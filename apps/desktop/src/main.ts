@@ -558,8 +558,8 @@ function readAppUpdateYml(): Record<string, string> | null {
       ? Path.join(process.resourcesPath, "app-update.yml")
       : Path.join(app.getAppPath(), "dev-app-update.yml");
     const raw = FS.readFileSync(ymlPath, "utf-8");
-    // The YAML is simple key-value pairs â€?avoid pulling in a YAML parser by
-    // doing a line-based parse (fields: provider, owner, repo, releaseType, â€?.
+    // The YAML is simple key-value pairs ï¿½?avoid pulling in a YAML parser by
+    // doing a line-based parse (fields: provider, owner, repo, releaseType, ï¿½?.
     const entries: Record<string, string> = {};
     for (const line of raw.split("\n")) {
       const match = line.match(/^(\w+):\s*(.+)$/);
@@ -590,8 +590,8 @@ function resolveEmbeddedCommitHash(): string | null {
 
   try {
     const raw = FS.readFileSync(packageJsonPath, "utf8");
-    const parsed = JSON.parse(raw) as { remi-codeCommitHash?: unknown };
-    return normalizeCommitHash(parsed.remi-codeCommitHash);
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return normalizeCommitHash(parsed["remi-codeCommitHash"]);
   } catch {
     return null;
   }
@@ -2076,7 +2076,7 @@ function configureMediaPermissions(): void {
 
 // Override Electron's userData path before the `ready` event so that
 // Chromium session data uses a filesystem-friendly directory name.
-// Must be called synchronously at the top level â€?before `app.whenReady()`.
+// Must be called synchronously at the top level ï¿½?before `app.whenReady()`.
 app.setPath("userData", resolveUserDataPath());
 
 configureAppIdentity();

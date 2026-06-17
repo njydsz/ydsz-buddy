@@ -1,0 +1,22 @@
+[package]
+name = "remi-pty"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+remi-core.workspace = true
+remi-contracts.workspace = true
+portable-pty.workspace = true
+tokio.workspace = true
+serde.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+dashmap.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tokio-test.workspace = true

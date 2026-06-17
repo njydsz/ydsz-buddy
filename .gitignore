@@ -35,6 +35,12 @@ __screenshots__/
 /preload.js.map
 /bootstrap.js.map
 
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
 # Local dev instance data
 .peakcode-*/
 

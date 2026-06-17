@@ -1,0 +1,94 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicegui/nicegui/main/tauri/tauri.conf.json",
+  "productName": "Remi Code",
+  "version": "0.1.0",
+  "identifier": "com.remi-code.app",
+  "build": {
+    "beforeBuildCommand": "bun run build",
+    "beforeDevCommand": "bun run dev:bundle",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "title": "Remi Code",
+        "width": 1100,
+        "height": 780,
+        "minWidth": 840,
+        "minHeight": 620,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "visible": false,
+        "center": true,
+        "acceptFirstMouse": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost data: blob:; font-src 'self' data:; connect-src 'self' https: http: ws: wss:; frame-src 'self' https: http:;",
+      "dangerousUseHttpScheme": false
+    },
+    "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.15",
+      "exceptionDomain": "",
+      "signingIdentity": null,
+      "entitlements": null
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      },
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "sidecar": true,
+      "scope": [
+        {
+          "name": "backend",
+          "cmd": "node",
+          "args": ["--eval", "require('../apps/server/dist/index.mjs')"]
+        }
+      ]
+    },
+    "dialog": {},
+    "fs": {
+      "scope": ["$APPDATA/**", "$DOWNLOAD/**", "$DOCUMENT/**", "$PICTURES/**", "$DESKTOP/**"]
+    },
+    "notification": {},
+    "updater": {
+      "pubkey": "REPLACE_WITH_ACTUAL_PUBKEY",
+      "endpoints": [
+        "https://github.com/nicegui/nicegui/releases/latest/download/latest.json"
+      ]
+    },
+    "clipboard-manager": {
+      "appCacheEnabled": true
+    }
+  }
+}

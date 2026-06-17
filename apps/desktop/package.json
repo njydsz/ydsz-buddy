@@ -2,30 +2,38 @@
   "name": "@remi-code/desktop",
   "version": "0.1.0",
   "private": true,
-  "main": "dist-electron/main.js",
+  "type": "module",
   "scripts": {
     "dev": "bun run scripts/dev.mjs",
     "dev:bundle": "tsdown --watch",
-    "dev:electron": "bun run scripts/dev-electron.mjs",
+    "dev:tauri": "tauri dev",
     "build": "tsdown",
-    "start": "bun run scripts/start-electron.mjs",
+    "build:tauri": "tauri build",
+    "start": "tauri dev",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "smoke-test": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
-    "effect": "catalog:",
-    "electron": "40.6.0",
-    "electron-updater": "^6.6.2"
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-fs": "^2.0.0",
+    "@tauri-apps/plugin-notification": "^2.0.0",
+    "@tauri-apps/plugin-shell": "^2.0.0",
+    "@tauri-apps/plugin-updater": "^2.0.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.0.0",
+    "@tauri-apps/plugin-http": "^2.0.0",
+    "effect": "catalog:"
   },
   "devDependencies": {
     "@remi-code/contracts": "workspace:*",
     "@remi-code/shared": "workspace:*",
+    "@tauri-apps/cli": "^2.0.0",
     "@types/node": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "wait-on": "^8.0.2"
   },
-  "productName": "Remi Code (Alpha)"
+  "productName": "Remi Code"
 }
