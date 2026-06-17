@@ -145,9 +145,9 @@ async fn handle_thread_list_turns(
 
 async fn handle_filesystem_browse(
     input: remi_contracts::FilesystemBrowseInput,
-    state: &Arc<RpcState>,
+    _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    let result = state
+    let result = _state
         .workspace
         .browse(&input.path, input.include_hidden, input.max_depth)
         .await?;
@@ -157,7 +157,7 @@ async fn handle_filesystem_browse(
 
 async fn handle_git_status(
     input: remi_contracts::GitStatusInput,
-    state: &Arc<RpcState>,
+    _state: &Arc<RpcState>,
 ) -> Result<Value> {
     let result = remi_git::GitService::status(&input.repo_path).await?;
 
@@ -166,7 +166,7 @@ async fn handle_git_status(
 
 async fn handle_git_list_branches(
     input: remi_contracts::GitListBranchesInput,
-    state: &Arc<RpcState>,
+    _state: &Arc<RpcState>,
 ) -> Result<Value> {
     let result = remi_git::GitService::list_branches(&input.repo_path, input.include_remote).await?;
 
@@ -175,7 +175,7 @@ async fn handle_git_list_branches(
 
 async fn handle_git_init(
     input: remi_contracts::GitInitInput,
-    state: &Arc<RpcState>,
+    _state: &Arc<RpcState>,
 ) -> Result<Value> {
     remi_git::GitService::init(&input.path).await?;
     Ok(serde_json::json!({"status": "ok"}))
