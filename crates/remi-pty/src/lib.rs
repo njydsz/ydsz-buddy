@@ -7,7 +7,7 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use remi_contracts::{CreateTerminalInput, CreateTerminalOutput, TerminalSession};
 use remi_core::{Error, Result};
 use std::sync::Arc;
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::broadcast;
 use tracing::{info, warn};
 use uuid::Uuid;
 
@@ -18,8 +18,8 @@ pub struct TerminalManager {
 
 struct TerminalHandle {
     session: TerminalSession,
-    writer: Box<dyn portable_pty::MasterPty + Send>,
-    _reader: Box<dyn std::io::Read + Send>,
+    writer: Box<dyn std::io::Write + Send + Sync>,
+    _reader: Box<dyn std::io::Read + Send + Sync>,
     output_tx: broadcast::Sender<String>,
     size: PtySize,
 }
@@ -133,7 +133,7 @@ impl TerminalManager {
 
     /// Close a terminal session.
     pub async fn close(&self, session_id: Uuid) -> Result<()> {
-        if let Some((_, mut handle)) = self.sessions.remove(&session_id) {
+        if let Some((_, handle)) = self.sessions.remove(&session_id) {
             // Drop writer to signal EOF
             drop(handle.writer);
             info!("Closed terminal session: {}", session_id);

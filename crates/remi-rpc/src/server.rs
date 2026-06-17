@@ -1,12 +1,11 @@
 //! WebSocket server setup.
 
 use axum::{
-    extract::ws::WebSocketUpgrade,
+    extract::{ws::WebSocketUpgrade, State},
     response::IntoResponse,
     routing::get,
     Router,
 };
-use remi_core::Result;
 use std::sync::Arc;
 
 use crate::{RpcState, WsState};
@@ -21,7 +20,7 @@ pub fn create_ws_router(rpc_state: Arc<RpcState>) -> Router {
 /// WebSocket upgrade handler.
 async fn ws_handler(
     ws: WebSocketUpgrade,
-    state: Arc<RpcState>,
+    State(state): State<Arc<RpcState>>,
 ) -> impl IntoResponse {
     ws.on_upgrade(move |socket| async move {
         if let Err(e) = crate::handle_ws_connection(socket, state).await {

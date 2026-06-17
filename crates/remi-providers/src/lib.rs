@@ -7,12 +7,10 @@ use dashmap::DashMap;
 use futures::Stream;
 use remi_contracts::{ModelId, ProviderHealth, ProviderHealthStatus, ProviderInfo, ProviderName};
 use remi_core::{Error, Result};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::process::{Child, Command};
-use tokio_util::codec::{FramedRead, LinesCodec};
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -58,8 +56,9 @@ impl ProviderRegistry {
     /// Register a provider adapter.
     pub fn register(&self, adapter: Arc<dyn ProviderAdapter>) {
         let info = adapter.info();
-        self.adapters.insert(info.name, adapter);
-        info!("Registered provider: {}", info.name);
+        let name = info.name.clone();
+        self.adapters.insert(name.clone(), adapter);
+        info!("Registered provider: {}", name);
     }
 
     /// Get a provider adapter.
@@ -102,7 +101,7 @@ pub struct StdioJsonRpcClient {
 impl StdioJsonRpcClient {
     /// Start a new stdio JSON-RPC client.
     pub async fn start(command: &str, args: &[&str]) -> Result<Self> {
-        let mut child = Command::new(command)
+        let child = Command::new(command)
             .args(args)
             .stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
@@ -141,16 +140,20 @@ impl StdioJsonRpcClient {
         }
 
         // Read from stdout
-        if let Some(stdout) = self.child.stdout.take() {
-            let mut reader = FramedRead::new(stdout, LinesCodec::new());
-            use futures::StreamExt;
-            if let Some(line) = reader.next().await {
-                let line = line.map_err(|e| Error::Provider(format!("Failed to read line: {}", e)))?;
-                let response: Value = serde_json::from_str(&line)?;
-                self.child.stdout.replace(stdout);
-                return Ok(response);
+        if let Some(mut stdout) = self.child.stdout.take() {
+            use tokio::io::AsyncBufReadExt;
+            let mut reader = tokio::io::BufReader::new(stdout);
+            let mut line = String::new();
+            reader
+                .read_line(&mut line)
+                .await
+                .map_err(|e| Error::Provider(format!("Failed to read line: {}", e)))?;
+            self.child.stdout = Some(reader.into_inner());
+            if line.trim().is_empty() {
+                return Err(Error::Provider("Empty response from provider".to_string()));
             }
-            self.child.stdout.replace(stdout);
+            let response: Value = serde_json::from_str(line.trim())?;
+            return Ok(response);
         }
 
         Err(Error::Provider("No response from provider".to_string()))
@@ -200,27 +203,27 @@ impl ProviderAdapter for ClaudeAdapter {
         })
     }
 
-    async fn start_session(&self, model: &ModelId) -> Result<String> {
+    async fn start_session(&self, _model: &ModelId) -> Result<String> {
         // TODO: Start Claude CLI process
         Ok(Uuid::new_v4().to_string())
     }
 
-    async fn send_message(&self, session_id: &str, message: &str) -> Result<Value> {
+    async fn send_message(&self, _session_id: &str, message: &str) -> Result<Value> {
         // TODO: Send message to Claude
         Ok(serde_json::json!({"response": message}))
     }
 
     async fn stream_response(
         &self,
-        session_id: &str,
-        message: &str,
+        _session_id: &str,
+        _message: &str,
     ) -> Result<Pin<Box<dyn Stream<Item = Result<String>> + Send>>> {
         // TODO: Implement streaming
         let stream = futures::stream::empty();
         Ok(Box::pin(stream))
     }
 
-    async fn close_session(&self, session_id: &str) -> Result<()> {
+    async fn close_session(&self, _session_id: &str) -> Result<()> {
         Ok(())
     }
 }

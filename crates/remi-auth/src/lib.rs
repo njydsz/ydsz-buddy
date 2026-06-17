@@ -3,11 +3,11 @@
 //! This crate handles user authentication, session management, and secret storage.
 
 use aes_gcm::{
-    aead::{Aead, KeyInit},
+    aead::{Aead, KeyInit, OsRng as AeadOsRng},
     Aes256Gcm, Key,
 };
 use argon2::{
-    password_hash::{rand_core::OsRng as ArgonOsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
 use chrono::{Duration, Utc};
@@ -93,7 +93,8 @@ impl AuthService {
 
         // Generate random nonce
         let mut nonce_bytes = [0u8; 12];
-        rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut nonce_bytes);
+        use aes_gcm::aead::rand_core::RngCore;
+        AeadOsRng.fill_bytes(&mut nonce_bytes);
         let nonce = aes_gcm::Nonce::from_slice(&nonce_bytes);
         let plaintext = Uuid::new_v4().to_string();
 
@@ -115,7 +116,7 @@ impl AuthService {
 
     /// Hash a password.
     pub async fn hash_password(&self, password: &str) -> Result<String> {
-        let salt = SaltString::generate(&mut rand::thread_rng());
+        let salt = SaltString::generate(&mut AeadOsRng);
         let argon2 = Argon2::default();
 
         let password_hash = argon2

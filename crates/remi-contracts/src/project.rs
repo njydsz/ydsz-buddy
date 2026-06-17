@@ -2,7 +2,6 @@
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::ProjectId;
 

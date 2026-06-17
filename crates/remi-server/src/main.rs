@@ -133,10 +133,9 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/health", get(health_handler))
-        .route("/api/providers", get(providers_handler))
-        .merge(create_ws_router(ws_state))
-        .layer(cors)
-        .with_state(state);
+        .route("/api/providers", get(providers_handler).with_state(state.clone()))
+        .merge(create_ws_router(rpc_state))
+        .layer(cors);
 
     // Start server
     let addr = format!("{}:{}", config.host, config.port);
@@ -149,7 +148,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 /// Health check handler.
-async fn health_handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+async fn health_handler() -> impl IntoResponse {
     Json(serde_json::json!({
         "status": "ok",
         "startupReady": true,

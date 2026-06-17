@@ -25,3 +25,56 @@ pub use project::*;
 pub use provider::*;
 pub use rpc::*;
 pub use terminal::*;
+
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+/// Unique identifier for a project.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema,
+)]
+pub struct ProjectId(pub uuid::Uuid);
+
+impl ProjectId {
+    /// Generate a new random project ID.
+    pub fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
+    }
+}
+
+impl Default for ProjectId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl std::fmt::Display for ProjectId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+/// Unique identifier for a thread.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema,
+)]
+pub struct ThreadId(pub uuid::Uuid);
+
+impl ThreadId {
+    /// Generate a new random thread ID.
+    pub fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
+    }
+}
+
+impl Default for ThreadId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl std::fmt::Display for ThreadId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}

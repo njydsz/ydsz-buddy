@@ -11,16 +11,26 @@ use remi_persistence::{
     Database,
 };
 use remi_providers::ProviderRegistry;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{error, info};
+use tracing::info;
 use uuid::Uuid;
+
+/// Read model for event projection.
+#[derive(Debug, Clone, Default)]
+pub struct ReadModel {
+    pub threads: HashMap<ThreadId, Thread>,
+    pub thread_messages: HashMap<ThreadId, Vec<remi_contracts::ThreadMessage>>,
+    pub thread_turns: HashMap<ThreadId, Vec<remi_contracts::ThreadTurn>>,
+}
 
 /// Orchestration engine.
 pub struct OrchestrationEngine {
-    db: Arc<Database>,
+    pub db: Arc<Database>,
     thread_repo: Arc<ThreadRepository>,
     provider_registry: Arc<ProviderRegistry>,
+    read_model: Arc<RwLock<ReadModel>>,
 }
 
 impl OrchestrationEngine {
@@ -35,6 +45,7 @@ impl OrchestrationEngine {
             db,
             thread_repo,
             provider_registry,
+            read_model: Arc::new(RwLock::new(ReadModel::default())),
         }
     }
 
@@ -68,6 +79,9 @@ impl OrchestrationEngine {
 
         self.store_event(&event).await?;
 
+        // Project event to read model
+        self.project_event(&event).await?;
+
         info!("Created thread: {}", thread.id);
         Ok(())
     }
@@ -75,6 +89,17 @@ impl OrchestrationEngine {
     /// Handle send message command.
     async fn handle_send_message(&self, thread_id: ThreadId, content: &str) -> Result<()> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        // Validate thread exists and is in valid state
+        let thread = self.thread_repo.get_by_id(thread_id).await?
+            .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
+
+        if thread.state != ThreadState::Idle && thread.state != ThreadState::Completed {
+            return Err(Error::Orchestration(format!(
+                "Thread {} is in invalid state for sending messages: {:?}",
+                thread_id, thread.state
+            )));
+        }
 
         // Add user message
         let message = self
@@ -91,6 +116,7 @@ impl OrchestrationEngine {
         };
 
         self.store_event(&event).await?;
+        self.project_event(&event).await?;
 
         // Update thread state
         self.thread_repo
@@ -107,6 +133,7 @@ impl OrchestrationEngine {
         };
 
         self.store_event(&turn_event).await?;
+        self.project_event(&turn_event).await?;
 
         info!("Processing message for thread: {}", thread_id);
 
@@ -129,6 +156,7 @@ impl OrchestrationEngine {
         };
 
         self.store_event(&assistant_event).await?;
+        self.project_event(&assistant_event).await?;
 
         // Complete turn
         let turn_complete_event = OrchestrationEvent::TurnCompleted {
@@ -138,6 +166,7 @@ impl OrchestrationEngine {
         };
 
         self.store_event(&turn_complete_event).await?;
+        self.project_event(&turn_complete_event).await?;
 
         // Update thread state back to idle
         self.thread_repo
@@ -151,6 +180,10 @@ impl OrchestrationEngine {
     async fn handle_delete_thread(&self, thread_id: ThreadId) -> Result<()> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
+        // Validate thread exists
+        let _thread = self.thread_repo.get_by_id(thread_id).await?
+            .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
+
         self.thread_repo.delete(thread_id).await?;
 
         let event = OrchestrationEvent::ThreadDeleted {
@@ -159,6 +192,7 @@ impl OrchestrationEngine {
         };
 
         self.store_event(&event).await?;
+        self.project_event(&event).await?;
 
         info!("Deleted thread: {}", thread_id);
         Ok(())
@@ -204,6 +238,96 @@ impl OrchestrationEngine {
         Ok(())
     }
 
+    /// Project an event to the read model.
+    async fn project_event(&self, event: &OrchestrationEvent) -> Result<()> {
+        let mut model = self.read_model.write().await;
+
+        match event {
+            OrchestrationEvent::ThreadCreated { thread_id, project_id, timestamp } => {
+                let thread = Thread {
+                    id: *thread_id,
+                    project_id: *project_id,
+                    title: None,
+                    state: ThreadState::Idle,
+                    created_at: timestamp.clone(),
+                    updated_at: timestamp.clone(),
+                };
+                model.threads.insert(*thread_id, thread);
+                model.thread_messages.insert(*thread_id, Vec::new());
+                model.thread_turns.insert(*thread_id, Vec::new());
+            }
+            OrchestrationEvent::ThreadUpdated { thread_id, timestamp } => {
+                if let Some(thread) = model.threads.get_mut(thread_id) {
+                    thread.updated_at = timestamp.clone();
+                }
+            }
+            OrchestrationEvent::ThreadDeleted { thread_id, .. } => {
+                model.threads.remove(thread_id);
+                model.thread_messages.remove(thread_id);
+                model.thread_turns.remove(thread_id);
+            }
+            OrchestrationEvent::MessageAdded { message_id, thread_id, role, timestamp } => {
+                if let Some(messages) = model.thread_messages.get_mut(thread_id) {
+                    messages.push(remi_contracts::ThreadMessage {
+                        id: *message_id,
+                        thread_id: *thread_id,
+                        role: *role,
+                        content: String::new(), // Content is stored separately
+                        created_at: timestamp.clone(),
+                    });
+                }
+            }
+            OrchestrationEvent::TurnStarted { turn_id, thread_id, timestamp } => {
+                if let Some(turns) = model.thread_turns.get_mut(thread_id) {
+                    let turn_number = turns.len() as u32 + 1;
+                    turns.push(remi_contracts::ThreadTurn {
+                        id: *turn_id,
+                        thread_id: *thread_id,
+                        turn_number,
+                        created_at: timestamp.clone(),
+                    });
+                }
+            }
+            OrchestrationEvent::TurnCompleted { .. } => {
+                // Turn completion doesn't change the read model structure
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Replay events from the database to rebuild the read model.
+    pub async fn replay_events(&self) -> Result<()> {
+        info!("Replaying events to rebuild read model");
+
+        let events: Vec<(String, String, String, String)> = sqlx::query_as(
+            "SELECT id, thread_id, event_type, payload FROM orchestration_events ORDER BY created_at ASC"
+        )
+        .fetch_all(self.db.pool())
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        let event_count = events.len();
+
+        let mut model = self.read_model.write().await;
+        model.threads.clear();
+        model.thread_messages.clear();
+        model.thread_turns.clear();
+
+        for (_id, _thread_id_str, _event_type, payload) in &events {
+            let event: OrchestrationEvent = serde_json::from_str(payload)
+                .map_err(|e| Error::Serialization(format!("Failed to deserialize event: {}", e)))?;
+
+            // Project event (without holding the lock)
+            drop(model);
+            self.project_event(&event).await?;
+            model = self.read_model.write().await;
+        }
+
+        info!("Replayed {} events", event_count);
+        Ok(())
+    }
+
     /// Get a thread by ID.
     pub async fn get_thread(&self, thread_id: ThreadId) -> Result<Option<Thread>> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
@@ -214,6 +338,11 @@ impl OrchestrationEngine {
     pub async fn list_threads(&self, project_id: Uuid) -> Result<Vec<Thread>> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
         self.thread_repo.list_by_project(project_id).await
+    }
+
+    /// Get the current read model snapshot.
+    pub async fn get_read_model(&self) -> ReadModel {
+        self.read_model.read().await.clone()
     }
 }
 

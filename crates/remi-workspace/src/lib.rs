@@ -6,7 +6,6 @@ use ignore::WalkBuilder;
 use remi_contracts::{FilesystemBrowseResult, FilesystemEntry, FilesystemEntryType};
 use remi_core::{Error, Result};
 use std::path::{Path, PathBuf};
-use tracing::info;
 
 /// Workspace service.
 pub struct WorkspaceService {

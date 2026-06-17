@@ -1,9 +1,11 @@
 //! RPC request handler.
 
-use remi_contracts::{JsonRpcRequest, JsonRpcResponse, RpcMethod};
+use remi_contracts::RpcMethod;
 use remi_core::{Error, Result};
 use remi_orchestration::OrchestrationEngine;
 use remi_persistence::repositories::{ProjectRepository, ThreadRepository};
+use remi_persistence::repositories::project_repo::ProjectRepositoryTrait;
+use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 use remi_providers::ProviderRegistry;
 use remi_workspace::WorkspaceService;
 use serde_json::Value;

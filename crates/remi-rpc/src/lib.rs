@@ -5,15 +5,12 @@
 pub mod handler;
 pub mod server;
 
-use axum::{
-    extract::ws::{Message, WebSocket},
-    Router,
-};
+use axum::extract::ws::{Message, WebSocket};
 use futures::{SinkExt, StreamExt};
-use remi_contracts::{JsonRpcRequest, JsonRpcResponse};
+use remi_contracts::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
 use remi_core::Result;
 use std::sync::Arc;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, mpsc};
 use tracing::{error, info};
 
 pub use handler::RpcState;
@@ -40,12 +37,23 @@ pub async fn handle_ws_connection(
     let (mut sender, mut receiver) = ws.split();
 
     let mut notification_rx = rpc_state.ws_state.notification_tx.subscribe();
+    let (response_tx, mut response_rx) = mpsc::channel::<String>(100);
 
-    // Spawn task to forward notifications to client
+    // Spawn task to forward notifications and responses to client
     let sender_task = tokio::spawn(async move {
-        while let Ok(notification) = notification_rx.recv().await {
-            if sender.send(Message::Text(notification)).await.is_err() {
-                break;
+        loop {
+            tokio::select! {
+                Ok(notification) = notification_rx.recv() => {
+                    if sender.send(Message::Text(notification)).await.is_err() {
+                        break;
+                    }
+                }
+                Some(response) = response_rx.recv() => {
+                    if sender.send(Message::Text(response)).await.is_err() {
+                        break;
+                    }
+                }
+                else => break,
             }
         }
     });
@@ -54,8 +62,9 @@ pub async fn handle_ws_connection(
     while let Some(Ok(msg)) = receiver.next().await {
         match msg {
             Message::Text(text) => {
-                if let Err(e) = handle_rpc_message(&text, &rpc_state, &mut sender).await {
-                    error!("Failed to handle RPC message: {}", e);
+                let response_str = handle_rpc_request(&text, &rpc_state).await;
+                if response_tx.send(response_str).await.is_err() {
+                    break;
                 }
             }
             Message::Close(_) => {
@@ -70,23 +79,18 @@ pub async fn handle_ws_connection(
     Ok(())
 }
 
-/// Handle a single RPC message.
-async fn handle_rpc_message(
-    text: &str,
-    state: &Arc<RpcState>,
-    sender: &mut futures::stream::SplitSink<WebSocket, Message>,
-) -> Result<()> {
+/// Handle a single RPC request and return the response as a string.
+async fn handle_rpc_request(text: &str, state: &Arc<RpcState>) -> String {
     let request: JsonRpcRequest = match serde_json::from_str(text) {
         Ok(req) => req,
         Err(e) => {
             error!("Failed to parse RPC request: {}", e);
-            return Ok(());
+            return String::new();
         }
     };
 
     info!("Received RPC request: {}", request.method);
 
-    // Route to appropriate handler
     let response = match handler::handle_method(&request.method, request.params, state).await {
         Ok(result) => JsonRpcResponse {
             jsonrpc: "2.0".to_string(),
@@ -98,7 +102,7 @@ async fn handle_rpc_message(
             jsonrpc: "2.0".to_string(),
             id: request.id,
             result: None,
-            error: Some(remi_contracts::JsonRpcError {
+            error: Some(JsonRpcError {
                 code: -32000,
                 message: e.to_string(),
                 data: None,
@@ -106,8 +110,5 @@ async fn handle_rpc_message(
         },
     };
 
-    let response_text = serde_json::to_string(&response)?;
-    let _ = sender.send(Message::Text(response_text)).await;
-
-    Ok(())
+    serde_json::to_string(&response).unwrap_or_default()
 }

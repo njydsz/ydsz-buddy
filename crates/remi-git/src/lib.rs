@@ -8,7 +8,6 @@ use remi_contracts::{
     GitStatusResult,
 };
 use remi_core::{Error, Result};
-use std::path::Path;
 use tracing::info;
 
 /// Git service.

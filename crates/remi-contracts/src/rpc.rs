@@ -11,7 +11,7 @@ use crate::{
     GitCreateDetachedWorktreeResult, GitCreateWorktreeInput, GitCreateWorktreeResult,
     GitHandoffThreadInput, GitHandoffThreadResult, GitInitInput, GitListBranchesInput,
     GitListBranchesResult, GitPreparePullRequestThreadInput, GitPreparePullRequestThreadResult,
-    GitPullInput, GitPullRequestRefInput, GitPullResult, GitReadWorkingTreeDiffInput,
+    GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput,
     GitReadWorkingTreeDiffResult, GitRemoveIndexLockInput, GitRemoveWorktreeInput,
     GitResolvePullRequestResult, GitRunStackedActionInput, GitStashAndCheckoutInput,
     GitStashDropInput, GitStashInfoInput, GitStashInfoResult, GitStatusInput, GitStatusResult,

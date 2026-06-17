@@ -300,11 +300,16 @@ export function createTauriBridge(): DesktopBridge {
             "@tauri-apps/plugin-notification"
           );
           await requestPermission();
-          sendNotification({
+          const notificationOptions: { title: string; body?: string; silent?: boolean } = {
             title: input.title,
-            body: input.body,
-            silent: input.silent,
-          });
+          };
+          if (input.body !== undefined) {
+            notificationOptions.body = input.body;
+          }
+          if (input.silent !== undefined) {
+            notificationOptions.silent = input.silent;
+          }
+          sendNotification(notificationOptions);
           return true;
         } catch (error) {
           console.error("Failed to show notification:", error);
