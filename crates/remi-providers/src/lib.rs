@@ -93,6 +93,7 @@ impl Default for ProviderRegistry {
 }
 
 /// Stdio JSON-RPC client for provider communication.
+#[allow(dead_code)]
 pub struct StdioJsonRpcClient {
     child: Child,
     session_id: String,
@@ -140,7 +141,7 @@ impl StdioJsonRpcClient {
         }
 
         // Read from stdout
-        if let Some(mut stdout) = self.child.stdout.take() {
+        if let Some(stdout) = self.child.stdout.take() {
             use tokio::io::AsyncBufReadExt;
             let mut reader = tokio::io::BufReader::new(stdout);
             let mut line = String::new();
@@ -169,6 +170,7 @@ impl StdioJsonRpcClient {
 }
 
 /// Claude provider adapter.
+#[allow(dead_code)]
 pub struct ClaudeAdapter {
     client: Option<StdioJsonRpcClient>,
 }

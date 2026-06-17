@@ -4,14 +4,12 @@
 
 use axum::{
     extract::State,
-    http::{HeaderValue, Method, StatusCode},
+    http::{HeaderValue, Method},
     response::IntoResponse,
     routing::get,
     Json, Router,
 };
-use remi_auth::AuthService;
 use remi_core::ServerConfig;
-use remi_git::GitService;
 use remi_orchestration::OrchestrationEngine;
 use remi_persistence::Database;
 use remi_providers::{ClaudeAdapter, ProviderRegistry};
@@ -24,6 +22,7 @@ use tracing::{error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Application state shared across handlers.
+#[allow(dead_code)]
 struct AppState {
     config: ServerConfig,
     db: Arc<Database>,

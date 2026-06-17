@@ -7,7 +7,7 @@ use remi_contracts::{
 };
 use remi_core::{Error, Result};
 use remi_persistence::{
-    repositories::{ProjectRepository, ThreadRepository},
+    repositories::ThreadRepository,
     Database,
 };
 use remi_providers::ProviderRegistry;
@@ -26,6 +26,7 @@ pub struct ReadModel {
 }
 
 /// Orchestration engine.
+#[allow(dead_code)]
 pub struct OrchestrationEngine {
     pub db: Arc<Database>,
     thread_repo: Arc<ThreadRepository>,

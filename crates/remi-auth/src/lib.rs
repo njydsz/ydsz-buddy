@@ -23,9 +23,10 @@ use tracing::info;
 use uuid::Uuid;
 
 /// Authentication service.
+#[allow(dead_code)]
 pub struct AuthService {
     db: Arc<Database>,
-    secret_key: Arc<RwLock<Vec<u8>>>,
+}    secret_key: Arc<RwLock<Vec<u8>>>,
 }
 
 impl AuthService {
