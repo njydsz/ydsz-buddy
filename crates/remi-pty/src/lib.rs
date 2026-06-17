@@ -152,7 +152,9 @@ impl TerminalManager {
             .iter()
             .map(|entry| entry.value().session.clone())
             .collect()
-        /// Subscribe to terminal output.
+    }
+
+    /// Subscribe to terminal output.
     pub async fn subscribe_output(&self, session_id: Uuid) -> Result<broadcast::Receiver<String>> {
         let handle = self
             .sessions
