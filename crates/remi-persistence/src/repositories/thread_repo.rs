@@ -215,24 +215,27 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(rows
-            .into_iter()
-            .map(|(id_str, thread_id_str, role_str, content, created_at)| {
-                let role = match role_str.as_str() {
-                    "user" => MessageRole::User,
-                    "assistant" => MessageRole::Assistant,
-                    "system" => MessageRole::System,
-                    _ => MessageRole::User,
-                };
-                ThreadMessage {
-                    id: Uuid::parse_str(&id_str).unwrap_or_default(),
-                    thread_id: ThreadId(Uuid::parse_str(&thread_id_str).unwrap_or_default()),
-                    role,
-                    content,
-                    created_at,
-                }
-            })
-            .collect())
+        let mut messages = Vec::new();
+        for (id_str, thread_id_str, role_str, content, created_at) in rows {
+            let id = Uuid::parse_str(&id_str)
+                .map_err(|e| Error::Database(format!("Invalid message ID in database: {}", e)))?;
+            let thread_id = Uuid::parse_str(&thread_id_str)
+                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+            let role = match role_str.as_str() {
+                "user" => MessageRole::User,
+                "assistant" => MessageRole::Assistant,
+                "system" => MessageRole::System,
+                _ => return Err(Error::Database(format!("Invalid message role in database: {}", role_str))),
+            };
+            messages.push(ThreadMessage {
+                id,
+                thread_id: ThreadId(thread_id),
+                role,
+                content,
+                created_at,
+            });
+        }
+        Ok(messages)
     }
 
     async fn start_turn(&self, thread_id: ThreadId) -> Result<ThreadTurn> {
@@ -281,14 +284,21 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(rows
-            .into_iter()
-            .map(|(id_str, thread_id_str, turn_number, created_at)| ThreadTurn {
-                id: Uuid::parse_str(&id_str).unwrap_or_default(),
-                thread_id: ThreadId(Uuid::parse_str(&thread_id_str).unwrap_or_default()),
-                turn_number: turn_number as u32,
+        let mut turns = Vec::new();
+        for (id_str, thread_id_str, turn_number, created_at) in rows {
+            let id = Uuid::parse_str(&id_str)
+                .map_err(|e| Error::Database(format!("Invalid turn ID in database: {}", e)))?;
+            let thread_id = Uuid::parse_str(&thread_id_str)
+                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+            let turn_number = u32::try_from(turn_number)
+                .map_err(|e| Error::Database(format!("Invalid turn number in database: {}", e)))?;
+            turns.push(ThreadTurn {
+                id,
+                thread_id: ThreadId(thread_id),
+                turn_number,
                 created_at,
-            })
-            .collect())
+            });
+        }
+        Ok(turns)
     }
 }
