@@ -66,7 +66,7 @@ impl AuthService {
     /// Create a pairing credential.
     pub async fn create_pairing_credential(
         &self,
-        input: AuthCreatePairingCredentialInput,
+        _input: AuthCreatePairingCredentialInput,
     ) -> Result<AuthCreatePairingCredentialOutput> {
         let pairing_code = self.generate_pairing_code().await?;
         let pairing_link = format!("remi-code://pair?code={}", pairing_code);
