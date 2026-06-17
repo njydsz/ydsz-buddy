@@ -1,0 +1,66 @@
+node_modules
+.bun
+.turbo
+.DS_Store
+*.log
+*.tsbuildinfo
+apps/*/dist
+.astro
+packages/*/dist
+.env
+.env.local
+build/
+.logs/
+release/
+.t3
+/.peakcode/electron-dev
+/.peakcode/backups
+.idea/
+apps/web/.playwright
+apps/web/playwright-report
+.playwright-cli/
+apps/web/src/components/__screenshots__
+.vitest-*
+__screenshots__/
+.tanstack
+/.pi/
+/.tmp/
+/~/
+/bootstrap.js
+/preload.js
+/browser-sidebar-comment-preload.js
+/main-*.js
+/main-*.js.map
+/browser-sidebar-comment-preload.js.map
+/preload.js.map
+/bootstrap.js.map
+
+# Local dev instance data
+.peakcode-*/
+
+# Internal plans and iteration docs
+.plans/
+.plans/**/*.md
+docs/
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# User data (logs, attachments, secrets)
+userdata/
+
+# Claude / IDE local config
+.claude/
+
+# Misc local artifacts
+成/
+.cowork-temp/attachments/manual/open-code-review-skill-1781013680555-kjr4cb.zip
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/CHANGELOG.md
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/INSTALL.md
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/LICENSE
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/SKILL.md
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/USAGE.md
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/examples/config.json
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/examples/.opencodereview/rule.json
+scripts/pr-review.sh
+.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/README.md
