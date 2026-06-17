@@ -1,6 +1,6 @@
 // Tauri 2 IPC bridge - replaces Electron preload.ts
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { listen, type UnlistenFn, type Event } from "@tauri-apps/api/event";
 import type {
   DesktopBridge,
   DesktopTheme,
@@ -168,11 +168,11 @@ export function createTauriBridge(): DesktopBridge {
       let unlistenFn: UnlistenFn | null = null;
       let cancelled = false;
 
-      listen<string>("menu-action", (event) => {
+      listen<string>("menu-action", (event: Event<string>) => {
         if (!cancelled && typeof event.payload === "string") {
           listener(event.payload);
         }
-      }).then((unlisten) => {
+      }).then((unlisten: UnlistenFn) => {
         if (cancelled) {
           unlisten();
         } else {
@@ -260,11 +260,11 @@ export function createTauriBridge(): DesktopBridge {
       let unlistenFn: UnlistenFn | null = null;
       let cancelled = false;
 
-      listen<DesktopUpdateState>("update-state", (event) => {
+      listen<DesktopUpdateState>("update-state", (event: Event<DesktopUpdateState>) => {
         if (!cancelled && event.payload) {
           listener(event.payload);
         }
-      }).then((unlisten) => {
+      }).then((unlisten: UnlistenFn) => {
         if (cancelled) {
           unlisten();
         } else {
