@@ -27,6 +27,7 @@ pub trait ProjectRepositoryTrait: Send + Sync {
 }
 
 /// Project repository implementation.
+#[derive(Clone)]
 pub struct ProjectRepository {
     pool: SqlitePool,
 }
@@ -82,12 +83,18 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str)
-                    .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+                let id = Uuid::parse_str(&id_str).map_err(|e| {
+                    Error::Database(format!("Invalid project ID in database: {}", e))
+                })?;
                 let kind = match kind_str.as_str() {
                     "local" => ProjectKind::Local,
                     "remote" => ProjectKind::Remote,
-                    _ => return Err(Error::Database(format!("Invalid project kind: {}", kind_str))),
+                    _ => {
+                        return Err(Error::Database(format!(
+                            "Invalid project kind: {}",
+                            kind_str
+                        )));
+                    }
                 };
                 Ok(Some(Project {
                     id: ProjectId(id),
@@ -113,12 +120,18 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str)
-                    .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+                let id = Uuid::parse_str(&id_str).map_err(|e| {
+                    Error::Database(format!("Invalid project ID in database: {}", e))
+                })?;
                 let kind = match kind_str.as_str() {
                     "local" => ProjectKind::Local,
                     "remote" => ProjectKind::Remote,
-                    _ => return Err(Error::Database(format!("Invalid project kind: {}", kind_str))),
+                    _ => {
+                        return Err(Error::Database(format!(
+                            "Invalid project kind: {}",
+                            kind_str
+                        )));
+                    }
                 };
                 Ok(Some(Project {
                     id: ProjectId(id),
@@ -148,7 +161,12 @@ impl ProjectRepositoryTrait for ProjectRepository {
             let kind = match kind_str.as_str() {
                 "local" => ProjectKind::Local,
                 "remote" => ProjectKind::Remote,
-                _ => return Err(Error::Database(format!("Invalid project kind: {}", kind_str))),
+                _ => {
+                    return Err(Error::Database(format!(
+                        "Invalid project kind: {}",
+                        kind_str
+                    )));
+                }
             };
             projects.push(Project {
                 id: ProjectId(id),

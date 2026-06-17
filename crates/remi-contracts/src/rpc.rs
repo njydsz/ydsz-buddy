@@ -11,12 +11,11 @@ use crate::{
     GitCreateDetachedWorktreeResult, GitCreateWorktreeInput, GitCreateWorktreeResult,
     GitHandoffThreadInput, GitHandoffThreadResult, GitInitInput, GitListBranchesInput,
     GitListBranchesResult, GitPreparePullRequestThreadInput, GitPreparePullRequestThreadResult,
-    GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput,
-    GitReadWorkingTreeDiffResult, GitRemoveIndexLockInput, GitRemoveWorktreeInput,
-    GitResolvePullRequestResult, GitRunStackedActionInput, GitStashAndCheckoutInput,
-    GitStashDropInput, GitStashInfoInput, GitStashInfoResult, GitStatusInput, GitStatusResult,
-    GitSummarizeDiffInput, GitSummarizeDiffResult, OpenInEditorInput, Thread, ThreadId,
-    ThreadMessage, ThreadTurn,
+    GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput, GitReadWorkingTreeDiffResult,
+    GitRemoveIndexLockInput, GitRemoveWorktreeInput, GitResolvePullRequestResult,
+    GitRunStackedActionInput, GitStashAndCheckoutInput, GitStashDropInput, GitStashInfoInput,
+    GitStashInfoResult, GitStatusInput, GitStatusResult, GitSummarizeDiffInput,
+    GitSummarizeDiffResult, OpenInEditorInput, Thread, ThreadId, ThreadMessage, ThreadTurn,
 };
 
 /// JSON-RPC request.
@@ -94,7 +93,10 @@ pub enum RpcMethod {
     ThreadGet { thread_id: ThreadId },
     /// Create thread.
     #[serde(rename = "thread.create")]
-    ThreadCreate { project_id: uuid::Uuid, title: Option<String> },
+    ThreadCreate {
+        project_id: uuid::Uuid,
+        title: Option<String>,
+    },
     /// Delete thread.
     #[serde(rename = "thread.delete")]
     ThreadDelete { thread_id: ThreadId },
@@ -264,5 +266,8 @@ pub enum RpcNotification {
     ThreadUpdated { thread_id: ThreadId },
     /// Message added.
     #[serde(rename = "thread.messageAdded")]
-    ThreadMessageAdded { message_id: uuid::Uuid, thread_id: ThreadId },
+    ThreadMessageAdded {
+        message_id: uuid::Uuid,
+        thread_id: ThreadId,
+    },
 }

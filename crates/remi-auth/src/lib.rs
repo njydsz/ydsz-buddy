@@ -1,14 +1,19 @@
 //! Authentication and authorization for Remi Code.
 //!
-//! This crate handles user authentication, session management, and secret storage.
+//! This crate handles user authentication, session management, secret storage,
+//! settings management, and lifecycle event tracking.
+
+pub mod lifecycle;
+pub mod secret_store;
+pub mod settings;
 
 use aes_gcm::{
-    aead::{Aead, KeyInit, OsRng as AeadOsRng},
     Aes256Gcm, Key,
+    aead::{Aead, KeyInit, OsRng as AeadOsRng},
 };
 use argon2::{
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
 };
 use chrono::{Duration, Utc};
 use remi_contracts::{
@@ -22,7 +27,12 @@ use tokio::sync::RwLock;
 use tracing::info;
 use uuid::Uuid;
 
+pub use lifecycle::{LifecycleEvent, LifecycleEventType, LifecycleManager};
+pub use secret_store::{SecretMetadata, SecretStore};
+pub use settings::{Setting, SettingsManager};
+
 /// Authentication service.
+#[derive(Clone)]
 #[allow(dead_code)]
 pub struct AuthService {
     db: Arc<Database>,
@@ -146,12 +156,21 @@ mod tests {
 
     #[tokio::test]
     async fn test_password_hashing() {
-        let db = Arc::new(Database::connect(&remi_core::ServerConfig::default()).await.expect("DB connect"));
+        let db = Arc::new(
+            Database::connect(&remi_core::ServerConfig::default())
+                .await
+                .expect("DB connect"),
+        );
         let service = AuthService::new(db);
         service.initialize(vec![0u8; 32]).await.expect("Init");
 
         let password = "test_password";
         let hash = service.hash_password(password).await.expect("Hash");
-        assert!(service.verify_password(password, &hash).await.expect("Verify"));
+        assert!(
+            service
+                .verify_password(password, &hash)
+                .await
+                .expect("Verify")
+        );
     }
 }

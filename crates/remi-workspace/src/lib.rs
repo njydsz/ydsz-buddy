@@ -21,7 +21,12 @@ impl WorkspaceService {
     }
 
     /// Browse a directory.
-    pub async fn browse(&self, path: &str, include_hidden: bool, max_depth: Option<u32>) -> Result<FilesystemBrowseResult> {
+    pub async fn browse(
+        &self,
+        path: &str,
+        include_hidden: bool,
+        max_depth: Option<u32>,
+    ) -> Result<FilesystemBrowseResult> {
         let full_path = if Path::new(path).is_absolute() {
             PathBuf::from(path)
         } else {

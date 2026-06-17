@@ -147,9 +147,7 @@ pub enum OrchestrationCommand {
         content: String,
     },
     /// Delete a thread.
-    DeleteThread {
-        thread_id: ThreadId,
-    },
+    DeleteThread { thread_id: ThreadId },
 }
 
 /// Orchestration error.

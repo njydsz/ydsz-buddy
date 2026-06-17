@@ -3,19 +3,21 @@
 //! This crate provides terminal session management using portable-pty.
 
 use dashmap::DashMap;
-use portable_pty::{native_pty_system, CommandBuilder, PtySize};
+use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 use remi_contracts::{CreateTerminalInput, CreateTerminalOutput, TerminalSession};
 use remi_core::{Error, Result};
-use std::sync::{Arc, Mutex};
-use tokio::sync::broadcast;
+use std::sync::Arc;
+use tokio::sync::{Mutex, broadcast};
 use tracing::{info, warn};
 use uuid::Uuid;
 
 /// Terminal manager.
+#[derive(Clone)]
 pub struct TerminalManager {
     sessions: Arc<DashMap<Uuid, TerminalHandle>>,
 }
 
+#[derive(Clone)]
 struct TerminalHandle {
     session: TerminalSession,
     writer: Arc<Mutex<Box<dyn std::io::Write + Send>>>,
@@ -56,13 +58,15 @@ impl TerminalManager {
             .spawn_command(cmd)
             .map_err(|e| Error::Internal(format!("Failed to spawn command: {}", e)))?;
 
-        let writer = pty_pair.master.take_writer().map_err(|e| {
-            Error::Internal(format!("Failed to get PTY writer: {}", e))
-        })?;
+        let writer = pty_pair
+            .master
+            .take_writer()
+            .map_err(|e| Error::Internal(format!("Failed to get PTY writer: {}", e)))?;
 
-        let reader = pty_pair.master.try_clone_reader().map_err(|e| {
-            Error::Internal(format!("Failed to get PTY reader: {}", e))
-        })?;
+        let reader = pty_pair
+            .master
+            .try_clone_reader()
+            .map_err(|e| Error::Internal(format!("Failed to get PTY reader: {}", e)))?;
 
         let size = PtySize {
             rows,
@@ -103,10 +107,8 @@ impl TerminalManager {
             .get(&session_id)
             .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
 
-        let mut writer = handle.writer.lock().map_err(|e| {
-            Error::Internal(format!("Failed to acquire writer lock: {}", e))
-        })?;
-        
+        let mut writer = handle.writer.lock().await;
+
         use std::io::Write;
         writer
             .write_all(data.as_bytes())
@@ -129,7 +131,10 @@ impl TerminalManager {
             pixel_height: 0,
         };
 
-        info!("Resized terminal session {} to {}x{}", session_id, cols, rows);
+        info!(
+            "Resized terminal session {} to {}x{}",
+            session_id, cols, rows
+        );
 
         Ok(())
     }
@@ -178,15 +183,20 @@ mod tests {
     #[tokio::test]
     async fn test_create_terminal() {
         let manager = TerminalManager::new();
+        let shell = if cfg!(windows) {
+            "cmd.exe".to_string()
+        } else {
+            "sh".to_string()
+        };
         let input = CreateTerminalInput {
             cwd: ".".to_string(),
-            shell: Some("sh".to_string()),
+            shell: Some(shell),
             thread_id: None,
             cols: Some(80),
             rows: Some(24),
         };
 
         let result = manager.create(input).await;
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "Failed to create terminal: {:?}", result);
     }
 }

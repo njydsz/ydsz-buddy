@@ -118,6 +118,59 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     .await
     .map_err(|e| Error::Database(e.to_string()))?;
 
+    // Migration 006: Secret Store
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS secrets (
+            id TEXT PRIMARY KEY,
+            key TEXT NOT NULL UNIQUE,
+            encrypted_value BLOB NOT NULL,
+            nonce BLOB NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            expires_at TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_secrets_key ON secrets(key);
+        "#,
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| Error::Database(e.to_string()))?;
+
+    // Migration 007: Settings
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        "#,
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| Error::Database(e.to_string()))?;
+
+    // Migration 008: Lifecycle Events
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS lifecycle_events (
+            id TEXT PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_lifecycle_events_type ON lifecycle_events(event_type);
+        CREATE INDEX IF NOT EXISTS idx_lifecycle_events_created_at ON lifecycle_events(created_at);
+        "#,
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| Error::Database(e.to_string()))?;
+
     info!("Database migrations completed successfully");
     Ok(())
 }

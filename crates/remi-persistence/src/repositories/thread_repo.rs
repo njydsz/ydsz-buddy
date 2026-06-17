@@ -2,9 +2,7 @@
 
 use async_trait::async_trait;
 use chrono::Utc;
-use remi_contracts::{
-    MessageRole, Thread, ThreadId, ThreadMessage, ThreadState, ThreadTurn,
-};
+use remi_contracts::{MessageRole, Thread, ThreadId, ThreadMessage, ThreadState, ThreadTurn};
 use remi_core::{Error, Result};
 use sqlx::SqlitePool;
 use uuid::Uuid;
@@ -46,6 +44,7 @@ pub trait ThreadRepositoryTrait: Send + Sync {
 }
 
 /// Thread repository implementation.
+#[derive(Clone)]
 pub struct ThreadRepository {
     pool: SqlitePool,
 }
@@ -98,12 +97,15 @@ impl ThreadRepositoryTrait for ThreadRepository {
 
         match row {
             Some((id_str, project_id_str, title, state_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str)
-                    .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
-                let project_id = Uuid::parse_str(&project_id_str)
-                    .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
-                let state: ThreadState = serde_json::from_str(&state_str)
-                    .map_err(|e| Error::Database(format!("Invalid thread state in database: {}", e)))?;
+                let id = Uuid::parse_str(&id_str).map_err(|e| {
+                    Error::Database(format!("Invalid thread ID in database: {}", e))
+                })?;
+                let project_id = Uuid::parse_str(&project_id_str).map_err(|e| {
+                    Error::Database(format!("Invalid project ID in database: {}", e))
+                })?;
+                let state: ThreadState = serde_json::from_str(&state_str).map_err(|e| {
+                    Error::Database(format!("Invalid thread state in database: {}", e))
+                })?;
                 Ok(Some(Thread {
                     id: ThreadId(id),
                     project_id,
@@ -225,7 +227,12 @@ impl ThreadRepositoryTrait for ThreadRepository {
                 "user" => MessageRole::User,
                 "assistant" => MessageRole::Assistant,
                 "system" => MessageRole::System,
-                _ => return Err(Error::Database(format!("Invalid message role in database: {}", role_str))),
+                _ => {
+                    return Err(Error::Database(format!(
+                        "Invalid message role in database: {}",
+                        role_str
+                    )));
+                }
             };
             messages.push(ThreadMessage {
                 id,
@@ -243,13 +250,12 @@ impl ThreadRepositoryTrait for ThreadRepository {
         let now = Utc::now().to_rfc3339();
 
         // Get the next turn number
-        let max_turn: Option<(Option<i64>,)> = sqlx::query_as(
-            "SELECT MAX(turn_number) FROM thread_turns WHERE thread_id = ?",
-        )
-        .bind(thread_id.to_string())
-        .fetch_optional(&self.pool)
-        .await
-        .map_err(|e| Error::Database(e.to_string()))?;
+        let max_turn: Option<(Option<i64>,)> =
+            sqlx::query_as("SELECT MAX(turn_number) FROM thread_turns WHERE thread_id = ?")
+                .bind(thread_id.to_string())
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| Error::Database(e.to_string()))?;
 
         let turn_number = max_turn
             .and_then(|(max,)| max)

@@ -16,6 +16,7 @@ use tracing::{error, info};
 pub use handler::RpcState;
 
 /// WebSocket connection state.
+#[derive(Clone)]
 pub struct WsState {
     /// Broadcast sender for notifications.
     pub notification_tx: broadcast::Sender<String>,
@@ -29,11 +30,14 @@ impl WsState {
     }
 }
 
+impl Default for WsState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Handle a WebSocket connection.
-pub async fn handle_ws_connection(
-    ws: WebSocket,
-    rpc_state: Arc<RpcState>,
-) -> Result<()> {
+pub async fn handle_ws_connection(ws: WebSocket, rpc_state: Arc<RpcState>) -> Result<()> {
     let (mut sender, mut receiver) = ws.split();
 
     let mut notification_rx = rpc_state.ws_state.notification_tx.subscribe();

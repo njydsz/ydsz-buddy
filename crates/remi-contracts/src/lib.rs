@@ -30,9 +30,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Unique identifier for a project.
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct ProjectId(pub uuid::Uuid);
 
 impl ProjectId {
@@ -55,9 +53,7 @@ impl std::fmt::Display for ProjectId {
 }
 
 /// Unique identifier for a thread.
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct ThreadId(pub uuid::Uuid);
 
 impl ThreadId {

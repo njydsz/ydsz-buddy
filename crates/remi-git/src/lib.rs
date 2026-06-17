@@ -129,17 +129,22 @@ impl GitService {
     }
 
     /// List branches.
-    pub async fn list_branches(repo_path: &str, include_remote: bool) -> Result<GitListBranchesResult> {
+    pub async fn list_branches(
+        repo_path: &str,
+        include_remote: bool,
+    ) -> Result<GitListBranchesResult> {
         let repo = Repository::open(repo_path)
             .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
 
         let mut branches = Vec::new();
 
         // Local branches
-        for branch in repo.branches(Some(git2::BranchType::Local)).map_err(|e| {
-            Error::Git(format!("Failed to list local branches: {}", e))
-        })? {
-            let (branch, _) = branch.map_err(|e| Error::Git(format!("Failed to read branch: {}", e)))?;
+        for branch in repo
+            .branches(Some(git2::BranchType::Local))
+            .map_err(|e| Error::Git(format!("Failed to list local branches: {}", e)))?
+        {
+            let (branch, _) =
+                branch.map_err(|e| Error::Git(format!("Failed to read branch: {}", e)))?;
             let name = branch
                 .name()
                 .map_err(|e| Error::Git(format!("Invalid branch name: {}", e)))?
@@ -169,9 +174,7 @@ impl GitService {
         if include_remote {
             for branch in repo
                 .branches(Some(git2::BranchType::Remote))
-                .map_err(|e| {
-                    Error::Git(format!("Failed to list remote branches: {}", e))
-                })?
+                .map_err(|e| Error::Git(format!("Failed to list remote branches: {}", e)))?
             {
                 let (branch, _) =
                     branch.map_err(|e| Error::Git(format!("Failed to read branch: {}", e)))?;
@@ -200,7 +203,8 @@ impl GitService {
 
     /// Initialize a new git repository.
     pub async fn init(path: &str) -> Result<()> {
-        Repository::init(path).map_err(|e| Error::Git(format!("Failed to init repository: {}", e)))?;
+        Repository::init(path)
+            .map_err(|e| Error::Git(format!("Failed to init repository: {}", e)))?;
         info!("Initialized git repository at {}", path);
         Ok(())
     }
@@ -209,7 +213,6 @@ impl GitService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
     use tempfile::TempDir;
 
     #[tokio::test]

@@ -3,9 +3,9 @@
 use remi_contracts::RpcMethod;
 use remi_core::{Error, Result};
 use remi_orchestration::OrchestrationEngine;
-use remi_persistence::repositories::{ProjectRepository, ThreadRepository};
 use remi_persistence::repositories::project_repo::ProjectRepositoryTrait;
 use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+use remi_persistence::repositories::{ProjectRepository, ThreadRepository};
 use remi_providers::ProviderRegistry;
 use remi_workspace::WorkspaceService;
 use serde_json::Value;
@@ -15,6 +15,7 @@ use tracing::{error, info};
 use crate::WsState;
 
 /// Application state for RPC handlers.
+#[derive(Clone)]
 pub struct RpcState {
     pub orchestration: Arc<OrchestrationEngine>,
     pub workspace: Arc<WorkspaceService>,
@@ -65,7 +66,10 @@ pub async fn handle_method(
         RpcMethod::GitInit(input) => handle_git_init(input, state).await,
         _ => {
             error!("Unimplemented RPC method: {}", method);
-            Err(Error::Internal(format!("Method not implemented: {}", method)))
+            Err(Error::Internal(format!(
+                "Method not implemented: {}",
+                method
+            )))
         }
     }
 }
@@ -168,7 +172,8 @@ async fn handle_git_list_branches(
     input: remi_contracts::GitListBranchesInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    let result = remi_git::GitService::list_branches(&input.repo_path, input.include_remote).await?;
+    let result =
+        remi_git::GitService::list_branches(&input.repo_path, input.include_remote).await?;
 
     serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
 }

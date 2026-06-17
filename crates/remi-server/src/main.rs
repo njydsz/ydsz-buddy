@@ -3,18 +3,18 @@
 //! This binary starts the HTTP/WebSocket server for Remi Code.
 
 use axum::{
+    Json, Router,
     extract::State,
     http::{HeaderValue, Method},
     response::IntoResponse,
     routing::get,
-    Json, Router,
 };
 use remi_core::ServerConfig;
 use remi_orchestration::OrchestrationEngine;
 use remi_persistence::Database;
 use remi_providers::{ClaudeAdapter, ProviderRegistry};
 use remi_pty::TerminalManager;
-use remi_rpc::{server::create_ws_router, RpcState, WsState};
+use remi_rpc::{RpcState, WsState, server::create_ws_router};
 use remi_workspace::WorkspaceService;
 use std::sync::Arc;
 use tower_http::cors::{AllowOrigin, CorsLayer};
@@ -22,6 +22,7 @@ use tracing::{error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Application state shared across handlers.
+#[derive(Clone)]
 #[allow(dead_code)]
 struct AppState {
     config: ServerConfig,
@@ -79,9 +80,7 @@ async fn main() -> anyhow::Result<()> {
     ));
 
     // Initialize workspace service
-    let workspace = Arc::new(WorkspaceService::new(
-        config.data_dir.join("workspace"),
-    ));
+    let workspace = Arc::new(WorkspaceService::new(config.data_dir.join("workspace")));
 
     // Initialize terminal manager
     let terminal_manager = Arc::new(TerminalManager::new());
@@ -123,16 +122,22 @@ async fn main() -> anyhow::Result<()> {
     } else {
         // Production mode: restrict to same origin
         CorsLayer::new()
-            .allow_origin(AllowOrigin::exact(
-                HeaderValue::from_static("https://remi-code.com"),
-            ))
+            .allow_origin(AllowOrigin::exact(HeaderValue::from_static(
+                "https://remi-code.com",
+            )))
             .allow_methods([Method::GET, Method::POST])
-            .allow_headers([axum::http::header::CONTENT_TYPE, axum::http::header::AUTHORIZATION])
+            .allow_headers([
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+            ])
     };
 
     let app = Router::new()
         .route("/health", get(health_handler))
-        .route("/api/providers", get(providers_handler).with_state(state.clone()))
+        .route(
+            "/api/providers",
+            get(providers_handler).with_state(state.clone()),
+        )
         .merge(create_ws_router(rpc_state))
         .layer(cors);
 

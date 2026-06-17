@@ -6,10 +6,7 @@ use remi_contracts::{
     MessageRole, OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadState,
 };
 use remi_core::{Error, Result};
-use remi_persistence::{
-    repositories::ThreadRepository,
-    Database,
-};
+use remi_persistence::{Database, repositories::ThreadRepository};
 use remi_providers::ProviderRegistry;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -26,6 +23,7 @@ pub struct ReadModel {
 }
 
 /// Orchestration engine.
+#[derive(Clone)]
 #[allow(dead_code)]
 pub struct OrchestrationEngine {
     pub db: Arc<Database>,
@@ -36,10 +34,7 @@ pub struct OrchestrationEngine {
 
 impl OrchestrationEngine {
     /// Create a new orchestration engine.
-    pub fn new(
-        db: Arc<Database>,
-        provider_registry: Arc<ProviderRegistry>,
-    ) -> Self {
+    pub fn new(db: Arc<Database>, provider_registry: Arc<ProviderRegistry>) -> Self {
         let thread_repo = Arc::new(ThreadRepository::new(db.pool().clone()));
 
         Self {
@@ -54,7 +49,8 @@ impl OrchestrationEngine {
     pub async fn handle_command(&self, command: OrchestrationCommand) -> Result<()> {
         match command {
             OrchestrationCommand::CreateThread { project_id, title } => {
-                self.handle_create_thread(project_id, title.as_deref()).await
+                self.handle_create_thread(project_id, title.as_deref())
+                    .await
             }
             OrchestrationCommand::SendMessage { thread_id, content } => {
                 self.handle_send_message(thread_id, &content).await
@@ -92,7 +88,10 @@ impl OrchestrationEngine {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
         // Validate thread exists and is in valid state
-        let thread = self.thread_repo.get_by_id(thread_id).await?
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
             .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
 
         if thread.state != ThreadState::Idle && thread.state != ThreadState::Completed {
@@ -182,7 +181,10 @@ impl OrchestrationEngine {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
         // Validate thread exists
-        let _thread = self.thread_repo.get_by_id(thread_id).await?
+        let _thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
             .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
 
         self.thread_repo.delete(thread_id).await?;
@@ -244,7 +246,11 @@ impl OrchestrationEngine {
         let mut model = self.read_model.write().await;
 
         match event {
-            OrchestrationEvent::ThreadCreated { thread_id, project_id, timestamp } => {
+            OrchestrationEvent::ThreadCreated {
+                thread_id,
+                project_id,
+                timestamp,
+            } => {
                 let thread = Thread {
                     id: *thread_id,
                     project_id: *project_id,
@@ -257,7 +263,10 @@ impl OrchestrationEngine {
                 model.thread_messages.insert(*thread_id, Vec::new());
                 model.thread_turns.insert(*thread_id, Vec::new());
             }
-            OrchestrationEvent::ThreadUpdated { thread_id, timestamp } => {
+            OrchestrationEvent::ThreadUpdated {
+                thread_id,
+                timestamp,
+            } => {
                 if let Some(thread) = model.threads.get_mut(thread_id) {
                     thread.updated_at = timestamp.clone();
                 }
@@ -267,7 +276,12 @@ impl OrchestrationEngine {
                 model.thread_messages.remove(thread_id);
                 model.thread_turns.remove(thread_id);
             }
-            OrchestrationEvent::MessageAdded { message_id, thread_id, role, timestamp } => {
+            OrchestrationEvent::MessageAdded {
+                message_id,
+                thread_id,
+                role,
+                timestamp,
+            } => {
                 if let Some(messages) = model.thread_messages.get_mut(thread_id) {
                     messages.push(remi_contracts::ThreadMessage {
                         id: *message_id,
@@ -278,7 +292,11 @@ impl OrchestrationEngine {
                     });
                 }
             }
-            OrchestrationEvent::TurnStarted { turn_id, thread_id, timestamp } => {
+            OrchestrationEvent::TurnStarted {
+                turn_id,
+                thread_id,
+                timestamp,
+            } => {
                 if let Some(turns) = model.thread_turns.get_mut(thread_id) {
                     let turn_number = turns.len() as u32 + 1;
                     turns.push(remi_contracts::ThreadTurn {
