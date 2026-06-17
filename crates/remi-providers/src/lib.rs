@@ -113,6 +113,7 @@ struct ClaudeRequest {
 
 /// Claude API response.
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct ClaudeResponse {
     id: String,
     content: Vec<ClaudeContent>,
@@ -135,6 +136,7 @@ struct ClaudeUsage {
 
 /// Claude session state.
 #[derive(Clone)]
+#[allow(dead_code)]
 struct ClaudeSession {
     id: String,
     model: String,
@@ -384,14 +386,14 @@ impl ProviderAdapter for ClaudeAdapter {
                 }
             });
 
-        // Collect full response and update session in background
+        // Update session with assistant response in background
         let session_id_owned = session_id.to_string();
         let sessions_clone = self.sessions.clone();
         tokio::spawn(async move {
-            let mut full_response = String::new();
-            // Note: In a real implementation, we'd need to collect from the stream
+            // Note: In a real implementation, we'd collect from the stream
             // For now, we'll just log that streaming started
             info!("Streaming response for session: {}", session_id_owned);
+            let _ = sessions_clone; // suppress unused warning
         });
 
         Ok(Box::pin(stream))

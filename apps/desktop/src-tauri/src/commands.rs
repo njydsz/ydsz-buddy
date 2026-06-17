@@ -1,8 +1,8 @@
 // Tauri IPC commands
-use tauri::{AppHandle, State, Manager};
+use tauri::{AppHandle, State};
 use serde::{Deserialize, Serialize};
 use anyhow::Result;
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::state::{AppState, UpdateState};
 use crate::browser::{BrowserManager, ThreadBrowserState, BrowserOpenInput, BrowserThreadInput, 
@@ -68,7 +68,7 @@ pub async fn pick_folder(app: AppHandle) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
     
     let folder = app.dialog().file().blocking_pick_folder();
-    Ok(folder.map(|p| p.to_string_lossy().to_string()))
+    Ok(folder.and_then(|p| p.into_path().ok().map(|path| path.to_string_lossy().to_string())))
 }
 
 #[tauri::command]
@@ -79,14 +79,17 @@ pub async fn save_file(app: AppHandle, input: SaveFileInput) -> Result<Option<St
     
     if let Some(filters) = input.filters {
         for (name, extensions) in filters {
-            dialog = dialog.add_filter(&name, &extensions);
+            let ext_refs: Vec<&str> = extensions.iter().map(|s| s.as_str()).collect();
+            dialog = dialog.add_filter(&name, &ext_refs);
         }
     }
     
     let file = dialog.blocking_save_file();
     if let Some(file_path) = file {
-        std::fs::write(&file_path, input.contents).map_err(|e| e.to_string())?;
-        Ok(Some(file_path.to_string_lossy().to_string()))
+        let path_str = file_path.into_path().map_err(|_| "Invalid file path".to_string())?;
+        let path = std::path::PathBuf::from(&path_str);
+        std::fs::write(&path, input.contents).map_err(|e| e.to_string())?;
+        Ok(Some(path.to_string_lossy().to_string()))
     } else {
         Ok(None)
     }
@@ -121,16 +124,14 @@ pub async fn show_context_menu(
 
 #[tauri::command]
 pub async fn open_external(app: AppHandle, url: String) -> Result<bool, String> {
-    use tauri_plugin_shell::ShellExt;
-    
-    app.shell().open(url, None::<&str>).map_err(|e| e.to_string())?;
+    use tauri_plugin_opener::OpenerExt;
+
+    app.opener().open_url(&url, None::<&str>).map_err(|e| e.to_string())?;
     Ok(true)
 }
 
 #[tauri::command]
-pub async fn show_in_folder(app: AppHandle, path: String) -> Result<(), String> {
-    use tauri_plugin_shell::ShellExt;
-    
+pub async fn show_in_folder(_app: AppHandle, path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         // On Windows, use explorer /select
@@ -152,8 +153,11 @@ pub async fn show_in_folder(app: AppHandle, path: String) -> Result<(), String> 
     
     #[cfg(target_os = "linux")]
     {
-        // On Linux, use xdg-open or shell.open
-        app.shell().open(path, None::<&str>).map_err(|e| e.to_string())?;
+        // On Linux, use xdg-open
+        std::process::Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
     }
     
     Ok(())
@@ -170,7 +174,7 @@ pub async fn check_for_updates(
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateState, String> {
-    updater.check_for_updates(state.inner().clone()).await
+    updater.check_for_updates(state.inner()).await
         .map_err(|e| e.to_string())
 }
 
@@ -179,7 +183,7 @@ pub async fn download_update(
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateActionResult, String> {
-    updater.download_update(state.inner().clone()).await
+    updater.download_update(state.inner()).await
         .map_err(|e| e.to_string())
 }
 
@@ -189,15 +193,13 @@ pub async fn install_update(
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateActionResult, String> {
-    updater.install_update(app, state.inner().clone()).await
+    updater.install_update(app, state.inner()).await
         .map_err(|e| e.to_string())
 }
 
 // Notification commands
 #[tauri::command]
 pub async fn notifications_is_supported() -> Result<bool, String> {
-    use tauri_plugin_notification::NotificationExt;
-    
     // Tauri notification plugin support check
     Ok(true)
 }

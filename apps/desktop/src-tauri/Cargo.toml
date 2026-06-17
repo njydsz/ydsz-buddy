@@ -10,7 +10,7 @@ rust-version = "1.77.2"
 
 [lib]
 name = "remi_code_desktop_lib"
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "lib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -23,6 +23,7 @@ tauri-plugin-fs = "2"
 tauri-plugin-process = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-http = "2"
@@ -42,6 +43,8 @@ rand = "0.8"
 reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
 dirs = "5"
 parking_lot = "0.12"
+hex = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.25"

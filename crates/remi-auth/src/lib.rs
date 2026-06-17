@@ -58,14 +58,17 @@ impl AuthService {
     /// Bootstrap authentication.
     pub async fn bootstrap(&self, input: AuthBootstrapInput) -> Result<AuthBootstrapOutput> {
         // Verify token if provided
-        if let Some(_token) = &input.token {
-            // TODO: Verify token against database
-            info!("Verifying bootstrap token for client: {}", input.client_id);
+        if let Some(token) = &input.token {
+            self.verify_token(token).await?;
+            info!("Verified bootstrap token for client: {}", input.client_id);
         }
 
         // Create session token
         let session_token = self.generate_session_token().await?;
         let expires_at = Utc::now() + Duration::hours(24);
+
+        // Store session token in database
+        self.store_session_token(&session_token, &input.client_id, expires_at).await?;
 
         Ok(AuthBootstrapOutput {
             session_token,
@@ -76,20 +79,80 @@ impl AuthService {
     /// Create a pairing credential.
     pub async fn create_pairing_credential(
         &self,
-        _input: AuthCreatePairingCredentialInput,
+        input: AuthCreatePairingCredentialInput,
     ) -> Result<AuthCreatePairingCredentialOutput> {
         let pairing_code = self.generate_pairing_code().await?;
         let pairing_link = format!("remi-code://pair?code={}", pairing_code);
         let expires_at = Utc::now() + Duration::minutes(10);
 
-        // Store pairing link in database
-        // TODO: Implement database storage
+        // Store pairing credential in database
+        self.store_pairing_credential(&pairing_code, &input.device_id, expires_at).await?;
 
         Ok(AuthCreatePairingCredentialOutput {
             pairing_code,
             pairing_link,
             expires_at: expires_at.to_rfc3339(),
         })
+    }
+
+    /// Verify a session token.
+    pub async fn verify_token(&self, token: &str) -> Result<bool> {
+        let pool = self.db.pool();
+        
+        let result: Option<(String,)> = sqlx::query_as(
+            "SELECT client_id FROM sessions WHERE token = ? AND expires_at > ?"
+        )
+        .bind(token)
+        .bind(Utc::now().to_rfc3339())
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(result.is_some())
+    }
+
+    /// Store a session token in the database.
+    async fn store_session_token(
+        &self,
+        token: &str,
+        client_id: &str,
+        expires_at: chrono::DateTime<Utc>,
+    ) -> Result<()> {
+        let pool = self.db.pool();
+        
+        sqlx::query(
+            "INSERT INTO sessions (token, client_id, expires_at) VALUES (?, ?, ?)"
+        )
+        .bind(token)
+        .bind(client_id)
+        .bind(expires_at.to_rfc3339())
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
+    }
+
+    /// Store a pairing credential in the database.
+    async fn store_pairing_credential(
+        &self,
+        code: &str,
+        client_id: &str,
+        expires_at: chrono::DateTime<Utc>,
+    ) -> Result<()> {
+        let pool = self.db.pool();
+        
+        sqlx::query(
+            "INSERT INTO pairing_credentials (code, client_id, expires_at, used) VALUES (?, ?, ?, FALSE)"
+        )
+        .bind(code)
+        .bind(client_id)
+        .bind(expires_at.to_rfc3339())
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
     }
 
     /// Generate a session token.

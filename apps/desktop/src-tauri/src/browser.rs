@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use anyhow::Result;
 use uuid::Uuid;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use tracing::{info, warn};
 
 // Input DTOs

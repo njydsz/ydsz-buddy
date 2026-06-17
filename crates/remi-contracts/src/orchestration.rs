@@ -132,6 +132,24 @@ pub enum OrchestrationEvent {
     },
 }
 
+/// Input for sending a message to a thread.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ThreadSendMessageInput {
+    /// Thread ID.
+    pub thread_id: ThreadId,
+    /// Message content.
+    pub content: String,
+}
+
+/// Output for sending a message to a thread.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ThreadSendMessageOutput {
+    /// User message.
+    pub user_message: ThreadMessage,
+    /// Assistant message (if provider produced one).
+    pub assistant_message: Option<ThreadMessage>,
+}
+
 /// Orchestration command.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "_tag")]

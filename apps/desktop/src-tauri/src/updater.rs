@@ -1,9 +1,8 @@
 // Auto-updater management for Tauri 2
-use std::sync::Arc;
-use anyhow::{Result, Context};
-use tracing::{info, warn, error};
-use tauri::{AppHandle, Manager};
-use serde::{Deserialize, Serialize};
+use anyhow::Result;
+use tracing::{info, warn};
+use tauri::AppHandle;
+use serde::Deserialize;
 
 use crate::state::{AppState, UpdateState};
 use crate::commands::UpdateActionResult;
@@ -14,6 +13,7 @@ pub struct UpdaterManager {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct GitHubRelease {
     tag_name: String,
     prerelease: bool,
@@ -22,6 +22,7 @@ struct GitHubRelease {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct GitHubAsset {
     name: String,
     browser_download_url: String,
@@ -30,12 +31,12 @@ struct GitHubAsset {
 impl UpdaterManager {
     pub fn new() -> Self {
         Self {
-            github_owner: "nicegui".to_string(),
-            github_repo: "nicegui".to_string(),
+            github_owner: "RemiCode-AI".to_string(),
+            github_repo: "RemiCode".to_string(),
         }
     }
 
-    pub async fn check_for_updates(&self, state: Arc<AppState>) -> Result<UpdateState> {
+    pub async fn check_for_updates(&self, state: &AppState) -> Result<UpdateState> {
         info!("Checking for updates...");
         
         {
@@ -112,28 +113,35 @@ impl UpdaterManager {
         }
     }
 
-    pub async fn download_update(&self, state: Arc<AppState>) -> Result<UpdateActionResult> {
+    pub async fn download_update(&self, state: &AppState) -> Result<UpdateActionResult> {
         info!("Downloading update...");
         
-        let mut update_state = state.update_state.write();
-        
-        if update_state.available_version.is_none() {
-            return Ok(UpdateActionResult {
-                success: false,
-                message: Some("No update available".to_string()),
-            });
+        {
+            let update_state = state.update_state.read();
+            if update_state.available_version.is_none() {
+                return Ok(UpdateActionResult {
+                    success: false,
+                    message: Some("No update available".to_string()),
+                });
+            }
         }
 
-        update_state.status = "downloading".to_string();
-        update_state.download_percent = Some(0.0);
+        {
+            let mut update_state = state.update_state.write();
+            update_state.status = "downloading".to_string();
+            update_state.download_percent = Some(0.0);
+        }
 
         // In a full implementation, this would download the update artifact
         // For now, simulate a successful download
         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
-        update_state.status = "downloaded".to_string();
-        update_state.downloaded_version = update_state.available_version.clone();
-        update_state.download_percent = Some(100.0);
+        {
+            let mut update_state = state.update_state.write();
+            update_state.status = "downloaded".to_string();
+            update_state.downloaded_version = update_state.available_version.clone();
+            update_state.download_percent = Some(100.0);
+        }
 
         info!("Update downloaded successfully");
 
@@ -143,7 +151,7 @@ impl UpdaterManager {
         })
     }
 
-    pub async fn install_update(&self, app: AppHandle, state: Arc<AppState>) -> Result<UpdateActionResult> {
+    pub async fn install_update(&self, _app: AppHandle, state: &AppState) -> Result<UpdateActionResult> {
         info!("Installing update...");
         
         let update_state = state.update_state.read();

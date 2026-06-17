@@ -3,7 +3,8 @@
 //! This crate implements the event sourcing engine, decider, and projection pipeline.
 
 use remi_contracts::{
-    MessageRole, OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadState,
+    MessageRole, OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadMessage,
+    ThreadState,
 };
 use remi_core::{Error, Result};
 use remi_persistence::{Database, repositories::ThreadRepository};
@@ -53,7 +54,8 @@ impl OrchestrationEngine {
                     .await
             }
             OrchestrationCommand::SendMessage { thread_id, content } => {
-                self.handle_send_message(thread_id, &content).await
+                let _ = self.handle_send_message(thread_id, &content).await?;
+                Ok(())
             }
             OrchestrationCommand::DeleteThread { thread_id } => {
                 self.handle_delete_thread(thread_id).await
@@ -84,7 +86,13 @@ impl OrchestrationEngine {
     }
 
     /// Handle send message command.
-    async fn handle_send_message(&self, thread_id: ThreadId, content: &str) -> Result<()> {
+    ///
+    /// Returns the user message and the assistant message (on success).
+    pub async fn handle_send_message(
+        &self,
+        thread_id: ThreadId,
+        content: &str,
+    ) -> Result<(ThreadMessage, ThreadMessage)> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
         // Validate thread exists and is in valid state
@@ -102,14 +110,14 @@ impl OrchestrationEngine {
         }
 
         // Add user message
-        let message = self
+        let user_message = self
             .thread_repo
             .add_message(thread_id, MessageRole::User, content)
             .await?;
 
         // Store event
         let event = OrchestrationEvent::MessageAdded {
-            message_id: message.id,
+            message_id: user_message.id,
             thread_id,
             role: MessageRole::User,
             timestamp: chrono::Utc::now().to_rfc3339(),
@@ -137,15 +145,12 @@ impl OrchestrationEngine {
 
         info!("Processing message for thread: {}", thread_id);
 
-        // TODO: Route to provider and get response
-        // For now, just add a placeholder assistant message
+        // Route to provider and get response
+        let assistant_content = self.call_provider(thread_id, content).await?;
+
         let assistant_message = self
             .thread_repo
-            .add_message(
-                thread_id,
-                MessageRole::Assistant,
-                "Response from provider (placeholder)",
-            )
+            .add_message(thread_id, MessageRole::Assistant, &assistant_content)
             .await?;
 
         let assistant_event = OrchestrationEvent::MessageAdded {
@@ -173,7 +178,7 @@ impl OrchestrationEngine {
             .update_state(thread_id, ThreadState::Idle)
             .await?;
 
-        Ok(())
+        Ok((user_message, assistant_message))
     }
 
     /// Handle delete thread command.
@@ -199,6 +204,77 @@ impl OrchestrationEngine {
 
         info!("Deleted thread: {}", thread_id);
         Ok(())
+    }
+
+    /// Call the AI provider to get a response.
+    ///
+    /// Uses the first available provider from the registry. In a production
+    /// implementation, the provider/model would be selected based on thread
+    /// or project settings.
+    async fn call_provider(&self, thread_id: ThreadId, content: &str) -> Result<String> {
+        use remi_contracts::ModelId;
+
+        // Find the first available provider
+        let providers = self.provider_registry.list();
+        let available = providers.iter().find(|p| p.available);
+
+        let provider_info = match available {
+            Some(p) => p,
+            None => {
+                tracing::warn!("No available AI provider, returning fallback response");
+                return Ok(format!(
+                    "No AI provider is available. Please configure an API key. (thread: {})",
+                    thread_id
+                ));
+            }
+        };
+
+        let adapter = self
+            .provider_registry
+            .get(&provider_info.name)
+            .ok_or_else(|| {
+                Error::Provider(format!("Provider not found: {}", provider_info.name))
+            })?;
+
+        // Use or create a session for this thread
+        let session_id = format!("thread-{}", thread_id);
+
+        // Try to send message; if session doesn't exist, create it first
+        let result = adapter.send_message(&session_id, content).await;
+
+        match result {
+            Ok(value) => {
+                // Extract response text from provider response
+                let response_text = value
+                    .get("response")
+                    .and_then(|r| r.as_str())
+                    .unwrap_or("No response from provider")
+                    .to_string();
+                Ok(response_text)
+            }
+            Err(e) => {
+                // Check if it's a "session not found" error and retry
+                let err_msg = e.to_string();
+                if err_msg.contains("Session not found") {
+                    let default_model = provider_info
+                        .models
+                        .first()
+                        .cloned()
+                        .unwrap_or(ModelId::new("claude-3-5-sonnet-20241022"));
+
+                    adapter.start_session(&default_model).await?;
+                    let value = adapter.send_message(&session_id, content).await?;
+                    let response_text = value
+                        .get("response")
+                        .and_then(|r| r.as_str())
+                        .unwrap_or("No response from provider")
+                        .to_string();
+                    Ok(response_text)
+                } else {
+                    Err(e)
+                }
+            }
+        }
     }
 
     /// Store an orchestration event.

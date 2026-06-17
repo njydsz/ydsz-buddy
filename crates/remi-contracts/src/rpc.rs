@@ -15,7 +15,7 @@ use crate::{
     GitRemoveIndexLockInput, GitRemoveWorktreeInput, GitResolvePullRequestResult,
     GitRunStackedActionInput, GitStashAndCheckoutInput, GitStashDropInput, GitStashInfoInput,
     GitStashInfoResult, GitStatusInput, GitStatusResult, GitSummarizeDiffInput,
-    GitSummarizeDiffResult, OpenInEditorInput, Thread, ThreadId, ThreadMessage, ThreadTurn,
+    GitSummarizeDiffResult, OpenInEditorInput, Thread, ThreadId, ThreadMessage, ThreadSendMessageInput, ThreadSendMessageOutput, ThreadTurn,
 };
 
 /// JSON-RPC request.
@@ -106,6 +106,9 @@ pub enum RpcMethod {
     /// List thread turns.
     #[serde(rename = "thread.listTurns")]
     ThreadListTurns { thread_id: ThreadId },
+    /// Send a message to a thread.
+    #[serde(rename = "thread.sendMessage")]
+    ThreadSendMessage(ThreadSendMessageInput),
 
     // Git methods
     /// Git status.
@@ -204,6 +207,8 @@ pub enum RpcResponse {
     ThreadListMessages(Vec<ThreadMessage>),
     #[serde(rename = "thread.listTurns")]
     ThreadListTurns(Vec<ThreadTurn>),
+    #[serde(rename = "thread.sendMessage")]
+    ThreadSendMessage(ThreadSendMessageOutput),
 
     // Git responses
     #[serde(rename = "git.status")]

@@ -1,16 +1,25 @@
 // Backend process management
+use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
-use tokio::process::{Child, Command};
 use tokio::io::{AsyncBufReadExt, BufReader};
-use anyhow::{Result, Context};
-use tracing::{info, warn, error};
+use tokio::process::{Child, Command};
+use anyhow::{Context, Result};
+use tracing::{error, info, warn};
 
 use crate::state::AppState;
 
 pub struct BackendServer {
     child: Arc<tokio::sync::Mutex<Option<Child>>>,
     restart_attempt: Arc<tokio::sync::Mutex<u32>>,
+}
+
+/// Resolved backend entry metadata used when spawning the process.
+struct BackendEntry {
+    /// Path to the executable or script to run.
+    path: PathBuf,
+    /// If true, the entry is a Node script that must be launched with `node`.
+    is_node_script: bool,
 }
 
 impl BackendServer {
@@ -39,14 +48,106 @@ impl BackendServer {
         hex::encode(bytes)
     }
 
-    /// Resolve the backend entry point path
-    fn resolve_backend_entry() -> Result<std::path::PathBuf> {
+    /// Returns true if the legacy Node/TypeScript backend should be spawned.
+    ///
+    /// The migration goal is Rust (`remi-server`) by default. Set
+    /// `REMI_CODE_LEGACY_NODE_BACKEND=1` to fall back to the old
+    /// `apps/server/dist/index.mjs` path during the transition period.
+    fn use_legacy_node_backend() -> bool {
+        std::env::var("REMI_CODE_LEGACY_NODE_BACKEND")
+            .map(|v| matches!(v.as_str(), "1" | "true" | "yes"))
+            .unwrap_or(false)
+    }
+
+    /// Resolve the backend entry point path.
+    ///
+    /// Prefers the Rust `remi-server` binary. Falls back to the legacy Node
+    /// backend only when `REMI_CODE_LEGACY_NODE_BACKEND=1` is set.
+    fn resolve_backend_entry() -> Result<BackendEntry> {
+        if Self::use_legacy_node_backend() {
+            let path = Self::resolve_legacy_node_backend_entry()?;
+            return Ok(BackendEntry {
+                path,
+                is_node_script: true,
+            });
+        }
+
+        let path = Self::resolve_rust_backend_entry()?;
+        Ok(BackendEntry {
+            path,
+            is_node_script: false,
+        })
+    }
+
+    /// Resolve the Rust `remi-server` binary path.
+    fn resolve_rust_backend_entry() -> Result<PathBuf> {
         let exe_path = std::env::current_exe().context("Failed to get current exe path")?;
-        let exe_dir = exe_path.parent()
+        let exe_dir = exe_path
+            .parent()
             .ok_or_else(|| anyhow::anyhow!("Failed to get exe directory"))?;
 
-        // In development: look for apps/server/dist/index.mjs relative to workspace root
-        // Workspace root is typically 3 levels up from target/debug or target/release
+        // Development: the Tauri binary lives under
+        //   target/<profile>/remi-code-desktop.exe
+        // Going up 3 ancestors lands at the workspace root, where the
+        // remi-server binary is at target/<profile>/remi-server[.exe].
+        let profile_dir = if cfg!(debug_assertions) {
+            "debug"
+        } else {
+            "release"
+        };
+        let dev_entry = exe_dir
+            .ancestors()
+            .nth(3)
+            .map(|workspace_root| {
+                Self::with_platform_exe_extension(
+                    workspace_root.join("target").join(profile_dir).join("remi-server"),
+                )
+            });
+
+        if let Some(ref dev_path) = dev_entry {
+            if dev_path.exists() {
+                info!("Using dev Rust backend entry: {}", dev_path.display());
+                return Ok(dev_path.clone());
+            }
+        }
+
+        // Production: sidecar binary next to the app executable.
+        let prod_entry = Self::with_platform_exe_extension(exe_dir.join("remi-server"));
+        if prod_entry.exists() {
+            info!("Using prod Rust backend entry: {}", prod_entry.display());
+            return Ok(prod_entry);
+        }
+
+        // Fallback: bundled under resources/bin.
+        let resource_entry = Self::with_platform_exe_extension(
+            exe_dir
+                .join("resources")
+                .join("bin")
+                .join("remi-server"),
+        );
+        if resource_entry.exists() {
+            info!(
+                "Using resource Rust backend entry: {}",
+                resource_entry.display()
+            );
+            return Ok(resource_entry);
+        }
+
+        anyhow::bail!(
+            "Rust backend binary not found. Tried:\n  - {:?}\n  - {}\n  - {}\nSet REMI_CODE_LEGACY_NODE_BACKEND=1 to use the legacy Node backend.",
+            dev_entry,
+            prod_entry.display(),
+            resource_entry.display()
+        )
+    }
+
+    /// Resolve the legacy Node/TypeScript backend entry point path.
+    fn resolve_legacy_node_backend_entry() -> Result<PathBuf> {
+        let exe_path = std::env::current_exe().context("Failed to get current exe path")?;
+        let exe_dir = exe_path
+            .parent()
+            .ok_or_else(|| anyhow::anyhow!("Failed to get exe directory"))?;
+
         let dev_entry = exe_dir
             .ancestors()
             .nth(3)
@@ -54,43 +155,57 @@ impl BackendServer {
 
         if let Some(ref dev_path) = dev_entry {
             if dev_path.exists() {
-                info!("Using dev backend entry: {}", dev_path.display());
+                info!("Using legacy dev backend entry: {}", dev_path.display());
                 return Ok(dev_path.clone());
             }
         }
 
-        // In production: look relative to resources directory
-        let prod_entry = exe_dir.join("resources").join("apps").join("server").join("dist").join("index.mjs");
+        let prod_entry = exe_dir
+            .join("resources")
+            .join("apps")
+            .join("server")
+            .join("dist")
+            .join("index.mjs");
         if prod_entry.exists() {
-            info!("Using prod backend entry: {}", prod_entry.display());
+            info!(
+                "Using legacy prod backend entry: {}",
+                prod_entry.display()
+            );
             return Ok(prod_entry);
         }
 
-        // Fallback: try current directory
-        let cwd_entry = std::path::PathBuf::from("apps/server/dist/index.mjs");
+        let cwd_entry = PathBuf::from("apps/server/dist/index.mjs");
         if cwd_entry.exists() {
-            info!("Using CWD backend entry: {}", cwd_entry.display());
+            info!("Using legacy CWD backend entry: {}", cwd_entry.display());
             return Ok(cwd_entry);
         }
 
-        anyhow::bail!("Backend entry not found. Tried:\n  - {:?}\n  - {}", dev_entry, prod_entry.display())
+        anyhow::bail!(
+            "Legacy Node backend entry not found. Tried:\n  - {:?}\n  - {}\n  - {}",
+            dev_entry,
+            prod_entry.display(),
+            cwd_entry.display()
+        )
     }
 
-    /// Resolve the backend working directory
-    fn resolve_backend_cwd() -> Result<std::path::PathBuf> {
+    /// Resolve the backend working directory.
+    fn resolve_backend_cwd() -> Result<PathBuf> {
         let exe_path = std::env::current_exe().context("Failed to get current exe path")?;
-        let exe_dir = exe_path.parent()
+        let exe_dir = exe_path
+            .parent()
             .ok_or_else(|| anyhow::anyhow!("Failed to get exe directory"))?;
 
-        // In development: use monorepo root (3 levels up)
-        let dev_cwd = exe_dir.ancestors().nth(3).map(|p| p.to_path_buf());
+        // In development the workspace root is a few levels above the binary.
+        let dev_cwd = exe_dir.ancestors().nth(3).map(PathBuf::from);
         if let Some(ref dev_path) = dev_cwd {
-            if dev_path.join("apps/server/dist/index.mjs").exists() {
+            let rust_marker = dev_path.join("Cargo.toml");
+            let node_marker = dev_path.join("apps/server/dist/index.mjs");
+            if rust_marker.exists() || node_marker.exists() {
                 return Ok(dev_path.clone());
             }
         }
 
-        // In production: use exe directory
+        // In production use the directory containing the app executable.
         Ok(exe_dir.to_path_buf())
     }
 
@@ -105,6 +220,17 @@ impl BackendServer {
         Ok(home.join(".remi-code").to_string_lossy().to_string())
     }
 
+    /// Append the platform executable extension when needed.
+    fn with_platform_exe_extension(path: PathBuf) -> PathBuf {
+        #[cfg(windows)]
+        {
+            if path.extension().is_none() {
+                return path.with_extension("exe");
+            }
+        }
+        path
+    }
+
     /// Start the backend server process
     pub async fn start(
         &self,
@@ -116,12 +242,19 @@ impl BackendServer {
         let backend_cwd = Self::resolve_backend_cwd()?;
         let base_dir = Self::resolve_base_dir()?;
 
-        info!("Starting backend server at {}", backend_entry.display());
+        info!("Starting backend server at {}", backend_entry.path.display());
         info!("Backend CWD: {}", backend_cwd.display());
         info!("Backend base dir: {}", base_dir);
 
-        let mut child = Command::new("node")
-            .arg(&backend_entry)
+        let mut command = if backend_entry.is_node_script {
+            let mut cmd = Command::new("node");
+            cmd.arg(&backend_entry.path);
+            cmd
+        } else {
+            Command::new(&backend_entry.path)
+        };
+
+        let mut child = command
             .current_dir(&backend_cwd)
             .env("REMI_CODE_MODE", "desktop")
             .env("REMI_CODE_NO_BROWSER", "1")

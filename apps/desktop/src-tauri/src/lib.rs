@@ -42,7 +42,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_updater::builder().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             info!("Single instance: focusing existing window");
             if let Some(window) = app.get_webview_window("main") {
@@ -142,8 +143,8 @@ pub fn run() {
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(move |app_handle, event| match event {
-            RunEvent::ExitRequested { api, .. } => {
+        .run(move |_app_handle, event| match event {
+            RunEvent::ExitRequested { api: _, .. } => {
                 info!("Exit requested, cleaning up...");
                 let backend = backend_server_events.clone();
                 tauri::async_runtime::spawn(async move {
