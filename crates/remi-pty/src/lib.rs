@@ -6,7 +6,7 @@ use dashmap::DashMap;
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use remi_contracts::{CreateTerminalInput, CreateTerminalOutput, TerminalSession};
 use remi_core::{Error, Result};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tokio::sync::broadcast;
 use tracing::{info, warn};
 use uuid::Uuid;
@@ -18,8 +18,8 @@ pub struct TerminalManager {
 
 struct TerminalHandle {
     session: TerminalSession,
-    writer: Box<dyn std::io::Write + Send + Sync>,
-    _reader: Box<dyn std::io::Read + Send + Sync>,
+    writer: Arc<Mutex<Box<dyn std::io::Write + Send>>>,
+    _reader: Arc<Mutex<Box<dyn std::io::Read + Send>>>,
     output_tx: broadcast::Sender<String>,
     size: PtySize,
 }
@@ -83,8 +83,8 @@ impl TerminalManager {
 
         let handle = TerminalHandle {
             session: session.clone(),
-            writer,
-            _reader: reader,
+            writer: Arc::new(Mutex::new(writer)),
+            _reader: Arc::new(Mutex::new(reader)),
             output_tx: output_tx.clone(),
             size,
         };
@@ -98,14 +98,17 @@ impl TerminalManager {
 
     /// Write data to a terminal session.
     pub async fn write(&self, session_id: Uuid, data: &str) -> Result<()> {
-        let mut handle = self
+        let handle = self
             .sessions
-            .get_mut(&session_id)
+            .get(&session_id)
             .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
 
+        let mut writer = handle.writer.lock().map_err(|e| {
+            Error::Internal(format!("Failed to acquire writer lock: {}", e))
+        })?;
+        
         use std::io::Write;
-        handle
-            .writer
+        writer
             .write_all(data.as_bytes())
             .map_err(|e| Error::Internal(format!("Failed to write to PTY: {}", e)))?;
 
