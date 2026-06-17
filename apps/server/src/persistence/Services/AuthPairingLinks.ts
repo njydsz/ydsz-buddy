@@ -73,4 +73,4 @@ export interface AuthPairingLinkRepositoryShape {
 export class AuthPairingLinkRepository extends ServiceMap.Service<
   AuthPairingLinkRepository,
   AuthPairingLinkRepositoryShape
->()("t3/persistence/Services/AuthPairingLinks/AuthPairingLinkRepository") {}
+>()("remi-code/persistence/Services/AuthPairingLinks/AuthPairingLinkRepository") {}

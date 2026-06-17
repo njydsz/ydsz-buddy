@@ -1,6 +1,6 @@
 /**
  * FILE: homeMigration.test.ts
- * Purpose: Verifies first-run import and resume behavior for the ~/.t3 -> ~/.remi-code migration.
+ * Purpose: Verifies first-run import and resume behavior for the ~/.remi-code-legacy -> ~/.remi-code migration.
  * Layer: Server startup tests
  * Depends on: deriveServerPaths, node:sqlite fixtures, and the migration marker contract
  */
@@ -17,7 +17,7 @@ import { deriveServerPaths } from "./config";
 import {
   REMI_CODE_HOME_DIRNAME,
   getLegacyImportMarkerPath,
-  LEGACY_T3_HOME_DIRNAME,
+  LEGACY_REMI_CODE_HOME_DIRNAME,
   migrateLegacyHomeIfNeeded,
 } from "./homeMigration";
 
@@ -61,7 +61,7 @@ it.layer(NodeServices.layer)("homeMigration", (it) => {
         Effect.sync(() => fs.rmSync(tempHome, { recursive: true, force: true })),
       );
 
-      const legacyBaseDir = path.join(tempHome, LEGACY_T3_HOME_DIRNAME);
+      const legacyBaseDir = path.join(tempHome, LEGACY_REMI_CODE_HOME_DIRNAME);
       const targetBaseDir = path.join(tempHome, REMI_CODE_HOME_DIRNAME);
       const legacyPaths = yield* deriveServerPaths(legacyBaseDir, undefined);
       const targetPaths = yield* deriveServerPaths(targetBaseDir, undefined);
@@ -111,7 +111,7 @@ it.layer(NodeServices.layer)("homeMigration", (it) => {
         Effect.sync(() => fs.rmSync(tempHome, { recursive: true, force: true })),
       );
 
-      const legacyBaseDir = path.join(tempHome, LEGACY_T3_HOME_DIRNAME);
+      const legacyBaseDir = path.join(tempHome, LEGACY_REMI_CODE_HOME_DIRNAME);
       const targetBaseDir = path.join(tempHome, REMI_CODE_HOME_DIRNAME);
       const legacyPaths = yield* deriveServerPaths(legacyBaseDir, undefined);
       const targetPaths = yield* deriveServerPaths(targetBaseDir, undefined);
@@ -144,7 +144,7 @@ it.layer(NodeServices.layer)("homeMigration", (it) => {
         Effect.sync(() => fs.rmSync(tempHome, { recursive: true, force: true })),
       );
 
-      const legacyBaseDir = path.join(tempHome, LEGACY_T3_HOME_DIRNAME);
+      const legacyBaseDir = path.join(tempHome, LEGACY_REMI_CODE_HOME_DIRNAME);
       const targetBaseDir = path.join(tempHome, REMI_CODE_HOME_DIRNAME);
       const legacyPaths = yield* deriveServerPaths(legacyBaseDir, undefined);
       const targetPaths = yield* deriveServerPaths(targetBaseDir, undefined);
@@ -176,7 +176,7 @@ it.layer(NodeServices.layer)("homeMigration", (it) => {
         Effect.sync(() => fs.rmSync(tempHome, { recursive: true, force: true })),
       );
 
-      const legacyBaseDir = path.join(tempHome, LEGACY_T3_HOME_DIRNAME);
+      const legacyBaseDir = path.join(tempHome, LEGACY_REMI_CODE_HOME_DIRNAME);
       const targetBaseDir = path.join(tempHome, REMI_CODE_HOME_DIRNAME);
       const legacyPaths = yield* deriveServerPaths(legacyBaseDir, undefined);
       const targetPaths = yield* deriveServerPaths(targetBaseDir, undefined);
@@ -241,7 +241,7 @@ it.layer(NodeServices.layer)("homeMigration", (it) => {
         Effect.sync(() => fs.rmSync(tempHome, { recursive: true, force: true })),
       );
 
-      const legacyBaseDir = path.join(tempHome, LEGACY_T3_HOME_DIRNAME);
+      const legacyBaseDir = path.join(tempHome, LEGACY_REMI_CODE_HOME_DIRNAME);
       const targetBaseDir = path.join(tempHome, REMI_CODE_HOME_DIRNAME);
       const devUrl = new URL("http://127.0.0.1:5173");
       const legacyPaths = yield* deriveServerPaths(legacyBaseDir, devUrl);

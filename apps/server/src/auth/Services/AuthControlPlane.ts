@@ -65,5 +65,5 @@ export interface AuthControlPlaneShape {
 }
 
 export class AuthControlPlane extends ServiceMap.Service<AuthControlPlane, AuthControlPlaneShape>()(
-  "t3/auth/Services/AuthControlPlane",
+  "remi-code/auth/Services/AuthControlPlane",
 ) {}

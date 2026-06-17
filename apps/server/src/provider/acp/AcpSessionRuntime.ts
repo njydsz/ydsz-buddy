@@ -140,7 +140,7 @@ interface EnsureActiveAssistantSegmentResult {
 export class AcpSessionRuntime extends ServiceMap.Service<
   AcpSessionRuntime,
   AcpSessionRuntimeShape
->()("t3/provider/acp/AcpSessionRuntime") {
+>()("remi-code/provider/acp/AcpSessionRuntime") {
   static layer(
     options: AcpSessionRuntimeOptions,
   ): Layer.Layer<

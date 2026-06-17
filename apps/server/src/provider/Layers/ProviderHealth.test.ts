@@ -97,8 +97,8 @@ function withTempCodexHome(configContent?: string) {
   return Effect.gen(function* () {
     const fileSystem = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const tmpDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-test-codex-" });
-    const runtimeDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-test-runtime-" });
+    const tmpDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "remi-code-test-codex-" });
+    const runtimeDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "remi-code-test-runtime-" });
 
     yield* Effect.acquireRelease(
       Effect.sync(() => {
@@ -198,7 +198,7 @@ it.layer(NodeServices.layer)("ProviderHealth", (it) => {
           'model_provider = "portkey"\n',
         );
         const configuredHome = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-configured-codex-",
+          prefix: "remi-code-configured-codex-",
         });
         yield* fileSystem.writeFileString(
           path.join(configuredHome, "config.toml"),
@@ -399,7 +399,7 @@ it.layer(NodeServices.layer)("ProviderHealth", (it) => {
       Effect.gen(function* () {
         yield* withTempCodexHome('model_provider = "openai"\n');
         const status = yield* checkCodexProviderStatus;
-        // The auth probe runs and sees "not logged in" ï¿½?error
+        // The auth probe runs and sees "not logged in" ï¿?error
         assert.strictEqual(status.status, "error");
         assert.strictEqual(status.authStatus, "unauthenticated");
       }).pipe(

@@ -112,7 +112,7 @@ const BASE_DIR =
   process.env.REMI_CODE_HOME?.trim() ||
   Path.join(OS.homedir(), ".remi-code");
 const STATE_DIR = Path.join(BASE_DIR, "userdata");
-const DESKTOP_SCHEME = "t3";
+const DESKTOP_SCHEME = "remi-code";
 const ROOT_DIR = Path.resolve(__dirname, "../../..");
 const isDevelopment = Boolean(process.env.VITE_DEV_SERVER_URL);
 const APP_DISPLAY_NAME = isDevelopment ? "Remi Code (Dev)" : "Remi Code (Alpha)";
@@ -1069,7 +1069,7 @@ function showDesktopNotification(input: {
  * parentheses (e.g. `~/.config/Remi Code (Alpha)` on Linux). This is
  * unfriendly for shell usage and violates Linux naming conventions.
  *
- * We override it to a clean lowercase Remi Code name. Legacy T3 Code/early
+ * We override it to a clean lowercase Remi Code name. Legacy Remi Code/early
  * Remi Code Chromium profiles are intentionally left in place so both apps can
  * coexist without sharing renderer storage.
  */

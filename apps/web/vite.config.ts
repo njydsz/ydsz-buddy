@@ -51,7 +51,7 @@ export default defineConfig({
     hmr: {
       // Explicit config so Vite's HMR WebSocket connects reliably
       // inside Electron's BrowserWindow. Vite 8 uses console.debug for
-      // connection logs â€?enable "Verbose" in DevTools to see them.
+      // connection logs -- enable "Verbose" in DevTools to see them.
       protocol: "ws",
       host: "localhost",
     },

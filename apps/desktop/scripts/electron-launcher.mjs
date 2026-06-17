@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 
 const isDevelopment = Boolean(process.env.VITE_DEV_SERVER_URL);
 const APP_DISPLAY_NAME = isDevelopment ? "Remi Code (Dev)" : "Remi Code (Alpha)";
-const APP_BUNDLE_ID = isDevelopment ? "com.t3tools.remi-code.dev" : "com.t3tools.remi-code";
+const APP_BUNDLE_ID = isDevelopment ? "com.remi-code.app.dev" : "com.remi-code.app";
 const LAUNCHER_VERSION = 2;
 const MICROPHONE_USAGE_DESCRIPTION =
   "Remi Code needs microphone access so you can record voice notes and transcribe them into the chat composer.";

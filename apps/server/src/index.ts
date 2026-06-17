@@ -3,7 +3,7 @@ import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 
-import { CliConfig, t3Cli } from "./main";
+import { CliConfig, remiCodeCli } from "./main";
 import { OpenLive } from "./open";
 import { Command } from "effect/unstable/cli";
 import { version } from "../package.json" with { type: "json" };
@@ -20,6 +20,6 @@ const RuntimeLayer = Layer.empty.pipe(
   Layer.provideMerge(FetchHttpClient.layer),
 );
 
-Command.run(t3Cli, { version })
+Command.run(remiCodeCli, { version })
   .pipe(Effect.provide(RuntimeLayer))
   .pipe((program) => NodeRuntime.runMain(program as Effect.Effect<void, unknown, never>));

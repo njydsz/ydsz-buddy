@@ -274,7 +274,7 @@ describe("classifyCodexStderrLine", () => {
 
 describe("buildCodexProcessEnv", () => {
   it("hydrates the active custom provider env_key from the effective CODEX_HOME", () => {
-    const tempDir = mkdtempSync(path.join(os.tmpdir(), "t3-codex-env-"));
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), "remi-code-codex-env-"));
     try {
       writeFileSync(
         path.join(tempDir, "config.toml"),
@@ -354,15 +354,15 @@ describe("buildCodexProcessEnv", () => {
   it("resolves the browser-use pipe path from desktop env aliases", () => {
     expect(
       resolveCodexBrowserUsePipePath({
-        env: { REMI_CODE_BROWSER_USE_PIPE_PATH_LEGACY: "/tmp/codex-browser-use/t3.sock" },
+        env: { REMI_CODE_BROWSER_USE_PIPE_PATH_LEGACY: "/tmp/codex-browser-use/remi-code.sock" },
         platform: "darwin",
       }),
-    ).toBe("/tmp/codex-browser-use/t3.sock");
+    ).toBe("/tmp/codex-browser-use/remi-code.sock");
   });
 
   it("disables the local remi-code-browser plugin in Remi Code's Codex home overlay", () => {
-    const tempDir = mkdtempSync(path.join(os.tmpdir(), "t3-codex-env-"));
-    const runtimeHome = mkdtempSync(path.join(os.tmpdir(), "t3-runtime-home-"));
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), "remi-code-codex-env-"));
+    const runtimeHome = mkdtempSync(path.join(os.tmpdir(), "remi-code-runtime-home-"));
     try {
       writeFileSync(
         path.join(tempDir, "config.toml"),

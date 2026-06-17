@@ -23,7 +23,7 @@ vi.mock("./threadRetention", async () => {
   };
 });
 
-import { CliConfig, recordStartupHeartbeat, t3Cli, type CliConfigShape } from "./main";
+import { CliConfig, recordStartupHeartbeat, remiCodeCli, type CliConfigShape } from "./main";
 
 const start = vi.fn(() => undefined);
 const stop = vi.fn(() => undefined);
@@ -41,7 +41,7 @@ const findAvailablePort = vi.fn((preferred: number) => Effect.succeed(preferred)
 // Shared service layer used by this CLI test suite.
 const testLayer = Layer.mergeAll(
   Layer.succeed(CliConfig, {
-    cwd: "/tmp/t3-test-workspace",
+    cwd: "/tmp/remi-code-test-workspace",
     fixPath: Effect.void,
     resolveStaticDir: Effect.undefined,
   } satisfies CliConfigShape),
@@ -67,16 +67,16 @@ const testLayer = Layer.mergeAll(
 const runCli = (
   args: ReadonlyArray<string>,
   env: Record<string, string> = {
-    REMI_CODE_HOME: "/tmp/t3-test-home",
+    REMI_CODE_HOME: "/tmp/remi-code-test-home",
     REMI_CODE_NO_BROWSER: "true",
   },
 ) => {
-  const program = Command.runWith(t3Cli, { version: "0.0.0-test" })(args).pipe(
+  const program = Command.runWith(remiCodeCli, { version: "0.0.0-test" })(args).pipe(
     Effect.provide(
       ConfigProvider.layer(
         ConfigProvider.fromEnv({
           env: {
-            REMI_CODE_HOME: "/tmp/t3-test-home",
+            REMI_CODE_HOME: "/tmp/remi-code-test-home",
             REMI_CODE_NO_BROWSER: "true",
             ...env,
           },
@@ -106,7 +106,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         "--host",
         "0.0.0.0",
         "--home-dir",
-        "/tmp/t3-cli-home",
+        "/tmp/remi-code-cli-home",
         "--dev-url",
         "http://127.0.0.1:5173",
         "--no-browser",
@@ -118,8 +118,8 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "desktop");
       assert.equal(resolvedConfig?.port, 4010);
       assert.equal(resolvedConfig?.host, "0.0.0.0");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-cli-home");
-      assert.equal(resolvedConfig?.stateDir, "/tmp/t3-cli-home/dev");
+      assert.equal(resolvedConfig?.baseDir, "/tmp/remi-code-cli-home");
+      assert.equal(resolvedConfig?.stateDir, "/tmp/remi-code-cli-home/dev");
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://127.0.0.1:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "auth-secret");
@@ -145,7 +145,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         REMI_CODE_MODE: "desktop",
         REMI_CODE_PORT: "4999",
         REMI_CODE_HOST: "100.88.10.4",
-        REMI_CODE_HOME: "/tmp/t3-env-home",
+        REMI_CODE_HOME: "/tmp/remi-code-env-home",
         VITE_DEV_SERVER_URL: "http://localhost:5173",
         REMI_CODE_NO_BROWSER: "true",
         REMI_CODE_AUTH_TOKEN: "env-token",
@@ -155,8 +155,8 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "desktop");
       assert.equal(resolvedConfig?.port, 4999);
       assert.equal(resolvedConfig?.host, "100.88.10.4");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-env-home");
-      assert.equal(resolvedConfig?.stateDir, "/tmp/t3-env-home/dev");
+      assert.equal(resolvedConfig?.baseDir, "/tmp/remi-code-env-home");
+      assert.equal(resolvedConfig?.stateDir, "/tmp/remi-code-env-home/dev");
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://localhost:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "env-token");

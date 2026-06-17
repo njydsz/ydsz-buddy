@@ -46,7 +46,7 @@ const exists = (filePath: string) =>
     return fileInfo._tag === "Success";
   });
 
-const BaseTestLayer = makeProjectionPipelinePrefixedTestLayer("t3-projection-pipeline-test-");
+const BaseTestLayer = makeProjectionPipelinePrefixedTestLayer("remi-code-projection-pipeline-test-");
 
 it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
   it.effect("bootstraps all projection states and writes projection rows", () =>
@@ -277,7 +277,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
   );
 });
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-base-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-base-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("stores message attachment references without mutating payloads", () =>
@@ -343,7 +343,7 @@ it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-base-")))(
   },
 );
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-pipeline-approvals-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-pipeline-approvals-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("refreshes stored thread approval summary after approval-response-requested", () =>
@@ -767,7 +767,7 @@ it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-pipe
   },
 );
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-safe-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-safe-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("preserves mixed image attachment metadata as-is", () =>
@@ -976,7 +976,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-overwrite-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-overwrite-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("overwrites stored attachment references when a message updates attachments", () =>
     Effect.gen(function* () {
@@ -1119,7 +1119,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-rollback-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-rollback-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("does not persist attachment files when projector transaction rolls back", () =>
     Effect.gen(function* () {
@@ -1242,7 +1242,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-overwrite-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-overwrite-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("removes unreferenced attachment files when a thread is reverted", () =>
     Effect.gen(function* () {
@@ -1324,7 +1324,7 @@ it.layer(
           threadId,
           turnId: TurnId.makeUnsafe("turn-keep"),
           checkpointTurnCount: 1,
-          checkpointRef: CheckpointRef.makeUnsafe("refs/t3/checkpoints/thread-revert-files/turn/1"),
+          checkpointRef: CheckpointRef.makeUnsafe("refs/remi-code/checkpoints/thread-revert-files/turn/1"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.makeUnsafe("message-keep"),
@@ -1377,7 +1377,7 @@ it.layer(
           threadId,
           turnId: TurnId.makeUnsafe("turn-remove"),
           checkpointTurnCount: 2,
-          checkpointRef: CheckpointRef.makeUnsafe("refs/t3/checkpoints/thread-revert-files/turn/2"),
+          checkpointRef: CheckpointRef.makeUnsafe("refs/remi-code/checkpoints/thread-revert-files/turn/2"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.makeUnsafe("message-remove"),
@@ -1450,7 +1450,7 @@ it.layer(
   );
 });
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-revert-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-revert-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("removes thread attachment directory when thread is deleted", () =>
@@ -1583,7 +1583,7 @@ it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-atta
   },
 );
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-attachments-delete-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-attachments-delete-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("ignores unsafe thread ids for attachment cleanup paths", () =>
@@ -2001,7 +2001,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
             threadId: ThreadId.makeUnsafe("thread-conflict"),
             turnId: TurnId.makeUnsafe("turn-completed"),
             checkpointTurnCount: 1,
-            checkpointRef: CheckpointRef.makeUnsafe("refs/t3/checkpoints/thread-conflict/turn/1"),
+            checkpointRef: CheckpointRef.makeUnsafe("refs/remi-code/checkpoints/thread-conflict/turn/1"),
             status: "ready",
             files: [],
             assistantMessageId: MessageId.makeUnsafe("assistant-conflict"),
@@ -2105,7 +2105,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
           threadId: ThreadId.makeUnsafe("thread-revert"),
           turnId: TurnId.makeUnsafe("turn-1"),
           checkpointTurnCount: 1,
-          checkpointRef: CheckpointRef.makeUnsafe("refs/t3/checkpoints/thread-revert/turn/1"),
+          checkpointRef: CheckpointRef.makeUnsafe("refs/remi-code/checkpoints/thread-revert/turn/1"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.makeUnsafe("assistant-keep"),
@@ -2149,7 +2149,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
           threadId: ThreadId.makeUnsafe("thread-revert"),
           turnId: TurnId.makeUnsafe("turn-2"),
           checkpointTurnCount: 2,
-          checkpointRef: CheckpointRef.makeUnsafe("refs/t3/checkpoints/thread-revert/turn/2"),
+          checkpointRef: CheckpointRef.makeUnsafe("refs/remi-code/checkpoints/thread-revert/turn/2"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.makeUnsafe("assistant-remove"),
@@ -2365,7 +2365,7 @@ it.effect("restores pending turn-start metadata across projection pipeline resta
     Effect.provide(
       Layer.provideMerge(
         ServerConfig.layerTest(process.cwd(), {
-          prefix: "t3-projection-pipeline-restart-",
+          prefix: "remi-code-projection-pipeline-restart-",
         }),
         NodeServices.layer,
       ),
@@ -2382,7 +2382,7 @@ const engineLayer = it.layer(
     Layer.provideMerge(SqlitePersistenceMemory),
     Layer.provideMerge(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "t3-projection-pipeline-engine-dispatch-",
+        prefix: "remi-code-projection-pipeline-engine-dispatch-",
       }),
     ),
     Layer.provideMerge(NodeServices.layer),
@@ -2517,7 +2517,7 @@ engineLayer("OrchestrationProjectionPipeline via engine dispatch", (it) => {
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("t3-projection-pipeline-turn-finish-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("remi-code-projection-pipeline-turn-finish-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("keeps assistant message completions from settling a running turn early", () =>
     Effect.gen(function* () {

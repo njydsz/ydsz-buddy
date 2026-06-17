@@ -46,7 +46,7 @@ function makeCookieRequest(sessionToken: string): AuthRequest {
   return {
     headers: {},
     cookies: {
-      t3_session: sessionToken,
+      remi_code_session: sessionToken,
     },
   };
 }

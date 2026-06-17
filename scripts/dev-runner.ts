@@ -14,7 +14,7 @@ const BASE_WEB_PORT = 5733;
 const MAX_HASH_OFFSET = 3000;
 const MAX_PORT = 65535;
 
-export const DEFAULT_T3_HOME = Effect.map(Effect.service(Path.Path), (path) =>
+export const DEFAULT_REMI_CODE_HOME = Effect.map(Effect.service(Path.Path), (path) =>
   path.join(homedir(), ".remi-code"),
 );
 
@@ -124,7 +124,7 @@ function resolveBaseDir(baseDir: string | undefined): Effect.Effect<string, neve
       return path.resolve(configured);
     }
 
-    return yield* DEFAULT_T3_HOME;
+    return yield* DEFAULT_REMI_CODE_HOME;
   });
 }
 
@@ -133,7 +133,7 @@ interface CreateDevRunnerEnvInput {
   readonly baseEnv: NodeJS.ProcessEnv;
   readonly serverOffset: number;
   readonly webOffset: number;
-  readonly t3Home: string | undefined;
+  readonly remiCodeHome: string | undefined;
   readonly authToken: string | undefined;
   readonly noBrowser: boolean | undefined;
   readonly autoBootstrapProjectFromCwd: boolean | undefined;
@@ -148,7 +148,7 @@ export function createDevRunnerEnv({
   baseEnv,
   serverOffset,
   webOffset,
-  t3Home,
+  remiCodeHome,
   authToken,
   noBrowser,
   autoBootstrapProjectFromCwd,
@@ -160,7 +160,7 @@ export function createDevRunnerEnv({
   return Effect.gen(function* () {
     const serverPort = port ?? BASE_SERVER_PORT + serverOffset;
     const webPort = BASE_WEB_PORT + webOffset;
-    const resolvedBaseDir = yield* resolveBaseDir(t3Home);
+    const resolvedBaseDir = yield* resolveBaseDir(remiCodeHome);
 
     const output: NodeJS.ProcessEnv = {
       ...baseEnv,
@@ -348,7 +348,7 @@ export function resolveModePortOffsets<R = NetService>({
 
 interface DevRunnerCliInput {
   readonly mode: DevMode;
-  readonly t3Home: string | undefined;
+  readonly remiCodeHome: string | undefined;
   readonly authToken: string | undefined;
   readonly noBrowser: boolean | undefined;
   readonly autoBootstrapProjectFromCwd: boolean | undefined;
@@ -430,7 +430,7 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
       baseEnv: process.env,
       serverOffset,
       webOffset,
-      t3Home: input.t3Home,
+      remiCodeHome: input.remiCodeHome,
       authToken: input.authToken,
       noBrowser: resolveOptionalBooleanOverride(input.noBrowser, envOverrides.noBrowser),
       autoBootstrapProjectFromCwd: resolveOptionalBooleanOverride(
@@ -460,8 +460,8 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
     }
 
     // On Windows the server must run on Node.js because Bun does not
-    // implement ConPTY.  When the user runs `dev` on Windows â€?or explicitly
-    // runs `dev:win` â€?we split into two processes: turbo drives contracts +
+    // implement ConPTY.  When the user runs `dev` on Windows ï¿?or explicitly
+    // runs `dev:win` ï¿?we split into two processes: turbo drives contracts +
     // Vite, and Node.js runs the pre-built server directly.
     const useWinSplit =
       input.mode === "dev:win" ||
@@ -549,7 +549,7 @@ const devRunnerCli = Command.make("dev-runner", {
   mode: Argument.choice("mode", DEV_RUNNER_MODES).pipe(
     Argument.withDescription("Development mode to run."),
   ),
-  t3Home: Flag.string("home-dir").pipe(
+  remiCodeHome: Flag.string("home-dir").pipe(
     Flag.withDescription("Base directory for all Remi Code data (equivalent to REMI_CODE_HOME)."),
     Flag.withFallbackConfig(optionalStringConfig("REMI_CODE_HOME")),
   ),

@@ -1,6 +1,6 @@
 /**
  * FILE: homeMigration.ts
- * Purpose: Imports legacy ~/.t3 state into the new ~/.remi-code home on first startup.
+ * Purpose: Imports legacy home state into the new ~/.remi-code home on first startup.
  * Layer: Startup utility
  * Depends on: config path derivation, Effect filesystem/path services, and sqlite snapshots
  */
@@ -9,9 +9,9 @@ import { Data, Effect, FileSystem, Path } from "effect";
 import { deriveServerPaths } from "./config";
 
 export const REMI_CODE_HOME_DIRNAME = ".remi-code";
-export const LEGACY_T3_HOME_DIRNAME = ".t3";
+export const LEGACY_REMI_CODE_HOME_DIRNAME = ".remi-code-legacy";
 const MIGRATIONS_DIRNAME = "migrations";
-const LEGACY_IMPORT_MARKER_BASENAME = "import-from-t3-v1.json";
+const LEGACY_IMPORT_MARKER_BASENAME = "import-from-remi-code-legacy-v1.json";
 
 export class HomeMigrationError extends Data.TaggedError("HomeMigrationError")<{
   readonly message: string;
@@ -211,7 +211,7 @@ export const migrateLegacyHomeIfNeeded = Effect.fn(function* (input: LegacyHomeM
     };
   }
 
-  const legacyBaseDir = path.resolve(path.join(input.homeDir, LEGACY_T3_HOME_DIRNAME));
+  const legacyBaseDir = path.resolve(path.join(input.homeDir, LEGACY_REMI_CODE_HOME_DIRNAME));
   if (!(yield* fs.exists(legacyBaseDir))) {
     return {
       status: "skipped",
@@ -292,7 +292,7 @@ export const migrateLegacyHomeIfNeeded = Effect.fn(function* (input: LegacyHomeM
       startedAt: migrationStartedAt,
       migratedAt: marker?.migratedAt ?? migrationStartedAt,
       notes: [
-        "Legacy ~/.t3 data is being imported into ~/.remi-code.",
+        "Legacy ~/.remi-code-legacy data is being imported into ~/.remi-code.",
         "If startup stops midway, the next launch resumes this import instead of starting from scratch.",
       ],
     });
@@ -344,12 +344,12 @@ export const migrateLegacyHomeIfNeeded = Effect.fn(function* (input: LegacyHomeM
       startedAt: migrationStartedAt,
       migratedAt: new Date().toISOString(),
       notes: [
-        "Legacy ~/.t3 data was imported into ~/.remi-code.",
+        "Legacy ~/.remi-code-legacy data was imported into ~/.remi-code.",
         "Existing legacy worktree directories were left in place and are still referenced by absolute path.",
       ],
     });
 
-    yield* Effect.logInfo("imported legacy T3 state into Remi Code home", {
+    yield* Effect.logInfo("imported legacy Remi Code state into Remi Code home", {
       sourceStateDir: sourcePaths.stateDir,
       targetStateDir: targetPaths.stateDir,
       importedArtifacts,
@@ -368,7 +368,7 @@ export const migrateLegacyHomeIfNeeded = Effect.fn(function* (input: LegacyHomeM
       error instanceof HomeMigrationError
         ? error
         : new HomeMigrationError({
-            message: "Failed to import legacy ~/.t3 state into ~/.remi-code.",
+            message: "Failed to import legacy ~/.remi-code-legacy state into ~/.remi-code.",
             cause: error,
           }),
     ),

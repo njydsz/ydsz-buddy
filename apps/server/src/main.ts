@@ -43,7 +43,7 @@ interface CliInput {
   readonly mode: Option.Option<RuntimeMode>;
   readonly port: Option.Option<number>;
   readonly host: Option.Option<string>;
-  readonly remi-codeHome: Option.Option<string>;
+  readonly remiCodeHome: Option.Option<string>;
   readonly devUrl: Option.Option<URL>;
   readonly noBrowser: Option.Option<boolean>;
   readonly authToken: Option.Option<string>;
@@ -76,7 +76,7 @@ export interface CliConfigShape {
  * CliConfig - Service tag for startup CLI/runtime helpers.
  */
 export class CliConfig extends ServiceMap.Service<CliConfig, CliConfigShape>()(
-  "t3/main/CliConfig",
+  "remi-code/main/CliConfig",
 ) {
   static readonly layer = Layer.effect(
     CliConfig,
@@ -107,7 +107,7 @@ const CliEnvConfig = Config.all({
   ),
   port: Config.port("REMI_CODE_PORT").pipe(Config.option, Config.map(Option.getOrUndefined)),
   host: Config.string("REMI_CODE_HOST").pipe(Config.option, Config.map(Option.getOrUndefined)),
-  remi-codeHome: Config.string("REMI_CODE_HOME").pipe(
+  remiCodeHome: Config.string("REMI_CODE_HOME").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
@@ -167,9 +167,9 @@ const ServerConfigLive = (input: CliInput) =>
 
       const devUrl = Option.getOrElse(input.devUrl, () => env.devUrl);
       const baseDir = yield* resolveBaseDir(
-        Option.getOrUndefined(input.remi-codeHome) ?? env.remi-codeHome,
+        Option.getOrUndefined(input.remiCodeHome) ?? env.remiCodeHome,
       );
-      // Import legacy ~/.t3 state before runtime paths are derived under ~/.remi-code.
+      // Import legacy ~/.remi-code-legacy state before runtime paths are derived under ~/.remi-code.
       yield* migrateLegacyHomeIfNeeded({
         baseDir,
         homeDir: OS.homedir(),
@@ -178,7 +178,7 @@ const ServerConfigLive = (input: CliInput) =>
         Effect.mapError(
           (cause) =>
             new StartupError({
-              message: "Failed to migrate legacy T3 home directory",
+              message: "Failed to migrate legacy Remi Code home directory",
               cause,
             }),
         ),
@@ -346,7 +346,7 @@ const hostFlag = Flag.string("host").pipe(
   Flag.withDescription("Host/interface to bind (for example 127.0.0.1, 0.0.0.0, or a Tailnet IP)."),
   Flag.optional,
 );
-const remi-codeHomeFlag = Flag.string("home-dir").pipe(
+const remiCodeHomeFlag = Flag.string("home-dir").pipe(
   Flag.withDescription("Base directory for all Remi Code data (equivalent to REMI_CODE_HOME)."),
   Flag.optional,
 );
@@ -384,11 +384,11 @@ const logWebSocketEventsFlag = Flag.boolean("log-websocket-events").pipe(
   Flag.optional,
 );
 
-export const t3Cli = Command.make("t3", {
+export const remiCodeCli = Command.make("remi-code", {
   mode: modeFlag,
   port: portFlag,
   host: hostFlag,
-  remi-codeHome: remi-codeHomeFlag,
+  remiCodeHome: remiCodeHomeFlag,
   devUrl: devUrlFlag,
   noBrowser: noBrowserFlag,
   authToken: authTokenFlag,

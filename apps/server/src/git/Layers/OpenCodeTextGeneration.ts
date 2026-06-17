@@ -329,7 +329,7 @@ const makeOpenCodeCompatibleTextGeneration = (config: OpenCodeCompatibleTextGene
               cliSpec: config.cliSpec,
             });
             const sessionCreateInput = {
-              title: `T3 Code ${input.operation}`,
+              title: `Remi Code ${input.operation}`,
               model: {
                 providerID: providerId,
                 id: modelId,

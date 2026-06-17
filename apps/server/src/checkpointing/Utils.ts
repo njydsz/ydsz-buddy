@@ -2,7 +2,7 @@ import { Encoding } from "effect";
 import { CheckpointRef, MessageId, ProjectId, type ThreadId, TurnId } from "@remi-code/contracts";
 import { resolveThreadWorkspaceCwd as resolveSharedThreadWorkspaceCwd } from "@remi-code/shared/threadEnvironment";
 
-export const CHECKPOINT_REFS_PREFIX = "refs/t3/checkpoints";
+export const CHECKPOINT_REFS_PREFIX = "refs/remi-code/checkpoints";
 
 export function checkpointRefForThreadTurn(threadId: ThreadId, turnCount: number): CheckpointRef {
   return CheckpointRef.makeUnsafe(

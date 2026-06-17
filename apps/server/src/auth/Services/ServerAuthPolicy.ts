@@ -6,5 +6,5 @@ export interface ServerAuthPolicyShape {
 }
 
 export class ServerAuthPolicy extends ServiceMap.Service<ServerAuthPolicy, ServerAuthPolicyShape>()(
-  "t3/auth/Services/ServerAuthPolicy",
+  "remi-code/auth/Services/ServerAuthPolicy",
 ) {}

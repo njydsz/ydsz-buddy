@@ -22,7 +22,7 @@ describe("desktopUserDataProfile", () => {
     );
     expect(resolveLegacyDesktopUserDataPaths({ appDataBase, isDevelopment: true })).toEqual([
       "/Users/tester/Library/Application Support/dpcode-dev",
-      "/Users/tester/Library/Application Support/Peak Code (Dev)",
+      "/Users/tester/Library/Application Support/Remi Code (Dev)",
     ]);
   });
 

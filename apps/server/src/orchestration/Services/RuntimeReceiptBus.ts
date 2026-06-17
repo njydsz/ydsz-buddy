@@ -46,4 +46,4 @@ export interface RuntimeReceiptBusShape {
 export class RuntimeReceiptBus extends ServiceMap.Service<
   RuntimeReceiptBus,
   RuntimeReceiptBusShape
->()("t3/orchestration/Services/RuntimeReceiptBus") {}
+>()("remi-code/orchestration/Services/RuntimeReceiptBus") {}

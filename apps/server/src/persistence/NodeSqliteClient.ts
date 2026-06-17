@@ -32,7 +32,7 @@ export type TypeId = "~local/sqlite-node/SqliteClient";
 /**
  * SqliteClient - Effect service tag for the sqlite SQL client.
  */
-export const SqliteClient = ServiceMap.Service<Client.SqlClient>("t3/persistence/NodeSqliteClient");
+export const SqliteClient = ServiceMap.Service<Client.SqlClient>("remi-code/persistence/NodeSqliteClient");
 
 export interface SqliteClientConfig {
   readonly filename: string;
@@ -52,7 +52,7 @@ export interface SqliteMemoryClientConfig extends Omit<
 
 /**
  * Verify that the current Node.js version includes the `node:sqlite` APIs
- * used by `NodeSqliteClient` â€” specifically `StatementSync.columns()` (added
+ * used by `NodeSqliteClient` â€?specifically `StatementSync.columns()` (added
  * in Node 22.16.0 / 23.11.0).
  *
  * @see https://github.com/nodejs/node/pull/57490

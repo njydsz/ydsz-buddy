@@ -44,7 +44,7 @@ import Migration0028 from "./Migrations/028_ProjectionProjectsKind.ts";
 import Migration0029 from "./Migrations/029_ProjectionThreadsLastKnownPr.ts";
 import Migration0030 from "./Migrations/030_ProjectionThreadMessagesDispatchMode.ts";
 import Migration0031 from "./Migrations/031_ProjectionThreadsCreateBranchFlowCompleted.ts";
-import Migration0032 from "./Migrations/032_ReconcileLegacyT3SchemaImport.ts";
+import Migration0032 from "./Migrations/032_ReconcileLegacyRemiCodeSchemaImport.ts";
 import Migration0033 from "./Migrations/033_ProjectionThreadsSidechatSource.ts";
 import Migration0034 from "./Migrations/034_AuthAccessManagement.ts";
 import Migration0035 from "./Migrations/035_NormalizeLegacyModelSelectionOptions.ts";
@@ -93,7 +93,7 @@ export const migrationEntries = [
   [29, "ProjectionThreadsLastKnownPr", Migration0029],
   [30, "ProjectionThreadMessagesDispatchMode", Migration0030],
   [31, "ProjectionThreadsCreateBranchFlowCompleted", Migration0031],
-  [32, "ReconcileLegacyT3SchemaImport", Migration0032],
+  [32, "ReconcileLegacyRemiCodeSchemaImport", Migration0032],
   [33, "ProjectionThreadsSidechatSource", Migration0033],
   [34, "AuthAccessManagement", Migration0034],
   [35, "NormalizeLegacyModelSelectionOptions", Migration0035],

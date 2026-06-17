@@ -54,4 +54,4 @@ export interface BootstrapCredentialServiceShape {
 export class BootstrapCredentialService extends ServiceMap.Service<
   BootstrapCredentialService,
   BootstrapCredentialServiceShape
->()("t3/auth/Services/BootstrapCredentialService") {}
+>()("remi-code/auth/Services/BootstrapCredentialService") {}

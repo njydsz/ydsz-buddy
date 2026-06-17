@@ -16,7 +16,7 @@ import { type SplitDirection, type SplitDropSide } from "../../splitViewStore";
 import { cn } from "../../lib/utils";
 
 // Custom MIME so external file drops on the composer (which listen for `Files`) cannot trigger us.
-export const THREAD_DRAG_MIME = "application/x-t3-thread";
+export const THREAD_DRAG_MIME = "application/x-remi-code-thread";
 
 export interface ThreadDragPayload {
   threadId: ThreadId;

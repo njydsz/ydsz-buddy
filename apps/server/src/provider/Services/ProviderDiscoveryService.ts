@@ -55,4 +55,4 @@ export interface ProviderDiscoveryServiceShape {
 export class ProviderDiscoveryService extends ServiceMap.Service<
   ProviderDiscoveryService,
   ProviderDiscoveryServiceShape
->()("t3/provider/Services/ProviderDiscoveryService") {}
+>()("remi-code/provider/Services/ProviderDiscoveryService") {}

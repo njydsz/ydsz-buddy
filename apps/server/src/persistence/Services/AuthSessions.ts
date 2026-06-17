@@ -90,4 +90,4 @@ export interface AuthSessionRepositoryShape {
 export class AuthSessionRepository extends ServiceMap.Service<
   AuthSessionRepository,
   AuthSessionRepositoryShape
->()("t3/persistence/Services/AuthSessions/AuthSessionRepository") {}
+>()("remi-code/persistence/Services/AuthSessions/AuthSessionRepository") {}

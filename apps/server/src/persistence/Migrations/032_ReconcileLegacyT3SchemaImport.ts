@@ -1,14 +1,14 @@
 /**
- * Reconciles schema after a legacy ~/.t3 import where the imported
+ * Reconciles schema after a legacy ~/.remi-code-legacy import where the imported
  * `effect_sql_migrations` tracker already records IDs 17-31 under unrelated
- * T3 Code names. Because the migrator skips by ID, the renumbered Remi Code
+ * Remi Code names. Because the migrator skips by ID, the renumbered Remi Code
  * migrations 17-31 never run on those imports, leaving columns like
  * `env_mode` missing and crashing the server on first query.
  *
  * Migration #023 previously held this self-healing logic, but legacy DBs
- * also have a row for ID 23 (T3 Code's `ProjectionThreadShellSummary`),
+ * also have a row for ID 23 (Remi Code's `ProjectionThreadShellSummary`),
  * so the migrator skipped it too. This migration is at a fresh ID beyond
- * any T3 Code migration, guaranteeing it runs on import.
+ * any Remi Code migration, guaranteeing it runs on import.
  *
  * Idempotent and a no-op for fresh Remi Code installs (every column already
  * exists from the in-order runs of 17-31).

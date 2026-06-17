@@ -102,7 +102,7 @@ function makeAuthDescriptor() {
     policy: "loopback-browser" as const,
     bootstrapMethods: ["one-time-token" as const],
     sessionMethods: ["browser-session-cookie" as const, "bearer-session-token" as const],
-    sessionCookieName: "t3_session",
+    sessionCookieName: "remi_code_session",
   };
 }
 
@@ -267,7 +267,7 @@ describe("createHttpRequestHandler", () => {
     const config = await makeConfig({ devUrl: new URL("http://localhost:5173/") });
     const handler = await makeHandler(config, {
       serverAuth: makeFakeServerAuth(),
-      cookieName: "t3_session",
+      cookieName: "remi_code_session",
     });
 
     await withServer(handler, async (origin) => {
@@ -288,7 +288,7 @@ describe("createHttpRequestHandler", () => {
     const config = await makeConfig();
     const handler = await makeHandler(config, {
       serverAuth: makeFakeServerAuth(),
-      cookieName: "t3_session",
+      cookieName: "remi_code_session",
     });
 
     await withServer(handler, async (origin) => {
@@ -299,7 +299,7 @@ describe("createHttpRequestHandler", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.headers.get("set-cookie")).toContain("t3_session=session-token");
+      expect(response.headers.get("set-cookie")).toContain("remi_code_session=session-token");
       await expect(response.json()).resolves.toMatchObject({
         authenticated: true,
         sessionMethod: "browser-session-cookie",

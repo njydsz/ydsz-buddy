@@ -139,7 +139,7 @@ export function normalizePersistedModelSelection(input: unknown): unknown {
     return input;
   }
 
-  // Newer T3 Code writes provider-less selections as { instanceId, model } and
+  // Newer Remi Code writes provider-less selections as { instanceId, model } and
   // option rows as [{ id, value }]; Remi Code stores canonical provider/options objects.
   return normalizeLegacyModelSelection({
     provider: input.provider ?? input.instanceId,

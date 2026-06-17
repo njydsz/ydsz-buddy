@@ -65,7 +65,7 @@ layer("OrchestrationEventStore", (it) => {
     }),
   );
 
-  it.effect("normalizes imported T3 Code model-selection shapes during replay", () =>
+  it.effect("normalizes imported Remi Code model-selection shapes during replay", () =>
     Effect.gen(function* () {
       const eventStore = yield* OrchestrationEventStore;
       const sql = yield* SqlClient.SqlClient;

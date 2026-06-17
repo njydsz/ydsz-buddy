@@ -24,4 +24,4 @@ export interface GitStatusBroadcasterShape {
 export class GitStatusBroadcaster extends ServiceMap.Service<
   GitStatusBroadcaster,
   GitStatusBroadcasterShape
->()("t3/git/Services/GitStatusBroadcaster") {}
+>()("remi-code/git/Services/GitStatusBroadcaster") {}

@@ -43,7 +43,7 @@ export interface ServerShape {
   readonly stopSignal: Effect.Effect<void, never>;
 }
 
-export class Server extends ServiceMap.Service<Server, ServerShape>()("t3/effectServer/Server") {}
+export class Server extends ServiceMap.Service<Server, ServerShape>()("remi-code/effectServer/Server") {}
 
 export class ServerLifecycleError extends Schema.TaggedErrorClass<ServerLifecycleError>()(
   "ServerLifecycleError",

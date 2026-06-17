@@ -350,9 +350,9 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "legacy-import-recovery",
-        title: "Legacy T3 imports heal themselves",
+        title: "legacy Remi Code imports heal themselves",
         description:
-          "A new migration reconciles older imported T3 Code databases whose migration history skipped Remi Code schema changes, preventing missing-column crashes after import.",
+          "A new migration reconciles older imported Remi Code databases whose migration history skipped Remi Code schema changes, preventing missing-column crashes after import.",
       },
       {
         id: "runtime-idle-cleanup",

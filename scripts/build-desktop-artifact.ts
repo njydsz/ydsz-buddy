@@ -531,10 +531,10 @@ const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     productName,
     artifactName:
       platform === "win"
-        ? "Peak-Code-${version}-win-${arch}.${ext}"
+        ? "Remi-Code-${version}-win-${arch}.${ext}"
         : platform === "linux"
-          ? "Peak-Code-${version}-linux-${arch}.${ext}"
-          : "Peak-Code-${version}-mac-${arch}.${ext}",
+          ? "Remi-Code-${version}-linux-${arch}.${ext}"
+          : "Remi-Code-${version}-mac-${arch}.${ext}",
     directories: {
       buildResources: "apps/desktop/resources",
     },

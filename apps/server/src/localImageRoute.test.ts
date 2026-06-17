@@ -61,7 +61,7 @@ function makeFakeServerAuth(): ServerAuthShape {
     policy: "loopback-browser" as const,
     bootstrapMethods: ["one-time-token" as const],
     sessionMethods: ["browser-session-cookie" as const, "bearer-session-token" as const],
-    sessionCookieName: "t3_session",
+    sessionCookieName: "remi_code_session",
   };
   const session = {
     sessionId: "session-id" as never,

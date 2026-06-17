@@ -24,7 +24,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev-runner.ts dev",
+    "dev": "bun run scripts/dev-runner.ts dev",
     "dev:server": "node scripts/dev-runner.ts dev:server",
     "dev:web": "node scripts/dev-runner.ts dev:web",
     "dev:marketing": "turbo run dev --filter=@remi-code/marketing",
@@ -56,9 +56,10 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "effect": "4.0.0-beta.25",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.55.0",
-    "turbo": "^2.3.3",
+    "turbo": "^2.9.18",
     "vitest": "catalog:"
   },
   "overrides": {
@@ -73,5 +74,8 @@
     "workerDirectory": [
       "apps/web/public"
     ]
+  },
+  "dependencies": {
+    "@effect/platform-node-shared": "https://pkg.pr.new/Effect-TS/effect-smol/@effect/platform-node-shared@8881a9b"
   }
 }

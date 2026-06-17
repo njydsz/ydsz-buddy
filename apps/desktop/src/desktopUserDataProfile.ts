@@ -8,8 +8,8 @@ import * as Path from "node:path";
 
 const DEV_USER_DATA_DIR_NAME = "remi-code-dev";
 const PROD_USER_DATA_DIR_NAME = "remi-code";
-const DEV_LEGACY_USER_DATA_DIR_NAMES = ["dpcode-dev", "Peak Code (Dev)"] as const;
-const PROD_LEGACY_USER_DATA_DIR_NAMES = ["dpcode", "Peak Code (Alpha)"] as const;
+const DEV_LEGACY_USER_DATA_DIR_NAMES = ["dpcode-dev", "Remi Code (Dev)"] as const;
+const PROD_LEGACY_USER_DATA_DIR_NAMES = ["dpcode", "Remi Code (Alpha)"] as const;
 const PROFILE_SEED_ENTRY_NAMES = [
   "Local Storage",
   "IndexedDB",
