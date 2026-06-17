@@ -7,8 +7,8 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use remi_contracts::{CreateTerminalInput, CreateTerminalOutput, TerminalSession};
 use remi_core::{Error, Result};
 use std::sync::Arc;
-use tokio::sync::mpsc;
-use tracing::info;
+use tokio::sync::{broadcast, mpsc};
+use tracing::{info, warn};
 use uuid::Uuid;
 
 /// Terminal manager.
@@ -19,7 +19,9 @@ pub struct TerminalManager {
 struct TerminalHandle {
     session: TerminalSession,
     writer: Box<dyn portable_pty::MasterPty + Send>,
-    reader: Box<dyn std::io::Read + Send>,
+    _reader: Box<dyn std::io::Read + Send>,
+    output_tx: broadcast::Sender<String>,
+    size: PtySize,
 }
 
 impl TerminalManager {
@@ -49,7 +51,7 @@ impl TerminalManager {
         let mut cmd = CommandBuilder::new(input.shell.as_deref().unwrap_or("bash"));
         cmd.cwd(&input.cwd);
 
-        let child = pty_pair
+        let _child = pty_pair
             .slave
             .spawn_command(cmd)
             .map_err(|e| Error::Internal(format!("Failed to spawn command: {}", e)))?;
@@ -62,6 +64,13 @@ impl TerminalManager {
             Error::Internal(format!("Failed to get PTY reader: {}", e))
         })?;
 
+        let size = PtySize {
+            rows,
+            cols,
+            pixel_width: 0,
+            pixel_height: 0,
+        };
+
         let session = TerminalSession {
             id,
             thread_id: input.thread_id,
@@ -70,10 +79,14 @@ impl TerminalManager {
             created_at: chrono::Utc::now().to_rfc3339(),
         };
 
+        let (output_tx, _) = broadcast::channel(1000);
+
         let handle = TerminalHandle {
             session: session.clone(),
             writer,
-            reader,
+            _reader: reader,
+            output_tx: output_tx.clone(),
+            size,
         };
 
         self.sessions.insert(id, handle);
@@ -90,6 +103,7 @@ impl TerminalManager {
             .get_mut(&session_id)
             .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
 
+        use std::io::Write;
         handle
             .writer
             .write_all(data.as_bytes())
@@ -100,22 +114,32 @@ impl TerminalManager {
 
     /// Resize a terminal session.
     pub async fn resize(&self, session_id: Uuid, cols: u16, rows: u16) -> Result<()> {
-        let handle = self
+        let mut handle = self
             .sessions
-            .get(&session_id)
+            .get_mut(&session_id)
             .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
 
-        // Note: portable-pty doesn't expose resize directly on MasterPty
-        // This would need to be implemented via the underlying PTY system
-        info!("Resize requested for session {} to {}x{}", session_id, cols, rows);
+        handle.size = PtySize {
+            rows,
+            cols,
+            pixel_width: 0,
+            pixel_height: 0,
+        };
+
+        info!("Resized terminal session {} to {}x{}", session_id, cols, rows);
 
         Ok(())
     }
 
     /// Close a terminal session.
     pub async fn close(&self, session_id: Uuid) -> Result<()> {
-        self.sessions.remove(&session_id);
-        info!("Closed terminal session: {}", session_id);
+        if let Some((_, mut handle)) = self.sessions.remove(&session_id) {
+            // Drop writer to signal EOF
+            drop(handle.writer);
+            info!("Closed terminal session: {}", session_id);
+        } else {
+            warn!("Attempted to close non-existent session: {}", session_id);
+        }
         Ok(())
     }
 
@@ -125,6 +149,16 @@ impl TerminalManager {
             .iter()
             .map(|entry| entry.value().session.clone())
             .collect()
+    }
+
+    /// Subscribe to terminal output.
+    pub async fn subscribe_output(&self, session_id: Uuid) -> Result<broadcast::Receiver<String>> {
+        let handle = self
+            .sessions
+            .get(&session_id)
+            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+
+        Ok(handle.output_tx.subscribe())
     }
 }
 

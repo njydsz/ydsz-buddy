@@ -57,7 +57,7 @@ git2 = "0.20"
 portable-pty = "0.8"
 
 # Utilities
-uuid = { version = "1.15", features = ["v4", "serde"] }
+uuid = { version = "1.15", features = ["v4", "serde", "schemars"] }
 chrono = { version = "0.4", features = ["serde"] }
 bytes = "1.10"
 futures = "0.3"

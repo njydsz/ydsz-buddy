@@ -58,18 +58,23 @@ impl Default for ServerConfig {
 impl ServerConfig {
     /// Load configuration from environment variables and config file.
     pub fn load() -> crate::Result<Self> {
-        let figment = Figment::new()
-            .merge(Toml::file("remi-code.toml").nested().optional())
-            .merge(Env::prefixed("REMI_CODE_"));
+        let mut figment = Figment::new().merge(Env::prefixed("REMI_CODE_"));
+
+        let config_path = PathBuf::from("remi-code.toml");
+        if config_path.exists() {
+            figment = figment.merge(Toml::file(&config_path).nested());
+        }
 
         figment.extract().map_err(Into::into)
     }
 
     /// Load configuration with a specific config file path.
     pub fn load_from(path: impl AsRef<std::path::Path>) -> crate::Result<Self> {
-        let figment = Figment::new()
-            .merge(Toml::file(path.as_ref()).nested().optional())
-            .merge(Env::prefixed("REMI_CODE_"));
+        let mut figment = Figment::new().merge(Env::prefixed("REMI_CODE_"));
+
+        if path.as_ref().exists() {
+            figment = figment.merge(Toml::file(path.as_ref()).nested());
+        }
 
         figment.extract().map_err(Into::into)
     }

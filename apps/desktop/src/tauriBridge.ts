@@ -531,11 +531,11 @@ export function createTauriBridge(): DesktopBridge {
         let unlistenFn: UnlistenFn | null = null;
         let cancelled = false;
 
-        listen<ThreadBrowserState>("browser-state", (event) => {
+        listen<ThreadBrowserState>("browser-state", (event: Event<ThreadBrowserState>) => {
           if (!cancelled && event.payload) {
             listener(event.payload);
           }
-        }).then((unlisten) => {
+        }).then((unlisten: UnlistenFn) => {
           if (cancelled) {
             unlisten();
           } else {

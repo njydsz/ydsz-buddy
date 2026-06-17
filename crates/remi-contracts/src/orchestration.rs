@@ -22,6 +22,18 @@ pub enum ThreadState {
     Completed,
 }
 
+impl std::fmt::Display for ThreadState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Idle => write!(f, "idle"),
+            Self::Processing => write!(f, "processing"),
+            Self::WaitingForInput => write!(f, "waiting_for_input"),
+            Self::Errored => write!(f, "errored"),
+            Self::Completed => write!(f, "completed"),
+        }
+    }
+}
+
 /// Thread information.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Thread {
