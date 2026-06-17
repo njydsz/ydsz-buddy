@@ -1,72 +1,123 @@
-node_modules
-.bun
-.turbo
-.DS_Store
-*.log
-*.tsbuildinfo
-apps/*/dist
-.astro
-packages/*/dist
-.env
-.env.local
+# ============================================
+# Dependencies & Build
+# ============================================
+node_modules/
+.bun/
+.turbo/
 build/
-.logs/
-release/
-.t3
-/.peakcode/electron-dev
-/.peakcode/backups
-.idea/
-apps/web/.playwright
-apps/web/playwright-report
-.playwright-cli/
-apps/web/src/components/__screenshots__
-.vitest-*
-__screenshots__/
-.tanstack
-/.pi/
-/.tmp/
-/~/
-/bootstrap.js
-/preload.js
-/browser-sidebar-comment-preload.js
-/main-*.js
-/main-*.js.map
-/browser-sidebar-comment-preload.js.map
-/preload.js.map
-/bootstrap.js.map
+dist/
+apps/*/dist/
+packages/*/dist/
 
-# Rust
+# ============================================
+# Rust (Cargo & Tauri)
+# ============================================
 /target/
+**/target/
 **/*.rs.bk
-*.pdb
 Cargo.lock
 
-# Local dev instance data
-.peakcode-*/
+# ============================================
+# OS generated files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Internal plans and iteration docs
+# ============================================
+# Logs
+# ============================================
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.tsbuildinfo
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# ============================================
+# IDEs & Editors
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# ============================================
+# Testing & Coverage
+# ============================================
+coverage/
+.nyc_output/
+.vitest-*
+.playwright/
+apps/web/.playwright/
+apps/web/playwright-report/
+.playwright-cli/
+.playwright-mcp/
+__screenshots__/
+apps/web/src/components/__screenshots__/
+
+# ============================================
+# Package Manager & Cache
+# ============================================
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.cache/
+
+# ============================================
+# Framework specific
+# ============================================
+.astro/
+.tanstack/
+.t3/
+
+# ============================================
+# Build artifacts
+# ============================================
+/bootstrap.js
+/bootstrap.js.map
+/preload.js
+/preload.js.map
+/main-*.js
+/main-*.js.map
+/browser-sidebar-comment-preload.js
+/browser-sidebar-comment-preload.js.map
+/release/
+
+# ============================================
+# Local dev instance data
+# ============================================
+.peakcode-*/
+/.peakcode/
+userdata/
+
+# ============================================
+# Temp & Misc
+# ============================================
+.tmp/
 .plans/
 .plans/**/*.md
 docs/
-
-# Playwright MCP artifacts
-.playwright-mcp/
-
-# User data (logs, attachments, secrets)
-userdata/
-
-# Claude / IDE local config
 .claude/
-
-# Misc local artifacts
+.cowork-temp/
 成/
-.cowork-temp/attachments/manual/open-code-review-skill-1781013680555-kjr4cb.zip
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/CHANGELOG.md
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/INSTALL.md
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/LICENSE
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/SKILL.md
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/USAGE.md
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/examples/config.json
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/examples/.opencodereview/rule.json
-scripts/pr-review.sh
-.cowork-temp/open-code-review-skill-inspect/open-code-review-skill/README.md
