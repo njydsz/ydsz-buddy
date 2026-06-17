@@ -73,7 +73,7 @@ pub async fn handle_method(
 async fn handle_thread_list(state: &Arc<RpcState>) -> Result<Value> {
     // Get all projects first, then list threads
     let project_repo = ProjectRepository::new(state.orchestration.db.pool().clone());
-    let projects = project_repo.list().await?;
+    let projects = ProjectRepositoryTrait::list(&project_repo).await?;
 
     let mut all_threads = Vec::new();
     for project in projects {
@@ -128,7 +128,7 @@ async fn handle_thread_list_messages(
     state: &Arc<RpcState>,
 ) -> Result<Value> {
     let thread_repo = ThreadRepository::new(state.orchestration.db.pool().clone());
-    let messages = thread_repo.list_messages(thread_id).await?;
+    let messages = ThreadRepositoryTrait::list_messages(&thread_repo, thread_id).await?;
 
     serde_json::to_value(messages).map_err(|e| Error::Serialization(e.to_string()))
 }
@@ -138,7 +138,7 @@ async fn handle_thread_list_turns(
     state: &Arc<RpcState>,
 ) -> Result<Value> {
     let thread_repo = ThreadRepository::new(state.orchestration.db.pool().clone());
-    let turns = thread_repo.list_turns(thread_id).await?;
+    let turns = ThreadRepositoryTrait::list_turns(&thread_repo, thread_id).await?;
 
     serde_json::to_value(turns).map_err(|e| Error::Serialization(e.to_string()))
 }
