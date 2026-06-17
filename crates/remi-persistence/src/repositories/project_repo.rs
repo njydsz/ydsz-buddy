@@ -111,21 +111,26 @@ impl ProjectRepositoryTrait for ProjectRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(row.map(|(id_str, name, path, kind_str, created_at, updated_at)| {
-            let kind = match kind_str.as_str() {
-                "local" => ProjectKind::Local,
-                "remote" => ProjectKind::Remote,
-                _ => ProjectKind::Local,
-            };
-            Project {
-                id: ProjectId(Uuid::parse_str(&id_str).unwrap_or_default()),
-                name,
-                path,
-                kind,
-                created_at,
-                updated_at,
+        match row {
+            Some((id_str, name, path, kind_str, created_at, updated_at)) => {
+                let id = Uuid::parse_str(&id_str)
+                    .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+                let kind = match kind_str.as_str() {
+                    "local" => ProjectKind::Local,
+                    "remote" => ProjectKind::Remote,
+                    _ => return Err(Error::Database(format!("Invalid project kind: {}", kind_str))),
+                };
+                Ok(Some(Project {
+                    id: ProjectId(id),
+                    name,
+                    path,
+                    kind,
+                    created_at,
+                    updated_at,
+                }))
             }
-        }))
+            None => Ok(None),
+        }
     }
 
     async fn list(&self) -> Result<Vec<Project>> {
@@ -136,24 +141,25 @@ impl ProjectRepositoryTrait for ProjectRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(rows
-            .into_iter()
-            .map(|(id_str, name, path, kind_str, created_at, updated_at)| {
-                let kind = match kind_str.as_str() {
-                    "local" => ProjectKind::Local,
-                    "remote" => ProjectKind::Remote,
-                    _ => ProjectKind::Local,
-                };
-                Project {
-                    id: ProjectId(Uuid::parse_str(&id_str).unwrap_or_default()),
-                    name,
-                    path,
-                    kind,
-                    created_at,
-                    updated_at,
-                }
-            })
-            .collect())
+        let mut projects = Vec::new();
+        for (id_str, name, path, kind_str, created_at, updated_at) in rows {
+            let id = Uuid::parse_str(&id_str)
+                .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+            let kind = match kind_str.as_str() {
+                "local" => ProjectKind::Local,
+                "remote" => ProjectKind::Remote,
+                _ => return Err(Error::Database(format!("Invalid project kind: {}", kind_str))),
+            };
+            projects.push(Project {
+                id: ProjectId(id),
+                name,
+                path,
+                kind,
+                created_at,
+                updated_at,
+            });
+        }
+        Ok(projects)
     }
 
     async fn delete(&self, id: ProjectId) -> Result<()> {

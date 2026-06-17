@@ -96,16 +96,25 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(row.map(|(id_str, project_id_str, title, state_str, created_at, updated_at)| {
-            Thread {
-                id: ThreadId(Uuid::parse_str(&id_str).unwrap_or_default()),
-                project_id: Uuid::parse_str(&project_id_str).unwrap_or_default(),
-                title,
-                state: serde_json::from_str(&state_str).unwrap_or(ThreadState::Idle),
-                created_at,
-                updated_at,
+        match row {
+            Some((id_str, project_id_str, title, state_str, created_at, updated_at)) => {
+                let id = Uuid::parse_str(&id_str)
+                    .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+                let project_id = Uuid::parse_str(&project_id_str)
+                    .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+                let state: ThreadState = serde_json::from_str(&state_str)
+                    .map_err(|e| Error::Database(format!("Invalid thread state in database: {}", e)))?;
+                Ok(Some(Thread {
+                    id: ThreadId(id),
+                    project_id,
+                    title,
+                    state,
+                    created_at,
+                    updated_at,
+                }))
             }
-        }))
+            None => Ok(None),
+        }
     }
 
     async fn list_by_project(&self, project_id: Uuid) -> Result<Vec<Thread>> {
@@ -117,19 +126,24 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
 
-        Ok(rows
-            .into_iter()
-            .map(|(id_str, project_id_str, title, state_str, created_at, updated_at)| {
-                Thread {
-                    id: ThreadId(Uuid::parse_str(&id_str).unwrap_or_default()),
-                    project_id: Uuid::parse_str(&project_id_str).unwrap_or_default(),
-                    title,
-                    state: serde_json::from_str(&state_str).unwrap_or(ThreadState::Idle),
-                    created_at,
-                    updated_at,
-                }
-            })
-            .collect())
+        let mut threads = Vec::new();
+        for (id_str, project_id_str, title, state_str, created_at, updated_at) in rows {
+            let id = Uuid::parse_str(&id_str)
+                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+            let project_id = Uuid::parse_str(&project_id_str)
+                .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
+            let state: ThreadState = serde_json::from_str(&state_str)
+                .map_err(|e| Error::Database(format!("Invalid thread state in database: {}", e)))?;
+            threads.push(Thread {
+                id: ThreadId(id),
+                project_id,
+                title,
+                state,
+                created_at,
+                updated_at,
+            });
+        }
+        Ok(threads)
     }
 
     async fn update_state(&self, id: ThreadId, state: ThreadState) -> Result<()> {
