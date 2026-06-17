@@ -3,7 +3,7 @@
 // Layer: Desktop test
 // Depends on: Vitest and browserUsePipeServer path resolution exports
 
-import { basename, dirname } from "node:path";
+import { basename, dirname, posix } from "node:path";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 
@@ -17,7 +17,10 @@ describe("browser-use pipe path resolution", () => {
   it("creates a discoverable unix socket path under the Codex browser-use directory", () => {
     const pipePath = resolveDefaultBrowserUsePipePath("darwin");
 
-    expect(dirname(pipePath)).toBe(`${tmpdir()}/codex-browser-use`);
+    // Normalize to posix separators so the assertion works on all platforms
+    const normalizedDir = dirname(pipePath).split(/[\\/]/).join("/");
+    const normalizedTmpdir = tmpdir().split(/[\\/]/).join("/");
+    expect(normalizedDir).toBe(`${normalizedTmpdir}/codex-browser-use`);
     expect(basename(pipePath)).toMatch(/^remi-code-iab-\d+\.sock$/);
   });
 

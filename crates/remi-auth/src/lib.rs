@@ -95,6 +95,36 @@ impl AuthService {
         })
     }
 
+    /// Revoke a pairing link by marking it as used.
+    pub async fn revoke_pairing_link(&self, code: &str) -> Result<()> {
+        let pool = self.db.pool();
+
+        sqlx::query(
+            "UPDATE pairing_credentials SET used = 1 WHERE code = ?"
+        )
+        .bind(code)
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
+    }
+
+    /// Revoke a client session by token.
+    pub async fn revoke_client_session(&self, token: &str) -> Result<()> {
+        let pool = self.db.pool();
+
+        sqlx::query(
+            "DELETE FROM sessions WHERE token = ?"
+        )
+        .bind(token)
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
+    }
+
     /// Verify a session token.
     pub async fn verify_token(&self, token: &str) -> Result<bool> {
         let pool = self.db.pool();
@@ -119,12 +149,16 @@ impl AuthService {
         expires_at: chrono::DateTime<Utc>,
     ) -> Result<()> {
         let pool = self.db.pool();
-        
+        let id = Uuid::new_v4().to_string();
+        let created_at = Utc::now().to_rfc3339();
+
         sqlx::query(
-            "INSERT INTO sessions (token, client_id, expires_at) VALUES (?, ?, ?)"
+            "INSERT INTO sessions (id, token, client_id, created_at, expires_at) VALUES (?, ?, ?, ?, ?)"
         )
+        .bind(&id)
         .bind(token)
         .bind(client_id)
+        .bind(&created_at)
         .bind(expires_at.to_rfc3339())
         .execute(pool)
         .await
@@ -137,16 +171,20 @@ impl AuthService {
     async fn store_pairing_credential(
         &self,
         code: &str,
-        client_id: &str,
+        device_id: &str,
         expires_at: chrono::DateTime<Utc>,
     ) -> Result<()> {
         let pool = self.db.pool();
-        
+        let id = Uuid::new_v4().to_string();
+        let created_at = Utc::now().to_rfc3339();
+
         sqlx::query(
-            "INSERT INTO pairing_credentials (code, client_id, expires_at, used) VALUES (?, ?, ?, FALSE)"
+            "INSERT INTO pairing_credentials (id, code, device_id, created_at, expires_at, used) VALUES (?, ?, ?, ?, ?, FALSE)"
         )
+        .bind(&id)
         .bind(code)
-        .bind(client_id)
+        .bind(device_id)
+        .bind(&created_at)
         .bind(expires_at.to_rfc3339())
         .execute(pool)
         .await
@@ -235,5 +273,44 @@ mod tests {
                 .await
                 .expect("Verify")
         );
+    }
+
+    #[tokio::test]
+    async fn test_bootstrap_and_pairing_lifecycle() {
+        let db = Arc::new(
+            Database::connect(&remi_core::ServerConfig::default())
+                .await
+                .expect("DB connect"),
+        );
+        db.run_migrations().await.expect("Migrations");
+        let service = AuthService::new(db);
+        service.initialize(vec![0u8; 32]).await.expect("Init");
+
+        let bootstrap = service
+            .bootstrap(AuthBootstrapInput {
+                client_id: "client-1".to_string(),
+                token: None,
+            })
+            .await
+            .expect("Bootstrap");
+        assert!(!bootstrap.session_token.is_empty());
+
+        let pairing = service
+            .create_pairing_credential(AuthCreatePairingCredentialInput {
+                device_id: "device-1".to_string(),
+                device_name: "Test Device".to_string(),
+            })
+            .await
+            .expect("Pairing");
+        assert_eq!(pairing.pairing_code.len(), 8);
+
+        service
+            .revoke_pairing_link(&pairing.pairing_code)
+            .await
+            .expect("Revoke pairing");
+        service
+            .revoke_client_session(&bootstrap.session_token)
+            .await
+            .expect("Revoke session");
     }
 }

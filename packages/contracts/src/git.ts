@@ -1,3 +1,19 @@
+/**
+ * Git 操作合约定义
+ *
+ * 用途：定义 Git 相关操作的数据结构，包括分支管理、工作树管理、PR 管理、
+ * 堆叠操作（commit/push/PR）等输入输出 Schema 以及进度事件。
+ * 所属模块：共享契约层（Shared Contracts）
+ * 主要导出：
+ *   - GitBranch —— 分支信息
+ *   - GitStatusInput / GitStatusResult —— 仓库状态查询
+ *   - GitRunStackedActionInput / GitRunStackedActionResult —— 堆叠操作
+ *   - GitListBranchesInput / GitListBranchesResult —— 分支列表
+ *   - GitCreateWorktreeInput / GitCreateWorktreeResult —— 工作树创建
+ *   - GitPullInput / GitPullResult —— 拉取操作
+ *   - GitActionProgressEvent —— 操作进度事件（联合类型）
+ *   - 各类 RPC Input/Result Schema
+ */
 import { Option, Schema } from "effect";
 import { NonNegativeInt, PositiveInt, TrimmedNonEmptyString } from "./baseSchemas";
 import { DEFAULT_GIT_TEXT_GENERATION_MODEL } from "./model";
@@ -5,8 +21,9 @@ import { ProviderStartOptions } from "./orchestration";
 
 const TrimmedNonEmptyStringSchema = TrimmedNonEmptyString;
 
-// Domain Types
+// ── 领域类型 ────────────────────────────────────────────────────────
 
+/** 堆叠操作类型：commit / push / create_pr / commit_push / commit_push_pr */
 export const GitStackedAction = Schema.Literals([
   "commit",
   "push",
@@ -15,8 +32,10 @@ export const GitStackedAction = Schema.Literals([
   "commit_push_pr",
 ]);
 export type GitStackedAction = typeof GitStackedAction.Type;
+/** 堆叠操作进度阶段：branch / commit / push / pr */
 export const GitActionProgressPhase = Schema.Literals(["branch", "commit", "push", "pr"]);
 export type GitActionProgressPhase = typeof GitActionProgressPhase.Type;
+/** 堆叠操作进度事件类型：action_started / phase_started / hook_started 等 */
 export const GitActionProgressKind = Schema.Literals([
   "action_started",
   "phase_started",
@@ -430,8 +449,4 @@ export const GitActionProgressEvent = Schema.Union([
   GitActionPhaseStartedEvent,
   GitActionHookStartedEvent,
   GitActionHookOutputEvent,
-  GitActionHookFinishedEvent,
-  GitActionFinishedEvent,
-  GitActionFailedEvent,
-]);
-export type GitActionProgressEvent = typeof GitActionProgressEvent.Type;
+  Git

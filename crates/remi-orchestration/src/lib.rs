@@ -445,10 +445,18 @@ impl OrchestrationEngine {
 mod tests {
     use super::*;
 
+    fn temp_db_config() -> remi_core::ServerConfig {
+        let mut config = remi_core::ServerConfig::default();
+        let db_dir = std::env::temp_dir().join(format!("remi-orchestration-test-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&db_dir).expect("Failed to create temp dir");
+        config.db_path = db_dir.join("remi-code.db");
+        config
+    }
+
     #[tokio::test]
     async fn test_orchestration_engine_creation() {
         // Basic smoke test
-        let config = remi_core::ServerConfig::default();
+        let config = temp_db_config();
         let db = Arc::new(Database::connect(&config).await.unwrap());
         db.run_migrations().await.unwrap();
         let registry = Arc::new(ProviderRegistry::new());
@@ -458,5 +466,64 @@ mod tests {
         let project_id = Uuid::new_v4();
         let threads = engine.list_threads(project_id).await.unwrap();
         assert!(threads.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_handle_send_message() {
+        let config = temp_db_config();
+        let db = Arc::new(Database::connect(&config).await.unwrap());
+        db.run_migrations().await.unwrap();
+        let registry = Arc::new(ProviderRegistry::new());
+        let engine = OrchestrationEngine::new(db.clone(), registry);
+
+        // Create a project first (threads have a foreign key to projects)
+        let project_path = std::env::temp_dir()
+            .join(format!("remi-orchestration-project-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&project_path).expect("Failed to create temp project dir");
+
+        let project_id = {
+            use remi_persistence::repositories::project_repo::{ProjectRepository, ProjectRepositoryTrait};
+            let project_repo = ProjectRepository::new(db.pool().clone());
+            let project = project_repo
+                .create("Test Project", project_path.to_str().unwrap(), remi_contracts::ProjectKind::Local)
+                .await
+                .unwrap();
+            project.id.0
+        };
+
+        // Create a thread
+        engine
+            .handle_command(OrchestrationCommand::CreateThread {
+                project_id,
+                title: Some("Test thread".to_string()),
+            })
+            .await
+            .unwrap();
+
+        let threads = engine.list_threads(project_id).await.unwrap();
+        assert_eq!(threads.len(), 1);
+        let thread_id = threads[0].id;
+
+        // Send a message (no real provider configured, so it falls back)
+        let (user_message, assistant_message) = engine
+            .handle_send_message(thread_id, "Hello, Remi!")
+            .await
+            .unwrap();
+
+        assert_eq!(user_message.role, MessageRole::User);
+        assert_eq!(user_message.content, "Hello, Remi!");
+        assert_eq!(assistant_message.role, MessageRole::Assistant);
+
+        // Thread should be back to idle
+        let thread = engine.get_thread(thread_id).await.unwrap().unwrap();
+        assert_eq!(thread.state, ThreadState::Idle);
+
+        // Verify messages persisted
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+        let repo = ThreadRepository::new(db.pool().clone());
+        let messages = repo.list_messages(thread_id).await.unwrap();
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0].content, "Hello, Remi!");
+        assert_eq!(messages[1].id, assistant_message.id);
     }
 }

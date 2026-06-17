@@ -1,3 +1,21 @@
+/**
+ * Provider 会话合约定义
+ *
+ * 用途：定义 Provider 会话的生命周期管理、Turn 发送、线程分叉、审批响应等操作的请求结构。
+ * 所属模块：共享契约层（Shared Contracts）
+ * 主要导出：
+ *   - ProviderSession —— Provider 会话状态
+ *   - ProviderSessionStartInput —— 启动会话输入
+ *   - ProviderSendTurnInput / SteerTurnInput —— 发送/引导 Turn 输入
+ *   - ProviderForkThreadInput / Result —— 分叉线程
+ *   - ProviderTurnStartResult —— Turn 启动结果
+ *   - ProviderStartReviewInput —— 启动审查输入
+ *   - ProviderInterruptTurnInput / StopSessionInput —— 中断/停止操作
+ *   - ProviderCompactThreadInput —— 压缩线程输入
+ *   - ProviderRespondToRequestInput / RespondToUserInputInput —— 审批/用户输入响应
+ *   - ProviderEvent —— Provider 事件
+ */
+
 import { Schema } from "effect";
 import { TrimmedNonEmptyString } from "./baseSchemas";
 import {
@@ -26,6 +44,7 @@ import {
 } from "./orchestration";
 import { ProviderMentionReference, ProviderSkillReference } from "./providerDiscovery";
 
+/** Provider 会话状态 */
 const ProviderSessionStatus = Schema.Literals([
   "connecting",
   "ready",
@@ -34,6 +53,7 @@ const ProviderSessionStatus = Schema.Literals([
   "closed",
 ]);
 
+/** Provider 会话 */
 export const ProviderSession = Schema.Struct({
   provider: ProviderKind,
   status: ProviderSessionStatus,
@@ -49,6 +69,7 @@ export const ProviderSession = Schema.Struct({
 });
 export type ProviderSession = typeof ProviderSession.Type;
 
+/** 启动 Provider 会话输入 */
 export const ProviderSessionStartInput = Schema.Struct({
   threadId: ThreadId,
   provider: Schema.optional(ProviderKind),
@@ -62,6 +83,7 @@ export const ProviderSessionStartInput = Schema.Struct({
 });
 export type ProviderSessionStartInput = typeof ProviderSessionStartInput.Type;
 
+/** 发送 Turn 输入 */
 export const ProviderSendTurnInput = Schema.Struct({
   threadId: ThreadId,
   input: Schema.optional(
@@ -76,9 +98,11 @@ export const ProviderSendTurnInput = Schema.Struct({
   interactionMode: Schema.optional(ProviderInteractionMode),
 });
 export type ProviderSendTurnInput = typeof ProviderSendTurnInput.Type;
+/** 引导 Turn 输入（与 SendTurnInput 结构相同） */
 export const ProviderSteerTurnInput = ProviderSendTurnInput;
 export type ProviderSteerTurnInput = typeof ProviderSteerTurnInput.Type;
 
+/** 分叉线程输入 */
 export const ProviderForkThreadInput = Schema.Struct({
   sourceThreadId: ThreadId,
   threadId: ThreadId,
@@ -90,12 +114,14 @@ export const ProviderForkThreadInput = Schema.Struct({
 });
 export type ProviderForkThreadInput = typeof ProviderForkThreadInput.Type;
 
+/** 分叉线程结果 */
 export const ProviderForkThreadResult = Schema.Struct({
   threadId: ThreadId,
   resumeCursor: Schema.optional(Schema.Unknown),
 });
 export type ProviderForkThreadResult = typeof ProviderForkThreadResult.Type;
 
+/** Turn 启动结果 */
 export const ProviderTurnStartResult = Schema.Struct({
   threadId: ThreadId,
   turnId: TurnId,
@@ -103,12 +129,14 @@ export const ProviderTurnStartResult = Schema.Struct({
 });
 export type ProviderTurnStartResult = typeof ProviderTurnStartResult.Type;
 
+/** 启动审查输入 */
 export const ProviderStartReviewInput = Schema.Struct({
   threadId: ThreadId,
   target: ProviderReviewTarget,
 });
 export type ProviderStartReviewInput = typeof ProviderStartReviewInput.Type;
 
+/** 中断 Turn 输入 */
 export const ProviderInterruptTurnInput = Schema.Struct({
   threadId: ThreadId,
   turnId: Schema.optional(TurnId),
@@ -116,16 +144,19 @@ export const ProviderInterruptTurnInput = Schema.Struct({
 });
 export type ProviderInterruptTurnInput = typeof ProviderInterruptTurnInput.Type;
 
+/** 停止会话输入 */
 export const ProviderStopSessionInput = Schema.Struct({
   threadId: ThreadId,
 });
 export type ProviderStopSessionInput = typeof ProviderStopSessionInput.Type;
 
+/** 压缩线程输入 */
 export const ProviderCompactThreadInput = Schema.Struct({
   threadId: ThreadId,
 });
 export type ProviderCompactThreadInput = typeof ProviderCompactThreadInput.Type;
 
+/** 响应审批请求输入 */
 export const ProviderRespondToRequestInput = Schema.Struct({
   threadId: ThreadId,
   requestId: ApprovalRequestId,
@@ -133,6 +164,7 @@ export const ProviderRespondToRequestInput = Schema.Struct({
 });
 export type ProviderRespondToRequestInput = typeof ProviderRespondToRequestInput.Type;
 
+/** 响应用户输入请求输入 */
 export const ProviderRespondToUserInputInput = Schema.Struct({
   threadId: ThreadId,
   requestId: ApprovalRequestId,
@@ -140,8 +172,10 @@ export const ProviderRespondToUserInputInput = Schema.Struct({
 });
 export type ProviderRespondToUserInputInput = typeof ProviderRespondToUserInputInput.Type;
 
+/** Provider 事件类型 */
 const ProviderEventKind = Schema.Literals(["session", "notification", "request", "error"]);
 
+/** Provider 事件 */
 export const ProviderEvent = Schema.Struct({
   id: EventId,
   kind: ProviderEventKind,

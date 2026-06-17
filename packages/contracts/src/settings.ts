@@ -1,19 +1,36 @@
+/**
+ * 设置合约定义
+ *
+ * 用途：定义服务端设置的结构，包括各 Provider 的配置项、设置补丁、默认值等。
+ * 所属模块：共享契约层（Shared Contracts）
+ * 主要导出：
+ *   - CodexServerProviderSettings / ClaudeServerProviderSettings / ... —— 各 Provider 设置
+ *   - ServerSettings —— 服务端设置
+ *   - DEFAULT_SERVER_SETTINGS —— 默认设置
+ *   - ServerSettingsPatch —— 设置补丁
+ *   - ServerSettingsError —— 设置错误类
+ */
+
 import { Schema } from "effect";
 import { TrimmedString } from "./baseSchemas";
 import { DEFAULT_GIT_TEXT_GENERATION_MODEL } from "./model";
 import { ModelSelection, ProviderKind, ThreadEnvironmentMode } from "./orchestration";
 
+/** 字符串设置约束（最大 4096 字符） */
 const StringSetting = TrimmedString.check(Schema.isMaxLength(4096));
+/** 自定义模型列表 */
 const CustomModels = Schema.Array(Schema.String.check(Schema.isMaxLength(256))).pipe(
   Schema.withDecodingDefault(() => []),
 );
 
+/** Provider 设置基础字段 */
 const ProviderSettingsBase = {
   enabled: Schema.Boolean.pipe(Schema.withDecodingDefault(() => true)),
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "")),
   customModels: CustomModels,
 };
 
+/** Codex Provider 设置 */
 export const CodexServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "codex")),
@@ -21,6 +38,7 @@ export const CodexServerProviderSettings = Schema.Struct({
 });
 export type CodexServerProviderSettings = typeof CodexServerProviderSettings.Type;
 
+/** Claude Provider 设置 */
 export const ClaudeServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "claude")),
@@ -30,18 +48,21 @@ export const ClaudeServerProviderSettings = Schema.Struct({
 });
 export type ClaudeServerProviderSettings = typeof ClaudeServerProviderSettings.Type;
 
+/** Gemini Provider 设置 */
 export const GeminiServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "gemini")),
 });
 export type GeminiServerProviderSettings = typeof GeminiServerProviderSettings.Type;
 
+/** Grok Provider 设置 */
 export const GrokServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "grok")),
 });
 export type GrokServerProviderSettings = typeof GrokServerProviderSettings.Type;
 
+/** Cursor Provider 设置 */
 export const CursorServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "cursor-agent")),
@@ -49,6 +70,7 @@ export const CursorServerProviderSettings = Schema.Struct({
 });
 export type CursorServerProviderSettings = typeof CursorServerProviderSettings.Type;
 
+/** OpenCode Provider 设置 */
 export const OpenCodeServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "opencode")),
@@ -57,6 +79,7 @@ export const OpenCodeServerProviderSettings = Schema.Struct({
 });
 export type OpenCodeServerProviderSettings = typeof OpenCodeServerProviderSettings.Type;
 
+/** Kilo Provider 设置 */
 export const KiloServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "kilo")),
@@ -65,6 +88,7 @@ export const KiloServerProviderSettings = Schema.Struct({
 });
 export type KiloServerProviderSettings = typeof KiloServerProviderSettings.Type;
 
+/** Pi Provider 设置 */
 export const PiServerProviderSettings = Schema.Struct({
   ...ProviderSettingsBase,
   binaryPath: StringSetting.pipe(Schema.withDecodingDefault(() => "pi")),
@@ -72,6 +96,7 @@ export const PiServerProviderSettings = Schema.Struct({
 });
 export type PiServerProviderSettings = typeof PiServerProviderSettings.Type;
 
+/** 服务端设置 */
 export const ServerSettings = Schema.Struct({
   enableAssistantStreaming: Schema.Boolean.pipe(Schema.withDecodingDefault(() => false)),
   defaultThreadEnvMode: ThreadEnvironmentMode.pipe(Schema.withDecodingDefault(() => "local")),
@@ -95,20 +120,24 @@ export const ServerSettings = Schema.Struct({
 });
 export type ServerSettings = typeof ServerSettings.Type;
 
+/** 默认服务端设置 */
 export const DEFAULT_SERVER_SETTINGS: ServerSettings = Schema.decodeSync(ServerSettings)({});
 
+/** 模型选择补丁 */
 const ModelSelectionPatch = Schema.Struct({
   provider: Schema.optionalKey(ProviderKind),
   model: Schema.optionalKey(Schema.String.check(Schema.isMaxLength(256))),
   options: Schema.optionalKey(Schema.Unknown),
 });
 
+/** Provider 设置基础补丁字段 */
 const ProviderSettingsBasePatch = {
   enabled: Schema.optionalKey(Schema.Boolean),
   binaryPath: Schema.optionalKey(StringSetting),
   customModels: Schema.optionalKey(CustomModels),
 };
 
+/** 服务端设置补丁（用于增量更新设置） */
 export const ServerSettingsPatch = Schema.Struct({
   enableAssistantStreaming: Schema.optionalKey(Schema.Boolean),
   defaultThreadEnvMode: Schema.optionalKey(ThreadEnvironmentMode),
@@ -162,6 +191,7 @@ export const ServerSettingsPatch = Schema.Struct({
 });
 export type ServerSettingsPatch = typeof ServerSettingsPatch.Type;
 
+/** 服务端设置错误 */
 export class ServerSettingsError extends Schema.TaggedErrorClass<ServerSettingsError>()(
   "ServerSettingsError",
   {

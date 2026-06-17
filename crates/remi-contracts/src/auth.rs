@@ -2,7 +2,6 @@
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// Input for bootstrapping authentication.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -45,15 +44,15 @@ pub struct AuthCreatePairingCredentialOutput {
 /// Input for revoking a pairing link.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthRevokePairingLinkInput {
-    /// Pairing link ID.
-    pub pairing_link_id: Uuid,
+    /// Pairing code to revoke.
+    pub code: String,
 }
 
 /// Input for revoking a client session.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthRevokeClientSessionInput {
-    /// Session ID to revoke.
-    pub session_id: Uuid,
+    /// Session token to revoke.
+    pub token: String,
 }
 
 /// Authentication error types.

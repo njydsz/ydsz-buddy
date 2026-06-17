@@ -1,5 +1,6 @@
 //! RPC request handler.
 
+use remi_auth::AuthService;
 use remi_contracts::RpcMethod;
 use remi_core::{Error, Result};
 use remi_orchestration::OrchestrationEngine;
@@ -7,6 +8,7 @@ use remi_persistence::repositories::project_repo::ProjectRepositoryTrait;
 use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 use remi_persistence::repositories::{ProjectRepository, ThreadRepository};
 use remi_providers::ProviderRegistry;
+use remi_pty::TerminalManager;
 use remi_workspace::WorkspaceService;
 use serde_json::Value;
 use std::sync::Arc;
@@ -20,6 +22,8 @@ pub struct RpcState {
     pub orchestration: Arc<OrchestrationEngine>,
     pub workspace: Arc<WorkspaceService>,
     pub provider_registry: Arc<ProviderRegistry>,
+    pub auth: Arc<AuthService>,
+    pub terminal_manager: Arc<TerminalManager>,
     pub ws_state: Arc<WsState>,
 }
 
@@ -88,8 +92,8 @@ pub async fn handle_method(
         RpcMethod::AuthCreatePairingCredential(input) => {
             handle_auth_create_pairing_credential(input, state).await
         }
-        RpcMethod::AuthRevokePairingLink(_input) => handle_auth_revoke_pairing_link(state).await,
-        RpcMethod::AuthRevokeClientSession(_input) => handle_auth_revoke_client_session(state).await,
+        RpcMethod::AuthRevokePairingLink(input) => handle_auth_revoke_pairing_link(input, state).await,
+        RpcMethod::AuthRevokeClientSession(input) => handle_auth_revoke_client_session(input, state).await,
 
         // Editor methods
         RpcMethod::EditorOpen(input) => handle_editor_open(input, state).await,
@@ -374,42 +378,34 @@ async fn handle_git_summarize_diff(
 }
 
 async fn handle_auth_bootstrap(
-    _input: remi_contracts::AuthBootstrapInput,
-    _state: &Arc<RpcState>,
+    input: remi_contracts::AuthBootstrapInput,
+    state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // For now, return a simple token
-    // In a full implementation, this would integrate with the auth service
-    Ok(serde_json::json!({
-        "session_token": format!("session-{}", uuid::Uuid::new_v4()),
-        "expires_at": chrono::Utc::now()
-            .checked_add_signed(chrono::Duration::hours(24))
-            .unwrap()
-            .to_rfc3339()
-    }))
+    let output = state.auth.bootstrap(input).await?;
+    serde_json::to_value(output).map_err(|e| Error::Serialization(e.to_string()))
 }
 
 async fn handle_auth_create_pairing_credential(
-    _input: remi_contracts::AuthCreatePairingCredentialInput,
-    _state: &Arc<RpcState>,
+    input: remi_contracts::AuthCreatePairingCredentialInput,
+    state: &Arc<RpcState>,
 ) -> Result<Value> {
-    let pairing_code = uuid::Uuid::new_v4().to_string()[..8].to_uppercase();
-    let pairing_link = format!("remi-code://pair?code={}", pairing_code);
-
-    Ok(serde_json::json!({
-        "pairing_code": pairing_code,
-        "pairing_link": pairing_link,
-        "expires_at": chrono::Utc::now()
-            .checked_add_signed(chrono::Duration::minutes(10))
-            .unwrap()
-            .to_rfc3339()
-    }))
+    let output = state.auth.create_pairing_credential(input).await?;
+    serde_json::to_value(output).map_err(|e| Error::Serialization(e.to_string()))
 }
 
-async fn handle_auth_revoke_pairing_link(_state: &Arc<RpcState>) -> Result<Value> {
+async fn handle_auth_revoke_pairing_link(
+    input: remi_contracts::AuthRevokePairingLinkInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.auth.revoke_pairing_link(&input.code).await?;
     Ok(serde_json::json!({"status": "ok"}))
 }
 
-async fn handle_auth_revoke_client_session(_state: &Arc<RpcState>) -> Result<Value> {
+async fn handle_auth_revoke_client_session(
+    input: remi_contracts::AuthRevokeClientSessionInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.auth.revoke_client_session(&input.token).await?;
     Ok(serde_json::json!({"status": "ok"}))
 }
 

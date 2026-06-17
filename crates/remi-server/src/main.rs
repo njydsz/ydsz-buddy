@@ -4,11 +4,12 @@
 
 use axum::{
     Json, Router,
-    extract::State,
-    http::{HeaderValue, Method},
+    extract::{Multipart, State},
+    http::{HeaderValue, Method, StatusCode},
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
 };
+use remi_auth::AuthService;
 use remi_core::ServerConfig;
 use remi_orchestration::OrchestrationEngine;
 use remi_persistence::Database;
@@ -31,6 +32,7 @@ struct AppState {
     workspace: Arc<WorkspaceService>,
     terminal_manager: Arc<TerminalManager>,
     provider_registry: Arc<ProviderRegistry>,
+    auth: Arc<AuthService>,
     ws_state: Arc<WsState>,
 }
 
@@ -68,6 +70,12 @@ async fn main() -> anyhow::Result<()> {
     db.run_migrations().await?;
     info!("Database initialized");
 
+    // Initialize authentication service
+    let auth = Arc::new(AuthService::new(db.clone()));
+    let secret_key: Vec<u8> = (0..32).map(|_| rand::random()).collect();
+    auth.initialize(secret_key).await?;
+    info!("Authentication service initialized");
+
     // Initialize provider registry
     let provider_registry = Arc::new(ProviderRegistry::new());
     provider_registry.register(Arc::new(ClaudeAdapter::new()));
@@ -93,6 +101,7 @@ async fn main() -> anyhow::Result<()> {
         orchestration: orchestration.clone(),
         workspace: workspace.clone(),
         provider_registry: provider_registry.clone(),
+        auth: auth.clone(),
         ws_state: ws_state.clone(),
     });
 
@@ -104,6 +113,7 @@ async fn main() -> anyhow::Result<()> {
         workspace,
         terminal_manager,
         provider_registry,
+        auth,
         ws_state: ws_state.clone(),
     });
 
@@ -138,6 +148,18 @@ async fn main() -> anyhow::Result<()> {
             "/api/providers",
             get(providers_handler).with_state(state.clone()),
         )
+        // Auth endpoints
+        .route("/api/auth/bootstrap", post(auth_bootstrap_handler).with_state(state.clone()))
+        .route("/api/auth/verify", post(auth_verify_handler).with_state(state.clone()))
+        // Settings endpoints
+        .route("/api/settings", get(settings_get_handler).with_state(state.clone()))
+        .route("/api/settings", post(settings_set_handler).with_state(state.clone()))
+        // Attachments endpoints
+        .route("/api/attachments/upload", post(attachments_upload_handler).with_state(state.clone()))
+        .route("/api/attachments/:id", get(attachments_get_handler).with_state(state.clone()))
+        // Terminal endpoints
+        .route("/api/terminal/create", post(terminal_create_handler).with_state(state.clone()))
+        .route("/api/terminal/list", get(terminal_list_handler).with_state(state.clone()))
         .merge(create_ws_router(rpc_state))
         .layer(cors);
 

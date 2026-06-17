@@ -299,7 +299,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_lifecycle_manager() {
-        let config = ServerConfig::default();
+        let mut config = ServerConfig::default();
+        let db_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&db_dir).expect("Failed to create temp dir");
+        config.db_path = db_dir.join("remi-code.db");
+
         let db = Database::connect(&config).await.expect("Failed to connect");
         db.run_migrations().await.expect("Failed to migrate");
 

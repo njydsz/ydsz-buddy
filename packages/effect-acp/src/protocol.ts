@@ -1,7 +1,18 @@
-// FILE: protocol.ts
-// Purpose: Bridges ACP JSON-RPC over stdio into Effect RPC while patching agent wire quirks.
-// Layer: effect-acp transport
-// Exports: makeAcpPatchedProtocol plus inbound notification/request helpers.
+/**
+ * @fileoverview ACP 协议传输层模块
+ *
+ * 将 ACP JSON-RPC over stdio 桥接到 Effect RPC 体系，同时处理 Agent 端的线缆层兼容性问题。
+ * 负责消息的编解码、路由、协议适配和错误处理。
+ *
+ * 核心功能：
+ * - NDJSON 消息解析与编码
+ * - ACP 协议与 Effect RPC 之间的消息格式转换
+ * - 扩展请求/通知的委托管理
+ * - 入站消息的缓冲和流式处理
+ *
+ * 所属模块：effect-acp
+ * 主要导出：makeAcpPatchedProtocol、AcpPatchedProtocol、AcpIncomingNotification 等
+ */
 
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
@@ -22,12 +33,23 @@ import * as AcpSchema from "./_generated/schema.gen.ts";
 import { CLIENT_METHODS } from "./_generated/meta.gen.ts";
 import * as AcpError from "./errors.ts";
 
+/**
+ * ACP 协议日志事件。
+ *
+ * 记录协议消息的方向（入站/出站）、处理阶段（原始/解码/解码失败/丢弃）和载荷内容。
+ */
 export interface AcpProtocolLogEvent {
   readonly direction: "incoming" | "outgoing";
   readonly stage: "raw" | "decoded" | "decode_failed" | "dropped";
   readonly payload: unknown;
 }
 
+/**
+ * ACP 入站通知类型。
+ *
+ * 支持三种通知类型：SessionUpdate（会话更新）、ElicitationComplete（引导完成）、
+ * 以及 ExtNotification（扩展通知）。
+ */
 export type AcpIncomingNotification =
   | {
       readonly _tag: "SessionUpdate";
@@ -45,6 +67,11 @@ export type AcpIncomingNotification =
       readonly params: unknown;
     };
 
+/**
+ * ACP 协议传输层配置选项。
+ *
+ * 包含 Stdio、终止处理、日志、通知回调、扩展请求回调和终止回调等配置。
+ */
 export interface AcpPatchedProtocolOptions {
   readonly stdio: Stdio.Stdio;
   readonly terminationError?: Effect.Effect<AcpError.AcpError>;
@@ -62,6 +89,11 @@ export interface AcpPatchedProtocolOptions {
   readonly onTermination?: (error: AcpError.AcpError) => Effect.Effect<void, never, never>;
 }
 
+/**
+ * ACP 协议传输层接口。
+ *
+ * 提供 Effect RPC 客户端/服务器协议服务、通知流以及扩展请求/通知的发送能力。
+ */
 export interface AcpPatchedProtocol {
   readonly clientProtocol: RpcClient.Protocol["Service"];
   readonly serverProtocol: RpcServer.Protocol["Service"];
@@ -70,17 +102,30 @@ export interface AcpPatchedProtocol {
   readonly notify: (method: string, payload: unknown) => Effect.Effect<void, AcpError.AcpError>;
 }
 
+/** SessionUpdate 通知的解码器 */
 const decodeSessionUpdate = Schema.decodeUnknownEffect(AcpSchema.SessionNotification);
+/** ElicitationComplete 通知的解码器 */
 const decodeElicitationComplete = Schema.decodeUnknownEffect(
   AcpSchema.ElicitationCompleteNotification,
 );
+/** NDJSON RPC 解析器工厂 */
 const parserFactory = RpcSerialization.ndJsonRpc();
+/** 文本编码器 */
 const textEncoder = new TextEncoder();
 
+/**
+ * 判断值是否为 JSON 对象（非数组、非 null 的对象）。
+ */
 function isJsonObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * 递归移除对象中的 _meta 属性。
+ *
+ * ACP 协议允许在任意层级携带 _meta 元数据，但 Effect RPC 的包络编码
+ * 不支持这些扩展字段。此函数在传输层边缘剔除这些元数据。
+ */
 function stripAcpMetaProperties(value: unknown): unknown {
   if (Array.isArray(value)) {
     let changed = false;
@@ -154,6 +199,19 @@ function isExpectedUntrackedStringResponseId(requestId: string): boolean {
   return requestId === "skills-reload";
 }
 
+/**
+ * 创建 ACP 协议传输层实例。
+ *
+ * 这是整个传输层的核心工厂函数。它：
+ * 1. 建立 stdio 读写管道
+ * 2. 解析和路由 NDJSON 消息
+ * 3. 管理 Effect RPC 客户端和服务端协议
+ * 4. 处理扩展请求/通知的委托
+ * 5. 处理连接终止和错误恢复
+ *
+ * @param options - 传输层配置选项
+ * @returns 作用域内的 AcpPatchedProtocol 实例
+ */
 export const makeAcpPatchedProtocol = Effect.fn("makeAcpPatchedProtocol")(function* (
   options: AcpPatchedProtocolOptions,
 ): Effect.fn.Return<AcpPatchedProtocol, never, Scope.Scope> {

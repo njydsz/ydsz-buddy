@@ -14,13 +14,17 @@ describe("desktopUserDataProfile", () => {
   it("resolves Remi Code profile names without reusing legacy profile paths", () => {
     const appDataBase = "/Users/tester/Library/Application Support";
 
-    expect(resolveDesktopUserDataPath({ appDataBase, isDevelopment: true })).toBe(
+    const normalize = (p: string) => p.split(/[\\/]/).join("/");
+
+    expect(normalize(resolveDesktopUserDataPath({ appDataBase, isDevelopment: true }))).toBe(
       "/Users/tester/Library/Application Support/remi-code-dev",
     );
-    expect(resolveDesktopUserDataPath({ appDataBase, isDevelopment: false })).toBe(
+    expect(normalize(resolveDesktopUserDataPath({ appDataBase, isDevelopment: false }))).toBe(
       "/Users/tester/Library/Application Support/remi-code",
     );
-    expect(resolveLegacyDesktopUserDataPaths({ appDataBase, isDevelopment: true })).toEqual([
+    expect(
+      resolveLegacyDesktopUserDataPaths({ appDataBase, isDevelopment: true }).map(normalize),
+    ).toEqual([
       "/Users/tester/Library/Application Support/dpcode-dev",
       "/Users/tester/Library/Application Support/Remi Code (Dev)",
     ]);

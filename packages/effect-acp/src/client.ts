@@ -1,3 +1,21 @@
+/**
+ * @fileoverview ACP Client 模块
+ *
+ * 实现 ACP 协议的客户端（Client）角色。Client 负责启动和管理与 Agent 的通信连接，
+ * 发送 Agent 端 RPC 请求，并响应来自 Agent 的 Client 端 RPC 请求。
+ *
+ * 核心功能：
+ * - 通过子进程 stdio 建立与 Agent 的 ACP 连接
+ * - 提供 Agent 端 RPC 的调用接口（如 initialize、createSession、prompt 等）
+ * - 注册客户端请求处理器（如 handleRequestPermission、handleReadTextFile 等）
+ * - 管理通知和扩展请求/通知的注册与分发
+ *
+ * 所属模块：effect-acp
+ * 主要导出：AcpClient、AcpClientShape、AcpClientOptions、make、layerChildProcess
+ *
+ * @see https://agentclientprotocol.com
+ */
+
 import * as Effect from "effect/Effect";
 import * as Stdio from "effect/Stdio";
 import * as Layer from "effect/Layer";
@@ -22,18 +40,39 @@ import {
 } from "./_internal/shared.ts";
 import { makeChildStdio, makeTerminationError } from "./_internal/stdio.ts";
 
+/**
+ * ACP Client 配置选项。
+ *
+ * 控制日志输出和协议事件记录行为。
+ */
 export interface AcpClientOptions {
+  /** 是否记录传入的协议消息 */
   readonly logIncoming?: boolean;
+  /** 是否记录传出的协议消息 */
   readonly logOutgoing?: boolean;
+  /** 自定义日志记录器 */
   readonly logger?: (event: AcpProtocol.AcpProtocolLogEvent) => Effect.Effect<void, never>;
 }
 
+/**
+ * ACP Client 原始操作接口。
+ *
+ * 提供底层的通知订阅、请求和通知发送能力。
+ */
 type AcpClientRaw = {
+  /** 入站通知流 */
   readonly notifications: Stream.Stream<AcpProtocol.AcpIncomingNotification>;
+  /** 发送通用请求 */
   readonly request: (method: string, payload: unknown) => Effect.Effect<unknown, AcpError.AcpError>;
+  /** 发送通用通知 */
   readonly notify: (method: string, payload: unknown) => Effect.Effect<void, AcpError.AcpError>;
 };
 
+/**
+ * ACP Client 对外接口形状。
+ *
+ * 定义客户端的所有操作能力，包括原始操作、Agent 端 RPC 调用、请求处理器注册和扩展支持。
+ */
 export interface AcpClientShape {
   readonly raw: AcpClientRaw;
   readonly agent: {
@@ -262,10 +301,21 @@ export interface AcpClientShape {
   ) => Effect.Effect<void>;
 }
 
+/**
+ * ACP Client 服务类。
+ *
+ * 基于 Effect ServiceMap 实现，作为依赖注入容器中的服务标识。
+ * 通过 `make` 工厂函数创建实例，通过 `layerChildProcess` 创建 Layer。
+ */
 export class AcpClient extends ServiceMap.Service<AcpClient, AcpClientShape>()(
   "effect-acp/client/AcpClient",
 ) {}
 
+/**
+ * 核心请求处理器映射。
+ *
+ * 存储 Client 端各核心请求方法的处理器函数，在注册前为 undefined。
+ */
 interface AcpCoreRequestHandlers {
   requestPermission?: (
     request: AcpSchema.RequestPermissionRequest,
@@ -296,16 +346,38 @@ interface AcpCoreRequestHandlers {
   ) => Effect.Effect<AcpSchema.ReleaseTerminalResponse | void, AcpError.AcpError>;
 }
 
+/**
+ * 通知处理器注册表。
+ *
+ * 管理 session_update 和 elicitation_complete 两种通知的处理器和待处理队列。
+ */
 interface AcpNotificationHandlers {
   readonly sessionUpdate: BufferedNotificationHandler<AcpSchema.SessionNotification>;
   readonly elicitationComplete: BufferedNotificationHandler<AcpSchema.ElicitationCompleteNotification>;
 }
 
+/**
+ * 缓冲通知处理器。
+ *
+ * 在处理器注册前收到的通知会暂存在 pending 队列中，
+ * 处理器注册后一次性刷新所有待处理通知。
+ */
 interface BufferedNotificationHandler<A> {
   readonly handlers: Array<(notification: A) => Effect.Effect<void, AcpError.AcpError>>;
   readonly pending: Array<A>;
 }
 
+/**
+ * 创建 AcpClient 实例的工厂函数。
+ *
+ * 建立 ACP 协议传输层，初始化 RPC 客户端和服务器，注册核心请求处理器和通知处理器。
+ * 返回 AcpClientShape 接口的完整实现。
+ *
+ * @param stdio - 标准 I/O 实例（通常来自子进程）
+ * @param options - 客户端配置选项
+ * @param terminationError - 自定义终止错误 Effect（可选，用于子进程场景）
+ * @returns 作用域内的 AcpClientShape 实现
+ */
 export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
   stdio: Stdio.Stdio,
   options: AcpClientOptions = {},
@@ -559,6 +631,16 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
   } satisfies AcpClientShape;
 });
 
+/**
+ * 从子进程创建 AcpClient Layer。
+ *
+ * 根据子进程句柄创建 Stdio 和终止错误处理，然后构建 AcpClient 的 Effect Layer。
+ * 这是创建 AcpClient 最常用的方式。
+ *
+ * @param handle - 子进程句柄
+ * @param options - 客户端配置选项
+ * @returns AcpClient 的 Layer
+ */
 export const layerChildProcess = (
   handle: ChildProcessSpawner.ChildProcessHandle,
   options: AcpClientOptions = {},

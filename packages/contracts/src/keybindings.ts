@@ -1,12 +1,34 @@
+/**
+ * 键盘快捷键合约定义
+ *
+ * 用途：定义键盘快捷键的配置、规则、解析等结构，供客户端与服务端共享使用。
+ * 所属模块：共享契约层（Shared Contracts）
+ * 主要导出：
+ *   - KeybindingCommand —— 快捷键命令类型
+ *   - KeybindingRule —— 快捷键规则
+ *   - KeybindingShortcut —— 快捷键组合
+ *   - KeybindingWhenNode —— When 条件表达式 AST 节点
+ *   - KeybindingsConfig —— 快捷键配置
+ *   - ResolvedKeybindingRule / ResolvedKeybindingsConfig —— 已解析的快捷键配置
+ *   - THREAD_JUMP_KEYBINDING_COMMANDS —— 线程跳转命令列表
+ *   - 各种常量：MAX_KEYBINDING_VALUE_LENGTH / MAX_SCRIPT_ID_LENGTH / MAX_KEYBINDINGS_COUNT 等
+ */
+
 import { Schema } from "effect";
 import { TrimmedString } from "./baseSchemas";
 
+/** 快捷键值最大长度 */
 export const MAX_KEYBINDING_VALUE_LENGTH = 64;
+/** When 条件最大长度 */
 const MAX_KEYBINDING_WHEN_LENGTH = 256;
+/** When 表达式 AST 最大深度 */
 export const MAX_WHEN_EXPRESSION_DEPTH = 64;
+/** 脚本 ID 最大长度 */
 export const MAX_SCRIPT_ID_LENGTH = 24;
+/** 快捷键最大数量 */
 export const MAX_KEYBINDINGS_COUNT = 256;
 
+/** 静态快捷键命令列表 */
 const STATIC_KEYBINDING_COMMANDS = [
   "sidebar.toggle",
   "sidebar.search",
@@ -50,7 +72,7 @@ const STATIC_KEYBINDING_COMMANDS = [
   "editor.openFavorite",
 ] as const;
 
-// Shared list of numbered thread-jump commands used by the web shortcut UI.
+/** 线程跳转快捷键命令列表，供 Web 快捷键 UI 使用 */
 export const THREAD_JUMP_KEYBINDING_COMMANDS = [
   "thread.jump.1",
   "thread.jump.2",
@@ -64,6 +86,7 @@ export const THREAD_JUMP_KEYBINDING_COMMANDS = [
 ] as const;
 export type ThreadJumpKeybindingCommand = (typeof THREAD_JUMP_KEYBINDING_COMMANDS)[number];
 
+/** 脚本运行命令模式：script.<id>.run */
 export const SCRIPT_RUN_COMMAND_PATTERN = Schema.TemplateLiteral([
   Schema.Literal("script."),
   Schema.NonEmptyString.check(
@@ -73,21 +96,26 @@ export const SCRIPT_RUN_COMMAND_PATTERN = Schema.TemplateLiteral([
   Schema.Literal(".run"),
 ]);
 
+/** 快捷键命令（静态命令 + 脚本运行命令） */
 export const KeybindingCommand = Schema.Union([
   Schema.Literals(STATIC_KEYBINDING_COMMANDS),
   SCRIPT_RUN_COMMAND_PATTERN,
 ]);
 export type KeybindingCommand = typeof KeybindingCommand.Type;
 
+/** 快捷键键值约束 */
 const KeybindingValue = TrimmedString.check(
   Schema.isMinLength(1),
   Schema.isMaxLength(MAX_KEYBINDING_VALUE_LENGTH),
 );
 
+/** When 条件约束 */
 const KeybindingWhen = TrimmedString.check(
   Schema.isMinLength(1),
   Schema.isMaxLength(MAX_KEYBINDING_WHEN_LENGTH),
 );
+
+/** 快捷键规则 */
 export const KeybindingRule = Schema.Struct({
   key: KeybindingValue,
   command: KeybindingCommand,
@@ -95,11 +123,13 @@ export const KeybindingRule = Schema.Struct({
 });
 export type KeybindingRule = typeof KeybindingRule.Type;
 
+/** 快捷键配置列表 */
 export const KeybindingsConfig = Schema.Array(KeybindingRule).check(
   Schema.isMaxLength(MAX_KEYBINDINGS_COUNT),
 );
 export type KeybindingsConfig = typeof KeybindingsConfig.Type;
 
+/** 快捷键组合（含修饰键信息） */
 export const KeybindingShortcut = Schema.Struct({
   key: KeybindingValue,
   metaKey: Schema.Boolean,
@@ -110,6 +140,7 @@ export const KeybindingShortcut = Schema.Struct({
 });
 export type KeybindingShortcut = typeof KeybindingShortcut.Type;
 
+/** When 条件表达式 AST 节点（支持 identifier / not / and / or） */
 export const KeybindingWhenNode: Schema.Schema<KeybindingWhenNode> = Schema.Union([
   Schema.Struct({
     type: Schema.Literal("identifier"),
@@ -136,6 +167,7 @@ export type KeybindingWhenNode =
   | { type: "and"; left: KeybindingWhenNode; right: KeybindingWhenNode }
   | { type: "or"; left: KeybindingWhenNode; right: KeybindingWhenNode };
 
+/** 已解析的快捷键规则 */
 export const ResolvedKeybindingRule = Schema.Struct({
   command: KeybindingCommand,
   shortcut: KeybindingShortcut,
@@ -143,6 +175,7 @@ export const ResolvedKeybindingRule = Schema.Struct({
 }).annotate({ parseOptions: { onExcessProperty: "ignore" } });
 export type ResolvedKeybindingRule = typeof ResolvedKeybindingRule.Type;
 
+/** 已解析的快捷键配置列表 */
 export const ResolvedKeybindingsConfig = Schema.Array(ResolvedKeybindingRule).check(
   Schema.isMaxLength(MAX_KEYBINDINGS_COUNT),
 );

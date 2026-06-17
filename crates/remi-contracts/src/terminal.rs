@@ -61,6 +61,20 @@ pub struct ResizeTerminalInput {
     pub rows: u16,
 }
 
+/// Input for closing a terminal session.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct CloseTerminalInput {
+    /// Session ID.
+    pub session_id: Uuid,
+}
+
+/// Input for subscribing to terminal output.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct SubscribeTerminalOutputInput {
+    /// Session ID.
+    pub session_id: Uuid,
+}
+
 /// Terminal output event.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalOutputEvent {

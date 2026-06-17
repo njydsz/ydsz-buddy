@@ -18,12 +18,15 @@ pub struct TerminalManager {
 }
 
 #[derive(Clone)]
+#[allow(dead_code)]
 struct TerminalHandle {
     session: TerminalSession,
     writer: Arc<Mutex<Box<dyn std::io::Write + Send>>>,
-    _reader: Arc<Mutex<Box<dyn std::io::Read + Send>>>,
+    reader: Arc<Mutex<Box<dyn std::io::Read + Send>>>,
     output_tx: broadcast::Sender<String>,
     size: PtySize,
+    child: Arc<Mutex<Box<dyn portable_pty::Child + Send>>>,
+    reader_task: Arc<tokio::sync::Notify>,
 }
 
 impl TerminalManager {
@@ -53,7 +56,7 @@ impl TerminalManager {
         let mut cmd = CommandBuilder::new(input.shell.as_deref().unwrap_or("bash"));
         cmd.cwd(&input.cwd);
 
-        let _child = pty_pair
+        let child = pty_pair
             .slave
             .spawn_command(cmd)
             .map_err(|e| Error::Internal(format!("Failed to spawn command: {}", e)))?;
@@ -84,14 +87,41 @@ impl TerminalManager {
         };
 
         let (output_tx, _) = broadcast::channel(1000);
+        let reader_task = Arc::new(tokio::sync::Notify::new());
 
         let handle = TerminalHandle {
             session: session.clone(),
             writer: Arc::new(Mutex::new(writer)),
-            _reader: Arc::new(Mutex::new(reader)),
+            reader: Arc::new(Mutex::new(reader)),
             output_tx: output_tx.clone(),
             size,
+            child: Arc::new(Mutex::new(child)),
+            reader_task: reader_task.clone(),
         };
+
+        // Spawn reader task to forward PTY output to subscribers
+        let reader_handle = handle.reader.clone();
+        let output_tx_clone = output_tx.clone();
+        let session_id_clone = id;
+        tokio::spawn(async move {
+            let mut buf = [0u8; 4096];
+            loop {
+                let n = {
+                    let mut reader = reader_handle.lock().await;
+                    match std::io::Read::read(&mut *reader, &mut buf) {
+                        Ok(n) => n,
+                        Err(_) => break,
+                    }
+                };
+                if n == 0 {
+                    break;
+                }
+                if let Ok(text) = String::from_utf8(buf[..n].to_vec()) {
+                    let _ = output_tx_clone.send(text);
+                }
+            }
+            info!("Reader task ended for session: {}", session_id_clone);
+        });
 
         self.sessions.insert(id, handle);
 

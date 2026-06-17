@@ -1,3 +1,17 @@
+/**
+ * WebSocket 通信合约定义
+ *
+ * 用途：定义 WebSocket 通信的 RPC 方法名、推送频道、请求/响应结构等。
+ * 所属模块：共享契约层（Shared Contracts）
+ * 主要导出：
+ *   - WS_METHODS —— 所有 WebSocket RPC 方法名常量
+ *   - WS_CHANNELS —— 所有推送事件频道名常量
+ *   - WebSocketRequest / WebSocketResponse —— 请求/响应结构
+ *   - WsPush / WsPushEnvelopeBase —— 推送消息结构
+ *   - WsPushPayloadByChannel —— 按频道索引的推送负载类型
+ *   - 各频道推送消息 Schema（WsPushServerWelcome 等）
+ */
+
 import { Schema, Struct } from "effect";
 import { NonNegativeInt, ProjectId, ThreadId, TrimmedNonEmptyString } from "./baseSchemas";
 
@@ -82,10 +96,11 @@ import {
 } from "./providerDiscovery";
 import { ProviderCompactThreadInput } from "./provider";
 
-// ── WebSocket RPC Method Names ───────────────────────────────────────
+// ── WebSocket RPC 方法名 ─────────────────────────────────────────────
 
+/** 所有 WebSocket RPC 方法名常量 */
 export const WS_METHODS = {
-  // Project registry methods
+  // 项目注册方法
   projectsList: "projects.list",
   projectsAdd: "projects.add",
   projectsRemove: "projects.remove",
@@ -94,13 +109,13 @@ export const WS_METHODS = {
   projectsSearchLocalEntries: "projects.searchLocalEntries",
   projectsWriteFile: "projects.writeFile",
 
-  // Filesystem browse methods
+  // 文件系统浏览方法
   filesystemBrowse: "filesystem.browse",
 
-  // Shell methods
+  // Shell 方法
   shellOpenInEditor: "shell.openInEditor",
 
-  // Git methods
+  // Git 方法
   gitPull: "git.pull",
   gitStatus: "git.status",
   gitReadWorkingTreeDiff: "git.readWorkingTreeDiff",
@@ -121,7 +136,7 @@ export const WS_METHODS = {
   gitResolvePullRequest: "git.resolvePullRequest",
   gitPreparePullRequestThread: "git.preparePullRequestThread",
 
-  // Terminal methods
+  // 终端方法
   terminalOpen: "terminal.open",
   terminalWrite: "terminal.write",
   terminalResize: "terminal.resize",
@@ -129,7 +144,7 @@ export const WS_METHODS = {
   terminalRestart: "terminal.restart",
   terminalClose: "terminal.close",
 
-  // Server meta
+  // 服务端元数据
   serverGetConfig: "server.getConfig",
   serverGetEnvironment: "server.getEnvironment",
   serverGetSettings: "server.getSettings",
@@ -146,12 +161,12 @@ export const WS_METHODS = {
   subscribeServerProviderStatuses: "server.subscribeProviderStatuses",
   subscribeServerSettings: "server.subscribeSettings",
 
-  // Streaming subscriptions
+  // 流订阅
   subscribeTerminalEvents: "terminal.subscribeEvents",
   subscribeOrchestrationDomainEvents: "orchestration.subscribeDomainEvents",
   subscribeGitActionProgress: "git.subscribeActionProgress",
 
-  // Provider discovery
+  // Provider 发现
   providerGetComposerCapabilities: "provider.getComposerCapabilities",
   providerCompactThread: "provider.compactThread",
   providerListCommands: "provider.listCommands",
@@ -161,12 +176,13 @@ export const WS_METHODS = {
   providerListModels: "provider.listModels",
   providerListAgents: "provider.listAgents",
 
-  // Local user skills (home-dir scan, independent of provider)
+  // 本地用户技能（主目录扫描，独立于 Provider）
   skillsListLocal: "skills.listLocal",
 } as const;
 
-// ── Push Event Channels ──────────────────────────────────────────────
+// ── 推送事件频道 ────────────────────────────────────────────────────
 
+/** 所有推送事件频道名常量 */
 export const WS_CHANNELS = {
   gitActionProgress: "git.actionProgress",
   terminalEvent: "terminal.event",
@@ -177,20 +193,27 @@ export const WS_CHANNELS = {
   serverSettingsUpdated: "server.settingsUpdated",
 } as const;
 
-// -- Tagged Union of all request body schemas ─────────────────────────
+// -- 所有请求体 Schema 的标签联合类型 ─────────────────────────────────
 
+/**
+ * 为请求体 Schema 添加 _tag 标签字段。
+ * @param tag - 标签值
+ * @param schema - 原始 Schema
+ * @returns 带标签的 Schema
+ */
 const tagRequestBody = <const Tag extends string, const Fields extends Schema.Struct.Fields>(
   tag: Tag,
   schema: Schema.Struct<Fields>,
 ) =>
   schema.mapFields(
     Struct.assign({ _tag: Schema.tag(tag) }),
-    // PreserveChecks is safe here. No existing schema should have checks depending on the tag
+    // PreserveChecks 在此处安全，因为现有 Schema 不应有依赖于标签的检查
     { unsafePreserveChecks: true },
   );
 
+/** 所有 WebSocket 请求体的标签联合类型 */
 const WebSocketRequestBody = Schema.Union([
-  // Orchestration methods
+  // 编排相关方法
   tagRequestBody(
     ORCHESTRATION_WS_METHODS.dispatchCommand,
     Schema.Struct({ command: ClientOrchestrationCommand }),
@@ -207,19 +230,19 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(ORCHESTRATION_WS_METHODS.subscribeThread, OrchestrationSubscribeThreadInput),
   tagRequestBody(ORCHESTRATION_WS_METHODS.unsubscribeThread, OrchestrationUnsubscribeThreadInput),
 
-  // Project Search
+  // 项目搜索
   tagRequestBody(WS_METHODS.projectsListDirectories, ProjectListDirectoriesInput),
   tagRequestBody(WS_METHODS.projectsSearchEntries, ProjectSearchEntriesInput),
   tagRequestBody(WS_METHODS.projectsSearchLocalEntries, ProjectSearchLocalEntriesInput),
   tagRequestBody(WS_METHODS.projectsWriteFile, ProjectWriteFileInput),
 
-  // Filesystem browse
+  // 文件系统浏览
   tagRequestBody(WS_METHODS.filesystemBrowse, FilesystemBrowseInput),
 
-  // Shell methods
+  // Shell 方法
   tagRequestBody(WS_METHODS.shellOpenInEditor, OpenInEditorInput),
 
-  // Git methods
+  // Git 方法
   tagRequestBody(WS_METHODS.gitPull, GitPullInput),
   tagRequestBody(WS_METHODS.gitStatus, GitStatusInput),
   tagRequestBody(WS_METHODS.gitReadWorkingTreeDiff, GitReadWorkingTreeDiffInput),
@@ -240,7 +263,7 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.gitResolvePullRequest, GitPullRequestRefInput),
   tagRequestBody(WS_METHODS.gitPreparePullRequestThread, GitPreparePullRequestThreadInput),
 
-  // Terminal methods
+  // 终端方法
   tagRequestBody(WS_METHODS.terminalOpen, TerminalOpenInput),
   tagRequestBody(WS_METHODS.terminalWrite, TerminalWriteInput),
   tagRequestBody(WS_METHODS.terminalResize, TerminalResizeInput),
@@ -248,7 +271,7 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.terminalRestart, TerminalRestartInput),
   tagRequestBody(WS_METHODS.terminalClose, TerminalCloseInput),
 
-  // Server meta
+  // 服务端元数据
   tagRequestBody(WS_METHODS.serverGetConfig, Schema.Struct({})),
   tagRequestBody(WS_METHODS.serverGetEnvironment, Schema.Struct({})),
   tagRequestBody(WS_METHODS.serverGetSettings, Schema.Struct({})),
@@ -261,7 +284,7 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.serverTranscribeVoice, ServerVoiceTranscriptionInput),
   tagRequestBody(WS_METHODS.serverUpsertKeybinding, KeybindingRule),
 
-  // Provider discovery
+  // Provider 发现
   tagRequestBody(WS_METHODS.providerGetComposerCapabilities, ProviderGetComposerCapabilitiesInput),
   tagRequestBody(WS_METHODS.providerCompactThread, ProviderCompactThreadInput),
   tagRequestBody(WS_METHODS.providerListCommands, ProviderListCommandsInput),
@@ -273,12 +296,14 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.skillsListLocal, ListLocalUserSkillsInput),
 ]);
 
+/** WebSocket 请求结构 */
 export const WebSocketRequest = Schema.Struct({
   id: TrimmedNonEmptyString,
   body: WebSocketRequestBody,
 });
 export type WebSocketRequest = typeof WebSocketRequest.Type;
 
+/** WebSocket 响应结构 */
 export const WebSocketResponse = Schema.Struct({
   id: TrimmedNonEmptyString,
   result: Schema.optional(Schema.Unknown),
@@ -290,9 +315,11 @@ export const WebSocketResponse = Schema.Struct({
 });
 export type WebSocketResponse = typeof WebSocketResponse.Type;
 
+/** 推送消息序号 */
 export const WsPushSequence = NonNegativeInt;
 export type WsPushSequence = typeof WsPushSequence.Type;
 
+/** 欢迎推送负载 */
 export const WsWelcomePayload = Schema.Struct({
   cwd: TrimmedNonEmptyString,
   homeDir: Schema.optional(TrimmedNonEmptyString),
@@ -302,6 +329,7 @@ export const WsWelcomePayload = Schema.Struct({
 });
 export type WsWelcomePayload = typeof WsWelcomePayload.Type;
 
+/** 按频道索引的推送负载类型映射 */
 export interface WsPushPayloadByChannel {
   readonly [WS_CHANNELS.serverWelcome]: WsWelcomePayload;
   readonly [WS_CHANNELS.serverMaintenanceUpdated]: ServerLifecycleStreamEvent;
@@ -318,6 +346,7 @@ export interface WsPushPayloadByChannel {
 export type WsPushChannel = keyof WsPushPayloadByChannel;
 export type WsPushData<C extends WsPushChannel> = WsPushPayloadByChannel[C];
 
+/** 构造推送消息 Schema */
 const makeWsPushSchema = <const Channel extends string, Payload extends Schema.Schema<any>>(
   channel: Channel,
   payload: Payload,
@@ -329,41 +358,52 @@ const makeWsPushSchema = <const Channel extends string, Payload extends Schema.S
     data: payload,
   });
 
+/** 欢迎推送消息 */
 export const WsPushServerWelcome = makeWsPushSchema(WS_CHANNELS.serverWelcome, WsWelcomePayload);
+/** 维护更新推送消息 */
 export const WsPushServerMaintenanceUpdated = makeWsPushSchema(
   WS_CHANNELS.serverMaintenanceUpdated,
   ServerLifecycleStreamEvent,
 );
+/** 配置更新推送消息 */
 export const WsPushServerConfigUpdated = makeWsPushSchema(
   WS_CHANNELS.serverConfigUpdated,
   ServerConfigUpdatedPayload,
 );
+/** Provider 状态更新推送消息 */
 export const WsPushServerProviderStatusesUpdated = makeWsPushSchema(
   WS_CHANNELS.serverProviderStatusesUpdated,
   ServerProviderStatusesUpdatedPayload,
 );
+/** 设置更新推送消息 */
 export const WsPushServerSettingsUpdated = makeWsPushSchema(
   WS_CHANNELS.serverSettingsUpdated,
   ServerSettingsUpdatedPayload,
 );
+/** Git 操作进度推送消息 */
 export const WsPushGitActionProgress = makeWsPushSchema(
   WS_CHANNELS.gitActionProgress,
   GitActionProgressEvent,
 );
+/** 终端事件推送消息 */
 export const WsPushTerminalEvent = makeWsPushSchema(WS_CHANNELS.terminalEvent, TerminalEvent);
+/** 编排领域事件推送消息 */
 export const WsPushOrchestrationDomainEvent = makeWsPushSchema(
   ORCHESTRATION_WS_CHANNELS.domainEvent,
   OrchestrationEvent,
 );
+/** 编排 Shell 事件推送消息 */
 export const WsPushOrchestrationShellEvent = makeWsPushSchema(
   ORCHESTRATION_WS_CHANNELS.shellEvent,
   OrchestrationShellStreamItem,
 );
+/** 编排线程事件推送消息 */
 export const WsPushOrchestrationThreadEvent = makeWsPushSchema(
   ORCHESTRATION_WS_CHANNELS.threadEvent,
   OrchestrationThreadStreamItem,
 );
 
+/** 推送频道 Schema */
 export const WsPushChannelSchema = Schema.Literals([
   WS_CHANNELS.gitActionProgress,
   WS_CHANNELS.serverWelcome,
@@ -378,6 +418,7 @@ export const WsPushChannelSchema = Schema.Literals([
 ]);
 export type WsPushChannelSchema = typeof WsPushChannelSchema.Type;
 
+/** 所有推送消息联合类型 */
 export const WsPush = Schema.Union([
   WsPushServerWelcome,
   WsPushServerMaintenanceUpdated,
@@ -392,8 +433,10 @@ export const WsPush = Schema.Union([
 ]);
 export type WsPush = typeof WsPush.Type;
 
+/** 提取特定频道的推送消息类型 */
 export type WsPushMessage<C extends WsPushChannel> = Extract<WsPush, { channel: C }>;
 
+/** 推送消息基础信封 */
 export const WsPushEnvelopeBase = Schema.Struct({
   type: Schema.Literal("push"),
   sequence: WsPushSequence,
@@ -402,7 +445,8 @@ export const WsPushEnvelopeBase = Schema.Struct({
 });
 export type WsPushEnvelopeBase = typeof WsPushEnvelopeBase.Type;
 
-// ── Union of all server → client messages ─────────────────────────────
+// ── 所有服务端 → 客户端消息的联合类型 ───────────────────────────────
 
+/** 所有服务端 → 客户端消息联合类型 */
 export const WsResponse = Schema.Union([WebSocketResponse, WsPush]);
 export type WsResponse = typeof WsResponse.Type;

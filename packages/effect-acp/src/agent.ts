@@ -1,3 +1,21 @@
+/**
+ * @fileoverview ACP Agent 模块
+ *
+ * 实现 ACP 协议的代理端（Agent）角色。Agent 负责响应 Client 的初始化、认证、会话管理和提示请求，
+ * 同时可以向 Client 发起文件系统操作、权限请求、引导输入和终端管理请求。
+ *
+ * 核心功能：
+ * - 通过 stdio 建立与 Client 的 ACP 连接
+ * - 提供 Client 端 RPC 的调用接口（如 requestPermission、readTextFile、createTerminal 等）
+ * - 注册 Agent 端请求处理器（如 handleInitialize、handlePrompt 等）
+ * - 管理扩展请求/通知的注册与分发
+ *
+ * 所属模块：effect-acp
+ * 主要导出：AcpAgent、AcpAgentShape、AcpAgentOptions、make、layer、layerStdio
+ *
+ * @see https://agentclientprotocol.com
+ */
+
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
@@ -21,12 +39,22 @@ import {
 } from "./_internal/shared.ts";
 import * as AcpTerminal from "./terminal.ts";
 
+/**
+ * ACP Agent 配置选项。
+ *
+ * 控制日志输出和协议事件记录行为。
+ */
 export interface AcpAgentOptions {
   readonly logIncoming?: boolean;
   readonly logOutgoing?: boolean;
   readonly logger?: (event: AcpProtocol.AcpProtocolLogEvent) => Effect.Effect<void, never>;
 }
 
+/**
+ * ACP Agent 对外接口形状。
+ *
+ * 定义 Agent 的所有操作能力，包括原始操作、Client 端 RPC 调用、请求处理器注册和扩展支持。
+ */
 export interface AcpAgentShape {
   readonly raw: {
     /**
@@ -207,10 +235,21 @@ export interface AcpAgentShape {
   ) => Effect.Effect<void>;
 }
 
+/**
+ * ACP Agent 服务类。
+ *
+ * 基于 Effect ServiceMap 实现，作为依赖注入容器中的服务标识。
+ * 通过 `make` 工厂函数创建实例，通过 `layer` 或 `layerStdio` 创建 Layer。
+ */
 export class AcpAgent extends ServiceMap.Service<AcpAgent, AcpAgentShape>()(
   "effect-acp/agent/AcpAgent",
 ) {}
 
+/**
+ * Agent 端核心请求处理器映射。
+ *
+ * 存储 Agent 端各核心请求方法的处理器函数，在注册前为 undefined。
+ */
 interface AcpCoreAgentRequestHandlers {
   initialize?: (
     request: AcpSchema.InitializeRequest,
@@ -250,8 +289,19 @@ interface AcpCoreAgentRequestHandlers {
   ) => Effect.Effect<AcpSchema.PromptResponse, AcpError.AcpError>;
 }
 
+/** Cancel 通知的解码器，用于安全地解码传入的 session/cancel 通知载荷 */
 const decodeCancelNotification = Schema.decodeUnknownEffect(AcpSchema.CancelNotification);
 
+/**
+ * 创建 AcpAgent 实例的工厂函数。
+ *
+ * 建立 ACP 协议传输层，初始化 RPC 客户端和服务器，注册核心请求处理器和通知处理器。
+ * 返回 AcpAgentShape 接口的完整实现。
+ *
+ * @param stdio - 标准 I/O 实例（通常来自子进程）
+ * @param options - Agent 配置选项
+ * @returns 作用域内的 AcpAgentShape 实现
+ */
 export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
   stdio: Stdio.Stdio,
   options: AcpAgentOptions = {},
@@ -509,9 +559,26 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
   } satisfies AcpAgentShape;
 });
 
+/**
+ * 创建 AcpAgent 的 Effect Layer。
+ *
+ * 提供一个 Stdio 实例来构建 AcpAgent 服务。
+ *
+ * @param stdio - 标准 I/O 实例
+ * @param options - Agent 配置选项
+ * @returns AcpAgent 的 Layer
+ */
 export const layer = (stdio: Stdio.Stdio, options: AcpAgentOptions = {}): Layer.Layer<AcpAgent> =>
   Layer.effect(AcpAgent, make(stdio, options));
 
+/**
+ * 从 Stdio 服务创建 AcpAgent 的 Effect Layer。
+ *
+ * 从依赖注入容器中获取 Stdio 实例，适用于已存在 Stdio 服务的上下文。
+ *
+ * @param options - Agent 配置选项
+ * @returns 需要 Stdio 服务的 AcpAgent Layer
+ */
 export const layerStdio = (
   options: AcpAgentOptions = {},
 ): Layer.Layer<AcpAgent, never, Stdio.Stdio> =>
