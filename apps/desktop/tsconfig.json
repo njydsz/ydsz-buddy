@@ -2,9 +2,25 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "types": ["node", "electron"],
-    "lib": ["ES2023", "DOM", "esnext.disposable"],
-    "skipLibCheck": true
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable", "esnext.disposable"],
+    "types": ["vite/client", "node"],
+    "paths": {
+      "~/*": ["./src/ui/*"]
+    },
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages": ["@effect/platform-node"],
+        "diagnosticSeverity": {
+          "importFromBarrel": "error",
+          "anyUnknownInErrorContext": "warning",
+          "instanceOfSchema": "warning",
+          "deterministicKeys": "warning"
+        }
+      }
+    ]
   },
-  "include": ["src", "tsdown.config.ts"]
+  "include": ["src", "vite.config.ts"]
 }

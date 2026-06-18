@@ -87,7 +87,7 @@ export function createTauriBridge(): DesktopBridge {
      */
     confirm: async (message: string): Promise<boolean> => {
       try {
-        return await invoke<boolean>("confirm_dialog", { message });
+        return await invoke<boolean>("confirm", { message });
       } catch (error) {
         console.error("Failed to show confirm dialog:", error);
         return false;
@@ -521,7 +521,7 @@ export function createTauriBridge(): DesktopBridge {
        * Tauri equivalent of ipcRenderer.invoke(BROWSER_IPC_CHANNELS.openDevTools, input)
        */
       openDevTools: async (input: BrowserTabInput): Promise<void> => {
-        await invoke("browser_open_devtools", {
+        await invoke("browser_open_dev_tools", {
           threadId: input.threadId,
           tabId: input.tabId,
         });

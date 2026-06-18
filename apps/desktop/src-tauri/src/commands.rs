@@ -1,8 +1,8 @@
 // Tauri IPC commands
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, State, Manager};
 use serde::{Deserialize, Serialize};
 use anyhow::Result;
-use tracing::info;
+use tracing::{info, warn, error};
 
 use crate::state::{AppState, UpdateState};
 use crate::browser::{BrowserManager, ThreadBrowserState, BrowserOpenInput, BrowserThreadInput, 
@@ -104,22 +104,62 @@ pub async fn confirm(app: AppHandle, message: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub async fn set_theme(_app: AppHandle, theme: String) -> Result<(), String> {
-    // Tauri 2 theme support would need to be implemented via window evaluation
+pub async fn set_theme(app: AppHandle, theme: String) -> Result<(), String> {
+    use tauri::Emitter;
+    
     info!("Setting theme to: {}", theme);
+    
+    // Emit an event to the frontend to apply the theme
+    let _ = app.emit("theme-changed", &theme);
+    
+    // Platform-specific theme handling can be added here if needed
+    // For now, the frontend handles theme application via the event
+    
     Ok(())
 }
 
 #[tauri::command]
 pub async fn show_context_menu(
-    _app: AppHandle,
+    app: AppHandle,
     items: Vec<ContextMenuItemDto>,
-    _position: Option<PositionDto>,
+    position: Option<PositionDto>,
 ) -> Result<Option<String>, String> {
-    // Context menu implementation would require custom window handling
-    // For now, return None (no selection)
-    info!("Context menu requested with {} items", items.len());
+    use tauri::Emitter;
+    
+    info!("Context menu requested with {} items at {:?}", items.len(), position);
+    
+    // Tauri 2 does not have a built-in native context menu API that returns a selection.
+    // We emit an event to the frontend with the menu items and position.
+    // The frontend can then show a custom context menu component and emit the selection back.
+    
+    #[derive(serde::Serialize, Clone)]
+    struct ContextMenuEvent {
+        items: Vec<ContextMenuItemDto>,
+        position: Option<PositionDto>,
+        request_id: String,
+    }
+    
+    let request_id = uuid::Uuid::new_v4().to_string();
+    
+    let _ = app.emit("context-menu-request", ContextMenuEvent {
+        items,
+        position,
+        request_id: request_id.clone(),
+    });
+    
+    // Return None immediately - the actual selection will come via emit_menu_action
+    // or a separate callback mechanism if needed
     Ok(None)
+}
+
+#[tauri::command]
+pub async fn emit_menu_action(
+    app: AppHandle,
+    action: String,
+) -> Result<(), String> {
+    use tauri::Emitter;
+    let _ = app.emit("menu-action", action);
+    Ok(())
 }
 
 #[tauri::command]
@@ -171,19 +211,21 @@ pub async fn get_update_state(state: State<'_, AppState>) -> Result<UpdateState,
 
 #[tauri::command]
 pub async fn check_for_updates(
+    app: AppHandle,
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateState, String> {
-    updater.check_for_updates(state.inner()).await
+    updater.check_for_updates(&app, state.inner()).await
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub async fn download_update(
+    app: AppHandle,
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateActionResult, String> {
-    updater.download_update(state.inner()).await
+    updater.download_update(&app, state.inner()).await
         .map_err(|e| e.to_string())
 }
 
@@ -193,8 +235,131 @@ pub async fn install_update(
     state: State<'_, AppState>,
     updater: State<'_, UpdaterManager>,
 ) -> Result<UpdateActionResult, String> {
-    updater.install_update(app, state.inner()).await
+    updater.install_update(&app, state.inner()).await
         .map_err(|e| e.to_string())
+}
+
+// Voice transcription command
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VoiceTranscriptionInput {
+    pub provider: String,
+    pub cwd: String,
+    pub thread_id: Option<String>,
+    pub mime_type: String,
+    pub sample_rate_hz: u32,
+    pub duration_ms: u32,
+    pub audio_base64: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VoiceTranscriptionResult {
+    pub text: String,
+}
+
+#[tauri::command]
+pub async fn server_transcribe_voice(
+    state: State<'_, AppState>,
+    input: VoiceTranscriptionInput,
+) -> Result<VoiceTranscriptionResult, String> {
+    use reqwest::Client;
+    use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+    
+    info!("Voice transcription requested for provider: {}", input.provider);
+    
+    // Get the backend HTTP URL
+    let backend_url = state.backend_http_url.read().clone();
+    let auth_token = state.backend_auth_token.read().clone();
+    
+    if backend_url.is_empty() || auth_token.is_empty() {
+        warn!("Backend not available, returning placeholder transcription");
+        return Ok(VoiceTranscriptionResult {
+            text: "[Backend not available]".to_string(),
+        });
+    }
+    
+    // Forward the audio to the backend's transcription endpoint
+    let client = Client::new();
+    let endpoint = format!("{}/api/voice/transcribe", backend_url);
+    
+    // Decode the base64 audio data
+    let audio_data = match BASE64.decode(&input.audio_base64) {
+        Ok(data) => data,
+        Err(e) => {
+            error!("Failed to decode audio base64: {}", e);
+            return Err(format!("Invalid audio data: {}", e));
+        }
+    };
+    
+    // Create multipart form data
+    let part = reqwest::multipart::Part::bytes(audio_data)
+        .file_name("audio.webm")
+        .mime_str(&input.mime_type)
+        .map_err(|e| e.to_string())?;
+    
+    let form = reqwest::multipart::Form::new()
+        .part("audio", part)
+        .text("provider", input.provider.clone())
+        .text("sample_rate_hz", input.sample_rate_hz.to_string())
+        .text("duration_ms", input.duration_ms.to_string());
+    
+    match client
+        .post(&endpoint)
+        .header("Authorization", format!("Bearer {}", auth_token))
+        .multipart(form)
+        .send()
+        .await
+    {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.json::<serde_json::Value>().await {
+                    Ok(json) => {
+                        let text = json
+                            .get("text")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        Ok(VoiceTranscriptionResult { text })
+                    }
+                    Err(e) => {
+                        error!("Failed to parse transcription response: {}", e);
+                        Err(format!("Invalid response: {}", e))
+                    }
+                }
+            } else {
+                let status = response.status();
+                let body = response.text().await.unwrap_or_default();
+                error!("Transcription failed: {} - {}", status, body);
+                Err(format!("Transcription failed: {}", status))
+            }
+        }
+        Err(e) => {
+            error!("Failed to send transcription request: {}", e);
+            Err(format!("Network error: {}", e))
+        }
+    }
+}
+
+// Browser attach webview command
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BrowserAttachWebviewInput {
+    pub thread_id: String,
+    pub tab_id: String,
+    pub web_contents_id: i32,
+}
+
+#[tauri::command]
+pub async fn browser_attach_webview(
+    browser: State<'_, BrowserManager>,
+    input: BrowserAttachWebviewInput,
+) -> Result<ThreadBrowserState, String> {
+    // In a full implementation, this would attach a webview to the browser tab
+    info!("Attaching webview for tab: {}", input.tab_id);
+    browser.get_state(BrowserThreadInput {
+        thread_id: input.thread_id,
+    }).await.map_err(|e| e.to_string())
 }
 
 // Notification commands

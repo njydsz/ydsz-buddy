@@ -1,7 +1,8 @@
 // Auto-updater management for Tauri 2
 use anyhow::Result;
-use tracing::{info, warn};
-use tauri::AppHandle;
+use tracing::{info, warn, error};
+use tauri::{AppHandle, Emitter};
+use tauri_plugin_updater::UpdaterExt;
 use serde::Deserialize;
 
 use crate::state::{AppState, UpdateState};
@@ -36,84 +37,79 @@ impl UpdaterManager {
         }
     }
 
-    pub async fn check_for_updates(&self, state: &AppState) -> Result<UpdateState> {
+    pub async fn check_for_updates(&self, app: &AppHandle, state: &AppState) -> Result<UpdateState> {
         info!("Checking for updates...");
         
         {
             let mut update_state = state.update_state.write();
             update_state.status = "checking".to_string();
             update_state.checked_at = Some(chrono::Utc::now().to_rfc3339());
+            let _ = app.emit("update-state", &*update_state);
         }
 
-        // Query GitHub API for latest release
-        let client = reqwest::Client::new();
-        let url = format!(
-            "https://api.github.com/repos/{}/{}/releases/latest",
-            self.github_owner, self.github_repo
-        );
+        // Use Tauri's updater plugin to check for updates
+        match app.updater() {
+            Ok(updater) => {
+                match updater.check().await {
+                    Ok(Some(update)) => {
+                        let latest_version = update.version.clone();
+                        let current_version = env!("CARGO_PKG_VERSION").to_string();
 
-        match client
-            .get(&url)
-            .header("User-Agent", "remi-code-desktop")
-            .send()
-            .await
-        {
-            Ok(response) => {
-                if response.status().is_success() {
-                    match response.json::<GitHubRelease>().await {
-                        Ok(release) => {
-                            let latest_version = release.tag_name.trim_start_matches('v').to_string();
-                            let current_version = env!("CARGO_PKG_VERSION").to_string();
+                        let mut update_state = state.update_state.write();
+                        update_state.checked_at = Some(chrono::Utc::now().to_rfc3339());
 
-                            let mut update_state = state.update_state.write();
-                            update_state.checked_at = Some(chrono::Utc::now().to_rfc3339());
-
-                            if Self::compare_versions(&latest_version, &current_version) > 0 {
-                                info!("Update available: {} -> {}", current_version, latest_version);
-                                update_state.status = "available".to_string();
-                                update_state.available_version = Some(latest_version);
-                                update_state.message = Some("A new version is available".to_string());
-                                update_state.can_retry = false;
-                            } else {
-                                info!("Application is up to date");
-                                update_state.status = "up-to-date".to_string();
-                                update_state.available_version = None;
-                                update_state.message = None;
-                                update_state.can_retry = false;
-                            }
-
-                            return Ok(update_state.clone());
+                        if Self::compare_versions(&latest_version, &current_version) > 0 {
+                            info!("Update available: {} -> {}", current_version, latest_version);
+                            update_state.status = "available".to_string();
+                            update_state.available_version = Some(latest_version);
+                            update_state.message = update.body.clone();
+                            update_state.can_retry = false;
+                        } else {
+                            info!("Application is up to date");
+                            update_state.status = "up-to-date".to_string();
+                            update_state.available_version = None;
+                            update_state.message = None;
+                            update_state.can_retry = false;
                         }
-                        Err(e) => {
-                            warn!("Failed to parse GitHub release: {}", e);
-                            let mut update_state = state.update_state.write();
-                            update_state.status = "error".to_string();
-                            update_state.error_context = Some(format!("Failed to parse release: {}", e));
-                            update_state.can_retry = true;
-                            return Ok(update_state.clone());
-                        }
+
+                        let _ = app.emit("update-state", &*update_state);
+                        return Ok(update_state.clone());
                     }
-                } else {
-                    warn!("GitHub API returned error status: {}", response.status());
-                    let mut update_state = state.update_state.write();
-                    update_state.status = "error".to_string();
-                    update_state.error_context = Some(format!("GitHub API error: {}", response.status()));
-                    update_state.can_retry = true;
-                    return Ok(update_state.clone());
+                    Ok(None) => {
+                        info!("No update available");
+                        let mut update_state = state.update_state.write();
+                        update_state.status = "up-to-date".to_string();
+                        update_state.checked_at = Some(chrono::Utc::now().to_rfc3339());
+                        update_state.available_version = None;
+                        update_state.message = None;
+                        update_state.can_retry = false;
+                        let _ = app.emit("update-state", &*update_state);
+                        return Ok(update_state.clone());
+                    }
+                    Err(e) => {
+                        error!("Failed to check for updates: {}", e);
+                        let mut update_state = state.update_state.write();
+                        update_state.status = "error".to_string();
+                        update_state.error_context = Some(format!("Update check failed: {}", e));
+                        update_state.can_retry = true;
+                        let _ = app.emit("update-state", &*update_state);
+                        return Ok(update_state.clone());
+                    }
                 }
             }
             Err(e) => {
-                warn!("Failed to check for updates: {}", e);
+                error!("Failed to get updater: {}", e);
                 let mut update_state = state.update_state.write();
                 update_state.status = "error".to_string();
-                update_state.error_context = Some(format!("Network error: {}", e));
+                update_state.error_context = Some(format!("Failed to get updater: {}", e));
                 update_state.can_retry = true;
+                let _ = app.emit("update-state", &*update_state);
                 return Ok(update_state.clone());
             }
         }
     }
 
-    pub async fn download_update(&self, state: &AppState) -> Result<UpdateActionResult> {
+    pub async fn download_update(&self, app: &AppHandle, state: &AppState) -> Result<UpdateActionResult> {
         info!("Downloading update...");
         
         {
@@ -130,28 +126,88 @@ impl UpdaterManager {
             let mut update_state = state.update_state.write();
             update_state.status = "downloading".to_string();
             update_state.download_percent = Some(0.0);
+            let _ = app.emit("update-state", &*update_state);
         }
 
-        // In a full implementation, this would download the update artifact
-        // For now, simulate a successful download
-        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+        // Use Tauri's updater plugin to download the update
+        match app.updater() {
+            Ok(updater) => {
+                match updater.check().await {
+                    Ok(Some(update)) => {
+                        // Download with progress callback
+                        let state_ref = state.clone();
+                        let app_ref = app.clone();
+                        let progress_callback = move |chunk_length: usize, content_length: Option<u64>| {
+                            if let Some(total) = content_length {
+                                let percent = (chunk_length as f64 / total as f64) * 100.0;
+                                let mut update_state = state_ref.update_state.write();
+                                update_state.download_percent = Some(percent);
+                                let _ = app_ref.emit("update-state", &*update_state);
+                            }
+                        };
 
-        {
-            let mut update_state = state.update_state.write();
-            update_state.status = "downloaded".to_string();
-            update_state.downloaded_version = update_state.available_version.clone();
-            update_state.download_percent = Some(100.0);
+                        match update.download(Some(progress_callback)).await {
+                            Ok(_) => {
+                                let mut update_state = state.update_state.write();
+                                update_state.status = "downloaded".to_string();
+                                update_state.downloaded_version = update_state.available_version.clone();
+                                update_state.download_percent = Some(100.0);
+                                let _ = app.emit("update-state", &*update_state);
+
+                                info!("Update downloaded successfully");
+                                Ok(UpdateActionResult {
+                                    success: true,
+                                    message: Some("Update downloaded successfully".to_string()),
+                                })
+                            }
+                            Err(e) => {
+                                error!("Failed to download update: {}", e);
+                                let mut update_state = state.update_state.write();
+                                update_state.status = "error".to_string();
+                                update_state.error_context = Some(format!("Download failed: {}", e));
+                                update_state.can_retry = true;
+                                let _ = app.emit("update-state", &*update_state);
+
+                                Ok(UpdateActionResult {
+                                    success: false,
+                                    message: Some(format!("Download failed: {}", e)),
+                                })
+                            }
+                        }
+                    }
+                    Ok(None) => {
+                        warn!("No update available to download");
+                        Ok(UpdateActionResult {
+                            success: false,
+                            message: Some("No update available".to_string()),
+                        })
+                    }
+                    Err(e) => {
+                        error!("Failed to check for update: {}", e);
+                        let mut update_state = state.update_state.write();
+                        update_state.status = "error".to_string();
+                        update_state.error_context = Some(format!("Update check failed: {}", e));
+                        update_state.can_retry = true;
+                        let _ = app.emit("update-state", &*update_state);
+
+                        Ok(UpdateActionResult {
+                            success: false,
+                            message: Some(format!("Update check failed: {}", e)),
+                        })
+                    }
+                }
+            }
+            Err(e) => {
+                error!("Failed to get updater: {}", e);
+                Ok(UpdateActionResult {
+                    success: false,
+                    message: Some(format!("Failed to get updater: {}", e)),
+                })
+            }
         }
-
-        info!("Update downloaded successfully");
-
-        Ok(UpdateActionResult {
-            success: true,
-            message: Some("Update downloaded successfully".to_string()),
-        })
     }
 
-    pub async fn install_update(&self, _app: AppHandle, state: &AppState) -> Result<UpdateActionResult> {
+    pub async fn install_update(&self, app: &AppHandle, state: &AppState) -> Result<UpdateActionResult> {
         info!("Installing update...");
         
         let update_state = state.update_state.read();
@@ -163,17 +219,60 @@ impl UpdaterManager {
             });
         }
 
-        // In a full implementation, this would use Tauri's updater plugin to install
-        // For now, just return success
-        info!("Update installation triggered");
+        // Use Tauri's updater plugin to install the update
+        match app.updater() {
+            Ok(updater) => {
+                match updater.check().await {
+                    Ok(Some(update)) => {
+                        // Install the update - this will restart the app
+                        match update.install(app) {
+                            Ok(_) => {
+                                info!("Update installed successfully, restarting...");
+                                // The app will restart automatically after install
+                                Ok(UpdateActionResult {
+                                    success: true,
+                                    message: Some("Update installed, restarting application".to_string()),
+                                })
+                            }
+                            Err(e) => {
+                                error!("Failed to install update: {}", e);
+                                let mut update_state = state.update_state.write();
+                                update_state.status = "error".to_string();
+                                update_state.error_context = Some(format!("Install failed: {}", e));
+                                update_state.can_retry = true;
+                                let _ = app.emit("update-state", &*update_state);
 
-        // The app would typically restart here
-        // In Tauri 2, we can use process::restart or let the updater handle it
-
-        Ok(UpdateActionResult {
-            success: true,
-            message: Some("Update installed, restarting application".to_string()),
-        })
+                                Ok(UpdateActionResult {
+                                    success: false,
+                                    message: Some(format!("Install failed: {}", e)),
+                                })
+                            }
+                        }
+                    }
+                    Ok(None) => {
+                        warn!("No update available to install");
+                        Ok(UpdateActionResult {
+                            success: false,
+                            message: Some("No update available".to_string()),
+                        })
+                    }
+                    Err(e) => {
+                        error!("Failed to check for update: {}", e);
+                        Ok(UpdateActionResult {
+                            success: false,
+                            message: Some(format!("Update check failed: {}", e)),
+                        })
+                    }
+                }
+            }
+            Err(e) => {
+                error!("Failed to get updater: {}", e);
+                Ok(UpdateActionResult {
+                    success: false,
+                    message: Some(format!("Failed to get updater: {}", e)),
+                })
+            }
+        }
     }
 
     /// Compare two semantic version strings

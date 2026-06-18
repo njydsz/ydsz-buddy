@@ -5,7 +5,7 @@
   "identifier": "com.remi-code.app",
   "build": {
     "beforeBuildCommand": "bun run build",
-    "beforeDevCommand": "bun run dev:bundle",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
   },

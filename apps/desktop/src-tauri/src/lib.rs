@@ -63,6 +63,7 @@ pub fn run() {
             commands::confirm,
             commands::set_theme,
             commands::show_context_menu,
+            commands::emit_menu_action,
             commands::open_external,
             commands::show_in_folder,
             commands::get_update_state,
@@ -71,6 +72,8 @@ pub fn run() {
             commands::install_update,
             commands::notifications_is_supported,
             commands::notifications_show,
+            commands::server_transcribe_voice,
+            commands::browser_attach_webview,
             commands::browser_open,
             commands::browser_close,
             commands::browser_hide,
@@ -92,6 +95,9 @@ pub fn run() {
             let app_handle = app.handle().clone();
             let state = app_state_setup.clone();
             let backend = backend_server_setup.clone();
+
+            // Set app handle for browser manager to emit events
+            browser_manager.set_app_handle(app_handle.clone());
 
             tauri::async_runtime::spawn(async move {
                 // Reserve a random port for the backend
