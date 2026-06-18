@@ -226,7 +226,7 @@ function canComposerHandlePanelWidth(input: {
   return !hasComposerOverflow && !overflowsViewport && !violatesMinimumComposerWidth;
 }
 
-// Electron <webview> can swallow pointermove during drag; this keeps resizing in the React layer.
+// Tauri <WebviewWindow> can swallow pointermove during drag; this keeps resizing in the React layer.
 function createPanelResizeOverlay(): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.setAttribute("data-panel-resize-overlay", "true");

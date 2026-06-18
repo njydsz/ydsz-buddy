@@ -2,7 +2,7 @@
 // Purpose: Owns the TanStack history instance and browser-style app navigation controls.
 // Layer: Web app routing utility
 // Exports: appHistory, route navigation helpers, and navigation availability state
-// Depends on: TanStack Router history and the Electron environment flag
+// Depends on: TanStack Router history and the Tauri environment flag
 
 import {
   createBrowserHistory,
@@ -23,7 +23,7 @@ function createAppHistory(): RouterHistory {
   if (typeof window === "undefined") {
     return createMemoryHistory({ initialEntries: ["/"] });
   }
-  // Electron loads the app from a file-backed shell, so hash history avoids path resolution issues.
+  // Tauri loads the app from a file-backed shell, so hash history avoids path resolution issues.
   return isElectron ? createHashHistory() : createBrowserHistory();
 }
 

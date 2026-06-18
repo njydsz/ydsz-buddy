@@ -46,17 +46,17 @@
       "frameworks": [],
       "minimumSystemVersion": "10.15",
       "exceptionDomain": "",
-      "signingIdentity": null,
-      "entitlements": null
+      "signingIdentity": "${TAURI_MACOS_SIGNING_IDENTITY}",
+      "entitlements": "resources/entitlements.mac.plist"
     },
     "windows": {
-      "certificateThumbprint": null,
+      "certificateThumbprint": "${TAURI_WINDOWS_CERT_THUMBPRINT}",
       "digestAlgorithm": "sha256",
-      "timestampUrl": ""
+      "timestampUrl": "http://timestamp.digicert.com"
     },
     "linux": {
       "deb": {
-        "depends": []
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
       },
       "appimage": {
         "bundleMediaFramework": true
@@ -66,14 +66,7 @@
   "plugins": {
     "shell": {
       "open": true,
-      "sidecar": true,
-      "scope": [
-        {
-          "name": "backend",
-          "cmd": "remi-server",
-          "args": true
-        }
-      ]
+      "sidecar": false
     },
     "dialog": {},
     "fs": {
@@ -81,7 +74,7 @@
     },
     "notification": {},
     "updater": {
-      "pubkey": "",
+      "pubkey": "${TAURI_UPDATER_PUBKEY}",
       "endpoints": [
         "https://github.com/RemiCode-AI/RemiCode/releases/latest/download/latest.json"
       ]

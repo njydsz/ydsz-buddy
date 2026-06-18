@@ -21,7 +21,7 @@ describe("resolveDesktopMenuAccelerator", () => {
 });
 
 describe("shouldUseNativeZoomMenuRoles", () => {
-  it("avoids Electron's role-provided zoom accelerators on Linux", () => {
+  it("avoids desktop role-provided zoom accelerators on Linux", () => {
     expect(shouldUseNativeZoomMenuRoles("linux")).toBe(false);
   });
 

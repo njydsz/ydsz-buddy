@@ -1,5 +1,5 @@
 // FILE: SidebarHeaderNavigationControls.tsx
-// Purpose: Keeps the collapsed-sidebar trigger and Electron route arrows in one header cluster.
+// Purpose: Keeps the collapsed-sidebar trigger and desktop route arrows in one header cluster.
 // Layer: Shared web shell chrome
 // Depends on: Sidebar state plus AppNavigationButtons
 

@@ -3215,7 +3215,7 @@ export default function ChatView({
     storeOpenNewFullWidthTerminal(activeThreadId, terminalId);
     setTerminalFocusRequestId((value) => value + 1);
   }, [activeProject, activeThreadId, storeOpenNewFullWidthTerminal]);
-  // Desktop accelerators like Cmd+T can be claimed by Electron before the page sees keydown.
+  // Desktop accelerators like Cmd+T can be claimed by Tauri before the page sees keydown.
   useEffect(() => {
     const onMenuAction = window.desktopBridge?.onMenuAction;
     if (typeof onMenuAction !== "function" || !isFocusedPane) {
@@ -4166,7 +4166,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers â€?skills are provider-specific.
+  // Clear selected skills when switching providers ï¿½?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -7727,7 +7727,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode â€?click to return to normal build mode"
+                            title="Plan mode ï¿½?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8471,7 +8471,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode â€?click to return to normal build mode"
+                                        title="Plan mode ï¿½?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

@@ -9,7 +9,9 @@ use crate::state::{AppState, UpdateState};
 use crate::commands::UpdateActionResult;
 
 pub struct UpdaterManager {
+    #[allow(dead_code)]
     github_owner: String,
+    #[allow(dead_code)]
     github_repo: String,
 }
 
@@ -137,7 +139,7 @@ impl UpdaterManager {
                         // Download with progress callback
                         let state_ref = state.clone();
                         let app_ref = app.clone();
-                        let progress_callback = move |chunk_length: usize, content_length: Option<u64>| {
+                        let on_chunk = move |chunk_length: usize, content_length: Option<u64>| {
                             if let Some(total) = content_length {
                                 let percent = (chunk_length as f64 / total as f64) * 100.0;
                                 let mut update_state = state_ref.update_state.write();
@@ -145,9 +147,13 @@ impl UpdaterManager {
                                 let _ = app_ref.emit("update-state", &*update_state);
                             }
                         };
+                        let on_body = move || {};
 
-                        match update.download(Some(progress_callback)).await {
-                            Ok(_) => {
+                        match update.download(on_chunk, on_body).await {
+                            Ok(bytes) => {
+                                // Store downloaded bytes for later install
+                                *state.downloaded_bytes.write() = Some(bytes);
+
                                 let mut update_state = state.update_state.write();
                                 update_state.status = "downloaded".to_string();
                                 update_state.downloaded_version = update_state.available_version.clone();
@@ -210,66 +216,78 @@ impl UpdaterManager {
     pub async fn install_update(&self, app: &AppHandle, state: &AppState) -> Result<UpdateActionResult> {
         info!("Installing update...");
         
-        let update_state = state.update_state.read();
-        
-        if update_state.downloaded_version.is_none() {
-            return Ok(UpdateActionResult {
-                success: false,
-                message: Some("No update downloaded".to_string()),
-            });
+        {
+            let update_state = state.update_state.read();
+            if update_state.downloaded_version.is_none() {
+                return Ok(UpdateActionResult {
+                    success: false,
+                    message: Some("No update downloaded".to_string()),
+                });
+            }
         }
 
-        // Use Tauri's updater plugin to install the update
-        match app.updater() {
-            Ok(updater) => {
-                match updater.check().await {
-                    Ok(Some(update)) => {
-                        // Install the update - this will restart the app
-                        match update.install(app) {
-                            Ok(_) => {
-                                info!("Update installed successfully, restarting...");
-                                // The app will restart automatically after install
+        // Get the downloaded bytes
+        let bytes = state.downloaded_bytes.read().clone();
+        match bytes {
+            Some(bytes) => {
+                // Use Tauri's updater plugin to install the update
+                match app.updater() {
+                    Ok(updater) => {
+                        match updater.check().await {
+                            Ok(Some(update)) => {
+                                // Install the update using the downloaded bytes
+                                match update.install(bytes) {
+                                    Ok(_) => {
+                                        info!("Update installed successfully, restarting...");
+                                        Ok(UpdateActionResult {
+                                            success: true,
+                                            message: Some("Update installed, restarting application".to_string()),
+                                        })
+                                    }
+                                    Err(e) => {
+                                        error!("Failed to install update: {}", e);
+                                        let mut update_state = state.update_state.write();
+                                        update_state.status = "error".to_string();
+                                        update_state.error_context = Some(format!("Install failed: {}", e));
+                                        update_state.can_retry = true;
+                                        let _ = app.emit("update-state", &*update_state);
+
+                                        Ok(UpdateActionResult {
+                                            success: false,
+                                            message: Some(format!("Install failed: {}", e)),
+                                        })
+                                    }
+                                }
+                            }
+                            Ok(None) => {
+                                warn!("No update available to install");
                                 Ok(UpdateActionResult {
-                                    success: true,
-                                    message: Some("Update installed, restarting application".to_string()),
+                                    success: false,
+                                    message: Some("No update available".to_string()),
                                 })
                             }
                             Err(e) => {
-                                error!("Failed to install update: {}", e);
-                                let mut update_state = state.update_state.write();
-                                update_state.status = "error".to_string();
-                                update_state.error_context = Some(format!("Install failed: {}", e));
-                                update_state.can_retry = true;
-                                let _ = app.emit("update-state", &*update_state);
-
+                                error!("Failed to check for update: {}", e);
                                 Ok(UpdateActionResult {
                                     success: false,
-                                    message: Some(format!("Install failed: {}", e)),
+                                    message: Some(format!("Update check failed: {}", e)),
                                 })
                             }
                         }
                     }
-                    Ok(None) => {
-                        warn!("No update available to install");
-                        Ok(UpdateActionResult {
-                            success: false,
-                            message: Some("No update available".to_string()),
-                        })
-                    }
                     Err(e) => {
-                        error!("Failed to check for update: {}", e);
+                        error!("Failed to get updater: {}", e);
                         Ok(UpdateActionResult {
                             success: false,
-                            message: Some(format!("Update check failed: {}", e)),
+                            message: Some(format!("Failed to get updater: {}", e)),
                         })
                     }
                 }
             }
-            Err(e) => {
-                error!("Failed to get updater: {}", e);
+            None => {
                 Ok(UpdateActionResult {
                     success: false,
-                    message: Some(format!("Failed to get updater: {}", e)),
+                    message: Some("No downloaded update data found".to_string()),
                 })
             }
         }

@@ -1,5 +1,5 @@
 // Tauri IPC commands
-use tauri::{AppHandle, State, Manager};
+use tauri::{AppHandle, State};
 use serde::{Deserialize, Serialize};
 use anyhow::Result;
 use tracing::{info, warn, error};
@@ -11,7 +11,7 @@ use crate::browser::{BrowserManager, ThreadBrowserState, BrowserOpenInput, Brows
 use crate::updater::UpdaterManager;
 
 // DTO structures
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContextMenuItemDto {
     pub id: String,
@@ -22,7 +22,7 @@ pub struct ContextMenuItemDto {
     pub destructive: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PositionDto {
     pub x: f64,

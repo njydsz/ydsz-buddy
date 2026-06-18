@@ -50,6 +50,7 @@ pub struct AppState {
     pub backend_ws_url: Arc<RwLock<String>>,
     pub update_state: Arc<RwLock<UpdateState>>,
     pub is_quitting: Arc<RwLock<bool>>,
+    pub downloaded_bytes: Arc<RwLock<Option<Vec<u8>>>>,
 }
 
 impl AppState {
@@ -61,6 +62,7 @@ impl AppState {
             backend_ws_url: Arc::new(RwLock::new(String::new())),
             update_state: Arc::new(RwLock::new(UpdateState::default())),
             is_quitting: Arc::new(RwLock::new(false)),
+            downloaded_bytes: Arc::new(RwLock::new(None)),
         }
     }
 }

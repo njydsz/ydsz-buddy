@@ -51,7 +51,7 @@ export function ProjectSidebarIcon({ cwd, expanded }: { cwd: string; expanded: b
   );
   const FolderGlyph = expanded ? HiOutlineFolderOpen : FolderClosed;
 
-  // Probe with Image() so Electron/file-origin behaves like the actual visible <img>.
+  // Probe with Image() so Tauri/file-origin behaves like the actual visible <img>.
   useEffect(() => {
     const cached = projectFaviconPresence.get(faviconSrc);
     if (cached !== undefined) {

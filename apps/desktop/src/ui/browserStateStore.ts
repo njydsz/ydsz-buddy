@@ -1,7 +1,7 @@
 /**
  * Lightweight browser metadata cache keyed by thread.
  *
- * The live browser surface stays in Electron; the web app only keeps enough
+ * The live browser surface stays in Tauri; the web app only keeps enough
  * state to render tabs/toolbars and survive thread switches predictably.
  */
 

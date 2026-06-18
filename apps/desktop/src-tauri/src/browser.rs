@@ -114,8 +114,6 @@ pub struct ThreadBrowserState {
 
 struct TabEntry {
     state: BrowserTabState,
-    /// The label of the Tauri WebviewWindow that hosts this tab's content.
-    window_label: String,
     /// Navigation history for back/forward (indices into `history`).
     history: Vec<String>,
     history_index: usize,
@@ -161,17 +159,8 @@ impl BrowserManager {
     }
 
     /// Create a real Tauri WebviewWindow for a tab.
-    fn create_webview(&self, tab_id: &str, _url: &str) -> Result<()> {
+    fn create_webview(&self, _tab_id: &str, _url: &str) -> Result<()> {
         let _app = self.app()?;
-        let _label = Self::window_label(
-            // extract thread_id from tabs map
-            self.tabs
-                .read()
-                .get(tab_id)
-                .map(|_| "") // placeholder – caller must use full label
-                .unwrap_or(""),
-            tab_id,
-        );
         // The actual label is set by the caller; this is just a fallback.
         Ok(())
     }
@@ -263,7 +252,6 @@ impl BrowserManager {
                     tab_id.clone(),
                     TabEntry {
                         state: tab_state.clone(),
-                        window_label: Self::window_label(&input.thread_id, &tab_id),
                         history: vec![url.clone()],
                         history_index: 0,
                     },
@@ -587,7 +575,6 @@ impl BrowserManager {
                 tab_id.clone(),
                 TabEntry {
                     state: tab_state.clone(),
-                    window_label: Self::window_label(&input.thread_id, &tab_id),
                     history: vec![url.clone()],
                     history_index: 0,
                 },

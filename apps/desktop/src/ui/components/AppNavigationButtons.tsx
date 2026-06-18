@@ -1,5 +1,5 @@
 // FILE: AppNavigationButtons.tsx
-// Purpose: Renders Electron-only browser-style route back/forward controls.
+// Purpose: Renders desktop-only browser-style route back/forward controls.
 // Layer: Shared web shell chrome
 // Depends on: appNavigation history helpers, header Button/Tooltip primitives
 

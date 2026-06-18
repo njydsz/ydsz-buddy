@@ -1,7 +1,7 @@
 // FILE: useDesktopTopBarGutter.ts
 // Purpose: Decide when desktop top bars must clear the macOS traffic light buttons.
 // Layer: Shared web shell chrome
-// Depends on: appSettings sidebar side, sidebar context, electron env detection.
+// Depends on: appSettings sidebar side, sidebar context, Tauri env detection.
 
 import type { SidebarSide } from "~/appSettings";
 import { useAppSettings } from "~/appSettings";
@@ -11,7 +11,7 @@ import { isMacPlatform } from "~/lib/utils";
 
 /**
  * Tailwind padding that clears the macOS traffic light cluster
- * (positioned at x=16, y=18 in the Electron BrowserWindow).
+ * (positioned at x=16, y=18 in the Tauri window).
  *
  * Both the base and `sm:` variants are emitted so this gutter wins over any
  * responsive horizontal-padding class (e.g. `sm:px-5`) on the surrounding top
