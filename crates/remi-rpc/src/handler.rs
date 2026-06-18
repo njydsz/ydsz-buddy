@@ -111,6 +111,26 @@ pub async fn handle_method(
             handle_git_resolve_pull_request_result(input, state).await
         }
         RpcMethod::GitHandoffThread(input) => handle_git_handoff_thread(input, state).await,
+
+        // Auth methods
+        RpcMethod::AuthBootstrap(input) => handle_auth_bootstrap(input, state).await,
+        RpcMethod::AuthCreatePairingCredential(input) => {
+            handle_auth_create_pairing_credential(input, state).await
+        }
+        RpcMethod::AuthRevokePairingLink(input) => handle_auth_revoke_pairing_link(input, state).await,
+        RpcMethod::AuthRevokeClientSession(input) => handle_auth_revoke_client_session(input, state).await,
+
+        // Editor methods
+        RpcMethod::EditorOpen(input) => handle_editor_open(input, state).await,
+
+        // Terminal methods
+        RpcMethod::TerminalCreate(input) => handle_terminal_create(input, state).await,
+        RpcMethod::TerminalWrite(input) => handle_terminal_write(input, state).await,
+        RpcMethod::TerminalResize(input) => handle_terminal_resize(input, state).await,
+        RpcMethod::TerminalClose(input) => handle_terminal_close(input, state).await,
+        RpcMethod::TerminalSubscribeOutput(input) => {
+            handle_terminal_subscribe_output(input, state).await
+        }
     }
 }
 
@@ -495,4 +515,86 @@ async fn handle_git_handoff_thread(
     Ok(serde_json::json!({
         "new_thread_id": uuid::Uuid::new_v4()
     }))
+}
+
+async fn handle_terminal_create(
+    input: remi_contracts::CreateTerminalInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let output = state.terminal_manager.create(input).await?;
+
+    // Spawn a task to forward terminal output to WebSocket clients as notifications.
+    let session_id = output.id;
+    let terminal_manager = state.terminal_manager.clone();
+    let notification_tx = state.ws_state.notification_tx.clone();
+    tokio::spawn(async move {
+        let mut output_rx = match terminal_manager.subscribe_output(session_id).await {
+            Ok(rx) => rx,
+            Err(e) => {
+                tracing::error!("Failed to subscribe to terminal output: {}", e);
+                return;
+            }
+        };
+
+        while let Ok(data) = output_rx.recv().await {
+            let notification = remi_contracts::JsonRpcNotification {
+                jsonrpc: "2.0".to_string(),
+                method: "terminal.output".to_string(),
+                params: Some(
+                    serde_json::to_value(remi_contracts::TerminalOutputEvent {
+                        session_id,
+                        data,
+                    })
+                    .unwrap_or_default(),
+                ),
+            };
+            if let Ok(text) = serde_json::to_string(&notification) {
+                let _ = notification_tx.send(text);
+            }
+        }
+
+        info!("Terminal output forwarder ended for session: {}", session_id);
+    });
+
+    serde_json::to_value(output).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_terminal_write(
+    input: remi_contracts::WriteTerminalInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.terminal_manager.write(input.session_id, &input.data).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_resize(
+    input: remi_contracts::ResizeTerminalInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state
+        .terminal_manager
+        .resize(input.session_id, input.cols, input.rows)
+        .await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_close(
+    input: remi_contracts::CloseTerminalInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.terminal_manager.close(input.session_id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_subscribe_output(
+    input: remi_contracts::SubscribeTerminalOutputInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    // Output forwarding is started automatically on terminal.create.
+    // This method serves as an explicit subscription acknowledgment.
+    let _ = state
+        .terminal_manager
+        .subscribe_output(input.session_id)
+        .await?;
+    Ok(serde_json::json!({"status": "ok"}))
 }

@@ -46,6 +46,7 @@ export const GitActionProgressKind = Schema.Literals([
   "action_failed",
 ]);
 export type GitActionProgressKind = typeof GitActionProgressKind.Type;
+/** 进度流方向：stdout / stderr */
 export const GitActionProgressStream = Schema.Literals(["stdout", "stderr"]);
 export type GitActionProgressStream = typeof GitActionProgressStream.Type;
 const GitCommitStepStatus = Schema.Literals([
@@ -66,6 +67,7 @@ const GitPullRequestState = Schema.Literals(["open", "closed", "merged"]);
 const GitPreparePullRequestThreadMode = Schema.Literals(["local", "worktree"]);
 const GitHandoffThreadMode = Schema.Literals(["local", "worktree"]);
 
+/** Git 分支信息 */
 export const GitBranch = Schema.Struct({
   name: TrimmedNonEmptyStringSchema,
   isRemote: Schema.optional(Schema.Boolean),
@@ -449,4 +451,8 @@ export const GitActionProgressEvent = Schema.Union([
   GitActionPhaseStartedEvent,
   GitActionHookStartedEvent,
   GitActionHookOutputEvent,
-  Git
+  GitActionHookFinishedEvent,
+  GitActionFinishedEvent,
+  GitActionFailedEvent,
+]);
+export type GitActionProgressEvent = typeof GitActionProgressEvent.Type;

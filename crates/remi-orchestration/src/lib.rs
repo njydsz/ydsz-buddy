@@ -1,48 +1,63 @@
 //! Orchestration engine for Remi Code.
 //!
-//! This crate implements the event sourcing engine, decider, and projection pipeline.
+//! This crate implements the event sourcing engine, decider, projector, and
+//! provider handoff layers.
+//!
+//! # Module layout
+//!
+//! - [`decider`] — pure command validation and event decision logic.
+//! - [`projector`] — read-model projection from events.
+//! - [`handoff`] — provider session routing.
+//! - [`event_store`] — event persistence abstraction.
+
+pub mod decider;
+pub mod event_store;
+pub mod handoff;
+pub mod projector;
+
+pub use decider::{decide, fold_thread};
+pub use event_store::{EventStore, SqliteEventStore};
+pub use handoff::ProviderHandoff;
+pub use projector::ReadModel;
 
 use remi_contracts::{
-    MessageRole, OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadMessage,
-    ThreadState,
+    OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadMessage,
 };
 use remi_core::{Error, Result};
 use remi_persistence::{Database, repositories::ThreadRepository};
 use remi_providers::ProviderRegistry;
-use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::info;
 use uuid::Uuid;
 
-/// Read model for event projection.
-#[derive(Debug, Clone, Default)]
-pub struct ReadModel {
-    pub threads: HashMap<ThreadId, Thread>,
-    pub thread_messages: HashMap<ThreadId, Vec<remi_contracts::ThreadMessage>>,
-    pub thread_turns: HashMap<ThreadId, Vec<remi_contracts::ThreadTurn>>,
-}
-
 /// Orchestration engine.
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct OrchestrationEngine {
+    /// Database handle.
     pub db: Arc<Database>,
     thread_repo: Arc<ThreadRepository>,
     provider_registry: Arc<ProviderRegistry>,
     read_model: Arc<RwLock<ReadModel>>,
+    event_store: Arc<dyn EventStore>,
+    handoff: Arc<ProviderHandoff>,
 }
 
 impl OrchestrationEngine {
     /// Create a new orchestration engine.
     pub fn new(db: Arc<Database>, provider_registry: Arc<ProviderRegistry>) -> Self {
         let thread_repo = Arc::new(ThreadRepository::new(db.pool().clone()));
+        let event_store: Arc<dyn EventStore> = Arc::new(SqliteEventStore::new(db.clone()));
+        let handoff = Arc::new(ProviderHandoff::new(provider_registry.clone()));
 
         Self {
             db,
             thread_repo,
             provider_registry,
             read_model: Arc::new(RwLock::new(ReadModel::default())),
+            event_store,
+            handoff,
         }
     }
 
@@ -50,8 +65,7 @@ impl OrchestrationEngine {
     pub async fn handle_command(&self, command: OrchestrationCommand) -> Result<()> {
         match command {
             OrchestrationCommand::CreateThread { project_id, title } => {
-                self.handle_create_thread(project_id, title.as_deref())
-                    .await
+                self.handle_create_thread(project_id, title.as_deref()).await
             }
             OrchestrationCommand::SendMessage { thread_id, content } => {
                 let _ = self.handle_send_message(thread_id, &content).await?;
@@ -69,17 +83,13 @@ impl OrchestrationEngine {
 
         let thread = self.thread_repo.create(project_id, title).await?;
 
-        // Store event
         let event = OrchestrationEvent::ThreadCreated {
             thread_id: thread.id,
             project_id,
             timestamp: chrono::Utc::now().to_rfc3339(),
         };
 
-        self.store_event(&event).await?;
-
-        // Project event to read model
-        self.project_event(&event).await?;
+        self.persist_and_project(&event).await?;
 
         info!("Created thread: {}", thread.id);
         Ok(())
@@ -95,87 +105,69 @@ impl OrchestrationEngine {
     ) -> Result<(ThreadMessage, ThreadMessage)> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
-        // Validate thread exists and is in valid state
+        // Load current aggregate state.
         let thread = self
             .thread_repo
             .get_by_id(thread_id)
             .await?
             .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
 
-        if thread.state != ThreadState::Idle && thread.state != ThreadState::Completed {
-            return Err(Error::Orchestration(format!(
-                "Thread {} is in invalid state for sending messages: {:?}",
-                thread_id, thread.state
-            )));
-        }
+        // Decide which events to emit.
+        let events = decider::decide(
+            &OrchestrationCommand::SendMessage {
+                thread_id,
+                content: content.to_string(),
+            },
+            Some(&thread),
+        )?;
 
-        // Add user message
+        // Persist user message and update state.
         let user_message = self
             .thread_repo
-            .add_message(thread_id, MessageRole::User, content)
+            .add_message(thread_id, remi_contracts::MessageRole::User, content)
             .await?;
 
-        // Store event
-        let event = OrchestrationEvent::MessageAdded {
-            message_id: user_message.id,
-            thread_id,
-            role: MessageRole::User,
-            timestamp: chrono::Utc::now().to_rfc3339(),
-        };
-
-        self.store_event(&event).await?;
-        self.project_event(&event).await?;
-
-        // Update thread state
         self.thread_repo
-            .update_state(thread_id, ThreadState::Processing)
+            .update_state(thread_id, remi_contracts::ThreadState::Processing)
             .await?;
 
-        // Start a turn
+        // Start a turn.
         let turn = self.thread_repo.start_turn(thread_id).await?;
 
-        let turn_event = OrchestrationEvent::TurnStarted {
-            turn_id: turn.id,
-            thread_id,
-            timestamp: chrono::Utc::now().to_rfc3339(),
-        };
-
-        self.store_event(&turn_event).await?;
-        self.project_event(&turn_event).await?;
+        // Persist and project the decider events plus the explicit turn event.
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
 
         info!("Processing message for thread: {}", thread_id);
 
-        // Route to provider and get response
-        let assistant_content = self.call_provider(thread_id, content).await?;
+        // Route to provider and get response.
+        let assistant_content = self.handoff.route(thread_id, content).await?;
 
         let assistant_message = self
             .thread_repo
-            .add_message(thread_id, MessageRole::Assistant, &assistant_content)
+            .add_message(thread_id, remi_contracts::MessageRole::Assistant, &assistant_content)
             .await?;
 
         let assistant_event = OrchestrationEvent::MessageAdded {
             message_id: assistant_message.id,
             thread_id,
-            role: MessageRole::Assistant,
+            role: remi_contracts::MessageRole::Assistant,
             timestamp: chrono::Utc::now().to_rfc3339(),
         };
 
-        self.store_event(&assistant_event).await?;
-        self.project_event(&assistant_event).await?;
+        self.persist_and_project(&assistant_event).await?;
 
-        // Complete turn
         let turn_complete_event = OrchestrationEvent::TurnCompleted {
             turn_id: turn.id,
             thread_id,
             timestamp: chrono::Utc::now().to_rfc3339(),
         };
 
-        self.store_event(&turn_complete_event).await?;
-        self.project_event(&turn_complete_event).await?;
+        self.persist_and_project(&turn_complete_event).await?;
 
-        // Update thread state back to idle
         self.thread_repo
-            .update_state(thread_id, ThreadState::Idle)
+            .update_state(thread_id, remi_contracts::ThreadState::Idle)
             .await?;
 
         Ok((user_message, assistant_message))
@@ -185,7 +177,6 @@ impl OrchestrationEngine {
     async fn handle_delete_thread(&self, thread_id: ThreadId) -> Result<()> {
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
 
-        // Validate thread exists
         let _thread = self
             .thread_repo
             .get_by_id(thread_id)
@@ -193,201 +184,24 @@ impl OrchestrationEngine {
             .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
 
         self.thread_repo.delete(thread_id).await?;
+        self.handoff.forget_thread(thread_id).await;
 
         let event = OrchestrationEvent::ThreadDeleted {
             thread_id,
             timestamp: chrono::Utc::now().to_rfc3339(),
         };
 
-        self.store_event(&event).await?;
-        self.project_event(&event).await?;
+        self.persist_and_project(&event).await?;
 
         info!("Deleted thread: {}", thread_id);
         Ok(())
     }
 
-    /// Call the AI provider to get a response.
-    ///
-    /// Uses the first available provider from the registry. In a production
-    /// implementation, the provider/model would be selected based on thread
-    /// or project settings.
-    async fn call_provider(&self, thread_id: ThreadId, content: &str) -> Result<String> {
-        use remi_contracts::ModelId;
-
-        // Find the first available provider
-        let providers = self.provider_registry.list();
-        let available = providers.iter().find(|p| p.available);
-
-        let provider_info = match available {
-            Some(p) => p,
-            None => {
-                tracing::warn!("No available AI provider, returning fallback response");
-                return Ok(format!(
-                    "No AI provider is available. Please configure an API key. (thread: {})",
-                    thread_id
-                ));
-            }
-        };
-
-        let adapter = self
-            .provider_registry
-            .get(&provider_info.name)
-            .ok_or_else(|| {
-                Error::Provider(format!("Provider not found: {}", provider_info.name))
-            })?;
-
-        // Use or create a session for this thread
-        let session_id = format!("thread-{}", thread_id);
-
-        // Try to send message; if session doesn't exist, create it first
-        let result = adapter.send_message(&session_id, content).await;
-
-        match result {
-            Ok(value) => {
-                // Extract response text from provider response
-                let response_text = value
-                    .get("response")
-                    .and_then(|r| r.as_str())
-                    .unwrap_or("No response from provider")
-                    .to_string();
-                Ok(response_text)
-            }
-            Err(e) => {
-                // Check if it's a "session not found" error and retry
-                let err_msg = e.to_string();
-                if err_msg.contains("Session not found") {
-                    let default_model = provider_info
-                        .models
-                        .first()
-                        .cloned()
-                        .unwrap_or(ModelId::new("claude-3-5-sonnet-20241022"));
-
-                    adapter.start_session(&default_model).await?;
-                    let value = adapter.send_message(&session_id, content).await?;
-                    let response_text = value
-                        .get("response")
-                        .and_then(|r| r.as_str())
-                        .unwrap_or("No response from provider")
-                        .to_string();
-                    Ok(response_text)
-                } else {
-                    Err(e)
-                }
-            }
-        }
-    }
-
-    /// Store an orchestration event.
-    async fn store_event(&self, event: &OrchestrationEvent) -> Result<()> {
-        let id = Uuid::new_v4().to_string();
-        let event_type = match event {
-            OrchestrationEvent::ThreadCreated { .. } => "ThreadCreated",
-            OrchestrationEvent::ThreadUpdated { .. } => "ThreadUpdated",
-            OrchestrationEvent::ThreadDeleted { .. } => "ThreadDeleted",
-            OrchestrationEvent::MessageAdded { .. } => "MessageAdded",
-            OrchestrationEvent::TurnStarted { .. } => "TurnStarted",
-            OrchestrationEvent::TurnCompleted { .. } => "TurnCompleted",
-        };
-
-        let payload = serde_json::to_string(event)?;
-        let now = chrono::Utc::now().to_rfc3339();
-
-        // Extract thread_id from event
-        let thread_id = match event {
-            OrchestrationEvent::ThreadCreated { thread_id, .. } => thread_id.to_string(),
-            OrchestrationEvent::ThreadUpdated { thread_id, .. } => thread_id.to_string(),
-            OrchestrationEvent::ThreadDeleted { thread_id, .. } => thread_id.to_string(),
-            OrchestrationEvent::MessageAdded { thread_id, .. } => thread_id.to_string(),
-            OrchestrationEvent::TurnStarted { thread_id, .. } => thread_id.to_string(),
-            OrchestrationEvent::TurnCompleted { thread_id, .. } => thread_id.to_string(),
-        };
-
-        sqlx::query(
-            "INSERT INTO orchestration_events (id, thread_id, event_type, payload, created_at) VALUES (?, ?, ?, ?, ?)",
-        )
-        .bind(&id)
-        .bind(&thread_id)
-        .bind(event_type)
-        .bind(&payload)
-        .bind(&now)
-        .execute(self.db.pool())
-        .await
-        .map_err(|e| Error::Database(e.to_string()))?;
-
-        Ok(())
-    }
-
-    /// Project an event to the read model.
-    async fn project_event(&self, event: &OrchestrationEvent) -> Result<()> {
+    /// Persist an event to the event store and project it to the read model.
+    async fn persist_and_project(&self, event: &OrchestrationEvent) -> Result<()> {
+        self.event_store.append(event).await?;
         let mut model = self.read_model.write().await;
-
-        match event {
-            OrchestrationEvent::ThreadCreated {
-                thread_id,
-                project_id,
-                timestamp,
-            } => {
-                let thread = Thread {
-                    id: *thread_id,
-                    project_id: *project_id,
-                    title: None,
-                    state: ThreadState::Idle,
-                    created_at: timestamp.clone(),
-                    updated_at: timestamp.clone(),
-                };
-                model.threads.insert(*thread_id, thread);
-                model.thread_messages.insert(*thread_id, Vec::new());
-                model.thread_turns.insert(*thread_id, Vec::new());
-            }
-            OrchestrationEvent::ThreadUpdated {
-                thread_id,
-                timestamp,
-            } => {
-                if let Some(thread) = model.threads.get_mut(thread_id) {
-                    thread.updated_at = timestamp.clone();
-                }
-            }
-            OrchestrationEvent::ThreadDeleted { thread_id, .. } => {
-                model.threads.remove(thread_id);
-                model.thread_messages.remove(thread_id);
-                model.thread_turns.remove(thread_id);
-            }
-            OrchestrationEvent::MessageAdded {
-                message_id,
-                thread_id,
-                role,
-                timestamp,
-            } => {
-                if let Some(messages) = model.thread_messages.get_mut(thread_id) {
-                    messages.push(remi_contracts::ThreadMessage {
-                        id: *message_id,
-                        thread_id: *thread_id,
-                        role: *role,
-                        content: String::new(), // Content is stored separately
-                        created_at: timestamp.clone(),
-                    });
-                }
-            }
-            OrchestrationEvent::TurnStarted {
-                turn_id,
-                thread_id,
-                timestamp,
-            } => {
-                if let Some(turns) = model.thread_turns.get_mut(thread_id) {
-                    let turn_number = turns.len() as u32 + 1;
-                    turns.push(remi_contracts::ThreadTurn {
-                        id: *turn_id,
-                        thread_id: *thread_id,
-                        turn_number,
-                        created_at: timestamp.clone(),
-                    });
-                }
-            }
-            OrchestrationEvent::TurnCompleted { .. } => {
-                // Turn completion doesn't change the read model structure
-            }
-        }
-
+        model.apply(event);
         Ok(())
     }
 
@@ -395,29 +209,12 @@ impl OrchestrationEngine {
     pub async fn replay_events(&self) -> Result<()> {
         info!("Replaying events to rebuild read model");
 
-        let events: Vec<(String, String, String, String)> = sqlx::query_as(
-            "SELECT id, thread_id, event_type, payload FROM orchestration_events ORDER BY created_at ASC"
-        )
-        .fetch_all(self.db.pool())
-        .await
-        .map_err(|e| Error::Database(e.to_string()))?;
-
+        let events = self.event_store.read_all().await?;
         let event_count = events.len();
 
         let mut model = self.read_model.write().await;
-        model.threads.clear();
-        model.thread_messages.clear();
-        model.thread_turns.clear();
-
-        for (_id, _thread_id_str, _event_type, payload) in &events {
-            let event: OrchestrationEvent = serde_json::from_str(payload)
-                .map_err(|e| Error::Serialization(format!("Failed to deserialize event: {}", e)))?;
-
-            // Project event (without holding the lock)
-            drop(model);
-            self.project_event(&event).await?;
-            model = self.read_model.write().await;
-        }
+        *model = ReadModel::default();
+        model.apply_all(&events);
 
         info!("Replayed {} events", event_count);
         Ok(())
@@ -444,6 +241,54 @@ impl OrchestrationEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
+    use remi_contracts::{ModelId, ProviderHealth, ProviderHealthStatus, ProviderInfo, ProviderName};
+    use remi_providers::ProviderAdapter;
+    use serde_json::json;
+
+    /// Test provider that always returns a fixed echo response.
+    struct EchoProvider;
+
+    #[async_trait]
+    impl ProviderAdapter for EchoProvider {
+        fn info(&self) -> ProviderInfo {
+            ProviderInfo {
+                name: ProviderName::Kilo,
+                display_name: "Echo".to_string(),
+                models: vec![ModelId::new("echo")],
+                available: true,
+            }
+        }
+
+        async fn health(&self) -> Result<ProviderHealth> {
+            Ok(ProviderHealth {
+                provider: ProviderName::Kilo,
+                status: ProviderHealthStatus::Healthy,
+                last_checked: chrono::Utc::now().to_rfc3339(),
+                error: None,
+            })
+        }
+
+        async fn start_session(&self, _model: &ModelId) -> Result<String> {
+            Ok("test-session".to_string())
+        }
+
+        async fn send_message(&self, _session_id: &str, message: &str) -> Result<serde_json::Value> {
+            Ok(json!({ "response": format!("Echo: {message}") }))
+        }
+
+        async fn stream_response(
+            &self,
+            _session_id: &str,
+            _message: &str,
+        ) -> Result<std::pin::Pin<Box<dyn futures::Stream<Item = Result<String>> + Send>>> {
+            Ok(Box::pin(futures::stream::empty()))
+        }
+
+        async fn close_session(&self, _session_id: &str) -> Result<()> {
+            Ok(())
+        }
+    }
 
     fn temp_db_config() -> remi_core::ServerConfig {
         let mut config = remi_core::ServerConfig::default();
@@ -455,14 +300,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_orchestration_engine_creation() {
-        // Basic smoke test
         let config = temp_db_config();
         let db = Arc::new(Database::connect(&config).await.unwrap());
         db.run_migrations().await.unwrap();
         let registry = Arc::new(ProviderRegistry::new());
         let engine = OrchestrationEngine::new(db, registry);
 
-        // Should be able to list threads (empty)
         let project_id = Uuid::new_v4();
         let threads = engine.list_threads(project_id).await.unwrap();
         assert!(threads.is_empty());
@@ -474,9 +317,9 @@ mod tests {
         let db = Arc::new(Database::connect(&config).await.unwrap());
         db.run_migrations().await.unwrap();
         let registry = Arc::new(ProviderRegistry::new());
+        registry.register(Arc::new(EchoProvider));
         let engine = OrchestrationEngine::new(db.clone(), registry);
 
-        // Create a project first (threads have a foreign key to projects)
         let project_path = std::env::temp_dir()
             .join(format!("remi-orchestration-project-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&project_path).expect("Failed to create temp project dir");
@@ -491,7 +334,6 @@ mod tests {
             project.id.0
         };
 
-        // Create a thread
         engine
             .handle_command(OrchestrationCommand::CreateThread {
                 project_id,
@@ -504,21 +346,18 @@ mod tests {
         assert_eq!(threads.len(), 1);
         let thread_id = threads[0].id;
 
-        // Send a message (no real provider configured, so it falls back)
         let (user_message, assistant_message) = engine
             .handle_send_message(thread_id, "Hello, Remi!")
             .await
             .unwrap();
 
-        assert_eq!(user_message.role, MessageRole::User);
+        assert_eq!(user_message.role, remi_contracts::MessageRole::User);
         assert_eq!(user_message.content, "Hello, Remi!");
-        assert_eq!(assistant_message.role, MessageRole::Assistant);
+        assert_eq!(assistant_message.role, remi_contracts::MessageRole::Assistant);
 
-        // Thread should be back to idle
         let thread = engine.get_thread(thread_id).await.unwrap().unwrap();
-        assert_eq!(thread.state, ThreadState::Idle);
+        assert_eq!(thread.state, remi_contracts::ThreadState::Idle);
 
-        // Verify messages persisted
         use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
         let repo = ThreadRepository::new(db.pool().clone());
         let messages = repo.list_messages(thread_id).await.unwrap();
