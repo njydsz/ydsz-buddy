@@ -1,4 +1,4 @@
-import {
+Ôªøimport {
   type KeybindingCommand,
   type ResolvedKeybindingRule,
   type KeybindingShortcut,
@@ -433,7 +433,7 @@ export function formatShortcutLabel(
   return parts.join("+");
 }
 
-const MODIFIER_SYMBOLS = new Set(["‚å?, "‚å?, "‚å?, "‚á?]);
+const MODIFIER_SYMBOLS = new Set(["‚åò", "‚áß", "‚å•", "‚åÉ"]);
 
 export function splitShortcutLabel(shortcutLabel: string): string[] {
   if (shortcutLabel.includes("+")) {

@@ -34,7 +34,7 @@ describe("settingsNavigation", () => {
     expect(en?.description).toBe(
       "Choose visible providers, review CLI installs, and update provider tools.",
     );
-    expect(zh?.description).toBe("选择可见的提供方、查�?CLI 安装状态并更新提供方工具�?);
+    expect(zh?.description).toBe("选择可见的提供方、查看 CLI 安装状态并更新提供方工具);
   });
 
   it("exposes localized group labels", () => {

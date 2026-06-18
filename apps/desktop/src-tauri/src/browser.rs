@@ -158,13 +158,6 @@ impl BrowserManager {
         format!("browser-{}-{}", thread_id, tab_id)
     }
 
-    /// Create a real Tauri WebviewWindow for a tab.
-    fn create_webview(&self, _tab_id: &str, _url: &str) -> Result<()> {
-        let _app = self.app()?;
-        // The actual label is set by the caller; this is just a fallback.
-        Ok(())
-    }
-
     /// Spawn a WebviewWindow for the given tab.
     fn spawn_webview_for_tab(
         &self,
@@ -682,7 +675,7 @@ impl BrowserManager {
     ) -> Result<BrowserCaptureScreenshotResult> {
         let label = Self::window_label(&input.thread_id, &input.tab_id);
         if let Ok(app) = self.app() {
-            if let Some(win) = app.get_webview_window(&label) {
+            if let Some(_win) = app.get_webview_window(&label) {
                 // Tauri 2 screenshot API
                 // In Tauri 2, screenshots are taken via the window
                 warn!("Screenshot capture via Tauri 2 window API – using placeholder");

@@ -178,7 +178,7 @@ fn init_logging() {
     std::fs::create_dir_all(&log_dir).ok();
 
     let file_appender = tracing_appender::rolling::daily(&log_dir, "desktop-main.log");
-    let (non_blocking, guard) = tracing_appender::nonblocking(file_appender);
+    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
     // Initialize Sentry if DSN is configured
     let _sentry_guard = if let Ok(dsn) = std::env::var("SENTRY_DSN") {

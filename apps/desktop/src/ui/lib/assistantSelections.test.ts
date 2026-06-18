@@ -105,7 +105,7 @@ describe("assistantSelections", () => {
       formatAssistantSelectionPreview(
         "This is a fairly long first line that should be trimmed for the chip label",
       ),
-    ).toBe("This is a fairly long first line that shoulâ€?);
+    ).toBe("This is a fairly long first line that should beâ€¦");
   });
 
   it("creates normalized assistant selection attachments", () => {

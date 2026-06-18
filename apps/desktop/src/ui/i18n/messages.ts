@@ -379,7 +379,7 @@ export type Messages = {
     };
     groups: {
       app: string;
-      remi-code: string;
+      "remi-code": string;
     };
     general: {
       heading: string;
@@ -1431,7 +1431,7 @@ const en: Messages = {
     },
     groups: {
       app: "App",
-      remi-code: "Remi Code",
+      "remi-code": "Remi Code",
     },
     general: {
       heading: "General",
@@ -2511,7 +2511,7 @@ const zh: Messages = {
     },
     groups: {
       app: "应用",
-      remi-code: "Remi Code",
+      "remi-code": "Remi Code",
     },
     general: {
       heading: "通用",

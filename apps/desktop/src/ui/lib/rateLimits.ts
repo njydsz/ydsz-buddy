@@ -351,7 +351,7 @@ export function deriveVisibleRateLimitRows(
 }
 
 export function formatRateLimitRemainingPercent(remainingPercent: number | undefined): string {
-  if (remainingPercent === undefined) return "â€?;
+  if (remainingPercent === undefined) return "â€”";
   return `${Math.round(Math.min(100, Math.max(0, remainingPercent)))}%`;
 }
 
