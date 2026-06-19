@@ -98,6 +98,7 @@ import {
   gitResolvePullRequestQueryOptions,
   gitStatusQueryOptions,
 } from "../lib/gitReactQuery";
+import { tauriBridge } from "../lib/tauri-bridge";
 import {
   providerComposerCapabilitiesQueryOptions,
   supportsThreadImport,
@@ -1138,7 +1139,7 @@ export default function Sidebar() {
   const { createThreadHandoff } = useThreadHandoff();
   const routeThreadId = useParams({
     strict: false,
-    select: (params) => (params.threadId ? ThreadId.makeUnsafe(params.threadId) : null),
+    select: (params) => (params.threadId ? (params.threadId as ThreadId) : null),
   });
   const routeWorkspaceId = useParams({
     strict: false,
@@ -1503,9 +1504,9 @@ export default function Sidebar() {
       const latestThread = sortThreadsForSidebar(
         snapshot.threads
           .filter(
-            (thread) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
+            (thread: { projectId: ProjectId; archivedAt: string | null }) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
           )
-          .map((thread) => ({
+          .map((thread: { id: ThreadId; createdAt: string; updatedAt: string; latestUserMessageAt: string | null }) => ({
             id: thread.id,
             createdAt: thread.createdAt,
             updatedAt: thread.updatedAt,
@@ -1536,7 +1537,7 @@ export default function Sidebar() {
   const openExistingProjectFromSnapshot = useCallback(
     async (projectId: ProjectId, snapshot: OrchestrationShellSnapshot): Promise<boolean> => {
       const existingProject =
-        snapshot.projects.find((candidate) => candidate.id === projectId) ?? null;
+        snapshot.projects.find((candidate: { id: ProjectId }) => candidate.id === projectId) ?? null;
       if (!existingProject) {
         return false;
       }
@@ -1544,9 +1545,9 @@ export default function Sidebar() {
       const latestThread = sortThreadsForSidebar(
         snapshot.threads
           .filter(
-            (thread) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
+            (thread: { projectId: ProjectId; archivedAt: string | null }) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
           )
-          .map((thread) => ({
+          .map((thread: { id: ThreadId; createdAt: string; updatedAt: string; latestUserMessageAt: string | null }) => ({
             id: thread.id,
             createdAt: thread.createdAt,
             updatedAt: thread.updatedAt,
@@ -1674,7 +1675,7 @@ export default function Sidebar() {
 
   const handleOpenProjectFromSearch = useCallback(
     (projectId: string) => {
-      const typedProjectId = ProjectId.makeUnsafe(projectId);
+      const typedProjectId = projectId as ProjectId;
       const hasProjectThread = sidebarThreads.some((thread) => thread.projectId === typedProjectId);
       if (hasProjectThread) {
         focusMostRecentThreadForProject(typedProjectId);
@@ -1724,7 +1725,7 @@ export default function Sidebar() {
       if (restorableRoute) {
         void navigate({
           to: "/$threadId",
-          params: { threadId: ThreadId.makeUnsafe(restorableRoute.threadId) },
+          params: { threadId: restorableRoute.threadId as ThreadId },
           search: () => ({
             splitViewId: restorableRoute.splitViewId,
           }),
@@ -1914,7 +1915,7 @@ export default function Sidebar() {
             const recovered = duplicateProjectId
               ? await recoverExistingProjectFromServer(
                   api,
-                  ProjectId.makeUnsafe(duplicateProjectId),
+                  duplicateProjectId as ProjectId,
                 )
               : await recoverExistingProjectByWorkspaceRootFromServer(api, cwd);
             if (recovered) {
@@ -3515,7 +3516,7 @@ export default function Sidebar() {
     const retainedThreadIds = new Set(sidebarThreads.map((thread) => thread.id));
     setDismissedThreadStatusKeyByThreadId((current) => {
       const nextEntries = Object.entries(current).filter(([threadId]) =>
-        retainedThreadIds.has(ThreadId.makeUnsafe(threadId)),
+        retainedThreadIds.has(threadId as ThreadId),
       );
       if (nextEntries.length === Object.keys(current).length) {
         return current;
@@ -4983,7 +4984,7 @@ export default function Sidebar() {
 
     let disposed = false;
     let receivedSubscriptionUpdate = false;
-    const unsubscribe = bridge.onUpdateState((nextState) => {
+    const unsubscribe = bridge.onUpdateState((nextState: DesktopUpdateState) => {
       if (disposed) return;
       receivedSubscriptionUpdate = true;
       setDesktopUpdateState(nextState);
@@ -4991,7 +4992,7 @@ export default function Sidebar() {
 
     void bridge
       .getUpdateState()
-      .then((nextState) => {
+      .then((nextState: DesktopUpdateState) => {
         if (disposed || receivedSubscriptionUpdate) return;
         setDesktopUpdateState(nextState);
       })
@@ -5138,7 +5139,7 @@ export default function Sidebar() {
     if (desktopUpdateButtonAction === "check") {
       void bridge
         .checkForUpdates()
-        .then((nextState) => {
+        .then((nextState: DesktopUpdateState) => {
           setInstallingDesktopUpdate(false);
           setDesktopUpdateState(nextState);
           if (nextState.status === "available") {
@@ -5167,7 +5168,7 @@ export default function Sidebar() {
             });
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           toastManager.add({
             type: "error",
             title: "Could not check for updates",
@@ -5180,7 +5181,7 @@ export default function Sidebar() {
     if (desktopUpdateButtonAction === "download") {
       void bridge
         .downloadUpdate()
-        .then((result) => {
+        .then((result: { completed: boolean; state: DesktopUpdateState }) => {
           setInstallingDesktopUpdate(false);
           setDesktopUpdateState(result.state);
           if (result.completed) {
@@ -5199,7 +5200,7 @@ export default function Sidebar() {
             description: actionError,
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           toastManager.add({
             type: "error",
             title: "Could not start update download",
@@ -5214,7 +5215,7 @@ export default function Sidebar() {
       persistAppStateNow();
       void bridge
         .installUpdate()
-        .then((result) => {
+        .then((result: { state: DesktopUpdateState }) => {
           setDesktopUpdateState(result.state);
           setInstallingDesktopUpdate(false);
           if (!shouldToastDesktopUpdateActionResult(result)) return;
@@ -5226,7 +5227,7 @@ export default function Sidebar() {
             description: actionError,
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           setInstallingDesktopUpdate(false);
           toastManager.add({
             type: "error",
@@ -5984,7 +5985,7 @@ export default function Sidebar() {
           onOpenProject={handleOpenProjectFromSearch}
           onImportThread={handleImportThread}
           onOpenThread={(threadId) => {
-            activateThreadFromSidebarIntent(ThreadId.makeUnsafe(threadId));
+            activateThreadFromSidebarIntent(threadId as ThreadId);
           }}
         />
       ) : null}

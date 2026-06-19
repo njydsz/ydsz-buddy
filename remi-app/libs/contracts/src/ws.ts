@@ -1,12 +1,11 @@
 /**
  * WebSocket 通信协议定义。
- * 包含 RPC 方法名常量、推送通道常量、请求/响应格式、推送消息 Schema，
+ * 包含 RPC 方法名常量、推送通道常量、请求/响应格式、推送消息类型，
  * 以及所有 WebSocket 消息的联合类型定义。
  */
-import { Schema, Struct } from "effect";
-import { NonNegativeInt, ProjectId, ThreadId, TrimmedNonEmptyString } from "./baseSchemas";
+import type { NonNegativeInt, ProjectId, ThreadId, TrimmedNonEmptyString } from "./baseSchemas";
 
-import {
+import type {
   ClientOrchestrationCommand,
   OrchestrationEvent,
   OrchestrationImportThreadInput,
@@ -25,7 +24,7 @@ import {
   OrchestrationGetTurnDiffInput,
   OrchestrationReplayEventsInput,
 } from "./orchestration";
-import {
+import type {
   GitActionProgressEvent,
   GitCheckoutInput,
   GitCreateBranchInput,
@@ -47,7 +46,7 @@ import {
   GitStatusInput,
   GitSummarizeDiffInput,
 } from "./git";
-import {
+import type {
   TerminalClearInput,
   TerminalCloseInput,
   TerminalEvent,
@@ -56,16 +55,16 @@ import {
   TerminalRestartInput,
   TerminalWriteInput,
 } from "./terminal";
-import { KeybindingRule } from "./keybindings";
-import {
+import type { KeybindingRule } from "./keybindings";
+import type {
   ProjectListDirectoriesInput,
   ProjectSearchEntriesInput,
   ProjectSearchLocalEntriesInput,
   ProjectWriteFileInput,
 } from "./project";
-import { FilesystemBrowseInput } from "./filesystem";
-import { OpenInEditorInput } from "./editor";
-import {
+import type { FilesystemBrowseInput } from "./filesystem";
+import type { OpenInEditorInput } from "./editor";
+import type {
   ServerConfigUpdatedPayload,
   ServerLifecycleStreamEvent,
   ServerProviderUpdateInput,
@@ -75,7 +74,7 @@ import {
   ServerSettingsUpdatedPayload,
   ServerVoiceTranscriptionInput,
 } from "./server";
-import {
+import type {
   ProviderListCommandsInput,
   ProviderGetComposerCapabilitiesInput,
   ProviderListPluginsInput,
@@ -85,7 +84,7 @@ import {
   ProviderListSkillsInput,
   ListLocalUserSkillsInput,
 } from "./providerDiscovery";
-import { ProviderCompactThreadInput } from "./provider";
+import type { ProviderCompactThreadInput } from "./provider";
 
 // ── WebSocket RPC 方法名常量 ─────────────────────────────────────────
 
@@ -184,142 +183,124 @@ export const WS_CHANNELS = {
   serverSettingsUpdated: "server.settingsUpdated",
 } as const;
 
-// ── 请求体 Schema 联合类型 ───────────────────────────────────────────
+// ── 请求体类型 ───────────────────────────────────────────────────────
 
-/** 为请求体 Schema 添加 _tag 标签字段，用于区分不同的请求类型 */
-const tagRequestBody = <const Tag extends string, const Fields extends Schema.Struct.Fields>(
-  tag: Tag,
-  schema: Schema.Struct<Fields>,
-) =>
-  schema.mapFields(
-    Struct.assign({ _tag: Schema.tag(tag) }),
-    // PreserveChecks is safe here. No existing schema should have checks depending on the tag
-    { unsafePreserveChecks: true },
-  );
-
-/** 所有 WebSocket 请求体的联合类型 Schema，通过 _tag 字段区分 */
-const WebSocketRequestBody = Schema.Union([
+/** 所有 WebSocket 请求体的联合类型，通过 _tag 字段区分 */
+export type WebSocketRequestBody =
   // Orchestration methods
-  tagRequestBody(
-    ORCHESTRATION_WS_METHODS.dispatchCommand,
-    Schema.Struct({ command: ClientOrchestrationCommand }),
-  ),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.importThread, OrchestrationImportThreadInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.getSnapshot, OrchestrationGetSnapshotInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.getShellSnapshot, OrchestrationGetShellSnapshotInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.repairState, OrchestrationRepairStateInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.getTurnDiff, OrchestrationGetTurnDiffInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.getFullThreadDiff, OrchestrationGetFullThreadDiffInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.replayEvents, OrchestrationReplayEventsInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.subscribeShell, OrchestrationSubscribeShellInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.unsubscribeShell, OrchestrationUnsubscribeShellInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.subscribeThread, OrchestrationSubscribeThreadInput),
-  tagRequestBody(ORCHESTRATION_WS_METHODS.unsubscribeThread, OrchestrationUnsubscribeThreadInput),
-
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.dispatchCommand; command: ClientOrchestrationCommand }
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.importThread } & OrchestrationImportThreadInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.getSnapshot } & OrchestrationGetSnapshotInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.getShellSnapshot } & OrchestrationGetShellSnapshotInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.repairState } & OrchestrationRepairStateInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.getTurnDiff } & OrchestrationGetTurnDiffInput
+  | {
+      _tag: typeof ORCHESTRATION_WS_METHODS.getFullThreadDiff;
+    } & OrchestrationGetFullThreadDiffInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.replayEvents } & OrchestrationReplayEventsInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.subscribeShell } & OrchestrationSubscribeShellInput
+  | {
+      _tag: typeof ORCHESTRATION_WS_METHODS.unsubscribeShell;
+    } & OrchestrationUnsubscribeShellInput
+  | { _tag: typeof ORCHESTRATION_WS_METHODS.subscribeThread } & OrchestrationSubscribeThreadInput
+  | {
+      _tag: typeof ORCHESTRATION_WS_METHODS.unsubscribeThread;
+    } & OrchestrationUnsubscribeThreadInput
   // Project Search
-  tagRequestBody(WS_METHODS.projectsListDirectories, ProjectListDirectoriesInput),
-  tagRequestBody(WS_METHODS.projectsSearchEntries, ProjectSearchEntriesInput),
-  tagRequestBody(WS_METHODS.projectsSearchLocalEntries, ProjectSearchLocalEntriesInput),
-  tagRequestBody(WS_METHODS.projectsWriteFile, ProjectWriteFileInput),
-
+  | { _tag: typeof WS_METHODS.projectsListDirectories } & ProjectListDirectoriesInput
+  | { _tag: typeof WS_METHODS.projectsSearchEntries } & ProjectSearchEntriesInput
+  | { _tag: typeof WS_METHODS.projectsSearchLocalEntries } & ProjectSearchLocalEntriesInput
+  | { _tag: typeof WS_METHODS.projectsWriteFile } & ProjectWriteFileInput
   // Filesystem browse
-  tagRequestBody(WS_METHODS.filesystemBrowse, FilesystemBrowseInput),
-
+  | { _tag: typeof WS_METHODS.filesystemBrowse } & FilesystemBrowseInput
   // Shell methods
-  tagRequestBody(WS_METHODS.shellOpenInEditor, OpenInEditorInput),
-
+  | { _tag: typeof WS_METHODS.shellOpenInEditor } & OpenInEditorInput
   // Git methods
-  tagRequestBody(WS_METHODS.gitPull, GitPullInput),
-  tagRequestBody(WS_METHODS.gitStatus, GitStatusInput),
-  tagRequestBody(WS_METHODS.gitReadWorkingTreeDiff, GitReadWorkingTreeDiffInput),
-  tagRequestBody(WS_METHODS.gitSummarizeDiff, GitSummarizeDiffInput),
-  tagRequestBody(WS_METHODS.gitRunStackedAction, GitRunStackedActionInput),
-  tagRequestBody(WS_METHODS.gitListBranches, GitListBranchesInput),
-  tagRequestBody(WS_METHODS.gitCreateWorktree, GitCreateWorktreeInput),
-  tagRequestBody(WS_METHODS.gitCreateDetachedWorktree, GitCreateDetachedWorktreeInput),
-  tagRequestBody(WS_METHODS.gitRemoveWorktree, GitRemoveWorktreeInput),
-  tagRequestBody(WS_METHODS.gitCreateBranch, GitCreateBranchInput),
-  tagRequestBody(WS_METHODS.gitCheckout, GitCheckoutInput),
-  tagRequestBody(WS_METHODS.gitStashAndCheckout, GitStashAndCheckoutInput),
-  tagRequestBody(WS_METHODS.gitStashDrop, GitStashDropInput),
-  tagRequestBody(WS_METHODS.gitStashInfo, GitStashInfoInput),
-  tagRequestBody(WS_METHODS.gitRemoveIndexLock, GitRemoveIndexLockInput),
-  tagRequestBody(WS_METHODS.gitInit, GitInitInput),
-  tagRequestBody(WS_METHODS.gitHandoffThread, GitHandoffThreadInput),
-  tagRequestBody(WS_METHODS.gitResolvePullRequest, GitPullRequestRefInput),
-  tagRequestBody(WS_METHODS.gitPreparePullRequestThread, GitPreparePullRequestThreadInput),
-
+  | { _tag: typeof WS_METHODS.gitPull } & GitPullInput
+  | { _tag: typeof WS_METHODS.gitStatus } & GitStatusInput
+  | { _tag: typeof WS_METHODS.gitReadWorkingTreeDiff } & GitReadWorkingTreeDiffInput
+  | { _tag: typeof WS_METHODS.gitSummarizeDiff } & GitSummarizeDiffInput
+  | { _tag: typeof WS_METHODS.gitRunStackedAction } & GitRunStackedActionInput
+  | { _tag: typeof WS_METHODS.gitListBranches } & GitListBranchesInput
+  | { _tag: typeof WS_METHODS.gitCreateWorktree } & GitCreateWorktreeInput
+  | { _tag: typeof WS_METHODS.gitCreateDetachedWorktree } & GitCreateDetachedWorktreeInput
+  | { _tag: typeof WS_METHODS.gitRemoveWorktree } & GitRemoveWorktreeInput
+  | { _tag: typeof WS_METHODS.gitCreateBranch } & GitCreateBranchInput
+  | { _tag: typeof WS_METHODS.gitCheckout } & GitCheckoutInput
+  | { _tag: typeof WS_METHODS.gitStashAndCheckout } & GitStashAndCheckoutInput
+  | { _tag: typeof WS_METHODS.gitStashDrop } & GitStashDropInput
+  | { _tag: typeof WS_METHODS.gitStashInfo } & GitStashInfoInput
+  | { _tag: typeof WS_METHODS.gitRemoveIndexLock } & GitRemoveIndexLockInput
+  | { _tag: typeof WS_METHODS.gitInit } & GitInitInput
+  | { _tag: typeof WS_METHODS.gitHandoffThread } & GitHandoffThreadInput
+  | { _tag: typeof WS_METHODS.gitResolvePullRequest } & GitPullRequestRefInput
+  | { _tag: typeof WS_METHODS.gitPreparePullRequestThread } & GitPreparePullRequestThreadInput
   // Terminal methods
-  tagRequestBody(WS_METHODS.terminalOpen, TerminalOpenInput),
-  tagRequestBody(WS_METHODS.terminalWrite, TerminalWriteInput),
-  tagRequestBody(WS_METHODS.terminalResize, TerminalResizeInput),
-  tagRequestBody(WS_METHODS.terminalClear, TerminalClearInput),
-  tagRequestBody(WS_METHODS.terminalRestart, TerminalRestartInput),
-  tagRequestBody(WS_METHODS.terminalClose, TerminalCloseInput),
-
+  | { _tag: typeof WS_METHODS.terminalOpen } & TerminalOpenInput
+  | { _tag: typeof WS_METHODS.terminalWrite } & TerminalWriteInput
+  | { _tag: typeof WS_METHODS.terminalResize } & TerminalResizeInput
+  | { _tag: typeof WS_METHODS.terminalClear } & TerminalClearInput
+  | { _tag: typeof WS_METHODS.terminalRestart } & TerminalRestartInput
+  | { _tag: typeof WS_METHODS.terminalClose } & TerminalCloseInput
   // Server meta
-  tagRequestBody(WS_METHODS.serverGetConfig, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverGetEnvironment, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverGetSettings, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverUpdateSettings, ServerUpdateSettingsInput),
-  tagRequestBody(WS_METHODS.serverRefreshProviders, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverUpdateProvider, ServerProviderUpdateInput),
-  tagRequestBody(WS_METHODS.serverListWorktrees, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverGetProviderUsageSnapshot, ServerGetProviderUsageSnapshotInput),
-  tagRequestBody(WS_METHODS.serverGetDiagnostics, Schema.Struct({})),
-  tagRequestBody(WS_METHODS.serverTranscribeVoice, ServerVoiceTranscriptionInput),
-  tagRequestBody(WS_METHODS.serverUpsertKeybinding, KeybindingRule),
-
+  | { _tag: typeof WS_METHODS.serverGetConfig }
+  | { _tag: typeof WS_METHODS.serverGetEnvironment }
+  | { _tag: typeof WS_METHODS.serverGetSettings }
+  | { _tag: typeof WS_METHODS.serverUpdateSettings } & ServerUpdateSettingsInput
+  | { _tag: typeof WS_METHODS.serverRefreshProviders }
+  | { _tag: typeof WS_METHODS.serverUpdateProvider } & ServerProviderUpdateInput
+  | { _tag: typeof WS_METHODS.serverListWorktrees }
+  | {
+      _tag: typeof WS_METHODS.serverGetProviderUsageSnapshot;
+    } & ServerGetProviderUsageSnapshotInput
+  | { _tag: typeof WS_METHODS.serverGetDiagnostics }
+  | { _tag: typeof WS_METHODS.serverTranscribeVoice } & ServerVoiceTranscriptionInput
+  | { _tag: typeof WS_METHODS.serverUpsertKeybinding } & KeybindingRule
   // Provider discovery
-  tagRequestBody(WS_METHODS.providerGetComposerCapabilities, ProviderGetComposerCapabilitiesInput),
-  tagRequestBody(WS_METHODS.providerCompactThread, ProviderCompactThreadInput),
-  tagRequestBody(WS_METHODS.providerListCommands, ProviderListCommandsInput),
-  tagRequestBody(WS_METHODS.providerListSkills, ProviderListSkillsInput),
-  tagRequestBody(WS_METHODS.providerListPlugins, ProviderListPluginsInput),
-  tagRequestBody(WS_METHODS.providerReadPlugin, ProviderReadPluginInput),
-  tagRequestBody(WS_METHODS.providerListModels, ProviderListModelsInput),
-  tagRequestBody(WS_METHODS.providerListAgents, ProviderListAgentsInput),
-  tagRequestBody(WS_METHODS.skillsListLocal, ListLocalUserSkillsInput),
-]);
+  | {
+      _tag: typeof WS_METHODS.providerGetComposerCapabilities;
+    } & ProviderGetComposerCapabilitiesInput
+  | { _tag: typeof WS_METHODS.providerCompactThread } & ProviderCompactThreadInput
+  | { _tag: typeof WS_METHODS.providerListCommands } & ProviderListCommandsInput
+  | { _tag: typeof WS_METHODS.providerListSkills } & ProviderListSkillsInput
+  | { _tag: typeof WS_METHODS.providerListPlugins } & ProviderListPluginsInput
+  | { _tag: typeof WS_METHODS.providerReadPlugin } & ProviderReadPluginInput
+  | { _tag: typeof WS_METHODS.providerListModels } & ProviderListModelsInput
+  | { _tag: typeof WS_METHODS.providerListAgents } & ProviderListAgentsInput
+  | { _tag: typeof WS_METHODS.skillsListLocal } & ListLocalUserSkillsInput;
 
 /** WebSocket 请求格式，包含请求 ID 和请求体 */
-export const WebSocketRequest = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  body: WebSocketRequestBody,
-});
-export type WebSocketRequest = typeof WebSocketRequest.Type;
+export interface WebSocketRequest {
+  id: TrimmedNonEmptyString;
+  body: WebSocketRequestBody;
+}
 
-export const WebSocketResponse = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  result: Schema.optional(Schema.Unknown),
-  error: Schema.optional(
-    Schema.Struct({
-      message: Schema.String,
-    }),
-  ),
-});
-export type WebSocketResponse = typeof WebSocketResponse.Type;
+export interface WebSocketResponse {
+  id: TrimmedNonEmptyString;
+  result?: unknown;
+  error?: {
+    message: string;
+  };
+}
 
-export const WsPushSequence = NonNegativeInt;
-export type WsPushSequence = typeof WsPushSequence.Type;
+export type WsPushSequence = NonNegativeInt;
 
-export const WsWelcomePayload = Schema.Struct({
-  cwd: TrimmedNonEmptyString,
-  homeDir: Schema.optional(TrimmedNonEmptyString),
-  projectName: TrimmedNonEmptyString,
-  bootstrapProjectId: Schema.optional(ProjectId),
-  bootstrapThreadId: Schema.optional(ThreadId),
-});
-export type WsWelcomePayload = typeof WsWelcomePayload.Type;
+export interface WsWelcomePayload {
+  cwd: TrimmedNonEmptyString;
+  homeDir?: TrimmedNonEmptyString;
+  projectName: TrimmedNonEmptyString;
+  bootstrapProjectId?: ProjectId;
+  bootstrapThreadId?: ThreadId;
+}
 
 export interface WsPushPayloadByChannel {
   readonly [WS_CHANNELS.serverWelcome]: WsWelcomePayload;
   readonly [WS_CHANNELS.serverMaintenanceUpdated]: ServerLifecycleStreamEvent;
-  readonly [WS_CHANNELS.serverConfigUpdated]: typeof ServerConfigUpdatedPayload.Type;
-  readonly [WS_CHANNELS.serverProviderStatusesUpdated]: typeof ServerProviderStatusesUpdatedPayload.Type;
-  readonly [WS_CHANNELS.serverSettingsUpdated]: typeof ServerSettingsUpdatedPayload.Type;
-  readonly [WS_CHANNELS.gitActionProgress]: typeof GitActionProgressEvent.Type;
-  readonly [WS_CHANNELS.terminalEvent]: typeof TerminalEvent.Type;
+  readonly [WS_CHANNELS.serverConfigUpdated]: ServerConfigUpdatedPayload;
+  readonly [WS_CHANNELS.serverProviderStatusesUpdated]: ServerProviderStatusesUpdatedPayload;
+  readonly [WS_CHANNELS.serverSettingsUpdated]: ServerSettingsUpdatedPayload;
+  readonly [WS_CHANNELS.gitActionProgress]: GitActionProgressEvent;
+  readonly [WS_CHANNELS.terminalEvent]: TerminalEvent;
   readonly [ORCHESTRATION_WS_CHANNELS.domainEvent]: OrchestrationEvent;
   readonly [ORCHESTRATION_WS_CHANNELS.shellEvent]: OrchestrationShellStreamItem;
   readonly [ORCHESTRATION_WS_CHANNELS.threadEvent]: OrchestrationThreadStreamItem;
@@ -328,91 +309,109 @@ export interface WsPushPayloadByChannel {
 export type WsPushChannel = keyof WsPushPayloadByChannel;
 export type WsPushData<C extends WsPushChannel> = WsPushPayloadByChannel[C];
 
-const makeWsPushSchema = <const Channel extends string, Payload extends Schema.Schema<any>>(
-  channel: Channel,
-  payload: Payload,
-) =>
-  Schema.Struct({
-    type: Schema.Literal("push"),
-    sequence: WsPushSequence,
-    channel: Schema.Literal(channel),
-    data: payload,
-  });
+export interface WsPushServerWelcome {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.serverWelcome;
+  data: WsWelcomePayload;
+}
 
-export const WsPushServerWelcome = makeWsPushSchema(WS_CHANNELS.serverWelcome, WsWelcomePayload);
-export const WsPushServerMaintenanceUpdated = makeWsPushSchema(
-  WS_CHANNELS.serverMaintenanceUpdated,
-  ServerLifecycleStreamEvent,
-);
-export const WsPushServerConfigUpdated = makeWsPushSchema(
-  WS_CHANNELS.serverConfigUpdated,
-  ServerConfigUpdatedPayload,
-);
-export const WsPushServerProviderStatusesUpdated = makeWsPushSchema(
-  WS_CHANNELS.serverProviderStatusesUpdated,
-  ServerProviderStatusesUpdatedPayload,
-);
-export const WsPushServerSettingsUpdated = makeWsPushSchema(
-  WS_CHANNELS.serverSettingsUpdated,
-  ServerSettingsUpdatedPayload,
-);
-export const WsPushGitActionProgress = makeWsPushSchema(
-  WS_CHANNELS.gitActionProgress,
-  GitActionProgressEvent,
-);
-export const WsPushTerminalEvent = makeWsPushSchema(WS_CHANNELS.terminalEvent, TerminalEvent);
-export const WsPushOrchestrationDomainEvent = makeWsPushSchema(
-  ORCHESTRATION_WS_CHANNELS.domainEvent,
-  OrchestrationEvent,
-);
-export const WsPushOrchestrationShellEvent = makeWsPushSchema(
-  ORCHESTRATION_WS_CHANNELS.shellEvent,
-  OrchestrationShellStreamItem,
-);
-export const WsPushOrchestrationThreadEvent = makeWsPushSchema(
-  ORCHESTRATION_WS_CHANNELS.threadEvent,
-  OrchestrationThreadStreamItem,
-);
+export interface WsPushServerMaintenanceUpdated {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.serverMaintenanceUpdated;
+  data: ServerLifecycleStreamEvent;
+}
 
-export const WsPushChannelSchema = Schema.Literals([
-  WS_CHANNELS.gitActionProgress,
-  WS_CHANNELS.serverWelcome,
-  WS_CHANNELS.serverMaintenanceUpdated,
-  WS_CHANNELS.serverConfigUpdated,
-  WS_CHANNELS.serverProviderStatusesUpdated,
-  WS_CHANNELS.serverSettingsUpdated,
-  WS_CHANNELS.terminalEvent,
-  ORCHESTRATION_WS_CHANNELS.domainEvent,
-  ORCHESTRATION_WS_CHANNELS.shellEvent,
-  ORCHESTRATION_WS_CHANNELS.threadEvent,
-]);
-export type WsPushChannelSchema = typeof WsPushChannelSchema.Type;
+export interface WsPushServerConfigUpdated {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.serverConfigUpdated;
+  data: ServerConfigUpdatedPayload;
+}
 
-export const WsPush = Schema.Union([
-  WsPushServerWelcome,
-  WsPushServerMaintenanceUpdated,
-  WsPushServerConfigUpdated,
-  WsPushServerProviderStatusesUpdated,
-  WsPushServerSettingsUpdated,
-  WsPushGitActionProgress,
-  WsPushTerminalEvent,
-  WsPushOrchestrationDomainEvent,
-  WsPushOrchestrationShellEvent,
-  WsPushOrchestrationThreadEvent,
-]);
-export type WsPush = typeof WsPush.Type;
+export interface WsPushServerProviderStatusesUpdated {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.serverProviderStatusesUpdated;
+  data: ServerProviderStatusesUpdatedPayload;
+}
+
+export interface WsPushServerSettingsUpdated {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.serverSettingsUpdated;
+  data: ServerSettingsUpdatedPayload;
+}
+
+export interface WsPushGitActionProgress {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.gitActionProgress;
+  data: GitActionProgressEvent;
+}
+
+export interface WsPushTerminalEvent {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof WS_CHANNELS.terminalEvent;
+  data: TerminalEvent;
+}
+
+export interface WsPushOrchestrationDomainEvent {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof ORCHESTRATION_WS_CHANNELS.domainEvent;
+  data: OrchestrationEvent;
+}
+
+export interface WsPushOrchestrationShellEvent {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof ORCHESTRATION_WS_CHANNELS.shellEvent;
+  data: OrchestrationShellStreamItem;
+}
+
+export interface WsPushOrchestrationThreadEvent {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: typeof ORCHESTRATION_WS_CHANNELS.threadEvent;
+  data: OrchestrationThreadStreamItem;
+}
+
+export type WsPushChannelSchema =
+  | typeof WS_CHANNELS.gitActionProgress
+  | typeof WS_CHANNELS.serverWelcome
+  | typeof WS_CHANNELS.serverMaintenanceUpdated
+  | typeof WS_CHANNELS.serverConfigUpdated
+  | typeof WS_CHANNELS.serverProviderStatusesUpdated
+  | typeof WS_CHANNELS.serverSettingsUpdated
+  | typeof WS_CHANNELS.terminalEvent
+  | typeof ORCHESTRATION_WS_CHANNELS.domainEvent
+  | typeof ORCHESTRATION_WS_CHANNELS.shellEvent
+  | typeof ORCHESTRATION_WS_CHANNELS.threadEvent;
+
+export type WsPush =
+  | WsPushServerWelcome
+  | WsPushServerMaintenanceUpdated
+  | WsPushServerConfigUpdated
+  | WsPushServerProviderStatusesUpdated
+  | WsPushServerSettingsUpdated
+  | WsPushGitActionProgress
+  | WsPushTerminalEvent
+  | WsPushOrchestrationDomainEvent
+  | WsPushOrchestrationShellEvent
+  | WsPushOrchestrationThreadEvent;
 
 export type WsPushMessage<C extends WsPushChannel> = Extract<WsPush, { channel: C }>;
 
-export const WsPushEnvelopeBase = Schema.Struct({
-  type: Schema.Literal("push"),
-  sequence: WsPushSequence,
-  channel: WsPushChannelSchema,
-  data: Schema.Unknown,
-});
-export type WsPushEnvelopeBase = typeof WsPushEnvelopeBase.Type;
+export interface WsPushEnvelopeBase {
+  type: "push";
+  sequence: WsPushSequence;
+  channel: WsPushChannelSchema;
+  data: unknown;
+}
 
-// ── Union of all server �?client messages ─────────────────────────────
+// ── Union of all server → client messages ─────────────────────────────
 
-export const WsResponse = Schema.Union([WebSocketResponse, WsPush]);
-export type WsResponse = typeof WsResponse.Type;
+export type WsResponse = WebSocketResponse | WsPush;

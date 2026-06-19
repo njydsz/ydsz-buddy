@@ -214,8 +214,15 @@ impl TerminalManager {
         };
 
         // 启动 PTY 进程
-        // TODO: 实现实际的 PTY 启动逻辑
+        let process = PtyProcess::new(
+            &input.cwd,
+            crate::pty::PtySize { cols, rows },
+            &input.env.unwrap_or_default(),
+        );
+
         session.status = TerminalSessionStatus::Running;
+        session.pid = Some(process.pid());
+        session.process = Some(process);
         session.updated_at = Utc::now();
 
         let snapshot = self.create_snapshot(&session);
@@ -250,8 +257,14 @@ impl TerminalManager {
             return Err(TerminalError::TerminalNotStarted);
         }
 
-        // TODO: 实际写入 PTY
-        info!("写入终端 {}: {} 字节", key, input.data.len());
+        // 实际写入 PTY
+        if let Some(ref process) = session.process {
+            process.write(&input.data);
+        }
+
+        // 追加到历史记录
+        session.history.push_str(&input.data);
+        session.updated_at = Utc::now();
 
         Ok(())
     }
@@ -271,7 +284,13 @@ impl TerminalManager {
         session.rows = input.rows;
         session.updated_at = Utc::now();
 
-        // TODO: 实际调整 PTY 大小
+        // 实际调整 PTY 大小
+        if let Some(ref mut process) = session.process {
+            process.resize(crate::pty::PtySize {
+                cols: input.cols,
+                rows: input.rows,
+            });
+        }
 
         Ok(())
     }
@@ -314,8 +333,8 @@ impl TerminalManager {
             let mut sessions = self.sessions.write().await;
             if let Some(session) = sessions.get_mut(&key) {
                 // 停止进程
-                if let Some(_process) = session.process.take() {
-                    // TODO: 实际停止进程
+                if let Some(mut process) = session.process.take() {
+                    process.kill();
                 }
 
                 // 清空历史
@@ -359,8 +378,8 @@ impl TerminalManager {
 
             if let Some(mut session) = sessions.remove(&key) {
                 // 停止进程
-                if let Some(_process) = session.process.take() {
-                    // TODO: 实际停止进程
+                if let Some(mut process) = session.process.take() {
+                    process.kill();
                 }
 
                 if input.delete_history {
@@ -379,8 +398,8 @@ impl TerminalManager {
 
             for key in keys_to_remove {
                 if let Some(mut session) = sessions.remove(&key) {
-                    if let Some(_process) = session.process.take() {
-                        // TODO: 实际停止进程
+                    if let Some(mut process) = session.process.take() {
+                        process.kill();
                     }
 
                     if input.delete_history {
@@ -427,7 +446,7 @@ impl TerminalManager {
             terminal_id: session.terminal_id.clone(),
             cwd: session.cwd.clone(),
             status: session.status.clone(),
-            pid: None, // TODO: 从 process 获取取
+            pid: session.process.as_ref().map(|p| p.pid()),
             history: session.history.clone(),
             exit_code: session.exit_code,
             exit_signal: session.exit_signal,
@@ -441,8 +460,8 @@ impl TerminalManager {
 
         let mut sessions = self.sessions.write().await;
         for (_, mut session) in sessions.drain() {
-            if let Some(_process) = session.process.take() {
-                // TODO: 实际停止进程
+            if let Some(mut process) = session.process.take() {
+                process.kill();
             }
         }
     }

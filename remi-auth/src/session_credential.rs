@@ -26,37 +26,6 @@
 //! # 线程安全
 //!
 //! 内部的会话存储使用 [`tokio::sync::RwLock`] 保护，支持高并发读取与独占写入，
-//! 适用于异步多任务环境。模块
-//!
-//! # 模块职责
-//!
-//! 本模块负责系统中所有会话（Session）凭证的生命周期管理，包括会话的创建、签名、验证、
-//! 撤销以及状态跟踪。它是认证子系统（`remi-auth`）的核心组件之一，为上层业务提供统一的
-//! 会话管理能力。
-//!
-//! # 核心功能
-//!
-//! - **会话颁发**：基于 HMAC-SHA256 签名算法生成安全的会话令牌，支持自定义 TTL、角色、
-//!   认证方式等参数。
-//! - **令牌验证**：校验令牌的合法性与时效性，返回已验证的会话信息。
-//! - **WebSocket 令牌**：为 WebSocket 长连接场景提供专用的令牌颁发与验证流程。
-//! - **会话状态管理**：跟踪会话的连接/断开状态、最后活跃时间等运行时信息。
-//! - **变更事件广播**：通过 `broadcast` 通道发布会话变更事件（创建、更新、移除），
-//!   供下游组件订阅消费。
-//! - **会话撤销**：支持单个撤销和批量撤销（保留指定会话），撤销时自动广播变更事件。
-//!
-//! # 使用场景
-//!
-//! - 用户登录后颁发会话凭证，后续请求携带令牌进行身份验证。
-//! - WebSocket 连接建立前，通过 [`SessionCredentialService::issue_websocket_token`]
-//!   获取专用令牌。
-//! - 管理后台查看所有活跃会话，或强制撤销指定会话。
-//! - 下游服务通过 [`SessionCredentialService::stream_changes`] 订阅会话变更事件，
-//!   实现实时联动。
-//!
-//! # 线程安全
-//!
-//! 内部的会话存储使用 [`tokio::sync::RwLock`] 保护，支持高并发读取与独占写入，
 //! 适用于异步多任务环境。
 
 use std::collections::HashMap;
@@ -64,6 +33,7 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Duration, Utc};
 use hmac::{Hmac, Mac};
+use serde::Serialize;
 use sha2::Sha256;
 use tokio::sync::{broadcast, RwLock};
 use tracing::info;
@@ -79,7 +49,7 @@ type HmacSha256 = Hmac<Sha256>;
 ///
 /// 用于标识当前会话所属的角色，不同角色拥有不同的权限级别。
 /// 在会话颁发时指定，验证后可从 [`VerifiedSession`] 中获取。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum SessionRole {
     /// 所有者角色：拥有最高权限，通常对应服务端的本地管理者或根用户。
     /// 可以执行敏感操作（如撤销其他会话、管理密钥等）。
@@ -93,7 +63,7 @@ pub enum SessionRole {
 ///
 /// 标识当前会话是通过何种认证流程建立的。不同的认证方式可能对应不同的安全等级
 /// 和权限范围。在会话颁发时指定，验证后可从 [`VerifiedSession`] 中获取。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum SessionMethod {
     /// 引导凭证认证：通常用于设备首次配对或服务初始化阶段。
     /// 通过预共享的引导密钥（bootstrap token）完成认证，安全性较高。
@@ -116,7 +86,7 @@ pub enum SessionMethod {
 /// - 管理后台展示当前登录的设备列表（名称、平台、版本）
 /// - 安全审计时追溯某个会话的来源客户端
 /// - 客户端断开后重连时，用于识别同一客户端身份
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ClientMetadata {
     /// 客户端名称：人类可读的客户端标识，如 "MyApp Desktop"、"iPhone 客户端" 等。
     /// 该字段为必填项，用于在管理界面展示。
@@ -145,7 +115,7 @@ pub struct ClientMetadata {
 ///
 /// `token` 字段是敏感凭证，应通过安全通道（如 HTTPS）传输，客户端应妥善存储，
 /// 避免泄露到日志或前端代码中。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct IssuedSession {
     /// 会话唯一标识符：使用 UUID v4 生成，全局唯一。
     /// 用于在服务端标识和管理该会话（如撤销、查询状态）。

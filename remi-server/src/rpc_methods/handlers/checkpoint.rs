@@ -34,12 +34,23 @@ pub async fn register_checkpoint_methods(
                         crate::error::ServerError::InvalidParams("Missing threadId".to_string())
                     })?;
 
+                let commit_sha = params
+                    .get("commitSha")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+
                 let message = params
                     .get("message")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string());
+                    .unwrap_or("")
+                    .to_string();
 
-                let checkpoint = checkpoint_store.create_checkpoint(thread_id, message).await?;
+                let thread_id: remi_core::models::ThreadId = thread_id
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+
+                let checkpoint = checkpoint_store.create_checkpoint(thread_id, commit_sha, message).await?;
                 serde_json::to_value(checkpoint)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }

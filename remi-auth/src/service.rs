@@ -29,6 +29,7 @@
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
+use serde::Serialize;
 use tracing::info;
 
 use crate::error::{AuthError, AuthResult};
@@ -130,7 +131,7 @@ pub struct AuthenticatedSession {
 ///
 /// 当服务端需要与新客户端建立信任关系时，调用 [`AuthService::issue_pairing_credential`]
 /// 颁发配对凭证，将返回的 `pairing_code` 展示给管理员，由管理员在客户端侧输入完成配对。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PairingCredentialResult {
     /// 配对码，用于客户端与服务端之间的安全绑定，通常为 8 位短码
     pub pairing_code: String,
