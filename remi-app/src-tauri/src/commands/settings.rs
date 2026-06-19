@@ -31,9 +31,7 @@
 //! - 使用 `Mutex` 保证多线程安全
 //! - 首次启动时如果配置文件不存在，会创建空配置
 
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::State;

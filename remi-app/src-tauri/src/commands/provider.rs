@@ -26,7 +26,7 @@
 //! - 当前支持的提供商：OpenAI、Anthropic
 //! - 模型列表硬编码在代码中，后续可改为动态获取
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tauri::State;

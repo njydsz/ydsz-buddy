@@ -26,7 +26,6 @@
 //! 应用重启后项目列表会丢失。后续可考虑持久化到本地文件。
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tauri::State;

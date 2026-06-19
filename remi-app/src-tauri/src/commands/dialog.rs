@@ -27,8 +27,7 @@
 //!
 //! 本模块依赖 `tauri_plugin_dialog` 插件，该插件在 `lib.rs` 中已注册。
 
-use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use serde::Deserialize;
 use tauri_plugin_dialog::DialogExt;
 
 /// 选择文件夹对话框命令
@@ -58,7 +57,7 @@ use tauri_plugin_dialog::DialogExt;
 pub async fn pick_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
     let dialog = app.dialog();
     let folder = dialog.file().blocking_pick_folder();
-    Ok(folder.map(|p| p.to_string_lossy().to_string()))
+    Ok(folder.map(|p| p.to_string()))
 }
 
 /// 文件保存对话框命令
@@ -102,7 +101,8 @@ pub async fn save_file(
     // 添加文件过滤器（如果提供）
     if let Some(filter_list) = filters {
         for filter in filter_list {
-            file_dialog = file_dialog.add_filter(&filter.name, &filter.extensions);
+            let ext_refs: Vec<&str> = filter.extensions.iter().map(|s| s.as_str()).collect();
+            file_dialog = file_dialog.add_filter(&filter.name, &ext_refs);
         }
     }
     
@@ -110,8 +110,9 @@ pub async fn save_file(
     
     // 如果用户选择了路径，则写入文件内容
     if let Some(path) = path {
-        std::fs::write(&path, contents).map_err(|e| e.to_string())?;
-        Ok(Some(path.to_string_lossy().to_string()))
+        let path_str = path.to_string();
+        std::fs::write(&path_str, contents).map_err(|e| e.to_string())?;
+        Ok(Some(path_str))
     } else {
         Ok(None)
     }

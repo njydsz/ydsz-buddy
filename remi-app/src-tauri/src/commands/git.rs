@@ -28,7 +28,7 @@
 //!
 //! 本模块依赖 `remi_git` 库提供的 `GitCore`、`GitManager`、`GitStatusBroadcaster`。
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
 use tauri::State;
 

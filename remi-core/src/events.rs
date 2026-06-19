@@ -24,8 +24,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
-    Activity, InteractionMode, Message, MessageId, ProjectId, ProposedPlan,
-    RuntimeMode, Sequence, ThreadId,
+    Activity, AssociatedWorktree, EnvMode, HandoffInfo, InteractionMode, Message, MessageId,
+    ProjectId, ProposedPlan, PullRequestInfo, RuntimeMode, Sequence, SubagentInfo, ThreadId,
 };
 
 /// # 编排事件
@@ -363,6 +363,20 @@ pub struct ProjectDeletedEvent {
 /// - `thread_id`: 新线程 ID
 /// - `project_id`: 所属项目 ID
 /// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式（Agent/Ask/Plan）
+/// - `interaction_mode`: 交互模式（Chat/Review）
+/// - `env_mode`: 环境模式（Local/Worktree）
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree`: 关联的 Worktree 信息（可选）
+/// - `is_pinned`: 是否置顶
+/// - `parent_thread_id`: 父线程 ID（可选，用于子线程）
+/// - `subagent`: 子代理信息（可选）
+/// - `fork_source_thread_id`: 分叉源线程 ID（可选）
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `last_known_pr`: 关联的 PR 信息（可选）
+/// - `handoff`: 交接信息（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadCreatedEvent {
@@ -378,6 +392,43 @@ pub struct ThreadCreatedEvent {
     pub project_id: ProjectId,
     /// 线程标题
     pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: crate::provider::ModelSelection,
+    /// 运行时模式
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联的 Worktree 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree: Option<AssociatedWorktree>,
+    /// 是否置顶
+    pub is_pinned: bool,
+    /// 父线程 ID（可选，用于子线程）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_thread_id: Option<ThreadId>,
+    /// 子代理信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent: Option<SubagentInfo>,
+    /// 分叉源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fork_source_thread_id: Option<ThreadId>,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 关联的 PR 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_known_pr: Option<PullRequestInfo>,
+    /// 交接信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handoff: Option<HandoffInfo>,
 }
 
 /// # 线程删除事件

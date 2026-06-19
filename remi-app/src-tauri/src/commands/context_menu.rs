@@ -26,8 +26,7 @@
 //! - 菜单项支持启用/禁用状态控制
 //! - 位置参数可选，不提供时使用默认位置
 
-use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use serde::Deserialize;
 
 /// 上下文菜单项结构
 ///

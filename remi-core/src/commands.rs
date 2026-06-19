@@ -23,8 +23,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
-    Activity, DispatchMode, InteractionMode, MessageId, ProjectId, ProposedPlan, RuntimeMode,
-    ThreadId,
+    Activity, DispatchMode, EnvMode, HandoffInfo, InteractionMode, MessageId, ProjectId,
+    ProposedPlan, PullRequestInfo, RuntimeMode, ThreadId,
 };
 use crate::provider::ModelSelection;
 
@@ -271,6 +271,24 @@ pub struct ProjectDeleteCommand {
 /// - `project_id`: 所属项目 ID
 /// - `title`: 线程标题
 /// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式（Agent/Ask/Plan）
+/// - `interaction_mode`: 交互模式（Chat/Review）
+/// - `env_mode`: 环境模式（Local/Worktree）
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `is_pinned`: 是否置顶（可选，默认为 false）
+/// - `parent_thread_id`: 父线程 ID（可选，用于子线程）
+/// - `subagent_agent_id`: 子代理 ID（可选）
+/// - `subagent_nickname`: 子代理昵称（可选）
+/// - `subagent_role`: 子代理角色（可选）
+/// - `fork_source_thread_id`: 分叉源线程 ID（可选）
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `last_known_pr`: 关联的 PR 信息（可选）
+/// - `handoff`: 交接信息（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadCreateCommand {
@@ -284,6 +302,75 @@ pub struct ThreadCreateCommand {
     pub title: String,
     /// AI 模型选择配置
     pub model_selection: ModelSelection,
+    /// 运行时模式，默认为 Agent
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式，默认为 Chat
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式，默认为 Local
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 是否置顶（可选，默认为 false）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_pinned: Option<bool>,
+    /// 父线程 ID（可选，用于子线程）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_thread_id: Option<ThreadId>,
+    /// 子代理 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_agent_id: Option<String>,
+    /// 子代理昵称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_nickname: Option<String>,
+    /// 子代理角色（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_role: Option<String>,
+    /// 分叉源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fork_source_thread_id: Option<ThreadId>,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 关联的 PR 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_known_pr: Option<PullRequestInfo>,
+    /// 交接信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handoff: Option<HandoffInfo>,
+}
+
+/// 默认运行时模式
+fn default_runtime_mode() -> RuntimeMode {
+    RuntimeMode::Agent
+}
+
+/// 默认交互模式
+fn default_interaction_mode() -> InteractionMode {
+    InteractionMode::Chat
+}
+
+/// 默认环境模式
+fn default_env_mode() -> EnvMode {
+    EnvMode::Local
 }
 
 /// # 删除线程命令

@@ -27,7 +27,7 @@
 //! 本模块依赖 `portable-pty` crate 实现跨平台的 PTY 操作。
 
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};

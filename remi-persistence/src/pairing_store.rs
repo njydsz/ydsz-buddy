@@ -207,7 +207,7 @@ impl PairingLinkStore for SqlitePairingLinkStore {
 
     fn list_active_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>> {
         let now = Utc::now().to_rfc3339();
-        let rows = self.client.query_map(
+        let rows: Vec<(String, String, String, String, String, Option<String>, String, String, Option<String>, Option<String>)> = self.client.query_map(
             "SELECT id, credential, method, role, subject, label, created_at, expires_at, consumed_at, revoked_at
              FROM auth_pairing_links 
              WHERE revoked_at IS NULL AND consumed_at IS NULL AND expires_at > ?1
@@ -225,14 +225,20 @@ impl PairingLinkStore for SqlitePairingLinkStore {
                 let consumed_at_str: Option<String> = row.get(8)?;
                 let revoked_at_str: Option<String> = row.get(9)?;
 
-                Self::build_pairing_link_from_row(
-                    id, credential, method, role, subject, label,
-                    created_at_str, expires_at_str, consumed_at_str, revoked_at_str,
-                )
+                Ok((id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str))
             },
         )?;
 
-        Ok(rows)
+        let mut result = Vec::new();
+        for (id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str) in rows {
+            let link = Self::build_pairing_link_from_row(
+                id, credential, method, role, subject, label,
+                created_at_str, expires_at_str, consumed_at_str, revoked_at_str,
+            )?;
+            result.push(link);
+        }
+
+        Ok(result)
     }
 
     fn revoke_pairing_link(&self, link_id: &str) -> PersistenceResult<bool> {

@@ -395,8 +395,8 @@ impl AuthService {
                     let session = self
                         .credential_service
                         .issue(
-                            Some(&link.subject),
                             None,
+                            Some(link.subject.clone()),
                             Some(SessionMethod::Pairing),
                             Some(role),
                             Some(client_metadata),

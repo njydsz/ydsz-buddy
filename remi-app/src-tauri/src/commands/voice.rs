@@ -1,6 +1,4 @@
 use serde::{Deserialize, Serialize};
-use tauri::State;
-use crate::error::Result;
 
 /// 语音转文字输入参数
 #[derive(Debug, Deserialize)]
@@ -42,7 +40,7 @@ pub struct TranscribeVoiceResult {
 #[tauri::command]
 pub async fn transcribe_voice(
     input: TranscribeVoiceInput,
-) -> Result<TranscribeVoiceResult> {
+) -> Result<TranscribeVoiceResult, String> {
     // TODO: 集成实际的语音识别服务
     // 可选方案：
     // 1. OpenAI Whisper API

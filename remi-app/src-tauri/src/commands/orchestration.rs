@@ -39,13 +39,12 @@
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tauri::State;
-use tokio::sync::RwLock;
 use uuid::Uuid;
 
 use remi_core::commands::*;
 use remi_core::models::*;
 use remi_core::provider::ModelSelection;
-use remi_orchestration::{OrchestrationEngine, OrchestrationReadModel, OrchestrationShellSnapshot};
+use remi_orchestration::OrchestrationEngine;
 use remi_persistence::{SqliteClient, SqliteEventStore, SqliteProjectionRepository, run_migrations};
 
 /// 编排引擎状态管理器
@@ -263,6 +262,24 @@ pub async fn create_thread(
             model: "default".to_string(),
             options: None,
         },
+        runtime_mode: remi_core::models::RuntimeMode::Agent,
+        interaction_mode: remi_core::models::InteractionMode::Chat,
+        env_mode: remi_core::models::EnvMode::Local,
+        branch: None,
+        worktree_path: None,
+        associated_worktree_path: None,
+        associated_worktree_branch: None,
+        associated_worktree_ref: None,
+        create_branch_flow_completed: None,
+        is_pinned: None,
+        parent_thread_id: None,
+        subagent_agent_id: None,
+        subagent_nickname: None,
+        subagent_role: None,
+        fork_source_thread_id: None,
+        sidechat_source_thread_id: None,
+        last_known_pr: None,
+        handoff: None,
     });
 
     // 分发命令到编排引擎

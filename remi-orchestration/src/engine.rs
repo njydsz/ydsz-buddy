@@ -404,11 +404,11 @@ impl OrchestrationEngine {
     /// 处理单个编排命令（内部方法）
     ///
     /// 命令处理的完整流程：
-    /// 1. 将命令转换为领域事件
-    /// 2. 将事件持久化到事件存储
+    /// 1. 将命令转换为领域事件（支持单命令产生多事件）
+    /// 2. 将所有事件持久化到事件存储
     /// 3. 更新当前序列号
-    /// 4. 将事件应用到投影仓库（更新读模型）
-    /// 5. 通过广播通道发布事件
+    /// 4. 将所有事件应用到投影仓库（更新读模型）
+    /// 5. 通过广播通道发布所有事件
     ///
     /// # 参数
     ///
@@ -416,30 +416,35 @@ impl OrchestrationEngine {
     ///
     /// # 返回值
     ///
-    /// 成功时返回事件持久化后的序列号，失败时返回相应错误。
+    /// 成功时返回最后一个事件的序列号，失败时返回相应错误。
     async fn handle_command(&self, command: OrchestrationCommand) -> OrchestrationResult<Sequence> {
         info!("处理命令: {:?}", std::mem::discriminant(&command));
 
-        // 步骤 1：将命令转换为领域事件
-        let event = self.command_to_event(command)?;
+        // 步骤 1：将命令转换为领域事件（支持多事件）
+        let events = self.command_to_events(command)?;
 
-        // 步骤 2：将事件持久化到事件存储，获取分配的序列号
-        let sequence = self.event_store.append_event(&event)?;
+        let mut last_sequence = 0;
 
-        // 步骤 3：更新引擎当前序列号（写锁保护）
-        {
-            let mut seq = self.current_sequence.write().await;
-            *seq = sequence;
+        for event in events {
+            // 步骤 2：将事件持久化到事件存储，获取分配的序列号
+            let sequence = self.event_store.append_event(&event)?;
+
+            // 步骤 3：更新引擎当前序列号（写锁保护）
+            {
+                let mut seq = self.current_sequence.write().await;
+                *seq = sequence;
+            }
+
+            // 步骤 4：将事件应用到投影仓库，更新读模型
+            self.apply_projection(&event).await?;
+
+            // 步骤 5：通过广播通道发布事件，通知所有订阅的 Reactor
+            let _ = self.event_tx.send(event);
+
+            last_sequence = sequence;
         }
 
-        // 步骤 4：将事件应用到投影仓库，更新读模型
-        self.apply_projection(&event).await?;
-
-        // 步骤 5：通过广播通道发布事件，通知所有订阅的 Reactor
-        // 注意：如果没有订阅者，send 会返回 Err，这里忽略即可
-        let _ = self.event_tx.send(event);
-
-        Ok(sequence)
+        Ok(last_sequence)
     }
 
     /// 将编排命令转换为领域事件（内部方法）
@@ -497,6 +502,33 @@ impl OrchestrationEngine {
                     thread_id: c.thread_id,
                     project_id: c.project_id,
                     title: c.title,
+                    // 使用命令中的新字段
+                    model_selection: c.model_selection,
+                    runtime_mode: c.runtime_mode,
+                    interaction_mode: c.interaction_mode,
+                    env_mode: c.env_mode,
+                    branch: c.branch,
+                    worktree_path: c.worktree_path,
+                    associated_worktree: c.associated_worktree_path.map(|path| {
+                        remi_core::models::AssociatedWorktree {
+                            path,
+                            branch: c.associated_worktree_branch.unwrap_or_default(),
+                            r#ref: c.associated_worktree_ref.unwrap_or_default(),
+                        }
+                    }),
+                    is_pinned: c.is_pinned.unwrap_or(false),
+                    parent_thread_id: c.parent_thread_id,
+                    subagent: c.subagent_agent_id.map(|agent_id| {
+                        remi_core::models::SubagentInfo {
+                            agent_id,
+                            nickname: c.subagent_nickname.unwrap_or_default(),
+                            role: c.subagent_role.unwrap_or_default(),
+                        }
+                    }),
+                    fork_source_thread_id: c.fork_source_thread_id,
+                    sidechat_source_thread_id: c.sidechat_source_thread_id,
+                    last_known_pr: c.last_known_pr,
+                    handoff: c.handoff,
                 }))
             }
             OrchestrationCommand::ThreadDelete(c) => {
@@ -819,23 +851,19 @@ impl OrchestrationEngine {
                     id: e.thread_id,
                     project_id: e.project_id,
                     title: e.title.clone(),
-                    model_selection: remi_core::provider::ModelSelection {
-                        provider: remi_core::provider::ProviderKind::Codex,
-                        model: "default".to_string(),
-                        options: None,
-                    },
-                    runtime_mode: remi_core::models::RuntimeMode::Agent,
-                    interaction_mode: remi_core::models::InteractionMode::Chat,
-                    env_mode: remi_core::models::EnvMode::Local,
-                    branch: None,
-                    worktree_path: None,
-                    associated_worktree: None,
-                    is_pinned: false,
-                    parent_thread_id: None,
-                    subagent: None,
-                    fork_source_thread_id: None,
-                    sidechat_source_thread_id: None,
-                    last_known_pr: None,
+                    model_selection: e.model_selection.clone(),
+                    runtime_mode: e.runtime_mode.clone(),
+                    interaction_mode: e.interaction_mode.clone(),
+                    env_mode: e.env_mode.clone(),
+                    branch: e.branch.clone(),
+                    worktree_path: e.worktree_path.clone(),
+                    associated_worktree: e.associated_worktree.clone(),
+                    is_pinned: e.is_pinned,
+                    parent_thread_id: e.parent_thread_id,
+                    subagent: e.subagent.clone(),
+                    fork_source_thread_id: e.fork_source_thread_id,
+                    sidechat_source_thread_id: e.sidechat_source_thread_id,
+                    last_known_pr: e.last_known_pr.clone(),
                     latest_turn: None,
                     latest_user_message_at: None,
                     has_pending_approvals: false,
@@ -850,7 +878,7 @@ impl OrchestrationEngine {
                     updated_at: e.occurred_at,
                     archived_at: None,
                     deleted_at: None,
-                    handoff: None,
+                    handoff: e.handoff.clone(),
                 };
                 self.projection_repo.save_thread(&thread)?;
             }

@@ -13,7 +13,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["macos-private-api"] }
+tauri = { version = "2", features = [] }
 tauri-plugin-shell = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -32,6 +32,19 @@ portable-pty = "0.8"
 dirs = "5.0"
 open = "5.0"
 chrono = "0.4"
+
+# Remi 工作区模块依赖
+remi-core = { path = "../../remi-core" }
+remi-config = { path = "../../remi-config" }
+remi-persistence = { path = "../../remi-persistence" }
+remi-orchestration = { path = "../../remi-orchestration" }
+remi-provider = { path = "../../remi-provider" }
+remi-git = { path = "../../remi-git" }
+remi-terminal = { path = "../../remi-terminal" }
+remi-workspace = { path = "../../remi-workspace" }
+remi-auth = { path = "../../remi-auth" }
+remi-checkpoint = { path = "../../remi-checkpoint" }
+remi-telemetry = { path = "../../remi-telemetry" }
 
 [features]
 # This feature is used for production builds or when `devPath` points to the filesystem

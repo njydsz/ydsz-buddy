@@ -9,7 +9,6 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "title": "Remi Code",
     "windows": [
       {
         "title": "Remi Code",

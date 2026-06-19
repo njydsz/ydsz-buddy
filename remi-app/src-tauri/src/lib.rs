@@ -101,7 +101,6 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())             // 文件系统访问
         .plugin(tauri_plugin_clipboard_manager::init()) // 剪贴板管理
         .plugin(tauri_plugin_notification::init())   // 系统通知
-        .plugin(tauri_plugin_updater::init())        // 自动更新
         .plugin(tauri_plugin_process::init())        // 进程管理
 
         // ========== 全局状态注入 ==========
