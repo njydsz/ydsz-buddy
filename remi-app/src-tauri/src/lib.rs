@@ -35,6 +35,7 @@ pub fn run() {
         .manage(ProviderState::new())
         .manage(BrowserState::new())
         .manage(UpdateState::new())
+        .manage(GitState::new())
         .invoke_handler(tauri::generate_handler![
             greet,
             pick_folder,

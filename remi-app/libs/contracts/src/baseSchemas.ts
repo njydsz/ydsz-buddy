@@ -18,39 +18,34 @@ export type PositiveInt = number;
 /** ISO 8601 日期时间字符串 */
 export type IsoDateTime = string;
 
-/**
- * 构造品牌化实体 ID，确保非空裁剪字符串并附加品牌标签
- */
-type EntityId<Brand extends string> = string & { readonly __brand: Brand };
-
 /** 会话/对话线程 ID */
-export type ThreadId = EntityId<"ThreadId">;
+export type ThreadId = string & { readonly __brand: "ThreadId" };
 /** 项目 ID */
-export type ProjectId = EntityId<"ProjectId">;
+export type ProjectId = string & { readonly __brand: "ProjectId" };
 /** 执行环境 ID */
-export type EnvironmentId = EntityId<"EnvironmentId">;
+export type EnvironmentId = string & { readonly __brand: "EnvironmentId" };
 /** 认证会话 ID */
-export type AuthSessionId = EntityId<"AuthSessionId">;
+export type AuthSessionId = string & { readonly __brand: "AuthSessionId" };
 /** 命令 ID */
-export type CommandId = EntityId<"CommandId">;
+export type CommandId = string & { readonly __brand: "CommandId" };
 /** 事件 ID */
-export type EventId = EntityId<"EventId">;
+export type EventId = string & { readonly __brand: "EventId" };
 /** 消息 ID */
-export type MessageId = EntityId<"MessageId">;
+export type MessageId = string & { readonly __brand: "MessageId" };
 /** 对话轮次 ID */
-export type TurnId = EntityId<"TurnId">;
+export type TurnId = string & { readonly __brand: "TurnId" };
 
 /** 提供者项 ID */
-export type ProviderItemId = EntityId<"ProviderItemId">;
+export type ProviderItemId = string & { readonly __brand: "ProviderItemId" };
 /** 运行时会话 ID */
-export type RuntimeSessionId = EntityId<"RuntimeSessionId">;
+export type RuntimeSessionId = string & { readonly __brand: "RuntimeSessionId" };
 /** 运行时项 ID */
-export type RuntimeItemId = EntityId<"RuntimeItemId">;
+export type RuntimeItemId = string & { readonly __brand: "RuntimeItemId" };
 /** 运行时请求 ID */
-export type RuntimeRequestId = EntityId<"RuntimeRequestId">;
+export type RuntimeRequestId = string & { readonly __brand: "RuntimeRequestId" };
 /** 运行时任务 ID */
-export type RuntimeTaskId = EntityId<"RuntimeTaskId">;
+export type RuntimeTaskId = string & { readonly __brand: "RuntimeTaskId" };
 /** 审批请求 ID */
-export type ApprovalRequestId = EntityId<"ApprovalRequestId">;
+export type ApprovalRequestId = string & { readonly __brand: "ApprovalRequestId" };
 /** 检查点引用标识 */
-export type CheckpointRef = EntityId<"CheckpointRef">;
+export type CheckpointRef = string & { readonly __brand: "CheckpointRef" };

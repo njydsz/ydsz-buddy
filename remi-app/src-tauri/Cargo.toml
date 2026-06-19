@@ -34,18 +34,18 @@ open = "5.0"
 chrono = "0.4"
 
 # Remi workspace modules
-remi-core = { path = "../../../remi-core" }
-remi-persistence = { path = "../../../remi-persistence" }
-remi-orchestration = { path = "../../../remi-orchestration" }
-remi-provider = { path = "../../../remi-provider" }
-remi-git = { path = "../../../remi-git" }
-remi-terminal = { path = "../../../remi-terminal" }
-remi-workspace = { path = "../../../remi-workspace" }
-remi-auth = { path = "../../../remi-auth" }
-remi-config = { path = "../../../remi-config" }
-remi-telemetry = { path = "../../../remi-telemetry" }
-remi-checkpoint = { path = "../../../remi-checkpoint" }
-remi-server = { path = "../../../remi-server" }
+remi-core = { path = "../../remi-core" }
+remi-persistence = { path = "../../remi-persistence" }
+remi-orchestration = { path = "../../remi-orchestration" }
+remi-provider = { path = "../../remi-provider" }
+remi-git = { path = "../../remi-git" }
+remi-terminal = { path = "../../remi-terminal" }
+remi-workspace = { path = "../../remi-workspace" }
+remi-auth = { path = "../../remi-auth" }
+remi-config = { path = "../../remi-config" }
+remi-telemetry = { path = "../../remi-telemetry" }
+remi-checkpoint = { path = "../../remi-checkpoint" }
+remi-server = { path = "../../remi-server" }
 
 [features]
 # This feature is used for production builds or when `devPath` points to the filesystem

@@ -686,7 +686,7 @@ export const UserInputQuestion = Schema.Struct({
   /** 选项列表 */
   options: Schema.Array(UserInputQuestionOption),
   /** 是否多选 */
-  multiSelect: Schema.optional(Schema.Boolean, { default: () => false }),
+  multiSelect: Schema.optionalWith(Schema.Boolean, { default: () => false }),
 });
 export type UserInputQuestion = typeof UserInputQuestion.Type;
 

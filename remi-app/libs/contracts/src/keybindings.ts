@@ -1,12 +1,11 @@
 /**
- * @file keybindings.ts
- * @description 快捷键绑定相关的共享契约。定义了快捷键命令、快捷键规则、快捷键配置以及 when 条件表达式的 Schema 和类型。
+ * 快捷键绑定相关的共享契约。
+ * 定义了快捷键命令、快捷键规则、快捷键配置以及 when 条件表达式的类型。
  * 支持静态命令（如侧边栏切换、终端操作、聊天操作等）和动态脚本命令（script.{id}.run 模式）。
- * 客户端和服务端共享使用，用于统一快捷键相关的类型定义和校验规则。
+ * 客户端和服务端共享使用，用于统一快捷键相关的类型定义。
  */
 
-import { Schema } from "effect";
-import { TrimmedString } from "./baseSchemas";
+import type { TrimmedString } from "./baseSchemas";
 
 /** 快捷键值的最大字符长度 */
 export const MAX_KEYBINDING_VALUE_LENGTH = 64;
@@ -81,117 +80,68 @@ export const THREAD_JUMP_KEYBINDING_COMMANDS = [
 /** 会话跳转命令的类型 */
 export type ThreadJumpKeybindingCommand = (typeof THREAD_JUMP_KEYBINDING_COMMANDS)[number];
 
-/** 脚本运行命令的 Schema，格式为 script.{scriptId}.run，scriptId 需符合小写字母数字和连字符的命名规则 */
-export const SCRIPT_RUN_COMMAND_PATTERN = Schema.TemplateLiteral([
-  Schema.Literal("script."),
-  Schema.NonEmptyString.check(
-    Schema.isMaxLength(MAX_SCRIPT_ID_LENGTH),
-    Schema.isPattern(/^[a-z0-9][a-z0-9-]*$/),
-  ),
-  Schema.Literal(".run"),
-]);
+/** 脚本运行命令的类型，格式为 script.{scriptId}.run，scriptId 需符合小写字母数字和连字符的命名规则 */
+type ScriptRunCommand = `script.${string}.run`;
 
-/** 快捷键命令的 Schema，可以是静态命令或动态脚本运行命令 */
-export const KeybindingCommand = Schema.Union([
-  Schema.Literals(STATIC_KEYBINDING_COMMANDS),
-  SCRIPT_RUN_COMMAND_PATTERN,
-]);
-export type KeybindingCommand = typeof KeybindingCommand.Type;
+/** 快捷键命令类型，可以是静态命令或动态脚本运行命令 */
+export type KeybindingCommand =
+  | (typeof STATIC_KEYBINDING_COMMANDS)[number]
+  | ScriptRunCommand;
 
-/** 快捷键按键值的 Schema，非空且长度受限 */
-const KeybindingValue = TrimmedString.check(
-  Schema.isMinLength(1),
-  Schema.isMaxLength(MAX_KEYBINDING_VALUE_LENGTH),
-);
+/** 快捷键按键值类型，非空且长度受限 */
+type KeybindingValue = TrimmedString;
 
-/** when 条件表达式字符串的 Schema，非空且长度受限 */
-const KeybindingWhen = TrimmedString.check(
-  Schema.isMinLength(1),
-  Schema.isMaxLength(MAX_KEYBINDING_WHEN_LENGTH),
-);
+/** when 条件表达式字符串类型，非空且长度受限 */
+type KeybindingWhen = TrimmedString;
 
-/** 单条快捷键规则的 Schema，包含按键、命令和可选的 when 条件 */
-export const KeybindingRule = Schema.Struct({
+/** 单条快捷键规则，包含按键、命令和可选的 when 条件 */
+export interface KeybindingRule {
   /** 快捷键按键值（如 "ctrl+shift+p"） */
-  key: KeybindingValue,
+  key: KeybindingValue;
   /** 快捷键对应的命令 */
-  command: KeybindingCommand,
+  command: KeybindingCommand;
   /** 可选的 when 条件表达式，满足条件时快捷键才生效 */
-  when: Schema.optional(KeybindingWhen),
-});
-export type KeybindingRule = typeof KeybindingRule.Type;
+  when?: KeybindingWhen;
+}
 
-/** 快捷键配置 Schema，为快捷键规则数组，数量有上限限制 */
-export const KeybindingsConfig = Schema.Array(KeybindingRule).check(
-  Schema.isMaxLength(MAX_KEYBINDINGS_COUNT),
-);
-export type KeybindingsConfig = typeof KeybindingsConfig.Type;
+/** 快捷键配置类型，为快捷键规则数组，数量有上限限制 */
+export type KeybindingsConfig = KeybindingRule[];
 
-/** 快捷键快捷键详情 Schema，描述按键组合的各个修饰键状态 */
-export const KeybindingShortcut = Schema.Struct({
+/** 快捷键快捷键详情类型，描述按键组合的各个修饰键状态 */
+export interface KeybindingShortcut {
   /** 按键值 */
-  key: KeybindingValue,
+  key: KeybindingValue;
   /** 是否按下 Meta 键（Mac 上的 Command 键） */
-  metaKey: Schema.Boolean,
+  metaKey: boolean;
   /** 是否按下 Ctrl 键 */
-  ctrlKey: Schema.Boolean,
+  ctrlKey: boolean;
   /** 是否按下 Shift 键 */
-  shiftKey: Schema.Boolean,
+  shiftKey: boolean;
   /** 是否按下 Alt 键 */
-  altKey: Schema.Boolean,
+  altKey: boolean;
   /** 是否按下 Mod 键（跨平台修饰键，Mac 上为 Meta，其他平台为 Ctrl） */
-  modKey: Schema.Boolean,
-});
-export type KeybindingShortcut = typeof KeybindingShortcut.Type;
+  modKey: boolean;
+}
 
 /**
- * when 条件表达式 AST 节点的 Schema，支持递归定义。
+ * when 条件表达式 AST 节点类型，支持递归定义。
  * 包含四种节点类型：identifier（标识符）、not（取反）、and（与）、or（或）。
  */
-export const KeybindingWhenNode: Schema.Schema<KeybindingWhenNode> = Schema.Union([
-  /** 标识符节点，表示一个条件变量名 */
-  Schema.Struct({
-    type: Schema.Literal("identifier"),
-    name: Schema.NonEmptyString,
-  }),
-  /** 取反节点，对子节点结果取反 */
-  Schema.Struct({
-    type: Schema.Literal("not"),
-    node: Schema.suspend((): Schema.Schema<KeybindingWhenNode> => KeybindingWhenNode),
-  }),
-  /** 与节点，左右子节点同时为真时结果为真 */
-  Schema.Struct({
-    type: Schema.Literal("and"),
-    left: Schema.suspend((): Schema.Schema<KeybindingWhenNode> => KeybindingWhenNode),
-    right: Schema.suspend((): Schema.Schema<KeybindingWhenNode> => KeybindingWhenNode),
-  }),
-  /** 或节点，左右子节点任一为真时结果为真 */
-  Schema.Struct({
-    type: Schema.Literal("or"),
-    left: Schema.suspend((): Schema.Schema<KeybindingWhenNode> => KeybindingWhenNode),
-    right: Schema.suspend((): Schema.Schema<KeybindingWhenNode> => KeybindingWhenNode),
-  }),
-]);
-/** when 条件表达式 AST 节点类型 */
 export type KeybindingWhenNode =
   | { type: "identifier"; name: string }
   | { type: "not"; node: KeybindingWhenNode }
   | { type: "and"; left: KeybindingWhenNode; right: KeybindingWhenNode }
   | { type: "or"; left: KeybindingWhenNode; right: KeybindingWhenNode };
 
-/** 解析后的快捷键规则 Schema，包含命令、快捷键详情和可选的 when 条件 AST */
-export const ResolvedKeybindingRule = Schema.Struct({
+/** 解析后的快捷键规则类型，包含命令、快捷键详情和可选的 when 条件 AST */
+export interface ResolvedKeybindingRule {
   /** 快捷键对应的命令 */
-  command: KeybindingCommand,
+  command: KeybindingCommand;
   /** 快捷键详情（按键组合） */
-  shortcut: KeybindingShortcut,
+  shortcut: KeybindingShortcut;
   /** 可选的 when 条件 AST，解析后的结构化条件表达式 */
-  whenAst: Schema.optional(KeybindingWhenNode),
-}).annotate({ parseOptions: { onExcessProperty: "ignore" } });
-export type ResolvedKeybindingRule = typeof ResolvedKeybindingRule.Type;
+  whenAst?: KeybindingWhenNode;
+}
 
-/** 解析后的快捷键配置 Schema，为解析后的快捷键规则数组，数量有上限限制 */
-export const ResolvedKeybindingsConfig = Schema.Array(ResolvedKeybindingRule).check(
-  Schema.isMaxLength(MAX_KEYBINDINGS_COUNT),
-);
-export type ResolvedKeybindingsConfig = typeof ResolvedKeybindingsConfig.Type;
+/** 解析后的快捷键配置类型，为解析后的快捷键规则数组，数量有上限限制 */
+export type ResolvedKeybindingsConfig = ResolvedKeybindingRule[];

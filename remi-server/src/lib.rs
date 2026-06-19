@@ -4,10 +4,12 @@
 
 pub mod error;
 pub mod rpc;
+pub mod rpc_methods;
 pub mod server;
 pub mod websocket;
 
 pub use error::*;
 pub use rpc::*;
+pub use rpc_methods::*;
 pub use server::*;
 pub use websocket::*;

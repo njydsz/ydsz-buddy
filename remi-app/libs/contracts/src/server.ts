@@ -1,355 +1,301 @@
 /**
  * 服务器配置、状态、诊断及相关事件定义。
- * 包含 Provider 状态、使用量快照、语音转录、快捷键、生命周期事件等 Schema。
+ * 包含 Provider 状态、使用量快照、语音转录、快捷键、生命周期事件等类型。
  */
-import { Schema } from "effect";
-import {
+import type {
   IsoDateTime,
   NonNegativeInt,
   ProjectId,
   ThreadId,
   TrimmedNonEmptyString,
 } from "./baseSchemas";
-import { KeybindingRule, ResolvedKeybindingsConfig } from "./keybindings";
-import { EditorId } from "./editor";
-import { ProviderKind } from "./orchestration";
-import { ServerSettings, ServerSettingsPatch } from "./settings";
-import { ExecutionEnvironmentDescriptor } from "./environment";
+import type { KeybindingRule, ResolvedKeybindingsConfig } from "./keybindings";
+import type { EditorId } from "./editor";
+import type { ProviderKind } from "./orchestration";
+import type { ServerSettings, ServerSettingsPatch } from "./settings";
+import type { ExecutionEnvironmentDescriptor } from "./environment";
 
 /** 语音转录音频 Base64 最大字符数限制 */
 const SERVER_VOICE_TRANSCRIPTION_MAX_AUDIO_BASE64_CHARS = 14_000_000;
 
-/** 快捷键配置格式错误问题 */
-const KeybindingsMalformedConfigIssue = Schema.Struct({
-  kind: Schema.Literal("keybindings.malformed-config"),
-  message: TrimmedNonEmptyString,
-});
+/** 快捷键配置问题联合类型（快捷键配置错误或条目无效） */
+export type ServerConfigIssue =
+  | {
+      kind: "keybindings.malformed-config";
+      message: TrimmedNonEmptyString;
+    }
+  | {
+      kind: "keybindings.invalid-entry";
+      message: TrimmedNonEmptyString;
+      index: number;
+    };
 
-/** 快捷键条目无效问题 */
-const KeybindingsInvalidEntryIssue = Schema.Struct({
-  kind: Schema.Literal("keybindings.invalid-entry"),
-  message: TrimmedNonEmptyString,
-  index: Schema.Number,
-});
-
-/** 服务器配置问题联合类型（快捷键配置错误或条目无效） */
-export const ServerConfigIssue = Schema.Union([
-  KeybindingsMalformedConfigIssue,
-  KeybindingsInvalidEntryIssue,
-]);
-export type ServerConfigIssue = typeof ServerConfigIssue.Type;
-
-const ServerConfigIssues = Schema.Array(ServerConfigIssue);
+type ServerConfigIssues = ServerConfigIssue[];
 
 /** Provider 状态枚举：就绪、警告、错误 */
-export const ServerProviderStatusState = Schema.Literals(["ready", "warning", "error"]);
-export type ServerProviderStatusState = typeof ServerProviderStatusState.Type;
+export type ServerProviderStatusState = "ready" | "warning" | "error";
 
 /** Provider 认证状态枚举：已认证、未认证、未知 */
-export const ServerProviderAuthStatus = Schema.Literals([
-  "authenticated",
-  "unauthenticated",
-  "unknown",
-]);
-export type ServerProviderAuthStatus = typeof ServerProviderAuthStatus.Type;
+export type ServerProviderAuthStatus = "authenticated" | "unauthenticated" | "unknown";
+
+/** Provider 版本建议信息 */
+export interface ServerProviderVersionAdvisory {
+  status: "unknown" | "current" | "behind_latest";
+  currentVersion: TrimmedNonEmptyString | null;
+  latestVersion: TrimmedNonEmptyString | null;
+  updateCommand: TrimmedNonEmptyString | null;
+  canUpdate: boolean;
+  checkedAt: IsoDateTime | null;
+  message: TrimmedNonEmptyString | null;
+}
+
+/** Provider 更新操作的状态跟踪 */
+export interface ServerProviderUpdateState {
+  status: "idle" | "queued" | "running" | "succeeded" | "failed" | "unchanged";
+  startedAt: IsoDateTime | null;
+  finishedAt: IsoDateTime | null;
+  message: TrimmedNonEmptyString | null;
+  output: string | null;
+}
 
 /** 单个 Provider 的完整状态信息，包括可用性、认证、版本、更新状态等 */
-export const ServerProviderStatus = Schema.Struct({
-  provider: ProviderKind,
-  status: ServerProviderStatusState,
-  available: Schema.Boolean,
-  authStatus: ServerProviderAuthStatus,
-  authType: Schema.optional(TrimmedNonEmptyString),
-  authLabel: Schema.optional(TrimmedNonEmptyString),
-  voiceTranscriptionAvailable: Schema.optional(Schema.Boolean),
-  version: Schema.optional(Schema.NullOr(TrimmedNonEmptyString)),
-  checkedAt: IsoDateTime,
-  message: Schema.optional(TrimmedNonEmptyString),
+export interface ServerProviderStatus {
+  provider: ProviderKind;
+  status: ServerProviderStatusState;
+  available: boolean;
+  authStatus: ServerProviderAuthStatus;
+  authType?: TrimmedNonEmptyString;
+  authLabel?: TrimmedNonEmptyString;
+  voiceTranscriptionAvailable?: boolean;
+  version?: TrimmedNonEmptyString | null;
+  checkedAt: IsoDateTime;
+  message?: TrimmedNonEmptyString;
   /** 版本建议信息，指示是否为最新版本及更新命令 */
-  versionAdvisory: Schema.optionalKey(
-    Schema.Struct({
-      status: Schema.Literals(["unknown", "current", "behind_latest"]),
-      currentVersion: Schema.NullOr(TrimmedNonEmptyString),
-      latestVersion: Schema.NullOr(TrimmedNonEmptyString),
-      updateCommand: Schema.NullOr(TrimmedNonEmptyString),
-      canUpdate: Schema.Boolean,
-      checkedAt: Schema.NullOr(IsoDateTime),
-      message: Schema.NullOr(TrimmedNonEmptyString),
-    }),
-  ),
+  versionAdvisory?: ServerProviderVersionAdvisory;
   /** Provider 更新操作的状态跟踪 */
-  updateState: Schema.optionalKey(
-    Schema.Struct({
-      status: Schema.Literals(["idle", "queued", "running", "succeeded", "failed", "unchanged"]),
-      startedAt: Schema.NullOr(IsoDateTime),
-      finishedAt: Schema.NullOr(IsoDateTime),
-      message: Schema.NullOr(TrimmedNonEmptyString),
-      output: Schema.NullOr(Schema.String.check(Schema.isMaxLength(10_000))),
-    }),
-  ),
-});
-export type ServerProviderStatus = typeof ServerProviderStatus.Type;
+  updateState?: ServerProviderUpdateState;
+}
 
-/** Provider 版本建议信息类型 */
-export type ServerProviderVersionAdvisory = NonNullable<ServerProviderStatus["versionAdvisory"]>;
-/** Provider 更新状态类型 */
-export type ServerProviderUpdateState = NonNullable<ServerProviderStatus["updateState"]>;
-
-const ServerProviderStatuses = Schema.Array(ServerProviderStatus);
+type ServerProviderStatuses = ServerProviderStatus[];
 
 /** 服务器配置信息，包含工作目录、快捷键、Provider 状态、可用编辑器等 */
-export const ServerConfig = Schema.Struct({
-  cwd: TrimmedNonEmptyString,
-  homeDir: Schema.optional(TrimmedNonEmptyString),
-  worktreesDir: TrimmedNonEmptyString,
-  keybindingsConfigPath: TrimmedNonEmptyString,
-  keybindings: ResolvedKeybindingsConfig,
-  issues: ServerConfigIssues,
-  providers: ServerProviderStatuses,
-  availableEditors: Schema.Array(EditorId),
-});
-export type ServerConfig = typeof ServerConfig.Type;
+export interface ServerConfig {
+  cwd: TrimmedNonEmptyString;
+  homeDir?: TrimmedNonEmptyString;
+  worktreesDir: TrimmedNonEmptyString;
+  keybindingsConfigPath: TrimmedNonEmptyString;
+  keybindings: ResolvedKeybindingsConfig;
+  issues: ServerConfigIssues;
+  providers: ServerProviderStatuses;
+  availableEditors: EditorId[];
+}
 
 /** 服务器管理的 Git Worktree 信息 */
-export const ServerManagedWorktree = Schema.Struct({
-  path: TrimmedNonEmptyString,
-  workspaceRoot: TrimmedNonEmptyString,
-});
-export type ServerManagedWorktree = typeof ServerManagedWorktree.Type;
+export interface ServerManagedWorktree {
+  path: TrimmedNonEmptyString;
+  workspaceRoot: TrimmedNonEmptyString;
+}
 
 /** 列出所有 Worktree 的结果 */
-export const ServerListWorktreesResult = Schema.Struct({
-  worktrees: Schema.Array(ServerManagedWorktree),
-});
-export type ServerListWorktreesResult = typeof ServerListWorktreesResult.Type;
+export interface ServerListWorktreesResult {
+  worktrees: ServerManagedWorktree[];
+}
 
 /** Provider 使用量限制信息，包含窗口、已用百分比、重置时间等 */
-export const ServerProviderUsageLimit = Schema.Struct({
-  window: TrimmedNonEmptyString,
-  usedPercent: Schema.optional(
-    Schema.Number.check(Schema.isGreaterThanOrEqualTo(0)).check(Schema.isLessThanOrEqualTo(100)),
-  ),
-  resetsAt: Schema.optional(IsoDateTime),
-  windowDurationMins: Schema.optional(NonNegativeInt),
-});
-export type ServerProviderUsageLimit = typeof ServerProviderUsageLimit.Type;
+export interface ServerProviderUsageLimit {
+  window: TrimmedNonEmptyString;
+  usedPercent?: number;
+  resetsAt?: IsoDateTime;
+  windowDurationMins?: NonNegativeInt;
+}
 
 /** Provider 使用量信息行（标签-值对） */
-export const ServerProviderUsageLine = Schema.Struct({
-  label: TrimmedNonEmptyString,
-  value: TrimmedNonEmptyString,
-  subtitle: Schema.optional(TrimmedNonEmptyString),
-});
-export type ServerProviderUsageLine = typeof ServerProviderUsageLine.Type;
+export interface ServerProviderUsageLine {
+  label: TrimmedNonEmptyString;
+  value: TrimmedNonEmptyString;
+  subtitle?: TrimmedNonEmptyString;
+}
 
 /** Provider 使用量快照，包含限制和使用量明细 */
-export const ServerProviderUsageSnapshot = Schema.Struct({
-  provider: ProviderKind,
-  updatedAt: IsoDateTime,
-  limits: Schema.Array(ServerProviderUsageLimit),
-  usageLines: Schema.Array(ServerProviderUsageLine),
-  source: TrimmedNonEmptyString,
-});
-export type ServerProviderUsageSnapshot = typeof ServerProviderUsageSnapshot.Type;
+export interface ServerProviderUsageSnapshot {
+  provider: ProviderKind;
+  updatedAt: IsoDateTime;
+  limits: ServerProviderUsageLimit[];
+  usageLines: ServerProviderUsageLine[];
+  source: TrimmedNonEmptyString;
+}
 
 /** 获取 Provider 使用量快照的输入参数 */
-export const ServerGetProviderUsageSnapshotInput = Schema.Struct({
-  provider: ProviderKind,
-  homePath: Schema.optional(TrimmedNonEmptyString),
-});
-export type ServerGetProviderUsageSnapshotInput = typeof ServerGetProviderUsageSnapshotInput.Type;
+export interface ServerGetProviderUsageSnapshotInput {
+  provider: ProviderKind;
+  homePath?: TrimmedNonEmptyString;
+}
 
 /** 获取 Provider 使用量快照的结果（可能为空） */
-export const ServerGetProviderUsageSnapshotResult = Schema.NullOr(ServerProviderUsageSnapshot);
-export type ServerGetProviderUsageSnapshotResult = typeof ServerGetProviderUsageSnapshotResult.Type;
+export type ServerGetProviderUsageSnapshotResult = ServerProviderUsageSnapshot | null;
 
 /** 服务器内存使用诊断信息 */
-export const ServerDiagnosticsMemory = Schema.Struct({
-  rssBytes: NonNegativeInt,
-  heapTotalBytes: NonNegativeInt,
-  heapUsedBytes: NonNegativeInt,
-  externalBytes: NonNegativeInt,
-  arrayBuffersBytes: NonNegativeInt,
-});
-export type ServerDiagnosticsMemory = typeof ServerDiagnosticsMemory.Type;
+export interface ServerDiagnosticsMemory {
+  rssBytes: NonNegativeInt;
+  heapTotalBytes: NonNegativeInt;
+  heapUsedBytes: NonNegativeInt;
+  externalBytes: NonNegativeInt;
+  arrayBuffersBytes: NonNegativeInt;
+}
 
 /** 子进程诊断信息 */
-export const ServerDiagnosticsChildProcess = Schema.Struct({
-  pid: NonNegativeInt,
-  ppid: NonNegativeInt,
-  rssBytes: NonNegativeInt,
-  virtualSizeBytes: NonNegativeInt,
-  command: Schema.String,
-  args: Schema.String,
-});
-export type ServerDiagnosticsChildProcess = typeof ServerDiagnosticsChildProcess.Type;
+export interface ServerDiagnosticsChildProcess {
+  pid: NonNegativeInt;
+  ppid: NonNegativeInt;
+  rssBytes: NonNegativeInt;
+  virtualSizeBytes: NonNegativeInt;
+  command: string;
+  args: string;
+}
 
 /** 服务器诊断结果，包含进程信息、子进程、项目/线程统计 */
-export const ServerDiagnosticsResult = Schema.Struct({
-  generatedAt: IsoDateTime,
-  process: Schema.Struct({
-    pid: NonNegativeInt,
-    uptimeSeconds: NonNegativeInt,
-    memory: ServerDiagnosticsMemory,
-  }),
-  childProcesses: Schema.Array(ServerDiagnosticsChildProcess),
-  childProcessTotalCount: NonNegativeInt,
-  childProcessTotalRssBytes: NonNegativeInt,
-  projection: Schema.Struct({
-    projectCount: NonNegativeInt,
-    threadCount: NonNegativeInt,
-  }),
-});
-export type ServerDiagnosticsResult = typeof ServerDiagnosticsResult.Type;
+export interface ServerDiagnosticsResult {
+  generatedAt: IsoDateTime;
+  process: {
+    pid: NonNegativeInt;
+    uptimeSeconds: NonNegativeInt;
+    memory: ServerDiagnosticsMemory;
+  };
+  childProcesses: ServerDiagnosticsChildProcess[];
+  childProcessTotalCount: NonNegativeInt;
+  childProcessTotalRssBytes: NonNegativeInt;
+  projection: {
+    projectCount: NonNegativeInt;
+    threadCount: NonNegativeInt;
+  };
+}
 
 /** 语音转录请求输入，包含音频数据和元信息 */
-export const ServerVoiceTranscriptionInput = Schema.Struct({
-  provider: ProviderKind,
-  cwd: TrimmedNonEmptyString,
-  threadId: Schema.optional(ThreadId),
-  mimeType: TrimmedNonEmptyString.check(Schema.isMaxLength(100)),
-  sampleRateHz: NonNegativeInt,
-  durationMs: NonNegativeInt,
-  audioBase64: TrimmedNonEmptyString.check(
-    Schema.isMaxLength(SERVER_VOICE_TRANSCRIPTION_MAX_AUDIO_BASE64_CHARS),
-  ),
-});
-export type ServerVoiceTranscriptionInput = typeof ServerVoiceTranscriptionInput.Type;
+export interface ServerVoiceTranscriptionInput {
+  provider: ProviderKind;
+  cwd: TrimmedNonEmptyString;
+  threadId?: ThreadId;
+  mimeType: TrimmedNonEmptyString;
+  sampleRateHz: NonNegativeInt;
+  durationMs: NonNegativeInt;
+  audioBase64: TrimmedNonEmptyString;
+}
 
 /** 语音转录结果 */
-export const ServerVoiceTranscriptionResult = Schema.Struct({
-  text: TrimmedNonEmptyString,
-});
-export type ServerVoiceTranscriptionResult = typeof ServerVoiceTranscriptionResult.Type;
+export interface ServerVoiceTranscriptionResult {
+  text: TrimmedNonEmptyString;
+}
 
 /** 新增或更新快捷键规则的输入 */
-export const ServerUpsertKeybindingInput = KeybindingRule;
-export type ServerUpsertKeybindingInput = typeof ServerUpsertKeybindingInput.Type;
+export type ServerUpsertKeybindingInput = KeybindingRule;
 
 /** 新增或更新快捷键规则的结果，返回更新后的配置和问题列表 */
-export const ServerUpsertKeybindingResult = Schema.Struct({
-  keybindings: ResolvedKeybindingsConfig,
-  issues: ServerConfigIssues,
-});
-export type ServerUpsertKeybindingResult = typeof ServerUpsertKeybindingResult.Type;
+export interface ServerUpsertKeybindingResult {
+  keybindings: ResolvedKeybindingsConfig;
+  issues: ServerConfigIssues;
+}
 
 /** 服务器配置更新事件载荷 */
-export const ServerConfigUpdatedPayload = Schema.Struct({
-  issues: ServerConfigIssues,
-  providers: ServerProviderStatuses,
-});
-export type ServerConfigUpdatedPayload = typeof ServerConfigUpdatedPayload.Type;
+export interface ServerConfigUpdatedPayload {
+  issues: ServerConfigIssues;
+  providers: ServerProviderStatuses;
+}
 
 /** Provider 状态更新事件载荷 */
-export const ServerProviderStatusesUpdatedPayload = Schema.Struct({
-  providers: ServerProviderStatuses,
-});
-export type ServerProviderStatusesUpdatedPayload = typeof ServerProviderStatusesUpdatedPayload.Type;
+export interface ServerProviderStatusesUpdatedPayload {
+  providers: ServerProviderStatuses;
+}
 
 /** 服务器设置更新事件载荷 */
-export const ServerSettingsUpdatedPayload = Schema.Struct({
-  settings: ServerSettings,
-});
-export type ServerSettingsUpdatedPayload = typeof ServerSettingsUpdatedPayload.Type;
+export interface ServerSettingsUpdatedPayload {
+  settings: ServerSettings;
+}
 
 /** 服务器生命周期欢迎事件载荷，包含初始项目信息 */
-export const ServerLifecycleWelcomePayload = Schema.Struct({
-  cwd: TrimmedNonEmptyString,
-  homeDir: Schema.optional(TrimmedNonEmptyString),
-  projectName: TrimmedNonEmptyString,
-  bootstrapProjectId: Schema.optional(ProjectId),
-  bootstrapThreadId: Schema.optional(ThreadId),
-});
-export type ServerLifecycleWelcomePayload = typeof ServerLifecycleWelcomePayload.Type;
+export interface ServerLifecycleWelcomePayload {
+  cwd: TrimmedNonEmptyString;
+  homeDir?: TrimmedNonEmptyString;
+  projectName: TrimmedNonEmptyString;
+  bootstrapProjectId?: ProjectId;
+  bootstrapThreadId?: ThreadId;
+}
 
 /** 服务器生命周期流事件：欢迎、就绪、维护任务 */
-export const ServerLifecycleStreamEvent = Schema.Union([
-  Schema.Struct({
-    type: Schema.Literal("welcome"),
-    payload: ServerLifecycleWelcomePayload,
-  }),
-  Schema.Struct({
-    type: Schema.Literal("ready"),
-    payload: Schema.Struct({
-      at: IsoDateTime,
-    }),
-  }),
-  Schema.Struct({
-    type: Schema.Literal("maintenance"),
-    payload: Schema.Struct({
-      task: Schema.Literal("thread-retention"),
-      state: Schema.Literals(["started", "progress", "compacting", "completed", "failed"]),
-      at: IsoDateTime,
-      deletedCount: Schema.optional(Schema.Number),
-      purgedCount: Schema.optional(Schema.Number),
-      totalCount: Schema.optional(Schema.Number),
-      freePageCount: Schema.optional(Schema.Number),
-      error: Schema.optional(Schema.String),
-    }),
-  }),
-]);
-export type ServerLifecycleStreamEvent = typeof ServerLifecycleStreamEvent.Type;
+export type ServerLifecycleStreamEvent =
+  | {
+      type: "welcome";
+      payload: ServerLifecycleWelcomePayload;
+    }
+  | {
+      type: "ready";
+      payload: {
+        at: IsoDateTime;
+      };
+    }
+  | {
+      type: "maintenance";
+      payload: {
+        task: "thread-retention";
+        state: "started" | "progress" | "compacting" | "completed" | "failed";
+        at: IsoDateTime;
+        deletedCount?: number;
+        purgedCount?: number;
+        totalCount?: number;
+        freePageCount?: number;
+        error?: string;
+      };
+    };
 
 /** 服务器配置流事件：快照、配置更新、Provider 状态更新、设置更新 */
-export const ServerConfigStreamEvent = Schema.Union([
-  Schema.Struct({
-    type: Schema.Literal("snapshot"),
-    config: ServerConfig,
-  }),
-  Schema.Struct({
-    type: Schema.Literal("configUpdated"),
-    payload: ServerConfigUpdatedPayload,
-  }),
-  Schema.Struct({
-    type: Schema.Literal("providerStatuses"),
-    payload: ServerProviderStatusesUpdatedPayload,
-  }),
-  Schema.Struct({
-    type: Schema.Literal("settingsUpdated"),
-    payload: ServerSettingsUpdatedPayload,
-  }),
-]);
-export type ServerConfigStreamEvent = typeof ServerConfigStreamEvent.Type;
+export type ServerConfigStreamEvent =
+  | {
+      type: "snapshot";
+      config: ServerConfig;
+    }
+  | {
+      type: "configUpdated";
+      payload: ServerConfigUpdatedPayload;
+    }
+  | {
+      type: "providerStatuses";
+      payload: ServerProviderStatusesUpdatedPayload;
+    }
+  | {
+      type: "settingsUpdated";
+      payload: ServerSettingsUpdatedPayload;
+    };
 
 /** 刷新 Provider 列表的结果 */
-export const ServerRefreshProvidersResult = ServerProviderStatusesUpdatedPayload;
-export type ServerRefreshProvidersResult = typeof ServerRefreshProvidersResult.Type;
+export type ServerRefreshProvidersResult = ServerProviderStatusesUpdatedPayload;
 
 /** 更新 Provider 的输入参数 */
-export const ServerProviderUpdateInput = Schema.Struct({
-  provider: ProviderKind,
-});
-export type ServerProviderUpdateInput = typeof ServerProviderUpdateInput.Type;
+export interface ServerProviderUpdateInput {
+  provider: ProviderKind;
+}
 
 /** Provider 更新失败错误 */
-export class ServerProviderUpdateError extends Schema.TaggedErrorClass<ServerProviderUpdateError>()(
-  "ServerProviderUpdateError",
-  {
-    provider: ProviderKind,
-    reason: TrimmedNonEmptyString,
-  },
-) {
-  override get message(): string {
-    return `Provider update failed for ${this.provider}: ${this.reason}`;
+export class ServerProviderUpdateError extends Error {
+  readonly _tag = "ServerProviderUpdateError";
+  constructor(
+    readonly provider: ProviderKind,
+    readonly reason: TrimmedNonEmptyString,
+  ) {
+    super(`Provider update failed for ${provider}: ${reason}`);
+    this.name = "ServerProviderUpdateError";
   }
 }
 
 /** Provider 更新结果 */
-export const ServerProviderUpdateResult = ServerProviderStatusesUpdatedPayload;
-export type ServerProviderUpdateResult = typeof ServerProviderUpdateResult.Type;
+export type ServerProviderUpdateResult = ServerProviderStatusesUpdatedPayload;
 
 /** 获取服务器设置的结果 */
-export const ServerGetSettingsResult = ServerSettings;
-export type ServerGetSettingsResult = typeof ServerGetSettingsResult.Type;
+export type ServerGetSettingsResult = ServerSettings;
 
 /** 获取执行环境描述的结果 */
-export const ServerGetEnvironmentResult = ExecutionEnvironmentDescriptor;
-export type ServerGetEnvironmentResult = typeof ServerGetEnvironmentResult.Type;
+export type ServerGetEnvironmentResult = ExecutionEnvironmentDescriptor;
 
 /** 更新服务器设置的输入参数 */
-export const ServerUpdateSettingsInput = ServerSettingsPatch;
-export type ServerUpdateSettingsInput = typeof ServerUpdateSettingsInput.Type;
+export type ServerUpdateSettingsInput = ServerSettingsPatch;
 
 /** 更新服务器设置的结果 */
-export const ServerUpdateSettingsResult = ServerSettings;
-export type ServerUpdateSettingsResult = typeof ServerUpdateSettingsResult.Type;
+export type ServerUpdateSettingsResult = ServerSettings;
