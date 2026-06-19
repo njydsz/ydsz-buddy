@@ -1012,7 +1012,7 @@ export const ComposerPromptEditor = forwardRef<
   const initialMentionReferencesRef = useRef(normalizedMentionReferences);
   const initialConfig = useMemo<InitialConfigType>(
     () => ({
-      namespace: "peakcode-composer-editor",
+      namespace: "remicode-composer-editor",
       editable: true,
       nodes: [
         ComposerMentionNode,

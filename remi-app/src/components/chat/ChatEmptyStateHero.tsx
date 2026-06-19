@@ -13,11 +13,11 @@ export const ChatEmptyStateHero = memo(function ChatEmptyStateHero({
   return (
     <div className="flex flex-col items-center gap-5 select-none">
       <img
-        alt="Peak Code logo"
+        alt="Remi Code logo"
         className="size-14 rounded-lg object-contain"
         draggable={false}
         height={112}
-        src="/peakcode-hero.png"
+        src="/remicode-hero.png"
         width={112}
       />
 

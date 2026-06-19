@@ -33,6 +33,7 @@ import {
 import { showConfirmDialogFallback } from "./confirmDialogFallback";
 import { showContextMenuFallback } from "./contextMenuFallback";
 import { WsTransport } from "./wsTransport";
+import { tauriBridge } from "./lib/tauri-bridge";
 
 let instance: { api: NativeApi; transport: WsTransport } | null = null;
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
@@ -415,12 +416,11 @@ export function createWsNativeApi(): NativeApi {
   const api: NativeApi = {
     dialogs: {
       pickFolder: async () => {
-        if (!window.desktopBridge) return null;
-        return window.desktopBridge.pickFolder();
+        return tauriBridge.pickFolder();
       },
       saveFile: async (input) => {
-        if (window.desktopBridge?.saveFile) {
-          return window.desktopBridge.saveFile(input);
+        if (tauriBridge.saveFile) {
+          return tauriBridge.saveFile(input);
         }
         const blob = new Blob([input.contents], { type: "text/markdown;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -466,23 +466,13 @@ export function createWsNativeApi(): NativeApi {
       openInEditor: (cwd, editor) =>
         transport.request(WS_METHODS.shellOpenInEditor, { cwd, editor }),
       openExternal: async (url) => {
-        if (window.desktopBridge) {
-          const opened = await window.desktopBridge.openExternal(url);
-          if (!opened) {
-            throw new Error("Unable to open link.");
-          }
-          return;
+        const opened = await tauriBridge.openExternal(url);
+        if (!opened) {
+          throw new Error("Unable to open link.");
         }
-
-        // Some mobile browsers can return null here even when the tab opens.
-        // Avoid false negatives and let the browser handle popup policy.
-        window.open(url, "_blank", "noopener,noreferrer");
       },
       showInFolder: async (path) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.showInFolder(path);
-        }
-        // No-op in browser - this is a desktop-only feature
+        await tauriBridge.showInFolder(path);
       },
     },
     git: {

@@ -85,7 +85,7 @@ export function ThreadWorktreeHandoffDialog({
                     onOpenChange(false);
                   }
                 }}
-                placeholder="peakcode/feature-name"
+                placeholder="remicode/feature-name"
               />
             </label>
           </form>

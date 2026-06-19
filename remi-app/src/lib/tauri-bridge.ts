@@ -1,74 +1,341 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
+import { appWindow } from '@tauri-apps/api/window';
+import { open, save, message, confirm } from '@tauri-apps/api/dialog';
+import { writeTextFile, readTextFile, createDir, readDir } from '@tauri-apps/api/fs';
+import { writeText, readText } from '@tauri-apps/api/clipboard';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/api/notification';
 import type { 
   Thread, 
   Message, 
   Model, 
   CreateThreadParams,
-  SendMessageParams 
+  SendMessageParams,
+  DesktopBridge,
+  DesktopTheme,
+  DesktopUpdateState,
+  DesktopUpdateActionResult,
+  DesktopNotificationInput,
+  ContextMenuItem,
+  ServerVoiceTranscriptionInput,
+  ServerVoiceTranscriptionResult,
+  BrowserOpenInput,
+  BrowserThreadInput,
+  BrowserSetPanelBoundsInput,
+  BrowserAttachWebviewInput,
+  BrowserTabInput,
+  BrowserCaptureScreenshotResult,
+  BrowserExecuteCdpInput,
+  BrowserNavigateInput,
+  BrowserNewTabInput,
+  ThreadBrowserState
 } from '@remi-code/contracts';
 
 /**
- * Tauri 桥接�? * 封装所有与 Tauri 后端的交�? */
-export const tauriBridge = {
+ * Tauri 桥接层
+ * 封装所有与 Tauri 后端的交互
+ */
+export const tauriBridge: DesktopBridge = {
+  /**
+   * 获取 WebSocket URL
+   */
+  getWsUrl: () => {
+    return import.meta.env.VITE_WS_URL || null;
+  },
+
+  /**
+   * 选择文件夹
+   */
+  pickFolder: async (): Promise<string | null> => {
+    return await open({
+      directory: true,
+      multiple: false,
+      title: '选择文件夹'
+    });
+  },
+
+  /**
+   * 保存文件
+   */
+  saveFile: async (input: {
+    defaultFilename: string;
+    contents: string;
+    filters?: ReadonlyArray<{ name: string; extensions: ReadonlyArray<string> }>;
+  }): Promise<string | null> => {
+    const filePath = await save({
+      defaultPath: input.defaultFilename,
+      filters: input.filters?.map(f => ({
+        name: f.name,
+        extensions: [...f.extensions]
+      }))
+    });
+    
+    if (filePath) {
+      await writeTextFile(filePath, input.contents);
+    }
+    
+    return filePath;
+  },
+
+  /**
+   * 显示确认对话框
+   */
+  confirm: async (message: string): Promise<boolean> => {
+    return await confirm(message, {
+      title: '确认',
+      type: 'info'
+    });
+  },
+
+  /**
+   * 设置主题
+   */
+  setTheme: async (theme: DesktopTheme): Promise<void> => {
+    await invoke('set_theme', { theme });
+  },
+
+  /**
+   * 显示上下文菜单
+   */
+  showContextMenu: async <T extends string>(
+    items: readonly ContextMenuItem<T>[],
+    position?: { x: number; y: number }
+  ): Promise<T | null> => {
+    return await invoke<T | null>('show_context_menu', { items, position });
+  },
+
+  /**
+   * 打开外部链接
+   */
+  openExternal: async (url: string): Promise<boolean> => {
+    try {
+      await invoke('open_external', { url });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * 在文件夹中显示文件
+   */
+  showInFolder: async (path: string): Promise<void> => {
+    await invoke('show_in_folder', { path });
+  },
+
+  /**
+   * Shell 模块
+   */
+  shell: {
+    showInFolder: async (path: string): Promise<void> => {
+      await invoke('show_in_folder', { path });
+    },
+  },
+
+  /**
+   * 监听菜单动作
+   */
+  onMenuAction: (listener: (action: string) => void) => {
+    return listen<string>('menu-action', (event) => {
+      listener(event.payload);
+    });
+  },
+
+  /**
+   * 获取更新状态
+   */
+  getUpdateState: async (): Promise<DesktopUpdateState> => {
+    return await invoke<DesktopUpdateState>('get_update_state');
+  },
+
+  /**
+   * 检查更新
+   */
+  checkForUpdates: async (): Promise<DesktopUpdateState> => {
+    return await invoke<DesktopUpdateState>('check_for_updates');
+  },
+
+  /**
+   * 下载更新
+   */
+  downloadUpdate: async (): Promise<DesktopUpdateActionResult> => {
+    return await invoke<DesktopUpdateActionResult>('download_update');
+  },
+
+  /**
+   * 安装更新
+   */
+  installUpdate: async (): Promise<DesktopUpdateActionResult> => {
+    return await invoke<DesktopUpdateActionResult>('install_update');
+  },
+
+  /**
+   * 监听更新状态
+   */
+  onUpdateState: (listener: (state: DesktopUpdateState) => void) => {
+    return listen<DesktopUpdateState>('update-state', (event) => {
+      listener(event.payload);
+    });
+  },
+
+  /**
+   * 通知模块
+   */
+  notifications: {
+    isSupported: async (): Promise<boolean> => {
+      return true; // Tauri 支持通知
+    },
+    
+    show: async (input: DesktopNotificationInput): Promise<boolean> => {
+      const granted = await isPermissionGranted();
+      if (!granted) {
+        const permission = await requestPermission();
+        if (permission !== 'granted') {
+          return false;
+        }
+      }
+      
+      sendNotification({
+        title: input.title,
+        body: input.body
+      });
+      return true;
+    },
+  },
+
+  /**
+   * 服务器模块
+   */
+  server: {
+    transcribeVoice: async (
+      input: ServerVoiceTranscriptionInput
+    ): Promise<ServerVoiceTranscriptionResult> => {
+      return await invoke<ServerVoiceTranscriptionResult>('transcribe_voice', input);
+    },
+  },
+
+  /**
+   * 浏览器模块
+   */
+  browser: {
+    open: async (input: BrowserOpenInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_open', input);
+    },
+
+    close: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_close', input);
+    },
+
+    hide: async (input: BrowserThreadInput): Promise<void> => {
+      await invoke('browser_hide', input);
+    },
+
+    getState: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_get_state', input);
+    },
+
+    setPanelBounds: async (input: BrowserSetPanelBoundsInput): Promise<void> => {
+      await invoke('browser_set_panel_bounds', input);
+    },
+
+    attachWebview: async (input: BrowserAttachWebviewInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_attach_webview', input);
+    },
+
+    copyScreenshotToClipboard: async (input: BrowserTabInput): Promise<void> => {
+      await invoke('browser_copy_screenshot_to_clipboard', input);
+    },
+
+    captureScreenshot: async (input: BrowserTabInput): Promise<BrowserCaptureScreenshotResult> => {
+      return await invoke<BrowserCaptureScreenshotResult>('browser_capture_screenshot', input);
+    },
+
+    executeCdp: async (input: BrowserExecuteCdpInput): Promise<unknown> => {
+      return await invoke('browser_execute_cdp', input);
+    },
+
+    navigate: async (input: BrowserNavigateInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_navigate', input);
+    },
+
+    reload: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_reload', input);
+    },
+
+    goBack: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_go_back', input);
+    },
+
+    goForward: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_go_forward', input);
+    },
+
+    newTab: async (input: BrowserNewTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_new_tab', input);
+    },
+
+    closeTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_close_tab', input);
+    },
+
+    selectTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_select_tab', input);
+    },
+
+    openDevTools: async (input: BrowserTabInput): Promise<void> => {
+      await invoke('browser_open_dev_tools', input);
+    },
+
+    onState: (listener: (state: ThreadBrowserState) => void) => {
+      return listen<ThreadBrowserState>('browser-state', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onBrowserUseOpenPanelRequest: (listener: () => void) => {
+      return listen('browser-use-open-panel-request', () => {
+        listener();
+      });
+    },
+  },
+
   /**
    * 编排引擎相关命令
    */
   orchestration: {
-    /**
-     * 创建新的聊天线程
-     */
     createThread: async (params: CreateThreadParams): Promise<Thread> => {
       return await invoke<Thread>('create_thread', { params });
     },
 
-    /**
-     * 发送消息到 AI
-     */
     sendMessage: async (params: SendMessageParams): Promise<void> => {
       return await invoke<void>('send_message', params);
     },
 
-    /**
-     * 获取线程列表
-     */
     listThreads: async (projectId: string): Promise<Thread[]> => {
       return await invoke<Thread[]>('list_threads', { projectId });
     },
 
-    /**
-     * 删除线程
-     */
     deleteThread: async (threadId: string): Promise<void> => {
       return await invoke<void>('delete_thread', { threadId });
     },
 
-    /**
-     * 重命名线�?     */
     renameThread: async (threadId: string, title: string): Promise<void> => {
       return await invoke<void>('rename_thread', { threadId, title });
     },
   },
 
   /**
-   * AI 提供商相关命�?   */
+   * AI 提供商相关命令
+   */
   provider: {
-    /**
-     * 获取可用模型列表
-     */
     listModels: async (provider?: string): Promise<Model[]> => {
       return await invoke<Model[]>('list_models', { provider });
     },
 
-    /**
-     * 设置 API Key
-     */
     setApiKey: async (provider: string, key: string): Promise<void> => {
       return await invoke<void>('set_api_key', { provider, key });
     },
 
-    /**
-     * 获取提供商状�?     */
     getProviderStatus: async (): Promise<Record<string, any>> => {
       return await invoke('get_provider_status');
     },
@@ -78,29 +345,18 @@ export const tauriBridge = {
    * 终端管理相关命令
    */
   terminal: {
-    /**
-     * 创建新的终端会话
-     */
     create: async (cwd: string, shell?: string): Promise<string> => {
       return await invoke<string>('create_terminal', { cwd, shell });
     },
 
-    /**
-     * 向终端写入数�?     */
     write: async (sessionId: string, data: string): Promise<void> => {
       return await invoke<void>('write_terminal', { sessionId, data });
     },
 
-    /**
-     * 调整终端大小
-     */
     resize: async (sessionId: string, rows: number, cols: number): Promise<void> => {
       return await invoke<void>('resize_terminal', { sessionId, rows, cols });
     },
 
-    /**
-     * 关闭终端会话
-     */
     close: async (sessionId: string): Promise<void> => {
       return await invoke<void>('close_terminal', { sessionId });
     },
@@ -110,68 +366,43 @@ export const tauriBridge = {
    * Git 操作相关命令
    */
   git: {
-    /**
-     * 获取 Git 状�?     */
     getStatus: async (cwd: string): Promise<any> => {
       return await invoke('git_status', { cwd });
     },
 
-    /**
-     * 获取分支列表
-     */
     listBranches: async (cwd: string): Promise<string[]> => {
       return await invoke<string[]>('git_list_branches', { cwd });
     },
 
-    /**
-     * 切换分支
-     */
     checkoutBranch: async (cwd: string, branch: string): Promise<void> => {
       return await invoke<void>('git_checkout', { cwd, branch });
     },
 
-    /**
-     * 提交更改
-     */
     commit: async (cwd: string, message: string): Promise<void> => {
       return await invoke<void>('git_commit', { cwd, message });
     },
   },
 
   /**
-   * 工作区管理相关命�?   */
+   * 工作区管理相关命令
+   */
   workspace: {
-    /**
-     * 获取项目列表
-     */
     listProjects: async (): Promise<any[]> => {
       return await invoke('list_projects');
     },
 
-    /**
-     * 添加项目
-     */
     addProject: async (path: string): Promise<void> => {
       return await invoke<void>('add_project', { path });
     },
 
-    /**
-     * 移除项目
-     */
     removeProject: async (projectId: string): Promise<void> => {
       return await invoke<void>('remove_project', { projectId });
     },
 
-    /**
-     * 读取文件
-     */
     readFile: async (path: string): Promise<string> => {
       return await invoke<string>('read_file', { path });
     },
 
-    /**
-     * 写入文件
-     */
     writeFile: async (path: string, content: string): Promise<void> => {
       return await invoke<void>('write_file', { path, content });
     },
@@ -181,16 +412,10 @@ export const tauriBridge = {
    * 设置管理相关命令
    */
   settings: {
-    /**
-     * 获取应用设置
-     */
     get: async (): Promise<any> => {
       return await invoke('get_settings');
     },
 
-    /**
-     * 保存应用设置
-     */
     save: async (settings: any): Promise<void> => {
       return await invoke<void>('save_settings', { settings });
     },
@@ -200,43 +425,30 @@ export const tauriBridge = {
    * 事件监听
    */
   events: {
-    /**
-     * 监听线程更新事件
-     */
     onThreadUpdated: (callback: (thread: Thread) => void) => {
       return listen<Thread>('thread-updated', (event) => {
         callback(event.payload);
       });
     },
 
-    /**
-     * 监听终端输出事件
-     */
     onTerminalOutput: (callback: (data: { sessionId: string; output: string }) => void) => {
       return listen('terminal-output', (event) => {
         callback(event.payload as { sessionId: string; output: string });
       });
     },
 
-    /**
-     * 监听消息事件
-     */
     onMessage: (callback: (message: Message) => void) => {
       return listen<Message>('message-received', (event) => {
         callback(event.payload);
       });
     },
 
-    /**
-     * 监听 Git 状态变化事�?     */
     onGitStatusChanged: (callback: (status: any) => void) => {
       return listen('git-status-changed', (event) => {
         callback(event.payload);
       });
     },
 
-    /**
-     * 发射事件到后�?     */
     emit: async (event: string, payload?: any) => {
       return await emit(event, payload);
     },
@@ -246,68 +458,41 @@ export const tauriBridge = {
    * 窗口操作
    */
   window: {
-    /**
-     * 最小化窗口
-     */
     minimize: async () => {
-      const { appWindow } = await import('@tauri-apps/api/window');
       await appWindow.minimize();
     },
 
-    /**
-     * 最大化窗口
-     */
     maximize: async () => {
-      const { appWindow } = await import('@tauri-apps/api/window');
       await appWindow.toggleMaximize();
     },
 
-    /**
-     * 关闭窗口
-     */
     close: async () => {
-      const { appWindow } = await import('@tauri-apps/api/window');
       await appWindow.close();
     },
 
-    /**
-     * 设置窗口标题
-     */
     setTitle: async (title: string) => {
-      const { appWindow } = await import('@tauri-apps/api/window');
       await appWindow.setTitle(title);
     },
   },
 
   /**
-   * 对话�?   */
+   * 对话框
+   */
   dialog: {
-    /**
-     * 打开文件选择对话�?     */
     open: async (options?: any): Promise<string | null> => {
-      const { open } = await import('@tauri-apps/api/dialog');
       return await open(options);
     },
 
-    /**
-     * 打开保存文件对话�?     */
     save: async (options?: any): Promise<string | null> => {
-      const { save } = await import('@tauri-apps/api/dialog');
       return await save(options);
     },
 
-    /**
-     * 显示消息对话�?     */
     message: async (message: string, options?: any) => {
-      const { message: showMessage } = await import('@tauri-apps/api/dialog');
-      return await showMessage(message, options);
+      return await message(message, options);
     },
 
-    /**
-     * 显示确认对话�?     */
     confirm: async (message: string, options?: any): Promise<boolean> => {
-      const { confirm: showConfirm } = await import('@tauri-apps/api/dialog');
-      return await showConfirm(message, options);
+      return await confirm(message, options);
     },
   },
 
@@ -315,53 +500,32 @@ export const tauriBridge = {
    * 文件系统
    */
   fs: {
-    /**
-     * 读取文本文件
-     */
     readTextFile: async (path: string): Promise<string> => {
-      const { readTextFile } = await import('@tauri-apps/api/fs');
       return await readTextFile(path);
     },
 
-    /**
-     * 写入文本文件
-     */
     writeTextFile: async (path: string, content: string): Promise<void> => {
-      const { writeTextFile } = await import('@tauri-apps/api/fs');
       return await writeTextFile(path, content);
     },
 
-    /**
-     * 创建目录
-     */
     createDir: async (path: string, options?: any): Promise<void> => {
-      const { createDir } = await import('@tauri-apps/api/fs');
       return await createDir(path, options);
     },
 
-    /**
-     * 读取目录
-     */
     readDir: async (path: string): Promise<any[]> => {
-      const { readDir } = await import('@tauri-apps/api/fs');
       return await readDir(path);
     },
   },
 
   /**
-   * 剪贴�?   */
+   * 剪贴板
+   */
   clipboard: {
-    /**
-     * 写入剪贴�?     */
     writeText: async (text: string): Promise<void> => {
-      const { writeText } = await import('@tauri-apps/api/clipboard');
       return await writeText(text);
     },
 
-    /**
-     * 读取剪贴�?     */
     readText: async (): Promise<string> => {
-      const { readText } = await import('@tauri-apps/api/clipboard');
       return await readText();
     },
   },
@@ -370,11 +534,7 @@ export const tauriBridge = {
    * 通知
    */
   notification: {
-    /**
-     * 请求通知权限
-     */
     requestPermission: async (): Promise<boolean> => {
-      const { isPermissionGranted, requestPermission } = await import('@tauri-apps/api/notification');
       const granted = await isPermissionGranted();
       if (!granted) {
         return await requestPermission() === 'granted';
@@ -382,11 +542,7 @@ export const tauriBridge = {
       return true;
     },
 
-    /**
-     * 发送通知
-     */
     send: async (title: string, body: string): Promise<void> => {
-      const { sendNotification } = await import('@tauri-apps/api/notification');
       sendNotification({ title, body });
     },
   },

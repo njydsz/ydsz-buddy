@@ -147,8 +147,8 @@ coverage.lcov
 # ============================================
 # Local dev instance data
 # ============================================
-.peakcode-*/
-.peakcode/
+.remicode-*/
+.remicode/
 userdata/
 *.db
 *.db-journal

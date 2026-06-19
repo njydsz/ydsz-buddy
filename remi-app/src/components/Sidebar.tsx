@@ -298,8 +298,8 @@ const PROJECT_CONTEXT_MENU_ARCHIVE_ICON = renderToStaticMarkup(<HiOutlineArchive
 const PROJECT_CONTEXT_MENU_DELETE_THREADS_ICON = renderToStaticMarkup(<Trash2 />);
 
 type DebugFeatureFlagsWindow = Window & {
-  peakcodeShowFeatureFlags?: () => void;
-  peakcodeHideFeatureFlags?: () => void;
+  remicodeShowFeatureFlags?: () => void;
+  remicodeHideFeatureFlags?: () => void;
 };
 
 function readDebugFeatureFlagsMenuVisibility(): boolean {
@@ -795,10 +795,10 @@ function prStatusIndicator(pr: ThreadPr): PrStatusIndicator | null {
   return null;
 }
 
-function PeakCodeWordmark() {
+function RemiCodeWordmark() {
   return (
-    <span aria-label="Peak Code" className="shrink-0 text-[14px] font-semibold text-foreground">
-      Peak
+    <span aria-label="Remi Code" className="shrink-0 text-[14px] font-semibold text-foreground">
+      Remi
     </span>
   );
 }
@@ -1204,18 +1204,18 @@ export default function Sidebar() {
       updateVisibility();
     };
 
-    debugWindow.peakcodeShowFeatureFlags = showFeatureFlags;
-    debugWindow.peakcodeHideFeatureFlags = hideFeatureFlags;
+    debugWindow.remicodeShowFeatureFlags = showFeatureFlags;
+    debugWindow.remicodeHideFeatureFlags = hideFeatureFlags;
     window.addEventListener("storage", updateVisibility);
     updateVisibility();
 
     return () => {
       window.removeEventListener("storage", updateVisibility);
-      if (debugWindow.peakcodeShowFeatureFlags === showFeatureFlags) {
-        delete debugWindow.peakcodeShowFeatureFlags;
+      if (debugWindow.remicodeShowFeatureFlags === showFeatureFlags) {
+        delete debugWindow.remicodeShowFeatureFlags;
       }
-      if (debugWindow.peakcodeHideFeatureFlags === hideFeatureFlags) {
-        delete debugWindow.peakcodeHideFeatureFlags;
+      if (debugWindow.remicodeHideFeatureFlags === hideFeatureFlags) {
+        delete debugWindow.remicodeHideFeatureFlags;
       }
     };
   }, []);
@@ -2575,7 +2575,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms â€?this is a folder-level operation, and
+      // Bulk archive always confirms ï¿½?this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [
@@ -5154,7 +5154,7 @@ export default function Sidebar() {
             toastManager.add({
               type: "info",
               title: "You're up to date",
-              description: `Peak Code ${nextState.currentVersion} is already the newest version.`,
+              description: `Remi Code ${nextState.currentVersion} is already the newest version.`,
             });
             return;
           }
@@ -5273,7 +5273,7 @@ export default function Sidebar() {
         render={
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui">
             <div className="flex min-w-0 items-center gap-1">
-              <PeakCodeWordmark />
+              <RemiCodeWordmark />
               <span className="truncate text-[14px] font-normal text-foreground/89">Code</span>
             </div>
           </div>

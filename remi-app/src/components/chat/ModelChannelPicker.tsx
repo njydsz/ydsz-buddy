@@ -88,7 +88,7 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "tongyi",
     name: "通义千问",
     nameEn: "Tongyi Qianwen",
-    subtitle: "阿里�?· 百炼平台",
+    subtitle: "阿里�?· 百炼平台",
     subtitleEn: "Alibaba Cloud BaiLian",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -202,7 +202,7 @@ function ChannelListItem({
 
 export const ModelChannelSection = memo(function ModelChannelSection() {
   const [enabledIds, setEnabledIds] = useLocalStorage(
-    "peakcode:enabled-model-channels:v1",
+    "remicode:enabled-model-channels:v1",
     ["deepseek", "siliconflow", "volcano", "tongyi", "kimi", "minimax"],
     ChannelSlugs
   );
@@ -233,7 +233,7 @@ export const ModelChannelSection = memo(function ModelChannelSection() {
             服务渠道
           </span>
           <span className="text-[11px] text-muted-foreground/70">
-            ({enabledCount}/{totalCount} 已启�?
+            ({enabledCount}/{totalCount} 已启�?
           </span>
         </MenuGroupLabel>
         <div className="space-y-0.5 px-1 py-1">
@@ -273,7 +273,7 @@ export const ModelChannelPicker = memo(function ModelChannelPicker({
   );
 
   const [enabledIds] = useLocalStorage(
-    "peakcode:enabled-model-channels:v1",
+    "remicode:enabled-model-channels:v1",
     ["deepseek", "siliconflow", "volcano", "tongyi", "kimi", "minimax"],
     ChannelSlugs
   );
@@ -293,7 +293,7 @@ export const ModelChannelPicker = memo(function ModelChannelPicker({
         />
         <span className="flex-1">服务渠道</span>
         <span className="text-[11px] text-muted-foreground/70">
-          ({enabledIds.length}/{CHANNELS.length} 已启�?
+          ({enabledIds.length}/{CHANNELS.length} 已启�?
         </span>
       </MenuSubTrigger>
       <MenuSubPopup className="[--available-height:min(24rem,70vh)] w-72">

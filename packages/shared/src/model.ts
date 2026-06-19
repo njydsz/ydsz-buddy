@@ -1,3 +1,9 @@
+/**
+ * @file 模型配置与选择管理模块
+ * @description 提供 AI 模型选项查询、能力解析、模型参数归一化、显示名称格式化等核心功能。
+ * 支持多种 AI 服务提供商（Claude、Codex、Cursor、Gemini、Grok、Pi、OpenCode、Kilo），
+ * 并为每种提供商提供统一的模型选择与能力描述接口。
+ */
 import {
   DEFAULT_MODEL_BY_PROVIDER,
   MODEL_CAPABILITIES_INDEX,
@@ -25,6 +31,10 @@ import {
   CodexReasoningEffort,
 } from "@remi-code/contracts";
 
+/**
+ * 按服务提供商索引的模型 Slug 集合
+ * @description 用于快速判断某个模型 Slug 是否属于指定提供商，避免遍历数组
+ */
 const MODEL_SLUG_SET_BY_PROVIDER: Record<ProviderKind, ReadonlySet<ModelSlug>> = {
   claudeAgent: new Set(MODEL_OPTIONS_BY_PROVIDER.claudeAgent.map((option) => option.slug)),
   codex: new Set(MODEL_OPTIONS_BY_PROVIDER.codex.map((option) => option.slug)),
@@ -36,16 +46,30 @@ const MODEL_SLUG_SET_BY_PROVIDER: Record<ProviderKind, ReadonlySet<ModelSlug>> =
   pi: new Set<ModelSlug>(),
 };
 
+/**
+ * 可选择的模型选项
+ * @description 用于 UI 下拉列表中展示的模型选项，包含标识符和显示名称
+ */
 export interface SelectableModelOption {
+  /** 模型唯一标识符（Slug） */
   slug: string;
+  /** 模型显示名称，用于 UI 展示 */
   name: string;
 }
 
+/**
+ * Gemini 思维配置类型
+ * @description "budget" 表示基于 Token 预算配置（Gemini 2.5），"level" 表示基于级别配置（Gemini 3）
+ */
 export type GeminiThinkingConfigKind = "budget" | "level";
 
+/** 匹配 Gemini 3 系列模型 ID 的正则表达式（如 gemini-3.0、auto-gemini-3 等） */
 const GEMINI_3_MODEL_PATTERN = /^(?:auto-)?gemini-3(?:[.-]|$)/i;
+/** 匹配 Gemini 2.5 系列模型 ID 的正则表达式（如 gemini-2.5-pro、auto-gemini-2.5 等） */
 const GEMINI_2_5_MODEL_PATTERN = /^(?:auto-)?gemini-2\.5(?:[.-]|$)/i;
+/** Gemini 思维级别合法值集合 */
 const GEMINI_THINKING_LEVEL_SET = new Set<GeminiThinkingLevel>(["LOW", "HIGH"]);
+/** Pi 思维级别合法值集合 */
 const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "off",
   "minimal",
@@ -54,6 +78,7 @@ const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "high",
   "xhigh",
 ]);
+/** Gemini 思维预算字符串到数值的映射表 */
 const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
   ["-1", -1],
   ["0", 0],

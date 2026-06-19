@@ -1,31 +1,110 @@
-// FILE: terminalThreads.ts
-// Purpose: Shared terminal identity helpers for naming, provider attribution, and run state.
-// Layer: Shared terminal metadata utilities
-// Exports: command parsing plus resolved terminal presentation metadata for web/server consumers.
+/**
+ * @file terminalThreads.ts
+ * @description 终端线程身份识别与状态管理工具模块
+ * @purpose 提供终端命令解析、CLI 工具识别、终端标题生成和视觉状态管理的共享工具函数
+ * @exports 命令解析、终端身份识别、视觉状态解析等工具函数，供 Web 端和服务端使用
+ */
 
+/**
+ * @constant GENERIC_TERMINAL_THREAD_TITLE
+ * @description 通用终端线程标题，用于未识别出特定 CLI 工具的终端
+ */
 export const GENERIC_TERMINAL_THREAD_TITLE = "New terminal";
+
+/**
+ * @type TerminalCliKind
+ * @description 终端 CLI 工具类型
+ * @property {"codex"} codex - OpenAI Codex CLI 工具
+ * @property {"claude"} claude - Anthropic Claude Code CLI 工具
+ */
 export type TerminalCliKind = "codex" | "claude";
+
+/**
+ * @type TerminalIconKey
+ * @description 终端图标键名，用于映射到具体的图标资源
+ * @property {"terminal"} terminal - 通用终端图标
+ * @property {"openai"} openai - OpenAI 品牌图标
+ * @property {"claude"} claude - Claude 品牌图标
+ */
 export type TerminalIconKey = "terminal" | "openai" | "claude";
+
+/**
+ * @type TerminalActivityState
+ * @description 终端活动状态类型
+ * @property {"running"} running - 正在运行中
+ * @property {"attention"} attention - 需要用户关注（如等待输入）
+ * @property {"review"} review - 需要用户审查（如等待审批）
+ */
 export type TerminalActivityState = "running" | "attention" | "review";
+
+/**
+ * @type TerminalVisualState
+ * @description 终端视觉状态类型，包含空闲状态和活动状态
+ * @property {"idle"} idle - 空闲状态
+ * @property {TerminalActivityState} - 继承所有活动状态
+ */
 export type TerminalVisualState = "idle" | TerminalActivityState;
+
+/**
+ * @type TerminalAgentHookEventType
+ * @description 终端代理钩子事件类型
+ * @property {"Start"} Start - 代理启动事件
+ * @property {"Stop"} Stop - 代理停止事件
+ * @property {"PermissionRequest"} PermissionRequest - 权限请求事件
+ */
 export type TerminalAgentHookEventType = "Start" | "Stop" | "PermissionRequest";
+
+/**
+ * @constant REMICODE_TERMINAL_CLI_KIND_ENV_KEY
+ * @description 环境变量键名，用于指定终端 CLI 工具类型
+ */
 export const REMICODE_TERMINAL_CLI_KIND_ENV_KEY = "REMICODE_TERMINAL_CLI_KIND";
+
+/**
+ * @constant REMICODE_TERMINAL_HOOK_OSC_PREFIX
+ * @description 终端钩子 OSC 转义序列前缀，用于代理事件通信
+ */
 export const REMICODE_TERMINAL_HOOK_OSC_PREFIX = "633;REMICODE_AGENT_EVENT=";
+
+/**
+ * @constant MANAGED_TERMINAL_COMMAND_NAME_BY_CLI_KIND
+ * @description 按 CLI 工具类型映射的托管终端命令名称
+ */
 export const MANAGED_TERMINAL_COMMAND_NAME_BY_CLI_KIND: Record<TerminalCliKind, string> = {
   codex: "codex",
   claude: "claude",
 };
 
+/**
+ * @interface TerminalCommandIdentity
+ * @description 终端命令身份信息接口
+ * @property {TerminalCliKind | null} cliKind - CLI 工具类型，null 表示通用终端
+ * @property {TerminalIconKey} iconKey - 图标键名
+ * @property {string} title - 终端标题
+ */
 export interface TerminalCommandIdentity {
   cliKind: TerminalCliKind | null;
   iconKey: TerminalIconKey;
   title: string;
 }
 
+/**
+ * @interface ResolvedTerminalVisualIdentity
+ * @description 解析后的终端视觉身份信息接口，继承自 TerminalCommandIdentity
+ * @property {TerminalVisualState} state - 终端视觉状态
+ */
 export interface ResolvedTerminalVisualIdentity extends TerminalCommandIdentity {
   state: TerminalVisualState;
 }
 
+/**
+ * @interface ReconcileTerminalCommandIdentityInput
+ * @description 协调终端命令身份的输入参数接口
+ * @property {TerminalCliKind | null | undefined} currentCliKind - 当前 CLI 工具类型
+ * @property {string | null | undefined} currentTitle - 当前终端标题
+ * @property {TerminalCliKind | null | undefined} nextCliKind - 新的 CLI 工具类型
+ * @property {string} nextTitle - 新的终端标题
+ */
 interface ReconcileTerminalCommandIdentityInput {
   currentCliKind?: TerminalCliKind | null | undefined;
   currentTitle?: string | null | undefined;
@@ -33,6 +112,12 @@ interface ReconcileTerminalCommandIdentityInput {
   nextTitle: string;
 }
 
+/**
+ * @function isGenericTerminalThreadTitle
+ * @description 判断给定的标题是否为通用终端线程标题
+ * @param {string | null | undefined} title - 待检查的标题
+ * @returns {boolean} 如果是通用标题返回 true，否则返回 false
+ */
 export function isGenericTerminalThreadTitle(title: string | null | undefined): boolean {
   return (title ?? "").trim() === GENERIC_TERMINAL_THREAD_TITLE;
 }

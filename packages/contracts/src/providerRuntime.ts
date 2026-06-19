@@ -1131,6 +1131,7 @@ const ProviderRuntimeThreadRealtimeClosedEvent = Schema.Struct({
 export type ProviderRuntimeThreadRealtimeClosedEvent =
   typeof ProviderRuntimeThreadRealtimeClosedEvent.Type;
 
+/** 轮次启动事件 */
 const ProviderRuntimeTurnStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnStartedType,
@@ -1138,6 +1139,7 @@ const ProviderRuntimeTurnStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTurnStartedEvent = typeof ProviderRuntimeTurnStartedEvent.Type;
 
+/** 轮次完成事件 */
 const ProviderRuntimeTurnCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnCompletedType,
@@ -1145,6 +1147,7 @@ const ProviderRuntimeTurnCompletedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTurnCompletedEvent = typeof ProviderRuntimeTurnCompletedEvent.Type;
 
+/** 轮次中止事件 */
 const ProviderRuntimeTurnAbortedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnAbortedType,
@@ -1152,6 +1155,7 @@ const ProviderRuntimeTurnAbortedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTurnAbortedEvent = typeof ProviderRuntimeTurnAbortedEvent.Type;
 
+/** 轮次任务更新事件 */
 const ProviderRuntimeTurnTasksUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnTasksUpdatedType,
@@ -1159,6 +1163,7 @@ const ProviderRuntimeTurnTasksUpdatedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTurnTasksUpdatedEvent = typeof ProviderRuntimeTurnTasksUpdatedEvent.Type;
 
+/** 轮次提议增量事件 */
 const ProviderRuntimeTurnProposedDeltaEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnProposedDeltaType,
@@ -1167,6 +1172,7 @@ const ProviderRuntimeTurnProposedDeltaEvent = Schema.Struct({
 export type ProviderRuntimeTurnProposedDeltaEvent =
   typeof ProviderRuntimeTurnProposedDeltaEvent.Type;
 
+/** 轮次提议完成事件 */
 const ProviderRuntimeTurnProposedCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnProposedCompletedType,
@@ -1175,6 +1181,7 @@ const ProviderRuntimeTurnProposedCompletedEvent = Schema.Struct({
 export type ProviderRuntimeTurnProposedCompletedEvent =
   typeof ProviderRuntimeTurnProposedCompletedEvent.Type;
 
+/** 轮次差异更新事件 */
 const ProviderRuntimeTurnDiffUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TurnDiffUpdatedType,
@@ -1182,6 +1189,7 @@ const ProviderRuntimeTurnDiffUpdatedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTurnDiffUpdatedEvent = typeof ProviderRuntimeTurnDiffUpdatedEvent.Type;
 
+/** 项目启动事件 */
 const ProviderRuntimeItemStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ItemStartedType,
@@ -1189,6 +1197,7 @@ const ProviderRuntimeItemStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeItemStartedEvent = typeof ProviderRuntimeItemStartedEvent.Type;
 
+/** 项目更新事件 */
 const ProviderRuntimeItemUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ItemUpdatedType,
@@ -1196,6 +1205,7 @@ const ProviderRuntimeItemUpdatedEvent = Schema.Struct({
 });
 export type ProviderRuntimeItemUpdatedEvent = typeof ProviderRuntimeItemUpdatedEvent.Type;
 
+/** 项目完成事件 */
 const ProviderRuntimeItemCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ItemCompletedType,
@@ -1203,6 +1213,7 @@ const ProviderRuntimeItemCompletedEvent = Schema.Struct({
 });
 export type ProviderRuntimeItemCompletedEvent = typeof ProviderRuntimeItemCompletedEvent.Type;
 
+/** 内容增量事件 */
 const ProviderRuntimeContentDeltaEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ContentDeltaType,
@@ -1210,6 +1221,7 @@ const ProviderRuntimeContentDeltaEvent = Schema.Struct({
 });
 export type ProviderRuntimeContentDeltaEvent = typeof ProviderRuntimeContentDeltaEvent.Type;
 
+/** 请求打开事件 */
 const ProviderRuntimeRequestOpenedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: RequestOpenedType,
@@ -1217,6 +1229,7 @@ const ProviderRuntimeRequestOpenedEvent = Schema.Struct({
 });
 export type ProviderRuntimeRequestOpenedEvent = typeof ProviderRuntimeRequestOpenedEvent.Type;
 
+/** 请求解决事件 */
 const ProviderRuntimeRequestResolvedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: RequestResolvedType,
@@ -1224,6 +1237,7 @@ const ProviderRuntimeRequestResolvedEvent = Schema.Struct({
 });
 export type ProviderRuntimeRequestResolvedEvent = typeof ProviderRuntimeRequestResolvedEvent.Type;
 
+/** 用户输入请求事件 */
 const ProviderRuntimeUserInputRequestedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: UserInputRequestedType,
@@ -1232,6 +1246,7 @@ const ProviderRuntimeUserInputRequestedEvent = Schema.Struct({
 export type ProviderRuntimeUserInputRequestedEvent =
   typeof ProviderRuntimeUserInputRequestedEvent.Type;
 
+/** 用户输入解决事件 */
 const ProviderRuntimeUserInputResolvedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: UserInputResolvedType,
@@ -1240,6 +1255,7 @@ const ProviderRuntimeUserInputResolvedEvent = Schema.Struct({
 export type ProviderRuntimeUserInputResolvedEvent =
   typeof ProviderRuntimeUserInputResolvedEvent.Type;
 
+/** 任务启动事件 */
 const ProviderRuntimeTaskStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TaskStartedType,
@@ -1247,6 +1263,7 @@ const ProviderRuntimeTaskStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTaskStartedEvent = typeof ProviderRuntimeTaskStartedEvent.Type;
 
+/** 任务进度事件 */
 const ProviderRuntimeTaskProgressEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TaskProgressType,
@@ -1254,6 +1271,7 @@ const ProviderRuntimeTaskProgressEvent = Schema.Struct({
 });
 export type ProviderRuntimeTaskProgressEvent = typeof ProviderRuntimeTaskProgressEvent.Type;
 
+/** 任务完成事件 */
 const ProviderRuntimeTaskCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: TaskCompletedType,
@@ -1261,6 +1279,7 @@ const ProviderRuntimeTaskCompletedEvent = Schema.Struct({
 });
 export type ProviderRuntimeTaskCompletedEvent = typeof ProviderRuntimeTaskCompletedEvent.Type;
 
+/** 钩子启动事件 */
 const ProviderRuntimeHookStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: HookStartedType,
@@ -1268,6 +1287,7 @@ const ProviderRuntimeHookStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeHookStartedEvent = typeof ProviderRuntimeHookStartedEvent.Type;
 
+/** 钩子进度事件 */
 const ProviderRuntimeHookProgressEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: HookProgressType,
@@ -1275,6 +1295,7 @@ const ProviderRuntimeHookProgressEvent = Schema.Struct({
 });
 export type ProviderRuntimeHookProgressEvent = typeof ProviderRuntimeHookProgressEvent.Type;
 
+/** 钩子完成事件 */
 const ProviderRuntimeHookCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: HookCompletedType,
@@ -1282,6 +1303,7 @@ const ProviderRuntimeHookCompletedEvent = Schema.Struct({
 });
 export type ProviderRuntimeHookCompletedEvent = typeof ProviderRuntimeHookCompletedEvent.Type;
 
+/** 工具进度事件 */
 const ProviderRuntimeToolProgressEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ToolProgressType,
@@ -1289,6 +1311,7 @@ const ProviderRuntimeToolProgressEvent = Schema.Struct({
 });
 export type ProviderRuntimeToolProgressEvent = typeof ProviderRuntimeToolProgressEvent.Type;
 
+/** 工具摘要事件 */
 const ProviderRuntimeToolSummaryEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ToolSummaryType,
@@ -1296,6 +1319,7 @@ const ProviderRuntimeToolSummaryEvent = Schema.Struct({
 });
 export type ProviderRuntimeToolSummaryEvent = typeof ProviderRuntimeToolSummaryEvent.Type;
 
+/** 认证状态事件 */
 const ProviderRuntimeAuthStatusEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: AuthStatusType,
@@ -1303,6 +1327,7 @@ const ProviderRuntimeAuthStatusEvent = Schema.Struct({
 });
 export type ProviderRuntimeAuthStatusEvent = typeof ProviderRuntimeAuthStatusEvent.Type;
 
+/** 账户更新事件 */
 const ProviderRuntimeAccountUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: AccountUpdatedType,
@@ -1310,6 +1335,7 @@ const ProviderRuntimeAccountUpdatedEvent = Schema.Struct({
 });
 export type ProviderRuntimeAccountUpdatedEvent = typeof ProviderRuntimeAccountUpdatedEvent.Type;
 
+/** 账户速率限制更新事件 */
 const ProviderRuntimeAccountRateLimitsUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: AccountRateLimitsUpdatedType,
@@ -1318,6 +1344,7 @@ const ProviderRuntimeAccountRateLimitsUpdatedEvent = Schema.Struct({
 export type ProviderRuntimeAccountRateLimitsUpdatedEvent =
   typeof ProviderRuntimeAccountRateLimitsUpdatedEvent.Type;
 
+/** MCP 状态更新事件 */
 const ProviderRuntimeMcpStatusUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: McpStatusUpdatedType,
@@ -1325,6 +1352,7 @@ const ProviderRuntimeMcpStatusUpdatedEvent = Schema.Struct({
 });
 export type ProviderRuntimeMcpStatusUpdatedEvent = typeof ProviderRuntimeMcpStatusUpdatedEvent.Type;
 
+/** MCP OAuth 完成事件 */
 const ProviderRuntimeMcpOauthCompletedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: McpOauthCompletedType,
@@ -1333,6 +1361,7 @@ const ProviderRuntimeMcpOauthCompletedEvent = Schema.Struct({
 export type ProviderRuntimeMcpOauthCompletedEvent =
   typeof ProviderRuntimeMcpOauthCompletedEvent.Type;
 
+/** 模型重路由事件 */
 const ProviderRuntimeModelReroutedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ModelReroutedType,
@@ -1340,6 +1369,7 @@ const ProviderRuntimeModelReroutedEvent = Schema.Struct({
 });
 export type ProviderRuntimeModelReroutedEvent = typeof ProviderRuntimeModelReroutedEvent.Type;
 
+/** 配置警告事件 */
 const ProviderRuntimeConfigWarningEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ConfigWarningType,
@@ -1347,6 +1377,7 @@ const ProviderRuntimeConfigWarningEvent = Schema.Struct({
 });
 export type ProviderRuntimeConfigWarningEvent = typeof ProviderRuntimeConfigWarningEvent.Type;
 
+/** 弃用通知事件 */
 const ProviderRuntimeDeprecationNoticeEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: DeprecationNoticeType,
@@ -1355,6 +1386,7 @@ const ProviderRuntimeDeprecationNoticeEvent = Schema.Struct({
 export type ProviderRuntimeDeprecationNoticeEvent =
   typeof ProviderRuntimeDeprecationNoticeEvent.Type;
 
+/** 文件持久化事件 */
 const ProviderRuntimeFilesPersistedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: FilesPersistedType,
@@ -1362,6 +1394,7 @@ const ProviderRuntimeFilesPersistedEvent = Schema.Struct({
 });
 export type ProviderRuntimeFilesPersistedEvent = typeof ProviderRuntimeFilesPersistedEvent.Type;
 
+/** 运行时警告事件 */
 const ProviderRuntimeWarningEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: RuntimeWarningType,
@@ -1369,6 +1402,7 @@ const ProviderRuntimeWarningEvent = Schema.Struct({
 });
 export type ProviderRuntimeWarningEvent = typeof ProviderRuntimeWarningEvent.Type;
 
+/** 运行时错误事件 */
 const ProviderRuntimeErrorEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: RuntimeErrorType,
@@ -1376,6 +1410,11 @@ const ProviderRuntimeErrorEvent = Schema.Struct({
 });
 export type ProviderRuntimeErrorEvent = typeof ProviderRuntimeErrorEvent.Type;
 
+/**
+ * Provider 运行时事件联合类型
+ *
+ * 包含所有可能的运行时事件类型，用于类型安全的运行时事件处理。
+ */
 export const ProviderRuntimeEventV2 = Schema.Union([
   ProviderRuntimeSessionStartedEvent,
   ProviderRuntimeSessionConfiguredEvent,
@@ -1427,26 +1466,44 @@ export const ProviderRuntimeEventV2 = Schema.Union([
 ]);
 export type ProviderRuntimeEventV2 = typeof ProviderRuntimeEventV2.Type;
 
+/**
+ * Provider 运行时事件
+ *
+ * 当前版本的运行时事件类型，等同于 ProviderRuntimeEventV2。
+ */
 export const ProviderRuntimeEvent = ProviderRuntimeEventV2;
 export type ProviderRuntimeEvent = ProviderRuntimeEventV2;
 
 // Compatibility aliases for call sites still importing legacy names.
+/** 兼容性别名：消息增量事件 -> 内容增量事件 */
 const ProviderRuntimeMessageDeltaEvent = ProviderRuntimeContentDeltaEvent;
 export type ProviderRuntimeMessageDeltaEvent = ProviderRuntimeContentDeltaEvent;
+
+/** 兼容性别名：消息完成事件 -> 项目完成事件 */
 const ProviderRuntimeMessageCompletedEvent = ProviderRuntimeItemCompletedEvent;
 export type ProviderRuntimeMessageCompletedEvent = ProviderRuntimeItemCompletedEvent;
+
+/** 兼容性别名：工具启动事件 -> 项目启动事件 */
 const ProviderRuntimeToolStartedEvent = ProviderRuntimeItemStartedEvent;
 export type ProviderRuntimeToolStartedEvent = ProviderRuntimeItemStartedEvent;
+
+/** 兼容性别名：工具完成事件 -> 项目完成事件 */
 const ProviderRuntimeToolCompletedEvent = ProviderRuntimeItemCompletedEvent;
 export type ProviderRuntimeToolCompletedEvent = ProviderRuntimeItemCompletedEvent;
+
+/** 兼容性别名：审批请求事件 -> 请求打开事件 */
 const ProviderRuntimeApprovalRequestedEvent = ProviderRuntimeRequestOpenedEvent;
 export type ProviderRuntimeApprovalRequestedEvent = ProviderRuntimeRequestOpenedEvent;
+
+/** 兼容性别名：审批解决事件 -> 请求解决事件 */
 const ProviderRuntimeApprovalResolvedEvent = ProviderRuntimeRequestResolvedEvent;
 export type ProviderRuntimeApprovalResolvedEvent = ProviderRuntimeRequestResolvedEvent;
 
 // Legacy helper aliases retained for adapters/tests.
+/** 兼容性别名：Provider 工具类型，用于适配器和测试 */
 const ProviderRuntimeToolKind = Schema.Literals(["command", "file-read", "file-change", "other"]);
 export type ProviderRuntimeToolKind = typeof ProviderRuntimeToolKind.Type;
 
+/** 兼容性别名：Provider 轮次状态，用于适配器和测试 */
 export const ProviderRuntimeTurnStatus = RuntimeTurnState;
 export type ProviderRuntimeTurnStatus = RuntimeTurnState;

@@ -1431,7 +1431,7 @@ const en: Messages = {
     },
     groups: {
       app: "App",
-      peakcode: "Remi Code",
+      remicode: "Remi Code",
     },
     general: {
       heading: "General",
@@ -2511,7 +2511,7 @@ const zh: Messages = {
     },
     groups: {
       app: "应用",
-      peakcode: "Remi Code",
+      remicode: "Remi Code",
     },
     general: {
       heading: "通用",

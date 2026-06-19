@@ -4166,7 +4166,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers â€?skills are provider-specific.
+  // Clear selected skills when switching providers ï¿½?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -7727,7 +7727,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode â€?click to return to normal build mode"
+                            title="Plan mode ï¿½?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8112,11 +8112,11 @@ export default function ChatView({
                 <div className="flex w-full max-w-3xl flex-col justify-center">
                   <div className="flex flex-col items-center gap-4 px-6 pb-5 text-center select-none">
                     <img
-                      alt="Peak Code logo"
+                      alt="Remi Code logo"
                       className="size-12 rounded-lg object-contain"
                       draggable={false}
                       height={96}
-                      src="/peakcode-hero.png"
+                      src="/remicode-hero.png"
                       width={96}
                     />
                     <h2 className="text-[26px] font-normal leading-[1.15] tracking-[-0.015em] text-foreground/95 sm:text-[30px]">
@@ -8471,7 +8471,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode â€?click to return to normal build mode"
+                                        title="Plan mode ï¿½?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

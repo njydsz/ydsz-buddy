@@ -60,11 +60,11 @@ interface BrowserPanelProps {
 
 const BROWSER_BOUNDS_SYNC_BURST_FRAMES = 30;
 const BROWSER_BOUNDS_SYNC_STABLE_FRAME_TARGET = 2;
-const BROWSER_WEBVIEW_PARTITION = "persist:peakcode-browser";
+const BROWSER_WEBVIEW_PARTITION = "persist:remicode-browser";
 const BROWSER_BLANK_URL = "about:blank";
 const BROWSER_PERF_SAMPLE_INTERVAL_MS = 5_000;
-const PEAKCODE_BROWSER_LABEL = "PeakCode browser";
-const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "peakcode:panel-resize-overlay-sync";
+const REMICODE_BROWSER_LABEL = "RemiCode browser";
+const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "remicode:panel-resize-overlay-sync";
 const IMAGE_SIZE_LIMIT_LABEL = `${Math.round(PROVIDER_SEND_TURN_MAX_IMAGE_BYTES / (1024 * 1024))}MB`;
 const NATIVE_BROWSER_OBSCURING_OVERLAY_SELECTOR = [
   "[data-slot='dialog-backdrop']",
@@ -285,7 +285,7 @@ function isBrowserPerfLoggingEnabled(): boolean {
   }
 
   try {
-    return window.localStorage.getItem("peakcode:browser-perf") === "1";
+    return window.localStorage.getItem("remicode:browser-perf") === "1";
   } catch {
     return false;
   }
@@ -531,7 +531,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
     }
 
     const intervalId = window.setInterval(() => {
-      console.info(`[${PEAKCODE_BROWSER_LABEL} panel perf]`, {
+      console.info(`[${REMICODE_BROWSER_LABEL} panel perf]`, {
         threadId,
         ...perfCountersRef.current,
       });

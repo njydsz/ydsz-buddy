@@ -41,7 +41,7 @@ function createBaseServerConfig(): ServerConfig {
   return {
     cwd: "/repo/project",
     worktreesDir: "/repo/.codex/worktrees",
-    keybindingsConfigPath: "/repo/project/.peakcode-keybindings.json",
+    keybindingsConfigPath: "/repo/project/.remicode-keybindings.json",
     keybindings: [],
     issues: [],
     providers: [
@@ -358,7 +358,7 @@ describe("Keybindings update toast", () => {
       sendServerConfigUpdatedPush([]);
       await waitForNoToast("Keybindings updated");
 
-      // Remount the app â€?onServerConfigUpdated replays the cached value
+      // Remount the app ï¿½?onServerConfigUpdated replays the cached value
       // synchronously on subscribe. This should NOT produce a toast.
       await mounted.cleanup();
       const remounted = await mountApp();

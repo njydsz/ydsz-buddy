@@ -40,7 +40,7 @@
 
 ### 1.1 项目定位
 
-**Remi Code** 是一个高性能、本地优先的 AI 编程助手桌面应用，基于 Peak Code 项目完整迁移至 Rust 技术栈。它提供了一个统一的界面来管理多个 AI 编程代理（Claude Code、Codex、Gemini、Grok、OpenCode 等），让开发者可以高效地与 AI 协作编程。
+**Remi Code** 是一个高性能、本地优先的 AI 编程助手桌面应用，基于 Remi Code 项目完整迁移至 Rust 技术栈。它提供了一个统一的界面来管理多个 AI 编程代理（Claude Code、Codex、Gemini、Grok、OpenCode 等），让开发者可以高效地与 AI 协作编程。
 
 ### 1.2 核心价值
 
@@ -50,9 +50,9 @@
 - 🛠️ **完整功能**：Git 集成、终端管理、文件浏览器、差异对比等完整开发工具链
 - 📦 **轻量桌面**：基于 Tauri 2.x 构建，安装包体积减少 60-70%
 
-### 1.3 与 Peak Code 的关系
+### 1.3 项目演进
 
-Remi Code 是 Peak Code 的 Rust 迁移版本，目标是：
+Remi Code 是独立发展的 Rust 迁移版本，目标是：
 
 - **后端完全重写**：从 Node.js + Effect-TS 迁移到 Rust + Tokio
 - **前端适配**：从 Electron 迁移到 Tauri，保持 React 技术栈
@@ -149,7 +149,7 @@ Remi Code 是 Peak Code 的 Rust 迁移版本，目标是：
 
 ### 3.4 技术栈对比
 
-| 层次 | Peak Code | Remi Code | 改进点 |
+| 层次 | 原方案 | Remi Code | 改进点 |
 |------|-----------|-----------|--------|
 | **运行时** | Node.js (单线程) | Rust (多线程) | 性能提升 80%+ |
 | **框架** | Effect-TS | Axum + Tokio | 学习曲线降低 |
@@ -670,7 +670,7 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 ### 9.1 目标性能
 
-| 指标 | Peak Code (Node.js) | Remi Code (Rust) 目标 | 提升幅度 |
+| 指标 | 原方案 (Node.js) | Remi Code (Rust) 目标 | 提升幅度 |
 |------|---------------------|----------------------|----------|
 | 启动时间 | ~5s | ~1s | 80% |
 | 内存占用 | ~300MB | ~50MB | 83% |
@@ -763,7 +763,7 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 ### B. 相关链接
 
-- [Peak Code 原项目](https://github.com/PeakCode-AI/PeakCode)
+- [原项目参考](https://github.com/PeakCode-AI/PeakCode)
 - [Tauri 官方文档](https://tauri.app/)
 - [Rust 官方文档](https://www.rust-lang.org/)
 - [Effect-TS 文档](https://effect.website/)

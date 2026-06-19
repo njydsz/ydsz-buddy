@@ -1,6 +1,6 @@
 # Remi Code 后端架构迁移全案
 
-> 基于 Peak Code 后端架构的全量深度分析 + Rust 全新架构设计 + 分模块精细化迁移方案
+> 基于 Remi Code 后端架构的全量深度分析 + Rust 全新架构设计 + 分模块精细化迁移方案
 
 **版本**: v1.0  
 **日期**: 2026-06-19  
@@ -10,7 +10,7 @@
 
 ## 目录
 
-- [第一部分：Peak Code 后端架构摸底分析](#第一部分peak-code-后端架构摸底分析)
+- [第一部分：Remi Code 后端架构摸底分析](#第一部分remi-code-后端架构摸底分析)
   - [一、系统总体架构概览](#一系统总体架构概览)
   - [二、技术栈分析](#二技术栈分析)
   - [三、后端核心模块深度拆解](#三后端核心模块深度拆解)
@@ -42,13 +42,13 @@
 
 ---
 
-# 第一部分：Peak Code 后端架构摸底分析
+# 第一部分：Remi Code 后端架构摸底分析
 
 ## 一、系统总体架构概览
 
 ### 1.1 系统定位
 
-Peak Code 是一个 AI 编程助手平台，后端作为 **Node.js WebSocket 服务器**运行，包装多个 AI Provider（Codex、Claude、Cursor、Gemini、Grok、Kilo、OpenCode、Pi）的 CLI/SDK，通过 JSON-RPC over stdio 与 Provider 运行时通信，向上层前端提供 WebSocket + HTTP 服务。
+Remi Code 是一个 AI 编程助手平台，后端作为 **Node.js WebSocket 服务器**运行，包装多个 AI Provider（Codex、Claude、Cursor、Gemini、Grok、Kilo、OpenCode、Pi）的 CLI/SDK，通过 JSON-RPC over stdio 与 Provider 运行时通信，向上层前端提供 WebSocket + HTTP 服务。
 
 ### 1.2 整体架构图
 
@@ -99,11 +99,11 @@ Peak Code 是一个 AI 编程助手平台，后端作为 **Node.js WebSocket 服
 
 | 包名 | 路径 | 职责 |
 |------|------|------|
-| `@peakcode/server` | `apps/server` | Node.js 后端主服务 |
-| `@peakcode/web` | `apps/web` | React 前端 |
-| `@peakcode/desktop` | `apps/desktop` | Electron 桌面壳 |
-| `@peakcode/contracts` | `packages/contracts` | 共享 Schema、TypeScript 类型合约 |
-| `@peakcode/shared` | `packages/shared` | 共享运行时工具（DrainableWorker、Net 等） |
+| `@remi-code/server` | `apps/server` | Node.js 后端主服务 |
+| `@remi-code/web` | `apps/web` | React 前端 |
+| `@remi-code/desktop` | `apps/desktop` | Electron 桌面壳 |
+| `@remi-code/contracts` | `packages/contracts` | 共享 Schema、TypeScript 类型合约 |
+| `@remi-code/shared` | `packages/shared` | 共享运行时工具（DrainableWorker、Net 等） |
 
 ---
 
@@ -582,7 +582,7 @@ Project (1) ---- (N) Thread
 
 - **无 Web 端**：仅考虑桌面端（Tauri）场景，移除 HTTP 服务器相关逻辑
 - **本地优先**：所有服务本地运行，无需远程服务器
-- **协议兼容**：WebSocket RPC 协议与 Peak Code 完全一致，前端零改动
+- **协议兼容**：WebSocket RPC 协议与 Remi Code 完全一致，前端零改动
 - **渐进式迁移**：按模块分阶段迁移，每阶段可独立验证
 
 ---
@@ -1030,7 +1030,7 @@ remi-cli
 
 ### 10.1 WebSocket RPC 协议
 
-保持与 Peak Code 完全兼容的协议格式：
+保持与 Remi Code 完全兼容的协议格式：
 
 ```rust
 // 请求
@@ -1063,7 +1063,7 @@ struct WebSocketPush {
 
 ### 10.2 RPC 方法清单（保持兼容）
 
-完整迁移 Peak Code 的 60+ RPC 方法，方法名和参数结构保持一致：
+完整迁移 Remi Code 的 60+ RPC 方法，方法名和参数结构保持一致：
 
 ```rust
 // 编排方法（12 个）
@@ -1161,7 +1161,7 @@ const PUSH_CHANNELS: &[&str] = &[
 
 ### 11.4 性能指标目标
 
-| 指标 | Peak Code (Node.js) | Remi Code (Rust) 目标 | 提升幅度 |
+| 指标 | Remi Code (Node.js) | Remi Code (Rust) 目标 | 提升幅度 |
 |------|---------------------|----------------------|----------|
 | 启动时间 | ~5s | ~1s | 80% |
 | 内存占用 | ~300MB | ~50MB | 83% |
@@ -1176,7 +1176,7 @@ const PUSH_CHANNELS: &[&str] = &[
 
 ### 12.1 迁移原则
 
-1. **功能完整性**：100% 复刻 Peak Code 后端所有功能
+1. **功能完整性**：100% 复刻 Remi Code 后端所有功能
 2. **接口兼容性**：WebSocket RPC 协议完全兼容，前端零改动
 3. **渐进式迁移**：按模块分阶段迁移，每阶段可独立验证
 4. **性能优先**：充分利用 Rust 性能优势，优化瓶颈
@@ -1235,7 +1235,7 @@ const PUSH_CHANNELS: &[&str] = &[
 - [ ] 所有事件类型定义完成
 - [ ] 所有命令类型定义完成
 - [ ] 配置解析测试通过
-- [ ] 序列化/反序列化测试通过（与 Peak Code JSON 格式兼容）
+- [ ] 序列化/反序列化测试通过（与 Remi Code JSON 格式兼容）
 
 ---
 
@@ -1253,13 +1253,13 @@ const PUSH_CHANNELS: &[&str] = &[
 
 1. **并发控制**：SQLite 写锁竞争
 2. **事务管理**：确保事件追加和投影更新的原子性
-3. **迁移兼容性**：与 Peak Code 数据库格式兼容
+3. **迁移兼容性**：与 Remi Code 数据库格式兼容
 
 ### 解决方案
 
 1. 使用 SQLite WAL 模式提升并发读性能
 2. 使用事务确保原子性
-3. 迁移脚本与 Peak Code 保持一致
+3. 迁移脚本与 Remi Code 保持一致
 
 ### 验收标准
 
@@ -1329,7 +1329,7 @@ const PUSH_CHANNELS: &[&str] = &[
 
 1. 使用 tokio::process 管理子进程
 2. 使用 serde_json 处理 JSON-RPC
-3. 参考 Peak Code 的 ACP 实现
+3. 参考 Remi Code 的 ACP 实现
 4. 实现事件转换层
 
 ### 验收标准
@@ -1538,7 +1538,7 @@ const PUSH_CHANNELS: &[&str] = &[
 
 ### 23.1 功能完整性
 
-- [ ] 所有 Peak Code 后端功能 100% 复刻
+- [ ] 所有 Remi Code 后端功能 100% 复刻
 - [ ] 所有 RPC 方法功能一致
 - [ ] 所有推送通道功能一致
 - [ ] 所有数据模型结构一致
@@ -1551,8 +1551,8 @@ const PUSH_CHANNELS: &[&str] = &[
 
 ### 23.3 性能指标
 
-- [ ] 启动时间 < 1 秒（Peak Code 约 3-5 秒）
-- [ ] 内存占用 < 50MB（Peak Code 约 150-200MB）
+- [ ] 启动时间 < 1 秒（Remi Code 约 3-5 秒）
+- [ ] 内存占用 < 50MB（Remi Code 约 150-200MB）
 - [ ] RPC 方法响应时间 < 10ms（P99）
 - [ ] 并发连接数 > 100
 
@@ -1577,9 +1577,9 @@ const PUSH_CHANNELS: &[&str] = &[
 
 | 风险 | 影响 | 应对措施 |
 |------|------|----------|
-| **Provider 协议复杂** | 高 | 详细研究 Peak Code 实现，逐步验证 |
-| **ACP 协议实现** | 高 | 参考 Peak Code 的 ACP 实现，充分测试 |
-| **WebSocket RPC 兼容性** | 高 | 与 Peak Code 协议格式严格对齐，前端联调验证 |
+| **Provider 协议复杂** | 高 | 详细研究 Remi Code 实现，逐步验证 |
+| **ACP 协议实现** | 高 | 参考 Remi Code 的 ACP 实现，充分测试 |
+| **WebSocket RPC 兼容性** | 高 | 与 Remi Code 协议格式严格对齐，前端联调验证 |
 | **SQLite 并发性能** | 中 | 使用 WAL 模式，必要时可升级到 PostgreSQL |
 | **跨平台 PTY** | 中 | 使用 portable-pty，充分测试各平台 |
 
@@ -1588,7 +1588,7 @@ const PUSH_CHANNELS: &[&str] = &[
 | 风险 | 影响 | 应对措施 |
 |------|------|----------|
 | **模块依赖复杂** | 中 | 严格按阶段推进，每阶段独立验证 |
-| **功能遗漏** | 高 | 详细对照 Peak Code 功能清单，逐一验证 |
+| **功能遗漏** | 高 | 详细对照 Remi Code 功能清单，逐一验证 |
 | **性能不达标** | 中 | 早期进行性能基准测试，及时优化 |
 
 ### 24.3 质量风险

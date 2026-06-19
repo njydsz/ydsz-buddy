@@ -57,7 +57,7 @@ function createBaseServerConfig(): ServerConfig {
   return {
     cwd: "/repo/project",
     worktreesDir: "/repo/.codex/worktrees",
-    keybindingsConfigPath: "/repo/project/.peakcode-keybindings.json",
+    keybindingsConfigPath: "/repo/project/.remicode-keybindings.json",
     keybindings: [],
     issues: [],
     providers: [

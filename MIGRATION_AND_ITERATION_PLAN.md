@@ -1,6 +1,6 @@
 # Remi Code 桌面端迁移实施方案
 
-> 基于 Peak Code 项目向 Tauri + React 桌面端应用的全量前端迁移
+> 基于 Remi Code 项目向 Tauri + React 桌面端应用的全量前端迁移
 
 **版本**: v1.0  
 **日期**: 2026-06-19  
@@ -28,7 +28,7 @@
 
 ### 1.1 迁移目标
 
-将 Peak Code 项目（Electron + React）的前端部分完整迁移至 Remi Code 桌面端应用，采用 **Tauri + React** 技术栈，实现：
+将 Remi Code 项目（Electron + React）的前端部分完整迁移至 Remi Code 桌面端应用，采用 **Tauri + React** 技术栈，实现：
 
 - ✅ 更小的应用体积（预期减少 60-70%）
 - ✅ 更低的内存占用（预期减少 40-50%）
@@ -40,7 +40,7 @@
 
 ### 1.2 技术栈对比
 
-| 层级 | Peak Code (原) | Remi Code (新) | 迁移策略 |
+| 层级 | Remi Code (原) | Remi Code (新) | 迁移策略 |
 |------|----------------|----------------|----------|
 | **桌面框架** | Electron 40.6.0 | Tauri 2.x | 适配 Tauri API，移除 Electron 特定代码 |
 | **前端框架** | React 19 + Vite 8 | React 19 + Vite 8 | 保持前端技术栈，适配 Tauri 环境 |
@@ -52,7 +52,7 @@
 
 ### 1.3 核心功能模块清单
 
-基于 Peak Code 项目分析，需迁移的前端模块包括：
+基于 Remi Code 项目分析，需迁移的前端模块包括：
 
 #### 界面组件 (apps/web/src/components)
 - ✅ 聊天界面系统（ChatView、ChatTranscript、Composer）
@@ -73,8 +73,8 @@
 - ✅ 工具函数（lib）
 
 #### 共享模块 (packages)
-- ✅ @peakcode/contracts → @remi-code/contracts
-- ✅ @peakcode/shared → @remi-code/shared
+- ✅ @remi-code/contracts → @remi-code/contracts
+- ✅ @remi-code/shared → @remi-code/shared
 - ✅ effect-acp → remi-acp
 
 ---
@@ -995,12 +995,12 @@ export function ChatView({ threadId }: Props) {
 **全局替换**：
 
 ```bash
-# 替换所有 @peakcode/* 为 @remi-code/*
+# 替换所有 @remi-code/* 为 @remi-code/*
 # 在所有 .ts 和 .tsx 文件中
 
 # 原代码
-import { ThreadId, type Thread } from "@peakcode/contracts";
-import { normalizeModelSlug } from "@peakcode/shared/model";
+import { ThreadId, type Thread } from "@remi-code/contracts";
+import { normalizeModelSlug } from "@remi-code/shared/model";
 
 # 新代码
 import { ThreadId, type Thread } from "@remi-code/contracts";
@@ -1162,13 +1162,13 @@ mkdir -p packages/contracts/src
 mkdir -p packages/shared/src
 mkdir -p packages/remi-acp/src
 
-# 复制 Peak Code 共享包源码
-cp -r D:/Code/github/PeakCode/packages/contracts/src/* packages/contracts/src/
-cp -r D:/Code/github/PeakCode/packages/shared/src/* packages/shared/src/
-cp -r D:/Code/github/PeakCode/packages/effect-acp/src/* packages/remi-acp/src/
+# 复制 Remi Code 共享包源码
+cp -r D:/Code/github/RemiCode/packages/contracts/src/* packages/contracts/src/
+cp -r D:/Code/github/RemiCode/packages/shared/src/* packages/shared/src/
+cp -r D:/Code/github/RemiCode/packages/effect-acp/src/* packages/remi-acp/src/
 
 # 更新 package.json 中的包名
-# 将所有 @peakcode/* 替换为 @remi-code/*
+# 将所有 @remi-code/* 替换为 @remi-code/*
 ```
 
 #### 任务 1.3：配置工作区
@@ -1203,8 +1203,8 @@ cp -r D:/Code/github/PeakCode/packages/effect-acp/src/* packages/remi-acp/src/
 #### 任务 2.1：迁移前端组件
 
 ```bash
-# 复制 Peak Code 前端源码
-cp -r D:/Code/github/PeakCode/apps/web/src/* remi-app/src/
+# 复制 Remi Code 前端源码
+cp -r D:/Code/github/RemiCode/apps/web/src/* remi-app/src/
 
 # 删除不需要的文件
 rm -rf remi-app/src/electron-*
@@ -1213,7 +1213,7 @@ rm -rf remi-app/src/electron-*
 #### 任务 2.2：更新导入路径
 
 ```bash
-# 替换所有 @peakcode/* 为 @remi-code/*
+# 替换所有 @remi-code/* 为 @remi-code/*
 # 可以使用 IDE 的全局替换功能
 ```
 
@@ -1292,7 +1292,7 @@ npm run tauri build
 
 ### 5.2 性能指标
 
-| 指标 | Peak Code | Remi Code (目标) |
+| 指标 | Remi Code | Remi Code (目标) |
 |------|-----------|------------------|
 | 安装包大小 | ~150MB | ~50MB |
 | 启动时间 | ~5s | ~2s |
@@ -1309,7 +1309,7 @@ npm run tauri build
 
 - ✅ README.md（项目介绍、安装、使用）
 - ✅ 开发文档（架构、模块、API）
-- ✅ 迁移指南（从 Peak Code 迁移）
+- ✅ 迁移指南（从 Remi Code 迁移）
 - ✅ API 文档（Tauri Commands）
 
 ---
@@ -1482,7 +1482,7 @@ npm run tauri build
 
 #### 7.1.1 当前问题分析
 
-**Peak Code (Electron)**:
+**Remi Code (Electron)**:
 - 启动时间：~5秒
 - 主要瓶颈：
   - Electron 主进程初始化
@@ -1658,7 +1658,7 @@ const sendMessage = useMutation({
 
 #### 7.4.1 当前问题分析
 
-**Peak Code (Electron)**:
+**Remi Code (Electron)**:
 - 基础内存：~300MB
 - 主要占用：
   - Electron 主进程：~80MB
@@ -2508,7 +2508,7 @@ function Terminal() {
 ### 10.4 迁移改造说明
 
 ```markdown
-# 从 Peak Code 迁移到 Remi Code
+# 从 Remi Code 迁移到 Remi Code
 
 ## 主要变化
 
@@ -2546,7 +2546,7 @@ const unlisten = await tauriBridge.events.onEvent((data) => {
 ### 3. 包名变化
 ```typescript
 // 旧代码
-import { Thread } from '@peakcode/contracts';
+import { Thread } from '@remi-code/contracts';
 
 // 新代码
 import { Thread } from '@remi-code/contracts';
@@ -2566,9 +2566,9 @@ TAURI=true
 #### 存储路径
 ```bash
 # 旧路径（Electron）
-Windows: %APPDATA%/PeakCode
-macOS: ~/Library/Application Support/PeakCode
-Linux: ~/.config/PeakCode
+Windows: %APPDATA%/RemiCode
+macOS: ~/Library/Application Support/RemiCode
+Linux: ~/.config/RemiCode
 
 # 新路径（Tauri）
 Windows: %APPDATA%/com.remi.code
@@ -2581,13 +2581,13 @@ Linux: ~/.config/remi-code
 ### 1. 备份数据
 ```bash
 # 备份配置文件
-cp -r ~/Library/Application\ Support/PeakCode ~/PeakCode-backup
+cp -r ~/Library/Application\ Support/RemiCode ~/RemiCode-backup
 ```
 
 ### 2. 卸载旧版本
 ```bash
 # macOS
-rm -rf /Applications/PeakCode.app
+rm -rf /Applications/RemiCode.app
 ```
 
 ### 3. 安装新版本
@@ -2606,9 +2606,9 @@ rm -rf /Applications/PeakCode.app
 
 ## 回滚方案
 
-如需回滚到 Peak Code：
+如需回滚到 Remi Code：
 1. 卸载 Remi Code
-2. 重新安装 Peak Code
+2. 重新安装 Remi Code
 3. 恢复备份数据
 ```
 
