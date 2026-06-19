@@ -2,7 +2,7 @@ import type { ProjectId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-const LATEST_PROJECT_STORAGE_KEY = "peakcode:latest-project:v1";
+const LATEST_PROJECT_STORAGE_KEY = "remicode:latest-project:v1";
 
 interface LatestProjectStore {
   latestProjectId: ProjectId | null;

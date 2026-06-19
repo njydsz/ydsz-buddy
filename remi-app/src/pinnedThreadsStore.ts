@@ -15,7 +15,7 @@ interface PinnedThreadsStoreState {
   prunePinnedThreads: (threadIds: readonly ThreadId[]) => void;
 }
 
-const PINNED_THREADS_STORAGE_KEY = "peakcode:pinned-threads:v1";
+const PINNED_THREADS_STORAGE_KEY = "remicode:pinned-threads:v1";
 
 function normalizePinnedThreadIds(threadIds: readonly ThreadId[]): ThreadId[] {
   const seen = new Set<ThreadId>();

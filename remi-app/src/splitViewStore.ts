@@ -112,8 +112,8 @@ interface SplitViewStore {
   setHasHydrated: (hasHydrated: boolean) => void;
 }
 
-// Keep the v1 suffix stable while using the PeakCode namespace.
-const SPLIT_VIEW_STORAGE_KEY = "peakcode:split-view-state:v1";
+// Keep the v1 suffix stable while using the RemiCode namespace.
+const SPLIT_VIEW_STORAGE_KEY = "remicode:split-view-state:v1";
 const SPLIT_VIEW_STORAGE_VERSION = 2;
 const DEFAULT_RATIO = 0.5;
 const MIN_RATIO = 0.25;

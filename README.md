@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="./remi-app/public/peakcode.png" alt="Remi Code" width="128" />
+  <img src="./remi-app/public/remicode.png" alt="Remi Code" width="128" />
 </p>
 
 <h1 align="center">Remi Code</h1>
 
 <p align="center">
   <strong>高性能 AI 编程助手桌面应用</strong><br />
-  基于 Peak Code 迁移至 Rust + Tauri 技术栈，统一管理 Claude、Codex、Gemini、Grok 等 AI 代理
+  基于 Remi Code 迁移至 Rust + Tauri 技术栈，统一管理 Claude、Codex、Gemini、Grok 等 AI 代理
 </p>
 
 <p align="center">

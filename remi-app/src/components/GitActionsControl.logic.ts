@@ -3,7 +3,7 @@ import type {
   GitStackedAction,
   GitStatusResult,
 } from "@remi-code/contracts";
-import { isTemporaryWorktreeBranch, resolveUniquePeakcodeBranchName } from "@remi-code/shared/git";
+import { isTemporaryWorktreeBranch, resolveUniqueRemicodeBranchName } from "@remi-code/shared/git";
 
 export type GitActionIconName = "commit" | "push" | "pr";
 
@@ -69,7 +69,7 @@ export function resolveDefaultCreateBranchName(
   existingBranchNames: readonly string[],
   preferredBranch?: string,
 ): string {
-  return resolveUniquePeakcodeBranchName(existingBranchNames, preferredBranch);
+  return resolveUniqueRemicodeBranchName(existingBranchNames, preferredBranch);
 }
 
 export function buildGitActionProgressStages(input: {

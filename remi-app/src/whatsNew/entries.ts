@@ -11,7 +11,7 @@
 //   - `version` must match `apps/web/package.json#version` exactly. The
 //     logic compares versions as semver and only opens the dialog when the
 //     installed build has a curated entry here.
-//   - `date` is rendered verbatim â€?pick whatever format you want (e.g.
+//   - `date` is rendered verbatim ï¿½?pick whatever format you want (e.g.
 //     `"Apr 18"`, `"2026-04-18"`), just be consistent release-to-release.
 //   - Each feature takes an `id` (stable, unique per release), a short
 //     `title`, a marketing `description`, and optionally an `image`
@@ -28,7 +28,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       {
         id: "claude-opus-4-8",
         title: "Claude Opus 4.8 is available",
-        description: "Peak Code now includes Claude Opus 4.8 in the Claude model picker.",
+        description: "Remi Code now includes Claude Opus 4.8 in the Claude model picker.",
       },
     ],
   },
@@ -46,7 +46,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "provider-picker-readiness",
         title: "Provider choices wait for real readiness",
         description:
-          "The provider picker no longer treats unknown provider status as usable. Providers stay in a checking state until Peak Code has confirmed that the local runtime is available and authenticated.",
+          "The provider picker no longer treats unknown provider status as usable. Providers stay in a checking state until Remi Code has confirmed that the local runtime is available and authenticated.",
       },
       {
         id: "desktop-shutdown-recovery",
@@ -74,7 +74,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "grok-provider-headline",
-        title: "Grok joins Peak Code",
+        title: "Grok joins Remi Code",
         description:
           "Pick Grok as a first-class coding provider with ACP-backed sessions, model selection, approval handling, resume support, provider health checks, settings, icons, and handoff wired through the same app surfaces as the rest of your agents.",
       },
@@ -154,7 +154,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "kilo-code-provider",
         title: "Kilo Code joins the provider lineup",
         description:
-          "Peak Code can now launch and monitor Kilo Code sessions alongside Codex, Claude, Cursor, OpenCode, and Gemini, with health checks, settings, mentions, handoff, and model compatibility wired through the app.",
+          "Remi Code can now launch and monitor Kilo Code sessions alongside Codex, Claude, Cursor, OpenCode, and Gemini, with health checks, settings, mentions, handoff, and model compatibility wired through the app.",
       },
       {
         id: "provider-ordering",
@@ -184,7 +184,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "opencode-latest-events",
         title: "OpenCode sessions understand the latest event stream",
         description:
-          "Peak Code now tracks the newer OpenCode SDK session events, keeps titles fresher, and has much deeper coverage around OpenCode startup, output, and recovery flows.",
+          "Remi Code now tracks the newer OpenCode SDK session events, keeps titles fresher, and has much deeper coverage around OpenCode startup, output, and recovery flows.",
       },
       {
         id: "turn-recovery-stability",
@@ -226,7 +226,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "secure-local-image-route",
         title: "Generated images use a safer local route",
         description:
-          "Peak Code now serves generated files through a dedicated local-image endpoint with MIME checks, workspace-aware path resolution, and Codex generated_images allowlists for both the normal home and desktop overlay home.",
+          "Remi Code now serves generated files through a dedicated local-image endpoint with MIME checks, workspace-aware path resolution, and Codex generated_images allowlists for both the normal home and desktop overlay home.",
       },
       {
         id: "provider-favorites",
@@ -254,9 +254,9 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "cursor-provider",
-        title: "Cursor is now a first-class Peak Code provider",
+        title: "Cursor is now a first-class Remi Code provider",
         description:
-          "Run Cursor CLI sessions directly from Peak Code with ACP-backed startup, model discovery, existing-chat resume, handoff, and provider health checks alongside Codex and OpenCode.",
+          "Run Cursor CLI sessions directly from Remi Code with ACP-backed startup, model discovery, existing-chat resume, handoff, and provider health checks alongside Codex and OpenCode.",
       },
       {
         id: "effect-acp-runtime",
@@ -304,7 +304,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "git-commit-push-action",
         title: "Git gained commit and push",
         description:
-          "The Git actions menu can now commit current work and push it from Peak Code, keeping the common release and handoff flow closer to the chat.",
+          "The Git actions menu can now commit current work and push it from Remi Code, keeping the common release and handoff flow closer to the chat.",
       },
       {
         id: "task-and-approval-polish",
@@ -346,13 +346,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "git-branch-pr-flow",
         title: "Git flows are smoother",
         description:
-          "The Git menu now includes branch creation with Peak Code-style names, and PR creation can recover from GitHub duplicate-PR responses by reusing the existing open pull request.",
+          "The Git menu now includes branch creation with Remi Code-style names, and PR creation can recover from GitHub duplicate-PR responses by reusing the existing open pull request.",
       },
       {
         id: "legacy-import-recovery",
         title: "Legacy T3 imports heal themselves",
         description:
-          "A new migration reconciles older imported T3 Code databases whose migration history skipped Peak Code schema changes, preventing missing-column crashes after import.",
+          "A new migration reconciles older imported T3 Code databases whose migration history skipped Remi Code schema changes, preventing missing-column crashes after import.",
       },
       {
         id: "runtime-idle-cleanup",
@@ -394,7 +394,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "opencode-task-events",
         title: "OpenCode tasks show live progress",
         description:
-          "OpenCode todo events now flow into Peak Code as active task updates, with a compact banner option for keeping current work visible without taking over the chat.",
+          "OpenCode todo events now flow into Remi Code as active task updates, with a compact banner option for keeping current work visible without taking over the chat.",
       },
       {
         id: "opencode-model-favourites",
@@ -406,7 +406,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "opencode-context-usage",
         title: "OpenCode context usage is tracked",
         description:
-          "OpenCode sessions now report context usage more consistently, giving Peak Code better runtime visibility as conversations grow.",
+          "OpenCode sessions now report context usage more consistently, giving Remi Code better runtime visibility as conversations grow.",
       },
       {
         id: "production-debug-flags",
@@ -424,7 +424,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "cursor-provider",
         title: "Cursor CLI support landed",
         description:
-          "Cursor is now available as a provider, with ACP sessions, model discovery, existing chats, handoff, shortcuts, and git text generation wired into Peak Code.",
+          "Cursor is now available as a provider, with ACP sessions, model discovery, existing chats, handoff, shortcuts, and git text generation wired into Remi Code.",
       },
       {
         id: "chatgpt-voice-transcription",
@@ -454,7 +454,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "toast-feature-flags",
         title: "Toast behavior can be feature-flagged",
         description:
-          "Toast notifications picked up feature-flag wiring, giving Peak Code a safer way to roll notification changes forward or back.",
+          "Toast notifications picked up feature-flag wiring, giving Remi Code a safer way to roll notification changes forward or back.",
       },
       {
         id: "desktop-bridge-reconnects",
@@ -472,7 +472,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "branch-switch-recovery",
         title: "Branch switching is much safer",
         description:
-          "Peak Code now handles messy branch switches with clearer recovery actions, recreated stashes, unpublished branch publishing, and stronger checks around conflicts and local work.",
+          "Remi Code now handles messy branch switches with clearer recovery actions, recreated stashes, unpublished branch publishing, and stronger checks around conflicts and local work.",
       },
       {
         id: "plan-mode-proposals",
@@ -484,7 +484,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "desktop-navigation-controls",
         title: "Desktop navigation controls landed",
         description:
-          "The desktop app now has app-level back and forward navigation controls, making it easier to move around Peak Code without losing your place.",
+          "The desktop app now has app-level back and forward navigation controls, making it easier to move around Remi Code without losing your place.",
       },
       {
         id: "sidebar-sort-stability",
@@ -508,7 +508,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "gpt-5-5-available",
         title: "GPT-5.5 is available",
         description:
-          "GPT-5.5 is now in the model picker with the right default reasoning behavior, so you can move new Codex sessions onto the latest model directly from Peak Code.",
+          "GPT-5.5 is now in the model picker with the right default reasoning behavior, so you can move new Codex sessions onto the latest model directly from Remi Code.",
       },
       {
         id: "opencode-provider",
@@ -548,7 +548,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "project-import-path-browsing",
-        title: "ðŸ—‚ï¸?Project import browsing got smarter",
+        title: "ðŸ—‚ï¿½?Project import browsing got smarter",
         description:
           "The import palette can now browse nearby paths more directly, helping you find and open the right project location with less guesswork.",
       },
@@ -562,17 +562,17 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "desktop-boot-splash-screen",
         title: "ðŸš€ Desktop startup feels clearer",
         description:
-          "Peak Code now shows a proper splash screen while the desktop backend spins up, so launch feels intentional instead of looking briefly stalled.",
+          "Remi Code now shows a proper splash screen while the desktop backend spins up, so launch feels intentional instead of looking briefly stalled.",
       },
       {
         id: "provider-capability-and-theme-polish",
-        title: "ðŸŽ›ï¸?Better provider and theme polish",
+        title: "ðŸŽ›ï¿½?Better provider and theme polish",
         description:
           "Model capability handling, theme editing, and related picker behavior were tightened up so settings feel more consistent and trustworthy.",
       },
       {
         id: "desktop-release-reliability",
-        title: "ðŸ› ï¸?Desktop release plumbing is sturdier",
+        title: "ðŸ› ï¿½?Desktop release plumbing is sturdier",
         description:
           "Startup readiness checks, desktop packaging config, and platform entitlements were refined to make desktop builds and app boot more reliable.",
       },
@@ -586,7 +586,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "theme-pack-editor",
         title: "ðŸŽ¨ Theme packs are editable",
         description:
-          "The new theme pack editor lets you tune UI colors directly in Peak Code, with shared theme tokens keeping the sidebar, composer, transcript, and controls in sync.",
+          "The new theme pack editor lets you tune UI colors directly in Remi Code, with shared theme tokens keeping the sidebar, composer, transcript, and controls in sync.",
       },
       {
         id: "sidebar-notifications",
@@ -602,13 +602,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "runtime-mode-recovery",
-        title: "ðŸ›¡ï¸?Safer runtime-mode recovery",
+        title: "ðŸ›¡ï¿½?Safer runtime-mode recovery",
         description:
           "Codex runtime permissions now propagate more reliably across resumed sessions and provider restarts, keeping the app closer to the mode you actually selected.",
       },
       {
         id: "composer-and-picker-polish",
-        title: "âœ?Cleaner composer and picker styling",
+        title: "ï¿½?Cleaner composer and picker styling",
         description:
           "Composer chrome, picker hover states, runtime controls, and changed-file rows picked up a more consistent visual pass across light and dark themes.",
       },
@@ -626,7 +626,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "cleaner-file-and-folder-mentions",
-        title: "ðŸ—‚ï¸?Cleaner file and folder mentions",
+        title: "ðŸ—‚ï¿½?Cleaner file and folder mentions",
         description:
           "Mention chips, file trees, and changed-file rows now use a lighter shared icon system that keeps paths easier to scan across the app.",
       },
@@ -664,7 +664,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         id: "update-check-timeout-recovery",
         title: "ðŸ›Ÿ No more stuck checking state",
         description:
-          "If the updater never answers, Peak Code now times out and recovers instead of hanging on a permanent Checking status.",
+          "If the updater never answers, Remi Code now times out and recovers instead of hanging on a permanent Checking status.",
       },
     ],
   },
@@ -674,15 +674,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "gemini-provider-support",
-        title: "â™?Gemini support is here",
+        title: "ï¿½?Gemini support is here",
         description:
           "Use Gemini alongside Codex and Claude Agent, with provider-aware models and handoff support built into the app.",
       },
       {
         id: "custom-provider-binaries",
-        title: "ðŸ› ï¸?Custom binary paths for every provider",
+        title: "ðŸ› ï¿½?Custom binary paths for every provider",
         description:
-          "Point Peak Code at your own Codex, Claude, or Gemini binary when your setup lives outside the default install path.",
+          "Point Remi Code at your own Codex, Claude, or Gemini binary when your setup lives outside the default install path.",
       },
       {
         id: "assistant-selections-as-context",
@@ -732,7 +732,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "cleaner-reasoning-picker",
-        title: "âœ?Cleaner reasoning picker order",
+        title: "ï¿½?Cleaner reasoning picker order",
         description:
           "The reasoning picker has been reordered to make the most common choices quicker to reach.",
       },
@@ -753,13 +753,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         description:
           "Every update now opens a one-time dialog highlighting the latest changes, so you don't have to hunt through a changelog to know what shipped.",
         details:
-          "The dialog only shows up once per release â€?dismiss it and it stays out of your way until the next version.",
+          "The dialog only shows up once per release ï¿½?dismiss it and it stays out of your way until the next version.",
       },
       {
         id: "release-history-settings",
         title: "ðŸ“š Release history in Settings",
         description:
-          "A full changelog lives under Settings â†?Release history, grouped by version in a collapsible accordion.",
+          "A full changelog lives under Settings ï¿½?Release history, grouped by version in a collapsible accordion.",
         details:
           "Revisit any past release at any time. The same notes as the post-update dialog, nothing to hunt for.",
       },

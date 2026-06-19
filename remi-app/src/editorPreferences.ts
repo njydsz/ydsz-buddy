@@ -2,7 +2,7 @@ import { EDITORS, EditorId, NativeApi } from "@remi-code/contracts";
 import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from "./hooks/useLocalStorage";
 import { useMemo } from "react";
 
-const LAST_EDITOR_KEY = "peakcode:last-editor";
+const LAST_EDITOR_KEY = "remicode:last-editor";
 
 export function usePreferredEditor(availableEditors: ReadonlyArray<EditorId>) {
   const [lastEditor, setLastEditor] = useLocalStorage(LAST_EDITOR_KEY, null, EditorId);

@@ -786,81 +786,122 @@ const HookCompletedPayload = Schema.Struct({
 });
 export type HookCompletedPayload = typeof HookCompletedPayload.Type;
 
+/** 工具进度事件负载 */
 const ToolProgressPayload = Schema.Struct({
+  /** 工具使用 ID */
   toolUseId: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 工具名称 */
   toolName: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 进度摘要 */
   summary: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 已用时间（秒） */
   elapsedSeconds: Schema.optional(Schema.Number),
 });
 export type ToolProgressPayload = typeof ToolProgressPayload.Type;
 
+/** 工具摘要事件负载 */
 const ToolSummaryPayload = Schema.Struct({
+  /** 摘要内容 */
   summary: TrimmedNonEmptyStringSchema,
+  /** 前置工具使用 ID 列表 */
   precedingToolUseIds: Schema.optional(Schema.Array(TrimmedNonEmptyStringSchema)),
 });
 export type ToolSummaryPayload = typeof ToolSummaryPayload.Type;
 
+/** 认证状态事件负载 */
 const AuthStatusPayload = Schema.Struct({
+  /** 是否正在认证 */
   isAuthenticating: Schema.optional(Schema.Boolean),
+  /** 输出信息 */
   output: Schema.optional(Schema.Array(Schema.String)),
+  /** 错误信息 */
   error: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type AuthStatusPayload = typeof AuthStatusPayload.Type;
 
+/** 账户更新事件负载 */
 const AccountUpdatedPayload = Schema.Struct({
+  /** 账户信息 */
   account: Schema.Unknown,
 });
 export type AccountUpdatedPayload = typeof AccountUpdatedPayload.Type;
 
+/** 账户速率限制更新事件负载 */
 const AccountRateLimitsUpdatedPayload = Schema.Struct({
+  /** 速率限制信息 */
   rateLimits: Schema.Unknown,
 });
 export type AccountRateLimitsUpdatedPayload = typeof AccountRateLimitsUpdatedPayload.Type;
 
+/** MCP 状态更新事件负载 */
 const McpStatusUpdatedPayload = Schema.Struct({
+  /** MCP 状态信息 */
   status: Schema.Unknown,
 });
 export type McpStatusUpdatedPayload = typeof McpStatusUpdatedPayload.Type;
 
+/** MCP OAuth 完成事件负载 */
 const McpOauthCompletedPayload = Schema.Struct({
+  /** 是否成功 */
   success: Schema.Boolean,
+  /** 名称 */
   name: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 错误信息 */
   error: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type McpOauthCompletedPayload = typeof McpOauthCompletedPayload.Type;
 
+/** 模型重路由事件负载 */
 const ModelReroutedPayload = Schema.Struct({
+  /** 原模型 */
   fromModel: TrimmedNonEmptyStringSchema,
+  /** 新模型 */
   toModel: TrimmedNonEmptyStringSchema,
+  /** 重路由原因 */
   reason: TrimmedNonEmptyStringSchema,
 });
 export type ModelReroutedPayload = typeof ModelReroutedPayload.Type;
 
+/** 配置警告事件负载 */
 const ConfigWarningPayload = Schema.Struct({
+  /** 警告摘要 */
   summary: TrimmedNonEmptyStringSchema,
+  /** 详细信息 */
   details: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 配置路径 */
   path: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 配置范围 */
   range: Schema.optional(Schema.Unknown),
 });
 export type ConfigWarningPayload = typeof ConfigWarningPayload.Type;
 
+/** 弃用通知事件负载 */
 const DeprecationNoticePayload = Schema.Struct({
+  /** 通知摘要 */
   summary: TrimmedNonEmptyStringSchema,
+  /** 详细信息 */
   details: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type DeprecationNoticePayload = typeof DeprecationNoticePayload.Type;
 
+/** 文件持久化事件负载 */
 const FilesPersistedPayload = Schema.Struct({
+  /** 成功持久化的文件列表 */
   files: Schema.Array(
     Schema.Struct({
+      /** 文件名 */
       filename: TrimmedNonEmptyStringSchema,
+      /** 文件 ID */
       fileId: TrimmedNonEmptyStringSchema,
     }),
   ),
+  /** 失败的文件列表 */
   failed: Schema.optional(
     Schema.Array(
       Schema.Struct({
+        /** 文件名 */
         filename: TrimmedNonEmptyStringSchema,
+        /** 错误信息 */
         error: TrimmedNonEmptyStringSchema,
       }),
     ),
@@ -868,19 +909,115 @@ const FilesPersistedPayload = Schema.Struct({
 });
 export type FilesPersistedPayload = typeof FilesPersistedPayload.Type;
 
+/** 运行时警告事件负载 */
 const RuntimeWarningPayload = Schema.Struct({
+  /** 警告消息 */
   message: TrimmedNonEmptyStringSchema,
+  /** 详细信息 */
   detail: Schema.optional(Schema.Unknown),
 });
 export type RuntimeWarningPayload = typeof RuntimeWarningPayload.Type;
 
+/** 运行时错误事件负载 */
 const RuntimeErrorPayload = Schema.Struct({
+  /** 错误消息 */
   message: TrimmedNonEmptyStringSchema,
+  /** 错误分类 */
   class: Schema.optional(RuntimeErrorClass),
+  /** 详细信息 */
   detail: Schema.optional(Schema.Unknown),
 });
 export type RuntimeErrorPayload = typeof RuntimeErrorPayload.Type;
 
+/**
+ * Provider 运行时事件定义
+ *
+ * 以下是所有具体的事件类型定义，每个事件都继承自 ProviderRuntimeEventBase，
+ * 并包含特定类型的负载数据。事件类型包括：
+ *
+ * 会话事件：
+ * - ProviderRuntimeSessionStartedEvent: 会话启动
+ * - ProviderRuntimeSessionConfiguredEvent: 会话配置
+ * - ProviderRuntimeSessionStateChangedEvent: 会话状态变化
+ * - ProviderRuntimeSessionExitedEvent: 会话退出
+ *
+ * 线程事件：
+ * - ProviderRuntimeThreadStartedEvent: 线程启动
+ * - ProviderRuntimeThreadStateChangedEvent: 线程状态变化
+ * - ProviderRuntimeThreadMetadataUpdatedEvent: 线程元数据更新
+ * - ProviderRuntimeThreadTokenUsageUpdatedEvent: 线程 Token 使用量更新
+ * - ProviderRuntimeThreadRealtimeStartedEvent: 实时会话启动
+ * - ProviderRuntimeThreadRealtimeItemAddedEvent: 实时会话新增项目
+ * - ProviderRuntimeThreadRealtimeAudioDeltaEvent: 实时会话音频增量
+ * - ProviderRuntimeThreadRealtimeErrorEvent: 实时会话错误
+ * - ProviderRuntimeThreadRealtimeClosedEvent: 实时会话关闭
+ *
+ * 轮次事件：
+ * - ProviderRuntimeTurnStartedEvent: 轮次启动
+ * - ProviderRuntimeTurnCompletedEvent: 轮次完成
+ * - ProviderRuntimeTurnAbortedEvent: 轮次中止
+ * - ProviderRuntimeTurnTasksUpdatedEvent: 轮次任务更新
+ * - ProviderRuntimeTurnProposedDeltaEvent: 轮次提议增量
+ * - ProviderRuntimeTurnProposedCompletedEvent: 轮次提议完成
+ * - ProviderRuntimeTurnDiffUpdatedEvent: 轮次差异更新
+ *
+ * 项目事件：
+ * - ProviderRuntimeItemStartedEvent: 项目启动
+ * - ProviderRuntimeItemUpdatedEvent: 项目更新
+ * - ProviderRuntimeItemCompletedEvent: 项目完成
+ *
+ * 内容事件：
+ * - ProviderRuntimeContentDeltaEvent: 内容增量
+ *
+ * 请求事件：
+ * - ProviderRuntimeRequestOpenedEvent: 请求打开
+ * - ProviderRuntimeRequestResolvedEvent: 请求解决
+ *
+ * 用户输入事件：
+ * - ProviderRuntimeUserInputRequestedEvent: 用户输入请求
+ * - ProviderRuntimeUserInputResolvedEvent: 用户输入解决
+ *
+ * 任务事件：
+ * - ProviderRuntimeTaskStartedEvent: 任务启动
+ * - ProviderRuntimeTaskProgressEvent: 任务进度
+ * - ProviderRuntimeTaskCompletedEvent: 任务完成
+ *
+ * 钩子事件：
+ * - ProviderRuntimeHookStartedEvent: 钩子启动
+ * - ProviderRuntimeHookProgressEvent: 钩子进度
+ * - ProviderRuntimeHookCompletedEvent: 钩子完成
+ *
+ * 工具事件：
+ * - ProviderRuntimeToolProgressEvent: 工具进度
+ * - ProviderRuntimeToolSummaryEvent: 工具摘要
+ *
+ * 认证事件：
+ * - ProviderRuntimeAuthStatusEvent: 认证状态
+ *
+ * 账户事件：
+ * - ProviderRuntimeAccountUpdatedEvent: 账户更新
+ * - ProviderRuntimeAccountRateLimitsUpdatedEvent: 账户速率限制更新
+ *
+ * MCP 事件：
+ * - ProviderRuntimeMcpStatusUpdatedEvent: MCP 状态更新
+ * - ProviderRuntimeMcpOauthCompletedEvent: MCP OAuth 完成
+ *
+ * 模型事件：
+ * - ProviderRuntimeModelReroutedEvent: 模型重路由
+ *
+ * 配置事件：
+ * - ProviderRuntimeConfigWarningEvent: 配置警告
+ * - ProviderRuntimeDeprecationNoticeEvent: 弃用通知
+ *
+ * 文件事件：
+ * - ProviderRuntimeFilesPersistedEvent: 文件持久化
+ *
+ * 运行时事件：
+ * - ProviderRuntimeWarningEvent: 运行时警告
+ * - ProviderRuntimeErrorEvent: 运行时错误
+ */
+
+/** 会话启动事件 */
 const ProviderRuntimeSessionStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: SessionStartedType,
@@ -888,6 +1025,7 @@ const ProviderRuntimeSessionStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeSessionStartedEvent = typeof ProviderRuntimeSessionStartedEvent.Type;
 
+/** 会话配置事件 */
 const ProviderRuntimeSessionConfiguredEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: SessionConfiguredType,
@@ -896,6 +1034,7 @@ const ProviderRuntimeSessionConfiguredEvent = Schema.Struct({
 export type ProviderRuntimeSessionConfiguredEvent =
   typeof ProviderRuntimeSessionConfiguredEvent.Type;
 
+/** 会话状态变化事件 */
 const ProviderRuntimeSessionStateChangedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: SessionStateChangedType,
@@ -904,6 +1043,7 @@ const ProviderRuntimeSessionStateChangedEvent = Schema.Struct({
 export type ProviderRuntimeSessionStateChangedEvent =
   typeof ProviderRuntimeSessionStateChangedEvent.Type;
 
+/** 会话退出事件 */
 const ProviderRuntimeSessionExitedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: SessionExitedType,
@@ -911,6 +1051,7 @@ const ProviderRuntimeSessionExitedEvent = Schema.Struct({
 });
 export type ProviderRuntimeSessionExitedEvent = typeof ProviderRuntimeSessionExitedEvent.Type;
 
+/** 线程启动事件 */
 const ProviderRuntimeThreadStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadStartedType,
@@ -918,6 +1059,7 @@ const ProviderRuntimeThreadStartedEvent = Schema.Struct({
 });
 export type ProviderRuntimeThreadStartedEvent = typeof ProviderRuntimeThreadStartedEvent.Type;
 
+/** 线程状态变化事件 */
 const ProviderRuntimeThreadStateChangedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadStateChangedType,
@@ -926,6 +1068,7 @@ const ProviderRuntimeThreadStateChangedEvent = Schema.Struct({
 export type ProviderRuntimeThreadStateChangedEvent =
   typeof ProviderRuntimeThreadStateChangedEvent.Type;
 
+/** 线程元数据更新事件 */
 const ProviderRuntimeThreadMetadataUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadMetadataUpdatedType,
@@ -934,6 +1077,7 @@ const ProviderRuntimeThreadMetadataUpdatedEvent = Schema.Struct({
 export type ProviderRuntimeThreadMetadataUpdatedEvent =
   typeof ProviderRuntimeThreadMetadataUpdatedEvent.Type;
 
+/** 线程 Token 使用量更新事件 */
 const ProviderRuntimeThreadTokenUsageUpdatedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadTokenUsageUpdatedType,
@@ -942,6 +1086,7 @@ const ProviderRuntimeThreadTokenUsageUpdatedEvent = Schema.Struct({
 export type ProviderRuntimeThreadTokenUsageUpdatedEvent =
   typeof ProviderRuntimeThreadTokenUsageUpdatedEvent.Type;
 
+/** 实时会话启动事件 */
 const ProviderRuntimeThreadRealtimeStartedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadRealtimeStartedType,
@@ -950,6 +1095,7 @@ const ProviderRuntimeThreadRealtimeStartedEvent = Schema.Struct({
 export type ProviderRuntimeThreadRealtimeStartedEvent =
   typeof ProviderRuntimeThreadRealtimeStartedEvent.Type;
 
+/** 实时会话新增项目事件 */
 const ProviderRuntimeThreadRealtimeItemAddedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadRealtimeItemAddedType,
@@ -958,6 +1104,7 @@ const ProviderRuntimeThreadRealtimeItemAddedEvent = Schema.Struct({
 export type ProviderRuntimeThreadRealtimeItemAddedEvent =
   typeof ProviderRuntimeThreadRealtimeItemAddedEvent.Type;
 
+/** 实时会话音频增量事件 */
 const ProviderRuntimeThreadRealtimeAudioDeltaEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadRealtimeAudioDeltaType,
@@ -966,6 +1113,7 @@ const ProviderRuntimeThreadRealtimeAudioDeltaEvent = Schema.Struct({
 export type ProviderRuntimeThreadRealtimeAudioDeltaEvent =
   typeof ProviderRuntimeThreadRealtimeAudioDeltaEvent.Type;
 
+/** 实时会话错误事件 */
 const ProviderRuntimeThreadRealtimeErrorEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadRealtimeErrorType,
@@ -974,6 +1122,7 @@ const ProviderRuntimeThreadRealtimeErrorEvent = Schema.Struct({
 export type ProviderRuntimeThreadRealtimeErrorEvent =
   typeof ProviderRuntimeThreadRealtimeErrorEvent.Type;
 
+/** 实时会话关闭事件 */
 const ProviderRuntimeThreadRealtimeClosedEvent = Schema.Struct({
   ...ProviderRuntimeEventBase.fields,
   type: ThreadRealtimeClosedType,

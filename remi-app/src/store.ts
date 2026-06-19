@@ -76,7 +76,7 @@ type ThreadUserInputResponseRequestedEvent = Extract<
   { type: "thread.user-input-response-requested" }
 >;
 
-const PERSISTED_STATE_KEY = "peakcode:renderer-state:v8";
+const PERSISTED_STATE_KEY = "remicode:renderer-state:v8";
 const LEGACY_PERSISTED_STATE_KEYS = [
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",
@@ -2685,7 +2685,7 @@ function applyTurnDiffSummaryToThread(
             completedAt: nextSummary.completedAt,
             // Prefer the incoming assistantMessageId when present; otherwise keep
             // the previous one from the same turn. Turn-diff events may arrive
-            // before the message has been finalized and carry a null id â€?they
+            // before the message has been finalized and carry a null id ï¿½?they
             // must not erase a real id already recorded by thread.message-sent.
             assistantMessageId:
               nextSummary.assistantMessageId ??

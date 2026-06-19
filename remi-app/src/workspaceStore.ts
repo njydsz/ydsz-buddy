@@ -31,7 +31,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-const WORKSPACE_STORE_STORAGE_KEY = "peakcode:workspace-pages:v2";
+const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
   if (typeof crypto.randomUUID === "function") {

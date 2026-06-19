@@ -282,6 +282,7 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.skillsListLocal, ListLocalUserSkillsInput),
 ]);
 
+/** WebSocket 请求格式，包含请求 ID 和请求体 */
 export const WebSocketRequest = Schema.Struct({
   id: TrimmedNonEmptyString,
   body: WebSocketRequestBody,

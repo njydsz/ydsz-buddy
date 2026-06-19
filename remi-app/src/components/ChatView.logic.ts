@@ -8,7 +8,7 @@ import {
   type ThreadId as ThreadIdType,
 } from "@remi-code/contracts";
 import { normalizeModelSlug } from "@remi-code/shared/model";
-import { buildPeakcodeBranchName } from "@remi-code/shared/git";
+import { buildRemicodeBranchName } from "@remi-code/shared/git";
 import { isGenericChatThreadTitle } from "@remi-code/shared/chatThreads";
 import { isGenericTerminalThreadTitle } from "@remi-code/shared/terminalThreads";
 import {
@@ -394,7 +394,7 @@ export function buildSuggestedWorktreeName(input: {
   associatedWorktreeBranch?: string | null;
   title?: string | null;
 }): string {
-  return buildPeakcodeBranchName(input.associatedWorktreeBranch ?? input.title);
+  return buildRemicodeBranchName(input.associatedWorktreeBranch ?? input.title);
 }
 
 export function cloneComposerImageForRetry(

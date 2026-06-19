@@ -55,7 +55,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-export const COMPOSER_DRAFT_STORAGE_KEY = "peakcode:composer-drafts:v1";
+export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
@@ -2710,10 +2710,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided â†?use them
+              // Explicit options provided ï¿½?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection â†?preserve existing options, update provider+model
+              // No options in selection ï¿½?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
