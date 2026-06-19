@@ -386,7 +386,7 @@ impl AuthService {
         match token {
             Some(t) => {
                 if self.verify_token(&t).await? {
-                    Ok(Some(t))
+                    Ok(Some(t.to_string()))
                 } else {
                     Ok(None)
                 }
@@ -422,7 +422,7 @@ impl AuthService {
             Some(t) => {
                 // Try WebSocket token first, then regular session token
                 if self.verify_websocket_token(&t).await? || self.verify_token(&t).await? {
-                    Ok(Some(t))
+                    Ok(Some(t.to_string()))
                 } else {
                     Ok(None)
                 }
