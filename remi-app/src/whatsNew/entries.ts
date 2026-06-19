@@ -11,7 +11,7 @@
 //   - `version` must match `apps/web/package.json#version` exactly. The
 //     logic compares versions as semver and only opens the dialog when the
 //     installed build has a curated entry here.
-//   - `date` is rendered verbatim — pick whatever format you want (e.g.
+//   - `date` is rendered verbatim �?pick whatever format you want (e.g.
 //     `"Apr 18"`, `"2026-04-18"`), just be consistent release-to-release.
 //   - Each feature takes an `id` (stable, unique per release), a short
 //     `title`, a marketing `description`, and optionally an `image`
@@ -548,7 +548,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "project-import-path-browsing",
-        title: "🗂️ Project import browsing got smarter",
+        title: "🗂�?Project import browsing got smarter",
         description:
           "The import palette can now browse nearby paths more directly, helping you find and open the right project location with less guesswork.",
       },
@@ -566,13 +566,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "provider-capability-and-theme-polish",
-        title: "🎛️ Better provider and theme polish",
+        title: "🎛�?Better provider and theme polish",
         description:
           "Model capability handling, theme editing, and related picker behavior were tightened up so settings feel more consistent and trustworthy.",
       },
       {
         id: "desktop-release-reliability",
-        title: "🛠️ Desktop release plumbing is sturdier",
+        title: "🛠�?Desktop release plumbing is sturdier",
         description:
           "Startup readiness checks, desktop packaging config, and platform entitlements were refined to make desktop builds and app boot more reliable.",
       },
@@ -602,13 +602,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "runtime-mode-recovery",
-        title: "🛡️ Safer runtime-mode recovery",
+        title: "🛡�?Safer runtime-mode recovery",
         description:
           "Codex runtime permissions now propagate more reliably across resumed sessions and provider restarts, keeping the app closer to the mode you actually selected.",
       },
       {
         id: "composer-and-picker-polish",
-        title: "✨ Cleaner composer and picker styling",
+        title: "�?Cleaner composer and picker styling",
         description:
           "Composer chrome, picker hover states, runtime controls, and changed-file rows picked up a more consistent visual pass across light and dark themes.",
       },
@@ -626,7 +626,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "cleaner-file-and-folder-mentions",
-        title: "🗂️ Cleaner file and folder mentions",
+        title: "🗂�?Cleaner file and folder mentions",
         description:
           "Mention chips, file trees, and changed-file rows now use a lighter shared icon system that keeps paths easier to scan across the app.",
       },
@@ -674,13 +674,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "gemini-provider-support",
-        title: "♊ Gemini support is here",
+        title: "�?Gemini support is here",
         description:
           "Use Gemini alongside Codex and Claude Agent, with provider-aware models and handoff support built into the app.",
       },
       {
         id: "custom-provider-binaries",
-        title: "🛠️ Custom binary paths for every provider",
+        title: "🛠�?Custom binary paths for every provider",
         description:
           "Point Peak Code at your own Codex, Claude, or Gemini binary when your setup lives outside the default install path.",
       },
@@ -732,7 +732,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       },
       {
         id: "cleaner-reasoning-picker",
-        title: "✨ Cleaner reasoning picker order",
+        title: "�?Cleaner reasoning picker order",
         description:
           "The reasoning picker has been reordered to make the most common choices quicker to reach.",
       },
@@ -753,13 +753,13 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         description:
           "Every update now opens a one-time dialog highlighting the latest changes, so you don't have to hunt through a changelog to know what shipped.",
         details:
-          "The dialog only shows up once per release — dismiss it and it stays out of your way until the next version.",
+          "The dialog only shows up once per release �?dismiss it and it stays out of your way until the next version.",
       },
       {
         id: "release-history-settings",
         title: "📚 Release history in Settings",
         description:
-          "A full changelog lives under Settings → Release history, grouped by version in a collapsible accordion.",
+          "A full changelog lives under Settings �?Release history, grouped by version in a collapsible accordion.",
         details:
           "Revisit any past release at any time. The same notes as the post-update dialog, nothing to hunt for.",
       },

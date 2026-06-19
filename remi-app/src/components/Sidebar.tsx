@@ -60,10 +60,10 @@ import {
   ThreadId,
   type GitStatusResult,
   type ResolvedKeybindingsConfig,
-} from "@peakcode/contracts";
-import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
-import { getDefaultModel } from "@peakcode/shared/model";
-import { resolveThreadWorkspaceCwd } from "@peakcode/shared/threadEnvironment";
+} from "@remi-code/contracts";
+import { isGenericChatThreadTitle } from "@remi-code/shared/chatThreads";
+import { getDefaultModel } from "@remi-code/shared/model";
+import { resolveThreadWorkspaceCwd } from "@remi-code/shared/threadEnvironment";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -2575,7 +2575,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms â€” this is a folder-level operation, and
+      // Bulk archive always confirms â€?this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [

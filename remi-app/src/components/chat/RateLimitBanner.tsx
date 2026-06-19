@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { OrchestrationThreadActivity } from "@peakcode/contracts";
+import type { OrchestrationThreadActivity } from "@remi-code/contracts";
 import { Alert, AlertAction, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";
@@ -25,7 +25,7 @@ export function deriveLatestRateLimitStatus(
     if (!payload) continue;
     const status = payload.status;
     if (status !== "rejected" && status !== "allowed_warning") continue;
-    // If resetsAt is in the past, the limit has expired â€” skip
+    // If resetsAt is in the past, the limit has expired â€?skip
     if (typeof payload.resetsAt === "string") {
       const resetsAtMs = Date.parse(payload.resetsAt);
       if (!Number.isNaN(resetsAtMs) && resetsAtMs < now) continue;

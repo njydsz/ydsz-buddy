@@ -3,7 +3,7 @@
 // Layer: UI state helpers
 // Exports: tree traversal/mutation utilities and migration helpers consumed by the store and route surfaces
 
-import type { ProjectId, ThreadId } from "@peakcode/contracts";
+import type { ProjectId, ThreadId } from "@remi-code/contracts";
 import type {
   LeafPane,
   Pane,

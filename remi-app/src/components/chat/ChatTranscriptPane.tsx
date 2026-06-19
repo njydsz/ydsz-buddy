@@ -3,7 +3,7 @@
 // Layer: Chat transcript shell
 // Depends on: MessagesTimeline and ChatView's list-owned scroll contract.
 
-import { type MessageId, type ThreadId, type TurnId } from "@peakcode/contracts";
+import { type MessageId, type ThreadId, type TurnId } from "@remi-code/contracts";
 import { type LegendListRef } from "@legendapp/list/react";
 import {
   memo,

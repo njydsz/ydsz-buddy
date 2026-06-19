@@ -6,7 +6,7 @@ import {
   ProjectId,
   ThreadId,
   TurnId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   buildInputNeededCopy,
   buildTaskCompletionCopy,

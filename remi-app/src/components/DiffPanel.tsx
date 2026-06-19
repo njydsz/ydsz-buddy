@@ -1,7 +1,7 @@
 import { FileDiff, type FileDiffMetadata, Virtualizer } from "@pierre/diffs/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { ThreadId, type TurnId } from "@peakcode/contracts";
+import { ThreadId, type TurnId } from "@remi-code/contracts";
 import { FaPlusMinus } from "react-icons/fa6";
 import { LuWrapText } from "react-icons/lu";
 import {
@@ -148,7 +148,7 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
   cursor: pointer;
 }
 
-/* Hide the default change-type icon (blue circle) â€” replaced by chevron + file-type icon. */
+/* Hide the default change-type icon (blue circle) â€?replaced by chevron + file-type icon. */
 [data-change-icon] {
   display: none;
 }

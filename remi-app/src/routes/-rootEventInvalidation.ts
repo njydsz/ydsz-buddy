@@ -3,8 +3,8 @@
 // Layer: Root route utility
 // Exports: Event invalidation predicates for provider/project and git query caches.
 
-import type { OrchestrationEvent, ThreadId } from "@peakcode/contracts";
-import { resolveThreadWorkspaceCwd } from "@peakcode/shared/threadEnvironment";
+import type { OrchestrationEvent, ThreadId } from "@remi-code/contracts";
+import { resolveThreadWorkspaceCwd } from "@remi-code/shared/threadEnvironment";
 
 import type { AppState } from "../store";
 import { getThreadFromState } from "../threadDerivation";

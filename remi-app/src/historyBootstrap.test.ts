@@ -1,4 +1,4 @@
-import { MessageId } from "@peakcode/contracts";
+import { MessageId } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { buildBootstrapInput } from "./historyBootstrap";

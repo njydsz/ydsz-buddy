@@ -13,7 +13,7 @@ import {
   type RuntimeMode,
   type ThreadEnvironmentMode,
   type ThreadId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   type ComposerThreadDraftState,
   type DraftThreadEnvMode,

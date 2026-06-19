@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DesktopUpdateState } from "@peakcode/contracts";
+import type { DesktopUpdateState } from "@remi-code/contracts";
 
 import { getDesktopUpdateButtonPresentation } from "./desktopUpdate.logic";
 

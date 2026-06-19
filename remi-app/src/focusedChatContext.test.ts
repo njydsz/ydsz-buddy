@@ -1,4 +1,4 @@
-import { ProjectId, ThreadId, TurnId } from "@peakcode/contracts";
+import { ProjectId, ThreadId, TurnId } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { type DraftThreadState } from "./composerDraftStore";

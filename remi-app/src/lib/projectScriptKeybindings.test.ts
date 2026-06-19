@@ -1,4 +1,4 @@
-import { MAX_KEYBINDING_VALUE_LENGTH, type KeybindingCommand } from "@peakcode/contracts";
+import { MAX_KEYBINDING_VALUE_LENGTH, type KeybindingCommand } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { commandForProjectScript } from "../projectScripts";

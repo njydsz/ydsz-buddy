@@ -7,7 +7,7 @@ import {
   OrchestrationGetFullThreadDiffInput,
   OrchestrationGetTurnDiffInput,
   ThreadId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { Option, Schema } from "effect";
 import { ensureNativeApi } from "../nativeApi";

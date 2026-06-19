@@ -1,4 +1,4 @@
-import { type ModelSelection } from "@peakcode/contracts";
+import { type ModelSelection } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 import {
   resolveAvailableHandoffTargetProviders,

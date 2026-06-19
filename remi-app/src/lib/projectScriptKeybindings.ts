@@ -3,7 +3,7 @@ import {
   type KeybindingCommand,
   type KeybindingRule,
   type ResolvedKeybindingsConfig,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { Schema } from "effect";
 
 export const PROJECT_SCRIPT_KEYBINDING_INVALID_MESSAGE = "Invalid keybinding.";

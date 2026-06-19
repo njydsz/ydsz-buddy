@@ -1,4 +1,4 @@
-import type { ProviderKind } from "@peakcode/contracts";
+import type { ProviderKind } from "@remi-code/contracts";
 import { queryOptions } from "@tanstack/react-query";
 
 import { openUsageProviderIdForProvider } from "./openUsageRateLimits";

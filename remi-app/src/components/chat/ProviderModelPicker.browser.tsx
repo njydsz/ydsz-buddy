@@ -1,4 +1,4 @@
-import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "@peakcode/contracts";
+import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "@remi-code/contracts";
 import { page } from "vitest/browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";

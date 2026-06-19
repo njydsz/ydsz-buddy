@@ -6,7 +6,7 @@ import {
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
   TurnId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { deriveThreadSummaryMetadata } from "./threadSummary";

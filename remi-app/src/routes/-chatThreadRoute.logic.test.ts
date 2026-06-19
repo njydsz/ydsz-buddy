@@ -1,4 +1,4 @@
-import { ThreadId, TurnId } from "@peakcode/contracts";
+import { ThreadId, TurnId } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import {

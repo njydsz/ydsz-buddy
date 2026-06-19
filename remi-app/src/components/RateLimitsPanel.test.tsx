@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EventId, type OrchestrationThreadActivity, TurnId } from "@peakcode/contracts";
+import { EventId, type OrchestrationThreadActivity, TurnId } from "@remi-code/contracts";
 
 import {
   deriveAccountRateLimits,

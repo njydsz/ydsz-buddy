@@ -3,15 +3,15 @@
 // Layer: Web domain helpers
 // Exports: thread env resolution + `/fork` target planning
 
-import type { ThreadEnvironmentMode } from "@peakcode/contracts";
+import type { ThreadEnvironmentMode } from "@remi-code/contracts";
 import {
   isPendingThreadWorktree,
   resolveThreadEnvironmentMode,
   resolveThreadWorkspaceCwd,
   resolveThreadWorkspaceState,
   type ResolvedThreadWorkspaceState,
-} from "@peakcode/shared/threadEnvironment";
-import { deriveAssociatedWorktreeMetadata } from "@peakcode/shared/threadWorkspace";
+} from "@remi-code/shared/threadEnvironment";
+import { deriveAssociatedWorktreeMetadata } from "@remi-code/shared/threadWorkspace";
 import type { Thread } from "../types";
 
 export type ForkThreadTarget = "local" | "worktree";
@@ -30,7 +30,7 @@ export {
   isPendingThreadWorktree,
   resolveThreadEnvironmentMode,
   resolveThreadWorkspaceState,
-} from "@peakcode/shared/threadEnvironment";
+} from "@remi-code/shared/threadEnvironment";
 
 export interface ThreadEnvironmentPresentation {
   mode: ThreadEnvironmentMode;

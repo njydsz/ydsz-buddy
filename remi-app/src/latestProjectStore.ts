@@ -1,4 +1,4 @@
-import type { ProjectId } from "@peakcode/contracts";
+import type { ProjectId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 

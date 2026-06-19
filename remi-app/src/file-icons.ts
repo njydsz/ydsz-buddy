@@ -9,7 +9,7 @@ const SETI_ICONS_BASE_URL = `https://cdn.jsdelivr.net/gh/jesseweed/seti-ui@${SET
 const DEFAULT_FILE_ICON = "default";
 const DEFAULT_FOLDER_ICON = "folder";
 
-// Exact basename â†’ Seti icon name (case-insensitive lookup). Add entries here
+// Exact basename â†?Seti icon name (case-insensitive lookup). Add entries here
 // when a well-known filename has a dedicated Seti icon we want to surface.
 const FILE_ICON_BY_BASENAME: Record<string, string> = {
   "package.json": "npm",
@@ -114,7 +114,7 @@ const FILE_ICON_BY_BASENAME: Record<string, string> = {
   procfile: "heroku",
 };
 
-// Extension â†’ Seti icon name. Longest extension wins because `extensionCandidates`
+// Extension â†?Seti icon name. Longest extension wins because `extensionCandidates`
 // yields compound extensions first (e.g. `.d.ts` before `.ts`).
 const FILE_ICON_BY_EXTENSION: Record<string, string> = {
   ts: "typescript",

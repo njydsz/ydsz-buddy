@@ -3,7 +3,7 @@
 // Layer: Web chat presentation helpers
 // Exports: row derivation, structural sharing, copy/timer helpers
 
-import { type MessageId, type TurnId } from "@peakcode/contracts";
+import { type MessageId, type TurnId } from "@remi-code/contracts";
 import { type TimelineEntry, type WorkLogEntry } from "../../session-logic";
 import { normalizeCompactToolLabel as normalizeCompactToolLabelValue } from "../../lib/toolCallLabel";
 import { type ChatMessage, type ProposedPlan, type TurnDiffSummary } from "../../types";

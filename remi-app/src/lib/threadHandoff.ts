@@ -11,8 +11,8 @@ import {
   type ModelSelection,
   type ProviderKind,
   type ThreadHandoffImportedMessage,
-} from "@peakcode/contracts";
-import { getDefaultModel } from "@peakcode/shared/model";
+} from "@remi-code/contracts";
+import { getDefaultModel } from "@remi-code/shared/model";
 import { type Thread } from "../types";
 import { stripEmbeddedAssistantSelections } from "./assistantSelections";
 import { randomUUID } from "./utils";

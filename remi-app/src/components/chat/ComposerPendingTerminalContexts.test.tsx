@@ -1,4 +1,4 @@
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remi-code/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 

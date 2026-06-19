@@ -5,7 +5,7 @@
  * and bulk actions on the selected set.
  */
 
-import type { ThreadId } from "@peakcode/contracts";
+import type { ThreadId } from "@remi-code/contracts";
 import { create } from "zustand";
 
 export interface ThreadSelectionState {
@@ -59,7 +59,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
     set((state) => {
       const anchor = state.anchorThreadId;
       if (anchor === null) {
-        // No anchor yet â€” treat as a single toggle
+        // No anchor yet â€?treat as a single toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };
@@ -68,7 +68,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
       const anchorIndex = orderedThreadIds.indexOf(anchor);
       const targetIndex = orderedThreadIds.indexOf(threadId);
       if (anchorIndex === -1 || targetIndex === -1) {
-        // Anchor or target not in this list (different project?) â€” fallback to toggle
+        // Anchor or target not in this list (different project?) â€?fallback to toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };

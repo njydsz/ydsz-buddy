@@ -9,13 +9,13 @@ import {
   type ProviderStartOptions,
   type ServerSettings,
   type ServerSettingsPatch,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   getDefaultModel,
   getModelOptions,
   normalizeModelSlug,
   resolveSelectableModel,
-} from "@peakcode/shared/model";
+} from "@remi-code/shared/model";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { EnvMode } from "./components/BranchToolbar.logic";
 import { formatProviderModelOptionName, type ProviderModelOption } from "./providerModelOptions";

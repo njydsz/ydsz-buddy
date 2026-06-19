@@ -1,7 +1,7 @@
 // FILE: BranchToolbar.tsx
 // Purpose: Renders the chat thread's compact workspace controls, including the
 // local usage popover, inline workspace handoff actions, and runtime access toggle.
-import type { ThreadId, RuntimeMode } from "@peakcode/contracts";
+import type { ThreadId, RuntimeMode } from "@remi-code/contracts";
 import { LuSplit } from "react-icons/lu";
 import { ChevronDownIcon, ChevronRightIcon, HandoffIcon } from "~/lib/icons";
 import { FiThumbsUp } from "react-icons/fi";
@@ -92,7 +92,7 @@ export function RuntimeUsageControls({
           }
           title={
             runtimeMode === "full-access"
-              ? "Full access â€” click to require approvals"
+              ? "Full access â€?click to require approvals"
               : "Ask every action"
           }
         >

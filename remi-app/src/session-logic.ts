@@ -9,14 +9,14 @@ import {
   type UserInputQuestion,
   type ThreadId,
   type TurnId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   decodeSubagentAgentStates,
   extractSubagentIdentityHints,
   decodeSubagentReceiverAgents,
   decodeSubagentReceiverThreadIds,
-} from "@peakcode/shared/subagents";
-import { summarizeToolRawOutput } from "@peakcode/shared/toolOutputSummary";
+} from "@remi-code/shared/subagents";
+import { summarizeToolRawOutput } from "@remi-code/shared/toolOutputSummary";
 import { deriveReadableToolTitle, normalizeCompactToolLabel } from "./lib/toolCallLabel";
 import { stripProposedPlanBlocksFromText } from "./proposedPlan";
 

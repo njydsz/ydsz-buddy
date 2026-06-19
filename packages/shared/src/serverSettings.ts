@@ -3,7 +3,7 @@ import {
   type ModelSelection,
   type ServerSettings,
   type ServerSettingsPatch,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { deepMerge, type DeepPartial } from "./Struct";
 
 function shouldReplaceTextGenerationModelSelection(

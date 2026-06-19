@@ -1,4 +1,4 @@
-import { ProjectId, ThreadId } from "@peakcode/contracts";
+import { ProjectId, ThreadId } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_INTERACTION_MODE, DEFAULT_RUNTIME_MODE, type Thread } from "./types";

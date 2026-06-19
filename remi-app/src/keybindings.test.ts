@@ -5,7 +5,7 @@ import {
   type KeybindingShortcut,
   type KeybindingWhenNode,
   type ResolvedKeybindingsConfig,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   formatShortcutLabel,
   isBrowserToggleShortcut,
@@ -638,7 +638,7 @@ describe("shortcutLabelForCommand", () => {
     );
     assert.strictEqual(
       shortcutLabelForCommand(DEFAULT_BINDINGS, "terminal.workspace.terminal", "MacIntel"),
-      "‚åò1",
+      "‚å?",
     );
     assert.strictEqual(
       shortcutLabelForCommand(DEFAULT_BINDINGS, "terminal.workspace.newFullWidth", "MacIntel"),
@@ -782,7 +782,7 @@ describe("chat/editor shortcuts", () => {
     );
     assert.strictEqual(
       resolveShortcutCommand(
-        event({ code: "KeyX", key: "‚âà", metaKey: true, altKey: true }),
+        event({ code: "KeyX", key: "‚â?, metaKey: true, altKey: true }),
         DEFAULT_BINDINGS,
         {
           platform: "MacIntel",
@@ -1060,7 +1060,7 @@ describe("resolveShortcutCommand", () => {
     );
     assert.strictEqual(
       resolveShortcutCommand(
-        event({ code: "KeyX", key: "‚âà", metaKey: true, altKey: true }),
+        event({ code: "KeyX", key: "‚â?, metaKey: true, altKey: true }),
         legacyBindings,
         {
           platform: "MacIntel",
@@ -1110,7 +1110,7 @@ describe("formatShortcutLabel", () => {
   });
 
   it("formats labels for plus key", () => {
-    assert.strictEqual(formatShortcutLabel(modShortcut("+"), "MacIntel"), "‚åò+");
+    assert.strictEqual(formatShortcutLabel(modShortcut("+"), "MacIntel"), "‚å?");
     assert.strictEqual(formatShortcutLabel(modShortcut("+"), "Linux"), "Ctrl++");
   });
 });

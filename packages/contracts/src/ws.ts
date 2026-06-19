@@ -402,7 +402,7 @@ export const WsPushEnvelopeBase = Schema.Struct({
 });
 export type WsPushEnvelopeBase = typeof WsPushEnvelopeBase.Type;
 
-// ── Union of all server → client messages ─────────────────────────────
+// ── Union of all server �?client messages ─────────────────────────────
 
 export const WsResponse = Schema.Union([WebSocketResponse, WsPush]);
 export type WsResponse = typeof WsResponse.Type;

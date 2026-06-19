@@ -7,7 +7,7 @@ import {
   ThreadId,
   type ThreadId as ThreadIdType,
   type TurnId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 import type { AppState } from "../store";
 import { getThreadFromState } from "../threadDerivation";

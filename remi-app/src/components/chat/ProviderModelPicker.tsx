@@ -3,8 +3,8 @@
 // Layer: Chat composer presentation
 // Depends on: provider availability metadata, shared menu primitives, and picker trigger styling.
 
-import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "@peakcode/contracts";
-import { resolveSelectableModel } from "@peakcode/shared/model";
+import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "@remi-code/contracts";
+import { resolveSelectableModel } from "@remi-code/shared/model";
 import * as Schema from "effect/Schema";
 import {
   Fragment,

@@ -4,7 +4,7 @@ import {
   ThreadId,
   TurnId,
   type OrchestrationThreadActivity,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import {

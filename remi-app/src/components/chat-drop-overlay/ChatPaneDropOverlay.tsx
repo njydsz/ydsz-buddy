@@ -10,7 +10,7 @@ import {
   type DragEvent as ReactDragEvent,
   type ReactNode,
 } from "react";
-import { type ThreadId } from "@peakcode/contracts";
+import { type ThreadId } from "@remi-code/contracts";
 
 import { type SplitDirection, type SplitDropSide } from "../../splitViewStore";
 import { cn } from "../../lib/utils";

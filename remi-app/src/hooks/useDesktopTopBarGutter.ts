@@ -15,7 +15,7 @@ import { isMacPlatform } from "~/lib/utils";
  *
  * Both the base and `sm:` variants are emitted so this gutter wins over any
  * responsive horizontal-padding class (e.g. `sm:px-5`) on the surrounding top
- * bar â€” `twMerge` only resolves conflicts within the same breakpoint.
+ * bar â€?`twMerge` only resolves conflicts within the same breakpoint.
  *
  * Kept as a module-level constant so every top bar uses the same gutter width.
  */

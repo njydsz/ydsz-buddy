@@ -1,5 +1,5 @@
-import { type ProjectId, ThreadId } from "@peakcode/contracts";
-import { getDefaultModel } from "@peakcode/shared/model";
+import { type ProjectId, ThreadId } from "@remi-code/contracts";
+import { getDefaultModel } from "@remi-code/shared/model";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { useAppSettings } from "../appSettings";

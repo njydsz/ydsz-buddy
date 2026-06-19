@@ -9,10 +9,10 @@ import {
   type ServerProviderStatus,
   type ThreadId,
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getModelOptions, normalizeModelSlug } from "@peakcode/shared/model";
+import { getModelOptions, normalizeModelSlug } from "@remi-code/shared/model";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,
@@ -154,7 +154,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "tongyi",
     name: "通义千问",
-    subtitle: "阿里云 · 百炼平台",
+    subtitle: "阿里�?· 百炼平台",
     iconColor: "#F97316",
   },
   {
@@ -1901,7 +1901,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM…"
+                  placeholder="-apple-system, BlinkM�?
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2551,7 +2551,7 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道。"
+            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2858,10 +2858,10 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="服务渠道"
-            description="管理第三方模型 API 渠道接入，启用后可在对应提供商中使用这些渠道。"
+            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启用)
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
               </span>
             }
           >

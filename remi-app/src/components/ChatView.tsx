@@ -28,25 +28,25 @@ import {
   OrchestrationThreadActivity,
   ProviderInteractionMode,
   RuntimeMode,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   applyClaudePromptEffortPrefix,
   getModelCapabilities,
   normalizeModelSlug,
-} from "@peakcode/shared/model";
-import { resolveTailUserMessageEditTarget } from "@peakcode/shared/conversationEdit";
-import { buildTemporaryWorktreeBranchName } from "@peakcode/shared/git";
+} from "@remi-code/shared/model";
+import { resolveTailUserMessageEditTarget } from "@remi-code/shared/conversationEdit";
+import { buildTemporaryWorktreeBranchName } from "@remi-code/shared/git";
 import {
   buildPromptThreadTitleFallback,
   GENERIC_CHAT_THREAD_TITLE,
-} from "@peakcode/shared/chatThreads";
+} from "@remi-code/shared/chatThreads";
 import {
   resolveThreadWorkspaceState,
   resolveThreadBranchSourceCwd,
   resolveThreadWorkspaceCwd as resolveSharedThreadWorkspaceCwd,
-} from "@peakcode/shared/threadEnvironment";
-import { deriveTerminalCommandIdentity } from "@peakcode/shared/terminalThreads";
-import { deriveAssociatedWorktreeMetadata } from "@peakcode/shared/threadWorkspace";
+} from "@remi-code/shared/threadEnvironment";
+import { deriveTerminalCommandIdentity } from "@remi-code/shared/terminalThreads";
+import { deriveAssociatedWorktreeMetadata } from "@remi-code/shared/threadWorkspace";
 import {
   useCallback,
   useEffect,
@@ -4166,7 +4166,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers â€” skills are provider-specific.
+  // Clear selected skills when switching providers â€?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -7727,7 +7727,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode â€” click to return to normal build mode"
+                            title="Plan mode â€?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8471,7 +8471,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode â€” click to return to normal build mode"
+                                        title="Plan mode â€?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

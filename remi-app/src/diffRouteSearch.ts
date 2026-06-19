@@ -1,4 +1,4 @@
-import { TurnId } from "@peakcode/contracts";
+import { TurnId } from "@remi-code/contracts";
 
 export type ChatRightPanel = "browser" | "diff";
 

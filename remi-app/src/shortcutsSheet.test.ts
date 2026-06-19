@@ -46,7 +46,7 @@ describe("buildShortcutSheetSections", () => {
     expect(sections[0]?.entries.some((entry) => entry.id === "shortcuts.show")).toBe(true);
     expect(
       sections[0]?.entries.some(
-        (entry) => entry.id === "thread.jump.1" && entry.shortcutLabel === "‚åò1",
+        (entry) => entry.id === "thread.jump.1" && entry.shortcutLabel === "‚å?",
       ),
     ).toBe(true);
     expect(sections[1]?.title).toBe("In workspace mode");

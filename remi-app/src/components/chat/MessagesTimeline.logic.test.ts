@@ -1,4 +1,4 @@
-import { CheckpointRef, MessageId, TurnId } from "@peakcode/contracts";
+import { CheckpointRef, MessageId, TurnId } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 import {
   buildTurnDiffSummaryByAssistantMessageId,

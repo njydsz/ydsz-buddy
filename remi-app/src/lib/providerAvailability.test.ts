@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ServerProviderStatus } from "@peakcode/contracts";
+import type { ServerProviderStatus } from "@remi-code/contracts";
 import {
   isProviderUsable,
   normalizeProviderStatusForLocalConfig,

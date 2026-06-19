@@ -1,5 +1,5 @@
-import type { TerminalEvent } from "@peakcode/contracts";
-import type { TerminalActivityState } from "@peakcode/shared/terminalThreads";
+import type { TerminalEvent } from "@remi-code/contracts";
+import type { TerminalActivityState } from "@remi-code/shared/terminalThreads";
 
 export interface TerminalActivityUpdate {
   agentState: TerminalActivityState | null;

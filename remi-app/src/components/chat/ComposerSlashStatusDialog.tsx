@@ -1,5 +1,5 @@
-import type { ResolvedThreadWorkspaceState } from "@peakcode/shared/threadEnvironment";
-import type { ProviderInteractionMode } from "@peakcode/contracts";
+import type { ResolvedThreadWorkspaceState } from "@remi-code/shared/threadEnvironment";
+import type { ProviderInteractionMode } from "@remi-code/contracts";
 import type { DraftThreadEnvMode } from "../../composerDraftStore";
 import {
   type ContextWindowSnapshot,

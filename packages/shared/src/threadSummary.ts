@@ -3,7 +3,7 @@ import type {
   OrchestrationMessage,
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 export interface ThreadSummaryMetadata {
   latestUserMessageAt: string | null;

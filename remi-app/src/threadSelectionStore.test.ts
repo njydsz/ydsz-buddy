@@ -1,4 +1,4 @@
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remi-code/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { useThreadSelectionStore } from "./threadSelectionStore";
@@ -196,7 +196,7 @@ describe("threadSelectionStore", () => {
       store.toggleThread(THREAD_A); // select A, anchor = A
       store.toggleThread(THREAD_B); // select B, anchor = B
 
-      // Now shift-select from B (anchor) to D â€” should add B, C, D but keep A
+      // Now shift-select from B (anchor) to D â€?should add B, C, D but keep A
       store.rangeSelectTo(THREAD_D, ORDERED);
 
       const state = useThreadSelectionStore.getState();

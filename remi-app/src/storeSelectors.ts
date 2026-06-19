@@ -2,7 +2,7 @@
 // Purpose: Stable Zustand selectors for entity lookups and lightweight sidebar projections.
 // Exports: Selector factories used by routes and sidebar-heavy components.
 
-import type { ProjectId, ThreadId } from "@peakcode/contracts";
+import type { ProjectId, ThreadId } from "@remi-code/contracts";
 
 import type { AppState } from "./store";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";

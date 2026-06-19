@@ -3,7 +3,7 @@
 // Layer: Web settings utility
 // Exports: default order, normalization, and order comparison helpers.
 
-import type { ProviderKind } from "@peakcode/contracts";
+import type { ProviderKind } from "@remi-code/contracts";
 
 export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "codex",

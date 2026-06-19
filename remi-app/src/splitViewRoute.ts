@@ -3,7 +3,7 @@
 // Layer: Route helpers
 // Exports: split route helpers shared by chat surface, sidebar, and thread-scoped UI
 
-import { type ThreadId } from "@peakcode/contracts";
+import { type ThreadId } from "@remi-code/contracts";
 import { type DiffRouteSearch } from "./diffRouteSearch";
 import {
   resolveSplitViewFocusedThreadId,

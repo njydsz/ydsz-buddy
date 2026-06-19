@@ -28,7 +28,7 @@ import {
   WS_CHANNELS,
   WS_METHODS,
   type WsWelcomePayload,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 import { showConfirmDialogFallback } from "./confirmDialogFallback";
 import { showContextMenuFallback } from "./contextMenuFallback";

@@ -4,7 +4,7 @@
 //   2. A dialog with the release notes, opened only when the user taps the card.
 // Persists the "already seen this version" marker in localStorage so the popout
 // doesn't reappear after dismissal.
-// Layer: hook â€” glue between `logic.ts` (pure rules), the changelog data, and
+// Layer: hook â€?glue between `logic.ts` (pure rules), the changelog data, and
 // the popout + dialog components.
 
 import { Schema } from "effect";
@@ -35,7 +35,7 @@ const INITIAL_STORAGE: WhatsNewStorage = { lastSeenVersion: null };
 export interface UseWhatsNewResult {
   /**
    * The release entry matching the installed build. `null` means "nothing
-   * to advertise" â€” silent-bootstrap or noop. When null, neither popout nor
+   * to advertise" â€?silent-bootstrap or noop. When null, neither popout nor
    * dialog should render.
    */
   readonly currentEntry: WhatsNewEntry | null;
@@ -49,13 +49,13 @@ export interface UseWhatsNewResult {
   readonly isDialogOpen: boolean;
   /**
    * Open the dialog in response to the user tapping the popout card. We don't
-   * mark the update as seen here â€” acknowledging the card is not the same as
+   * mark the update as seen here â€?acknowledging the card is not the same as
    * acknowledging the notes. `onDialogOpenChange(false)` handles that.
    */
   readonly openDialog: () => void;
   /**
-   * Dismiss the popout via its âœ• button. This marks the release as seen and
-   * never re-prompts â€” even if the user never opens the dialog. Matches
+   * Dismiss the popout via its âœ?button. This marks the release as seen and
+   * never re-prompts â€?even if the user never opens the dialog. Matches
    * IndieDevs behaviour: hitting the X is a deliberate "I don't care".
    */
   readonly dismissPopout: () => void;
@@ -71,12 +71,12 @@ export interface UseWhatsNewResult {
  * Drives the "What's new" post-update surface.
  *
  * Behaviour summary (see `resolveWhatsNewState` for the rules):
- *   - First launch â†’ silently record the current version, no popout.
- *   - User already on the latest (or somehow ahead) â†’ no popout.
- *   - User upgraded and there are curated notes â†’ show the popout card.
- *   - User upgraded but no curated notes exist â†’ silently advance the marker.
+ *   - First launch â†?silently record the current version, no popout.
+ *   - User already on the latest (or somehow ahead) â†?no popout.
+ *   - User upgraded and there are curated notes â†?show the popout card.
+ *   - User upgraded but no curated notes exist â†?silently advance the marker.
  *
- * The dialog is never opened automatically â€” only via the popout card click.
+ * The dialog is never opened automatically â€?only via the popout card click.
  */
 export function useWhatsNew(options?: {
   readonly entries?: readonly WhatsNewEntry[];
@@ -135,7 +135,7 @@ export function useWhatsNew(options?: {
   }, [initialState, setStorage]);
 
   const openDialog = useCallback(() => {
-    // Just open the dialog. The user is about to read the notes â€” don't mark
+    // Just open the dialog. The user is about to read the notes â€?don't mark
     // as seen yet; that happens on dialog close.
     setIsDialogOpen(true);
   }, []);

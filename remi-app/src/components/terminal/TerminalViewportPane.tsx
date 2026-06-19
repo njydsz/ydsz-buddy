@@ -5,7 +5,7 @@
 
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
-import type { ResolvedTerminalVisualIdentity } from "@peakcode/shared/terminalThreads";
+import type { ResolvedTerminalVisualIdentity } from "@remi-code/shared/terminalThreads";
 
 import {
   Maximize2,

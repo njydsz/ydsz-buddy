@@ -78,7 +78,7 @@ export function ContextWindowMeter(props: {
               <span>{display.usedPercentageLabel}</span>
               {display.hasReliableTokenRatio ? (
                 <>
-                  <span className="mx-1">â‹…</span>
+                  <span className="mx-1">â‹?/span>
                   <span>{display.tokenUsageLabel}</span>
                   <span>/</span>
                   <span>{formatContextWindowTokens(usage.maxTokens)} context used</span>

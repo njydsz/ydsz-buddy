@@ -14,10 +14,10 @@ import {
   type OrchestrationShellStreamEvent,
   type OrchestrationSessionStatus,
   type TurnId,
-} from "@peakcode/contracts";
-import { resolveThreadBranchRegressionGuard } from "@peakcode/shared/git";
-import { normalizeModelSlug } from "@peakcode/shared/model";
-import { normalizeWorkspaceRootForComparison } from "@peakcode/shared/threadWorkspace";
+} from "@remi-code/contracts";
+import { resolveThreadBranchRegressionGuard } from "@remi-code/shared/git";
+import { normalizeModelSlug } from "@remi-code/shared/model";
+import { normalizeWorkspaceRootForComparison } from "@remi-code/shared/threadWorkspace";
 import { create } from "zustand";
 import {
   type ChatAttachment,
@@ -32,7 +32,7 @@ import {
 } from "./types";
 import { Debouncer } from "@tanstack/react-pacer";
 import { hasLiveTurnTailWork } from "./session-logic";
-import { deriveThreadSummaryMetadata } from "@peakcode/shared/threadSummary";
+import { deriveThreadSummaryMetadata } from "@remi-code/shared/threadSummary";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import { toAttachmentPreviewUrl } from "./lib/wsHttpUrl";
 
@@ -2685,7 +2685,7 @@ function applyTurnDiffSummaryToThread(
             completedAt: nextSummary.completedAt,
             // Prefer the incoming assistantMessageId when present; otherwise keep
             // the previous one from the same turn. Turn-diff events may arrive
-            // before the message has been finalized and carry a null id â€” they
+            // before the message has been finalized and carry a null id â€?they
             // must not erase a real id already recorded by thread.message-sent.
             assistantMessageId:
               nextSummary.assistantMessageId ??

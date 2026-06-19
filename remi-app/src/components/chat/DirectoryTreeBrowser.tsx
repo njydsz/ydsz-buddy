@@ -3,7 +3,7 @@
 // Layer: Chat/home filesystem UI helper
 // Exports: DirectoryTreeBrowser for inline and popover-based local file/folder navigation.
 
-import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "@peakcode/contracts";
+import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "@remi-code/contracts";
 import type { ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronDownIcon, ChevronRightIcon, FileIcon, FolderIcon } from "~/lib/icons";
@@ -35,7 +35,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
   rootPath,
   emptyLabel = "No folders found",
   unavailableLabel = "Home directory unavailable.",
-  loadingLabel = "Loading foldersâ€¦",
+  loadingLabel = "Loading foldersâ€?,
   className,
   includeFiles = false,
   query = "",
@@ -176,7 +176,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
               <span className="truncate text-foreground/95">{entry.name}</span>
             </button>
             {isDirectory && isLoadingChildren ? (
-              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loadingâ€¦</span>
+              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loadingâ€?/span>
             ) : null}
           </div>,
           ...renderedChildren,

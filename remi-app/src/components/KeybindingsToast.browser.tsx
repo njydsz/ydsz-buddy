@@ -10,7 +10,7 @@ import {
   type WsWelcomePayload,
   WS_CHANNELS,
   WS_METHODS,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { RouterProvider, createMemoryHistory } from "@tanstack/react-router";
 import { ws, http, HttpResponse } from "msw";
 import { setupWorker } from "msw/browser";
@@ -358,7 +358,7 @@ describe("Keybindings update toast", () => {
       sendServerConfigUpdatedPush([]);
       await waitForNoToast("Keybindings updated");
 
-      // Remount the app â€” onServerConfigUpdated replays the cached value
+      // Remount the app â€?onServerConfigUpdated replays the cached value
       // synchronously on subscribe. This should NOT produce a toast.
       await mounted.cleanup();
       const remounted = await mountApp();

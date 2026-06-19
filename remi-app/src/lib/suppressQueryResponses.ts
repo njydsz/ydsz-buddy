@@ -6,10 +6,10 @@ import type { Terminal } from "@xterm/xterm";
  * Only suppresses sequences where the response uses a DIFFERENT final byte
  * than the query, so we never accidentally eat real commands.
  *
- * - CSI R  â€” Cursor Position Report (query is CSI 6n)
- * - CSI I  â€” Focus In report (mode 1004, no query)
- * - CSI O  â€” Focus Out report (mode 1004, no query)
- * - CSI $y â€” Mode Report (query is CSI $p)
+ * - CSI R  â€?Cursor Position Report (query is CSI 6n)
+ * - CSI I  â€?Focus In report (mode 1004, no query)
+ * - CSI O  â€?Focus Out report (mode 1004, no query)
+ * - CSI $y â€?Mode Report (query is CSI $p)
  */
 export function suppressQueryResponses(terminal: Terminal): () => void {
   const disposables: { dispose(): void }[] = [];

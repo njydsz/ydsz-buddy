@@ -75,7 +75,7 @@ export function PluginsView() {
                 <InlineWarning>
                   {data.pluginsQuery.data?.marketplaceLoadErrors
                     .map((err) => `${sectionTitle(err.marketplacePath)}: ${err.message}`)
-                    .join(" â€¢ ")}
+                    .join(" â€?")}
                 </InlineWarning>
               ) : null}
             </div>

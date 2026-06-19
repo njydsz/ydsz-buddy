@@ -8,13 +8,13 @@ import type {
   ModelCapabilities,
   ProviderKind,
   ProviderModelDescriptor,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   getDefaultEffort,
   getModelCapabilities,
   normalizeModelSlug,
   trimOrNull,
-} from "@peakcode/shared/model";
+} from "@remi-code/shared/model";
 import { normalizeCursorModelVariantBaseId } from "../../cursorModelVariants";
 
 function runtimeEffortLabel(value: string): string {

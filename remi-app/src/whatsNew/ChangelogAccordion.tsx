@@ -3,7 +3,7 @@
 // "Release history" surface and the `WhatsNewDialog` "Complete changelog"
 // secondary view. Each row summarises a release; expanding reveals the
 // FeatureSection cards for that version.
-// Layer: presentational â€” it assumes the caller has already sorted entries
+// Layer: presentational â€?it assumes the caller has already sorted entries
 // newest-first (see `sortEntriesByVersionDesc`).
 
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function ChangelogAccordion({
   if (entries.length === 0) {
     return (
       <p className={cn("text-xs text-muted-foreground", className)}>
-        No release notes yet â€” check back after the next update.
+        No release notes yet â€?check back after the next update.
       </p>
     );
   }

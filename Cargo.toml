@@ -1,0 +1,82 @@
+[workspace]
+resolver = "2"
+members = [
+    "remi-core",
+    "remi-config",
+    "remi-persistence",
+    "remi-orchestration",
+    "remi-provider",
+    "remi-git",
+    "remi-terminal",
+    "remi-workspace",
+    "remi-auth",
+    "remi-checkpoint",
+    "remi-telemetry",
+    "remi-server",
+    "remi-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Remi Code Team"]
+license = "MIT"
+rust-version = "1.75"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.36", features = ["full"] }
+async-trait = "0.1"
+
+# Web framework
+axum = { version = "0.7", features = ["ws"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# WebSocket
+tokio-tungstenite = "0.21"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database
+rusqlite = { version = "0.31", features = ["bundled", "blob"] }
+
+# Process management
+portable-pty = "0.8"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+config = "0.14"
+clap = { version = "4.5", features = ["derive"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.7", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+walkdir = "2.4"
+globset = "0.4"
+sha2 = "0.10"
+hmac = "0.12"
+reqwest = { version = "0.12", features = ["json"] }
+
+# Internal crates
+remi-core = { path = "remi-core" }
+remi-config = { path = "remi-config" }
+remi-persistence = { path = "remi-persistence" }
+remi-orchestration = { path = "remi-orchestration" }
+remi-provider = { path = "remi-provider" }
+remi-git = { path = "remi-git" }
+remi-terminal = { path = "remi-terminal" }
+remi-workspace = { path = "remi-workspace" }
+remi-auth = { path = "remi-auth" }
+remi-checkpoint = { path = "remi-checkpoint" }
+remi-telemetry = { path = "remi-telemetry" }
+remi-server = { path = "remi-server" }

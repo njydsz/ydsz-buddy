@@ -1,9 +1,9 @@
 // FILE: whatsNew/FeatureSection.tsx
-// Purpose: Render a single "What's new" feature card â€” title, description,
+// Purpose: Render a single "What's new" feature card â€?title, description,
 // optional screenshot, and an optional longer technical blurb. Matches the
 // IndieDevs card layout so the post-update dialog and the Settings release
 // history share one visual vocabulary.
-// Layer: presentational â€” no state, no data fetching, no storage.
+// Layer: presentational â€?no state, no data fetching, no storage.
 
 import { cn } from "~/lib/utils";
 
@@ -23,7 +23,7 @@ export interface FeatureSectionProps {
  *   - Image below when provided; we frame it in a rounded border and let the
  *     natural aspect ratio dictate height (no cropping).
  *   - Details text sits tight under the image as a compact
- *     muted blurb â€” think "release note footnote", not body copy.
+ *     muted blurb â€?think "release note footnote", not body copy.
  */
 export function FeatureSection({ feature, className }: FeatureSectionProps) {
   const hasMedia = feature.image !== undefined || feature.details !== undefined;

@@ -5,7 +5,7 @@ import {
   ThreadId,
   type ClientOrchestrationCommand,
   type NativeApi,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 import { useComposerDraftStore } from "../composerDraftStore";
 import { useStore } from "../store";

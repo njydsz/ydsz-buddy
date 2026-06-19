@@ -1,8 +1,8 @@
-import type { GitBranch } from "@peakcode/contracts";
+import type { GitBranch } from "@remi-code/contracts";
 import {
   deriveAssociatedWorktreeMetadata,
   type AssociatedWorktreeMetadata,
-} from "@peakcode/shared/threadWorkspace";
+} from "@remi-code/shared/threadWorkspace";
 import { Schema } from "effect";
 
 export const EnvMode = Schema.Literals(["local", "worktree"]);

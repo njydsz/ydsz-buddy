@@ -1,4 +1,4 @@
-import { EDITORS, EditorId, NativeApi } from "@peakcode/contracts";
+import { EDITORS, EditorId, NativeApi } from "@remi-code/contracts";
 import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from "./hooks/useLocalStorage";
 import { useMemo } from "react";
 

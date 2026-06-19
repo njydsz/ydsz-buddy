@@ -1,4 +1,4 @@
-import type { GitBranch } from "@peakcode/contracts";
+import type { GitBranch } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 import {
   dedupeRemoteBranchesWithLocalMatches,

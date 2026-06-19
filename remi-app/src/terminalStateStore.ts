@@ -5,8 +5,8 @@
  * API constrained to store actions/selectors.
  */
 
-import { type TerminalActivityState, type TerminalCliKind } from "@peakcode/shared/terminalThreads";
-import type { ThreadId } from "@peakcode/contracts";
+import { type TerminalActivityState, type TerminalCliKind } from "@remi-code/shared/terminalThreads";
+import type { ThreadId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {

@@ -1,4 +1,4 @@
-import type { DesktopUpdateActionResult, DesktopUpdateState } from "@peakcode/contracts";
+import type { DesktopUpdateActionResult, DesktopUpdateState } from "@remi-code/contracts";
 
 export type DesktopUpdateButtonAction = "check" | "download" | "install" | "none";
 

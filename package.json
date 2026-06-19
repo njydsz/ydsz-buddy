@@ -1,0 +1,19 @@
+{
+  "name": "remi-code",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "remi-app",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=remi-app",
+    "build": "npm run build --workspace=remi-app",
+    "tauri": "npm run tauri --workspace=remi-app",
+    "typecheck": "npm run typecheck --workspace=remi-app"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

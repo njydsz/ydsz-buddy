@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import type {
   ResolvedTerminalVisualIdentity,
   TerminalVisualState,
-} from "@peakcode/shared/terminalThreads";
+} from "@remi-code/shared/terminalThreads";
 
 import { Popover, PopoverPopup, PopoverTrigger } from "~/components/ui/popover";
 import { XIcon } from "~/lib/icons";
@@ -265,7 +265,7 @@ export function TerminalSidebar(props: {
                       }`}
                     >
                       {props.showGroupHeaders && (
-                        <span className="text-[10px] text-muted-foreground/80">â””</span>
+                        <span className="text-[10px] text-muted-foreground/80">â”?/span>
                       )}
                       <button
                         type="button"

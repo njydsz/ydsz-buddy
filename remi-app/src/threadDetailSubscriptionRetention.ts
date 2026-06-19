@@ -3,7 +3,7 @@
 // Layer: Web subscription retention utility
 // Exports: retain/release helpers plus React and imperative subscription listeners.
 
-import type { ThreadId } from "@peakcode/contracts";
+import type { ThreadId } from "@remi-code/contracts";
 import { useSyncExternalStore } from "react";
 import { useStore } from "./store";
 

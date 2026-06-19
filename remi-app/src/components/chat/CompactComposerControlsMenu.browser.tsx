@@ -1,5 +1,5 @@
-import { ModelSelection, ThreadId } from "@peakcode/contracts";
-import { getDefaultModel } from "@peakcode/shared/model";
+import { ModelSelection, ThreadId } from "@remi-code/contracts";
+import { getDefaultModel } from "@remi-code/shared/model";
 import "../../index.css";
 
 import { page } from "vitest/browser";

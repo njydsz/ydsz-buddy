@@ -6,7 +6,7 @@ import {
   ThreadId,
   type OrchestrationReadModel,
   type OrchestrationShellSnapshot,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import { hasLiveThreadsWithMissingProjects } from "./desktopProjectRecovery";

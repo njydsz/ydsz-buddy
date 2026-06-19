@@ -17,7 +17,7 @@ import {
   type WsWelcomePayload,
   WS_CHANNELS,
   WS_METHODS,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { RouterProvider, createMemoryHistory } from "@tanstack/react-router";
 import { HttpResponse, http, ws } from "msw";
 import { setupWorker } from "msw/browser";

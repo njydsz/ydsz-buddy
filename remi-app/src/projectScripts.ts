@@ -3,7 +3,7 @@ import {
   SCRIPT_RUN_COMMAND_PATTERN,
   type KeybindingCommand,
   type ProjectScript,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { Schema } from "effect";
 
 function normalizeScriptId(value: string): string {

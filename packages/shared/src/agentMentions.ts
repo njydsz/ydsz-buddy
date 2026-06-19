@@ -3,7 +3,7 @@ import {
   type ClaudeSubagentAliasDefinition,
   type ProviderKind,
   type ResolvedAgentAlias,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 export interface ParsedAgentMentionInvocation {
   readonly alias: string;

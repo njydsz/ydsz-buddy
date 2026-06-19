@@ -3,7 +3,7 @@ import {
   isUncPath,
   isWindowsAbsolutePath,
   isWindowsDrivePath,
-} from "@peakcode/shared/path";
+} from "@remi-code/shared/path";
 import { isWindowsPlatform } from "./utils";
 
 function isRootPath(value: string): boolean {

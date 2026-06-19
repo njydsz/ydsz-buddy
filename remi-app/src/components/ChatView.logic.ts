@@ -6,11 +6,11 @@ import {
   type ProviderKind,
   type ServerProviderAuthStatus,
   type ThreadId as ThreadIdType,
-} from "@peakcode/contracts";
-import { normalizeModelSlug } from "@peakcode/shared/model";
-import { buildPeakcodeBranchName } from "@peakcode/shared/git";
-import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
-import { isGenericTerminalThreadTitle } from "@peakcode/shared/terminalThreads";
+} from "@remi-code/contracts";
+import { normalizeModelSlug } from "@remi-code/shared/model";
+import { buildPeakcodeBranchName } from "@remi-code/shared/git";
+import { isGenericChatThreadTitle } from "@remi-code/shared/chatThreads";
+import { isGenericTerminalThreadTitle } from "@remi-code/shared/terminalThreads";
 import {
   type ChatAssistantSelectionAttachment,
   type ChatMessage,

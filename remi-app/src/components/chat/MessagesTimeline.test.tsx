@@ -1,4 +1,4 @@
-import { MessageId, TurnId } from "@peakcode/contracts";
+import { MessageId, TurnId } from "@remi-code/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { formatShortTimestamp } from "../../timestampFormat";
@@ -911,7 +911,7 @@ describe("MessagesTimeline", () => {
     );
 
     expect(markup).toContain(
-      `${formatShortTimestamp("2026-03-17T19:12:29.000Z", "locale")} â€¢ 1.0s`,
+      `${formatShortTimestamp("2026-03-17T19:12:29.000Z", "locale")} â€?1.0s`,
     );
     expect(markup).not.toContain("Work log");
   });

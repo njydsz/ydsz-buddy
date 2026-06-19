@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DesktopUpdateActionResult, DesktopUpdateState } from "@peakcode/contracts";
+import type { DesktopUpdateActionResult, DesktopUpdateState } from "@remi-code/contracts";
 
 import {
   getArm64IntelBuildWarningDescription,

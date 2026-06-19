@@ -1,6 +1,7 @@
-import type { NativeApi } from "@peakcode/contracts";
+import type { NativeApi } from "@remi-code/contracts";
 
 import { createWsNativeApi } from "./wsNativeApi";
+import { tauriBridge } from "./lib/tauri-bridge";
 
 let cachedDesktopApi: NativeApi | undefined;
 
@@ -10,6 +11,12 @@ export function readNativeApi(): NativeApi | undefined {
 
   if (window.nativeApi) {
     cachedDesktopApi = window.nativeApi;
+    return cachedDesktopApi;
+  }
+
+  // In Tauri environment, use tauriBridge
+  if ("__TAURI__" in window) {
+    cachedDesktopApi = tauriBridge as unknown as NativeApi;
     return cachedDesktopApi;
   }
 

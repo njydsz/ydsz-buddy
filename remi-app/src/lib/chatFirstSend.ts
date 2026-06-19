@@ -1,5 +1,5 @@
-import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "@peakcode/contracts";
-import { workspaceRootsEqual } from "@peakcode/shared/threadWorkspace";
+import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "@remi-code/contracts";
+import { workspaceRootsEqual } from "@remi-code/shared/threadWorkspace";
 
 import type { Project } from "../types";
 

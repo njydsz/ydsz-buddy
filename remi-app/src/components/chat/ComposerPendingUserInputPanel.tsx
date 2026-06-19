@@ -1,4 +1,4 @@
-import { type ApprovalRequestId } from "@peakcode/contracts";
+import { type ApprovalRequestId } from "@remi-code/contracts";
 import { memo, useEffect, useEffectEvent, useRef } from "react";
 import { type PendingUserInput } from "../../session-logic";
 import {
@@ -67,7 +67,7 @@ const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard(
   }, [onAdvance]);
 
   // Cancel a pending auto-advance on unmount, and whenever the active question
-  // changes or a response goes in flight â€” otherwise a manual Next/Submit landing
+  // changes or a response goes in flight â€?otherwise a manual Next/Submit landing
   // inside the 200ms window leaves a stale timer that advances or submits again.
   useEffect(() => {
     return () => {

@@ -1,4 +1,4 @@
-import type { GitStatusResult } from "@peakcode/contracts";
+import type { GitStatusResult } from "@remi-code/contracts";
 import { assert, describe, it } from "vitest";
 import {
   buildGitActionProgressStages,

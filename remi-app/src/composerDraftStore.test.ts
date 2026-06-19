@@ -4,7 +4,7 @@ import {
   ThreadId,
   type ModelSelection,
   type ProviderModelOptions,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -1113,7 +1113,7 @@ describe("composerDraftStore modelSelection", () => {
       }),
     );
 
-    // Now set options for only codex â€” claudeAgent should be untouched
+    // Now set options for only codex â€?claudeAgent should be untouched
     store.setModelOptions(threadId, providerModelOptions({ codex: { reasoningEffort: "xhigh" } }));
 
     const draft = useComposerDraftStore.getState().draftsByThreadId[threadId];

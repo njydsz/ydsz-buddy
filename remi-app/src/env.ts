@@ -1,8 +1,11 @@
 /**
- * True when running inside the Electron preload bridge, false in a regular browser.
- * The preload script sets window.nativeApi via contextBridge before any web-app
- * code executes, so this is reliable at module load time.
+ * True when running inside the Tauri desktop shell, false in a regular browser.
+ * Tauri injects `window.__TAURI__` when running inside the WebView.
  */
-export const isElectron =
-  typeof window !== "undefined" &&
-  (window.desktopBridge !== undefined || window.nativeApi !== undefined);
+export const isTauri =
+  typeof window !== "undefined" && "__TAURI__" in window;
+
+/**
+ * @deprecated Use isTauri instead. Kept for backward compatibility during migration.
+ */
+export const isElectron = isTauri;

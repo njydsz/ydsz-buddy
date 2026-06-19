@@ -1,6 +1,6 @@
 // FILE: shellQuote.ts
 // Purpose: POSIX-compatible shell argument quoting for commands typed into a PTY.
-// Exports: `quotePosixShellArgument` â€” wraps a value in single quotes and escapes
+// Exports: `quotePosixShellArgument` â€?wraps a value in single quotes and escapes
 // embedded single quotes so it is always a single, opaque shell token.
 
 const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9_@%+=:,./-]+$/;

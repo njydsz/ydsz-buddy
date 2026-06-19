@@ -13,8 +13,8 @@ import {
   SquarePenIcon,
   SunIcon,
 } from "~/lib/icons";
-import { type FilesystemBrowseResult, type ProviderKind } from "@peakcode/contracts";
-import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
+import { type FilesystemBrowseResult, type ProviderKind } from "@remi-code/contracts";
+import { isGenericChatThreadTitle } from "@remi-code/shared/chatThreads";
 import { BsChat } from "react-icons/bs";
 import { HiOutlineFolderOpen } from "react-icons/hi2";
 import { LuArrowDownToLine, LuArrowLeft, LuCornerLeftUp, LuFolderPlus } from "react-icons/lu";
@@ -532,7 +532,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
   };
 
   const isMac = isMacPlatform(platform);
-  const submitModifierLabel = isMac ? "‚åò" : "Ctrl";
+  const submitModifierLabel = isMac ? "‚å? : "Ctrl";
 
   const handleBrowseInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isBrowsing) return;

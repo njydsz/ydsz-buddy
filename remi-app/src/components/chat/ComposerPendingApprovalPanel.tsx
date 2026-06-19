@@ -159,7 +159,7 @@ function parseApprovalDetail(detail: string | undefined): ParsedApproval {
     return { tool, fileName: null, fileDir: null, command: url, fallback: null };
   }
 
-  // Payload is not a recognized JSON shape â€” treat it as a raw command/text.
+  // Payload is not a recognized JSON shape â€?treat it as a raw command/text.
   const fallback = collapseWhitespace(payload);
   return {
     tool,
@@ -235,12 +235,12 @@ function regexExtractString(payload: string, key: string): string | null {
     }
     out += ch;
   }
-  // Truncated before closing quote â€” return partial value if we got anything.
+  // Truncated before closing quote â€?return partial value if we got anything.
   return out.length > 0 ? out : null;
 }
 
 function stripTrailingEllipsis(value: string): string {
-  return value.replace(/\.{3}$/u, "").replace(/â€¦$/u, "");
+  return value.replace(/\.{3}$/u, "").replace(/â€?/u, "");
 }
 
 function splitPath(path: string): { name: string; parent: string | null } {
@@ -266,7 +266,7 @@ function shortenPath(path: string): string {
   }
   const leading = withoutHome.startsWith("~") ? "~" : "";
   const tail = segments.slice(-2).join("/");
-  return `${leading}/â€¦/${tail}`.replace(/^\/â€¦/, "â€¦");
+  return `${leading}/â€?${tail}`.replace(/^\/â€?, "â€?);
 }
 
 function collapseWhitespace(value: string): string {

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remi-code/contracts";
 import { useStore } from "./store";
 import {
   getRetainedThreadDetailIdsSnapshot,

@@ -3,7 +3,7 @@
 // Layer: Terminal presentation primitive
 // Depends on: shared terminal icon keys plus local provider/icon components.
 
-import type { TerminalIconKey } from "@peakcode/shared/terminalThreads";
+import type { TerminalIconKey } from "@remi-code/shared/terminalThreads";
 
 import { TerminalSquare } from "~/lib/icons";
 import { cn } from "~/lib/utils";

@@ -2,9 +2,9 @@
 // Purpose: Normalizes generic tool-call titles and humanizes command executions for timeline rows.
 // Layer: UI utility
 // Exports: deriveReadableToolTitle, deriveReadableCommandDisplay, deriveInlineCommandCall, normalizeCompactToolLabel
-// Depends on: @peakcode/contracts tool lifecycle item types
+// Depends on: @remi-code/contracts tool lifecycle item types
 
-import type { ToolLifecycleItemType } from "@peakcode/contracts";
+import type { ToolLifecycleItemType } from "@remi-code/contracts";
 
 export function normalizeCompactToolLabel(value: string): string {
   return value
@@ -95,7 +95,7 @@ function humanizeRequestKind(
 ): string | null {
   if (requestKind === "file-read") return "Read";
   if (requestKind === "file-change" || itemType === "file_change") return "Edited";
-  // Don't handle command types here â€” let humanizeCommandToolLabel produce more specific labels
+  // Don't handle command types here â€?let humanizeCommandToolLabel produce more specific labels
   if (itemType === "web_search") return "Searched the web";
   if (itemType === "image_generation") return "Generated image";
   if (itemType === "image_view") return "Viewed image";

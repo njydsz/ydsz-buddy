@@ -3,12 +3,12 @@
 // Layer: Web lib
 // Exports: cwd resolution, search normalization, and provider skill/plugin display helpers.
 
-import { resolveThreadBranchSourceCwd } from "@peakcode/shared/threadEnvironment";
+import { resolveThreadBranchSourceCwd } from "@remi-code/shared/threadEnvironment";
 import type {
   ProviderNativeCommandDescriptor,
   ProviderPluginDescriptor,
   ProviderSkillDescriptor,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 // Prefer the most specific workspace context so discovery reflects the active thread first.
 export function resolveProviderDiscoveryCwd(options: {

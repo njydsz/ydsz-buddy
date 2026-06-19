@@ -3,7 +3,7 @@
 // Layer: Chat shell overlay
 // Depends on: shared dialog UI, shortcut label builder, and current project script metadata.
 
-import type { ResolvedKeybindingsConfig } from "@peakcode/contracts";
+import type { ResolvedKeybindingsConfig } from "@remi-code/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,

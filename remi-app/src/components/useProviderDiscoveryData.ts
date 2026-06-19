@@ -12,7 +12,7 @@ import {
   type ProviderKind,
   type ProviderPluginDescriptor,
   type ProviderSkillDescriptor,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { useFocusedChatContext } from "~/focusedChatContext";
 import { useStore } from "~/store";
 import {

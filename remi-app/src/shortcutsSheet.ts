@@ -3,7 +3,7 @@
 // Layer: UI helper
 // Depends on: keybinding label resolution, project script command mapping, and platform helpers.
 
-import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@peakcode/contracts";
+import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@remi-code/contracts";
 import { isMacPlatform } from "./lib/utils";
 import { shortcutLabelForCommand } from "./keybindings";
 import { commandForProjectScript } from "./projectScripts";
@@ -171,7 +171,7 @@ const WORKSPACE_DEFINITIONS: readonly ShortcutDefinition[] = [
 ] as const;
 
 function modSlashLabel(platform: string): string {
-  return isMacPlatform(platform) ? "‚åò/" : "Ctrl+/";
+  return isMacPlatform(platform) ? "‚å?" : "Ctrl+/";
 }
 
 function definitionToEntry(

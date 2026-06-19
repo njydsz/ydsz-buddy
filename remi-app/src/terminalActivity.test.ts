@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { TerminalEvent, TerminalSessionSnapshot } from "@peakcode/contracts";
+import type { TerminalEvent, TerminalSessionSnapshot } from "@remi-code/contracts";
 import { terminalActivityFromEvent } from "./terminalActivity";
 
 const snapshot: TerminalSessionSnapshot = {

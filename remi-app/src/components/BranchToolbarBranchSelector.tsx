@@ -6,7 +6,7 @@ import type {
   GitStashInfoResult,
   GitStatusResult,
   NativeApi,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDownIcon, PlusIcon } from "~/lib/icons";

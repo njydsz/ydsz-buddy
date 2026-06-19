@@ -7,8 +7,8 @@ import {
   type OrchestrationThread,
   type ServerConfig,
   type ServerProviderStatus,
-} from "@peakcode/contracts";
-import { defaultTerminalTitleForCliKind } from "@peakcode/shared/terminalThreads";
+} from "@remi-code/contracts";
+import { defaultTerminalTitleForCliKind } from "@remi-code/shared/terminalThreads";
 import {
   Outlet,
   createRootRouteWithContext,
@@ -414,7 +414,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // Silent-bootstrap or noop â€” nothing to render on either surface.
+    // Silent-bootstrap or noop â€?nothing to render on either surface.
     return null;
   }
 

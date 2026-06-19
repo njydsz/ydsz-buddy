@@ -7,7 +7,7 @@ import {
   defaultTerminalTitleForCliKind,
   type TerminalCliKind,
   type TerminalVisualState,
-} from "@peakcode/shared/terminalThreads";
+} from "@remi-code/shared/terminalThreads";
 import type { Thread, ThreadSession } from "../types";
 import {
   derivePendingApprovals,

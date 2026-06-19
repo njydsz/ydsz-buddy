@@ -1,6 +1,6 @@
 import "../../index.css";
 
-import { MessageId } from "@peakcode/contracts";
+import { MessageId } from "@remi-code/contracts";
 import { type LegendListRef } from "@legendapp/list/react";
 import { page } from "vitest/browser";
 import { Profiler, useCallback, useRef, useState, type ProfilerOnRenderCallback } from "react";

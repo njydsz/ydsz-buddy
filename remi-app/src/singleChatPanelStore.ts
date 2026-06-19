@@ -3,7 +3,7 @@
 // Layer: UI state store
 // Exports: single-surface panel store, default-state helpers, and selectors.
 
-import type { ThreadId, TurnId } from "@peakcode/contracts";
+import type { ThreadId, TurnId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ChatRightPanel } from "./diffRouteSearch";

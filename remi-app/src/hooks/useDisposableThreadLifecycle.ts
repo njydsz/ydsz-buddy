@@ -1,4 +1,4 @@
-import type { ThreadId } from "@peakcode/contracts";
+import type { ThreadId } from "@remi-code/contracts";
 import { useEffect, useRef } from "react";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { resolveDisposableThreadIdToDispose } from "../lib/disposableThread";

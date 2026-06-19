@@ -6,7 +6,7 @@ import {
   type ResolvedKeybindingsConfig,
   THREAD_JUMP_KEYBINDING_COMMANDS,
   type ThreadJumpKeybindingCommand,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { isMacPlatform } from "./lib/utils";
 
 export interface ShortcutEventLike {
@@ -433,7 +433,7 @@ export function formatShortcutLabel(
   return parts.join("+");
 }
 
-const MODIFIER_SYMBOLS = new Set(["‚åò", "‚å•", "‚åÉ", "‚áß"]);
+const MODIFIER_SYMBOLS = new Set(["‚å?, "‚å?, "‚å?, "‚á?]);
 
 export function splitShortcutLabel(shortcutLabel: string): string[] {
   if (shortcutLabel.includes("+")) {

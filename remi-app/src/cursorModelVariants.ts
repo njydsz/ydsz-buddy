@@ -1,4 +1,4 @@
-import type { ProviderModelDescriptor } from "@peakcode/contracts";
+import type { ProviderModelDescriptor } from "@remi-code/contracts";
 
 function uniqueByValue<T extends { readonly value: string }>(values: ReadonlyArray<T>): T[] {
   const seen = new Set<string>();

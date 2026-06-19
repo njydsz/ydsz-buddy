@@ -1,4 +1,4 @@
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remi-code/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { collectTerminalIdsFromLayout } from "./terminalPaneLayout";

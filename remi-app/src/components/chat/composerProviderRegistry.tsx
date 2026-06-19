@@ -10,7 +10,7 @@ import {
   type ProviderModelDescriptor,
   type ProviderModelOptions,
   type ThreadId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import {
   getDefaultContextWindow,
   getDefaultEffort,
@@ -25,7 +25,7 @@ import {
   normalizePiModelOptions,
   resolveLabeledOptionValue,
   trimOrNull,
-} from "@peakcode/shared/model";
+} from "@remi-code/shared/model";
 import type { ReactNode } from "react";
 import { TraitsMenuContent, TraitsPicker } from "./TraitsPicker";
 import { getComposerTraitSelection, hasVisibleComposerTraitControls } from "./composerTraits";

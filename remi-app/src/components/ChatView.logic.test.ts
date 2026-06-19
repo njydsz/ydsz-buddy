@@ -1,4 +1,4 @@
-import { ThreadId, type ModelSlug } from "@peakcode/contracts";
+import { ThreadId, type ModelSlug } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import {

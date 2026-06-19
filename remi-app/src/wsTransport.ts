@@ -17,7 +17,7 @@ import {
   type WsPush,
   type WsPushChannel,
   type WsPushMessage,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from "effect";
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";

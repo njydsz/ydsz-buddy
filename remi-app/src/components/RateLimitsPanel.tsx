@@ -3,7 +3,7 @@
 // orchestration thread activities.
 
 import { useMemo, useState } from "react";
-import type { OrchestrationThread } from "@peakcode/contracts";
+import type { OrchestrationThread } from "@remi-code/contracts";
 import { ChevronDownIcon, ExternalLinkIcon } from "~/lib/icons";
 import { deriveAccountRateLimits, deriveRateLimitLearnMoreHref } from "~/lib/rateLimits";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "./ui/collapsible";

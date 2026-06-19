@@ -333,7 +333,7 @@ export const Implementation = Schema.Struct({
     Schema.Union([
       Schema.String.annotate({
         description:
-          "Intended for UI and end-user contexts â€” optimized to be human-readable\nand easily understood.\n\nIf not provided, the name should be used for display.",
+          "Intended for UI and end-user contexts â€?optimized to be human-readable\nand easily understood.\n\nIf not provided, the name should be used for display.",
       }),
       Schema.Null,
     ]),

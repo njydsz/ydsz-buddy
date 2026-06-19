@@ -1,4 +1,4 @@
-import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS } from "@peakcode/contracts";
+import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS } from "@remi-code/contracts";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -105,7 +105,7 @@ describe("assistantSelections", () => {
       formatAssistantSelectionPreview(
         "This is a fairly long first line that should be trimmed for the chip label",
       ),
-    ).toBe("This is a fairly long first line that shoulâ€¦");
+    ).toBe("This is a fairly long first line that shoulâ€?);
   });
 
   it("creates normalized assistant selection attachments", () => {

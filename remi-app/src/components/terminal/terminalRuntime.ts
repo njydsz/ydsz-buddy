@@ -13,7 +13,7 @@ import {
   defaultTerminalTitleForCliKind,
   consumeTerminalIdentityInput,
   deriveTerminalOutputIdentity,
-} from "@peakcode/shared/terminalThreads";
+} from "@remi-code/shared/terminalThreads";
 import { Terminal } from "@xterm/xterm";
 
 import { readNativeApi } from "~/nativeApi";

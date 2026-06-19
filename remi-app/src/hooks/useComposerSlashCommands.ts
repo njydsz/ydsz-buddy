@@ -7,9 +7,9 @@ import {
   type ProviderModelOptions,
   type RuntimeMode,
   type ThreadId,
-} from "@peakcode/contracts";
-import { buildPromptThreadTitleFallback } from "@peakcode/shared/chatThreads";
-import { deriveAssociatedWorktreeMetadata } from "@peakcode/shared/threadWorkspace";
+} from "@remi-code/contracts";
+import { buildPromptThreadTitleFallback } from "@remi-code/shared/chatThreads";
+import { deriveAssociatedWorktreeMetadata } from "@remi-code/shared/threadWorkspace";
 import { useCallback, useState } from "react";
 import { newCommandId, newMessageId, newThreadId } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";

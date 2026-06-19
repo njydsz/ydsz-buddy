@@ -24,7 +24,7 @@ import {
   ProviderStartOptions,
   RuntimeMode,
   ThreadId,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import * as Schema from "effect/Schema";
 import * as Equal from "effect/Equal";
 import { DeepMutable } from "effect/Types";
@@ -33,7 +33,7 @@ import {
   normalizeModelSlug,
   resolveSelectableModel,
   resolveModelSlugForProvider,
-} from "@peakcode/shared/model";
+} from "@remi-code/shared/model";
 import { useMemo } from "react";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { resolveAppModelSelection } from "./appSettings";
@@ -2710,10 +2710,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided â†’ use them
+              // Explicit options provided â†?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection â†’ preserve existing options, update provider+model
+              // No options in selection â†?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,

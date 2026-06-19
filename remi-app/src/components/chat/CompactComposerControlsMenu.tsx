@@ -1,4 +1,4 @@
-import { ProviderInteractionMode, RuntimeMode } from "@peakcode/contracts";
+import { ProviderInteractionMode, RuntimeMode } from "@remi-code/contracts";
 import { memo, type ReactNode } from "react";
 import { EllipsisIcon, ListTodoIcon } from "~/lib/icons";
 import { Button } from "../ui/button";

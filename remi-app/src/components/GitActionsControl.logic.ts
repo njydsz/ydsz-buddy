@@ -2,8 +2,8 @@ import type {
   GitRunStackedActionResult,
   GitStackedAction,
   GitStatusResult,
-} from "@peakcode/contracts";
-import { isTemporaryWorktreeBranch, resolveUniquePeakcodeBranchName } from "@peakcode/shared/git";
+} from "@remi-code/contracts";
+import { isTemporaryWorktreeBranch, resolveUniquePeakcodeBranchName } from "@remi-code/shared/git";
 
 export type GitActionIconName = "commit" | "push" | "pr";
 
@@ -537,4 +537,4 @@ export function resolveLiveThreadBranchUpdate(input: {
 }
 
 // Re-export from shared for backwards compatibility in this module's exports
-export { resolveAutoFeatureBranchName } from "@peakcode/shared/git";
+export { resolveAutoFeatureBranchName } from "@remi-code/shared/git";

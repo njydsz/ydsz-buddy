@@ -2,7 +2,7 @@
 // Purpose: Normalizes OpenUsage local HTTP snapshots into the shared rate-limit
 // model consumed by the local toolbar popover.
 
-import type { ProviderKind } from "@peakcode/contracts";
+import type { ProviderKind } from "@remi-code/contracts";
 
 import type { ProviderRateLimit, RateLimitWindow } from "~/lib/rateLimits";
 import { normalizeRateLimitLabel } from "~/lib/rateLimits";

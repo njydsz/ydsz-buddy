@@ -3,7 +3,7 @@
 // Layer: Browser storage helper
 // Exports: sidebar UI state read/write helpers.
 
-import { normalizeWorkspaceRootForComparison } from "@peakcode/shared/threadWorkspace";
+import { normalizeWorkspaceRootForComparison } from "@remi-code/shared/threadWorkspace";
 import type { LastThreadRoute } from "../chatRouteRestore";
 
 const SIDEBAR_UI_STATE_STORAGE_KEY = "peakcode:sidebar-ui:v1";

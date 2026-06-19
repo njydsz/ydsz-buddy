@@ -11,7 +11,7 @@ import {
   type OrchestrationReadModel,
   type OrchestrationShellStreamEvent,
   type OrchestrationThreadActivity,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { describe, expect, it, vi } from "vitest";
 
 import {

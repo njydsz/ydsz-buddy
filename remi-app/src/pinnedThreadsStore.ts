@@ -3,7 +3,7 @@
 // Layer: UI state store
 // Exports: usePinnedThreadsStore
 
-import { type ThreadId } from "@peakcode/contracts";
+import { type ThreadId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 

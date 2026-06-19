@@ -2,12 +2,12 @@
 // Purpose: Shared sidebar sorting and status helpers used by the thread list UI.
 // Exports: Sidebar row state derivation, add-project error helpers, sort utilities, and visibility helpers.
 
-import type { KeybindingCommand, ProjectId, ThreadId } from "@peakcode/contracts";
+import type { KeybindingCommand, ProjectId, ThreadId } from "@remi-code/contracts";
 import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "../appSettings";
 import type { ChatMessage, Project, SidebarThreadSummary, Thread } from "../types";
 import { cn } from "../lib/utils";
 import { isDuplicateProjectCreateError } from "../lib/projectCreateRecovery";
-import { workspaceRootsEqual } from "@peakcode/shared/threadWorkspace";
+import { workspaceRootsEqual } from "@remi-code/shared/threadWorkspace";
 import {
   hasLiveLatestTurn,
   findLatestProposedPlan,

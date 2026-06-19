@@ -5,7 +5,7 @@
  * state to render tabs/toolbars and survive thread switches predictably.
  */
 
-import type { ThreadBrowserState, ThreadId } from "@peakcode/contracts";
+import type { ThreadBrowserState, ThreadId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 

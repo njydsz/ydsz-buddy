@@ -10,8 +10,8 @@ import {
   type ProviderKind,
   type ResolvedKeybindingsConfig,
   type ThreadId,
-} from "@peakcode/contracts";
-import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
+} from "@remi-code/contracts";
+import { isGenericChatThreadTitle } from "@remi-code/shared/chatThreads";
 import { useQuery } from "@tanstack/react-query";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { BsLayoutSplit, BsTerminal } from "react-icons/bs";
@@ -389,7 +389,7 @@ export const ChatHeader = memo(function ChatHeader({
           </Tooltip>
         ) : null}
 
-        {/* Panel toggles menu â€” editor, terminal, browser, split chat. */}
+        {/* Panel toggles menu â€?editor, terminal, browser, split chat. */}
         {!isDisposableThread &&
         (terminalAvailable ||
           activeProjectName ||

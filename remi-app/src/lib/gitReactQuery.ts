@@ -2,7 +2,7 @@ import type {
   GitReadWorkingTreeDiffInput,
   GitStackedAction,
   ProviderStartOptions,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { mutationOptions, queryOptions, type QueryClient } from "@tanstack/react-query";
 import { ensureNativeApi } from "../nativeApi";
 import { buildPatchCacheKey } from "./diffRendering";

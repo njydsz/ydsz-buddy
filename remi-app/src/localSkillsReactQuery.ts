@@ -5,7 +5,7 @@
 // Layer: Web React Query binding
 // Exports: localSkillsQueryKey, localSkillsQueryOptions
 
-import type { ListLocalUserSkillsResult } from "@peakcode/contracts";
+import type { ListLocalUserSkillsResult } from "@remi-code/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { ensureNativeApi } from "~/nativeApi";
 

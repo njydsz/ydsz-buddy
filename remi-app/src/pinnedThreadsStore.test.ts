@@ -3,7 +3,7 @@
 // Layer: UI state store test
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remi-code/contracts";
 import { usePinnedThreadsStore } from "./pinnedThreadsStore";
 
 describe("usePinnedThreadsStore", () => {

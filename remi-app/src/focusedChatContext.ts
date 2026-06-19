@@ -3,7 +3,7 @@
 // Layer: Route-aware UI helpers
 // Exports: pure resolver and hook used by shortcut, discovery, and thread creation flows
 
-import { ThreadId, type ThreadId as ThreadIdType } from "@peakcode/contracts";
+import { ThreadId, type ThreadId as ThreadIdType } from "@remi-code/contracts";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { type DraftThreadState, useComposerDraftStore } from "./composerDraftStore";
