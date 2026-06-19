@@ -1,13 +1,13 @@
-//! Cursor Agent Control Protocol (ACP).
+//! Cursor Agent Control Protocol (ACP)。
 //!
-//! ACP is Cursor's JSON-RPC based protocol for communicating with the
-//! `cursor` agent. The protocol runs over stdio (one JSON object per line)
-//! and exposes a set of methods such as `agent/send`, `agent/stream`,
-//! `agent/approval`, and `agent/list_commands`.
+//! ACP 是 Cursor 基于 JSON-RPC 的协议，用于与 `cursor` agent 通信。
+//! 该协议在 stdio 上运行（每行一个 JSON 对象）
+//! 并暴露一组方法，如 `agent/send`、`agent/stream`、
+//! `agent/approval` 和 `agent/list_commands`。
 //!
-//! This module provides a typed client used by the [`CursorAdapter`] to
-//! send requests and decode responses, with first-class support for the
-//! `agent/stream` notification channel used for incremental output.
+//! 本模块提供 [`CursorAdapter`] 使用的类型化客户端，用于
+//! 发送请求和解码响应，并对用于增量输出的
+//! `agent/stream` 通知通道提供一流支持。
 
 use crate::errors::ProviderAdapterError;
 use futures::{Stream, StreamExt};
@@ -20,15 +20,14 @@ use tokio::process::{Child, ChildStdin, ChildStdout};
 use tokio::sync::Mutex;
 use tracing::{debug, warn};
 
-/// ACP protocol version implemented by this client.
+/// 本客户端实现的 ACP 协议版本。
 pub const ACP_PROTOCOL_VERSION: &str = "1.0";
 
-/// ACP client wrapping a running `cursor agent --stdio` child process.
+/// ACP 客户端，包装运行中的 `cursor agent --stdio` 子进程。
 ///
-/// The client owns the child process and serialises every request behind a
-/// mutex to avoid interleaving writes on stdin. Response matching is done
-/// by `id` — the response is the next message whose `id` matches the
-/// request id.
+/// 客户端拥有子进程，并在互斥锁后序列化每个请求，
+/// 以避免 stdin 上的交错写入。响应匹配通过
+/// `id` 完成——响应是下一个 `id` 与请求 id 匹配的消息。
 pub struct AcpClient {
     inner: Arc<AcpClientInner>,
 }
@@ -41,17 +40,17 @@ struct AcpClientInner {
 }
 
 impl AcpClient {
-    /// Take ownership of a child process that was just spawned with stdio
-    /// pipes and wrap it as an ACP client.
+    /// 获取刚用 stdio 管道生成的子进程的所有权
+    /// 并将其包装为 ACP 客户端。
     pub fn new(mut child: Child) -> Self {
         let stdin = child
             .stdin
             .take()
-            .expect("child stdin must be piped for ACP client");
+            .expect("子进程 stdin 必须为管道以用于 ACP 客户端");
         let stdout = child
             .stdout
             .take()
-            .expect("child stdout must be piped for ACP client");
+            .expect("子进程 stdout 必须为管道以用于 ACP 客户端");
         Self {
             inner: Arc::new(AcpClientInner {
                 stdin: Mutex::new(stdin),
@@ -62,7 +61,7 @@ impl AcpClient {
         }
     }
 
-    /// Send a JSON-RPC request and read the matching response.
+    /// 发送 JSON-RPC 请求并读取匹配的响应。
     pub async fn request(&self, method: &str, params: Value) -> Result<Value, ProviderAdapterError> {
         let id = {
             let mut guard = self.inner.next_id.lock().await;
@@ -77,36 +76,35 @@ impl AcpClient {
             "params": params,
         });
         let line = serde_json::to_string(&payload)
-            .map_err(|e| ProviderAdapterError::Internal(format!("serialize: {e}")))?;
+            .map_err(|e| ProviderAdapterError::Internal(format!("序列化：{e}")))?;
 
         {
             let mut stdin = self.inner.stdin.lock().await;
             stdin
                 .write_all(line.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin write: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 写入：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 换行：{e}")))?;
             stdin
                 .flush()
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin flush: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 刷新：{e}")))?;
         }
 
-        // Drain notifications and read until we find a response matching the
-        // request id.
+        // 排空通知并读取，直到找到匹配请求 id 的响应。
         let mut reader = self.inner.reader.lock().await;
         loop {
             let mut buf = String::new();
             let read = reader
                 .read_line(&mut buf)
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("read line: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("读取行：{e}")))?;
             if read == 0 {
                 return Err(ProviderAdapterError::Internal(
-                    "ACP child closed before responding".to_string(),
+                    "ACP 子进程在响应前关闭".to_string(),
                 ));
             }
 
@@ -117,14 +115,14 @@ impl AcpClient {
             let parsed: Value = match serde_json::from_str(trimmed) {
                 Ok(v) => v,
                 Err(e) => {
-                    warn!(error = %e, "ACP received non-JSON line; ignoring");
+                    warn!(error = %e, "ACP 接收到非 JSON 行；忽略");
                     continue;
                 }
             };
 
-            // Server-to-client notifications (no `id`).
+            // 服务器到客户端的通知（无 `id`）。
             if parsed.get("id").is_none() {
-                debug!(payload = %trimmed, "ACP notification");
+                debug!(payload = %trimmed, "ACP 通知");
                 continue;
             }
 
@@ -132,32 +130,32 @@ impl AcpClient {
                 if resp_id == id {
                     if let Some(err) = parsed.get("error") {
                         return Err(ProviderAdapterError::Internal(format!(
-                            "ACP error: {}",
+                            "ACP 错误：{}",
                             err
                         )));
                     }
                     return Ok(parsed.get("result").cloned().unwrap_or(Value::Null));
                 }
-                // Not for us: a different request is in flight. Drop and
-                // keep draining. (This is extremely rare with serialised
-                // requests, but we keep the loop robust.)
-                warn!(id = resp_id, "ACP received out-of-order response");
+                // 不是给我们的：另一个请求正在进行中。丢弃并
+                // 继续排空。（这在序列化请求中极为罕见，
+                // 但我们保持循环健壮。）
+                warn!(id = resp_id, "ACP 接收到乱序响应");
                 continue;
             }
         }
     }
 
-    /// Send a streaming request and produce a stream of incremental text
-    /// chunks collected from `agent/stream` notifications.
+    /// 发送流式请求并从 `agent/stream` 通知中收集增量文本
+    /// 块生成流。
     pub async fn stream(
         &self,
         method: &str,
         params: Value,
     ) -> Result<Pin<Box<dyn Stream<Item = Result<String, ProviderAdapterError>> + Send>>, ProviderAdapterError>
     {
-        // Reserve the next id and send the request, then return a stream
-        // that owns its own clone of the reader so that we don't lock the
-        // shared reader for the entire stream lifetime.
+        // 预留下一个 id 并发送请求，然后返回一个
+        /// 拥有自己读取器克隆的流，这样我们就不会在
+        /// 整个流生命周期内锁定共享读取器。
         let id = {
             let mut guard = self.inner.next_id.lock().await;
             *guard += 1;
@@ -170,26 +168,26 @@ impl AcpClient {
             "params": params,
         });
         let line = serde_json::to_string(&payload)
-            .map_err(|e| ProviderAdapterError::Internal(format!("serialize: {e}")))?;
+            .map_err(|e| ProviderAdapterError::Internal(format!("序列化：{e}")))?;
         {
             let mut stdin = self.inner.stdin.lock().await;
             stdin
                 .write_all(line.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin write: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 写入：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 换行：{e}")))?;
             stdin
                 .flush()
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin flush: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 刷新：{e}")))?;
         }
 
         let reader = self.inner.reader.lock().await;
         
-        // Create a stream that reads lines from the buffered reader
+        // 创建从缓冲读取器读取行的流
         let stream = futures::stream::unfold(reader, |mut reader| async move {
             let mut line = String::new();
             loop {
@@ -205,7 +203,7 @@ impl AcpClient {
                             Ok(v) => v,
                             Err(_) => continue,
                         };
-                        // Extract text from notifications
+                        // 从通知中提取文本
                         if let Some(method) = parsed.get("method").and_then(|m| m.as_str()) {
                             if method == "agent/stream" || method == "agent/notification" {
                                 if let Some(params) = parsed.get("params") {
@@ -217,7 +215,7 @@ impl AcpClient {
                         }
                     }
                     Err(e) => {
-                        return Some((Err(ProviderAdapterError::Transport(format!("stream read: {e}"))), reader));
+                        return Some((Err(ProviderAdapterError::Transport(format!("流读取：{e}"))), reader));
                     }
                 }
             }
@@ -226,7 +224,7 @@ impl AcpClient {
         Ok(Box::pin(stream))
     }
 
-    /// Terminate the child process. Best-effort: ignores errors.
+    /// 终止子进程。尽力而为：忽略错误。
     pub async fn shutdown(&self) {
         let mut child = self.inner.child.lock().await;
         let _ = child.start_kill();
@@ -250,22 +248,22 @@ fn extract_text(params: &Value) -> Option<String> {
 }
 
 // ---------------------------------------------------------------------------
-// Typed payloads
+// 类型化载荷
 // ---------------------------------------------------------------------------
 
-/// Request payload for `agent/initialize`.
+/// `agent/initialize` 的请求载荷。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InitializeParams {
-    /// Protocol version spoken by the client.
+    /// 客户端使用的协议版本。
     pub protocol_version: String,
-    /// Client identifier (e.g. "remi-code").
+    /// 客户端标识符（例如 "remi-code"）。
     pub client: String,
-    /// Client version.
+    /// 客户端版本。
     pub client_version: String,
 }
 
 impl InitializeParams {
-    /// Build an `InitializeParams` for Remi Code.
+    /// 为 Remi Code 构建 `InitializeParams`。
     pub fn remi_code(version: impl Into<String>) -> Self {
         Self {
             protocol_version: ACP_PROTOCOL_VERSION.to_string(),
@@ -275,21 +273,21 @@ impl InitializeParams {
     }
 }
 
-/// Request payload for `agent/send` and `agent/stream`.
+/// `agent/send` 和 `agent/stream` 的请求载荷。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSendParams {
-    /// Session ID (optional; Cursor may create one if absent).
+    /// 会话 ID（可选；如果缺失，Cursor 可能会创建一个）。
     pub session_id: Option<String>,
-    /// User message.
+    /// 用户消息。
     pub message: String,
-    /// Optional model override.
+    /// 可选的模型覆盖。
     pub model: Option<String>,
-    /// Optional list of workspace paths to include as context.
+    /// 可选的工作区路径列表，作为上下文包含。
     pub workspace_paths: Option<Vec<String>>,
 }
 
 impl AgentSendParams {
-    /// Construct a new `AgentSendParams` for a plain text message.
+    /// 为纯文本消息构造新的 `AgentSendParams`。
     pub fn new(message: impl Into<String>) -> Self {
         Self {
             session_id: None,
@@ -299,77 +297,77 @@ impl AgentSendParams {
         }
     }
 
-    /// Attach a session id.
+    /// 附加会话 ID。
     pub fn with_session(mut self, session_id: impl Into<String>) -> Self {
         self.session_id = Some(session_id.into());
         self
     }
 
-    /// Attach a model override.
+    /// 附加模型覆盖。
     pub fn with_model(mut self, model: impl Into<String>) -> Self {
         self.model = Some(model.into());
         self
     }
 }
 
-/// Response payload for `agent/send`.
+/// `agent/send` 的响应载荷。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSendResult {
-    /// Session ID assigned by the agent.
+    /// agent 分配的会话 ID。
     pub session_id: String,
-    /// Assistant reply text.
+    /// 助手回复文本。
     pub response: String,
-    /// Tool calls the agent wants to make (optional).
+    /// agent 想要进行的工具调用（可选）。
     #[serde(default)]
     pub tool_calls: Vec<ToolCall>,
-    /// Whether the response requires user approval before continuing.
+    /// 响应是否需要在继续前获得用户批准。
     #[serde(default)]
     pub approval_required: bool,
-    /// Token usage, when reported.
+    /// Token 用量（如果报告）。
     #[serde(default)]
     pub usage: Option<TokenUsage>,
 }
 
-/// A tool call requested by the agent.
+/// agent 请求的工具调用。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolCall {
-    /// Tool identifier.
+    /// 工具标识符。
     pub id: String,
-    /// Tool name (e.g. "file_read", "shell_run").
+    /// 工具名称（例如 "file_read"、"shell_run"）。
     pub name: String,
-    /// Tool input as a JSON object.
+    /// 工具输入，作为 JSON 对象。
     pub input: Value,
 }
 
-/// Token usage information.
+/// Token 用量信息。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TokenUsage {
-    /// Input / prompt tokens.
+    /// 输入 / 提示 token。
     pub input_tokens: u32,
-    /// Output / completion tokens.
+    /// 输出 / 完成 token。
     pub output_tokens: u32,
 }
 
-/// Request payload for `agent/approval`.
+/// `agent/approval` 的请求载荷。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentApprovalParams {
-    /// Session id.
+    /// 会话 ID。
     pub session_id: String,
-    /// Whether the user approved the request.
+    /// 用户是否批准了请求。
     pub approved: bool,
-    /// Optional feedback for the agent.
+    /// 给 agent 的可选反馈。
     #[serde(default)]
     pub feedback: Option<String>,
 }
 
-/// Provider-native command descriptor returned by `agent/list_commands`.
+/// `agent/list_commands` 返回的 Provider 原生命令描述符。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AcpCommand {
-    /// Command name (e.g. "/explain", "/test").
+    /// 命令名称（例如 "/explain"、"/test"）。
     pub name: String,
-    /// Human-readable description.
+    /// 人类可读的描述。
     pub description: Option<String>,
-    /// Argument hint shown to the user.
+    /// 显示给用户的参数提示。
     #[serde(default)]
     pub args_hint: Option<String>,
 }

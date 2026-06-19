@@ -173,7 +173,7 @@ impl ProviderAdapter for CodexAdapter {
                 provider: ProviderName::Codex,
                 status: ProviderHealthStatus::Unhealthy,
                 last_checked: chrono::Utc::now().to_rfc3339(),
-                error: Some("OPENAI_API_KEY not configured".to_string()),
+                error: Some("OPENAI_API_KEY 未配置".to_string()),
             });
         }
 
@@ -194,7 +194,7 @@ impl ProviderAdapter for CodexAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Codex session");
+        info!(session_id = %session_id, model = %model, "已启动 Codex 会话");
 
         Ok(session_id)
     }
@@ -288,7 +288,7 @@ impl ProviderAdapter for CodexAdapter {
             let message = response
                 .text()
                 .await
-                .unwrap_or_else(|_| "Unknown error".to_string());
+                .unwrap_or_else(|_| "未知错误".to_string());
             return Err(ProviderAdapterError::ApiError {
                 status: status.as_u16(),
                 message,
@@ -354,7 +354,7 @@ impl ProviderAdapter for CodexAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Codex session");
+        info!(session_id = %session_id, "已关闭 Codex 会话");
         Ok(())
     }
 }

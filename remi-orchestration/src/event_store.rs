@@ -15,6 +15,12 @@ pub trait EventStore: Send + Sync {
 
     /// 按创建时间顺序读取所有事件。
     async fn read_all(&self) -> Result<Vec<OrchestrationEvent>>;
+
+    /// 按会话 ID 读取事件。
+    async fn read_for_thread(&self, thread_id: remi_contracts::ThreadId) -> Result<Vec<OrchestrationEvent>>;
+
+    /// 获取最后一个事件的 sequence。
+    async fn last_sequence(&self) -> Result<i64>;
 }
 
 /// 基于 SQLite 的事件存储实现。
@@ -34,21 +40,45 @@ impl SqliteEventStore {
             OrchestrationEvent::ThreadCreated { .. } => "ThreadCreated",
             OrchestrationEvent::ThreadUpdated { .. } => "ThreadUpdated",
             OrchestrationEvent::ThreadDeleted { .. } => "ThreadDeleted",
+            OrchestrationEvent::ThreadRenamed { .. } => "ThreadRenamed",
+            OrchestrationEvent::ThreadStateChanged { .. } => "ThreadStateChanged",
             OrchestrationEvent::MessageAdded { .. } => "MessageAdded",
+            OrchestrationEvent::MessageUpdated { .. } => "MessageUpdated",
             OrchestrationEvent::TurnStarted { .. } => "TurnStarted",
             OrchestrationEvent::TurnCompleted { .. } => "TurnCompleted",
+            OrchestrationEvent::TurnFailed { .. } => "TurnFailed",
+            OrchestrationEvent::CheckpointCreated { .. } => "CheckpointCreated",
+            OrchestrationEvent::CheckpointRestored { .. } => "CheckpointRestored",
+            OrchestrationEvent::ProviderSelected { .. } => "ProviderSelected",
+            OrchestrationEvent::ApprovalRequested { .. } => "ApprovalRequested",
+            OrchestrationEvent::ApprovalDecided { .. } => "ApprovalDecided",
+            OrchestrationEvent::ThreadImported { .. } => "ThreadImported",
         }
     }
 
     /// 提取会话 ID 字符串用于存储。
     fn thread_id(event: &OrchestrationEvent) -> String {
+        use remi_contracts::ThreadId;
         match event {
             OrchestrationEvent::ThreadCreated { thread_id, .. }
             | OrchestrationEvent::ThreadUpdated { thread_id, .. }
             | OrchestrationEvent::ThreadDeleted { thread_id, .. }
+            | OrchestrationEvent::ThreadRenamed { thread_id, .. }
+            | OrchestrationEvent::ThreadStateChanged { thread_id, .. }
             | OrchestrationEvent::MessageAdded { thread_id, .. }
+            | OrchestrationEvent::MessageUpdated { thread_id, .. }
             | OrchestrationEvent::TurnStarted { thread_id, .. }
-            | OrchestrationEvent::TurnCompleted { thread_id, .. } => thread_id.to_string(),
+            | OrchestrationEvent::TurnCompleted { thread_id, .. }
+            | OrchestrationEvent::TurnFailed { thread_id, .. }
+            | OrchestrationEvent::CheckpointCreated { thread_id, .. }
+            | OrchestrationEvent::CheckpointRestored { thread_id, .. }
+            | OrchestrationEvent::ProviderSelected { thread_id, .. }
+            | OrchestrationEvent::ApprovalRequested { thread_id, .. }
+            | OrchestrationEvent::ApprovalDecided { thread_id, .. }
+            | OrchestrationEvent::ThreadImported { thread_id, .. } => {
+                let ThreadId(uuid) = thread_id;
+                uuid.to_string()
+            }
         }
     }
 
@@ -58,9 +88,19 @@ impl SqliteEventStore {
             OrchestrationEvent::ThreadCreated { timestamp, .. }
             | OrchestrationEvent::ThreadUpdated { timestamp, .. }
             | OrchestrationEvent::ThreadDeleted { timestamp, .. }
+            | OrchestrationEvent::ThreadRenamed { timestamp, .. }
+            | OrchestrationEvent::ThreadStateChanged { timestamp, .. }
             | OrchestrationEvent::MessageAdded { timestamp, .. }
+            | OrchestrationEvent::MessageUpdated { timestamp, .. }
             | OrchestrationEvent::TurnStarted { timestamp, .. }
-            | OrchestrationEvent::TurnCompleted { timestamp, .. } => Some(timestamp.clone()),
+            | OrchestrationEvent::TurnCompleted { timestamp, .. }
+            | OrchestrationEvent::TurnFailed { timestamp, .. }
+            | OrchestrationEvent::CheckpointCreated { timestamp, .. }
+            | OrchestrationEvent::CheckpointRestored { timestamp, .. }
+            | OrchestrationEvent::ProviderSelected { timestamp, .. }
+            | OrchestrationEvent::ApprovalRequested { timestamp, .. }
+            | OrchestrationEvent::ApprovalDecided { timestamp, .. }
+            | OrchestrationEvent::ThreadImported { timestamp, .. } => Some(timestamp.clone()),
         }
     }
 }
@@ -71,9 +111,8 @@ impl EventStore for SqliteEventStore {
         let event_id = Uuid::new_v4().to_string();
         let event_type = Self::event_type(event);
         let thread_id = Self::thread_id(event);
-        let payload_json = serde_json::to_string(event).map_err(|e| {
-            Error::Serialization(format!("序列化编排事件失败: {e}"))
-        })?;
+        let payload_json = serde_json::to_string(event)
+            .map_err(|e| Error::Serialization(format!("序列化编排事件失败: {e}")))?;
         let occurred_at = Self::timestamp(event).unwrap_or_else(|| chrono::Utc::now().to_rfc3339());
 
         // 计算该会话聚合的下一个流版本号。
@@ -133,13 +172,41 @@ impl EventStore for SqliteEventStore {
 
         let mut events = Vec::with_capacity(rows.len());
         for (payload_json,) in rows {
-            let event: OrchestrationEvent = serde_json::from_str(&payload_json).map_err(|e| {
-                Error::Serialization(format!("反序列化编排事件失败: {e}"))
-            })?;
+            let event: OrchestrationEvent = serde_json::from_str(&payload_json)
+                .map_err(|e| Error::Serialization(format!("反序列化编排事件失败: {e}")))?;
             events.push(event);
         }
 
         info!(count = events.len(), "已从存储中读取事件");
         Ok(events)
+    }
+
+    async fn read_for_thread(
+        &self,
+        thread_id: remi_contracts::ThreadId,
+    ) -> Result<Vec<OrchestrationEvent>> {
+        let rows: Vec<(String,)> = sqlx::query_as(
+            "SELECT payload_json FROM orchestration_events WHERE aggregate_kind = 'thread' AND stream_id = ? ORDER BY sequence ASC",
+        )
+        .bind(thread_id.to_string())
+        .fetch_all(self.db.pool())
+        .await
+        .map_err(|e| Error::Database(format!("读取会话事件失败: {e}")))?;
+
+        let mut events = Vec::with_capacity(rows.len());
+        for (payload_json,) in rows {
+            let event: OrchestrationEvent = serde_json::from_str(&payload_json)
+                .map_err(|e| Error::Serialization(format!("反序列化编排事件失败: {e}")))?;
+            events.push(event);
+        }
+        Ok(events)
+    }
+
+    async fn last_sequence(&self) -> Result<i64> {
+        let seq: Option<i64> = sqlx::query_scalar("SELECT MAX(sequence) FROM orchestration_events")
+            .fetch_optional(self.db.pool())
+            .await
+            .map_err(|e| Error::Database(format!("读取最后 sequence 失败: {e}")))?;
+        Ok(seq.unwrap_or(0))
     }
 }

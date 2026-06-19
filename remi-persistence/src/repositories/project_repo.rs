@@ -149,7 +149,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
         let mut projects = Vec::new();
         for (id_str, name, path, kind_str, created_at, updated_at) in rows {
             let id = Uuid::parse_str(&id_str)
-                .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
+                .map_err(|e| Error::Database(format!("无效的项目 ID: {e}")))?;
             projects.push(Project {
                 id: ProjectId(id),
                 name,

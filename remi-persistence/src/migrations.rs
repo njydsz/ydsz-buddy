@@ -13,7 +13,7 @@ use tracing::info;
 
 /// 幂等地执行所有数据库迁移。
 pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
-    info!("Running database migrations (37 total)");
+    info!("正在执行数据库迁移（共 37 个）");
 
     migration_001_orchestration_events(pool).await?;
     migration_002_orchestration_command_receipts(pool).await?;
@@ -53,7 +53,7 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     migration_036_projection_threads_pinned(pool).await?;
     migration_037_projection_snapshot_cap_indexes(pool).await?;
 
-    info!("Database migrations completed successfully");
+    info!("数据库迁移执行成功");
     Ok(())
 }
 

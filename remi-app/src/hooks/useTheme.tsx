@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { setWindowTheme } from "@/lib/theme";
+import { nativeApi } from "@/lib/nativeApi";
+import { useAppStore } from "@/store";
 
 type Theme = "light" | "dark";
 
@@ -11,25 +12,29 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = "remi:theme";
-
 function detectInitialTheme(): Theme {
   if (typeof window === "undefined") return "dark";
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = window.localStorage.getItem("remi:theme");
   if (stored === "light" || stored === "dark") return stored;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(detectInitialTheme);
+  const setStoreTheme = useAppStore((s) => s.setTheme);
+  const stored = useAppStore((s) => s.theme);
+  const initial = stored === "light" || stored === "dark" ? stored : detectInitialTheme();
+  const [theme, setTheme] = useState<Theme>(initial);
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("light", theme === "light");
     root.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem(STORAGE_KEY, theme);
-    void setWindowTheme({ theme }).catch(() => undefined);
-  }, [theme]);
+    window.localStorage.setItem("remi:theme", theme);
+    setStoreTheme(theme);
+    if (nativeApi) {
+      void nativeApi.setWindowTheme({ theme }).catch(() => undefined);
+    }
+  }, [theme, setStoreTheme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({

@@ -20,7 +20,7 @@ impl Database {
     pub async fn connect(config: &ServerConfig) -> Result<Self> {
         let database_url = format!("sqlite://{}?mode=rwc", config.db_path.display());
 
-        info!("Connecting to database at {}", config.db_path.display());
+        info!("正在连接数据库: {}", config.db_path.display());
 
         let pool = SqlitePoolOptions::new()
             .max_connections(5)
@@ -39,7 +39,7 @@ impl Database {
             .await
             .map_err(|e| Error::Database(e.to_string()))?;
 
-        info!("Database connected successfully");
+        info!("数据库连接成功");
 
         Ok(Self { pool })
     }

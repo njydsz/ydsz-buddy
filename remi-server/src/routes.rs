@@ -1014,7 +1014,6 @@ pub fn route_count() -> usize {
 
 #[allow(dead_code)]
 fn _unused_marker(_: &Value, _: &HeaderMap) {
-    // Reference helper used to keep imports stable for the route handlers
-    // that may be added in the future. Not a real handler.
+    // 占位辅助函数，用于保持未来可能添加的路由处理器的导入稳定性。非真实处理器。
     warn!("unused marker hit");
 }

@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::ThreadId;
+use crate::{ModelId, ProviderName, ThreadId};
 
 /// 线程状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -31,6 +31,18 @@ impl std::fmt::Display for ThreadState {
             Self::Errored => write!(f, "errored"),
             Self::Completed => write!(f, "completed"),
         }
+    }
+}
+
+impl ThreadState {
+    /// 判断是否允许接收新消息。
+    pub fn can_accept_message(&self) -> bool {
+        matches!(self, Self::Idle | Self::Completed | Self::Errored)
+    }
+
+    /// 判断是否为终态。
+    pub fn is_terminal(&self) -> bool {
+        matches!(self, Self::Completed)
     }
 }
 
@@ -111,11 +123,31 @@ pub enum OrchestrationEvent {
         thread_id: ThreadId,
         timestamp: String,
     },
+    /// 线程已重命名。
+    ThreadRenamed {
+        thread_id: ThreadId,
+        title: String,
+        timestamp: String,
+    },
+    /// 线程状态已变更。
+    ThreadStateChanged {
+        thread_id: ThreadId,
+        from: ThreadState,
+        to: ThreadState,
+        timestamp: String,
+    },
     /// 消息已添加。
     MessageAdded {
         message_id: Uuid,
         thread_id: ThreadId,
         role: MessageRole,
+        timestamp: String,
+    },
+    /// 消息内容已更新（用于流式追加）。
+    MessageUpdated {
+        message_id: Uuid,
+        thread_id: ThreadId,
+        content: String,
         timestamp: String,
     },
     /// 轮次已开始。
@@ -128,6 +160,54 @@ pub enum OrchestrationEvent {
     TurnCompleted {
         turn_id: Uuid,
         thread_id: ThreadId,
+        timestamp: String,
+    },
+    /// 轮次失败。
+    TurnFailed {
+        turn_id: Uuid,
+        thread_id: ThreadId,
+        error: String,
+        timestamp: String,
+    },
+    /// 检查点已创建。
+    CheckpointCreated {
+        checkpoint_id: String,
+        thread_id: ThreadId,
+        turn_id: Uuid,
+        timestamp: String,
+    },
+    /// 检查点已恢复。
+    CheckpointRestored {
+        checkpoint_id: String,
+        thread_id: ThreadId,
+        timestamp: String,
+    },
+    /// Provider 已切换。
+    ProviderSelected {
+        thread_id: ThreadId,
+        provider: ProviderName,
+        model: ModelId,
+        timestamp: String,
+    },
+    /// 审批已请求。
+    ApprovalRequested {
+        request_id: Uuid,
+        thread_id: ThreadId,
+        reason: String,
+        timestamp: String,
+    },
+    /// 审批结果已决定。
+    ApprovalDecided {
+        request_id: Uuid,
+        thread_id: ThreadId,
+        approved: bool,
+        timestamp: String,
+    },
+    /// 线程已导入（从外部源）。
+    ThreadImported {
+        thread_id: ThreadId,
+        project_id: Uuid,
+        source: String,
         timestamp: String,
     },
 }
@@ -163,6 +243,38 @@ pub enum OrchestrationCommand {
     SendMessage {
         thread_id: ThreadId,
         content: String,
+    },
+    /// 重命名线程。
+    RenameThread {
+        thread_id: ThreadId,
+        title: String,
+    },
+    /// 取消正在进行的轮次。
+    CancelTurn {
+        thread_id: ThreadId,
+        turn_id: Uuid,
+    },
+    /// 创建检查点。
+    CreateCheckpoint {
+        thread_id: ThreadId,
+        turn_id: Uuid,
+    },
+    /// 恢复到指定检查点。
+    RestoreCheckpoint {
+        thread_id: ThreadId,
+        checkpoint_id: String,
+    },
+    /// 切换 Provider。
+    SelectProvider {
+        thread_id: ThreadId,
+        provider: ProviderName,
+        model: ModelId,
+    },
+    /// 决定审批请求。
+    DecideApproval {
+        request_id: Uuid,
+        thread_id: ThreadId,
+        approved: bool,
     },
     /// 删除线程。
     DeleteThread { thread_id: ThreadId },

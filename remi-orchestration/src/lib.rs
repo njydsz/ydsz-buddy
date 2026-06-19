@@ -5,11 +5,12 @@
 //!
 //! # 模块布局
 //!
-//! - [`decider`] — 纯命令校验与事件决策逻辑。
+//! - [`decider`] — 纯命令校验与事件决策逻辑（含 Command Invariants）。
 //! - [`projector`] — 基于事件的读模型投影。
 //! - [`handoff`] — Provider 会话路由。
 //! - [`event_store`] — 事件持久化抽象层。
 //! - [`reactors`] — 自治事件驱动副作用（8 个内置反应器）。
+//! - [`receipts`] — 运行时回执总线（RuntimeReceiptBus）。
 //! - [`services`] — 高层业务服务（5 个内置服务）。
 
 pub mod decider;
@@ -19,15 +20,16 @@ pub mod projector;
 pub mod reactors;
 pub mod services;
 
-pub use decider::{decide, fold_thread};
+pub use decider::{check_invariants, decide, event_belongs_to_thread, event_thread_id, fold_thread};
 pub use event_store::{EventStore, SqliteEventStore};
 pub use handoff::ProviderHandoff;
-pub use projector::ReadModel;
+pub use projector::{ApprovalRecord, CheckpointRecord, ReadModel};
 pub use reactors::{
-    ApprovalReactor, CheckpointReactor, GitReactor, MetricsReactor, NotificationReactor,
+    ApprovalReactor, CheckpointReactor, GitReactor, MetricsReactor, Metrics, NotificationReactor,
     PendingApproval, RateLimitReactor, Reactor, ReactorRegistry, RetentionReactor,
     TelemetryReactor, default_registry, spawn_event_loop,
 };
+pub use receipts::{ReceiptEmitter, ReceiptKind, RuntimeReceipt, RuntimeReceiptBus, SharedReceiptBus};
 pub use services::{
     Checkpoint, CheckpointService, ConversationContext, ConversationService, DiffService,
     DiffSummary, MessageService, Plugin, PluginKind, PluginResult, PluginService,
@@ -58,6 +60,8 @@ pub struct OrchestrationEngine {
     handoff: Arc<ProviderHandoff>,
     /// Optional reactor registry that fans out every event to listeners.
     reactors: Arc<ReactorRegistry>,
+    /// Runtime receipt bus for side-effect observation.
+    receipt_bus: SharedReceiptBus,
     /// Broadcast channel used to notify external consumers (HTTP, Tauri)
     /// about new orchestration events.
     event_tx: broadcast::Sender<OrchestrationEvent>,
@@ -74,6 +78,7 @@ impl OrchestrationEngine {
         // 可能会出现峰值，我们不希望背压拖慢引擎。
         // 延迟订阅者可通过 `replay_events` 重新同步。
         let (event_tx, _) = broadcast::channel(1024);
+        let receipt_bus = Arc::new(RuntimeReceiptBus::new(256));
 
         Self {
             db,
@@ -83,6 +88,7 @@ impl OrchestrationEngine {
             event_store,
             handoff,
             reactors: Arc::new(ReactorRegistry::new()),
+            receipt_bus,
             event_tx,
         }
     }
@@ -97,9 +103,11 @@ impl OrchestrationEngine {
         // 反应器发出的通知（以及公共订阅者）
         // 共享同一个通道。
         let (event_tx, _) = broadcast::channel(1024);
-        let registry = default_registry(event_tx.clone());
+        let receipt_bus = Arc::new(RuntimeReceiptBus::new(256));
+        let registry = default_registry(event_tx.clone(), Some(receipt_bus.clone()));
         Self {
             reactors: Arc::new(registry),
+            receipt_bus,
             event_tx,
             ..engine
         }
@@ -111,9 +119,25 @@ impl OrchestrationEngine {
         self
     }
 
+    /// 替换回执总线。
+    pub fn with_receipt_bus(mut self, bus: SharedReceiptBus) -> Self {
+        self.receipt_bus = bus;
+        self
+    }
+
+    /// 获取共享的运行时回执总线。
+    pub fn receipt_bus(&self) -> SharedReceiptBus {
+        self.receipt_bus.clone()
+    }
+
     /// 订阅编排事件。
     pub fn subscribe(&self) -> broadcast::Receiver<OrchestrationEvent> {
         self.event_tx.subscribe()
+    }
+
+    /// 订阅运行时回执。
+    pub fn subscribe_receipts(&self) -> broadcast::Receiver<RuntimeReceipt> {
+        self.receipt_bus.subscribe()
     }
 
     /// 启动后台事件循环，将事件泵入反应器注册表。
@@ -132,6 +156,24 @@ impl OrchestrationEngine {
                 let _ = self.handle_send_message(thread_id, &content).await?;
                 Ok(())
             }
+            OrchestrationCommand::RenameThread { thread_id, title } => {
+                self.handle_rename_thread(thread_id, &title).await
+            }
+            OrchestrationCommand::CancelTurn { thread_id, turn_id } => {
+                self.handle_cancel_turn(thread_id, turn_id).await
+            }
+            OrchestrationCommand::CreateCheckpoint { thread_id, turn_id } => {
+                self.handle_create_checkpoint(thread_id, turn_id).await
+            }
+            OrchestrationCommand::RestoreCheckpoint { thread_id, checkpoint_id } => {
+                self.handle_restore_checkpoint(thread_id, &checkpoint_id).await
+            }
+            OrchestrationCommand::SelectProvider { thread_id, provider, model } => {
+                self.handle_select_provider(thread_id, provider, model).await
+            }
+            OrchestrationCommand::DecideApproval { request_id, thread_id, approved } => {
+                self.handle_decide_approval(thread_id, request_id, approved).await
+            }
             OrchestrationCommand::DeleteThread { thread_id } => {
                 self.handle_delete_thread(thread_id).await
             }
@@ -144,13 +186,23 @@ impl OrchestrationEngine {
 
         let thread = self.thread_repo.create(project_id, title).await?;
 
-        let event = OrchestrationEvent::ThreadCreated {
-            thread_id: thread.id,
-            project_id,
-            timestamp: chrono::Utc::now().to_rfc3339(),
-        };
-
-        self.persist_and_project(&event).await?;
+        let events = decider::decide(
+            &OrchestrationCommand::CreateThread {
+                project_id,
+                title: title.map(String::from),
+            },
+            None,
+        )?;
+        for event in &events {
+            // 替换决策器生成的随机 thread_id 为仓库已创建的真实 ID。
+            let mut ev = event.clone();
+            if let OrchestrationEvent::ThreadCreated { thread_id, .. }
+            | OrchestrationEvent::ThreadRenamed { thread_id, .. } = &mut ev
+            {
+                *thread_id = thread.id;
+            }
+            self.persist_and_project(&ev).await?;
+        }
 
         info!("已创建会话: {}", thread.id);
         Ok(())
@@ -188,10 +240,6 @@ impl OrchestrationEngine {
             .add_message(thread_id, remi_contracts::MessageRole::User, content)
             .await?;
 
-        self.thread_repo
-            .update_state(thread_id, remi_contracts::ThreadState::Processing)
-            .await?;
-
         // 启动一个轮次。
         let turn = self.thread_repo.start_turn(thread_id).await?;
 
@@ -227,11 +275,147 @@ impl OrchestrationEngine {
 
         self.persist_and_project(&turn_complete_event).await?;
 
-        self.thread_repo
-            .update_state(thread_id, remi_contracts::ThreadState::Idle)
-            .await?;
-
         Ok((user_message, assistant_message))
+    }
+
+    /// 处理重命名会话。
+    async fn handle_rename_thread(&self, thread_id: ThreadId, title: &str) -> Result<()> {
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
+            .ok_or_else(|| Error::Orchestration(format!("会话不存在: {}", thread_id)))?;
+
+        let events = decider::decide(
+            &OrchestrationCommand::RenameThread {
+                thread_id,
+                title: title.to_string(),
+            },
+            Some(&thread),
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
+    }
+
+    /// 处理取消轮次命令。
+    async fn handle_cancel_turn(&self, thread_id: ThreadId, turn_id: Uuid) -> Result<()> {
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
+            .ok_or_else(|| Error::Orchestration(format!("会话不存在: {}", thread_id)))?;
+
+        let events = decider::decide(
+            &OrchestrationCommand::CancelTurn { thread_id, turn_id },
+            Some(&thread),
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
+    }
+
+    /// 处理创建检查点命令。
+    async fn handle_create_checkpoint(&self, thread_id: ThreadId, turn_id: Uuid) -> Result<()> {
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
+            .ok_or_else(|| Error::Orchestration(format!("会话不存在: {}", thread_id)))?;
+
+        let events = decider::decide(
+            &OrchestrationCommand::CreateCheckpoint { thread_id, turn_id },
+            Some(&thread),
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
+    }
+
+    /// 处理恢复检查点命令。
+    async fn handle_restore_checkpoint(
+        &self,
+        thread_id: ThreadId,
+        checkpoint_id: &str,
+    ) -> Result<()> {
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
+            .ok_or_else(|| Error::Orchestration(format!("会话不存在: {}", thread_id)))?;
+
+        let events = decider::decide(
+            &OrchestrationCommand::RestoreCheckpoint {
+                thread_id,
+                checkpoint_id: checkpoint_id.to_string(),
+            },
+            Some(&thread),
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
+    }
+
+    /// 处理切换 Provider 命令。
+    async fn handle_select_provider(
+        &self,
+        thread_id: ThreadId,
+        provider: remi_contracts::ProviderName,
+        model: remi_contracts::ModelId,
+    ) -> Result<()> {
+        use remi_persistence::repositories::thread_repo::ThreadRepositoryTrait;
+
+        let thread = self
+            .thread_repo
+            .get_by_id(thread_id)
+            .await?
+            .ok_or_else(|| Error::Orchestration(format!("会话不存在: {}", thread_id)))?;
+
+        let events = decider::decide(
+            &OrchestrationCommand::SelectProvider {
+                thread_id,
+                provider,
+                model,
+            },
+            Some(&thread),
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
+    }
+
+    /// 处理审批决定命令。
+    async fn handle_decide_approval(
+        &self,
+        thread_id: ThreadId,
+        request_id: Uuid,
+        approved: bool,
+    ) -> Result<()> {
+        let events = decider::decide(
+            &OrchestrationCommand::DecideApproval {
+                request_id,
+                thread_id,
+                approved,
+            },
+            None,
+        )?;
+        for event in &events {
+            self.persist_and_project(event).await?;
+        }
+        Ok(())
     }
 
     /// 处理删除会话命令。
@@ -436,5 +620,75 @@ mod tests {
         assert_eq!(messages.len(), 2);
         assert_eq!(messages[0].content, "Hello, Remi!");
         assert_eq!(messages[1].id, assistant_message.id);
+    }
+
+    #[tokio::test]
+    async fn test_handle_rename_thread() {
+        let config = temp_db_config();
+        let db = Arc::new(Database::connect(&config).await.unwrap());
+        db.run_migrations().await.unwrap();
+        let registry = Arc::new(ProviderRegistry::new());
+        let engine = OrchestrationEngine::new(db.clone(), registry);
+
+        let project_path = std::env::temp_dir()
+            .join(format!("remi-orchestration-project-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&project_path).expect("创建临时项目目录失败");
+
+        let project_id = {
+            use remi_persistence::repositories::project_repo::{ProjectRepository, ProjectRepositoryTrait};
+            let project_repo = ProjectRepository::new(db.pool().clone());
+            let project = project_repo
+                .create("Test Project", project_path.to_str().unwrap(), remi_contracts::ProjectKind::Local)
+                .await
+                .unwrap();
+            project.id.0
+        };
+
+        engine
+            .handle_command(OrchestrationCommand::CreateThread {
+                project_id,
+                title: None,
+            })
+            .await
+            .unwrap();
+
+        let threads = engine.list_threads(project_id).await.unwrap();
+        let thread_id = threads[0].id;
+
+        engine
+            .handle_command(OrchestrationCommand::RenameThread {
+                thread_id,
+                title: "重命名后的会话".to_string(),
+            })
+            .await
+            .unwrap();
+
+        let thread = engine.get_thread(thread_id).await.unwrap().unwrap();
+        assert_eq!(thread.title, Some("重命名后的会话".to_string()));
+    }
+
+    #[tokio::test]
+    async fn test_orchestration_engine_with_default_reactors() {
+        let config = temp_db_config();
+        let db = Arc::new(Database::connect(&config).await.unwrap());
+        db.run_migrations().await.unwrap();
+        let registry = Arc::new(ProviderRegistry::new());
+        let engine = OrchestrationEngine::with_default_reactors(db, registry);
+
+        // 验证 receipt_bus 可用
+        let bus = engine.receipt_bus();
+        let mut rx = bus.subscribe();
+
+        let receipt = receipts::RuntimeReceipt::new(receipts::ReceiptKind::Custom {
+            kind: "test".to_string(),
+            payload: serde_json::json!({}),
+        });
+        bus.emit(receipts::ReceiptKind::Custom {
+            kind: "test".to_string(),
+            payload: serde_json::json!({}),
+        });
+
+        let r = rx.recv().await.unwrap();
+        assert!(matches!(r.kind, receipts::ReceiptKind::Custom { .. }));
     }
 }

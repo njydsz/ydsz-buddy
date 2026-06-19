@@ -1,6 +1,6 @@
-//! Git operations for Remi Code.
+//! Remi Code 的 Git 操作。
 //!
-//! This crate provides git operations using git2-rs and CLI commands.
+//! 本 crate 使用 git2-rs 和 CLI 命令提供 Git 操作功能。
 
 use git2::{Repository, StatusOptions};
 use remi_contracts::{
@@ -10,14 +10,14 @@ use remi_contracts::{
 use remi_core::{Error, Result};
 use tracing::info;
 
-/// Git service.
+/// Git 服务。
 pub struct GitService;
 
 impl GitService {
-    /// Get the status of a git repository.
+    /// 获取 Git 仓库的状态。
     pub async fn status(repo_path: &str) -> Result<GitStatusResult> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let mut opts = StatusOptions::new();
         opts.include_untracked(true);
@@ -25,7 +25,7 @@ impl GitService {
 
         let statuses = repo
             .statuses(Some(&mut opts))
-            .map_err(|e| Error::Git(format!("Failed to get statuses: {}", e)))?;
+            .map_err(|e| Error::Git(format!("获取状态失败: {}", e)))?;
 
         let mut staged = Vec::new();
         let mut unstaged = Vec::new();
@@ -85,7 +85,7 @@ impl GitService {
         })
     }
 
-    /// Create a new branch.
+    /// 创建新分支。
     pub async fn create_branch(
         repo_path: &str,
         branch_name: &str,
@@ -93,31 +93,31 @@ impl GitService {
         checkout: bool,
     ) -> Result<GitCreateBranchResult> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let commit = if let Some(base_ref) = base {
             repo.revparse_single(base_ref)
-                .map_err(|e| Error::Git(format!("Failed to parse base ref: {}", e)))?
+                .map_err(|e| Error::Git(format!("解析基准引用失败: {}", e)))?
                 .peel_to_commit()
-                .map_err(|e| Error::Git(format!("Failed to peel to commit: {}", e)))?
+                .map_err(|e| Error::Git(format!("解析为提交失败: {}", e)))?
         } else {
             repo.head()
-                .map_err(|e| Error::Git(format!("Failed to get HEAD: {}", e)))?
+                .map_err(|e| Error::Git(format!("获取 HEAD 失败: {}", e)))?
                 .peel_to_commit()
-                .map_err(|e| Error::Git(format!("Failed to peel to commit: {}", e)))?
+                .map_err(|e| Error::Git(format!("解析为提交失败: {}", e)))?
         };
 
         let branch = repo
             .branch(branch_name, &commit, false)
-            .map_err(|e| Error::Git(format!("Failed to create branch: {}", e)))?;
+            .map_err(|e| Error::Git(format!("创建分支失败: {}", e)))?;
 
         if checkout {
             let ref_name = branch
                 .get()
                 .name()
-                .ok_or_else(|| Error::Git("Invalid branch name".to_string()))?;
+                .ok_or_else(|| Error::Git("无效的分支名称".to_string()))?;
             repo.set_head(ref_name)
-                .map_err(|e| Error::Git(format!("Failed to checkout branch: {}", e)))?;
+                .map_err(|e| Error::Git(format!("检出分支失败: {}", e)))?;
         }
 
         let commit_sha = commit.id().to_string();
@@ -128,33 +128,33 @@ impl GitService {
         })
     }
 
-    /// List branches.
+    /// 列出分支。
     pub async fn list_branches(
         repo_path: &str,
         include_remote: bool,
     ) -> Result<GitListBranchesResult> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let mut branches = Vec::new();
 
-        // Local branches
+        // 本地分支
         for branch in repo
             .branches(Some(git2::BranchType::Local))
-            .map_err(|e| Error::Git(format!("Failed to list local branches: {}", e)))?
+            .map_err(|e| Error::Git(format!("列出本地分支失败: {}", e)))?
         {
             let (branch, _) =
-                branch.map_err(|e| Error::Git(format!("Failed to read branch: {}", e)))?;
+                branch.map_err(|e| Error::Git(format!("读取分支失败: {}", e)))?;
             let name = branch
                 .name()
-                .map_err(|e| Error::Git(format!("Invalid branch name: {}", e)))?
+                .map_err(|e| Error::Git(format!("无效的分支名称: {}", e)))?
                 .unwrap_or("")
                 .to_string();
 
             let commit = branch
                 .get()
                 .peel_to_commit()
-                .map_err(|e| Error::Git(format!("Failed to get commit: {}", e)))?;
+                .map_err(|e| Error::Git(format!("获取提交失败: {}", e)))?;
 
             let is_current = repo
                 .head()
@@ -170,24 +170,24 @@ impl GitService {
             });
         }
 
-        // Remote branches
+        // 远程分支
         if include_remote {
             for branch in repo
                 .branches(Some(git2::BranchType::Remote))
-                .map_err(|e| Error::Git(format!("Failed to list remote branches: {}", e)))?
+                .map_err(|e| Error::Git(format!("列出远程分支失败: {}", e)))?
             {
                 let (branch, _) =
-                    branch.map_err(|e| Error::Git(format!("Failed to read branch: {}", e)))?;
+                    branch.map_err(|e| Error::Git(format!("读取分支失败: {}", e)))?;
                 let name = branch
                     .name()
-                    .map_err(|e| Error::Git(format!("Invalid branch name: {}", e)))?
+                    .map_err(|e| Error::Git(format!("无效的分支名称: {}", e)))?
                     .unwrap_or("")
                     .to_string();
 
                 let commit = branch
                     .get()
                     .peel_to_commit()
-                    .map_err(|e| Error::Git(format!("Failed to get commit: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("获取提交失败: {}", e)))?;
 
                 branches.push(GitBranch {
                     name,
@@ -201,95 +201,95 @@ impl GitService {
         Ok(GitListBranchesResult { branches })
     }
 
-    /// Initialize a new git repository.
+    /// 初始化新的 Git 仓库。
     pub async fn init(path: &str) -> Result<()> {
         Repository::init(path)
-            .map_err(|e| Error::Git(format!("Failed to init repository: {}", e)))?;
-        info!("Initialized git repository at {}", path);
+            .map_err(|e| Error::Git(format!("初始化仓库失败: {}", e)))?;
+        info!("在 {} 初始化了 Git 仓库", path);
         Ok(())
     }
 
-    /// Checkout a branch or commit.
+    /// 检出分支或提交。
     pub async fn checkout(repo_path: &str, target: &str, create_branch: bool) -> Result<()> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         if create_branch {
-            // Create and checkout new branch
+            // 创建并检出新分支
             let commit = repo
                 .head()
-                .map_err(|e| Error::Git(format!("Failed to get HEAD: {}", e)))?
+                .map_err(|e| Error::Git(format!("获取 HEAD 失败: {}", e)))?
                 .peel_to_commit()
-                .map_err(|e| Error::Git(format!("Failed to peel to commit: {}", e)))?;
+                .map_err(|e| Error::Git(format!("解析为提交失败: {}", e)))?;
 
             let branch = repo
                 .branch(target, &commit, false)
-                .map_err(|e| Error::Git(format!("Failed to create branch: {}", e)))?;
+                .map_err(|e| Error::Git(format!("创建分支失败: {}", e)))?;
 
             let ref_name = branch
                 .get()
                 .name()
-                .ok_or_else(|| Error::Git("Invalid branch name".to_string()))?;
+                .ok_or_else(|| Error::Git("无效的分支名称".to_string()))?;
 
             repo.set_head(ref_name)
-                .map_err(|e| Error::Git(format!("Failed to checkout branch: {}", e)))?;
+                .map_err(|e| Error::Git(format!("检出分支失败: {}", e)))?;
         } else {
-            // Checkout existing branch or commit
+            // 检出已有分支或提交
             let obj = repo
                 .revparse_single(target)
-                .map_err(|e| Error::Git(format!("Failed to parse target: {}", e)))?;
+                .map_err(|e| Error::Git(format!("解析目标失败: {}", e)))?;
 
             repo.checkout_tree(&obj, None)
-                .map_err(|e| Error::Git(format!("Failed to checkout tree: {}", e)))?;
+                .map_err(|e| Error::Git(format!("检出树失败: {}", e)))?;
 
-            // Try to set HEAD to the target (if it's a branch)
+            // 尝试将 HEAD 设置为目标（如果是分支）
             if let Ok(branch) = repo.find_branch(target, git2::BranchType::Local) {
                 if let Some(name) = branch.get().name() {
                     repo.set_head(name)
-                        .map_err(|e| Error::Git(format!("Failed to set HEAD: {}", e)))?;
+                        .map_err(|e| Error::Git(format!("设置 HEAD 失败: {}", e)))?;
                 }
             } else {
-                // Detached HEAD
+                // 分离 HEAD
                 repo.set_head_detached(obj.id())
-                    .map_err(|e| Error::Git(format!("Failed to detach HEAD: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("分离 HEAD 失败: {}", e)))?;
             }
         }
 
-        info!("Checked out {} in {}", target, repo_path);
+        info!("在 {} 检出了 {}", repo_path, target);
         Ok(())
     }
 
-    /// Pull from remote.
+    /// 从远程仓库拉取。
     pub async fn pull(repo_path: &str, remote: Option<&str>, branch: Option<&str>) -> Result<()> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let remote_name = remote.unwrap_or("origin");
-        
-        // Use git2 to fetch
+
+        // 使用 git2 进行获取
         let mut remote_obj = repo
             .find_remote(remote_name)
-            .map_err(|e| Error::Git(format!("Failed to find remote: {}", e)))?;
+            .map_err(|e| Error::Git(format!("查找远程仓库失败: {}", e)))?;
 
         let branch_name = branch.unwrap_or("main");
         let refspec = format!("refs/heads/{}:refs/remotes/{}/{}", branch_name, remote_name, branch_name);
 
         remote_obj
             .fetch(&[&refspec], None, None)
-            .map_err(|e| Error::Git(format!("Failed to fetch: {}", e)))?;
+            .map_err(|e| Error::Git(format!("获取失败: {}", e)))?;
 
-        info!("Pulled from {}:{} in {}", remote_name, branch_name, repo_path);
+        info!("在 {} 从 {}:{} 拉取", repo_path, remote_name, branch_name);
         Ok(())
     }
 
-    /// Read working tree diff.
+    /// 读取工作树差异。
     pub async fn read_working_tree_diff(
         repo_path: &str,
         file_path: Option<&str>,
         include_staged: bool,
     ) -> Result<String> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let mut diff_opts = git2::DiffOptions::new();
         if let Some(path) = file_path {
@@ -297,20 +297,20 @@ impl GitService {
         }
 
         let diff = if include_staged {
-            // Diff between index and HEAD
+            // 索引与 HEAD 之间的差异
             let head = repo
                 .head()
-                .map_err(|e| Error::Git(format!("Failed to get HEAD: {}", e)))?;
+                .map_err(|e| Error::Git(format!("获取 HEAD 失败: {}", e)))?;
             let head_tree = head
                 .peel_to_tree()
-                .map_err(|e| Error::Git(format!("Failed to peel to tree: {}", e)))?;
-            
+                .map_err(|e| Error::Git(format!("解析为树失败: {}", e)))?;
+
             repo.diff_tree_to_index(Some(&head_tree), None, Some(&mut diff_opts))
-                .map_err(|e| Error::Git(format!("Failed to diff: {}", e)))?
+                .map_err(|e| Error::Git(format!("差异比较失败: {}", e)))?
         } else {
-            // Diff between working directory and index
+            // 工作目录与索引之间的差异
             repo.diff_index_to_workdir(None, Some(&mut diff_opts))
-                .map_err(|e| Error::Git(format!("Failed to diff: {}", e)))?
+                .map_err(|e| Error::Git(format!("差异比较失败: {}", e)))?
         };
 
         let mut diff_text = String::new();
@@ -320,171 +320,171 @@ impl GitService {
             }
             true
         })
-        .map_err(|e| Error::Git(format!("Failed to print diff: {}", e)))?;
+        .map_err(|e| Error::Git(format!("打印差异失败: {}", e)))?;
 
         Ok(diff_text)
     }
 
-    /// Stash current changes.
+    /// 暂存当前更改。
     pub async fn stash_save(repo_path: &str, message: Option<&str>) -> Result<()> {
         let mut repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let sig = repo
             .signature()
-            .map_err(|e| Error::Git(format!("Failed to get signature: {}", e)))?;
+            .map_err(|e| Error::Git(format!("获取签名失败: {}", e)))?;
 
         repo.stash_save(
             &sig,
             message.unwrap_or("WIP"),
             Some(git2::StashFlags::INCLUDE_UNTRACKED),
         )
-        .map_err(|e| Error::Git(format!("Failed to stash changes: {}", e)))?;
+        .map_err(|e| Error::Git(format!("暂存更改失败: {}", e)))?;
 
-        info!("Stashed changes in {}", repo_path);
+        info!("在 {} 暂存了更改", repo_path);
         Ok(())
     }
 
-    /// Stash info - list stashes.
+    /// 暂存信息 — 列出暂存条目。
     pub async fn stash_info(repo_path: &str) -> Result<Vec<remi_contracts::GitStashEntry>> {
         let mut repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let mut stashes = Vec::new();
         repo.stash_foreach(|index, message, _oid| {
             stashes.push(remi_contracts::GitStashEntry {
                 index: index as u32,
                 message: message.to_string(),
-                timestamp: chrono::Utc::now().to_rfc3339(), // git2 doesn't provide timestamp easily
+                timestamp: chrono::Utc::now().to_rfc3339(), // git2 不直接提供时间戳
             });
             true
         })
-        .map_err(|e| Error::Git(format!("Failed to list stashes: {}", e)))?;
+        .map_err(|e| Error::Git(format!("列出暂存条目失败: {}", e)))?;
 
         Ok(stashes)
     }
 
-    /// Stash drop - remove a stash.
+    /// 删除暂存条目。
     pub async fn stash_drop(repo_path: &str, index: u32) -> Result<()> {
         let mut repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         repo.stash_drop(index as usize)
-            .map_err(|e| Error::Git(format!("Failed to drop stash: {}", e)))?;
+            .map_err(|e| Error::Git(format!("删除暂存条目失败: {}", e)))?;
 
-        info!("Dropped stash {} in {}", index, repo_path);
+        info!("在 {} 删除了暂存条目 {}", repo_path, index);
         Ok(())
     }
 
-    /// Create worktree.
+    /// 创建 worktree。
     pub async fn create_worktree(
         repo_path: &str,
         worktree_path: &str,
         branch_name: &str,
     ) -> Result<()> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         repo.worktree(
             branch_name,
             std::path::Path::new(worktree_path),
             None,
         )
-        .map_err(|e| Error::Git(format!("Failed to create worktree: {}", e)))?;
+        .map_err(|e| Error::Git(format!("创建 worktree 失败: {}", e)))?;
 
-        info!("Created worktree {} at {}", branch_name, worktree_path);
+        info!("在 {} 创建了 worktree {}", worktree_path, branch_name);
         Ok(())
     }
 
-    /// Remove worktree.
+    /// 移除 worktree。
     pub async fn remove_worktree(repo_path: &str, worktree_path: &str, force: bool) -> Result<()> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let worktree_name = std::path::Path::new(worktree_path)
             .file_name()
             .and_then(|n| n.to_str())
-            .ok_or_else(|| Error::Git("Invalid worktree path".to_string()))?;
+            .ok_or_else(|| Error::Git("无效的 worktree 路径".to_string()))?;
 
         let worktree = repo
             .find_worktree(worktree_name)
-            .map_err(|e| Error::Git(format!("Failed to find worktree: {}", e)))?;
+            .map_err(|e| Error::Git(format!("查找 worktree 失败: {}", e)))?;
 
         if force {
             worktree
                 .prune(None)
-                .map_err(|e| Error::Git(format!("Failed to prune worktree: {}", e)))?;
+                .map_err(|e| Error::Git(format!("清理 worktree 失败: {}", e)))?;
         } else {
-            // git2 doesn't have a direct remove method, use prune instead
+            // git2 没有直接的移除方法，改用 prune
             worktree
                 .prune(None)
-                .map_err(|e| Error::Git(format!("Failed to remove worktree: {}", e)))?;
+                .map_err(|e| Error::Git(format!("移除 worktree 失败: {}", e)))?;
         }
 
-        info!("Removed worktree at {}", worktree_path);
+        info!("在 {} 移除了 worktree", worktree_path);
         Ok(())
     }
 
-    /// Remove index lock.
+    /// 移除索引锁。
     pub async fn remove_index_lock(repo_path: &str) -> Result<()> {
         let lock_path = std::path::Path::new(repo_path).join(".git").join("index.lock");
         if lock_path.exists() {
             std::fs::remove_file(&lock_path)
-                .map_err(|e| Error::Git(format!("Failed to remove index lock: {}", e)))?;
-            info!("Removed index lock in {}", repo_path);
+                .map_err(|e| Error::Git(format!("移除索引锁失败: {}", e)))?;
+            info!("在 {} 移除了索引锁", repo_path);
         }
         Ok(())
     }
 
-    /// Create detached worktree at a specific commit.
+    /// 在指定提交处创建分离 HEAD 的 worktree。
     pub async fn create_detached_worktree(
         repo_path: &str,
         worktree_path: &str,
         commit_sha: &str,
     ) -> Result<()> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         let commit = repo
             .revparse_single(commit_sha)
-            .map_err(|e| Error::Git(format!("Failed to resolve commit: {}", e)))?
+            .map_err(|e| Error::Git(format!("解析提交失败: {}", e)))?
             .peel_to_commit()
-            .map_err(|e| Error::Git(format!("Failed to peel to commit: {}", e)))?;
+            .map_err(|e| Error::Git(format!("解析为提交失败: {}", e)))?;
 
         let wt_name = std::path::Path::new(worktree_path)
             .file_name()
             .and_then(|n| n.to_str())
-            .ok_or_else(|| Error::Git("Invalid worktree path".to_string()))?;
+            .ok_or_else(|| Error::Git("无效的 worktree 路径".to_string()))?;
 
         let mut opts = git2::WorktreeAddOptions::new();
         opts.reference(None);
 
         let worktree = repo
             .worktree(wt_name, std::path::Path::new(worktree_path), Some(&opts))
-            .map_err(|e| Error::Git(format!("Failed to create worktree: {}", e)))?;
+            .map_err(|e| Error::Git(format!("创建 worktree 失败: {}", e)))?;
 
         let wt_repo = Repository::open_from_worktree(&worktree)
-            .map_err(|e| Error::Git(format!("Failed to open worktree repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开 worktree 仓库失败: {}", e)))?;
         wt_repo
             .set_head_detached(commit.id())
-            .map_err(|e| Error::Git(format!("Failed to detach HEAD: {}", e)))?;
+            .map_err(|e| Error::Git(format!("分离 HEAD 失败: {}", e)))?;
         wt_repo
             .checkout_head(Some(git2::build::CheckoutBuilder::new().force()))
-            .map_err(|e| Error::Git(format!("Failed to checkout commit: {}", e)))?;
+            .map_err(|e| Error::Git(format!("检出提交失败: {}", e)))?;
 
         info!(
-            "Created detached worktree {} at {} on {}",
-            wt_name, worktree_path, commit_sha
+            "在 {} 创建了分离 HEAD 的 worktree {}，基于提交 {}",
+            worktree_path, wt_name, commit_sha
         );
         Ok(())
     }
 
-    /// Summarize a diff using text generation.
+    /// 使用文本生成总结差异。
     pub async fn summarize_diff(
         repo_path: &str,
         diff: &str,
     ) -> Result<remi_contracts::GitSummarizeDiffResult> {
-        // Parse diff to count changes
+        // 解析差异以统计变更
         let mut files_changed = 0;
         let mut insertions = 0;
         let mut deletions = 0;
@@ -499,13 +499,13 @@ impl GitService {
             }
         }
 
-        // Generate summary (simplified version - in production would use AI)
+        // 生成摘要（简化版本 — 生产环境会使用 AI）
         let summary = format!(
             "Changed {} file(s) with {} insertion(s) and {} deletion(s)",
             files_changed, insertions, deletions
         );
 
-        info!("Summarized diff in {}", repo_path);
+        info!("在 {} 总结了差异", repo_path);
         Ok(remi_contracts::GitSummarizeDiffResult {
             summary,
             files_changed,
@@ -514,73 +514,73 @@ impl GitService {
         })
     }
 
-    /// Stash changes and checkout a branch.
+    /// 暂存更改并检出分支。
     pub async fn stash_and_checkout(
         repo_path: &str,
         branch: &str,
         message: Option<&str>,
     ) -> Result<()> {
         let mut repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
-        // Stash current changes
+        // 暂存当前更改
         let sig = repo
             .signature()
-            .map_err(|e| Error::Git(format!("Failed to get signature: {}", e)))?;
+            .map_err(|e| Error::Git(format!("获取签名失败: {}", e)))?;
 
         repo.stash_save(
             &sig,
             message.unwrap_or("WIP"),
             Some(git2::StashFlags::INCLUDE_UNTRACKED),
         )
-        .map_err(|e| Error::Git(format!("Failed to stash changes: {}", e)))?;
+        .map_err(|e| Error::Git(format!("暂存更改失败: {}", e)))?;
 
-        // Checkout branch
+        // 检出分支
         let obj = repo
             .revparse_single(branch)
-            .map_err(|e| Error::Git(format!("Failed to parse branch: {}", e)))?;
+            .map_err(|e| Error::Git(format!("解析分支失败: {}", e)))?;
 
         repo.checkout_tree(&obj, None)
-            .map_err(|e| Error::Git(format!("Failed to checkout tree: {}", e)))?;
+            .map_err(|e| Error::Git(format!("检出树失败: {}", e)))?;
 
         if let Ok(branch_ref) = repo.find_branch(branch, git2::BranchType::Local) {
             if let Some(name) = branch_ref.get().name() {
                 repo.set_head(name)
-                    .map_err(|e| Error::Git(format!("Failed to set HEAD: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("设置 HEAD 失败: {}", e)))?;
             }
         }
 
-        info!("Stashed and checked out {} in {}", branch, repo_path);
+        info!("在 {} 暂存并检出了 {}", repo_path, branch);
         Ok(())
     }
 
-    /// Run a stacked Git action (commit, push, create_pr).
+    /// 运行堆叠 Git 操作（commit、push、create_pr）。
     pub async fn run_stacked_action(
         repo_path: &str,
         action: &str,
         params: serde_json::Value,
     ) -> Result<serde_json::Value> {
         let repo = Repository::open(repo_path)
-            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+            .map_err(|e| Error::Git(format!("打开仓库失败: {}", e)))?;
 
         match action {
             "commit" => {
                 let message = params["message"].as_str().unwrap_or("Commit");
                 let sig = repo
                     .signature()
-                    .map_err(|e| Error::Git(format!("Failed to get signature: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("获取签名失败: {}", e)))?;
 
                 let mut index = repo
                     .index()
-                    .map_err(|e| Error::Git(format!("Failed to get index: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("获取索引失败: {}", e)))?;
 
                 let tree_id = index
                     .write_tree()
-                    .map_err(|e| Error::Git(format!("Failed to write tree: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("写入树失败: {}", e)))?;
 
                 let tree = repo
                     .find_tree(tree_id)
-                    .map_err(|e| Error::Git(format!("Failed to find tree: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("查找树失败: {}", e)))?;
 
                 let parent_commit = repo
                     .head()
@@ -596,9 +596,9 @@ impl GitService {
 
                 let commit_id = repo
                     .commit(Some("HEAD"), &sig, &sig, message, &tree, &parents)
-                    .map_err(|e| Error::Git(format!("Failed to commit: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("提交失败: {}", e)))?;
 
-                info!("Committed changes in {}", repo_path);
+                info!("在 {} 提交了更改", repo_path);
                 Ok(serde_json::json!({
                     "status": "committed",
                     "sha": commit_id.to_string()
@@ -609,17 +609,17 @@ impl GitService {
                 let branch_name = params["branch"].as_str().unwrap_or("HEAD");
                 let mut remote = repo
                     .find_remote(remote_name)
-                    .map_err(|e| Error::Git(format!("Failed to find remote: {}", e)))?;
+                    .map_err(|e| Error::Git(format!("查找远程仓库失败: {}", e)))?;
                 let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
                 let mut push_opts = git2::PushOptions::new();
                 remote
                     .push(&[&refspec], Some(&mut push_opts))
-                    .map_err(|e| Error::Git(format!("Failed to push: {}", e)))?;
-                info!("Pushed {} to {} in {}", branch_name, remote_name, repo_path);
+                    .map_err(|e| Error::Git(format!("推送失败: {}", e)))?;
+                info!("在 {} 推送了 {} 到 {}", repo_path, branch_name, remote_name);
                 Ok(serde_json::json!({"status": "pushed", "remote": remote_name, "branch": branch_name}))
             }
             "create_pr" => {
-                // Spawn `gh pr create` if available, else return a stub URL.
+                // 尝试运行 `gh pr create`，如不可用则返回存根 URL。
                 let title = params["title"].as_str().unwrap_or("Untitled");
                 let body = params["body"].as_str().unwrap_or("");
                 let base = params["base"].as_str().unwrap_or("main");
@@ -641,29 +641,29 @@ impl GitService {
                     }
                     Ok(out) => {
                         let stderr = String::from_utf8_lossy(&out.stderr).to_string();
-                        // Fall back to a synthetic URL if gh isn't available.
+                        // 如果 gh 不可用，回退到合成 URL。
                         if stderr.contains("not found") || stderr.contains("command not found") {
                             Ok(serde_json::json!({
                                 "status": "pr_stub",
                                 "url": format!("https://github.com/example/repo/compare/{base}...{head}?title={title}"),
-                                "note": "gh CLI unavailable, returned stub URL"
+                                "note": "gh CLI 不可用，返回存根 URL"
                             }))
                         } else {
-                            Err(Error::Git(format!("gh pr create failed: {stderr}")))
+                            Err(Error::Git(format!("gh pr create 失败: {stderr}")))
                         }
                     }
                     Err(_) => Ok(serde_json::json!({
                         "status": "pr_stub",
                         "url": format!("https://github.com/example/repo/compare/{base}...{head}?title={title}"),
-                        "note": "gh CLI unavailable, returned stub URL"
+                        "note": "gh CLI 不可用，返回存根 URL"
                     })),
                 }
             }
-            _ => Err(Error::Git(format!("Unknown action: {}", action))),
+            _ => Err(Error::Git(format!("未知操作: {}", action))),
         }
     }
 
-    /// Prepare a pull request thread by running `gh pr create` and capturing URL.
+    /// 通过运行 `gh pr create` 准备拉取请求线程并捕获 URL。
     pub async fn prepare_pull_request_thread(
         repo_path: &str,
         base_branch: &str,
@@ -685,25 +685,25 @@ impl GitService {
         match output {
             Ok(out) if out.status.success() => {
                 let url = String::from_utf8_lossy(&out.stdout).trim().to_string();
-                // Try to parse PR number from URL like https://github.com/o/r/pull/123
+                // 尝试从 URL 解析 PR 编号，如 https://github.com/o/r/pull/123
                 let pr_number = url
                     .rsplit('/')
                     .next()
                     .and_then(|s| s.trim().parse::<u32>().ok())
                     .unwrap_or(0);
-                info!("Created PR #{} from {} to {} in {}", pr_number, head_branch, base_branch, repo_path);
+                info!("在 {} 创建了 PR #{}（{} -> {}）", repo_path, pr_number, head_branch, base_branch);
                 Ok(remi_contracts::GitPreparePullRequestThreadResult {
                     pr_number,
                     pr_url: url,
                 })
             }
             _ => {
-                // Fall back to a synthetic URL
+                // 回退到合成 URL
                 let url = format!(
                     "https://github.com/example/repo/compare/{}...{}",
                     base_branch, head_branch
                 );
-                info!("Falling back to stub PR URL for {}: {}", repo_path, url);
+                info!("在 {} 回退到存根 PR URL: {}", repo_path, url);
                 Ok(remi_contracts::GitPreparePullRequestThreadResult {
                     pr_number: 0,
                     pr_url: url,
@@ -712,33 +712,33 @@ impl GitService {
         }
     }
 
-    /// Resolve a pull request (mark ready for review / close draft).
+    /// 解决拉取请求（标记为可评审 / 关闭草稿）。
     pub async fn resolve_pull_request(
         repo_path: &str,
         pr_number: u32,
     ) -> Result<remi_contracts::GitResolvePullRequestResult> {
-        // Try to mark PR ready (gh pr ready); ignore failure.
+        // 尝试标记 PR 为就绪状态（gh pr ready）；忽略失败。
         let _ = std::process::Command::new("gh")
             .args(["pr", "ready", &pr_number.to_string()])
             .current_dir(repo_path)
             .output();
-        info!("Resolved PR #{} in {}", pr_number, repo_path);
+        info!("在 {} 解决了 PR #{}", repo_path, pr_number);
         Ok(remi_contracts::GitResolvePullRequestResult {
             repo_path: repo_path.to_string(),
             pr_number,
         })
     }
 
-    /// Handoff a thread to a worktree by writing a handoff manifest JSON.
+    /// 通过写入交接清单 JSON 将线程交接给 worktree。
     pub async fn handoff_thread(
         thread_id: uuid::Uuid,
         worktree_path: &str,
     ) -> Result<remi_contracts::GitHandoffThreadResult> {
-        // Ensure the worktree directory exists, then write a handoff marker.
+        // 确保 worktree 目录存在，然后写入交接标记。
         let path = std::path::Path::new(worktree_path);
         if !path.exists() {
             std::fs::create_dir_all(path).map_err(|e| {
-                Error::Git(format!("Failed to create worktree dir: {}", e))
+                Error::Git(format!("创建 worktree 目录失败: {}", e))
             })?;
         }
         let manifest = serde_json::json!({
@@ -749,11 +749,11 @@ impl GitService {
         std::fs::write(
             &manifest_path,
             serde_json::to_string_pretty(&manifest)
-                .map_err(|e| Error::Git(format!("Failed to serialize handoff: {}", e)))?,
+                .map_err(|e| Error::Git(format!("序列化交接信息失败: {}", e)))?,
         )
-        .map_err(|e| Error::Git(format!("Failed to write handoff manifest: {}", e)))?;
+        .map_err(|e| Error::Git(format!("写入交接清单失败: {}", e)))?;
 
-        info!("Handed off thread {} to {}", thread_id, worktree_path);
+        info!("将线程 {} 交接给 {}", thread_id, worktree_path);
         Ok(remi_contracts::GitHandoffThreadResult {
             new_thread_id: uuid::Uuid::new_v4(),
         })

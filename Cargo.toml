@@ -65,6 +65,7 @@ futures = "0.3"
 async-trait = "0.1"
 parking_lot = "0.12"
 dashmap = "6.1"
+num-traits = "0.2.20"
 
 # Configuration
 figment = { version = "0.10", features = ["env", "toml"] }

@@ -3,10 +3,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { rpc } from "@/lib/rpc";
 import { useAppStore } from "@/store";
+import { useT } from "@/i18n";
+import { toast } from "@/lib/toast";
+import { log } from "@/lib/logger";
 
 export function ChatEmptyState() {
+  const t = useT();
   const navigate = useNavigate();
   const projects = useAppStore((s) => s.projects);
+  const upsertThread = useAppStore((s) => s.upsertThread);
+  const setActiveThread = useAppStore((s) => s.setActiveThread);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -20,11 +26,28 @@ export function ChatEmptyState() {
     setCreating(true);
     setError(null);
     try {
-      const thread = await rpc.threadCreate(projectId, "New chat");
+      const thread = await rpc.threadCreate(projectId, t("chat.empty.heading"));
+      upsertThread({
+        id: thread.id,
+        projectId: thread.projectId,
+        title: thread.title,
+        createdAt: thread.createdAt,
+        updatedAt: thread.updatedAt,
+        archivedAt: thread.archivedAt ?? null,
+        isPinned: thread.isPinned ?? false,
+        sessionStatus: "connecting",
+        latestTurn: thread.latestTurn ?? null,
+        hasPendingApprovals: thread.hasPendingApprovals ?? false,
+        hasPendingUserInput: thread.hasPendingUserInput ?? false,
+      });
+      setActiveThread(thread.id);
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
       navigate({ to: "/$threadId", params: { threadId: thread.id } });
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg);
+      toast.error(t("chat.empty.createError", { error: msg }));
+      log.error("threadCreate failed", { error: msg, projectId });
     } finally {
       setCreating(false);
     }
@@ -36,12 +59,10 @@ export function ChatEmptyState() {
     <div className="flex h-full flex-col items-center justify-center px-6 text-center">
       <div className="max-w-xl space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Start a new conversation
+          {t("chat.empty.heading")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Pick a project to open a new thread. Remi Code streams assistant replies
-          in real time, executes tools against your repository, and keeps every
-          turn inspectable in the diff panel.
+          {t("chat.empty.description")}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           {list.map((project) => (
@@ -52,12 +73,14 @@ export function ChatEmptyState() {
               disabled={creating}
             >
               {project.name}
-              <span className="ml-2 text-xs text-muted-foreground">{project.kind}</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                {project.kind}
+              </span>
             </button>
           ))}
           {list.length === 0 ? (
             <div className="rounded-md border border-dashed border-border/60 px-4 py-3 text-sm text-muted-foreground">
-              No projects yet. Add a project in <strong>Settings → Projects</strong> first.
+              {t("chat.empty.noProjects", { section: t("nav.settings") })}
             </div>
           ) : null}
         </div>

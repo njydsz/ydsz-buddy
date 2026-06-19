@@ -1,7 +1,7 @@
-//! Pi provider adapter.
+//! Pi Provider 适配器。
 //!
-//! Pi is a local CLI agent. This adapter discovers the `pi` executable and
-//! communicates via stdio JSON-RPC.
+//! Pi 是本地 CLI agent。本适配器发现 `pi` 可执行文件
+//! 并通过 stdio JSON-RPC 通信。
 
 use crate::errors::ProviderAdapterError;
 use crate::traits::ProviderAdapter;
@@ -19,7 +19,7 @@ use tokio::sync::Mutex;
 use tracing::{debug, info};
 use uuid::Uuid;
 
-/// Pi session state.
+/// Pi 会话状态。
 #[allow(dead_code)]
 struct PiSession {
     id: String,
@@ -28,14 +28,14 @@ struct PiSession {
     request_id: Arc<Mutex<u64>>,
 }
 
-/// Pi provider adapter.
+/// Pi Provider 适配器。
 pub struct PiAdapter {
     executable: Option<String>,
     sessions: Arc<DashMap<String, PiSession>>,
 }
 
 impl PiAdapter {
-    /// Create a new Pi adapter, probing for the `pi` executable.
+    /// 创建新的 Pi 适配器，探测 `pi` 可执行文件。
     pub fn new() -> Self {
         let executable = find_pi_executable();
         Self {
@@ -44,7 +44,7 @@ impl PiAdapter {
         }
     }
 
-    /// Returns true if the Pi executable is available.
+    /// 若 Pi 可执行文件可用则返回 true。
     fn is_configured(&self) -> bool {
         self.executable.is_some()
     }
@@ -73,7 +73,7 @@ impl ProviderAdapter for PiAdapter {
                 provider: ProviderName::Pi,
                 status: ProviderHealthStatus::Unhealthy,
                 last_checked: chrono::Utc::now().to_rfc3339(),
-                error: Some("pi executable not found on PATH".to_string()),
+                error: Some("pi 可执行文件未在 PATH 中找到".to_string()),
             });
         }
 
@@ -92,7 +92,7 @@ impl ProviderAdapter for PiAdapter {
 
         let session_id = Uuid::new_v4().to_string();
         
-        // Start pi CLI process
+        // 启动 pi CLI 进程
         let executable = self.executable.as_ref().unwrap();
         let child = Command::new(executable)
             .args(&["--stdio"])
@@ -100,7 +100,7 @@ impl ProviderAdapter for PiAdapter {
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
             .spawn()
-            .map_err(|e| ProviderAdapterError::Transport(format!("Failed to start pi: {e}")))?;
+            .map_err(|e| ProviderAdapterError::Transport(format!("启动 pi 失败：{e}")))?;
 
         let session = PiSession {
             id: session_id.clone(),
@@ -110,7 +110,7 @@ impl ProviderAdapter for PiAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Pi session");
+        info!(session_id = %session_id, model = %model, "已启动 Pi 会话");
 
         Ok(session_id)
     }
@@ -130,7 +130,7 @@ impl ProviderAdapter for PiAdapter {
         *request_id += 1;
         let id = *request_id;
 
-        // Send JSON-RPC request via stdin
+        // 通过 stdin 发送 JSON-RPC 请求
         let request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -146,15 +146,15 @@ impl ProviderAdapter for PiAdapter {
             stdin
                 .write_all(request_str.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入 stdin 失败：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入换行符失败：{e}")))?;
             child.stdin.replace(stdin);
         }
 
-        // Read response from stdout
+        // 从 stdout 读取响应
         if let Some(stdout) = child.stdout.take() {
             use tokio::io::AsyncBufReadExt;
             let mut reader = tokio::io::BufReader::new(stdout);
@@ -162,19 +162,19 @@ impl ProviderAdapter for PiAdapter {
             reader
                 .read_line(&mut line)
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to read response: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("读取响应失败：{e}")))?;
             child.stdout.replace(reader.into_inner());
 
             if line.trim().is_empty() {
-                return Err(ProviderAdapterError::Internal("Empty response from Pi".to_string()).into());
+                return Err(ProviderAdapterError::Internal("Pi 返回空响应".to_string()).into());
             }
 
             let response: Value = serde_json::from_str(line.trim())?;
-            debug!(session_id = %session_id, "Received Pi response");
+            debug!(session_id = %session_id, "已接收 Pi 响应");
             return Ok(response);
         }
 
-        Err(ProviderAdapterError::Internal("No stdout stream available".to_string()).into())
+        Err(ProviderAdapterError::Internal("无可用的 stdout 流".to_string()).into())
     }
 
     async fn stream_response(
@@ -196,7 +196,7 @@ impl ProviderAdapter for PiAdapter {
         *request_id += 1;
         let id = *request_id;
 
-        // Send streaming request
+        // 发送流式请求
         let request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -212,25 +212,25 @@ impl ProviderAdapter for PiAdapter {
             stdin
                 .write_all(request_str.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入 stdin 失败：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入换行符失败：{e}")))?;
             child.stdin.replace(stdin);
         }
 
-        // Create stream from stdout
+        // 从 stdout 创建流
         let stdout = child
             .stdout
             .take()
-            .ok_or_else(|| ProviderAdapterError::Internal("No stdout stream available".to_string()))?;
+            .ok_or_else(|| ProviderAdapterError::Internal("无可用的 stdout 流".to_string()))?;
 
         let stream = tokio_util::io::ReaderStream::new(stdout)
             .map(|result| {
                 result
                     .map(|bytes| String::from_utf8_lossy(&bytes).to_string())
-                    .map_err(|e| ProviderAdapterError::Transport(format!("Stream error: {e}")).into())
+                    .map_err(|e| ProviderAdapterError::Transport(format!("流错误：{e}")).into())
             });
 
         Ok(Box::pin(stream))
@@ -238,12 +238,12 @@ impl ProviderAdapter for PiAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Pi session");
+        info!(session_id = %session_id, "已关闭 Pi 会话");
         Ok(())
     }
 }
 
-/// Search for the `pi` executable on PATH.
+/// 在 PATH 中搜索 `pi` 可执行文件。
 fn find_pi_executable() -> Option<String> {
     let candidates = ["pi", "pi.exe"];
     let path_var = std::env::var_os("PATH")?;

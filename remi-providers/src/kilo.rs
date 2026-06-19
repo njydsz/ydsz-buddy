@@ -1,7 +1,7 @@
-//! Kilo provider adapter.
+//! Kilo Provider 适配器。
 //!
-//! Kilo is a local CLI agent. This adapter discovers the `kilo` executable
-//! and communicates via stdio JSON-RPC.
+//! Kilo 是本地 CLI agent。本适配器发现 `kilo` 可执行文件
+//! 并通过 stdio JSON-RPC 通信。
 
 use crate::errors::ProviderAdapterError;
 use crate::traits::ProviderAdapter;
@@ -19,7 +19,7 @@ use tokio::sync::Mutex;
 use tracing::{debug, info};
 use uuid::Uuid;
 
-/// Kilo session state.
+/// Kilo 会话状态。
 #[allow(dead_code)]
 struct KiloSession {
     id: String,
@@ -28,14 +28,14 @@ struct KiloSession {
     request_id: Arc<Mutex<u64>>,
 }
 
-/// Kilo provider adapter.
+/// Kilo Provider 适配器。
 pub struct KiloAdapter {
     executable: Option<String>,
     sessions: Arc<DashMap<String, KiloSession>>,
 }
 
 impl KiloAdapter {
-    /// Create a new Kilo adapter, probing for the `kilo` executable.
+    /// 创建新的 Kilo 适配器，探测 `kilo` 可执行文件。
     pub fn new() -> Self {
         let executable = find_kilo_executable();
         Self {
@@ -44,7 +44,7 @@ impl KiloAdapter {
         }
     }
 
-    /// Returns true if the Kilo executable is available.
+    /// 若 Kilo 可执行文件可用则返回 true。
     fn is_configured(&self) -> bool {
         self.executable.is_some()
     }
@@ -92,7 +92,7 @@ impl ProviderAdapter for KiloAdapter {
 
         let session_id = Uuid::new_v4().to_string();
         
-        // Start kilo CLI process
+        // 启动 kilo CLI 进程
         let executable = self.executable.as_ref().unwrap();
         let child = Command::new(executable)
             .args(&["--stdio"])
@@ -100,7 +100,7 @@ impl ProviderAdapter for KiloAdapter {
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
             .spawn()
-            .map_err(|e| ProviderAdapterError::Transport(format!("Failed to start kilo: {e}")))?;
+            .map_err(|e| ProviderAdapterError::Transport(format!("启动 kilo 失败：{e}")))?;
 
         let session = KiloSession {
             id: session_id.clone(),
@@ -110,7 +110,7 @@ impl ProviderAdapter for KiloAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Kilo session");
+        info!(session_id = %session_id, model = %model, "已启动 Kilo 会话");
 
         Ok(session_id)
     }
@@ -130,7 +130,7 @@ impl ProviderAdapter for KiloAdapter {
         *request_id += 1;
         let id = *request_id;
 
-        // Send JSON-RPC request via stdin
+        // 通过 stdin 发送 JSON-RPC 请求
         let request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -146,15 +146,15 @@ impl ProviderAdapter for KiloAdapter {
             stdin
                 .write_all(request_str.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入 stdin 失败：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入换行符失败：{e}")))?;
             child.stdin.replace(stdin);
         }
 
-        // Read response from stdout
+        // 从 stdout 读取响应
         if let Some(stdout) = child.stdout.take() {
             use tokio::io::AsyncBufReadExt;
             let mut reader = tokio::io::BufReader::new(stdout);
@@ -162,19 +162,19 @@ impl ProviderAdapter for KiloAdapter {
             reader
                 .read_line(&mut line)
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to read response: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("读取响应失败：{e}")))?;
             child.stdout.replace(reader.into_inner());
 
             if line.trim().is_empty() {
-                return Err(ProviderAdapterError::Internal("Empty response from Kilo".to_string()).into());
+                return Err(ProviderAdapterError::Internal("Kilo 返回空响应".to_string()).into());
             }
 
             let response: Value = serde_json::from_str(line.trim())?;
-            debug!(session_id = %session_id, "Received Kilo response");
+            debug!(session_id = %session_id, "已接收 Kilo 响应");
             return Ok(response);
         }
 
-        Err(ProviderAdapterError::Internal("No stdout stream available".to_string()).into())
+        Err(ProviderAdapterError::Internal("无可用的 stdout 流".to_string()).into())
     }
 
     async fn stream_response(
@@ -196,7 +196,7 @@ impl ProviderAdapter for KiloAdapter {
         *request_id += 1;
         let id = *request_id;
 
-        // Send streaming request
+        // 发送流式请求
         let request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -212,25 +212,25 @@ impl ProviderAdapter for KiloAdapter {
             stdin
                 .write_all(request_str.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入 stdin 失败：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("写入换行符失败：{e}")))?;
             child.stdin.replace(stdin);
         }
 
-        // Create stream from stdout
+        // 从 stdout 创建流
         let stdout = child
             .stdout
             .take()
-            .ok_or_else(|| ProviderAdapterError::Internal("No stdout stream available".to_string()))?;
+            .ok_or_else(|| ProviderAdapterError::Internal("无可用的 stdout 流".to_string()))?;
 
         let stream = tokio_util::io::ReaderStream::new(stdout)
             .map(|result| {
                 result
                     .map(|bytes| String::from_utf8_lossy(&bytes).to_string())
-                    .map_err(|e| ProviderAdapterError::Transport(format!("Stream error: {e}")).into())
+                    .map_err(|e| ProviderAdapterError::Transport(format!("流错误：{e}")).into())
             });
 
         Ok(Box::pin(stream))
@@ -238,12 +238,12 @@ impl ProviderAdapter for KiloAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Kilo session");
+        info!(session_id = %session_id, "已关闭 Kilo 会话");
         Ok(())
     }
 }
 
-/// Search for the `kilo` executable on PATH.
+/// 在 PATH 中搜索 `kilo` 可执行文件。
 fn find_kilo_executable() -> Option<String> {
     let candidates = ["kilo", "kilo.exe"];
     let path_var = std::env::var_os("PATH")?;

@@ -1,11 +1,11 @@
-//! Workspace management for Remi Code.
+//! Remi Code 工作区管理。
 //!
-//! Responsibilities:
-//! - Recursive filesystem scanning with ignore rules (via the `ignore` crate).
-//! - LRU entry cache to avoid re-walking large repos on every browse call.
-//! - Chunked entry returns so huge directories don't blow the wire.
-//! - Atomic file writes inside the workspace root.
-//! - Managed worktree lifecycle: create, list, clean, GC stale entries.
+//! 职责：
+//! - 递归文件系统扫描，支持忽略规则（通过 `ignore` crate）。
+//! - LRU 条目缓存，避免每次浏览调用时重新遍历大型仓库。
+//! - 分块返回条目，防止超大目录撑爆网络。
+//! - 工作区根目录内的原子文件写入。
+//! - 托管 worktree 生命周期：创建、列出、清理、GC 过期条目。
 
 use std::collections::HashMap;
 use std::num::NonZeroUsize;
@@ -26,21 +26,21 @@ use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
 use uuid::Uuid;
 
-/// Default chunk size for paginated browse responses.
+/// 分页浏览响应的默认块大小。
 pub const DEFAULT_CHUNK_SIZE: usize = 200;
-/// Default entry cache size (number of directories).
+/// 默认条目缓存大小（目录数）。
 pub const DEFAULT_CACHE_ENTRIES: usize = 64;
-/// Default entry cache TTL.
+/// 默认条目缓存 TTL。
 pub const DEFAULT_CACHE_TTL: Duration = Duration::from_secs(5);
 
-/// One cached snapshot of a directory listing.
+/// 目录列表的一个缓存快照。
 #[derive(Debug, Clone)]
 struct CachedListing {
     entries: Vec<FilesystemEntry>,
     cached_at: Instant,
 }
 
-/// Workspace service.
+/// 工作区服务。
 pub struct WorkspaceService {
     root: PathBuf,
     cache: Arc<Mutex<LruCache<String, CachedListing>>>,
@@ -49,7 +49,7 @@ pub struct WorkspaceService {
 }
 
 impl WorkspaceService {
-    /// Create a new workspace service rooted at the given directory.
+    /// 创建以给定目录为根的新工作区服务。
     pub fn new(root: impl AsRef<Path>) -> Self {
         let root = root.as_ref().to_path_buf();
         let worktrees_root = root.join(".remi-code").join("worktrees");
@@ -63,20 +63,20 @@ impl WorkspaceService {
         }
     }
 
-    /// Get the workspace root.
+    /// 获取工作区根目录。
     pub fn root(&self) -> &Path {
         &self.root
     }
 
-    /// Get the worktrees directory.
+    /// 获取 worktree 目录。
     pub fn worktrees_root(&self) -> &Path {
         &self.worktrees_root
     }
 
-    /// Browse a directory.
+    /// 浏览目录。
     ///
-    /// Cached for [`DEFAULT_CACHE_TTL`] so rapid re-renders don't re-walk the
-    /// entire tree.
+    /// 缓存 [`DEFAULT_CACHE_TTL`]，以便快速重新渲染时不必重新遍历
+    /// 整棵树。
     pub async fn browse(
         &self,
         path: &str,
@@ -170,10 +170,10 @@ impl WorkspaceService {
         })
     }
 
-    /// Browse a directory and return one chunk of the result.
+    /// 浏览目录并返回结果的一个块。
     ///
-    /// `offset` and `limit` are page parameters. When `limit` is `None`,
-    /// [`DEFAULT_CHUNK_SIZE`] is used.
+    /// `offset` 和 `limit` 是分页参数。当 `limit` 为 `None` 时，
+    /// 使用 [`DEFAULT_CHUNK_SIZE`]。
     pub async fn browse_chunked(
         &self,
         path: &str,
@@ -201,12 +201,12 @@ impl WorkspaceService {
         })
     }
 
-    /// Invalidate the entry cache.
+    /// 使条目缓存失效。
     pub fn invalidate_cache(&self) {
         self.cache.lock().clear();
     }
 
-    /// Write a file to the workspace, creating parent directories as needed.
+    /// 将文件写入工作区，根据需要创建父目录。
     pub async fn write_file(&self, input: ProjectWriteFileInput) -> Result<ProjectWriteFileResult> {
         let cwd_path = Path::new(&input.cwd);
         let full_path = if cwd_path.is_absolute() {
@@ -236,14 +236,14 @@ impl WorkspaceService {
         }
         std::fs::write(&full_path, &input.contents)
             .map_err(|e| Error::Workspace(format!("Failed to write file: {}", e)))?;
-        // Invalidate cache so the next browse sees the new file.
+        // 使缓存失效，以便下次浏览能看到新文件。
         self.invalidate_cache();
         Ok(ProjectWriteFileResult {
             relative_path: input.relative_path,
         })
     }
 
-    /// Resolve a relative or absolute path against the workspace root.
+    /// 相对于工作区根目录解析相对或绝对路径。
     pub fn resolve_path(&self, path: &str) -> Result<PathBuf> {
         let p = Path::new(path);
         if p.is_absolute() {
@@ -254,11 +254,11 @@ impl WorkspaceService {
     }
 
     // -----------------------------------------------------------------
-    // Managed worktree helpers
+    // 托管 worktree 辅助函数
     // -----------------------------------------------------------------
 
-    /// Create a managed worktree directory. The directory is a sibling under
-    /// `.remi-code/worktrees/` and is recorded in the in-memory worktree map.
+    /// 创建托管 worktree 目录。该目录是 `.remi-code/worktrees/` 下的
+    /// 同级目录，并记录在内存 worktree 映射中。
     pub async fn create_managed_worktree(&self, label: &str) -> Result<ManagedWorktree> {
         std::fs::create_dir_all(&self.worktrees_root).map_err(|e| {
             Error::Workspace(format!("Failed to create worktrees root: {}", e))
@@ -281,12 +281,12 @@ impl WorkspaceService {
         Ok(worktree)
     }
 
-    /// List all managed worktrees.
+    /// 列出所有托管的 worktree。
     pub async fn list_managed_worktrees(&self) -> Vec<ManagedWorktree> {
         self.worktree_state.read().await.values().cloned().collect()
     }
 
-    /// Touch a worktree (updates `last_used_at`).
+    /// 触摸 worktree（更新 `last_used_at`）。
     pub async fn touch_managed_worktree(&self, id: &str) -> Result<()> {
         let mut state = self.worktree_state.write().await;
         let entry = state
@@ -296,7 +296,7 @@ impl WorkspaceService {
         Ok(())
     }
 
-    /// Remove a managed worktree from disk and the in-memory map.
+    /// 从磁盘和内存映射中移除托管的 worktree。
     pub async fn remove_managed_worktree(&self, id: &str) -> Result<()> {
         let path = {
             let mut state = self.worktree_state.write().await;
@@ -313,7 +313,7 @@ impl WorkspaceService {
         Ok(())
     }
 
-    /// Garbage-collect managed worktrees not touched for `max_age`.
+    /// 垃圾回收超过 `max_age` 未使用的托管 worktree。
     pub async fn gc_managed_worktrees(&self, max_age: Duration) -> Result<usize> {
         let now = chrono::Utc::now();
         let mut stale: Vec<String> = Vec::new();
@@ -337,10 +337,10 @@ impl WorkspaceService {
     }
 
     // -----------------------------------------------------------------
-    // File-level read / write / search helpers used by the RPC layer
+    // RPC 层使用的文件级读/写/搜索辅助函数
     // -----------------------------------------------------------------
 
-    /// Read a file from the workspace root.
+    /// 从工作区根目录读取文件。
     pub async fn read_file(&self, input: ReadFileInput) -> Result<ReadFileResult> {
         let full_path = self.resolve_path(&input.path)?;
         if !full_path.exists() {
@@ -375,7 +375,7 @@ impl WorkspaceService {
         })
     }
 
-    /// Write a file under the workspace root.
+    /// 在工作区根目录下写入文件。
     pub async fn write_file_simple(&self, input: WriteFileInput) -> Result<WriteFileResult> {
         let full_path = self.resolve_path(&input.path)?;
         if let Some(parent) = full_path.parent() {
@@ -394,7 +394,7 @@ impl WorkspaceService {
         })
     }
 
-    /// Create a directory under the workspace root.
+    /// 在工作区根目录下创建目录。
     pub async fn create_directory(&self, input: CreateDirectoryInput) -> Result<()> {
         let full_path = self.resolve_path(&input.path)?;
         tokio::fs::create_dir_all(&full_path)
@@ -404,7 +404,7 @@ impl WorkspaceService {
         Ok(())
     }
 
-    /// Delete a path (file or directory) from the workspace.
+    /// 从工作区删除路径（文件或目录）。
     pub async fn delete_path(&self, input: DeletePathInput) -> Result<()> {
         let full_path = self.resolve_path(&input.path)?;
         if !full_path.exists() {
@@ -427,7 +427,7 @@ impl WorkspaceService {
         Ok(())
     }
 
-    /// Recursive content search.
+    /// 递归内容搜索。
     pub async fn search(
         &self,
         path: &str,
@@ -479,7 +479,7 @@ impl WorkspaceService {
     }
 }
 
-/// A managed worktree tracked by the workspace service.
+/// 工作区服务跟踪的托管 worktree。
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ManagedWorktree {
     pub id: String,
