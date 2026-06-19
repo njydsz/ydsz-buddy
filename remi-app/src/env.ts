@@ -6,6 +6,6 @@ export const isTauri =
   typeof window !== "undefined" && "__TAURI__" in window;
 
 /**
- * @deprecated Use isTauri instead. Kept for backward compatibility during migration.
+ * Desktop environment detection - true when running as Tauri desktop app
  */
-export const isElectron = isTauri;
+export const isDesktop = isTauri;

@@ -6,7 +6,7 @@ edition.workspace = true
 [dependencies]
 remi-core = { workspace = true }
 tokio = { workspace = true }
-serde = { workspace = true }
-thiserror = { workspace = true }
 async-trait = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true }
+chrono = { workspace = true }

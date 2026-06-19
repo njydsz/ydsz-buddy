@@ -7,11 +7,11 @@
 // Build a fully-qualified HTTP URL for `rawPath` against the same server the WS connection uses.
 // On desktop the page is served from a custom protocol scheme, so <img>/<a download> with a
 // relative path never reaches the server. We mirror the WS host and forward the legacy token
-// query param so authenticated GET routes (attachments, local-image, â€? can authorize the
+// query param so authenticated GET routes (attachments, local-image, ï¿½? can authorize the
 // request without touching cookies.
 export function resolveWsHttpUrl(rawPath: string): string {
   if (typeof window === "undefined") return rawPath;
-  const bridgeWsUrl = window.desktopBridge?.getWsUrl?.();
+  const bridgeWsUrl = tauriBridge.getWsUrl?.();
   const envWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const wsCandidate =
     typeof bridgeWsUrl === "string" && bridgeWsUrl.length > 0

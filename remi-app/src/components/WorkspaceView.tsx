@@ -259,7 +259,7 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
   );
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function") {
       return;
     }

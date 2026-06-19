@@ -12,7 +12,7 @@ const projectFaviconPresence = new Map<string, boolean>();
 function resolveServerHttpOrigin(): string {
   if (typeof window === "undefined") return "";
 
-  const bridgeWsUrl = window.desktopBridge?.getWsUrl?.();
+  const bridgeWsUrl = tauriBridge.getWsUrl?.();
   const envWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const wsCandidate =
     typeof bridgeWsUrl === "string" && bridgeWsUrl.length > 0
@@ -51,7 +51,7 @@ export function ProjectSidebarIcon({ cwd, expanded }: { cwd: string; expanded: b
   );
   const FolderGlyph = expanded ? HiOutlineFolderOpen : FolderClosed;
 
-  // Probe with Image() so Electron/file-origin behaves like the actual visible <img>.
+  // Probe with Image() so desktop/file-origin behaves like the actual visible <img>.
   useEffect(() => {
     const cached = projectFaviconPresence.get(faviconSrc);
     if (cached !== undefined) {

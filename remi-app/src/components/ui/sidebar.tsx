@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { FiSidebar } from "react-icons/fi";
 import * as React from "react";
 import { cn } from "~/lib/utils";
-import { isElectron } from "~/env";
+import { isDesktop } from "~/env";
 import { useAppSettings } from "~/appSettings";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -362,7 +362,7 @@ function SidebarHeaderTrigger({
   return (
     <SidebarTrigger
       className={cn(
-        isElectron && !isMobile && settings.sidebarSide === "left" && "ml-[76px]",
+        isDesktop && !isMobile && settings.sidebarSide === "left" && "ml-[76px]",
         className,
       )}
       onClick={onClick}

@@ -154,3 +154,26 @@ pub struct ProviderUsageSnapshot {
     pub tokens_used: u64,
     pub rate_limit_remaining: Option<u64>,
 }
+
+/// Provider 会话启动输入
+#[derive(Debug, Clone)]
+pub struct ProviderSessionStartInput {
+    pub thread_id: String,
+    pub provider: ProviderKind,
+    pub model: String,
+}
+
+/// Turn 启动输入
+#[derive(Debug, Clone)]
+pub struct TurnInput {
+    pub thread_id: String,
+    pub turn_id: String,
+    pub provider: ProviderKind,
+}
+
+/// Turn 启动结果
+#[derive(Debug, Clone)]
+pub struct ProviderTurnStartResult {
+    pub turn_id: String,
+    pub thread_id: String,
+}

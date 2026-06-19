@@ -515,10 +515,7 @@ export function createWsNativeApi(): NativeApi {
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
       ): Promise<T | null> => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.showContextMenu(items, position);
-        }
-        return showContextMenuFallback(items, position);
+        return tauriBridge.showContextMenu(items, position);
       },
     },
     server: {
@@ -568,10 +565,7 @@ export function createWsNativeApi(): NativeApi {
         transport.request(WS_METHODS.serverGetProviderUsageSnapshot, input),
       getDiagnostics: () => transport.request(WS_METHODS.serverGetDiagnostics),
       transcribeVoice: (input) => {
-        if (window.desktopBridge?.server?.transcribeVoice) {
-          return window.desktopBridge.server.transcribeVoice(input);
-        }
-        return transport.request(WS_METHODS.serverTranscribeVoice, input);
+        return tauriBridge.server.transcribeVoice(input);
       },
       upsertKeybinding: (input) => transport.request(WS_METHODS.serverUpsertKeybinding, input),
     },
@@ -634,157 +628,58 @@ export function createWsNativeApi(): NativeApi {
     },
     browser: {
       open: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.open(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        if (input.initialUrl && state.tabs.length > 0) {
-          const activeTab = resolveFallbackBrowserTab(state);
-          activeTab.url = input.initialUrl;
-          activeTab.title = defaultBrowserTitle(input.initialUrl);
-          activeTab.lastCommittedUrl = input.initialUrl;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.open(input);
       },
       close: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.close(input);
-        }
-        const state = getFallbackBrowserState(input.threadId);
-        state.open = false;
-        state.activeTabId = null;
-        state.tabs = [];
-        state.lastError = null;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.close(input);
       },
       hide: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.hide(input);
-        }
+        await tauriBridge.browser.hide(input);
       },
       getState: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.getState(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.getState(input);
       },
       setPanelBounds: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.setPanelBounds(input);
-          return;
-        }
+        await tauriBridge.browser.setPanelBounds(input);
       },
       attachWebview: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.attachWebview(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.attachWebview(input);
       },
       copyScreenshotToClipboard: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.copyScreenshotToClipboard(input);
-          return;
-        }
-        throw new Error("Browser screenshots require the desktop app.");
+        await tauriBridge.browser.copyScreenshotToClipboard(input);
       },
       captureScreenshot: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.captureScreenshot(input);
-        }
-        throw new Error("Browser screenshots require the desktop app.");
+        return tauriBridge.browser.captureScreenshot(input);
       },
       executeCdp: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.executeCdp(input);
-        }
-        throw new Error("Browser automation requires the desktop app.");
+        return tauriBridge.browser.executeCdp(input);
       },
       navigate: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.navigate(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = resolveFallbackBrowserTab(state, input.tabId);
-        tab.url = input.url;
-        tab.title = defaultBrowserTitle(input.url);
-        tab.lastCommittedUrl = input.url;
-        tab.lastError = null;
-        tab.status = "live";
-        state.activeTabId = tab.id;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.navigate(input);
       },
       reload: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.reload(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.reload(input);
       },
       goBack: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.goBack(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.goBack(input);
       },
       goForward: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.goForward(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.goForward(input);
       },
       newTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.newTab(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = createFallbackTab(input.url);
-        state.tabs = [...state.tabs, tab];
-        if (input.activate !== false || !state.activeTabId) {
-          state.activeTabId = tab.id;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.newTab(input);
       },
       closeTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.closeTab(input);
-        }
-        const state = getFallbackBrowserState(input.threadId);
-        state.tabs = state.tabs.filter((tab) => tab.id !== input.tabId);
-        if (state.tabs.length === 0) {
-          state.open = false;
-          state.activeTabId = null;
-        } else if (!state.tabs.some((tab) => tab.id === state.activeTabId)) {
-          state.activeTabId = state.tabs[0]?.id ?? null;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.closeTab(input);
       },
       selectTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.selectTab(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = resolveFallbackBrowserTab(state, input.tabId);
-        state.activeTabId = tab.id;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.selectTab(input);
       },
       openDevTools: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.openDevTools(input);
-        }
+        await tauriBridge.browser.openDevTools(input);
       },
       onState: (callback) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.onState(callback);
-        }
-        fallbackBrowserStateListeners.add(callback);
-        return () => {
-          fallbackBrowserStateListeners.delete(callback);
-        };
+        return tauriBridge.browser.onState(callback);
       },
     },
   };

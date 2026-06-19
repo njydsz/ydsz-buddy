@@ -72,7 +72,7 @@ import {
   type SidebarThreadSortOrder,
   useAppSettings,
 } from "../appSettings";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { APP_VERSION } from "../branding";
 import { showConfirmDialogFallback } from "../confirmDialogFallback";
 import { isMacPlatform, newCommandId, newProjectId, newThreadId, randomUUID } from "../lib/utils";
@@ -1997,7 +1997,7 @@ export default function Sidebar() {
       return;
     }
 
-    if (isElectron) {
+    if (isDesktop) {
       void handlePickFolder();
       return;
     }
@@ -4971,8 +4971,8 @@ export default function Sidebar() {
   ]);
 
   useEffect(() => {
-    if (!isElectron) return;
-    const bridge = window.desktopBridge;
+    if (!isDesktop) return;
+    const bridge = tauriBridge;
     if (
       !bridge ||
       typeof bridge.getUpdateState !== "function" ||
@@ -5003,7 +5003,7 @@ export default function Sidebar() {
     };
   }, []);
 
-  const showDesktopUpdateButton = isElectron && shouldShowDesktopUpdateButton(desktopUpdateState);
+  const showDesktopUpdateButton = isDesktop && shouldShowDesktopUpdateButton(desktopUpdateState);
 
   const desktopUpdateTooltip = desktopUpdateState
     ? getDesktopUpdateButtonTooltip(desktopUpdateState, {
@@ -5020,7 +5020,7 @@ export default function Sidebar() {
     installing: installingDesktopUpdate,
   });
   const showArm64IntelBuildWarning =
-    isElectron && shouldShowArm64IntelBuildWarning(desktopUpdateState);
+    isDesktop && shouldShowArm64IntelBuildWarning(desktopUpdateState);
   const arm64IntelBuildWarningDescription =
     desktopUpdateState && showArm64IntelBuildWarning
       ? getArm64IntelBuildWarningDescription(desktopUpdateState)
@@ -5130,7 +5130,7 @@ export default function Sidebar() {
   );
 
   const handleDesktopUpdateButtonClick = useCallback(() => {
-    const bridge = window.desktopBridge;
+    const bridge = tauriBridge;
     if (!bridge || !desktopUpdateState) return;
     if (desktopUpdateButtonDisabled || desktopUpdateButtonAction === "none") return;
 
@@ -5317,7 +5317,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {isElectron ? (
+      {isDesktop ? (
         <>
           <SidebarHeader
             className={cn(
@@ -5437,7 +5437,7 @@ export default function Sidebar() {
           </SidebarGroup>
         ) : (
           <>
-            {isElectron ? sidebarBrand : null}
+            {isDesktop ? sidebarBrand : null}
             <SidebarSegmentedPicker
               activeView={isOnWorkspace ? "workspace" : "threads"}
               onSelectView={handleSidebarViewChange}
@@ -5761,7 +5761,7 @@ export default function Sidebar() {
                       type="button"
                       className="mx-auto mt-3 inline-flex h-8 items-center justify-center gap-2 rounded-lg bg-[var(--color-background-elevated-secondary)] px-3 text-[length:var(--app-font-size-ui,12px)] font-normal text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)] disabled:opacity-50"
                       onClick={() => {
-                        if (isElectron) {
+                        if (isDesktop) {
                           void handlePickFolder();
                           return;
                         }

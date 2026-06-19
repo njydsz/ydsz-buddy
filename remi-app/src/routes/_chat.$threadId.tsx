@@ -226,7 +226,7 @@ function canComposerHandlePanelWidth(input: {
   return !hasComposerOverflow && !overflowsViewport && !violatesMinimumComposerWidth;
 }
 
-// Electron <webview> can swallow pointermove during drag; this keeps resizing in the React layer.
+// Tauri <webview> can swallow pointermove during drag; this keeps resizing in the React layer.
 function createPanelResizeOverlay(): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.setAttribute("data-panel-resize-overlay", "true");
@@ -1186,7 +1186,7 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
   );
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function" || !activeSplitView) {
       return;
     }
@@ -1202,7 +1202,7 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
   }, [activeSplitView, togglePanePanel]);
 
   useEffect(() => {
-    const onOpenBrowserPanelRequest = window.desktopBridge?.browser.onBrowserUseOpenPanelRequest;
+    const onOpenBrowserPanelRequest = tauriBridge.browser.onBrowserUseOpenPanelRequest;
     if (typeof onOpenBrowserPanelRequest !== "function" || !activeSplitView) {
       return;
     }
@@ -1646,7 +1646,7 @@ function SingleChatSurface(props: {
   }, [navigate, props.search, props.threadId, updatePanelState]);
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function") {
       return;
     }
@@ -1677,7 +1677,7 @@ function SingleChatSurface(props: {
   }, [activePanel, props.search.panel, updatePanelState]);
 
   useEffect(() => {
-    const onOpenBrowserPanelRequest = window.desktopBridge?.browser.onBrowserUseOpenPanelRequest;
+    const onOpenBrowserPanelRequest = tauriBridge.browser.onBrowserUseOpenPanelRequest;
     if (typeof onOpenBrowserPanelRequest !== "function") {
       return;
     }

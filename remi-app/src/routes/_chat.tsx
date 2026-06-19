@@ -11,7 +11,7 @@ import {
 import ShortcutsDialog from "../components/ShortcutsDialog";
 import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
 import ThreadSidebar from "../components/Sidebar";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { useHandleNewChat } from "../hooks/useHandleNewChat";
 import { useDisposableThreadLifecycle } from "../hooks/useDisposableThreadLifecycle";
 import { useHandleNewThread } from "../hooks/useHandleNewThread";
@@ -275,7 +275,7 @@ function ChatRouteGlobalShortcuts() {
         return;
       }
 
-      const appNavigationShortcut = isElectron
+      const appNavigationShortcut = isDesktop
         ? resolveBrowserNavigationShortcut(event, platform)
         : null;
       if (appNavigationShortcut) {
@@ -299,7 +299,7 @@ function ChatRouteGlobalShortcuts() {
 
       const command = resolveShortcutCommand(event, keybindings, { context: shortcutContext });
       if (command === "sidebar.toggle") {
-        if (!isElectron) return;
+        if (!isDesktop) return;
         event.preventDefault();
         event.stopPropagation();
         toggleSidebar();
@@ -439,7 +439,7 @@ function ChatRouteGlobalShortcuts() {
   ]);
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function") {
       return;
     }
@@ -470,7 +470,7 @@ function ChatRouteGlobalShortcuts() {
         terminalOpen,
         terminalWorkspaceOpen,
       }}
-      isElectron={isElectron}
+      isDesktop={isDesktop}
     />
   );
 }

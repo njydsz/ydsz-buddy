@@ -10,7 +10,7 @@ import { toastManager } from "../components/ui/toast";
 import { resolveVisibleToastThreadIds } from "../components/ui/toastRouteVisibility";
 import { useAppSettings } from "../appSettings";
 import { parseDiffRouteSearch } from "../diffRouteSearch";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { selectSplitView, useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 import { createAllThreadsSelector } from "../storeSelectors";
@@ -92,12 +92,12 @@ async function showSystemThreadNotification(
 ): Promise<boolean> {
   const { body, title } = copy;
 
-  if (window.desktopBridge) {
-    const supported = await window.desktopBridge.notifications.isSupported();
+  if (tauriBridge) {
+    const supported = await tauriBridge.notifications.isSupported();
     if (!supported) {
       return false;
     }
-    return window.desktopBridge.notifications.show({ title, body, silent: false, threadId });
+    return tauriBridge.notifications.show({ title, body, silent: false, threadId });
   }
 
   if (readBrowserNotificationPermissionState() !== "granted") {
@@ -163,7 +163,7 @@ export function TaskCompletionNotifications() {
   const readyRef = useRef(false);
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function") {
       return;
     }
@@ -231,7 +231,7 @@ export function TaskCompletionNotifications() {
 
     const shouldAttemptSystemNotification =
       settings.enableSystemTaskCompletionNotifications &&
-      (window.desktopBridge ? true : !isWindowForeground());
+      (tauriBridge ? true : !isWindowForeground());
 
     for (const completion of completions) {
       const copy = buildTaskCompletionCopy(completion);
@@ -316,7 +316,7 @@ export function TaskCompletionNotifications() {
 export function buildNotificationSettingsSupportText(
   permissionState: BrowserNotificationPermissionState,
 ): string {
-  if (isElectron) {
+  if (isDesktop) {
     return "Desktop app notifications use your operating system notification center.";
   }
   switch (permissionState) {

@@ -45,7 +45,7 @@ function resolveRpcUrl(rawUrl: string): string {
 
 function makeSocketUrl(explicitUrl: string | null): string {
   if (explicitUrl) return resolveRpcUrl(explicitUrl);
-  const bridgeUrl = window.desktopBridge?.getWsUrl();
+  const bridgeUrl = tauriBridge.getWsUrl();
   const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const rawUrl =
     bridgeUrl && bridgeUrl.length > 0

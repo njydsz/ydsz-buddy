@@ -1,5 +1,5 @@
 // FILE: BrowserPanel.tsx
-// Purpose: Renders the in-app browser chrome and mirrors the native Electron view.
+// Purpose: Renders the in-app browser chrome and mirrors the native desktop view.
 // Layer: Desktop-only React component
 // Depends on: browserStateStore, nativeApi browser bridge, DiffPanelShell
 
@@ -863,7 +863,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
 
   const header = (
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      {/* Keep the browser chrome interactive inside Electron's draggable titlebar. */}
+      {/* Keep the browser chrome interactive inside Tauri's draggable titlebar. */}
       <div className="relative flex min-w-0 flex-1 items-center gap-2 [-webkit-app-region:no-drag]">
         <div className="flex shrink-0 items-center gap-1 [-webkit-app-region:no-drag]">
           <Button

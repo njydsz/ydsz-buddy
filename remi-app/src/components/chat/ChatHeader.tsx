@@ -29,7 +29,7 @@ import { SidebarHeaderNavigationControls } from "../SidebarHeaderNavigationContr
 import ProjectScriptsControl, { type NewProjectScriptInput } from "../ProjectScriptsControl";
 import { Toggle } from "../ui/toggle";
 import { useSidebar } from "../ui/sidebar";
-import { isElectron } from "~/env";
+import { isDesktop } from "~/env";
 import { cn } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
 import { resolveEditorIcon } from "../../editorMetadata";
@@ -389,13 +389,13 @@ export const ChatHeader = memo(function ChatHeader({
           </Tooltip>
         ) : null}
 
-        {/* Panel toggles menu â€?editor, terminal, browser, split chat. */}
+        {/* Panel toggles menu ï¿½?editor, terminal, browser, split chat. */}
         {!isDisposableThread &&
         (terminalAvailable ||
           activeProjectName ||
           menuChatLayoutAction ||
           changeThreadAction ||
-          isElectron) ? (
+          isDesktop) ? (
           <Menu modal={false}>
             <MenuTrigger
               render={
@@ -439,7 +439,7 @@ export const ChatHeader = memo(function ChatHeader({
                   </span>
                 )}
               </MenuItem>
-              {isElectron ? (
+              {isDesktop ? (
                 <MenuItem onClick={onToggleBrowser}>
                   <GlobeIcon className="size-3.5 shrink-0" />
                   <span>{browserOpen ? "Hide browser" : "Show browser"}</span>

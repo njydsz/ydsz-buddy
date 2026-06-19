@@ -4,18 +4,109 @@
  * 提供 Git 分支名称的清洗、构建、唯一性保证等功能，
  * 以及临时工作树分支的识别与线程分支回退保护机制。
  *
+ * **核心功能：**
+ * - **分支名称清洗**：将任意字符串转换为合法的 Git 分支名称
+ * - **唯一性保证**：自动处理分支名称冲突，追加数字后缀
+ * - **临时工作树分支**：生成和识别临时工作树占位分支
+ * - **线程分支保护**：防止临时占位分支覆盖正式分支
+ * - **状态合并**：合并本地和远程 Git 状态信息
+ *
+ * **分支命名规范：**
+ * - Feature 分支：`feature/<name>` 格式
+ * - 工作树分支：`remicode/<fragment>` 格式
+ * - 临时工作树分支：`remicode/<8位十六进制>` 格式
+ *
+ * @packageDocumentation
+ *
+ * @example 生成分支名称
+ * ```ts
+ * import {
+ *   sanitizeFeatureBranchName,
+ *   resolveAutoFeatureBranchName,
+ *   buildRemicodeBranchName
+ * } from './git';
+ *
+ * // 清洗分支名称
+ * sanitizeFeatureBranchName('My Feature Branch');
+ * // 返回: 'feature/my-feature-branch'
+ *
+ * // 生成唯一的 feature 分支
+ * const existing = ['feature/login', 'feature/login-2'];
+ * resolveAutoFeatureBranchName(existing, 'login');
+ * // 返回: 'feature/login-3'
+ *
+ * // 构建 remicode 工作树分支
+ * buildRemicodeBranchName('user-auth');
+ * // 返回: 'remicode/user-auth'
+ * ```
+ *
+ * @example 临时工作树分支
+ * ```ts
+ * import {
+ *   buildTemporaryWorktreeBranchName,
+ *   isTemporaryWorktreeBranch
+ * } from './git';
+ *
+ * const tempBranch = buildTemporaryWorktreeBranchName();
+ * // 返回: 'remicode/a1b2c3d4'
+ *
+ * isTemporaryWorktreeBranch(tempBranch);
+ * // 返回: true
+ * ```
+ *
+ * @see {@link sanitizeBranchFragment} - 清洗分支片段
+ * @see {@link sanitizeFeatureBranchName} - 清洗 feature 分支名称
+ * @see {@link resolveAutoFeatureBranchName} - 生成唯一 feature 分支
+ * @see {@link buildRemicodeBranchName} - 构建 remicode 分支
+ * @see {@link isTemporaryWorktreeBranch} - 判断临时工作树分支
+ *
  * @module git
  */
 
 /**
  * 工作树分支前缀常量
- * 所有由本模块生成的工作树分支均以该前缀开头，格式为 `remicode/<fragment>`
+ *
+ * 所有由本模块生成的工作树分支均以该前缀开头，格式为 `remicode/<fragment>`。
+ * 此前缀用于标识由本系统自动生成的分支，便于区分用户手动创建的分支。
+ *
+ * @constant {string}
+ * @default "remicode"
+ *
+ * @example
+ * ```ts
+ * console.log(WORKTREE_BRANCH_PREFIX);
+ * // 输出: "remicode"
+ * ```
  */
 export const WORKTREE_BRANCH_PREFIX = "remicode";
 
 /**
  * 临时工作树分支的正则匹配模式
- * 匹配格式：`remicode/<8位十六进制>`，例如 `remicode/a1b2c3d4`
+ *
+ * 匹配格式：`remicode/<8位十六进制>`，例如 `remicode/a1b2c3d4`。
+ *
+ * **正则表达式说明：**
+ * ```regex
+ * ^remicode\/[0-9a-f]{8}$
+ * ```
+ * - `^remicode\/` - 匹配以 "remicode/" 开头
+ * - `[0-9a-f]{8}` - 匹配恰好 8 位十六进制字符（小写）
+ * - `$` - 匹配字符串结尾
+ *
+ * @constant {RegExp}
+ * @private 此常量为内部实现细节，不应直接使用
+ *
+ * @example
+ * ```ts
+ * TEMP_WORKTREE_BRANCH_PATTERN.test('remicode/a1b2c3d4');
+ * // 返回: true
+ *
+ * TEMP_WORKTREE_BRANCH_PATTERN.test('remicode/xyz123');
+ * // 返回: false (包含非十六进制字符)
+ *
+ * TEMP_WORKTREE_BRANCH_PATTERN.test('remicode/a1b2c3d4e5');
+ * // 返回: false (超过 8 位)
+ * ```
  */
 const TEMP_WORKTREE_BRANCH_PATTERN = new RegExp(`^${WORKTREE_BRANCH_PREFIX}\\/[0-9a-f]{8}$`);
 

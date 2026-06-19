@@ -655,13 +655,13 @@ export function resolveThemeVariant(mode: ThemeMode, systemDark: boolean): Theme
 export function buildThemeCssVariables(
   pack: ThemePack,
   variant: ThemeVariant,
-  options?: { electron?: boolean },
+  options?: { desktop?: boolean },
 ): ThemeCssVariableBuild {
   const resolvedTokens = buildResolvedThemeTokens(pack, variant);
   const codexVariables = resolvedTokens.codexVariables;
   const readCodexVariable = (name: string) => getRequiredVariable(codexVariables, name);
   const material: WindowMaterial =
-    options?.electron === true && !pack.theme.opaqueWindows ? "translucent" : "opaque";
+    options?.desktop === true && !pack.theme.opaqueWindows ? "translucent" : "opaque";
   const warningColor = variant === "dark" ? "#f5b44a" : "#d97706";
   const sidebarSurfaceUnder = readCodexVariable("--color-background-surface-under");
   const sidebarRaisedSurface = readCodexVariable("--color-background-elevated-primary");

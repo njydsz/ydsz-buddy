@@ -36,7 +36,7 @@ interface BuildShortcutSheetSectionsOptions {
   projectScripts: ReadonlyArray<ProjectScript>;
   platform: string;
   context: ShortcutSheetContext;
-  isElectron: boolean;
+  isDesktop: boolean;
 }
 
 interface ShortcutDefinition {
@@ -171,7 +171,7 @@ const WORKSPACE_DEFINITIONS: readonly ShortcutDefinition[] = [
 ] as const;
 
 function modSlashLabel(platform: string): string {
-  return isMacPlatform(platform) ? "âŒ?" : "Ctrl+/";
+  return isMacPlatform(platform) ? "ï¿½?" : "Ctrl+/";
 }
 
 function definitionToEntry(
@@ -228,7 +228,7 @@ export function buildShortcutSheetSections(
     ),
   ];
 
-  if (options.isElectron) {
+  if (options.isDesktop) {
     const sidebarToggle = definitionToEntry(
       {
         command: "sidebar.toggle",

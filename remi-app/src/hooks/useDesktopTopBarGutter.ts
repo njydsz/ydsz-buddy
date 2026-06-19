@@ -1,21 +1,21 @@
 // FILE: useDesktopTopBarGutter.ts
 // Purpose: Decide when desktop top bars must clear the macOS traffic light buttons.
 // Layer: Shared web shell chrome
-// Depends on: appSettings sidebar side, sidebar context, electron env detection.
+// Depends on: appSettings sidebar side, sidebar context, desktop env detection.
 
 import type { SidebarSide } from "~/appSettings";
 import { useAppSettings } from "~/appSettings";
-import { isElectron } from "~/env";
+import { isDesktop } from "~/env";
 import { useSidebar } from "~/components/ui/sidebar";
 import { isMacPlatform } from "~/lib/utils";
 
 /**
  * Tailwind padding that clears the macOS traffic light cluster
- * (positioned at x=16, y=18 in the Electron BrowserWindow).
+ * (positioned at x=16, y=18 in the Tauri BrowserWindow).
  *
  * Both the base and `sm:` variants are emitted so this gutter wins over any
  * responsive horizontal-padding class (e.g. `sm:px-5`) on the surrounding top
- * bar â€?`twMerge` only resolves conflicts within the same breakpoint.
+ * bar ï¿½?`twMerge` only resolves conflicts within the same breakpoint.
  *
  * Kept as a module-level constant so every top bar uses the same gutter width.
  */
@@ -32,13 +32,13 @@ export const DESKTOP_TOP_BAR_TRAFFIC_LIGHT_GUTTER_CLASS = "pl-[90px] sm:pl-[90px
  * otherwise the next surface to the right has to provide it instead.
  */
 export function shouldReserveDesktopTopBarTrafficLightGutter(input: {
-  isElectron: boolean;
+  isDesktop: boolean;
   isMacDesktop: boolean;
   sidebarSide: SidebarSide;
   sidebarOpen: boolean;
   isMobile: boolean;
 }): boolean {
-  if (!input.isElectron) return false;
+  if (!input.isDesktop) return false;
   if (!input.isMacDesktop) return false;
   if (input.sidebarSide === "right") return true;
   // Mobile drawers float above content rather than reserving a column,
@@ -59,7 +59,7 @@ export function useDesktopTopBarTrafficLightGutterClassName(): string | null {
   const { isMobile, open } = useSidebar();
   const isMacDesktop = typeof navigator !== "undefined" ? isMacPlatform(navigator.platform) : false;
   return shouldReserveDesktopTopBarTrafficLightGutter({
-    isElectron,
+    isDesktop,
     isMacDesktop,
     sidebarSide: settings.sidebarSide,
     sidebarOpen: open,

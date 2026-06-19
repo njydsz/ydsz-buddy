@@ -31,7 +31,7 @@ import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
 import { Button } from "../components/ui/button";
 import { AnchoredToastProvider, ToastProvider, toastManager } from "../components/ui/toast";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { useFocusedChatContext } from "../focusedChatContext";
 import { isTerminalFocused } from "../lib/terminalFocus";
 import {
@@ -365,7 +365,7 @@ function GlobalShortcutsDialog() {
   });
 
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function") {
       return;
     }
@@ -393,7 +393,7 @@ function GlobalShortcutsDialog() {
         terminalOpen,
         terminalWorkspaceOpen,
       }}
-      isElectron={isElectron}
+      isDesktop={isDesktop}
     />
   );
 }
@@ -414,7 +414,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // Silent-bootstrap or noop â€?nothing to render on either surface.
+    // Silent-bootstrap or noop ï¿½?nothing to render on either surface.
     return null;
   }
 

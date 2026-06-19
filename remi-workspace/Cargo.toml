@@ -7,8 +7,9 @@ edition.workspace = true
 remi-core = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
-walkdir = { workspace = true }
-globset = { workspace = true }
-async-trait = { workspace = true }
 tracing = { workspace = true }
+walkdir = "2.5"
+globset = "0.4"
+async-trait = { workspace = true }

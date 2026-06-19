@@ -352,3 +352,6 @@ pub struct HandoffInfo {
 
 /// 序列号类型
 pub type Sequence = u64;
+
+/// 检查点 ID
+pub type CheckpointId = String;

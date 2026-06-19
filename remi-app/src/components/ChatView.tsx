@@ -93,7 +93,7 @@ import {
   normalizeProviderStatusForLocalConfig,
   providerUnavailableReason,
 } from "~/lib/providerAvailability";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { parseDiffRouteSearch, stripDiffSearchParams } from "../diffRouteSearch";
 import { resolveSubagentPresentationForThread } from "../lib/subagentPresentation";
 import { isHomeChatContainerProject } from "../lib/chatProjects";
@@ -3215,9 +3215,9 @@ export default function ChatView({
     storeOpenNewFullWidthTerminal(activeThreadId, terminalId);
     setTerminalFocusRequestId((value) => value + 1);
   }, [activeProject, activeThreadId, storeOpenNewFullWidthTerminal]);
-  // Desktop accelerators like Cmd+T can be claimed by Electron before the page sees keydown.
+  // Desktop accelerators like Cmd+T can be claimed by Tauri before the page sees keydown.
   useEffect(() => {
-    const onMenuAction = window.desktopBridge?.onMenuAction;
+    const onMenuAction = tauriBridge.onMenuAction;
     if (typeof onMenuAction !== "function" || !isFocusedPane) {
       return;
     }
@@ -3616,7 +3616,7 @@ export default function ChatView({
         command: input.keybindingCommand,
       });
 
-      if (isElectron && keybindingRule) {
+      if (isDesktop && keybindingRule) {
         await api.server.upsertKeybinding(keybindingRule);
         await queryClient.invalidateQueries({ queryKey: serverQueryKeys.all });
       }
@@ -4636,7 +4636,7 @@ export default function ChatView({
       if (command === "browser.toggle") {
         event.preventDefault();
         event.stopPropagation();
-        if (!isElectron) return;
+        if (!isDesktop) return;
         onToggleBrowser();
         return;
       }
@@ -7346,7 +7346,7 @@ export default function ChatView({
   if (!activeThread) {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--color-background-surface)] text-[var(--color-text-foreground-secondary)]">
-        {!isElectron && (
+        {!isDesktop && (
           <header className="border-b border-[color:var(--color-border-light)] px-3 py-2 md:hidden">
             <div className="flex items-center gap-2">
               <SidebarHeaderTrigger className="size-7 shrink-0" />
@@ -7356,7 +7356,7 @@ export default function ChatView({
             </div>
           </header>
         )}
-        {isElectron && (
+        {isDesktop && (
           <div
             className={cn(
               "drag-region flex h-[52px] shrink-0 items-center border-b border-[color:var(--color-border-light)] px-5",
@@ -7991,7 +7991,7 @@ export default function ChatView({
       <header
         className={cn(
           "border-b border-[color:var(--color-border-light)] px-3 sm:px-5",
-          isElectron ? "drag-region flex h-[52px] items-center" : "py-2 sm:py-3",
+          isDesktop ? "drag-region flex h-[52px] items-center" : "py-2 sm:py-3",
           desktopTopBarTrafficLightGutterClassName,
         )}
       >

@@ -74,7 +74,7 @@ import { ThemePackEditor } from "../components/ThemePackEditor";
 import { SidebarHeaderTrigger, SidebarInset } from "../components/ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../components/ui/tooltip";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import { useTheme } from "../hooks/useTheme";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
 import {
@@ -1180,7 +1180,7 @@ function SettingsRouteView() {
       return;
     }
 
-    if (isElectron) {
+    if (isDesktop) {
       updateSettings({ enableSystemTaskCompletionNotifications: true });
       return;
     }
@@ -1205,8 +1205,8 @@ function SettingsRouteView() {
     const title = "Activity notification";
     const body = "Notification test for chats and terminal agents.";
 
-    if (window.desktopBridge) {
-      const shown = await window.desktopBridge.notifications.show({ title, body, silent: false });
+    if (tauriBridge) {
+      const shown = await tauriBridge.notifications.show({ title, body, silent: false });
       toastManager.add({
         type: shown ? "success" : "warning",
         title: shown ? "Test notification sent" : "Notifications unavailable",
@@ -3650,7 +3650,7 @@ function SettingsRouteView() {
     <SidebarInset className="h-dvh min-h-0 overflow-hidden overscroll-y-none text-foreground">
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
         {/* Header */}
-        {isElectron ? (
+        {isDesktop ? (
           <div
             className={cn(
               "drag-region flex h-[52px] shrink-0 items-center border-b border-border/70 px-5",

@@ -4,7 +4,7 @@
 // Exports: useTheme for mode, resolved variant, theme-pack import/export, and active theme metadata.
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
-import { isElectron } from "../env";
+import { isDesktop } from "../env";
 import {
   DEFAULT_THEME_STATE,
   type ChromeTheme,
@@ -155,7 +155,7 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
   const variant = resolveThemeVariant(state.mode, getSystemDark());
   const activeTheme = resolveThemePack(state, variant);
   const cssVariableBuild = buildThemeCssVariables(activeTheme, variant, {
-    electron: isElectron,
+    desktop: isDesktop,
   });
 
   root.classList.toggle("dark", variant === "dark");
@@ -189,7 +189,7 @@ function syncDesktopTheme(theme: ThemeMode) {
     return;
   }
 
-  const bridge = window.desktopBridge;
+  const bridge = tauriBridge;
   if (!bridge || lastDesktopTheme === theme) {
     return;
   }
