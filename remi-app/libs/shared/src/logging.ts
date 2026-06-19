@@ -1,26 +1,95 @@
 /**
- * 日志文件轮转工具模块
- *
- * 提供基于文件大小和数量的日志文件轮转机制，
- * 当主日志文件达到指定大小时自动创建备份并清空原文件，
- * 同时保留指定数量的历史备份文件。
- *
+ * @fileoverview 日志文件轮转工具模块
+ * 
+ * @description
+ * 提供基于文件大小和数量的日志文件轮转机制。当主日志文件达到指定大小时，
+ * 自动创建备份并清空原文件，同时保留指定数量的历史备份文件。
+ * 
+ * 核心功能：
+ * - 基于文件大小的自动轮转
+ * - 基于文件数量的备份管理
+ * - 支持同步写入和错误处理
+ * - 自动清理过期备份文件
+ * 
+ * 轮转策略：
+ * - 当文件大小超过 maxBytes 时触发轮转
+ * - 备份文件按序号递增命名（.1, .2, .3...）
+ * - 保留最多 maxFiles 个历史备份
+ * - 超出限制的备份自动删除
+ * 
  * @module logging
+ * @layer 共享工具层
+ * 
+ * @example
+ * // 基础使用示例
+ * import { RotatingFileSink } from './logging';
+ * 
+ * const sink = new RotatingFileSink({
+ *   filePath: '/var/log/app.log',
+ *   maxBytes: 10 * 1024 * 1024, // 10MB
+ *   maxFiles: 5,
+ *   throwOnError: false
+ * });
+ * 
+ * // 写入日志
+ * sink.write('2024-01-01 12:00:00 INFO Application started\n');
+ * sink.write('2024-01-01 12:00:01 DEBUG Processing request\n');
+ * 
+ * // 当 app.log 达到 10MB 时，自动轮转：
+ * // app.log -> app.log.1
+ * // app.log.1 -> app.log.2
+ * // ...
+ * // app.log.4 -> app.log.5
+ * // app.log.5 被删除
+ * 
+ * @example
+ * // 生产环境配置示例
+ * const productionSink = new RotatingFileSink({
+ *   filePath: '/var/log/production/app.log',
+ *   maxBytes: 100 * 1024 * 1024, // 100MB
+ *   maxFiles: 10,
+ *   throwOnError: true // 生产环境建议抛出错误
+ * });
+ * 
+ * @see {@link RotatingFileSink} - 轮转文件输出器类
+ * @see {@link RotatingFileSinkOptions} - 配置选项接口
  */
 import fs from "node:fs";
 import path from "node:path";
 
 /**
- * 轮转文件输出器配置选项
+ * 轮转文件输出器配置选项接口
+ * 
+ * @description
+ * 定义日志文件轮转器的所有配置参数，控制轮转行为和错误处理策略。
+ * 
+ * @interface RotatingFileSinkOptions
+ * 
+ * @property {string} filePath - 日志文件的完整路径
+ * @property {number} maxBytes - 单个日志文件的最大字节数，超过此值将触发轮转
+ * @property {number} maxFiles - 保留的历史备份文件最大数量
+ * @property {boolean} [throwOnError=false] - 是否在发生错误时抛出异常，默认为 false（静默处理）
+ * 
+ * @example
+ * ```ts
+ * const options: RotatingFileSinkOptions = {
+ *   filePath: '/var/log/app.log',
+ *   maxBytes: 10 * 1024 * 1024, // 10MB
+ *   maxFiles: 5,
+ *   throwOnError: false
+ * };
+ * ```
+ * 
+ * @see {@link RotatingFileSink} - 使用此配置选项的类
  */
 export interface RotatingFileSinkOptions {
-  /** 日志文件的完整路径 */
+  /** 日志文件的完整路径（必须是绝对路径或相对于进程工作目录的路径） */
   readonly filePath: string;
-  /** 单个日志文件的最大字节数，超过此值将触发轮转 */
+  /** 单个日志文件的最大字节数，超过此值将触发轮转（必须 >= 1） */
   readonly maxBytes: number;
-  /** 保留的历史备份文件最大数量 */
+  /** 保留的历史备份文件最大数量（必须 >= 1） */
   readonly maxFiles: number;
-  /** 是否在发生错误时抛出异常，默认为 false（静默处理） */
+  /** 是否在发生错误时抛出异常，默认为 false（静默处理错误） */
   readonly throwOnError?: boolean;
 }
 

@@ -40,7 +40,7 @@ impl Default for ClaudeAdapter {
 #[async_trait]
 impl ProviderAdapter for ClaudeAdapter {
     fn provider_kind(&self) -> ProviderKind {
-        ProviderKind::Claude
+        ProviderKind::ClaudeAgent
     }
 
     fn capabilities(&self) -> ProviderCapabilities {
@@ -59,8 +59,11 @@ impl ProviderAdapter for ClaudeAdapter {
 
         // TODO: 实现 Claude 会话启动逻辑（Claude Agent SDK）
         let session = ProviderSession {
+            session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
-            provider: ProviderKind::Claude,
+            provider: ProviderKind::ClaudeAgent,
+            model: input.model.clone(),
+            status: remi_core::provider::ProviderSessionStatus::Running,
             created_at: chrono::Utc::now(),
         };
 

@@ -12,9 +12,8 @@
     "lint": "eslint src --ext ts,tsx"
   },
   "dependencies": {
-    "@remi-code/contracts": "workspace:*",
-    "@remi-code/shared": "workspace:*",
-    "@remi-code/acp": "workspace:*",
+    "@remi-code/contracts": "*",
+    "@remi-code/shared": "*",
     "@tauri-apps/api": "^2.0.0",
     "@base-ui/react": "^1.2.0",
     "@dnd-kit/core": "^6.3.1",

@@ -59,8 +59,11 @@ impl ProviderAdapter for PiAdapter {
 
         // TODO: 实现 Pi 会话启动逻辑（Pi Agent SDK）
         let session = ProviderSession {
+            session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
             provider: ProviderKind::Pi,
+            model: input.model.clone(),
+            status: remi_core::provider::ProviderSessionStatus::Running,
             created_at: chrono::Utc::now(),
         };
 

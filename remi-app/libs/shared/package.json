@@ -97,11 +97,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remi-code/contracts": "workspace:*",
-    "effect": "catalog:"
+    "@remi-code/contracts": "*",
+    "effect": "^3.10.0"
   },
   "devDependencies": {
-    "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.3"
   }
 }

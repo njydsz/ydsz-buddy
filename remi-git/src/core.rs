@@ -456,6 +456,44 @@ impl GitCore {
 
         Ok(result.stdout)
     }
+
+    /// 回滚到指定 commit
+    pub async fn revert_to_commit(&self, commit_sha: &str) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "reset --hard".to_string(),
+            cwd: ".".to_string(),
+            args: vec!["reset".to_string(), "--hard".to_string(), commit_sha.to_string()],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 获取两个 commit 之间的 diff
+    pub async fn diff_between_commits(
+        &self,
+        from_commit: &str,
+        to_commit: &str,
+    ) -> GitResult<String> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "diff".to_string(),
+                cwd: ".".to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    format!("{}...{}", from_commit, to_commit),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        Ok(result.stdout)
+    }
 }
 
 impl Default for GitCore {

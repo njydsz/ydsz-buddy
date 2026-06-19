@@ -22,10 +22,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "effect": "catalog:"
+    "effect": "^3.10.0"
   },
   "devDependencies": {
-    "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "tsdown": "^0.2.0",
+    "typescript": "^5.7.3"
   }
 }

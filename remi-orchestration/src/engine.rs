@@ -1,4 +1,11 @@
-//! 编排引擎核心
+//! 编排引擎核心模块
+//!
+//! 本模块实现了基于 CQRS + Event Sourcing 模式的编排引擎，负责：
+//! - 接收并串行化处理编排命令（通过内部 MPSC 通道）
+//! - 将命令转换为领域事件并持久化到事件存储
+//! - 将事件应用到投影仓库以维护读模型
+//! - 通过广播通道发布领域事件供 Reactor 消费
+//! - 提供完整快照和轻量 Shell 快照查询接口
 
 use std::sync::Arc;
 
@@ -14,27 +21,61 @@ use uuid::Uuid;
 use crate::error::{OrchestrationError, OrchestrationResult};
 
 /// 编排引擎服务
+///
+/// 编排引擎是整个编排层的核心组件，采用 Actor 模型思想：
+/// - 内部通过 MPSC 通道串行处理命令，避免并发冲突
+/// - 命令处理流程：命令 → 事件转换 → 事件持久化 → 投影应用 → 事件广播
+/// - 对外提供命令分发、事件读取、快照查询、事件订阅等接口
+///
+/// # 线程安全
+///
+/// 引擎内部使用 `Arc` 管理共享状态，`RwLock` 保护当前序列号，
+/// 支持在多线程环境中安全共享。
 pub struct OrchestrationEngine {
+    /// 事件存储，用于持久化和读取领域事件
     event_store: Arc<SqliteEventStore>,
+    /// 投影仓库，用于维护读模型（物化视图）
     projection_repo: Arc<SqliteProjectionRepository>,
+    /// 命令发送端，用于向内部命令处理循环发送命令
     command_tx: mpsc::Sender<CommandMessage>,
+    /// 事件广播发送端，用于向所有订阅者发布领域事件
     event_tx: broadcast::Sender<OrchestrationEvent>,
+    /// 当前最新的序列号，用于快照版本控制
     current_sequence: Arc<RwLock<Sequence>>,
 }
 
 /// 命令消息
+///
+/// 封装命令及其对应的 oneshot 响应通道，
+/// 用于在命令发送方和命令处理循环之间传递。
 struct CommandMessage {
+    /// 待处理的编排命令
     command: OrchestrationCommand,
+    /// 用于将处理结果（序列号或错误）回传给调用方的 oneshot 通道
     response_tx: tokio::sync::oneshot::Sender<OrchestrationResult<Sequence>>,
 }
 
 impl OrchestrationEngine {
-    /// 创建新的编排引擎
+    /// 创建并启动编排引擎
+    ///
+    /// 初始化引擎内部状态，创建命令通道（容量 1000）和事件广播通道（容量 10000），
+    /// 并启动后台异步任务处理命令队列。
+    ///
+    /// # 参数
+    ///
+    /// - `event_store`: 事件存储实例，用于事件的持久化与读取
+    /// - `projection_repo`: 投影仓库实例，用于读模型的维护与查询
+    ///
+    /// # 返回值
+    ///
+    /// 返回已启动的引擎实例。引擎创建后立即开始处理命令队列中的消息。
     pub fn new(
         event_store: Arc<SqliteEventStore>,
         projection_repo: Arc<SqliteProjectionRepository>,
     ) -> Self {
+        // 创建命令通道（MPSC），容量 1000 条消息
         let (command_tx, command_rx) = mpsc::channel(1000);
+        // 创建事件广播通道，容量 10000 条事件
         let (event_tx, _) = broadcast::channel(10000);
 
         let engine = Self {
@@ -45,7 +86,7 @@ impl OrchestrationEngine {
             current_sequence: Arc::new(RwLock::new(0)),
         };
 
-        // 启动命令处理循环
+        // 克隆引擎引用用于后台命令处理任务
         let engine_clone = OrchestrationEngine {
             event_store,
             projection_repo,
@@ -53,6 +94,7 @@ impl OrchestrationEngine {
             event_tx: event_tx.clone(),
             current_sequence: engine.current_sequence.clone(),
         };
+        // 启动后台异步任务，持续从命令队列中消费并处理命令
         tokio::spawn(async move {
             engine_clone.process_commands(command_rx).await;
         });
@@ -60,21 +102,53 @@ impl OrchestrationEngine {
         engine
     }
 
-    /// 分发命令
+    /// 分发命令到编排引擎
+    ///
+    /// 将命令放入内部消息队列，由后台处理任务串行执行。
+    /// 调用方通过 oneshot 通道同步等待处理结果。
+    ///
+    /// # 参数
+    ///
+    /// - `command`: 待分发的编排命令
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回事件在存储中的序列号（`Sequence`），
+    /// 失败时返回 [`OrchestrationError`]。
+    ///
+    /// # 错误
+    ///
+    /// - 当命令队列已关闭时，返回 `InternalError`
+    /// - 当响应通道已关闭时，返回 `InternalError`
+    /// - 命令处理过程中的其他错误由具体处理逻辑决定
     pub async fn dispatch(&self, command: OrchestrationCommand) -> OrchestrationResult<Sequence> {
+        // 创建 oneshot 通道用于接收命令处理结果
         let (response_tx, response_rx) = tokio::sync::oneshot::channel();
         
+        // 将命令和响应通道封装为消息发送到内部队列
         self.command_tx
             .send(CommandMessage { command, response_tx })
             .await
             .map_err(|_| OrchestrationError::InternalError("命令队列已关闭".to_string()))?;
 
+        // 等待命令处理完成并返回结果
         response_rx
             .await
             .map_err(|_| OrchestrationError::InternalError("响应通道已关闭".to_string()))?
     }
 
-    /// 读取事件
+    /// 从事件存储中读取领域事件
+    ///
+    /// 支持从指定序列号开始分页读取事件，适用于事件回放和审计场景。
+    ///
+    /// # 参数
+    ///
+    /// - `from_sequence`: 起始序列号（含），从此位置开始读取
+    /// - `limit`: 最大读取数量
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回存储的事件列表，失败时返回持久化层错误。
     pub async fn read_events(
         &self,
         from_sequence: Sequence,
@@ -84,7 +158,17 @@ impl OrchestrationEngine {
         Ok(events)
     }
 
-    /// 获取完整快照
+    /// 获取完整的编排读模型快照
+    ///
+    /// 返回包含所有项目和线程完整信息的读模型，适用于需要完整数据的场景。
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 [`OrchestrationReadModel`]，包含：
+    /// - 当前快照序列号（版本号）
+    /// - 所有项目列表（含完整字段）
+    /// - 所有线程列表（含完整字段）
+    /// - 快照生成时间戳
     pub async fn get_snapshot(&self) -> OrchestrationResult<OrchestrationReadModel> {
         let projects = self.projection_repo.list_projects()?;
         let threads = self.projection_repo.list_threads()?;
@@ -98,13 +182,24 @@ impl OrchestrationEngine {
         })
     }
 
-    /// 获取 Shell 快照（轻量版）
+    /// 获取轻量级 Shell 快照
+    ///
+    /// 返回仅包含项目和线程基本信息的精简快照，不包含消息、活动、检查点等详细数据。
+    /// 适用于前端列表展示、状态轮询等对数据量敏感的场景。
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 [`OrchestrationShellSnapshot`]，包含：
+    /// - 当前快照序列号
+    /// - 项目精简信息（ID、标题、工作区路径）
+    /// - 线程精简信息（ID、所属项目、标题、运行模式、待审批/待输入状态）
+    /// - 快照生成时间戳
     pub async fn get_shell_snapshot(&self) -> OrchestrationResult<OrchestrationShellSnapshot> {
         let projects = self.projection_repo.list_projects()?;
         let threads = self.projection_repo.list_threads()?;
         let sequence = *self.current_sequence.read().await;
 
-        // Shell 快照只包含基本信息，不包含消息、活动等详细内容
+        // 将完整项目数据映射为精简的 Shell 项目数据
         let shell_projects: Vec<ShellProject> = projects
             .into_iter()
             .map(|p| ShellProject {
@@ -114,6 +209,7 @@ impl OrchestrationEngine {
             })
             .collect();
 
+        // 将完整线程数据映射为精简的 Shell 线程数据
         let shell_threads: Vec<ShellThread> = threads
             .into_iter()
             .map(|t| ShellThread {
@@ -134,45 +230,88 @@ impl OrchestrationEngine {
         })
     }
 
-    /// 订阅领域事件
+    /// 订阅领域事件流
+    ///
+    /// 返回一个广播接收器，用于接收引擎产生的所有领域事件。
+    /// 多个 Reactor 可同时订阅，实现事件驱动的异步处理。
+    ///
+    /// # 返回值
+    ///
+    /// 返回 `broadcast::Receiver<OrchestrationEvent>`，
+    /// 调用方可通过 `recv()` 异步接收事件。
     pub fn stream_domain_events(&self) -> broadcast::Receiver<OrchestrationEvent> {
         self.event_tx.subscribe()
     }
 
-    /// 处理命令循环
+    /// 命令处理主循环（内部方法）
+    ///
+    /// 持续从命令队列中消费消息，逐个处理并通过 oneshot 通道返回结果。
+    /// 当命令队列关闭时（所有发送端被 drop），循环自动退出。
+    ///
+    /// # 参数
+    ///
+    /// - `command_rx`: 命令接收端，用于从队列中获取待处理命令
     async fn process_commands(self, mut command_rx: mpsc::Receiver<CommandMessage>) {
         while let Some(msg) = command_rx.recv().await {
+            // 处理单个命令，获取结果后通过 oneshot 通道回传
             let result = self.handle_command(msg.command).await;
             let _ = msg.response_tx.send(result);
         }
     }
 
-    /// 处理单个命令
+    /// 处理单个编排命令（内部方法）
+    ///
+    /// 命令处理的完整流程：
+    /// 1. 将命令转换为领域事件
+    /// 2. 将事件持久化到事件存储
+    /// 3. 更新当前序列号
+    /// 4. 将事件应用到投影仓库（更新读模型）
+    /// 5. 通过广播通道发布事件
+    ///
+    /// # 参数
+    ///
+    /// - `command`: 待处理的编排命令
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回事件持久化后的序列号，失败时返回相应错误。
     async fn handle_command(&self, command: OrchestrationCommand) -> OrchestrationResult<Sequence> {
         info!("处理命令: {:?}", std::mem::discriminant(&command));
 
-        // 根据命令类型生成事件
+        // 步骤 1：将命令转换为领域事件
         let event = self.command_to_event(command)?;
 
-        // 持久化事件
+        // 步骤 2：将事件持久化到事件存储，获取分配的序列号
         let sequence = self.event_store.append_event(&event)?;
 
-        // 更新当前序列号
+        // 步骤 3：更新引擎当前序列号（写锁保护）
         {
             let mut seq = self.current_sequence.write().await;
             *seq = sequence;
         }
 
-        // 应用投影
+        // 步骤 4：将事件应用到投影仓库，更新读模型
         self.apply_projection(&event).await?;
 
-        // 广播事件
+        // 步骤 5：通过广播通道发布事件，通知所有订阅的 Reactor
+        // 注意：如果没有订阅者，send 会返回 Err，这里忽略即可
         let _ = self.event_tx.send(event);
 
         Ok(sequence)
     }
 
-    /// 将命令转换为事件
+    /// 将编排命令转换为领域事件（内部方法）
+    ///
+    /// 根据命令类型构造对应的领域事件，填充时间戳和命令 ID 等元数据。
+    /// 事件的 `sequence` 字段初始为 0，将在持久化后由存储层分配实际值。
+    ///
+    /// # 参数
+    ///
+    /// - `command`: 待转换的编排命令
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回对应的领域事件，失败时返回命令处理错误（如未实现的命令类型）。
     fn command_to_event(&self, command: OrchestrationCommand) -> OrchestrationResult<OrchestrationEvent> {
         let now = Utc::now();
         let command_id = command.command_id().map(|s| s.to_string());
@@ -231,7 +370,7 @@ impl OrchestrationEngine {
                 }))
             }
             _ => {
-                // 其他命令类型暂时返回错误
+                // 尚未实现的命令类型，返回错误提示
                 Err(OrchestrationError::CommandError(format!(
                     "未实现的命令类型: {:?}",
                     std::mem::discriminant(&command)
@@ -240,10 +379,25 @@ impl OrchestrationEngine {
         }
     }
 
-    /// 应用投影
+    /// 将领域事件应用到投影仓库（内部方法）
+    ///
+    /// 根据事件类型更新读模型：
+    /// - `ProjectCreated`: 创建项目投影
+    /// - `ProjectDeleted`: 删除项目投影
+    /// - `ThreadCreated`: 创建线程投影（使用默认配置初始化）
+    /// - `ThreadDeleted`: 删除线程投影
+    ///
+    /// # 参数
+    ///
+    /// - `event`: 待应用的领域事件
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 `Ok(())`，失败时返回投影相关错误。
     async fn apply_projection(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
         match event {
             OrchestrationEvent::ProjectCreated(e) => {
+                // 构造项目实体并保存到投影仓库
                 let project = Project {
                     id: e.project_id,
                     kind: ProjectKind::Local,
@@ -258,10 +412,11 @@ impl OrchestrationEngine {
                 self.projection_repo.save_project(&project)?;
             }
             OrchestrationEvent::ProjectDeleted(e) => {
+                // 从投影仓库中删除项目
                 self.projection_repo.delete_project(e.project_id)?;
             }
             OrchestrationEvent::ThreadCreated(e) => {
-                // 创建默认线程
+                // 使用默认配置创建线程实体并保存到投影仓库
                 let thread = Thread {
                     id: e.thread_id,
                     project_id: e.project_id,
@@ -302,10 +457,11 @@ impl OrchestrationEngine {
                 self.projection_repo.save_thread(&thread)?;
             }
             OrchestrationEvent::ThreadDeleted(e) => {
+                // 从投影仓库中删除线程
                 self.projection_repo.delete_thread(e.thread_id)?;
             }
             _ => {
-                // 其他事件类型暂时忽略
+                // 其他事件类型暂未实现投影逻辑，记录警告日志
                 warn!("未处理的投影事件: {:?}", std::mem::discriminant(event));
             }
         }
@@ -314,39 +470,94 @@ impl OrchestrationEngine {
     }
 }
 
-/// 完整读模型
+/// 完整编排读模型
+///
+/// 包含所有项目和线程的完整信息，适用于需要全量数据的场景（如数据导出、完整状态恢复）。
+///
+/// # 字段说明
+///
+/// - `snapshot_sequence`: 快照对应的序列号，用于版本控制和增量同步
+/// - `projects`: 所有项目的完整列表
+/// - `threads`: 所有线程的完整列表
+/// - `updated_at`: 快照生成时间
 #[derive(Debug, Clone)]
 pub struct OrchestrationReadModel {
+    /// 快照序列号，标识当前读模型的版本
     pub snapshot_sequence: Sequence,
+    /// 所有项目的完整列表
     pub projects: Vec<Project>,
+    /// 所有线程的完整列表
     pub threads: Vec<Thread>,
+    /// 快照生成时间（UTC）
     pub updated_at: chrono::DateTime<Utc>,
 }
 
-/// Shell 快照（轻量版）
+/// Shell 快照（轻量版读模型）
+///
+/// 仅包含项目和线程的基本信息，不包含消息、活动、检查点等详细数据。
+/// 适用于前端列表展示、状态轮询等对传输体积敏感的场景。
+///
+/// # 字段说明
+///
+/// - `snapshot_sequence`: 快照对应的序列号
+/// - `projects`: 项目精简信息列表
+/// - `threads`: 线程精简信息列表
+/// - `updated_at`: 快照生成时间（UTC）
 #[derive(Debug, Clone)]
 pub struct OrchestrationShellSnapshot {
+    /// 快照序列号
     pub snapshot_sequence: Sequence,
+    /// 项目精简信息列表
     pub projects: Vec<ShellProject>,
+    /// 线程精简信息列表
     pub threads: Vec<ShellThread>,
+    /// 快照生成时间（UTC）
     pub updated_at: chrono::DateTime<Utc>,
 }
 
-/// Shell 项目
+/// Shell 项目（精简版项目信息）
+///
+/// 仅包含项目的基本标识和路径信息，用于 Shell 快照中的项目展示。
+///
+/// # 字段说明
+///
+/// - `id`: 项目唯一标识
+/// - `title`: 项目标题
+/// - `workspace_root`: 项目工作区根路径
 #[derive(Debug, Clone)]
 pub struct ShellProject {
+    /// 项目唯一标识
     pub id: ProjectId,
+    /// 项目标题
     pub title: String,
+    /// 项目工作区根路径
     pub workspace_root: String,
 }
 
-/// Shell 线程
+/// Shell 线程（精简版线程信息）
+///
+/// 仅包含线程的基本信息和状态标识，用于 Shell 快照中的线程列表展示。
+///
+/// # 字段说明
+///
+/// - `id`: 线程唯一标识
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `runtime_mode`: 运行时模式（Agent / Plan 等）
+/// - `has_pending_approvals`: 是否有待审批的操作
+/// - `has_pending_user_input`: 是否有待用户输入的请求
 #[derive(Debug, Clone)]
 pub struct ShellThread {
+    /// 线程唯一标识
     pub id: ThreadId,
+    /// 所属项目 ID
     pub project_id: ProjectId,
+    /// 线程标题
     pub title: String,
+    /// 运行时模式
     pub runtime_mode: remi_core::models::RuntimeMode,
+    /// 是否有待审批的操作
     pub has_pending_approvals: bool,
+    /// 是否有待用户输入的请求
     pub has_pending_user_input: bool,
 }

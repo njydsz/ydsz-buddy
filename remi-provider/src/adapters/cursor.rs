@@ -59,8 +59,11 @@ impl ProviderAdapter for CursorAdapter {
 
         // TODO: 实现 Cursor 会话启动逻辑（ACP 协议）
         let session = ProviderSession {
+            session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
             provider: ProviderKind::Cursor,
+            model: input.model.clone(),
+            status: remi_core::provider::ProviderSessionStatus::Running,
             created_at: chrono::Utc::now(),
         };
 

@@ -1,9 +1,8 @@
 //! Git 检查点存储
 
 use std::sync::Arc;
-
 use chrono::{DateTime, Utc};
-use remi_core::models::{Checkpoint, CheckpointId, ThreadId};
+use remi_core::models::{Checkpoint, ThreadId};
 use remi_git::GitCore;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info};
@@ -31,10 +30,10 @@ impl CheckpointStore {
         info!("创建检查点: thread_id={}, commit={}", thread_id, commit_sha);
 
         let checkpoint = Checkpoint {
-            id: CheckpointId::new(),
-            thread_id,
-            commit_sha,
-            message,
+            id: uuid::Uuid::new_v4().to_string(),
+            turn_id: String::new(), // TODO: 从上下文获取
+            git_ref: commit_sha,
+            description: message,
             created_at: Utc::now(),
         };
 
@@ -45,7 +44,7 @@ impl CheckpointStore {
     }
 
     /// 获取检查点
-    pub async fn get_checkpoint(&self, checkpoint_id: CheckpointId) -> CheckpointResult<Option<Checkpoint>> {
+    pub async fn get_checkpoint(&self, checkpoint_id: String) -> CheckpointResult<Option<Checkpoint>> {
         debug!("获取检查点: {}", checkpoint_id);
 
         // TODO: 从数据库查询
@@ -61,7 +60,7 @@ impl CheckpointStore {
     }
 
     /// 删除检查点
-    pub async fn delete_checkpoint(&self, checkpoint_id: CheckpointId) -> CheckpointResult<()> {
+    pub async fn delete_checkpoint(&self, checkpoint_id: String) -> CheckpointResult<()> {
         info!("删除检查点: {}", checkpoint_id);
 
         // TODO: 从数据库删除
@@ -72,7 +71,7 @@ impl CheckpointStore {
     pub async fn revert_to_checkpoint(
         &self,
         thread_id: ThreadId,
-        checkpoint_id: CheckpointId,
+        checkpoint_id: String,
     ) -> CheckpointResult<String> {
         info!("回滚到检查点: thread_id={}, checkpoint_id={}", thread_id, checkpoint_id);
 
@@ -80,14 +79,14 @@ impl CheckpointStore {
         let checkpoint = self
             .get_checkpoint(checkpoint_id)
             .await?
-            .ok_or_else(|| CheckpointError::NotFound(checkpoint_id.to_string()))?;
+            .ok_or_else(|| CheckpointError::NotFound(checkpoint_id))?;
 
         // 使用 Git 回滚
         self.git_core
-            .revert_to_commit(&checkpoint.commit_sha)
+            .revert_to_commit(&checkpoint.git_ref)
             .await
             .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?;
 
-        Ok(checkpoint.commit_sha)
+        Ok(checkpoint.git_ref)
     }
 }

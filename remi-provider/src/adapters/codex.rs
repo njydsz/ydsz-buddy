@@ -59,8 +59,11 @@ impl ProviderAdapter for CodexAdapter {
 
         // TODO: 实现 Codex 会话启动逻辑（JSON-RPC over stdio）
         let session = ProviderSession {
+            session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
             provider: ProviderKind::Codex,
+            model: input.model.clone(),
+            status: remi_core::provider::ProviderSessionStatus::Running,
             created_at: chrono::Utc::now(),
         };
 

@@ -1,7 +1,6 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
     "plugins": [
       {
         "name": "@effect/language-service",
@@ -15,5 +14,5 @@
       }
     ]
   },
-  "include": ["src", "scripts", "test"]
+  "include": ["src"]
 }

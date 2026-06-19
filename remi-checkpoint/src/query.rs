@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use remi_core::models::{CheckpointId, ThreadId};
+use remi_core::models::ThreadId;
 use remi_git::GitCore;
 use tracing::debug;
 
@@ -95,8 +95,8 @@ impl CheckpointDiffQuery {
     /// 获取两个检查点之间的 Diff
     pub async fn get_diff_between_checkpoints(
         &self,
-        from_checkpoint: CheckpointId,
-        to_checkpoint: CheckpointId,
+        from_checkpoint: String,
+        to_checkpoint: String,
     ) -> CheckpointResult<String> {
         debug!(
             "获取检查点间 Diff: from={}, to={}",
@@ -108,18 +108,18 @@ impl CheckpointDiffQuery {
             .checkpoint_store
             .get_checkpoint(from_checkpoint)
             .await?
-            .ok_or_else(|| CheckpointError::NotFound(from_checkpoint.to_string()))?;
+            .ok_or_else(|| CheckpointError::NotFound("from_checkpoint".to_string()))?;
 
         let to = self
             .checkpoint_store
             .get_checkpoint(to_checkpoint)
             .await?
-            .ok_or_else(|| CheckpointError::NotFound(to_checkpoint.to_string()))?;
+            .ok_or_else(|| CheckpointError::NotFound("to_checkpoint".to_string()))?;
 
         // 使用 Git 计算 Diff
         let diff = self
             .git_core
-            .diff_between_commits(&from.commit_sha, &to.commit_sha)
+            .diff_between_commits(&from.git_ref, &to.git_ref)
             .await
             .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?;
 

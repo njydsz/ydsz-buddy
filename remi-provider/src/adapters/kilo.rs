@@ -59,8 +59,11 @@ impl ProviderAdapter for KiloAdapter {
 
         // TODO: 实现 Kilo 会话启动逻辑（OpenCode 协议）
         let session = ProviderSession {
+            session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
             provider: ProviderKind::Kilo,
+            model: input.model.clone(),
+            status: remi_core::provider::ProviderSessionStatus::Running,
             created_at: chrono::Utc::now(),
         };
 

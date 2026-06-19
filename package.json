@@ -5,7 +5,7 @@
   "type": "module",
   "workspaces": [
     "remi-app",
-    "packages/*"
+    "remi-app/libs/*"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=remi-app",
