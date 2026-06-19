@@ -1,1 +1,0 @@
-Placeholder macOS .icns icon. Replace with a real branded asset before release.

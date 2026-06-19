@@ -48,6 +48,71 @@ export interface FilesystemEntry {
   children?: FilesystemEntry[];
 }
 
+export interface ProviderSettings {
+  id: string;
+  apiKey?: string;
+  baseUrl?: string;
+  defaultModel?: string;
+  enabled: boolean;
+  lastUpdated?: string;
+}
+
+export interface Keybinding {
+  id: string;
+  /** Human-readable label, e.g. "Send message" */
+  label: string;
+  /** Chord string, e.g. "Mod+Enter" */
+  chord: string;
+  /** Conflict with another keybinding id, if detected. */
+  conflictsWith?: string;
+}
+
+export interface ThemePack {
+  id: string;
+  name: string;
+  author?: string;
+  description?: string;
+  source: "built-in" | "user";
+  colors: Record<string, string>;
+}
+
+export interface AuthBootstrapState {
+  needsPairing: boolean;
+  clientId?: string;
+  expiresAt?: string;
+}
+
+export interface AuthPairingInfo {
+  pairingCode: string;
+  pairingLink?: string;
+  expiresAt: string;
+}
+
+export interface VoiceSettings {
+  enabled: boolean;
+  language: string;
+  /** Audio input device id, when supported by the platform. */
+  deviceId?: string;
+  /** Whisper / upstream transcription model identifier. */
+  model?: string;
+}
+
+export interface DebugSettings {
+  verboseLogging: boolean;
+  /** Persist JSON-RPC frames for postmortem inspection. */
+  recordFrames: boolean;
+  /** How many frames to keep in the ring buffer. */
+  maxFrames: number;
+}
+
+export interface BackupSnapshot {
+  id: string;
+  createdAt: string;
+  byteSize: number;
+  description?: string;
+  source: "auto" | "manual";
+}
+
 export const rpc = {
   // Authentication
   authBootstrap: () => call<{ needsPairing: boolean }>("auth.bootstrap"),
@@ -153,6 +218,56 @@ export const rpc = {
   // Editor
   editorOpen: (path: string, editor?: string) =>
     call<void>("editor.open", { path, editor }),
+
+  // Settings (M2 surface)
+  settingsGet: () =>
+    call<{
+      providers: ProviderSettings[];
+      keybindings: Keybinding[];
+      themePacks: ThemePack[];
+      voice: VoiceSettings;
+      debug: DebugSettings;
+      activeThemePackId: string;
+    }>("settings.get"),
+  settingsUpdate: (patch: Record<string, unknown>) =>
+    call<void>("settings.update", { patch }),
+
+  // Provider settings (M2)
+  providerListSettings: () => call<ProviderSettings[]>("provider.listSettings"),
+  providerUpdateSettings: (id: string, patch: Partial<ProviderSettings>) =>
+    call<ProviderSettings>("provider.updateSettings", { provider: id, patch }),
+
+  // Keybindings (M2)
+  keybindingsList: () => call<Keybinding[]>("keybindings.list"),
+  keybindingsUpdate: (id: string, chord: string) =>
+    call<Keybinding>("keybindings.update", { id, chord }),
+  keybindingsReset: () => call<Keybinding[]>("keybindings.reset"),
+
+  // Theme packs (M2)
+  themeList: () => call<ThemePack[]>("theme.list"),
+  themeActivate: (id: string) => call<void>("theme.activate", { id }),
+  themeImport: (json: string) =>
+    call<ThemePack>("theme.import", { json }),
+  themeRemove: (id: string) => call<void>("theme.remove", { id }),
+  themeExport: (id: string) =>
+    call<{ json: string; filename: string }>("theme.export", { id }),
+
+  // Voice (M2)
+  voiceGet: () => call<VoiceSettings>("voice.get"),
+  voiceUpdate: (patch: Partial<VoiceSettings>) =>
+    call<VoiceSettings>("voice.update", { patch }),
+
+  // Debug (M2)
+  debugGet: () => call<DebugSettings>("debug.get"),
+  debugUpdate: (patch: Partial<DebugSettings>) =>
+    call<DebugSettings>("debug.update", { patch }),
+
+  // Backup (M2)
+  backupList: () => call<BackupSnapshot[]>("backup.list"),
+  backupCreate: (description?: string) =>
+    call<BackupSnapshot>("backup.create", { description }),
+  backupRestore: (id: string) => call<void>("backup.restore", { id }),
+  backupDelete: (id: string) => call<void>("backup.delete", { id }),
 } as const;
 
 // Re-export the raw call so the rest of the app can use it for
