@@ -1,13 +1,19 @@
-// FILE: messages.ts
-// Purpose: Centralize user-facing UI strings so the React tree can swap them by
-//          language without touching call sites. Keys are grouped by surface so a
-//          future move to a translation tool can re-export them as flat
-//          namespaced ids. Templates use ${...} for interpolation.
-// Layer: Shared runtime utility (web)
-// Exports: Messages type, MESSAGES dictionary, NATIVE_LANGUAGE_LABELS
+/**
+ * @file messages.ts
+ * @description 集中管理所有面向用户的 UI 字符串，使 React 组件树可以根据语言动态切换翻译内容，
+ *              而无需修改调用方代码。消息按键（surface）分组，便于未来迁移到翻译工具时将其
+ *              重新导出为扁平化的命名空间 ID。模板使用 ${...} 语法进行插值。
+ * @module messages
+ */
 
 import type { Language } from "./language";
 
+/**
+ * 翻译消息类型定义。
+ * 定义了应用中所有 UI 字符串的结构，按键分组组织。
+ * 每个分组对应应用的一个功能模块或界面区域。
+ * 部分字段为函数类型，用于支持动态插值（如传入用户名、数量等）。
+ */
 export type Messages = {
   common: {
     cancel: string;

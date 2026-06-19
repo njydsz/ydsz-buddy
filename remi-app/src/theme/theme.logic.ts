@@ -1,156 +1,306 @@
-// FILE: theme.logic.ts
-// Purpose: Owns the Codex-style theme model, share-string parsing, and derived CSS token math.
-// Layer: Web appearance domain logic
-// Exports: Theme types, normalization helpers, import/export utilities, and CSS variable builders.
+/**
+ * @file 主题逻辑模块
+ * @description 负责 Codex 风格主题模型的实现,包括分享字符串解析和派生 CSS 令牌计算
+ * @layer Web 外观领域逻辑层
+ * @exports 主题类型、规范化辅助函数、导入/导出工具函数和 CSS 变量构建器
+ */
 
 import { THEME_SEED_CATALOG } from "./theme.seed.generated";
 import { normalizeFontFamilyCssValue } from "../lib/fontFamily";
 
+/** 主题模式类型:浅色、深色或跟随系统 */
 export type ThemeMode = "light" | "dark" | "system";
+
+/** 主题变体类型:仅浅色或深色 */
 export type ThemeVariant = "light" | "dark";
+
+/** 窗口材质类型:不透明或半透明 */
 export type WindowMaterial = "opaque" | "translucent";
 
+/**
+ * 主题字体配置接口
+ * @description 定义 UI 和代码编辑器使用的字体
+ */
 export interface ThemeFonts {
+  /** UI 字体,用于界面元素 */
   ui: string | null;
+  /** 代码字体,用于代码编辑器 */
   code: string | null;
 }
 
+/**
+ * 主题语义颜色接口
+ * @description 定义具有特定语义含义的颜色,如差异高亮和技能标识
+ */
 export interface ThemeSemanticColors {
+  /** 新增内容的颜色(diff added) */
   diffAdded: string;
+  /** 删除内容的颜色(diff removed) */
   diffRemoved: string;
+  /** 技能标识颜色 */
   skill: string;
 }
 
+/**
+ * Chrome 主题接口
+ * @description 定义应用外壳(Chrome)的完整主题配置
+ */
 export interface ChromeTheme {
+  /** 强调色,用于主要交互元素 */
   accent: string;
+  /** 对比度,范围 0-100 */
   contrast: number;
+  /** 字体配置 */
   fonts: ThemeFonts;
+  /** 墨色(前景色),用于主要文本 */
   ink: string;
+  /** 是否使用不透明窗口 */
   opaqueWindows: boolean;
+  /** 语义颜色配置 */
   semanticColors: ThemeSemanticColors;
+  /** 表面色(背景色) */
   surface: string;
 }
 
+/**
+ * 主题包接口
+ * @description 包含代码主题 ID 和 Chrome 主题的完整主题包
+ */
 export interface ThemePack {
+  /** 代码主题的唯一标识符 */
   codeThemeId: string;
+  /** Chrome 主题配置 */
   theme: ChromeTheme;
 }
 
+/**
+ * 主题状态接口
+ * @description 应用的完整主题状态,包括两种变体的主题和代码主题 ID
+ */
 export interface ThemeState {
+  /** 浅色和深色变体的 Chrome 主题 */
   chromeThemes: Record<ThemeVariant, ChromeTheme>;
+  /** 浅色和深色变体的代码主题 ID */
   codeThemeIds: Record<ThemeVariant, string>;
+  /** 当前主题模式 */
   mode: ThemeMode;
 }
 
+/**
+ * 代码主题选项接口
+ * @description 用于主题选择器的代码主题配置
+ */
 export interface CodeThemeOption {
+  /** 主题唯一标识符 */
   id: string;
+  /** 主题显示名称 */
   label: string;
+  /** 该主题支持的变体列表 */
   variants: readonly ThemeVariant[];
 }
 
+/**
+ * 主题分享载荷接口
+ * @description 用于主题分享字符串的数据结构
+ */
 export interface ThemeSharePayload {
+  /** 代码主题 ID */
   codeThemeId: string;
+  /** Chrome 主题配置 */
   theme: ChromeTheme;
+  /** 主题变体 */
   variant: ThemeVariant;
 }
 
+/**
+ * 主题 CSS 变量构建结果接口
+ * @description 包含窗口材质和生成的 CSS 变量映射
+ */
 export interface ThemeCssVariableBuild {
+  /** 窗口材质类型 */
   material: WindowMaterial;
+  /** CSS 变量名值对映射 */
   variables: Record<string, string>;
 }
 
+/**
+ * 主题派生令牌接口
+ * @description 从基础主题计算得出的所有派生颜色令牌,用于构建完整的 CSS 变量系统
+ */
 export interface ThemeDerivedTokens {
+  /** 强调色背景 */
   accentBackground: string;
+  /** 强调色背景 - 激活状态 */
   accentBackgroundActive: string;
+  /** 强调色背景 - 悬停状态 */
   accentBackgroundHover: string;
+  /** 默认边框颜色 */
   border: string;
+  /** 焦点边框颜色 */
   borderFocus: string;
+  /** 粗边框颜色 */
   borderHeavy: string;
+  /** 细边框颜色 */
   borderLight: string;
+  /** 主要按钮背景 */
   buttonPrimaryBackground: string;
+  /** 主要按钮背景 - 激活状态 */
   buttonPrimaryBackgroundActive: string;
+  /** 主要按钮背景 - 悬停状态 */
   buttonPrimaryBackgroundHover: string;
+  /** 主要按钮背景 - 非活动状态 */
   buttonPrimaryBackgroundInactive: string;
+  /** 次要按钮背景 */
   buttonSecondaryBackground: string;
+  /** 次要按钮背景 - 激活状态 */
   buttonSecondaryBackgroundActive: string;
+  /** 次要按钮背景 - 悬停状态 */
   buttonSecondaryBackgroundHover: string;
+  /** 次要按钮背景 - 非活动状态 */
   buttonSecondaryBackgroundInactive: string;
+  /** 三级按钮背景 */
   buttonTertiaryBackground: string;
+  /** 三级按钮背景 - 激活状态 */
   buttonTertiaryBackgroundActive: string;
+  /** 三级按钮背景 - 悬停状态 */
   buttonTertiaryBackgroundHover: string;
+  /** 控件背景 */
   controlBackground: string;
+  /** 控件背景 - 不透明版本 */
   controlBackgroundOpaque: string;
+  /** 主要提升层级背景 */
   elevatedPrimary: string;
+  /** 主要提升层级背景 - 不透明版本 */
   elevatedPrimaryOpaque: string;
+  /** 次要提升层级背景 */
   elevatedSecondary: string;
+  /** 次要提升层级背景 - 不透明版本 */
   elevatedSecondaryOpaque: string;
+  /** 强调色图标 */
   iconAccent: string;
+  /** 主要图标颜色 */
   iconPrimary: string;
+  /** 次要图标颜色 */
   iconSecondary: string;
+  /** 三级图标颜色 */
   iconTertiary: string;
+  /** 简单遮罩颜色 */
   simpleScrim: string;
+  /** 强调色文本 */
   textAccent: string;
+  /** 主要按钮文本 */
   textButtonPrimary: string;
+  /** 次要按钮文本 */
   textButtonSecondary: string;
+  /** 三级按钮文本 */
   textButtonTertiary: string;
+  /** 主要前景文本 */
   textForeground: string;
+  /** 次要前景文本 */
   textForegroundSecondary: string;
+  /** 三级前景文本 */
   textForegroundTertiary: string;
 }
 
+/**
+ * 已解析主题令牌接口
+ * @description 包含所有已解析的主题令牌,包括别名、Codex 变量、计算值和派生令牌
+ */
 export interface ResolvedThemeTokens {
+  /** 令牌别名映射 */
   aliases: Record<string, string>;
+  /** Codex CSS 变量映射 */
   codexVariables: Record<string, string>;
+  /** 计算得出的主题值 */
   computed: {
+    /** 实际对比度值 */
     contrast: number;
+    /** 编辑器背景色 */
     editorBackground: string;
+    /** 面板背景色 */
     panel: string;
+    /** 底层表面色 */
     surfaceUnder: string;
   };
+  /** 派生令牌 */
   derived: ThemeDerivedTokens;
 }
 
+/**
+ * Chrome 主题种子补丁类型
+ * @description 用于从种子主题合并到当前主题的部分更新
+ */
 type ChromeThemeSeedPatch = Partial<
   Pick<ChromeTheme, "accent" | "contrast" | "ink" | "opaqueWindows" | "surface">
 > & {
+  /** 字体配置的部分更新 */
   fonts?: Partial<ThemeFonts>;
+  /** 语义颜色的部分更新 */
   semanticColors?: Partial<ThemeSemanticColors>;
 };
 
+/**
+ * 代码主题种子补丁元数据类型
+ * @description 描述代码主题种子中哪些字段应该被应用到当前主题
+ */
 type CodeThemeSeedPatchMetadata = {
+  /** 是否应用对比度 */
   contrast?: true;
+  /** 是否应用字体配置 */
   fonts?: Partial<Record<keyof ThemeFonts, true>>;
+  /** 是否应用不透明窗口设置 */
   opaqueWindows?: true;
 };
 
+/**
+ * RGB 颜色类型
+ * @description 表示一个 RGB 颜色值,每个通道范围为 0-255
+ */
 type RgbColor = {
+  /** 红色通道 */
   red: number;
+  /** 绿色通道 */
   green: number;
+  /** 蓝色通道 */
   blue: number;
 };
 
+/** 黑色 RGB 值 */
 const BLACK: RgbColor = { blue: 0, green: 0, red: 0 };
+/** 白色 RGB 值 */
 const WHITE: RgbColor = { blue: 255, green: 255, red: 255 };
+/** 6位十六进制颜色正则表达式 */
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+/** 主题分享字符串前缀 */
 const THEME_SHARE_PREFIX = "codex-theme-v1:";
+/** 对比度曲线 - 基线以下系数 */
 const CONTRAST_CURVE_BELOW_BASELINE = 0.7;
+/** 对比度曲线 - 基线以上系数 */
 const CONTRAST_CURVE_ABOVE_BASELINE = 2;
+/** 底层表面基础透明度(按变体) */
 const SURFACE_UNDER_BASE_ALPHA: Record<ThemeVariant, number> = {
   dark: 0.16,
   light: 0.04,
 };
+/** 底层表面对比度步进系数(按变体) */
 const SURFACE_UNDER_CONTRAST_STEP: Record<ThemeVariant, number> = {
   dark: 0.0015,
   light: 0.0012,
 };
+/** 面板基础透明度(按变体) */
 const PANEL_BASE_ALPHA: Record<ThemeVariant, number> = {
   dark: 0.03,
   light: 0.18,
 };
+/** 面板对比度步进系数(按变体) */
 const PANEL_CONTRAST_STEP: Record<ThemeVariant, number> = {
   dark: 0.03,
   light: 0.008,
 };
+/**
+ * 代码主题种子补丁元数据
+ * @description 记录每个代码主题在不同变体下需要应用的种子字段
+ */
 const CODE_THEME_SEED_PATCH_METADATA: Partial<
   Record<string, Partial<Record<ThemeVariant, CodeThemeSeedPatchMetadata>>>
 > = {
@@ -188,8 +338,10 @@ const CODE_THEME_SEED_PATCH_METADATA: Partial<
   },
 };
 
-// Mirror the packaged Codex catalog closely enough that share-string validation
-// can preserve the "known theme + variant availability" behavior.
+/**
+ * 代码主题选项列表
+ * @description 与打包的 Codex 目录紧密镜像,用于分享字符串验证时保留"已知主题 + 变体可用性"行为
+ */
 export const CODE_THEME_OPTIONS: readonly CodeThemeOption[] = [
   { id: "absolutely", label: "Absolutely", variants: ["light", "dark"] },
   { id: "ayu", label: "Ayu", variants: ["dark"] },
@@ -221,6 +373,10 @@ export const CODE_THEME_OPTIONS: readonly CodeThemeOption[] = [
   { id: "vscode-plus", label: "VS Code Plus", variants: ["light", "dark"] },
 ] as const;
 
+/**
+ * 按变体分类的默认 Chrome 主题
+ * @description 当没有匹配到具体主题时使用的回退主题配置
+ */
 export const DEFAULT_CHROME_THEME_BY_VARIANT: Record<ThemeVariant, ChromeTheme> = {
   dark: {
     accent: "#339cff",
@@ -250,6 +406,10 @@ export const DEFAULT_CHROME_THEME_BY_VARIANT: Record<ThemeVariant, ChromeTheme> 
   },
 };
 
+/**
+ * 默认主题状态
+ * @description 应用初始化时的默认主题配置,使用 Codex 主题作为默认值
+ */
 export const DEFAULT_THEME_STATE: ThemeState = {
   chromeThemes: {
     dark: getCodeThemeSeed("codex", "dark"),
@@ -262,24 +422,49 @@ export const DEFAULT_THEME_STATE: ThemeState = {
   mode: "system",
 };
 
-// ─── Theme catalog helpers ────────────────────────────────────────────────
+// ─── 主题目录辅助函数 ────────────────────────────────────────────────
 
+/**
+ * 类型守卫:检查值是否为有效的主题模式
+ * @param value - 待检查的值
+ * @returns 如果值是有效的 ThemeMode 则返回 true
+ */
 export function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "dark" || value === "system";
 }
 
+/**
+ * 类型守卫:检查值是否为有效的主题变体
+ * @param value - 待检查的值
+ * @returns 如果值是有效的 ThemeVariant 则返回 true
+ */
 export function isThemeVariant(value: unknown): value is ThemeVariant {
   return value === "light" || value === "dark";
 }
 
+/**
+ * 获取主题分享字符串前缀
+ * @returns 主题分享字符串的前缀标识
+ */
 export function getThemeSharePrefix(): string {
   return THEME_SHARE_PREFIX;
 }
 
+/**
+ * 获取指定变体下可用的代码主题列表
+ * @param variant - 主题变体(浅色或深色)
+ * @returns 该变体下可用的代码主题选项数组
+ */
 export function getAvailableCodeThemes(variant: ThemeVariant): readonly CodeThemeOption[] {
   return CODE_THEME_OPTIONS.filter((option) => option.variants.includes(variant));
 }
 
+/**
+ * 检查代码主题在指定变体下是否可用
+ * @param codeThemeId - 代码主题 ID
+ * @param variant - 主题变体
+ * @returns 如果该主题在该变体下可用则返回 true
+ */
 export function isCodeThemeAvailable(codeThemeId: string, variant: ThemeVariant): boolean {
   const normalizedCodeThemeId = codeThemeId.trim().toLowerCase();
   return CODE_THEME_OPTIONS.some(
@@ -287,6 +472,13 @@ export function isCodeThemeAvailable(codeThemeId: string, variant: ThemeVariant)
   );
 }
 
+/**
+ * 规范化代码主题 ID
+ * @param codeThemeId - 待规范化的代码主题 ID
+ * @param variant - 主题变体
+ * @param fallback - 当 ID 无效时使用的回退值,默认为该变体的默认主题 ID
+ * @returns 规范化后的代码主题 ID,如果无效则返回回退值
+ */
 export function normalizeCodeThemeId(
   codeThemeId: unknown,
   variant: ThemeVariant,
@@ -297,8 +489,13 @@ export function normalizeCodeThemeId(
   return isCodeThemeAvailable(normalizedCodeThemeId, variant) ? normalizedCodeThemeId : fallback;
 }
 
-// ─── Theme normalization ──────────────────────────────────────────────────
+// ─── 主题规范化 ──────────────────────────────────────────────────────
 
+/**
+ * 规范化主题字体配置
+ * @param value - 待规范化的字体配置值
+ * @returns 规范化后的字体配置对象
+ */
 export function normalizeThemeFonts(value: unknown): ThemeFonts {
   const fonts = isRecord(value) ? value : {};
   return {
@@ -307,6 +504,12 @@ export function normalizeThemeFonts(value: unknown): ThemeFonts {
   };
 }
 
+/**
+ * 规范化语义颜色配置
+ * @param value - 待规范化的语义颜色值
+ * @param fallback - 当值无效时使用的回退颜色配置
+ * @returns 规范化后的语义颜色配置对象
+ */
 export function normalizeSemanticColors(
   value: unknown,
   fallback: ThemeSemanticColors,
@@ -319,6 +522,12 @@ export function normalizeSemanticColors(
   };
 }
 
+/**
+ * 规范化 Chrome 主题配置
+ * @param value - 待规范化的主题值
+ * @param variant - 主题变体,用于获取默认回退值
+ * @returns 规范化后的完整 Chrome 主题对象
+ */
 export function normalizeChromeTheme(value: unknown, variant: ThemeVariant): ChromeTheme {
   const fallback = DEFAULT_CHROME_THEME_BY_VARIANT[variant];
   const theme = isRecord(value) ? value : {};
@@ -337,6 +546,12 @@ export function normalizeChromeTheme(value: unknown, variant: ThemeVariant): Chr
   };
 }
 
+/**
+ * 规范化主题包
+ * @param value - 待规范化的主题包值
+ * @param variant - 主题变体
+ * @returns 规范化后的主题包对象
+ */
 export function normalizeThemePack(value: unknown, variant: ThemeVariant): ThemePack {
   const pack = isRecord(value) ? value : {};
   return {
@@ -345,15 +560,23 @@ export function normalizeThemePack(value: unknown, variant: ThemeVariant): Theme
   };
 }
 
+/**
+ * 规范化主题状态
+ * @description 支持从旧版 packs 格式迁移,兼容 chromeThemes 和 packs 两种存储结构
+ * @param value - 待规范化的主题状态值
+ * @returns 规范化后的完整主题状态对象
+ */
 export function normalizeThemeState(value: unknown): ThemeState {
   const state = isRecord(value) ? value : {};
   const codeThemeIds = isRecord(state.codeThemeIds) ? state.codeThemeIds : {};
   const chromeThemes = isRecord(state.chromeThemes) ? state.chromeThemes : {};
+  // 兼容旧版 packs 格式(已废弃,但需要支持数据迁移)
   const packs = isRecord(state.packs) ? state.packs : {};
   const legacyDarkPack = normalizeThemePack(packs.dark, "dark");
   const legacyLightPack = normalizeThemePack(packs.light, "light");
   return {
     chromeThemes: {
+      // 优先使用 chromeThemes,其次使用旧版 packs,最后使用默认值
       dark: isRecord(chromeThemes.dark)
         ? normalizeChromeTheme(chromeThemes.dark, "dark")
         : isRecord(packs.dark)
@@ -373,10 +596,17 @@ export function normalizeThemeState(value: unknown): ThemeState {
   };
 }
 
+/**
+ * 解析存储的主题状态字符串
+ * @description 支持三种格式:空值、旧版主题模式字符串、新版 JSON 格式
+ * @param rawValue - 原始存储字符串
+ * @returns 解析后的主题状态对象,解析失败时返回默认状态
+ */
 export function parseStoredThemeState(rawValue: string | null | undefined): ThemeState {
   if (!rawValue) {
     return DEFAULT_THEME_STATE;
   }
+  // 兼容旧版仅存储主题模式的格式
   if (isThemeMode(rawValue)) {
     return {
       ...DEFAULT_THEME_STATE,
@@ -391,12 +621,23 @@ export function parseStoredThemeState(rawValue: string | null | undefined): Them
   }
 }
 
+/**
+ * 序列化主题状态为 JSON 字符串
+ * @param state - 要序列化的主题状态
+ * @returns JSON 字符串
+ */
 export function serializeThemeState(state: ThemeState): string {
   return JSON.stringify(state);
 }
 
-// ─── Share-string import / export ─────────────────────────────────────────
+// ─── 分享字符串导入/导出 ────────────────────────────────────────────────
 
+/**
+ * 创建主题分享字符串
+ * @param variant - 主题变体
+ * @param pack - 要分享的主题包
+ * @returns 格式化的分享字符串,包含前缀和 JSON 数据
+ */
 export function createThemeShareString(variant: ThemeVariant, pack: ThemePack): string {
   return `${THEME_SHARE_PREFIX}${JSON.stringify({
     codeThemeId: pack.codeThemeId,
@@ -405,6 +646,13 @@ export function createThemeShareString(variant: ThemeVariant, pack: ThemePack): 
   })}`;
 }
 
+/**
+ * 解析主题分享字符串
+ * @description 支持 JSON 和 URL 编码两种格式,验证主题可用性
+ * @param rawValue - 原始分享字符串
+ * @returns 解析后的主题分享载荷
+ * @throws 当字符串格式无效或主题不可用时抛出错误
+ */
 export function parseThemeShareString(rawValue: string): ThemeSharePayload {
   const value = rawValue.trim();
   if (!value.startsWith(THEME_SHARE_PREFIX)) {
@@ -412,6 +660,7 @@ export function parseThemeShareString(rawValue: string): ThemeSharePayload {
   }
 
   const payloadText = value.slice(THEME_SHARE_PREFIX.length);
+  // 支持两种格式:直接 JSON 或 URL 编码的 JSON
   const jsonText = payloadText.startsWith("{") ? payloadText : decodeURIComponent(payloadText);
   let payload: unknown;
   try {
@@ -434,6 +683,12 @@ export function parseThemeShareString(rawValue: string): ThemeSharePayload {
   };
 }
 
+/**
+ * 检查是否可以解析主题分享字符串
+ * @param value - 待检查的分享字符串
+ * @param targetVariant - 可选的目标变体,如果提供则验证变体匹配
+ * @returns 如果可以成功解析则返回 true,否则返回 false
+ */
 export function canParseThemeShareString(value: string, targetVariant?: ThemeVariant): boolean {
   try {
     parseThemeShareStringForVariant(value, targetVariant);
@@ -443,6 +698,13 @@ export function canParseThemeShareString(value: string, targetVariant?: ThemeVar
   }
 }
 
+/**
+ * 为指定变体解析主题分享字符串
+ * @param value - 原始分享字符串
+ * @param targetVariant - 目标变体,如果提供则验证变体匹配
+ * @returns 解析后的主题分享载荷
+ * @throws 当变体不匹配时抛出错误
+ */
 export function parseThemeShareStringForVariant(
   value: string,
   targetVariant?: ThemeVariant,
@@ -456,6 +718,13 @@ export function parseThemeShareStringForVariant(
   return payload;
 }
 
+/**
+ * 从分享字符串更新主题包
+ * @param state - 当前主题状态
+ * @param value - 分享字符串
+ * @param targetVariant - 目标变体
+ * @returns 更新后的主题状态
+ */
 export function updateThemePackFromShareString(
   state: ThemeState,
   value: string,
@@ -475,8 +744,15 @@ export function updateThemePackFromShareString(
   };
 }
 
-// ─── Granular pack mutators ───────────────────────────────────────────────
+// ─── 细粒度主题包修改器 ───────────────────────────────────────────────
 
+/**
+ * 更新 Chrome 主题
+ * @param state - 当前主题状态
+ * @param variant - 要更新的变体
+ * @param patch - 主题补丁
+ * @returns 更新后的主题状态
+ */
 export function updateChromeTheme(
   state: ThemeState,
   variant: ThemeVariant,
@@ -499,6 +775,14 @@ export function updateChromeTheme(
   };
 }
 
+/**
+ * 设置代码主题 ID
+ * @description 切换代码主题时调用,会同时应用新主题的种子补丁
+ * @param state - 当前主题状态
+ * @param variant - 目标变体
+ * @param codeThemeId - 新的代码主题 ID
+ * @returns 更新后的主题状态
+ */
 export function setThemeCodeThemeId(
   state: ThemeState,
   variant: ThemeVariant,
@@ -523,12 +807,25 @@ export function setThemeCodeThemeId(
   };
 }
 
+/**
+ * 获取代码主题种子
+ * @param codeThemeId - 代码主题 ID
+ * @param variant - 主题变体
+ * @returns 规范化后的 Chrome 主题,如果不存在则返回默认主题
+ */
 export function getCodeThemeSeed(codeThemeId: string, variant: ThemeVariant): ChromeTheme {
   const fallback = DEFAULT_CHROME_THEME_BY_VARIANT[variant];
   const themeSeed = THEME_SEED_CATALOG[codeThemeId]?.[variant];
   return themeSeed ? normalizeChromeTheme(themeSeed, variant) : fallback;
 }
 
+/**
+ * 获取代码主题种子补丁
+ * @description 根据元数据决定哪些字段应该从种子应用到当前主题
+ * @param codeThemeId - 代码主题 ID
+ * @param variant - 主题变体
+ * @returns 主题种子补丁对象
+ */
 export function getCodeThemeSeedPatch(
   codeThemeId: string,
   variant: ThemeVariant,
@@ -547,6 +844,7 @@ export function getCodeThemeSeedPatch(
     surface: normalizedSeed.surface,
   };
 
+  // 根据元数据决定是否应用对比度、不透明窗口和字体配置
   if (metadata?.contrast) {
     patch.contrast = normalizedSeed.contrast;
   }
@@ -571,6 +869,12 @@ export function getCodeThemeSeedPatch(
   return patch;
 }
 
+/**
+ * 合并主题种子补丁
+ * @param currentTheme - 当前主题
+ * @param seedPatch - 种子补丁
+ * @returns 合并后的补丁对象
+ */
 function mergeThemeSeedPatch(
   currentTheme: ChromeTheme,
   seedPatch: ChromeThemeSeedPatch,

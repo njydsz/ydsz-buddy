@@ -7,7 +7,7 @@ use rand::Rng;
 use tokio::sync::RwLock;
 use tracing::{debug, info};
 
-use crate::error::{AuthError, AuthResult};
+use crate::error::AuthResult;
 
 /// 密钥存储
 pub struct SecretStore {

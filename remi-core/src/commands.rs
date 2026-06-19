@@ -21,7 +21,6 @@
 //! - **内部命令**: 会话设置、消息导入、助手消息增量/完成、计划更新、差异完成、回退完成、回滚完成
 
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::models::{
     Activity, DispatchMode, InteractionMode, MessageId, ProjectId, ProposedPlan, RuntimeMode,

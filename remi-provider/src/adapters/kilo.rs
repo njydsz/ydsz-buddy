@@ -1,4 +1,30 @@
-//! Kilo Provider 适配器
+//! Kilo Provider 适配器实现
+//!
+//! 本模块实现了 Kilo Provider 的适配器，通过 OpenCode 协议
+//! 与 Kilo AI 服务进行交互。
+//!
+//! # 功能特性
+//!
+//! - **会话管理**：支持创建、停止、列出会话
+//! - **消息发送**：支持发送 Turn 和中断 Turn
+//! - **事件流**：支持订阅运行时事件
+//!
+//! # 当前状态
+//!
+//! 当前实现为占位逻辑，核心功能（如实际的 OpenCode 协议通信）尚未实现。
+//! 需要后续集成 Kilo SDK 或实现自定义的 OpenCode 客户端。
+//!
+//! # 使用示例
+//!
+//! ```rust,ignore
+//! use remi_provider::adapters::KiloAdapter;
+//! use remi_provider::service::ProviderService;
+//! use std::sync::Arc;
+//!
+//! let adapter = Arc::new(KiloAdapter::new());
+//! let service = ProviderService::new();
+//! service.register_adapter(adapter).await;
+//! ```
 
 use std::sync::Arc;
 
@@ -14,13 +40,48 @@ use crate::adapter::{ProviderAdapter, ProviderCapabilities, SessionModelSwitchMo
 use crate::error::ProviderResult;
 
 /// Kilo 适配器
+///
+/// 实现 `ProviderAdapter` trait，提供与 Kilo AI 服务的交互能力。
+/// 内部维护会话列表和事件广播通道。
+///
+/// # 线程安全
+///
+/// 使用 `Arc<RwLock<...>>` 管理内部状态，支持多线程并发访问。
+///
+/// # TODO
+///
+/// 需要实现的核心功能：
+/// - OpenCode 协议通信
+/// - 会话状态持久化
+/// - 事件流处理
 pub struct KiloAdapter {
+    /// 活跃会话列表
+    ///
+    /// 存储当前所有由该适配器管理的会话信息。
+    /// 使用 `RwLock` 保证并发读写安全。
     sessions: Arc<RwLock<Vec<ProviderSession>>>,
+
+    /// 事件广播发送器
+    ///
+    /// 用于广播 Provider 运行时事件，支持多个订阅者。
+    /// 通道容量为 10000。
     event_tx: broadcast::Sender<ProviderRuntimeEvent>,
 }
 
 impl KiloAdapter {
-    /// 创建新的 Kilo 适配器
+    /// 创建新的 Kilo 适配器实例
+    ///
+    /// 初始化空的会话列表和事件广播通道。
+    ///
+    /// # 返回值
+    ///
+    /// 返回新创建的 `KiloAdapter` 实例
+    ///
+    /// # 示例
+    ///
+    /// ```rust,ignore
+    /// let adapter = KiloAdapter::new();
+    /// ```
     pub fn new() -> Self {
         let (event_tx, _) = broadcast::channel(10000);
 
@@ -32,6 +93,7 @@ impl KiloAdapter {
 }
 
 impl Default for KiloAdapter {
+    /// 默认实现，等同于 `new()`
     fn default() -> Self {
         Self::new()
     }
@@ -39,10 +101,17 @@ impl Default for KiloAdapter {
 
 #[async_trait]
 impl ProviderAdapter for KiloAdapter {
+    /// 获取 Provider 类型标识
+    ///
+    /// 返回 `ProviderKind::Kilo`，标识此适配器对应的 Provider 类型。
     fn provider_kind(&self) -> ProviderKind {
         ProviderKind::Kilo
     }
 
+    /// 获取适配器能力声明
+    ///
+    /// Kilo 适配器当前不支持高级特性（如模型切换、技能发现等）。
+    /// 所有能力标志均设置为 `false` 或 `Unsupported`。
     fn capabilities(&self) -> ProviderCapabilities {
         ProviderCapabilities {
             session_model_switch: SessionModelSwitchMode::Unsupported,
@@ -54,10 +123,28 @@ impl ProviderAdapter for KiloAdapter {
         }
     }
 
+    /// 启动新的会话
+    ///
+    /// 创建并初始化一个新的 Kilo 会话。当前实现为占位逻辑，
+    /// 需要后续集成 Kilo SDK 实现实际的会话启动。
+    ///
+    /// # 参数
+    ///
+    /// - `input`: 会话启动输入参数，包含 thread_id、模型选择等
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(ProviderSession)`: 成功创建的会话信息
+    /// - `Err(ProviderError)`: 启动失败
+    ///
+    /// # TODO
+    ///
+    /// 需要实现 Kilo 会话启动逻辑（OpenCode 协议）
     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
         info!("KiloAdapter: 启动会话 thread_id={}", input.thread_id);
 
         // TODO: 实现 Kilo 会话启动逻辑（OpenCode 协议）
+        // 当前为占位实现，生成模拟的会话信息
         let session = ProviderSession {
             session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
@@ -67,12 +154,30 @@ impl ProviderAdapter for KiloAdapter {
             created_at: chrono::Utc::now(),
         };
 
+        // 将会话添加到活跃列表
         let mut sessions = self.sessions.write().await;
         sessions.push(session.clone());
 
         Ok(session)
     }
 
+    /// 发送 Turn（对话轮次）
+    ///
+    /// 将用户消息发送到 Kilo Provider，启动一个新的对话轮次。
+    /// 当前实现为占位逻辑。
+    ///
+    /// # 参数
+    ///
+    /// - `input`: Turn 输入参数，包含消息内容、上下文等信息
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(ProviderTurnStartResult)`: Turn 启动成功
+    /// - `Err(ProviderError)`: 发送失败
+    ///
+    /// # TODO
+    ///
+    /// 需要实现 Kilo Turn 发送逻辑
     async fn send_turn(&self, input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
         info!("KiloAdapter: 发送 Turn thread_id={}", input.thread_id);
 
@@ -83,6 +188,23 @@ impl ProviderAdapter for KiloAdapter {
         })
     }
 
+    /// 中断正在执行的 Turn
+    ///
+    /// 停止指定 Turn 的执行。当前实现为占位逻辑。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 会话线程 ID
+    /// - `turn_id`: 可选的 Turn ID
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 中断成功
+    /// - `Err(ProviderError)`: 中断失败
+    ///
+    /// # TODO
+    ///
+    /// 需要实现 Kilo Turn 中断逻辑
     async fn interrupt_turn(&self, thread_id: &str, turn_id: Option<&str>) -> ProviderResult<()> {
         info!("KiloAdapter: 中断 Turn thread_id={}, turn_id={:?}", thread_id, turn_id);
 
@@ -90,34 +212,85 @@ impl ProviderAdapter for KiloAdapter {
         Ok(())
     }
 
+    /// 停止指定会话
+    ///
+    /// 清理会话资源，从活跃列表中移除会话。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 要停止的会话线程 ID
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 停止成功
+    /// - `Err(ProviderError)`: 停止失败
     async fn stop_session(&self, thread_id: &str) -> ProviderResult<()> {
         info!("KiloAdapter: 停止会话 thread_id={}", thread_id);
 
+        // 从活跃列表中移除指定会话
         let mut sessions = self.sessions.write().await;
         sessions.retain(|s| s.thread_id != thread_id);
 
         Ok(())
     }
 
+    /// 停止所有会话
+    ///
+    /// 清理所有会话资源，清空活跃列表。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 停止成功
+    /// - `Err(ProviderError)`: 停止失败
     async fn stop_all(&self) -> ProviderResult<()> {
         info!("KiloAdapter: 停止所有会话");
 
+        // 清空活跃列表
         let mut sessions = self.sessions.write().await;
         sessions.clear();
 
         Ok(())
     }
 
+    /// 列出所有活跃会话
+    ///
+    /// 返回当前所有活跃会话的列表。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<ProviderSession>)`: 会话列表
+    /// - `Err(ProviderError)`: 获取失败
     async fn list_sessions(&self) -> ProviderResult<Vec<ProviderSession>> {
         let sessions = self.sessions.read().await;
         Ok(sessions.clone())
     }
 
+    /// 检查是否存在指定会话
+    ///
+    /// 快速检查指定 thread_id 的会话是否存在。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 要检查的会话线程 ID
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(true)`: 会话存在
+    /// - `Ok(false)`: 会话不存在
+    /// - `Err(ProviderError)`: 检查失败
     async fn has_session(&self, thread_id: &str) -> ProviderResult<bool> {
         let sessions = self.sessions.read().await;
         Ok(sessions.iter().any(|s| s.thread_id == thread_id))
     }
 
+    /// 获取运行时事件流接收器
+    ///
+    /// 订阅 Provider 运行时事件流。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(broadcast::Receiver<ProviderRuntimeEvent>)`: 事件流接收器
+    /// - `Err(ProviderError)`: 订阅失败
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
     }

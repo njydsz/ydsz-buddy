@@ -1,9 +1,9 @@
 // FILE: whatsNew/WhatsNewPopoutCard.tsx
 // Purpose: Post-update "popout" card that lives in the bottom-left corner of
 // the app after an upgrade. Clicking the card body opens the release-notes
-// dialog; clicking the âœ?dismisses the update silently. Matches the
+// dialog; clicking the âœ• dismisses the update silently. Matches the
 // IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
-// Layer: overlay â€?rendered once from the root route next to the dialog.
+// Layer: overlay â€” rendered once from the root route next to the dialog.
 
 import { type KeyboardEvent } from "react";
 
@@ -22,7 +22,8 @@ export interface WhatsNewPopoutCardProps {
 
 /**
  * A small attention-grabber card. Clicking the body acts as a "open release
- * notes" affordance; the âœ?in the corner is a deliberate "not interested" â€? * both paths mark the release as seen, so the card never nags twice.
+ * notes" affordance; the âœ• in the corner is a deliberate "not interested" â€”
+ * both paths mark the release as seen, so the card never nags twice.
  *
  * The card is keyboard-reachable (tab-stop with Enter/Space activating) to
  * match the mouse affordance, since base-ui's Dialog otherwise owns the only
@@ -138,7 +139,7 @@ export function WhatsNewPopoutCard({
             {primaryFeatureTitle ?? `What's new in v${currentVersion}`}
           </p>
           <p className="text-xs text-muted-foreground">
-            Find out what&rsquo;s new <span aria-hidden="true">â†?/span>
+            Find out what&rsquo;s new <span aria-hidden="true">â†’</span>
           </p>
         </div>
       </div>

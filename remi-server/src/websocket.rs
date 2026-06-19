@@ -3,10 +3,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use futures_util::{SinkExt, StreamExt};
+use axum::extract::ws::Message;
 use serde_json::Value;
 use tokio::sync::{broadcast, mpsc, RwLock};
-use tokio_tungstenite::tungstenite::Message;
 use tracing::{debug, error, info, warn};
 
 use crate::error::{ServerError, ServerResult};
@@ -122,9 +121,6 @@ impl WebSocketManager {
             }
             Message::Close(frame) => {
                 info!("收到 Close 消息: {:?}", frame);
-            }
-            Message::Frame(_) => {
-                // 内部帧，忽略
             }
         }
 

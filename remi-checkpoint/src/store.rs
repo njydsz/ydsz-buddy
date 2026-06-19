@@ -1,10 +1,9 @@
 //! Git 检查点存储
 
 use std::sync::Arc;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use remi_core::models::{Checkpoint, ThreadId};
 use remi_git::GitCore;
-use serde::{Deserialize, Serialize};
 use tracing::{debug, info};
 
 use crate::error::{CheckpointError, CheckpointResult};
@@ -77,7 +76,7 @@ impl CheckpointStore {
 
         // 获取检查点
         let checkpoint = self
-            .get_checkpoint(checkpoint_id)
+            .get_checkpoint(checkpoint_id.clone())
             .await?
             .ok_or_else(|| CheckpointError::NotFound(checkpoint_id))?;
 

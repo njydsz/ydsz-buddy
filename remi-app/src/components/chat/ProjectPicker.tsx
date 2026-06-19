@@ -4,7 +4,7 @@
 // Layer: Chat / empty-state entrypoint
 
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { type ProjectDirectoryEntry } from "@remi-code/contracts";
+import { type ProjectDirectoryEntry } from "@peakcode/contracts";
 import { readNativeApi } from "../../nativeApi";
 import { useStore } from "../../store";
 import { createSidebarDisplayThreadsSelector } from "../../storeSelectors";
@@ -299,7 +299,7 @@ export const ProjectPicker = memo(function ProjectPicker({
               >
                 <PlusIcon className="size-3.5 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">
-                  {isPicking ? "Opening folder pickerâ€? : "Add new project"}
+                  {isPicking ? "Opening folder pickerâ€¦" : "Add new project"}
                 </span>
               </button>
               {showResetToHome ? (
@@ -323,7 +323,7 @@ export const ProjectPicker = memo(function ProjectPicker({
         >
           <ComboboxEmpty>
             {isLoadingDirectories
-              ? "Loading foldersâ€?
+              ? "Loading foldersâ€¦"
               : activeFolderOptions.length === 0 && macFolderOptions.length === 0
                 ? "No folders found"
                 : "No matches"}

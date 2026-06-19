@@ -98,7 +98,7 @@
   },
   "dependencies": {
     "@remi-code/contracts": "*",
-    "effect": "^3.10.0"
+    "effect": "https://pkg.pr.new/Effect-TS/effect-smol/effect@8881a9b"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

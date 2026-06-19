@@ -3,12 +3,12 @@
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::error::{AuthError, AuthResult};
 use crate::session_credential::{
     ClientMetadata, ClientSession, IssuedSession, SessionCredentialService, SessionMethod,
-    SessionRole, VerifiedSession,
+    SessionRole,
 };
 
 /// 认证请求
@@ -110,7 +110,7 @@ impl AuthService {
     /// 交换引导凭证
     pub async fn exchange_bootstrap_credential(
         &self,
-        credential: &str,
+        _credential: &str,
         client_metadata: ClientMetadata,
     ) -> AuthResult<(IssuedSession, String)> {
         info!("交换引导凭证");
@@ -135,7 +135,7 @@ impl AuthService {
     /// 颁发配对凭证
     pub async fn issue_pairing_credential(
         &self,
-        role: Option<SessionRole>,
+        _role: Option<SessionRole>,
     ) -> AuthResult<PairingCredentialResult> {
         info!("颁发配对凭证");
 
@@ -199,7 +199,7 @@ impl AuthService {
             .headers
             .get("authorization")
             .and_then(|v| v.strip_prefix("Bearer "))
-            .or_else(|| request.cookies.get(self.credential_service.cookie_name()));
+            .or_else(|| request.cookies.get(self.credential_service.cookie_name()).map(|s| s.as_str()));
 
         let token = token.ok_or_else(|| {
             AuthError::AuthenticationFailed("未提供认证令牌".to_string())
@@ -226,7 +226,7 @@ impl AuthService {
             .headers
             .get("authorization")
             .and_then(|v| v.strip_prefix("Bearer "))
-            .or_else(|| request.cookies.get(self.credential_service.cookie_name()));
+            .or_else(|| request.cookies.get(self.credential_service.cookie_name()).map(|s| s.as_str()));
 
         let token = token.ok_or_else(|| {
             AuthError::AuthenticationFailed("未提供认证令牌".to_string())

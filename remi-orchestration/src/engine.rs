@@ -81,8 +81,8 @@ impl OrchestrationEngine {
         let engine = Self {
             event_store: event_store.clone(),
             projection_repo: projection_repo.clone(),
-            command_tx,
-            event_tx,
+            command_tx: command_tx.clone(),
+            event_tx: event_tx.clone(),
             current_sequence: Arc::new(RwLock::new(0)),
         };
 
@@ -90,8 +90,8 @@ impl OrchestrationEngine {
         let engine_clone = OrchestrationEngine {
             event_store,
             projection_repo,
-            command_tx: command_tx.clone(),
-            event_tx: event_tx.clone(),
+            command_tx,
+            event_tx,
             current_sequence: engine.current_sequence.clone(),
         };
         // 启动后台异步任务，持续从命令队列中消费并处理命令

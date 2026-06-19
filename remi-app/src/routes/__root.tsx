@@ -1,3 +1,10 @@
+/**
+ * @file 根路由模块
+ * @description 应用根路由，负责初始化全局状态、事件订阅、主题管理、国际化等核心功能
+ * @layer 根路由层
+ * @exports Route - 根路由配置
+ */
+
 import {
   PROVIDER_DISPLAY_NAMES,
   ThreadId,
@@ -84,18 +91,36 @@ import {
   shouldInvalidateProviderQueriesForEvent,
 } from "./-rootEventInvalidation";
 
+/** Shell 快照引导降级延迟时间（毫秒） */
 const SHELL_SNAPSHOT_BOOTSTRAP_FALLBACK_DELAY_MS = 1_500;
+/** 线程详情追赶轮询间隔（毫秒） */
 const THREAD_DETAIL_CATCHUP_INTERVAL_MS = 1_500;
+/** 已见过的提供者更新通知键集合，用于避免重复通知 */
 const seenProviderUpdateNotificationKeys = new Set<string>();
 
+/**
+ * 判断 Shell 线程是否已启动
+ * @param thread - Shell 快照中的线程对象
+ * @returns 如果线程有最新的轮次或会话，则返回 true
+ */
 function shellThreadHasStarted(thread: OrchestrationShellSnapshot["threads"][number]): boolean {
   return thread.latestTurn !== null || thread.session !== null;
 }
 
+/**
+ * 判断详情线程是否已启动
+ * @param thread - 编排线程对象
+ * @returns 如果线程已启动或包含消息，则返回 true
+ */
 function detailThreadHasStarted(thread: OrchestrationThread): boolean {
   return shellThreadHasStarted(thread) || thread.messages.length > 0;
 }
 
+/**
+ * 从 Shell 线程列表中协调已提升的草稿线程
+ * @param threads - Shell 快照中的线程列表
+ * @description 标记所有线程为已提升，并将已启动的线程标记为已最终化
+ */
 function reconcilePromotedDraftsFromShellThreads(
   threads: ReadonlyArray<OrchestrationShellSnapshot["threads"][number]>,
 ): void {
@@ -105,6 +130,11 @@ function reconcilePromotedDraftsFromShellThreads(
   );
 }
 
+/**
+ * 从线程详情协调已提升的草稿线程
+ * @param thread - 编排线程对象
+ * @description 标记线程为已提升，如果已启动则标记为已最终化
+ */
 function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): void {
   markPromotedDraftThreads(new Set([thread.id]));
   if (detailThreadHasStarted(thread)) {
@@ -112,6 +142,10 @@ function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): vo
   }
 }
 
+/**
+ * 根路由配置
+ * @description 创建带有 QueryClient 上下文的根路由，定义根视图和错误视图
+ */
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
@@ -122,6 +156,10 @@ export const Route = createRootRouteWithContext<{
   }),
 });
 
+/**
+ * 根路由视图组件
+ * @description 初始化全局样式、主题、字体、国际化等，并渲染全局组件
+ */
 function RootRouteView() {
   useAppTypography();
   useChatCodeFont();
@@ -159,6 +197,10 @@ function RootRouteView() {
   );
 }
 
+/**
+ * 提供者更新通知组件
+ * @description 监控提供者版本状态，当有可用更新时显示通知，支持单个或批量更新
+ */
 function ProviderUpdateNotifications() {
   const messages = useMessages();
   const navigate = useNavigate();
@@ -166,6 +208,7 @@ function ProviderUpdateNotifications() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const updateToastIdRef = useRef<ReturnType<typeof toastManager.add> | null>(null);
+  // 过滤出有可用更新的提供者
   const outdatedProviders = useMemo(
     () =>
       (serverConfigQuery.data?.providers ?? []).filter(
@@ -176,6 +219,11 @@ function ProviderUpdateNotifications() {
     [serverConfigQuery.data?.providers],
   );
 
+  /**
+   * 批量更新所有过时的提供者
+   * @param providers - 需要更新的提供者列表
+   * @description 依次更新每个提供者，收集失败信息，并显示相应的通知
+   */
   const updateAll = useCallback(
     async (providers: ReadonlyArray<ServerProviderStatus>) => {
       if (isUpdatingAll || providers.length === 0) {
@@ -346,6 +394,10 @@ function ProviderUpdateNotifications() {
   return null;
 }
 
+/**
+ * 全局快捷键对话框组件
+ * @description 管理全局快捷键对话框的显示，响应菜单动作和键盘事件
+ */
 function GlobalShortcutsDialog() {
   const [open, setOpen] = useState(false);
   const { focusedThreadId, activeProject } = useFocusedChatContext();

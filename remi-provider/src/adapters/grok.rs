@@ -283,6 +283,14 @@ impl ProviderAdapter for GrokAdapter {
         Ok(sessions.iter().any(|s| s.thread_id == thread_id))
     }
 
+    /// 获取运行时事件流接收器
+    ///
+    /// 订阅 Provider 运行时事件流。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(broadcast::Receiver<ProviderRuntimeEvent>)`: 事件流接收器
+    /// - `Err(ProviderError)`: 订阅失败
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
     }

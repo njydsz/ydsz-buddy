@@ -36,7 +36,8 @@ async fn main() -> Result<()> {
     // register_rpc_methods(rpc_router.clone()).await;
 
     // 创建服务器地址
-    let addr: SocketAddr = format!("{}:{}", config.host, config.port)
+    let host = config.host.unwrap_or_else(|| "127.0.0.1".to_string());
+    let addr: SocketAddr = format!("{}:{}", host, config.port)
         .parse()
         .expect("Invalid server address");
 

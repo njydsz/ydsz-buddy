@@ -12,14 +12,14 @@ use axum::{
     routing::get,
     Router,
 };
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 use tokio::sync::mpsc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{error, info};
 
 use crate::error::{ServerError, ServerResult};
 use crate::rpc::RpcRouter;
-use crate::websocket::{WebSocketConnection, WebSocketManager};
+use crate::websocket::WebSocketManager;
 
 /// 服务器状态
 pub struct ServerState {
@@ -123,9 +123,10 @@ async fn handle_socket(socket: WebSocket, state: Arc<ServerState>) {
     });
 
     // 接收消息任务
+    let state_for_recv = state.clone();
     let recv_task = tokio::spawn(async move {
         while let Some(Ok(message)) = ws_rx.next().await {
-            if let Err(e) = state.ws_manager.handle_message(&connection, message).await {
+            if let Err(e) = state_for_recv.ws_manager.handle_message(&connection, message).await {
                 error!("处理 WebSocket 消息失败: {}", e);
                 break;
             }

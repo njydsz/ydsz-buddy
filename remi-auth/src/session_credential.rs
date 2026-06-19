@@ -7,7 +7,7 @@ use chrono::{DateTime, Duration, Utc};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use tokio::sync::{broadcast, RwLock};
-use tracing::{info, warn};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::error::{AuthError, AuthResult};
