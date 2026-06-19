@@ -41,6 +41,13 @@ pub struct AuthCreatePairingCredentialOutput {
     pub expires_at: String,
 }
 
+/// Input for verifying an auth token.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct AuthVerifyInput {
+    /// Token to verify.
+    pub token: String,
+}
+
 /// Input for revoking a pairing link.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthRevokePairingLinkInput {

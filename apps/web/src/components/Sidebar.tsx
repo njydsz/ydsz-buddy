@@ -298,8 +298,8 @@ const PROJECT_CONTEXT_MENU_ARCHIVE_ICON = renderToStaticMarkup(<HiOutlineArchive
 const PROJECT_CONTEXT_MENU_DELETE_THREADS_ICON = renderToStaticMarkup(<Trash2 />);
 
 type DebugFeatureFlagsWindow = Window & {
-  remi-codeShowFeatureFlags?: () => void;
-  remi-codeHideFeatureFlags?: () => void;
+  "remi-codeShowFeatureFlags"?: () => void;
+  "remi-codeHideFeatureFlags"?: () => void;
 };
 
 function readDebugFeatureFlagsMenuVisibility(): boolean {
@@ -1204,8 +1204,8 @@ export default function Sidebar() {
       updateVisibility();
     };
 
-    debugWindow.remi-codeShowFeatureFlags = showFeatureFlags;
-    debugWindow.remi-codeHideFeatureFlags = hideFeatureFlags;
+    debugWindow["remi-codeShowFeatureFlags"] = showFeatureFlags;
+    debugWindow["remi-codeHideFeatureFlags"] = hideFeatureFlags;
     window.addEventListener("storage", updateVisibility);
     updateVisibility();
 
@@ -2575,7 +2575,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms �?this is a folder-level operation, and
+      // Bulk archive always confirms this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [

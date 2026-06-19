@@ -117,3 +117,38 @@ pub enum ProviderError {
     #[error("internal error: {message}")]
     Internal { message: String },
 }
+
+/// Input for listing provider commands.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ProviderListCommandsInput {
+    /// Provider name.
+    pub provider: ProviderName,
+    /// Current working directory.
+    pub cwd: String,
+    /// Thread ID (optional).
+    pub thread_id: Option<String>,
+    /// Agent directory (optional).
+    pub agent_dir: Option<String>,
+    /// Force reload (optional).
+    pub force_reload: Option<bool>,
+}
+
+/// Provider native command descriptor.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ProviderNativeCommandDescriptor {
+    /// Command name.
+    pub name: String,
+    /// Command description.
+    pub description: Option<String>,
+}
+
+/// Output for listing provider commands.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ProviderListCommandsOutput {
+    /// List of commands.
+    pub commands: Vec<ProviderNativeCommandDescriptor>,
+    /// Source of the commands.
+    pub source: Option<String>,
+    /// Whether the commands are cached.
+    pub cached: Option<bool>,
+}

@@ -68,6 +68,20 @@ pub struct CloseTerminalInput {
     pub session_id: Uuid,
 }
 
+/// Input for clearing terminal history.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ClearTerminalInput {
+    /// Session ID.
+    pub session_id: Uuid,
+}
+
+/// Input for restarting a terminal session.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct RestartTerminalInput {
+    /// Session ID.
+    pub session_id: Uuid,
+}
+
 /// Input for subscribing to terminal output.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SubscribeTerminalOutputInput {

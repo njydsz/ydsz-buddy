@@ -323,7 +323,7 @@ export const ProjectPicker = memo(function ProjectPicker({
         >
           <ComboboxEmpty>
             {isLoadingDirectories
-              ? "Loading folders�?
+              ? "Loading folders..."
               : activeFolderOptions.length === 0 && macFolderOptions.length === 0
                 ? "No folders found"
                 : "No matches"}

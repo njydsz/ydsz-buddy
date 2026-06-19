@@ -299,7 +299,7 @@ export const ProjectPicker = memo(function ProjectPicker({
               >
                 <PlusIcon className="size-3.5 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">
-                  {isPicking ? "Opening folder pickerâ€? : "Add new project"}
+                  {isPicking ? "Opening folder picker..." : "Add new project"}
                 </span>
               </button>
               {showResetToHome ? (
@@ -323,7 +323,7 @@ export const ProjectPicker = memo(function ProjectPicker({
         >
           <ComboboxEmpty>
             {isLoadingDirectories
-              ? "Loading foldersâ€?
+              ? "Loading folders..."
               : activeFolderOptions.length === 0 && macFolderOptions.length === 0
                 ? "No folders found"
                 : "No matches"}

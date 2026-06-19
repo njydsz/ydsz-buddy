@@ -198,6 +198,56 @@ impl TerminalManager {
 
         Ok(handle.output_tx.subscribe())
     }
+
+    /// Clear terminal history (send clear command to PTY).
+    pub async fn clear(&self, session_id: Uuid) -> Result<()> {
+        let handle = self
+            .sessions
+            .get(&session_id)
+            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+
+        let mut writer = handle.writer.lock().await;
+        // Send ANSI clear screen command
+        use std::io::Write;
+        writer
+            .write_all(b"\x1b[2J\x1b[H")
+            .map_err(|e| Error::Internal(format!("Failed to clear terminal: {}", e)))?;
+
+        info!("Cleared terminal session: {}", session_id);
+        Ok(())
+    }
+
+    /// Restart a terminal session with the same configuration.
+    pub async fn restart(&self, session_id: Uuid) -> Result<()> {
+        let handle = self
+            .sessions
+            .get(&session_id)
+            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+
+        let old_session = handle.session.clone();
+        let old_size = handle.size;
+
+        // Close the old session
+        drop(handle);
+        self.sessions.remove(&session_id);
+
+        // Create a new session with the same configuration
+        let input = CreateTerminalInput {
+            cwd: old_session.cwd,
+            shell: Some(old_session.shell),
+            thread_id: old_session.thread_id,
+            cols: Some(old_size.cols),
+            rows: Some(old_size.rows),
+        };
+
+        let new_output = self.create(input).await?;
+
+        info!(
+            "Restarted terminal session {} -> {}",
+            session_id, new_output.id
+        );
+        Ok(())
+    }
 }
 
 impl Default for TerminalManager {

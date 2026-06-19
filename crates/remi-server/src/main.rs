@@ -159,6 +159,14 @@ async fn main() -> anyhow::Result<()> {
         // Auth endpoints
         .route("/api/auth/bootstrap", post(auth_bootstrap_handler).with_state(state.clone()))
         .route("/api/auth/verify", post(auth_verify_handler).with_state(state.clone()))
+        .route("/api/auth/session", get(auth_session_handler).with_state(state.clone()))
+        .route("/api/auth/pairing-token", post(auth_pairing_token_handler).with_state(state.clone()))
+        .route("/api/auth/ws-token", post(auth_ws_token_handler).with_state(state.clone()))
+        .route("/api/auth/pairing-links", get(auth_pairing_links_handler).with_state(state.clone()))
+        .route("/api/auth/pairing-links/revoke", post(auth_revoke_pairing_link_handler).with_state(state.clone()))
+        .route("/api/auth/clients", get(auth_clients_handler).with_state(state.clone()))
+        .route("/api/auth/clients/revoke", post(auth_revoke_client_handler).with_state(state.clone()))
+        .route("/api/auth/clients/revoke-others", post(auth_revoke_other_clients_handler).with_state(state.clone()))
         // Settings endpoints
         .route("/api/settings", get(settings_get_handler).with_state(state.clone()))
         .route("/api/settings", post(settings_set_handler).with_state(state.clone()))
@@ -237,6 +245,342 @@ async fn auth_verify_handler(
             }))).into_response()
         }
     }
+}
+
+/// Auth session handler - get current session state.
+async fn auth_session_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => match state.auth.get_session_state(&t).await {
+            Ok(session_state) => Json(session_state).into_response(),
+            Err(e) => {
+                error!("Auth session failed: {}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                    "authenticated": false,
+                    "error": e.to_string()
+                }))).into_response()
+            }
+        },
+        None => Json(serde_json::json!({
+            "authenticated": false
+        })).into_response(),
+    }
+}
+
+/// Auth pairing token handler - create pairing credential.
+async fn auth_pairing_token_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+    Json(input): Json<remi_contracts::AuthCreatePairingCredentialInput>,
+) -> impl IntoResponse {
+    // Verify owner session
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            match state.auth.verify_token(&t).await {
+                Ok(true) => {
+                    match state.auth.create_pairing_credential(input).await {
+                        Ok(output) => Json(serde_json::json!({
+                            "success": true,
+                            "data": output
+                        })).into_response(),
+                        Err(e) => {
+                            error!("Create pairing credential failed: {}", e);
+                            (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                "success": false,
+                                "error": e.to_string()
+                            }))).into_response()
+                        }
+                    }
+                }
+                Ok(false) => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": "Invalid session"
+                }))).into_response(),
+                Err(e) => {
+                    error!("Token verification failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth WebSocket token handler - issue WS token.
+async fn auth_ws_token_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => match state.auth.issue_websocket_token(&t).await {
+            Ok(ws_token) => Json(serde_json::json!({
+                "success": true,
+                "data": ws_token
+            })).into_response(),
+            Err(e) => {
+                error!("Issue WS token failed: {}", e);
+                (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": e.to_string()
+                }))).into_response()
+            }
+        },
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth pairing links handler - list active pairing links.
+async fn auth_pairing_links_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            match state.auth.verify_token(&t).await {
+                Ok(true) => {
+                    match state.auth.list_pairing_links().await {
+                        Ok(links) => Json(serde_json::json!({
+                            "success": true,
+                            "data": links
+                        })).into_response(),
+                        Err(e) => {
+                            error!("List pairing links failed: {}", e);
+                            (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                "success": false,
+                                "error": e.to_string()
+                            }))).into_response()
+                        }
+                    }
+                }
+                Ok(false) => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": "Invalid session"
+                }))).into_response(),
+                Err(e) => {
+                    error!("Token verification failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth revoke pairing link handler.
+async fn auth_revoke_pairing_link_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+    Json(input): Json<remi_contracts::AuthRevokePairingLinkInput>,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            match state.auth.verify_token(&t).await {
+                Ok(true) => {
+                    match state.auth.revoke_pairing_link(&input.code).await {
+                        Ok(_) => Json(serde_json::json!({
+                            "success": true,
+                            "revoked": true
+                        })).into_response(),
+                        Err(e) => {
+                            error!("Revoke pairing link failed: {}", e);
+                            (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                "success": false,
+                                "error": e.to_string()
+                            }))).into_response()
+                        }
+                    }
+                }
+                Ok(false) => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": "Invalid session"
+                }))).into_response(),
+                Err(e) => {
+                    error!("Token verification failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth clients handler - list client sessions.
+async fn auth_clients_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            match state.auth.verify_token(&t).await {
+                Ok(true) => {
+                    match state.auth.list_client_sessions(None).await {
+                        Ok(clients) => Json(serde_json::json!({
+                            "success": true,
+                            "data": clients
+                        })).into_response(),
+                        Err(e) => {
+                            error!("List client sessions failed: {}", e);
+                            (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                "success": false,
+                                "error": e.to_string()
+                            }))).into_response()
+                        }
+                    }
+                }
+                Ok(false) => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": "Invalid session"
+                }))).into_response(),
+                Err(e) => {
+                    error!("Token verification failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth revoke client handler.
+async fn auth_revoke_client_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+    Json(input): Json<remi_contracts::AuthRevokeClientSessionInput>,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            match state.auth.verify_token(&t).await {
+                Ok(true) => {
+                    match state.auth.revoke_client_session(&input.token).await {
+                        Ok(_) => Json(serde_json::json!({
+                            "success": true,
+                            "revoked": true
+                        })).into_response(),
+                        Err(e) => {
+                            error!("Revoke client session failed: {}", e);
+                            (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                "success": false,
+                                "error": e.to_string()
+                            }))).into_response()
+                        }
+                    }
+                }
+                Ok(false) => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                    "success": false,
+                    "error": "Invalid session"
+                }))).into_response(),
+                Err(e) => {
+                    error!("Token verification failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Auth revoke other clients handler.
+async fn auth_revoke_other_clients_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    let token = extract_auth_token(&headers);
+    match token {
+        Some(t) => {
+            // First get the session ID for the current token
+            match state.auth.get_session_state(&t).await {
+                Ok(session) => {
+                    if let Some(session_id) = session.get("sessionId").and_then(|v| v.as_str()) {
+                        match state.auth.revoke_other_client_sessions(session_id).await {
+                            Ok(count) => Json(serde_json::json!({
+                                "success": true,
+                                "revokedCount": count
+                            })).into_response(),
+                            Err(e) => {
+                                error!("Revoke other client sessions failed: {}", e);
+                                (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                                    "success": false,
+                                    "error": e.to_string()
+                                }))).into_response()
+                            }
+                        }
+                    } else {
+                        (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+                            "success": false,
+                            "error": "Invalid session"
+                        }))).into_response()
+                    }
+                }
+                Err(e) => {
+                    error!("Get session state failed: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                        "success": false,
+                        "error": e.to_string()
+                    }))).into_response()
+                }
+            }
+        }
+        None => (StatusCode::UNAUTHORIZED, Json(serde_json::json!({
+            "success": false,
+            "error": "Missing authorization token"
+        }))).into_response(),
+    }
+}
+
+/// Extract authorization token from headers.
+fn extract_auth_token(headers: &axum::http::HeaderMap) -> Option<String> {
+    headers
+        .get("authorization")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| {
+            if v.starts_with("Bearer ") {
+                Some(v[7..].to_string())
+            } else {
+                Some(v.to_string())
+            }
+        })
 }
 
 /// Settings get handler.

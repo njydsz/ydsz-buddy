@@ -532,7 +532,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
   };
 
   const isMac = isMacPlatform(platform);
-  const submitModifierLabel = isMac ? "‚å? : "Ctrl";
+  const submitModifierLabel = isMac ? "‚åò" : "Ctrl";
 
   const handleBrowseInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isBrowsing) return;

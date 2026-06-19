@@ -6,18 +6,19 @@ use serde::{Deserialize, Serialize};
 use crate::{
     AuthBootstrapInput, AuthBootstrapOutput, AuthCreatePairingCredentialInput,
     AuthCreatePairingCredentialOutput, AuthRevokeClientSessionInput, AuthRevokePairingLinkInput,
-    CloseTerminalInput, CreateTerminalInput, CreateTerminalOutput, FilesystemBrowseInput,
-    FilesystemBrowseResult, GitActionProgressEvent, GitCheckoutInput, GitCreateBranchInput,
-    GitCreateBranchResult, GitCreateDetachedWorktreeInput, GitCreateDetachedWorktreeResult,
-    GitCreateWorktreeInput, GitCreateWorktreeResult, GitHandoffThreadInput, GitHandoffThreadResult,
-    GitInitInput, GitListBranchesInput, GitListBranchesResult, GitPreparePullRequestThreadInput,
-    GitPreparePullRequestThreadResult, GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput,
-    GitReadWorkingTreeDiffResult, GitRemoveIndexLockInput, GitRemoveWorktreeInput,
-    GitResolvePullRequestResult, GitRunStackedActionInput, GitStashAndCheckoutInput,
-    GitStashDropInput, GitStashInfoInput, GitStashInfoResult, GitStatusInput, GitStatusResult,
-    GitSummarizeDiffInput, GitSummarizeDiffResult, OpenInEditorInput, ResizeTerminalInput,
-    SubscribeTerminalOutputInput, TerminalOutputEvent, Thread, ThreadId, ThreadMessage,
-    ThreadSendMessageInput, ThreadSendMessageOutput, ThreadTurn, WriteTerminalInput,
+    CloseTerminalInput, CreateProjectInput, CreateTerminalInput, CreateTerminalOutput,
+    FilesystemBrowseInput, FilesystemBrowseResult, GitActionProgressEvent, GitCheckoutInput,
+    GitCreateBranchInput, GitCreateBranchResult, GitCreateDetachedWorktreeInput,
+    GitCreateDetachedWorktreeResult, GitCreateWorktreeInput, GitCreateWorktreeResult,
+    GitHandoffThreadInput, GitHandoffThreadResult, GitInitInput, GitListBranchesInput,
+    GitListBranchesResult, GitPreparePullRequestThreadInput, GitPreparePullRequestThreadResult,
+    GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput, GitReadWorkingTreeDiffResult,
+    GitRemoveIndexLockInput, GitRemoveWorktreeInput, GitResolvePullRequestResult,
+    GitRunStackedActionInput, GitStashAndCheckoutInput, GitStashDropInput, GitStashInfoInput,
+    GitStashInfoResult, GitStatusInput, GitStatusResult, GitSummarizeDiffInput,
+    GitSummarizeDiffResult, OpenInEditorInput, ProjectId, ProviderListCommandsInput,
+    ResizeTerminalInput, SubscribeTerminalOutputInput, TerminalOutputEvent, Thread, ThreadId,
+    ThreadMessage, ThreadSendMessageInput, ThreadSendMessageOutput, ThreadTurn, WriteTerminalInput,
 };
 
 /// JSON-RPC request.
@@ -197,6 +198,22 @@ pub enum RpcMethod {
     /// Subscribe to terminal output.
     #[serde(rename = "terminal.subscribeOutput")]
     TerminalSubscribeOutput(SubscribeTerminalOutputInput),
+
+    // Project methods
+    /// List all projects.
+    #[serde(rename = "projects.list")]
+    ProjectsList,
+    /// Add a new project.
+    #[serde(rename = "projects.add")]
+    ProjectsAdd(CreateProjectInput),
+    /// Remove a project.
+    #[serde(rename = "projects.remove")]
+    ProjectsRemove { project_id: ProjectId },
+
+    // Provider methods
+    /// List provider commands.
+    #[serde(rename = "provider.listCommands")]
+    ProviderListCommands(ProviderListCommandsInput),
 }
 
 /// RPC response types.

@@ -210,6 +210,18 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     .await
     .map_err(|e| Error::Database(e.to_string()))?;
 
+    // Migration 011: Add connection tracking to sessions
+    sqlx::query(
+        r#"
+        ALTER TABLE sessions ADD COLUMN connected_at TEXT;
+        ALTER TABLE sessions ADD COLUMN is_connected INTEGER NOT NULL DEFAULT 0;
+        CREATE INDEX IF NOT EXISTS idx_sessions_is_connected ON sessions(is_connected);
+        "#,
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| Error::Database(e.to_string()))?;
+
     info!("Database migrations completed successfully");
     Ok(())
 }

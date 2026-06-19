@@ -112,17 +112,6 @@ pub async fn handle_method(
         }
         RpcMethod::GitHandoffThread(input) => handle_git_handoff_thread(input, state).await,
 
-        // Auth methods
-        RpcMethod::AuthBootstrap(input) => handle_auth_bootstrap(input, state).await,
-        RpcMethod::AuthCreatePairingCredential(input) => {
-            handle_auth_create_pairing_credential(input, state).await
-        }
-        RpcMethod::AuthRevokePairingLink(input) => handle_auth_revoke_pairing_link(input, state).await,
-        RpcMethod::AuthRevokeClientSession(input) => handle_auth_revoke_client_session(input, state).await,
-
-        // Editor methods
-        RpcMethod::EditorOpen(input) => handle_editor_open(input, state).await,
-
         // Terminal methods
         RpcMethod::TerminalCreate(input) => handle_terminal_create(input, state).await,
         RpcMethod::TerminalWrite(input) => handle_terminal_write(input, state).await,
@@ -131,6 +120,14 @@ pub async fn handle_method(
         RpcMethod::TerminalSubscribeOutput(input) => {
             handle_terminal_subscribe_output(input, state).await
         }
+
+        // Project methods
+        RpcMethod::ProjectsList => handle_projects_list(state).await,
+        RpcMethod::ProjectsAdd(input) => handle_projects_add(input, state).await,
+        RpcMethod::ProjectsRemove { project_id } => handle_projects_remove(project_id, state).await,
+
+        // Provider methods
+        RpcMethod::ProviderListCommands(input) => handle_provider_list_commands(input, state).await,
     }
 }
 
@@ -597,4 +594,47 @@ async fn handle_terminal_subscribe_output(
         .subscribe_output(input.session_id)
         .await?;
     Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_projects_list(state: &Arc<RpcState>) -> Result<Value> {
+    let project_repo = ProjectRepository::new(state.orchestration.db.pool().clone());
+    let projects = ProjectRepositoryTrait::list(&project_repo).await?;
+    serde_json::to_value(projects).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_projects_add(
+    input: remi_contracts::CreateProjectInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let project_repo = ProjectRepository::new(state.orchestration.db.pool().clone());
+    let project = ProjectRepositoryTrait::create(&project_repo, &input.name, &input.path, input.kind).await?;
+    serde_json::to_value(project).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_projects_remove(
+    project_id: remi_contracts::ProjectId,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let project_repo = ProjectRepository::new(state.orchestration.db.pool().clone());
+    ProjectRepositoryTrait::delete(&project_repo, project_id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_provider_list_commands(
+    input: remi_contracts::ProviderListCommandsInput,
+    _state: &Arc<RpcState>,
+) -> Result<Value> {
+    // In a full implementation, this would query the provider for available commands
+    info!(
+        "Listing commands for provider: {} in {}",
+        input.provider, input.cwd
+    );
+
+    let output = remi_contracts::ProviderListCommandsOutput {
+        commands: vec![],
+        source: Some("provider".to_string()),
+        cached: Some(false),
+    };
+
+    serde_json::to_value(output).map_err(|e| Error::Serialization(e.to_string()))
 }

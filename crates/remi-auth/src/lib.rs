@@ -125,6 +125,128 @@ impl AuthService {
         Ok(())
     }
 
+    /// List all active pairing links.
+    pub async fn list_pairing_links(&self) -> Result<Vec<serde_json::Value>> {
+        let pool = self.db.pool();
+
+        let rows: Vec<(String, String, String, String, bool)> = sqlx::query_as(
+            "SELECT id, code, device_id, expires_at, used FROM pairing_credentials WHERE used = 0 AND expires_at > ?"
+        )
+        .bind(Utc::now().to_rfc3339())
+        .fetch_all(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(rows.into_iter().map(|(id, code, device_id, expires_at, used)| {
+            serde_json::json!({
+                "id": id,
+                "code": code,
+                "deviceId": device_id,
+                "expiresAt": expires_at,
+                "used": used
+            })
+        }).collect())
+    }
+
+    /// List client sessions.
+    pub async fn list_client_sessions(&self, exclude_session_id: Option<&str>) -> Result<Vec<serde_json::Value>> {
+        let pool = self.db.pool();
+
+        let rows: Vec<(String, String, String, String, String)> = sqlx::query_as(
+            "SELECT id, token, client_id, created_at, expires_at FROM sessions WHERE expires_at > ?"
+        )
+        .bind(Utc::now().to_rfc3339())
+        .fetch_all(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(rows.into_iter().filter(|(id, _, _, _, _)| {
+            exclude_session_id.map_or(true, |exclude| id != exclude)
+        }).map(|(id, _token, client_id, created_at, expires_at)| {
+            serde_json::json!({
+                "id": id,
+                "clientId": client_id,
+                "createdAt": created_at,
+                "expiresAt": expires_at
+            })
+        }).collect())
+    }
+
+    /// Revoke all other client sessions except the given one.
+    pub async fn revoke_other_client_sessions(&self, keep_session_id: &str) -> Result<u64> {
+        let pool = self.db.pool();
+
+        let result = sqlx::query(
+            "DELETE FROM sessions WHERE id != ?"
+        )
+        .bind(keep_session_id)
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(result.rows_affected())
+    }
+
+    /// Get session state for the current request.
+    pub async fn get_session_state(&self, token: &str) -> Result<serde_json::Value> {
+        let pool = self.db.pool();
+
+        let result: Option<(String, String, String, String)> = sqlx::query_as(
+            "SELECT id, client_id, created_at, expires_at FROM sessions WHERE token = ? AND expires_at > ?"
+        )
+        .bind(token)
+        .bind(Utc::now().to_rfc3339())
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        match result {
+            Some((id, client_id, created_at, expires_at)) => {
+                Ok(serde_json::json!({
+                    "authenticated": true,
+                    "sessionId": id,
+                    "clientId": client_id,
+                    "createdAt": created_at,
+                    "expiresAt": expires_at
+                }))
+            }
+            None => {
+                Ok(serde_json::json!({
+                    "authenticated": false
+                }))
+            }
+        }
+    }
+
+    /// Issue a WebSocket token for an authenticated session.
+    pub async fn issue_websocket_token(&self, session_token: &str) -> Result<serde_json::Value> {
+        // Verify the session token first
+        let pool = self.db.pool();
+        let result: Option<(String,)> = sqlx::query_as(
+            "SELECT client_id FROM sessions WHERE token = ? AND expires_at > ?"
+        )
+        .bind(session_token)
+        .bind(Utc::now().to_rfc3339())
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        match result {
+            Some((_client_id,)) => {
+                // Generate a short-lived WS token
+                let ws_token = self.generate_session_token().await?;
+                let expires_at = Utc::now() + Duration::hours(1);
+                self.store_session_token(&ws_token, "websocket", expires_at).await?;
+
+                Ok(serde_json::json!({
+                    "token": ws_token,
+                    "expiresAt": expires_at.to_rfc3339()
+                }))
+            }
+            None => Err(Error::Auth("Invalid session token".to_string())),
+        }
+    }
+
     /// Verify a session token.
     pub async fn verify_token(&self, token: &str) -> Result<bool> {
         let pool = self.db.pool();
@@ -139,6 +261,174 @@ impl AuthService {
         .map_err(|e| Error::Database(e.to_string()))?;
 
         Ok(result.is_some())
+    }
+
+    /// Verify a WebSocket token.
+    pub async fn verify_websocket_token(&self, token: &str) -> Result<bool> {
+        let pool = self.db.pool();
+        
+        let result: Option<(String,)> = sqlx::query_as(
+            "SELECT client_id FROM sessions WHERE token = ? AND expires_at > ? AND client_id = 'websocket'"
+        )
+        .bind(token)
+        .bind(Utc::now().to_rfc3339())
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(result.is_some())
+    }
+
+    /// List active sessions with connection status.
+    pub async fn list_active_sessions(&self) -> Result<Vec<serde_json::Value>> {
+        let pool = self.db.pool();
+
+        let rows: Vec<(String, String, String, String, String, bool)> = sqlx::query_as(
+            "SELECT id, client_id, created_at, expires_at, connected_at, is_connected FROM sessions WHERE expires_at > ?"
+        )
+        .bind(Utc::now().to_rfc3339())
+        .fetch_all(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(rows.into_iter().map(|(id, client_id, created_at, expires_at, connected_at, is_connected)| {
+            serde_json::json!({
+                "id": id,
+                "clientId": client_id,
+                "createdAt": created_at,
+                "expiresAt": expires_at,
+                "connectedAt": if is_connected { Some(connected_at) } else { None },
+                "isConnected": is_connected
+            })
+        }).collect())
+    }
+
+    /// Mark a session as connected.
+    pub async fn mark_connected(&self, session_id: &str) -> Result<()> {
+        let pool = self.db.pool();
+        let connected_at = Utc::now().to_rfc3339();
+
+        sqlx::query(
+            "UPDATE sessions SET is_connected = TRUE, connected_at = ? WHERE id = ?"
+        )
+        .bind(&connected_at)
+        .bind(session_id)
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
+    }
+
+    /// Mark a session as disconnected.
+    pub async fn mark_disconnected(&self, session_id: &str) -> Result<()> {
+        let pool = self.db.pool();
+
+        sqlx::query(
+            "UPDATE sessions SET is_connected = FALSE WHERE id = ?"
+        )
+        .bind(session_id)
+        .execute(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        Ok(())
+    }
+
+    /// Consume a bootstrap token (one-time use).
+    pub async fn consume_bootstrap_token(&self, token: &str) -> Result<String> {
+        let pool = self.db.pool();
+
+        // Find and mark the token as used
+        let result: Option<(String, String)> = sqlx::query_as(
+            "SELECT client_id, device_id FROM pairing_credentials WHERE code = ? AND used = FALSE AND expires_at > ?"
+        )
+        .bind(token)
+        .bind(Utc::now().to_rfc3339())
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
+
+        match result {
+            Some((client_id, device_id)) => {
+                // Mark as used
+                sqlx::query(
+                    "UPDATE pairing_credentials SET used = TRUE WHERE code = ?"
+                )
+                .bind(token)
+                .execute(pool)
+                .await
+                .map_err(|e| Error::Database(e.to_string()))?;
+
+                info!("Consumed bootstrap token for device: {}", device_id);
+                Ok(client_id)
+            }
+            None => Err(Error::Auth("Invalid or expired bootstrap token".to_string())),
+        }
+    }
+
+    /// Authenticate an HTTP request by extracting and verifying the bearer token.
+    pub async fn authenticate_http_request(
+        &self,
+        headers: &axum::http::HeaderMap,
+    ) -> Result<Option<String>> {
+        let token = headers
+            .get("authorization")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| {
+                if v.starts_with("Bearer ") {
+                    Some(v[7..].to_string())
+                } else {
+                    Some(v.to_string())
+                }
+            });
+
+        match token {
+            Some(t) => {
+                if self.verify_token(&t).await? {
+                    Ok(Some(t))
+                } else {
+                    Ok(None)
+                }
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Authenticate a WebSocket upgrade request.
+    pub async fn authenticate_websocket_upgrade(
+        &self,
+        headers: &axum::http::HeaderMap,
+    ) -> Result<Option<String>> {
+        // Check for WebSocket token in Sec-WebSocket-Protocol or Authorization header
+        let token = headers
+            .get("sec-websocket-protocol")
+            .and_then(|v| v.to_str().ok())
+            .map(|v| v.to_string())
+            .or_else(|| {
+                headers
+                    .get("authorization")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|v| {
+                        if v.starts_with("Bearer ") {
+                            Some(v[7..].to_string())
+                        } else {
+                            Some(v.to_string())
+                        }
+                    })
+            });
+
+        match token {
+            Some(t) => {
+                // Try WebSocket token first, then regular session token
+                if self.verify_websocket_token(&t).await? || self.verify_token(&t).await? {
+                    Ok(Some(t))
+                } else {
+                    Ok(None)
+                }
+            }
+            None => Ok(None),
+        }
     }
 
     /// Store a session token in the database.

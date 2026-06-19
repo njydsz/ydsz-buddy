@@ -4,7 +4,7 @@
     "composite": true,
     "jsx": "react-jsx",
     "lib": ["ES2023", "DOM", "DOM.Iterable", "esnext.disposable"],
-    "types": ["vite/client", "node"],
+    "types": ["node"],
     "paths": {
       "~/*": ["./src/ui/*"]
     },
