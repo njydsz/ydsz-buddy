@@ -1205,8 +1205,8 @@ function SettingsRouteView() {
     const title = "Activity notification";
     const body = "Notification test for chats and terminal agents.";
 
-    if (window.desktopBridge) {
-      const shown = await window.desktopBridge.notifications.show({ title, body, silent: false });
+    if (tauriBridge) {
+      const shown = await tauriBridge.notifications.show({ title, body, silent: false });
       toastManager.add({
         type: shown ? "success" : "warning",
         title: shown ? "Test notification sent" : "Notifications unavailable",

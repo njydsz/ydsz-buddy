@@ -1,4 +1,42 @@
-//! 检查点 Diff 查询
+//! # 检查点 Diff 查询模块
+//!
+//! 本模块提供检查点（Checkpoint）之间的代码变更差异（Diff）查询能力，
+//! 是检查点系统中面向**变更追溯**和**变更审计**的核心查询层。
+//!
+//! ## 核心功能
+//!
+//! - **单轮 Diff 查询**：获取某个对话轮次（Turn）相对于前一轮的代码变更。
+//! - **全线程 Diff 查询**：获取整个对话线程（Thread）从创建到当前的所有代码变更汇总。
+//! - **跨检查点 Diff 查询**：计算任意两个检查点之间的代码差异。
+//! - **Diff 统计**：提供新增行数、删除行数、变更文件数等聚合统计信息。
+//!
+//! ## 架构设计
+//!
+//! [`CheckpointDiffQuery`] 作为查询服务的入口，内部依赖：
+//! - [`CheckpointStore`]：用于查询检查点元数据（如 Git Commit 引用）。
+//! - [`GitCore`]：用于调用底层 Git 命令计算实际的代码差异。
+//!
+//! 查询结果通过 [`TurnDiff`]、[`FullThreadDiff`]、[`DiffStats`] 等数据结构返回，
+//! 所有结构均实现了 `Debug` 和 `Clone`，便于在异步上下文中传递和调试。
+//!
+//! ## 使用示例
+//!
+//! ```rust,ignore
+//! use std::sync::Arc;
+//! use remi_checkpoint::query::CheckpointDiffQuery;
+//! use remi_checkpoint::store::CheckpointStore;
+//! use remi_git::GitCore;
+//!
+//! let git_core = Arc::new(GitCore::new("/path/to/repo")?);
+//! let store = Arc::new(CheckpointStore::new(git_core.clone()));
+//! let query = CheckpointDiffQuery::new(store, git_core);
+//!
+//! // 查询两个检查点之间的 Diff
+//! let diff = query.get_diff_between_checkpoints(
+//!     "checkpoint-id-1".to_string(),
+//!     "checkpoint-id-2".to_string(),
+//! ).await?;
+//! ```
 
 use std::sync::Arc;
 
@@ -9,47 +47,146 @@ use tracing::debug;
 use crate::error::{CheckpointError, CheckpointResult};
 use crate::store::CheckpointStore;
 
-/// Turn Diff 结果
+/// # Turn Diff 查询结果
+///
+/// 表示对话线程中某一轮（Turn）的代码变更差异信息。
+/// 每个 Turn 对应一次 AI 代码生成或用户手动修改，本结构记录了该轮变更的
+/// 完整 Diff 内容及统计摘要。
+///
+/// ## 字段说明
+///
+/// | 字段 | 类型 | 说明 |
+/// |------|------|------|
+/// | `turn_id` | `String` | 轮次的唯一标识符，用于关联对话上下文 |
+/// | `diff` | `String` | 该轮变更的完整 Unified Diff 格式文本 |
+/// | `stats` | [`DiffStats`] | 该轮变更的统计摘要（增删行数、变更文件数） |
 #[derive(Debug, Clone)]
 pub struct TurnDiff {
-    /// Turn ID
+    /// 轮次唯一标识符
+    ///
+    /// 与对话线程中的某一轮 Turn 一一对应，用于追溯该轮变更的上下文。
     pub turn_id: String,
-    /// Diff 内容
+    /// Diff 内容（Unified Diff 格式）
+    ///
+    /// 包含该轮次所有文件变更的完整差异文本，格式遵循标准的 Unified Diff 规范。
     pub diff: String,
     /// 统计信息
+    ///
+    /// 该轮次变更的聚合统计，包括新增行数、删除行数和变更文件数。
     pub stats: DiffStats,
 }
 
-/// Full Thread Diff 结果
+/// # 全线程 Diff 查询结果
+///
+/// 表示整个对话线程（Thread）从创建到当前时刻的所有代码变更汇总。
+/// 包含每个轮次的独立 Diff 信息以及全局聚合统计。
+///
+/// ## 使用场景
+///
+/// - 展示整个对话过程中代码的完整演变历史。
+/// - 评估一次 AI 辅助编码会话的总体代码变更规模。
+///
+/// ## 字段说明
+///
+/// | 字段 | 类型 | 说明 |
+/// |------|------|------|
+/// | `thread_id` | [`ThreadId`] | 对话线程的唯一标识符 |
+/// | `turns` | `Vec<TurnDiff>` | 线程中每个轮次的 Diff 详情列表，按时间顺序排列 |
+/// | `total_stats` | [`DiffStats`] | 所有轮次合并后的全局统计信息 |
 #[derive(Debug, Clone)]
 pub struct FullThreadDiff {
-    /// 线程 ID
+    /// 对话线程唯一标识符
+    ///
+    /// 关联到 [`remi_core::models::ThreadId`]，用于标识本次查询所属的对话线程。
     pub thread_id: ThreadId,
-    /// 所有 Turn 的 Diff
+    /// 所有轮次的 Diff 列表
+    ///
+    /// 按时间顺序排列，每个元素对应线程中一轮对话的代码变更详情。
     pub turns: Vec<TurnDiff>,
-    /// 总统计信息
+    /// 全局统计信息
+    ///
+    /// 所有轮次变更的聚合统计，等同于将所有 Turn 的 Diff 合并后计算的统计结果。
     pub total_stats: DiffStats,
 }
 
-/// Diff 统计信息
+/// # Diff 统计信息
+///
+/// 记录代码变更的聚合统计数据，用于量化变更规模。
+/// 可用于单个 Turn 或整个 Thread 的变更统计。
+///
+/// ## 字段说明
+///
+/// | 字段 | 类型 | 说明 |
+/// |------|------|------|
+/// | `additions` | `usize` | 新增的代码行数 |
+/// | `deletions` | `usize` | 删除的代码行数 |
+/// | `files_changed` | `usize` | 发生变更的文件总数 |
+///
+/// ## 默认值
+///
+/// 通过 `#[derive(Default)]` 实现，所有字段默认为 `0`，
+/// 适用于无变更或初始化场景。
 #[derive(Debug, Clone, Default)]
 pub struct DiffStats {
     /// 新增行数
+    ///
+    /// 在 Diff 中以 `+` 开头的行数（不含 `+++` 文件头行）。
     pub additions: usize,
     /// 删除行数
+    ///
+    /// 在 Diff 中以 `-` 开头的行数（不含 `---` 文件头行）。
     pub deletions: usize,
     /// 修改的文件数
+    ///
+    /// 在 Diff 中以 `diff --git` 开头的文件级变更块数量。
     pub files_changed: usize,
 }
 
-/// 检查点 Diff 查询服务
+/// # 检查点 Diff 查询服务
+///
+/// 提供检查点之间代码变更差异的查询能力，是检查点系统的**只读查询层**。
+/// 内部组合了检查点存储服务（用于获取检查点元数据）和 Git 核心服务（用于计算实际 Diff）。
+///
+/// ## 线程安全
+///
+/// 内部依赖均通过 `Arc` 持有，支持在多线程/异步任务中安全共享。
+///
+/// ## 依赖注入
+///
+/// - `checkpoint_store`：[`CheckpointStore`] 的共享引用，用于查询检查点记录。
+/// - `git_core`：[`GitCore`] 的共享引用，用于调用 Git 底层命令计算 Diff。
 pub struct CheckpointDiffQuery {
+    /// 检查点存储服务引用
+    ///
+    /// 通过 `Arc` 共享，用于查询检查点的元数据（如 Git Commit SHA）。
     checkpoint_store: Arc<CheckpointStore>,
+    /// Git 核心服务引用
+    ///
+    /// 通过 `Arc` 共享，用于执行 Git Diff 等底层操作。
     git_core: Arc<GitCore>,
 }
 
 impl CheckpointDiffQuery {
-    /// 创建新的 Diff 查询服务
+    /// # 创建新的 Diff 查询服务实例
+    ///
+    /// 通过注入检查点存储服务和 Git 核心服务来构造查询服务。
+    ///
+    /// ## 参数
+    ///
+    /// | 参数 | 类型 | 说明 |
+    /// |------|------|------|
+    /// | `checkpoint_store` | `Arc<CheckpointStore>` | 检查点存储服务的共享引用 |
+    /// | `git_core` | `Arc<GitCore>` | Git 核心服务的共享引用 |
+    ///
+    /// ## 返回值
+    ///
+    /// 返回新构造的 [`CheckpointDiffQuery`] 实例。
+    ///
+    /// ## 使用示例
+    ///
+    /// ```rust,ignore
+    /// let query = CheckpointDiffQuery::new(store, git_core);
+    /// ```
     pub fn new(checkpoint_store: Arc<CheckpointStore>, git_core: Arc<GitCore>) -> Self {
         Self {
             checkpoint_store,
@@ -57,7 +194,31 @@ impl CheckpointDiffQuery {
         }
     }
 
-    /// 获取 Turn 的 Diff
+    /// # 获取单个轮次（Turn）的代码变更差异
+    ///
+    /// 查询指定对话线程中某一轮对话相对于前一轮的代码变更。
+    /// 内部会查找该 Turn 对应的检查点，并计算与前一个检查点之间的 Git Diff。
+    ///
+    /// ## 参数
+    ///
+    /// | 参数 | 类型 | 说明 |
+    /// |------|------|------|
+    /// | `thread_id` | [`ThreadId`] | 对话线程的唯一标识符 |
+    /// | `turn_id` | `String` | 目标轮次的唯一标识符 |
+    ///
+    /// ## 返回值
+    ///
+    /// - `Ok(Some(TurnDiff))`：成功获取到该轮次的 Diff 信息。
+    /// - `Ok(None)`：该轮次尚无关联的检查点或无代码变更。
+    /// - `Err(CheckpointError)`：查询过程中发生错误（如检查点不存在、Git 操作失败）。
+    ///
+    /// ## 实现状态
+    ///
+    /// > ⚠️ **TODO**：当前为桩实现，尚未完成以下逻辑：
+    /// > 1. 查找 Turn 对应的检查点记录。
+    /// > 2. 定位前一个检查点。
+    /// > 3. 调用 Git 计算两个检查点之间的 Diff。
+    /// > 4. 解析 Diff 文本并提取统计信息。
     pub async fn get_turn_diff(
         &self,
         thread_id: ThreadId,
@@ -73,7 +234,28 @@ impl CheckpointDiffQuery {
         Ok(None)
     }
 
-    /// 获取完整线程的 Diff
+    /// # 获取完整对话线程的代码变更差异
+    ///
+    /// 查询指定对话线程从创建到当前时刻的所有代码变更汇总，
+    /// 包含每个轮次的独立 Diff 详情和全局聚合统计。
+    ///
+    /// ## 参数
+    ///
+    /// | 参数 | 类型 | 说明 |
+    /// |------|------|------|
+    /// | `thread_id` | [`ThreadId`] | 目标对话线程的唯一标识符 |
+    ///
+    /// ## 返回值
+    ///
+    /// - `Ok(FullThreadDiff)`：成功获取全线程 Diff 信息（可能包含零个或多个轮次）。
+    /// - `Err(CheckpointError)`：查询过程中发生错误。
+    ///
+    /// ## 实现状态
+    ///
+    /// > ⚠️ **TODO**：当前为桩实现，尚未完成以下逻辑：
+    /// > 1. 获取线程的所有检查点记录（按时间排序）。
+    /// > 2. 逐对计算相邻检查点之间的 Diff。
+    /// > 3. 汇总所有轮次的统计信息到 `total_stats`。
     pub async fn get_full_thread_diff(
         &self,
         thread_id: ThreadId,
@@ -92,7 +274,30 @@ impl CheckpointDiffQuery {
         })
     }
 
-    /// 获取两个检查点之间的 Diff
+    /// # 获取两个检查点之间的代码差异
+    ///
+    /// 计算任意两个检查点之间的 Git Diff。两个检查点可以属于不同的对话线程，
+    /// 只要它们在同一个 Git 仓库中即可。
+    ///
+    /// ## 参数
+    ///
+    /// | 参数 | 类型 | 说明 |
+    /// |------|------|------|
+    /// | `from_checkpoint` | `String` | 起始检查点的 ID（Diff 的基准点） |
+    /// | `to_checkpoint` | `String` | 目标检查点的 ID（Diff 的对比点） |
+    ///
+    /// ## 返回值
+    ///
+    /// - `Ok(String)`：成功时返回 Unified Diff 格式的文本。
+    /// - `Err(CheckpointError::NotFound)`：起始或目标检查点不存在。
+    /// - `Err(CheckpointError::GitOperationFailed)`：Git Diff 命令执行失败。
+    ///
+    /// ## 错误处理
+    ///
+    /// 1. 先通过 [`CheckpointStore::get_checkpoint`] 查询两个检查点的元数据。
+    /// 2. 若任一检查点不存在，返回 [`CheckpointError::NotFound`]。
+    /// 3. 调用 [`GitCore::diff_between_commits`] 计算两个 Git Commit 之间的 Diff。
+    /// 4. 若 Git 操作失败，将错误映射为 [`CheckpointError::GitOperationFailed`]。
     pub async fn get_diff_between_checkpoints(
         &self,
         from_checkpoint: String,
@@ -103,20 +308,21 @@ impl CheckpointDiffQuery {
             from_checkpoint, to_checkpoint
         );
 
-        // 获取两个检查点
+        // 查询起始检查点的元数据，若不存在则返回 NotFound 错误
         let from = self
             .checkpoint_store
             .get_checkpoint(from_checkpoint)
             .await?
             .ok_or_else(|| CheckpointError::NotFound("from_checkpoint".to_string()))?;
 
+        // 查询目标检查点的元数据，若不存在则返回 NotFound 错误
         let to = self
             .checkpoint_store
             .get_checkpoint(to_checkpoint)
             .await?
             .ok_or_else(|| CheckpointError::NotFound("to_checkpoint".to_string()))?;
 
-        // 使用 Git 计算 Diff
+        // 调用 Git 核心服务计算两个 Commit 之间的 Unified Diff
         let diff = self
             .git_core
             .diff_between_commits(&from.git_ref, &to.git_ref)

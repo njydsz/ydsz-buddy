@@ -26,9 +26,9 @@ export interface ExecutionEnvironmentCapabilities {
 
 /** 执行环境描述符，完整描述一个执行环境的标识、标签、平台、版本和能力 */
 export interface ExecutionEnvironmentDescriptor {
-  environmentId: typeof EnvironmentId.Type;
-  label: typeof TrimmedNonEmptyString.Type;
+  environmentId: EnvironmentId;
+  label: string;
   platform: ExecutionEnvironmentPlatform;
-  serverVersion: typeof TrimmedNonEmptyString.Type;
+  serverVersion: string;
   capabilities: ExecutionEnvironmentCapabilities;
 }

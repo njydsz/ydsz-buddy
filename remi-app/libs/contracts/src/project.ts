@@ -35,21 +35,21 @@ type ProjectEntryKind = "file" | "directory";
 /** 项目条目，表示搜索到的文件或目录 */
 export interface ProjectEntry {
   /** 条目路径 */
-  path: typeof TrimmedNonEmptyString.Type;
+  path: string;
   /** 条目类型（文件或目录） */
   kind: ProjectEntryKind;
   /** 父目录路径（可选） */
-  parentPath?: typeof TrimmedNonEmptyString.Type;
+  parentPath?: string;
 }
 
 /** 项目目录条目，用于目录列表展示，包含是否含有子节点的信息 */
 export interface ProjectDirectoryEntry {
   /** 目录路径 */
-  path: typeof TrimmedNonEmptyString.Type;
+  path: string;
   /** 目录名称 */
-  name: typeof TrimmedNonEmptyString.Type;
+  name: string;
   /** 父目录路径（可选） */
-  parentPath?: typeof TrimmedNonEmptyString.Type;
+  parentPath?: string;
   /** 是否含有子节点（文件或子目录） */
   hasChildren: boolean;
 }
@@ -57,11 +57,11 @@ export interface ProjectDirectoryEntry {
 /** 项目文件系统条目，用于目录列表结果，同时支持文件和目录 */
 export interface ProjectFileSystemEntry {
   /** 条目路径 */
-  path: typeof TrimmedNonEmptyString.Type;
+  path: string;
   /** 条目名称 */
-  name: typeof TrimmedNonEmptyString.Type;
+  name: string;
   /** 父目录路径（可选） */
-  parentPath?: typeof TrimmedNonEmptyString.Type;
+  parentPath?: string;
   /** 条目类型（文件或目录） */
   kind: ProjectEntryKind;
   /** 是否含有子节点（可选，仅目录有效） */
@@ -71,9 +71,9 @@ export interface ProjectFileSystemEntry {
 /** 列出项目目录的输入参数，支持指定相对路径、递归深度和是否包含文件 */
 export interface ProjectListDirectoriesInput {
   /** 工作目录（绝对路径） */
-  cwd: typeof TrimmedNonEmptyString.Type;
+  cwd: string;
   /** 相对路径（可选），相对于 cwd 的目录路径，最大长度 1024 */
-  relativePath?: typeof TrimmedNonEmptyString.Type;
+  relativePath?: string;
   /** 递归深度（可选），不超过 PROJECT_DIRECTORY_LIST_MAX_DEPTH */
   depth?: number;
   /** 是否包含文件（可选），默认只返回目录 */
@@ -97,9 +97,9 @@ export interface ProjectSearchEntriesResult {
 /** 本地文件搜索的输入参数，在指定根路径下搜索文件或目录 */
 export interface ProjectSearchLocalEntriesInput {
   /** 搜索的根路径 */
-  rootPath: typeof TrimmedNonEmptyString.Type;
+  rootPath: string;
   /** 搜索关键词，最大长度 256 */
-  query: typeof TrimmedNonEmptyString.Type;
+  query: string;
   /** 最大返回条目数（可选），不超过 PROJECT_SEARCH_LOCAL_ENTRIES_MAX_LIMIT */
   limit?: number;
   /** 是否包含文件（可选），默认只返回目录 */
@@ -109,11 +109,11 @@ export interface ProjectSearchLocalEntriesInput {
 /** 本地搜索条目，表示本地搜索到的文件或目录 */
 export interface ProjectLocalSearchEntry {
   /** 条目路径 */
-  path: typeof TrimmedNonEmptyString.Type;
+  path: string;
   /** 条目名称 */
-  name: typeof TrimmedNonEmptyString.Type;
+  name: string;
   /** 父目录路径（可选） */
-  parentPath?: typeof TrimmedNonEmptyString.Type;
+  parentPath?: string;
   /** 条目类型（文件或目录） */
   kind: ProjectEntryKind;
 }
@@ -129,9 +129,9 @@ export interface ProjectSearchLocalEntriesResult {
 /** 写入项目文件的输入参数，包含工作目录、相对路径和文件内容 */
 export interface ProjectWriteFileInput {
   /** 工作目录（绝对路径） */
-  cwd: typeof TrimmedNonEmptyString.Type;
+  cwd: string;
   /** 文件相对路径，最大长度 PROJECT_WRITE_FILE_PATH_MAX_LENGTH */
-  relativePath: typeof TrimmedNonEmptyString.Type;
+  relativePath: string;
   /** 文件内容 */
   contents: string;
 }
@@ -139,5 +139,5 @@ export interface ProjectWriteFileInput {
 /** 写入项目文件的结果，返回写入文件的相对路径 */
 export interface ProjectWriteFileResult {
   /** 写入文件的相对路径 */
-  relativePath: typeof TrimmedNonEmptyString.Type;
+  relativePath: string;
 }

@@ -50,6 +50,7 @@
 //! service.register_adapter(adapter).await;
 //! ```
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -57,67 +58,131 @@ use remi_core::provider::{
     ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
     ProviderTurnStartResult, TurnInput,
 };
+use serde_json::json;
 use tokio::sync::{broadcast, RwLock};
-use tracing::info;
+use tracing::{debug, error, info};
 
 use crate::adapter::{ProviderAdapter, ProviderCapabilities, SessionModelSwitchMode};
-use crate::error::ProviderResult;
+use crate::error::{ProviderError, ProviderResult};
+use crate::jsonrpc_client::JsonRpcClient;
 
 /// Codex 适配器
 ///
-/// 实现 `ProviderAdapter` trait，提供与 Codex AI 服务的交互能力。
-/// 内部维护会话列表和事件广播通道。
-///
-/// # 线程安全
-///
-/// 使用 `Arc<RwLock<...>>` 管理内部状态，支持多线程并发访问。
-///
-/// # TODO
-///
-/// 需要实现的核心功能：
-/// - JSON-RPC over stdio 通信
-/// - 会话状态持久化
-/// - 事件流处理
+/// 通过 JSON-RPC over stdio 与 Codex Provider 进程通信
 pub struct CodexAdapter {
     /// 活跃会话列表
-    ///
-    /// 存储当前所有由该适配器管理的会话信息。
-    /// 使用 `RwLock` 保证并发读写安全。
-    sessions: Arc<RwLock<Vec<ProviderSession>>>,
-
+    sessions: Arc<RwLock<HashMap<String, Arc<JsonRpcClient>>>>,
     /// 事件广播发送器
-    ///
-    /// 用于广播 Provider 运行时事件，支持多个订阅者。
-    /// 通道容量为 10000。
     event_tx: broadcast::Sender<ProviderRuntimeEvent>,
 }
 
 impl CodexAdapter {
     /// 创建新的 Codex 适配器实例
-    ///
-    /// 初始化空的会话列表和事件广播通道。
-    ///
-    /// # 返回值
-    ///
-    /// 返回新创建的 `CodexAdapter` 实例
-    ///
-    /// # 示例
-    ///
-    /// ```rust,ignore
-    /// let adapter = CodexAdapter::new();
-    /// ```
     pub fn new() -> Self {
         let (event_tx, _) = broadcast::channel(10000);
 
         Self {
-            sessions: Arc::new(RwLock::new(Vec::new())),
+            sessions: Arc::new(RwLock::new(HashMap::new())),
             event_tx,
+        }
+    }
+
+    /// 启动 Codex 进程并建立连接
+    async fn spawn_codex_process(
+        &self,
+        model: &str,
+        cwd: &str,
+    ) -> ProviderResult<JsonRpcClient> {
+        info!("启动 Codex 进程: model={}, cwd={}", model, cwd);
+
+        // Codex CLI 命令和参数
+        let program = "codex";
+        let args = vec!["--json", "--model", model];
+        let env = HashMap::new();
+
+        let client = JsonRpcClient::spawn(program, &args, &env, cwd).await?;
+
+        // 启动事件监听
+        let event_tx = self.event_tx.clone();
+        let client_clone = client.clone();
+        tokio::spawn(async move {
+            Self::listen_events(client_clone, event_tx).await;
+        });
+
+        Ok(client)
+    }
+
+    /// 监听 Provider 事件
+    async fn listen_events(
+        client: Arc<JsonRpcClient>,
+        event_tx: broadcast::Sender<ProviderRuntimeEvent>,
+    ) {
+        loop {
+            match client.recv_notification().await {
+                Some(notification) => {
+                    debug!("收到 Codex 通知: {}", notification.method);
+
+                    // 将通知转换为 ProviderRuntimeEvent
+                    let event = match notification.method.as_str() {
+                        "session.update" => {
+                            if let Some(params) = notification.params {
+                                ProviderRuntimeEvent::SessionUpdate {
+                                    session_id: params
+                                        .get("sessionId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
+                                    data: params,
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        "turn.complete" => {
+                            if let Some(params) = notification.params {
+                                ProviderRuntimeEvent::TurnComplete {
+                                    turn_id: params
+                                        .get("turnId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
+                                    result: params,
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        "error" => {
+                            if let Some(params) = notification.params {
+                                ProviderRuntimeEvent::Error {
+                                    error: params
+                                        .get("message")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("Unknown error")
+                                        .to_string(),
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        _ => {
+                            debug!("忽略未知通知: {}", notification.method);
+                            continue;
+                        }
+                    };
+
+                    let _ = event_tx.send(event);
+                }
+                None => {
+                    info!("Codex 事件流已关闭");
+                    break;
+                }
+            }
         }
     }
 }
 
 impl Default for CodexAdapter {
-    /// 默认实现，等同于 `new()`
     fn default() -> Self {
         Self::new()
     }
@@ -125,17 +190,10 @@ impl Default for CodexAdapter {
 
 #[async_trait]
 impl ProviderAdapter for CodexAdapter {
-    /// 获取 Provider 类型标识
-    ///
-    /// 返回 `ProviderKind::Codex`，标识此适配器对应的 Provider 类型。
     fn provider_kind(&self) -> ProviderKind {
         ProviderKind::Codex
     }
 
-    /// 获取适配器能力声明
-    ///
-    /// Codex 适配器当前不支持高级特性（如模型切换、技能发现等）。
-    /// 所有能力标志均设置为 `false` 或 `Unsupported`。
     fn capabilities(&self) -> ProviderCapabilities {
         ProviderCapabilities {
             session_model_switch: SessionModelSwitchMode::Unsupported,
@@ -147,28 +205,44 @@ impl ProviderAdapter for CodexAdapter {
         }
     }
 
-    /// 启动新的会话
-    ///
-    /// 创建并初始化一个新的 Codex 会话。当前实现为占位逻辑，
-    /// 需要后续集成 Codex SDK 实现实际的会话启动。
-    ///
-    /// # 参数
-    ///
-    /// - `input`: 会话启动输入参数，包含 thread_id、模型选择等
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(ProviderSession)`: 成功创建的会话信息
-    /// - `Err(ProviderError)`: 启动失败
-    ///
-    /// # TODO
-    ///
-    /// 需要实现 Codex 会话启动逻辑（JSON-RPC over stdio）
     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
         info!("CodexAdapter: 启动会话 thread_id={}", input.thread_id);
 
-        // TODO: 实现 Codex 会话启动逻辑（JSON-RPC over stdio）
-        // 当前为占位实现，生成模拟的会话信息
+        // 检查会话是否已存在
+        {
+            let sessions = self.sessions.read().await;
+            if sessions.contains_key(&input.thread_id) {
+                return Err(ProviderError::SessionAlreadyExists(input.thread_id.clone()));
+            }
+        }
+
+        // 启动 Codex 进程
+        let cwd = std::env::current_dir()
+            .map_err(|e| ProviderError::AdapterError(format!("获取当前目录失败: {}", e)))?
+            .to_string_lossy()
+            .to_string();
+
+        let client = self.spawn_codex_process(&input.model, &cwd).await?;
+        let client = Arc::new(client);
+
+        // 初始化会话
+        let init_result = client
+            .request(
+                "session.initialize",
+                Some(json!({
+                    "threadId": input.thread_id,
+                    "model": input.model,
+                })),
+            )
+            .await?;
+
+        if let Some(error) = init_result.error {
+            return Err(ProviderError::AdapterError(format!(
+                "初始化会话失败: {}",
+                error.message
+            )));
+        }
+
         let session = ProviderSession {
             session_id: uuid::Uuid::new_v4().to_string(),
             thread_id: input.thread_id.clone(),
@@ -178,143 +252,134 @@ impl ProviderAdapter for CodexAdapter {
             created_at: chrono::Utc::now(),
         };
 
-        // 将会话添加到活跃列表
-        let mut sessions = self.sessions.write().await;
-        sessions.push(session.clone());
+        // 保存客户端
+        {
+            let mut sessions = self.sessions.write().await;
+            sessions.insert(input.thread_id.clone(), client);
+        }
 
         Ok(session)
     }
 
-    /// 发送 Turn（对话轮次）
-    ///
-    /// 将用户消息发送到 Codex Provider，启动一个新的对话轮次。
-    /// 当前实现为占位逻辑。
-    ///
-    /// # 参数
-    ///
-    /// - `input`: Turn 输入参数，包含消息内容、上下文等信息
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(ProviderTurnStartResult)`: Turn 启动成功
-    /// - `Err(ProviderError)`: 发送失败
-    ///
-    /// # TODO
-    ///
-    /// 需要实现 Codex Turn 发送逻辑
     async fn send_turn(&self, input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
         info!("CodexAdapter: 发送 Turn thread_id={}", input.thread_id);
 
-        // TODO: 实现 Codex Turn 发送逻辑
+        let sessions = self.sessions.read().await;
+        let client = sessions
+            .get(&input.thread_id)
+            .ok_or_else(|| ProviderError::SessionNotFound(input.thread_id.clone()))?;
+
+        let result = client
+            .request(
+                "turn.send",
+                Some(json!({
+                    "threadId": input.thread_id,
+                    "turnId": input.turn_id,
+                    "message": input.message,
+                })),
+            )
+            .await?;
+
+        if let Some(error) = result.error {
+            return Err(ProviderError::AdapterError(format!(
+                "发送 Turn 失败: {}",
+                error.message
+            )));
+        }
+
         Ok(ProviderTurnStartResult {
             turn_id: input.turn_id,
             thread_id: input.thread_id,
         })
     }
 
-    /// 中断正在执行的 Turn
-    ///
-    /// 停止指定 Turn 的执行。当前实现为占位逻辑。
-    ///
-    /// # 参数
-    ///
-    /// - `thread_id`: 会话线程 ID
-    /// - `turn_id`: 可选的 Turn ID
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(())`: 中断成功
-    /// - `Err(ProviderError)`: 中断失败
-    ///
-    /// # TODO
-    ///
-    /// 需要实现 Codex Turn 中断逻辑
     async fn interrupt_turn(&self, thread_id: &str, turn_id: Option<&str>) -> ProviderResult<()> {
         info!("CodexAdapter: 中断 Turn thread_id={}, turn_id={:?}", thread_id, turn_id);
 
-        // TODO: 实现 Codex Turn 中断逻辑
+        let sessions = self.sessions.read().await;
+        let client = sessions
+            .get(thread_id)
+            .ok_or_else(|| ProviderError::SessionNotFound(thread_id.to_string()))?;
+
+        let result = client
+            .request(
+                "turn.interrupt",
+                Some(json!({
+                    "threadId": thread_id,
+                    "turnId": turn_id,
+                })),
+            )
+            .await?;
+
+        if let Some(error) = result.error {
+            return Err(ProviderError::AdapterError(format!(
+                "中断 Turn 失败: {}",
+                error.message
+            )));
+        }
+
         Ok(())
     }
 
-    /// 停止指定会话
-    ///
-    /// 清理会话资源，从活跃列表中移除会话。
-    ///
-    /// # 参数
-    ///
-    /// - `thread_id`: 要停止的会话线程 ID
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(())`: 停止成功
-    /// - `Err(ProviderError)`: 停止失败
     async fn stop_session(&self, thread_id: &str) -> ProviderResult<()> {
         info!("CodexAdapter: 停止会话 thread_id={}", thread_id);
 
-        // 从活跃列表中移除指定会话
-        let mut sessions = self.sessions.write().await;
-        sessions.retain(|s| s.thread_id != thread_id);
+        let client = {
+            let mut sessions = self.sessions.write().await;
+            sessions.remove(thread_id)
+        };
+
+        if let Some(client) = client {
+            // 发送关闭请求
+            let _ = client.request("session.close", None).await;
+
+            // 关闭客户端
+            client.close().await?;
+        }
 
         Ok(())
     }
 
-    /// 停止所有会话
-    ///
-    /// 清理所有会话资源，清空活跃列表。
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(())`: 停止成功
-    /// - `Err(ProviderError)`: 停止失败
     async fn stop_all(&self) -> ProviderResult<()> {
         info!("CodexAdapter: 停止所有会话");
 
-        // 清空活跃列表
-        let mut sessions = self.sessions.write().await;
-        sessions.clear();
+        let sessions = {
+            let mut sessions = self.sessions.write().await;
+            std::mem::take(&mut *sessions)
+        };
+
+        for (thread_id, client) in sessions {
+            if let Err(e) = client.close().await {
+                error!("关闭会话 {} 失败: {}", thread_id, e);
+            }
+        }
 
         Ok(())
     }
 
-    /// 列出所有活跃会话
-    ///
-    /// 返回当前所有活跃会话的列表。
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(Vec<ProviderSession>)`: 会话列表
-    /// - `Err(ProviderError)`: 获取失败
     async fn list_sessions(&self) -> ProviderResult<Vec<ProviderSession>> {
         let sessions = self.sessions.read().await;
-        Ok(sessions.clone())
+        let mut result = Vec::new();
+
+        for (thread_id, _) in sessions.iter() {
+            result.push(ProviderSession {
+                session_id: uuid::Uuid::new_v4().to_string(),
+                thread_id: thread_id.clone(),
+                provider: ProviderKind::Codex,
+                model: String::new(),
+                status: remi_core::provider::ProviderSessionStatus::Running,
+                created_at: chrono::Utc::now(),
+            });
+        }
+
+        Ok(result)
     }
 
-    /// 检查是否存在指定会话
-    ///
-    /// 快速检查指定 thread_id 的会话是否存在。
-    ///
-    /// # 参数
-    ///
-    /// - `thread_id`: 要检查的会话线程 ID
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(true)`: 会话存在
-    /// - `Ok(false)`: 会话不存在
-    /// - `Err(ProviderError)`: 检查失败
     async fn has_session(&self, thread_id: &str) -> ProviderResult<bool> {
         let sessions = self.sessions.read().await;
-        Ok(sessions.iter().any(|s| s.thread_id == thread_id))
+        Ok(sessions.contains_key(thread_id))
     }
 
-    /// 获取运行时事件流接收器
-    ///
-    /// 订阅 Provider 运行时事件流。
-    ///
-    /// # 返回值
-    ///
-    /// - `Ok(broadcast::Receiver<ProviderRuntimeEvent>)`: 事件流接收器
-    /// - `Err(ProviderError)`: 订阅失败
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
     }

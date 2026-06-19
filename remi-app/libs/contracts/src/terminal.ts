@@ -13,7 +13,7 @@ export const DEFAULT_TERMINAL_ID = "default";
 /** 终端会话输入的基础参数，仅需 threadId */
 export interface TerminalThreadInput {
   /** 会话线程 ID */
-  threadId: typeof TrimmedNonEmptyString.Type;
+  threadId: string;
 }
 
 /** 终端会话输入参数，包含 threadId 和 terminalId（可选，默认使用 DEFAULT_TERMINAL_ID） */
@@ -25,7 +25,7 @@ export interface TerminalSessionInput extends TerminalThreadInput {
 /** 打开终端的输入参数，包含工作目录、可选的列数、行数和环境变量 */
 export interface TerminalOpenInput extends TerminalSessionInput {
   /** 终端的工作目录（绝对路径） */
-  cwd: typeof TrimmedNonEmptyString.Type;
+  cwd: string;
   /** 终端列数（可选） */
   cols?: number;
   /** 终端行数（可选） */
@@ -54,7 +54,7 @@ export type TerminalClearInput = TerminalSessionInput;
 /** 重启终端的输入参数，包含工作目录、列数、行数和可选的环境变量 */
 export interface TerminalRestartInput extends TerminalSessionInput {
   /** 重启后的工作目录 */
-  cwd: typeof TrimmedNonEmptyString.Type;
+  cwd: string;
   /** 终端列数 */
   cols: number;
   /** 终端行数 */

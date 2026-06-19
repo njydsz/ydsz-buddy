@@ -10,18 +10,18 @@ const FILESYSTEM_PATH_MAX_LENGTH = 512;
 
 /** 文件系统浏览请求输入，包含部分路径和可选的工作目录 */
 export interface FilesystemBrowseInput {
-  partialPath: typeof TrimmedNonEmptyString.Type;
-  cwd?: typeof TrimmedNonEmptyString.Type;
+  partialPath: string;
+  cwd?: string;
 }
 
 /** 文件系统浏览条目，表示单个文件或目录 */
 export interface FilesystemBrowseEntry {
-  name: typeof TrimmedNonEmptyString.Type;
-  fullPath: typeof TrimmedNonEmptyString.Type;
+  name: string;
+  fullPath: string;
 }
 
 /** 文件系统浏览结果，包含父路径和条目列表 */
 export interface FilesystemBrowseResult {
-  parentPath: typeof TrimmedNonEmptyString.Type;
+  parentPath: string;
   entries: Array<FilesystemBrowseEntry>;
 }

@@ -22,7 +22,6 @@
  *
  * 这些事件用于实时传递 Provider 的运行状态和数据流。
  */
-import type { Option } from "effect";
 import type {
   EventId,
   IsoDateTime,

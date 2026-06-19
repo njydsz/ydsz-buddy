@@ -9,7 +9,6 @@
  * 这些类型用于 RPC 通信，确保 Git 操作的类型安全
  */
 
-import type { Option } from "effect";
 import type { NonNegativeInt, PositiveInt, TrimmedNonEmptyString } from "./baseSchemas";
 import type { DEFAULT_GIT_TEXT_GENERATION_MODEL } from "./model";
 import type { ProviderStartOptions } from "./orchestration";
