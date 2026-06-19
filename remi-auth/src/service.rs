@@ -33,10 +33,12 @@ use serde::Serialize;
 use tracing::info;
 
 use crate::error::{AuthError, AuthResult};
+use crate::pairing_store::PairingLinkStore;
 use crate::session_credential::{
     ClientMetadata, ClientSession, IssuedSession, SessionCredentialService, SessionMethod,
     SessionRole,
 };
+use remi_core::models::PairingLink as CorePairingLink;
 
 /// # 认证请求
 ///
@@ -252,6 +254,8 @@ pub struct AuthDescriptor {
 pub struct AuthService {
     /// 底层凭证服务实例，负责具体的凭证签发、验证和会话管理
     credential_service: Arc<SessionCredentialService>,
+    /// 配对链接存储实例，负责配对链接的持久化管理
+    pairing_store: Option<Arc<dyn PairingLinkStore>>,
 }
 
 impl AuthService {
@@ -274,7 +278,32 @@ impl AuthService {
     /// let auth_service = AuthService::new(credential_service);
     /// ```
     pub fn new(credential_service: Arc<SessionCredentialService>) -> Self {
-        Self { credential_service }
+        Self {
+            credential_service,
+            pairing_store: None,
+        }
+    }
+
+    /// # 创建带配对链接存储的认证服务
+    ///
+    /// 通过共享的底层凭证服务实例和配对链接存储实例创建认证服务门面。
+    ///
+    /// ## 参数
+    ///
+    /// - `credential_service`: 底层凭证服务的共享实例
+    /// - `pairing_store`: 配对链接存储实例，用于配对链接的持久化管理
+    ///
+    /// ## 返回值
+    ///
+    /// 返回新创建的 [`AuthService`] 实例。
+    pub fn with_pairing_store(
+        credential_service: Arc<SessionCredentialService>,
+        pairing_store: Arc<dyn PairingLinkStore>,
+    ) -> Self {
+        Self {
+            credential_service,
+            pairing_store: Some(pairing_store),
+        }
     }
 
     /// # 获取认证服务描述

@@ -25,6 +25,7 @@
 //! 本模块通常不直接暴露给最终用户，而是被 [`GitManager`](crate::manager::GitManager) 或
 //! [`GitStatusBroadcaster`](crate::broadcaster::GitStatusBroadcaster) 等高层组件封装使用。
 
+use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 
 use tokio::process::Command;
@@ -119,7 +120,7 @@ pub struct ExecuteGitResult {
 /// - 前端 UI 展示仓库状态
 /// - 判断是否可以执行某些操作（如分支切换前检查 `is_dirty`）
 /// - 代码审查时确定需要审查的文件范围
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitStatusResult {
     /// 当前分支名称
     pub current_branch: Option<String>,
@@ -151,7 +152,7 @@ pub struct GitStatusResult {
 ///
 /// 目前此功能尚未实现，`GitStatusResult::pr` 字段始终为 None。
 /// 未来将集成 GitHub/GitLab API 自动获取 PR 信息。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PullRequestInfo {
     /// PR 编号
     pub number: u64,

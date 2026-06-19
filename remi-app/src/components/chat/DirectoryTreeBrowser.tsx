@@ -3,7 +3,7 @@
 // Layer: Chat/home filesystem UI helper
 // Exports: DirectoryTreeBrowser for inline and popover-based local file/folder navigation.
 
-import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "@peakcode/contracts";
+import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "@remi-code/contracts";
 import type { ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronDownIcon, ChevronRightIcon, FileIcon, FolderIcon } from "~/lib/icons";

@@ -319,10 +319,14 @@ impl Projector {
                     id: e.thread_id,
                     project_id: e.project_id,
                     title: e.title.clone(),
-                    model_selection: remi_core::models::ModelSelection::default(),
+                    model_selection: remi_core::provider::ModelSelection {
+                        provider: remi_core::provider::ProviderKind::Codex,
+                        model: String::new(),
+                        options: None,
+                    },
                     runtime_mode: remi_core::models::RuntimeMode::Agent,
                     interaction_mode: remi_core::models::InteractionMode::Chat,
-                    env_mode: remi_core::models::EnvMode::Sandboxed,
+                    env_mode: remi_core::models::EnvMode::Local,
                     branch: None,
                     worktree_path: None,
                     associated_worktree: None,
@@ -378,14 +382,14 @@ impl Projector {
             }
             ThreadRuntimeModeSet(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    thread.runtime_mode = e.runtime_mode;
+                    thread.runtime_mode = e.runtime_mode.clone();
                     thread.updated_at = e.occurred_at;
                     self.projection_repo.save_thread(&thread)?;
                 }
             }
             ThreadInteractionModeSet(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    thread.interaction_mode = e.interaction_mode;
+                    thread.interaction_mode = e.interaction_mode.clone();
                     thread.updated_at = e.occurred_at;
                     self.projection_repo.save_thread(&thread)?;
                 }
@@ -460,14 +464,13 @@ impl Projector {
             ThreadTurnDiffCompleted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
                     // 更新或添加检查点
-                    let checkpoint = remi_core::models::CheckpointSummary {
+                    let checkpoint = remi_core::models::Checkpoint {
+                        id: String::new(),
+                        thread_id: e.thread_id,
                         turn_id: e.turn_id.clone(),
-                        checkpoint_turn_count: 0,
-                        checkpoint_ref: String::new(),
-                        status: "ready".to_string(),
-                        files: vec![],
-                        assistant_message_id: None,
-                        completed_at: e.occurred_at,
+                        git_ref: String::new(),
+                        description: String::new(),
+                        created_at: e.occurred_at,
                     };
                     thread.checkpoints.retain(|c| c.turn_id != e.turn_id);
                     thread.checkpoints.push(checkpoint);

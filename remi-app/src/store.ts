@@ -831,7 +831,7 @@ function readModelAttachmentsFromChatMessage(
         ? {
             id: attachment.id,
             type: "assistant-selection" as const,
-            assistantMessageId: MessageId.makeUnsafe(attachment.assistantMessageId),
+            assistantMessageId: attachment.assistantMessageId as MessageId,
             text: attachment.text,
           }
         : {
@@ -999,7 +999,7 @@ function readModelSessionFromThreadSession(
   incomingSession: ReadModelThread["session"],
 ): NonNullable<ReadModelThread["session"]> {
   return {
-    threadId: previousThread?.id ?? incomingSession?.threadId ?? ThreadId.makeUnsafe("unknown"),
+    threadId: previousThread?.id ?? incomingSession?.threadId ?? "unknown" as ThreadId,
     status: previousSession.orchestrationStatus,
     providerName: previousSession.provider,
     runtimeMode: previousThread?.runtimeMode ?? incomingSession?.runtimeMode ?? "full-access",
@@ -1677,11 +1677,11 @@ function normalizeThreadShellSnapshot(
       ? previous.handoff
       : (incoming.handoff ?? null);
   const lastKnownPr =
-    previous?.lastKnownPr &&
-    incoming.lastKnownPr &&
-    deepEqualJson(previous.lastKnownPr, incoming.lastKnownPr)
-      ? previous.lastKnownPr
-      : (incoming.lastKnownPr ?? null);
+    previous?.lastKnownPR &&
+    incoming.lastKnownPR &&
+    deepEqualJson(previous.lastKnownPR, incoming.lastKnownPR)
+      ? previous.lastKnownPR
+      : (incoming.lastKnownPR ?? null);
   const error = normalizeThreadErrorMessage(incoming.session?.lastError);
   const lastVisitedAt = previous?.lastVisitedAt ?? incoming.updatedAt;
   const nextWorktreePath = incoming.worktreePath;
@@ -1954,9 +1954,7 @@ function resolveThreadSummaryAfterUserInputResponseRequested(
     activities: [
       ...thread.activities,
       {
-        id: EventId.makeUnsafe(
-          `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}`,
-        ),
+        id: `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
         kind: "user-input.resolved",
         payload: {
           requestId: event.payload.requestId,
@@ -1978,9 +1976,7 @@ function resolveThreadSummaryAfterApprovalResponseRequested(
     activities: [
       ...thread.activities,
       {
-        id: EventId.makeUnsafe(
-          `synthetic-approval-resolved:${event.payload.requestId}:${event.sequence}`,
-        ),
+        id: `synthetic-approval-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
         kind: "approval.resolved",
         payload: {
           requestId: event.payload.requestId,
@@ -3251,9 +3247,7 @@ function applyOrchestrationEvent(
           // Hide the composer prompt as soon as the response command is accepted;
           // the provider may append its own resolved activity shortly after.
           const syntheticResolvedActivity = {
-            id: EventId.makeUnsafe(
-              `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}`,
-            ),
+            id: `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
             tone: "info",
             kind: "user-input.resolved",
             summary: "User input submitted",

@@ -428,6 +428,60 @@ impl ProviderService {
         adapter.compact_thread(thread_id).await
     }
 
+    /// 列出所有已知的 Provider 状态
+    ///
+    /// 遍历所有已注册的 Provider 类型，返回它们的状态快照。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<ProviderStatus>)`: Provider 状态列表
+    /// - `Err(ProviderError)`: 查询失败
+    pub async fn list_providers(&self) -> ProviderResult<Vec<crate::health::ProviderHealthStatus>> {
+        // TODO: 实现完整的 Provider 状态查询
+        Ok(vec![])
+    }
+
+    /// 列出指定 Provider 支持的模型
+    ///
+    /// # 参数
+    ///
+    /// - `provider`: Provider 类型
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<serde_json::Value>)`: 模型列表
+    /// - `Err(ProviderError)`: 查询失败
+    pub async fn list_models(&self, _provider: ProviderKind) -> ProviderResult<Vec<serde_json::Value>> {
+        // TODO: 通过适配器获取模型列表
+        Ok(vec![])
+    }
+
+    /// 列出指定 Provider 支持的 Agent
+    ///
+    /// # 参数
+    ///
+    /// - `provider`: Provider 类型
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<serde_json::Value>)`: Agent 列表
+    /// - `Err(ProviderError)`: 查询失败
+    pub async fn list_agents(&self, _provider: ProviderKind) -> ProviderResult<Vec<serde_json::Value>> {
+        // TODO: 通过适配器获取 Agent 列表
+        Ok(vec![])
+    }
+
+    /// 刷新所有 Provider 的状态
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 刷新成功
+    /// - `Err(ProviderError)`: 刷新失败
+    pub async fn refresh_providers(&self) -> ProviderResult<()> {
+        // TODO: 实现 Provider 状态刷新
+        Ok(())
+    }
+
     /// 订阅 Provider 事件流
     ///
     /// 创建一个新的接收器，用于接收 Provider 运行时事件。

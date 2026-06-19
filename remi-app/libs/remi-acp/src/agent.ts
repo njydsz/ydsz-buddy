@@ -559,56 +559,102 @@ interface AcpCoreAgentRequestHandlers {
   ) => Effect.Effect<AcpSchema.PromptResponse, AcpError.AcpError>;
 }
 
-/** 取消通知解码器 */
+/**
+ * 取消通知解码器
+ *
+ * @description 用于将原始的取消通知参数解码为类型化的 CancelNotification 对象。
+ *              解码失败时会返回错误。
+ *
+ * @internal
+ */
 const decodeCancelNotification = Schema.decodeUnknownEffect(AcpSchema.CancelNotification);
 
 /**
  * 创建 ACP Agent 实例
+ *
  * @description 工厂函数，创建并初始化一个完整的 ACP Agent，包括协议传输层、RPC 客户端/服务端、
- *              处理器注册等所有功能
- * @param stdio - 标准输入输出接口
- * @param options - Agent 配置选项
- * @returns 包含所有 Agent 功能的 Effect
+ *              处理器注册等所有功能。
+ *
+ * @remarks
+ * **初始化流程：**
+ * 1. 创建协议传输层，建立与 Client 的通信通道
+ * 2. 创建 RPC 服务端，处理 Client 发起的请求
+ * 3. 创建 RPC 客户端，用于调用 Client 端的方法
+ * 4. 返回完整的 Agent 接口实现
+ *
+ * **生命周期管理：**
+ * - 使用 Scope 管理资源，确保连接正确关闭
+ * - RPC 服务端在后台 fork 运行，处理并发请求
+ *
+ * @param stdio - 标准输入输出接口，用于与 Client 进程通信
+ * @param options - Agent 配置选项，控制日志记录等行为
+ * @returns 包含所有 Agent 功能的 Effect，需要 Scope 来管理生命周期
+ *
+ * @example
+ * ```typescript
+ * const agentEffect = make(stdio, {
+ *   logIncoming: true,
+ *   logOutgoing: false
+ * });
+ *
+ * // 在 Scope 中运行
+ * Effect.runPromise(
+ *   Effect.scoped(
+ *     Effect.flatMap(agentEffect, (agent) => {
+ *       return agent.handleInitialize((request) => {
+ *         return Effect.succeed({ protocolVersion: '1.0', capabilities: [] });
+ *       });
+ *     })
+ *   )
+ * );
+ * ```
+ *
+ * @public
  */
 export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
   stdio: Stdio.Stdio,
   options: AcpAgentOptions = {},
 ): Effect.fn.Return<AcpAgentShape, never, Scope.Scope> {
-  // 核心处理器存储
+  // 核心处理器存储，用于保存所有已注册的请求处理器
   const coreHandlers: AcpCoreAgentRequestHandlers = {};
-  // 取消通知处理器列表
+
+  // 取消通知处理器列表，支持多个处理器同时监听取消事件
   const cancelHandlers: Array<
     (notification: AcpSchema.CancelNotification) => Effect.Effect<void, AcpError.AcpError>
   > = [];
-  // 扩展请求处理器映射
+
+  // 扩展请求处理器映射，key 为方法名，value 为对应的处理函数
   const extRequestHandlers = new Map<
     string,
     (params: unknown) => Effect.Effect<unknown, AcpError.AcpError>
   >();
-  // 扩展通知处理器映射
+
+  // 扩展通知处理器映射，key 为方法名，value 为对应的处理函数
   const extNotificationHandlers = new Map<
     string,
     (params: unknown) => Effect.Effect<void, AcpError.AcpError>
   >();
-  // 未知扩展请求处理器
+
+  // 未知扩展请求处理器，作为后备处理器处理未注册的扩展请求
   let unknownExtRequestHandler:
     | ((method: string, params: unknown) => Effect.Effect<unknown, AcpError.AcpError>)
     | undefined;
-  // 未知扩展通知处理器
+
+  // 未知扩展通知处理器，作为后备处理器处理未注册的扩展通知
   let unknownExtNotificationHandler:
     | ((method: string, params: unknown) => Effect.Effect<void, AcpError.AcpError>)
     | undefined;
 
-  // 创建协议传输层
+  // 创建协议传输层，建立与 Client 的通信通道
   const transport = yield* AcpProtocol.makeAcpPatchedProtocol({
     stdio,
     serverRequestMethods: new Set(AcpRpcs.AgentRpcs.requests.keys()),
     ...(options.logIncoming !== undefined ? { logIncoming: options.logIncoming } : {}),
     ...(options.logOutgoing !== undefined ? { logOutgoing: options.logOutgoing } : {}),
     ...(options.logger ? { logger: options.logger } : {}),
-    // 通知处理回调
+    // 通知处理回调，处理来自 Client 的通知
     onNotification: (notification) => {
-      // 特殊处理取消通知
+      // 特殊处理取消通知，解码后分发给所有取消处理器
       if (
         notification._tag === "ExtNotification" &&
         notification.method === AGENT_METHODS.session_cancel
@@ -632,7 +678,7 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
         return Effect.void;
       }
 
-      // 查找并执行扩展通知处理器
+      // 查找并执行特定方法的扩展通知处理器
       const handler = extNotificationHandlers.get(notification.method);
       if (handler) {
         return handler(notification.params);
@@ -642,8 +688,9 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
         ? unknownExtNotificationHandler(notification.method, notification.params)
         : Effect.void;
     },
-    // 扩展请求处理回调
+    // 扩展请求处理回调，处理来自 Client 的扩展请求
     onExtRequest: (method, params) => {
+      // 查找特定方法的处理器
       const handler = extRequestHandlers.get(method);
       if (handler) {
         return handler(params);
@@ -655,7 +702,7 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
     },
   });
 
-  // 创建 Agent RPC 处理器层
+  // 创建 Agent RPC 处理器层，处理 Client 发起的 RPC 请求
   const agentHandlerLayer = AcpRpcs.AgentRpcs.toLayer(
     AcpRpcs.AgentRpcs.of({
       [AGENT_METHODS.initialize]: (payload) =>
@@ -689,7 +736,7 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
     }),
   );
 
-  // 启动 RPC 服务端
+  // 启动 RPC 服务端，处理来自 Client 的请求
   yield* RpcServer.make(AcpRpcs.AgentRpcs).pipe(
     Effect.provideService(RpcServer.Protocol, transport.serverProtocol),
     Effect.provide(agentHandlerLayer),
@@ -697,24 +744,28 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
   );
 
   // 创建 RPC 客户端（用于调用 Client 端方法）
+  // 使用大整数作为请求 ID 起始值，避免与 Client 端的请求 ID 冲突
   let nextRpcRequestId = 1n << 32n;
   const rpc = yield* RpcClient.make(AcpRpcs.ClientRpcs, {
     generateRequestId: () => nextRpcRequestId++ as never,
   }).pipe(Effect.provideService(RpcClient.Protocol, transport.clientProtocol));
 
-  // 返回 Agent 接口实现
+  // 返回 Agent 接口实现，包含原始协议访问、客户端操作和处理器注册方法
   return {
+    // 原始协议访问层
     raw: {
       notifications: transport.incoming,
       request: transport.request,
       notify: transport.notify,
     },
+    // 客户端操作层，封装所有调用 Client 的方法
     client: {
       requestPermission: (payload) =>
         callRpc(rpc[CLIENT_METHODS.session_request_permission](payload)),
       elicit: (payload) => callRpc(rpc[CLIENT_METHODS.session_elicitation](payload)),
       readTextFile: (payload) => callRpc(rpc[CLIENT_METHODS.fs_read_text_file](payload)),
       writeTextFile: (payload) => callRpc(rpc[CLIENT_METHODS.fs_write_text_file](payload)),
+      // 创建终端并封装为终端对象，提供完整的终端操作接口
       createTerminal: (payload) =>
         callRpc(rpc[CLIENT_METHODS.terminal_create](payload)).pipe(
           Effect.map((response) =>
@@ -848,19 +899,69 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
 
 /**
  * 创建 Agent Layer
- * @description 创建用于依赖注入的 Layer，需要提供 stdio
- * @param stdio - 标准输入输出接口
- * @param options - Agent 配置选项
- * @returns Agent Layer
+ *
+ * @description 创建用于依赖注入的 Layer，需要提供 stdio 参数。
+ *              该函数封装了 Agent 的创建过程，使其可以方便地集成到 Effect 的依赖注入系统中。
+ *
+ * @remarks
+ * **使用场景：**
+ * - 在 Effect 应用中注册 Agent 服务
+ * - 通过 Layer 组合管理 Agent 的生命周期
+ * - 与其他服务层组合使用
+ *
+ * @param stdio - 标准输入输出接口，用于与 Client 进程通信
+ * @param options - Agent 配置选项，控制日志记录等行为
+ * @returns Agent Layer，提供 AcpAgent 服务
+ *
+ * @example
+ * ```typescript
+ * import { layer } from './agent';
+ * import { Effect, Layer } from 'effect';
+ *
+ * // 创建 Agent Layer
+ * const agentLayer = layer(stdio, {
+ *   logIncoming: true
+ * });
+ *
+ * // 在应用中使用
+ * const app = Effect.provide(myProgram, agentLayer);
+ * ```
+ *
+ * @public
  */
 export const layer = (stdio: Stdio.Stdio, options: AcpAgentOptions = {}): Layer.Layer<AcpAgent> =>
   Layer.effect(AcpAgent, make(stdio, options));
 
 /**
  * 创建从 stdio 服务获取的 Agent Layer
- * @description 创建用于依赖注入的 Layer，从环境中获取 stdio 服务
- * @param options - Agent 配置选项
+ *
+ * @description 创建用于依赖注入的 Layer，从环境中获取 stdio 服务。
+ *              该函数允许 Agent 依赖于环境中的 Stdio 服务，而不是直接传入 stdio 实例。
+ *
+ * @remarks
+ * **使用场景：**
+ * - 当 stdio 服务由其他 Layer 提供时
+ * - 需要更灵活的依赖注入配置
+ * - 在测试中方便地替换 stdio 实现
+ *
+ * @param options - Agent 配置选项，控制日志记录等行为
  * @returns Agent Layer，依赖 Stdio 服务
+ *
+ * @example
+ * ```typescript
+ * import { layerStdio } from './agent';
+ * import { Effect, Layer } from 'effect';
+ *
+ * // 创建依赖 Stdio 服务的 Agent Layer
+ * const agentLayer = layerStdio({
+ *   logIncoming: true
+ * });
+ *
+ * // 组合多个 Layer
+ * const appLayer = Layer.merge(stdioLayer, agentLayer);
+ * ```
+ *
+ * @public
  */
 export const layerStdio = (
   options: AcpAgentOptions = {},

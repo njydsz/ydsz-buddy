@@ -30,6 +30,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, RwLock};
 use tracing::info;
 
@@ -40,7 +41,7 @@ use crate::pty::PtyProcess;
 ///
 /// 表示终端会话在其生命周期中所处的阶段。
 /// 状态转换路径：`Starting` → `Running` → `Exited`，任何阶段都可能进入 `Error`。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TerminalSessionStatus {
     /// 启动中：PTY 进程正在创建和初始化
     Starting,
@@ -62,7 +63,7 @@ pub enum TerminalSessionStatus {
 /// - 前端请求终端列表时，返回每个会话的快照
 /// - 终端事件（如启动、重启）中携带快照，提供完整的状态信息
 /// - 轮询检查终端状态时获取快照
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TerminalSessionSnapshot {
     /// 线程 ID：标识该终端所属的工作线程
     pub thread_id: String,

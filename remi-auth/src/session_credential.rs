@@ -33,7 +33,7 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Duration, Utc};
 use hmac::{Hmac, Mac};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use tokio::sync::{broadcast, RwLock};
 use tracing::info;
@@ -86,7 +86,7 @@ pub enum SessionMethod {
 /// - 管理后台展示当前登录的设备列表（名称、平台、版本）
 /// - 安全审计时追溯某个会话的来源客户端
 /// - 客户端断开后重连时，用于识别同一客户端身份
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClientMetadata {
     /// 客户端名称：人类可读的客户端标识，如 "MyApp Desktop"、"iPhone 客户端" 等。
     /// 该字段为必填项，用于在管理界面展示。

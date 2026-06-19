@@ -51,7 +51,7 @@ pub async fn register_provider_methods(
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
-                let capabilities = provider_service.get_capabilities(&provider).await?;
+                let capabilities = provider_service.get_capabilities(provider).await?;
                 serde_json::to_value(capabilities)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -79,7 +79,7 @@ pub async fn register_provider_methods(
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
-                let models = provider_service.list_models(&provider).await?;
+                let models = provider_service.list_models(provider).await?;
                 serde_json::to_value(models)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -107,7 +107,7 @@ pub async fn register_provider_methods(
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
-                let agents = provider_service.list_agents(&provider).await?;
+                let agents = provider_service.list_agents(provider).await?;
                 serde_json::to_value(agents)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }

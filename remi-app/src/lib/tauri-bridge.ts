@@ -212,6 +212,46 @@ export const tauriBridge: DesktopBridge = {
     ): Promise<ServerVoiceTranscriptionResult> => {
       return await invoke<ServerVoiceTranscriptionResult>('transcribe_voice', input);
     },
+
+    getConfig: async (): Promise<any> => {
+      return await invoke('server_get_config');
+    },
+
+    getEnvironment: async (): Promise<any> => {
+      return await invoke('server_get_environment');
+    },
+
+    getSettings: async (): Promise<any> => {
+      return await invoke('server_get_settings');
+    },
+
+    updateSettings: async (settings: any): Promise<void> => {
+      return await invoke<void>('server_update_settings', { settings });
+    },
+
+    refreshProviders: async (): Promise<void> => {
+      return await invoke<void>('server_refresh_providers');
+    },
+
+    updateProvider: async (provider: any): Promise<void> => {
+      return await invoke<void>('server_update_provider', { provider });
+    },
+
+    listWorktrees: async (): Promise<any[]> => {
+      return await invoke('server_list_worktrees');
+    },
+
+    getProviderUsageSnapshot: async (): Promise<any> => {
+      return await invoke('server_get_provider_usage_snapshot');
+    },
+
+    getDiagnostics: async (): Promise<any> => {
+      return await invoke('server_get_diagnostics');
+    },
+
+    upsertKeybinding: async (keybinding: any): Promise<void> => {
+      return await invoke<void>('server_upsert_keybinding', { keybinding });
+    },
   },
 
   /**
@@ -360,6 +400,14 @@ export const tauriBridge: DesktopBridge = {
     close: async (sessionId: string): Promise<void> => {
       return await invoke<void>('close_terminal', { sessionId });
     },
+
+    clear: async (sessionId: string): Promise<void> => {
+      return await invoke<void>('clear_terminal', { sessionId });
+    },
+
+    restart: async (sessionId: string): Promise<void> => {
+      return await invoke<void>('restart_terminal', { sessionId });
+    },
   },
 
   /**
@@ -380,6 +428,26 @@ export const tauriBridge: DesktopBridge = {
 
     commit: async (cwd: string, message: string): Promise<void> => {
       return await invoke<void>('git_commit', { cwd, message });
+    },
+
+    pull: async (cwd: string): Promise<void> => {
+      return await invoke<void>('git_pull', { cwd });
+    },
+
+    readWorkingTreeDiff: async (cwd: string): Promise<string> => {
+      return await invoke<string>('git_read_working_tree_diff', { cwd });
+    },
+
+    summarizeDiff: async (cwd: string): Promise<string> => {
+      return await invoke<string>('git_summarize_diff', { cwd });
+    },
+
+    createBranch: async (cwd: string, branchName: string): Promise<void> => {
+      return await invoke<void>('git_create_branch', { cwd, branchName });
+    },
+
+    init: async (cwd: string): Promise<void> => {
+      return await invoke<void>('git_init', { cwd });
     },
   },
 

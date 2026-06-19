@@ -145,7 +145,7 @@ export function buildSettingsNavGroups(messages: Messages): ReadonlyArray<{
 }> {
   return [
     { id: "app", label: messages.settings.groups.app },
-    { id: "remicode", label: messages.settings.groups.remicode },
+    { id: "remicode", label: messages.settings.groups.peakcode },
   ];
 }
 

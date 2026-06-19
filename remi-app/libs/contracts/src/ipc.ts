@@ -467,160 +467,281 @@ export interface DesktopBridge {
   };
 }
 
+/**
+ * 原生 API 接口 - 提供完整的原生能力访问接口。
+ * 包含对话框、终端、项目、文件系统、Shell、Git、右键菜单、服务器、Provider、
+ * 技能、编排系统、浏览器面板等功能模块。
+ * 这是 DesktopBridge 的扩展版本，包含更多后端功能接口。
+ */
 export interface NativeApi {
+  /** 对话框功能 */
   dialogs: {
+    /** 弹出文件夹选择对话框 */
     pickFolder: () => Promise<string | null>;
+    /** 弹出文件保存对话框（可选） */
     saveFile?: (input: {
+      /** 默认文件名 */
       defaultFilename: string;
+      /** 文件内容 */
       contents: string;
+      /** 文件类型过滤器 */
       filters?: ReadonlyArray<{ name: string; extensions: ReadonlyArray<string> }>;
     }) => Promise<string | null>;
+    /** 弹出确认对话框 */
     confirm: (message: string) => Promise<boolean>;
   };
+  /** 终端管理功能 */
   terminal: {
+    /** 打开新终端会话 */
     open: (input: TerminalOpenInput) => Promise<TerminalSessionSnapshot>;
+    /** 向终端写入数据 */
     write: (input: TerminalWriteInput) => Promise<void>;
+    /** 调整终端尺寸 */
     resize: (input: TerminalResizeInput) => Promise<void>;
+    /** 清屏 */
     clear: (input: TerminalClearInput) => Promise<void>;
+    /** 重启终端会话 */
     restart: (input: TerminalRestartInput) => Promise<TerminalSessionSnapshot>;
+    /** 关闭终端会话 */
     close: (input: TerminalCloseInput) => Promise<void>;
+    /** 监听终端事件，返回取消订阅函数 */
     onEvent: (callback: (event: TerminalEvent) => void) => () => void;
   };
+  /** 项目管理功能 */
   projects: {
+    /** 列出项目目录 */
     listDirectories: (input: ProjectListDirectoriesInput) => Promise<ProjectListDirectoriesResult>;
+    /** 搜索项目条目 */
     searchEntries: (input: ProjectSearchEntriesInput) => Promise<ProjectSearchEntriesResult>;
+    /** 搜索本地项目条目 */
     searchLocalEntries: (
       input: ProjectSearchLocalEntriesInput,
     ) => Promise<ProjectSearchLocalEntriesResult>;
+    /** 写入项目文件 */
     writeFile: (input: ProjectWriteFileInput) => Promise<ProjectWriteFileResult>;
   };
+  /** 文件系统浏览功能 */
   filesystem: {
+    /** 浏览文件系统 */
     browse: (input: FilesystemBrowseInput) => Promise<FilesystemBrowseResult>;
   };
+  /** Shell 操作功能 */
   shell: {
+    /** 在指定编辑器中打开目录 */
     openInEditor: (cwd: string, editor: EditorId) => Promise<void>;
+    /** 在外部浏览器中打开 URL */
     openExternal: (url: string) => Promise<void>;
+    /** 在文件管理器中显示文件 */
     showInFolder: (path: string) => Promise<void>;
   };
+  /** Git 操作功能 */
   git: {
-    // Existing branch/worktree API
+    /** 列出分支 */
     listBranches: (input: GitListBranchesInput) => Promise<GitListBranchesResult>;
+    /** 创建工作树 */
     createWorktree: (input: GitCreateWorktreeInput) => Promise<GitCreateWorktreeResult>;
+    /** 创建独立工作树 */
     createDetachedWorktree: (
       input: GitCreateDetachedWorktreeInput,
     ) => Promise<GitCreateDetachedWorktreeResult>;
+    /** 删除工作树 */
     removeWorktree: (input: GitRemoveWorktreeInput) => Promise<void>;
+    /** 创建分支 */
     createBranch: (input: GitCreateBranchInput) => Promise<void>;
+    /** 切换分支 */
     checkout: (input: GitCheckoutInput) => Promise<void>;
+    /** 暂存并切换分支 */
     stashAndCheckout: (input: GitStashAndCheckoutInput) => Promise<void>;
+    /** 删除暂存 */
     stashDrop: (input: GitStashDropInput) => Promise<void>;
+    /** 获取暂存信息 */
     stashInfo: (input: GitStashInfoInput) => Promise<GitStashInfoResult>;
+    /** 删除索引锁 */
     removeIndexLock: (input: GitRemoveIndexLockInput) => Promise<void>;
+    /** 初始化 Git 仓库 */
     init: (input: GitInitInput) => Promise<void>;
+    /** 将线程移交给 Git 分支 */
     handoffThread: (input: GitHandoffThreadInput) => Promise<GitHandoffThreadResult>;
+    /** 解析 Pull Request */
     resolvePullRequest: (input: GitPullRequestRefInput) => Promise<GitResolvePullRequestResult>;
+    /** 准备 Pull Request 线程 */
     preparePullRequestThread: (
       input: GitPreparePullRequestThreadInput,
     ) => Promise<GitPreparePullRequestThreadResult>;
-    // Stacked action API
+    /** 拉取远程更新 */
     pull: (input: GitPullInput) => Promise<GitPullResult>;
+    /** 获取仓库状态 */
     status: (input: GitStatusInput) => Promise<GitStatusResult>;
+    /** 读取工作树差异 */
     readWorkingTreeDiff: (
       input: GitReadWorkingTreeDiffInput,
     ) => Promise<GitReadWorkingTreeDiffResult>;
+    /** 总结差异内容 */
     summarizeDiff: (input: GitSummarizeDiffInput) => Promise<GitSummarizeDiffResult>;
+    /** 执行堆叠操作 */
     runStackedAction: (input: GitRunStackedActionInput) => Promise<GitRunStackedActionResult>;
+    /** 监听操作进度事件，返回取消订阅函数 */
     onActionProgress: (callback: (event: GitActionProgressEvent) => void) => () => void;
   };
+  /** 右键菜单功能 */
   contextMenu: {
+    /** 显示右键菜单 */
     show: <T extends string>(
       items: readonly ContextMenuItem<T>[],
       position?: { x: number; y: number },
     ) => Promise<T | null>;
   };
+  /** 服务器管理功能 */
   server: {
+    /** 获取服务器配置 */
     getConfig: () => Promise<ServerConfig>;
+    /** 获取执行环境信息 */
     getEnvironment: () => Promise<ServerGetEnvironmentResult>;
+    /** 获取服务器设置 */
     getSettings: () => Promise<ServerGetSettingsResult>;
+    /** 更新服务器设置 */
     updateSettings: (input: ServerUpdateSettingsInput) => Promise<ServerUpdateSettingsResult>;
+    /** 获取认证会话状态 */
     getAuthSession: () => Promise<AuthSessionState>;
+    /** 引导认证流程 */
     bootstrapAuth: (input: AuthBootstrapInput) => Promise<AuthBootstrapResult>;
+    /** 引导 Bearer Token 认证流程 */
     bootstrapBearerAuth: (input: AuthBootstrapInput) => Promise<AuthBearerBootstrapResult>;
+    /** 颁发 WebSocket Token */
     issueAuthWebSocketToken: () => Promise<AuthWebSocketTokenResult>;
+    /** 创建配对凭证 */
     createAuthPairingToken: (
       input?: AuthCreatePairingCredentialInput,
     ) => Promise<AuthPairingCredentialResult>;
+    /** 列出所有配对链接 */
     listAuthPairingLinks: () => Promise<ReadonlyArray<AuthPairingLink>>;
+    /** 撤销配对链接 */
     revokeAuthPairingLink: (input: AuthRevokePairingLinkInput) => Promise<{ revoked: boolean }>;
+    /** 列出所有客户端会话 */
     listAuthClients: () => Promise<ReadonlyArray<AuthClientSession>>;
+    /** 撤销客户端会话 */
     revokeAuthClient: (input: AuthRevokeClientSessionInput) => Promise<{ revoked: boolean }>;
+    /** 撤销其他所有客户端会话 */
     revokeOtherAuthClients: () => Promise<{ revokedCount: number }>;
+    /** 刷新 Provider 列表 */
     refreshProviders: () => Promise<ServerRefreshProvidersResult>;
+    /** 更新 Provider 配置 */
     updateProvider: (input: ServerProviderUpdateInput) => Promise<ServerProviderUpdateResult>;
+    /** 列出所有工作树 */
     listWorktrees: () => Promise<ServerListWorktreesResult>;
+    /** 获取 Provider 使用快照 */
     getProviderUsageSnapshot: (
       input: ServerGetProviderUsageSnapshotInput,
     ) => Promise<ServerGetProviderUsageSnapshotResult>;
+    /** 获取诊断信息 */
     getDiagnostics: () => Promise<ServerDiagnosticsResult>;
+    /** 语音转文字 */
     transcribeVoice: (
       input: ServerVoiceTranscriptionInput,
     ) => Promise<ServerVoiceTranscriptionResult>;
+    /** 新增或更新快捷键绑定 */
     upsertKeybinding: (input: ServerUpsertKeybindingInput) => Promise<ServerUpsertKeybindingResult>;
   };
+  /** Provider 管理功能 */
   provider: {
+    /** 获取 Composer 能力 */
     getComposerCapabilities: (
       input: ProviderGetComposerCapabilitiesInput,
     ) => Promise<ProviderComposerCapabilities>;
+    /** 压缩线程历史 */
     compactThread: (input: ProviderCompactThreadInput) => Promise<void>;
+    /** 列出可用命令 */
     listCommands: (input: ProviderListCommandsInput) => Promise<ProviderListCommandsResult>;
+    /** 列出可用技能 */
     listSkills: (input: ProviderListSkillsInput) => Promise<ProviderListSkillsResult>;
+    /** 列出可用插件 */
     listPlugins: (input: ProviderListPluginsInput) => Promise<ProviderListPluginsResult>;
+    /** 读取插件详情 */
     readPlugin: (input: ProviderReadPluginInput) => Promise<ProviderReadPluginResult>;
+    /** 列出可用模型 */
     listModels: (input: ProviderListModelsInput) => Promise<ProviderListModelsResult>;
+    /** 列出可用代理 */
     listAgents: (input: ProviderListAgentsInput) => Promise<ProviderListAgentsResult>;
   };
+  /** 技能管理功能 */
   skills: {
+    /** 列出本地用户技能 */
     listLocal: () => Promise<ListLocalUserSkillsResult>;
   };
+  /** 编排系统功能 */
   orchestration: {
+    /** 获取编排状态快照 */
     getSnapshot: () => Promise<OrchestrationReadModel>;
+    /** 获取 Shell 快照 */
     getShellSnapshot: () => Promise<OrchestrationShellSnapshot>;
+    /** 分发命令到编排系统 */
     dispatchCommand: (command: ClientOrchestrationCommand) => Promise<{ sequence: number }>;
+    /** 导入外部线程 */
     importThread: (
       input: OrchestrationImportThreadInput,
     ) => Promise<OrchestrationImportThreadResult>;
+    /** 修复状态 */
     repairState: () => Promise<OrchestrationReadModel>;
+    /** 获取轮次差异 */
     getTurnDiff: (input: OrchestrationGetTurnDiffInput) => Promise<OrchestrationGetTurnDiffResult>;
+    /** 获取完整线程差异 */
     getFullThreadDiff: (
       input: OrchestrationGetFullThreadDiffInput,
     ) => Promise<OrchestrationGetFullThreadDiffResult>;
+    /** 重放事件 */
     replayEvents: (fromSequenceExclusive: number) => Promise<OrchestrationEvent[]>;
+    /** 订阅 Shell 事件 */
     subscribeShell: () => Promise<void>;
+    /** 取消订阅 Shell 事件 */
     unsubscribeShell: () => Promise<void>;
+    /** 订阅线程事件 */
     subscribeThread: (input: OrchestrationSubscribeThreadInput) => Promise<void>;
+    /** 取消订阅线程事件 */
     unsubscribeThread: (input: OrchestrationSubscribeThreadInput) => Promise<void>;
+    /** 监听领域事件，返回取消订阅函数 */
     onDomainEvent: (callback: (event: OrchestrationEvent) => void) => () => void;
+    /** 监听 Shell 事件，返回取消订阅函数 */
     onShellEvent: (callback: (event: OrchestrationShellStreamItem) => void) => () => void;
+    /** 监听线程事件，返回取消订阅函数 */
     onThreadEvent: (callback: (event: OrchestrationThreadStreamItem) => void) => () => void;
   };
+  /** 浏览器面板功能 */
   browser: {
+    /** 打开线程关联的浏览器面板 */
     open: (input: BrowserOpenInput) => Promise<ThreadBrowserState>;
+    /** 关闭线程关联的浏览器面板 */
     close: (input: BrowserThreadInput) => Promise<ThreadBrowserState>;
+    /** 隐藏浏览器面板 */
     hide: (input: BrowserThreadInput) => Promise<void>;
+    /** 获取浏览器面板当前状态 */
     getState: (input: BrowserThreadInput) => Promise<ThreadBrowserState>;
+    /** 设置浏览器面板边界 */
     setPanelBounds: (input: BrowserSetPanelBoundsInput) => Promise<void>;
+    /** 附加 WebView 到浏览器面板 */
     attachWebview: (input: BrowserAttachWebviewInput) => Promise<ThreadBrowserState>;
+    /** 将截图复制到剪贴板 */
     copyScreenshotToClipboard: (input: BrowserTabInput) => Promise<void>;
+    /** 捕获当前页面截图 */
     captureScreenshot: (input: BrowserTabInput) => Promise<BrowserCaptureScreenshotResult>;
+    /** 执行 Chrome DevTools Protocol 命令 */
     executeCdp: (input: BrowserExecuteCdpInput) => Promise<unknown>;
+    /** 导航到指定 URL */
     navigate: (input: BrowserNavigateInput) => Promise<ThreadBrowserState>;
+    /** 重新加载当前页面 */
     reload: (input: BrowserTabInput) => Promise<ThreadBrowserState>;
+    /** 后退到上一页 */
     goBack: (input: BrowserTabInput) => Promise<ThreadBrowserState>;
+    /** 前进到下一页 */
     goForward: (input: BrowserTabInput) => Promise<ThreadBrowserState>;
+    /** 新建标签页 */
     newTab: (input: BrowserNewTabInput) => Promise<ThreadBrowserState>;
+    /** 关闭标签页 */
     closeTab: (input: BrowserTabInput) => Promise<ThreadBrowserState>;
+    /** 切换到指定标签页 */
     selectTab: (input: BrowserTabInput) => Promise<ThreadBrowserState>;
+    /** 打开开发者工具 */
     openDevTools: (input: BrowserTabInput) => Promise<void>;
+    /** 监听浏览器面板状态变化，返回取消订阅函数 */
     onState: (callback: (state: ThreadBrowserState) => void) => () => void;
   };
 }

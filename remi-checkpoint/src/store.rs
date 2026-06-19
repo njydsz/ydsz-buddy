@@ -101,8 +101,8 @@ impl CheckpointStore {
     /// let git_core = Arc::new(GitCore::new("/path/to/repo")?);
     /// let store = CheckpointStore::new(git_core);
     /// ```
-    pub fn new(git_core: Arc<GitCore>) -> Self {
-        Self { git_core }
+    pub fn new(git_core: Arc<GitCore>, checkpoint_store: Arc<SqliteCheckpointStore>) -> Self {
+        Self { git_core, checkpoint_store }
     }
 
     /// # 创建新的检查点
@@ -149,6 +149,7 @@ impl CheckpointStore {
         // 构造检查点对象
         let checkpoint = Checkpoint {
             id: uuid::Uuid::new_v4().to_string(),
+            thread_id,
             turn_id: String::new(), // TODO: 从上下文获取当前轮次 ID
             git_ref: commit_sha,
             description: message,

@@ -1,3 +1,21 @@
+/**
+ * @file orchestration.ts
+ * @description 编排系统核心定义。定义了项目、线程、消息、轮次、检查点等核心概念，
+ * 以及编排命令、事件、状态快照等数据结构。
+ *
+ * 核心职责：
+ * - 定义 Provider 类型（Codex、Claude、Cursor、Gemini 等）和模型选择
+ * - 定义项目、线程、消息、轮次的完整数据结构
+ * - 定义编排命令（创建项目/线程、启动轮次、审批响应等）
+ * - 定义编排事件（项目创建、线程更新、消息发送等）
+ * - 定义状态快照和流式事件推送格式
+ *
+ * 使用场景：
+ * - 前端通过编排系统管理项目和线程
+ * - 后端处理编排命令并生成事件
+ * - WebSocket 通信使用这些类型进行序列化/反序列化
+ */
+
 import {
   ClaudeModelOptions,
   CodexModelOptions,
@@ -25,89 +43,152 @@ import {
   TurnId,
 } from "./baseSchemas";
 
+/** 编排系统 WebSocket RPC 方法名映射 */
 export const ORCHESTRATION_WS_METHODS = {
+  /** 获取完整状态快照 */
   getSnapshot: "orchestration.getSnapshot",
+  /** 获取 Shell 快照（轻量级） */
   getShellSnapshot: "orchestration.getShellSnapshot",
+  /** 分发编排命令 */
   dispatchCommand: "orchestration.dispatchCommand",
+  /** 导入外部线程 */
   importThread: "orchestration.importThread",
+  /** 修复状态 */
   repairState: "orchestration.repairState",
+  /** 获取轮次差异 */
   getTurnDiff: "orchestration.getTurnDiff",
+  /** 获取完整线程差异 */
   getFullThreadDiff: "orchestration.getFullThreadDiff",
+  /** 重放事件 */
   replayEvents: "orchestration.replayEvents",
+  /** 订阅 Shell 事件流 */
   subscribeShell: "orchestration.subscribeShell",
+  /** 取消订阅 Shell 事件流 */
   unsubscribeShell: "orchestration.unsubscribeShell",
+  /** 订阅线程事件流 */
   subscribeThread: "orchestration.subscribeThread",
+  /** 取消订阅线程事件流 */
   unsubscribeThread: "orchestration.unsubscribeThread",
 } as const;
 
+/** 编排系统 WebSocket 推送通道名映射 */
 export const ORCHESTRATION_WS_CHANNELS = {
+  /** 领域事件通道（项目/线程级别事件） */
   domainEvent: "orchestration.domainEvent",
+  /** Shell 事件通道（项目/线程的轻量级更新） */
   shellEvent: "orchestration.shellEvent",
+  /** 线程事件通道（单个线程的详细事件流） */
   threadEvent: "orchestration.threadEvent",
 } as const;
 
+/** Provider 类型枚举 */
 export type ProviderKind =
-  | "codex"
-  | "claudeAgent"
-  | "cursor"
-  | "gemini"
-  | "grok"
-  | "kilo"
-  | "opencode"
-  | "pi";
+  | "codex"        // OpenAI Codex
+  | "claudeAgent"  // Anthropic Claude
+  | "cursor"       // Cursor
+  | "gemini"       // Google Gemini
+  | "grok"         // xAI Grok
+  | "kilo"         // Kilo (基于 OpenCode)
+  | "opencode"     // OpenCode
+  | "pi";          // Pi
+
+/** 默认 Provider 类型 */
 export const DEFAULT_PROVIDER_KIND: ProviderKind = "codex";
 
-export type ProviderApprovalPolicy = "untrusted" | "on-failure" | "on-request" | "never";
-export type ProviderSandboxMode = "read-only" | "workspace-write" | "danger-full-access";
+/** Provider 审批策略 */
+export type ProviderApprovalPolicy = 
+  | "untrusted"    // 不信任，需要审批
+  | "on-failure"   // 失败时审批
+  | "on-request"   // 请求时审批
+  | "never";       // 从不审批
 
+/** Provider 沙箱模式 */
+export type ProviderSandboxMode = 
+  | "read-only"           // 只读模式
+  | "workspace-write"     // 工作区写入模式
+  | "danger-full-access"; // 危险：完全访问模式
+
+/** Codex Provider 模型选择 */
 export interface CodexModelSelection {
+  /** Provider 类型标识 */
   provider: "codex";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: CodexModelOptions;
 }
 
+/** Claude Provider 模型选择 */
 export interface ClaudeModelSelection {
+  /** Provider 类型标识 */
   provider: "claudeAgent";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: ClaudeModelOptions;
 }
 
+/** Cursor Provider 模型选择 */
 export interface CursorModelSelection {
+  /** Provider 类型标识 */
   provider: "cursor";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: CursorModelOptions;
 }
 
+/** Gemini Provider 模型选择 */
 export interface GeminiModelSelection {
+  /** Provider 类型标识 */
   provider: "gemini";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: GeminiModelOptions;
 }
 
+/** Grok Provider 模型选择 */
 export interface GrokModelSelection {
+  /** Provider 类型标识 */
   provider: "grok";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: GrokModelOptions;
 }
 
+/** OpenCode Provider 模型选择 */
 export interface OpenCodeModelSelection {
+  /** Provider 类型标识 */
   provider: "opencode";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: OpenCodeModelOptions;
 }
 
+/** Kilo Provider 模型选择（基于 OpenCode） */
 export interface KiloModelSelection {
+  /** Provider 类型标识 */
   provider: "kilo";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选，使用 OpenCode 选项） */
   options?: OpenCodeModelOptions;
 }
 
+/** Pi Provider 模型选择 */
 export interface PiModelSelection {
+  /** Provider 类型标识 */
   provider: "pi";
+  /** 模型名称 */
   model: TrimmedNonEmptyString;
+  /** 模型选项（可选） */
   options?: PiModelOptions;
 }
 
+/** 模型选择联合类型，支持所有 Provider */
 export type ModelSelection =
   | CodexModelSelection
   | ClaudeModelSelection
@@ -118,444 +199,834 @@ export type ModelSelection =
   | OpenCodeModelSelection
   | PiModelSelection;
 
+/** Codex Provider 启动选项 */
 export interface CodexProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** Codex 主目录路径（可选） */
   homePath?: TrimmedNonEmptyString;
 }
 
+/** Claude Provider 启动选项 */
 export interface ClaudeProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** 权限模式（可选） */
   permissionMode?: TrimmedNonEmptyString;
+  /** 最大思考 token 数（可选） */
   maxThinkingTokens?: NonNegativeInt;
 }
 
+/** Gemini Provider 启动选项 */
 export interface GeminiProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
 }
 
+/** Cursor Provider 启动选项 */
 export interface CursorProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** API 端点（可选） */
   apiEndpoint?: TrimmedNonEmptyString;
 }
 
+/** Grok Provider 启动选项 */
 export interface GrokProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
 }
 
+/** OpenCode Provider 启动选项 */
 export interface OpenCodeProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** 服务器 URL（可选） */
   serverUrl?: TrimmedNonEmptyString;
+  /** 服务器密码（可选） */
   serverPassword?: TrimmedNonEmptyString;
 }
 
+/** Kilo Provider 启动选项 */
 export interface KiloProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** 服务器 URL（可选） */
   serverUrl?: TrimmedNonEmptyString;
+  /** 服务器密码（可选） */
   serverPassword?: TrimmedNonEmptyString;
 }
 
+/** Pi Provider 启动选项 */
 export interface PiProviderStartOptions {
+  /** 二进制文件路径（可选） */
   binaryPath?: TrimmedNonEmptyString;
+  /** 代理目录（可选） */
   agentDir?: TrimmedNonEmptyString;
 }
 
+/** Provider 启动选项集合，按 Provider 类型分组 */
 export interface ProviderStartOptions {
+  /** Codex Provider 启动选项 */
   codex?: CodexProviderStartOptions;
+  /** Claude Provider 启动选项 */
   claudeAgent?: ClaudeProviderStartOptions;
+  /** Cursor Provider 启动选项 */
   cursor?: CursorProviderStartOptions;
+  /** Gemini Provider 启动选项 */
   gemini?: GeminiProviderStartOptions;
+  /** Grok Provider 启动选项 */
   grok?: GrokProviderStartOptions;
+  /** Kilo Provider 启动选项 */
   kilo?: KiloProviderStartOptions;
+  /** OpenCode Provider 启动选项 */
   opencode?: OpenCodeProviderStartOptions;
+  /** Pi Provider 启动选项 */
   pi?: PiProviderStartOptions;
 }
 
-export type RuntimeMode = "approval-required" | "full-access";
+/** 运行时模式 */
+export type RuntimeMode = 
+  | "approval-required"  // 需要审批模式
+  | "full-access";       // 完全访问模式
+
+/** 默认运行时模式 */
 export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";
-export type ProviderInteractionMode = "default" | "plan";
+
+/** Provider 交互模式 */
+export type ProviderInteractionMode = 
+  | "default"   // 默认模式
+  | "plan";     // 计划模式
+
+/** 默认 Provider 交互模式 */
 export const DEFAULT_PROVIDER_INTERACTION_MODE: ProviderInteractionMode = "default";
 
-export type ProviderRequestKind = "command" | "file-read" | "file-change";
-export type AssistantDeliveryMode = "buffered" | "streaming";
-export type TurnDispatchMode = "queue" | "steer";
+/** Provider 请求类型 */
+export type ProviderRequestKind = 
+  | "command"      // 命令执行
+  | "file-read"    // 文件读取
+  | "file-change"; // 文件修改
+
+/** 助手消息交付模式 */
+export type AssistantDeliveryMode = 
+  | "buffered"   // 缓冲模式（完整消息）
+  | "streaming"; // 流式模式（逐字输出）
+
+/** 轮次分发模式 */
+export type TurnDispatchMode = 
+  | "queue"   // 队列模式（排队执行）
+  | "steer";  // 引导模式（立即执行）
+
+/** 默认轮次分发模式 */
 export const DEFAULT_TURN_DISPATCH_MODE: TurnDispatchMode = "queue";
 
+/** Provider 审查目标 */
 export type ProviderReviewTarget =
-  | { type: "uncommittedChanges" }
-  | { type: "baseBranch"; branch: TrimmedNonEmptyString };
+  | { type: "uncommittedChanges" }  // 未提交的更改
+  | { type: "baseBranch"; branch: TrimmedNonEmptyString };  // 基础分支
 
-export type ProviderApprovalDecision = "accept" | "acceptForSession" | "decline" | "cancel";
+/** Provider 审批决策 */
+export type ProviderApprovalDecision = 
+  | "accept"            // 接受
+  | "acceptForSession"  // 接受本次会话
+  | "decline"           // 拒绝
+  | "cancel";          // 取消
+
+/** Provider 用户输入答案类型 */
 export type ProviderUserInputAnswer = string | Array<string> | null;
+
+/** Provider 用户输入答案集合 */
 export type ProviderUserInputAnswers = Record<string, ProviderUserInputAnswer>;
-export type ThreadHandoffBootstrapStatus = "pending" | "completed";
-export type ThreadEnvironmentMode = "local" | "worktree";
 
-export type OrchestrationMessageSource = "native" | "handoff-import" | "fork-import";
+/** 线程移交引导状态 */
+export type ThreadHandoffBootstrapStatus = 
+  | "pending"    // 待处理
+  | "completed"; // 已完成
 
+/** 线程环境模式 */
+export type ThreadEnvironmentMode = 
+  | "local"     // 本地环境
+  | "worktree"; // 工作树环境
+
+/** 编排消息来源 */
+export type OrchestrationMessageSource = 
+  | "native"        // 原生消息
+  | "handoff-import" // 移交导入
+  | "fork-import";  // 分叉导入
+
+/** Provider 发送轮次最大输入字符数 */
 export const PROVIDER_SEND_TURN_MAX_INPUT_CHARS = 120_000;
+
+/** Provider 发送轮次最大附件数 */
 export const PROVIDER_SEND_TURN_MAX_ATTACHMENTS = 8;
+
+/** Provider 发送轮次最大图片字节数（10MB） */
 export const PROVIDER_SEND_TURN_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+/** Provider 发送轮次最大图片 Data URL 字符数（14MB） */
 const PROVIDER_SEND_TURN_MAX_IMAGE_DATA_URL_CHARS = 14_000_000;
+
+/** 聊天附件 ID 最大字符数 */
 const CHAT_ATTACHMENT_ID_MAX_CHARS = 128;
+
+/** 聊天助手选择文本最大字符数 */
 export const CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS = 4_000;
+
+/** 关联 ID 类型（等同于命令 ID） */
 export type CorrelationId = CommandId;
 
+/** 聊天附件 ID 类型 */
 type ChatAttachmentId = TrimmedNonEmptyString;
 
+/** 聊天图片附件 */
 export interface ChatImageAttachment {
+  /** 附件类型标识 */
   type: "image";
+  /** 附件唯一标识 */
   id: ChatAttachmentId;
+  /** 图片名称 */
   name: TrimmedNonEmptyString;
+  /** MIME 类型（如 image/png） */
   mimeType: TrimmedNonEmptyString;
+  /** 文件大小（字节） */
   sizeBytes: NonNegativeInt;
 }
 
+/** 聊天助手选择附件 */
 export interface ChatAssistantSelectionAttachment {
+  /** 附件类型标识 */
   type: "assistant-selection";
+  /** 附件唯一标识 */
   id: ChatAttachmentId;
+  /** 关联的助手消息 ID */
   assistantMessageId: MessageId;
+  /** 选中的文本内容 */
   text: TrimmedNonEmptyString;
 }
 
+/** 上传聊天图片附件（客户端使用） */
 export interface UploadChatImageAttachment {
+  /** 附件类型标识 */
   type: "image";
+  /** 图片名称 */
   name: TrimmedNonEmptyString;
+  /** MIME 类型 */
   mimeType: TrimmedNonEmptyString;
+  /** 文件大小（字节） */
   sizeBytes: NonNegativeInt;
+  /** Data URL 格式的图片数据 */
   dataUrl: TrimmedNonEmptyString;
 }
 
+/** 上传聊天助手选择附件（客户端使用） */
 export interface UploadChatAssistantSelectionAttachment {
+  /** 附件类型标识 */
   type: "assistant-selection";
+  /** 关联的助手消息 ID */
   assistantMessageId: MessageId;
+  /** 选中的文本内容 */
   text: TrimmedNonEmptyString;
 }
 
+/** 聊天附件联合类型 */
 export type ChatAttachment = ChatImageAttachment | ChatAssistantSelectionAttachment;
+
+/** 上传聊天附件联合类型（内部使用） */
 type UploadChatAttachment = UploadChatImageAttachment | UploadChatAssistantSelectionAttachment;
 
-export type ProjectScriptIcon = "play" | "test" | "lint" | "configure" | "build" | "debug";
+/** 项目脚本图标类型 */
+export type ProjectScriptIcon = 
+  | "play"       // 播放
+  | "test"       // 测试
+  | "lint"       // 代码检查
+  | "configure"  // 配置
+  | "build"      // 构建
+  | "debug";     // 调试
 
+/** 项目脚本定义 */
 export interface ProjectScript {
+  /** 脚本唯一标识 */
   id: TrimmedNonEmptyString;
+  /** 脚本显示名称 */
   name: TrimmedNonEmptyString;
+  /** 脚本执行命令 */
   command: TrimmedNonEmptyString;
+  /** 脚本图标 */
   icon: ProjectScriptIcon;
+  /** 是否在工作树创建时运行 */
   runOnWorktreeCreate: boolean;
 }
 
+/** 编排项目定义 */
 export interface OrchestrationProject {
+  /** 项目唯一标识 */
   id: ProjectId;
+  /** 项目类型（可选） */
   kind?: ProjectKind;
+  /** 项目标题 */
   title: TrimmedNonEmptyString;
+  /** 工作区根路径 */
   workspaceRoot: TrimmedNonEmptyString;
+  /** 默认模型选择 */
   defaultModelSelection: ModelSelection | null;
+  /** 项目脚本列表 */
   scripts: Array<ProjectScript>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
+  /** 删除时间（null 表示未删除） */
   deletedAt: IsoDateTime | null;
 }
 
+/** 编排项目 Shell（轻量级版本，用于列表展示） */
 export interface OrchestrationProjectShell {
+  /** 项目唯一标识 */
   id: ProjectId;
+  /** 项目类型（可选） */
   kind?: ProjectKind;
+  /** 项目标题 */
   title: TrimmedNonEmptyString;
+  /** 工作区根路径 */
   workspaceRoot: TrimmedNonEmptyString;
+  /** 默认模型选择 */
   defaultModelSelection: ModelSelection | null;
+  /** 项目脚本列表 */
   scripts: Array<ProjectScript>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 编排消息角色 */
 export type OrchestrationMessageRole = "user" | "assistant" | "system";
 
+/** 编排消息定义 */
 export interface OrchestrationMessage {
+  /** 消息唯一标识 */
   id: MessageId;
+  /** 消息角色（user/assistant/system） */
   role: OrchestrationMessageRole;
+  /** 消息文本内容 */
   text: string;
+  /** 消息附件列表（可选） */
   attachments?: Array<ChatAttachment>;
+  /** 引用的技能列表（可选） */
   skills?: Array<ProviderSkillReference>;
+  /** 提及的代理列表（可选） */
   mentions?: Array<ProviderMentionReference>;
+  /** 分发模式（可选） */
   dispatchMode?: TurnDispatchMode;
+  /** 关联的轮次 ID（null 表示未关联） */
   turnId: TurnId | null;
+  /** 是否正在流式传输 */
   streaming: boolean;
+  /** 消息来源 */
   source: OrchestrationMessageSource;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 线程移交信息 */
 export interface ThreadHandoff {
+  /** 源线程 ID */
   sourceThreadId: ThreadId;
+  /** 源 Provider 类型 */
   sourceProvider: ProviderKind;
+  /** 导入时间 */
   importedAt: IsoDateTime;
+  /** 引导状态 */
   bootstrapStatus: ThreadHandoffBootstrapStatus;
 }
 
+/** 编排建议计划 ID 类型 */
 export type OrchestrationProposedPlanId = TrimmedNonEmptyString;
 
+/** 编排建议计划定义 */
 export interface OrchestrationProposedPlan {
+  /** 计划唯一标识 */
   id: OrchestrationProposedPlanId;
+  /** 关联的轮次 ID（可选） */
   turnId: TurnId | null;
+  /** 计划 Markdown 内容 */
   planMarkdown: TrimmedNonEmptyString;
+  /** 实现时间（null 表示未实现） */
   implementedAt: IsoDateTime | null;
+  /** 实现该计划的线程 ID（可选） */
   implementationThreadId: ThreadId | null;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 源建议计划引用（内部使用） */
 interface SourceProposedPlanReference {
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 计划 ID */
   planId: OrchestrationProposedPlanId;
 }
 
+/** 编排会话状态 */
 export type OrchestrationSessionStatus =
-  | "idle"
-  | "starting"
-  | "running"
-  | "ready"
-  | "interrupted"
-  | "stopped"
-  | "error";
+  | "idle"         // 空闲
+  | "starting"     // 启动中
+  | "running"      // 运行中
+  | "ready"        // 就绪
+  | "interrupted"  // 已中断
+  | "stopped"      // 已停止
+  | "error";       // 错误
 
+/** 编排会话定义 */
 export interface OrchestrationSession {
+  /** 关联的线程 ID */
   threadId: ThreadId;
+  /** 会话状态 */
   status: OrchestrationSessionStatus;
+  /** Provider 名称（可选） */
   providerName: TrimmedNonEmptyString | null;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 当前活跃的轮次 ID（可选） */
   activeTurnId: TurnId | null;
+  /** 最后错误信息（可选） */
   lastError: TrimmedNonEmptyString | null;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 编排检查点文件信息 */
 export interface OrchestrationCheckpointFile {
+  /** 文件路径 */
   path: TrimmedNonEmptyString;
+  /** 文件类型/种类 */
   kind: TrimmedNonEmptyString;
+  /** 新增行数 */
   additions: NonNegativeInt;
+  /** 删除行数 */
   deletions: NonNegativeInt;
 }
 
-export type OrchestrationCheckpointStatus = "ready" | "missing" | "error";
+/** 编排检查点状态 */
+export type OrchestrationCheckpointStatus = 
+  | "ready"    // 就绪
+  | "missing"  // 缺失
+  | "error";   // 错误
 
+/** 编排检查点摘要 */
 export interface OrchestrationCheckpointSummary {
+  /** 关联的轮次 ID */
   turnId: TurnId;
+  /** 检查点轮次计数 */
   checkpointTurnCount: NonNegativeInt;
+  /** 检查点引用标识 */
   checkpointRef: CheckpointRef;
+  /** 检查点状态 */
   status: OrchestrationCheckpointStatus;
+  /** 检查点文件列表 */
   files: Array<OrchestrationCheckpointFile>;
+  /** 关联的助手消息 ID（可选） */
   assistantMessageId: MessageId | null;
+  /** 完成时间 */
   completedAt: IsoDateTime;
 }
 
-export type OrchestrationThreadActivityTone = "info" | "tool" | "approval" | "error";
+/** 编排线程活动色调 */
+export type OrchestrationThreadActivityTone = 
+  | "info"      // 信息
+  | "tool"      // 工具
+  | "approval"  // 审批
+  | "error";    // 错误
 
+/** 编排线程活动定义 */
 export interface OrchestrationThreadActivity {
+  /** 活动唯一标识 */
   id: EventId;
+  /** 活动色调（用于 UI 显示） */
   tone: OrchestrationThreadActivityTone;
+  /** 活动类型标识 */
   kind: TrimmedNonEmptyString;
+  /** 活动摘要描述 */
   summary: TrimmedNonEmptyString;
+  /** 活动负载数据 */
   payload: unknown;
+  /** 关联的轮次 ID（可选） */
   turnId: TurnId | null;
+  /** 序列号（可选） */
   sequence?: NonNegativeInt;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
-type OrchestrationLatestTurnState = "running" | "interrupted" | "completed" | "error";
+/** 编排最新轮次状态（内部使用） */
+type OrchestrationLatestTurnState = 
+  | "running"      // 运行中
+  | "interrupted"  // 已中断
+  | "completed"    // 已完成
+  | "error";       // 错误
 
+/** 编排最新轮次信息 */
 export interface OrchestrationLatestTurn {
+  /** 轮次唯一标识 */
   turnId: TurnId;
+  /** 轮次状态 */
   state: OrchestrationLatestTurnState;
+  /** 请求时间 */
   requestedAt: IsoDateTime;
+  /** 开始时间（可选） */
   startedAt: IsoDateTime | null;
+  /** 完成时间（可选） */
   completedAt: IsoDateTime | null;
+  /** 关联的助手消息 ID（可选） */
   assistantMessageId: MessageId | null;
+  /** 源建议计划引用（可选） */
   sourceProposedPlan?: SourceProposedPlanReference;
 }
 
+/** 编排线程 Pull Request 信息 */
 export interface OrchestrationThreadPullRequest {
+  /** PR 编号 */
   number: PositiveInt;
+  /** PR 标题 */
   title: TrimmedNonEmptyString;
+  /** PR URL */
   url: string;
+  /** 基础分支 */
   baseBranch: TrimmedNonEmptyString;
+  /** 头部分支 */
   headBranch: TrimmedNonEmptyString;
+  /** PR 状态 */
   state: "open" | "closed" | "merged";
 }
 
+/** 编排线程完整定义 */
 export interface OrchestrationThread {
+  /** 线程唯一标识 */
   id: ThreadId;
+  /** 所属项目 ID */
   projectId: ProjectId;
+  /** 线程标题 */
   title: TrimmedNonEmptyString;
+  /** 模型选择配置 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支 */
   branch: TrimmedNonEmptyString | null;
+  /** 工作树路径 */
   worktreePath: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 是否置顶（可选） */
   isPinned?: boolean;
+  /** 父线程 ID（可选，用于线程树） */
   parentThreadId?: ThreadId | null;
+  /** 子代理 ID（可选） */
   subagentAgentId?: TrimmedNonEmptyString | null;
+  /** 子代理昵称（可选） */
   subagentNickname?: TrimmedNonEmptyString | null;
+  /** 子代理角色（可选） */
   subagentRole?: TrimmedNonEmptyString | null;
+  /** 分叉源线程 ID（可选） */
   forkSourceThreadId?: ThreadId | null;
+  /** 侧聊源线程 ID（可选） */
   sidechatSourceThreadId?: ThreadId | null;
+  /** 最后已知的 PR 信息（可选） */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
+  /** 最新轮次信息 */
   latestTurn: OrchestrationLatestTurn | null;
+  /** 最后用户消息时间（可选） */
   latestUserMessageAt?: IsoDateTime | null;
+  /** 是否有待审批项（可选） */
   hasPendingApprovals?: boolean;
+  /** 是否有待用户输入（可选） */
   hasPendingUserInput?: boolean;
+  /** 是否有可执行的建议计划（可选） */
   hasActionableProposedPlan?: boolean;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
+  /** 归档时间（可选） */
   archivedAt?: IsoDateTime | null;
+  /** 删除时间（null 表示未删除） */
   deletedAt: IsoDateTime | null;
+  /** 线程移交信息 */
   handoff: ThreadHandoff | null;
+  /** 消息列表 */
   messages: Array<OrchestrationMessage>;
+  /** 建议计划列表 */
   proposedPlans: Array<OrchestrationProposedPlan>;
+  /** 活动列表 */
   activities: Array<OrchestrationThreadActivity>;
+  /** 检查点列表 */
   checkpoints: Array<OrchestrationCheckpointSummary>;
+  /** 会话信息 */
   session: OrchestrationSession | null;
 }
 
+/** 编排线程 Shell（轻量级版本，用于列表展示） */
 export interface OrchestrationThreadShell {
+  /** 线程唯一标识 */
   id: ThreadId;
+  /** 所属项目 ID */
   projectId: ProjectId;
+  /** 线程标题 */
   title: TrimmedNonEmptyString;
+  /** 模型选择配置 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支 */
   branch: TrimmedNonEmptyString | null;
+  /** 工作树路径 */
   worktreePath: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 是否置顶（可选） */
   isPinned?: boolean;
+  /** 父线程 ID（可选） */
   parentThreadId?: ThreadId | null;
+  /** 子代理 ID（可选） */
   subagentAgentId?: TrimmedNonEmptyString | null;
+  /** 子代理昵称（可选） */
   subagentNickname?: TrimmedNonEmptyString | null;
+  /** 子代理角色（可选） */
   subagentRole?: TrimmedNonEmptyString | null;
+  /** 分叉源线程 ID（可选） */
   forkSourceThreadId?: ThreadId | null;
+  /** 侧聊源线程 ID（可选） */
   sidechatSourceThreadId?: ThreadId | null;
+  /** 最后已知的 PR 信息（可选） */
   lastKnownPR?: OrchestrationThreadPullRequest | null;
+  /** 最新轮次信息 */
   latestTurn: OrchestrationLatestTurn | null;
+  /** 最后用户消息时间（可选） */
   latestUserMessageAt?: IsoDateTime | null;
+  /** 是否有待审批项（可选） */
   hasPendingApprovals?: boolean;
+  /** 是否有待用户输入（可选） */
   hasPendingUserInput?: boolean;
+  /** 是否有可执行的建议计划（可选） */
   hasActionableProposedPlan?: boolean;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
+  /** 归档时间（可选） */
   archivedAt?: IsoDateTime | null;
+  /** 线程移交信息 */
   handoff: ThreadHandoff | null;
+  /** 会话信息 */
   session: OrchestrationSession | null;
 }
 
+/** 编排读取模型（完整状态快照） */
 export interface OrchestrationReadModel {
+  /** 快照序列号 */
   snapshotSequence: NonNegativeInt;
+  /** 项目列表 */
   projects: Array<OrchestrationProject>;
+  /** 线程列表 */
   threads: Array<OrchestrationThread>;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 编排 Shell 快照（轻量级状态快照） */
 export interface OrchestrationShellSnapshot {
+  /** 快照序列号 */
   snapshotSequence: NonNegativeInt;
+  /** 项目 Shell 列表 */
   projects: Array<OrchestrationProjectShell>;
+  /** 线程 Shell 列表 */
   threads: Array<OrchestrationThreadShell>;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 
+/** 编排 Shell 流事件（轻量级更新事件） */
 export type OrchestrationShellStreamEvent =
   | {
+      /** 事件类型：项目新增/更新 */
       kind: "project-upserted";
+      /** 事件序列号 */
       sequence: NonNegativeInt;
+      /** 项目 Shell 数据 */
       project: OrchestrationProjectShell;
     }
   | {
+      /** 事件类型：项目删除 */
       kind: "project-removed";
+      /** 事件序列号 */
       sequence: NonNegativeInt;
+      /** 被删除的项目 ID */
       projectId: ProjectId;
     }
   | {
+      /** 事件类型：线程新增/更新 */
       kind: "thread-upserted";
+      /** 事件序列号 */
       sequence: NonNegativeInt;
+      /** 线程 Shell 数据 */
       thread: OrchestrationThreadShell;
     }
   | {
+      /** 事件类型：线程删除 */
       kind: "thread-removed";
+      /** 事件序列号 */
       sequence: NonNegativeInt;
+      /** 被删除的线程 ID */
       threadId: ThreadId;
     };
 
+/** 编排 Shell 流条目（快照或事件） */
 export type OrchestrationShellStreamItem =
   | {
+      /** 条目类型：完整快照 */
       kind: "snapshot";
+      /** Shell 快照数据 */
       snapshot: OrchestrationShellSnapshot;
     }
   | OrchestrationShellStreamEvent;
 
+/** 项目创建命令 */
 export interface ProjectCreateCommand {
+  /** 命令类型标识 */
   type: "project.create";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 项目 ID */
   projectId: ProjectId;
+  /** 项目类型（可选） */
   kind?: ProjectKind;
+  /** 项目标题 */
   title: TrimmedNonEmptyString;
+  /** 工作区根路径 */
   workspaceRoot: TrimmedNonEmptyString;
+  /** 工作区根路径不存在时是否自动创建（可选） */
   createWorkspaceRootIfMissing?: boolean;
+  /** 默认模型选择（可选） */
   defaultModelSelection?: ModelSelection | null;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 项目元数据更新命令（内部使用） */
 interface ProjectMetaUpdateCommand {
+  /** 命令类型标识 */
   type: "project.meta.update";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 项目 ID */
   projectId: ProjectId;
+  /** 项目类型（可选） */
   kind?: ProjectKind;
+  /** 项目标题（可选） */
   title?: TrimmedNonEmptyString;
+  /** 工作区根路径（可选） */
   workspaceRoot?: TrimmedNonEmptyString;
+  /** 默认模型选择（可选） */
   defaultModelSelection?: ModelSelection | null;
+  /** 项目脚本列表（可选） */
   scripts?: Array<ProjectScript>;
 }
 
+/** 项目删除命令（内部使用） */
 interface ProjectDeleteCommand {
+  /** 命令类型标识 */
   type: "project.delete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 项目 ID */
   projectId: ProjectId;
 }
 
+/** 线程创建命令（内部使用） */
 interface ThreadCreateCommand {
+  /** 命令类型标识 */
   type: "thread.create";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 所属项目 ID */
   projectId: ProjectId;
+  /** 线程标题 */
   title: TrimmedNonEmptyString;
+  /** 模型选择配置 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支 */
   branch: TrimmedNonEmptyString | null;
+  /** 工作树路径 */
   worktreePath: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 是否置顶（可选） */
   isPinned?: boolean;
+  /** 父线程 ID（可选） */
   parentThreadId?: ThreadId | null;
+  /** 子代理 ID（可选） */
   subagentAgentId?: TrimmedNonEmptyString | null;
+  /** 子代理昵称（可选） */
   subagentNickname?: TrimmedNonEmptyString | null;
+  /** 子代理角色（可选） */
   subagentRole?: TrimmedNonEmptyString | null;
+  /** 最后已知的 PR 信息（可选） */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程移交导入的消息定义 */
 export interface ThreadHandoffImportedMessage {
+  /** 消息 ID */
   messageId: MessageId;
+  /** 消息角色（用户或助手） */
   role: "user" | "assistant";
+  /** 消息文本内容 */
   text: string;
+  /** 消息附件列表（可选） */
   attachments?: Array<ChatAttachment>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
+  /** 更新时间 */
   updatedAt: IsoDateTime;
 }
 

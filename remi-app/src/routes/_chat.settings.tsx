@@ -9,10 +9,10 @@ import {
   type ServerProviderStatus,
   type ThreadId,
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getModelOptions, normalizeModelSlug } from "@peakcode/shared/model";
+import { getModelOptions, normalizeModelSlug } from "@remi-code/shared/model";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,

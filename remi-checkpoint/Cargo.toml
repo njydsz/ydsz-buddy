@@ -6,6 +6,7 @@ edition.workspace = true
 [dependencies]
 remi-core = { workspace = true }
 remi-git = { workspace = true }
+remi-persistence = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }

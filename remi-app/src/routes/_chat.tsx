@@ -496,8 +496,8 @@ function ChatRouteLayout() {
       side={side}
       collapsible="offcanvas"
       className="text-foreground"
-      gapClassName={SIDEBAR_GAP_CLASS[side]}
-      innerClassName={SIDEBAR_INNER_CLASS[side]}
+      gapClassName={SIDEBAR_GAP_CLASS[side as "left" | "right"]}
+      innerClassName={SIDEBAR_INNER_CLASS[side as "left" | "right"]}
       transparentSurface
       resizable={{
         minWidth: THREAD_SIDEBAR_MIN_WIDTH,

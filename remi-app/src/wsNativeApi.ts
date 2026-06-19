@@ -565,7 +565,7 @@ export function createWsNativeApi(): NativeApi {
         transport.request(WS_METHODS.serverGetProviderUsageSnapshot, input),
       getDiagnostics: () => transport.request(WS_METHODS.serverGetDiagnostics),
       transcribeVoice: (input) => {
-        return tauriBridge.server?.transcribeVoice(input);
+        return tauriBridge.server?.transcribeVoice(input) ?? Promise.reject(new Error("Not available"));
       },
       upsertKeybinding: (input) => transport.request(WS_METHODS.serverUpsertKeybinding, input),
     },

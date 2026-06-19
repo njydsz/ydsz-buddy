@@ -600,6 +600,8 @@ pub enum ActivityKind {
 pub struct Checkpoint {
     /// 检查点唯一标识
     pub id: String,
+    /// 所属线程的 ID
+    pub thread_id: ThreadId,
     /// 所属 Turn 的 ID
     pub turn_id: String,
     /// 对应的 Git 引用（commit hash 或 tag）
@@ -744,3 +746,37 @@ pub type Sequence = u64;
 
 /// 检查点唯一标识类型
 pub type CheckpointId = String;
+
+/// # 配对链接
+///
+/// 表示一个配对链接的完整信息，用于客户端与服务端之间的安全配对流程。
+/// 配对链接在颁发后存储到数据库，支持查询、列出和撤销操作。
+///
+/// ## 字段说明
+///
+/// - `id`: 配对链接的唯一标识符
+/// - `pairing_code`: 配对码，用于客户端与服务端之间的安全绑定
+/// - `role`: 配对链接关联的角色（Owner/Client）
+/// - `created_at`: 配对链接的创建时间
+/// - `expires_at`: 配对链接的过期时间
+/// - `is_used`: 配对链接是否已被使用
+/// - `revoked_at`: 配对链接的撤销时间，`Some` 表示已撤销
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PairingLink {
+    /// 配对链接的唯一标识符
+    pub id: String,
+    /// 配对码，用于客户端与服务端之间的安全绑定
+    pub pairing_code: String,
+    /// 配对链接关联的角色
+    pub role: String,
+    /// 配对链接的创建时间
+    pub created_at: DateTime<Utc>,
+    /// 配对链接的过期时间
+    pub expires_at: DateTime<Utc>,
+    /// 配对链接是否已被使用
+    pub is_used: bool,
+    /// 配对链接的撤销时间，`Some` 表示已撤销
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revoked_at: Option<DateTime<Utc>>,
+}

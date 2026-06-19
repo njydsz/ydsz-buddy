@@ -145,7 +145,7 @@ pub struct BrowseInput {
 /// - 展示目录内容列表
 /// - 构建文件树结构
 /// - 分析目录组成
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BrowseResult {
     /// 目录条目列表（已排序）
     pub entries: Vec<DirectoryEntry>,
@@ -207,7 +207,7 @@ pub struct SearchEntriesInput {
 ///
 /// - 展示搜索结果列表
 /// - 显示匹配数量统计
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchEntriesResult {
     /// 匹配的目录条目列表
     pub entries: Vec<DirectoryEntry>,
@@ -260,7 +260,7 @@ pub struct ListDirectoriesInput {
 ///
 /// - 构建目录树结构
 /// - 展示项目目录列表
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ListDirectoriesResult {
     /// 目录条目列表（按路径排序）
     pub directories: Vec<DirectoryEntry>,

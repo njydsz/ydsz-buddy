@@ -85,6 +85,10 @@ const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
   ["512", 512],
 ]);
 
+/**
+ * 空的模型能力对象
+ * @description 所有能力字段均为默认值/空值，用作未知模型或无特殊能力模型的回退值
+ */
 export const EMPTY_MODEL_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [],
   supportsFastMode: false,
@@ -92,8 +96,16 @@ export const EMPTY_MODEL_CAPABILITIES: ModelCapabilities = {
   promptInjectedEffortLevels: [],
   contextWindowOptions: [],
 };
+/**
+ * Gemini 模型的默认能力对象
+ * @description 当前与 EMPTY_MODEL_CAPABILITIES 相同，用于 Gemini 模型无法识别系列时的回退
+ */
 export const DEFAULT_GEMINI_MODEL_CAPABILITIES = EMPTY_MODEL_CAPABILITIES;
 
+/**
+ * Gemini 3 系列模型的能力描述
+ * @description 支持基于级别（HIGH/LOW）的思维配置，不支持快速模式和思维切换
+ */
 export const GEMINI_3_MODEL_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [
     { value: "HIGH", label: "High", isDefault: true },
@@ -105,6 +117,10 @@ export const GEMINI_3_MODEL_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 
+/**
+ * Gemini 2.5 系列模型的能力描述
+ * @description 支持基于 Token 预算（Dynamic/-1、512）的思维配置，不支持快速模式和思维切换
+ */
 export const GEMINI_2_5_MODEL_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [
     { value: "-1", label: "Dynamic", isDefault: true },
