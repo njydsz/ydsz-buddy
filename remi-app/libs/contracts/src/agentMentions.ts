@@ -274,8 +274,24 @@ function mapAgentEntries(input: Record<string, AgentAliasDefinition>): ResolvedA
 }
 
 /**
- * Get all available agent aliases for a provider. When no provider is passed,
- * returns the global union for parsing and validation helpers.
+ * 获取指定 Provider 的所有可用 Agent 别名
+ *
+ * @description 返回指定 Provider 支持的所有 Agent 别名列表。如果不指定 Provider，
+ * 则返回所有 Provider 的别名合集（用于解析和验证辅助函数）。
+ *
+ * @param provider - 可选的 Provider 类型。如果提供，仅返回该 Provider 的别名；
+ * 如果省略，返回所有 Provider 的别名合集。
+ * @returns 解析后的 Agent 别名数组，按字母顺序排序
+ *
+ * @example
+ * ```typescript
+ * // 获取 Claude 的所有别名
+ * const claudeAliases = getAgentMentionAliases("claudeAgent");
+ * // 返回: [{ alias: "build", ... }, { alias: "explore", ... }, ...]
+ *
+ * // 获取所有 Provider 的别名合集
+ * const allAliases = getAgentMentionAliases();
+ * ```
  */
 export function getAgentMentionAliases(provider?: ProviderKind): ResolvedAgentAlias[] {
   if (provider) {
@@ -288,7 +304,20 @@ export function getAgentMentionAliases(provider?: ProviderKind): ResolvedAgentAl
 }
 
 /**
- * Get the preferred aliases shown in autocomplete for a provider.
+ * 获取指定 Provider 的自动补全别名列表
+ *
+ * @description 返回在 UI 自动补全中显示的推荐别名。这些别名是经过筛选的、
+ * 最常用的 Agent 别名，用于在用户输入 @ 时提供智能提示。
+ *
+ * @param provider - Provider 类型，用于获取该 Provider 推荐的自动补全别名
+ * @returns 解析后的 Agent 别名数组，仅包含推荐的自动补全别名
+ *
+ * @example
+ * ```typescript
+ * // 获取 Claude 的自动补全别名
+ * const autocompleteAliases = getAgentMentionAutocompleteAliases("claudeAgent");
+ * // 返回: [{ alias: "explore", ... }, { alias: "review", ... }, ...]
+ * ```
  */
 export function getAgentMentionAutocompleteAliases(provider: ProviderKind): ResolvedAgentAlias[] {
   return AGENT_MENTION_AUTOCOMPLETE_ALIASES_BY_PROVIDER[provider].map((alias) => {
@@ -302,7 +331,25 @@ export function getAgentMentionAutocompleteAliases(provider: ProviderKind): Reso
 }
 
 /**
- * Resolve an agent alias. When a provider is passed, only provider-specific aliases are considered.
+ * 解析 Agent 别名
+ *
+ * @description 根据别名名称和可选的 Provider 类型，解析出对应的 Agent 别名定义。
+ * 如果指定了 Provider，则仅在该 Provider 的别名中查找；否则在所有 Provider 的别名中查找。
+ *
+ * @param alias - 要解析的别名名称（不区分大小写）
+ * @param provider - 可选的 Provider 类型。如果提供，仅在该 Provider 的别名中查找；
+ * 如果省略，在所有 Provider 的别名中查找。
+ * @returns 解析成功返回 Agent 别名定义对象，解析失败返回 null
+ *
+ * @example
+ * ```typescript
+ * // 在 Claude 中解析 "explore" 别名
+ * const definition = resolveAgentAlias("explore", "claudeAgent");
+ * // 返回: { alias: "explore", provider: "claudeAgent", kind: "claude-subagent", ... }
+ *
+ * // 在所有 Provider 中解析 "build" 别名
+ * const definition = resolveAgentAlias("build");
+ * ```
  */
 export function resolveAgentAlias(
   alias: string,
@@ -322,10 +369,52 @@ export function resolveAgentAlias(
   return null;
 }
 
+/**
+ * 验证 Agent 别名是否有效
+ *
+ * @description 检查给定的别名名称是否在指定 Provider 或所有 Provider 的别名列表中有效。
+ *
+ * @param alias - 要验证的别名名称（不区分大小写）
+ * @param provider - 可选的 Provider 类型。如果提供，仅在该 Provider 的别名中验证；
+ * 如果省略，在所有 Provider 的别名中验证。
+ * @returns 如果别名有效返回 true，否则返回 false
+ *
+ * @example
+ * ```typescript
+ * // 验证 "explore" 在 Claude 中是否有效
+ * const isValid = isValidAgentAlias("explore", "claudeAgent");
+ * // 返回: true
+ *
+ * // 验证 "unknown" 是否有效
+ * const isValid = isValidAgentAlias("unknown");
+ * // 返回: false
+ * ```
+ */
 export function isValidAgentAlias(alias: string, provider?: ProviderKind): boolean {
   return resolveAgentAlias(alias, provider) !== null;
 }
 
+/**
+ * 获取所有 Agent 别名名称列表
+ *
+ * @description 返回指定 Provider 或所有 Provider 的 Agent 别名名称数组。
+ * 与 getAgentMentionAliases 不同，此函数仅返回别名名称字符串，不包含完整的定义对象。
+ *
+ * @param provider - 可选的 Provider 类型。如果提供，仅返回该 Provider 的别名名称；
+ * 如果省略，返回所有 Provider 的别名名称合集。
+ * @returns Agent 别名名称数组
+ *
+ * @example
+ * ```typescript
+ * // 获取 Claude 的所有别名名称
+ * const names = getAgentAliasNames("claudeAgent");
+ * // 返回: ["explore", "review", "build", "plan"]
+ *
+ * // 获取所有 Provider 的别名名称
+ * const allNames = getAgentAliasNames();
+ * // 返回: ["5.5", "5.4", "mini", "explore", "review", ...]
+ * ```
+ */
 export function getAgentAliasNames(provider?: ProviderKind): string[] {
   if (provider) {
     return Object.keys(AGENT_MENTION_ALIASES_BY_PROVIDER[provider]);

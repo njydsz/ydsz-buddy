@@ -1,12 +1,11 @@
 //! 配对链接存储模块
 //!
-//! 本模块实现配对链接的持久化存储，支持配对链接的创建、查询、列出和撤销操作。
+//! 本模块实现配对链接的持久化存储，支持配对链接的创建、查询、列出、消费和撤销操作。
 //! 配对链接用于客户端与服务端之间的安全配对流程。
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use remi_core::models::PairingLink;
-use uuid::Uuid;
 
 use crate::error::PersistenceResult;
 use crate::sqlite_client::SqliteClient;
@@ -26,25 +25,27 @@ pub trait PairingLinkStore: Send + Sync {
     /// 根据配对链接 ID 从存储中查询配对链接记录。
     fn get_pairing_link(&self, link_id: &str) -> PersistenceResult<Option<PairingLink>>;
 
-    /// 按配对码查询配对链接
+    /// 按凭证查询配对链接
     ///
-    /// 根据配对码从存储中查询未撤销的配对链接记录。
-    fn get_pairing_link_by_code(&self, pairing_code: &str) -> PersistenceResult<Option<PairingLink>>;
+    /// 根据凭证从存储中查询未撤销、未消费的配对链接记录。
+    fn get_pairing_link_by_credential(&self, credential: &str) -> PersistenceResult<Option<PairingLink>>;
 
-    /// 列出所有配对链接
+    /// 列出所有活跃的配对链接
     ///
-    /// 查询所有配对链接，包括已撤销和未撤销的链接。
-    fn list_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>>;
+    /// 查询所有未过期且未撤销的配对链接。
+    fn list_active_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>>;
 
     /// 撤销配对链接
     ///
     /// 将指定配对链接标记为已撤销。
     fn revoke_pairing_link(&self, link_id: &str) -> PersistenceResult<bool>;
 
-    /// 标记配对链接为已使用
+    /// 消费可用的配对链接
     ///
-    /// 将指定配对链接标记为已使用状态。
-    fn mark_pairing_link_used(&self, link_id: &str) -> PersistenceResult<()>;
+    /// 根据凭证消费配对链接，设置 consumed_at 时间戳。
+    /// 这是一个原子操作，确保并发安全。
+    /// 返回消费后的配对链接，如果凭证无效或已被消费则返回 None。
+    fn consume_available(&self, credential: &str) -> PersistenceResult<Option<PairingLink>>;
 }
 
 /// SQLite 配对链接存储实现
@@ -59,22 +60,62 @@ impl SqlitePairingLinkStore {
     pub fn new(client: SqliteClient) -> Self {
         Self { client }
     }
+
+    /// 从数据库行构建 PairingLink
+    fn build_pairing_link_from_row(
+        id: String,
+        credential: String,
+        method: String,
+        role: String,
+        subject: String,
+        label: Option<String>,
+        created_at_str: String,
+        expires_at_str: String,
+        consumed_at_str: Option<String>,
+        revoked_at_str: Option<String>,
+    ) -> PersistenceResult<PairingLink> {
+        Ok(PairingLink {
+            id,
+            credential,
+            method,
+            role,
+            subject,
+            label,
+            created_at: created_at_str.parse().map_err(|e| {
+                crate::error::PersistenceError::SerializationError(format!(
+                    "日期解析错误: {}",
+                    e
+                ))
+            })?,
+            expires_at: expires_at_str.parse().map_err(|e| {
+                crate::error::PersistenceError::SerializationError(format!(
+                    "日期解析错误: {}",
+                    e
+                ))
+            })?,
+            consumed_at: consumed_at_str.and_then(|s| s.parse().ok()),
+            revoked_at: revoked_at_str.and_then(|s| s.parse().ok()),
+        })
+    }
 }
 
 impl PairingLinkStore for SqlitePairingLinkStore {
     fn save_pairing_link(&self, link: &PairingLink) -> PersistenceResult<()> {
         self.client.execute(
             "INSERT OR REPLACE INTO auth_pairing_links 
-             (id, pairing_code, role, created_at, expires_at, is_used, revoked_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+             (id, credential, method, role, subject, label, created_at, expires_at, consumed_at, revoked_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             &[
                 &link.id,
-                &link.pairing_code,
+                &link.credential,
+                &link.method,
                 &link.role,
+                &link.subject,
+                &link.label,
                 &link.created_at.to_rfc3339(),
                 &link.expires_at.to_rfc3339(),
-                &link.is_used.to_string(),
-                &link.revoked_at.map(|t| t.to_rfc3339()),
+                &link.consumed_at.as_ref().map(|t| t.to_rfc3339()),
+                &link.revoked_at.as_ref().map(|t| t.to_rfc3339()),
             ],
         )?;
 
@@ -83,19 +124,22 @@ impl PairingLinkStore for SqlitePairingLinkStore {
 
     fn get_pairing_link(&self, link_id: &str) -> PersistenceResult<Option<PairingLink>> {
         let rows = self.client.query_map(
-            "SELECT id, pairing_code, role, created_at, expires_at, is_used, revoked_at
+            "SELECT id, credential, method, role, subject, label, created_at, expires_at, consumed_at, revoked_at
              FROM auth_pairing_links WHERE id = ?1",
             &[&link_id],
             |row| {
                 let id: String = row.get(0)?;
-                let pairing_code: String = row.get(1)?;
-                let role: String = row.get(2)?;
-                let created_at_str: String = row.get(3)?;
-                let expires_at_str: String = row.get(4)?;
-                let is_used_str: String = row.get(5)?;
-                let revoked_at_str: Option<String> = row.get(6)?;
+                let credential: String = row.get(1)?;
+                let method: String = row.get(2)?;
+                let role: String = row.get(3)?;
+                let subject: String = row.get(4)?;
+                let label: Option<String> = row.get(5)?;
+                let created_at_str: String = row.get(6)?;
+                let expires_at_str: String = row.get(7)?;
+                let consumed_at_str: Option<String> = row.get(8)?;
+                let revoked_at_str: Option<String> = row.get(9)?;
 
-                Ok((id, pairing_code, role, created_at_str, expires_at_str, is_used_str, revoked_at_str))
+                Ok((id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str))
             },
         )?;
 
@@ -103,47 +147,41 @@ impl PairingLinkStore for SqlitePairingLinkStore {
             return Ok(None);
         }
 
-        let (id, pairing_code, role, created_at_str, expires_at_str, is_used_str, revoked_at_str) = &rows[0];
+        let (id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str) = &rows[0];
 
-        let link = PairingLink {
-            id: id.clone(),
-            pairing_code: pairing_code.clone(),
-            role: role.clone(),
-            created_at: created_at_str.parse().map_err(|e| {
-                crate::error::PersistenceError::SerializationError(format!(
-                    "日期解析错误: {}",
-                    e
-                ))
-            })?,
-            expires_at: expires_at_str.parse().map_err(|e| {
-                crate::error::PersistenceError::SerializationError(format!(
-                    "日期解析错误: {}",
-                    e
-                ))
-            })?,
-            is_used: is_used_str == "true",
-            revoked_at: revoked_at_str.as_ref().and_then(|s| s.parse().ok()),
-        };
-
-        Ok(Some(link))
+        Self::build_pairing_link_from_row(
+            id.clone(),
+            credential.clone(),
+            method.clone(),
+            role.clone(),
+            subject.clone(),
+            label.clone(),
+            created_at_str.clone(),
+            expires_at_str.clone(),
+            consumed_at_str.clone(),
+            revoked_at_str.clone(),
+        ).map(Some)
     }
 
-    fn get_pairing_link_by_code(&self, pairing_code: &str) -> PersistenceResult<Option<PairingLink>> {
+    fn get_pairing_link_by_credential(&self, credential: &str) -> PersistenceResult<Option<PairingLink>> {
         let rows = self.client.query_map(
-            "SELECT id, pairing_code, role, created_at, expires_at, is_used, revoked_at
+            "SELECT id, credential, method, role, subject, label, created_at, expires_at, consumed_at, revoked_at
              FROM auth_pairing_links 
-             WHERE pairing_code = ?1 AND revoked_at IS NULL AND is_used = 'false'",
-            &[&pairing_code],
+             WHERE credential = ?1 AND revoked_at IS NULL AND consumed_at IS NULL",
+            &[&credential],
             |row| {
                 let id: String = row.get(0)?;
-                let pairing_code: String = row.get(1)?;
-                let role: String = row.get(2)?;
-                let created_at_str: String = row.get(3)?;
-                let expires_at_str: String = row.get(4)?;
-                let is_used_str: String = row.get(5)?;
-                let revoked_at_str: Option<String> = row.get(6)?;
+                let credential: String = row.get(1)?;
+                let method: String = row.get(2)?;
+                let role: String = row.get(3)?;
+                let subject: String = row.get(4)?;
+                let label: Option<String> = row.get(5)?;
+                let created_at_str: String = row.get(6)?;
+                let expires_at_str: String = row.get(7)?;
+                let consumed_at_str: Option<String> = row.get(8)?;
+                let revoked_at_str: Option<String> = row.get(9)?;
 
-                Ok((id, pairing_code, role, created_at_str, expires_at_str, is_used_str, revoked_at_str))
+                Ok((id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str))
             },
         )?;
 
@@ -151,59 +189,46 @@ impl PairingLinkStore for SqlitePairingLinkStore {
             return Ok(None);
         }
 
-        let (id, pairing_code, role, created_at_str, expires_at_str, is_used_str, revoked_at_str) = &rows[0];
+        let (id, credential, method, role, subject, label, created_at_str, expires_at_str, consumed_at_str, revoked_at_str) = &rows[0];
 
-        let link = PairingLink {
-            id: id.clone(),
-            pairing_code: pairing_code.clone(),
-            role: role.clone(),
-            created_at: created_at_str.parse().map_err(|e| {
-                crate::error::PersistenceError::SerializationError(format!(
-                    "日期解析错误: {}",
-                    e
-                ))
-            })?,
-            expires_at: expires_at_str.parse().map_err(|e| {
-                crate::error::PersistenceError::SerializationError(format!(
-                    "日期解析错误: {}",
-                    e
-                ))
-            })?,
-            is_used: is_used_str == "true",
-            revoked_at: revoked_at_str.as_ref().and_then(|s| s.parse().ok()),
-        };
-
-        Ok(Some(link))
+        Self::build_pairing_link_from_row(
+            id.clone(),
+            credential.clone(),
+            method.clone(),
+            role.clone(),
+            subject.clone(),
+            label.clone(),
+            created_at_str.clone(),
+            expires_at_str.clone(),
+            consumed_at_str.clone(),
+            revoked_at_str.clone(),
+        ).map(Some)
     }
 
-    fn list_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>> {
+    fn list_active_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>> {
+        let now = Utc::now().to_rfc3339();
         let rows = self.client.query_map(
-            "SELECT id, pairing_code, role, created_at, expires_at, is_used, revoked_at
+            "SELECT id, credential, method, role, subject, label, created_at, expires_at, consumed_at, revoked_at
              FROM auth_pairing_links 
+             WHERE revoked_at IS NULL AND consumed_at IS NULL AND expires_at > ?1
              ORDER BY created_at DESC",
-            &[],
+            &[&now],
             |row| {
                 let id: String = row.get(0)?;
-                let pairing_code: String = row.get(1)?;
-                let role: String = row.get(2)?;
-                let created_at_str: String = row.get(3)?;
-                let expires_at_str: String = row.get(4)?;
-                let is_used_str: String = row.get(5)?;
-                let revoked_at_str: Option<String> = row.get(6)?;
+                let credential: String = row.get(1)?;
+                let method: String = row.get(2)?;
+                let role: String = row.get(3)?;
+                let subject: String = row.get(4)?;
+                let label: Option<String> = row.get(5)?;
+                let created_at_str: String = row.get(6)?;
+                let expires_at_str: String = row.get(7)?;
+                let consumed_at_str: Option<String> = row.get(8)?;
+                let revoked_at_str: Option<String> = row.get(9)?;
 
-                Ok(PairingLink {
-                    id,
-                    pairing_code,
-                    role,
-                    created_at: created_at_str.parse().map_err(|_| {
-                        rusqlite::Error::InvalidColumnIndex(0)
-                    })?,
-                    expires_at: expires_at_str.parse().map_err(|_| {
-                        rusqlite::Error::InvalidColumnIndex(0)
-                    })?,
-                    is_used: is_used_str == "true",
-                    revoked_at: revoked_at_str.and_then(|s| s.parse().ok()),
-                })
+                Self::build_pairing_link_from_row(
+                    id, credential, method, role, subject, label,
+                    created_at_str, expires_at_str, consumed_at_str, revoked_at_str,
+                )
             },
         )?;
 
@@ -221,15 +246,33 @@ impl PairingLinkStore for SqlitePairingLinkStore {
         Ok(affected > 0)
     }
 
-    fn mark_pairing_link_used(&self, link_id: &str) -> PersistenceResult<()> {
-        self.client.execute(
-            "UPDATE auth_pairing_links 
-             SET is_used = 'true' 
-             WHERE id = ?1",
-            &[&link_id],
-        )?;
-
-        Ok(())
+    fn consume_available(&self, credential: &str) -> PersistenceResult<Option<PairingLink>> {
+        let now = Utc::now().to_rfc3339();
+        
+        // 先查询配对链接
+        let link = self.get_pairing_link_by_credential(credential)?;
+        
+        if let Some(link) = link {
+            // 检查是否已过期
+            if link.expires_at < Utc::now() {
+                return Ok(None);
+            }
+            
+            // 设置 consumed_at
+            self.client.execute(
+                "UPDATE auth_pairing_links 
+                 SET consumed_at = ?1 
+                 WHERE id = ?2 AND consumed_at IS NULL",
+                &[&now, &link.id],
+            )?;
+            
+            // 返回更新后的配对链接
+            let mut consumed_link = link;
+            consumed_link.consumed_at = Some(Utc::now());
+            Ok(Some(consumed_link))
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -238,6 +281,7 @@ mod tests {
     use super::*;
     use crate::migrations::run_migrations;
     use chrono::Duration;
+    use uuid::Uuid;
 
     #[test]
     fn test_pairing_link_store() {
@@ -252,11 +296,14 @@ mod tests {
         // 创建测试配对链接
         let link = PairingLink {
             id: Uuid::new_v4().to_string(),
-            pairing_code: "abc12345".to_string(),
-            role: "Client".to_string(),
+            credential: "ABC12345".to_string(),
+            method: "desktop-bootstrap".to_string(),
+            role: "client".to_string(),
+            subject: "test-client".to_string(),
+            label: Some("Test Link".to_string()),
             created_at: Utc::now(),
             expires_at: Utc::now() + Duration::minutes(10),
-            is_used: false,
+            consumed_at: None,
             revoked_at: None,
         };
 
@@ -268,23 +315,68 @@ mod tests {
         assert!(retrieved.is_some());
         let retrieved = retrieved.unwrap();
         assert_eq!(retrieved.id, link.id);
-        assert_eq!(retrieved.pairing_code, link.pairing_code);
+        assert_eq!(retrieved.credential, link.credential);
+        assert_eq!(retrieved.method, link.method);
+        assert_eq!(retrieved.role, link.role);
 
-        // 按配对码查询
-        let retrieved_by_code = store.get_pairing_link_by_code("abc12345").unwrap();
-        assert!(retrieved_by_code.is_some());
+        // 按凭证查询
+        let retrieved_by_credential = store.get_pairing_link_by_credential("ABC12345").unwrap();
+        assert!(retrieved_by_credential.is_some());
 
-        // 列出所有配对链接
-        let links = store.list_pairing_links().unwrap();
+        // 列出活跃的配对链接
+        let links = store.list_active_pairing_links().unwrap();
         assert_eq!(links.len(), 1);
+
+        // 消费配对链接
+        let consumed = store.consume_available("ABC12345").unwrap();
+        assert!(consumed.is_some());
+        let consumed = consumed.unwrap();
+        assert!(consumed.consumed_at.is_some());
+
+        // 验证已消费（按凭证查询应该找不到）
+        let retrieved_after_consume = store.get_pairing_link_by_credential("ABC12345").unwrap();
+        assert!(retrieved_after_consume.is_none());
+
+        // 清理
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_revoke_pairing_link() {
+        let temp_dir = std::env::temp_dir().join("remi-test-pairing-revoke");
+        let db_path = temp_dir.join("test.sqlite");
+        
+        let client = SqliteClient::new(&db_path).unwrap();
+        run_migrations(&client).unwrap();
+        
+        let store = SqlitePairingLinkStore::new(client);
+
+        let link = PairingLink {
+            id: Uuid::new_v4().to_string(),
+            credential: "REVOK123".to_string(),
+            method: "one-time-token".to_string(),
+            role: "owner".to_string(),
+            subject: "test-owner".to_string(),
+            label: None,
+            created_at: Utc::now(),
+            expires_at: Utc::now() + Duration::minutes(10),
+            consumed_at: None,
+            revoked_at: None,
+        };
+
+        store.save_pairing_link(&link).unwrap();
 
         // 撤销配对链接
         let revoked = store.revoke_pairing_link(&link.id).unwrap();
         assert!(revoked);
 
-        // 验证已撤销（按配对码查询应该找不到）
-        let retrieved_after_revoke = store.get_pairing_link_by_code("abc12345").unwrap();
+        // 验证已撤销（按凭证查询应该找不到）
+        let retrieved_after_revoke = store.get_pairing_link_by_credential("REVOK123").unwrap();
         assert!(retrieved_after_revoke.is_none());
+
+        // 列出活跃的配对链接应该为空
+        let links = store.list_active_pairing_links().unwrap();
+        assert_eq!(links.len(), 0);
 
         // 清理
         let _ = std::fs::remove_dir_all(&temp_dir);

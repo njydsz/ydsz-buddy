@@ -53,8 +53,12 @@ pub mod service;
 /// 会话凭证服务模块
 pub mod session_credential;
 
+/// 配对码生成器模块
+pub mod pairing_code_generator;
+
 // 重导出所有公开类型，方便外部使用
 pub use error::*;
 pub use secret_store::*;
 pub use service::*;
 pub use session_credential::*;
+pub use pairing_code_generator::*;

@@ -271,48 +271,81 @@ export type WebSocketRequestBody =
 
 /** WebSocket 请求格式，包含请求 ID 和请求体 */
 export interface WebSocketRequest {
+  /** 请求唯一标识 */
   id: TrimmedNonEmptyString;
+  /** 请求体 */
   body: WebSocketRequestBody;
 }
 
+/** WebSocket 响应格式 */
 export interface WebSocketResponse {
+  /** 对应请求的 ID */
   id: TrimmedNonEmptyString;
+  /** 成功结果（可选） */
   result?: unknown;
+  /** 错误信息（可选） */
   error?: {
+    /** 错误消息 */
     message: string;
   };
 }
 
+/** WebSocket 推送消息序列号 */
 export type WsPushSequence = NonNegativeInt;
 
+/** WebSocket 欢迎消息负载 */
 export interface WsWelcomePayload {
+  /** 当前工作目录 */
   cwd: TrimmedNonEmptyString;
+  /** 用户主目录（可选） */
   homeDir?: TrimmedNonEmptyString;
+  /** 项目名称 */
   projectName: TrimmedNonEmptyString;
+  /** 引导项目 ID（可选） */
   bootstrapProjectId?: ProjectId;
+  /** 引导线程 ID（可选） */
   bootstrapThreadId?: ThreadId;
 }
 
+/** WebSocket 推送消息通道与负载类型映射 */
 export interface WsPushPayloadByChannel {
+  /** 服务器欢迎消息 */
   readonly [WS_CHANNELS.serverWelcome]: WsWelcomePayload;
+  /** 服务器维护状态更新 */
   readonly [WS_CHANNELS.serverMaintenanceUpdated]: ServerLifecycleStreamEvent;
+  /** 服务器配置更新 */
   readonly [WS_CHANNELS.serverConfigUpdated]: ServerConfigUpdatedPayload;
+  /** Provider 状态更新 */
   readonly [WS_CHANNELS.serverProviderStatusesUpdated]: ServerProviderStatusesUpdatedPayload;
+  /** 服务器设置更新 */
   readonly [WS_CHANNELS.serverSettingsUpdated]: ServerSettingsUpdatedPayload;
+  /** Git 操作进度 */
   readonly [WS_CHANNELS.gitActionProgress]: GitActionProgressEvent;
+  /** 终端事件 */
   readonly [WS_CHANNELS.terminalEvent]: TerminalEvent;
+  /** 编排领域事件 */
   readonly [ORCHESTRATION_WS_CHANNELS.domainEvent]: OrchestrationEvent;
+  /** 编排 Shell 事件 */
   readonly [ORCHESTRATION_WS_CHANNELS.shellEvent]: OrchestrationShellStreamItem;
+  /** 编排线程事件 */
   readonly [ORCHESTRATION_WS_CHANNELS.threadEvent]: OrchestrationThreadStreamItem;
 }
 
+/** WebSocket 推送消息通道类型 */
 export type WsPushChannel = keyof WsPushPayloadByChannel;
+
+/** 获取指定通道的推送数据类型 */
 export type WsPushData<C extends WsPushChannel> = WsPushPayloadByChannel[C];
 
+/** 服务器欢迎推送消息 */
 export interface WsPushServerWelcome {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：server.welcome */
   channel: typeof WS_CHANNELS.serverWelcome;
+  /** 欢迎消息负载 */
   data: WsWelcomePayload;
 }
 

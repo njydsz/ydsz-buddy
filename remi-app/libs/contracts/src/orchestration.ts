@@ -1030,239 +1030,433 @@ export interface ThreadHandoffImportedMessage {
   updatedAt: IsoDateTime;
 }
 
+/** 线程移交创建命令（内部使用） */
 interface ThreadHandoffCreateCommand {
+  /** 命令类型标识 */
   type: "thread.handoff.create";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 新线程 ID */
   threadId: ThreadId;
+  /** 源线程 ID */
   sourceThreadId: ThreadId;
+  /** 所属项目 ID */
   projectId: ProjectId;
+  /** 线程标题 */
   title: TrimmedNonEmptyString;
+  /** 模型选择配置 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支 */
   branch: TrimmedNonEmptyString | null;
+  /** 工作树路径 */
   worktreePath: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 导入的消息列表 */
   importedMessages: Array<ThreadHandoffImportedMessage>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程分叉创建命令（内部使用） */
 interface ThreadForkCreateCommand {
+  /** 命令类型标识 */
   type: "thread.fork.create";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 新线程 ID */
   threadId: ThreadId;
+  /** 源线程 ID */
   sourceThreadId: ThreadId;
+  /** 所属项目 ID */
   projectId: ProjectId;
+  /** 线程标题 */
   title: TrimmedNonEmptyString;
+  /** 模型选择配置 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支 */
   branch: TrimmedNonEmptyString | null;
+  /** 工作树路径 */
   worktreePath: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 侧聊源线程 ID（可选） */
   sidechatSourceThreadId?: ThreadId | null;
+  /** 导入的消息列表 */
   importedMessages: Array<ThreadHandoffImportedMessage>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程删除命令（内部使用） */
 interface ThreadDeleteCommand {
+  /** 命令类型标识 */
   type: "thread.delete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
 }
 
+/** 线程归档命令（内部使用） */
 interface ThreadArchiveCommand {
+  /** 命令类型标识 */
   type: "thread.archive";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
 }
 
+/** 线程取消归档命令（内部使用） */
 interface ThreadUnarchiveCommand {
+  /** 命令类型标识 */
   type: "thread.unarchive";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
 }
 
+/** 线程元数据更新命令（内部使用） */
 interface ThreadMetaUpdateCommand {
+  /** 命令类型标识 */
   type: "thread.meta.update";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 线程标题（可选） */
   title?: TrimmedNonEmptyString;
+  /** 模型选择配置（可选） */
   modelSelection?: ModelSelection;
+  /** 环境模式（可选） */
   envMode?: ThreadEnvironmentMode;
+  /** 关联的 Git 分支（可选） */
   branch?: TrimmedNonEmptyString | null;
+  /** 工作树路径（可选） */
   worktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树路径（可选） */
   associatedWorktreePath?: TrimmedNonEmptyString | null;
+  /** 关联工作树分支（可选） */
   associatedWorktreeBranch?: TrimmedNonEmptyString | null;
+  /** 关联工作树引用（可选） */
   associatedWorktreeRef?: TrimmedNonEmptyString | null;
+  /** 分支创建流程是否完成（可选） */
   createBranchFlowCompleted?: boolean;
+  /** 是否置顶（可选） */
   isPinned?: boolean;
+  /** 父线程 ID（可选） */
   parentThreadId?: ThreadId | null;
+  /** 子代理 ID（可选） */
   subagentAgentId?: TrimmedNonEmptyString | null;
+  /** 子代理昵称（可选） */
   subagentNickname?: TrimmedNonEmptyString | null;
+  /** 子代理角色（可选） */
   subagentRole?: TrimmedNonEmptyString | null;
+  /** 线程移交信息（可选） */
   handoff?: ThreadHandoff | null;
+  /** 最后已知的 PR 信息（可选） */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
 }
 
+/** 线程运行时模式设置命令（内部使用） */
 interface ThreadRuntimeModeSetCommand {
+  /** 命令类型标识 */
   type: "thread.runtime-mode.set";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程交互模式设置命令（内部使用） */
 interface ThreadInteractionModeSetCommand {
+  /** 命令类型标识 */
   type: "thread.interaction-mode.set";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程轮次启动命令（导出） */
 export interface ThreadTurnStartCommand {
+  /** 命令类型标识 */
   type: "thread.turn.start";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 用户消息 */
   message: {
+    /** 消息 ID */
     messageId: MessageId;
+    /** 消息角色（固定为 user） */
     role: "user";
+    /** 消息文本内容 */
     text: string;
+    /** 消息附件列表 */
     attachments: Array<ChatAttachment>;
+    /** 引用的技能列表（可选） */
     skills?: Array<ProviderSkillReference>;
+    /** 提及的代理列表（可选） */
     mentions?: Array<ProviderMentionReference>;
   };
+  /** 模型选择配置（可选） */
   modelSelection?: ModelSelection;
+  /** Provider 启动选项（可选） */
   providerOptions?: ProviderStartOptions;
+  /** 审查目标（可选） */
   reviewTarget?: ProviderReviewTarget;
+  /** 助手消息交付模式（可选） */
   assistantDeliveryMode?: AssistantDeliveryMode;
+  /** 轮次分发模式（可选） */
   dispatchMode?: TurnDispatchMode;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 源建议计划引用（可选） */
   sourceProposedPlan?: SourceProposedPlanReference;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 客户端线程轮次启动命令（内部使用） */
 interface ClientThreadTurnStartCommand {
+  /** 命令类型标识 */
   type: "thread.turn.start";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 用户消息 */
   message: {
+    /** 消息 ID */
     messageId: MessageId;
+    /** 消息角色（固定为 user） */
     role: "user";
+    /** 消息文本内容 */
     text: string;
+    /** 消息附件列表（上传格式） */
     attachments: Array<UploadChatAttachment>;
+    /** 引用的技能列表（可选） */
     skills?: Array<ProviderSkillReference>;
+    /** 提及的代理列表（可选） */
     mentions?: Array<ProviderMentionReference>;
   };
+  /** 模型选择配置（可选） */
   modelSelection?: ModelSelection;
+  /** Provider 启动选项（可选） */
   providerOptions?: ProviderStartOptions;
+  /** 审查目标（可选） */
   reviewTarget?: ProviderReviewTarget;
+  /** 助手消息交付模式（可选） */
   assistantDeliveryMode?: AssistantDeliveryMode;
+  /** 轮次分发模式（可选） */
   dispatchMode?: TurnDispatchMode;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 源建议计划引用（可选） */
   sourceProposedPlan?: SourceProposedPlanReference;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程轮次中断命令（内部使用） */
 interface ThreadTurnInterruptCommand {
+  /** 命令类型标识 */
   type: "thread.turn.interrupt";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 轮次 ID（可选，不指定则中断当前轮次） */
   turnId?: TurnId;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程分发排队轮次命令（内部使用） */
 interface ThreadDispatchQueuedTurnCommand {
+  /** 命令类型标识 */
   type: "thread.turn.dispatch-queued";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 模型选择配置（可选） */
   modelSelection?: ModelSelection;
+  /** Provider 启动选项（可选） */
   providerOptions?: ProviderStartOptions;
+  /** 审查目标（可选） */
   reviewTarget?: ProviderReviewTarget;
+  /** 助手消息交付模式（可选） */
   assistantDeliveryMode?: AssistantDeliveryMode;
+  /** 轮次分发模式（可选） */
   dispatchMode?: TurnDispatchMode;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 源建议计划引用（可选） */
   sourceProposedPlan?: SourceProposedPlanReference;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程审批响应命令（内部使用） */
 interface ThreadApprovalRespondCommand {
+  /** 命令类型标识 */
   type: "thread.approval.respond";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 审批请求 ID */
   requestId: ApprovalRequestId;
+  /** 审批决策 */
   decision: ProviderApprovalDecision;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程用户输入响应命令（内部使用） */
 interface ThreadUserInputRespondCommand {
+  /** 命令类型标识 */
   type: "thread.user-input.respond";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 审批请求 ID */
   requestId: ApprovalRequestId;
+  /** 用户输入答案 */
   answers: ProviderUserInputAnswers;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程检查点回退命令（内部使用） */
 interface ThreadCheckpointRevertCommand {
+  /** 命令类型标识 */
   type: "thread.checkpoint.revert";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 回退的轮次数 */
   turnCount: NonNegativeInt;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程对话回滚命令（内部使用） */
 interface ThreadConversationRollbackCommand {
+  /** 命令类型标识 */
   type: "thread.conversation.rollback";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 回滚的轮次数 */
   numTurns: NonNegativeInt;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程消息编辑并重新发送命令（内部使用） */
 interface ThreadMessageEditAndResendCommand {
+  /** 命令类型标识 */
   type: "thread.message.edit-and-resend";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 编辑后的文本 */
   text: TrimmedNonEmptyString;
+  /** 模型选择配置（可选） */
   modelSelection?: ModelSelection;
+  /** Provider 启动选项（可选） */
   providerOptions?: ProviderStartOptions;
+  /** 助手消息交付模式（可选） */
   assistantDeliveryMode?: AssistantDeliveryMode;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程会话停止命令（内部使用） */
 interface ThreadSessionStopCommand {
+  /** 命令类型标识 */
   type: "thread.session.stop";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程活动追加命令（内部使用） */
 interface ThreadActivityAppendCommand {
+  /** 命令类型标识 */
   type: "thread.activity.append";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 活动数据 */
   activity: OrchestrationThreadActivity;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 可分发的客户端编排命令联合类型 */
 export type DispatchableClientOrchestrationCommand =
   | ProjectCreateCommand
   | ProjectMetaUpdateCommand
@@ -1285,6 +1479,7 @@ export type DispatchableClientOrchestrationCommand =
   | ThreadActivityAppendCommand
   | ThreadSessionStopCommand;
 
+/** 客户端编排命令联合类型（包含所有客户端可发送的命令） */
 export type ClientOrchestrationCommand =
   | ProjectCreateCommand
   | ProjectMetaUpdateCommand
@@ -1307,82 +1502,143 @@ export type ClientOrchestrationCommand =
   | ThreadActivityAppendCommand
   | ThreadSessionStopCommand;
 
+/** 线程会话设置命令（内部使用） */
 interface ThreadSessionSetCommand {
+  /** 命令类型标识 */
   type: "thread.session.set";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 会话数据 */
   session: OrchestrationSession;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程消息导入命令（内部使用） */
 interface ThreadMessagesImportCommand {
+  /** 命令类型标识 */
   type: "thread.messages.import";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 导入的消息列表 */
   messages: Array<ThreadHandoffImportedMessage>;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程助手消息增量更新命令（内部使用） */
 interface ThreadMessageAssistantDeltaCommand {
+  /** 命令类型标识 */
   type: "thread.message.assistant.delta";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 增量文本 */
   delta: string;
+  /** 轮次 ID（可选） */
   turnId?: TurnId;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程助手消息完成命令（内部使用） */
 interface ThreadMessageAssistantCompleteCommand {
+  /** 命令类型标识 */
   type: "thread.message.assistant.complete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 轮次 ID（可选） */
   turnId?: TurnId;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程建议计划新增/更新命令（内部使用） */
 interface ThreadProposedPlanUpsertCommand {
+  /** 命令类型标识 */
   type: "thread.proposed-plan.upsert";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 建议计划数据 */
   proposedPlan: OrchestrationProposedPlan;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程轮次差异完成命令（内部使用） */
 interface ThreadTurnDiffCompleteCommand {
+  /** 命令类型标识 */
   type: "thread.turn.diff.complete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 轮次 ID */
   turnId: TurnId;
+  /** 完成时间 */
   completedAt: IsoDateTime;
+  /** 检查点引用 */
   checkpointRef: CheckpointRef;
+  /** 检查点状态 */
   status: OrchestrationCheckpointStatus;
+  /** 检查点文件列表 */
   files: Array<OrchestrationCheckpointFile>;
+  /** 助手消息 ID（可选） */
   assistantMessageId?: MessageId;
+  /** 检查点轮次计数 */
   checkpointTurnCount: NonNegativeInt;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程回退完成命令（内部使用） */
 interface ThreadRevertCompleteCommand {
+  /** 命令类型标识 */
   type: "thread.revert.complete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 回退的轮次数 */
   turnCount: NonNegativeInt;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 线程对话回滚完成命令（内部使用） */
 interface ThreadConversationRollbackCompleteCommand {
+  /** 命令类型标识 */
   type: "thread.conversation.rollback.complete";
+  /** 命令唯一标识 */
   commandId: CommandId;
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 消息 ID */
   messageId: MessageId;
+  /** 回滚的轮次数 */
   numTurns: NonNegativeInt;
+  /** 移除的轮次 ID 列表（可选） */
   removedTurnIds?: Array<TurnId>;
+  /** 是否跳过附件清理（可选） */
   skipAttachmentPrune?: boolean;
+  /** 创建时间 */
   createdAt: IsoDateTime;
 }
 
+/** 内部编排命令联合类型 */
 export type InternalOrchestrationCommand =
   | ThreadSessionSetCommand
   | ThreadMessagesImportCommand
@@ -1396,8 +1652,10 @@ export type InternalOrchestrationCommand =
   | ThreadConversationRollbackCompleteCommand
   | ThreadDispatchQueuedTurnCommand;
 
+/** 编排命令联合类型（包含所有内部和客户端命令） */
 export type OrchestrationCommand = DispatchableClientOrchestrationCommand | InternalOrchestrationCommand;
 
+/** 编排事件类型枚举 */
 export type OrchestrationEventType =
   | "project.created"
   | "project.meta-updated"

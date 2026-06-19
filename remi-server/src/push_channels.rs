@@ -150,7 +150,7 @@ impl PushChannelManager {
     pub async fn publish(&self, channel: &str, notification: JsonRpcNotification) {
         let channels = self.channels.read().await;
         if let Some(tx) = channels.get(channel) {
-            let _ = tx.send(notification);
+            let _ = tx.send(notification.clone());
             debug!("发布推送到通道 {}: {}", channel, notification.method);
         }
     }

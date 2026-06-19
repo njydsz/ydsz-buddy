@@ -2,11 +2,11 @@
 
 use std::sync::Arc;
 
-use remi_provider::{ProviderKind, ProviderService};
+use remi_core::provider::ProviderKind;
+use remi_provider::ProviderService;
 use serde_json::Value;
 use tracing::info;
 
-use crate::error::ServerResult;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 

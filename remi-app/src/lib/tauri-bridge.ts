@@ -362,6 +362,72 @@ export const tauriBridge: DesktopBridge = {
     renameThread: async (threadId: string, title: string): Promise<void> => {
       return await invoke<void>('rename_thread', { threadId, title });
     },
+
+    getSnapshot: async (): Promise<any> => {
+      return await invoke('orchestration_get_snapshot');
+    },
+
+    getShellSnapshot: async (): Promise<any> => {
+      return await invoke('orchestration_get_shell_snapshot');
+    },
+
+    dispatchCommand: async (command: any): Promise<void> => {
+      return await invoke<void>('orchestration_dispatch_command', { command });
+    },
+
+    importThread: async (input: any): Promise<Thread> => {
+      return await invoke<Thread>('orchestration_import_thread', input);
+    },
+
+    repairState: async (): Promise<void> => {
+      return await invoke<void>('orchestration_repair_state');
+    },
+
+    getTurnDiff: async (input: any): Promise<string> => {
+      return await invoke<string>('orchestration_get_turn_diff', input);
+    },
+
+    getFullThreadDiff: async (input: any): Promise<string> => {
+      return await invoke<string>('orchestration_get_full_thread_diff', input);
+    },
+
+    replayEvents: async (fromSequenceExclusive: number): Promise<void> => {
+      return await invoke<void>('orchestration_replay_events', { fromSequenceExclusive });
+    },
+
+    subscribeShell: async (): Promise<void> => {
+      return await invoke<void>('orchestration_subscribe_shell');
+    },
+
+    unsubscribeShell: async (): Promise<void> => {
+      return await invoke<void>('orchestration_unsubscribe_shell');
+    },
+
+    subscribeThread: async (input: any): Promise<void> => {
+      return await invoke<void>('orchestration_subscribe_thread', input);
+    },
+
+    unsubscribeThread: async (input: any): Promise<void> => {
+      return await invoke<void>('orchestration_unsubscribe_thread', input);
+    },
+
+    onDomainEvent: (listener: (event: any) => void) => {
+      return listen('orchestration-domain-event', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onShellEvent: (listener: (event: any) => void) => {
+      return listen('orchestration-shell-event', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onThreadEvent: (listener: (event: any) => void) => {
+      return listen('orchestration-thread-event', (event) => {
+        listener(event.payload);
+      });
+    },
   },
 
   /**
@@ -378,6 +444,43 @@ export const tauriBridge: DesktopBridge = {
 
     getProviderStatus: async (): Promise<Record<string, any>> => {
       return await invoke('get_provider_status');
+    },
+
+    getComposerCapabilities: async (input: any): Promise<any> => {
+      return await invoke('provider_get_composer_capabilities', input);
+    },
+
+    compactThread: async (input: any): Promise<void> => {
+      return await invoke<void>('provider_compact_thread', input);
+    },
+
+    listCommands: async (input: any): Promise<any[]> => {
+      return await invoke('provider_list_commands', input);
+    },
+
+    listSkills: async (input: any): Promise<any[]> => {
+      return await invoke('provider_list_skills', input);
+    },
+
+    listPlugins: async (input: any): Promise<any[]> => {
+      return await invoke('provider_list_plugins', input);
+    },
+
+    readPlugin: async (input: any): Promise<any> => {
+      return await invoke('provider_read_plugin', input);
+    },
+
+    listAgents: async (input: any): Promise<any[]> => {
+      return await invoke('provider_list_agents', input);
+    },
+  },
+
+  /**
+   * 技能模块
+   */
+  skills: {
+    listLocal: async (): Promise<any[]> => {
+      return await invoke('skills_list_local');
     },
   },
 
@@ -434,20 +537,32 @@ export const tauriBridge: DesktopBridge = {
       return await invoke<void>('git_pull', { cwd });
     },
 
+    push: async (cwd: string): Promise<void> => {
+      return await invoke<void>('git_push', { cwd });
+    },
+
     readWorkingTreeDiff: async (cwd: string): Promise<string> => {
-      return await invoke<string>('git_read_working_tree_diff', { cwd });
+      return await invoke<string>('git_diff', { cwd, staged: false });
     },
 
     summarizeDiff: async (cwd: string): Promise<string> => {
-      return await invoke<string>('git_summarize_diff', { cwd });
+      return await invoke<string>('git_diff', { cwd, staged: true });
     },
 
     createBranch: async (cwd: string, branchName: string): Promise<void> => {
       return await invoke<void>('git_create_branch', { cwd, branchName });
     },
 
-    init: async (cwd: string): Promise<void> => {
-      return await invoke<void>('git_init', { cwd });
+    stash: async (cwd: string): Promise<void> => {
+      return await invoke<void>('git_stash', { cwd });
+    },
+
+    stashPop: async (cwd: string): Promise<void> => {
+      return await invoke<void>('git_stash_pop', { cwd });
+    },
+
+    log: async (cwd: string, maxCount?: number): Promise<string> => {
+      return await invoke<string>('git_log', { cwd, maxCount });
     },
   },
 

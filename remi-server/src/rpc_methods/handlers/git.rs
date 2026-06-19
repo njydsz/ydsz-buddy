@@ -2,11 +2,10 @@
 
 use std::sync::Arc;
 
-use remi_git::{GitCore, GitManager, GitStatusBroadcaster, StackedAction};
+use remi_git::{GitAction, GitCore, GitManager, GitRunStackedActionInput, GitStatusBroadcaster};
 use serde_json::Value;
 use tracing::info;
 
-use crate::error::ServerResult;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
@@ -69,7 +68,7 @@ pub async fn register_git_methods(
     let git_core = services.git_core.clone();
     let broadcaster = services.git_status_broadcaster.clone();
     router
-        .register("git.pull", move |params| {
+        .register("git.pull", move |params: Option<Value>| {
             let git_core = git_core.clone();
             let broadcaster = broadcaster.clone();
             async move {
@@ -84,7 +83,7 @@ pub async fn register_git_methods(
                         crate::error::ServerError::InvalidParams("Missing cwd".to_string())
                     })?;
 
-                git_core.pull(cwd).await?;
+                git_core.pull_current_branch(cwd).await?;
                 broadcaster.refresh_status(cwd).await?;
                 Ok(Value::Null)
             }
@@ -95,7 +94,7 @@ pub async fn register_git_methods(
     let git_manager = services.git_manager.clone();
     let broadcaster = services.git_status_broadcaster.clone();
     router
-        .register("git.runStackedAction", move |params| {
+        .register("git.runStackedAction", move |params: Option<Value>| {
             let git_manager = git_manager.clone();
             let broadcaster = broadcaster.clone();
             async move {
@@ -117,7 +116,7 @@ pub async fn register_git_methods(
                         crate::error::ServerError::InvalidParams("Missing action".to_string())
                     })?;
 
-                let action: StackedAction = action_str
+                let action: GitAction = action_str
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
@@ -126,7 +125,14 @@ pub async fn register_git_methods(
                     .and_then(|v| v.as_str())
                     .map(|s| s.to_string());
 
-                git_manager.run_stacked_action(cwd, action, message).await?;
+                let input = GitRunStackedActionInput {
+                    cwd: cwd.to_string(),
+                    action,
+                    commit_message: message,
+                    feature_branch: None,
+                };
+
+                git_manager.run_stacked_action(input).await?;
                 broadcaster.refresh_status(cwd).await?;
                 Ok(Value::Null)
             }
@@ -166,7 +172,7 @@ pub async fn register_git_methods(
     // git.checkout
     let git_core = services.git_core.clone();
     router
-        .register("git.checkout", move |params| {
+        .register("git.checkout", move |params: Option<Value>| {
             let git_core = git_core.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -187,7 +193,7 @@ pub async fn register_git_methods(
                         crate::error::ServerError::InvalidParams("Missing branch".to_string())
                     })?;
 
-                git_core.checkout(cwd, branch).await?;
+                git_core.checkout_branch(cwd, branch).await?;
                 Ok(Value::Null)
             }
         })

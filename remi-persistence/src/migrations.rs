@@ -153,16 +153,20 @@ pub const MIGRATIONS: &[Migration] = &[
 
             CREATE TABLE IF NOT EXISTS auth_pairing_links (
                 id TEXT PRIMARY KEY,
-                pairing_code TEXT NOT NULL UNIQUE,
+                credential TEXT NOT NULL UNIQUE,
+                method TEXT NOT NULL,
                 role TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                label TEXT,
                 created_at TEXT NOT NULL,
                 expires_at TEXT NOT NULL,
-                is_used INTEGER NOT NULL DEFAULT 0,
+                consumed_at TEXT,
                 revoked_at TEXT
             );
 
-            CREATE INDEX IF NOT EXISTS idx_pairing_links_code ON auth_pairing_links(pairing_code);
+            CREATE INDEX IF NOT EXISTS idx_pairing_links_credential ON auth_pairing_links(credential);
             CREATE INDEX IF NOT EXISTS idx_pairing_links_revoked ON auth_pairing_links(revoked_at);
+            CREATE INDEX IF NOT EXISTS idx_pairing_links_consumed ON auth_pairing_links(consumed_at);
         "#,
     },
     Migration {

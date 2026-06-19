@@ -755,27 +755,38 @@ pub type CheckpointId = String;
 /// ## 字段说明
 ///
 /// - `id`: 配对链接的唯一标识符
-/// - `pairing_code`: 配对码，用于客户端与服务端之间的安全绑定
-/// - `role`: 配对链接关联的角色（Owner/Client）
+/// - `credential`: 配对凭证（配对码），用于客户端与服务端之间的安全绑定
+/// - `method`: 引导方法（desktop-bootstrap 或 one-time-token）
+/// - `role`: 配对链接关联的角色（owner/client）
+/// - `subject`: 主体标识，描述配对链接的用途或来源
+/// - `label`: 可选标签，用于人类可读的描述
 /// - `created_at`: 配对链接的创建时间
 /// - `expires_at`: 配对链接的过期时间
-/// - `is_used`: 配对链接是否已被使用
+/// - `consumed_at`: 配对链接的消费时间，`Some` 表示已被使用
 /// - `revoked_at`: 配对链接的撤销时间，`Some` 表示已撤销
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairingLink {
     /// 配对链接的唯一标识符
     pub id: String,
-    /// 配对码，用于客户端与服务端之间的安全绑定
-    pub pairing_code: String,
-    /// 配对链接关联的角色
+    /// 配对凭证（配对码），用于客户端与服务端之间的安全绑定
+    pub credential: String,
+    /// 引导方法：desktop-bootstrap 或 one-time-token
+    pub method: String,
+    /// 配对链接关联的角色：owner 或 client
     pub role: String,
+    /// 主体标识，描述配对链接的用途或来源
+    pub subject: String,
+    /// 可选标签，用于人类可读的描述
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
     /// 配对链接的创建时间
     pub created_at: DateTime<Utc>,
     /// 配对链接的过期时间
     pub expires_at: DateTime<Utc>,
-    /// 配对链接是否已被使用
-    pub is_used: bool,
+    /// 配对链接的消费时间，`Some` 表示已被使用
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub consumed_at: Option<DateTime<Utc>>,
     /// 配对链接的撤销时间，`Some` 表示已撤销
     #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,

@@ -2,11 +2,11 @@
 
 use std::sync::Arc;
 
-use remi_orchestration::{OrchestrationCommand, OrchestrationEngine, ProjectionSnapshotQuery};
+use remi_core::commands::OrchestrationCommand;
+use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use serde_json::Value;
 use tracing::info;
 
-use crate::error::ServerResult;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
@@ -20,7 +20,7 @@ pub async fn register_orchestration_methods(
     // orchestration.dispatchCommand
     let engine = services.orchestration_engine.clone();
     router
-        .register("orchestration.dispatchCommand", move |params| {
+        .register("orchestration.dispatchCommand", move |params: Option<Value>| {
             let engine = engine.clone();
             async move {
                 let params = params.ok_or_else(|| {

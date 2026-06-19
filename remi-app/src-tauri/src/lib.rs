@@ -138,6 +138,13 @@ pub fn run() {
             git_list_branches,               // 列出分支
             git_checkout,                    // 切换分支
             git_commit,                      // 提交更改
+            git_push,                        // 推送当前分支
+            git_pull,                        // 拉取当前分支
+            git_diff,                        // 获取差异
+            git_log,                         // 获取提交日志
+            git_create_branch,               // 创建分支
+            git_stash,                       // 暂存更改
+            git_stash_pop,                   // 恢复暂存
 
             // 工作区命令
             list_projects,                   // 列出项目
