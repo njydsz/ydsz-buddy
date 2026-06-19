@@ -75,7 +75,6 @@
 #### 共享模块 (packages)
 - ✅ @remi-code/contracts → @remi-code/contracts
 - ✅ @remi-code/shared → @remi-code/shared
-- ✅ effect-acp → remi-acp
 
 ---
 
@@ -92,8 +91,7 @@ remi-code/
 │   └── tauri.conf.json         # Tauri 配置（前端相关）
 ├── packages/                   # 共享包
 │   ├── contracts/             # 类型契约
-│   ├── shared/                # 共享工具
-│   └── remi-acp/             # ACP 协议实现
+│   └── shared/                # 共享工具
 ├── docs/                       # 文档
 ├── scripts/                    # 构建脚本
 └── .github/                    # CI/CD
@@ -240,15 +238,6 @@ packages/
 │   │   ├── conversationEdit.ts # 对话编辑
 │   │   └── ...
 │   └── package.json
-│
-└── remi-acp/                  # ACP 协议
-    ├── src/
-    │   ├── client.ts
-    │   ├── agent.ts
-    │   ├── protocol.ts
-    │   ├── rpc.ts
-    │   └── ...
-    └── package.json
 ```
 
 ---
@@ -1160,12 +1149,10 @@ npm install
 # 在 remi-code 根目录
 mkdir -p packages/contracts/src
 mkdir -p packages/shared/src
-mkdir -p packages/remi-acp/src
 
 # 复制 Remi Code 共享包源码
 cp -r D:/Code/github/RemiCode/packages/contracts/src/* packages/contracts/src/
 cp -r D:/Code/github/RemiCode/packages/shared/src/* packages/shared/src/
-cp -r D:/Code/github/RemiCode/packages/effect-acp/src/* packages/remi-acp/src/
 
 # 更新 package.json 中的包名
 # 将所有 @remi-code/* 替换为 @remi-code/*

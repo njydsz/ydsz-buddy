@@ -320,14 +320,6 @@ remi-code/
 │   │   │   ├── chatThreads.ts
 │   │   │   └── ...
 │   │   └── package.json
-│   │
-│   └── remi-acp/               # ACP 协议实现
-│       ├── src/
-│       │   ├── client.ts
-│       │   ├── agent.ts
-│       │   ├── protocol.ts
-│       │   └── ...
-│       └── package.json
 │
 ├── BACKEND_MIGRATION_FULL_PLAN.md    # 后端迁移全案
 ├── MIGRATION_AND_ITERATION_PLAN.md   # 前端迁移与迭代计划
