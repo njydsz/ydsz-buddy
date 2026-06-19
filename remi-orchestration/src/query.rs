@@ -1,13 +1,88 @@
-//! 读模型查询服务模块
+//! # 读模型查询服务模块
 //!
-//! 本模块提供对编排引擎读模型（投影数据）的查询接口，支持：
-//! - 完整快照查询（包含所有项目和线程的完整信息）
-//! - Shell 快照查询（仅包含基本信息，适用于列表展示）
-//! - 单个线程/项目的详情查询
-//! - 投影数据统计（项目数、线程数）
+//! 本模块提供对编排引擎读模型（投影数据）的查询接口，是 CQRS 架构中查询侧的核心组件。
 //!
-//! 查询服务独立于编排引擎，可直接从投影仓库读取数据，
-//! 适用于不需要命令分发能力的只读场景。
+//! ## 核心功能
+//!
+//! - **完整快照查询**：返回包含所有项目和线程完整信息的 [`OrchestrationReadModel`]
+//! - **Shell 快照查询**：返回仅包含基本信息的精简快照 [`OrchestrationShellSnapshot`]，适用于列表展示
+//! - **详情查询**：支持单个线程/项目的详细信息查询
+//! - **数据统计**：提供投影数据统计（项目数、线程数）
+//!
+//! ## 架构位置
+//!
+//! ```text
+//! ┌──────────────────────────────────────────────────┐
+//! │              查询侧 (Query Side)                  │
+//! │                                                    │
+//! │  ┌─────────────────────┐                          │
+//! │  │ ProjectionSnapshotQuery │                      │
+//! │  ├─────────────────────┤                          │
+//! │  │ get_snapshot()          │ ← 完整快照            │
+//! │  │ get_shell_snapshot()    │ ← 精简快照            │
+//! │  │ get_thread_detail()     │ ← 线程详情            │
+//! │  │ get_project_detail()    │ ← 项目详情            │
+//! │  │ get_counts()            │ ← 数据统计            │
+//! │  └──────────┬──────────┘                          │
+//! │             │                                      │
+//! │             ↓                                      │
+//! │  ┌─────────────────────┐                          │
+//! │  │ SqliteProjectionRepository │                   │
+//! │  │     (投影仓库/读模型)     │                     │
+//! │  └─────────────────────┘                          │
+//! └──────────────────────────────────────────────────┘
+//! ```
+//!
+//! ## 使用场景
+//!
+//! | 场景 | 推荐接口 | 说明 |
+//! |------|---------|------|
+//! | 前端页面初始化 | `get_snapshot()` | 获取全量数据 |
+//! | 状态轮询/心跳检测 | `get_shell_snapshot()` | 轻量数据，低带宽 |
+//! | 线程详情页 | `get_thread_detail()` | 含消息、活动等完整数据 |
+//! | 项目详情页 | `get_project_detail()` | 项目完整配置 |
+//! | 监控面板 | `get_counts()` | 实体数量统计 |
+//!
+//! ## 与 Engine 查询接口的区别
+//!
+//! - **本模块（`ProjectionSnapshotQuery`）**：独立查询服务，直接从投影仓库读取，
+//!   适用于不需要命令分发能力的只读场景。`snapshot_sequence` 固定为 0。
+//! - **[`OrchestrationEngine::get_snapshot`]**：引擎内置查询，返回准确的 `snapshot_sequence`，
+//!   适用于需要版本控制和增量同步的场景。
+//!
+//! ## 使用示例
+//!
+//! ```rust,ignore
+//! use std::sync::Arc;
+//! use remi_orchestration::ProjectionSnapshotQuery;
+//! use remi_persistence::SqliteProjectionRepository;
+//!
+//! // 创建查询服务
+//! let query = ProjectionSnapshotQuery::new(
+//!     Arc::new(projection_repo),
+//! );
+//!
+//! // 获取 Shell 快照（适用于列表展示）
+//! let shell = query.get_shell_snapshot().await?;
+//! println!("项目数: {}, 线程数: {}", shell.projects.len(), shell.threads.len());
+//!
+//! // 获取线程详情
+//! if let Some(thread) = query.get_thread_detail(thread_id).await? {
+//!     println!("线程标题: {}", thread.title);
+//!     println!("消息数: {}", thread.messages.len());
+//! }
+//!
+//! // 获取统计数据
+//! let counts = query.get_counts().await?;
+//! println!("项目: {}, 线程: {}", counts.project_count, counts.thread_count);
+//! ```
+//!
+//! ## 注意事项
+//!
+//! - 查询服务直接从投影仓库读取，不经过命令处理流程，因此是**最终一致**的
+//! - `snapshot_sequence` 在本模块中固定为 0，如需准确序列号请使用 Engine 接口
+//! - 所有查询接口均为异步方法，底层通过 SQLite 读取
+//! - 查询操作是只读的，不会修改任何状态
 
 use std::sync::Arc;
 

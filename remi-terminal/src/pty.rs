@@ -7,13 +7,6 @@ use std::sync::{Arc, Mutex};
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use tracing::{debug, error};
 
-/// PTY 大小
-#[derive(Debug, Clone, Copy)]
-pub struct PtySize {
-    pub cols: u16,
-    pub rows: u16,
-}
-
 /// PTY 进程
 pub struct PtyProcess {
     pid: u32,
@@ -151,7 +144,7 @@ impl PtyProcess {
     /// 检查进程是否还在运行
     pub fn is_alive(&self) -> bool {
         if let Some(ref child) = self.child {
-            if let Ok(c) = child.lock() {
+            if let Ok(mut c) = child.lock() {
                 // 尝试等待，如果返回 None 说明还在运行
                 return c.try_wait().ok().flatten().is_none();
             }

@@ -17,6 +17,29 @@
 //! 本模块采用适配器模式（Adapter Pattern），将不同 AI Provider 的异构接口统一为标准接口，
 //! 使上层业务无需关心底层 Provider 的具体实现差异。
 //!
+//! # 核心组件
+//!
+//! - **[`adapter`] 模块**：定义统一的 Provider 适配器接口（`ProviderAdapter` trait）
+//! - **[`adapters`] 模块**：实现多种 AI Provider 的具体适配器（Claude、Codex、Cursor 等）
+//! - **[`error`] 模块**：定义统一的错误类型（`ProviderError` 枚举）
+//! - **[`health`] 模块**：提供 Provider 健康状态监控功能
+//! - **[`reaper`] 模块**：自动清理过期会话，防止资源泄漏
+//! - **[`service`] 模块**：提供跨 Provider 的统一操作接口（门面模式）
+//!
+//! # 设计模式
+//!
+//! - **适配器模式（Adapter Pattern）**：将不同 Provider 的异构接口统一为标准接口
+//! - **门面模式（Facade Pattern）**：通过 `ProviderService` 提供统一的访问入口
+//! - **策略模式（Strategy Pattern）**：不同适配器可互换，实现不同的 Provider 策略
+//!
+//! # 使用场景
+//!
+//! 本模块适用于需要同时支持多种 AI Provider 的场景，例如：
+//! - 多模型对话系统
+//! - AI 助手应用
+//! - 智能客服平台
+//! - 代码生成工具
+//!
 //! # 示例
 //!
 //! ```rust,ignore
@@ -51,6 +74,11 @@ pub mod error;
 /// 提供 Provider 健康状态监控功能，支持定期检查 Provider 可用性并缓存状态。
 pub mod health;
 
+/// JSON-RPC over stdio 客户端
+///
+/// 提供与 Provider 进程通过标准输入输出进行 JSON-RPC 通信的能力。
+pub mod jsonrpc_client;
+
 /// Provider 会话清理模块
 ///
 /// 提供自动清理过期会话的功能，防止会话资源泄漏。
@@ -65,5 +93,6 @@ pub mod service;
 pub use adapter::*;
 pub use error::*;
 pub use health::*;
+pub use jsonrpc_client::*;
 pub use reaper::*;
 pub use service::*;

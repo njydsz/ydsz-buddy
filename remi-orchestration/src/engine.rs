@@ -1,11 +1,154 @@
-//! 编排引擎核心模块
+//! # 编排引擎核心模块
 //!
-//! 本模块实现了基于 CQRS + Event Sourcing 模式的编排引擎，负责：
+//! 本模块实现了基于 CQRS + Event Sourcing 模式的编排引擎，是 Remi 编排层的核心组件。
+//!
+//! ## 核心职责
+//!
 //! - 接收并串行化处理编排命令（通过内部 MPSC 通道）
 //! - 将命令转换为领域事件并持久化到事件存储
 //! - 将事件应用到投影仓库以维护读模型
 //! - 通过广播通道发布领域事件供 Reactor 消费
 //! - 提供完整快照和轻量 Shell 快照查询接口
+//!
+//! ## 架构设计
+//!
+//! ```text
+//! ┌─────────────────────────────────────────────────────────────┐
+//! │                    OrchestrationEngine                       │
+//! ├─────────────────────────────────────────────────────────────┤
+//! │                                                              │
+//! │  ┌──────────────┐    ┌──────────────────────────────────┐  │
+//! │  │ command_tx   │───→│  process_commands (后台任务)      │  │
+//! │  │ (MPSC 发送端)│    │  ┌────────────────────────────┐  │  │
+//! │  └──────────────┘    │  │ handle_command             │  │  │
+//! │                      │  │  1. command_to_event       │  │  │
+//! │  ┌──────────────┐    │  │  2. event_store.append    │  │  │
+//! │  │ current_seq  │    │  │  3. apply_projection     │  │  │
+//! │  │ (RwLock)     │    │  │  4. broadcast.send       │  │  │
+//! │  └──────────────┘    │  └────────────────────────────┘  │  │
+//! │                      │  └────────────────────────────────┘  │
+//! │  ┌──────────────┐    └──────────────────────────────────────┘
+//! │  │ event_tx     │───→ broadcast 通道（供 Reactor 订阅）
+//! │  │ (broadcast)  │
+//! │  └──────────────┘
+//! │                                                              │
+//! │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+//! │  │ event_store  │    │ projection_  │    │  对外接口    │  │
+//! │  │ (Arc)        │    │ repo (Arc)   │    │ - dispatch   │  │
+//! │  └──────────────┘    └──────────────┘    │ - snapshot   │  │
+//! │                                           │ - stream     │  │
+//! │                                           └──────────────┘  │
+//! └─────────────────────────────────────────────────────────────┘
+//! ```
+//!
+//! ## 命令处理流程
+//!
+//! ```text
+//! dispatch(command)
+//!     │
+//!     ↓
+//! ┌─────────────────┐
+//! │ 创建 oneshot 通道│
+//! │ 封装 CommandMessage│
+//! └────────┬────────┘
+//!          │
+//!          ↓
+//! ┌─────────────────┐
+//! │ 发送到 MPSC 队列 │
+//! │ command_tx.send()│
+//! └────────┬────────┘
+//!          │
+//!          ↓ (后台任务)
+//! ┌─────────────────┐
+//! │ handle_command  │
+//! │  ├─ command_to_event (命令→事件)
+//! │  ├─ event_store.append (持久化)
+//! │  ├─ update_sequence (更新序列号)
+//! │  ├─ apply_projection (更新读模型)
+//! │  └─ event_tx.send (广播事件)
+//! └────────┬────────┘
+//!          │
+//!          ↓
+//! ┌─────────────────┐
+//! │ oneshot.send()  │
+//! │ 返回结果给调用方 │
+//! └─────────────────┘
+//! ```
+//!
+//! ## 命令类型索引
+//!
+//! | 分类 | 命令 | 说明 |
+//! |------|------|------|
+//! | 项目 | `ProjectCreate` | 创建项目 |
+//! | 项目 | `ProjectMetaUpdate` | 更新项目元数据 |
+//! | 项目 | `ProjectDelete` | 删除项目 |
+//! | 线程 | `ThreadCreate` | 创建线程 |
+//! | 线程 | `ThreadDelete` | 删除线程 |
+//! | 线程 | `ThreadArchive` | 归档线程 |
+//! | 线程 | `ThreadUnarchive` | 取消归档 |
+//! | 线程 | `ThreadMetaUpdate` | 更新线程元数据 |
+//! | 线程 | `ThreadRuntimeModeSet` | 设置运行模式 |
+//! | 线程 | `ThreadInteractionModeSet` | 设置交互模式 |
+//! | Turn | `ThreadTurnStart` | 启动 Turn |
+//! | Turn | `ThreadTurnInterrupt` | 中断 Turn |
+//! | Turn | `ThreadTurnDispatchQueued` | 分发排队中的 Turn |
+//! | 审批 | `ThreadApprovalRespond` | 审批响应 |
+//! | 审批 | `ThreadUserInputRespond` | 用户输入响应 |
+//! | 检查点 | `ThreadCheckpointRevert` | 检查点回滚 |
+//! | 检查点 | `ThreadConversationRollback` | 对话回滚 |
+//! | 消息 | `ThreadMessageEditAndResend` | 编辑并重发消息 |
+//! | 消息 | `ThreadSessionStop` | 停止会话 |
+//! | 活动 | `ThreadActivityAppend` | 追加活动记录 |
+//! | 内部 | `ThreadSessionSet` | 设置会话状态 |
+//! | 内部 | `ThreadMessagesImport` | 导入消息 |
+//! | 内部 | `ThreadMessageAssistantDelta` | 助手消息增量更新 |
+//! | 内部 | `ThreadMessageAssistantComplete` | 助手消息完成 |
+//! | 内部 | `ThreadProposedPlanUpsert` | 更新/插入提议计划 |
+//! | 内部 | `ThreadTurnDiffComplete` | Turn 差异完成 |
+//! | 内部 | `ThreadRevertComplete` | 回滚完成 |
+//! | 内部 | `ThreadConversationRollbackComplete` | 对话回滚完成 |
+//!
+//! ## 线程安全模型
+//!
+//! - **命令处理**：通过 MPSC 通道串行化，保证顺序一致性
+//! - **序列号**：使用 `RwLock<Sequence>` 保护，支持并发读取、独占写入
+//! - **共享状态**：使用 `Arc` 管理，支持多线程安全共享
+//! - **事件广播**：使用 `broadcast` 通道，支持多订阅者并发消费
+//!
+//! ## 通道容量配置
+//!
+//! | 通道类型 | 容量 | 说明 |
+//! |---------|------|------|
+//! | 命令队列 (MPSC) | 1000 | 命令处理队列，背压保护 |
+//! | 事件广播 (broadcast) | 10000 | 事件发布通道，支持多订阅者 |
+//!
+//! ## 使用示例
+//!
+//! ```rust,ignore
+//! use std::sync::Arc;
+//! use remi_orchestration::OrchestrationEngine;
+//! use remi_persistence::{SqliteEventStore, SqliteProjectionRepository};
+//!
+//! // 创建引擎（自动启动后台命令处理任务）
+//! let engine = OrchestrationEngine::new(
+//!     Arc::new(event_store),
+//!     Arc::new(projection_repo),
+//! );
+//!
+//! // 分发命令
+//! let sequence = engine.dispatch(command).await?;
+//!
+//! // 查询快照
+//! let snapshot = engine.get_shell_snapshot().await?;
+//!
+//! // 订阅事件流
+//! let mut event_rx = engine.stream_domain_events();
+//! tokio::spawn(async move {
+//!     while let Ok(event) = event_rx.recv().await {
+//!         // 处理事件...
+//!     }
+//! });
+//! ```
 
 use std::sync::Arc;
 

@@ -186,7 +186,7 @@ pub struct PairingLink {
 ///
 /// 在已认证的 HTTP 会话基础上，调用 [`AuthService::issue_websocket_token`] 颁发
 /// WebSocket 专用令牌，客户端在发起 WebSocket 连接时携带此令牌完成身份验证。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct WebSocketTokenResult {
     /// WebSocket 专用令牌字符串，用于 WebSocket 升级请求的身份验证
     pub token: String,

@@ -5,9 +5,77 @@
 //!
 //! # 核心概念
 //!
-//! - [`ProviderAdapter`]: 适配器 trait，定义了与 Provider 交互的标准接口
-//! - [`ProviderCapabilities`]: 适配器能力声明，描述 Provider 支持的功能特性
-//! - [`SessionModelSwitchMode`]: 会话内模型切换模式枚举
+//! - **[`ProviderAdapter`]**: 适配器 trait，定义了与 Provider 交互的标准接口
+//! - **[`ProviderCapabilities`]**: 适配器能力声明，描述 Provider 支持的功能特性
+//! - **[`SessionModelSwitchMode`]**: 会话内模型切换模式枚举
+//!
+//! # 设计原则
+//!
+//! - **统一接口**：屏蔽不同 Provider 的实现差异，提供一致的调用方式
+//! - **异步优先**：所有操作均为异步，适配 I/O 密集型场景
+//! - **线程安全**：要求实现 `Send + Sync`，支持并发访问
+//! - **可扩展性**：部分方法提供默认实现，新适配器可选择性覆盖
+//! - **最小接口**：只包含必要的核心方法，避免过度抽象
+//!
+//! # 会话生命周期
+//!
+//! 典型的会话生命周期如下：
+//!
+//! ```text
+//! ┌─────────────┐
+//! │ start_session│ ← 创建并启动会话
+//! └──────┬──────┘
+//!        ↓
+//! ┌─────────────┐
+//! │  send_turn  │ ← 发送用户消息，获取响应（可多次调用）
+//! └──────┬──────┘
+//!        ↓
+//! ┌─────────────┐
+//! │ steer_turn  │ ← （可选）在运行中重定向对话
+//! └──────┬──────┘
+//!        ↓
+//! ┌──────────────┐
+//! │interrupt_turn│ ← （可选）中断正在执行的 Turn
+//! └──────┬───────┘
+//!        ↓
+//! ┌─────────────┐
+//! │stop_session │ ← 停止并清理会话
+//! └─────────────┘
+//! ```
+//!
+//! # 模块依赖
+//!
+//! - 依赖 `remi_core::provider` 中的核心类型定义
+//! - 被 [`crate::adapters`] 中的具体适配器实现依赖
+//! - 被 [`crate::service`] 中的服务门面依赖
+//!
+//! # 使用示例
+//!
+//! ```rust,ignore
+//! use remi_provider::adapter::{ProviderAdapter, ProviderCapabilities};
+//! use async_trait::async_trait;
+//!
+//! #[async_trait]
+//! impl ProviderAdapter for MyAdapter {
+//!     fn provider_kind(&self) -> ProviderKind {
+//!         ProviderKind::Custom
+//!     }
+//!
+//!     fn capabilities(&self) -> ProviderCapabilities {
+//!         ProviderCapabilities {
+//!             session_model_switch: SessionModelSwitchMode::InSession,
+//!             supports_skill_mentions: true,
+//!             // ... 其他能力配置
+//!         }
+//!     }
+//!
+//!     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
+//!         // 实现会话启动逻辑
+//!     }
+//!
+//!     // ... 实现其他必需方法
+//! }
+//! ```
 
 use async_trait::async_trait;
 use remi_core::provider::{

@@ -105,6 +105,7 @@ struct TerminalSession {
     updated_at: DateTime<Utc>,
     cols: u16,
     rows: u16,
+    pid: Option<u32>,
     process: Option<PtyProcess>,
     #[allow(dead_code)]
     env: HashMap<String, String>,
@@ -209,8 +210,9 @@ impl TerminalManager {
             updated_at: Utc::now(),
             cols,
             rows,
+            pid: None,
             process: None,
-            env: input.env.unwrap_or_default(),
+            env: input.env.clone().unwrap_or_default(),
         };
 
         // 启动 PTY 进程

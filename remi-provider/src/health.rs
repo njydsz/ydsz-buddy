@@ -8,9 +8,34 @@
 //!
 //! # 设计目标
 //!
-//! - **实时监控**：及时发现 Provider 不可用情况
-//! - **性能优化**：通过缓存减少重复检查开销
-//! - **容错处理**：检查失败时返回降级状态而非错误
+//! - **实时监控**：及时发现 Provider 不可用情况，快速响应故障
+//! - **性能优化**：通过缓存减少重复检查开销，提高查询效率
+//! - **容错处理**：检查失败时返回降级状态而非错误，保证系统稳定性
+//! - **并发安全**：使用 `RwLock` 保证多线程环境下的数据一致性
+//!
+//! # 核心组件
+//!
+//! - **[`ProviderHealthStatus`]**: 健康状态信息结构体，记录单个 Provider 的状态
+//! - **[`ProviderHealth`]**: 健康检查服务，提供检查和查询接口
+//!
+//! # 使用场景
+//!
+//! - **启动检查**：应用启动时检查所有 Provider 可用性
+//! - **定期轮询**：定时任务监控 Provider 状态变化
+//! - **请求前检查**：快速查询缓存状态，避免重复检查
+//! - **故障诊断**：通过状态消息定位问题原因
+//!
+//! # 性能特性
+//!
+//! - 缓存读取使用读锁，不阻塞其他读操作
+//! - 缓存写入使用写锁，保证数据一致性
+//! - 批量检查支持部分失败，不影响整体流程
+//!
+//! # 模块依赖
+//!
+//! - 依赖 `remi_core::provider::ProviderKind` 标识 Provider 类型
+//! - 依赖 `chrono` 库处理时间戳
+//! - 被 [`crate::service`] 可选集成，用于服务级别的健康监控
 //!
 //! # 使用示例
 //!
@@ -29,6 +54,11 @@
 //! // 批量检查
 //! let providers = vec![ProviderKind::ClaudeAgent, ProviderKind::Codex];
 //! let statuses = health.check_all_health(&providers).await;
+//!
+//! // 查询缓存状态（不执行实际检查）
+//! if let Some(cached) = health.get_cached_status(ProviderKind::ClaudeAgent).await {
+//!     println!("上次检查时间: {}", cached.last_checked);
+//! }
 //! ```
 
 use std::collections::HashMap;

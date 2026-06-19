@@ -10,20 +10,91 @@
 //! - 根据事件类型执行相应的处理逻辑
 //! - 支持优雅关闭（通过 shutdown 信号）
 //!
+//! # 架构位置
+//!
+//! ```text
+//! ┌─────────────────┐
+//! │ OrchestrationEngine │
+//! │  (事件发布源)       │
+//! └────────┬────────┘
+//!          │ broadcast
+//!          ↓
+//! ┌─────────────────┐
+//! │   Reactor 层    │
+//! ├─────────────────┤
+//! │ ProviderCommand │ ← 处理 Turn 启动/中断/会话停止
+//! │ Checkpoint      │ ← 处理检查点回滚
+//! │ ThreadDeletion  │ ← 处理线程删除清理
+//! └─────────────────┘
+//!          │
+//!          ↓
+//! ┌─────────────────┐
+//! │  外部系统调用   │
+//! │ (Provider/API)  │
+//! └─────────────────┘
+//! ```
+//!
 //! # 内置反应器
 //!
 //! 本模块提供以下反应器实现：
 //!
-//! - [`ProviderCommandReactor`][]: Provider 命令反应器，监听 Turn 启动/中断/会话停止事件
-//! - [`CheckpointReactor`][]: 检查点反应器，监听检查点回滚事件
-//! - [`ThreadDeletionReactor`][]: 线程删除反应器，监听线程删除事件并清理相关资源
+//! | 反应器名称 | 职责 | 监听事件 |
+//! |-----------|------|---------|
+//! | [`ProviderCommandReactor`] | Provider 命令反应器 | Turn 启动/中断、会话停止 |
+//! | [`CheckpointReactor`] | 检查点反应器 | 检查点回滚请求 |
+//! | [`ThreadDeletionReactor`] | 线程删除反应器 | 线程删除事件 |
 //!
-//! # 扩展性
+//! # 使用示例
 //!
-//! 可根据业务需求新增自定义反应器，只需：
-//! 1. 定义新的反应器结构体
-//! 2. 实现 `new` 和 `run` 方法
-//! 3. 在 `handle_event` 中实现具体的事件处理逻辑
+//! ```rust,ignore
+//! use std::sync::Arc;
+//! use remi_orchestration::{OrchestrationEngine, ProviderCommandReactor};
+//! use tokio::sync::broadcast;
+//!
+//! // 创建编排引擎
+//! let engine = Arc::new(OrchestrationEngine::new(event_store, projection_repo));
+//!
+//! // 创建关闭信号通道
+//! let (shutdown_tx, _) = broadcast::channel(1);
+//!
+//! // 创建并启动反应器
+//! let reactor = ProviderCommandReactor::new(engine.clone());
+//! let shutdown_rx = shutdown_tx.subscribe();
+//!
+//! tokio::spawn(async move {
+//!     reactor.run(shutdown_rx).await.unwrap();
+//! });
+//!
+//! // 需要关闭时发送信号
+//! shutdown_tx.send(()).ok();
+//! ```
+//!
+//! # 扩展指南
+//!
+//! 可根据业务需求新增自定义反应器，步骤如下：
+//!
+//! 1. **定义反应器结构体**：包含必要的依赖（通常是 `Arc<OrchestrationEngine>`）
+//! 2. **实现 `new` 方法**：初始化反应器实例
+//! 3. **实现 `run` 方法**：
+//!    - 订阅事件流：`engine.stream_domain_events()`
+//!    - 使用 `tokio::select!` 同时监听关闭信号和事件
+//!    - 在 `handle_event` 中实现具体逻辑
+//! 4. **实现 `handle_event` 方法**：
+//!    - 使用 `match` 匹配感兴趣的事件类型
+//!    - 对不关心的事件直接忽略（`_ => {}`）
+//!    - 错误处理：记录日志但不中断反应器运行
+//!
+//! # 错误处理策略
+//!
+//! - **事件处理错误**：记录警告日志，继续处理后续事件
+//! - **事件接收错误**：记录警告日志，通常表示通道已关闭
+//! - **关闭信号**：优雅退出，完成当前处理后返回
+//!
+//! # 性能考虑
+//!
+//! - 每个反应器独立订阅事件流，互不干扰
+//! - 事件处理应尽量异步化，避免阻塞反应器循环
+//! - 对于耗时操作，建议 spawn 新的异步任务
 
 use std::sync::Arc;
 

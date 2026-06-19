@@ -1091,7 +1091,6 @@ export interface ThreadTurnStartRequestedPayload {
   createdAt: IsoDateTime;
 }
 
-export const ThreadTurnQueuedPayload = ThreadTurnStartRequestedPayload;
 export type ThreadTurnQueuedPayload = ThreadTurnStartRequestedPayload;
 
 export interface ThreadTurnInterruptRequestedPayload {

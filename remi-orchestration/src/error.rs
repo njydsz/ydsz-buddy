@@ -1,8 +1,61 @@
-//! 编排引擎错误类型定义模块
+//! # 编排引擎错误类型定义模块
 //!
 //! 本模块定义了编排引擎（Orchestration Engine）中所有可能出现的错误类型，
 //! 以及统一的结果类型别名。基于 `thiserror` 派生宏实现 `Display` 和 `Error` trait，
 //! 提供结构化的错误分类与友好的错误信息输出。
+//!
+//! ## 错误分类体系
+//!
+//! ```text
+//! OrchestrationError
+//! ├── PersistenceError      ← 底层存储引擎错误（SQLite I/O、约束冲突等）
+//! ├── SerializationError    ← JSON 序列化/反序列化失败
+//! ├── CommandError          ← 命令校验或处理逻辑错误
+//! ├── ProjectionError       ← 投影应用过程中的错误
+//! └── InternalError         ← 引擎内部运行时错误（通道关闭等）
+//! ```
+//!
+//! ## 错误处理策略
+//!
+//! - **持久化错误**：通常表示底层存储异常，需要检查数据库状态
+//! - **序列化错误**：检查数据结构兼容性，可能是版本不匹配
+//! - **命令错误**：业务逻辑错误，根据错误信息进行修正
+//! - **投影错误**：读模型更新失败，可能需要重建投影
+//! - **内部错误**：运行时异常，通常是通道关闭等生命周期问题
+//!
+//! ## 错误转换
+//!
+//! 本模块实现了以下错误转换：
+//!
+//! - `From<PersistenceError>`: 通过 `#[from]` 自动转换，支持 `?` 运算符
+//! - `From<serde_json::Error>`: 手动实现，将 JSON 错误转为 `SerializationError`
+//!
+//! ## 使用示例
+//!
+//! ```rust,ignore
+//! use remi_orchestration::{OrchestrationError, OrchestrationResult};
+//!
+//! fn process_command() -> OrchestrationResult<()> {
+//!     // 使用 ? 运算符自动转换错误
+//!     let event = serde_json::from_str::<Event>(json_str)?;
+//!     
+//!     // 手动构造特定错误类型
+//!     if !valid {
+//!         return Err(OrchestrationError::CommandError("参数不合法".into()));
+//!     }
+//!     
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ## 扩展指南
+//!
+//! 如需添加新的错误类型：
+//!
+//! 1. 在 `OrchestrationError` 枚举中添加新变体
+//! 2. 使用 `#[error("...")]` 定义错误消息格式
+//! 3. 如需自动转换，添加 `#[from]` 属性或实现 `From` trait
+//! 4. 更新本文档的错误分类说明
 
 use thiserror::Error;
 

@@ -13,10 +13,40 @@
 //!
 //! # 设计特点
 //!
-//! - **统一接口**：屏蔽不同 Provider 的实现差异
+//! - **统一接口**：屏蔽不同 Provider 的实现差异，提供一致的调用方式
 //! - **并发安全**：使用 `RwLock` 保证多线程环境下的安全性
 //! - **事件驱动**：通过 `broadcast` 通道实现事件订阅和广播
 //! - **容错处理**：部分操作失败不影响整体服务可用性
+//! - **路由透明**：根据 Provider 类型自动路由到对应适配器
+//!
+//! # 架构设计
+//!
+//! ```text
+//! ┌─────────────────────────────────────┐
+//! │      ProviderService (门面)          │
+//! ├─────────────────────────────────────┤
+//! │  - adapters: HashMap<ProviderKind>  │
+//! │  - event_tx: broadcast::Sender      │
+//! └─────────────────────────────────────┘
+//!           ↓           ↓           ↓
+//!    ┌──────────┐ ┌──────────┐ ┌──────────┐
+//!    │  Claude  │ │  Codex   │ │  Cursor  │
+//!    │ Adapter  │ │ Adapter  │ │ Adapter  │
+//!    └──────────┘ └──────────┘ └──────────┘
+//! ```
+//!
+//! # 使用场景
+//!
+//! - **多模型应用**：同时支持多种 AI Provider 的应用
+//! - **模型切换**：在运行时动态切换不同的 Provider
+//! - **事件监控**：订阅 Provider 事件流，实现实时监控和日志
+//! - **能力查询**：根据 Provider 能力动态调整业务逻辑
+//!
+//! # 模块依赖
+//!
+//! - 依赖 [`crate::adapter::ProviderAdapter`] trait 定义适配器接口
+//! - 依赖 [`crate::error`] 模块定义错误类型
+//! - 被上层业务模块依赖，作为 Provider 操作的统一入口
 //!
 //! # 使用示例
 //!
@@ -43,6 +73,14 @@
 //! // 发送消息
 //! let turn_input = TurnInput { /* ... */ };
 //! let result = service.send_turn(turn_input).await?;
+//!
+//! // 订阅事件
+//! let mut rx = service.stream_events();
+//! tokio::spawn(async move {
+//!     while let Ok(event) = rx.recv().await {
+//!         println!("收到事件: {:?}", event);
+//!     }
+//! });
 //! ```
 
 use std::collections::HashMap;

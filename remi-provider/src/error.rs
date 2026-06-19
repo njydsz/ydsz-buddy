@@ -5,12 +5,27 @@
 //!
 //! # 错误类型
 //!
-//! - [`ProviderError::ProviderNotFound`]: Provider 未找到
-//! - [`ProviderError::SessionNotFound`]: 会话未找到
-//! - [`ProviderError::SessionAlreadyExists`]: 会话已存在
-//! - [`ProviderError::UnsupportedOperation`]: 不支持的操作
-//! - [`ProviderError::AdapterError`]: 适配器内部错误
-//! - [`ProviderError::InternalError`]: 内部错误
+//! | 变体 | 说明 | 典型场景 |
+//! |------|------|----------|
+//! | [`ProviderError::ProviderNotFound`] | Provider 未找到 | Provider 名称拼写错误、适配器未注册 |
+//! | [`ProviderError::SessionNotFound`] | 会话未找到 | 会话已过期、thread_id 无效 |
+//! | [`ProviderError::SessionAlreadyExists`] | 会话已存在 | 重复创建相同 thread_id 的会话 |
+//! | [`ProviderError::UnsupportedOperation`] | 不支持的操作 | 调用了适配器未实现的可选方法 |
+//! | [`ProviderError::AdapterError`] | 适配器内部错误 | 底层 SDK 调用失败、网络错误 |
+//! | [`ProviderError::InternalError`] | 内部错误 | 程序逻辑错误、未处理的边界情况 |
+//!
+//! # 设计原则
+//!
+//! - **类型安全**：通过枚举区分不同错误类型，避免字符串匹配
+//! - **上下文丰富**：每个变体都携带 `String` 类型的上下文信息，便于问题定位
+//! - **易于调试**：派生 `Debug` trait，支持格式化输出
+//! - **兼容标准**：实现 `std::error::Error` trait，可与 `?` 运算符无缝配合
+//! - **可扩展性**：新增错误类型只需添加枚举变体，不影响现有代码
+//!
+//! # 模块依赖
+//!
+//! - 被 [`crate::adapter`]、[`crate::service`]、[`crate::health`]、[`crate::reaper`] 等模块依赖
+//! - 依赖 `thiserror` 库自动生成 `Display` 和 `Error` trait 实现
 //!
 //! # 使用示例
 //!
