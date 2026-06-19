@@ -53,16 +53,15 @@ impl ClaudeAdapter {
         let env = HashMap::new();
 
         let client = JsonRpcClient::spawn(program, &args, &env, cwd).await?;
-        let client = Arc::new(client);
 
         // 启动事件监听
         let event_tx = self.event_tx.clone();
-        let client_clone = client.clone();
+        let client_clone = Arc::new(client.clone());
         tokio::spawn(async move {
             Self::listen_events(client_clone, event_tx).await;
         });
 
-        Ok(Arc::into_inner(client).unwrap())
+        Ok(client)
     }
 
     /// 监听 Provider 事件
@@ -79,13 +78,22 @@ impl ClaudeAdapter {
                     let event = match notification.method.as_str() {
                         "session.update" => {
                             if let Some(params) = notification.params {
-                                ProviderRuntimeEvent::SessionUpdate {
+                                ProviderRuntimeEvent::TurnDelta {
                                     session_id: params
                                         .get("sessionId")
                                         .and_then(|v| v.as_str())
                                         .unwrap_or("")
                                         .to_string(),
-                                    data: params,
+                                    turn_id: params
+                                        .get("turnId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
+                                    delta: params
+                                        .get("delta")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
                                 }
                             } else {
                                 continue;
@@ -93,13 +101,17 @@ impl ClaudeAdapter {
                         }
                         "turn.complete" => {
                             if let Some(params) = notification.params {
-                                ProviderRuntimeEvent::TurnComplete {
+                                ProviderRuntimeEvent::TurnCompleted {
+                                    session_id: params
+                                        .get("sessionId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
                                     turn_id: params
                                         .get("turnId")
                                         .and_then(|v| v.as_str())
                                         .unwrap_or("")
                                         .to_string(),
-                                    result: params,
                                 }
                             } else {
                                 continue;
@@ -108,6 +120,11 @@ impl ClaudeAdapter {
                         "error" => {
                             if let Some(params) = notification.params {
                                 ProviderRuntimeEvent::Error {
+                                    session_id: params
+                                        .get("sessionId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
                                     error: params
                                         .get("message")
                                         .and_then(|v| v.as_str())

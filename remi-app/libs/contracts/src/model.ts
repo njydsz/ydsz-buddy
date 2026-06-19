@@ -1,7 +1,19 @@
+/**
+ * @file model.ts
+ * @description AI 模型配置与能力定义。定义了各 Provider（Codex、Claude、Gemini、Grok、Cursor、OpenCode、Kilo、Pi）
+ * 支持的模型列表、推理努力程度选项、上下文窗口配置、模型能力矩阵等。
+ * 提供模型选项、默认模型、模型别名映射等配置，用于前端 UI 展示和 Provider 运行时选择模型。
+ */
+
 import type { ProviderKind } from "./orchestration";
 
+/** Codex Provider 推理努力程度选项：low（低）、medium（中）、high（高）、xhigh（超高） */
 export const CODEX_REASONING_EFFORT_OPTIONS = ["low", "medium", "high", "xhigh"] as const;
+
+/** Codex 推理努力程度类型 */
 export type CodexReasoningEffort = (typeof CODEX_REASONING_EFFORT_OPTIONS)[number];
+
+/** Claude Code Provider 推理努力程度选项，包含从 low 到 ultracode 的多个级别 */
 export const CLAUDE_CODE_EFFORT_OPTIONS = [
   "low",
   "medium",
@@ -11,11 +23,23 @@ export const CLAUDE_CODE_EFFORT_OPTIONS = [
   "ultrathink",
   "ultracode",
 ] as const;
+
+/** Claude Code 推理努力程度类型 */
 export type ClaudeCodeEffort = (typeof CLAUDE_CODE_EFFORT_OPTIONS)[number];
+
+/** Gemini Provider 思考级别选项：LOW（低）、HIGH（高） */
 export const GEMINI_THINKING_LEVEL_OPTIONS = ["LOW", "HIGH"] as const;
+
+/** Gemini 思考级别类型 */
 export type GeminiThinkingLevel = (typeof GEMINI_THINKING_LEVEL_OPTIONS)[number];
+
+/** Gemini Provider 思考预算选项：-1（动态）、512（固定）、0（无） */
 export const GEMINI_THINKING_BUDGET_OPTIONS = [-1, 512, 0] as const;
+
+/** Gemini 思考预算类型 */
 export type GeminiThinkingBudget = (typeof GEMINI_THINKING_BUDGET_OPTIONS)[number];
+
+/** Pi Provider 思考级别选项：从 off 到 xhigh 的多个级别 */
 export const PI_THINKING_LEVEL_OPTIONS = [
   "off",
   "minimal",
@@ -24,9 +48,17 @@ export const PI_THINKING_LEVEL_OPTIONS = [
   "high",
   "xhigh",
 ] as const;
+
+/** Pi 思考级别类型 */
 export type PiThinkingLevel = (typeof PI_THINKING_LEVEL_OPTIONS)[number];
+
+/** Grok Provider 推理努力程度选项：none（无）、low（低）、medium（中）、high（高） */
 export const GROK_REASONING_EFFORT_OPTIONS = ["none", "low", "medium", "high"] as const;
+
+/** Grok 推理努力程度类型 */
 export type GrokReasoningEffort = (typeof GROK_REASONING_EFFORT_OPTIONS)[number];
+
+/** Provider 推理努力程度联合类型，包含所有 Provider 的推理努力程度选项 */
 export type ProviderReasoningEffort =
   | CodexReasoningEffort
   | ClaudeCodeEffort
@@ -35,115 +67,192 @@ export type ProviderReasoningEffort =
   | PiThinkingLevel
   | GrokReasoningEffort;
 
+/** Provider 选项选择项，用于下拉选择框等 UI 组件 */
 export interface ProviderOptionChoice {
+  /** 选项 ID */
   id: string;
+  /** 选项显示标签 */
   label: string;
+  /** 选项描述 */
   description?: string;
+  /** 是否为默认选项 */
   isDefault?: true;
 }
 
+/** Provider 选项描述符基础接口 */
 interface ProviderOptionDescriptorBase {
+  /** 选项 ID */
   id: string;
+  /** 选项显示标签 */
   label: string;
+  /** 选项描述 */
   description?: string;
 }
 
+/** 选择类型 Provider 选项描述符，包含选项列表和当前值 */
 export interface SelectProviderOptionDescriptor extends ProviderOptionDescriptorBase {
+  /** 选项类型，固定为 "select" */
   type: "select";
+  /** 可选选项列表 */
   options: Array<ProviderOptionChoice>;
+  /** 当前选中的值 */
   currentValue?: string;
+  /** 注入到提示词中的值列表 */
   promptInjectedValues?: Array<string>;
 }
 
+/** 布尔类型 Provider 选项描述符，用于开关类配置 */
 export interface BooleanProviderOptionDescriptor extends ProviderOptionDescriptorBase {
+  /** 选项类型，固定为 "boolean" */
   type: "boolean";
+  /** 当前布尔值 */
   currentValue?: boolean;
 }
 
+/** Provider 选项描述符联合类型，支持选择和布尔两种类型 */
 export type ProviderOptionDescriptor =
   | SelectProviderOptionDescriptor
   | BooleanProviderOptionDescriptor;
 
+/** Provider 选项选择，包含选项 ID 和选中的值 */
 export interface ProviderOptionSelection {
+  /** 选项 ID */
   id: string;
+  /** 选中的值（字符串或布尔） */
   value: string | boolean;
 }
 
+/** Provider 选项选择列表 */
 export type ProviderOptionSelections = Array<ProviderOptionSelection>;
 
+/** Codex 模型选项，包含推理努力程度和快速模式开关 */
 export interface CodexModelOptions {
-  // Codex runtime discovery can expose early-access effort values outside the built-in enum.
+  /** 推理努力程度，支持运行时发现的早期访问值 */
   reasoningEffort?: string;
+  /** 是否启用快速模式 */
   fastMode?: boolean;
 }
 
+/** Claude 模型选项，包含思考开关、推理努力程度、快速模式和上下文窗口 */
 export interface ClaudeModelOptions {
+  /** 是否启用思考模式 */
   thinking?: boolean;
+  /** 推理努力程度 */
   effort?: ClaudeCodeEffort;
+  /** 是否启用快速模式 */
   fastMode?: boolean;
+  /** 上下文窗口大小 */
   contextWindow?: string;
 }
 
+/** Gemini 模型选项，包含思考级别和思考预算 */
 export interface GeminiModelOptions {
+  /** 思考级别 */
   thinkingLevel?: GeminiThinkingLevel;
+  /** 思考预算 */
   thinkingBudget?: GeminiThinkingBudget;
 }
 
+/** OpenCode 模型选项，包含变体和代理配置 */
 export interface OpenCodeModelOptions {
+  /** 模型变体 */
   variant?: string;
+  /** 代理配置 */
   agent?: string;
 }
 
+/** Pi 模型选项，包含思考级别 */
 export interface PiModelOptions {
+  /** 思考级别 */
   thinkingLevel?: PiThinkingLevel;
 }
 
+/** Cursor 模型选项，包含推理努力程度、快速模式、思考开关和上下文窗口 */
 export interface CursorModelOptions {
+  /** 推理努力程度 */
   reasoningEffort?: string;
+  /** 是否启用快速模式 */
   fastMode?: boolean;
+  /** 是否启用思考模式 */
   thinking?: boolean;
+  /** 上下文窗口大小 */
   contextWindow?: string;
 }
 
+/** Grok 模型选项，包含推理努力程度 */
 export interface GrokModelOptions {
+  /** 推理努力程度 */
   reasoningEffort?: GrokReasoningEffort;
 }
 
+/** Provider 模型选项联合类型，按 Provider 分类的模型配置 */
 export interface ProviderModelOptions {
+  /** Codex 模型选项 */
   codex?: CodexModelOptions;
+  /** Claude 模型选项 */
   claudeAgent?: ClaudeModelOptions;
+  /** Cursor 模型选项 */
   cursor?: CursorModelOptions;
+  /** Gemini 模型选项 */
   gemini?: GeminiModelOptions;
+  /** Grok 模型选项 */
   grok?: GrokModelOptions;
+  /** Kilo 模型选项（复用 OpenCode 配置） */
   kilo?: OpenCodeModelOptions;
+  /** OpenCode 模型选项 */
   opencode?: OpenCodeModelOptions;
+  /** Pi 模型选项 */
   pi?: PiModelOptions;
 }
 
+/** 推理努力程度选项，用于 UI 展示 */
 export type EffortOption = {
+  /** 选项值 */
   readonly value: string;
+  /** 显示标签 */
   readonly label: string;
+  /** 选项描述 */
   readonly description?: string;
+  /** 是否为默认选项 */
   readonly isDefault?: true;
 };
 
+/** 上下文窗口选项，用于 UI 展示 */
 export type ContextWindowOption = {
+  /** 选项值 */
   readonly value: string;
+  /** 显示标签 */
   readonly label: string;
+  /** 是否为默认选项 */
   readonly isDefault?: true;
 };
 
+/**
+ * 模型能力矩阵
+ *
+ * 描述一个模型支持的所有能力，包括推理努力程度、快速模式、思考切换、
+ * 上下文窗口选项、变体选项、代理选项等。
+ */
 export type ModelCapabilities = {
+  /** Provider 选项描述符列表 */
   readonly optionDescriptors?: readonly ProviderOptionDescriptor[];
+  /** 支持的推理努力程度列表 */
   readonly reasoningEffortLevels: readonly EffortOption[];
+  /** 是否支持快速模式 */
   readonly supportsFastMode: boolean;
+  /** 是否支持思考模式切换 */
   readonly supportsThinkingToggle: boolean;
+  /** 注入到提示词中的推理努力程度列表 */
   readonly promptInjectedEffortLevels: readonly string[];
+  /** 上下文窗口选项列表 */
   readonly contextWindowOptions: readonly ContextWindowOption[];
+  /** 变体选项列表（可选） */
   readonly variantOptions?: readonly EffortOption[];
+  /** 代理选项列表（可选） */
   readonly agentOptions?: readonly EffortOption[];
 };
 
+/** Gemini 2.5 系列模型的能力配置 */
 const GEMINI_2_5_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [
     { value: "-1", label: "Dynamic", isDefault: true },
@@ -155,6 +264,7 @@ const GEMINI_2_5_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 
+/** Codex GPT-5 系列模型的能力配置 */
 const CODEX_GPT_5_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [
     { value: "low", label: "Low" },
@@ -168,6 +278,7 @@ const CODEX_GPT_5_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 
+/** Codex GPT-5.5 系列模型的能力配置，默认推理努力程度为 medium */
 const CODEX_GPT_5_5_CAPABILITIES: ModelCapabilities = {
   ...CODEX_GPT_5_CAPABILITIES,
   reasoningEffortLevels: [
@@ -178,6 +289,7 @@ const CODEX_GPT_5_5_CAPABILITIES: ModelCapabilities = {
   ],
 };
 
+/** Grok Build 系列模型的能力配置 */
 const GROK_BUILD_CAPABILITIES: ModelCapabilities = {
   reasoningEffortLevels: [
     { value: "none", label: "None" },
@@ -191,15 +303,21 @@ const GROK_BUILD_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 
+/** 模型定义内部类型，包含模型标识、名称和能力 */
 type ModelDefinition = {
+  /** 模型唯一标识（slug） */
   readonly slug: string;
+  /** 模型显示名称 */
   readonly name: string;
+  /** 模型能力矩阵 */
   readonly capabilities: ModelCapabilities;
 };
 
 /**
- * TODO: This should not be a static array, each provider
- * should return its own model list over the WS API.
+ * 各 Provider 支持的模型选项列表
+ *
+ * TODO: 这不应该是一个静态数组，每个 Provider 应该通过 WS API 返回自己的模型列表。
+ * 当前实现为硬编码的模型配置，用于前端 UI 展示和默认模型选择。
  */
 export const MODEL_OPTIONS_BY_PROVIDER = {
   codex: [

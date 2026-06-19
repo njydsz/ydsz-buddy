@@ -80,6 +80,20 @@ pub struct JsonRpcClient {
     closed: Arc<std::sync::atomic::AtomicBool>,
 }
 
+impl Clone for JsonRpcClient {
+    fn clone(&self) -> Self {
+        Self {
+            child: self.child.clone(),
+            stdin: self.stdin.clone(),
+            request_id: AtomicU64::new(self.request_id.load(std::sync::atomic::Ordering::Relaxed)),
+            pending: self.pending.clone(),
+            notification_tx: self.notification_tx.clone(),
+            notification_rx: self.notification_rx.clone(),
+            closed: self.closed.clone(),
+        }
+    }
+}
+
 impl JsonRpcClient {
     /// 启动 Provider 进程并创建客户端
     pub async fn spawn(

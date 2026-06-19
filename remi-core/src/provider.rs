@@ -191,6 +191,13 @@ pub enum ProviderRuntimeEvent {
         /// 关联的线程 ID
         thread_id: String,
     },
+    /// 会话状态更新
+    SessionUpdate {
+        /// 会话 ID
+        session_id: String,
+        /// 更新数据
+        data: serde_json::Value,
+    },
     /// 会话已停止
     SessionStopped {
         /// 会话 ID
@@ -209,6 +216,13 @@ pub enum ProviderRuntimeEvent {
         session_id: String,
         /// Turn ID
         turn_id: String,
+    },
+    /// Turn 完成（携带结果数据）
+    TurnComplete {
+        /// Turn ID
+        turn_id: String,
+        /// 结果数据
+        result: serde_json::Value,
     },
     /// Turn 流式输出增量
     TurnDelta {
@@ -253,7 +267,7 @@ pub enum ProviderRuntimeEvent {
         /// 会话 ID
         session_id: String,
         /// 错误信息
-        message: String,
+        error: String,
     },
 }
 
@@ -348,6 +362,8 @@ pub struct TurnInput {
     pub turn_id: String,
     /// Provider 类型
     pub provider: ProviderKind,
+    /// 用户消息内容
+    pub message: String,
 }
 
 /// # Turn 启动结果

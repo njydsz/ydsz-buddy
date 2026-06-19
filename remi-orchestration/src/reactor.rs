@@ -212,15 +212,22 @@ impl ProviderCommandReactor {
         match event {
             OrchestrationEvent::ThreadTurnStartRequested(e) => {
                 info!("处理 Turn 启动请求: thread_id={}, turn_id={}", e.thread_id, e.turn_id);
-                // TODO: 调用 Provider 启动 Turn
+                // TODO: 从引擎获取 Provider 服务，调用 send_turn
+                // let provider_service = self.engine.provider_service();
+                // let input = TurnInput { thread_id: e.thread_id, turn_id: e.turn_id, ... };
+                // provider_service.send_turn(input).await?;
             }
             OrchestrationEvent::ThreadTurnInterruptRequested(e) => {
                 info!("处理 Turn 中断请求: thread_id={}, turn_id={}", e.thread_id, e.turn_id);
                 // TODO: 调用 Provider 中断 Turn
+                // let provider_service = self.engine.provider_service();
+                // provider_service.interrupt_turn(&e.thread_id, Some(&e.turn_id), provider).await?;
             }
             OrchestrationEvent::ThreadSessionStopRequested(e) => {
                 info!("处理会话停止请求: thread_id={}", e.thread_id);
                 // TODO: 调用 Provider 停止会话
+                // let provider_service = self.engine.provider_service();
+                // provider_service.stop_session(&e.thread_id, provider).await?;
             }
             _ => {
                 // 忽略其他事件类型
@@ -325,7 +332,9 @@ impl CheckpointReactor {
         match event {
             OrchestrationEvent::ThreadCheckpointRevertRequested(e) => {
                 info!("处理检查点回滚请求: thread_id={}, checkpoint_id={}", e.thread_id, e.checkpoint_id);
-                // TODO: 执行检查点回滚
+                // TODO: 从引擎获取 checkpoint 服务，执行回滚
+                // let checkpoint_service = self.engine.checkpoint_service();
+                // checkpoint_service.revert_to_checkpoint(&e.thread_id, &e.checkpoint_id).await?;
             }
             _ => {
                 // 忽略其他事件类型
@@ -430,7 +439,11 @@ impl ThreadDeletionReactor {
         match event {
             OrchestrationEvent::ThreadDeleted(e) => {
                 info!("处理线程删除: thread_id={}", e.thread_id);
-                // TODO: 清理线程相关资源（Provider 会话、检查点等）
+                // TODO: 从引擎获取 provider 和 checkpoint 服务，清理资源
+                // let provider_service = self.engine.provider_service();
+                // provider_service.stop_session(&e.thread_id, provider).await?;
+                // let checkpoint_service = self.engine.checkpoint_service();
+                // checkpoint_service.delete_thread_checkpoints(&e.thread_id).await?;
             }
             _ => {
                 // 忽略其他事件类型

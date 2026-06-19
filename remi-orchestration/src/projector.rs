@@ -269,13 +269,10 @@ impl Projector {
         Ok(())
     }
 
-    /// 应用单个事件到投影仓库（内部方法）
+    /// 应用单个事件到投影仓库
     ///
-    /// 当前实现为空，具体的投影逻辑由 [`OrchestrationEngine::apply_projection`] 处理。
-    /// 本投影器主要用于异步消费事件流，可用于：
-    /// - 构建独立的读模型
-    /// - 外部系统集成
-    /// - 事件审计和日志
+    /// 根据事件类型执行相应的投影操作，更新投影仓库中的项目和线程数据。
+    /// 对齐 PeakCode projector.ts 的 projectEvent 函数逻辑。
     ///
     /// # 参数
     ///
@@ -284,9 +281,230 @@ impl Projector {
     /// # 返回值
     ///
     /// 成功时返回 `Ok(())`，发生错误时返回相应错误。
-    async fn apply_event(&self, _event: &OrchestrationEvent) -> OrchestrationResult<()> {
-        // 这里可以实现具体的投影逻辑
-        // 目前由 OrchestrationEngine 直接处理，投影器主要用于异步消费
+    async fn apply_event(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
+        use remi_core::events::OrchestrationEvent::*;
+
+        match event {
+            // 项目事件
+            ProjectCreated(e) => {
+                let project = remi_core::models::Project {
+                    id: e.project_id,
+                    kind: remi_core::models::ProjectKind::Local,
+                    title: e.title.clone(),
+                    workspace_root: e.workspace_root.clone(),
+                    default_model_selection: None,
+                    scripts: vec![],
+                    created_at: e.occurred_at,
+                    updated_at: e.occurred_at,
+                    deleted_at: None,
+                };
+                self.projection_repo.save_project(&project)?;
+            }
+            ProjectMetaUpdated(e) => {
+                if let Some(mut project) = self.projection_repo.get_project(e.project_id)? {
+                    if let Some(title) = &e.title {
+                        project.title = title.clone();
+                    }
+                    project.updated_at = e.occurred_at;
+                    self.projection_repo.save_project(&project)?;
+                }
+            }
+            ProjectDeleted(e) => {
+                self.projection_repo.delete_project(e.project_id)?;
+            }
+
+            // 线程事件
+            ThreadCreated(e) => {
+                let thread = remi_core::models::Thread {
+                    id: e.thread_id,
+                    project_id: e.project_id,
+                    title: e.title.clone(),
+                    model_selection: remi_core::models::ModelSelection::default(),
+                    runtime_mode: remi_core::models::RuntimeMode::Agent,
+                    interaction_mode: remi_core::models::InteractionMode::Chat,
+                    env_mode: remi_core::models::EnvMode::Sandboxed,
+                    branch: None,
+                    worktree_path: None,
+                    associated_worktree: None,
+                    is_pinned: false,
+                    parent_thread_id: None,
+                    subagent: None,
+                    fork_source_thread_id: None,
+                    sidechat_source_thread_id: None,
+                    last_known_pr: None,
+                    latest_turn: None,
+                    latest_user_message_at: None,
+                    has_pending_approvals: false,
+                    has_pending_user_input: false,
+                    has_actionable_proposed_plan: false,
+                    messages: vec![],
+                    proposed_plans: vec![],
+                    activities: vec![],
+                    checkpoints: vec![],
+                    session: None,
+                    created_at: e.occurred_at,
+                    updated_at: e.occurred_at,
+                    archived_at: None,
+                    deleted_at: None,
+                    handoff: None,
+                };
+                self.projection_repo.save_thread(&thread)?;
+            }
+            ThreadDeleted(e) => {
+                self.projection_repo.delete_thread(e.thread_id)?;
+            }
+            ThreadArchived(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.archived_at = Some(e.occurred_at);
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadUnarchived(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.archived_at = None;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadMetaUpdated(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    if let Some(title) = &e.title {
+                        thread.title = title.clone();
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadRuntimeModeSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.runtime_mode = e.runtime_mode;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadInteractionModeSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.interaction_mode = e.interaction_mode;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadMessageSent(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 检查消息是否已存在（流式更新场景）
+                    if let Some(existing) = thread.messages.iter_mut().find(|m| m.id == e.message.id) {
+                        if e.message.streaming {
+                            existing.text.push_str(&e.message.text);
+                        } else if !e.message.text.is_empty() {
+                            existing.text = e.message.text.clone();
+                        }
+                        existing.streaming = e.message.streaming;
+                        existing.updated_at = e.message.updated_at;
+                    } else {
+                        thread.messages.push(e.message.clone());
+                        // 限制消息数量
+                        if thread.messages.len() > 2000 {
+                            thread.messages = thread.messages.split_off(thread.messages.len() - 2000);
+                        }
+                    }
+                    thread.latest_user_message_at = if e.message.role == remi_core::models::MessageRole::User {
+                        Some(e.occurred_at)
+                    } else {
+                        thread.latest_user_message_at
+                    };
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadTurnStartRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.runtime_mode = remi_core::models::RuntimeMode::Agent;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadSessionSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.session = e.session.clone();
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadProposedPlanUpserted(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 移除同 ID 的旧计划，添加新计划
+                    thread.proposed_plans.retain(|p| p.id != e.plan.id);
+                    thread.proposed_plans.push(e.plan.clone());
+                    // 限制计划数量
+                    if thread.proposed_plans.len() > 200 {
+                        thread.proposed_plans = thread.proposed_plans.split_off(thread.proposed_plans.len() - 200);
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadActivityAppended(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 移除同 ID 的旧活动，添加新活动
+                    thread.activities.retain(|a| a.id != e.activity.id);
+                    thread.activities.push(e.activity.clone());
+                    // 限制活动数量
+                    if thread.activities.len() > 500 {
+                        thread.activities = thread.activities.split_off(thread.activities.len() - 500);
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadTurnDiffCompleted(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 更新或添加检查点
+                    let checkpoint = remi_core::models::CheckpointSummary {
+                        turn_id: e.turn_id.clone(),
+                        checkpoint_turn_count: 0,
+                        checkpoint_ref: String::new(),
+                        status: "ready".to_string(),
+                        files: vec![],
+                        assistant_message_id: None,
+                        completed_at: e.occurred_at,
+                    };
+                    thread.checkpoints.retain(|c| c.turn_id != e.turn_id);
+                    thread.checkpoints.push(checkpoint);
+                    // 限制检查点数量
+                    if thread.checkpoints.len() > 500 {
+                        thread.checkpoints = thread.checkpoints.split_off(thread.checkpoints.len() - 500);
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadReverted(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 回滚时清空消息、计划、活动、检查点
+                    thread.messages.clear();
+                    thread.proposed_plans.clear();
+                    thread.activities.clear();
+                    thread.checkpoints.clear();
+                    thread.latest_turn = None;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            ThreadConversationRolledBack(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 找到目标消息索引，截断之后的消息
+                    if let Some(idx) = thread.messages.iter().position(|m| m.id == e.message_id) {
+                        thread.messages.truncate(idx + 1);
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            // 其他事件暂不处理投影
+            _ => {}
+        }
+
         Ok(())
     }
 }

@@ -40,35 +40,57 @@ export type ServerProviderAuthStatus = "authenticated" | "unauthenticated" | "un
 
 /** Provider 版本建议信息 */
 export interface ServerProviderVersionAdvisory {
+  /** 版本状态：unknown（未知）、current（最新）、behind_latest（落后于最新版本） */
   status: "unknown" | "current" | "behind_latest";
+  /** 当前安装的版本号 */
   currentVersion: TrimmedNonEmptyString | null;
+  /** 最新版本号 */
   latestVersion: TrimmedNonEmptyString | null;
+  /** 更新命令（用于升级到最新版本） */
   updateCommand: TrimmedNonEmptyString | null;
+  /** 是否可以直接更新 */
   canUpdate: boolean;
+  /** 检查时间戳 */
   checkedAt: IsoDateTime | null;
+  /** 附加消息（如更新提示或警告） */
   message: TrimmedNonEmptyString | null;
 }
 
 /** Provider 更新操作的状态跟踪 */
 export interface ServerProviderUpdateState {
+  /** 更新状态：idle（空闲）、queued（已排队）、running（运行中）、succeeded（成功）、failed（失败）、unchanged（无变化） */
   status: "idle" | "queued" | "running" | "succeeded" | "failed" | "unchanged";
+  /** 更新开始时间 */
   startedAt: IsoDateTime | null;
+  /** 更新完成时间 */
   finishedAt: IsoDateTime | null;
+  /** 状态消息 */
   message: TrimmedNonEmptyString | null;
+  /** 更新过程的输出日志 */
   output: string | null;
 }
 
 /** 单个 Provider 的完整状态信息，包括可用性、认证、版本、更新状态等 */
 export interface ServerProviderStatus {
+  /** Provider 类型 */
   provider: ProviderKind;
+  /** Provider 状态 */
   status: ServerProviderStatusState;
+  /** 是否可用 */
   available: boolean;
+  /** 认证状态 */
   authStatus: ServerProviderAuthStatus;
+  /** 认证类型（如 "api-key"、"oauth"） */
   authType?: TrimmedNonEmptyString;
+  /** 认证标签（显示名称） */
   authLabel?: TrimmedNonEmptyString;
+  /** 是否支持语音转录 */
   voiceTranscriptionAvailable?: boolean;
+  /** Provider 版本号 */
   version?: TrimmedNonEmptyString | null;
+  /** 状态检查时间 */
   checkedAt: IsoDateTime;
+  /** 附加消息（如错误信息或警告） */
   message?: TrimmedNonEmptyString;
   /** 版本建议信息，指示是否为最新版本及更新命令 */
   versionAdvisory?: ServerProviderVersionAdvisory;
@@ -76,23 +98,31 @@ export interface ServerProviderStatus {
   updateState?: ServerProviderUpdateState;
 }
 
-type ServerProviderStatuses = ServerProviderStatus[];
-
 /** 服务器配置信息，包含工作目录、快捷键、Provider 状态、可用编辑器等 */
 export interface ServerConfig {
+  /** 当前工作目录（绝对路径） */
   cwd: TrimmedNonEmptyString;
+  /** 用户主目录（可选） */
   homeDir?: TrimmedNonEmptyString;
+  /** Worktree 目录路径 */
   worktreesDir: TrimmedNonEmptyString;
+  /** 快捷键配置文件路径 */
   keybindingsConfigPath: TrimmedNonEmptyString;
+  /** 解析后的快捷键配置 */
   keybindings: ResolvedKeybindingsConfig;
+  /** 配置问题列表（如快捷键配置错误） */
   issues: ServerConfigIssues;
+  /** 所有 Provider 的状态列表 */
   providers: ServerProviderStatuses;
+  /** 可用的编辑器列表 */
   availableEditors: EditorId[];
 }
 
 /** 服务器管理的 Git Worktree 信息 */
 export interface ServerManagedWorktree {
+  /** Worktree 路径 */
   path: TrimmedNonEmptyString;
+  /** 工作区根目录 */
   workspaceRoot: TrimmedNonEmptyString;
 }
 

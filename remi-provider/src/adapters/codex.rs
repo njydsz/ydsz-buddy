@@ -104,7 +104,7 @@ impl CodexAdapter {
 
         // 启动事件监听
         let event_tx = self.event_tx.clone();
-        let client_clone = client.clone();
+        let client_clone = Arc::new(client.clone());
         tokio::spawn(async move {
             Self::listen_events(client_clone, event_tx).await;
         });
@@ -155,6 +155,11 @@ impl CodexAdapter {
                         "error" => {
                             if let Some(params) = notification.params {
                                 ProviderRuntimeEvent::Error {
+                                    session_id: params
+                                        .get("sessionId")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_string(),
                                     error: params
                                         .get("message")
                                         .and_then(|v| v.as_str())

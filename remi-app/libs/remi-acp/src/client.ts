@@ -3,7 +3,32 @@
  * @description 实现 ACP（Agent Client Protocol）协议的 Client 端功能。
  *              Client 作为调用方，向 Agent 发送请求并处理 Agent 的回调。
  *              支持会话管理、文件操作、终端管理、权限请求等功能。
+ *
  * @module client
+ *
+ * @remarks
+ * **核心职责：**
+ * - 建立与 Agent 的通信通道（通过 stdio）
+ * - 管理 ACP 会话的完整生命周期（初始化、创建、加载、恢复、关闭等）
+ * - 处理 Agent 向 Client 发起的请求（文件读写、终端操作、权限请求等）
+ * - 支持协议扩展机制，允许自定义方法和通知
+ *
+ * @example
+ * ```typescript
+ * import { make, AcpClient } from './client';
+ * import { Effect, Layer } from 'effect';
+ *
+ * // 创建 Client 实例
+ * const clientEffect = make(stdio, {
+ *   logIncoming: true,
+ *   logOutgoing: false
+ * });
+ *
+ * // 使用 Layer 方式（推荐用于依赖注入）
+ * const clientLayer = layerChildProcess(childProcessHandle);
+ * ```
+ *
+ * @see {@link https://agentclientprotocol.com/|ACP 协议规范}
  */
 
 import * as Effect from "effect/Effect";
@@ -31,134 +56,285 @@ import {
 import { makeChildStdio, makeTerminationError } from "./_internal/stdio.ts";
 
 /**
- * ACP Client 配置选项
- * @description 用于配置 Client 的行为，包括日志记录选项
+ * ACP Client 配置选项接口
+ *
+ * @description 用于配置 Client 的行为，包括日志记录选项。
+ *              这些选项在创建 Client 实例时传入，影响整个 Client 生命周期的行为。
+ *
+ * @remarks
+ * **使用场景：**
+ * - 开发调试时启用日志记录
+ * - 生产环境可自定义日志记录器以集成监控系统
+ *
+ * @property logIncoming - 是否记录从 Agent 接收到的消息，默认为 false
+ * @property logOutgoing - 是否记录发送给 Agent 的消息，默认为 false
+ * @property logger - 自定义日志记录器函数，接收协议日志事件并返回 Effect
+ *
+ * @example
+ * ```typescript
+ * const options: AcpClientOptions = {
+ *   logIncoming: true,
+ *   logOutgoing: true,
+ *   logger: (event) => Effect.sync(() => console.log('ACP Log:', event))
+ * };
+ * ```
  */
 export interface AcpClientOptions {
-  /** 是否记录传入的消息 */
+  /**
+   * 是否记录传入的消息
+   * @description 启用后将记录所有从 Agent 接收到的请求、响应和通知
+   */
   readonly logIncoming?: boolean;
-  /** 是否记录发出的消息 */
+  /**
+   * 是否记录发出的消息
+   * @description 启用后将记录所有发送给 Agent 的请求、响应和通知
+   */
   readonly logOutgoing?: boolean;
-  /** 自定义日志记录器 */
+  /**
+   * 自定义日志记录器
+   * @description 提供自定义的日志处理逻辑，可用于集成第三方日志库或监控系统
+   * @param event - 协议日志事件，包含消息方向、方法名、参数等详细信息
+   * @returns Effect 副作用，执行日志记录操作
+   */
   readonly logger?: (event: AcpProtocol.AcpProtocolLogEvent) => Effect.Effect<void, never>;
 }
 
 /**
- * 原始客户端接口
- * @description 提供底层的协议访问能力
+ * 原始客户端接口类型
+ *
+ * @description 提供底层的协议访问能力，允许直接操作 ACP 协议的原始功能。
+ *              该接口主要用于需要绕过高层封装、直接处理协议消息的场景。
+ *
+ * @remarks
+ * **使用场景：**
+ * - 需要直接访问通知流进行自定义处理
+ * - 需要发送未封装的扩展请求或通知
+ * - 实现自定义的协议扩展功能
+ *
+ * @property notifications - 传入通知流，包含所有从 Agent 接收到的通知
+ * @property request - 发送扩展请求的函数，返回 Agent 的响应或错误
+ * @property notify - 发送扩展通知的函数，不期望返回值
+ *
+ * @example
+ * ```typescript
+ * const rawClient: AcpClientRaw = {
+ *   notifications: notificationStream,
+ *   request: (method, payload) => sendRequest(method, payload),
+ *   notify: (method, payload) => sendNotification(method, payload)
+ * };
+ * ```
  */
 type AcpClientRaw = {
-  /** 传入通知流 */
+  /**
+   * 传入通知流
+   * @description 包含所有从 Agent 接收到的 ACP 通知，可用于监听协议事件
+   */
   readonly notifications: Stream.Stream<AcpProtocol.AcpIncomingNotification>;
-  /** 发送扩展请求 */
+  /**
+   * 发送扩展请求
+   * @description 向 Agent 发送自定义扩展请求，支持任意方法和参数
+   * @param method - 请求方法名称
+   * @param payload - 请求参数
+   * @returns Effect，成功时返回响应结果，失败时返回 AcpError
+   */
   readonly request: (method: string, payload: unknown) => Effect.Effect<unknown, AcpError.AcpError>;
-  /** 发送扩展通知 */
+  /**
+   * 发送扩展通知
+   * @description 向 Agent 发送自定义扩展通知，不期望返回值
+   * @param method - 通知方法名称
+   * @param payload - 通知参数
+   * @returns Effect，失败时返回 AcpError
+   */
   readonly notify: (method: string, payload: unknown) => Effect.Effect<void, AcpError.AcpError>;
 };
 
 /**
- * ACP Client 接口形状
- * @description 定义了 Client 提供的所有功能，包括原始协议访问、Agent 操作和处理器注册
+ * ACP Client 接口形状定义
+ *
+ * @description 定义了 Client 提供的所有功能，包括原始协议访问、Agent 操作和处理器注册。
+ *              这是 Client 的完整 API 表面，包含了与 Agent 交互的所有方法。
+ *
+ * @remarks
+ * **接口结构：**
+ * - `raw`: 原始协议访问层，提供底层通信能力
+ * - `agent`: Agent 操作层，封装了所有调用 Agent 的方法
+ * - `handle*`: 处理器注册方法，用于处理 Agent 向 Client 发起的请求和通知
+ *
+ * **使用场景：**
+ * - 作为依赖注入服务的具体实现类型
+ * - 指导 Client 使用者了解可用的功能
+ *
+ * @example
+ * ```typescript
+ * const client: AcpClientShape = {
+ *   raw: { notifications, request, notify },
+ *   agent: { initialize, createSession, prompt, ... },
+ *   handleRequestPermission: (handler) => registerHandler(handler),
+ *   // ... 其他处理器注册方法
+ * };
+ * ```
  */
 export interface AcpClientShape {
-  /** 原始协议访问层 */
+  /**
+   * 原始协议访问层
+   * @description 提供底层的协议访问能力，用于直接操作 ACP 协议
+   */
   readonly raw: AcpClientRaw;
-  /** Agent 操作层（Client 调用 Agent 的功能） */
+
+  /**
+   * Agent 操作层
+   * @description 封装了 Client 调用 Agent 的所有方法，包括会话管理、认证、提示等核心功能
+   */
   readonly agent: {
     /**
      * 初始化 ACP 会话并协商能力
+     * @description 建立连接后的第一个调用，用于协商协议版本和支持的功能
+     * @param payload - 初始化请求参数，包含客户端信息和支持的能力
+     * @returns Effect，成功时返回初始化响应，包含 Agent 信息和支持的能力
      * @see https://agentclientprotocol.com/protocol/schema#initialize
      */
     readonly initialize: (
       payload: AcpSchema.InitializeRequest,
     ) => Effect.Effect<AcpSchema.InitializeResponse, AcpError.AcpError>;
+
     /**
-     * 执行 ACP 认证（当 Agent 要求时）
+     * 执行 ACP 认证
+     * @description 当 Agent 要求认证时调用，完成身份验证流程
+     * @param payload - 认证请求参数，包含认证所需的信息
+     * @returns Effect，成功时返回认证响应
      * @see https://agentclientprotocol.com/protocol/schema#authenticate
      */
     readonly authenticate: (
       payload: AcpSchema.AuthenticateRequest,
     ) => Effect.Effect<AcpSchema.AuthenticateResponse, AcpError.AcpError>;
+
     /**
      * 登出当前 ACP 身份
+     * @description 结束当前认证会话，清除认证状态
+     * @param payload - 登出请求参数
+     * @returns Effect，成功时返回登出响应
      * @see https://agentclientprotocol.com/protocol/schema#logout
      */
     readonly logout: (
       payload: AcpSchema.LogoutRequest,
     ) => Effect.Effect<AcpSchema.LogoutResponse, AcpError.AcpError>;
+
     /**
      * 启动新的 ACP 会话
+     * @description 创建一个新的会话，开始与 Agent 的交互
+     * @param payload - 新会话请求参数，包含会话配置
+     * @returns Effect，成功时返回新会话的 ID 和初始状态
      * @see https://agentclientprotocol.com/protocol/schema#session/new
      */
     readonly createSession: (
       payload: AcpSchema.NewSessionRequest,
     ) => Effect.Effect<AcpSchema.NewSessionResponse, AcpError.AcpError>;
+
     /**
      * 加载之前保存的 ACP 会话
+     * @description 恢复之前保存的会话状态，继续之前的交互
+     * @param payload - 加载会话请求参数，包含会话 ID
+     * @returns Effect，成功时返回加载的会话状态
      * @see https://agentclientprotocol.com/protocol/schema#session/load
      */
     readonly loadSession: (
       payload: AcpSchema.LoadSessionRequest,
     ) => Effect.Effect<AcpSchema.LoadSessionResponse, AcpError.AcpError>;
+
     /**
      * 列出可用的 ACP 会话
+     * @description 获取所有可用会话的列表，用于会话管理界面
+     * @param payload - 列出会话请求参数，可包含过滤条件
+     * @returns Effect，成功时返回会话列表
      * @see https://agentclientprotocol.com/protocol/schema#session/list
      */
     readonly listSessions: (
       payload: AcpSchema.ListSessionsRequest,
     ) => Effect.Effect<AcpSchema.ListSessionsResponse, AcpError.AcpError>;
+
     /**
      * 分叉 ACP 会话
+     * @description 基于现有会话创建一个新的分支，用于并行探索不同的交互路径
+     * @param payload - 分叉会话请求参数，包含源会话 ID
+     * @returns Effect，成功时返回新分叉会话的信息
      * @see https://agentclientprotocol.com/protocol/schema#session/fork
      */
     readonly forkSession: (
       payload: AcpSchema.ForkSessionRequest,
     ) => Effect.Effect<AcpSchema.ForkSessionResponse, AcpError.AcpError>;
+
     /**
      * 恢复 ACP 会话
+     * @description 恢复之前暂停的会话，继续交互
+     * @param payload - 恢复会话请求参数，包含会话 ID
+     * @returns Effect，成功时返回恢复的会话状态
      * @see https://agentclientprotocol.com/protocol/schema#session/resume
      */
     readonly resumeSession: (
       payload: AcpSchema.ResumeSessionRequest,
     ) => Effect.Effect<AcpSchema.ResumeSessionResponse, AcpError.AcpError>;
+
     /**
      * 关闭 ACP 会话
+     * @description 结束会话，释放相关资源
+     * @param payload - 关闭会话请求参数，包含会话 ID
+     * @returns Effect，成功时返回关闭确认
      * @see https://agentclientprotocol.com/protocol/schema#session/close
      */
     readonly closeSession: (
       payload: AcpSchema.CloseSessionRequest,
     ) => Effect.Effect<AcpSchema.CloseSessionResponse, AcpError.AcpError>;
+
     /**
      * 选择会话的活动模型
+     * @description 切换会话使用的 AI 模型
+     * @param payload - 设置会话模型请求参数，包含模型标识
+     * @returns Effect，成功时返回设置确认
      * @see https://agentclientprotocol.com/protocol/schema#session/set_model
      */
     readonly setSessionModel: (
       payload: AcpSchema.SetSessionModelRequest,
     ) => Effect.Effect<AcpSchema.SetSessionModelResponse, AcpError.AcpError>;
+
     /**
      * 更新会话配置选项
+     * @description 修改会话的配置参数，如温度、最大 token 数等
+     * @param payload - 设置会话配置选项请求参数
+     * @returns Effect，成功时返回设置确认
      * @see https://agentclientprotocol.com/protocol/schema#session/set_config_option
      */
     readonly setSessionConfigOption: (
       payload: AcpSchema.SetSessionConfigOptionRequest,
     ) => Effect.Effect<AcpSchema.SetSessionConfigOptionResponse, AcpError.AcpError>;
+
     /**
      * 向 Agent 发送提示轮次
+     * @description 向 Agent 发送用户输入，触发 Agent 的响应
+     * @param payload - 提示请求参数，包含用户消息和上下文
+     * @returns Effect，成功时返回 Agent 的响应
      * @see https://agentclientprotocol.com/protocol/schema#session/prompt
      */
     readonly prompt: (
       payload: AcpSchema.PromptRequest,
     ) => Effect.Effect<AcpSchema.PromptResponse, AcpError.AcpError>;
+
     /**
      * 发送真实的 ACP `session/cancel` 通知
+     * @description 取消正在进行的会话操作
+     * @param payload - 取消通知参数，包含会话 ID
+     * @returns Effect，不返回值，仅发送通知
      * @see https://agentclientprotocol.com/protocol/schema#session/cancel
      */
     readonly cancel: (
       payload: AcpSchema.CancelNotification,
     ) => Effect.Effect<void, AcpError.AcpError>;
   };
+
   /**
    * 注册权限请求处理器
+   * @description 处理 Agent 向 Client 请求权限的操作，如执行危险操作前的确认
+   * @param handler - 权限请求处理函数，接收权限请求并返回用户的选择
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#session/request_permission
    */
   readonly handleRequestPermission: (
@@ -166,8 +342,12 @@ export interface AcpClientShape {
       request: AcpSchema.RequestPermissionRequest,
     ) => Effect.Effect<AcpSchema.RequestPermissionResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册引导请求处理器
+   * @description 处理 Agent 向 Client 请求结构化用户输入的操作
+   * @param handler - 引导请求处理函数，接收引导请求并返回用户输入
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#session/elicitation
    */
   readonly handleElicitation: (
@@ -175,8 +355,12 @@ export interface AcpClientShape {
       request: AcpSchema.ElicitationRequest,
     ) => Effect.Effect<AcpSchema.ElicitationResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册读取文本文件处理器
+   * @description 处理 Agent 请求读取文件内容的操作
+   * @param handler - 文件读取处理函数，接收文件路径并返回文件内容
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#fs/read_text_file
    */
   readonly handleReadTextFile: (
@@ -184,8 +368,12 @@ export interface AcpClientShape {
       request: AcpSchema.ReadTextFileRequest,
     ) => Effect.Effect<AcpSchema.ReadTextFileResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册写入文本文件处理器
+   * @description 处理 Agent 请求写入文件内容的操作
+   * @param handler - 文件写入处理函数，接收文件路径和内容并执行写入
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#fs/write_text_file
    */
   readonly handleWriteTextFile: (
@@ -193,8 +381,12 @@ export interface AcpClientShape {
       request: AcpSchema.WriteTextFileRequest,
     ) => Effect.Effect<AcpSchema.WriteTextFileResponse | void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册创建终端处理器
+   * @description 处理 Agent 请求创建终端的操作
+   * @param handler - 终端创建处理函数，接收终端配置并返回终端 ID
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#terminal/create
    */
   readonly handleCreateTerminal: (
@@ -202,8 +394,12 @@ export interface AcpClientShape {
       request: AcpSchema.CreateTerminalRequest,
     ) => Effect.Effect<AcpSchema.CreateTerminalResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册终端输出处理器
+   * @description 处理 Agent 请求获取终端输出的操作
+   * @param handler - 终端输出处理函数，接收终端 ID 并返回输出内容
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#terminal/output
    */
   readonly handleTerminalOutput: (
@@ -211,8 +407,12 @@ export interface AcpClientShape {
       request: AcpSchema.TerminalOutputRequest,
     ) => Effect.Effect<AcpSchema.TerminalOutputResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册等待终端退出处理器
+   * @description 处理 Agent 请求等待终端退出的操作
+   * @param handler - 等待终端退出处理函数，接收终端 ID 并返回退出状态
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#terminal/wait_for_exit
    */
   readonly handleTerminalWaitForExit: (
@@ -220,8 +420,12 @@ export interface AcpClientShape {
       request: AcpSchema.WaitForTerminalExitRequest,
     ) => Effect.Effect<AcpSchema.WaitForTerminalExitResponse, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册终止终端处理器
+   * @description 处理 Agent 请求终止终端的操作
+   * @param handler - 终止终端处理函数，接收终端 ID 并执行终止
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#terminal/kill
    */
   readonly handleTerminalKill: (
@@ -229,8 +433,12 @@ export interface AcpClientShape {
       request: AcpSchema.KillTerminalRequest,
     ) => Effect.Effect<AcpSchema.KillTerminalResponse | void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册释放终端处理器
+   * @description 处理 Agent 请求释放终端资源的操作
+   * @param handler - 释放终端处理函数，接收终端 ID 并释放资源
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#terminal/release
    */
   readonly handleTerminalRelease: (
@@ -238,8 +446,12 @@ export interface AcpClientShape {
       request: AcpSchema.ReleaseTerminalRequest,
     ) => Effect.Effect<AcpSchema.ReleaseTerminalResponse | void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册会话更新通知处理器
+   * @description 处理 Agent 发送的会话状态更新通知
+   * @param handler - 会话更新处理函数，接收会话通知并处理
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#session/update
    */
   readonly handleSessionUpdate: (
@@ -247,8 +459,12 @@ export interface AcpClientShape {
       notification: AcpSchema.SessionNotification,
     ) => Effect.Effect<void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册引导完成通知处理器
+   * @description 处理 Agent 发送的引导完成通知
+   * @param handler - 引导完成处理函数，接收通知并处理
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/schema#session/elicitation/complete
    */
   readonly handleElicitationComplete: (
@@ -256,22 +472,38 @@ export interface AcpClientShape {
       notification: AcpSchema.ElicitationCompleteNotification,
     ) => Effect.Effect<void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册回退扩展请求处理器
+   * @description 处理未注册的扩展请求，作为默认处理器
+   * @param handler - 扩展请求处理函数，接收方法名和参数并返回响应
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/extensibility
    */
   readonly handleUnknownExtRequest: (
     handler: (method: string, params: unknown) => Effect.Effect<unknown, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册回退扩展通知处理器
+   * @description 处理未注册的扩展通知，作为默认处理器
+   * @param handler - 扩展通知处理函数，接收方法名和参数并处理
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/extensibility
    */
   readonly handleUnknownExtNotification: (
     handler: (method: string, params: unknown) => Effect.Effect<void, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册类型化扩展请求处理器
+   * @description 注册带有类型定义的扩展请求处理器，提供类型安全
+   * @typeParam A - 解码后的参数类型
+   * @typeParam I - 编码后的参数类型
+   * @param method - 扩展方法名称
+   * @param payload - 参数的 Schema 编解码器
+   * @param handler - 扩展请求处理函数，接收解码后的参数并返回响应
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/extensibility
    */
   readonly handleExtRequest: <A, I>(
@@ -279,8 +511,16 @@ export interface AcpClientShape {
     payload: Schema.Codec<A, I>,
     handler: (payload: A) => Effect.Effect<unknown, AcpError.AcpError>,
   ) => Effect.Effect<void>;
+
   /**
    * 注册类型化扩展通知处理器
+   * @description 注册带有类型定义的扩展通知处理器，提供类型安全
+   * @typeParam A - 解码后的参数类型
+   * @typeParam I - 编码后的参数类型
+   * @param method - 扩展方法名称
+   * @param payload - 参数的 Schema 编解码器
+   * @param handler - 扩展通知处理函数，接收解码后的参数并处理
+   * @returns Effect，注册成功后返回 void
    * @see https://agentclientprotocol.com/protocol/extensibility
    */
   readonly handleExtNotification: <A, I>(
@@ -291,8 +531,30 @@ export interface AcpClientShape {
 }
 
 /**
- * ACP Client 服务
- * @description Effect ServiceMap 服务定义，用于依赖注入
+ * ACP Client 服务类
+ *
+ * @description Effect ServiceMap 服务定义，用于依赖注入系统。
+ *              该类定义了 AcpClient 服务的标识符和接口形状，
+ *              允许在 Effect 应用中通过依赖注入的方式使用 Client 功能。
+ *
+ * @remarks
+ * **使用场景：**
+ * - 在 Effect 应用中注册 Client 服务
+ * - 通过 `Effect.service(AcpClient)` 获取 Client 实例
+ * - 在 Layer 组合中提供 Client 依赖
+ *
+ * @example
+ * ```typescript
+ * import { AcpClient } from './client';
+ * import { Effect } from 'effect';
+ *
+ * // 在 Effect 中获取 Client 服务
+ * const program = Effect.flatMap(Effect.service(AcpClient), (client) => {
+ *   return client.agent.initialize({ ... });
+ * });
+ * ```
+ *
+ * @public
  */
 export class AcpClient extends ServiceMap.Service<AcpClient, AcpClientShape>()(
   "effect-acp/client/AcpClient",
