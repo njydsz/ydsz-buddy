@@ -97,8 +97,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remi-code/contracts": "*",
-    "effect": "https://pkg.pr.new/Effect-TS/effect-smol/effect@8881a9b"
+    "@remi-code/contracts": "*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

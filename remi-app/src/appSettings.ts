@@ -36,19 +36,19 @@ export const MIN_CHAT_FONT_SIZE_PX = 11;
 export const MAX_CHAT_FONT_SIZE_PX = 18;
 export const DEFAULT_CHAT_FONT_SIZE_PX = 12;
 
-export const TimestampFormat = Schema.Literals(["locale", "12-hour", "24-hour"]);
+export const TimestampFormat = Schema.Literal("locale", "12-hour", "24-hour");
 export type TimestampFormat = typeof TimestampFormat.Type;
 export const DEFAULT_TIMESTAMP_FORMAT: TimestampFormat = "locale";
-export const SidebarSide = Schema.Literals(["left", "right"]);
+export const SidebarSide = Schema.Literal("left", "right");
 export type SidebarSide = typeof SidebarSide.Type;
 export const DEFAULT_SIDEBAR_SIDE: SidebarSide = "left";
-export const SidebarProjectSortOrder = Schema.Literals(["updated_at", "created_at", "manual"]);
+export const SidebarProjectSortOrder = Schema.Literal("updated_at", "created_at", "manual");
 export type SidebarProjectSortOrder = typeof SidebarProjectSortOrder.Type;
 export const DEFAULT_SIDEBAR_PROJECT_SORT_ORDER: SidebarProjectSortOrder = "manual";
-export const SidebarThreadSortOrder = Schema.Literals(["updated_at", "created_at"]);
+export const SidebarThreadSortOrder = Schema.Literal("updated_at", "created_at");
 export type SidebarThreadSortOrder = typeof SidebarThreadSortOrder.Type;
 export const DEFAULT_SIDEBAR_THREAD_SORT_ORDER: SidebarThreadSortOrder = "updated_at";
-export const LanguageSchema = Schema.Literals(["en", "zh"]);
+export const LanguageSchema = Schema.Literal("en", "zh");
 export type LanguageSetting = typeof LanguageSchema.Type;
 export const DEFAULT_LANGUAGE_SETTING: LanguageSetting = DEFAULT_LANGUAGE;
 
@@ -88,7 +88,7 @@ const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>
 
 const withDefaults =
   <
-    S extends Schema.Top & Schema.WithoutConstructorDefault,
+    S extends Schema.Schema.Any,
     D extends S["~type.make.in"] & S["Encoded"],
   >(
     fallback: () => D,

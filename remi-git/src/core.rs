@@ -402,8 +402,8 @@ impl GitCore {
             .map(|line| {
                 // 移除前导空格和星号
                 let branch = line.trim_start();
-                if branch.starts_with("* ") {
-                    branch[2..].to_string()
+                if let Some(stripped) = branch.strip_prefix("* ") {
+                    stripped.to_string()
                 } else {
                     branch.to_string()
                 }

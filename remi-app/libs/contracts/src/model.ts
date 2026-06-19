@@ -1,5 +1,3 @@
-import { Schema } from "effect";
-import { TrimmedNonEmptyString } from "./baseSchemas";
 import type { ProviderKind } from "./orchestration";
 
 export const CODEX_REASONING_EFFORT_OPTIONS = ["low", "medium", "high", "xhigh"] as const;
@@ -37,107 +35,90 @@ export type ProviderReasoningEffort =
   | PiThinkingLevel
   | GrokReasoningEffort;
 
-export const ProviderOptionChoice = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  label: TrimmedNonEmptyString,
-  description: Schema.optional(TrimmedNonEmptyString),
-  isDefault: Schema.optional(Schema.Literal(true)),
-});
-export type ProviderOptionChoice = typeof ProviderOptionChoice.Type;
+export interface ProviderOptionChoice {
+  id: string;
+  label: string;
+  description?: string;
+  isDefault?: true;
+}
 
-const ProviderOptionDescriptorBase = {
-  id: TrimmedNonEmptyString,
-  label: TrimmedNonEmptyString,
-  description: Schema.optional(TrimmedNonEmptyString),
-} as const;
+interface ProviderOptionDescriptorBase {
+  id: string;
+  label: string;
+  description?: string;
+}
 
-export const SelectProviderOptionDescriptor = Schema.Struct({
-  ...ProviderOptionDescriptorBase,
-  type: Schema.Literal("select"),
-  options: Schema.Array(ProviderOptionChoice),
-  currentValue: Schema.optional(TrimmedNonEmptyString),
-  promptInjectedValues: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
-});
-export type SelectProviderOptionDescriptor = typeof SelectProviderOptionDescriptor.Type;
+export interface SelectProviderOptionDescriptor extends ProviderOptionDescriptorBase {
+  type: "select";
+  options: Array<ProviderOptionChoice>;
+  currentValue?: string;
+  promptInjectedValues?: Array<string>;
+}
 
-export const BooleanProviderOptionDescriptor = Schema.Struct({
-  ...ProviderOptionDescriptorBase,
-  type: Schema.Literal("boolean"),
-  currentValue: Schema.optional(Schema.Boolean),
-});
-export type BooleanProviderOptionDescriptor = typeof BooleanProviderOptionDescriptor.Type;
+export interface BooleanProviderOptionDescriptor extends ProviderOptionDescriptorBase {
+  type: "boolean";
+  currentValue?: boolean;
+}
 
-export const ProviderOptionDescriptor = Schema.Union([
-  SelectProviderOptionDescriptor,
-  BooleanProviderOptionDescriptor,
-]);
-export type ProviderOptionDescriptor = typeof ProviderOptionDescriptor.Type;
+export type ProviderOptionDescriptor =
+  | SelectProviderOptionDescriptor
+  | BooleanProviderOptionDescriptor;
 
-export const ProviderOptionSelection = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  value: Schema.Union([TrimmedNonEmptyString, Schema.Boolean]),
-});
-export type ProviderOptionSelection = typeof ProviderOptionSelection.Type;
+export interface ProviderOptionSelection {
+  id: string;
+  value: string | boolean;
+}
 
-export const ProviderOptionSelections = Schema.Array(ProviderOptionSelection);
-export type ProviderOptionSelections = typeof ProviderOptionSelections.Type;
+export type ProviderOptionSelections = Array<ProviderOptionSelection>;
 
-export const CodexModelOptions = Schema.Struct({
+export interface CodexModelOptions {
   // Codex runtime discovery can expose early-access effort values outside the built-in enum.
-  reasoningEffort: Schema.optional(TrimmedNonEmptyString),
-  fastMode: Schema.optional(Schema.Boolean),
-});
-export type CodexModelOptions = typeof CodexModelOptions.Type;
+  reasoningEffort?: string;
+  fastMode?: boolean;
+}
 
-export const ClaudeModelOptions = Schema.Struct({
-  thinking: Schema.optional(Schema.Boolean),
-  effort: Schema.optional(Schema.Literals(CLAUDE_CODE_EFFORT_OPTIONS)),
-  fastMode: Schema.optional(Schema.Boolean),
-  contextWindow: Schema.optional(Schema.String),
-});
-export type ClaudeModelOptions = typeof ClaudeModelOptions.Type;
+export interface ClaudeModelOptions {
+  thinking?: boolean;
+  effort?: ClaudeCodeEffort;
+  fastMode?: boolean;
+  contextWindow?: string;
+}
 
-export const GeminiModelOptions = Schema.Struct({
-  thinkingLevel: Schema.optional(Schema.Literals(GEMINI_THINKING_LEVEL_OPTIONS)),
-  thinkingBudget: Schema.optional(Schema.Literals(GEMINI_THINKING_BUDGET_OPTIONS)),
-});
-export type GeminiModelOptions = typeof GeminiModelOptions.Type;
+export interface GeminiModelOptions {
+  thinkingLevel?: GeminiThinkingLevel;
+  thinkingBudget?: GeminiThinkingBudget;
+}
 
-export const OpenCodeModelOptions = Schema.Struct({
-  variant: Schema.optional(TrimmedNonEmptyString),
-  agent: Schema.optional(TrimmedNonEmptyString),
-});
-export type OpenCodeModelOptions = typeof OpenCodeModelOptions.Type;
+export interface OpenCodeModelOptions {
+  variant?: string;
+  agent?: string;
+}
 
-export const PiModelOptions = Schema.Struct({
-  thinkingLevel: Schema.optional(Schema.Literals(PI_THINKING_LEVEL_OPTIONS)),
-});
-export type PiModelOptions = typeof PiModelOptions.Type;
+export interface PiModelOptions {
+  thinkingLevel?: PiThinkingLevel;
+}
 
-export const CursorModelOptions = Schema.Struct({
-  reasoningEffort: Schema.optional(TrimmedNonEmptyString),
-  fastMode: Schema.optional(Schema.Boolean),
-  thinking: Schema.optional(Schema.Boolean),
-  contextWindow: Schema.optional(Schema.String),
-});
-export type CursorModelOptions = typeof CursorModelOptions.Type;
+export interface CursorModelOptions {
+  reasoningEffort?: string;
+  fastMode?: boolean;
+  thinking?: boolean;
+  contextWindow?: string;
+}
 
-export const GrokModelOptions = Schema.Struct({
-  reasoningEffort: Schema.optional(Schema.Literals(GROK_REASONING_EFFORT_OPTIONS)),
-});
-export type GrokModelOptions = typeof GrokModelOptions.Type;
+export interface GrokModelOptions {
+  reasoningEffort?: GrokReasoningEffort;
+}
 
-export const ProviderModelOptions = Schema.Struct({
-  codex: Schema.optional(CodexModelOptions),
-  claudeAgent: Schema.optional(ClaudeModelOptions),
-  cursor: Schema.optional(CursorModelOptions),
-  gemini: Schema.optional(GeminiModelOptions),
-  grok: Schema.optional(GrokModelOptions),
-  kilo: Schema.optional(OpenCodeModelOptions),
-  opencode: Schema.optional(OpenCodeModelOptions),
-  pi: Schema.optional(PiModelOptions),
-});
-export type ProviderModelOptions = typeof ProviderModelOptions.Type;
+export interface ProviderModelOptions {
+  codex?: CodexModelOptions;
+  claudeAgent?: ClaudeModelOptions;
+  cursor?: CursorModelOptions;
+  gemini?: GeminiModelOptions;
+  grok?: GrokModelOptions;
+  kilo?: OpenCodeModelOptions;
+  opencode?: OpenCodeModelOptions;
+  pi?: PiModelOptions;
+}
 
 export type EffortOption = {
   readonly value: string;

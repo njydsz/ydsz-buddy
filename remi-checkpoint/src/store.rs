@@ -78,7 +78,7 @@ impl CheckpointStore {
         let checkpoint = self
             .get_checkpoint(checkpoint_id.clone())
             .await?
-            .ok_or_else(|| CheckpointError::NotFound(checkpoint_id))?;
+            .ok_or(CheckpointError::NotFound(checkpoint_id))?;
 
         // 使用 Git 回滚
         self.git_core

@@ -202,7 +202,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
         let scripts_json = serde_json::to_string(&project.scripts)?;
         // 序列化 default_model_selection 字段（可选）
         let model_json = project.default_model_selection.as_ref()
-            .map(|m| serde_json::to_string(m))
+            .map(serde_json::to_string)
             .transpose()?;
 
         // 执行插入或更新操作
@@ -241,22 +241,22 @@ impl ProjectionRepository for SqliteProjectionRepository {
         let activities_json = serde_json::to_string(&thread.activities)?;
         let checkpoints_json = serde_json::to_string(&thread.checkpoints)?;
         let session_json = thread.session.as_ref()
-            .map(|s| serde_json::to_string(s))
+            .map(serde_json::to_string)
             .transpose()?;
         let worktree_json = thread.associated_worktree.as_ref()
-            .map(|w| serde_json::to_string(w))
+            .map(serde_json::to_string)
             .transpose()?;
         let subagent_json = thread.subagent.as_ref()
-            .map(|s| serde_json::to_string(s))
+            .map(serde_json::to_string)
             .transpose()?;
         let pr_json = thread.last_known_pr.as_ref()
-            .map(|p| serde_json::to_string(p))
+            .map(serde_json::to_string)
             .transpose()?;
         let turn_json = thread.latest_turn.as_ref()
-            .map(|t| serde_json::to_string(t))
+            .map(serde_json::to_string)
             .transpose()?;
         let handoff_json = thread.handoff.as_ref()
-            .map(|h| serde_json::to_string(h))
+            .map(serde_json::to_string)
             .transpose()?;
 
         // 执行插入或更新操作
@@ -608,9 +608,6 @@ mod tests {
     use crate::migrations::run_migrations;
     use chrono::Utc;
     use remi_core::models::*;
-    use remi_core::provider::{ModelSelection, ProviderKind};
-    use std::path::PathBuf;
-    use uuid::Uuid;
 
     #[test]
     fn test_projection_repository() {

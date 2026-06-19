@@ -263,7 +263,6 @@ pub fn get_current_version(client: &SqliteClient) -> PersistenceResult<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
 
     #[test]
     fn test_run_migrations() {

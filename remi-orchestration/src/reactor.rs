@@ -14,9 +14,9 @@
 //!
 //! 本模块提供以下反应器实现：
 //!
-//! - [`ProviderCommandReactor`]: Provider 命令反应器，监听 Turn 启动/中断/会话停止事件
-//! - [`CheckpointReactor`]: 检查点反应器，监听检查点回滚事件
-//! - [`ThreadDeletionReactor`]: 线程删除反应器，监听线程删除事件并清理相关资源
+//! - [`ProviderCommandReactor`][]: Provider 命令反应器，监听 Turn 启动/中断/会话停止事件
+//! - [`CheckpointReactor`][]: 检查点反应器，监听检查点回滚事件
+//! - [`ThreadDeletionReactor`][]: 线程删除反应器，监听线程删除事件并清理相关资源
 //!
 //! # 扩展性
 //!

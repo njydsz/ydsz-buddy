@@ -13,7 +13,7 @@
 //! 2. 环境变量（如 `REMI_PORT`、`REMI_HOST`）
 //! 3. 内置默认值（最低优先级）
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use clap::Parser;
 use serde::{Deserialize, Serialize};
@@ -287,7 +287,7 @@ impl ServerConfig {
     /// # 返回值
     ///
     /// - `Ok(DerivedPaths)` — 包含所有派生路径的结构体
-    pub fn derive_paths(base_dir: &PathBuf) -> ConfigResult<DerivedPaths> {
+    pub fn derive_paths(base_dir: &Path) -> ConfigResult<DerivedPaths> {
         // 状态数据根目录：存放数据库、日志、密钥等运行时数据
         let state_dir = base_dir.join("userdata");
         let db_path = state_dir.join("state.sqlite");

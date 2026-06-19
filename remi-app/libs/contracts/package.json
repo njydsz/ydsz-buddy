@@ -21,9 +21,7 @@
     "build": "tsdown src/index.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "effect": "https://pkg.pr.new/Effect-TS/effect-smol/effect@8881a9b"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tsdown": "^0.2.0",
     "typescript": "^5.7.3"

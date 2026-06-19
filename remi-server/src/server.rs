@@ -65,13 +65,13 @@ impl WebSocketServer {
 
         let listener = tokio::net::TcpListener::bind(self.addr)
             .await
-            .map_err(|e| ServerError::IoError(e))?;
+            .map_err(ServerError::IoError)?;
 
         info!("WebSocket 服务器已启动，监听地址: {}", self.addr);
 
         axum::serve(listener, app)
             .await
-            .map_err(|e| ServerError::IoError(e))?;
+            .map_err(ServerError::IoError)?;
 
         Ok(())
     }

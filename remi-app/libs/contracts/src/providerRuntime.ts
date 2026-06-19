@@ -125,11 +125,11 @@ const RuntimeTaskStatus = Schema.Literal("pending", "inProgress", "completed");
 export type RuntimeTaskStatus = typeof RuntimeTaskStatus.Type;
 
 /** 运行时项目状态枚举：进行中、已完成、失败、已拒绝 */
-const RuntimeItemStatus = Schema.Literals(["inProgress", "completed", "failed", "declined"]);
+const RuntimeItemStatus = Schema.Literal("inProgress", "completed", "failed", "declined");
 export type RuntimeItemStatus = typeof RuntimeItemStatus.Type;
 
 /** 运行时内容流类型枚举：助手文本、推理文本、推理摘要、计划文本、命令输出、文件变更输出、未知 */
-const RuntimeContentStreamKind = Schema.Literals([
+const RuntimeContentStreamKind = Schema.Literal(
   "assistant_text",
   "reasoning_text",
   "reasoning_summary_text",
@@ -137,21 +137,21 @@ const RuntimeContentStreamKind = Schema.Literals([
   "command_output",
   "file_change_output",
   "unknown",
-]);
+);
 export type RuntimeContentStreamKind = typeof RuntimeContentStreamKind.Type;
 
 /** 运行时会话退出类型枚举：优雅退出、错误退出 */
-const RuntimeSessionExitKind = Schema.Literals(["graceful", "error"]);
+const RuntimeSessionExitKind = Schema.Literal("graceful", "error");
 export type RuntimeSessionExitKind = typeof RuntimeSessionExitKind.Type;
 
 /** 运行时错误分类枚举：提供者错误、传输错误、权限错误、验证错误、未知错误 */
-const RuntimeErrorClass = Schema.Literals([
+const RuntimeErrorClass = Schema.Literal(
   "provider_error",
   "transport_error",
   "permission_error",
   "validation_error",
   "unknown",
-]);
+);
 export type RuntimeErrorClass = typeof RuntimeErrorClass.Type;
 
 /** 工具生命周期项目类型常量：命令执行、文件变更、MCP 工具调用、动态工具调用、协作代理工具调用、网页搜索、图片查看、图片生成 */
@@ -167,7 +167,7 @@ export const TOOL_LIFECYCLE_ITEM_TYPES = [
 ] as const;
 
 /** 工具生命周期项目类型 */
-export const ToolLifecycleItemType = Schema.Literals(TOOL_LIFECYCLE_ITEM_TYPES);
+export const ToolLifecycleItemType = Schema.Literal(...TOOL_LIFECYCLE_ITEM_TYPES);
 export type ToolLifecycleItemType = typeof ToolLifecycleItemType.Type;
 
 /** 判断是否为工具生命周期项目类型 */
@@ -176,7 +176,7 @@ export function isToolLifecycleItemType(value: string): value is ToolLifecycleIt
 }
 
 /** 规范项目类型枚举：用户消息、助手消息、推理、计划、工具生命周期项目、审查进入、审查退出、上下文压缩、错误、未知 */
-export const CanonicalItemType = Schema.Literals([
+export const CanonicalItemType = Schema.Literal(
   "user_message",
   "assistant_message",
   "reasoning",
@@ -187,11 +187,11 @@ export const CanonicalItemType = Schema.Literals([
   "context_compaction",
   "error",
   "unknown",
-]);
+);
 export type CanonicalItemType = typeof CanonicalItemType.Type;
 
 /** 规范请求类型枚举：命令执行审批、文件读取审批、文件变更审批、应用补丁审批、执行命令审批、工具用户输入、动态工具调用、认证令牌刷新、未知 */
-export const CanonicalRequestType = Schema.Literals([
+export const CanonicalRequestType = Schema.Literal(
   "command_execution_approval",
   "file_read_approval",
   "file_change_approval",
@@ -201,11 +201,11 @@ export const CanonicalRequestType = Schema.Literals([
   "dynamic_tool_call",
   "auth_tokens_refresh",
   "unknown",
-]);
+);
 export type CanonicalRequestType = typeof CanonicalRequestType.Type;
 
 /** Provider 运行时事件类型枚举，包含所有可能的事件类型 */
-const ProviderRuntimeEventType = Schema.Literals([
+const ProviderRuntimeEventType = Schema.Literal(
   // 会话事件
   "session.started",
   "session.configured",
@@ -270,7 +270,7 @@ const ProviderRuntimeEventType = Schema.Literals([
   // 运行时事件
   "runtime.warning",
   "runtime.error",
-]);
+);
 export type ProviderRuntimeEventType = typeof ProviderRuntimeEventType.Type;
 
 /** 事件类型常量定义 */
@@ -424,7 +424,7 @@ export const ThreadTokenUsageSnapshot = Schema.Struct({
   usedTokens: NonNegativeInt,
   /** 已使用百分比 */
   usedPercent: Schema.optional(
-    Schema.Number.check(Schema.isGreaterThanOrEqualTo(0)).check(Schema.isLessThanOrEqualTo(100)),
+    Schema.Number.pipe(Schema.greaterThanOrEqualTo(0), Schema.lessThanOrEqualTo(100)),
   ),
   /** 总处理 Token 数 */
   totalProcessedTokens: Schema.optional(NonNegativeInt),
@@ -686,9 +686,7 @@ export const UserInputQuestion = Schema.Struct({
   /** 选项列表 */
   options: Schema.Array(UserInputQuestionOption),
   /** 是否多选 */
-  multiSelect: Schema.optional(Schema.Boolean).pipe(
-    Schema.withConstructorDefault(() => Option.some(false)),
-  ),
+  multiSelect: Schema.optional(Schema.Boolean, { default: () => false }),
 });
 export type UserInputQuestion = typeof UserInputQuestion.Type;
 
@@ -737,7 +735,7 @@ const TaskCompletedPayload = Schema.Struct({
   /** 任务 ID */
   taskId: RuntimeTaskId,
   /** 完成状态 */
-  status: Schema.Literals(["completed", "failed", "stopped"]),
+  status: Schema.Literal("completed", "failed", "stopped"),
   /** 完成摘要 */
   summary: Schema.optional(TrimmedNonEmptyStringSchema),
   /** 使用情况 */
@@ -774,7 +772,7 @@ const HookCompletedPayload = Schema.Struct({
   /** 钩子 ID */
   hookId: TrimmedNonEmptyStringSchema,
   /** 完成结果 */
-  outcome: Schema.Literals(["success", "error", "cancelled"]),
+  outcome: Schema.Literal("success", "error", "cancelled"),
   /** 输出内容 */
   output: Schema.optional(Schema.String),
   /** 标准输出 */
@@ -1501,7 +1499,7 @@ export type ProviderRuntimeApprovalResolvedEvent = ProviderRuntimeRequestResolve
 
 // Legacy helper aliases retained for adapters/tests.
 /** 兼容性别名：Provider 工具类型，用于适配器和测试 */
-const ProviderRuntimeToolKind = Schema.Literals(["command", "file-read", "file-change", "other"]);
+const ProviderRuntimeToolKind = Schema.Literal("command", "file-read", "file-change", "other");
 export type ProviderRuntimeToolKind = typeof ProviderRuntimeToolKind.Type;
 
 /** 兼容性别名：Provider 轮次状态，用于适配器和测试 */

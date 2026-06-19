@@ -15,7 +15,7 @@ use remi_core::events::OrchestrationEvent;
 use remi_core::models::{Project, ProjectId, ProjectKind, Sequence, Thread, ThreadId};
 use remi_persistence::{EventStore, ProjectionRepository, SqliteEventStore, SqliteProjectionRepository};
 use tokio::sync::{broadcast, mpsc, RwLock};
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::error::{OrchestrationError, OrchestrationResult};
 
