@@ -49,6 +49,7 @@ pub struct Migration {
 /// 3. `003_projection_threads`: 创建线程投影表
 /// 4. `004_projection_state`: 创建投影器状态跟踪表
 /// 5. `005_auth_sessions`: 创建认证会话和配对链接表
+/// 6. `006_checkpoints`: 创建检查点表
 pub const MIGRATIONS: &[Migration] = &[
     Migration {
         version: 1,
@@ -156,6 +157,25 @@ pub const MIGRATIONS: &[Migration] = &[
                 created_at TEXT NOT NULL,
                 revoked_at TEXT
             );
+        "#,
+    },
+    Migration {
+        version: 6,
+        name: "006_checkpoints",
+        sql: r#"
+            CREATE TABLE IF NOT EXISTS checkpoints (
+                id TEXT PRIMARY KEY,
+                thread_id TEXT NOT NULL,
+                turn_id TEXT NOT NULL,
+                git_ref TEXT NOT NULL,
+                description TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (thread_id) REFERENCES projection_threads(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_checkpoints_thread_id ON checkpoints(thread_id);
+            CREATE INDEX IF NOT EXISTS idx_checkpoints_turn_id ON checkpoints(turn_id);
+            CREATE INDEX IF NOT EXISTS idx_checkpoints_created_at ON checkpoints(created_at);
         "#,
     },
 ];

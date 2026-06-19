@@ -45,6 +45,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use remi_core::models::{Checkpoint, ThreadId};
 use remi_git::GitCore;
+use remi_persistence::{CheckpointStore as CheckpointStoreTrait, SqliteCheckpointStore};
 use tracing::{debug, info};
 
 use crate::error::{CheckpointError, CheckpointResult};
@@ -63,19 +64,20 @@ use crate::error::{CheckpointError, CheckpointResult};
 /// ## 依赖注入
 ///
 /// - `git_core`：[`GitCore`] 的共享引用，用于执行 Git 回滚等底层操作。
+/// - `checkpoint_store`：[`SqliteCheckpointStore`] 的共享引用，用于检查点持久化。
 ///
-/// ## 当前实现状态
+/// ## 实现状态
 ///
-/// > ⚠️ 当前检查点元数据为**内存桩实现**，以下操作尚未完成持久化：
-/// > - `create_checkpoint`：创建检查点但未写入数据库。
-/// > - `get_checkpoint`：始终返回 `None`。
-/// > - `list_checkpoints`：始终返回空列表。
-/// > - `delete_checkpoint`：未执行实际删除。
+/// ✅ 已完成数据库持久化实现，支持检查点的完整 CRUD 操作。
 pub struct CheckpointStore {
     /// Git 核心服务引用
     ///
     /// 通过 `Arc` 共享，用于执行 Git 回滚（`revert_to_commit`）等底层操作。
     git_core: Arc<GitCore>,
+    /// 检查点存储服务引用
+    ///
+    /// 通过 `Arc` 共享，用于检查点的持久化存储和查询。
+    checkpoint_store: Arc<SqliteCheckpointStore>,
 }
 
 impl CheckpointStore {

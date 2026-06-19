@@ -42,6 +42,8 @@ pub mod migrations;
 pub mod projection_repo;
 // SQLite 客户端模块
 pub mod sqlite_client;
+// 检查点存储模块
+pub mod checkpoint_store;
 
 // 重导出所有模块的公开类型，简化外部引用路径
 pub use error::*;
@@ -49,3 +51,4 @@ pub use event_store::*;
 pub use migrations::*;
 pub use projection_repo::*;
 pub use sqlite_client::*;
+pub use checkpoint_store::*;

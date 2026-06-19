@@ -561,102 +561,184 @@ export class AcpClient extends ServiceMap.Service<AcpClient, AcpClientShape>()(
 ) {}
 
 /**
- * Client 核心请求处理器集合
- * @description 内部使用，存储所有核心方法的处理器
+ * Client 核心请求处理器集合接口
+ *
+ * @description 内部使用，存储所有核心方法的处理器函数。
+ *              每个字段对应一个 ACP 协议方法，处理器在注册前为 undefined。
+ *
+ * @remarks
+ * **设计说明：**
+ * - 所有字段都是可选的，允许按需注册处理器
+ * - 处理器注册后，当收到对应请求时会被调用
+ * - 未注册处理器的请求会返回错误
+ *
+ * @internal
  */
 interface AcpCoreRequestHandlers {
+  /** 权限请求处理器，处理 Agent 的权限请求 */
   requestPermission?: (
     request: AcpSchema.RequestPermissionRequest,
   ) => Effect.Effect<AcpSchema.RequestPermissionResponse, AcpError.AcpError>;
+  /** 引导请求处理器，处理 Agent 的用户输入引导请求 */
   elicitation?: (
     request: AcpSchema.ElicitationRequest,
   ) => Effect.Effect<AcpSchema.ElicitationResponse, AcpError.AcpError>;
+  /** 文本文件读取处理器 */
   readTextFile?: (
     request: AcpSchema.ReadTextFileRequest,
   ) => Effect.Effect<AcpSchema.ReadTextFileResponse, AcpError.AcpError>;
+  /** 文本文件写入处理器 */
   writeTextFile?: (
     request: AcpSchema.WriteTextFileRequest,
   ) => Effect.Effect<AcpSchema.WriteTextFileResponse | void, AcpError.AcpError>;
+  /** 终端创建处理器 */
   createTerminal?: (
     request: AcpSchema.CreateTerminalRequest,
   ) => Effect.Effect<AcpSchema.CreateTerminalResponse, AcpError.AcpError>;
+  /** 终端输出获取处理器 */
   terminalOutput?: (
     request: AcpSchema.TerminalOutputRequest,
   ) => Effect.Effect<AcpSchema.TerminalOutputResponse, AcpError.AcpError>;
+  /** 终端退出等待处理器 */
   terminalWaitForExit?: (
     request: AcpSchema.WaitForTerminalExitRequest,
   ) => Effect.Effect<AcpSchema.WaitForTerminalExitResponse, AcpError.AcpError>;
+  /** 终端终止处理器 */
   terminalKill?: (
     request: AcpSchema.KillTerminalRequest,
   ) => Effect.Effect<AcpSchema.KillTerminalResponse | void, AcpError.AcpError>;
+  /** 终端资源释放处理器 */
   terminalRelease?: (
     request: AcpSchema.ReleaseTerminalRequest,
   ) => Effect.Effect<AcpSchema.ReleaseTerminalResponse | void, AcpError.AcpError>;
 }
 
 /**
- * 通知处理器集合
- * @description 存储会话更新和引导完成通知的处理器
+ * 通知处理器集合接口
+ *
+ * @description 存储会话更新和引导完成通知的处理器。
+ *              每种通知类型都使用带缓冲的处理器，支持在处理器注册前缓冲通知。
+ *
+ * @internal
  */
 interface AcpNotificationHandlers {
+  /** 会话更新通知处理器，处理会话状态变更通知 */
   readonly sessionUpdate: BufferedNotificationHandler<AcpSchema.SessionNotification>;
+  /** 引导完成通知处理器，处理用户输入引导完成通知 */
   readonly elicitationComplete: BufferedNotificationHandler<AcpSchema.ElicitationCompleteNotification>;
 }
 
 /**
- * 带缓冲的通知处理器
- * @description 支持在处理器注册前缓冲通知，确保不丢失早期通知
+ * 带缓冲的通知处理器接口
+ *
+ * @description 支持在处理器注册前缓冲通知，确保不丢失早期通知。
+ *              当第一个处理器注册后，缓冲的通知会被立即处理。
+ *
+ * @typeParam A - 通知参数的类型
+ *
+ * @remarks
+ * **设计动机：**
+ * - 在 Client 初始化阶段，通知可能在处理器注册前到达
+ * - 缓冲机制确保这些通知不会丢失
+ * - 处理器注册后立即处理所有缓冲的通知
+ *
+ * @internal
  */
 interface BufferedNotificationHandler<A> {
-  /** 处理器列表 */
+  /** 已注册的处理器列表，支持多个处理器同时监听同一通知 */
   readonly handlers: Array<(notification: A) => Effect.Effect<void, AcpError.AcpError>>;
-  /** 待处理的通知队列 */
+  /** 待处理的通知队列，在处理器注册前缓冲到达的通知 */
   readonly pending: Array<A>;
 }
 
 /**
  * 创建 ACP Client 实例
+ *
  * @description 工厂函数，创建并初始化一个完整的 ACP Client，包括协议传输层、RPC 客户端/服务端、
- *              处理器注册等所有功能
- * @param stdio - 标准输入输出接口
- * @param options - Client 配置选项
- * @param terminationError - 终止错误 Effect（可选）
- * @returns 包含所有 Client 功能的 Effect
+ *              处理器注册等所有功能。
+ *
+ * @remarks
+ * **初始化流程：**
+ * 1. 创建协议传输层，建立与 Agent 的通信通道
+ * 2. 创建 RPC 服务端，处理 Agent 向 Client 发起的请求
+ * 3. 创建 RPC 客户端，用于调用 Agent 端的方法
+ * 4. 返回完整的 Client 接口实现
+ *
+ * **生命周期管理：**
+ * - 使用 Scope 管理资源，确保连接正确关闭
+ * - 支持子进程终止错误的处理
+ *
+ * @param stdio - 标准输入输出接口，用于与 Agent 进程通信
+ * @param options - Client 配置选项，控制日志记录等行为
+ * @param terminationError - 终止错误 Effect（可选），当子进程异常终止时产生的错误
+ * @returns 包含所有 Client 功能的 Effect，需要 Scope 来管理生命周期
+ *
+ * @example
+ * ```typescript
+ * const clientEffect = make(stdio, {
+ *   logIncoming: true,
+ *   logOutgoing: false
+ * });
+ *
+ * // 在 Scope 中运行
+ * Effect.runPromise(
+ *   Effect.scoped(
+ *     Effect.flatMap(clientEffect, (client) => {
+ *       return client.agent.initialize({ ... });
+ *     })
+ *   )
+ * );
+ * ```
+ *
+ * @public
  */
 export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
   stdio: Stdio.Stdio,
   options: AcpClientOptions = {},
   terminationError?: Effect.Effect<AcpError.AcpError>,
 ): Effect.fn.Return<AcpClientShape, never, Scope.Scope> {
-  // 核心处理器存储
+  // 核心处理器存储，用于保存所有已注册的请求处理器
   const coreHandlers: AcpCoreRequestHandlers = {};
-  // 通知处理器存储
+
+  // 通知处理器存储，使用带缓冲的处理器确保不丢失早期通知
   const notificationHandlers: AcpNotificationHandlers = {
     sessionUpdate: { handlers: [], pending: [] },
     elicitationComplete: { handlers: [], pending: [] },
   };
-  // 扩展请求处理器映射
+
+  // 扩展请求处理器映射，key 为方法名，value 为对应的处理函数
   const extRequestHandlers = new Map<
     string,
     (params: unknown) => Effect.Effect<unknown, AcpError.AcpError>
   >();
-  // 扩展通知处理器映射
+
+  // 扩展通知处理器映射，key 为方法名，value 为对应的处理函数
   const extNotificationHandlers = new Map<
     string,
     (params: unknown) => Effect.Effect<void, AcpError.AcpError>
   >();
-  // 未知扩展请求处理器
+
+  // 未知扩展请求处理器，作为后备处理器处理未注册的扩展请求
   let unknownExtRequestHandler:
     | ((method: string, params: unknown) => Effect.Effect<unknown, AcpError.AcpError>)
     | undefined;
-  // 未知扩展通知处理器
+
+  // 未知扩展通知处理器，作为后备处理器处理未注册的扩展通知
   let unknownExtNotificationHandler:
     | ((method: string, params: unknown) => Effect.Effect<void, AcpError.AcpError>)
     | undefined;
 
   /**
    * 运行通知处理器
-   * @description 执行所有注册的通知处理器，忽略错误
+   *
+   * @description 执行所有注册的通知处理器，忽略单个处理器的错误以确保其他处理器继续执行。
+   *
+   * @typeParam A - 通知参数的类型
+   * @param registration - 带缓冲的通知处理器实例
+   * @param notification - 要处理的通知数据
+   * @returns Effect，执行所有处理器后返回 void
+   *
+   * @internal
    */
   const runNotificationHandlers = <A>(
     registration: BufferedNotificationHandler<A>,
@@ -670,14 +752,25 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
 
   /**
    * 刷新缓冲的通知
-   * @description 当处理器注册后，处理之前缓冲的通知
+   *
+   * @description 当处理器注册后，处理之前缓冲的通知。
+   *              确保在处理器注册前到达的通知不会丢失。
+   *
+   * @typeParam A - 通知参数的类型
+   * @param registration - 带缓冲的通知处理器实例
+   * @returns Effect，处理所有缓冲通知后返回 void
+   *
+   * @internal
    */
   const flushBufferedNotifications = <A>(registration: BufferedNotificationHandler<A>) =>
     Effect.suspend(() => {
+      // 如果没有处理器或没有缓冲的通知，直接返回
       if (registration.handlers.length === 0 || registration.pending.length === 0) {
         return Effect.void;
       }
+      // 取出所有缓冲的通知并清空队列
       const pending = registration.pending.splice(0, registration.pending.length);
+      // 依次处理所有缓冲的通知
       return Effect.forEach(
         pending,
         (notification) => runNotificationHandlers(registration, notification),
@@ -689,31 +782,40 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
 
   /**
    * 分发通知
-   * @description 根据通知类型分发到相应的处理器
+   *
+   * @description 根据通知类型分发到相应的处理器。
+   *              支持三种通知类型：会话更新、引导完成、扩展通知。
+   *
+   * @param notification - 传入的 ACP 通知
+   * @returns Effect，处理通知后返回 void
+   *
+   * @internal
    */
   const dispatchNotification = (notification: AcpProtocol.AcpIncomingNotification) => {
     switch (notification._tag) {
       case "SessionUpdate": {
-        // 如果没有处理器，缓冲通知
+        // 如果没有处理器，缓冲通知等待后续处理
         if (notificationHandlers.sessionUpdate.handlers.length === 0) {
           notificationHandlers.sessionUpdate.pending.push(notification.params);
           return Effect.void;
         }
+        // 有处理器时立即执行
         return runNotificationHandlers(notificationHandlers.sessionUpdate, notification.params);
       }
       case "ElicitationComplete": {
-        // 如果没有处理器，缓冲通知
+        // 如果没有处理器，缓冲通知等待后续处理
         if (notificationHandlers.elicitationComplete.handlers.length === 0) {
           notificationHandlers.elicitationComplete.pending.push(notification.params);
           return Effect.void;
         }
+        // 有处理器时立即执行
         return runNotificationHandlers(
           notificationHandlers.elicitationComplete,
           notification.params,
         );
       }
       case "ExtNotification": {
-        // 查找并执行扩展通知处理器
+        // 查找并执行特定方法的扩展通知处理器
         const handler = extNotificationHandlers.get(notification.method);
         if (handler) {
           return handler(notification.params);
@@ -728,9 +830,18 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
 
   /**
    * 分发扩展请求
-   * @description 查找并执行扩展请求处理器
+   *
+   * @description 查找并执行扩展请求处理器。
+   *              如果找不到特定方法的处理器，使用未知扩展请求处理器作为后备。
+   *
+   * @param method - 请求方法名称
+   * @param params - 请求参数
+   * @returns Effect，成功时返回响应结果，失败时返回 AcpError
+   *
+   * @internal
    */
   const dispatchExtRequest = (method: string, params: unknown) => {
+    // 查找特定方法的处理器
     const handler = extRequestHandlers.get(method);
     if (handler) {
       return handler(params);
@@ -741,7 +852,7 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
       : Effect.fail(AcpError.AcpRequestError.methodNotFound(method));
   };
 
-  // 创建协议传输层
+  // 创建协议传输层，建立与 Agent 的通信通道
   const transport = yield* AcpProtocol.makeAcpPatchedProtocol({
     stdio: stdio,
     ...(terminationError ? { terminationError } : {}),
@@ -753,7 +864,7 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
     onExtRequest: dispatchExtRequest,
   });
 
-  // 创建 Client RPC 处理器层
+  // 创建 Client RPC 处理器层，处理 Agent 向 Client 发起的 RPC 请求
   const clientHandlerLayer = AcpRpcs.ClientRpcs.toLayer(
     AcpRpcs.ClientRpcs.of({
       [CLIENT_METHODS.session_request_permission]: (payload) =>
@@ -791,7 +902,7 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
     }),
   );
 
-  // 启动 RPC 服务端
+  // 启动 RPC 服务端，处理来自 Agent 的请求
   yield* RpcServer.make(AcpRpcs.ClientRpcs).pipe(
     Effect.provideService(RpcServer.Protocol, transport.serverProtocol),
     Effect.provide(clientHandlerLayer),
@@ -799,18 +910,21 @@ export const make = Effect.fn("effect-acp/AcpClient.make")(function* (
   );
 
   // 创建 RPC 客户端（用于调用 Agent 端方法）
+  // 使用大整数作为请求 ID 起始值，避免与 Agent 端的请求 ID 冲突
   let nextRpcRequestId = 1n << 32n;
   const rpc = yield* RpcClient.make(AcpRpcs.AgentRpcs, {
     generateRequestId: () => nextRpcRequestId++ as never,
   }).pipe(Effect.provideService(RpcClient.Protocol, transport.clientProtocol));
 
-  // 返回 Client 接口实现
+  // 返回 Client 接口实现，包含原始协议访问、Agent 操作和处理器注册方法
   return {
+    // 原始协议访问层
     raw: {
       notifications: transport.incoming,
       request: transport.request,
       notify: transport.notify,
     },
+    // Agent 操作层，封装所有调用 Agent 的方法
     agent: {
       initialize: (payload) => callRpc(rpc[AGENT_METHODS.initialize](payload)),
       authenticate: (payload) => callRpc(rpc[AGENT_METHODS.authenticate](payload)),

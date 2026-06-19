@@ -9,3 +9,8 @@ export const isTauri =
  * Desktop environment detection - true when running as Tauri desktop app
  */
 export const isDesktop = isTauri;
+
+/**
+ * Backward compatibility - project migrated from Electron to Tauri
+ */
+export const isElectron = false;

@@ -951,6 +951,362 @@ impl GitCore {
 
         Ok(result.stdout)
     }
+
+    /// 拉取 GitHub Pull Request 分支
+    ///
+    /// 从远程仓库拉取指定的 Pull Request 分支到本地。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `pr_number`: Pull Request 编号
+    /// - `local_branch`: 本地分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 拉取成功
+    /// - `Err(GitError::CommandError)`: 拉取失败
+    pub async fn fetch_pull_request_branch(
+        &self,
+        cwd: &str,
+        pr_number: u32,
+        local_branch: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "fetch".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "fetch".to_string(),
+                "origin".to_string(),
+                format!("pull/{}/head:{}", pr_number, local_branch),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 确保远程仓库存在
+    ///
+    /// 检查指定的远程仓库是否存在，如果不存在则添加。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `remote_name`: 远程仓库名称
+    /// - `remote_url`: 远程仓库 URL
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 远程仓库存在或已成功添加
+    /// - `Err(GitError::CommandError)`: 操作失败
+    pub async fn ensure_remote(
+        &self,
+        cwd: &str,
+        remote_name: &str,
+        remote_url: &str,
+    ) -> GitResult<()> {
+        // 先检查远程仓库是否存在
+        let check_result = self
+            .execute(ExecuteGitInput {
+                operation: "remote".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["remote".to_string(), "get-url".to_string(), remote_name.to_string()],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        // 如果不存在，则添加远程仓库
+        if check_result.code != 0 {
+            self.execute(ExecuteGitInput {
+                operation: "remote add".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "remote".to_string(),
+                    "add".to_string(),
+                    remote_name.to_string(),
+                    remote_url.to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+        }
+
+        Ok(())
+    }
+
+    /// 拉取远程分支
+    ///
+    /// 从远程仓库拉取指定的分支到本地。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `remote_name`: 远程仓库名称
+    /// - `remote_branch`: 远程分支名称
+    /// - `local_branch`: 本地分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 拉取成功
+    /// - `Err(GitError::CommandError)`: 拉取失败
+    pub async fn fetch_remote_branch(
+        &self,
+        cwd: &str,
+        remote_name: &str,
+        remote_branch: &str,
+        local_branch: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "fetch".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "fetch".to_string(),
+                remote_name.to_string(),
+                format!("{}:{}", remote_branch, local_branch),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 设置分支上游跟踪
+    ///
+    /// 为本地分支设置上游跟踪分支。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `branch`: 本地分支名称
+    /// - `upstream`: 上游分支引用（如 "origin/main"）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 设置成功
+    /// - `Err(GitError::CommandError)`: 设置失败
+    pub async fn set_branch_upstream(
+        &self,
+        cwd: &str,
+        branch: &str,
+        upstream: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "branch".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "branch".to_string(),
+                format!("--set-upstream-to={}", upstream),
+                branch.to_string(),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 发布分支
+    ///
+    /// 将本地分支推送到远程仓库并设置上游跟踪。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `remote_name`: 远程仓库名称
+    /// - `branch`: 本地分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 发布成功
+    /// - `Err(GitError::CommandError)`: 发布失败
+    pub async fn publish_branch(
+        &self,
+        cwd: &str,
+        remote_name: &str,
+        branch: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "push".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "push".to_string(),
+                "-u".to_string(),
+                remote_name.to_string(),
+                branch.to_string(),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 重命名分支
+    ///
+    /// 重命名本地分支。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `old_name`: 旧分支名称
+    /// - `new_name`: 新分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 重命名成功
+    /// - `Err(GitError::CommandError)`: 重命名失败
+    pub async fn rename_branch(
+        &self,
+        cwd: &str,
+        old_name: &str,
+        new_name: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "branch".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "branch".to_string(),
+                "-m".to_string(),
+                old_name.to_string(),
+                new_name.to_string(),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 删除最新的 stash
+    ///
+    /// 删除 stash 栈顶的条目。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 删除成功
+    /// - `Err(GitError::CommandError)`: 删除失败（stash 为空等）
+    pub async fn stash_drop(&self, cwd: &str) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "stash".to_string(),
+            cwd: cwd.to_string(),
+            args: vec!["stash".to_string(), "drop".to_string()],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 获取最新 stash 信息
+    ///
+    /// 获取 stash 栈顶条目的信息。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: stash 信息（格式：`stash@{0}: <message>`）
+    /// - `Err(GitError::CommandError)`: 获取失败（stash 为空等）
+    pub async fn stash_info(&self, cwd: &str) -> GitResult<String> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "stash".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["stash".to_string(), "list".to_string(), "-1".to_string()],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        Ok(result.stdout.trim().to_string())
+    }
+
+    /// 移除索引锁文件
+    ///
+    /// 删除 `.git/index.lock` 文件，用于解决 Git 索引锁定问题。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 移除成功或文件不存在
+    /// - `Err(GitError::CommandError)`: 移除失败
+    pub async fn remove_index_lock(&self, cwd: &str) -> GitResult<()> {
+        let lock_path = std::path::Path::new(cwd).join(".git").join("index.lock");
+        
+        if lock_path.exists() {
+            std::fs::remove_file(&lock_path).map_err(|e| {
+                crate::error::GitError::CommandError(format!(
+                    "Failed to remove index.lock: {}",
+                    e
+                ))
+            })?;
+        }
+
+        Ok(())
+    }
+
+    /// 列出本地分支名称（短格式）
+    ///
+    /// 列出所有本地分支的名称，不包含远程分支。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<String>)`: 分支名称列表
+    /// - `Err(GitError::CommandError)`: 列出失败
+    pub async fn list_local_branch_names(&self, cwd: &str) -> GitResult<Vec<String>> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "branch".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["branch".to_string(), "--format=%(refname:short)".to_string()],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let branches: Vec<String> = result
+            .stdout
+            .lines()
+            .map(|line| line.trim().to_string())
+            .filter(|line| !line.is_empty())
+            .collect();
+
+        Ok(branches)
+    }
 }
 
 impl Default for GitCore {

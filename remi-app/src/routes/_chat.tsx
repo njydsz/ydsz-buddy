@@ -36,6 +36,7 @@ import {
 } from "~/lib/providerAvailability";
 import { toastManager } from "~/components/ui/toast";
 import { Sidebar, SidebarProvider, SidebarRail, useSidebar } from "~/components/ui/sidebar";
+import { tauriBridge } from "../lib/tauri-bridge";
 
 const EMPTY_KEYBINDINGS: ResolvedKeybindingsConfig = [];
 const THREAD_SIDEBAR_WIDTH_STORAGE_KEY = "chat_thread_sidebar_width";
@@ -444,7 +445,7 @@ function ChatRouteGlobalShortcuts() {
       return;
     }
 
-    const unsubscribe = onMenuAction((action) => {
+    const unsubscribe = onMenuAction((action: string) => {
       if (action === "toggle-sidebar") {
         toggleSidebar();
         return;

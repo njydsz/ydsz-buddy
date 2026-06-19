@@ -77,6 +77,7 @@ import { resolveAndPersistPreferredEditor } from "../editorPreferences";
 import { isElectron } from "../env";
 import { useTheme } from "../hooks/useTheme";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
+import { tauriBridge } from "../lib/tauri-bridge";
 import {
   ArchiveIcon,
   ChevronDownIcon,
@@ -746,7 +747,7 @@ function SettingsRouteView() {
   );
   const orderedProviderVisibilityOptions = useMemo(
     () =>
-      settings.providerOrder.flatMap((provider) => {
+      settings.providerOrder.flatMap((provider: string) => {
         const option = providerVisibilityOptionsByProvider.get(provider);
         return option ? [option] : [];
       }),
@@ -1020,7 +1021,7 @@ function SettingsRouteView() {
         }));
         return;
       }
-      if (getModelOptions(provider).some((option) => option.slug === normalized)) {
+      if (getModelOptions(provider).some((option: { slug: string }) => option.slug === normalized)) {
         setCustomModelErrorByProvider((existing) => ({
           ...existing,
           [provider]: "That model is already built in.",
@@ -1467,7 +1468,7 @@ function SettingsRouteView() {
                   className="w-full sm:w-44"
                   aria-label={messages.settings.general.language.title}
                 >
-                  <SelectValue>{NATIVE_LANGUAGE_LABELS[settings.language]}</SelectValue>
+                  <SelectValue>{NATIVE_LANGUAGE_LABELS[settings.language as keyof typeof NATIVE_LANGUAGE_LABELS]}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   {SUPPORTED_LANGUAGES.map((language) => (
@@ -2963,11 +2964,11 @@ function SettingsRouteView() {
               onDragEnd={handleProviderOrderDragEnd}
             >
               <SortableContext
-                items={orderedProviderVisibilityOptions.map((option) => option.provider)}
+                items={orderedProviderVisibilityOptions.map((option: { provider: string }) => option.provider)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="mt-4 space-y-2">
-                  {orderedProviderVisibilityOptions.map((option) => (
+                  {orderedProviderVisibilityOptions.map((option: { provider: string }) => (
                     <SortableProviderVisibilityRow
                       key={option.provider}
                       option={option}
