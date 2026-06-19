@@ -64,18 +64,18 @@ export function resolveAutoFeatureBranchName(
   return `${resolvedBase}-${suffix}`;
 }
 
-export function buildPeakcodeBranchName(preferredBranch?: string | null): string {
-  const normalizedExisting = preferredBranch?.trim().replace(/^(codex|peakcode)\//i, "") ?? "";
+export function buildRemicodeBranchName(preferredBranch?: string | null): string {
+  const normalizedExisting = preferredBranch?.trim().replace(/^(codex|remicode)\//i, "") ?? "";
   return `${WORKTREE_BRANCH_PREFIX}/${sanitizeBranchFragment(
-    normalizedExisting || PEAKCODE_BRANCH_FALLBACK,
+    normalizedExisting || REMICODE_BRANCH_FALLBACK,
   )}`;
 }
 
-export function resolveUniquePeakcodeBranchName(
+export function resolveUniqueRemicodeBranchName(
   existingBranchNames: readonly string[],
   preferredBranch?: string | null,
 ): string {
-  const resolvedBase = buildPeakcodeBranchName(preferredBranch);
+  const resolvedBase = buildRemicodeBranchName(preferredBranch);
   const existingNames = new Set(existingBranchNames.map((branch) => branch.toLowerCase()));
 
   if (!existingNames.has(resolvedBase)) {

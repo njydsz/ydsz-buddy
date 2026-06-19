@@ -76,10 +76,10 @@ export function projectScriptRuntimeEnv(
   input: ProjectScriptRuntimeEnvInput,
 ): Record<string, string> {
   const env: Record<string, string> = {
-    PEAKCODE_PROJECT_ROOT: input.project.cwd,
+    REMICODE_PROJECT_ROOT: input.project.cwd,
   };
   if (input.worktreePath) {
-    env.PEAKCODE_WORKTREE_PATH = input.worktreePath;
+    env.REMICODE_WORKTREE_PATH = input.worktreePath;
   }
   if (input.extraEnv) {
     return { ...env, ...input.extraEnv };

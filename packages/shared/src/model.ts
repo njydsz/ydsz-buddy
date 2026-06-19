@@ -236,12 +236,12 @@ export function getGeminiThinkingModelAlias(
 
   const base = sanitizeGeminiAliasSegment(model);
   if (kind === "level" && nextOptions.thinkingLevel) {
-    return `peakcode-gemini-${base}-thinking-level-${nextOptions.thinkingLevel.toLowerCase()}`;
+    return `remicode-gemini-${base}-thinking-level-${nextOptions.thinkingLevel.toLowerCase()}`;
   }
   if (kind === "budget" && nextOptions.thinkingBudget !== undefined) {
     const budget =
       nextOptions.thinkingBudget === -1 ? "dynamic" : String(nextOptions.thinkingBudget);
-    return `peakcode-gemini-${base}-thinking-budget-${budget}`;
+    return `remicode-gemini-${base}-thinking-budget-${budget}`;
   }
   return null;
 }

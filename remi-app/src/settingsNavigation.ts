@@ -30,7 +30,7 @@ export const SETTINGS_SECTION_IDS = [
 ] as const;
 
 export type SettingsSectionId = (typeof SETTINGS_SECTION_IDS)[number];
-export type SettingsNavGroupId = "app" | "peakcode";
+export type SettingsNavGroupId = "app" | "remicode";
 
 export type SettingsNavItem = {
   id: SettingsSectionId;
@@ -101,7 +101,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "models",
-    group: "peakcode",
+    group: "remicode",
     icon: BrainIcon,
     eyebrow: "AI configuration",
     labelKey: "models",
@@ -109,7 +109,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "providers",
-    group: "peakcode",
+    group: "remicode",
     icon: PlugIcon,
     eyebrow: "Picker visibility",
     labelKey: "providers",
@@ -117,7 +117,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "advanced",
-    group: "peakcode",
+    group: "remicode",
     icon: WrenchIcon,
     eyebrow: "System tools",
     labelKey: "advanced",
@@ -145,7 +145,7 @@ export function buildSettingsNavGroups(messages: Messages): ReadonlyArray<{
 }> {
   return [
     { id: "app", label: messages.settings.groups.app },
-    { id: "peakcode", label: messages.settings.groups.peakcode },
+    { id: "remicode", label: messages.settings.groups.remicode },
   ];
 }
 
@@ -167,7 +167,7 @@ export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
   label: string;
 }> = [
   { id: "app", label: "App" },
-  { id: "peakcode", label: "Peak Code" },
+  { id: "remicode", label: "Remi Code" },
 ] as const;
 
 export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
@@ -207,7 +207,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
     id: "worktrees",
     group: "app",
     label: "Worktrees",
-    description: "Review and clean up the worktrees created by Peak Code.",
+    description: "Review and clean up the worktrees created by Remi Code.",
     icon: WorktreeIcon,
     eyebrow: "Workspace management",
   },
@@ -221,7 +221,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "models",
-    group: "peakcode",
+    group: "remicode",
     label: "Models",
     description: "Git writing defaults and custom model slugs.",
     icon: BrainIcon,
@@ -229,7 +229,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "providers",
-    group: "peakcode",
+    group: "remicode",
     label: "Providers",
     description: "Choose visible providers, review CLI installs, and update provider tools.",
     icon: PlugIcon,
@@ -237,7 +237,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "advanced",
-    group: "peakcode",
+    group: "remicode",
     label: "Advanced",
     description: "Keybindings, recovery, and version info.",
     icon: WrenchIcon,

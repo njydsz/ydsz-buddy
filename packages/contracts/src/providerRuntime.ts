@@ -389,236 +389,399 @@ const SessionExitedPayload = Schema.Struct({
 });
 export type SessionExitedPayload = typeof SessionExitedPayload.Type;
 
+/** 线程启动事件负载 */
 const ThreadStartedPayload = Schema.Struct({
+  /** Provider 线程 ID */
   providerThreadId: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type ThreadStartedPayload = typeof ThreadStartedPayload.Type;
 
+/** 线程状态变化事件负载 */
 const ThreadStateChangedPayload = Schema.Struct({
+  /** 新状态 */
   state: RuntimeThreadState,
+  /** 详细信息 */
   detail: Schema.optional(Schema.Unknown),
 });
 export type ThreadStateChangedPayload = typeof ThreadStateChangedPayload.Type;
 
+/** 线程元数据更新事件负载 */
 const ThreadMetadataUpdatedPayload = Schema.Struct({
+  /** 线程名称 */
   name: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 元数据 */
   metadata: Schema.optional(UnknownRecordSchema),
 });
 export type ThreadMetadataUpdatedPayload = typeof ThreadMetadataUpdatedPayload.Type;
 
+/**
+ * 线程 Token 使用量快照
+ *
+ * 记录线程的 Token 使用情况，包括已使用 Token 数、百分比、各类 Token 统计等。
+ */
 export const ThreadTokenUsageSnapshot = Schema.Struct({
+  /** 已使用的 Token 数 */
   usedTokens: NonNegativeInt,
+  /** 已使用百分比 */
   usedPercent: Schema.optional(
     Schema.Number.check(Schema.isGreaterThanOrEqualTo(0)).check(Schema.isLessThanOrEqualTo(100)),
   ),
+  /** 总处理 Token 数 */
   totalProcessedTokens: Schema.optional(NonNegativeInt),
+  /** 最大 Token 数 */
   maxTokens: Schema.optional(PositiveInt),
+  /** 输入 Token 数 */
   inputTokens: Schema.optional(NonNegativeInt),
+  /** 缓存输入 Token 数 */
   cachedInputTokens: Schema.optional(NonNegativeInt),
+  /** 输出 Token 数 */
   outputTokens: Schema.optional(NonNegativeInt),
+  /** 推理输出 Token 数 */
   reasoningOutputTokens: Schema.optional(NonNegativeInt),
+  /** 上次使用的 Token 数 */
   lastUsedTokens: Schema.optional(NonNegativeInt),
+  /** 上次输入 Token 数 */
   lastInputTokens: Schema.optional(NonNegativeInt),
+  /** 上次缓存输入 Token 数 */
   lastCachedInputTokens: Schema.optional(NonNegativeInt),
+  /** 上次输出 Token 数 */
   lastOutputTokens: Schema.optional(NonNegativeInt),
+  /** 上次推理输出 Token 数 */
   lastReasoningOutputTokens: Schema.optional(NonNegativeInt),
+  /** 工具使用次数 */
   toolUses: Schema.optional(NonNegativeInt),
+  /** 持续时间（毫秒） */
   durationMs: Schema.optional(NonNegativeInt),
+  /** 是否自动压缩 */
   compactsAutomatically: Schema.optional(Schema.Boolean),
 });
 export type ThreadTokenUsageSnapshot = typeof ThreadTokenUsageSnapshot.Type;
 
+/** 线程 Token 使用量更新事件负载 */
 const ThreadTokenUsageUpdatedPayload = Schema.Struct({
+  /** Token 使用量快照 */
   usage: ThreadTokenUsageSnapshot,
 });
 export type ThreadTokenUsageUpdatedPayload = typeof ThreadTokenUsageUpdatedPayload.Type;
 
+/** 线程实时会话启动事件负载 */
 const ThreadRealtimeStartedPayload = Schema.Struct({
+  /** 实时会话 ID */
   realtimeSessionId: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type ThreadRealtimeStartedPayload = typeof ThreadRealtimeStartedPayload.Type;
 
+/** 线程实时会话新增项目事件负载 */
 const ThreadRealtimeItemAddedPayload = Schema.Struct({
+  /** 新增的项目数据 */
   item: Schema.Unknown,
 });
 export type ThreadRealtimeItemAddedPayload = typeof ThreadRealtimeItemAddedPayload.Type;
 
+/** 线程实时会话音频增量事件负载 */
 const ThreadRealtimeAudioDeltaPayload = Schema.Struct({
+  /** 音频数据 */
   audio: Schema.Unknown,
 });
 export type ThreadRealtimeAudioDeltaPayload = typeof ThreadRealtimeAudioDeltaPayload.Type;
 
+/** 线程实时会话错误事件负载 */
 const ThreadRealtimeErrorPayload = Schema.Struct({
+  /** 错误消息 */
   message: TrimmedNonEmptyStringSchema,
 });
 export type ThreadRealtimeErrorPayload = typeof ThreadRealtimeErrorPayload.Type;
 
+/** 线程实时会话关闭事件负载 */
 const ThreadRealtimeClosedPayload = Schema.Struct({
+  /** 关闭原因 */
   reason: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type ThreadRealtimeClosedPayload = typeof ThreadRealtimeClosedPayload.Type;
 
+/** 轮次启动事件负载 */
 const TurnStartedPayload = Schema.Struct({
+  /** 使用的模型 */
   model: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 推理努力程度 */
   effort: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type TurnStartedPayload = typeof TurnStartedPayload.Type;
 
+/** 轮次完成事件负载 */
 const TurnCompletedPayload = Schema.Struct({
+  /** 最终状态 */
   state: RuntimeTurnState,
+  /** 停止原因 */
   stopReason: Schema.optional(Schema.NullOr(TrimmedNonEmptyStringSchema)),
+  /** 使用情况 */
   usage: Schema.optional(Schema.Unknown),
+  /** 模型使用情况 */
   modelUsage: Schema.optional(UnknownRecordSchema),
+  /** 本次费用（美元） */
   totalCostUsd: Schema.optional(Schema.Number),
+  /** 累计费用（美元） */
   cumulativeCostUsd: Schema.optional(Schema.Number),
+  /** 错误消息 */
   errorMessage: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type TurnCompletedPayload = typeof TurnCompletedPayload.Type;
 
+/** 轮次中止事件负载 */
 const TurnAbortedPayload = Schema.Struct({
+  /** 中止原因 */
   reason: TrimmedNonEmptyStringSchema,
 });
 export type TurnAbortedPayload = typeof TurnAbortedPayload.Type;
 
+/** 运行时任务列表项 */
 const RuntimeTaskListItem = Schema.Struct({
+  /** 任务描述 */
   task: TrimmedNonEmptyStringSchema,
+  /** 任务状态 */
   status: RuntimeTaskStatus,
 });
 export type RuntimeTaskListItem = typeof RuntimeTaskListItem.Type;
 
+/** 轮次任务更新事件负载 */
 const TurnTasksUpdatedPayload = Schema.Struct({
+  /** 任务说明 */
   explanation: Schema.optional(Schema.NullOr(TrimmedNonEmptyStringSchema)),
+  /** 任务列表 */
   tasks: Schema.Array(RuntimeTaskListItem),
 });
 export type TurnTasksUpdatedPayload = typeof TurnTasksUpdatedPayload.Type;
 
+/** 轮次提议增量事件负载 */
 const TurnProposedDeltaPayload = Schema.Struct({
+  /** 增量文本 */
   delta: Schema.String,
 });
 export type TurnProposedDeltaPayload = typeof TurnProposedDeltaPayload.Type;
 
+/** 轮次提议完成事件负载 */
 const TurnProposedCompletedPayload = Schema.Struct({
+  /** 计划 Markdown 内容 */
   planMarkdown: TrimmedNonEmptyStringSchema,
 });
 export type TurnProposedCompletedPayload = typeof TurnProposedCompletedPayload.Type;
 
+/** 轮次差异更新事件负载 */
 const TurnDiffUpdatedPayload = Schema.Struct({
+  /** 统一差异格式 */
   unifiedDiff: Schema.String,
 });
 export type TurnDiffUpdatedPayload = typeof TurnDiffUpdatedPayload.Type;
 
+/**
+ * 项目生命周期负载
+ *
+ * 描述项目（Item）在生命周期中的状态变化，包括类型、状态、标题等。
+ * 用于 item.started、item.updated、item.completed 事件。
+ */
 export const ItemLifecyclePayload = Schema.Struct({
+  /** 项目类型 */
   itemType: CanonicalItemType,
+  /** 项目状态 */
   status: Schema.optional(RuntimeItemStatus),
+  /** 项目标题 */
   title: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 项目详情 */
   detail: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 项目数据 */
   data: Schema.optional(Schema.Unknown),
 });
 export type ItemLifecyclePayload = typeof ItemLifecyclePayload.Type;
 
-// Codex-generated images are persisted as local file references, never inline bytes.
+/** Codex 生成图片的产物类型常量 */
 export const CODEX_GENERATED_IMAGE_ARTIFACT_KIND = "codex.generated_image" as const;
+
+/**
+ * Codex 生成图片的产物描述
+ *
+ * 描述 Codex 生成的图片产物，包含本地文件路径和调用 ID。
+ */
 export const CodexGeneratedImageArtifact = Schema.Struct({
+  /** 产物类型 */
   kind: Schema.Literal(CODEX_GENERATED_IMAGE_ARTIFACT_KIND),
+  /** 本地文件路径 */
   path: TrimmedNonEmptyStringSchema,
+  /** 调用 ID */
   callId: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type CodexGeneratedImageArtifact = typeof CodexGeneratedImageArtifact.Type;
 
+/**
+ * 内容增量负载
+ *
+ * 描述流式输出的文本增量，包括流类型、增量文本和索引信息。
+ * 用于 content.delta 事件。
+ */
 const ContentDeltaPayload = Schema.Struct({
+  /** 流类型 */
   streamKind: RuntimeContentStreamKind,
+  /** 增量文本 */
   delta: Schema.String,
+  /** 内容索引 */
   contentIndex: Schema.optional(Schema.Int),
+  /** 摘要索引 */
   summaryIndex: Schema.optional(Schema.Int),
 });
 export type ContentDeltaPayload = typeof ContentDeltaPayload.Type;
 
+/**
+ * 请求打开负载
+ *
+ * 描述审批请求的开启，包括请求类型、详情和参数。
+ * 用于 request.opened 事件。
+ */
 const RequestOpenedPayload = Schema.Struct({
+  /** 请求类型 */
   requestType: CanonicalRequestType,
+  /** 请求详情 */
   detail: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 请求参数 */
   args: Schema.optional(Schema.Unknown),
 });
 export type RequestOpenedPayload = typeof RequestOpenedPayload.Type;
 
+/**
+ * 请求解决负载
+ *
+ * 描述审批请求的解决结果，包括请求类型、决策和解决方案。
+ * 用于 request.resolved 事件。
+ */
 const RequestResolvedPayload = Schema.Struct({
+  /** 请求类型 */
   requestType: CanonicalRequestType,
+  /** 用户决策 */
   decision: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 解决方案 */
   resolution: Schema.optional(Schema.Unknown),
 });
 export type RequestResolvedPayload = typeof RequestResolvedPayload.Type;
 
+/** 用户输入问题选项 */
 const UserInputQuestionOption = Schema.Struct({
+  /** 选项标签 */
   label: TrimmedNonEmptyStringSchema,
+  /** 选项描述 */
   description: TrimmedNonEmptyStringSchema,
 });
 export type UserInputQuestionOption = typeof UserInputQuestionOption.Type;
 
+/**
+ * 用户输入问题
+ *
+ * 描述需要用户回答的问题，包括问题 ID、标题、问题文本和选项列表。
+ * 用于 user-input.requested 事件。
+ */
 export const UserInputQuestion = Schema.Struct({
+  /** 问题 ID */
   id: TrimmedNonEmptyStringSchema,
+  /** 问题标题 */
   header: TrimmedNonEmptyStringSchema,
+  /** 问题文本 */
   question: TrimmedNonEmptyStringSchema,
+  /** 选项列表 */
   options: Schema.Array(UserInputQuestionOption),
+  /** 是否多选 */
   multiSelect: Schema.optional(Schema.Boolean).pipe(
     Schema.withConstructorDefault(() => Option.some(false)),
   ),
 });
 export type UserInputQuestion = typeof UserInputQuestion.Type;
 
+/** 用户输入请求事件负载 */
 const UserInputRequestedPayload = Schema.Struct({
+  /** 问题列表 */
   questions: Schema.Array(UserInputQuestion),
 });
 export type UserInputRequestedPayload = typeof UserInputRequestedPayload.Type;
 
+/** 用户输入解决事件负载 */
 const UserInputResolvedPayload = Schema.Struct({
+  /** 用户答案 */
   answers: UnknownRecordSchema,
 });
 export type UserInputResolvedPayload = typeof UserInputResolvedPayload.Type;
 
+/** 任务启动事件负载 */
 const TaskStartedPayload = Schema.Struct({
+  /** 任务 ID */
   taskId: RuntimeTaskId,
+  /** 任务描述 */
   description: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 任务类型 */
   taskType: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type TaskStartedPayload = typeof TaskStartedPayload.Type;
 
+/** 任务进度事件负载 */
 const TaskProgressPayload = Schema.Struct({
+  /** 任务 ID */
   taskId: RuntimeTaskId,
+  /** 进度描述 */
   description: TrimmedNonEmptyStringSchema,
+  /** 进度摘要 */
   summary: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 使用情况 */
   usage: Schema.optional(Schema.Unknown),
+  /** 最后使用的工具名称 */
   lastToolName: Schema.optional(TrimmedNonEmptyStringSchema),
 });
 export type TaskProgressPayload = typeof TaskProgressPayload.Type;
 
+/** 任务完成事件负载 */
 const TaskCompletedPayload = Schema.Struct({
+  /** 任务 ID */
   taskId: RuntimeTaskId,
+  /** 完成状态 */
   status: Schema.Literals(["completed", "failed", "stopped"]),
+  /** 完成摘要 */
   summary: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 使用情况 */
   usage: Schema.optional(Schema.Unknown),
 });
 export type TaskCompletedPayload = typeof TaskCompletedPayload.Type;
 
+/** 钩子启动事件负载 */
 const HookStartedPayload = Schema.Struct({
+  /** 钩子 ID */
   hookId: TrimmedNonEmptyStringSchema,
+  /** 钩子名称 */
   hookName: TrimmedNonEmptyStringSchema,
+  /** 钩子事件 */
   hookEvent: TrimmedNonEmptyStringSchema,
 });
 export type HookStartedPayload = typeof HookStartedPayload.Type;
 
+/** 钩子进度事件负载 */
 const HookProgressPayload = Schema.Struct({
+  /** 钩子 ID */
   hookId: TrimmedNonEmptyStringSchema,
+  /** 输出内容 */
   output: Schema.optional(Schema.String),
+  /** 标准输出 */
   stdout: Schema.optional(Schema.String),
+  /** 标准错误 */
   stderr: Schema.optional(Schema.String),
 });
 export type HookProgressPayload = typeof HookProgressPayload.Type;
 
+/** 钩子完成事件负载 */
 const HookCompletedPayload = Schema.Struct({
+  /** 钩子 ID */
   hookId: TrimmedNonEmptyStringSchema,
+  /** 完成结果 */
   outcome: Schema.Literals(["success", "error", "cancelled"]),
+  /** 输出内容 */
   output: Schema.optional(Schema.String),
+  /** 标准输出 */
   stdout: Schema.optional(Schema.String),
+  /** 标准错误 */
   stderr: Schema.optional(Schema.String),
+  /** 退出码 */
   exitCode: Schema.optional(Schema.Int),
 });
 export type HookCompletedPayload = typeof HookCompletedPayload.Type;

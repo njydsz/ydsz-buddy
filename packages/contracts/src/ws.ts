@@ -1,3 +1,8 @@
+/**
+ * WebSocket 通信协议定义。
+ * 包含 RPC 方法名常量、推送通道常量、请求/响应格式、推送消息 Schema，
+ * 以及所有 WebSocket 消息的联合类型定义。
+ */
 import { Schema, Struct } from "effect";
 import { NonNegativeInt, ProjectId, ThreadId, TrimmedNonEmptyString } from "./baseSchemas";
 
@@ -82,10 +87,11 @@ import {
 } from "./providerDiscovery";
 import { ProviderCompactThreadInput } from "./provider";
 
-// ── WebSocket RPC Method Names ───────────────────────────────────────
+// ── WebSocket RPC 方法名常量 ─────────────────────────────────────────
 
+/** 所有 WebSocket RPC 方法名映射，键为逻辑名，值为协议方法标识 */
 export const WS_METHODS = {
-  // Project registry methods
+  // 项目注册相关方法
   projectsList: "projects.list",
   projectsAdd: "projects.add",
   projectsRemove: "projects.remove",
@@ -94,13 +100,13 @@ export const WS_METHODS = {
   projectsSearchLocalEntries: "projects.searchLocalEntries",
   projectsWriteFile: "projects.writeFile",
 
-  // Filesystem browse methods
+  // 文件系统浏览方法
   filesystemBrowse: "filesystem.browse",
 
-  // Shell methods
+  // Shell 相关方法
   shellOpenInEditor: "shell.openInEditor",
 
-  // Git methods
+  // Git 相关方法
   gitPull: "git.pull",
   gitStatus: "git.status",
   gitReadWorkingTreeDiff: "git.readWorkingTreeDiff",
@@ -121,7 +127,7 @@ export const WS_METHODS = {
   gitResolvePullRequest: "git.resolvePullRequest",
   gitPreparePullRequestThread: "git.preparePullRequestThread",
 
-  // Terminal methods
+  // 终端相关方法
   terminalOpen: "terminal.open",
   terminalWrite: "terminal.write",
   terminalResize: "terminal.resize",
@@ -129,7 +135,7 @@ export const WS_METHODS = {
   terminalRestart: "terminal.restart",
   terminalClose: "terminal.close",
 
-  // Server meta
+  // 服务器管理方法
   serverGetConfig: "server.getConfig",
   serverGetEnvironment: "server.getEnvironment",
   serverGetSettings: "server.getSettings",
@@ -146,12 +152,12 @@ export const WS_METHODS = {
   subscribeServerProviderStatuses: "server.subscribeProviderStatuses",
   subscribeServerSettings: "server.subscribeSettings",
 
-  // Streaming subscriptions
+  // 流式订阅方法
   subscribeTerminalEvents: "terminal.subscribeEvents",
   subscribeOrchestrationDomainEvents: "orchestration.subscribeDomainEvents",
   subscribeGitActionProgress: "git.subscribeActionProgress",
 
-  // Provider discovery
+  // Provider 发现方法
   providerGetComposerCapabilities: "provider.getComposerCapabilities",
   providerCompactThread: "provider.compactThread",
   providerListCommands: "provider.listCommands",
@@ -161,12 +167,13 @@ export const WS_METHODS = {
   providerListModels: "provider.listModels",
   providerListAgents: "provider.listAgents",
 
-  // Local user skills (home-dir scan, independent of provider)
+  // 本地用户技能（基于 home 目录扫描，不依赖 Provider）
   skillsListLocal: "skills.listLocal",
 } as const;
 
-// ── Push Event Channels ──────────────────────────────────────────────
+// ── 推送事件通道常量 ─────────────────────────────────────────────────
 
+/** 服务端主动推送的事件通道名映射 */
 export const WS_CHANNELS = {
   gitActionProgress: "git.actionProgress",
   terminalEvent: "terminal.event",
@@ -177,8 +184,9 @@ export const WS_CHANNELS = {
   serverSettingsUpdated: "server.settingsUpdated",
 } as const;
 
-// -- Tagged Union of all request body schemas ─────────────────────────
+// ── 请求体 Schema 联合类型 ───────────────────────────────────────────
 
+/** 为请求体 Schema 添加 _tag 标签字段，用于区分不同的请求类型 */
 const tagRequestBody = <const Tag extends string, const Fields extends Schema.Struct.Fields>(
   tag: Tag,
   schema: Schema.Struct<Fields>,
@@ -189,6 +197,7 @@ const tagRequestBody = <const Tag extends string, const Fields extends Schema.St
     { unsafePreserveChecks: true },
   );
 
+/** 所有 WebSocket 请求体的联合类型 Schema，通过 _tag 字段区分 */
 const WebSocketRequestBody = Schema.Union([
   // Orchestration methods
   tagRequestBody(
@@ -402,7 +411,7 @@ export const WsPushEnvelopeBase = Schema.Struct({
 });
 export type WsPushEnvelopeBase = typeof WsPushEnvelopeBase.Type;
 
-// ── Union of all server �?client messages ─────────────────────────────
+// ── Union of all server �?client messages ─────────────────────────────
 
 export const WsResponse = Schema.Union([WebSocketResponse, WsPush]);
 export type WsResponse = typeof WsResponse.Type;

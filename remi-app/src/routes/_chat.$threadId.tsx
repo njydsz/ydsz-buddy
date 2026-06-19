@@ -104,7 +104,7 @@ const SINGLE_PANEL_MIN_WIDTH = 26 * 16;
 const BROWSER_PANEL_MIN_WIDTH = 21 * 16;
 const COMPOSER_COMPACT_MIN_LEFT_CONTROLS_WIDTH_PX = 208;
 const RIGHT_PANEL_SIDEBAR_WIDTH_STORAGE_KEY = "chat_right_panel_width";
-const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "peakcode:panel-resize-overlay-sync";
+const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "remicode:panel-resize-overlay-sync";
 const SPLIT_RATIO_MIN = 0.25;
 const SPLIT_RATIO_MAX = 0.75;
 
