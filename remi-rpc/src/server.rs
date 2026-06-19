@@ -1,4 +1,4 @@
-//! WebSocket server setup.
+//! WebSocket 服务器配置。
 
 use axum::{
     Router,
@@ -13,14 +13,14 @@ use std::sync::Arc;
 
 use crate::{RpcState, handle_ws_connection};
 
-/// Create the WebSocket router.
+/// 创建 WebSocket 路由。
 pub fn create_ws_router(rpc_state: Arc<RpcState>) -> Router {
     Router::new()
         .route("/ws", get(ws_handler))
         .with_state(rpc_state)
 }
 
-/// WebSocket upgrade handler.
+/// WebSocket 升级处理器。
 async fn ws_handler(ws: WebSocketUpgrade, State(state): State<Arc<RpcState>>) -> Response {
     ws.on_upgrade(move |socket: WebSocket| async move {
         if let Err(e) = handle_ws_connection(socket, state).await {

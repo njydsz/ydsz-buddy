@@ -1,18 +1,17 @@
-//! Database migrations.
+//! 数据库迁移。
 //!
-//! All 37 migrations ported from the Node/Effect backend
-//! (apps/server/src/persistence/Migrations/).
+//! 全部 37 个迁移，从 Node/Effect 后端移植而来
+//! （apps/server/src/persistence/Migrations/）。
 //!
-//! Schema is projection-based: orchestration events are the source of truth
-//! and `projection_*` tables are materialized read models maintained by the
-//! projector at runtime. Migrations create the read models and evolve their
-//! columns/indexes over time.
+//! Schema 采用基于投影（projection）的设计：编排事件（orchestration events）
+//! 是唯一数据源，`projection_*` 表是由 projector 在运行时维护的
+//! 物化读模型。迁移负责创建这些读模型，并随时间演进其列和索引。
 
 use remi_core::{Error, Result};
 use sqlx::{Row, SqlitePool};
 use tracing::info;
 
-/// Run all migrations idempotently.
+/// 幂等地执行所有数据库迁移。
 pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     info!("Running database migrations (37 total)");
 
@@ -58,7 +57,7 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-/// Helper: execute a SQL statement, swallowing duplicate-column errors only when allowed.
+/// 辅助函数：执行 SQL 语句，仅在允许时吞掉重复列错误。
 async fn exec(pool: &SqlitePool, sql: &str) -> Result<()> {
     sqlx::query(sql)
         .execute(pool)
@@ -67,7 +66,7 @@ async fn exec(pool: &SqlitePool, sql: &str) -> Result<()> {
         .map_err(|e| Error::Database(format!("{sql}: {e}")))
 }
 
-/// Check whether a column exists on a given table (idempotent migration helper).
+/// 检查指定表中是否存在某列（幂等迁移辅助函数）。
 async fn column_exists(pool: &SqlitePool, table: &str, column: &str) -> Result<bool> {
     let pragma = format!("PRAGMA table_info({table})");
     let rows = sqlx::query(&pragma).fetch_all(pool).await.map_err(|e| Error::Database(e.to_string()))?;
@@ -80,7 +79,7 @@ async fn column_exists(pool: &SqlitePool, table: &str, column: &str) -> Result<b
     Ok(false)
 }
 
-/// Conditionally ALTER TABLE ADD COLUMN, no-op if column already exists.
+/// 条件性执行 ALTER TABLE ADD COLUMN，若列已存在则不执行任何操作。
 async fn add_column_if_missing(pool: &SqlitePool, table: &str, column: &str, definition: &str) -> Result<bool> {
     if column_exists(pool, table, column).await? {
         return Ok(false);
@@ -90,7 +89,7 @@ async fn add_column_if_missing(pool: &SqlitePool, table: &str, column: &str, def
     Ok(true)
 }
 
-// 001: OrchestrationEvents
+// 001: 编排事件表
 async fn migration_001_orchestration_events(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -137,7 +136,7 @@ async fn migration_001_orchestration_events(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// 002: OrchestrationCommandReceipts
+// 002: 编排命令回执表
 async fn migration_002_orchestration_command_receipts(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -167,7 +166,7 @@ async fn migration_002_orchestration_command_receipts(pool: &SqlitePool) -> Resu
     Ok(())
 }
 
-// 003: CheckpointDiffBlobs
+// 003: 检查点差异数据块表
 async fn migration_003_checkpoint_diff_blobs(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -191,7 +190,7 @@ async fn migration_003_checkpoint_diff_blobs(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// 004: ProviderSessionRuntime
+// 004: Provider 会话运行时表
 async fn migration_004_provider_session_runtime(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -222,9 +221,9 @@ async fn migration_004_provider_session_runtime(pool: &SqlitePool) -> Result<()>
     Ok(())
 }
 
-// 005: Projections
+// 005: 投影表（含密钥存储、生命周期事件、设置、项目、线程、消息、活动、会话、轮次、待审批、投影状态）
 async fn migration_005_projections(pool: &SqlitePool) -> Result<()> {
-    // Remi Code-specific secret store (lives alongside projections)
+    // Remi Code 专用密钥存储（与投影表共存）
     exec(
         pool,
         r#"
@@ -246,7 +245,7 @@ async fn migration_005_projections(pool: &SqlitePool) -> Result<()> {
     )
     .await?;
 
-    // Lifecycle events
+    // 生命周期事件
     exec(
         pool,
         r#"
@@ -270,7 +269,7 @@ async fn migration_005_projections(pool: &SqlitePool) -> Result<()> {
     )
     .await?;
 
-    // Settings
+    // 设置表
     exec(
         pool,
         r#"
@@ -284,7 +283,7 @@ async fn migration_005_projections(pool: &SqlitePool) -> Result<()> {
     )
     .await?;
 
-    // Generic key/value table for server settings
+    // 服务器设置的通用键值表
     exec(
         pool,
         r#"
@@ -461,7 +460,7 @@ async fn migration_005_projections(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// 006: ProjectionThreadSessionRuntimeModeColumns
+// 006: 投影线程会话运行时模式列
 async fn migration_006_projection_thread_session_runtime_mode_columns(pool: &SqlitePool) -> Result<()> {
     let added = add_column_if_missing(
         pool,
@@ -480,13 +479,13 @@ async fn migration_006_projection_thread_session_runtime_mode_columns(pool: &Sql
     Ok(())
 }
 
-// 007: ProjectionThreadMessageAttachments
+// 007: 投影线程消息附件
 async fn migration_007_projection_thread_message_attachments(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_thread_messages", "attachments_json", "TEXT").await?;
     Ok(())
 }
 
-// 008: ProjectionThreadActivitySequence
+// 008: 投影线程活动序列
 async fn migration_008_projection_thread_activity_sequence(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_thread_activities", "sequence", "INTEGER").await?;
     exec(
@@ -497,12 +496,12 @@ async fn migration_008_projection_thread_activity_sequence(pool: &SqlitePool) ->
     Ok(())
 }
 
-// 009: ProviderSessionRuntimeMode (no-op, runtime_mode already added in 004)
+// 009: Provider 会话运行时模式（无操作，runtime_mode 已在 004 中添加）
 async fn migration_009_provider_session_runtime_mode(_pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// 010: ProjectionThreadsRuntimeMode
+// 010: 投影线程运行时模式
 async fn migration_010_projection_threads_runtime_mode(pool: &SqlitePool) -> Result<()> {
     let added = add_column_if_missing(
         pool,
@@ -521,9 +520,9 @@ async fn migration_010_projection_threads_runtime_mode(pool: &SqlitePool) -> Res
     Ok(())
 }
 
-// 011: OrchestrationThreadCreatedRuntimeMode
+// 011: 编排线程创建时运行时模式
 async fn migration_011_orchestration_thread_created_runtime_mode(pool: &SqlitePool) -> Result<()> {
-    // Backfill runtimeMode in payload_json for thread.created events
+    // 回填 thread.created 事件 payload_json 中的 runtimeMode
     let _ = sqlx::query(
         r#"
         UPDATE orchestration_events
@@ -537,7 +536,7 @@ async fn migration_011_orchestration_thread_created_runtime_mode(pool: &SqlitePo
     Ok(())
 }
 
-// 012: ProjectionThreadsInteractionMode
+// 012: 投影线程交互模式
 async fn migration_012_projection_threads_interaction_mode(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(
         pool,
@@ -549,7 +548,7 @@ async fn migration_012_projection_threads_interaction_mode(pool: &SqlitePool) ->
     Ok(())
 }
 
-// 013: ProjectionThreadProposedPlans
+// 013: 投影线程提议计划
 async fn migration_013_projection_thread_proposed_plans(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -573,7 +572,7 @@ async fn migration_013_projection_thread_proposed_plans(pool: &SqlitePool) -> Re
     Ok(())
 }
 
-// 014: ProjectionThreadProposedPlanImplementation
+// 014: 投影线程提议计划实施
 async fn migration_014_projection_thread_proposed_plan_implementation(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_thread_proposed_plans", "implemented_at", "TEXT").await?;
     add_column_if_missing(
@@ -586,19 +585,19 @@ async fn migration_014_projection_thread_proposed_plan_implementation(pool: &Sql
     Ok(())
 }
 
-// 015: ProjectionTurnsSourceProposedPlan
+// 015: 投影轮次来源提议计划
 async fn migration_015_projection_turns_source_proposed_plan(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_turns", "source_proposed_plan_thread_id", "TEXT").await?;
     add_column_if_missing(pool, "projection_turns", "source_proposed_plan_id", "TEXT").await?;
     Ok(())
 }
 
-// 016: CanonicalizeModelSelections
+// 016: 规范化模型选择
 async fn migration_016_canonicalize_model_selections(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_projects", "default_model_selection_json", "TEXT").await?;
     add_column_if_missing(pool, "projection_threads", "model_selection_json", "TEXT").await?;
 
-    // Backfill default_model_selection_json from default_model
+    // 从 default_model 回填 default_model_selection_json
     let _ = sqlx::query(
         r#"
         UPDATE projection_projects
@@ -620,7 +619,7 @@ async fn migration_016_canonicalize_model_selections(pool: &SqlitePool) -> Resul
     .execute(pool)
     .await;
 
-    // Backfill model_selection_json from model
+    // 从 model 回填 model_selection_json
     let _ = sqlx::query(
         r#"
         UPDATE projection_threads
@@ -649,7 +648,7 @@ async fn migration_016_canonicalize_model_selections(pool: &SqlitePool) -> Resul
     Ok(())
 }
 
-// 017: ThreadHandoffMetadata
+// 017: 线程交接元数据
 async fn migration_017_thread_handoff_metadata(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "handoff_json", "TEXT").await?;
     add_column_if_missing(
@@ -662,14 +661,14 @@ async fn migration_017_thread_handoff_metadata(pool: &SqlitePool) -> Result<()> 
     Ok(())
 }
 
-// 018: ProjectionThreadMessageMentions
+// 018: 投影线程消息提及
 async fn migration_018_projection_thread_message_mentions(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_thread_messages", "skills_json", "TEXT").await?;
     add_column_if_missing(pool, "projection_thread_messages", "mentions_json", "TEXT").await?;
     Ok(())
 }
 
-// 019: ProjectionThreadsEnvMode
+// 019: 投影线程环境模式
 async fn migration_019_projection_threads_env_mode(pool: &SqlitePool) -> Result<()> {
     let added = add_column_if_missing(
         pool,
@@ -694,13 +693,13 @@ async fn migration_019_projection_threads_env_mode(pool: &SqlitePool) -> Result<
     Ok(())
 }
 
-// 020: ProjectionThreadsForkSource
+// 020: 投影线程分叉来源
 async fn migration_020_projection_threads_fork_source(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "fork_source_thread_id", "TEXT").await?;
     Ok(())
 }
 
-// 021: ProjectionThreadsAssociatedWorktree
+// 021: 投影线程关联工作树
 async fn migration_021_projection_threads_associated_worktree(pool: &SqlitePool) -> Result<()> {
     let added = add_column_if_missing(
         pool,
@@ -719,7 +718,7 @@ async fn migration_021_projection_threads_associated_worktree(pool: &SqlitePool)
     Ok(())
 }
 
-// 022: ProjectionThreadsAssociatedWorktreeBranch
+// 022: 投影线程关联工作树分支
 async fn migration_022_projection_threads_associated_worktree_branch(pool: &SqlitePool) -> Result<()> {
     let added = add_column_if_missing(
         pool,
@@ -738,7 +737,7 @@ async fn migration_022_projection_threads_associated_worktree_branch(pool: &Sqli
     Ok(())
 }
 
-// 023: ProjectionThreadsAssociatedWorktreeRef (self-healing re-application of 17-22)
+// 023: 投影线程关联工作树引用（对 017-022 的自愈式重新应用）
 async fn migration_023_projection_threads_associated_worktree_ref(pool: &SqlitePool) -> Result<()> {
     migration_017_thread_handoff_metadata(pool).await?;
     migration_018_projection_thread_message_mentions(pool).await?;
@@ -769,13 +768,13 @@ async fn migration_023_projection_threads_associated_worktree_ref(pool: &SqliteP
     Ok(())
 }
 
-// 024: ProjectionThreadsArchivedAt
+// 024: 投影线程归档时间
 async fn migration_024_projection_threads_archived_at(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "archived_at", "TEXT").await?;
     Ok(())
 }
 
-// 025: ProjectionThreadsSubagents
+// 025: 投影线程子代理
 async fn migration_025_projection_threads_subagents(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "parent_thread_id", "TEXT").await?;
     add_column_if_missing(pool, "projection_threads", "subagent_agent_id", "TEXT").await?;
@@ -789,7 +788,7 @@ async fn migration_025_projection_threads_subagents(pool: &SqlitePool) -> Result
     Ok(())
 }
 
-// 026: ProjectionThreadShellSummary
+// 026: 投影线程 Shell 摘要
 async fn migration_026_projection_thread_shell_summary(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "latest_user_message_at", "TEXT").await?;
     add_column_if_missing(
@@ -816,9 +815,9 @@ async fn migration_026_projection_thread_shell_summary(pool: &SqlitePool) -> Res
     Ok(())
 }
 
-// 027: BackfillProjectionThreadShellSummary
+// 027: 回填投影线程 Shell 摘要
 async fn migration_027_backfill_projection_thread_shell_summary(pool: &SqlitePool) -> Result<()> {
-    // Backfill projection_pending_approvals from activity stream
+    // 从活动流回填 projection_pending_approvals
     let _ = sqlx::query(
         r#"
         INSERT OR IGNORE INTO projection_pending_approvals (
@@ -852,7 +851,7 @@ async fn migration_027_backfill_projection_thread_shell_summary(pool: &SqlitePoo
     .execute(pool)
     .await;
 
-    // Mark resolved approvals from activity stream
+    // 从活动流标记已解决的审批
     let _ = sqlx::query(
         r#"
         WITH latest_resolutions AS (
@@ -890,7 +889,7 @@ async fn migration_027_backfill_projection_thread_shell_summary(pool: &SqlitePoo
     .execute(pool)
     .await;
 
-    // Backfill denormalized counts onto projection_threads
+    // 回填反规范化计数到 projection_threads
     let _ = sqlx::query(
         r#"
         UPDATE projection_threads
@@ -925,7 +924,7 @@ async fn migration_027_backfill_projection_thread_shell_summary(pool: &SqlitePoo
     Ok(())
 }
 
-// 028: ProjectionProjectsKind
+// 028: 投影项目类型
 async fn migration_028_projection_projects_kind(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(
         pool,
@@ -937,19 +936,19 @@ async fn migration_028_projection_projects_kind(pool: &SqlitePool) -> Result<()>
     Ok(())
 }
 
-// 029: ProjectionThreadsLastKnownPr
+// 029: 投影线程最近已知 PR
 async fn migration_029_projection_threads_last_known_pr(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_threads", "last_known_pr_json", "TEXT").await?;
     Ok(())
 }
 
-// 030: ProjectionThreadMessagesDispatchMode
+// 030: 投影线程消息分发模式
 async fn migration_030_projection_thread_messages_dispatch_mode(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(pool, "projection_thread_messages", "dispatch_mode", "TEXT").await?;
     Ok(())
 }
 
-// 031: ProjectionThreadsCreateBranchFlowCompleted
+// 031: 投影线程创建分支流程已完成
 async fn migration_031_projection_threads_create_branch_flow_completed(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(
         pool,
@@ -961,7 +960,7 @@ async fn migration_031_projection_threads_create_branch_flow_completed(pool: &Sq
     Ok(())
 }
 
-// 032: ReconcileLegacySchemaImport (self-heal for imported DBs)
+// 032: 协调旧版 Schema 导入（针对导入数据库的自愈）
 async fn migration_032_reconcile_legacy_schema_import(pool: &SqlitePool) -> Result<()> {
     migration_017_thread_handoff_metadata(pool).await?;
     migration_018_projection_thread_message_mentions(pool).await?;
@@ -978,14 +977,14 @@ async fn migration_032_reconcile_legacy_schema_import(pool: &SqlitePool) -> Resu
     migration_030_projection_thread_messages_dispatch_mode(pool).await?;
     migration_031_projection_threads_create_branch_flow_completed(pool).await?;
 
-    // Backfill shell summary if any of the new columns were added by this migration
+    // 如果本迁移添加了新的 Shell 摘要列，则回填数据
     if column_exists(pool, "projection_threads", "latest_user_message_at").await? {
         migration_027_backfill_projection_thread_shell_summary(pool).await?;
     }
     Ok(())
 }
 
-// 033: ProjectionThreadsSidechatSource
+// 033: 投影线程 Sidechat 来源
 async fn migration_033_projection_threads_sidechat_source(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(
         pool,
@@ -997,7 +996,7 @@ async fn migration_033_projection_threads_sidechat_source(pool: &SqlitePool) -> 
     Ok(())
 }
 
-// 034: AuthAccessManagement
+// 034: 认证与访问管理
 async fn migration_034_auth_access_management(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,
@@ -1053,11 +1052,11 @@ async fn migration_034_auth_access_management(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// 035: NormalizeLegacyModelSelectionOptions (lightweight JSON normalization)
+// 035: 规范化旧版模型选择选项（轻量级 JSON 规范化）
 async fn migration_035_normalize_legacy_model_selection_options(pool: &SqlitePool) -> Result<()> {
-    // Read all model selection JSON and re-serialize to ensure canonical form.
-    // Heavy lifting is normally a normalization helper; we do a best-effort
-    // re-serialize so downstream consumers see consistent shapes.
+    // 读取所有模型选择 JSON 并重新序列化，确保规范形式。
+    // 通常由规范化辅助函数完成繁重工作；此处采用尽力而为的
+    // 重新序列化策略，使下游消费者看到一致的数据结构。
     let rows = sqlx::query("SELECT project_id, default_model_selection_json FROM projection_projects WHERE default_model_selection_json IS NOT NULL")
         .fetch_all(pool)
         .await
@@ -1078,7 +1077,7 @@ async fn migration_035_normalize_legacy_model_selection_options(pool: &SqlitePoo
     Ok(())
 }
 
-// 036: ProjectionThreadsPinned
+// 036: 投影线程置顶
 async fn migration_036_projection_threads_pinned(pool: &SqlitePool) -> Result<()> {
     add_column_if_missing(
         pool,
@@ -1090,7 +1089,7 @@ async fn migration_036_projection_threads_pinned(pool: &SqlitePool) -> Result<()
     Ok(())
 }
 
-// 037: ProjectionSnapshotCapIndexes
+// 037: 投影快照上限索引
 async fn migration_037_projection_snapshot_cap_indexes(pool: &SqlitePool) -> Result<()> {
     exec(
         pool,

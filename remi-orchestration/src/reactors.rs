@@ -1,12 +1,11 @@
-//! Reactor framework and concrete reactors.
+//! 反应器框架与具体反应器实现。
 //!
-//! A reactor is an autonomous component that subscribes to orchestration
-//! events and reacts to them. The orchestration engine owns a list of
-//! reactors and fans out every event to each of them.
+//! 反应器是一种自治组件，订阅编排事件并对其作出响应。
+//! 编排引擎持有一个反应器列表，并将每个事件分发给所有反应器。
 //!
-//! The 8 reactors here cover the core ADE workflows (approvals,
-//! checkpoints, notifications, metrics, rate limit, retention, git,
-//! telemetry) so that the event log remains the single source of truth.
+//! 此处的 8 个反应器覆盖了核心 ADE 工作流（审批、检查点、
+//! 通知、指标、限流、数据保留、Git、遥测），确保事件日志
+//! 始终是唯一的真相来源。
 
 use remi_contracts::{OrchestrationCommand, OrchestrationEvent, ThreadId};
 use remi_core::{Error, Result};
@@ -14,60 +13,59 @@ use std::sync::Arc;
 use tokio::sync::broadcast;
 use tracing::{debug, warn};
 
-/// Trait implemented by all reactors.
+/// 所有反应器必须实现的 trait。
 #[async_trait::async_trait]
 pub trait Reactor: Send + Sync {
-    /// Name of the reactor (used for logging / diagnostics).
+    /// 反应器名称（用于日志/诊断）。
     fn name(&self) -> &'static str;
 
-    /// React to a single event.
+    /// 对单个事件作出响应。
     async fn react(&self, event: &OrchestrationEvent) -> Result<()>;
 }
 
-/// Registry of reactors used by the orchestration engine.
+/// 编排引擎使用的反应器注册表。
 #[derive(Clone, Default)]
 pub struct ReactorRegistry {
     reactors: Vec<Arc<dyn Reactor>>,
 }
 
 impl ReactorRegistry {
-    /// Create a new empty registry.
+    /// 创建一个新的空注册表。
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Register a new reactor.
+    /// 注册一个新的反应器。
     pub fn register(&mut self, reactor: Arc<dyn Reactor>) {
         self.reactors.push(reactor);
     }
 
-    /// Fan out an event to all reactors.
+    /// 将事件分发给所有反应器。
     pub async fn fan_out(&self, event: &OrchestrationEvent) {
         for reactor in &self.reactors {
             if let Err(e) = reactor.react(event).await {
                 warn!(
                     reactor = reactor.name(),
                     error = %e,
-                    "Reactor failed"
+                    "反应器执行失败"
                 );
             }
         }
     }
 
-    /// Number of registered reactors.
+    /// 已注册反应器的数量。
     pub fn len(&self) -> usize {
         self.reactors.len()
     }
 
-    /// Whether any reactor is registered.
+    /// 是否已注册反应器。
     pub fn is_empty(&self) -> bool {
         self.reactors.is_empty()
     }
 }
 
-/// Subscribes to the event broadcast channel and dispatches each event to
-/// the supplied reactor registry. Returns the broadcast receiver so the
-/// caller can decide when to stop the loop.
+/// 订阅事件广播通道，并将每个事件分发给指定的反应器注册表。
+/// 返回广播接收器，调用方可决定何时停止循环。
 pub fn spawn_event_loop(
     mut rx: broadcast::Receiver<OrchestrationEvent>,
     registry: Arc<ReactorRegistry>,
@@ -80,37 +78,37 @@ pub fn spawn_event_loop(
                 Err(broadcast::error::RecvError::Closed) => break,
             }
         }
-        debug!("Event loop ended");
+        debug!("事件循环已结束");
     })
 }
 
-// Concrete reactors ------------------------------------------------------------
+// 具体反应器 ----------------------------------------------------------------
 
-/// Tracks pending approval requests and surfaces them to the UI.
+/// 跟踪待审批请求并将其展示给 UI。
 pub struct ApprovalReactor {
     pending: tokio::sync::Mutex<Vec<PendingApproval>>,
 }
 
-/// A pending approval request.
+/// 待审批请求。
 #[derive(Debug, Clone)]
 pub struct PendingApproval {
-    /// Thread that needs approval.
+    /// 需要审批的会话。
     pub thread_id: ThreadId,
-    /// Why the approval is needed.
+    /// 需要审批的原因。
     pub reason: String,
-    /// When the request was created.
+    /// 请求创建时间。
     pub created_at: String,
 }
 
 impl ApprovalReactor {
-    /// Create a new approval reactor.
+    /// 创建一个新的审批反应器。
     pub fn new() -> Self {
         Self {
             pending: tokio::sync::Mutex::new(Vec::new()),
         }
     }
 
-    /// List currently pending approvals.
+    /// 列出当前待审批的请求。
     pub async fn list_pending(&self) -> Vec<PendingApproval> {
         self.pending.lock().await.clone()
     }
@@ -136,15 +134,14 @@ impl Reactor for ApprovalReactor {
             ..
         } = event
         {
-            // Heuristic: messages from the user requesting sensitive
-            // actions trigger an approval slot. This mirrors Cursor's
-            // "review before running" flow.
+            // 启发式规则：用户请求敏感操作的消息会触发审批槽位。
+            // 这类似于 Cursor 的"执行前审查"流程。
             if matches!(role, remi_contracts::MessageRole::User) {
                 let mut guard = self.pending.lock().await;
                 guard.retain(|p| p.thread_id != *thread_id);
                 guard.push(PendingApproval {
                     thread_id: *thread_id,
-                    reason: "User message requires review".to_string(),
+                    reason: "用户消息需要审查".to_string(),
                     created_at: timestamp.clone(),
                 });
             }
@@ -153,29 +150,29 @@ impl Reactor for ApprovalReactor {
     }
 }
 
-/// Creates a snapshot/checkpoint on every turn completion.
+/// 在每次轮次完成时创建快照/检查点。
 pub struct CheckpointReactor {
     state: Arc<tokio::sync::Mutex<CheckpointState>>,
 }
 
-/// State of the checkpoint reactor.
+/// 检查点反应器的状态。
 #[derive(Debug, Default)]
 struct CheckpointState {
-    /// Last checkpoint id, if any.
+    /// 上一个检查点 ID（如有）。
     last_id: Option<String>,
-    /// Number of checkpoints taken so far.
+    /// 迄今为止已拍摄的检查点数量。
     total: u64,
 }
 
 impl CheckpointReactor {
-    /// Create a new checkpoint reactor.
+    /// 创建一个新的检查点反应器。
     pub fn new() -> Self {
         Self {
             state: Arc::new(tokio::sync::Mutex::new(CheckpointState::default())),
         }
     }
 
-    /// Snapshot of the reactor state.
+    /// 获取反应器状态的快照。
     pub async fn snapshot(&self) -> (Option<String>, u64) {
         let state = self.state.lock().await;
         (state.last_id.clone(), state.total)
@@ -204,13 +201,13 @@ impl Reactor for CheckpointReactor {
     }
 }
 
-/// Forwards notable events to the WebSocket notification bus.
+/// 将重要事件转发到 WebSocket 通知总线。
 pub struct NotificationReactor {
     bus: broadcast::Sender<String>,
 }
 
 impl NotificationReactor {
-    /// Create a new notification reactor bound to a broadcast bus.
+    /// 创建一个新的通知反应器，绑定到广播总线。
     pub fn new(bus: broadcast::Sender<String>) -> Self {
         Self { bus }
     }
@@ -234,35 +231,35 @@ impl Reactor for NotificationReactor {
     }
 }
 
-/// Aggregates metrics from events (counts, durations, etc.).
+/// 从事件中聚合指标（计数、时长等）。
 pub struct MetricsReactor {
     metrics: Arc<tokio::sync::Mutex<Metrics>>,
 }
 
-/// Aggregated metrics.
+/// 聚合的指标数据。
 #[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct Metrics {
-    /// Total events observed.
+    /// 观测到的事件总数。
     pub events_total: u64,
-    /// Number of `MessageAdded` events.
+    /// `MessageAdded` 事件的数量。
     pub messages_added: u64,
-    /// Number of completed turns.
+    /// 已完成的轮次数量。
     pub turns_completed: u64,
-    /// Number of created threads.
+    /// 已创建的会话数量。
     pub threads_created: u64,
-    /// Number of deleted threads.
+    /// 已删除的会话数量。
     pub threads_deleted: u64,
 }
 
 impl MetricsReactor {
-    /// Create a new metrics reactor.
+    /// 创建一个新的指标反应器。
     pub fn new() -> Self {
         Self {
             metrics: Arc::new(tokio::sync::Mutex::new(Metrics::default())),
         }
     }
 
-    /// Take a snapshot of the current metrics.
+    /// 获取当前指标的快照。
     pub async fn snapshot(&self) -> Metrics {
         self.metrics.lock().await.clone()
     }
@@ -294,21 +291,21 @@ impl Reactor for MetricsReactor {
     }
 }
 
-/// Tracks per-thread request rate to enforce rate limits.
+/// 跟踪每个会话的请求速率以执行限流策略。
 pub struct RateLimitReactor {
-    /// Maximum requests per minute per thread.
+    /// 每个会话每分钟的最大请求数。
     pub max_per_minute: u32,
     state: Arc<tokio::sync::Mutex<RateLimitState>>,
 }
 
 #[derive(Debug, Default)]
 struct RateLimitState {
-    /// Sliding window of (thread_id, timestamp) for each request.
+    /// 每个请求的滑动窗口，存储 (会话 ID, 时间戳)。
     window: Vec<(ThreadId, chrono::DateTime<chrono::Utc>)>,
 }
 
 impl RateLimitReactor {
-    /// Create a new rate limit reactor.
+    /// 创建一个新的限流反应器。
     pub fn new(max_per_minute: u32) -> Self {
         Self {
             max_per_minute,
@@ -316,7 +313,7 @@ impl RateLimitReactor {
         }
     }
 
-    /// Whether the supplied thread is currently rate limited.
+    /// 判断指定会话当前是否被限流。
     pub async fn is_limited(&self, thread_id: ThreadId) -> bool {
         let mut state = self.state.lock().await;
         let now = chrono::Utc::now();
@@ -346,15 +343,15 @@ impl Reactor for RateLimitReactor {
     }
 }
 
-/// Periodically garbage-collects old orchestration data.
+/// 定期垃圾回收旧的编排数据。
 pub struct RetentionReactor {
-    /// Maximum age in seconds.
+    /// 最大保留时间（秒）。
     pub max_age_secs: i64,
     last_run: Arc<tokio::sync::Mutex<Option<chrono::DateTime<chrono::Utc>>>>,
 }
 
 impl RetentionReactor {
-    /// Create a new retention reactor.
+    /// 创建一个新的数据保留反应器。
     pub fn new(max_age_secs: i64) -> Self {
         Self {
             max_age_secs,
@@ -362,7 +359,7 @@ impl RetentionReactor {
         }
     }
 
-    /// When the reactor last fired.
+    /// 获取反应器上次触发的时间。
     pub async fn last_run(&self) -> Option<chrono::DateTime<chrono::Utc>> {
         self.last_run.lock().await.clone()
     }
@@ -379,20 +376,20 @@ impl Reactor for RetentionReactor {
             let mut guard = self.last_run.lock().await;
             *guard = Some(chrono::Utc::now());
         }
-        // The actual GC work happens out of band; the reactor only keeps
-        // a coarse "last touched" timestamp so the orchestration engine
-        // can drive a periodic janitor.
+        // 实际的垃圾回收工作在后台异步进行；反应器仅维护一个
+        // 粗略的"最后触达"时间戳，以便编排引擎可以驱动
+        // 定期清理任务。
         let _ = self.max_age_secs;
         Ok(())
     }
 }
 
-/// Bridges orchestration events with the git service (auto-commit hooks,
-/// handoff manifest updates, etc.).
+/// 桥接编排事件与 Git 服务（自动提交钩子、
+/// 切换清单更新等）。
 pub struct GitReactor;
 
 impl GitReactor {
-    /// Create a new git reactor.
+    /// 创建一个新的 Git 反应器。
     pub fn new() -> Self {
         Self
     }
@@ -412,17 +409,17 @@ impl Reactor for GitReactor {
 
     async fn react(&self, event: &OrchestrationEvent) -> Result<()> {
         if let OrchestrationEvent::TurnCompleted { thread_id, .. } = event {
-            debug!(thread_id = %thread_id, "git reactor observed turn completion");
+            debug!(thread_id = %thread_id, "Git 反应器观测到轮次完成");
         }
         Ok(())
     }
 }
 
-/// Emits OpenTelemetry-compatible spans for every event.
+/// 为每个事件生成兼容 OpenTelemetry 的 span。
 pub struct TelemetryReactor;
 
 impl TelemetryReactor {
-    /// Create a new telemetry reactor.
+    /// 创建一个新的遥测反应器。
     pub fn new() -> Self {
         Self
     }
@@ -441,12 +438,12 @@ impl Reactor for TelemetryReactor {
     }
 
     async fn react(&self, event: &OrchestrationEvent) -> Result<()> {
-        debug!(?event, "telemetry reactor observed event");
+        debug!(?event, "遥测反应器观测到事件");
         Ok(())
     }
 }
 
-/// Default reactor registry with all 8 standard reactors wired up.
+/// 默认反应器注册表，已连接全部 8 个标准反应器。
 pub fn default_registry(notification_bus: broadcast::Sender<String>) -> ReactorRegistry {
     let mut registry = ReactorRegistry::new();
     registry.register(Arc::new(ApprovalReactor::new()));
@@ -460,10 +457,10 @@ pub fn default_registry(notification_bus: broadcast::Sender<String>) -> ReactorR
     registry
 }
 
-/// Build a command from the supplied reactor (used for handoff integration).
+/// 从指定反应器构建命令（用于切换集成）。
 pub async fn command_for_thread(_thread_id: ThreadId) -> Result<OrchestrationCommand> {
     Err(Error::Internal(
-        "command_for_thread: not yet implemented in default reactor set".to_string(),
+        "command_for_thread: 在默认反应器集中尚未实现".to_string(),
     ))
 }
 

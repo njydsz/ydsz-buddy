@@ -1,81 +1,81 @@
-//! Authentication schemas.
+//! 认证模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// Input for bootstrapping authentication.
+/// 启动认证的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthBootstrapInput {
-    /// Client identifier.
+    /// 客户端标识符。
     pub client_id: String,
-    /// Bootstrap token (if required).
+    /// 启动令牌（如需要）。
     pub token: Option<String>,
 }
 
-/// Output for successful authentication.
+/// 认证成功后的输出。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthBootstrapOutput {
-    /// Session token.
+    /// 会话令牌。
     pub session_token: String,
-    /// Session expiration timestamp (ISO 8601).
+    /// 会话过期时间戳（ISO 8601 格式）。
     pub expires_at: String,
 }
 
-/// Input for creating a pairing credential.
+/// 创建配对凭证的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthCreatePairingCredentialInput {
-    /// Device identifier.
+    /// 设备标识符。
     pub device_id: String,
-    /// Device name.
+    /// 设备名称。
     pub device_name: String,
 }
 
-/// Output for pairing credential creation.
+/// 配对凭证创建成功的输出。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthCreatePairingCredentialOutput {
-    /// Pairing code.
+    /// 配对码。
     pub pairing_code: String,
-    /// Pairing link (for URL-based pairing).
+    /// 配对链接（用于基于 URL 的配对）。
     pub pairing_link: String,
-    /// Expiration timestamp (ISO 8601).
+    /// 过期时间戳（ISO 8601 格式）。
     pub expires_at: String,
 }
 
-/// Input for verifying an auth token.
+/// 验证认证令牌的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthVerifyInput {
-    /// Token to verify.
+    /// 待验证的令牌。
     pub token: String,
 }
 
-/// Input for revoking a pairing link.
+/// 撤销配对链接的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthRevokePairingLinkInput {
-    /// Pairing code to revoke.
+    /// 待撤销的配对码。
     pub code: String,
 }
 
-/// Input for revoking a client session.
+/// 撤销客户端会话的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct AuthRevokeClientSessionInput {
-    /// Session token to revoke.
+    /// 待撤销的会话令牌。
     pub token: String,
 }
 
-/// Authentication error types.
+/// 认证错误类型。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, thiserror::Error)]
 #[serde(tag = "_tag")]
 pub enum AuthError {
-    /// Invalid credentials.
-    #[error("invalid credentials")]
+    /// 凭证无效。
+    #[error("凭证无效")]
     InvalidCredentials,
-    /// Session expired.
-    #[error("session expired")]
+    /// 会话已过期。
+    #[error("会话已过期")]
     SessionExpired,
-    /// Pairing link expired.
-    #[error("pairing link expired")]
+    /// 配对链接已过期。
+    #[error("配对链接已过期")]
     PairingLinkExpired,
-    /// Internal error.
-    #[error("internal error: {message}")]
+    /// 内部错误。
+    #[error("内部错误: {message}")]
     Internal { message: String },
 }

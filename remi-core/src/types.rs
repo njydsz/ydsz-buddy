@@ -1,25 +1,25 @@
-//! Core types used across Remi Code.
+//! Remi Code 核心类型定义
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Unique identifier for threads.
+/// 线程唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ThreadId(pub Uuid);
 
 impl ThreadId {
-    /// Create a new random thread ID.
+    /// 创建新的随机线程 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
 
-    /// Construct a thread ID from a UUID.
+    /// 从 UUID 构造线程 ID
     pub fn from_uuid(uuid: Uuid) -> Self {
         Self(uuid)
     }
 
-    /// Construct a nil thread ID (used for placeholder values).
+    /// 构造空线程 ID（用于占位符）
     pub fn nil() -> Self {
         Self(Uuid::nil())
     }
@@ -43,17 +43,17 @@ impl From<Uuid> for ThreadId {
     }
 }
 
-/// Unique identifier for projects.
+/// 项目唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ProjectId(pub Uuid);
 
 impl ProjectId {
-    /// Create a new random project ID.
+    /// 创建新的随机项目 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
 
-    /// Construct a nil project ID.
+    /// 构造空项目 ID
     pub fn nil() -> Self {
         Self(Uuid::nil())
     }
@@ -77,17 +77,17 @@ impl From<Uuid> for ProjectId {
     }
 }
 
-/// Unique identifier for turns within a thread.
+/// 线程内轮次的唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TurnId(pub Uuid);
 
 impl TurnId {
-    /// Create a new random turn ID.
+    /// 创建新的随机轮次 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
 
-    /// Construct a nil turn ID.
+    /// 构造空轮次 ID
     pub fn nil() -> Self {
         Self(Uuid::nil())
     }
@@ -105,12 +105,12 @@ impl std::fmt::Display for TurnId {
     }
 }
 
-/// Unique identifier for messages within a thread.
+/// 线程内消息的唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MessageId(pub Uuid);
 
 impl MessageId {
-    /// Create a new random message ID.
+    /// 创建新的随机消息 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
@@ -128,12 +128,12 @@ impl std::fmt::Display for MessageId {
     }
 }
 
-/// Unique identifier for terminal sessions.
+/// 终端会话唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TerminalId(pub Uuid);
 
 impl TerminalId {
-    /// Create a new random terminal session ID.
+    /// 创建新的随机终端会话 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
@@ -151,12 +151,12 @@ impl std::fmt::Display for TerminalId {
     }
 }
 
-/// Unique identifier for worktrees.
+/// 工作树唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct WorktreeId(pub Uuid);
 
 impl WorktreeId {
-    /// Create a new random worktree ID.
+    /// 创建新的随机工作树 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
@@ -174,12 +174,12 @@ impl std::fmt::Display for WorktreeId {
     }
 }
 
-/// Unique identifier for provider sessions.
+/// 提供商会话唯一标识符
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ProviderSessionId(pub Uuid);
 
 impl ProviderSessionId {
-    /// Create a new random provider session ID.
+    /// 创建新的随机提供商会话 ID
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
@@ -197,25 +197,25 @@ impl std::fmt::Display for ProviderSessionId {
     }
 }
 
-/// Timestamp type alias.
+/// 时间戳类型别名
 pub type Timestamp = DateTime<Utc>;
 
-/// Get the current UTC timestamp.
+/// 获取当前 UTC 时间戳
 pub fn now() -> Timestamp {
     Utc::now()
 }
 
-/// Get the current UTC timestamp as an RFC 3339 string.
+/// 获取当前 UTC 时间戳的 RFC 3339 字符串格式
 pub fn now_string() -> String {
     Utc::now().to_rfc3339()
 }
 
-/// Pagination request, used in many list RPCs.
+/// 分页请求，用于多个列表 RPC 接口
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PageRequest {
-    /// Offset into the result set.
+    /// 结果集的偏移量
     pub offset: usize,
-    /// Maximum number of items to return.
+    /// 返回的最大条目数
     pub limit: usize,
 }
 
@@ -228,23 +228,23 @@ impl Default for PageRequest {
     }
 }
 
-/// Paginated result envelope.
+/// 分页结果封装
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Page<T> {
-    /// Items in this page.
+    /// 当前页的条目
     pub items: Vec<T>,
-    /// Total number of items available.
+    /// 可用条目总数
     pub total: usize,
-    /// Offset of this page.
+    /// 当前页的偏移量
     pub offset: usize,
-    /// Limit used to compute this page.
+    /// 用于计算当前页的限制值
     pub limit: usize,
-    /// Whether more items exist beyond this page.
+    /// 是否还有更多条目
     pub has_more: bool,
 }
 
 impl<T> Page<T> {
-    /// Build a page from a slice of items.
+    /// 从条目切片构建分页结果
     pub fn from_slice(items: &[T], offset: usize, limit: usize, total: usize) -> Self
     where
         T: Clone,

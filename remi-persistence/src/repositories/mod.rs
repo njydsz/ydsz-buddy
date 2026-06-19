@@ -1,4 +1,4 @@
-//! Repository implementations.
+//! 仓库实现。
 
 pub mod project_repo;
 pub mod thread_repo;

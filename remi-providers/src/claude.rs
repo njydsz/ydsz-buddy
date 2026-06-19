@@ -1,4 +1,4 @@
-//! Anthropic Claude provider adapter.
+//! Anthropic Claude Provider 适配器。
 
 use crate::common::{build_http_client, parse_json_response};
 use crate::config::HttpProviderConfig;
@@ -17,14 +17,14 @@ use std::sync::Arc;
 use tracing::{error, info};
 use uuid::Uuid;
 
-/// Anthropic API message.
+/// Anthropic API 消息。
 #[derive(Debug, Clone, Serialize)]
 struct ClaudeMessage {
     role: String,
     content: String,
 }
 
-/// Anthropic API request.
+/// Anthropic API 请求。
 #[derive(Debug, Serialize)]
 struct ClaudeRequest {
     model: String,
@@ -33,21 +33,21 @@ struct ClaudeRequest {
     stream: bool,
 }
 
-/// Anthropic API content block.
+/// Anthropic API 内容块。
 #[derive(Debug, Deserialize)]
 struct ClaudeContent {
     r#type: String,
     text: Option<String>,
 }
 
-/// Anthropic API usage.
+/// Anthropic API 用量。
 #[derive(Debug, Deserialize)]
 struct ClaudeUsage {
     input_tokens: u32,
     output_tokens: u32,
 }
 
-/// Anthropic API non-streaming response.
+/// Anthropic API 非流式响应。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct ClaudeResponse {
@@ -56,7 +56,7 @@ struct ClaudeResponse {
     usage: ClaudeUsage,
 }
 
-/// Anthropic streaming SSE event.
+/// Anthropic 流式 SSE 事件。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct ClaudeStreamEvent {
@@ -72,7 +72,7 @@ struct ClaudeStreamDelta {
     text: Option<String>,
 }
 
-/// Claude session state.
+/// Claude 会话状态。
 #[derive(Clone)]
 #[allow(dead_code)]
 struct ClaudeSession {
@@ -81,7 +81,7 @@ struct ClaudeSession {
     messages: Vec<ClaudeMessage>,
 }
 
-/// Anthropic Claude HTTP provider adapter.
+/// Anthropic Claude HTTP Provider 适配器。
 pub struct ClaudeAdapter {
     config: HttpProviderConfig,
     sessions: Arc<DashMap<String, ClaudeSession>>,
@@ -89,7 +89,7 @@ pub struct ClaudeAdapter {
 }
 
 impl ClaudeAdapter {
-    /// Create a new Claude adapter reading `ANTHROPIC_API_KEY` from the environment.
+    /// 创建新的 Claude 适配器，从环境变量 `ANTHROPIC_API_KEY` 读取。
     pub fn new() -> Self {
         let api_key = std::env::var("ANTHROPIC_API_KEY").ok();
         let config = HttpProviderConfig::new("https://api.anthropic.com").with_api_key(
@@ -98,10 +98,10 @@ impl ClaudeAdapter {
         Self::with_config(config)
     }
 
-    /// Create a Claude adapter with explicit configuration.
+    /// 使用显式配置创建 Claude 适配器。
     pub fn with_config(config: HttpProviderConfig) -> Self {
         let client = build_http_client(config.timeout).unwrap_or_else(|e| {
-            error!(error = %e, "Failed to build HTTP client; falling back to default");
+            error!(error = %e, "构建 HTTP 客户端失败；回退到默认实现");
             reqwest::Client::new()
         });
         Self {
@@ -111,7 +111,7 @@ impl ClaudeAdapter {
         }
     }
 
-    /// Returns true if the adapter has an API key configured.
+    /// 若适配器已配置 API 密钥则返回 true。
     fn is_configured(&self) -> bool {
         self.config
             .api_key
@@ -119,7 +119,7 @@ impl ClaudeAdapter {
             .is_some_and(|k| !k.is_empty())
     }
 
-    /// Get the configured API key.
+    /// 获取已配置的 API 密钥。
     fn api_key(&self) -> Result<&str, ProviderAdapterError> {
         self.config
             .api_key
@@ -128,7 +128,7 @@ impl ClaudeAdapter {
             .ok_or(ProviderAdapterError::NotConfigured(ProviderName::Claude))
     }
 
-    /// Append a message to a session's conversation history.
+    /// 将消息追加到会话的对话历史。
     fn push_message(&self, session_id: &str, role: &str, content: &str) -> Result<()> {
         let mut session = self
             .sessions
@@ -170,7 +170,7 @@ impl ProviderAdapter for ClaudeAdapter {
                 provider: ProviderName::Claude,
                 status: ProviderHealthStatus::Unhealthy,
                 last_checked: chrono::Utc::now().to_rfc3339(),
-                error: Some("ANTHROPIC_API_KEY not configured".to_string()),
+                error: Some("ANTHROPIC_API_KEY 未配置".to_string()),
             });
         }
 
@@ -191,7 +191,7 @@ impl ProviderAdapter for ClaudeAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Claude session");
+        info!(session_id = %session_id, model = %model, "已启动 Claude 会话");
 
         Ok(session_id)
     }
@@ -285,7 +285,7 @@ impl ProviderAdapter for ClaudeAdapter {
             let message = response
                 .text()
                 .await
-                .unwrap_or_else(|_| "Unknown error".to_string());
+                .unwrap_or_else(|_| "未知错误".to_string());
             return Err(ProviderAdapterError::ApiError {
                 status: status.as_u16(),
                 message,
@@ -352,7 +352,7 @@ impl ProviderAdapter for ClaudeAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Claude session");
+        info!(session_id = %session_id, "已关闭 Claude 会话");
         Ok(())
     }
 }

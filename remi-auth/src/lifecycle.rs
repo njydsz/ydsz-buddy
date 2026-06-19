@@ -65,9 +65,9 @@ impl LifecycleManager {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
         let event_type_str = serde_json::to_string(&event_type)
-            .map_err(|e| Error::Internal(format!("Failed to serialize event type: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("序列化事件类型失败: {}", e)))?;
         let payload_str = serde_json::to_string(&payload)
-            .map_err(|e| Error::Internal(format!("Failed to serialize payload: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("序列化负载数据失败: {}", e)))?;
 
         sqlx::query(
             r#"
@@ -81,7 +81,7 @@ impl LifecycleManager {
         .bind(&now)
         .execute(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to record lifecycle event: {}", e)))?;
+        .map_err(|e| Error::Database(format!("记录生命周期事件失败: {}", e)))?;
 
         Ok(id)
     }
@@ -141,7 +141,7 @@ impl LifecycleManager {
         limit: Option<usize>,
     ) -> Result<Vec<LifecycleEvent>> {
         let event_type_str = serde_json::to_string(&event_type)
-            .map_err(|e| Error::Internal(format!("Failed to serialize event type: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("序列化事件类型失败: {}", e)))?;
 
         let limit = limit.unwrap_or(100);
         let rows: Vec<(String, String, String, String)> = sqlx::query_as(
@@ -157,16 +157,16 @@ impl LifecycleManager {
         .bind(limit as i64)
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to query lifecycle events: {}", e)))?;
+        .map_err(|e| Error::Database(format!("查询生命周期事件失败: {}", e)))?;
 
         let mut events = Vec::new();
         for (id, event_type_json, payload_json, created_at) in rows {
             let event_type: LifecycleEventType = serde_json::from_str(&event_type_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize event type: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化事件类型失败: {}", e)))?;
             let payload: serde_json::Value = serde_json::from_str(&payload_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize payload: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化负载数据失败: {}", e)))?;
             let created_at = DateTime::parse_from_rfc3339(&created_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
 
             events.push(LifecycleEvent {
@@ -193,16 +193,16 @@ impl LifecycleManager {
         .bind(limit as i64)
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to query lifecycle events: {}", e)))?;
+        .map_err(|e| Error::Database(format!("查询生命周期事件失败: {}", e)))?;
 
         let mut events = Vec::new();
         for (id, event_type_json, payload_json, created_at) in rows {
             let event_type: LifecycleEventType = serde_json::from_str(&event_type_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize event type: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化事件类型失败: {}", e)))?;
             let payload: serde_json::Value = serde_json::from_str(&payload_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize payload: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化负载数据失败: {}", e)))?;
             let created_at = DateTime::parse_from_rfc3339(&created_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
 
             events.push(LifecycleEvent {
@@ -238,16 +238,16 @@ impl LifecycleManager {
         .bind(limit as i64)
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to query lifecycle events: {}", e)))?;
+        .map_err(|e| Error::Database(format!("查询生命周期事件失败: {}", e)))?;
 
         let mut events = Vec::new();
         for (id, event_type_json, payload_json, created_at) in rows {
             let event_type: LifecycleEventType = serde_json::from_str(&event_type_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize event type: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化事件类型失败: {}", e)))?;
             let payload: serde_json::Value = serde_json::from_str(&payload_json)
-                .map_err(|e| Error::Internal(format!("Failed to deserialize payload: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("反序列化负载数据失败: {}", e)))?;
             let created_at = DateTime::parse_from_rfc3339(&created_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
 
             events.push(LifecycleEvent {
@@ -269,7 +269,7 @@ impl LifecycleManager {
         .bind(older_than.to_rfc3339())
         .execute(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to cleanup lifecycle events: {}", e)))?;
+        .map_err(|e| Error::Database(format!("清理生命周期事件失败: {}", e)))?;
 
         Ok(result.rows_affected() as usize)
     }
@@ -277,7 +277,7 @@ impl LifecycleManager {
     /// 按类型统计事件数量。
     pub async fn count_by_type(&self, event_type: LifecycleEventType) -> Result<usize> {
         let event_type_str = serde_json::to_string(&event_type)
-            .map_err(|e| Error::Internal(format!("Failed to serialize event type: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("序列化事件类型失败: {}", e)))?;
 
         let row: (i64,) = sqlx::query_as(
             "SELECT COUNT(*) FROM lifecycle_events WHERE event_type = ?",
@@ -285,7 +285,7 @@ impl LifecycleManager {
         .bind(&event_type_str)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to count lifecycle events: {}", e)))?;
+        .map_err(|e| Error::Database(format!("统计生命周期事件失败: {}", e)))?;
 
         Ok(row.0 as usize)
     }
@@ -301,45 +301,45 @@ mod tests {
     async fn test_lifecycle_manager() {
         let mut config = ServerConfig::default();
         let db_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", Uuid::new_v4()));
-        std::fs::create_dir_all(&db_dir).expect("Failed to create temp dir");
+        std::fs::create_dir_all(&db_dir).expect("创建临时目录失败");
         config.db_path = db_dir.join("remi-code.db");
 
-        let db = Database::connect(&config).await.expect("Failed to connect");
-        db.run_migrations().await.expect("Failed to migrate");
+        let db = Database::connect(&config).await.expect("数据库连接失败");
+        db.run_migrations().await.expect("数据库迁移失败");
 
         let manager = LifecycleManager::new(db.pool().clone());
 
-        // Record startup event
+        // 记录启动事件
         let id = manager
             .record_startup("0.1.0", serde_json::json!({"port": 3845}))
             .await
-            .expect("Failed to record startup");
+            .expect("记录启动事件失败");
 
         assert!(!id.is_empty());
 
-        // Get recent events
-        let events = manager.get_recent(10).await.expect("Failed to get recent");
+        // 获取最近的事件
+        let events = manager.get_recent(10).await.expect("获取最近事件失败");
         assert!(!events.is_empty());
         assert_eq!(events[0].event_type, LifecycleEventType::Startup);
 
-        // Get by type
+        // 按类型获取事件
         let startup_events = manager
             .get_by_type(LifecycleEventType::Startup, Some(10))
             .await
-            .expect("Failed to get by type");
+            .expect("按类型获取事件失败");
         assert!(!startup_events.is_empty());
 
-        // Record error event
+        // 记录错误事件
         manager
-            .record_error("Test error", serde_json::json!({"context": "test"}))
+            .record_error("测试错误", serde_json::json!({"context": "test"}))
             .await
-            .expect("Failed to record error");
+            .expect("记录错误事件失败");
 
-        // Count by type
+        // 按类型统计事件数量
         let error_count = manager
             .count_by_type(LifecycleEventType::Error)
             .await
-            .expect("Failed to count");
+            .expect("统计事件数量失败");
         assert_eq!(error_count, 1);
     }
 }

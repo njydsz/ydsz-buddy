@@ -1,55 +1,55 @@
-//! Provider adapter error types.
+//! Provider 适配器错误类型。
 
 use remi_contracts::{ModelId, ProviderName};
 use remi_core::Error as CoreError;
 
-/// Provider-specific errors.
+/// Provider 特定错误。
 #[derive(Debug, thiserror::Error, Clone)]
 pub enum ProviderAdapterError {
-    /// Provider is not configured (missing API key or executable).
-    #[error("provider {0} is not configured")]
+    /// Provider 未配置（缺少 API 密钥或可执行文件）。
+    #[error("provider {0} 未配置")]
     NotConfigured(ProviderName),
 
-    /// Requested model is not supported by the provider.
-    #[error("model {model} is not supported by provider {provider}")]
+    /// 请求的模型不被 Provider 支持。
+    #[error("provider {provider} 不支持模型 {model}")]
     ModelNotSupported {
-        /// Provider name.
+        /// Provider 名称。
         provider: ProviderName,
-        /// Model ID.
+        /// 模型 ID。
         model: ModelId,
     },
 
-    /// Session was not found.
-    #[error("session not found: {0}")]
+    /// 会话未找到。
+    #[error("会话未找到：{0}")]
     SessionNotFound(String),
 
-    /// API returned an error response.
-    #[error("API error ({status}): {message}")]
+    /// API 返回错误响应。
+    #[error("API 错误（{status}）：{message}")]
     ApiError {
-        /// HTTP status code.
+        /// HTTP 状态码。
         status: u16,
-        /// Error message.
+        /// 错误消息。
         message: String,
     },
 
-    /// Network or transport error.
-    #[error("transport error: {0}")]
+    /// 网络或传输错误。
+    #[error("传输错误：{0}")]
     Transport(String),
 
-    /// Failed to parse provider response.
-    #[error("parse error: {0}")]
+    /// 解析 Provider 响应失败。
+    #[error("解析错误：{0}")]
     Parse(String),
 
-    /// Rate limit was exceeded.
-    #[error("rate limit exceeded")]
+    /// 超出速率限制。
+    #[error("超出速率限制")]
     RateLimitExceeded,
 
-    /// Streaming error.
-    #[error("stream error: {0}")]
+    /// 流式传输错误。
+    #[error("流错误：{0}")]
     Stream(String),
 
-    /// Internal provider error.
-    #[error("internal error: {0}")]
+    /// 内部 Provider 错误。
+    #[error("内部错误：{0}")]
     Internal(String),
 }
 

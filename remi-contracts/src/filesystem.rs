@@ -1,127 +1,127 @@
-//! Filesystem schemas.
+//! 文件系统模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// Input for browsing filesystem.
+/// 浏览文件系统的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FilesystemBrowseInput {
-    /// Directory path to browse.
+    /// 要浏览的目录路径。
     pub path: String,
-    /// Whether to include hidden files.
+    /// 是否包含隐藏文件。
     #[serde(default)]
     pub include_hidden: bool,
-    /// Maximum depth to traverse.
+    /// 最大遍历深度。
     pub max_depth: Option<u32>,
 }
 
-/// Result of filesystem browse operation.
+/// 文件系统浏览操作的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FilesystemBrowseResult {
-    /// Parent directory path.
+    /// 父目录路径。
     pub parent: String,
-    /// Entries in the directory.
+    /// 目录中的条目列表。
     pub entries: Vec<FilesystemEntry>,
 }
 
-/// A paginated chunk of [`FilesystemBrowseResult`].
+/// [`FilesystemBrowseResult`] 的分页块。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FilesystemBrowseChunk {
-    /// Parent directory path.
+    /// 父目录路径。
     pub parent: String,
-    /// Total number of entries available.
+    /// 可用条目总数。
     pub total: usize,
-    /// Offset where this chunk starts.
+    /// 此块的起始偏移量。
     pub offset: usize,
-    /// Maximum entries returned in this chunk.
+    /// 此块返回的最大条目数。
     pub limit: usize,
-    /// The chunk entries.
+    /// 块中的条目列表。
     pub entries: Vec<FilesystemEntry>,
-    /// Whether more entries exist beyond this chunk.
+    /// 是否还有更多条目。
     pub has_more: bool,
 }
 
-/// A filesystem entry (file or directory).
+/// 文件系统条目（文件或目录）。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FilesystemEntry {
-    /// Entry name.
+    /// 条目名称。
     pub name: String,
-    /// Full path.
+    /// 完整路径。
     pub path: String,
-    /// Entry type.
+    /// 条目类型。
     pub entry_type: FilesystemEntryType,
-    /// File size in bytes (for files only).
+    /// 文件大小（字节，仅文件有效）。
     pub size: Option<u64>,
-    /// Last modified timestamp (ISO 8601).
+    /// 最近修改时间戳（ISO 8601 格式）。
     pub modified_at: Option<String>,
-    /// Whether the entry is hidden.
+    /// 条目是否为隐藏文件。
     pub is_hidden: bool,
 }
 
-/// Type of filesystem entry.
+/// 文件系统条目类型。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum FilesystemEntryType {
-    /// Regular file.
+    /// 普通文件。
     File,
-    /// Directory.
+    /// 目录。
     Directory,
-    /// Symbolic link.
+    /// 符号链接。
     Symlink,
-    /// Other (device, socket, etc.).
+    /// 其他类型（设备、套接字等）。
     Other,
 }
 
-/// Input for reading a single file from the workspace.
+/// 从工作区读取单个文件的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ReadFileInput {
-    /// Workspace-relative path.
+    /// 相对于工作区的路径。
     pub path: String,
 }
 
-/// Result of reading a single file.
+/// 读取单个文件的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ReadFileResult {
-    /// Workspace-relative path.
+    /// 相对于工作区的路径。
     pub path: String,
-    /// File contents (UTF-8).
+    /// 文件内容（UTF-8 编码）。
     pub contents: String,
-    /// File size in bytes.
+    /// 文件大小（字节）。
     pub size: u64,
-    /// Last modified timestamp (ISO 8601).
+    /// 最近修改时间戳（ISO 8601 格式）。
     pub modified_at: Option<String>,
 }
 
-/// Input for writing a single file to the workspace.
+/// 向工作区写入单个文件的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct WriteFileInput {
-    /// Workspace-relative path.
+    /// 相对于工作区的路径。
     pub path: String,
-    /// New file contents (UTF-8).
+    /// 新文件内容（UTF-8 编码）。
     pub contents: String,
 }
 
-/// Result of writing a single file.
+/// 写入单个文件的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct WriteFileResult {
-    /// Path that was written.
+    /// 已写入的路径。
     pub path: String,
-    /// Bytes written.
+    /// 写入的字节数。
     pub bytes_written: usize,
 }
 
-/// Input for creating a directory.
+/// 创建目录的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CreateDirectoryInput {
-    /// Workspace-relative path of the new directory.
+    /// 新目录相对于工作区的路径。
     pub path: String,
 }
 
-/// Input for deleting a path.
+/// 删除路径的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct DeletePathInput {
-    /// Workspace-relative path to delete.
+    /// 要删除的相对于工作区的路径。
     pub path: String,
-    /// Recursive delete (required for non-empty directories).
+    /// 是否递归删除（非空目录必须为 true）。
     pub recursive: bool,
 }

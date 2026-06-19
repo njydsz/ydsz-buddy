@@ -1,7 +1,6 @@
-//! xAI Grok provider adapter.
+//! xAI Grok Provider 适配器。
 //!
-//! Targets the xAI REST API (`v1/chat/completions`). Reads `XAI_API_KEY`
-//! from the environment.
+//! 目标为 xAI REST API（`v1/chat/completions`）。从环境变量 `XAI_API_KEY` 读取。
 
 use crate::common::{build_http_client, parse_json_response};
 use crate::config::HttpProviderConfig;
@@ -20,14 +19,14 @@ use std::sync::Arc;
 use tracing::{error, info};
 use uuid::Uuid;
 
-/// xAI chat message.
+/// xAI 聊天消息。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct GrokMessage {
     role: String,
     content: String,
 }
 
-/// xAI chat completions request.
+/// xAI 聊天补全请求。
 #[derive(Debug, Serialize)]
 struct GrokRequest {
     model: String,
@@ -36,32 +35,32 @@ struct GrokRequest {
     stream: bool,
 }
 
-/// xAI streaming delta.
+/// xAI 流式增量。
 #[derive(Debug, Deserialize)]
 struct GrokStreamDelta {
     content: Option<String>,
 }
 
-/// xAI streaming choice.
+/// xAI 流式选择。
 #[derive(Debug, Deserialize)]
 struct GrokStreamChoice {
     delta: GrokStreamDelta,
 }
 
-/// xAI streaming SSE event.
+/// xAI 流式 SSE 事件。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct GrokStreamEvent {
     choices: Vec<GrokStreamChoice>,
 }
 
-/// xAI non-streaming choice.
+/// xAI 非流式选择。
 #[derive(Debug, Deserialize)]
 struct GrokChoice {
     message: GrokMessage,
 }
 
-/// xAI non-streaming response.
+/// xAI 非流式响应。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct GrokResponse {
@@ -69,7 +68,7 @@ struct GrokResponse {
     usage: Option<GrokUsage>,
 }
 
-/// xAI token usage.
+/// xAI token 用量。
 #[derive(Debug, Deserialize)]
 struct GrokUsage {
     prompt_tokens: u32,
@@ -169,7 +168,7 @@ impl ProviderAdapter for GrokAdapter {
                 provider: ProviderName::Grok,
                 status: ProviderHealthStatus::Unhealthy,
                 last_checked: chrono::Utc::now().to_rfc3339(),
-                error: Some("XAI_API_KEY not configured".to_string()),
+                error: Some("XAI_API_KEY 未配置".to_string()),
             });
         }
 
@@ -190,7 +189,7 @@ impl ProviderAdapter for GrokAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Grok session");
+        info!(session_id = %session_id, model = %model, "已启动 Grok 会话");
 
         Ok(session_id)
     }
@@ -284,7 +283,7 @@ impl ProviderAdapter for GrokAdapter {
             let message = response
                 .text()
                 .await
-                .unwrap_or_else(|_| "Unknown error".to_string());
+                .unwrap_or_else(|_| "未知错误".to_string());
             return Err(ProviderAdapterError::ApiError {
                 status: status.as_u16(),
                 message,
@@ -350,7 +349,7 @@ impl ProviderAdapter for GrokAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Grok session");
+        info!(session_id = %session_id, "已关闭 Grok 会话");
         Ok(())
     }
 }

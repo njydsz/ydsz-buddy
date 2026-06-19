@@ -1,153 +1,153 @@
-//! Terminal schemas.
+//! 终端模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Terminal session information.
+/// 终端会话信息。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalSession {
-    /// Session ID.
+    /// 会话 ID。
     pub id: Uuid,
-    /// Thread ID (if associated with a thread).
+    /// 关联的线程 ID（如有）。
     pub thread_id: Option<Uuid>,
-    /// Working directory.
+    /// 工作目录。
     pub cwd: String,
-    /// Shell command.
+    /// Shell 命令。
     pub shell: String,
-    /// Created timestamp (ISO 8601).
+    /// 创建时间戳（ISO 8601 格式）。
     pub created_at: String,
 }
 
-/// Input for creating a terminal session.
+/// 创建终端会话的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CreateTerminalInput {
-    /// Working directory.
+    /// 工作目录。
     pub cwd: String,
-    /// Shell command (optional, uses default if not specified).
+    /// Shell 命令（可选，未指定时使用默认值）。
     pub shell: Option<String>,
-    /// Thread ID (optional).
+    /// 线程 ID（可选）。
     pub thread_id: Option<Uuid>,
-    /// Terminal columns.
+    /// 终端列数。
     pub cols: Option<u16>,
-    /// Terminal rows.
+    /// 终端行数。
     pub rows: Option<u16>,
 }
 
-/// Output for creating a terminal session.
+/// 创建终端会话的输出。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CreateTerminalOutput {
-    /// Session ID.
+    /// 会话 ID。
     pub id: Uuid,
 }
 
-/// Input for writing to a terminal.
+/// 向终端写入数据的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct WriteTerminalInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// Data to write.
+    /// 要写入的数据。
     pub data: String,
 }
 
-/// Input for resizing a terminal.
+/// 调整终端大小的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ResizeTerminalInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// New columns.
+    /// 新的列数。
     pub cols: u16,
-    /// New rows.
+    /// 新的行数。
     pub rows: u16,
 }
 
-/// Input for closing a terminal session.
+/// 关闭终端会话的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CloseTerminalInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
 }
 
-/// Input for clearing terminal history.
+/// 清除终端历史记录的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ClearTerminalInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
 }
 
-/// Input for restarting a terminal session.
+/// 重启终端会话的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RestartTerminalInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
 }
 
-/// Input for subscribing to terminal output.
+/// 订阅终端输出的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SubscribeTerminalOutputInput {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
 }
 
-/// Terminal output event.
+/// 终端输出事件。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalOutputEvent {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// Output data.
+    /// 输出数据。
     pub data: String,
 }
 
-/// Terminal exit event.
+/// 终端退出事件。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalExitEvent {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// Exit code.
+    /// 退出码。
     pub exit_code: i32,
 }
 
-/// Terminal title change event.
+/// 终端标题变更事件。
 ///
-/// Emitted whenever the running program sends an OSC 0/1/2 sequence to set
-/// the terminal title (e.g. tmux/zellij panes, vim, etc.).
+/// 当运行中的程序发送 OSC 0/1/2 序列来设置终端标题时触发
+/// （例如 tmux/zellij 窗格、vim 等）。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalTitleEvent {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// New title.
+    /// 新标题。
     pub title: String,
 }
 
-/// Terminal status snapshot for `terminal.status` queries.
+/// 终端状态快照，用于 `terminal.status` 查询。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TerminalStatus {
-    /// Session ID.
+    /// 会话 ID。
     pub session_id: Uuid,
-    /// Whether the underlying process is still running.
+    /// 底层进程是否仍在运行。
     pub running: bool,
-    /// Last observed exit code (if any).
+    /// 最近观察到的退出码（如有）。
     pub exit_code: Option<i32>,
-    /// Last reported title.
+    /// 最近报告的标题。
     pub title: String,
-    /// Number of bytes received from the process.
+    /// 从进程接收的字节数。
     pub bytes_received: u64,
-    /// Number of bytes sent to the process.
+    /// 向进程发送的字节数。
     pub bytes_sent: u64,
-    /// Session creation timestamp (ISO 8601).
+    /// 会话创建时间戳（ISO 8601 格式）。
     pub created_at: String,
-    /// Last activity timestamp (ISO 8601).
+    /// 最近活动时间戳（ISO 8601 格式）。
     pub last_activity_at: String,
 }
 
-/// Aggregated stream of events that subscribers can listen for.
+/// 聚合事件流，订阅者可监听此流。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum TerminalEvent {
-    /// Plain PTY output.
+    /// 普通 PTY 输出。
     Output(TerminalOutputEvent),
-    /// Title update.
+    /// 标题更新。
     Title(TerminalTitleEvent),
-    /// Process exited.
+    /// 进程已退出。
     Exit(TerminalExitEvent),
 }

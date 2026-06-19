@@ -75,7 +75,7 @@ pub struct JsonRpcNotification {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "method", content = "params")]
 pub enum RpcMethod {
-    // Authentication methods
+    // 认证方法
     /// 启动认证。
     #[serde(rename = "auth.bootstrap")]
     AuthBootstrap(AuthBootstrapInput),
@@ -89,7 +89,7 @@ pub enum RpcMethod {
     #[serde(rename = "auth.revokeClientSession")]
     AuthRevokeClientSession(AuthRevokeClientSessionInput),
 
-    // Thread methods
+    // 线程方法
     /// 列出线程。
     #[serde(rename = "thread.list")]
     ThreadList,
@@ -115,7 +115,7 @@ pub enum RpcMethod {
     #[serde(rename = "thread.sendMessage")]
     ThreadSendMessage(ThreadSendMessageInput),
 
-    // Git methods
+    // Git 方法
     /// Git 状态。
     #[serde(rename = "git.status")]
     GitStatus(GitStatusInput),
@@ -174,7 +174,7 @@ pub enum RpcMethod {
     #[serde(rename = "git.handoffThread")]
     GitHandoffThread(GitHandoffThreadInput),
 
-    // Filesystem methods
+    // 文件系统方法
     /// 浏览文件系统。
     #[serde(rename = "filesystem.browse")]
     FilesystemBrowse(FilesystemBrowseInput),
@@ -212,7 +212,7 @@ pub enum RpcMethod {
         limit: Option<usize>,
     },
 
-    // Workspace worktree methods
+    // 工作区工作树方法
     /// 列出管理的工作树。
     #[serde(rename = "workspace.worktree.list")]
     WorkspaceWorktreeList,
@@ -241,12 +241,12 @@ pub enum RpcMethod {
         max_age_secs: u64,
     },
 
-    // Editor methods
+    // 编辑器方法
     /// 在编辑器中打开。
     #[serde(rename = "editor.open")]
     EditorOpen(OpenInEditorInput),
 
-    // Terminal methods
+    // 终端方法
     /// 创建终端会话。
     #[serde(rename = "terminal.create")]
     TerminalCreate(CreateTerminalInput),
@@ -296,7 +296,7 @@ pub enum RpcMethod {
         session_id: uuid::Uuid,
     },
 
-    // Project methods
+    // 项目方法
     /// 列出所有项目。
     #[serde(rename = "projects.list")]
     ProjectsList,
@@ -307,7 +307,7 @@ pub enum RpcMethod {
     #[serde(rename = "projects.remove")]
     ProjectsRemove { project_id: ProjectId },
 
-    // Provider methods
+    // 提供者方法
     /// 列出提供者命令。
     #[serde(rename = "provider.listCommands")]
     ProviderListCommands(ProviderListCommandsInput),
@@ -327,7 +327,7 @@ pub enum RpcResponse {
     #[serde(rename = "auth.revokeClientSession")]
     AuthRevokeClientSession,
 
-    // Thread responses
+    // 线程响应
     #[serde(rename = "thread.list")]
     ThreadList(Vec<Thread>),
     #[serde(rename = "thread.get")]
@@ -343,7 +343,7 @@ pub enum RpcResponse {
     #[serde(rename = "thread.sendMessage")]
     ThreadSendMessage(ThreadSendMessageOutput),
 
-    // Git responses
+    // Git 响应
     #[serde(rename = "git.status")]
     GitStatus(GitStatusResult),
     #[serde(rename = "git.checkout")]
@@ -383,15 +383,15 @@ pub enum RpcResponse {
     #[serde(rename = "git.handoffThread")]
     GitHandoffThread(GitHandoffThreadResult),
 
-    // Filesystem responses
+    // 文件系统响应
     #[serde(rename = "filesystem.browse")]
     FilesystemBrowse(FilesystemBrowseResult),
 
-    // Editor responses
+    // 编辑器响应
     #[serde(rename = "editor.open")]
     EditorOpen,
 
-    // Terminal responses
+    // 终端响应
     #[serde(rename = "terminal.create")]
     TerminalCreate(CreateTerminalOutput),
     #[serde(rename = "terminal.write")]
@@ -408,19 +408,19 @@ pub enum RpcResponse {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "method", content = "params")]
 pub enum RpcNotification {
-    /// Git action progress.
+    /// Git 操作进度通知。
     #[serde(rename = "git.actionProgress")]
     GitActionProgress(GitActionProgressEvent),
-    /// Thread updated.
+    /// 线程已更新。
     #[serde(rename = "thread.updated")]
     ThreadUpdated { thread_id: ThreadId },
-    /// Message added.
+    /// 消息已添加。
     #[serde(rename = "thread.messageAdded")]
     ThreadMessageAdded {
         message_id: uuid::Uuid,
         thread_id: ThreadId,
     },
-    /// Terminal output.
+    /// 终端输出。
     #[serde(rename = "terminal.output")]
     TerminalOutput(TerminalOutputEvent),
 }

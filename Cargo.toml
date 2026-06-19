@@ -91,6 +91,8 @@ remi-auth = { path = "remi-auth" }
 remi-providers = { path = "remi-providers" }
 remi-orchestration = { path = "remi-orchestration" }
 remi-diff-apply = { path = "remi-diff-apply" }
+remi-server = { path = "remi-server" }
+remi-app = { path = "remi-app/src-tauri" }
 
 [profile.release]
 lto = "fat"

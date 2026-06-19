@@ -1,8 +1,7 @@
-//! Decider logic for the orchestration engine.
+//! 编排引擎的决策器逻辑。
 //!
-//! The decider is responsible for validating commands against the current
-//! aggregate state and deciding which events should be emitted. It contains
-//! no side effects and can be unit tested in isolation.
+//! 决策器负责根据当前聚合状态校验命令，并决定应发出哪些事件。
+//! 它不包含任何副作用，可以独立进行单元测试。
 
 use remi_contracts::{
     MessageRole, OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadMessage,
@@ -11,7 +10,7 @@ use remi_contracts::{
 use remi_core::{Error, Result};
 use uuid::Uuid;
 
-/// Validate and decide which events should be emitted for a command.
+/// 校验命令并决定应发出哪些事件。
 pub fn decide(
     command: &OrchestrationCommand,
     thread: Option<&Thread>,
@@ -27,7 +26,7 @@ pub fn decide(
     }
 }
 
-/// Decide events for creating a thread.
+/// 决定创建会话时应发出的事件。
 fn decide_create_thread(project_id: Uuid, _title: Option<&str>) -> Result<Vec<OrchestrationEvent>> {
     let thread_id = ThreadId::new();
     let timestamp = chrono::Utc::now().to_rfc3339();
@@ -39,17 +38,17 @@ fn decide_create_thread(project_id: Uuid, _title: Option<&str>) -> Result<Vec<Or
     }])
 }
 
-/// Decide events for sending a message.
+/// 决定发送消息时应发出的事件。
 fn decide_send_message(
     thread: Option<&Thread>,
     thread_id: ThreadId,
     _content: &str,
 ) -> Result<Vec<OrchestrationEvent>> {
-    let thread = thread.ok_or_else(|| Error::Orchestration(format!("Thread not found: {thread_id}")))?;
+    let thread = thread.ok_or_else(|| Error::Orchestration(format!("会话不存在: {thread_id}")))?;
 
     if thread.state != ThreadState::Idle && thread.state != ThreadState::Completed {
         return Err(Error::Orchestration(format!(
-            "Thread {thread_id} is in invalid state for sending messages: {:?}",
+            "会话 {thread_id} 处于无效状态，无法发送消息: {:?}",
             thread.state
         )));
     }
@@ -73,9 +72,9 @@ fn decide_send_message(
     ])
 }
 
-/// Decide events for deleting a thread.
+/// 决定删除会话时应发出的事件。
 fn decide_delete_thread(thread: Option<&Thread>, thread_id: ThreadId) -> Result<Vec<OrchestrationEvent>> {
-    let _thread = thread.ok_or_else(|| Error::Orchestration(format!("Thread not found: {thread_id}")))?;
+    let _thread = thread.ok_or_else(|| Error::Orchestration(format!("会话不存在: {thread_id}")))?;
 
     Ok(vec![OrchestrationEvent::ThreadDeleted {
         thread_id,
@@ -83,7 +82,7 @@ fn decide_delete_thread(thread: Option<&Thread>, thread_id: ThreadId) -> Result<
     }])
 }
 
-/// Apply a single event to a thread aggregate.
+/// 将单个事件应用到会话聚合。
 pub fn apply_event(thread: Option<Thread>, event: &OrchestrationEvent) -> Option<Thread> {
     match event {
         OrchestrationEvent::ThreadCreated {
@@ -127,7 +126,7 @@ pub fn apply_event(thread: Option<Thread>, event: &OrchestrationEvent) -> Option
     }
 }
 
-/// Rebuild a thread aggregate from a sequence of events.
+/// 从事件序列重建会话聚合。
 pub fn fold_thread(events: &[OrchestrationEvent], thread_id: ThreadId) -> Option<Thread> {
     events
         .iter()
@@ -135,7 +134,7 @@ pub fn fold_thread(events: &[OrchestrationEvent], thread_id: ThreadId) -> Option
         .fold(None, apply_event)
 }
 
-/// Extract the thread ID from an event.
+/// 从事件中提取会话 ID。
 pub fn event_thread_id(event: &OrchestrationEvent) -> ThreadId {
     match event {
         OrchestrationEvent::ThreadCreated { thread_id, .. }
@@ -147,7 +146,7 @@ pub fn event_thread_id(event: &OrchestrationEvent) -> ThreadId {
     }
 }
 
-/// Compute the next message metadata from user command content.
+/// 根据用户命令内容计算下一条消息的元数据。
 pub fn user_message_stub(content: &str) -> ThreadMessage {
     ThreadMessage {
         id: Uuid::new_v4(),
@@ -158,7 +157,7 @@ pub fn user_message_stub(content: &str) -> ThreadMessage {
     }
 }
 
-/// Compute the next turn metadata.
+/// 计算下一个轮次的元数据。
 pub fn turn_stub() -> ThreadTurn {
     ThreadTurn {
         id: Uuid::new_v4(),
@@ -218,7 +217,7 @@ mod tests {
         let project_id = thread.project_id;
 
         let mut events = decide_create_thread(project_id, None).unwrap();
-        // Override the generated thread id so it matches.
+        // 覆盖生成的会话 ID 以匹配测试数据。
         events[0] = OrchestrationEvent::ThreadCreated {
             thread_id,
             project_id,

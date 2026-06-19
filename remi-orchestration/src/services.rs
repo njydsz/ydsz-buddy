@@ -1,8 +1,7 @@
-//! Higher level orchestration services.
+//! 高层编排服务。
 //!
-//! Services are the building blocks the RPC layer and the orchestration
-//! engine use to perform common workflows. They wrap the event store and
-//! provider registry with strongly typed APIs.
+//! 服务是 RPC 层和编排引擎执行常见工作流所使用的构建块。
+//! 它们用强类型 API 封装了事件存储和 Provider 注册表。
 
 use chrono::{DateTime, Utc};
 use remi_contracts::{
@@ -23,38 +22,38 @@ use uuid::Uuid;
 // ConversationService
 // ---------------------------------------------------------------------------
 
-/// Aggregated conversation context used to assemble prompts.
+/// 聚合的对话上下文，用于组装提示词。
 #[derive(Debug, Clone, Default, serde::Serialize)]
 pub struct ConversationContext {
-    /// Recent messages (sliding window).
+    /// 最近的消息（滑动窗口）。
     pub messages: Vec<ThreadMessage>,
-    /// Current turn id (if any).
+    /// 当前轮次 ID（如有）。
     pub turn_id: Option<Uuid>,
-    /// System prompt prefix injected at the start of the conversation.
+    /// 注入到对话开头的系统提示前缀。
     pub system_prompt: Option<String>,
-    /// Approximate token count.
+    /// 近似的 token 数量。
     pub token_estimate: u64,
 }
 
-/// Service that produces a `ConversationContext` for a thread.
+/// 为会话生成 `ConversationContext` 的服务。
 pub struct ConversationService {
     db: Arc<Database>,
     window: usize,
 }
 
 impl ConversationService {
-    /// Create a new conversation service with a default context window.
+    /// 创建一个新的对话服务，使用默认上下文窗口大小。
     pub fn new(db: Arc<Database>) -> Self {
         Self { db, window: 32 }
     }
 
-    /// Set the context window size (in messages).
+    /// 设置上下文窗口大小（以消息条数计）。
     pub fn with_window(mut self, window: usize) -> Self {
         self.window = window;
         self
     }
 
-    /// Build a context for the supplied thread.
+    /// 为指定会话构建上下文。
     pub async fn build_context(&self, thread_id: ThreadId) -> Result<ConversationContext> {
         let repo = ThreadRepository::new(self.db.pool().clone());
         let all = repo.list_messages(thread_id).await?;
@@ -71,9 +70,9 @@ impl ConversationService {
 }
 
 fn default_system_prompt() -> String {
-    "You are Remi Code, an AI pair programmer embedded in a desktop IDE. \
-     Be concise, prefer concrete code snippets, and respect the user's \
-     coding style."
+    "你是 Remi Code，一个嵌入在桌面 IDE 中的 AI 结对编程助手。\
+     请保持简洁，优先给出具体的代码片段，并尊重用户的\
+     编码风格。"
         .to_string()
 }
 
@@ -81,18 +80,18 @@ fn default_system_prompt() -> String {
 // MessageService
 // ---------------------------------------------------------------------------
 
-/// High level message operations.
+/// 高层消息操作服务。
 pub struct MessageService {
     db: Arc<Database>,
 }
 
 impl MessageService {
-    /// Create a new message service.
+    /// 创建一个新的消息服务。
     pub fn new(db: Arc<Database>) -> Self {
         Self { db }
     }
 
-    /// Append a message to a thread and return it.
+    /// 向会话追加一条消息并返回该消息。
     pub async fn append(
         &self,
         thread_id: ThreadId,
@@ -101,11 +100,11 @@ impl MessageService {
     ) -> Result<ThreadMessage> {
         let repo = ThreadRepository::new(self.db.pool().clone());
         let message = repo.add_message(thread_id, role, content).await?;
-        info!(thread_id = %thread_id, role = ?role, "Appended message");
+        info!(thread_id = %thread_id, role = ?role, "已追加消息");
         Ok(message)
     }
 
-    /// Bulk insert messages in a single transaction.
+    /// 在单个事务中批量插入消息。
     pub async fn append_batch(
         &self,
         thread_id: ThreadId,
@@ -119,7 +118,7 @@ impl MessageService {
         Ok(out)
     }
 
-    /// Search the messages of a thread for a substring.
+    /// 在会话的消息中搜索子串。
     pub async fn search(&self, thread_id: ThreadId, query: &str) -> Result<Vec<ThreadMessage>> {
         let repo = ThreadRepository::new(self.db.pool().clone());
         let messages = repo.list_messages(thread_id).await?;
@@ -134,22 +133,22 @@ impl MessageService {
 // CheckpointService
 // ---------------------------------------------------------------------------
 
-/// A snapshot of the thread state at a given turn.
+/// 会话在某一轮次的状态快照。
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Checkpoint {
-    /// Checkpoint ID.
+    /// 检查点 ID。
     pub id: String,
-    /// Thread this checkpoint belongs to.
+    /// 该检查点所属的会话。
     pub thread_id: ThreadId,
-    /// Turn at which the snapshot was taken.
+    /// 拍摄快照时的轮次 ID。
     pub turn_id: Uuid,
-    /// Snapshot of the messages.
+    /// 消息快照。
     pub messages: Vec<ThreadMessage>,
-    /// When the checkpoint was taken.
+    /// 检查点的创建时间。
     pub created_at: DateTime<Utc>,
 }
 
-/// Service that creates and restores checkpoints.
+/// 创建和恢复检查点的服务。
 pub struct CheckpointService {
     db: Arc<Database>,
     checkpoints: Arc<tokio::sync::Mutex<HashMap<ThreadId, VecDeque<Checkpoint>>>>,
@@ -157,7 +156,7 @@ pub struct CheckpointService {
 }
 
 impl CheckpointService {
-    /// Create a new checkpoint service.
+    /// 创建一个新的检查点服务。
     pub fn new(db: Arc<Database>) -> Self {
         Self {
             db,
@@ -166,7 +165,7 @@ impl CheckpointService {
         }
     }
 
-    /// Take a checkpoint of the current thread state.
+    /// 为当前会话状态拍摄一个检查点。
     pub async fn take(&self, thread_id: ThreadId, turn_id: Uuid) -> Result<Checkpoint> {
         let repo = ThreadRepository::new(self.db.pool().clone());
         let messages = repo.list_messages(thread_id).await?;
@@ -186,7 +185,7 @@ impl CheckpointService {
         Ok(checkpoint)
     }
 
-    /// List checkpoints for a thread.
+    /// 列出会话的所有检查点。
     pub async fn list(&self, thread_id: ThreadId) -> Vec<Checkpoint> {
         let map = self.checkpoints.lock().await;
         map.get(&thread_id)
@@ -194,21 +193,21 @@ impl CheckpointService {
             .unwrap_or_default()
     }
 
-    /// Return the latest checkpoint for a thread.
+    /// 返回会话最新的检查点。
     pub async fn latest(&self, thread_id: ThreadId) -> Option<Checkpoint> {
         let map = self.checkpoints.lock().await;
         map.get(&thread_id).and_then(|q| q.front().cloned())
     }
 
-    /// Restore a checkpoint by writing its messages back to the database.
+    /// 恢复检查点：将其消息写回数据库。
     pub async fn restore(&self, checkpoint: &Checkpoint) -> Result<()> {
         let repo = ThreadRepository::new(self.db.pool().clone());
-        // Truncate existing messages for the thread.
+        // 清空该会话的现有消息。
         sqlx::query("DELETE FROM projection_thread_messages WHERE thread_id = ?")
             .bind(checkpoint.thread_id.to_string())
             .execute(self.db.pool())
             .await
-            .map_err(|e| Error::Database(format!("Failed to clear messages: {e}")))?;
+            .map_err(|e| Error::Database(format!("清空消息失败: {e}")))?;
         for m in &checkpoint.messages {
             repo.add_message(checkpoint.thread_id, m.role, &m.content).await?;
         }
@@ -220,29 +219,29 @@ impl CheckpointService {
 // DiffService
 // ---------------------------------------------------------------------------
 
-/// Summary of a diff between two file snapshots.
+/// 两个文件快照之间差异的摘要。
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DiffSummary {
-    /// Number of files changed.
+    /// 变更的文件数量。
     pub files: usize,
-    /// Number of inserted lines.
+    /// 新增的行数。
     pub insertions: usize,
-    /// Number of deleted lines.
+    /// 删除的行数。
     pub deletions: usize,
-    /// Paths of changed files.
+    /// 变更文件的路径。
     pub paths: Vec<String>,
 }
 
-/// Service that computes and summarises file diffs.
+/// 计算并汇总文件差异的服务。
 pub struct DiffService;
 
 impl DiffService {
-    /// Create a new diff service.
+    /// 创建一个新的差异服务。
     pub fn new() -> Self {
         Self
     }
 
-    /// Parse a unified diff and produce a [`DiffSummary`].
+    /// 解析 unified diff 并生成 [`DiffSummary`]。
     pub fn summarize(diff: &str) -> DiffSummary {
         let mut files = 0usize;
         let mut insertions = 0usize;
@@ -268,9 +267,9 @@ impl DiffService {
         }
     }
 
-    /// Compute a diff between two strings using a line-based LCS heuristic.
+    /// 使用基于行的 LCS 启发式算法计算两个字符串之间的差异。
     pub fn compute(before: &str, after: &str) -> String {
-        // Simple Myers-like line diff. Suitable for small previews.
+        // 简单的类 Myers 行级差异算法。适用于小型预览。
         let before_lines: Vec<&str> = before.lines().collect();
         let after_lines: Vec<&str> = after.lines().collect();
         let mut output = String::new();
@@ -316,84 +315,84 @@ impl Default for DiffService {
 }
 
 // ---------------------------------------------------------------------------
-// PluginService (skills & plugins)
+// PluginService（技能与插件）
 // ---------------------------------------------------------------------------
 
-/// A registered plugin/skill.
+/// 已注册的插件/技能。
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Plugin {
-    /// Plugin ID.
+    /// 插件 ID。
     pub id: String,
-    /// Plugin display name.
+    /// 插件显示名称。
     pub name: String,
-    /// Plugin description.
+    /// 插件描述。
     pub description: String,
-    /// Whether the plugin is enabled.
+    /// 插件是否已启用。
     pub enabled: bool,
-    /// Plugin kind (`skill`, `command`, `tool`).
+    /// 插件类型（`skill`、`command`、`tool`）。
     pub kind: PluginKind,
 }
 
-/// Plugin category.
+/// 插件类别。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PluginKind {
-    /// A skill (reusable prompt / template).
+    /// 技能（可复用的提示词/模板）。
     Skill,
-    /// A slash command.
+    /// 斜杠命令。
     Command,
-    /// A tool that can be invoked by the assistant.
+    /// 可由助手调用的工具。
     Tool,
 }
 
-/// Result of running a plugin.
+/// 插件运行结果。
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct PluginResult {
-    /// Plugin ID.
+    /// 插件 ID。
     pub plugin_id: String,
-    /// Output text from the plugin.
+    /// 插件输出的文本。
     pub output: String,
 }
 
-/// Service that registers, enables, disables, and runs plugins.
+/// 注册、启用、禁用和运行插件的服务。
 pub struct PluginService {
     plugins: Arc<tokio::sync::Mutex<HashMap<String, Plugin>>>,
 }
 
 impl PluginService {
-    /// Create a new plugin service pre-populated with the default skills.
+    /// 创建一个新的插件服务，并预置默认技能。
     pub fn new() -> Self {
         let mut service = Self {
             plugins: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
         };
-        // Register a few baseline skills to mirror competitor defaults.
+        // 注册一些基线技能，以对齐竞品的默认配置。
         let baselines = vec![
             Plugin {
                 id: "explain".to_string(),
                 name: "Explain".to_string(),
-                description: "Explain a code selection in detail.".to_string(),
+                description: "详细解释选中的代码。".to_string(),
                 enabled: true,
                 kind: PluginKind::Skill,
             },
             Plugin {
                 id: "refactor".to_string(),
                 name: "Refactor".to_string(),
-                description: "Refactor a code selection for clarity.".to_string(),
+                description: "重构选中的代码以提升清晰度。".to_string(),
                 enabled: true,
                 kind: PluginKind::Skill,
             },
             Plugin {
                 id: "tests".to_string(),
                 name: "Tests".to_string(),
-                description: "Generate unit tests for the selection.".to_string(),
+                description: "为选中的代码生成单元测试。".to_string(),
                 enabled: true,
                 kind: PluginKind::Skill,
             },
         ];
-        // Best-effort sync seed (we can't await here).
+        // 尽力而为的同步种子（此处无法 await）。
         if let Ok(handle) = tokio::runtime::Handle::try_current() {
             handle.spawn(async move {
-                // intentionally empty - registration is done synchronously
+                // 故意留空 - 注册已同步完成
             });
         }
         for p in baselines {
@@ -402,51 +401,50 @@ impl PluginService {
         service
     }
 
-    /// Register a plugin.
+    /// 注册一个插件。
     pub async fn register(&self, plugin: Plugin) {
         let mut map = self.plugins.lock().await;
         map.insert(plugin.id.clone(), plugin);
     }
 
-    /// List all plugins.
+    /// 列出所有插件。
     pub async fn list(&self) -> Vec<Plugin> {
         self.plugins.lock().await.values().cloned().collect()
     }
 
-    /// Enable a plugin.
+    /// 启用一个插件。
     pub async fn enable(&self, id: &str) -> Result<()> {
         let mut map = self.plugins.lock().await;
         let plugin = map
             .get_mut(id)
-            .ok_or_else(|| Error::Internal(format!("Plugin not found: {id}")))?;
+            .ok_or_else(|| Error::Internal(format!("插件不存在: {id}")))?;
         plugin.enabled = true;
         Ok(())
     }
 
-    /// Disable a plugin.
+    /// 禁用一个插件。
     pub async fn disable(&self, id: &str) -> Result<()> {
         let mut map = self.plugins.lock().await;
         let plugin = map
             .get_mut(id)
-            .ok_or_else(|| Error::Internal(format!("Plugin not found: {id}")))?;
+            .ok_or_else(|| Error::Internal(format!("插件不存在: {id}")))?;
         plugin.enabled = false;
         Ok(())
     }
 
-    /// Invoke a plugin (skill) and return the result.
+    /// 调用一个插件（技能）并返回结果。
     pub async fn invoke(&self, id: &str, input: &str) -> Result<PluginResult> {
         let plugin = {
             let map = self.plugins.lock().await;
             map.get(id)
-                .ok_or_else(|| Error::Internal(format!("Plugin not found: {id}")))?
+                .ok_or_else(|| Error::Internal(format!("插件不存在: {id}")))?
                 .clone()
         };
         if !plugin.enabled {
-            return Err(Error::Internal(format!("Plugin disabled: {id}")));
+            return Err(Error::Internal(format!("插件已禁用: {id}")));
         }
-        // In a real implementation, this would call into the provider with
-        // the skill template. We just echo the input here.
-        debug!(plugin = id, "Invoking plugin");
+        // 在实际实现中，这里会带着技能模板调用 Provider。此处仅回显输入。
+        debug!(plugin = id, "正在调用插件");
         Ok(PluginResult {
             plugin_id: id.to_string(),
             output: format!("[{}:{}] {}", plugin.name, plugin.kind_as_str(), input),
@@ -474,49 +472,49 @@ impl Default for PluginService {
 // VoiceService
 // ---------------------------------------------------------------------------
 
-/// Voice interaction state.
+/// 语音交互状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum VoiceState {
-    /// Voice session is idle.
+    /// 语音会话空闲。
     Idle,
-    /// Voice session is recording.
+    /// 语音会话正在录音。
     Recording,
-    /// Voice session is transcribing.
+    /// 语音会话正在转写。
     Transcribing,
-    /// Voice session errored.
+    /// 语音会话出错。
     Error,
 }
 
-/// Voice session for STT/TTS.
+/// 用于 STT/TTS 的语音会话服务。
 pub struct VoiceService {
     state: Arc<tokio::sync::Mutex<VoiceState>>,
 }
 
 impl VoiceService {
-    /// Create a new voice service.
+    /// 创建一个新的语音服务。
     pub fn new() -> Self {
         Self {
             state: Arc::new(tokio::sync::Mutex::new(VoiceState::Idle)),
         }
     }
 
-    /// Start recording.
+    /// 开始录音。
     pub async fn start(&self) -> Result<()> {
         let mut state = self.state.lock().await;
         *state = VoiceState::Recording;
         Ok(())
     }
 
-    /// Stop recording and transcribe.
+    /// 停止录音并进行转写。
     pub async fn stop(&self) -> Result<String> {
         let mut state = self.state.lock().await;
         *state = VoiceState::Transcribing;
-        // In a real impl we'd call out to whisper.cpp. We just emit a stub.
+        // 在实际实现中会调用 whisper.cpp。此处仅返回空字符串占位。
         *state = VoiceState::Idle;
         Ok(String::new())
     }
 
-    /// Current state.
+    /// 获取当前状态。
     pub async fn state(&self) -> VoiceState {
         *self.state.lock().await
     }
@@ -529,27 +527,27 @@ impl Default for VoiceService {
 }
 
 // ---------------------------------------------------------------------------
-// ServiceBundle – convenience accessor used by the orchestration engine.
+// ServiceBundle – 编排引擎使用的便捷访问器。
 // ---------------------------------------------------------------------------
 
-/// Bundle of all orchestration services.
+/// 所有编排服务的集合。
 pub struct ServiceBundle {
-    /// Conversation context builder.
+    /// 对话上下文构建器。
     pub conversation: ConversationService,
-    /// Message append/search.
+    /// 消息追加/搜索。
     pub messages: MessageService,
-    /// Checkpoint management.
+    /// 检查点管理。
     pub checkpoints: CheckpointService,
-    /// Diff computation.
+    /// 差异计算。
     pub diff: DiffService,
-    /// Plugin registry.
+    /// 插件注册表。
     pub plugins: PluginService,
-    /// Voice interaction.
+    /// 语音交互。
     pub voice: VoiceService,
 }
 
 impl ServiceBundle {
-    /// Create a new service bundle.
+    /// 创建一个新的服务集合。
     pub fn new(db: Arc<Database>) -> Self {
         Self {
             conversation: ConversationService::new(db.clone()),
@@ -595,7 +593,7 @@ mod tests {
     }
 }
 
-// Suppress unused warnings for items reserved for future use.
+// 抑制为保留供未来使用的项发出的未使用警告。
 #[allow(dead_code)]
 fn _silence_unused() {
     let _: Option<Thread> = None;

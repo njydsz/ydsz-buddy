@@ -68,7 +68,7 @@ impl AuthService {
     pub async fn bootstrap(&self, input: AuthBootstrapInput) -> Result<AuthBootstrapOutput> {
         if let Some(token) = &input.token {
             self.verify_token(token).await?;
-            info!("Verified bootstrap token for client: {}", input.client_id);
+            info!("已验证客户端的引导令牌: {}", input.client_id);
         }
 
         let session_token = self.generate_session_token().await?;
@@ -247,7 +247,7 @@ impl AuthService {
                     "expiresAt": expires_at.to_rfc3339()
                 }))
             }
-            None => Err(Error::Auth("Invalid session token".to_string())),
+            None => Err(Error::Auth("会话令牌无效或已过期".to_string())),
         }
     }
 
@@ -344,10 +344,10 @@ impl AuthService {
                     .execute(pool)
                     .await
                     .map_err(|e| Error::Database(e.to_string()))?;
-                info!("Consumed bootstrap token for device: {}", label);
+                info!("已消费设备的引导令牌: {}", label);
                 Ok(subject)
             }
-            None => Err(Error::Auth("Invalid or expired bootstrap token".to_string())),
+            None => Err(Error::Auth("引导令牌无效或已过期".to_string())),
         }
     }
 
@@ -459,7 +459,7 @@ impl AuthService {
     async fn generate_session_token(&self) -> Result<String> {
         let key = self.secret_key.read().await;
         if key.is_empty() {
-            return Err(Error::Auth("Secret key not initialized".to_string()));
+            return Err(Error::Auth("密钥未初始化".to_string()));
         }
 
         let key = Key::<Aes256Gcm>::from_slice(&key[..32]);
@@ -473,7 +473,7 @@ impl AuthService {
 
         let ciphertext = cipher
             .encrypt(nonce, plaintext.as_bytes())
-            .map_err(|e| Error::Auth(format!("Failed to encrypt: {}", e)))?;
+            .map_err(|e| Error::Auth(format!("加密失败: {}", e)))?;
 
         let mut combined = nonce_bytes.to_vec();
         combined.extend_from_slice(&ciphertext);
@@ -492,7 +492,7 @@ impl AuthService {
         let argon2 = Argon2::default();
         let password_hash = argon2
             .hash_password(password.as_bytes(), &salt)
-            .map_err(|e| Error::Auth(format!("Failed to hash password: {}", e)))?
+            .map_err(|e| Error::Auth(format!("密码哈希失败: {}", e)))?
             .to_string();
         Ok(password_hash)
     }
@@ -500,7 +500,7 @@ impl AuthService {
     /// 验证密码。
     pub async fn verify_password(&self, password: &str, hash: &str) -> Result<bool> {
         let parsed_hash = PasswordHash::new(hash)
-            .map_err(|e| Error::Auth(format!("Invalid password hash: {}", e)))?;
+            .map_err(|e| Error::Auth(format!("密码哈希格式无效: {}", e)))?;
         let argon2 = Argon2::default();
         Ok(argon2
             .verify_password(password.as_bytes(), &parsed_hash)
@@ -517,35 +517,35 @@ mod tests {
         let db = Arc::new(
             Database::connect(&remi_core::ServerConfig::default())
                 .await
-                .expect("DB connect"),
+                .expect("数据库连接失败"),
         );
         let service = AuthService::new(db);
-        service.initialize(vec![0u8; 32]).await.expect("Init");
+        service.initialize(vec![0u8; 32]).await.expect("初始化失败");
 
         let password = "test_password";
-        let hash = service.hash_password(password).await.expect("Hash");
+        let hash = service.hash_password(password).await.expect("密码哈希失败");
         assert!(
             service
                 .verify_password(password, &hash)
                 .await
-                .expect("Verify")
+                .expect("密码验证失败")
         );
     }
 
     #[tokio::test]
     async fn test_bootstrap_and_pairing_lifecycle() {
         let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        std::fs::create_dir_all(&temp_dir).expect("创建临时目录失败");
         let mut config = remi_core::ServerConfig::default();
         config.db_path = temp_dir.join("test.db");
         let db = Arc::new(
             Database::connect(&config)
                 .await
-                .expect("DB connect"),
+                .expect("数据库连接失败"),
         );
-        db.run_migrations().await.expect("Migrations");
+        db.run_migrations().await.expect("数据库迁移失败");
         let service = AuthService::new(db);
-        service.initialize(vec![0u8; 32]).await.expect("Init");
+        service.initialize(vec![0u8; 32]).await.expect("初始化失败");
 
         let bootstrap = service
             .bootstrap(AuthBootstrapInput {
@@ -553,25 +553,25 @@ mod tests {
                 token: None,
             })
             .await
-            .expect("Bootstrap");
+            .expect("引导流程失败");
         assert!(!bootstrap.session_token.is_empty());
 
         let pairing = service
             .create_pairing_credential(AuthCreatePairingCredentialInput {
                 device_id: "device-1".to_string(),
-                device_name: "Test Device".to_string(),
+                device_name: "测试设备".to_string(),
             })
             .await
-            .expect("Pairing");
+            .expect("创建配对凭证失败");
         assert_eq!(pairing.pairing_code.len(), 8);
 
         service
             .revoke_pairing_link(&pairing.pairing_code)
             .await
-            .expect("Revoke pairing");
+            .expect("吊销配对链接失败");
         service
             .revoke_client_session(&bootstrap.session_token)
             .await
-            .expect("Revoke session");
+            .expect("吊销客户端会话失败");
     }
 }

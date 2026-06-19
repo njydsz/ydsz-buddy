@@ -1,25 +1,24 @@
-//! Runtime mode helpers.
+//! 运行时模式辅助工具
 //!
-//! The server binary, the Tauri desktop app and the embedded CLI can all
-//! load the same [`ServerConfig`](crate::ServerConfig) but interpret it
-//! slightly differently. This module centralises the runtime-mode logic so
-//! each entry point asks one question: "what mode are we in?".
+//! 服务器二进制文件、Tauri 桌面应用和嵌入式 CLI 都可以加载相同的
+//! [`ServerConfig`](crate::ServerConfig)，但解释方式略有不同。本模块集中处理运行时模式逻辑，
+//! 使每个入口点只需问一个问题："我们处于什么模式？"。
 
 use crate::config::RuntimeMode;
 
-/// Effective runtime mode used at startup.
+/// 启动时使用的有效运行时模式
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EffectiveRuntimeMode {
-    /// Headless server, listens for HTTP and WebSocket.
+    /// 无头服务器，监听 HTTP 和 WebSocket
     Server,
-    /// Tauri desktop application.
+    /// Tauri 桌面应用
     Desktop,
-    /// Development mode (verbose logging, permissive CORS, hot reload).
+    /// 开发模式（详细日志、宽松 CORS、热重载）
     Development,
 }
 
 impl EffectiveRuntimeMode {
-    /// Build an [`EffectiveRuntimeMode`] from a [`RuntimeMode`].
+    /// 从 [`RuntimeMode`] 构建 [`EffectiveRuntimeMode`]
     pub fn from_config(mode: RuntimeMode, dev_mode: bool) -> Self {
         match mode {
             RuntimeMode::Server if dev_mode => Self::Development,
@@ -29,24 +28,23 @@ impl EffectiveRuntimeMode {
         }
     }
 
-    /// Whether the mode runs as a desktop app.
+    /// 是否作为桌面应用运行
     pub fn is_desktop(&self) -> bool {
         matches!(self, Self::Desktop)
     }
 
-    /// Whether the mode is the headless server.
+    /// 是否是无头服务器
     pub fn is_server(&self) -> bool {
         matches!(self, Self::Server)
     }
 
-    /// Whether the mode enables development conveniences.
+    /// 是否启用开发便利功能
     pub fn is_development(&self) -> bool {
         matches!(self, Self::Development)
     }
 }
 
-/// Heuristic detection of the effective runtime mode based on the presence
-/// of the `REMI_DESKTOP` environment variable and whether stdout is a TTY.
+/// 基于 `REMI_DESKTOP` 环境变量和标准输出是否为 TTY 的启发式运行时模式检测
 pub fn detect() -> EffectiveRuntimeMode {
     if std::env::var_os("REMI_DESKTOP").is_some() {
         return EffectiveRuntimeMode::Desktop;

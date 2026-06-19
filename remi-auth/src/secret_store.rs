@@ -48,7 +48,7 @@ impl SecretStore {
         // 加密值
         let ciphertext = cipher
             .encrypt(nonce, value.as_bytes())
-            .map_err(|e| Error::Internal(format!("Encryption failed: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("加密失败: {}", e)))?;
 
         let id = Uuid::new_v4().to_string();
         let now = Utc::now();
@@ -73,7 +73,7 @@ impl SecretStore {
         .bind(expires_at.map(|t| t.to_rfc3339()))
         .execute(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to store secret: {}", e)))?;
+        .map_err(|e| Error::Database(format!("存储密钥失败: {}", e)))?;
 
         Ok(())
     }
@@ -87,7 +87,7 @@ impl SecretStore {
         .bind(key)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to retrieve secret: {}", e)))?;
+        .map_err(|e| Error::Database(format!("检索密钥失败: {}", e)))?;
 
         let (key, ciphertext, nonce_bytes, expires_at) = match row {
             Some(r) => r,
@@ -111,10 +111,10 @@ impl SecretStore {
         
         let plaintext = cipher
             .decrypt(nonce, ciphertext.as_ref())
-            .map_err(|e| Error::Internal(format!("Decryption failed: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("解密失败: {}", e)))?;
 
         let value = String::from_utf8(plaintext)
-            .map_err(|e| Error::Internal(format!("Invalid UTF-8 in secret: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("密钥中包含无效的UTF-8: {}", e)))?;
 
         Ok(Some(value))
     }
@@ -125,7 +125,7 @@ impl SecretStore {
             .bind(key)
             .execute(&self.pool)
             .await
-            .map_err(|e| Error::Database(format!("Failed to delete secret: {}", e)))?;
+            .map_err(|e| Error::Database(format!("删除密钥失败: {}", e)))?;
 
         Ok(())
     }
@@ -137,15 +137,15 @@ impl SecretStore {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to list secrets: {}", e)))?;
+        .map_err(|e| Error::Database(format!("列出密钥失败: {}", e)))?;
 
         let mut secrets = Vec::new();
         for (id, key, created_at, updated_at, expires_at) in rows {
             let created = DateTime::parse_from_rfc3339(&created_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
             let updated = DateTime::parse_from_rfc3339(&updated_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
             let expires = expires_at
                 .and_then(|s| DateTime::parse_from_rfc3339(&s).ok())
@@ -170,7 +170,7 @@ impl SecretStore {
             .bind(&now)
             .execute(&self.pool)
             .await
-            .map_err(|e| Error::Database(format!("Failed to cleanup secrets: {}", e)))?;
+            .map_err(|e| Error::Database(format!("清理过期密钥失败: {}", e)))?;
 
         Ok(result.rows_affected() as usize)
     }
@@ -185,25 +185,25 @@ mod tests {
     #[tokio::test]
     async fn test_secret_store() {
         let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        std::fs::create_dir_all(&temp_dir).expect("创建临时目录失败");
         let mut config = ServerConfig::default();
         config.db_path = temp_dir.join("test.db");
-        let db = Database::connect(&config).await.expect("Failed to connect");
-        db.run_migrations().await.expect("Failed to migrate");
+        let db = Database::connect(&config).await.expect("数据库连接失败");
+        db.run_migrations().await.expect("数据库迁移失败");
 
         let key = [0u8; 32];
         let store = SecretStore::new(db.pool().clone(), key);
 
-        // Set secret
-        store.set("test_key", "test_value", None).await.expect("Failed to set");
+        // 存储密钥
+        store.set("test_key", "test_value", None).await.expect("存储失败");
 
-        // Get secret
-        let value = store.get("test_key").await.expect("Failed to get").expect("Secret not found");
+        // 获取密钥
+        let value = store.get("test_key").await.expect("获取失败").expect("密钥未找到");
         assert_eq!(value, "test_value");
 
-        // Delete secret
-        store.delete("test_key").await.expect("Failed to delete");
-        let value = store.get("test_key").await.expect("Failed to get");
+        // 删除密钥
+        store.delete("test_key").await.expect("删除失败");
+        let value = store.get("test_key").await.expect("获取失败");
         assert!(value.is_none());
     }
 }

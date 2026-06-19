@@ -1,32 +1,31 @@
-//! Read-model projector for orchestration events.
+//! 编排事件的读模型投影器。
 //!
-//! The projector applies a stream of events to an in-memory read model. It
-//! is intentionally free of side effects and can be used both for live
-//! projection and for rebuilding the read model from the event store.
+//! 投影器将事件流应用到内存中的读模型。它故意不包含任何副作用，
+//! 既可用于实时投影，也可用于从事件存储重建读模型。
 
 use remi_contracts::{
     OrchestrationEvent, Thread, ThreadId, ThreadMessage, ThreadState, ThreadTurn,
 };
 use std::collections::HashMap;
 
-/// In-memory read model for orchestration queries.
+/// 用于编排查询的内存读模型。
 #[derive(Debug, Clone, Default)]
 pub struct ReadModel {
-    /// Threads indexed by thread ID.
+    /// 按会话 ID 索引的会话。
     pub threads: HashMap<ThreadId, Thread>,
-    /// Messages indexed by thread ID.
+    /// 按会话 ID 索引的消息。
     pub thread_messages: HashMap<ThreadId, Vec<ThreadMessage>>,
-    /// Turns indexed by thread ID.
+    /// 按会话 ID 索引的轮次。
     pub thread_turns: HashMap<ThreadId, Vec<ThreadTurn>>,
 }
 
 impl ReadModel {
-    /// Create a new empty read model.
+    /// 创建一个新的空读模型。
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Apply a single event to the read model.
+    /// 将单个事件应用到读模型。
     pub fn apply(&mut self, event: &OrchestrationEvent) {
         match event {
             OrchestrationEvent::ThreadCreated {
@@ -67,7 +66,7 @@ impl ReadModel {
                         id: *message_id,
                         thread_id: *thread_id,
                         role: *role,
-                        content: String::new(), // Content is stored separately in the repository
+                        content: String::new(), // 消息内容单独存储在仓库中
                         created_at: timestamp.clone(),
                     });
                 }
@@ -102,7 +101,7 @@ impl ReadModel {
         }
     }
 
-    /// Apply a sequence of events to the read model.
+    /// 将一系列事件应用到读模型。
     pub fn apply_all(&mut self, events: &[OrchestrationEvent]) {
         for event in events {
             self.apply(event);

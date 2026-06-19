@@ -1,4 +1,4 @@
-//! Provider registry.
+//! Provider 注册中心。
 
 use crate::traits::ProviderAdapter;
 use dashmap::DashMap;
@@ -6,53 +6,53 @@ use remi_contracts::{ProviderHealth, ProviderInfo, ProviderName};
 use std::sync::Arc;
 use tracing::{error, info};
 
-/// Registry of provider adapters.
+/// Provider 适配器注册中心。
 #[derive(Clone)]
 pub struct ProviderRegistry {
     adapters: Arc<DashMap<ProviderName, Arc<dyn ProviderAdapter>>>,
 }
 
 impl ProviderRegistry {
-    /// Create a new empty provider registry.
+    /// 创建新的空 Provider 注册中心。
     pub fn new() -> Self {
         Self {
             adapters: Arc::new(DashMap::new()),
         }
     }
 
-    /// Register a provider adapter.
+    /// 注册 Provider 适配器。
     pub fn register(&self, adapter: Arc<dyn ProviderAdapter>) {
         let info = adapter.info();
         let name = info.name.clone();
         self.adapters.insert(name.clone(), adapter);
-        info!(provider = %name, "Registered provider adapter");
+        info!(provider = %name, "已注册 Provider 适配器");
     }
 
-    /// Get a provider adapter by name.
+    /// 根据名称获取 Provider 适配器。
     pub fn get(&self, name: &ProviderName) -> Option<Arc<dyn ProviderAdapter>> {
         self.adapters.get(name).map(|a| a.clone())
     }
 
-    /// List all registered providers.
+    /// 列出所有已注册的 Provider。
     pub fn list(&self) -> Vec<ProviderInfo> {
         self.adapters.iter().map(|a| a.value().info()).collect()
     }
 
-    /// Check health of all registered providers.
+    /// 检查所有已注册 Provider 的健康状态。
     pub async fn health_check_all(&self) -> Vec<ProviderHealth> {
         let mut results = Vec::with_capacity(self.adapters.len());
         for adapter in self.adapters.iter() {
             match adapter.value().health().await {
                 Ok(health) => results.push(health),
                 Err(e) => {
-                    error!(provider = %adapter.key(), error = %e, "Health check failed");
+                    error!(provider = %adapter.key(), error = %e, "健康检查失败");
                 }
             }
         }
         results
     }
 
-    /// Returns true if the registry contains an adapter for the given provider.
+    /// 如果注册中心包含指定 Provider 的适配器，则返回 true。
     pub fn contains(&self, name: &ProviderName) -> bool {
         self.adapters.contains_key(name)
     }

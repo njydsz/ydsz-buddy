@@ -1,4 +1,4 @@
-//! Secret store repository.
+//! 密钥存储仓库。
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -6,30 +6,30 @@ use remi_core::{Error, Result};
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
-/// Secret store trait.
+/// 密钥存储 trait。
 #[async_trait]
 pub trait SecretStoreTrait: Send + Sync {
-    /// Store an encrypted secret.
+    /// 存储加密的密钥。
     async fn store(&self, key: &str, encrypted_value: &[u8], nonce: &[u8], expires_at: Option<&str>) -> Result<()>;
 
-    /// Retrieve an encrypted secret.
+    /// 检索加密的密钥。
     async fn get(&self, key: &str) -> Result<Option<(Vec<u8>, Vec<u8>)>>;
 
-    /// Delete a secret.
+    /// 删除密钥。
     async fn delete(&self, key: &str) -> Result<()>;
 
-    /// List all secret keys.
+    /// 列出所有密钥键。
     async fn list_keys(&self) -> Result<Vec<String>>;
 }
 
-/// Secret store repository implementation.
+/// 密钥存储仓库实现。
 #[derive(Clone)]
 pub struct SecretStore {
     pool: SqlitePool,
 }
 
 impl SecretStore {
-    /// Create a new secret store.
+    /// 创建新密钥存储。
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }

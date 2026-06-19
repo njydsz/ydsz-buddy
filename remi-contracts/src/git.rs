@@ -1,372 +1,372 @@
-//! Git operation schemas.
+//! Git 操作模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Input for git status operation.
+/// Git 状态查询的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStatusInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
 }
 
-/// Result of git status operation.
+/// Git 状态查询的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStatusResult {
-    /// Current branch name.
+    /// 当前分支名称。
     pub current_branch: Option<String>,
-    /// Whether the repository is in a clean state.
+    /// 仓库是否处于干净状态。
     pub is_clean: bool,
-    /// Staged changes.
+    /// 已暂存的变更。
     pub staged: Vec<GitFileChange>,
-    /// Unstaged changes.
+    /// 未暂存的变更。
     pub unstaged: Vec<GitFileChange>,
-    /// Untracked files.
+    /// 未跟踪的文件。
     pub untracked: Vec<String>,
 }
 
-/// A file change in git.
+/// Git 文件变更。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitFileChange {
-    /// File path.
+    /// 文件路径。
     pub path: String,
-    /// Change status.
+    /// 变更状态。
     pub status: GitChangeStatus,
 }
 
-/// Git change status.
+/// Git 变更状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum GitChangeStatus {
-    /// Added.
+    /// 新增。
     Added,
-    /// Modified.
+    /// 修改。
     Modified,
-    /// Deleted.
+    /// 删除。
     Deleted,
-    /// Renamed.
+    /// 重命名。
     Renamed,
-    /// Copied.
+    /// 复制。
     Copied,
-    /// Unmerged.
+    /// 未合并。
     Unmerged,
 }
 
-/// Input for git checkout operation.
+/// Git 切换操作的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCheckoutInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Branch or commit to checkout.
+    /// 要切换的分支或提交。
     pub target: String,
-    /// Whether to create a new branch.
+    /// 是否创建新分支。
     #[serde(default)]
     pub create_branch: bool,
 }
 
-/// Input for creating a branch.
+/// 创建分支的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateBranchInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Branch name.
+    /// 分支名称。
     pub branch_name: String,
-    /// Base branch or commit (optional).
+    /// 基准分支或提交（可选）。
     pub base: Option<String>,
-    /// Whether to checkout the new branch immediately.
+    /// 是否立即切换到新分支。
     #[serde(default)]
     pub checkout: bool,
 }
 
-/// Result of creating a branch.
+/// 创建分支的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateBranchResult {
-    /// Branch name.
+    /// 分支名称。
     pub branch_name: String,
-    /// Commit SHA.
+    /// 提交 SHA。
     pub commit_sha: String,
 }
 
-/// Input for listing branches.
+/// 列出分支的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitListBranchesInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Whether to include remote branches.
+    /// 是否包含远程分支。
     #[serde(default)]
     pub include_remote: bool,
 }
 
-/// Result of listing branches.
+/// 列出分支的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitListBranchesResult {
-    /// Branches.
+    /// 分支列表。
     pub branches: Vec<GitBranch>,
 }
 
-/// A git branch.
+/// Git 分支。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitBranch {
-    /// Branch name.
+    /// 分支名称。
     pub name: String,
-    /// Whether this is the current branch.
+    /// 是否为当前分支。
     pub is_current: bool,
-    /// Whether this is a remote branch.
+    /// 是否为远程分支。
     pub is_remote: bool,
-    /// Commit SHA.
+    /// 提交 SHA。
     pub commit_sha: String,
 }
 
-/// Input for git pull operation.
+/// Git 拉取操作的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitPullInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Remote name (default: "origin").
+    /// 远程名称（默认: "origin"）。
     pub remote: Option<String>,
-    /// Branch name (optional).
+    /// 分支名称（可选）。
     pub branch: Option<String>,
 }
 
-/// Result of git pull operation.
+/// Git 拉取操作的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitPullResult {
-    /// Number of commits pulled.
+    /// 拉取的提交数量。
     pub commits_pulled: u32,
-    /// Whether there were conflicts.
+    /// 是否存在冲突。
     pub has_conflicts: bool,
 }
 
-/// Input for reading working tree diff.
+/// 读取工作树差异的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitReadWorkingTreeDiffInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// File path (optional, for specific file).
+    /// 文件路径（可选，用于指定特定文件）。
     pub file_path: Option<String>,
-    /// Whether to include staged changes.
+    /// 是否包含已暂存的变更。
     #[serde(default)]
     pub include_staged: bool,
 }
 
-/// Result of reading working tree diff.
+/// 读取工作树差异的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitReadWorkingTreeDiffResult {
-    /// Diff content (unified diff format).
+    /// 差异内容（unified diff 格式）。
     pub diff: String,
 }
 
-/// Git action progress event.
+/// Git 操作进度事件。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitActionProgressEvent {
-    /// Operation ID.
+    /// 操作 ID。
     pub operation_id: Uuid,
-    /// Progress percentage (0-100).
+    /// 进度百分比（0-100）。
     pub progress: u8,
-    /// Status message.
+    /// 状态消息。
     pub message: String,
 }
 
-/// Input for creating a worktree.
+/// 创建工作树的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateWorktreeInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Worktree path.
+    /// 工作树路径。
     pub worktree_path: String,
-    /// Branch name.
+    /// 分支名称。
     pub branch_name: String,
-    /// Whether to create a detached worktree.
+    /// 是否创建分离的工作树。
     #[serde(default)]
     pub detached: bool,
 }
 
-/// Result of creating a worktree.
+/// 创建工作树的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateWorktreeResult {
-    /// Worktree path.
+    /// 工作树路径。
     pub worktree_path: String,
-    /// Branch name.
+    /// 分支名称。
     pub branch_name: String,
 }
 
-/// Input for creating a detached worktree.
+/// 创建分离工作树的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateDetachedWorktreeInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Worktree path.
+    /// 工作树路径。
     pub worktree_path: String,
-    /// Commit SHA.
+    /// 提交 SHA。
     pub commit_sha: String,
 }
 
-/// Result of creating a detached worktree.
+/// 创建分离工作树的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitCreateDetachedWorktreeResult {
-    /// Worktree path.
+    /// 工作树路径。
     pub worktree_path: String,
 }
 
-/// Input for removing a worktree.
+/// 移除工作树的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitRemoveWorktreeInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Worktree path.
+    /// 工作树路径。
     pub worktree_path: String,
-    /// Whether to force removal.
+    /// 是否强制移除。
     #[serde(default)]
     pub force: bool,
 }
 
-/// Input for initializing a git repository.
+/// 初始化 Git 仓库的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitInitInput {
-    /// Directory path.
+    /// 目录路径。
     pub path: String,
 }
 
-/// Input for summarizing a diff.
+/// 差异摘要的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitSummarizeDiffInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Diff content.
+    /// 差异内容。
     pub diff: String,
 }
 
-/// Result of summarizing a diff.
+/// 差异摘要的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitSummarizeDiffResult {
-    /// Summary text.
+    /// 摘要文本。
     pub summary: String,
-    /// Number of files changed.
+    /// 变更的文件数量。
     pub files_changed: u32,
-    /// Number of insertions.
+    /// 新增行数。
     pub insertions: u32,
-    /// Number of deletions.
+    /// 删除行数。
     pub deletions: u32,
 }
 
-/// Input for removing index lock.
+/// 移除索引锁的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitRemoveIndexLockInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
 }
 
-/// Input for stash operations.
+/// 暂存操作的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStashInfoInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
 }
 
-/// Result of stash info.
+/// 暂存信息的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStashInfoResult {
-    /// Stash entries.
+    /// 暂存条目列表。
     pub stashes: Vec<GitStashEntry>,
 }
 
-/// A git stash entry.
+/// Git 暂存条目。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStashEntry {
-    /// Stash index.
+    /// 暂存索引。
     pub index: u32,
-    /// Stash message.
+    /// 暂存消息。
     pub message: String,
-    /// Timestamp (ISO 8601).
+    /// 时间戳（ISO 8601 格式）。
     pub timestamp: String,
 }
 
-/// Input for dropping a stash.
+/// 删除暂存的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStashDropInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Stash index.
+    /// 暂存索引。
     pub index: u32,
 }
 
-/// Input for stash and checkout.
+/// 暂存并切换分支的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitStashAndCheckoutInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Branch to checkout.
+    /// 要切换的分支。
     pub branch: String,
-    /// Stash message (optional).
+    /// 暂存消息（可选）。
     pub message: Option<String>,
 }
 
-/// Input for running stacked action.
+/// 运行堆叠操作的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitRunStackedActionInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Action type.
+    /// 操作类型。
     pub action: String,
-    /// Action parameters.
+    /// 操作参数。
     pub params: serde_json::Value,
 }
 
-/// Input for preparing a pull request.
+/// 准备拉取请求的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitPreparePullRequestThreadInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// Base branch.
+    /// 基础分支。
     pub base_branch: String,
-    /// Head branch.
+    /// 头部 分支。
     pub head_branch: String,
-    /// PR title.
+    /// PR 标题。
     pub title: String,
-    /// PR description.
+    /// PR 描述。
     pub description: Option<String>,
 }
 
-/// Result of preparing a pull request.
+/// 准备拉取请求的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitPreparePullRequestThreadResult {
-    /// PR number.
+    /// PR 编号。
     pub pr_number: u32,
-    /// PR URL.
+    /// PR URL。
     pub pr_url: String,
 }
 
-/// Input for resolving a pull request.
+/// 解析拉取请求的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitResolvePullRequestResult {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// PR number.
+    /// PR 编号。
     pub pr_number: u32,
 }
 
-/// Input for pull request ref.
+/// 拉取请求引用查询的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitPullRequestRefInput {
-    /// Repository path.
+    /// 仓库路径。
     pub repo_path: String,
-    /// PR number.
+    /// PR 编号。
     pub pr_number: u32,
 }
 
-/// Input for handing off a thread.
+/// 移交线程的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitHandoffThreadInput {
-    /// Thread ID.
+    /// 线程 ID。
     pub thread_id: uuid::Uuid,
-    /// Target worktree path.
+    /// 目标工作树路径。
     pub worktree_path: String,
 }
 
-/// Result of handing off a thread.
+/// 移交线程的结果。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct GitHandoffThreadResult {
-    /// New thread ID.
+    /// 新线程 ID。
     pub new_thread_id: uuid::Uuid,
 }

@@ -1,7 +1,7 @@
-//! Google Gemini provider adapter.
+//! Google Gemini Provider 适配器。
 //!
-//! Targets the Gemini REST API (`v1beta/models/{model}:generateContent` and
-//! `streamGenerateContent`). Reads `GEMINI_API_KEY` from the environment.
+//! 目标为 Gemini REST API（`v1beta/models/{model}:generateContent` 和
+//! `streamGenerateContent`）。从环境变量 `GEMINI_API_KEY` 读取。
 
 use crate::common::{build_http_client, parse_json_response};
 use crate::config::HttpProviderConfig;
@@ -20,47 +20,47 @@ use std::sync::Arc;
 use tracing::{error, info};
 use uuid::Uuid;
 
-/// Gemini content part.
+/// Gemini 内容部分。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct GeminiPart {
     text: String,
 }
 
-/// Gemini content.
+/// Gemini 内容。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct GeminiContent {
     role: String,
     parts: Vec<GeminiPart>,
 }
 
-/// Gemini generate content request.
+/// Gemini 生成内容请求。
 #[derive(Debug, Serialize)]
 struct GeminiRequest {
     contents: Vec<GeminiContent>,
 }
 
-/// Gemini response candidate.
+/// Gemini 响应候选。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct GeminiCandidate {
     content: GeminiContent,
 }
 
-/// Gemini non-streaming response.
+/// Gemini 非流式响应。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct GeminiResponse {
     candidates: Vec<GeminiCandidate>,
 }
 
-/// Gemini streaming response chunk.
+/// Gemini 流式响应块。
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 struct GeminiStreamChunk {
     candidates: Vec<GeminiCandidate>,
 }
 
-/// Gemini session state.
+/// Gemini 会话状态。
 #[derive(Clone)]
 #[allow(dead_code)]
 struct GeminiSession {
@@ -69,7 +69,7 @@ struct GeminiSession {
     messages: Vec<GeminiContent>,
 }
 
-/// Google Gemini provider adapter.
+/// Google Gemini Provider 适配器。
 pub struct GeminiAdapter {
     config: HttpProviderConfig,
     sessions: Arc<DashMap<String, GeminiSession>>,
@@ -77,7 +77,7 @@ pub struct GeminiAdapter {
 }
 
 impl GeminiAdapter {
-    /// Create a new Gemini adapter reading `GEMINI_API_KEY` from the environment.
+    /// 创建新的 Gemini 适配器，从环境变量 `GEMINI_API_KEY` 读取。
     pub fn new() -> Self {
         let api_key = std::env::var("GEMINI_API_KEY").ok();
         let config = HttpProviderConfig::new("https://generativelanguage.googleapis.com")
@@ -85,10 +85,10 @@ impl GeminiAdapter {
         Self::with_config(config)
     }
 
-    /// Create a Gemini adapter with explicit configuration.
+    /// 使用显式配置创建 Gemini 适配器。
     pub fn with_config(config: HttpProviderConfig) -> Self {
         let client = build_http_client(config.timeout).unwrap_or_else(|e| {
-            error!(error = %e, "Failed to build HTTP client; falling back to default");
+            error!(error = %e, "构建 HTTP 客户端失败；回退到默认实现");
             reqwest::Client::new()
         });
         Self {
@@ -98,6 +98,7 @@ impl GeminiAdapter {
         }
     }
 
+    /// 若适配器已配置 API 密钥则返回 true。
     fn is_configured(&self) -> bool {
         self.config
             .api_key
@@ -105,6 +106,7 @@ impl GeminiAdapter {
             .is_some_and(|k| !k.is_empty())
     }
 
+    /// 获取已配置的 API 密钥。
     fn api_key(&self) -> Result<&str, ProviderAdapterError> {
         self.config
             .api_key
@@ -113,6 +115,7 @@ impl GeminiAdapter {
             .ok_or(ProviderAdapterError::NotConfigured(ProviderName::Gemini))
     }
 
+    /// 将消息追加到会话的对话历史。
     fn push_message(&self, session_id: &str, role: &str, content: &str) -> Result<()> {
         let mut session = self
             .sessions
@@ -155,7 +158,7 @@ impl ProviderAdapter for GeminiAdapter {
                 provider: ProviderName::Gemini,
                 status: ProviderHealthStatus::Unhealthy,
                 last_checked: chrono::Utc::now().to_rfc3339(),
-                error: Some("GEMINI_API_KEY not configured".to_string()),
+                error: Some("GEMINI_API_KEY 未配置".to_string()),
             });
         }
 
@@ -176,7 +179,7 @@ impl ProviderAdapter for GeminiAdapter {
         };
 
         self.sessions.insert(session_id.clone(), session);
-        info!(session_id = %session_id, model = %model, "Started Gemini session");
+        info!(session_id = %session_id, model = %model, "已启动 Gemini 会话");
 
         Ok(session_id)
     }
@@ -262,7 +265,7 @@ impl ProviderAdapter for GeminiAdapter {
             let message = response
                 .text()
                 .await
-                .unwrap_or_else(|_| "Unknown error".to_string());
+                .unwrap_or_else(|_| "未知错误".to_string());
             return Err(ProviderAdapterError::ApiError {
                 status: status.as_u16(),
                 message,
@@ -334,7 +337,7 @@ impl ProviderAdapter for GeminiAdapter {
 
     async fn close_session(&self, session_id: &str) -> Result<()> {
         self.sessions.remove(session_id);
-        info!(session_id = %session_id, "Closed Gemini session");
+        info!(session_id = %session_id, "已关闭 Gemini 会话");
         Ok(())
     }
 }

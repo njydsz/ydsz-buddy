@@ -1,4 +1,4 @@
-//! Server configuration types.
+//! 服务器配置类型
 
 use figment::{
     Figment,
@@ -7,217 +7,217 @@ use figment::{
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-/// Server configuration.
+/// 服务器配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerConfig {
-    /// Server host to bind to.
+    /// 服务器绑定地址
     #[serde(default = "default_host")]
     pub host: String,
 
-    /// Server port to listen on.
+    /// 服务器监听端口
     #[serde(default = "default_port")]
     pub port: u16,
 
-    /// Path to the SQLite database file.
+    /// SQLite 数据库文件路径
     #[serde(default = "default_db_path")]
     pub db_path: PathBuf,
 
-    /// Path to the data directory.
+    /// 数据目录路径
     #[serde(default = "default_data_dir")]
     pub data_dir: PathBuf,
 
-    /// Authentication token (optional).
+    /// 认证令牌（可选）
     #[serde(default)]
     pub auth_token: Option<String>,
 
-    /// Enable development mode.
+    /// 启用开发模式
     #[serde(default)]
     pub dev_mode: bool,
 
-    /// Runtime mode.
+    /// 运行时模式
     #[serde(default = "default_runtime_mode")]
     pub runtime_mode: RuntimeMode,
 
-    /// Log configuration.
+    /// 日志配置
     #[serde(default)]
     pub log: LogConfig,
 
-    /// Server configuration.
+    /// 服务器设置
     #[serde(default)]
     pub server: ServerSettings,
 
-    /// Database configuration.
+    /// 数据库配置
     #[serde(default)]
     pub database: DatabaseConfig,
 
-    /// CORS configuration.
+    /// CORS 配置
     #[serde(default)]
     pub cors: CorsConfig,
 
-    /// Security configuration.
+    /// 安全配置
     #[serde(default)]
     pub security: SecurityConfig,
 
-    /// Provider configuration.
+    /// 提供商配置
     #[serde(default)]
     pub providers: ProviderConfig,
 }
 
-/// Log configuration.
+/// 日志配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LogConfig {
-    /// Log level (trace, debug, info, warn, error).
+    /// 日志级别（trace, debug, info, warn, error）
     #[serde(default = "default_log_level")]
     pub level: String,
 
-    /// Log format (json, pretty).
+    /// 日志格式（json, pretty）
     #[serde(default = "default_log_format")]
     pub format: LogFormat,
 
-    /// Log file path (optional, logs to stdout if not set).
+    /// 日志文件路径（可选，未设置时输出到标准输出）
     #[serde(default)]
     pub file: Option<PathBuf>,
 
-    /// Enable ANSI colors in logs.
+    /// 启用 ANSI 颜色
     #[serde(default = "default_true")]
     pub ansi: bool,
 }
 
-/// Log format.
+/// 日志格式
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum LogFormat {
-    /// JSON format.
+    /// JSON 格式
     #[default]
     Json,
-    /// Pretty print format.
+    /// 美化打印格式
     Pretty,
 }
 
-/// Server settings.
+/// 服务器设置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerSettings {
-    /// Request timeout in seconds.
+    /// 请求超时时间（秒）
     #[serde(default = "default_request_timeout")]
     pub request_timeout_secs: u64,
 
-    /// Maximum concurrent connections.
+    /// 最大并发连接数
     #[serde(default = "default_max_connections")]
     pub max_connections: usize,
 
-    /// Enable graceful shutdown.
+    /// 启用优雅关闭
     #[serde(default = "default_true")]
     pub graceful_shutdown: bool,
 
-    /// Shutdown timeout in seconds.
+    /// 关闭超时时间（秒）
     #[serde(default = "default_shutdown_timeout")]
     pub shutdown_timeout_secs: u64,
 }
 
-/// Database configuration.
+/// 数据库配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DatabaseConfig {
-    /// Maximum connection pool size.
+    /// 最大连接池大小
     #[serde(default = "default_max_db_connections")]
     pub max_connections: u32,
 
-    /// Minimum connection pool size.
+    /// 最小连接池大小
     #[serde(default = "default_min_db_connections")]
     pub min_connections: u32,
 
-    /// Connection timeout in seconds.
+    /// 连接超时时间（秒）
     #[serde(default = "default_connect_timeout")]
     pub connect_timeout_secs: u64,
 
-    /// Idle timeout in seconds.
+    /// 空闲超时时间（秒）
     #[serde(default = "default_idle_timeout")]
     pub idle_timeout_secs: u64,
 
-    /// Enable WAL mode.
+    /// 启用 WAL 模式
     #[serde(default = "default_true")]
     pub wal_mode: bool,
 }
 
-/// CORS configuration.
+/// CORS 配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CorsConfig {
-    /// Allowed origins.
+    /// 允许的源
     #[serde(default = "default_cors_origins")]
     pub allowed_origins: Vec<String>,
 
-    /// Allowed methods.
+    /// 允许的方法
     #[serde(default = "default_cors_methods")]
     pub allowed_methods: Vec<String>,
 
-    /// Allowed headers.
+    /// 允许的请求头
     #[serde(default = "default_cors_headers")]
     pub allowed_headers: Vec<String>,
 
-    /// Allow credentials.
+    /// 允许携带凭证
     #[serde(default)]
     pub allow_credentials: bool,
 
-    /// Max age in seconds.
+    /// 最大缓存时间（秒）
     #[serde(default = "default_cors_max_age")]
     pub max_age_secs: u64,
 }
 
-/// Security configuration.
+/// 安全配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SecurityConfig {
-    /// Path to secret key file.
+    /// 密钥文件路径
     #[serde(default)]
     pub secret_key_path: Option<PathBuf>,
 
-    /// Session token expiration in hours.
+    /// 会话令牌过期时间（小时）
     #[serde(default = "default_session_expiry")]
     pub session_expiry_hours: u64,
 
-    /// Pairing code expiration in minutes.
+    /// 配对码过期时间（分钟）
     #[serde(default = "default_pairing_expiry")]
     pub pairing_expiry_minutes: u64,
 
-    /// Enable rate limiting.
+    /// 启用速率限制
     #[serde(default = "default_true")]
     pub rate_limiting: bool,
 
-    /// Maximum requests per minute.
+    /// 每分钟最大请求数
     #[serde(default = "default_rate_limit")]
     pub max_requests_per_minute: u32,
 }
 
-/// Provider configuration.
+/// 提供商配置
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ProviderConfig {
-    /// Default provider.
+    /// 默认提供商
     #[serde(default)]
     pub default_provider: Option<String>,
 
-    /// Provider-specific configurations.
+    /// 提供商特定配置
     #[serde(default)]
     pub providers: std::collections::HashMap<String, ProviderSettings>,
 }
 
-/// Individual provider settings.
+/// 单个提供商设置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderSettings {
-    /// API key (if required).
+    /// API 密钥（如果需要）
     #[serde(default)]
     pub api_key: Option<String>,
 
-    /// API endpoint.
+    /// API 端点
     #[serde(default)]
     pub endpoint: Option<String>,
 
-    /// Model to use.
+    /// 使用的模型
     #[serde(default)]
     pub model: Option<String>,
 
-    /// Request timeout in seconds.
+    /// 请求超时时间（秒）
     #[serde(default = "default_provider_timeout")]
     pub timeout_secs: u64,
 
-    /// Maximum retry attempts.
+    /// 最大重试次数
     #[serde(default = "default_max_retries")]
     pub max_retries: u32,
 }
@@ -301,7 +301,7 @@ impl Default for SecurityConfig {
 }
 
 impl ServerConfig {
-    /// Load configuration from environment variables and config file.
+    /// 从环境变量和配置文件加载配置
     pub fn load() -> crate::Result<Self> {
         let mut figment = Figment::new().merge(Env::prefixed("REMI_CODE_"));
 
@@ -315,7 +315,7 @@ impl ServerConfig {
         Ok(config)
     }
 
-    /// Load configuration with a specific config file path.
+    /// 从指定配置文件路径加载配置
     pub fn load_from(path: impl AsRef<std::path::Path>) -> crate::Result<Self> {
         let mut figment = Figment::new().merge(Env::prefixed("REMI_CODE_"));
 
@@ -328,38 +328,38 @@ impl ServerConfig {
         Ok(config)
     }
 
-    /// Validate configuration.
+    /// 验证配置
     pub fn validate(&self) -> crate::Result<()> {
         if self.port == 0 {
-            return Err(crate::Error::Config("Port must be greater than 0".to_string()));
+            return Err(crate::Error::Config("端口必须大于 0".to_string()));
         }
 
         if self.server.request_timeout_secs == 0 {
-            return Err(crate::Error::Config("Request timeout must be greater than 0".to_string()));
+            return Err(crate::Error::Config("请求超时时间必须大于 0".to_string()));
         }
 
         if self.database.max_connections == 0 {
-            return Err(crate::Error::Config("Database max connections must be greater than 0".to_string()));
+            return Err(crate::Error::Config("数据库最大连接数必须大于 0".to_string()));
         }
 
         if self.security.session_expiry_hours == 0 {
-            return Err(crate::Error::Config("Session expiry must be greater than 0".to_string()));
+            return Err(crate::Error::Config("会话过期时间必须大于 0".to_string()));
         }
 
         Ok(())
     }
 }
 
-/// Runtime mode for the server.
+/// 服务器运行时模式
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum RuntimeMode {
-    /// Server mode (default).
+    /// 服务器模式（默认）
     #[default]
     Server,
-    /// Desktop mode.
+    /// 桌面模式
     Desktop,
-    /// Development mode.
+    /// 开发模式
     Dev,
 }
 

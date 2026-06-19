@@ -1,9 +1,8 @@
-//! Remi Code Server - Main entry point.
+//! Remi Code 服务器 - 主入口点。
 //!
-//! This binary starts the HTTP/WebSocket server for Remi Code. It uses
-//! the [`remi_server::routes`] module to mount every HTTP route in one
-//! place and additionally exposes the WebSocket endpoint used by the
-//! Tauri desktop client.
+//! 此二进制程序启动 Remi Code 的 HTTP/WebSocket 服务器。它使用
+//! [`remi_server::routes`] 模块在一处挂载所有 HTTP 路由，
+//! 并额外暴露 Tauri 桌面客户端使用的 WebSocket 端点。
 
 use axum::{
     Router,
@@ -28,7 +27,7 @@ use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::{error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-/// Application state shared across handlers.
+/// 在处理器间共享的应用状态。
 #[derive(Clone)]
 struct AppState {
     config: ServerConfig,
@@ -58,7 +57,7 @@ impl From<AppState> for ServerState {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Initialize tracing
+    // 初始化追踪
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -69,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
 
     info!("Starting Remi Code Server");
 
-    // Load configuration
+    // 加载配置
     let config = ServerConfig::load().unwrap_or_else(|e| {
         error!("Failed to load configuration: {}", e);
         ServerConfig::default()
@@ -82,21 +81,21 @@ async fn main() -> anyhow::Result<()> {
         config.db_path.display()
     );
 
-    // Ensure data directory exists
+    // 确保数据目录存在
     tokio::fs::create_dir_all(&config.data_dir).await?;
 
-    // Initialize database
+    // 初始化数据库
     let db = Arc::new(Database::connect(&config).await?);
     db.run_migrations().await?;
     info!("Database initialized");
 
-    // Initialize authentication service
+    // 初始化认证服务
     let auth = Arc::new(AuthService::new(db.clone()));
     let secret_key: Vec<u8> = (0..32).map(|_| rand::random()).collect();
     auth.initialize(secret_key).await?;
     info!("Authentication service initialized");
 
-    // Initialize provider registry
+    // 初始化 provider 注册表
     let provider_registry = Arc::new(ProviderRegistry::new());
     provider_registry.register(Arc::new(ClaudeAdapter::new()));
     provider_registry.register(Arc::new(CodexAdapter::new()));
@@ -111,7 +110,7 @@ async fn main() -> anyhow::Result<()> {
         provider_registry.list().len()
     );
 
-    // Initialize orchestration engine (with reactor fan-out wired up).
+    // 初始化编排引擎（已连接 reactor 扇出）
     let orchestration = Arc::new(OrchestrationEngine::with_default_reactors(
         db.clone(),
         provider_registry.clone(),
@@ -119,16 +118,16 @@ async fn main() -> anyhow::Result<()> {
     let _reactor_handle = orchestration.spawn_reactor_loop();
     info!("Orchestration engine started with default reactor set");
 
-    // Initialize workspace service
+    // 初始化工作区服务
     let workspace = Arc::new(WorkspaceService::new(config.data_dir.join("workspace")));
 
-    // Initialize terminal manager
+    // 初始化终端管理器
     let terminal_manager = Arc::new(TerminalManager::new());
 
-    // Initialize WebSocket state
+    // 初始化 WebSocket 状态
     let ws_state = Arc::new(WsState::new());
 
-    // Initialize RPC state
+    // 初始化 RPC 状态
     let rpc_state = Arc::new(RpcState {
         orchestration: orchestration.clone(),
         workspace: workspace.clone(),
@@ -138,7 +137,7 @@ async fn main() -> anyhow::Result<()> {
         ws_state: ws_state.clone(),
     });
 
-    // Build application state
+    // 构建应用状态
     let state = AppState {
         config: config.clone(),
         db: db.clone(),
@@ -153,7 +152,7 @@ async fn main() -> anyhow::Result<()> {
 
     let server_state: Arc<ServerState> = Arc::new(state.clone().into());
 
-    // Build router with secure CORS configuration
+    // 使用安全的 CORS 配置构建路由
     let cors = if config.dev_mode {
         CorsLayer::new()
             .allow_origin(AllowOrigin::list([
@@ -184,13 +183,13 @@ async fn main() -> anyhow::Result<()> {
             ])
     };
 
-    // Mount the full route surface (50+ endpoints) and the WebSocket.
+    // 挂载完整路由表（50+ 端点）和 WebSocket
     let app = register_routes(server_state)
         .route("/", get(root_redirect))
         .merge(create_ws_router(rpc_state))
         .layer(cors);
 
-    // Start server
+    // 启动服务器
     let addr = format!("{}:{}", config.host, config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!(
@@ -204,8 +203,8 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Root path: 200 OK with a small JSON descriptor so health probes that
-/// hit `/` (not `/health`) still get a useful response.
+/// 根路径：返回 200 OK 和小型 JSON 描述符，以便健康检查探针
+/// 访问 `/`（而非 `/health`）时仍能获得有用响应。
 async fn root_redirect() -> axum::response::Response {
     axum::Json(serde_json::json!({
         "name": "remi-code-server",
@@ -215,6 +214,6 @@ async fn root_redirect() -> axum::response::Response {
     .into_response()
 }
 
-// `IntoResponse` lives in `axum::response`; re-export here so the helper
-// above compiles when the import is re-anchored at the call site.
+// `IntoResponse` 位于 `axum::response`；在此重新导出，以便上述辅助函数
+// 在导入重新定位到调用点时能够编译通过。
 use axum::response::IntoResponse;

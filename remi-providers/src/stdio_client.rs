@@ -1,14 +1,11 @@
-//! Stdio JSON-RPC client for provider CLIs.
+//! Provider CLI 的 Stdio JSON-RPC 客户端。
 //!
-//! This module provides a unified, line-based JSON-RPC client for talking to
-//! local provider CLIs (OpenCode, Pi, Kilo, Cursor's `agent --stdio` mode,
-//! …). All of these tools speak the same shape: one JSON request per line
-//! in, one JSON response (or notification) per line out, requests matched
-//! by `id`.
+//! 本模块为与本地 Provider CLI（OpenCode、Pi、Kilo、Cursor 的 `agent --stdio` 模式等）
+//! 通信提供统一的、基于行的 JSON-RPC 客户端。所有这些工具都使用相同的模式：
+//! 每行一个 JSON 请求输入，每行一个 JSON 响应（或通知）输出，通过 `id` 匹配请求。
 //!
-//! Most providers in this crate have their own historical bespoke client
-//! implementation; the goal of [`StdioJsonRpcClient`] is to give new
-//! adapters a single, well-tested entry point.
+//! 本 crate 中的大多数 Provider 都有各自历史遗留的定制客户端实现；
+//! [`StdioJsonRpcClient`] 的目标是为新适配器提供一个单一、经过充分测试的入口点。
 
 use crate::errors::ProviderAdapterError;
 use serde_json::Value;
@@ -18,7 +15,7 @@ use tokio::process::{Child, ChildStdin, ChildStdout};
 use tokio::sync::Mutex;
 use tracing::{debug, warn};
 
-/// Shared state for the stdio JSON-RPC client.
+/// Stdio JSON-RPC 客户端的共享状态。
 struct Inner {
     stdin: Mutex<ChildStdin>,
     reader: Mutex<BufReader<ChildStdout>>,
@@ -26,23 +23,23 @@ struct Inner {
     child: Mutex<Child>,
 }
 
-/// Stdio JSON-RPC client wrapping a child process with piped stdio.
+/// 包装带管道 stdio 的子进程的 Stdio JSON-RPC 客户端。
 #[derive(Clone)]
 pub struct StdioJsonRpcClient {
     inner: Arc<Inner>,
 }
 
 impl StdioJsonRpcClient {
-    /// Wrap a spawned child as a stdio JSON-RPC client.
+    /// 将已生成的子进程包装为 Stdio JSON-RPC 客户端。
     pub fn new(mut child: Child) -> Self {
         let stdin = child
             .stdin
             .take()
-            .expect("child stdin must be piped for stdio JSON-RPC client");
+            .expect("子进程 stdin 必须为管道以用于 stdio JSON-RPC 客户端");
         let stdout = child
             .stdout
             .take()
-            .expect("child stdout must be piped for stdio JSON-RPC client");
+            .expect("子进程 stdout 必须为管道以用于 stdio JSON-RPC 客户端");
         Self {
             inner: Arc::new(Inner {
                 stdin: Mutex::new(stdin),
@@ -53,7 +50,7 @@ impl StdioJsonRpcClient {
         }
     }
 
-    /// Send a request and read the matching response.
+    /// 发送请求并读取匹配的响应。
     pub async fn request(&self, method: &str, params: Value) -> Result<Value, ProviderAdapterError> {
         let id = {
             let mut guard = self.inner.next_id.lock().await;
@@ -67,22 +64,22 @@ impl StdioJsonRpcClient {
             "params": params,
         });
         let line = serde_json::to_string(&payload)
-            .map_err(|e| ProviderAdapterError::Internal(format!("serialize: {e}")))?;
+            .map_err(|e| ProviderAdapterError::Internal(format!("序列化：{e}")))?;
 
         {
             let mut stdin = self.inner.stdin.lock().await;
             stdin
                 .write_all(line.as_bytes())
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin write: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 写入：{e}")))?;
             stdin
                 .write_all(b"\n")
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin newline: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 换行：{e}")))?;
             stdin
                 .flush()
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("stdin flush: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("stdin 刷新：{e}")))?;
         }
 
         let mut reader = self.inner.reader.lock().await;
@@ -91,10 +88,10 @@ impl StdioJsonRpcClient {
             let n = reader
                 .read_line(&mut buf)
                 .await
-                .map_err(|e| ProviderAdapterError::Transport(format!("read line: {e}")))?;
+                .map_err(|e| ProviderAdapterError::Transport(format!("读取行：{e}")))?;
             if n == 0 {
                 return Err(ProviderAdapterError::Internal(
-                    "stdio JSON-RPC child closed before responding".to_string(),
+                    "stdio JSON-RPC 子进程在响应前关闭".to_string(),
                 ));
             }
             let trimmed = buf.trim();
@@ -104,32 +101,32 @@ impl StdioJsonRpcClient {
             let parsed: Value = match serde_json::from_str(trimmed) {
                 Ok(v) => v,
                 Err(e) => {
-                    warn!(error = %e, "received non-JSON line; ignoring");
+                    warn!(error = %e, "接收到非 JSON 行；忽略");
                     continue;
                 }
             };
             if parsed.get("id").is_none() {
-                debug!(payload = %trimmed, "notification");
+                debug!(payload = %trimmed, "通知");
                 continue;
             }
             if let Some(resp_id) = parsed.get("id").and_then(|v| v.as_u64()) {
                 if resp_id == id {
                     if let Some(err) = parsed.get("error") {
                         return Err(ProviderAdapterError::Internal(format!(
-                            "JSON-RPC error: {}",
+                            "JSON-RPC 错误：{}",
                             err
                         )));
                     }
                     return Ok(parsed.get("result").cloned().unwrap_or(Value::Null));
                 }
-                warn!(id = resp_id, "received out-of-order response");
+                warn!(id = resp_id, "接收到乱序响应");
                 continue;
             }
         }
     }
 
-    /// Send a request and return the raw response, but also tolerate the
-    /// child not having the method implemented by returning `Ok(None)`.
+    /// 发送请求并返回原始响应，但如果子进程未实现该方法，
+    /// 则通过返回 `Ok(None)` 来容忍。
     pub async fn try_request(
         &self,
         method: &str,
@@ -144,15 +141,15 @@ impl StdioJsonRpcClient {
         }
     }
 
-    /// Terminate the child process. Best-effort: ignores errors.
+    /// 终止子进程。尽力而为：忽略错误。
     pub async fn shutdown(&self) {
         if let Ok(mut child) = self.inner.child.lock().await {
             let _ = child.start_kill();
         }
     }
 
-    /// Borrow a clone of the inner child handle. Currently unused but
-    /// exposed for future adapters that need direct `Child` access.
+    /// 借用内部子进程句柄的克隆。当前未使用，
+    /// 但为未来需要直接 `Child` 访问的适配器暴露。
     #[allow(dead_code)]
     pub fn inner(&self) -> Arc<Inner> {
         self.inner.clone()

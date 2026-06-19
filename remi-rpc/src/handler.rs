@@ -1,4 +1,4 @@
-//! RPC request handler.
+//! RPC 请求处理器。
 
 use remi_auth::AuthService;
 use remi_contracts::RpcMethod;
@@ -16,7 +16,7 @@ use tracing::{error, info};
 
 use crate::WsState;
 
-/// Application state for RPC handlers.
+/// RPC 处理器的应用状态。
 #[derive(Clone)]
 pub struct RpcState {
     pub orchestration: Arc<OrchestrationEngine>,
@@ -27,13 +27,13 @@ pub struct RpcState {
     pub ws_state: Arc<WsState>,
 }
 
-/// Handle an RPC method call.
+/// 处理 RPC 方法调用。
 pub async fn handle_method(
     method: &str,
     params: Option<Value>,
     state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // Parse the method
+    // 解析方法
     let rpc_method: RpcMethod = match serde_json::from_value(serde_json::json!({
         "method": method,
         "params": params.unwrap_or(Value::Null)
@@ -50,9 +50,9 @@ pub async fn handle_method(
 
     info!("Handling RPC method: {}", method);
 
-    // Route to appropriate handler
+    // 路由到相应的处理器
     match rpc_method {
-        // Thread methods
+        // 线程方法
         RpcMethod::ThreadList => handle_thread_list(state).await,
         RpcMethod::ThreadGet { thread_id } => handle_thread_get(thread_id, state).await,
         RpcMethod::ThreadCreate { project_id, title } => {
@@ -67,7 +67,7 @@ pub async fn handle_method(
         }
         RpcMethod::ThreadSendMessage(input) => handle_thread_send_message(input, state).await,
 
-        // Filesystem methods
+        // 文件系统方法
         RpcMethod::FilesystemBrowse(input) => handle_filesystem_browse(input, state).await,
         RpcMethod::FilesystemBrowseChunked {
             input,
@@ -86,7 +86,7 @@ pub async fn handle_method(
             handle_filesystem_search(path, query, limit, state).await
         }
 
-        // Workspace worktree methods
+        // 工作区 worktree 方法
         RpcMethod::WorkspaceWorktreeList => handle_workspace_worktree_list(state).await,
         RpcMethod::WorkspaceWorktreeCreate { label } => {
             handle_workspace_worktree_create(label, state).await
@@ -101,7 +101,7 @@ pub async fn handle_method(
             handle_workspace_worktree_gc(max_age_secs, state).await
         }
 
-        // Git methods
+        // Git 方法
         RpcMethod::GitStatus(input) => handle_git_status(input, state).await,
         RpcMethod::GitListBranches(input) => handle_git_list_branches(input, state).await,
         RpcMethod::GitInit(input) => handle_git_init(input, state).await,
@@ -118,7 +118,7 @@ pub async fn handle_method(
         RpcMethod::GitRemoveWorktree(input) => handle_git_remove_worktree(input, state).await,
         RpcMethod::GitSummarizeDiff(input) => handle_git_summarize_diff(input, state).await,
 
-        // Auth methods
+        // 认证方法
         RpcMethod::AuthBootstrap(input) => handle_auth_bootstrap(input, state).await,
         RpcMethod::AuthCreatePairingCredential(input) => {
             handle_auth_create_pairing_credential(input, state).await
@@ -126,10 +126,10 @@ pub async fn handle_method(
         RpcMethod::AuthRevokePairingLink(input) => handle_auth_revoke_pairing_link(input, state).await,
         RpcMethod::AuthRevokeClientSession(input) => handle_auth_revoke_client_session(input, state).await,
 
-        // Editor methods
+        // 编辑器方法
         RpcMethod::EditorOpen(input) => handle_editor_open(input, state).await,
 
-        // Git advanced methods
+        // Git 高级方法
         RpcMethod::GitStashAndCheckout(input) => handle_git_stash_and_checkout(input, state).await,
         RpcMethod::GitRunStackedAction(input) => handle_git_run_stacked_action(input, state).await,
         RpcMethod::GitCreateDetachedWorktree(input) => {
@@ -143,7 +143,7 @@ pub async fn handle_method(
         }
         RpcMethod::GitHandoffThread(input) => handle_git_handoff_thread(input, state).await,
 
-        // Terminal methods
+        // 终端方法
         RpcMethod::TerminalCreate(input) => handle_terminal_create(input, state).await,
         RpcMethod::TerminalWrite(input) => handle_terminal_write(input, state).await,
         RpcMethod::TerminalResize(input) => handle_terminal_resize(input, state).await,
@@ -168,18 +168,18 @@ pub async fn handle_method(
             handle_terminal_replay(session_id, state).await
         }
 
-        // Project methods
+        // 项目方法
         RpcMethod::ProjectsList => handle_projects_list(state).await,
         RpcMethod::ProjectsAdd(input) => handle_projects_add(input, state).await,
         RpcMethod::ProjectsRemove { project_id } => handle_projects_remove(project_id, state).await,
 
-        // Provider methods
+        // Provider 方法
         RpcMethod::ProviderListCommands(input) => handle_provider_list_commands(input, state).await,
     }
 }
 
 async fn handle_thread_list(state: &Arc<RpcState>) -> Result<Value> {
-    // Get all projects first, then list threads
+    // 先获取所有项目，然后列出线程
     let project_repo = ProjectRepository::new(state.orchestration.db.pool().clone());
     let projects = ProjectRepositoryTrait::list(&project_repo).await?;
 
@@ -215,7 +215,7 @@ async fn handle_thread_create(
     let command = OrchestrationCommand::CreateThread { project_id, title };
     state.orchestration.handle_command(command).await?;
 
-    // Return success
+    // 返回成功
     Ok(serde_json::json!({"status": "ok"}))
 }
 
@@ -507,7 +507,7 @@ async fn handle_git_summarize_diff(
     input: remi_contracts::GitSummarizeDiffInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // Parse diff to extract stats
+    // 解析 diff 以提取统计信息
     let mut files_changed = 0u32;
     let mut insertions = 0u32;
     let mut deletions = 0u32;
@@ -522,7 +522,7 @@ async fn handle_git_summarize_diff(
         }
     }
 
-    // Generate a simple summary
+    // 生成简单的摘要
     let summary = format!(
         "Changed {} file(s) with {} insertion(s) and {} deletion(s)",
         files_changed, insertions, deletions
@@ -572,7 +572,7 @@ async fn handle_editor_open(
     input: remi_contracts::OpenInEditorInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // In a full implementation, this would open the file in the configured editor
+    // 在完整实现中，这将在配置的编辑器中打开文件
     info!("Opening file in editor: {}", input.path);
     Ok(serde_json::json!({"status": "ok"}))
 }
@@ -581,11 +581,11 @@ async fn handle_git_stash_and_checkout(
     input: remi_contracts::GitStashAndCheckoutInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // Stash current changes
+    // 暂存当前更改
     remi_git::GitService::stash_save(&input.repo_path, input.message.as_deref())
         .await?;
 
-    // Checkout target branch
+    // 检出目标分支
     remi_git::GitService::checkout(&input.repo_path, &input.branch, false).await?;
 
     Ok(serde_json::json!({"status": "ok"}))
@@ -669,7 +669,7 @@ async fn handle_terminal_create(
 ) -> Result<Value> {
     let output = state.terminal_manager.create(input).await?;
 
-    // Spawn a task to forward terminal output to WebSocket clients as notifications.
+    // 生成任务，将终端输出作为通知转发给 WebSocket 客户端
     let session_id = output.id;
     let terminal_manager = state.terminal_manager.clone();
     let notification_tx = state.ws_state.notification_tx.clone();
@@ -736,8 +736,8 @@ async fn handle_terminal_subscribe_output(
     input: remi_contracts::SubscribeTerminalOutputInput,
     state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // Output forwarding is started automatically on terminal.create.
-    // This method serves as an explicit subscription acknowledgment.
+    // 输出转发在 terminal.create 时自动启动
+    // 此方法作为显式订阅确认
     let _ = state
         .terminal_manager
         .subscribe_output(input.session_id)
@@ -818,7 +818,7 @@ async fn handle_provider_list_commands(
     input: remi_contracts::ProviderListCommandsInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // In a full implementation, this would query the provider for available commands
+    // 在完整实现中，这将查询 provider 以获取可用命令
     info!(
         "Listing commands for provider: {} in {}",
         input.provider, input.cwd

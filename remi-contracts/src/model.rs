@@ -1,14 +1,14 @@
-//! Model schemas.
+//! 模型模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// AI model identifier.
+/// AI 模型标识符。
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct ModelId(pub String);
 
 impl ModelId {
-    /// Create a new model ID.
+    /// 创建新的模型 ID。
     pub fn new(id: impl Into<String>) -> Self {
         Self(id.into())
     }
@@ -20,30 +20,30 @@ impl std::fmt::Display for ModelId {
     }
 }
 
-/// Model capabilities.
+/// 模型能力描述。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ModelCapabilities {
-    /// Whether the model supports streaming.
+    /// 是否支持流式输出。
     pub streaming: bool,
-    /// Whether the model supports function calling.
+    /// 是否支持函数调用。
     pub function_calling: bool,
-    /// Whether the model supports vision.
+    /// 是否支持视觉能力。
     pub vision: bool,
-    /// Maximum context length in tokens.
+    /// 最大上下文长度（以 token 计）。
     pub max_context_length: u32,
-    /// Maximum output length in tokens.
+    /// 最大输出长度（以 token 计）。
     pub max_output_length: u32,
 }
 
-/// Model information.
+/// 模型信息。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ModelInfo {
-    /// Model ID.
+    /// 模型 ID。
     pub id: ModelId,
-    /// Display name.
+    /// 显示名称。
     pub name: String,
-    /// Provider name.
+    /// 提供者名称。
     pub provider: String,
-    /// Model capabilities.
+    /// 模型能力。
     pub capabilities: ModelCapabilities,
 }

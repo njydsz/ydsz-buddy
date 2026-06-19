@@ -1,33 +1,33 @@
-//! Editor integration schemas.
+//! 编辑器集成模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// Input for opening a file in editor.
+/// 在编辑器中打开文件的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct OpenInEditorInput {
-    /// File path to open.
+    /// 要打开的文件路径。
     pub path: String,
-    /// Line number (1-indexed, optional).
+    /// 行号（从 1 开始，可选）。
     pub line: Option<u32>,
-    /// Column number (1-indexed, optional).
+    /// 列号（从 1 开始，可选）。
     pub column: Option<u32>,
 }
 
-/// Supported editor types.
+/// 支持的编辑器类型。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum EditorType {
-    /// VS Code.
+    /// VS Code。
     VsCode,
-    /// Cursor.
+    /// Cursor。
     Cursor,
-    /// Vim.
+    /// Vim。
     Vim,
-    /// Neovim.
+    /// Neovim。
     Neovim,
-    /// Emacs.
+    /// Emacs。
     Emacs,
-    /// System default.
+    /// 系统默认编辑器。
     Default,
 }

@@ -1,4 +1,4 @@
-//! Event store for orchestration events.
+//! 编排事件的事件存储。
 
 use remi_contracts::OrchestrationEvent;
 use remi_core::{Error, Result};
@@ -7,28 +7,28 @@ use std::sync::Arc;
 use tracing::info;
 use uuid::Uuid;
 
-/// Abstraction over orchestration event persistence.
+/// 编排事件持久化的抽象层。
 #[async_trait::async_trait]
 pub trait EventStore: Send + Sync {
-    /// Append an event to the store.
+    /// 向存储中追加一个事件。
     async fn append(&self, event: &OrchestrationEvent) -> Result<()>;
 
-    /// Read all events ordered by creation time.
+    /// 按创建时间顺序读取所有事件。
     async fn read_all(&self) -> Result<Vec<OrchestrationEvent>>;
 }
 
-/// SQLite-backed event store.
+/// 基于 SQLite 的事件存储实现。
 pub struct SqliteEventStore {
     db: Arc<Database>,
 }
 
 impl SqliteEventStore {
-    /// Create a new SQLite event store.
+    /// 创建一个新的 SQLite 事件存储。
     pub fn new(db: Arc<Database>) -> Self {
         Self { db }
     }
 
-    /// Extract the event type string for storage.
+    /// 提取事件类型字符串用于存储。
     fn event_type(event: &OrchestrationEvent) -> &'static str {
         match event {
             OrchestrationEvent::ThreadCreated { .. } => "ThreadCreated",
@@ -40,7 +40,7 @@ impl SqliteEventStore {
         }
     }
 
-    /// Extract the thread ID string for storage.
+    /// 提取会话 ID 字符串用于存储。
     fn thread_id(event: &OrchestrationEvent) -> String {
         match event {
             OrchestrationEvent::ThreadCreated { thread_id, .. }
@@ -52,7 +52,7 @@ impl SqliteEventStore {
         }
     }
 
-    /// Extract the timestamp string for storage.
+    /// 提取时间戳字符串用于存储。
     fn timestamp(event: &OrchestrationEvent) -> Option<String> {
         match event {
             OrchestrationEvent::ThreadCreated { timestamp, .. }
@@ -72,18 +72,18 @@ impl EventStore for SqliteEventStore {
         let event_type = Self::event_type(event);
         let thread_id = Self::thread_id(event);
         let payload_json = serde_json::to_string(event).map_err(|e| {
-            Error::Serialization(format!("Failed to serialize orchestration event: {e}"))
+            Error::Serialization(format!("序列化编排事件失败: {e}"))
         })?;
         let occurred_at = Self::timestamp(event).unwrap_or_else(|| chrono::Utc::now().to_rfc3339());
 
-        // Compute the next stream version for this thread aggregate.
+        // 计算该会话聚合的下一个流版本号。
         let stream_version: i64 = sqlx::query_scalar::<_, i64>(
             "SELECT COUNT(*) FROM orchestration_events WHERE aggregate_kind = 'thread' AND stream_id = ?",
         )
         .bind(&thread_id)
         .fetch_one(self.db.pool())
         .await
-        .map_err(|e| Error::Database(format!("Failed to compute stream version: {e}")))?
+        .map_err(|e| Error::Database(format!("计算流版本号失败: {e}")))?
             + 1;
 
         sqlx::query(
@@ -118,7 +118,7 @@ impl EventStore for SqliteEventStore {
         .bind("{}")
         .execute(self.db.pool())
         .await
-        .map_err(|e| Error::Database(format!("Failed to append event: {e}")))?;
+        .map_err(|e| Error::Database(format!("追加事件失败: {e}")))?;
 
         Ok(())
     }
@@ -129,17 +129,17 @@ impl EventStore for SqliteEventStore {
         )
         .fetch_all(self.db.pool())
         .await
-        .map_err(|e| Error::Database(format!("Failed to read events: {e}")))?;
+        .map_err(|e| Error::Database(format!("读取事件失败: {e}")))?;
 
         let mut events = Vec::with_capacity(rows.len());
         for (payload_json,) in rows {
             let event: OrchestrationEvent = serde_json::from_str(&payload_json).map_err(|e| {
-                Error::Serialization(format!("Failed to deserialize orchestration event: {e}"))
+                Error::Serialization(format!("反序列化编排事件失败: {e}"))
             })?;
             events.push(event);
         }
 
-        info!(count = events.len(), "Read events from store");
+        info!(count = events.len(), "已从存储中读取事件");
         Ok(events)
     }
 }

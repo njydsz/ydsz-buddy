@@ -1,48 +1,48 @@
-//! Core error types for Remi Code.
+//! Remi Code 核心错误类型
 
 use thiserror::Error;
 
-/// The main error type for Remi Code operations.
+/// Remi Code 操作的主错误类型
 #[derive(Error, Debug, Clone)]
 pub enum Error {
-    /// Configuration error.
-    #[error("configuration error: {0}")]
+    /// 配置错误
+    #[error("配置错误：{0}")]
     Config(String),
 
-    /// Database error.
-    #[error("database error: {0}")]
+    /// 数据库错误
+    #[error("数据库错误：{0}")]
     Database(String),
 
-    /// I/O error.
-    #[error("I/O error: {0}")]
+    /// I/O 错误
+    #[error("I/O 错误：{0}")]
     Io(String),
 
-    /// Serialization error.
-    #[error("serialization error: {0}")]
+    /// 序列化错误
+    #[error("序列化错误：{0}")]
     Serialization(String),
 
-    /// Authentication error.
-    #[error("authentication error: {0}")]
+    /// 认证错误
+    #[error("认证错误：{0}")]
     Auth(String),
 
-    /// Provider error.
-    #[error("provider error: {0}")]
+    /// 提供商错误
+    #[error("提供商错误：{0}")]
     Provider(String),
 
-    /// Git error.
-    #[error("git error: {0}")]
+    /// Git 错误
+    #[error("Git 错误：{0}")]
     Git(String),
 
-    /// Workspace error.
-    #[error("workspace error: {0}")]
+    /// 工作区错误
+    #[error("工作区错误：{0}")]
     Workspace(String),
 
-    /// Orchestration error.
-    #[error("orchestration error: {0}")]
+    /// 编排错误
+    #[error("编排错误：{0}")]
     Orchestration(String),
 
-    /// Internal error.
-    #[error("internal error: {0}")]
+    /// 内部错误
+    #[error("内部错误：{0}")]
     Internal(String),
 }
 
@@ -64,5 +64,5 @@ impl From<figment::Error> for Error {
     }
 }
 
-/// Result type alias using the core Error type.
+/// 使用核心 Error 类型的 Result 类型别名
 pub type Result<T, E = Error> = std::result::Result<T, E>;

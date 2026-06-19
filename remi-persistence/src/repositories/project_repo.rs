@@ -1,4 +1,4 @@
-//! Project repository.
+//! 项目仓库。
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -7,33 +7,33 @@ use remi_core::{Error, Result};
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
-/// Project repository trait.
+/// 项目仓库 trait。
 #[async_trait]
 pub trait ProjectRepositoryTrait: Send + Sync {
-    /// Create a new project.
+    /// 创建新项目。
     async fn create(&self, name: &str, path: &str, kind: ProjectKind) -> Result<Project>;
 
-    /// Get a project by ID.
+    /// 根据 ID 获取项目。
     async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>>;
 
-    /// Get a project by path.
+    /// 根据路径获取项目。
     async fn get_by_path(&self, path: &str) -> Result<Option<Project>>;
 
-    /// List all projects.
+    /// 列出所有项目。
     async fn list(&self) -> Result<Vec<Project>>;
 
-    /// Delete a project (soft delete via deleted_at).
+    /// 删除项目（通过 deleted_at 软删除）。
     async fn delete(&self, id: ProjectId) -> Result<()>;
 }
 
-/// Project repository implementation.
+/// 项目仓库实现。
 #[derive(Clone)]
 pub struct ProjectRepository {
     pool: SqlitePool,
 }
 
 impl ProjectRepository {
-    /// Create a new project repository.
+    /// 创建新项目仓库。
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
@@ -49,7 +49,7 @@ impl ProjectRepository {
         match s {
             "project" | "local" => Ok(ProjectKind::Local),
             "remote" => Ok(ProjectKind::Remote),
-            other => Err(Error::Database(format!("Invalid project kind: {other}"))),
+            other => Err(Error::Database(format!("无效的项目类型: {other}"))),
         }
     }
 }
@@ -98,7 +98,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
                 let id = Uuid::parse_str(&id_str)
-                    .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
+                    .map_err(|e| Error::Database(format!("无效的项目 ID: {e}")))?;
                 Ok(Some(Project {
                     id: ProjectId(id),
                     name,
@@ -124,7 +124,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
                 let id = Uuid::parse_str(&id_str)
-                    .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
+                    .map_err(|e| Error::Database(format!("无效的项目 ID: {e}")))?;
                 Ok(Some(Project {
                     id: ProjectId(id),
                     name,

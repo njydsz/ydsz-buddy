@@ -1,25 +1,25 @@
-//! AI Provider adapters for Remi Code.
+//! Remi Code 的 AI Provider 适配器。
 //!
-//! This crate provides adapters for various AI providers (Claude, Codex, Cursor,
-//! Gemini, Grok, OpenCode, Pi, Kilo) using HTTP APIs and stdio JSON-RPC
-//! communication.
+//! 本 crate 为多种 AI Provider（Claude、Codex、Cursor、
+//! Gemini、Grok、OpenCode、Pi、Kilo）提供适配器，支持 HTTP API 和 stdio JSON-RPC
+//! 通信方式。
 //!
-//! # Module layout
+//! # 模块布局
 //!
-//! - [`traits`] — the provider adapter contract.
-//! - [`registry`] — registry of provider adapters.
-//! - [`config`] — shared adapter configuration.
-//! - [`errors`] — provider-specific error types.
-//! - [`common`] — shared utilities for HTTP adapters.
-//! - [`acp`] — Cursor Agent Control Protocol client.
-//! - [`claude`] — Anthropic Claude adapter.
-//! - [`codex`] — OpenAI Codex adapter.
-//! - [`gemini`] — Google Gemini adapter.
-//! - [`grok`] — xAI Grok adapter.
-//! - [`opencode`] — OpenCode CLI adapter.
-//! - [`cursor`] — Cursor CLI adapter.
-//! - [`pi`] — Pi CLI adapter.
-//! - [`kilo`] — Kilo CLI adapter.
+//! - [`traits`] — Provider 适配器契约定义。
+//! - [`registry`] — Provider 适配器注册中心。
+//! - [`config`] — 适配器共享配置。
+//! - [`errors`] — Provider 特定错误类型。
+//! - [`common`] — HTTP 适配器共享工具函数。
+//! - [`acp`] — Cursor Agent Control Protocol 客户端。
+//! - [`claude`] — Anthropic Claude 适配器。
+//! - [`codex`] — OpenAI Codex 适配器。
+//! - [`gemini`] — Google Gemini 适配器。
+//! - [`grok`] — xAI Grok 适配器。
+//! - [`opencode`] — OpenCode CLI 适配器。
+//! - [`cursor`] — Cursor CLI 适配器。
+//! - [`pi`] — Pi CLI 适配器。
+//! - [`kilo`] — Kilo CLI 适配器。
 
 pub mod acp;
 pub mod claude;

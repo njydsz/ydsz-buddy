@@ -1,8 +1,8 @@
-//! OpenAI Codex provider adapter.
+//! OpenAI Codex Provider 适配器。
 //!
-//! Codex exposes an OpenAI-compatible chat completions API. This adapter
-//! targets the official `/v1/chat/completions` endpoint and therefore also
-//! works with any OpenAI-compatible base URL (useful for local gateways).
+//! Codex 暴露了 OpenAI 兼容的聊天补全 API。本适配器
+//! 目标为官方 `/v1/chat/completions` 端点，因此也
+//! 适用于任何 OpenAI 兼容的基础 URL（适用于本地网关）。
 
 use crate::common::{build_http_client, parse_json_response};
 use crate::config::HttpProviderConfig;
@@ -21,14 +21,14 @@ use std::sync::Arc;
 use tracing::{error, info};
 use uuid::Uuid;
 
-/// OpenAI chat message.
+/// OpenAI 聊天消息。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct CodexMessage {
     role: String,
     content: String,
 }
 
-/// OpenAI chat completions request.
+/// OpenAI 聊天补全请求。
 #[derive(Debug, Serialize)]
 struct CodexRequest {
     model: String,
@@ -37,45 +37,45 @@ struct CodexRequest {
     stream: bool,
 }
 
-/// OpenAI streaming delta.
+/// OpenAI 流式增量。
 #[derive(Debug, Deserialize)]
 struct CodexStreamDelta {
     content: Option<String>,
 }
 
-/// OpenAI streaming choice.
+/// OpenAI 流式选择。
 #[derive(Debug, Deserialize)]
 struct CodexStreamChoice {
     delta: CodexStreamDelta,
 }
 
-/// OpenAI streaming SSE event.
+/// OpenAI 流式 SSE 事件。
 #[derive(Debug, Deserialize)]
 struct CodexStreamEvent {
     choices: Vec<CodexStreamChoice>,
 }
 
-/// OpenAI non-streaming choice.
+/// OpenAI 非流式选择。
 #[derive(Debug, Deserialize)]
 struct CodexChoice {
     message: CodexMessage,
 }
 
-/// OpenAI non-streaming response.
+/// OpenAI 非流式响应。
 #[derive(Debug, Deserialize)]
 struct CodexResponse {
     choices: Vec<CodexChoice>,
     usage: Option<CodexUsage>,
 }
 
-/// OpenAI token usage.
+/// OpenAI token 用量。
 #[derive(Debug, Deserialize)]
 struct CodexUsage {
     prompt_tokens: u32,
     completion_tokens: u32,
 }
 
-/// Codex session state.
+/// Codex 会话状态。
 #[derive(Clone)]
 #[allow(dead_code)]
 struct CodexSession {
@@ -84,7 +84,7 @@ struct CodexSession {
     messages: Vec<CodexMessage>,
 }
 
-/// OpenAI Codex provider adapter.
+/// OpenAI Codex Provider 适配器。
 pub struct CodexAdapter {
     config: HttpProviderConfig,
     sessions: Arc<DashMap<String, CodexSession>>,
@@ -92,7 +92,7 @@ pub struct CodexAdapter {
 }
 
 impl CodexAdapter {
-    /// Create a new Codex adapter reading `OPENAI_API_KEY` from the environment.
+    /// 创建新的 Codex 适配器，从环境变量 `OPENAI_API_KEY` 读取。
     pub fn new() -> Self {
         let api_key = std::env::var("OPENAI_API_KEY").ok();
         let config = HttpProviderConfig::new("https://api.openai.com").with_api_key(
@@ -101,10 +101,10 @@ impl CodexAdapter {
         Self::with_config(config)
     }
 
-    /// Create a Codex adapter with explicit configuration.
+    /// 使用显式配置创建 Codex 适配器。
     pub fn with_config(config: HttpProviderConfig) -> Self {
         let client = build_http_client(config.timeout).unwrap_or_else(|e| {
-            error!(error = %e, "Failed to build HTTP client; falling back to default");
+            error!(error = %e, "构建 HTTP 客户端失败；回退到默认实现");
             reqwest::Client::new()
         });
         Self {
@@ -114,6 +114,7 @@ impl CodexAdapter {
         }
     }
 
+    /// 若适配器已配置 API 密钥则返回 true。
     fn is_configured(&self) -> bool {
         self.config
             .api_key
@@ -121,6 +122,7 @@ impl CodexAdapter {
             .is_some_and(|k| !k.is_empty())
     }
 
+    /// 获取已配置的 API 密钥。
     fn api_key(&self) -> Result<&str, ProviderAdapterError> {
         self.config
             .api_key
@@ -129,6 +131,7 @@ impl CodexAdapter {
             .ok_or(ProviderAdapterError::NotConfigured(ProviderName::Codex))
     }
 
+    /// 将消息追加到会话的对话历史。
     fn push_message(&self, session_id: &str, role: &str, content: &str) -> Result<()> {
         let mut session = self
             .sessions

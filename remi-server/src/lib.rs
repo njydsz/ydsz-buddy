@@ -1,12 +1,10 @@
-//! Remi Code server library.
+//! Remi Code 服务器库。
 //!
-//! This crate exposes:
+//! 本 crate 暴露以下内容：
 //!
-//! - [`routes`] — the full HTTP route surface (50+ endpoints).
-//! - [`AppStateAccess`] / [`ServerState`] — the state trait and concrete
-//!   wrapper used by every handler.
-//! - [`register_routes`] — single entry point to mount all routes on an
-//!   `axum::Router`.
+//! - [`routes`] — 完整 HTTP 路由表（50+ 端点）。
+//! - [`AppStateAccess`] / [`ServerState`] — 状态 trait 及每个处理器使用的具体包装器。
+//! - [`register_routes`] — 将所有路由挂载到 `axum::Router` 上的单一入口。
 
 pub mod routes;
 

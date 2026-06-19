@@ -1,4 +1,4 @@
-//! Orchestration schemas.
+//! 编排模式定义。
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -6,19 +6,19 @@ use uuid::Uuid;
 
 use crate::ThreadId;
 
-/// Thread state.
+/// 线程状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum ThreadState {
-    /// Thread is idle.
+    /// 线程空闲中。
     Idle,
-    /// Thread is processing.
+    /// 线程处理中。
     Processing,
-    /// Thread is waiting for user input.
+    /// 线程等待用户输入。
     WaitingForInput,
-    /// Thread has errored.
+    /// 线程发生错误。
     Errored,
-    /// Thread is completed.
+    /// 线程已完成。
     Completed,
 }
 
@@ -34,97 +34,97 @@ impl std::fmt::Display for ThreadState {
     }
 }
 
-/// Thread information.
+/// 线程信息。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Thread {
-    /// Thread ID.
+    /// 线程 ID。
     pub id: ThreadId,
-    /// Project ID.
+    /// 项目 ID。
     pub project_id: Uuid,
-    /// Thread title.
+    /// 线程标题。
     pub title: Option<String>,
-    /// Thread state.
+    /// 线程状态。
     pub state: ThreadState,
-    /// Created timestamp (ISO 8601).
+    /// 创建时间戳（ISO 8601 格式）。
     pub created_at: String,
-    /// Updated timestamp (ISO 8601).
+    /// 更新时间戳（ISO 8601 格式）。
     pub updated_at: String,
 }
 
-/// Message in a thread.
+/// 线程中的消息。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ThreadMessage {
-    /// Message ID.
+    /// 消息 ID。
     pub id: Uuid,
-    /// Thread ID.
+    /// 线程 ID。
     pub thread_id: ThreadId,
-    /// Message role.
+    /// 消息角色。
     pub role: MessageRole,
-    /// Message content.
+    /// 消息内容。
     pub content: String,
-    /// Created timestamp (ISO 8601).
+    /// 创建时间戳（ISO 8601 格式）。
     pub created_at: String,
 }
 
-/// Message role.
+/// 消息角色。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum MessageRole {
-    /// User message.
+    /// 用户消息。
     User,
-    /// Assistant message.
+    /// 助手消息。
     Assistant,
-    /// System message.
+    /// 系统消息。
     System,
 }
 
-/// Turn in a thread.
+/// 线程中的轮次。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ThreadTurn {
-    /// Turn ID.
+    /// 轮次 ID。
     pub id: Uuid,
-    /// Thread ID.
+    /// 线程 ID。
     pub thread_id: ThreadId,
-    /// Turn number.
+    /// 轮次编号。
     pub turn_number: u32,
-    /// Created timestamp (ISO 8601).
+    /// 创建时间戳（ISO 8601 格式）。
     pub created_at: String,
 }
 
-/// Orchestration event.
+/// 编排事件。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "_tag")]
 pub enum OrchestrationEvent {
-    /// Thread created.
+    /// 线程已创建。
     ThreadCreated {
         thread_id: ThreadId,
         project_id: Uuid,
         timestamp: String,
     },
-    /// Thread updated.
+    /// 线程已更新。
     ThreadUpdated {
         thread_id: ThreadId,
         timestamp: String,
     },
-    /// Thread deleted.
+    /// 线程已删除。
     ThreadDeleted {
         thread_id: ThreadId,
         timestamp: String,
     },
-    /// Message added.
+    /// 消息已添加。
     MessageAdded {
         message_id: Uuid,
         thread_id: ThreadId,
         role: MessageRole,
         timestamp: String,
     },
-    /// Turn started.
+    /// 轮次已开始。
     TurnStarted {
         turn_id: Uuid,
         thread_id: ThreadId,
         timestamp: String,
     },
-    /// Turn completed.
+    /// 轮次已完成。
     TurnCompleted {
         turn_id: Uuid,
         thread_id: ThreadId,
@@ -132,53 +132,53 @@ pub enum OrchestrationEvent {
     },
 }
 
-/// Input for sending a message to a thread.
+/// 向线程发送消息的输入参数。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ThreadSendMessageInput {
-    /// Thread ID.
+    /// 线程 ID。
     pub thread_id: ThreadId,
-    /// Message content.
+    /// 消息内容。
     pub content: String,
 }
 
-/// Output for sending a message to a thread.
+/// 向线程发送消息的输出。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ThreadSendMessageOutput {
-    /// User message.
+    /// 用户消息。
     pub user_message: ThreadMessage,
-    /// Assistant message (if provider produced one).
+    /// 助手消息（如提供者有响应）。
     pub assistant_message: Option<ThreadMessage>,
 }
 
-/// Orchestration command.
+/// 编排命令。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "_tag")]
 pub enum OrchestrationCommand {
-    /// Create a thread.
+    /// 创建线程。
     CreateThread {
         project_id: Uuid,
         title: Option<String>,
     },
-    /// Send a message.
+    /// 发送消息。
     SendMessage {
         thread_id: ThreadId,
         content: String,
     },
-    /// Delete a thread.
+    /// 删除线程。
     DeleteThread { thread_id: ThreadId },
 }
 
-/// Orchestration error.
+/// 编排错误类型。
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, thiserror::Error)]
 #[serde(tag = "_tag")]
 pub enum OrchestrationError {
-    /// Thread not found.
-    #[error("thread not found: {thread_id}")]
+    /// 线程未找到。
+    #[error("线程未找到: {thread_id}")]
     ThreadNotFound { thread_id: ThreadId },
-    /// Invalid state transition.
-    #[error("invalid state transition: {from} -> {to}")]
+    /// 无效的状态转换。
+    #[error("无效的状态转换: {from} -> {to}")]
     InvalidStateTransition { from: ThreadState, to: ThreadState },
-    /// Internal error.
-    #[error("internal error: {message}")]
+    /// 内部错误。
+    #[error("内部错误: {message}")]
     Internal { message: String },
 }

@@ -1,14 +1,12 @@
-//! HTTP route handlers for the Remi Code server.
+//! Remi Code 服务器的 HTTP 路由处理器。
 //!
-//! This module aggregates every HTTP route that the desktop client (and
-//! any external consumer) can call. The legacy `main.rs` has its own
-//! `*_handler` functions for backwards compatibility; this module exposes
-//! a single [`register_routes`] helper that wires up the complete surface
-//! (50+ endpoints) against the [`AppState`] shared by `main.rs`.
+//! 本模块聚合了桌面客户端（及任何外部消费者）可调用的所有 HTTP 路由。
+//! 旧版 `main.rs` 为向后兼容保留了自己的 `*_handler` 函数；本模块暴露
+//! 一个 [`register_routes`] 辅助函数，将完整路由表（50+ 端点）挂载到
+//! `main.rs` 共享的 [`AppState`] 上。
 //!
-//! All handlers return a uniform JSON envelope of the form
-//! `{"success": bool, "data"?: T, "error"?: String}` so the front-end can
-//! rely on a single error contract.
+//! 所有处理器返回统一的 JSON 信封格式
+//! `{"success": bool, "data"?: T, "error"?: String}`，前端可依赖单一的错误约定。
 
 use axum::{
     Json, Router,
@@ -23,12 +21,12 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::{error, info, warn};
 
-/// Helper to wrap a successful payload in the standard envelope.
+/// 将成功载荷包装在标准信封中。
 pub fn ok<T: serde::Serialize>(data: T) -> axum::response::Response {
     Json(serde_json::json!({ "success": true, "data": data })).into_response()
 }
 
-/// Helper to wrap an error message in the standard envelope.
+/// 将错误消息包装在标准信封中。
 pub fn err(status: StatusCode, message: impl Into<String>) -> axum::response::Response {
     (
         status,
@@ -40,7 +38,7 @@ pub fn err(status: StatusCode, message: impl Into<String>) -> axum::response::Re
         .into_response()
 }
 
-/// Extract bearer token from headers.
+/// 从请求头中提取 Bearer Token。
 pub fn extract_token(headers: &HeaderMap) -> Option<String> {
     headers
         .get("authorization")
@@ -54,54 +52,52 @@ pub fn extract_token(headers: &HeaderMap) -> Option<String> {
         })
 }
 
-// We need a small subset of `AppState` to avoid coupling this module to
-// `remi-server` directly. The caller is expected to provide a concrete
-// state type that implements these methods via the `AppStateAccess`
-// extension trait. The `register_routes!` macro in `main.rs` wires the
-// concrete fields in.
+// 我们需要 `AppState` 的一个小子集，以避免将此模块直接耦合到
+// `remi-server`。调用方应提供一个具体状态类型，通过
+// `AppStateAccess` 扩展 trait 实现这些方法。`main.rs` 中的
+// `register_routes!` 宏负责注入具体字段。
 
-/// Trait implemented by `AppState` to expose the services this module
-/// needs. Keeps the route definitions decoupled from the concrete state
-/// type, while still allowing `main.rs` to pass its `Arc<AppState>`.
+/// 由 `AppState` 实现的 trait，暴露本模块所需的服务。
+/// 保持路由定义与具体状态类型解耦，同时允许
+/// `main.rs` 传入其 `Arc<AppState>`。
 pub trait AppStateAccess: Send + Sync {
-    /// The shared database handle.
+    /// 共享数据库句柄。
     fn db(&self) -> &Arc<remi_persistence::Database>;
-    /// Workspace service.
+    /// 工作区服务。
     fn workspace(&self) -> &Arc<remi_workspace::WorkspaceService>;
-    /// Terminal manager.
+    /// 终端管理器。
     fn terminal_manager(&self) -> &Arc<remi_pty::TerminalManager>;
-    /// Provider registry.
+    /// Provider 注册表。
     fn provider_registry(&self) -> &Arc<remi_providers::ProviderRegistry>;
-    /// Auth service.
+    /// 认证服务。
     fn auth(&self) -> &Arc<remi_auth::AuthService>;
-    /// Orchestration engine.
+    /// 编排引擎。
     fn orchestration(&self) -> &Arc<remi_orchestration::OrchestrationEngine>;
-    /// WebSocket state.
+    /// WebSocket 状态。
     fn ws_state(&self) -> &Arc<remi_rpc::WsState>;
-    /// Server config.
+    /// 服务器配置。
     fn config(&self) -> &remi_core::ServerConfig;
 }
 
-/// Concrete state that aggregates all the services this module needs.
+/// 聚合本模块所需所有服务的具体状态。
 ///
-/// This wrapper is what the route handlers consume; `main.rs` can
-/// construct it directly from its `AppState`.
+/// 路由处理器消费此包装器；`main.rs` 可直接从其 `AppState` 构造。
 pub struct ServerState {
-    /// Database handle.
+    /// 数据库句柄。
     pub db: Arc<remi_persistence::Database>,
-    /// Workspace service.
+    /// 工作区服务。
     pub workspace: Arc<remi_workspace::WorkspaceService>,
-    /// Terminal manager.
+    /// 终端管理器。
     pub terminal_manager: Arc<remi_pty::TerminalManager>,
-    /// Provider registry.
+    /// Provider 注册表。
     pub provider_registry: Arc<remi_providers::ProviderRegistry>,
-    /// Auth service.
+    /// 认证服务。
     pub auth: Arc<remi_auth::AuthService>,
-    /// Orchestration engine.
+    /// 编排引擎。
     pub orchestration: Arc<remi_orchestration::OrchestrationEngine>,
-    /// WebSocket state.
+    /// WebSocket 状态。
     pub ws_state: Arc<remi_rpc::WsState>,
-    /// Server config.
+    /// 服务器配置。
     pub config: remi_core::ServerConfig,
 }
 
@@ -133,10 +129,10 @@ impl AppStateAccess for ServerState {
 }
 
 // ---------------------------------------------------------------------------
-// Health and meta endpoints
+// 健康检查与元信息端点
 // ---------------------------------------------------------------------------
 
-/// `GET /health` — full health payload with subsystem readiness.
+/// `GET /health` — 包含子系统就绪状态的完整健康检查载荷。
 pub async fn health() -> axum::response::Response {
     ok(serde_json::json!({
         "status": "ok",
@@ -149,7 +145,7 @@ pub async fn health() -> axum::response::Response {
     }))
 }
 
-/// `GET /api/version` — server version info.
+/// `GET /api/version` — 服务器版本信息。
 pub async fn version() -> axum::response::Response {
     ok(serde_json::json!({
         "version": env!("CARGO_PKG_VERSION"),
@@ -157,7 +153,7 @@ pub async fn version() -> axum::response::Response {
     }))
 }
 
-/// `GET /api/providers` — list providers and their health.
+/// `GET /api/providers` — 列出 provider 及其健康状态。
 pub async fn list_providers<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -169,7 +165,7 @@ pub async fn list_providers<S: AppStateAccess + 'static>(
     }))
 }
 
-/// `POST /api/providers/{name}/commands` — list slash commands.
+/// `POST /api/providers/{name}/commands` — 列出斜杠命令。
 pub async fn list_provider_commands<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(name): Path<String>,
@@ -206,10 +202,10 @@ pub async fn list_provider_commands<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Project endpoints
+// 项目端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/projects` — list all projects.
+/// `GET /api/projects` — 列出所有项目。
 pub async fn list_projects<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -221,7 +217,7 @@ pub async fn list_projects<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/projects` — create a new project.
+/// `POST /api/projects` — 创建新项目。
 pub async fn create_project<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::CreateProjectInput>,
@@ -237,7 +233,7 @@ pub async fn create_project<S: AppStateAccess + 'static>(
     }
 }
 
-/// `GET /api/projects/{id}` — fetch a single project.
+/// `GET /api/projects/{id}` — 获取单个项目。
 pub async fn get_project<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -251,7 +247,7 @@ pub async fn get_project<S: AppStateAccess + 'static>(
     }
 }
 
-/// `DELETE /api/projects/{id}` — soft-delete a project.
+/// `DELETE /api/projects/{id}` — 软删除项目。
 pub async fn delete_project<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -265,10 +261,10 @@ pub async fn delete_project<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Thread endpoints
+// 线程端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/projects/{id}/threads` — list threads for a project.
+/// `GET /api/projects/{id}/threads` — 列出项目下的线程。
 pub async fn list_threads<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -279,7 +275,7 @@ pub async fn list_threads<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/projects/{id}/threads` — create a thread.
+/// `POST /api/projects/{id}/threads` — 创建线程。
 pub async fn create_thread<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -306,7 +302,7 @@ pub struct ThreadCreateBody {
     pub title: Option<String>,
 }
 
-/// `GET /api/threads/{id}` — fetch a single thread.
+/// `GET /api/threads/{id}` — 获取单个线程。
 pub async fn get_thread<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -319,7 +315,7 @@ pub async fn get_thread<S: AppStateAccess + 'static>(
     }
 }
 
-/// `DELETE /api/threads/{id}` — delete a thread.
+/// `DELETE /api/threads/{id}` — 删除线程。
 pub async fn delete_thread<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -336,7 +332,7 @@ pub async fn delete_thread<S: AppStateAccess + 'static>(
     }
 }
 
-/// `GET /api/threads/{id}/messages` — list messages of a thread.
+/// `GET /api/threads/{id}/messages` — 列出线程的消息。
 pub async fn list_messages<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -350,7 +346,7 @@ pub async fn list_messages<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/threads/{id}/messages` — send a message and get the assistant reply.
+/// `POST /api/threads/{id}/messages` — 发送消息并获取助手回复。
 pub async fn send_message<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -376,7 +372,7 @@ pub struct MessageBody {
 }
 
 // ---------------------------------------------------------------------------
-// Filesystem endpoints
+// 文件系统端点
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Deserialize)]
@@ -392,7 +388,7 @@ pub struct BrowseQuery {
     pub limit: Option<usize>,
 }
 
-/// `GET /api/filesystem/browse` — browse a directory (paginated).
+/// `GET /api/filesystem/browse` — 浏览目录（分页）。
 pub async fn filesystem_browse<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Query(q): Query<BrowseQuery>,
@@ -407,7 +403,7 @@ pub async fn filesystem_browse<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/filesystem/read` — read a single file.
+/// `POST /api/filesystem/read` — 读取单个文件。
 pub async fn filesystem_read<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::ReadFileInput>,
@@ -418,7 +414,7 @@ pub async fn filesystem_read<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/filesystem/write` — write a single file.
+/// `POST /api/filesystem/write` — 写入单个文件。
 pub async fn filesystem_write<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::WriteFileInput>,
@@ -430,10 +426,10 @@ pub async fn filesystem_write<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Terminal endpoints
+// 终端端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/terminal/list` — list active terminal sessions.
+/// `GET /api/terminal/list` — 列出活跃的终端会话。
 pub async fn terminal_list<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -441,7 +437,7 @@ pub async fn terminal_list<S: AppStateAccess + 'static>(
     ok(serde_json::json!({ "sessions": sessions }))
 }
 
-/// `POST /api/terminal/create` — create a new terminal session.
+/// `POST /api/terminal/create` — 创建新的终端会话。
 pub async fn terminal_create<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::CreateTerminalInput>,
@@ -452,7 +448,7 @@ pub async fn terminal_create<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/terminal/{id}/write` — write input to a terminal.
+/// `POST /api/terminal/{id}/write` — 向终端写入输入。
 pub async fn terminal_write<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -464,7 +460,7 @@ pub async fn terminal_write<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/terminal/{id}/resize` — resize a PTY.
+/// `POST /api/terminal/{id}/resize` — 调整 PTY 大小。
 pub async fn terminal_resize<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -480,7 +476,7 @@ pub async fn terminal_resize<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/terminal/{id}/close` — close a terminal session.
+/// `POST /api/terminal/{id}/close` — 关闭终端会话。
 pub async fn terminal_close<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<uuid::Uuid>,
@@ -492,10 +488,10 @@ pub async fn terminal_close<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Workspace worktree endpoints
+// 工作区 worktree 端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/workspace/worktrees` — list managed worktrees.
+/// `GET /api/workspace/worktrees` — 列出托管的 worktree。
 pub async fn worktree_list<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -505,7 +501,7 @@ pub async fn worktree_list<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/workspace/worktrees` — create a managed worktree.
+/// `POST /api/workspace/worktrees` — 创建托管的 worktree。
 pub async fn worktree_create<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<WorktreeCreateBody>,
@@ -526,7 +522,7 @@ pub struct WorktreeCreateBody {
     pub branch: String,
 }
 
-/// `DELETE /api/workspace/worktrees/{id}` — remove a managed worktree.
+/// `DELETE /api/workspace/worktrees/{id}` — 移除托管的 worktree。
 pub async fn worktree_remove<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<String>,
@@ -573,7 +569,7 @@ pub async fn auth_verify<S: AppStateAccess + 'static>(
     }
 }
 
-/// `GET /api/auth/session` — current session state.
+/// `GET /api/auth/session` — 当前会话状态。
 pub async fn auth_session<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -590,7 +586,7 @@ pub async fn auth_session<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/pairing-token` — create a pairing credential.
+/// `POST /api/auth/pairing-token` — 创建配对凭证。
 pub async fn auth_pairing<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -609,7 +605,7 @@ pub async fn auth_pairing<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/ws-token` — issue a WebSocket token.
+/// `POST /api/auth/ws-token` — 签发 WebSocket 令牌。
 pub async fn auth_ws_token<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -624,7 +620,7 @@ pub async fn auth_ws_token<S: AppStateAccess + 'static>(
     }
 }
 
-/// `GET /api/auth/pairing-links` — list active pairing links.
+/// `GET /api/auth/pairing-links` — 列出活跃的配对链接。
 pub async fn auth_pairing_links<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -642,7 +638,7 @@ pub async fn auth_pairing_links<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/pairing-links/revoke` — revoke a pairing link.
+/// `POST /api/auth/pairing-links/revoke` — 撤销配对链接。
 pub async fn auth_revoke_pairing<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -661,7 +657,7 @@ pub async fn auth_revoke_pairing<S: AppStateAccess + 'static>(
     }
 }
 
-/// `GET /api/auth/clients` — list client sessions.
+/// `GET /api/auth/clients` — 列出客户端会话。
 pub async fn auth_clients<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -679,7 +675,7 @@ pub async fn auth_clients<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/clients/revoke` — revoke a single client session.
+/// `POST /api/auth/clients/revoke` — 撤销单个客户端会话。
 pub async fn auth_revoke_client<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -698,8 +694,8 @@ pub async fn auth_revoke_client<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/clients/revoke-others` — revoke every client session
-/// other than the current one.
+/// `POST /api/auth/clients/revoke-others` — 撤销除当前会话外的
+/// 所有客户端会话。
 pub async fn auth_revoke_other_clients<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     headers: HeaderMap,
@@ -723,10 +719,10 @@ pub async fn auth_revoke_other_clients<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Settings endpoints
+// 设置端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/settings` — list all settings.
+/// `GET /api/settings` — 列出所有设置。
 pub async fn settings_list<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -741,7 +737,7 @@ pub async fn settings_list<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/settings` — bulk set settings.
+/// `POST /api/settings` — 批量设置。
 pub async fn settings_set<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<HashMap<String, String>>,
@@ -757,10 +753,10 @@ pub async fn settings_set<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Attachment endpoints
+// 附件端点
 // ---------------------------------------------------------------------------
 
-/// `POST /api/attachments/upload` — upload one or more files.
+/// `POST /api/attachments/upload` — 上传一个或多个文件。
 pub async fn attachments_upload<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     mut multipart: Multipart,
@@ -794,7 +790,7 @@ pub async fn attachments_upload<S: AppStateAccess + 'static>(
     ok(attachments)
 }
 
-/// `GET /api/attachments/{id}` — download a single attachment.
+/// `GET /api/attachments/{id}` — 下载单个附件。
 pub async fn attachments_get<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(id): Path<String>,
@@ -811,10 +807,10 @@ pub async fn attachments_get<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Secret store endpoints
+// 密钥存储端点
 // ---------------------------------------------------------------------------
 
-/// `GET /api/secrets` — list secret names (values are never returned).
+/// `GET /api/secrets` — 列出密钥名称（不返回值）。
 pub async fn secrets_list<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -826,7 +822,7 @@ pub async fn secrets_list<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/secrets` — set a secret value.
+/// `POST /api/secrets` — 设置密钥值。
 pub async fn secrets_set<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<SecretBody>,
@@ -845,7 +841,7 @@ pub struct SecretBody {
     pub value: String,
 }
 
-/// `DELETE /api/secrets/{name}` — delete a secret.
+/// `DELETE /api/secrets/{name}` — 删除密钥。
 pub async fn secrets_delete<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Path(name): Path<String>,
@@ -859,10 +855,10 @@ pub async fn secrets_delete<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Git endpoints
+// Git 端点
 // ---------------------------------------------------------------------------
 
-/// `POST /api/git/status` — get the working tree status of a path.
+/// `POST /api/git/status` — 获取路径的工作树状态。
 pub async fn git_status<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<GitPathBody>,
@@ -874,7 +870,7 @@ pub async fn git_status<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/git/checkout` — checkout a branch in a repo.
+/// `POST /api/git/checkout` — 检出仓库中的分支。
 pub async fn git_checkout<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<GitCheckoutBody>,
@@ -886,7 +882,7 @@ pub async fn git_checkout<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/git/branches` — list branches.
+/// `POST /api/git/branches` — 列出分支。
 pub async fn git_branches<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<GitPathBody>,
@@ -910,24 +906,24 @@ pub struct GitCheckoutBody {
 }
 
 // ---------------------------------------------------------------------------
-// Route registration
+// 路由注册
 // ---------------------------------------------------------------------------
 
-/// Register the complete HTTP surface on the supplied [`Router`].
+/// 在提供的 [`Router`] 上注册完整的 HTTP 路由表。
 pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
     info!("Registering HTTP routes");
 
     let r = Router::new()
-        // Health and meta
+        // 健康检查与元信息
         .route("/health", get(health))
         .route("/api/version", get(version))
-        // Providers
+        // Provider
         .route("/api/providers", get(list_providers::<S>))
         .route(
             "/api/providers/:name/commands",
             get(list_provider_commands::<S>),
         )
-        // Projects
+        // 项目
         .route("/api/projects", get(list_projects::<S>))
         .route("/api/projects", post(create_project::<S>))
         .route("/api/projects/:id", get(get_project::<S>))
@@ -936,16 +932,16 @@ pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
             "/api/projects/:id/threads",
             get(list_threads::<S>).post(create_thread::<S>),
         )
-        // Threads
+        // 线程
         .route("/api/threads/:id", get(get_thread::<S>))
         .route("/api/threads/:id", delete(delete_thread::<S>))
         .route("/api/threads/:id/messages", get(list_messages::<S>))
         .route("/api/threads/:id/messages", post(send_message::<S>))
-        // Filesystem
+        // 文件系统
         .route("/api/filesystem/browse", get(filesystem_browse::<S>))
         .route("/api/filesystem/read", post(filesystem_read::<S>))
         .route("/api/filesystem/write", post(filesystem_write::<S>))
-        // Terminal
+        // 终端
         .route("/api/terminal/list", get(terminal_list::<S>))
         .route("/api/terminal/create", post(terminal_create::<S>))
         .route(
@@ -960,7 +956,7 @@ pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
             "/api/terminal/:id/close",
             post(terminal_close::<S>),
         )
-        // Worktrees
+        // Worktree
         .route("/api/workspace/worktrees", get(worktree_list::<S>))
         .route("/api/workspace/worktrees", post(worktree_create::<S>))
         .route(
@@ -971,7 +967,7 @@ pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
             "/api/workspace/worktrees/:id",
             delete(worktree_remove::<S>),
         )
-        // Auth
+        // 认证
         .route("/api/auth/bootstrap", post(auth_bootstrap::<S>))
         .route("/api/auth/verify", post(auth_verify::<S>))
         .route("/api/auth/session", get(auth_session::<S>))
@@ -991,13 +987,13 @@ pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
             "/api/auth/clients/revoke-others",
             post(auth_revoke_other_clients::<S>),
         )
-        // Settings
+        // 设置
         .route("/api/settings", get(settings_list::<S>))
         .route("/api/settings", post(settings_set::<S>))
-        // Attachments
+        // 附件
         .route("/api/attachments/upload", post(attachments_upload::<S>))
         .route("/api/attachments/:id", get(attachments_get::<S>))
-        // Secrets
+        // 密钥
         .route("/api/secrets", get(secrets_list::<S>))
         .route("/api/secrets", post(secrets_set::<S>))
         .route("/api/secrets/:name", delete(secrets_delete::<S>))
@@ -1009,10 +1005,10 @@ pub fn register_routes<S: AppStateAccess + 'static>(state: Arc<S>) -> Router {
     r.with_state(state)
 }
 
-/// Count of registered HTTP routes (for diagnostics and tests).
+/// 已注册的 HTTP 路由数量（用于诊断和测试）。
 pub fn route_count() -> usize {
-    // Updated manually when routes are added; used by the integration
-    // smoke test to assert we have a reasonable surface.
+    // 添加路由时需手动更新；集成冒烟测试用此值
+    // 断言路由表规模是否合理。
     53
 }
 

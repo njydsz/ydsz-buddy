@@ -1,34 +1,34 @@
-//! Settings repository.
+//! 设置仓库。
 
 use async_trait::async_trait;
 use chrono::Utc;
 use remi_core::{Error, Result};
 use sqlx::SqlitePool;
 
-/// Settings repository trait.
+/// 设置仓库 trait。
 #[async_trait]
 pub trait SettingsRepositoryTrait: Send + Sync {
-    /// Get a setting value.
+    /// 获取设置值。
     async fn get(&self, key: &str) -> Result<Option<String>>;
 
-    /// Set a setting value.
+    /// 设置值。
     async fn set(&self, key: &str, value: &str) -> Result<()>;
 
-    /// Delete a setting.
+    /// 删除设置。
     async fn delete(&self, key: &str) -> Result<()>;
 
-    /// List all settings.
+    /// 列出所有设置。
     async fn list(&self) -> Result<Vec<(String, String)>>;
 }
 
-/// Settings repository Implementation.
+/// 设置仓库实现。
 #[derive(Clone)]
 pub struct SettingsRepository {
     pool: SqlitePool,
 }
 
 impl SettingsRepository {
-    /// Create a new settings repository.
+    /// 创建设置仓库。
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }

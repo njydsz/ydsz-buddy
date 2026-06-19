@@ -1,8 +1,7 @@
-//! Provider handoff logic.
+//! Provider 会话切换逻辑。
 //!
-//! The handoff layer is responsible for routing a user turn to an AI
-//! provider, managing provider sessions per thread, and returning the
-//! assistant response.
+//! 切换层负责将用户轮次路由到 AI Provider，管理每个会话的
+//! Provider 会话，并返回助手响应。
 
 use remi_contracts::{ModelId, ThreadId};
 use remi_core::{Error, Result};
@@ -12,45 +11,45 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, warn};
 
-/// Maps thread IDs to provider session IDs.
+/// 将会话 ID 映射到 Provider 会话 ID。
 #[derive(Default)]
 pub struct ProviderSessionMap {
     sessions: Mutex<HashMap<(ThreadId, String), String>>,
 }
 
 impl ProviderSessionMap {
-    /// Create a new empty session map.
+    /// 创建一个新的空会话映射。
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Get the session ID for a thread/provider pair, if one exists.
+    /// 获取指定会话/Provider 对的会话 ID（如存在）。
     pub async fn get(&self, thread_id: ThreadId, provider: &str) -> Option<String> {
         let sessions = self.sessions.lock().await;
         sessions.get(&(thread_id, provider.to_string())).cloned()
     }
 
-    /// Set the session ID for a thread/provider pair.
+    /// 设置指定会话/Provider 对的会话 ID。
     pub async fn set(&self, thread_id: ThreadId, provider: String, session_id: String) {
         let mut sessions = self.sessions.lock().await;
         sessions.insert((thread_id, provider), session_id);
     }
 
-    /// Remove all sessions for a thread.
+    /// 移除某个会话的所有 Provider 会话。
     pub async fn remove_thread(&self, thread_id: ThreadId) {
         let mut sessions = self.sessions.lock().await;
         sessions.retain(|(tid, _), _| *tid != thread_id);
     }
 }
 
-/// Handoff service that routes turns to providers.
+/// 将轮次路由到 Provider 的切换服务。
 pub struct ProviderHandoff {
     registry: Arc<ProviderRegistry>,
     sessions: Arc<ProviderSessionMap>,
 }
 
 impl ProviderHandoff {
-    /// Create a new provider handoff service.
+    /// 创建一个新的 Provider 切换服务。
     pub fn new(registry: Arc<ProviderRegistry>) -> Self {
         Self {
             registry,
@@ -58,18 +57,18 @@ impl ProviderHandoff {
         }
     }
 
-    /// Route a user message to a provider and return the assistant text.
+    /// 将用户消息路由到 Provider 并返回助手文本。
     pub async fn route(&self, thread_id: ThreadId, content: &str) -> Result<String> {
         let providers = self.registry.list();
         let provider_info = providers
             .into_iter()
             .find(|p| p.available)
-            .ok_or_else(|| Error::Provider("No AI provider is available. Please configure an API key.".to_string()))?;
+            .ok_or_else(|| Error::Provider("没有可用的 AI 服务。请配置 API 密钥。".to_string()))?;
 
         let adapter = self
             .registry
             .get(&provider_info.name)
-            .ok_or_else(|| Error::Provider(format!("Provider not found: {}", provider_info.name)))?;
+            .ok_or_else(|| Error::Provider(format!("Provider 不存在: {}", provider_info.name)))?;
 
         let provider_name = provider_info.name.to_string();
         let session_id = match self.sessions.get(thread_id, &provider_name).await {
@@ -82,10 +81,10 @@ impl ProviderHandoff {
                     .unwrap_or_else(|| ModelId::new("claude-3-5-sonnet-20241022"));
 
                 let new_session_id = adapter.start_session(&default_model).await.map_err(|e| {
-                    Error::Provider(format!("Failed to start provider session: {e}"))
+                    Error::Provider(format!("启动 Provider 会话失败: {e}"))
                 })?;
 
-                info!(thread_id = %thread_id, provider = %provider_name, session_id = %new_session_id, "Started provider session");
+                info!(thread_id = %thread_id, provider = %provider_name, session_id = %new_session_id, "已启动 Provider 会话");
                 self.sessions
                     .set(thread_id, provider_name.clone(), new_session_id.clone())
                     .await;
@@ -96,22 +95,22 @@ impl ProviderHandoff {
         let response = adapter
             .send_message(&session_id, content)
             .await
-            .map_err(|e| Error::Provider(format!("Provider request failed: {e}")))?;
+            .map_err(|e| Error::Provider(format!("Provider 请求失败: {e}")))?;
 
         let response_text = response
             .get("response")
             .and_then(|r| r.as_str())
-            .unwrap_or("No response from provider")
+            .unwrap_or("Provider 未返回响应")
             .to_string();
 
-        if response_text == "No response from provider" {
-            warn!(thread_id = %thread_id, provider = %provider_name, "Provider returned empty response");
+        if response_text == "Provider 未返回响应" {
+            warn!(thread_id = %thread_id, provider = %provider_name, "Provider 返回了空响应");
         }
 
         Ok(response_text)
     }
 
-    /// Drop provider sessions for a thread.
+    /// 清除某个会话的 Provider 会话。
     pub async fn forget_thread(&self, thread_id: ThreadId) {
         self.sessions.remove_thread(thread_id).await;
     }
@@ -152,7 +151,7 @@ mod tests {
         let handoff = ProviderHandoff::new(registry);
         let thread_id = ThreadId::new();
 
-        // Claude without API key is unavailable, so handoff should fail.
+        // 未配置 API 密钥的 Claude 不可用，因此切换应失败。
         let result = handoff.route(thread_id, "Hello").await;
         assert!(result.is_err());
     }

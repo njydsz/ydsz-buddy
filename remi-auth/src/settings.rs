@@ -33,7 +33,7 @@ impl SettingsManager {
         .bind(key)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to get setting: {}", e)))?;
+        .map_err(|e| Error::Database(format!("获取设置失败: {}", e)))?;
 
         Ok(row.map(|(v,)| v))
     }
@@ -57,7 +57,7 @@ impl SettingsManager {
         .bind(&now)
         .execute(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to set setting: {}", e)))?;
+        .map_err(|e| Error::Database(format!("设置值失败: {}", e)))?;
 
         Ok(())
     }
@@ -68,7 +68,7 @@ impl SettingsManager {
             .bind(key)
             .execute(&self.pool)
             .await
-            .map_err(|e| Error::Database(format!("Failed to delete setting: {}", e)))?;
+            .map_err(|e| Error::Database(format!("删除设置失败: {}", e)))?;
 
         Ok(())
     }
@@ -80,15 +80,15 @@ impl SettingsManager {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| Error::Database(format!("Failed to list settings: {}", e)))?;
+        .map_err(|e| Error::Database(format!("列出设置失败: {}", e)))?;
 
         let mut settings = Vec::new();
         for (key, value, created_at, updated_at) in rows {
             let created = DateTime::parse_from_rfc3339(&created_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
             let updated = DateTime::parse_from_rfc3339(&updated_at)
-                .map_err(|e| Error::Internal(format!("Invalid timestamp: {}", e)))?
+                .map_err(|e| Error::Internal(format!("时间戳格式无效: {}", e)))?
                 .with_timezone(&Utc);
 
             settings.push(Setting {
@@ -107,7 +107,7 @@ impl SettingsManager {
         match self.get(key).await? {
             Some(value) => {
                 let parsed = serde_json::from_str(&value)
-                    .map_err(|e| Error::Internal(format!("Failed to parse JSON setting: {}", e)))?;
+                    .map_err(|e| Error::Internal(format!("解析JSON设置失败: {}", e)))?;
                 Ok(Some(parsed))
             }
             None => Ok(None),
@@ -117,7 +117,7 @@ impl SettingsManager {
     /// 以 JSON 格式设置值。
     pub async fn set_json<T: Serialize>(&self, key: &str, value: &T) -> Result<()> {
         let json = serde_json::to_string(value)
-            .map_err(|e| Error::Internal(format!("Failed to serialize setting: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("序列化设置失败: {}", e)))?;
         self.set(key, &json).await
     }
 
@@ -141,7 +141,7 @@ impl SettingsManager {
         let rows = q
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| Error::Database(format!("Failed to get settings: {}", e)))?;
+            .map_err(|e| Error::Database(format!("批量获取设置失败: {}", e)))?;
 
         Ok(rows)
     }
@@ -156,44 +156,44 @@ mod tests {
     #[tokio::test]
     async fn test_settings_manager() {
         let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        std::fs::create_dir_all(&temp_dir).expect("创建临时目录失败");
         let mut config = ServerConfig::default();
         config.db_path = temp_dir.join("test.db");
-        let db = Database::connect(&config).await.expect("Failed to connect");
-        db.run_migrations().await.expect("Failed to migrate");
+        let db = Database::connect(&config).await.expect("数据库连接失败");
+        db.run_migrations().await.expect("数据库迁移失败");
 
         let manager = SettingsManager::new(db.pool().clone());
 
-        // Set setting
-        manager.set("test_key", "test_value").await.expect("Failed to set");
+        // 设置值
+        manager.set("test_key", "test_value").await.expect("设置失败");
 
-        // Get setting
-        let value = manager.get("test_key").await.expect("Failed to get").expect("Setting not found");
+        // 获取值
+        let value = manager.get("test_key").await.expect("获取失败").expect("设置未找到");
         assert_eq!(value, "test_value");
 
-        // Update setting
-        manager.set("test_key", "updated_value").await.expect("Failed to update");
-        let value = manager.get("test_key").await.expect("Failed to get").expect("Setting not found");
+        // 更新值
+        manager.set("test_key", "updated_value").await.expect("更新失败");
+        let value = manager.get("test_key").await.expect("获取失败").expect("设置未找到");
         assert_eq!(value, "updated_value");
 
-        // List settings
-        let settings = manager.list().await.expect("Failed to list");
+        // 列出所有设置
+        let settings = manager.list().await.expect("列出设置失败");
         assert!(!settings.is_empty());
 
-        // Delete setting
-        manager.delete("test_key").await.expect("Failed to delete");
-        let value = manager.get("test_key").await.expect("Failed to get");
+        // 删除设置
+        manager.delete("test_key").await.expect("删除失败");
+        let value = manager.get("test_key").await.expect("获取失败");
         assert!(value.is_none());
     }
 
     #[tokio::test]
     async fn test_json_settings() {
         let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        std::fs::create_dir_all(&temp_dir).expect("创建临时目录失败");
         let mut config = ServerConfig::default();
         config.db_path = temp_dir.join("test.db");
-        let db = Database::connect(&config).await.expect("Failed to connect");
-        db.run_migrations().await.expect("Failed to migrate");
+        let db = Database::connect(&config).await.expect("数据库连接失败");
+        db.run_migrations().await.expect("数据库迁移失败");
 
         let manager = SettingsManager::new(db.pool().clone());
 
@@ -208,11 +208,11 @@ mod tests {
             count: 42,
         };
 
-        // Set JSON setting
-        manager.set_json("test_config", &config).await.expect("Failed to set JSON");
+        // 设置JSON配置
+        manager.set_json("test_config", &config).await.expect("设置JSON失败");
 
-        // Get JSON setting
-        let retrieved: TestConfig = manager.get_json("test_config").await.expect("Failed to get JSON").expect("Setting not found");
+        // 获取JSON配置
+        let retrieved: TestConfig = manager.get_json("test_config").await.expect("获取JSON失败").expect("设置未找到");
         assert_eq!(retrieved, config);
     }
 }

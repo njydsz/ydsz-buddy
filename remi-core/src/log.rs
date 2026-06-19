@@ -1,8 +1,7 @@
-//! Logging and tracing initialization.
+//! 日志和追踪初始化
 //!
-//! This module wires up `tracing` with `tracing-subscriber` based on the
-//! [`LogConfig`](crate::LogConfig) settings. The server binary uses this
-//! during startup so all crates emit consistent log output.
+//! 本模块根据 [`LogConfig`](crate::LogConfig) 设置将 `tracing` 与 `tracing-subscriber` 连接。
+//! 服务器二进制文件在启动时使用此模块，以便所有 crate 输出一致的日志格式。
 
 use crate::config::LogConfig;
 use crate::config::LogFormat;
@@ -10,11 +9,10 @@ use std::io::IsTerminal;
 use std::path::Path;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-/// Initialise the global tracing subscriber.
+/// 初始化全局追踪订阅器
 ///
-/// This must be called at most once per process. Subsequent calls are
-/// no-ops so embedded test harnesses don't crash when the binary already
-/// initialised logging.
+/// 每个进程最多调用一次。后续调用将是空操作，
+/// 这样当二进制文件已经初始化日志时，嵌入式测试工具不会崩溃。
 pub fn init(config: &LogConfig) -> anyhow::Result<()> {
     static INIT: std::sync::OnceLock<()> = std::sync::OnceLock::new();
     let mut initialised = false;
@@ -67,7 +65,7 @@ pub fn init(config: &LogConfig) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Construct a [`LogConfig`] from a level string and optional file path.
+/// 从级别字符串和可选文件路径构造 [`LogConfig`]
 pub fn config_from_env(level: Option<&str>, file: Option<&Path>) -> LogConfig {
     let level = level
         .map(|s| s.to_string())
@@ -85,6 +83,7 @@ pub fn config_from_env(level: Option<&str>, file: Option<&Path>) -> LogConfig {
     }
 }
 
+/// 打开日志文件
 fn open_log_file(path: &Path) -> anyhow::Result<std::fs::File> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
