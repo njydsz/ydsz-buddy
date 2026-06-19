@@ -38,7 +38,7 @@ use remi_diff_apply::DiffApplyEngine;
 use remi_orchestration::receipts::{ReceiptKind, RuntimeReceiptBus, SharedReceiptBus};
 use remi_persistence::Database;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Instant;
 use tracing::{debug, error, info, warn};

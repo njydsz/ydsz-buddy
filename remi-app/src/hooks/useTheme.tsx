@@ -1,48 +1,83 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { nativeApi } from "@/lib/nativeApi";
 import { useAppStore } from "@/store";
 
-type Theme = "light" | "dark";
+type ResolvedTheme = "light" | "dark";
+export type ThemePreference = "light" | "dark" | "system";
 
 interface ThemeContextValue {
-  theme: Theme;
+  /** The effective, resolved theme (no "system" — always light or dark). */
+  theme: ResolvedTheme;
+  /** Toggle between light and dark. */
   toggle: () => void;
-  set: (next: Theme) => void;
+  /** Set a concrete theme; the caller resolves "system" before calling. */
+  set: (next: ResolvedTheme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function detectInitialTheme(): Theme {
+function detectSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "dark";
-  const stored = window.localStorage.getItem("remi:theme");
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
+function resolvePreference(pref: ThemePreference): ResolvedTheme {
+  if (pref === "light" || pref === "dark") return pref;
+  return detectSystemTheme();
+}
+
+/**
+ * Reads/writes the user theme. The store stores the *preference*
+ * (which may be "system"); the context exposes the *resolved* theme
+ * (always light or dark) so consumers don't need to re-derive it.
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const setStoreTheme = useAppStore((s) => s.setTheme);
   const stored = useAppStore((s) => s.theme);
-  const initial = stored === "light" || stored === "dark" ? stored : detectInitialTheme();
-  const [theme, setTheme] = useState<Theme>(initial);
+
+  // Track the system theme so "system" can react to OS changes.
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() =>
+    detectSystemTheme(),
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => setSystemTheme(mql.matches ? "dark" : "light");
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  const resolved: ResolvedTheme =
+    stored === "light" || stored === "dark" ? stored : systemTheme;
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle("light", theme === "light");
-    root.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem("remi:theme", theme);
-    setStoreTheme(theme);
+    root.classList.toggle("light", resolved === "light");
+    root.classList.toggle("dark", resolved === "dark");
+    window.localStorage.setItem("remi:theme", resolved);
     if (nativeApi) {
-      void nativeApi.setWindowTheme({ theme }).catch(() => undefined);
+      void nativeApi
+        .setWindowTheme({ theme: resolved })
+        .catch(() => undefined);
     }
-  }, [theme, setStoreTheme]);
+  }, [resolved]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
-      theme,
-      set: setTheme,
-      toggle: () => setTheme((prev) => (prev === "dark" ? "light" : "dark")),
+      theme: resolved,
+      set: (next) => setStoreTheme(next),
+      toggle: () => setStoreTheme(resolved === "dark" ? "light" : "dark"),
     }),
-    [theme],
+    [resolved, setStoreTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -55,3 +90,5 @@ export function useTheme(): ThemeContextValue {
   }
   return ctx;
 }
+
+export { resolvePreference };

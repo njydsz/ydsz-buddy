@@ -16,6 +16,7 @@
 pub mod decider;
 pub mod event_store;
 pub mod handoff;
+pub mod integrations;
 pub mod projector;
 pub mod reactors;
 pub mod services;
@@ -23,6 +24,12 @@ pub mod services;
 pub use decider::{check_invariants, decide, event_belongs_to_thread, event_thread_id, fold_thread};
 pub use event_store::{EventStore, SqliteEventStore};
 pub use handoff::ProviderHandoff;
+pub use integrations::{
+    GitHubCli, GitHubIssue, GitHubPullRequest, GitHubRepo, ImportSource, ImportStats,
+    ImportedMessage, ImportedThread, ReadinessCheck, ReadinessReport, ReadinessStatus,
+    ServerReadiness, TelemetryClient, TelemetryEvent, TelemetryLevel, ThreadImporter,
+    VoiceProvider, VoiceService, VoiceState, VoiceTranscription,
+};
 pub use projector::{ApprovalRecord, CheckpointRecord, ReadModel};
 pub use reactors::{
     ApprovalReactor, CheckpointReactor, GitReactor, MetricsReactor, Metrics, NotificationReactor,
@@ -33,7 +40,7 @@ pub use receipts::{ReceiptEmitter, ReceiptKind, RuntimeReceipt, RuntimeReceiptBu
 pub use services::{
     Checkpoint, CheckpointService, ConversationContext, ConversationService, DiffService,
     DiffSummary, MessageService, Plugin, PluginKind, PluginResult, PluginService,
-    ServiceBundle, VoiceService, VoiceState,
+    ServiceBundle, VoiceService as LegacyVoiceService, VoiceState as LegacyVoiceState,
 };
 
 use remi_contracts::{

@@ -13,7 +13,7 @@ use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{Stream, StreamExt};
 use remi_contracts::{
-    ModelId, ProviderHealth, ProviderInfo, ProviderListCommandsInput,
+    ModelId, ProviderHealth, ProviderHealthStatus, ProviderInfo, ProviderListCommandsInput,
     ProviderListCommandsOutput, ProviderName,
 };
 use remi_core::Result;

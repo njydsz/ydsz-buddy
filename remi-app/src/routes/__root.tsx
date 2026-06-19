@@ -9,6 +9,7 @@ import { useTransportState } from "@/hooks/useTransport";
 import { useLanguage } from "@/i18n";
 import { LogPanel } from "@/components/LogPanel";
 import { TransportStatusBanner } from "@/components/TransportStatusBanner";
+import { Toaster } from "@/components/Toaster";
 import { log } from "@/lib/logger";
 
 export function RootRouteView() {
@@ -53,6 +54,7 @@ export function RootRouteView() {
       <EventRouter />
       <Outlet />
       <LogPanel />
+      <Toaster />
       <div className="pointer-events-none fixed bottom-2 right-2 z-30 text-[10px] text-muted-foreground/40">
         <span className="pointer-events-auto">
           <select

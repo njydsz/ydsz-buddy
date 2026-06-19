@@ -1,4 +1,4 @@
-import { useToasts, type Toast } from "@/lib/toast";
+import { useToasts, useToastStore, type Toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
@@ -46,6 +46,7 @@ const ICON: Record<Toast["variant"], string> = {
  */
 export function Toaster() {
   const toasts = useToasts();
+  const dismiss = useToastStore((s) => s.dismiss);
   const sorted = useMemo(
     () => toasts.slice().sort((a, b) => b.createdAt - a.createdAt),
     [toasts],
@@ -58,13 +59,19 @@ export function Toaster() {
       aria-label="Notifications"
     >
       {sorted.map((toast) => (
-        <ToastCard key={toast.id} toast={toast} />
+        <ToastCard key={toast.id} toast={toast} onDismiss={dismiss} />
       ))}
     </div>
   );
 }
 
-function ToastCard({ toast }: { toast: Toast }) {
+function ToastCard({
+  toast,
+  onDismiss,
+}: {
+  toast: Toast;
+  onDismiss: (id: string) => void;
+}) {
   const styles = VARIANT_STYLES[toast.variant];
   return (
     <div
@@ -114,7 +121,7 @@ function ToastCard({ toast }: { toast: Toast }) {
         </div>
         <button
           className="ml-1 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => useToastsDismiss(toast.id)}
+          onClick={() => onDismiss(toast.id)}
           aria-label="Dismiss notification"
         >
           ×
@@ -122,9 +129,4 @@ function ToastCard({ toast }: { toast: Toast }) {
       </div>
     </div>
   );
-}
-
-import { useToastStore } from "@/lib/toast";
-function useToastsDismiss(id: string) {
-  return useToastStore.getState().dismiss(id);
 }

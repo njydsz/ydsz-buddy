@@ -43,7 +43,7 @@ pub async fn handle_ws_connection(ws: WebSocket, rpc_state: Arc<RpcState>) -> Re
     let mut notification_rx = rpc_state.ws_state.notification_tx.subscribe();
     let (response_tx, mut response_rx) = mpsc::channel::<String>(100);
 
-    // Spawn task to forward notifications and responses to client
+    // 生成任务以将通知和响应转发给客户端
     let sender_task = tokio::spawn(async move {
         loop {
             tokio::select! {
@@ -62,7 +62,7 @@ pub async fn handle_ws_connection(ws: WebSocket, rpc_state: Arc<RpcState>) -> Re
         }
     });
 
-    // Handle incoming messages
+    // 处理传入的消息
     while let Some(Ok(msg)) = receiver.next().await {
         match msg {
             Message::Text(text) => {
@@ -88,12 +88,12 @@ async fn handle_rpc_request(text: &str, state: &Arc<RpcState>) -> String {
     let request: JsonRpcRequest = match serde_json::from_str(text) {
         Ok(req) => req,
         Err(e) => {
-            error!("Failed to parse RPC request: {}", e);
+            error!("解析 RPC 请求失败: {}", e);
             return String::new();
         }
     };
 
-    info!("Received RPC request: {}", request.method);
+    info!("收到 RPC 请求: {}", request.method);
 
     let response = match handler::handle_method(&request.method, request.params, state).await {
         Ok(result) => JsonRpcResponse {

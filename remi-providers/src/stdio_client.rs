@@ -50,6 +50,31 @@ impl StdioJsonRpcClient {
         }
     }
 
+    /// 创建一个用于测试的"假"客户端。
+    ///
+    /// 该客户端没有真实的子进程，调用 `request` 时会返回
+    /// `Transport` 错误。可用于单元测试中验证高层 API
+    /// 的错误传播路径。
+    #[cfg(test)]
+    pub fn new_fake() -> Self {
+        use std::process::{Command, Stdio};
+        // 用一个会立即退出的进程（`remi_fake_subprocess_xyz` 一定不存在）作为占位。
+        let child = Command::new("remi_fake_subprocess_xyz")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap_or_else(|_| {
+                // 退而求其次：spawn 一个总是会退出的命令
+                Command::new("cmd")
+                    .args(&["/C", "exit 0"])
+                    .stdin(Stdio::piped())
+                    .stdout(Stdio::piped())
+                    .spawn()
+                    .expect("无法创建测试用假客户端")
+            });
+        Self::new(child)
+    }
+
     /// 发送请求并读取匹配的响应。
     pub async fn request(&self, method: &str, params: Value) -> Result<Value, ProviderAdapterError> {
         let id = {
@@ -143,9 +168,8 @@ impl StdioJsonRpcClient {
 
     /// 终止子进程。尽力而为：忽略错误。
     pub async fn shutdown(&self) {
-        if let Ok(mut child) = self.inner.child.lock().await {
-            let _ = child.start_kill();
-        }
+        let mut child = self.inner.child.lock().await;
+        let _ = child.start_kill();
     }
 
     /// 借用内部子进程句柄的克隆。当前未使用，

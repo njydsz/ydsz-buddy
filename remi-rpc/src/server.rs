@@ -24,7 +24,7 @@ pub fn create_ws_router(rpc_state: Arc<RpcState>) -> Router {
 async fn ws_handler(ws: WebSocketUpgrade, State(state): State<Arc<RpcState>>) -> Response {
     ws.on_upgrade(move |socket: WebSocket| async move {
         if let Err(e) = handle_ws_connection(socket, state).await {
-            tracing::error!("WebSocket connection error: {}", e);
+            tracing::error!("WebSocket 连接错误: {}", e);
         }
     })
 }

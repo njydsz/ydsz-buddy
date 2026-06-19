@@ -5,7 +5,7 @@
 
 use remi_contracts::{ModelId, ThreadId};
 use remi_core::{Error, Result};
-use remi_providers::ProviderRegistry;
+use remi_providers::{ProviderDispatcher, ProviderRegistry};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -46,6 +46,9 @@ impl ProviderSessionMap {
 pub struct ProviderHandoff {
     registry: Arc<ProviderRegistry>,
     sessions: Arc<ProviderSessionMap>,
+    /// 可选的调度器（failover/round-robin/priority）。
+    /// 为 None 时使用简单的"第一个可用 Provider"策略。
+    dispatcher: Option<Arc<ProviderDispatcher>>,
 }
 
 impl ProviderHandoff {
@@ -54,23 +57,44 @@ impl ProviderHandoff {
         Self {
             registry,
             sessions: Arc::new(ProviderSessionMap::new()),
+            dispatcher: None,
         }
+    }
+
+    /// 附加一个 Provider 调度器，启用多 Provider 路由策略。
+    pub fn with_dispatcher(mut self, dispatcher: Arc<ProviderDispatcher>) -> Self {
+        self.dispatcher = Some(dispatcher);
+        self
+    }
+
+    /// 访问底层的 Provider 注册中心。
+    pub fn registry(&self) -> &Arc<ProviderRegistry> {
+        &self.registry
+    }
+
+    /// 选择一个 Provider（使用 dispatcher 或兜底到第一个可用）。
+    async fn select_provider(&self) -> Result<Arc<dyn remi_providers::ProviderAdapter>> {
+        if let Some(dispatcher) = &self.dispatcher {
+            if let Some(adapter) = dispatcher.select().await {
+                return Ok(adapter);
+            }
+        }
+        let providers = self.registry.list();
+        let info = providers
+            .into_iter()
+            .find(|p| p.available)
+            .ok_or_else(|| Error::Provider("没有可用的 AI 服务。请配置 API 密钥。".to_string()))?;
+        self.registry
+            .get(&info.name)
+            .ok_or_else(|| Error::Provider(format!("Provider 不存在: {}", info.name)))
     }
 
     /// 将用户消息路由到 Provider 并返回助手文本。
     pub async fn route(&self, thread_id: ThreadId, content: &str) -> Result<String> {
-        let providers = self.registry.list();
-        let provider_info = providers
-            .into_iter()
-            .find(|p| p.available)
-            .ok_or_else(|| Error::Provider("没有可用的 AI 服务。请配置 API 密钥。".to_string()))?;
-
-        let adapter = self
-            .registry
-            .get(&provider_info.name)
-            .ok_or_else(|| Error::Provider(format!("Provider 不存在: {}", provider_info.name)))?;
-
+        let adapter = self.select_provider().await?;
+        let provider_info = adapter.info();
         let provider_name = provider_info.name.to_string();
+
         let session_id = match self.sessions.get(thread_id, &provider_name).await {
             Some(session_id) => session_id,
             None => {

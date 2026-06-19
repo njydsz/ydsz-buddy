@@ -10,7 +10,7 @@
 //! `agent/stream` 通知通道提供一流支持。
 
 use crate::errors::ProviderAdapterError;
-use futures::{Stream, StreamExt};
+use futures::Stream;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::pin::Pin;
@@ -154,8 +154,8 @@ impl AcpClient {
     ) -> Result<Pin<Box<dyn Stream<Item = Result<String, ProviderAdapterError>> + Send>>, ProviderAdapterError>
     {
         // 预留下一个 id 并发送请求，然后返回一个
-        /// 拥有自己读取器克隆的流，这样我们就不会在
-        /// 整个流生命周期内锁定共享读取器。
+        // 拥有自己读取器克隆的流，这样我们就不会在
+        // 整个流生命周期内锁定共享读取器。
         let id = {
             let mut guard = self.inner.next_id.lock().await;
             *guard += 1;
@@ -185,42 +185,45 @@ impl AcpClient {
                 .map_err(|e| ProviderAdapterError::Transport(format!("stdin 刷新：{e}")))?;
         }
 
-        let reader = self.inner.reader.lock().await;
-        
-        // 创建从缓冲读取器读取行的流
-        let stream = futures::stream::unfold(reader, |mut reader| async move {
-            let mut line = String::new();
-            loop {
-                line.clear();
+        let inner_arc = self.inner.clone();
+        // 创建从缓冲读取器读取行的流 —— 每次读都重新加锁，
+        // 避免长时间持有 MutexGuard 导致锁被绑死。
+        let stream = futures::stream::unfold((), move |()| {
+            let inner_arc = inner_arc.clone();
+            async move {
+                let mut line = String::new();
+                let mut reader = inner_arc.reader.lock().await;
                 match reader.read_line(&mut line).await {
-                    Ok(0) => return None, // EOF
+                    Ok(0) => None, // EOF
                     Ok(_) => {
                         let trimmed = line.trim();
                         if trimmed.is_empty() {
-                            continue;
+                            return Some((Ok(String::new()), ()));
                         }
                         let parsed: Value = match serde_json::from_str(trimmed) {
                             Ok(v) => v,
-                            Err(_) => continue,
+                            Err(_) => return Some((Ok(String::new()), ())),
                         };
                         // 从通知中提取文本
                         if let Some(method) = parsed.get("method").and_then(|m| m.as_str()) {
                             if method == "agent/stream" || method == "agent/notification" {
                                 if let Some(params) = parsed.get("params") {
                                     if let Some(text) = extract_text(params) {
-                                        return Some((Ok(text), reader));
+                                        return Some((Ok(text), ()));
                                     }
                                 }
                             }
                         }
+                        Some((Ok(String::new()), ()))
                     }
-                    Err(e) => {
-                        return Some((Err(ProviderAdapterError::Transport(format!("流读取：{e}"))), reader));
-                    }
+                    Err(e) => Some((
+                        Err(ProviderAdapterError::Transport(format!("流读取：{e}"))),
+                        (),
+                    )),
                 }
             }
         });
-        
+
         Ok(Box::pin(stream))
     }
 

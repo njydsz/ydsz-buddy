@@ -179,12 +179,12 @@ pub async fn list_provider_commands<S: AppStateAccess + 'static>(
         "cursor" => remi_contracts::ProviderName::Cursor,
         "pi" => remi_contracts::ProviderName::Pi,
         "kilo" => remi_contracts::ProviderName::Kilo,
-        _ => return err(StatusCode::NOT_FOUND, format!("Unknown provider: {name}")),
+        _ => return err(StatusCode::NOT_FOUND, format!("未知的提供商: {name}")),
     };
 
     let adapter = match state.provider_registry().get(&provider_name) {
         Some(a) => a,
-        None => return err(StatusCode::NOT_FOUND, "Provider not registered"),
+        None => return err(StatusCode::NOT_FOUND, "提供商未注册"),
     };
 
     let input = remi_contracts::ProviderListCommandsInput {
@@ -242,7 +242,7 @@ pub async fn get_project<S: AppStateAccess + 'static>(
     let repo = remi_persistence::repositories::ProjectRepository::new(state.db().pool().clone());
     match repo.get_by_id(remi_contracts::ProjectId(id)).await {
         Ok(Some(p)) => ok(p),
-        Ok(None) => err(StatusCode::NOT_FOUND, "Project not found"),
+        Ok(None) => err(StatusCode::NOT_FOUND, "项目未找到"),
         Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
     }
 }
@@ -310,7 +310,7 @@ pub async fn get_thread<S: AppStateAccess + 'static>(
     let thread_id = remi_contracts::ThreadId(id);
     match state.orchestration().get_thread(thread_id).await {
         Ok(Some(t)) => ok(t),
-        Ok(None) => err(StatusCode::NOT_FOUND, "Thread not found"),
+        Ok(None) => err(StatusCode::NOT_FOUND, "线程未找到"),
         Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
     }
 }
@@ -533,7 +533,7 @@ pub async fn worktree_remove<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/workspace/worktrees/gc` — garbage collect stale worktrees.
+/// `POST /api/workspace/worktrees/gc` — 垃圾回收过时的 worktree。
 pub async fn worktree_gc<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
 ) -> axum::response::Response {
@@ -544,10 +544,10 @@ pub async fn worktree_gc<S: AppStateAccess + 'static>(
 }
 
 // ---------------------------------------------------------------------------
-// Auth endpoints
+// 认证端点
 // ---------------------------------------------------------------------------
 
-/// `POST /api/auth/bootstrap` — first-time owner bootstrap.
+/// `POST /api/auth/bootstrap` — 首次所有者初始化。
 pub async fn auth_bootstrap<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::AuthBootstrapInput>,
@@ -558,7 +558,7 @@ pub async fn auth_bootstrap<S: AppStateAccess + 'static>(
     }
 }
 
-/// `POST /api/auth/verify` — verify a token.
+/// `POST /api/auth/verify` — 验证令牌。
 pub async fn auth_verify<S: AppStateAccess + 'static>(
     State(state): State<Arc<S>>,
     Json(input): Json<remi_contracts::AuthVerifyInput>,
@@ -594,14 +594,14 @@ pub async fn auth_pairing<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().verify_token(&token).await {
         Ok(true) => match state.auth().create_pairing_credential(input).await {
             Ok(out) => ok(out),
             Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         },
-        _ => err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        _ => err(StatusCode::UNAUTHORIZED, "无效的会话"),
     }
 }
 
@@ -612,7 +612,7 @@ pub async fn auth_ws_token<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().issue_websocket_token(&token).await {
         Ok(ws) => ok(ws),
@@ -627,14 +627,14 @@ pub async fn auth_pairing_links<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().verify_token(&token).await {
         Ok(true) => match state.auth().list_pairing_links().await {
             Ok(links) => ok(links),
             Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         },
-        _ => err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        _ => err(StatusCode::UNAUTHORIZED, "无效的会话"),
     }
 }
 
@@ -646,14 +646,14 @@ pub async fn auth_revoke_pairing<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().verify_token(&token).await {
         Ok(true) => match state.auth().revoke_pairing_link(&input.code).await {
             Ok(_) => ok(serde_json::json!({ "revoked": true })),
             Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         },
-        _ => err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        _ => err(StatusCode::UNAUTHORIZED, "无效的会话"),
     }
 }
 
@@ -664,14 +664,14 @@ pub async fn auth_clients<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().verify_token(&token).await {
         Ok(true) => match state.auth().list_client_sessions(None).await {
             Ok(list) => ok(list),
             Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         },
-        _ => err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        _ => err(StatusCode::UNAUTHORIZED, "无效的会话"),
     }
 }
 
@@ -683,14 +683,14 @@ pub async fn auth_revoke_client<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     match state.auth().verify_token(&token).await {
         Ok(true) => match state.auth().revoke_client_session(&input.token).await {
             Ok(_) => ok(serde_json::json!({ "revoked": true })),
             Err(e) => err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         },
-        _ => err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        _ => err(StatusCode::UNAUTHORIZED, "无效的会话"),
     }
 }
 
@@ -702,15 +702,15 @@ pub async fn auth_revoke_other_clients<S: AppStateAccess + 'static>(
 ) -> axum::response::Response {
     let token = match extract_token(&headers) {
         Some(t) => t,
-        None => return err(StatusCode::UNAUTHORIZED, "Missing authorization token"),
+        None => return err(StatusCode::UNAUTHORIZED, "缺少授权令牌"),
     };
     let session = match state.auth().get_session_state(&token).await {
         Ok(s) => s,
-        Err(_) => return err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        Err(_) => return err(StatusCode::UNAUTHORIZED, "无效的会话"),
     };
     let session_id = match session.get("sessionId").and_then(|v| v.as_str()) {
         Some(s) => s.to_string(),
-        None => return err(StatusCode::UNAUTHORIZED, "Invalid session"),
+        None => return err(StatusCode::UNAUTHORIZED, "无效的会话"),
     };
     match state.auth().revoke_other_client_sessions(&session_id).await {
         Ok(count) => ok(serde_json::json!({ "revokedCount": count })),
@@ -802,7 +802,7 @@ pub async fn attachments_get<S: AppStateAccess + 'static>(
             .body(axum::body::Body::from(data))
             .unwrap()
             .into_response(),
-        Err(_) => err(StatusCode::NOT_FOUND, "Attachment not found"),
+        Err(_) => err(StatusCode::NOT_FOUND, "附件未找到"),
     }
 }
 

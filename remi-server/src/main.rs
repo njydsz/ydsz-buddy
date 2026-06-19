@@ -66,11 +66,11 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    info!("Starting Remi Code Server");
+    info!("正在启动 Remi Code 服务器");
 
     // 加载配置
     let config = ServerConfig::load().unwrap_or_else(|e| {
-        error!("Failed to load configuration: {}", e);
+        error!("加载配置失败: {}", e);
         ServerConfig::default()
     });
 
@@ -87,13 +87,13 @@ async fn main() -> anyhow::Result<()> {
     // 初始化数据库
     let db = Arc::new(Database::connect(&config).await?);
     db.run_migrations().await?;
-    info!("Database initialized");
+    info!("数据库已初始化");
 
     // 初始化认证服务
     let auth = Arc::new(AuthService::new(db.clone()));
     let secret_key: Vec<u8> = (0..32).map(|_| rand::random()).collect();
     auth.initialize(secret_key).await?;
-    info!("Authentication service initialized");
+    info!("认证服务已初始化");
 
     // 初始化 provider 注册表
     let provider_registry = Arc::new(ProviderRegistry::new());
@@ -106,7 +106,7 @@ async fn main() -> anyhow::Result<()> {
     provider_registry.register(Arc::new(PiAdapter::new()));
     provider_registry.register(Arc::new(KiloAdapter::new()));
     info!(
-        "Provider registry initialized ({} providers)",
+        "提供商注册表已初始化（{} 个提供商）",
         provider_registry.list().len()
     );
 
@@ -116,7 +116,7 @@ async fn main() -> anyhow::Result<()> {
         provider_registry.clone(),
     ));
     let _reactor_handle = orchestration.spawn_reactor_loop();
-    info!("Orchestration engine started with default reactor set");
+    info!("编排引擎已启动，包含默认反应器集");
 
     // 初始化工作区服务
     let workspace = Arc::new(WorkspaceService::new(config.data_dir.join("workspace")));
@@ -193,7 +193,7 @@ async fn main() -> anyhow::Result<()> {
     let addr = format!("{}:{}", config.host, config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!(
-        "Server listening on {} ({} routes registered)",
+        "服务器正在监听 {}（已注册 {} 条路由）",
         addr,
         remi_server::route_count()
     );

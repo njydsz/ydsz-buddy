@@ -14,6 +14,7 @@ members = [
     "remi-server",
     "remi-diff-apply",
     "remi-persistence",
+    "remi-checkpoint",
     "remi-app/src-tauri",
 ]
 
@@ -97,6 +98,7 @@ remi-diff-apply = { path = "remi-diff-apply" }
 remi-server = { path = "remi-server" }
 remi-app = { path = "remi-app/src-tauri" }
 remi-projection = { path = "remi-projection" }
+remi-checkpoint = { path = "remi-checkpoint" }
 
 [profile.release]
 lto = "fat"

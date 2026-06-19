@@ -40,15 +40,15 @@ pub async fn handle_method(
     })) {
         Ok(m) => m,
         Err(e) => {
-            error!("Failed to parse RPC method '{}': {}", method, e);
+            error!("解析 RPC 方法 '{}' 失败: {}", method, e);
             return Err(Error::Internal(format!(
-                "Failed to parse RPC method: {}",
+                "解析 RPC 方法失败: {}",
                 e
             )));
         }
     };
 
-    info!("Handling RPC method: {}", method);
+    info!("处理 RPC 方法: {}", method);
 
     // 路由到相应的处理器
     match rpc_method {
@@ -200,7 +200,7 @@ async fn handle_thread_get(
         .orchestration
         .get_thread(thread_id)
         .await?
-        .ok_or_else(|| Error::Orchestration(format!("Thread not found: {}", thread_id)))?;
+        .ok_or_else(|| Error::Orchestration(format!("线程未找到: {}", thread_id)))?;
 
     serde_json::to_value(thread).map_err(|e| Error::Serialization(e.to_string()))
 }
@@ -524,7 +524,7 @@ async fn handle_git_summarize_diff(
 
     // 生成简单的摘要
     let summary = format!(
-        "Changed {} file(s) with {} insertion(s) and {} deletion(s)",
+        "已更改 {} 个文件，新增 {} 行，删除 {} 行",
         files_changed, insertions, deletions
     );
 
@@ -573,7 +573,7 @@ async fn handle_editor_open(
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
     // 在完整实现中，这将在配置的编辑器中打开文件
-    info!("Opening file in editor: {}", input.path);
+    info!("在编辑器中打开文件: {}", input.path);
     Ok(serde_json::json!({"status": "ok"}))
 }
 
@@ -677,7 +677,7 @@ async fn handle_terminal_create(
         let mut output_rx = match terminal_manager.subscribe_output(session_id).await {
             Ok(rx) => rx,
             Err(e) => {
-                tracing::error!("Failed to subscribe to terminal output: {}", e);
+                tracing::error!("订阅终端输出失败: {}", e);
                 return;
             }
         };
@@ -699,7 +699,7 @@ async fn handle_terminal_create(
             }
         }
 
-        info!("Terminal output forwarder ended for session: {}", session_id);
+        info!("终端输出转发器已结束，会话: {}", session_id);
     });
 
     serde_json::to_value(output).map_err(|e| Error::Serialization(e.to_string()))
