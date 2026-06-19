@@ -154,7 +154,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "tongyi",
     name: "通义千问",
-    subtitle: "阿里· 百炼平台",
+    subtitle: "阿里 · 百炼平台",
     iconColor: "#F97316",
   },
   {
@@ -2858,7 +2858,7 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="服务渠道"
-            description="管理第三方模API 渠道接入，启用后可在对应提供商中使用这些渠道"
+            description="管理第三方模型 API 渠道接入，启用后可在对应提供商中使用这些渠道"
             status={
               <span className="text-[11px] text-muted-foreground">
                 ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启用)

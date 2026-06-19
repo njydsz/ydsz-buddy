@@ -11,9 +11,9 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  # ── Tauri Desktop Check ────────────────────────────────────────────
-  tauri-check:
-    name: Tauri Check
+  # ── Rust Workspace Check ───────────────────────────────────────────
+  workspace-check:
+    name: Workspace Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,22 +31,24 @@ jobs:
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: apps/desktop/src-tauri
+          workspaces: |
+            .
+            apps/desktop/src-tauri
 
-      - name: Check
-        run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets
+      - name: Check workspace
+        run: cargo check --workspace --all-targets
 
       - name: Check formatting
-        run: cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml --all -- --check
+        run: cargo fmt --all -- --check
 
-      - name: Clippy
-        run: cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+      - name: Clippy workspace
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
-  # ── Tauri Desktop Test ─────────────────────────────────────────────
-  tauri-test:
-    name: Tauri Test
+  # ── Rust Workspace Test ────────────────────────────────────────────
+  workspace-test:
+    name: Workspace Test
     runs-on: ubuntu-latest
-    needs: tauri-check
+    needs: workspace-check
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +63,66 @@ jobs:
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: apps/desktop/src-tauri
+          workspaces: |
+            .
+            apps/desktop/src-tauri
+
+      - name: Run workspace tests
+        run: cargo test --workspace --all-features
+
+  # ── Tauri Desktop Check ────────────────────────────────────────────
+  tauri-check:
+    name: Tauri Check
+    runs-on: ubuntu-latest
+    needs: workspace-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            apps/desktop/src-tauri
+
+      - name: Check
+        run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets
+
+      - name: Clippy
+        run: cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+
+  # ── Tauri Desktop Test ─────────────────────────────────────────────
+  tauri-test:
+    name: Tauri Test
+    runs-on: ubuntu-latest
+    needs: [workspace-check, tauri-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            apps/desktop/src-tauri
 
       - name: Run tests
         run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --all-features

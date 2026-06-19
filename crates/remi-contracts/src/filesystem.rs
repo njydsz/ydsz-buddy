@@ -24,6 +24,23 @@ pub struct FilesystemBrowseResult {
     pub entries: Vec<FilesystemEntry>,
 }
 
+/// A paginated chunk of [`FilesystemBrowseResult`].
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct FilesystemBrowseChunk {
+    /// Parent directory path.
+    pub parent: String,
+    /// Total number of entries available.
+    pub total: usize,
+    /// Offset where this chunk starts.
+    pub offset: usize,
+    /// Maximum entries returned in this chunk.
+    pub limit: usize,
+    /// The chunk entries.
+    pub entries: Vec<FilesystemEntry>,
+    /// Whether more entries exist beyond this chunk.
+    pub has_more: bool,
+}
+
 /// A filesystem entry (file or directory).
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FilesystemEntry {

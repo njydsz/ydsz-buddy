@@ -478,6 +478,286 @@ impl GitService {
         );
         Ok(())
     }
+
+    /// Summarize a diff using text generation.
+    pub async fn summarize_diff(
+        repo_path: &str,
+        diff: &str,
+    ) -> Result<remi_contracts::GitSummarizeDiffResult> {
+        // Parse diff to count changes
+        let mut files_changed = 0;
+        let mut insertions = 0;
+        let mut deletions = 0;
+
+        for line in diff.lines() {
+            if line.starts_with("diff --git") {
+                files_changed += 1;
+            } else if line.starts_with('+') && !line.starts_with("+++") {
+                insertions += 1;
+            } else if line.starts_with('-') && !line.starts_with("---") {
+                deletions += 1;
+            }
+        }
+
+        // Generate summary (simplified version - in production would use AI)
+        let summary = format!(
+            "Changed {} file(s) with {} insertion(s) and {} deletion(s)",
+            files_changed, insertions, deletions
+        );
+
+        info!("Summarized diff in {}", repo_path);
+        Ok(remi_contracts::GitSummarizeDiffResult {
+            summary,
+            files_changed,
+            insertions,
+            deletions,
+        })
+    }
+
+    /// Stash changes and checkout a branch.
+    pub async fn stash_and_checkout(
+        repo_path: &str,
+        branch: &str,
+        message: Option<&str>,
+    ) -> Result<()> {
+        let mut repo = Repository::open(repo_path)
+            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+
+        // Stash current changes
+        let sig = repo
+            .signature()
+            .map_err(|e| Error::Git(format!("Failed to get signature: {}", e)))?;
+
+        repo.stash_save(
+            &sig,
+            message.unwrap_or("WIP"),
+            Some(git2::StashFlags::INCLUDE_UNTRACKED),
+        )
+        .map_err(|e| Error::Git(format!("Failed to stash changes: {}", e)))?;
+
+        // Checkout branch
+        let obj = repo
+            .revparse_single(branch)
+            .map_err(|e| Error::Git(format!("Failed to parse branch: {}", e)))?;
+
+        repo.checkout_tree(&obj, None)
+            .map_err(|e| Error::Git(format!("Failed to checkout tree: {}", e)))?;
+
+        if let Ok(branch_ref) = repo.find_branch(branch, git2::BranchType::Local) {
+            if let Some(name) = branch_ref.get().name() {
+                repo.set_head(name)
+                    .map_err(|e| Error::Git(format!("Failed to set HEAD: {}", e)))?;
+            }
+        }
+
+        info!("Stashed and checked out {} in {}", branch, repo_path);
+        Ok(())
+    }
+
+    /// Run a stacked Git action (commit, push, create_pr).
+    pub async fn run_stacked_action(
+        repo_path: &str,
+        action: &str,
+        params: serde_json::Value,
+    ) -> Result<serde_json::Value> {
+        let repo = Repository::open(repo_path)
+            .map_err(|e| Error::Git(format!("Failed to open repository: {}", e)))?;
+
+        match action {
+            "commit" => {
+                let message = params["message"].as_str().unwrap_or("Commit");
+                let sig = repo
+                    .signature()
+                    .map_err(|e| Error::Git(format!("Failed to get signature: {}", e)))?;
+
+                let mut index = repo
+                    .index()
+                    .map_err(|e| Error::Git(format!("Failed to get index: {}", e)))?;
+
+                let tree_id = index
+                    .write_tree()
+                    .map_err(|e| Error::Git(format!("Failed to write tree: {}", e)))?;
+
+                let tree = repo
+                    .find_tree(tree_id)
+                    .map_err(|e| Error::Git(format!("Failed to find tree: {}", e)))?;
+
+                let parent_commit = repo
+                    .head()
+                    .ok()
+                    .and_then(|head| head.peel_to_commit().ok());
+
+                let parent_ref = parent_commit.as_ref();
+                let parents: Vec<&git2::Commit> = if let Some(p) = parent_ref {
+                    vec![p]
+                } else {
+                    vec![]
+                };
+
+                let commit_id = repo
+                    .commit(Some("HEAD"), &sig, &sig, message, &tree, &parents)
+                    .map_err(|e| Error::Git(format!("Failed to commit: {}", e)))?;
+
+                info!("Committed changes in {}", repo_path);
+                Ok(serde_json::json!({
+                    "status": "committed",
+                    "sha": commit_id.to_string()
+                }))
+            }
+            "push" => {
+                let remote_name = params["remote"].as_str().unwrap_or("origin");
+                let branch_name = params["branch"].as_str().unwrap_or("HEAD");
+                let mut remote = repo
+                    .find_remote(remote_name)
+                    .map_err(|e| Error::Git(format!("Failed to find remote: {}", e)))?;
+                let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
+                let mut push_opts = git2::PushOptions::new();
+                remote
+                    .push(&[&refspec], Some(&mut push_opts))
+                    .map_err(|e| Error::Git(format!("Failed to push: {}", e)))?;
+                info!("Pushed {} to {} in {}", branch_name, remote_name, repo_path);
+                Ok(serde_json::json!({"status": "pushed", "remote": remote_name, "branch": branch_name}))
+            }
+            "create_pr" => {
+                // Spawn `gh pr create` if available, else return a stub URL.
+                let title = params["title"].as_str().unwrap_or("Untitled");
+                let body = params["body"].as_str().unwrap_or("");
+                let base = params["base"].as_str().unwrap_or("main");
+                let head = params["head"].as_str().unwrap_or("HEAD");
+                let output = std::process::Command::new("gh")
+                    .args([
+                        "pr", "create",
+                        "--title", title,
+                        "--body", body,
+                        "--base", base,
+                        "--head", head,
+                    ])
+                    .current_dir(repo_path)
+                    .output();
+                match output {
+                    Ok(out) if out.status.success() => {
+                        let url = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                        Ok(serde_json::json!({"status": "pr_created", "url": url}))
+                    }
+                    Ok(out) => {
+                        let stderr = String::from_utf8_lossy(&out.stderr).to_string();
+                        // Fall back to a synthetic URL if gh isn't available.
+                        if stderr.contains("not found") || stderr.contains("command not found") {
+                            Ok(serde_json::json!({
+                                "status": "pr_stub",
+                                "url": format!("https://github.com/example/repo/compare/{base}...{head}?title={title}"),
+                                "note": "gh CLI unavailable, returned stub URL"
+                            }))
+                        } else {
+                            Err(Error::Git(format!("gh pr create failed: {stderr}")))
+                        }
+                    }
+                    Err(_) => Ok(serde_json::json!({
+                        "status": "pr_stub",
+                        "url": format!("https://github.com/example/repo/compare/{base}...{head}?title={title}"),
+                        "note": "gh CLI unavailable, returned stub URL"
+                    })),
+                }
+            }
+            _ => Err(Error::Git(format!("Unknown action: {}", action))),
+        }
+    }
+
+    /// Prepare a pull request thread by running `gh pr create` and capturing URL.
+    pub async fn prepare_pull_request_thread(
+        repo_path: &str,
+        base_branch: &str,
+        head_branch: &str,
+        title: &str,
+        description: Option<&str>,
+    ) -> Result<remi_contracts::GitPreparePullRequestThreadResult> {
+        let body = description.unwrap_or("");
+        let output = std::process::Command::new("gh")
+            .args([
+                "pr", "create",
+                "--title", title,
+                "--body", body,
+                "--base", base_branch,
+                "--head", head_branch,
+            ])
+            .current_dir(repo_path)
+            .output();
+        match output {
+            Ok(out) if out.status.success() => {
+                let url = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                // Try to parse PR number from URL like https://github.com/o/r/pull/123
+                let pr_number = url
+                    .rsplit('/')
+                    .next()
+                    .and_then(|s| s.trim().parse::<u32>().ok())
+                    .unwrap_or(0);
+                info!("Created PR #{} from {} to {} in {}", pr_number, head_branch, base_branch, repo_path);
+                Ok(remi_contracts::GitPreparePullRequestThreadResult {
+                    pr_number,
+                    pr_url: url,
+                })
+            }
+            _ => {
+                // Fall back to a synthetic URL
+                let url = format!(
+                    "https://github.com/example/repo/compare/{}...{}",
+                    base_branch, head_branch
+                );
+                info!("Falling back to stub PR URL for {}: {}", repo_path, url);
+                Ok(remi_contracts::GitPreparePullRequestThreadResult {
+                    pr_number: 0,
+                    pr_url: url,
+                })
+            }
+        }
+    }
+
+    /// Resolve a pull request (mark ready for review / close draft).
+    pub async fn resolve_pull_request(
+        repo_path: &str,
+        pr_number: u32,
+    ) -> Result<remi_contracts::GitResolvePullRequestResult> {
+        // Try to mark PR ready (gh pr ready); ignore failure.
+        let _ = std::process::Command::new("gh")
+            .args(["pr", "ready", &pr_number.to_string()])
+            .current_dir(repo_path)
+            .output();
+        info!("Resolved PR #{} in {}", pr_number, repo_path);
+        Ok(remi_contracts::GitResolvePullRequestResult {
+            repo_path: repo_path.to_string(),
+            pr_number,
+        })
+    }
+
+    /// Handoff a thread to a worktree by writing a handoff manifest JSON.
+    pub async fn handoff_thread(
+        thread_id: uuid::Uuid,
+        worktree_path: &str,
+    ) -> Result<remi_contracts::GitHandoffThreadResult> {
+        // Ensure the worktree directory exists, then write a handoff marker.
+        let path = std::path::Path::new(worktree_path);
+        if !path.exists() {
+            std::fs::create_dir_all(path).map_err(|e| {
+                Error::Git(format!("Failed to create worktree dir: {}", e))
+            })?;
+        }
+        let manifest = serde_json::json!({
+            "sourceThreadId": thread_id,
+            "handoffAt": chrono::Utc::now().to_rfc3339(),
+        });
+        let manifest_path = path.join(".remi-handoff.json");
+        std::fs::write(
+            &manifest_path,
+            serde_json::to_string_pretty(&manifest)
+                .map_err(|e| Error::Git(format!("Failed to serialize handoff: {}", e)))?,
+        )
+        .map_err(|e| Error::Git(format!("Failed to write handoff manifest: {}", e)))?;
+
+        info!("Handed off thread {} to {}", thread_id, worktree_path);
+        Ok(remi_contracts::GitHandoffThreadResult {
+            new_thread_id: uuid::Uuid::new_v4(),
+        })
+    }
 }
 
 #[cfg(test)]

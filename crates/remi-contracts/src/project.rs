@@ -60,3 +60,21 @@ pub struct ProjectFavicon {
     /// Favicon data (base64 encoded).
     pub data: Option<String>,
 }
+
+/// Input for writing a file.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ProjectWriteFileInput {
+    /// Current working directory.
+    pub cwd: String,
+    /// Relative path to the file.
+    pub relative_path: String,
+    /// File contents.
+    pub contents: String,
+}
+
+/// Result of writing a file.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ProjectWriteFileResult {
+    /// Relative path to the written file.
+    pub relative_path: String,
+}

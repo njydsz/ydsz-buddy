@@ -510,7 +510,8 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
           <p className="px-2 py-1.5 text-destructive/80 text-[11px]">{errorMessage}</p>
         ) : isSearchPending ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Searching nested files�?          </p>
+            Searching nested files…
+          </p>
         ) : visibleCount === 0 ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
             {filter.trim().length > 0 ? "No matches." : "No files or folders here."}

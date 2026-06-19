@@ -22,7 +22,7 @@ pub trait ProjectRepositoryTrait: Send + Sync {
     /// List all projects.
     async fn list(&self) -> Result<Vec<Project>>;
 
-    /// Delete a project.
+    /// Delete a project (soft delete via deleted_at).
     async fn delete(&self, id: ProjectId) -> Result<()>;
 }
 
@@ -37,6 +37,21 @@ impl ProjectRepository {
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
+
+    fn kind_to_str(kind: ProjectKind) -> &'static str {
+        match kind {
+            ProjectKind::Local => "project",
+            ProjectKind::Remote => "remote",
+        }
+    }
+
+    fn str_to_kind(s: &str) -> Result<ProjectKind> {
+        match s {
+            "project" | "local" => Ok(ProjectKind::Local),
+            "remote" => Ok(ProjectKind::Remote),
+            other => Err(Error::Database(format!("Invalid project kind: {other}"))),
+        }
+    }
 }
 
 #[async_trait]
@@ -44,18 +59,17 @@ impl ProjectRepositoryTrait for ProjectRepository {
     async fn create(&self, name: &str, path: &str, kind: ProjectKind) -> Result<Project> {
         let id = ProjectId::new();
         let now = Utc::now().to_rfc3339();
-        let kind_str = match kind {
-            ProjectKind::Local => "local",
-            ProjectKind::Remote => "remote",
-        };
+        let kind_str = Self::kind_to_str(kind);
+        let scripts_json = "[]";
 
         sqlx::query(
-            "INSERT INTO projects (id, name, path, kind, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO projection_projects (project_id, kind, title, workspace_root, scripts_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(id.to_string())
+        .bind(kind_str)
         .bind(name)
         .bind(path)
-        .bind(kind_str)
+        .bind(scripts_json)
         .bind(&now)
         .bind(&now)
         .execute(&self.pool)
@@ -74,7 +88,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
     async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>> {
         let row: Option<(String, String, String, String, String, String)> = sqlx::query_as(
-            "SELECT id, name, path, kind, created_at, updated_at FROM projects WHERE id = ?",
+            "SELECT project_id, title, workspace_root, kind, created_at, updated_at FROM projection_projects WHERE project_id = ? AND deleted_at IS NULL",
         )
         .bind(id.to_string())
         .fetch_optional(&self.pool)
@@ -83,24 +97,13 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str).map_err(|e| {
-                    Error::Database(format!("Invalid project ID in database: {}", e))
-                })?;
-                let kind = match kind_str.as_str() {
-                    "local" => ProjectKind::Local,
-                    "remote" => ProjectKind::Remote,
-                    _ => {
-                        return Err(Error::Database(format!(
-                            "Invalid project kind: {}",
-                            kind_str
-                        )));
-                    }
-                };
+                let id = Uuid::parse_str(&id_str)
+                    .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
                 Ok(Some(Project {
                     id: ProjectId(id),
                     name,
                     path,
-                    kind,
+                    kind: Self::str_to_kind(&kind_str)?,
                     created_at,
                     updated_at,
                 }))
@@ -111,7 +114,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
     async fn get_by_path(&self, path: &str) -> Result<Option<Project>> {
         let row: Option<(String, String, String, String, String, String)> = sqlx::query_as(
-            "SELECT id, name, path, kind, created_at, updated_at FROM projects WHERE path = ?",
+            "SELECT project_id, title, workspace_root, kind, created_at, updated_at FROM projection_projects WHERE workspace_root = ? AND deleted_at IS NULL",
         )
         .bind(path)
         .fetch_optional(&self.pool)
@@ -120,24 +123,13 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
         match row {
             Some((id_str, name, path, kind_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str).map_err(|e| {
-                    Error::Database(format!("Invalid project ID in database: {}", e))
-                })?;
-                let kind = match kind_str.as_str() {
-                    "local" => ProjectKind::Local,
-                    "remote" => ProjectKind::Remote,
-                    _ => {
-                        return Err(Error::Database(format!(
-                            "Invalid project kind: {}",
-                            kind_str
-                        )));
-                    }
-                };
+                let id = Uuid::parse_str(&id_str)
+                    .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
                 Ok(Some(Project {
                     id: ProjectId(id),
                     name,
                     path,
-                    kind,
+                    kind: Self::str_to_kind(&kind_str)?,
                     created_at,
                     updated_at,
                 }))
@@ -148,7 +140,7 @@ impl ProjectRepositoryTrait for ProjectRepository {
 
     async fn list(&self) -> Result<Vec<Project>> {
         let rows: Vec<(String, String, String, String, String, String)> = sqlx::query_as(
-            "SELECT id, name, path, kind, created_at, updated_at FROM projects ORDER BY updated_at DESC",
+            "SELECT project_id, title, workspace_root, kind, created_at, updated_at FROM projection_projects WHERE deleted_at IS NULL ORDER BY updated_at DESC",
         )
         .fetch_all(&self.pool)
         .await
@@ -157,22 +149,12 @@ impl ProjectRepositoryTrait for ProjectRepository {
         let mut projects = Vec::new();
         for (id_str, name, path, kind_str, created_at, updated_at) in rows {
             let id = Uuid::parse_str(&id_str)
-                .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
-            let kind = match kind_str.as_str() {
-                "local" => ProjectKind::Local,
-                "remote" => ProjectKind::Remote,
-                _ => {
-                    return Err(Error::Database(format!(
-                        "Invalid project kind: {}",
-                        kind_str
-                    )));
-                }
-            };
+                .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
             projects.push(Project {
                 id: ProjectId(id),
                 name,
                 path,
-                kind,
+                kind: Self::str_to_kind(&kind_str)?,
                 created_at,
                 updated_at,
             });
@@ -181,12 +163,13 @@ impl ProjectRepositoryTrait for ProjectRepository {
     }
 
     async fn delete(&self, id: ProjectId) -> Result<()> {
-        sqlx::query("DELETE FROM projects WHERE id = ?")
+        let now = Utc::now().to_rfc3339();
+        sqlx::query("UPDATE projection_projects SET deleted_at = ? WHERE project_id = ?")
+            .bind(&now)
             .bind(id.to_string())
             .execute(&self.pool)
             .await
             .map_err(|e| Error::Database(e.to_string()))?;
-
         Ok(())
     }
 }

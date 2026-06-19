@@ -1,14 +1,12 @@
 //! Pi provider adapter.
 //!
 //! Pi is a local CLI agent. This adapter discovers the `pi` executable and
-//! will eventually speak its native protocol over stdio. The runtime
-//! implementation is intentionally left as a stub until the upstream protocol
-//! is stable enough to harden.
+//! communicates via stdio JSON-RPC.
 
 use crate::errors::ProviderAdapterError;
 use crate::traits::ProviderAdapter;
 use dashmap::DashMap;
-use futures::Stream;
+use futures::{Stream, StreamExt};
 use remi_contracts::{
     ModelId, ProviderHealth, ProviderHealthStatus, ProviderInfo, ProviderName,
 };
@@ -16,15 +14,18 @@ use remi_core::Result;
 use serde_json::Value;
 use std::pin::Pin;
 use std::sync::Arc;
-use tracing::{info, warn};
+use tokio::process::{Child, Command};
+use tokio::sync::Mutex;
+use tracing::{debug, info};
 use uuid::Uuid;
 
 /// Pi session state.
-#[derive(Clone)]
 #[allow(dead_code)]
 struct PiSession {
     id: String,
     model: String,
+    child: Arc<Mutex<Child>>,
+    request_id: Arc<Mutex<u64>>,
 }
 
 /// Pi provider adapter.
@@ -90,9 +91,22 @@ impl ProviderAdapter for PiAdapter {
         }
 
         let session_id = Uuid::new_v4().to_string();
+        
+        // Start pi CLI process
+        let executable = self.executable.as_ref().unwrap();
+        let child = Command::new(executable)
+            .args(&["--stdio"])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .map_err(|e| ProviderAdapterError::Transport(format!("Failed to start pi: {e}")))?;
+
         let session = PiSession {
             id: session_id.clone(),
             model: model.0.clone(),
+            child: Arc::new(Mutex::new(child)),
+            request_id: Arc::new(Mutex::new(0)),
         };
 
         self.sessions.insert(session_id.clone(), session);
@@ -101,34 +115,125 @@ impl ProviderAdapter for PiAdapter {
         Ok(session_id)
     }
 
-    async fn send_message(&self, session_id: &str, _message: &str) -> Result<Value> {
+    async fn send_message(&self, session_id: &str, message: &str) -> Result<Value> {
         if !self.is_configured() {
             return Err(ProviderAdapterError::NotConfigured(ProviderName::Pi).into());
         }
 
-        if self.sessions.get(session_id).is_none() {
-            return Err(ProviderAdapterError::SessionNotFound(session_id.to_string()).into());
+        let session = self
+            .sessions
+            .get(session_id)
+            .ok_or_else(|| ProviderAdapterError::SessionNotFound(session_id.to_string()))?;
+
+        let mut child = session.child.lock().await;
+        let mut request_id = session.request_id.lock().await;
+        *request_id += 1;
+        let id = *request_id;
+
+        // Send JSON-RPC request via stdin
+        let request = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": "agent/send",
+            "params": {
+                "message": message
+            }
+        });
+
+        if let Some(mut stdin) = child.stdin.take() {
+            use tokio::io::AsyncWriteExt;
+            let request_str = serde_json::to_string(&request)?;
+            stdin
+                .write_all(request_str.as_bytes())
+                .await
+                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+            stdin
+                .write_all(b"\n")
+                .await
+                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+            child.stdin.replace(stdin);
         }
 
-        warn!("Pi send_message is not yet implemented");
-        Err(ProviderAdapterError::Internal("Pi adapter not yet implemented".to_string()).into())
+        // Read response from stdout
+        if let Some(stdout) = child.stdout.take() {
+            use tokio::io::AsyncBufReadExt;
+            let mut reader = tokio::io::BufReader::new(stdout);
+            let mut line = String::new();
+            reader
+                .read_line(&mut line)
+                .await
+                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to read response: {e}")))?;
+            child.stdout.replace(reader.into_inner());
+
+            if line.trim().is_empty() {
+                return Err(ProviderAdapterError::Internal("Empty response from Pi".to_string()).into());
+            }
+
+            let response: Value = serde_json::from_str(line.trim())?;
+            debug!(session_id = %session_id, "Received Pi response");
+            return Ok(response);
+        }
+
+        Err(ProviderAdapterError::Internal("No stdout stream available".to_string()).into())
     }
 
     async fn stream_response(
         &self,
         session_id: &str,
-        _message: &str,
+        message: &str,
     ) -> Result<Pin<Box<dyn Stream<Item = Result<String>> + Send>>> {
         if !self.is_configured() {
             return Err(ProviderAdapterError::NotConfigured(ProviderName::Pi).into());
         }
 
-        if self.sessions.get(session_id).is_none() {
-            return Err(ProviderAdapterError::SessionNotFound(session_id.to_string()).into());
+        let session = self
+            .sessions
+            .get(session_id)
+            .ok_or_else(|| ProviderAdapterError::SessionNotFound(session_id.to_string()))?;
+
+        let mut child = session.child.lock().await;
+        let mut request_id = session.request_id.lock().await;
+        *request_id += 1;
+        let id = *request_id;
+
+        // Send streaming request
+        let request = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": "agent/stream",
+            "params": {
+                "message": message
+            }
+        });
+
+        if let Some(mut stdin) = child.stdin.take() {
+            use tokio::io::AsyncWriteExt;
+            let request_str = serde_json::to_string(&request)?;
+            stdin
+                .write_all(request_str.as_bytes())
+                .await
+                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write to stdin: {e}")))?;
+            stdin
+                .write_all(b"\n")
+                .await
+                .map_err(|e| ProviderAdapterError::Transport(format!("Failed to write newline: {e}")))?;
+            child.stdin.replace(stdin);
         }
 
-        warn!("Pi stream_response is not yet implemented");
-        Err(ProviderAdapterError::Internal("Pi adapter not yet implemented".to_string()).into())
+        // Create stream from stdout
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| ProviderAdapterError::Internal("No stdout stream available".to_string()))?;
+
+        let stream = tokio_util::io::ReaderStream::new(stdout)
+            .map(|result| {
+                result
+                    .map(|bytes| String::from_utf8_lossy(&bytes).to_string())
+                    .map_err(|e| ProviderAdapterError::Transport(format!("Stream error: {e}")).into())
+            });
+
+        Ok(Box::pin(stream))
     }
 
     async fn close_session(&self, session_id: &str) -> Result<()> {

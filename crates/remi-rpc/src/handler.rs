@@ -453,9 +453,14 @@ async fn handle_git_run_stacked_action(
     input: remi_contracts::GitRunStackedActionInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // Execute stacked action (e.g., rebase, merge, etc.)
-    info!("Running stacked action: {} in {}", input.action, input.repo_path);
-    Ok(serde_json::json!({"status": "ok"}))
+    let result = remi_git::GitService::run_stacked_action(
+        &input.repo_path,
+        &input.action,
+        input.params,
+    )
+    .await?;
+
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
 }
 
 async fn handle_git_create_detached_worktree(
@@ -478,40 +483,42 @@ async fn handle_git_prepare_pull_request_thread(
     input: remi_contracts::GitPreparePullRequestThreadInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // In a full implementation, this would create a PR
-    info!(
-        "Preparing PR: {} -> {} in {}",
-        input.head_branch, input.base_branch, input.repo_path
-    );
+    let result = remi_git::GitService::prepare_pull_request_thread(
+        &input.repo_path,
+        &input.base_branch,
+        &input.head_branch,
+        &input.title,
+        input.description.as_deref(),
+    )
+    .await?;
 
-    Ok(serde_json::json!({
-        "pr_number": 1,
-        "pr_url": format!("{}/pull/1", input.repo_path)
-    }))
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
 }
 
 async fn handle_git_resolve_pull_request_result(
     input: remi_contracts::GitResolvePullRequestResult,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // In a full implementation, this would check PR status
-    info!("Resolving PR #{} in {}", input.pr_number, input.repo_path);
-    Ok(serde_json::json!({"status": "merged"}))
+    let result = remi_git::GitService::resolve_pull_request(
+        &input.repo_path,
+        input.pr_number,
+    )
+    .await?;
+
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
 }
 
 async fn handle_git_handoff_thread(
     input: remi_contracts::GitHandoffThreadInput,
     _state: &Arc<RpcState>,
 ) -> Result<Value> {
-    // In a full implementation, this would hand off the thread to a new worktree
-    info!(
-        "Handing off thread {} to {}",
-        input.thread_id, input.worktree_path
-    );
+    let result = remi_git::GitService::handoff_thread(
+        input.thread_id,
+        &input.worktree_path,
+    )
+    .await?;
 
-    Ok(serde_json::json!({
-        "new_thread_id": uuid::Uuid::new_v4()
-    }))
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
 }
 
 async fn handle_terminal_create(

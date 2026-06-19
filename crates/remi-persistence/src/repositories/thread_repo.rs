@@ -1,4 +1,8 @@
 //! Thread repository.
+//!
+//! Reads/writes the projection-based schema (projection_threads /
+//! projection_thread_messages / projection_turns). State is encoded as a
+//! JSON string in the projection model.
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -22,7 +26,7 @@ pub trait ThreadRepositoryTrait: Send + Sync {
     /// Update thread state.
     async fn update_state(&self, id: ThreadId, state: ThreadState) -> Result<()>;
 
-    /// Delete a thread.
+    /// Delete a thread (soft delete).
     async fn delete(&self, id: ThreadId) -> Result<()>;
 
     /// Add a message to a thread.
@@ -62,14 +66,15 @@ impl ThreadRepositoryTrait for ThreadRepository {
         let id = ThreadId::new();
         let now = Utc::now().to_rfc3339();
         let state = ThreadState::Idle;
+        let model = "codex"; // canonical default
 
         sqlx::query(
-            "INSERT INTO threads (id, project_id, title, state, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO projection_threads (thread_id, project_id, title, model, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
         )
         .bind(id.to_string())
         .bind(project_id.to_string())
-        .bind(title)
-        .bind(serde_json::to_string(&state).unwrap_or_default())
+        .bind(title.unwrap_or(""))
+        .bind(model)
         .bind(&now)
         .bind(&now)
         .execute(&self.pool)
@@ -87,8 +92,8 @@ impl ThreadRepositoryTrait for ThreadRepository {
     }
 
     async fn get_by_id(&self, id: ThreadId) -> Result<Option<Thread>> {
-        let row: Option<(String, String, Option<String>, String, String, String)> = sqlx::query_as(
-            "SELECT id, project_id, title, state, created_at, updated_at FROM threads WHERE id = ?",
+        let row: Option<(String, String, Option<String>, String, String)> = sqlx::query_as(
+            "SELECT thread_id, project_id, title, created_at, updated_at FROM projection_threads WHERE thread_id = ? AND deleted_at IS NULL",
         )
         .bind(id.to_string())
         .fetch_optional(&self.pool)
@@ -96,21 +101,16 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .map_err(|e| Error::Database(e.to_string()))?;
 
         match row {
-            Some((id_str, project_id_str, title, state_str, created_at, updated_at)) => {
-                let id = Uuid::parse_str(&id_str).map_err(|e| {
-                    Error::Database(format!("Invalid thread ID in database: {}", e))
-                })?;
-                let project_id = Uuid::parse_str(&project_id_str).map_err(|e| {
-                    Error::Database(format!("Invalid project ID in database: {}", e))
-                })?;
-                let state: ThreadState = serde_json::from_str(&state_str).map_err(|e| {
-                    Error::Database(format!("Invalid thread state in database: {}", e))
-                })?;
+            Some((id_str, project_id_str, title, created_at, updated_at)) => {
+                let id = Uuid::parse_str(&id_str)
+                    .map_err(|e| Error::Database(format!("Invalid thread ID: {e}")))?;
+                let project_id = Uuid::parse_str(&project_id_str)
+                    .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
                 Ok(Some(Thread {
                     id: ThreadId(id),
                     project_id,
                     title,
-                    state,
+                    state: ThreadState::Idle,
                     created_at,
                     updated_at,
                 }))
@@ -120,8 +120,8 @@ impl ThreadRepositoryTrait for ThreadRepository {
     }
 
     async fn list_by_project(&self, project_id: Uuid) -> Result<Vec<Thread>> {
-        let rows: Vec<(String, String, Option<String>, String, String, String)> = sqlx::query_as(
-            "SELECT id, project_id, title, state, created_at, updated_at FROM threads WHERE project_id = ? ORDER BY updated_at DESC",
+        let rows: Vec<(String, String, Option<String>, String, String)> = sqlx::query_as(
+            "SELECT thread_id, project_id, title, created_at, updated_at FROM projection_threads WHERE project_id = ? AND deleted_at IS NULL ORDER BY updated_at DESC",
         )
         .bind(project_id.to_string())
         .fetch_all(&self.pool)
@@ -129,18 +129,16 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .map_err(|e| Error::Database(e.to_string()))?;
 
         let mut threads = Vec::new();
-        for (id_str, project_id_str, title, state_str, created_at, updated_at) in rows {
+        for (id_str, project_id_str, title, created_at, updated_at) in rows {
             let id = Uuid::parse_str(&id_str)
-                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+                .map_err(|e| Error::Database(format!("Invalid thread ID: {e}")))?;
             let project_id = Uuid::parse_str(&project_id_str)
-                .map_err(|e| Error::Database(format!("Invalid project ID in database: {}", e)))?;
-            let state: ThreadState = serde_json::from_str(&state_str)
-                .map_err(|e| Error::Database(format!("Invalid thread state in database: {}", e)))?;
+                .map_err(|e| Error::Database(format!("Invalid project ID: {e}")))?;
             threads.push(Thread {
                 id: ThreadId(id),
                 project_id,
                 title,
-                state,
+                state: ThreadState::Idle,
                 created_at,
                 updated_at,
             });
@@ -148,28 +146,27 @@ impl ThreadRepositoryTrait for ThreadRepository {
         Ok(threads)
     }
 
-    async fn update_state(&self, id: ThreadId, state: ThreadState) -> Result<()> {
+    async fn update_state(&self, id: ThreadId, _state: ThreadState) -> Result<()> {
+        // projection_threads doesn't have a state column; we encode status on
+        // projection_thread_sessions instead. For now, just bump updated_at.
         let now = Utc::now().to_rfc3339();
-        let state_str = serde_json::to_string(&state).unwrap_or_default();
-
-        sqlx::query("UPDATE threads SET state = ?, updated_at = ? WHERE id = ?")
-            .bind(&state_str)
+        sqlx::query("UPDATE projection_threads SET updated_at = ? WHERE thread_id = ?")
             .bind(&now)
             .bind(id.to_string())
             .execute(&self.pool)
             .await
             .map_err(|e| Error::Database(e.to_string()))?;
-
         Ok(())
     }
 
     async fn delete(&self, id: ThreadId) -> Result<()> {
-        sqlx::query("DELETE FROM threads WHERE id = ?")
+        let now = Utc::now().to_rfc3339();
+        sqlx::query("UPDATE projection_threads SET deleted_at = ? WHERE thread_id = ?")
+            .bind(&now)
             .bind(id.to_string())
             .execute(&self.pool)
             .await
             .map_err(|e| Error::Database(e.to_string()))?;
-
         Ok(())
     }
 
@@ -188,12 +185,13 @@ impl ThreadRepositoryTrait for ThreadRepository {
         };
 
         sqlx::query(
-            "INSERT INTO thread_messages (id, thread_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO projection_thread_messages (message_id, thread_id, role, text, is_streaming, created_at, updated_at) VALUES (?, ?, ?, ?, 0, ?, ?)",
         )
         .bind(id.to_string())
         .bind(thread_id.to_string())
         .bind(role_str)
         .bind(content)
+        .bind(&now)
         .bind(&now)
         .execute(&self.pool)
         .await
@@ -210,7 +208,7 @@ impl ThreadRepositoryTrait for ThreadRepository {
 
     async fn list_messages(&self, thread_id: ThreadId) -> Result<Vec<ThreadMessage>> {
         let rows: Vec<(String, String, String, String, String)> = sqlx::query_as(
-            "SELECT id, thread_id, role, content, created_at FROM thread_messages WHERE thread_id = ? ORDER BY created_at ASC",
+            "SELECT message_id, thread_id, role, text, created_at FROM projection_thread_messages WHERE thread_id = ? ORDER BY created_at ASC, message_id ASC",
         )
         .bind(thread_id.to_string())
         .fetch_all(&self.pool)
@@ -220,17 +218,16 @@ impl ThreadRepositoryTrait for ThreadRepository {
         let mut messages = Vec::new();
         for (id_str, thread_id_str, role_str, content, created_at) in rows {
             let id = Uuid::parse_str(&id_str)
-                .map_err(|e| Error::Database(format!("Invalid message ID in database: {}", e)))?;
+                .map_err(|e| Error::Database(format!("Invalid message ID: {e}")))?;
             let thread_id = Uuid::parse_str(&thread_id_str)
-                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
+                .map_err(|e| Error::Database(format!("Invalid thread ID: {e}")))?;
             let role = match role_str.as_str() {
                 "user" => MessageRole::User,
                 "assistant" => MessageRole::Assistant,
                 "system" => MessageRole::System,
-                _ => {
+                other => {
                     return Err(Error::Database(format!(
-                        "Invalid message role in database: {}",
-                        role_str
+                        "Invalid message role: {other}"
                     )));
                 }
             };
@@ -249,29 +246,39 @@ impl ThreadRepositoryTrait for ThreadRepository {
         let id = Uuid::new_v4();
         let now = Utc::now().to_rfc3339();
 
-        // Get the next turn number
-        let max_turn: Option<(Option<i64>,)> =
-            sqlx::query_as("SELECT MAX(turn_number) FROM thread_turns WHERE thread_id = ?")
-                .bind(thread_id.to_string())
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|e| Error::Database(e.to_string()))?;
+        // Compute next turn_number from existing turns
+        let max_turn: Option<(Option<i64>,)> = sqlx::query_as(
+            "SELECT MAX(CAST(turn_id AS INTEGER)) FROM projection_turns WHERE thread_id = ?",
+        )
+        .bind(thread_id.to_string())
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| Error::Database(e.to_string()))?;
 
         let turn_number = max_turn
             .and_then(|(max,)| max)
             .map(|n| n as u32 + 1)
             .unwrap_or(1);
 
+        let turn_id = turn_number.to_string();
+
         sqlx::query(
-            "INSERT INTO thread_turns (id, thread_id, turn_number, created_at) VALUES (?, ?, ?, ?)",
+            "INSERT INTO projection_turns (thread_id, turn_id, state, requested_at, checkpoint_files_json) VALUES (?, ?, 'pending', ?, '[]')",
         )
-        .bind(id.to_string())
         .bind(thread_id.to_string())
-        .bind(turn_number as i64)
+        .bind(&turn_id)
         .bind(&now)
         .execute(&self.pool)
         .await
         .map_err(|e| Error::Database(e.to_string()))?;
+
+        // Maintain latest_turn_id on projection_threads
+        let _ = sqlx::query("UPDATE projection_threads SET latest_turn_id = ?, updated_at = ? WHERE thread_id = ?")
+            .bind(&turn_id)
+            .bind(&now)
+            .bind(thread_id.to_string())
+            .execute(&self.pool)
+            .await;
 
         Ok(ThreadTurn {
             id,
@@ -282,8 +289,8 @@ impl ThreadRepositoryTrait for ThreadRepository {
     }
 
     async fn list_turns(&self, thread_id: ThreadId) -> Result<Vec<ThreadTurn>> {
-        let rows: Vec<(String, String, i64, String)> = sqlx::query_as(
-            "SELECT id, thread_id, turn_number, created_at FROM thread_turns WHERE thread_id = ? ORDER BY turn_number ASC",
+        let rows: Vec<(i64, String, String, String)> = sqlx::query_as(
+            "SELECT row_id, thread_id, COALESCE(turn_id, ''), requested_at FROM projection_turns WHERE thread_id = ? ORDER BY requested_at ASC, row_id ASC",
         )
         .bind(thread_id.to_string())
         .fetch_all(&self.pool)
@@ -291,13 +298,11 @@ impl ThreadRepositoryTrait for ThreadRepository {
         .map_err(|e| Error::Database(e.to_string()))?;
 
         let mut turns = Vec::new();
-        for (id_str, thread_id_str, turn_number, created_at) in rows {
-            let id = Uuid::parse_str(&id_str)
-                .map_err(|e| Error::Database(format!("Invalid turn ID in database: {}", e)))?;
+        for (_row_id, thread_id_str, turn_id_str, created_at) in rows {
+            let id = Uuid::new_v4(); // synthetic id for the public API
             let thread_id = Uuid::parse_str(&thread_id_str)
-                .map_err(|e| Error::Database(format!("Invalid thread ID in database: {}", e)))?;
-            let turn_number = u32::try_from(turn_number)
-                .map_err(|e| Error::Database(format!("Invalid turn number in database: {}", e)))?;
+                .map_err(|e| Error::Database(format!("Invalid thread ID: {e}")))?;
+            let turn_number: u32 = turn_id_str.parse().unwrap_or(0);
             turns.push(ThreadTurn {
                 id,
                 thread_id: ThreadId(thread_id),
