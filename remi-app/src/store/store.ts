@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create, type StoreApi } from "zustand";
 import { getNativeApi } from "@/lib/nativeApi";
 import { isTauri } from "@/lib/env";
 import {
@@ -6,17 +6,17 @@ import {
   loadPersistedState,
   savePersistedState,
 } from "./persistence";
-import type { AppState, AppStore } from "./types";
+import type { AppState } from "./types";
 
 /**
  * The single client store. The Tauri shell owns the HTTP/WS server
  * and the IPC bridge; the store subscribes to lifecycle events and
  * normalizes them into React-friendly state.
  */
-export const createAppStore = () =>
-  create<AppState>()((set, get) => {
-    const persisted = loadPersistedState();
+export const createAppStore = (): StoreApi<AppState> => {
+  const persisted = loadPersistedState();
 
+  return create<AppState>()((set, get) => {
     const persist = (overrides: Partial<typeof persisted> = {}) => {
       const current = get();
       savePersistedState({
@@ -51,8 +51,6 @@ export const createAppStore = () =>
       language: persisted.language,
 
       async bootstrap() {
-        // Step 1: ask the Tauri side for paths and server info. In a
-        // browser dev session we fall back to the Vite-provided URLs.
         const api = getNativeApi();
         try {
           if (isTauri && api) {
@@ -73,20 +71,14 @@ export const createAppStore = () =>
             });
           }
         } catch (err) {
-          // Non-fatal: the WS transport layer will retry.
           console.warn("[remi-app] bootstrap failed", err);
         }
 
-        // Step 2: kick off the WS transport. The transport itself
-        // listens for `thread.*` / `terminal.*` events and feeds back
-        // into this store through the imperative setters below.
         const { startTransport } = await import("@/lib/wsTransport");
         await startTransport({
           getServerInfo: () => get().serverInfo,
           onState: (state) => set({ transport: state }),
           onHealth: (snapshot) => {
-            // The health snapshot includes the current `state`; we
-            // mirror it into the store for status indicators.
             set({ transport: snapshot.state });
           },
           heartbeatMs: 15_000,
@@ -166,8 +158,6 @@ export const createAppStore = () =>
           const next = s.projects.slice();
           next[idx] = project;
           return { projects: next };
-          // Side-effect persistence is handled by the caller when
-          // expanded state changes.
         });
         persist();
       },
@@ -179,4 +169,5 @@ export const createAppStore = () =>
         persist();
       },
     };
-  }) as () => AppStore;
+  });
+};

@@ -1,109 +1,108 @@
-//! Diff apply engine for Remi Code.
+//! Remi Code 的 Diff 应用引擎。
 //!
-//! This crate provides functionality to parse and apply diffs in various formats
-//! (unified diff, search/replace, code blocks) to files, with automatic backup
-//! and conflict detection.
+//! 本 crate 提供解析和应用各种格式的 diff（统一 diff、搜索/替换、代码块）
+//! 到文件的功能，支持自动备份和冲突检测。
 
 use remi_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use tracing::{debug, error, info, warn};
 
-/// Error type for diff apply operations.
+/// Diff 应用操作的错误类型。
 #[derive(Debug, thiserror::Error)]
 pub enum DiffApplyError {
-    #[error("File not found: {0}")]
+    #[error("文件未找到: {0}")]
     FileNotFound(String),
 
-    #[error("Invalid diff format: {0}")]
+    #[error("无效的 diff 格式: {0}")]
     InvalidDiff(String),
 
-    #[error("Search string not found: {0}")]
+    #[error("搜索字符串未找到: {0}")]
     SearchNotFound(String),
 
-    #[error("Multiple matches found for search string")]
+    #[error("搜索字符串找到多个匹配项")]
     MultipleMatches,
 
-    #[error("IO error: {0}")]
+    #[error("IO 错误: {0}")]
     Io(#[from] std::io::Error),
 
-    #[error("Backup failed: {0}")]
+    #[error("备份失败: {0}")]
     BackupFailed(String),
 }
 
-/// A single line in a diff hunk.
+/// diff hunk 中的单行。
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum DiffLine {
-    /// Context line (unchanged).
+    /// 上下文行（未更改）。
     Context(String),
-    /// Added line.
+    /// 添加的行。
     Added(String),
-    /// Removed line.
+    /// 删除的行。
     Removed(String),
 }
 
-/// A hunk in a unified diff.
+/// 统一 diff 中的 hunk。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiffHunk {
-    /// Starting line number in the original file.
+    /// 原始文件中的起始行号。
     pub start_line: u32,
-    /// Number of lines in the original file.
+    /// 原始文件中的行数。
     pub original_count: u32,
-    /// Starting line number in the modified file.
+    /// 修改后文件中的起始行号。
     pub modified_start: u32,
-    /// Number of lines in the modified file.
+    /// 修改后文件中的行数。
     pub modified_count: u32,
-    /// Lines in this hunk.
+    /// 此 hunk 中的行。
     pub lines: Vec<DiffLine>,
 }
 
-/// Result of applying a diff.
+/// 应用 diff 的结果。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiffApplyResult {
-    /// Path to the modified file.
+    /// 修改后文件的路径。
     pub file_path: String,
-    /// Path to the backup file (if created).
+    /// 备份文件的路径（如果创建了）。
     pub backup_path: Option<String>,
-    /// Number of hunks applied.
+    /// 应用的 hunk 数量。
     pub hunks_applied: u32,
-    /// Number of lines added.
+    /// 添加的行数。
     pub lines_added: u32,
-    /// Number of lines removed.
+    /// 删除的行数。
     pub lines_removed: u32,
 }
 
-/// Mode for applying code blocks.
+/// 应用代码块的模式。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CodeBlockMode {
-    /// Replace entire file content.
+    /// 替换整个文件内容。
     Overwrite,
-    /// Insert at specific line.
+    /// 在指定行插入。
     Insert(u32),
-    /// Replace lines in range [start, end].
+    /// 替换范围 [start, end] 内的行。
     Replace(u32, u32),
 }
 
-/// File edit operation.
+/// 文件编辑操作。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum FileEdit {
-    /// Unified diff format.
+    /// 统一 diff 格式。
     Diff(String),
-    /// Search and replace.
+    /// 搜索和替换。
     SearchReplace { search: String, replace: String },
-    /// Code block with mode.
+    /// 带模式的代码块。
     CodeBlock { code: String, mode: CodeBlockMode },
 }
 
-/// Diff apply engine.
+/// Diff 应用引擎。
 pub struct DiffApplyEngine {
-    /// Whether to create backups before applying changes.
+    /// 是否在应用更改前创建备份。
     create_backups: bool,
-    /// Backup directory path.
+    /// 备份目录路径。
     backup_dir: Option<PathBuf>,
 }
 
 impl DiffApplyEngine {
-    /// Create a new diff apply engine.
+    /// 创建新的 diff 应用引擎。
     pub fn new() -> Self {
         Self {
             create_backups: true,
@@ -111,19 +110,19 @@ impl DiffApplyEngine {
         }
     }
 
-    /// Set whether to create backups.
+    /// 设置是否创建备份。
     pub fn with_backups(mut self, create_backups: bool) -> Self {
         self.create_backups = create_backups;
         self
     }
 
-    /// Set backup directory.
+    /// 设置备份目录。
     pub fn with_backup_dir(mut self, backup_dir: PathBuf) -> Self {
         self.backup_dir = Some(backup_dir);
         self
     }
 
-    /// Apply a file edit operation.
+    /// 应用文件编辑操作。
     pub async fn apply_edit(
         &self,
         file_path: &str,
@@ -140,7 +139,7 @@ impl DiffApplyEngine {
         }
     }
 
-    /// Apply a unified diff to a file.
+    /// 将统一 diff 应用到文件。
     pub async fn apply_diff(
         &self,
         file_path: &str,
@@ -149,36 +148,36 @@ impl DiffApplyEngine {
         let path = Path::new(file_path);
         if !path.exists() {
             return Err(Error::Internal(format!(
-                "File not found: {}",
+                "文件未找到: {}",
                 file_path
             )));
         }
 
-        // Read original content
+        // 读取原始内容
         let original_content = tokio::fs::read_to_string(path)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to read file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("读取文件失败: {}", e)))?;
 
-        // Parse diff
-        let hunks = parse_diff(diff).map_err(|e| Error::Internal(format!("Failed to parse diff: {}", e)))?;
+        // 解析 diff
+        let hunks = parse_diff(diff).map_err(|e| Error::Internal(format!("解析 diff 失败: {}", e)))?;
 
-        // Apply hunks
+        // 应用 hunks
         let modified_content = apply_hunks(&original_content, &hunks)
-            .map_err(|e| Error::Internal(format!("Failed to apply hunks: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("应用 hunks 失败: {}", e)))?;
 
-        // Create backup if enabled
+        // 如果启用则创建备份
         let backup_path = if self.create_backups {
             Some(self.create_backup(file_path, &original_content).await?)
         } else {
             None
         };
 
-        // Write modified content
+        // 写入修改后的内容
         tokio::fs::write(path, &modified_content)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to write file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("写入文件失败: {}", e)))?;
 
-        // Calculate statistics
+        // 计算统计信息
         let (lines_added, lines_removed) = count_changes(&hunks);
 
         info!(
@@ -186,7 +185,7 @@ impl DiffApplyEngine {
             hunks_applied = hunks.len(),
             lines_added = lines_added,
             lines_removed = lines_removed,
-            "Applied diff"
+            "应用了 diff"
         );
 
         Ok(DiffApplyResult {
@@ -198,7 +197,7 @@ impl DiffApplyEngine {
         })
     }
 
-    /// Apply search and replace to a file.
+    /// 将搜索和替换应用到文件。
     pub async fn apply_search_replace(
         &self,
         file_path: &str,
@@ -208,21 +207,21 @@ impl DiffApplyEngine {
         let path = Path::new(file_path);
         if !path.exists() {
             return Err(Error::Internal(format!(
-                "File not found: {}",
+                "文件未找到: {}",
                 file_path
             )));
         }
 
-        // Read original content
+        // 读取原始内容
         let original_content = tokio::fs::read_to_string(path)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to read file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("读取文件失败: {}", e)))?;
 
-        // Count matches
+        // 计算匹配数
         let match_count = original_content.matches(search).count();
         if match_count == 0 {
             return Err(Error::Internal(format!(
-                "Search string not found in file: {}",
+                "在文件中未找到搜索字符串: {}",
                 file_path
             )));
         }
@@ -230,33 +229,33 @@ impl DiffApplyEngine {
             warn!(
                 file_path = %file_path,
                 match_count = match_count,
-                "Multiple matches found; replacing all occurrences"
+                "找到多个匹配项; 替换所有出现"
             );
         }
 
-        // Apply replacement
+        // 应用替换
         let modified_content = original_content.replace(search, replace);
 
-        // Create backup if enabled
+        // 如果启用则创建备份
         let backup_path = if self.create_backups {
             Some(self.create_backup(file_path, &original_content).await?)
         } else {
             None
         };
 
-        // Write modified content
+        // 写入修改后的内容
         tokio::fs::write(path, &modified_content)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to write file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("写入文件失败: {}", e)))?;
 
-        // Calculate statistics
+        // 计算统计信息
         let lines_added = modified_content.lines().count() as u32;
         let lines_removed = original_content.lines().count() as u32;
 
         info!(
             file_path = %file_path,
             matches = match_count,
-            "Applied search/replace"
+            "应用了搜索/替换"
         );
 
         Ok(DiffApplyResult {
@@ -268,7 +267,7 @@ impl DiffApplyEngine {
         })
     }
 
-    /// Apply a code block to a file.
+    /// 将代码块应用到文件。
     pub async fn apply_code_block(
         &self,
         file_path: &str,
@@ -277,16 +276,16 @@ impl DiffApplyEngine {
     ) -> Result<DiffApplyResult> {
         let path = Path::new(file_path);
         
-        // Read original content (or empty if file doesn't exist)
+        // 读取原始内容（如果文件不存在则为空）
         let original_content = if path.exists() {
             tokio::fs::read_to_string(path)
                 .await
-                .map_err(|e| Error::Internal(format!("Failed to read file: {}", e)))?
+                .map_err(|e| Error::Internal(format!("读取文件失败: {}", e)))?
         } else {
             String::new()
         };
 
-        // Apply code block based on mode
+        // 根据模式应用代码块
         let modified_content = match mode {
             CodeBlockMode::Overwrite => code.to_string(),
             CodeBlockMode::Insert(line) => {
@@ -302,7 +301,7 @@ impl DiffApplyEngine {
                 
                 if start_pos >= end_pos {
                     return Err(Error::Internal(format!(
-                        "Invalid range: start ({}) >= end ({})",
+                        "无效范围: start ({}) >= end ({})",
                         start, end
                     )));
                 }
@@ -312,26 +311,26 @@ impl DiffApplyEngine {
             }
         };
 
-        // Create backup if enabled and file exists
+        // 如果启用且文件存在则创建备份
         let backup_path = if self.create_backups && path.exists() {
             Some(self.create_backup(file_path, &original_content).await?)
         } else {
             None
         };
 
-        // Write modified content
+        // 写入修改后的内容
         tokio::fs::write(path, &modified_content)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to write file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("写入文件失败: {}", e)))?;
 
-        // Calculate statistics
+        // 计算统计信息
         let lines_added = modified_content.lines().count() as u32;
         let lines_removed = original_content.lines().count() as u32;
 
         info!(
             file_path = %file_path,
             mode = ?mode,
-            "Applied code block"
+            "应用了代码块"
         );
 
         Ok(DiffApplyResult {
@@ -343,7 +342,7 @@ impl DiffApplyEngine {
         })
     }
 
-    /// Generate a unified diff between two strings.
+    /// 生成两个字符串之间的统一 diff。
     pub fn generate_diff(
         original: &str,
         modified: &str,
@@ -351,22 +350,22 @@ impl DiffApplyEngine {
     ) -> String {
         let mut diff = String::new();
         
-        // Add header
+        // 添加头部
         diff.push_str(&format!("--- a/{}\n", file_path));
         diff.push_str(&format!("+++ b/{}\n", file_path));
         
-        // Simple line-by-line diff (for demonstration)
+        // 简单的逐行 diff（用于演示）
         let original_lines: Vec<&str> = original.lines().collect();
         let modified_lines: Vec<&str> = modified.lines().collect();
         
-        // Add hunk header
+        // 添加 hunk 头部
         diff.push_str(&format!(
             "@@ -1,{} +1,{} @@\n",
             original_lines.len(),
             modified_lines.len()
         ));
         
-        // Add lines
+        // 添加行
         for line in &original_lines {
             diff.push_str(&format!("-{}\n", line));
         }
@@ -377,7 +376,7 @@ impl DiffApplyEngine {
         diff
     }
 
-    /// Create a backup of a file.
+    /// 创建文件的备份。
     async fn create_backup(
         &self,
         file_path: &str,
@@ -387,12 +386,12 @@ impl DiffApplyEngine {
             Path::new(file_path).parent().unwrap_or(Path::new("."))
         });
 
-        // Create backup directory if it doesn't exist
+        // 如果备份目录不存在则创建
         tokio::fs::create_dir_all(backup_dir)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to create backup directory: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("创建备份目录失败: {}", e)))?;
 
-        // Generate backup filename
+        // 生成备份文件名
         let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S");
         let original_name = Path::new(file_path)
             .file_name()
@@ -401,15 +400,15 @@ impl DiffApplyEngine {
         let backup_name = format!("{}.backup.{}", original_name, timestamp);
         let backup_path = backup_dir.join(backup_name);
 
-        // Write backup
+        // 写入备份
         tokio::fs::write(&backup_path, content)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to write backup: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("写入备份失败: {}", e)))?;
 
         debug!(
             file_path = %file_path,
             backup_path = %backup_path.display(),
-            "Created backup"
+            "创建了备份"
         );
 
         Ok(backup_path.to_string_lossy().to_string())
@@ -422,14 +421,14 @@ impl Default for DiffApplyEngine {
     }
 }
 
-/// Parse a unified diff format.
+/// 解析统一 diff 格式。
 fn parse_diff(diff: &str) -> std::result::Result<Vec<DiffHunk>, DiffApplyError> {
     let mut hunks = Vec::new();
     let mut current_hunk: Option<DiffHunk> = None;
     
     for line in diff.lines() {
         if line.starts_with("@@") {
-            // Parse hunk header: @@ -start,count +start,count @@
+            // 解析 hunk 头部: @@ -start,count +start,count @@
             if let Some(hunk) = current_hunk.take() {
                 hunks.push(hunk);
             }
@@ -437,7 +436,7 @@ fn parse_diff(diff: &str) -> std::result::Result<Vec<DiffHunk>, DiffApplyError> 
             let parts: Vec<&str> = line.split_whitespace().collect();
             if parts.len() < 3 {
                 return Err(DiffApplyError::InvalidDiff(
-                    "Invalid hunk header".to_string(),
+                    "无效的 hunk 头部".to_string(),
                 ));
             }
             
@@ -469,58 +468,58 @@ fn parse_diff(diff: &str) -> std::result::Result<Vec<DiffHunk>, DiffApplyError> 
     Ok(hunks)
 }
 
-/// Parse a range like "1,5" into (start, count).
+/// 解析类似 "1,5" 的范围为 (start, count)。
 fn parse_range(range: &str) -> std::result::Result<(u32, u32), DiffApplyError> {
     let parts: Vec<&str> = range.split(',').collect();
     if parts.len() == 1 {
         let start = parts[0]
             .parse::<u32>()
-            .map_err(|_| DiffApplyError::InvalidDiff("Invalid range".to_string()))?;
+            .map_err(|_| DiffApplyError::InvalidDiff("无效范围".to_string()))?;
         Ok((start, 1))
     } else if parts.len() == 2 {
         let start = parts[0]
             .parse::<u32>()
-            .map_err(|_| DiffApplyError::InvalidDiff("Invalid range start".to_string()))?;
+            .map_err(|_| DiffApplyError::InvalidDiff("无效范围起始值".to_string()))?;
         let count = parts[1]
             .parse::<u32>()
-            .map_err(|_| DiffApplyError::InvalidDiff("Invalid range count".to_string()))?;
+            .map_err(|_| DiffApplyError::InvalidDiff("无效范围计数".to_string()))?;
         Ok((start, count))
     } else {
-        Err(DiffApplyError::InvalidDiff("Invalid range format".to_string()))
+        Err(DiffApplyError::InvalidDiff("无效范围格式".to_string()))
     }
 }
 
-/// Apply hunks to original content.
+/// 将 hunks 应用到原始内容。
 fn apply_hunks(original: &str, hunks: &[DiffHunk]) -> std::result::Result<String, DiffApplyError> {
     let mut lines: Vec<String> = original.lines().map(|s| s.to_string()).collect();
     
-    // Apply hunks in reverse order to preserve line numbers
+    // 以相反顺序应用 hunks 以保持行号正确
     for hunk in hunks.iter().rev() {
         let start_idx = (hunk.start_line - 1) as usize;
         
-        // Build new lines for this hunk
+        // 为此 hunk 构建新行
         let mut new_lines = Vec::new();
         for line in &hunk.lines {
             match line {
                 DiffLine::Context(text) => new_lines.push(text.clone()),
                 DiffLine::Added(text) => new_lines.push(text.clone()),
-                DiffLine::Removed(_) => {} // Skip removed lines
+                DiffLine::Removed(_) => {} // 跳过删除的行
             }
         }
         
-        // Calculate how many lines to remove
+        // 计算要删除多少行
         let remove_count = hunk
             .lines
             .iter()
             .filter(|l| matches!(l, DiffLine::Removed(_) | DiffLine::Context(_)))
             .count();
         
-        // Replace lines
+        // 替换行
         if start_idx + remove_count <= lines.len() {
             lines.splice(start_idx..start_idx + remove_count, new_lines);
         } else {
             return Err(DiffApplyError::InvalidDiff(
-                "Hunk extends beyond file length".to_string(),
+                "Hunk 超出文件长度".to_string(),
             ));
         }
     }
@@ -528,7 +527,7 @@ fn apply_hunks(original: &str, hunks: &[DiffHunk]) -> std::result::Result<String
     Ok(lines.join("\n"))
 }
 
-/// Count lines added and removed in hunks.
+/// 计算 hunks 中添加和删除的行数。
 fn count_changes(hunks: &[DiffHunk]) -> (u32, u32) {
     let mut added = 0;
     let mut removed = 0;

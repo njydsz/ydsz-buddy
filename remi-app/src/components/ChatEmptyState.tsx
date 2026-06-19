@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { rpc } from "@/lib/rpc";
+import { rpc, type Project } from "@/lib/rpc";
 import { useAppStore } from "@/store";
 import { useT } from "@/i18n";
 import { toast } from "@/lib/toast";
@@ -28,14 +28,9 @@ export function ChatEmptyState() {
     try {
       const thread = await rpc.threadCreate(projectId, t("chat.empty.heading"));
       upsertThread({
-        id: thread.id,
-        projectId: thread.projectId,
-        title: thread.title,
-        createdAt: thread.createdAt,
-        updatedAt: thread.updatedAt,
+        ...thread,
         archivedAt: thread.archivedAt ?? null,
         isPinned: thread.isPinned ?? false,
-        sessionStatus: "connecting",
         latestTurn: thread.latestTurn ?? null,
         hasPendingApprovals: thread.hasPendingApprovals ?? false,
         hasPendingUserInput: thread.hasPendingUserInput ?? false,
@@ -65,7 +60,7 @@ export function ChatEmptyState() {
           {t("chat.empty.description")}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          {list.map((project) => (
+          {list.map((project: Project) => (
             <button
               key={project.id}
               className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground transition hover:border-primary hover:bg-accent disabled:opacity-50"

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { rpc } from "@/lib/rpc";
 import { useAppStore } from "@/store";
@@ -9,8 +9,6 @@ import { useT } from "@/i18n";
 import { ProviderHealthBar } from "./ProviderHealthBar";
 import { TransportStatusBanner } from "./TransportStatusBanner";
 import { useTransportState } from "@/hooks/useTransport";
-import { toast } from "@/lib/toast";
-import { log } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { APP_DISPLAY_NAME, APP_VERSION } from "@/lib/branding";
 
@@ -57,8 +55,6 @@ export function Sidebar() {
     () => readExpandedProjectIds(),
   );
 
-  const queryClient = useQueryClient();
-
   // Hydrate the projects + threads from the server. The query is
   // reactive: when the WebSocket re-emits the welcome snapshot, we
   // refresh the queries. The `staleTime: Infinity` keeps the list
@@ -91,19 +87,6 @@ export function Sidebar() {
     setTransport(transport);
   }, [transport, setTransport]);
 
-  const upsertProject = useMutation({
-    mutationFn: (input: { name: string; cwd: string }) =>
-      rpc.projectsAdd(input),
-    onSuccess: (project) => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-      toast.success(`Added project ${project.name}`);
-    },
-    onError: (e: Error) => {
-      toast.error(e.message);
-      log.error("projects.add failed", { error: e.message });
-    },
-  });
-
   const onToggleProject = (id: string) => {
     setExpandedProjectIds((prev) => {
       const next = prev.includes(id)
@@ -127,7 +110,10 @@ export function Sidebar() {
       map.set(thread.projectId, arr);
     }
     for (const [key, value] of map) {
-      value.sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""));
+      value.sort(
+        (a: typeof threads[number], b: typeof threads[number]) =>
+          (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""),
+      );
       map.set(key, value);
     }
     return map;
@@ -192,7 +178,7 @@ export function Sidebar() {
             {projectsQuery.isLoading ? t("sidebar.loading") : "—"}
           </div>
         ) : null}
-        {projects.map((project) => {
+        {projects.map((project: typeof projects[number]) => {
           const isExpanded = expandedProjectIds.includes(project.id);
           const projectThreads = grouped.get(project.id) ?? [];
           return (
@@ -210,7 +196,7 @@ export function Sidebar() {
               </button>
               {isExpanded && (
                 <ul className="mt-1 space-y-0.5">
-                  {projectThreads.map((thread) => (
+                  {projectThreads.map((thread: typeof projectThreads[number]) => (
                     <li key={thread.id}>
                       <button
                         className={cn(
@@ -244,13 +230,13 @@ export function Sidebar() {
                               title="Awaiting input"
                             />
                           ) : null}
-                          {thread.sessionStatus === "running" ? (
+                          {thread.session?.status === "running" ? (
                             <span
                               className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"
                               title="Running"
                             />
                           ) : null}
-                          {thread.sessionStatus === "error" ? (
+                          {thread.session?.status === "error" ? (
                             <span
                               className="h-2 w-2 rounded-full bg-red-500"
                               title="Error"

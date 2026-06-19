@@ -79,6 +79,10 @@ export const rpc = {
     text: string;
     attachments?: unknown[];
   }) => call<{ turnId: string }>("thread.sendMessage", input),
+  threadCancel: (threadId: string) =>
+    call<{ cancelled: boolean }>("thread.cancel", { threadId }),
+  threadRetryTurn: (threadId: string, turnId: string) =>
+    call<{ turnId: string }>("thread.retryTurn", { threadId, turnId }),
 
   // Projects
   projectsList: () => call<Project[]>("projects.list"),
@@ -151,4 +155,6 @@ export const rpc = {
     call<void>("editor.open", { path, editor }),
 } as const;
 
-export type RpcClient = typeof rpc;
+// Re-export the raw call so the rest of the app can use it for
+// ad-hoc RPCs (cancel, retry, custom events).
+export { call } from "./wsTransport";

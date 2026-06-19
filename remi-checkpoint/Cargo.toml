@@ -1,0 +1,29 @@
+[package]
+name = "remi-checkpoint"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+remi-core.workspace = true
+remi-contracts.workspace = true
+remi-git.workspace = true
+remi-orchestration.workspace = true
+remi-persistence.workspace = true
+remi-diff-apply.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+sqlx.workspace = true
+
+[dev-dependencies]
+tokio-test.workspace = true

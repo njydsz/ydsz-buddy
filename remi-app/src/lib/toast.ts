@@ -28,7 +28,9 @@ export interface Toast {
 
 interface ToastState {
   toasts: Toast[];
-  push: (toast: Omit<Toast, "id" | "createdAt">) => string;
+  push: (
+    toast: Omit<Toast, "id" | "createdAt" | "duration"> & { duration?: number },
+  ) => string;
   dismiss: (id: string) => void;
   clear: () => void;
 }
@@ -49,7 +51,8 @@ export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   push: (input) => {
     const id = genId();
-    const duration = input.duration ?? TOAST_DEFAULTS[input.variant];
+    const duration =
+      input.duration !== undefined ? input.duration : TOAST_DEFAULTS[input.variant];
     const toast: Toast = {
       id,
       createdAt: Date.now(),
@@ -72,27 +75,34 @@ export const useToastStore = create<ToastState>((set) => ({
 /** Imperative helper so non-React code (transport / event router)
  * can also push toasts. Returns the toast id. */
 export function pushToast(
-  input: Omit<Toast, "id" | "createdAt">,
+  input: Omit<Toast, "id" | "createdAt" | "duration"> & { duration?: number },
 ): string {
   return useToastStore.getState().push(input);
 }
 
 /** Convenience shortcuts — the rest of the codebase should prefer
  * these over `pushToast` so the call sites stay readable. */
+type ToastOptions = Omit<Toast, "id" | "createdAt" | "variant" | "message">;
+
 export const toast = {
-  info: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message">) =>
+  info: (message: string, opts?: Partial<ToastOptions>) =>
     pushToast({ variant: "info", message, ...opts }),
-  success: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message">) =>
+  success: (message: string, opts?: Partial<ToastOptions>) =>
     pushToast({ variant: "success", message, ...opts }),
-  warning: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message">) =>
+  warning: (message: string, opts?: Partial<ToastOptions>) =>
     pushToast({ variant: "warning", message, ...opts }),
-  error: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message">) =>
+  error: (message: string, opts?: Partial<ToastOptions>) =>
     pushToast({ variant: "error", message, ...opts }),
 };
 
 export function useToasts(): Toast[] {
   return useToastStore((s) => s.toasts);
 }
+
+type ScopedToastOptions = Omit<
+  Toast,
+  "id" | "createdAt" | "variant" | "message" | "source"
+>;
 
 /**
  * Helper for streaming a single value (e.g. an RPC error) to a toast
@@ -101,13 +111,13 @@ export function useToasts(): Toast[] {
  */
 export function useScopedToast(source: string) {
   return {
-    info: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message" | "source">) =>
+    info: (message: string, opts?: Partial<ScopedToastOptions>) =>
       pushToast({ variant: "info", message, source, ...opts }),
-    success: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message" | "source">) =>
+    success: (message: string, opts?: Partial<ScopedToastOptions>) =>
       pushToast({ variant: "success", message, source, ...opts }),
-    warning: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message" | "source">) =>
+    warning: (message: string, opts?: Partial<ScopedToastOptions>) =>
       pushToast({ variant: "warning", message, source, ...opts }),
-    error: (message: string, opts?: Partial<Omit<Toast, "id" | "createdAt" | "variant" | "message" | "source">) =>
+    error: (message: string, opts?: Partial<ScopedToastOptions>) =>
       pushToast({ variant: "error", message, source, ...opts }),
   };
 }

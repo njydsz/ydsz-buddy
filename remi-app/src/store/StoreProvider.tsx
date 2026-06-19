@@ -1,6 +1,7 @@
 import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
-import { type AppStore, createAppStore } from "./store";
+import { createAppStore } from "./store";
+import type { AppState } from "./types";
 
 const StoreContext = createContext<ReturnType<typeof createAppStore> | null>(null);
 
@@ -16,7 +17,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 
-export function useAppStore<T>(selector: (state: AppStore) => T): T {
+export function useAppStore<T>(selector: (state: AppState) => T): T {
   const store = useContext(StoreContext);
   if (!store) {
     throw new Error("useAppStore must be used inside <StoreProvider>");

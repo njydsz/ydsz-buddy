@@ -1,20 +1,16 @@
-//! PTY (pseudo-terminal) management for Remi Code.
+//! Remi Code 的 PTY（伪终端）管理。
 //!
-//! This crate provides terminal session management using `portable-pty`. It
-//! mirrors the capabilities found in mainstream ADE competitors (Cursor / Codex
-//! / OpenCode / ZCode) including:
+//! 本 crate 使用 `portable-pty` 提供终端会话管理功能，
+//! 与主流 ADE 竞品（Cursor / Codex / OpenCode / ZCode）的能力对齐，包括：
 //!
-//! * **Title monitoring** – parses OSC 0/1/2 escape sequences emitted by
-//!   shells, multiplexers (`tmux`, `zellij`) and editors (`vim`, `htop`) and
-//!   broadcasts them through a single event bus.
-//! * **Session reaper** – a background task that polls child processes,
-//!   captures their exit codes, and removes zombie sessions after a grace
-//!   period so the manager never leaks file descriptors.
-//! * **Managed wrappers** – [`ManagedTerminal`] provides a higher level,
-//!   ergonomic API (typed events, line buffering, command execution) on top
-//!   of the raw [`TerminalManager`]. The manager is the right entry point
-//!   for the RPC layer; the managed wrapper is what the orchestration engine
-//!   uses to drive interactive sessions.
+//! * **标题监控** — 解析 shell、多路复用器（`tmux`、`zellij`）和编辑器
+//!   （`vim`、`htop`）发出的 OSC 0/1/2 转义序列，并通过单一事件总线广播。
+//! * **会话回收器** — 后台任务轮询子进程，捕获其退出码，
+//!   并在宽限期后清理僵尸会话，确保管理器不会泄漏文件描述符。
+//! * **托管包装器** — [`ManagedTerminal`] 在原始 [`TerminalManager`] 之上
+//!   提供更高层、更符合人体工程学的 API（类型化事件、行缓冲、命令执行）。
+//!   管理器是 RPC 层的合适入口；托管包装器则是编排引擎用于驱动
+//!   交互式会话的工具。
 
 use std::collections::VecDeque;
 use std::sync::Arc;
@@ -32,16 +28,16 @@ use tokio::sync::broadcast;
 use tracing::{debug, info, warn};
 use uuid::Uuid;
 
-/// Maximum number of bytes replayed to a fresh subscriber.
+/// 重放缓冲区的最大字节数。
 pub const DEFAULT_REPLAY_BUFFER: usize = 64 * 1024;
-/// How often the reaper inspects child processes.
+/// 回收器检查子进程的频率。
 pub const REAPER_INTERVAL: Duration = Duration::from_millis(750);
-/// How long a session lives after its process exits before being reaped.
+/// 会话在进程退出后到被回收前的存活时间。
 pub const REAPER_GRACE: Duration = Duration::from_secs(10);
-/// Default broadcast capacity for terminal event channels.
+/// 终端事件通道的默认广播容量。
 pub const DEFAULT_EVENT_CAPACITY: usize = 1024;
 
-/// PTY (pseudo-terminal) manager.
+/// PTY（伪终端）管理器。
 #[derive(Clone)]
 pub struct TerminalManager {
     inner: Arc<TerminalManagerInner>,
@@ -77,12 +73,12 @@ struct SessionState {
 }
 
 impl TerminalManager {
-    /// Create a new terminal manager with a background reaper.
+    /// 创建带有后台回收器的新终端管理器。
     pub fn new() -> Self {
         Self::with_default_shell(default_shell())
     }
 
-    /// Create a new terminal manager with a specific default shell.
+    /// 使用指定默认 shell 创建新终端管理器。
     pub fn with_default_shell(shell: impl Into<String>) -> Self {
         let manager = Self {
             inner: Arc::new(TerminalManagerInner {
@@ -95,12 +91,12 @@ impl TerminalManager {
         manager
     }
 
-    /// Default shell used when callers do not provide one.
+    /// 调用方未提供时使用的默认 shell。
     pub fn default_shell(&self) -> &str {
         &self.inner.default_shell
     }
 
-    /// Create a new terminal session.
+    /// 创建新终端会话。
     pub async fn create(&self, input: CreateTerminalInput) -> Result<CreateTerminalOutput> {
         let id = Uuid::new_v4();
         let cols = input.cols.unwrap_or(80);
@@ -119,12 +115,12 @@ impl TerminalManager {
                 pixel_width: 0,
                 pixel_height: 0,
             })
-            .map_err(|e| Error::Internal(format!("Failed to create PTY: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("创建 PTY 失败: {}", e)))?;
 
         let mut cmd = CommandBuilder::new(&shell);
         cmd.cwd(&cwd);
 
-        // Forward a minimal but useful environment so shells behave normally.
+        // 转发最小但有用的环境，使 shell 正常运行。
         cmd.env("TERM", "xterm-256color");
         cmd.env("COLORTERM", "truecolor");
         cmd.env("REMI_TERMINAL_ID", id.to_string());
@@ -132,16 +128,16 @@ impl TerminalManager {
         let child = pty_pair
             .slave
             .spawn_command(cmd)
-            .map_err(|e| Error::Internal(format!("Failed to spawn command: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("生成命令失败: {}", e)))?;
 
         let writer = pty_pair
             .master
             .take_writer()
-            .map_err(|e| Error::Internal(format!("Failed to get PTY writer: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("获取 PTY 写入器失败: {}", e)))?;
         let reader = pty_pair
             .master
             .try_clone_reader()
-            .map_err(|e| Error::Internal(format!("Failed to get PTY reader: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("获取 PTY 读取器失败: {}", e)))?;
 
         let session = TerminalSession {
             id,
@@ -169,23 +165,23 @@ impl TerminalManager {
             exited: Arc::new(Mutex::new(None)),
         };
 
-        // Spawn reader task: parses OSC sequences, broadcasts events, keeps a
-        // bounded replay buffer for late subscribers.
+        // 生成读取器任务：解析 OSC 序列，广播事件，为延迟订阅者保留
+        // 有界重放缓冲区。
         Self::spawn_reader(handle.clone());
 
         self.inner.sessions.insert(id, handle);
-        info!("Created terminal session: {}", id);
+        info!("创建了终端会话: {}", id);
 
         Ok(CreateTerminalOutput { id })
     }
 
-    /// Write data to a terminal session.
+    /// 向终端会话写入数据。
     pub async fn write(&self, session_id: Uuid, data: &str) -> Result<()> {
         let handle = self
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
 
         let bytes = data.as_bytes().to_vec();
         let len = bytes.len() as u64;
@@ -194,10 +190,10 @@ impl TerminalManager {
             use std::io::Write;
             writer
                 .write_all(&bytes)
-                .map_err(|e| Error::Internal(format!("Failed to write to PTY: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("写入 PTY 失败: {}", e)))?;
             writer
                 .flush()
-                .map_err(|e| Error::Internal(format!("Failed to flush PTY: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("刷新 PTY 失败: {}", e)))?;
         }
         {
             let mut state = handle.state.lock();
@@ -207,21 +203,20 @@ impl TerminalManager {
         Ok(())
     }
 
-    /// Send a line of input to a terminal session (writes the data followed by
-    /// a newline character).
+    /// 向终端会话发送一行输入（写入数据后跟换行符）。
     pub async fn write_line(&self, session_id: Uuid, line: &str) -> Result<()> {
         let mut data = line.to_string();
         data.push('\n');
         self.write(session_id, &data).await
     }
 
-    /// Resize a terminal session.
+    /// 调整终端会话大小。
     pub async fn resize(&self, session_id: Uuid, cols: u16, rows: u16) -> Result<()> {
         let handle = self
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
 
         let size = PtySize {
             rows,
@@ -233,35 +228,35 @@ impl TerminalManager {
             .master
             .lock()
             .resize(size)
-            .map_err(|e| Error::Internal(format!("Failed to resize PTY: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("调整 PTY 大小失败: {}", e)))?;
         info!(
-            "Resized terminal session {} to {}x{}",
+            "将终端会话 {} 调整为 {}x{}",
             session_id, cols, rows
         );
         Ok(())
     }
 
-    /// Send SIGINT to a terminal session, falling back to a control-C
-    /// character if the platform does not support signal delivery.
+    /// 向终端会话发送 SIGINT，如果平台不支持信号传递，则回退到
+    /// control-C 字符。
     pub async fn interrupt(&self, session_id: Uuid) -> Result<()> {
         self.write(session_id, "\u{3}").await
     }
 
-    /// Close a terminal session.
+    /// 关闭终端会话。
     pub async fn close(&self, session_id: Uuid) -> Result<()> {
         if let Some((_, handle)) = self.inner.sessions.remove(&session_id) {
-            // Drop the writer to send EOF to the shell.
+            // 丢弃写入器以向 shell 发送 EOF。
             drop(handle.writer);
-            // Drop the master to close the PTY pair.
+            // 丢弃主设备以关闭 PTY 对。
             drop(handle.master);
-            info!("Closed terminal session: {}", session_id);
+            info!("关闭了终端会话: {}", session_id);
         } else {
-            warn!("Attempted to close non-existent session: {}", session_id);
+            warn!("尝试关闭不存在的会话: {}", session_id);
         }
         Ok(())
     }
 
-    /// List all active sessions.
+    /// 列出所有活跃会话。
     pub async fn list_sessions(&self) -> Vec<TerminalSession> {
         self.inner
             .sessions
@@ -270,7 +265,7 @@ impl TerminalManager {
             .collect()
     }
 
-    /// Subscribe to terminal events.
+    /// 订阅终端事件。
     pub async fn subscribe_events(
         &self,
         session_id: Uuid,
@@ -279,23 +274,23 @@ impl TerminalManager {
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
         Ok(handle.output_tx.subscribe())
     }
 
-    /// Backwards-compatible subscribe to plain output (no title/exit).
+    /// 向后兼容的纯输出订阅（无标题/退出）。
     pub async fn subscribe_output(&self, session_id: Uuid) -> Result<broadcast::Receiver<String>> {
         let rx = self.subscribe_events(session_id).await?;
         Ok(OutputOnly { inner: rx }.to_receiver())
     }
 
-    /// Get a status snapshot for a session.
+    /// 获取会话的状态快照。
     pub async fn status(&self, session_id: Uuid) -> Result<TerminalStatus> {
         let handle = self
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
         let state = handle.state.lock().clone();
         let exited = handle.exited.lock();
         let last_activity = state
@@ -320,21 +315,21 @@ impl TerminalManager {
         })
     }
 
-    /// Clear terminal screen (sends ANSI clear sequence).
+    /// 清除终端屏幕（发送 ANSI 清除序列）。
     pub async fn clear(&self, session_id: Uuid) -> Result<()> {
         self.write(session_id, "\x1b[2J\x1b[H").await?;
-        info!("Cleared terminal session: {}", session_id);
+        info!("清除了终端会话: {}", session_id);
         Ok(())
     }
 
-    /// Restart a terminal session with the same configuration.
+    /// 使用相同配置重启终端会话。
     pub async fn restart(&self, session_id: Uuid) -> Result<()> {
         let (cwd, shell, thread_id, cols, rows) = {
             let handle = self
                 .inner
                 .sessions
                 .get(&session_id)
-                .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+                .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
             (
                 handle.session.cwd.clone(),
                 handle.session.shell.clone(),
@@ -343,7 +338,7 @@ impl TerminalManager {
                 24u16,
             )
         };
-        // Best-effort close: ignore missing entries.
+        // 尽力关闭：忽略缺失条目。
         let _ = self.close(session_id).await;
         let input = CreateTerminalInput {
             cwd,
@@ -354,35 +349,35 @@ impl TerminalManager {
         };
         let new_output = self.create(input).await?;
         info!(
-            "Restarted terminal session {} -> {}",
+            "重启了终端会话 {} -> {}",
             session_id, new_output.id
         );
         Ok(())
     }
 
-    /// Get the latest observed title for a session.
+    /// 获取会话的最新观察标题。
     pub async fn title(&self, session_id: Uuid) -> Result<String> {
         let handle = self
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
         Ok(handle.state.lock().title.clone())
     }
 
-    /// Snapshot of the buffered output for late subscribers / replay.
+    /// 缓冲输出的快照，供延迟订阅者/重放使用。
     pub async fn replay(&self, session_id: Uuid) -> Result<String> {
         let handle = self
             .inner
             .sessions
             .get(&session_id)
-            .ok_or_else(|| Error::Internal(format!("Session not found: {}", session_id)))?;
+            .ok_or_else(|| Error::Internal(format!("会话未找到: {}", session_id)))?;
         let state = handle.state.lock();
         let bytes: Vec<u8> = state.replay_buffer.iter().copied().collect();
         Ok(String::from_utf8_lossy(&bytes).to_string())
     }
 
-    /// Spawn the background reaper (idempotent).
+    /// 生成后台回收器（幂等）。
     fn spawn_reaper(&self) {
         let mut running = self.inner.reaper_running.lock();
         if *running {
@@ -431,7 +426,7 @@ impl TerminalManager {
                     push_replay(&mut state.replay_buffer, chunk);
                 }
 
-                // Stream the raw chunk to subscribers for redrawing.
+                // 将原始块流式传输给订阅者以进行重绘。
                 if let Ok(text) = std::str::from_utf8(chunk) {
                     let _ = output_tx.send(TerminalEvent::Output(TerminalOutputEvent {
                         session_id,
@@ -439,7 +434,7 @@ impl TerminalManager {
                     }));
                 }
 
-                // Look for OSC title updates and broadcast them.
+                // 查找 OSC 标题更新并广播。
                 for title in parser.feed(chunk) {
                     let cleaned = title.trim_end_matches('\u{7}').to_string();
                     {
@@ -453,8 +448,8 @@ impl TerminalManager {
                 }
             }
 
-            // Mark exit; we don't have the real exit code here (it lives on the
-            // child handle), so we report -1 to signal "process ended".
+            // 标记退出；这里没有真实的退出码（它在子句柄上），
+            // 所以我们报告 -1 以表示"进程已结束"。
             let code = {
                 let mut slot = exited.lock();
                 if slot.is_none() {
@@ -466,7 +461,7 @@ impl TerminalManager {
                 session_id,
                 exit_code: code.unwrap_or(-1),
             }));
-            debug!("Reader task ended for session: {}", session_id);
+            debug!("会话 {} 的读取器任务已结束", session_id);
         });
     }
 }
@@ -484,24 +479,24 @@ async fn reap_once(sessions: &DashMap<Uuid, TerminalHandle>) {
         let handle = entry.value();
         let mut exited = handle.exited.lock();
         if exited.is_none() {
-            // Try to detect that the child has exited without blocking.
+            // 尝试在不阻塞的情况下检测子进程是否已退出。
             let mut child = handle.child.lock();
             match child.try_wait() {
                 Ok(Some(status)) => {
                     *exited = Some(status.exit_code() as i32);
                 }
                 Ok(None) => {
-                    // Still running.
+                    // 仍在运行。
                 }
                 Err(_) => {
-                    // Treat unrecoverable error as "exited with -1" so the
-                    // reaper eventually cleans up the session.
+                    // 将不可恢复的错误视为"以 -1 退出"，以便
+                    // 回收器最终清理会话。
                     *exited = Some(-1);
                 }
             }
         }
         if let Some(code) = *exited {
-            // Reap once the grace period has elapsed.
+            // 宽限期过后进行回收。
             if now.duration_since(handle.created_at) > REAPER_GRACE {
                 to_remove.push((entry.key().clone(), code));
             }
@@ -510,17 +505,17 @@ async fn reap_once(sessions: &DashMap<Uuid, TerminalHandle>) {
     }
     for (id, _) in to_remove {
         if let Some((_, handle)) = sessions.remove(&id) {
-            // Best-effort: dropping the writer + master closes the PTY.
+            // 尽力而为：丢弃写入器 + 主设备会关闭 PTY。
             drop(handle.writer);
             drop(handle.master);
             drop(handle.child);
-            info!("Reaped terminal session: {}", id);
+            info!("回收了终端会话: {}", id);
         }
     }
 }
 
-/// Adapter that turns a [`TerminalEvent`] stream into a plain `String` stream
-/// for backwards compatibility with the original `subscribe_output` API.
+/// 适配器，将 [`TerminalEvent`] 流转换为纯 `String` 流，
+/// 以便与原始 `subscribe_output` API 向后兼容。
 struct OutputOnly {
     inner: broadcast::Receiver<TerminalEvent>,
 }
@@ -562,10 +557,10 @@ fn default_shell() -> String {
     }
 }
 
-/// Incremental parser for OSC (`ESC ]`) sequences carrying the terminal title.
+/// 用于承载终端标题的 OSC (`ESC ]`) 序列的增量解析器。
 ///
-/// Recognises OSC 0/1/2, terminated by either `BEL` (0x07) or `ESC \`
-/// (string terminator). Other OSC codes are skipped.
+/// 识别 OSC 0/1/2，以 `BEL` (0x07) 或 `ESC \`（字符串终止符）结束。
+/// 其他 OSC 代码会被跳过。
 struct OscParser {
     in_osc: bool,
     accum: Vec<u8>,
@@ -586,7 +581,7 @@ impl OscParser {
         for &byte in chunk {
             if !self.in_osc {
                 if byte == 0x1b {
-                    // Mark potential OSC; only commit if the next byte is ']'.
+                    // 标记潜在的 OSC；仅当下一个字节是 ']' 时才确认。
                     self.pending_code = Some(0x1b);
                 } else if self.pending_code == Some(0x1b) && byte == b']' {
                     self.in_osc = true;
@@ -600,11 +595,11 @@ impl OscParser {
 
             match byte {
                 0x07 => {
-                    // BEL terminator
+                    // BEL 终止符
                     self.finish_into(&mut titles);
                 }
                 0x1b => {
-                    // Possible ST (ESC \) – peek at next byte outside this loop.
+                    // 可能是 ST (ESC \) — 在此循环外查看下一个字节。
                     self.pending_code = Some(0x1b);
                 }
                 _ if self.pending_code == Some(0x1b) && byte == b'\\' => {
@@ -635,12 +630,11 @@ impl OscParser {
 }
 
 // ---------------------------------------------------------------------------
-// Managed wrapper
+// 托管包装器
 // ---------------------------------------------------------------------------
 
-/// High level wrapper around a terminal session that adds typed event
-/// iteration, line buffering and one-shot command execution. This is what
-/// the orchestration engine uses to interact with shells.
+/// 终端会话的高层包装器，添加了类型化事件迭代、行缓冲
+/// 和一次性命令执行。这是编排引擎用于与 shell 交互的工具。
 pub struct ManagedTerminal {
     manager: TerminalManager,
     session_id: Uuid,
@@ -650,7 +644,7 @@ pub struct ManagedTerminal {
 }
 
 impl ManagedTerminal {
-    /// Open a new managed terminal session.
+    /// 打开新的托管终端会话。
     pub async fn open(
         manager: &TerminalManager,
         input: CreateTerminalInput,
@@ -666,28 +660,28 @@ impl ManagedTerminal {
         })
     }
 
-    /// Override the default command timeout.
+    /// 覆盖默认命令超时。
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.command_timeout = timeout;
         self
     }
 
-    /// Session ID of the underlying terminal.
+    /// 底层终端的会话 ID。
     pub fn id(&self) -> Uuid {
         self.session_id
     }
 
-    /// Send a line of input.
+    /// 发送一行输入。
     pub async fn send_line(&self, line: &str) -> Result<()> {
         self.manager.write_line(self.session_id, line).await
     }
 
-    /// Send raw data (e.g. control sequences).
+    /// 发送原始数据（例如控制序列）。
     pub async fn send_raw(&self, data: &str) -> Result<()> {
         self.manager.write(self.session_id, data).await
     }
 
-    /// Read the next typed event.
+    /// 读取下一个类型化事件。
     pub async fn next_event(&mut self) -> Result<TerminalEvent> {
         loop {
             match self.events.recv().await {
@@ -700,20 +694,19 @@ impl ManagedTerminal {
                 }
                 Err(broadcast::error::RecvError::Lagged(_)) => continue,
                 Err(broadcast::error::RecvError::Closed) => {
-                    return Err(Error::Internal("terminal event stream closed".to_string()));
+                    return Err(Error::Internal("终端事件流已关闭".to_string()));
                 }
             }
         }
     }
 
-    /// Drain buffered output into a string and clear the buffer.
+    /// 将缓冲的输出排空到字符串并清空缓冲区。
     pub fn drain_lines(&self) -> String {
         let mut buf = self.line_buffer.lock();
         std::mem::take(&mut *buf)
     }
 
-    /// Wait for a line that contains the marker substring, returning everything
-    /// buffered up to and including that line.
+    /// 等待包含标记子字符串的行，返回缓冲到该行（包括该行）的所有内容。
     pub async fn wait_for(&mut self, marker: &str) -> Result<String> {
         let deadline = Instant::now() + self.command_timeout;
         loop {
@@ -733,7 +726,7 @@ impl ManagedTerminal {
             }
             if Instant::now() >= deadline {
                 return Err(Error::Internal(format!(
-                    "timed out waiting for marker: {}",
+                    "等待标记超时: {}",
                     marker
                 )));
             }
@@ -742,35 +735,35 @@ impl ManagedTerminal {
                 self.next_event(),
             )
             .await
-            .map_err(|_| Error::Internal(format!("timed out waiting for marker: {}", marker)))??;
+            .map_err(|_| Error::Internal(format!("等待标记超时: {}", marker)))??;
             if matches!(event, TerminalEvent::Exit(_)) {
-                return Err(Error::Internal("terminal exited while waiting".to_string()));
+                return Err(Error::Internal("等待时终端已退出".to_string()));
             }
         }
     }
 
-    /// Send a command and wait for the prompt marker.
+    /// 发送命令并等待提示标记。
     pub async fn send_command(&mut self, command: &str, prompt: &str) -> Result<String> {
         self.send_line(command).await?;
         self.wait_for(prompt).await
     }
 
-    /// Current title.
+    /// 当前标题。
     pub async fn title(&self) -> Result<String> {
         self.manager.title(self.session_id).await
     }
 
-    /// Status snapshot.
+    /// 状态快照。
     pub async fn status(&self) -> Result<TerminalStatus> {
         self.manager.status(self.session_id).await
     }
 
-    /// Replay buffered output.
+    /// 重放缓冲的输出。
     pub async fn replay(&self) -> Result<String> {
         self.manager.replay(self.session_id).await
     }
 
-    /// Close the underlying session.
+    /// 关闭底层会话。
     pub async fn close(self) -> Result<()> {
         self.manager.close(self.session_id).await
     }

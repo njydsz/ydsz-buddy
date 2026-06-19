@@ -1,36 +1,11 @@
 import type { StoreApi } from "zustand";
+import type { Project, Thread } from "@/lib/rpc";
 
-export interface ThreadSummary {
-  id: string;
-  projectId: string;
-  title: string;
-  createdAt: string;
-  updatedAt?: string;
-  archivedAt?: string | null;
-  isPinned?: boolean;
-  sessionStatus:
-    | "disconnected"
-    | "connecting"
-    | "ready"
-    | "running"
-    | "error"
-    | "closed"
-    | null;
-  latestTurn: unknown | null;
-  hasPendingApprovals: boolean;
-  hasPendingUserInput: boolean;
-  lastVisitedAt?: string | null;
-}
-
-export interface ProjectSummary {
-  id: string;
-  name: string;
-  kind: "project" | "workspace";
-  remoteName: string;
-  folderName: string;
-  cwd: string;
-  expanded: boolean;
-}
+// The store uses the same shapes as the RPC layer so we don't have to
+// keep two parallel definitions in sync. Any client-side helpers can
+// derive the narrower sidebar views from these records.
+export type ThreadSummary = Thread;
+export type ProjectSummary = Project;
 
 export type TransportStateName =
   | "idle"

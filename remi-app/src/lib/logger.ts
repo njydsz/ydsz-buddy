@@ -33,7 +33,7 @@ const listeners = new Set<(entry: LogEntry) => void>();
 
 export function recordLog(entry: Omit<LogEntry, "id" | "ts">) {
   const full: LogEntry = {
-    id: `log_${nextId++}`,
+    id: `log_${nextLogId++}`,
     ts: Date.now(),
     ...entry,
   };
@@ -49,6 +49,7 @@ export function recordLog(entry: Omit<LogEntry, "id" | "ts">) {
       variant: "error",
       title: entry.source === "tauri" ? "Server error" : "Error",
       message: entry.message,
+      duration: 8_000,
       source: `log:${entry.source}`,
     });
   } else if (entry.level === "warn") {

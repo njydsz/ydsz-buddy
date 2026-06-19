@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter, createRoute, createRootRoute, Link } from "@tanstack/react-router";
+import { createRouter, createRoute, createRootRoute } from "@tanstack/react-router";
 
 import { RootRouteView } from "@/routes/__root";
 import { ChatLayout } from "@/routes/_chat";

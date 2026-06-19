@@ -28,7 +28,6 @@ export function TransportStatusBanner() {
   if (!showStale) return null;
 
   const isError = state === "closed" || state === "disposed";
-  const isConnecting = state === "connecting" || state === "reconnecting";
 
   return (
     <div

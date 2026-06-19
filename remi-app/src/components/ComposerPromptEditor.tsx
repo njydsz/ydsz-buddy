@@ -73,14 +73,14 @@ export function ComposerPromptEditor({ threadId }: Props) {
     const dialog = await import("@tauri-apps/plugin-dialog");
     const path = await dialog.open({ directory: true, multiple: false });
     if (typeof path === "string") {
-      setText((prev) => (prev ? `${prev}\n@${path}` : `@${path}`));
+      setText((prev: string) => (prev ? `${prev}\n@${path}` : `@${path}`));
     }
   }, []);
 
   const onCancel = useCallback(async () => {
     if (!busy) return;
     try {
-      await rpc.call<unknown>("thread.cancel", { threadId });
+      await rpc.threadCancel(threadId);
       toast.info(t("chat.cancel"), { source: "composer" });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
