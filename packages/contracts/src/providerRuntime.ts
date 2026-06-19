@@ -1,3 +1,27 @@
+/**
+ * Provider 运行时事件契约
+ *
+ * 定义 Provider 运行时产生的各种事件数据结构，包括：
+ * - 会话事件：启动、配置、状态变化、退出
+ * - 线程事件：启动、状态变化、元数据更新、Token 使用量更新、实时会话
+ * - 轮次事件：启动、完成、中止、任务更新、提议变更、差异更新
+ * - 项目事件：启动、更新、完成
+ * - 内容事件：文本增量
+ * - 请求事件：审批请求打开、审批请求解决
+ * - 用户输入事件：请求用户输入、用户输入解决
+ * - 任务事件：任务启动、进度、完成
+ * - 钩子事件：钩子启动、进度、完成
+ * - 工具事件：工具进度、工具摘要
+ * - 认证事件：认证状态
+ * - 账户事件：账户更新、速率限制更新
+ * - MCP 事件：MCP 状态更新、OAuth 完成
+ * - 模型事件：模型重路由
+ * - 配置事件：配置警告、弃用通知
+ * - 文件事件：文件持久化
+ * - 运行时事件：警告、错误
+ *
+ * 这些事件用于实时传递 Provider 的运行状态和数据流。
+ */
 import { Option, Schema } from "effect";
 import {
   EventId,
@@ -17,6 +41,7 @@ import { ProviderKind } from "./orchestration";
 const TrimmedNonEmptyStringSchema = TrimmedNonEmptyString;
 const UnknownRecordSchema = Schema.Record(Schema.String, Schema.Unknown);
 
+/** 运行时事件原始来源，标识事件来自哪个 Provider 的哪种通信渠道 */
 const RuntimeEventRawSource = Schema.Literals([
   "codex.app-server.notification",
   "codex.app-server.request",
@@ -35,27 +60,41 @@ const RuntimeEventRawSource = Schema.Literals([
 ]);
 export type RuntimeEventRawSource = typeof RuntimeEventRawSource.Type;
 
+/** 运行时原始事件，包含来源、方法、消息类型和负载数据 */
 export const RuntimeEventRaw = Schema.Struct({
+  /** 事件来源 */
   source: RuntimeEventRawSource,
+  /** 方法名 */
   method: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 消息类型 */
   messageType: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 负载数据 */
   payload: Schema.Unknown,
 });
 export type RuntimeEventRaw = typeof RuntimeEventRaw.Type;
 
+/** Provider 请求 ID 类型 */
 const ProviderRequestId = TrimmedNonEmptyStringSchema;
 export type ProviderRequestId = typeof ProviderRequestId.Type;
 
+/** Provider 引用信息，用于关联 Provider 层的线程、轮次、项目等 */
 const ProviderRefs = Schema.Struct({
+  /** Provider 线程 ID */
   providerThreadId: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** Provider 父线程 ID */
   providerParentThreadId: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** Provider 轮次 ID */
   providerTurnId: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 父轮次的 Provider 轮次 ID */
   parentProviderTurnId: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** Provider 项目 ID */
   providerItemId: Schema.optional(ProviderItemId),
+  /** Provider 请求 ID */
   providerRequestId: Schema.optional(ProviderRequestId),
 });
 export type ProviderRefs = typeof ProviderRefs.Type;
 
+/** 运行时会话状态枚举：启动中、就绪、运行中、等待、已停止、错误 */
 const RuntimeSessionState = Schema.Literals([
   "starting",
   "ready",
@@ -66,6 +105,7 @@ const RuntimeSessionState = Schema.Literals([
 ]);
 export type RuntimeSessionState = typeof RuntimeSessionState.Type;
 
+/** 运行时线程状态枚举：活跃、空闲、已归档、已关闭、已压缩、错误 */
 const RuntimeThreadState = Schema.Literals([
   "active",
   "idle",
@@ -76,15 +116,19 @@ const RuntimeThreadState = Schema.Literals([
 ]);
 export type RuntimeThreadState = typeof RuntimeThreadState.Type;
 
+/** 运行时轮次状态枚举：已完成、失败、已中断、已取消 */
 const RuntimeTurnState = Schema.Literals(["completed", "failed", "interrupted", "cancelled"]);
 export type RuntimeTurnState = typeof RuntimeTurnState.Type;
 
+/** 运行时任务状态枚举：待处理、进行中、已完成 */
 const RuntimeTaskStatus = Schema.Literals(["pending", "inProgress", "completed"]);
 export type RuntimeTaskStatus = typeof RuntimeTaskStatus.Type;
 
+/** 运行时项目状态枚举：进行中、已完成、失败、已拒绝 */
 const RuntimeItemStatus = Schema.Literals(["inProgress", "completed", "failed", "declined"]);
 export type RuntimeItemStatus = typeof RuntimeItemStatus.Type;
 
+/** 运行时内容流类型枚举：助手文本、推理文本、推理摘要、计划文本、命令输出、文件变更输出、未知 */
 const RuntimeContentStreamKind = Schema.Literals([
   "assistant_text",
   "reasoning_text",
@@ -96,9 +140,11 @@ const RuntimeContentStreamKind = Schema.Literals([
 ]);
 export type RuntimeContentStreamKind = typeof RuntimeContentStreamKind.Type;
 
+/** 运行时会话退出类型枚举：优雅退出、错误退出 */
 const RuntimeSessionExitKind = Schema.Literals(["graceful", "error"]);
 export type RuntimeSessionExitKind = typeof RuntimeSessionExitKind.Type;
 
+/** 运行时错误分类枚举：提供者错误、传输错误、权限错误、验证错误、未知错误 */
 const RuntimeErrorClass = Schema.Literals([
   "provider_error",
   "transport_error",
@@ -108,6 +154,7 @@ const RuntimeErrorClass = Schema.Literals([
 ]);
 export type RuntimeErrorClass = typeof RuntimeErrorClass.Type;
 
+/** 工具生命周期项目类型常量：命令执行、文件变更、MCP 工具调用、动态工具调用、协作代理工具调用、网页搜索、图片查看、图片生成 */
 export const TOOL_LIFECYCLE_ITEM_TYPES = [
   "command_execution",
   "file_change",
@@ -119,13 +166,16 @@ export const TOOL_LIFECYCLE_ITEM_TYPES = [
   "image_generation",
 ] as const;
 
+/** 工具生命周期项目类型 */
 export const ToolLifecycleItemType = Schema.Literals(TOOL_LIFECYCLE_ITEM_TYPES);
 export type ToolLifecycleItemType = typeof ToolLifecycleItemType.Type;
 
+/** 判断是否为工具生命周期项目类型 */
 export function isToolLifecycleItemType(value: string): value is ToolLifecycleItemType {
   return TOOL_LIFECYCLE_ITEM_TYPES.includes(value as ToolLifecycleItemType);
 }
 
+/** 规范项目类型枚举：用户消息、助手消息、推理、计划、工具生命周期项目、审查进入、审查退出、上下文压缩、错误、未知 */
 export const CanonicalItemType = Schema.Literals([
   "user_message",
   "assistant_message",
@@ -140,6 +190,7 @@ export const CanonicalItemType = Schema.Literals([
 ]);
 export type CanonicalItemType = typeof CanonicalItemType.Type;
 
+/** 规范请求类型枚举：命令执行审批、文件读取审批、文件变更审批、应用补丁审批、执行命令审批、工具用户输入、动态工具调用、认证令牌刷新、未知 */
 export const CanonicalRequestType = Schema.Literals([
   "command_execution_approval",
   "file_read_approval",
@@ -153,11 +204,14 @@ export const CanonicalRequestType = Schema.Literals([
 ]);
 export type CanonicalRequestType = typeof CanonicalRequestType.Type;
 
+/** Provider 运行时事件类型枚举，包含所有可能的事件类型 */
 const ProviderRuntimeEventType = Schema.Literals([
+  // 会话事件
   "session.started",
   "session.configured",
   "session.state.changed",
   "session.exited",
+  // 线程事件
   "thread.started",
   "thread.state.changed",
   "thread.metadata.updated",
@@ -167,6 +221,7 @@ const ProviderRuntimeEventType = Schema.Literals([
   "thread.realtime.audio.delta",
   "thread.realtime.error",
   "thread.realtime.closed",
+  // 轮次事件
   "turn.started",
   "turn.completed",
   "turn.aborted",
@@ -174,36 +229,51 @@ const ProviderRuntimeEventType = Schema.Literals([
   "turn.proposed.delta",
   "turn.proposed.completed",
   "turn.diff.updated",
+  // 项目事件
   "item.started",
   "item.updated",
   "item.completed",
+  // 内容事件
   "content.delta",
+  // 请求事件
   "request.opened",
   "request.resolved",
+  // 用户输入事件
   "user-input.requested",
   "user-input.resolved",
+  // 任务事件
   "task.started",
   "task.progress",
   "task.completed",
+  // 钩子事件
   "hook.started",
   "hook.progress",
   "hook.completed",
+  // 工具事件
   "tool.progress",
   "tool.summary",
+  // 认证事件
   "auth.status",
+  // 账户事件
   "account.updated",
   "account.rate-limits.updated",
+  // MCP 事件
   "mcp.status.updated",
   "mcp.oauth.completed",
+  // 模型事件
   "model.rerouted",
+  // 配置事件
   "config.warning",
   "deprecation.notice",
+  // 文件事件
   "files.persisted",
+  // 运行时事件
   "runtime.warning",
   "runtime.error",
 ]);
 export type ProviderRuntimeEventType = typeof ProviderRuntimeEventType.Type;
 
+/** 事件类型常量定义 */
 const SessionStartedType = Schema.Literal("session.started");
 const SessionConfiguredType = Schema.Literal("session.configured");
 const SessionStateChangedType = Schema.Literal("session.state.changed");
@@ -252,41 +322,69 @@ const FilesPersistedType = Schema.Literal("files.persisted");
 const RuntimeWarningType = Schema.Literal("runtime.warning");
 const RuntimeErrorType = Schema.Literal("runtime.error");
 
+/**
+ * Provider 运行时事件基础结构
+ *
+ * 所有运行时事件的公共基础字段，包含事件 ID、提供者、线程、时间戳等信息。
+ */
 const ProviderRuntimeEventBase = Schema.Struct({
+  /** 事件 ID */
   eventId: EventId,
+  /** Provider 类型 */
   provider: ProviderKind,
+  /** 线程 ID */
   threadId: ThreadId,
+  /** 事件创建时间 */
   createdAt: IsoDateTime,
+  /** 轮次 ID */
   turnId: Schema.optional(TurnId),
+  /** 父轮次 ID */
   parentTurnId: Schema.optional(TurnId),
+  /** 项目 ID */
   itemId: Schema.optional(RuntimeItemId),
+  /** 请求 ID */
   requestId: Schema.optional(RuntimeRequestId),
+  /** Provider 引用信息 */
   providerRefs: Schema.optional(ProviderRefs),
+  /** 原始事件数据 */
   raw: Schema.optional(RuntimeEventRaw),
 });
 export type ProviderRuntimeEventBase = typeof ProviderRuntimeEventBase.Type;
 
+/** 会话启动事件负载 */
 const SessionStartedPayload = Schema.Struct({
+  /** 启动消息 */
   message: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 恢复信息 */
   resume: Schema.optional(Schema.Unknown),
 });
 export type SessionStartedPayload = typeof SessionStartedPayload.Type;
 
+/** 会话配置事件负载 */
 const SessionConfiguredPayload = Schema.Struct({
+  /** 配置信息 */
   config: UnknownRecordSchema,
 });
 export type SessionConfiguredPayload = typeof SessionConfiguredPayload.Type;
 
+/** 会话状态变化事件负载 */
 const SessionStateChangedPayload = Schema.Struct({
+  /** 新状态 */
   state: RuntimeSessionState,
+  /** 变化原因 */
   reason: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 详细信息 */
   detail: Schema.optional(Schema.Unknown),
 });
 export type SessionStateChangedPayload = typeof SessionStateChangedPayload.Type;
 
+/** 会话退出事件负载 */
 const SessionExitedPayload = Schema.Struct({
+  /** 退出原因 */
   reason: Schema.optional(TrimmedNonEmptyStringSchema),
+  /** 是否可恢复 */
   recoverable: Schema.optional(Schema.Boolean),
+  /** 退出类型 */
   exitKind: Schema.optional(RuntimeSessionExitKind),
 });
 export type SessionExitedPayload = typeof SessionExitedPayload.Type;

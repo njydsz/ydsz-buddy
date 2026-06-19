@@ -146,22 +146,47 @@ impl OrchestrationEvent {
             OrchestrationEvent::ThreadActivityAppended(e) => e.occurred_at,
         }
     }
-}
 
-/// 事件基础字段宏
-macro_rules! event_base_fields {
-    () => {
-        pub sequence: Sequence,
-        pub occurred_at: DateTime<Utc>,
-        pub command_id: Option<String>,
-    };
+    /// 获取命令 ID
+    pub fn command_id(&self) -> Option<String> {
+        match self {
+            OrchestrationEvent::ProjectCreated(e) => e.command_id.clone(),
+            OrchestrationEvent::ProjectMetaUpdated(e) => e.command_id.clone(),
+            OrchestrationEvent::ProjectDeleted(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadCreated(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadDeleted(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadArchived(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadUnarchived(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadMetaUpdated(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadRuntimeModeSet(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadInteractionModeSet(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadMessageSent(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadTurnQueued(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadTurnStartRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadTurnInterruptRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadApprovalResponseRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadUserInputResponseRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadCheckpointRevertRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadReverted(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadTurnDiffCompleted(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadConversationRollbackRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadConversationRolledBack(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadMessageEditResendRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadSessionStopRequested(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadSessionSet(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadProposedPlanUpserted(e) => e.command_id.clone(),
+            OrchestrationEvent::ThreadActivityAppended(e) => e.command_id.clone(),
+        }
+    }
 }
 
 // 项目事件
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectCreatedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub project_id: ProjectId,
     pub title: String,
     pub workspace_root: String,
@@ -170,7 +195,9 @@ pub struct ProjectCreatedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectMetaUpdatedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub project_id: ProjectId,
     pub title: Option<String>,
 }
@@ -178,7 +205,9 @@ pub struct ProjectMetaUpdatedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectDeletedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub project_id: ProjectId,
 }
 
@@ -186,7 +215,9 @@ pub struct ProjectDeletedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadCreatedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub project_id: ProjectId,
     pub title: String,
@@ -195,28 +226,36 @@ pub struct ThreadCreatedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadDeletedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadArchivedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadUnarchivedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadMetaUpdatedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub title: Option<String>,
 }
@@ -224,7 +263,9 @@ pub struct ThreadMetaUpdatedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadRuntimeModeSetEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub runtime_mode: RuntimeMode,
 }
@@ -232,7 +273,9 @@ pub struct ThreadRuntimeModeSetEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadInteractionModeSetEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub interaction_mode: InteractionMode,
 }
@@ -241,7 +284,9 @@ pub struct ThreadInteractionModeSetEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadMessageSentEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub message: Message,
 }
@@ -250,7 +295,9 @@ pub struct ThreadMessageSentEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadTurnQueuedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
 }
@@ -258,7 +305,9 @@ pub struct ThreadTurnQueuedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadTurnStartRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
 }
@@ -266,7 +315,9 @@ pub struct ThreadTurnStartRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadTurnInterruptRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
 }
@@ -275,7 +326,9 @@ pub struct ThreadTurnInterruptRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadApprovalResponseRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
     pub request_id: String,
@@ -285,7 +338,9 @@ pub struct ThreadApprovalResponseRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadUserInputResponseRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
     pub request_id: String,
@@ -296,7 +351,9 @@ pub struct ThreadUserInputResponseRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadCheckpointRevertRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub checkpoint_id: String,
 }
@@ -304,7 +361,9 @@ pub struct ThreadCheckpointRevertRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadRevertedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub checkpoint_id: String,
 }
@@ -312,7 +371,9 @@ pub struct ThreadRevertedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadTurnDiffCompletedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub turn_id: String,
     pub diff: String,
@@ -322,7 +383,9 @@ pub struct ThreadTurnDiffCompletedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadConversationRollbackRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub message_id: MessageId,
 }
@@ -330,7 +393,9 @@ pub struct ThreadConversationRollbackRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadConversationRolledBackEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub message_id: MessageId,
 }
@@ -339,7 +404,9 @@ pub struct ThreadConversationRolledBackEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadMessageEditResendRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub message_id: MessageId,
     pub new_text: String,
@@ -348,14 +415,18 @@ pub struct ThreadMessageEditResendRequestedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadSessionStopRequestedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadSessionSetEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub session: Option<crate::models::Session>,
 }
@@ -363,7 +434,9 @@ pub struct ThreadSessionSetEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadProposedPlanUpsertedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub plan: ProposedPlan,
 }
@@ -371,7 +444,9 @@ pub struct ThreadProposedPlanUpsertedEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadActivityAppendedEvent {
-    event_base_fields!();
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
     pub thread_id: ThreadId,
     pub activity: Activity,
 }

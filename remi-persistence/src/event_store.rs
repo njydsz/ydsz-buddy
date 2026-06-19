@@ -134,7 +134,7 @@ impl EventStore for SqliteEventStore {
     fn get_latest_sequence(&self) -> PersistenceResult<Sequence> {
         let sequence: Sequence = self.client.query_row(
             "SELECT COALESCE(MAX(sequence), 0) FROM orchestration_events",
-            [],
+            &[],
             |row| row.get(0),
         )?;
 

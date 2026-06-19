@@ -1,3 +1,7 @@
+/**
+ * 服务器配置、状态、诊断及相关事件定义。
+ * 包含 Provider 状态、使用量快照、语音转录、快捷键、生命周期事件等 Schema。
+ */
 import { Schema } from "effect";
 import {
   IsoDateTime,
@@ -12,19 +16,23 @@ import { ProviderKind } from "./orchestration";
 import { ServerSettings, ServerSettingsPatch } from "./settings";
 import { ExecutionEnvironmentDescriptor } from "./environment";
 
+/** 语音转录音频 Base64 最大字符数限制 */
 const SERVER_VOICE_TRANSCRIPTION_MAX_AUDIO_BASE64_CHARS = 14_000_000;
 
+/** 快捷键配置格式错误问题 */
 const KeybindingsMalformedConfigIssue = Schema.Struct({
   kind: Schema.Literal("keybindings.malformed-config"),
   message: TrimmedNonEmptyString,
 });
 
+/** 快捷键条目无效问题 */
 const KeybindingsInvalidEntryIssue = Schema.Struct({
   kind: Schema.Literal("keybindings.invalid-entry"),
   message: TrimmedNonEmptyString,
   index: Schema.Number,
 });
 
+/** 服务器配置问题联合类型（快捷键配置错误或条目无效） */
 export const ServerConfigIssue = Schema.Union([
   KeybindingsMalformedConfigIssue,
   KeybindingsInvalidEntryIssue,
@@ -33,9 +41,11 @@ export type ServerConfigIssue = typeof ServerConfigIssue.Type;
 
 const ServerConfigIssues = Schema.Array(ServerConfigIssue);
 
+/** Provider 状态枚举：就绪、警告、错误 */
 export const ServerProviderStatusState = Schema.Literals(["ready", "warning", "error"]);
 export type ServerProviderStatusState = typeof ServerProviderStatusState.Type;
 
+/** Provider 认证状态枚举：已认证、未认证、未知 */
 export const ServerProviderAuthStatus = Schema.Literals([
   "authenticated",
   "unauthenticated",
@@ -43,6 +53,7 @@ export const ServerProviderAuthStatus = Schema.Literals([
 ]);
 export type ServerProviderAuthStatus = typeof ServerProviderAuthStatus.Type;
 
+/** 单个 Provider 的完整状态信息，包括可用性、认证、版本、更新状态等 */
 export const ServerProviderStatus = Schema.Struct({
   provider: ProviderKind,
   status: ServerProviderStatusState,
@@ -54,6 +65,7 @@ export const ServerProviderStatus = Schema.Struct({
   version: Schema.optional(Schema.NullOr(TrimmedNonEmptyString)),
   checkedAt: IsoDateTime,
   message: Schema.optional(TrimmedNonEmptyString),
+  /** 版本建议信息，指示是否为最新版本及更新命令 */
   versionAdvisory: Schema.optionalKey(
     Schema.Struct({
       status: Schema.Literals(["unknown", "current", "behind_latest"]),
@@ -65,6 +77,7 @@ export const ServerProviderStatus = Schema.Struct({
       message: Schema.NullOr(TrimmedNonEmptyString),
     }),
   ),
+  /** Provider 更新操作的状态跟踪 */
   updateState: Schema.optionalKey(
     Schema.Struct({
       status: Schema.Literals(["idle", "queued", "running", "succeeded", "failed", "unchanged"]),
@@ -77,11 +90,14 @@ export const ServerProviderStatus = Schema.Struct({
 });
 export type ServerProviderStatus = typeof ServerProviderStatus.Type;
 
+/** Provider 版本建议信息类型 */
 export type ServerProviderVersionAdvisory = NonNullable<ServerProviderStatus["versionAdvisory"]>;
+/** Provider 更新状态类型 */
 export type ServerProviderUpdateState = NonNullable<ServerProviderStatus["updateState"]>;
 
 const ServerProviderStatuses = Schema.Array(ServerProviderStatus);
 
+/** 服务器配置信息，包含工作目录、快捷键、Provider 状态、可用编辑器等 */
 export const ServerConfig = Schema.Struct({
   cwd: TrimmedNonEmptyString,
   homeDir: Schema.optional(TrimmedNonEmptyString),
@@ -94,17 +110,20 @@ export const ServerConfig = Schema.Struct({
 });
 export type ServerConfig = typeof ServerConfig.Type;
 
+/** 服务器管理的 Git Worktree 信息 */
 export const ServerManagedWorktree = Schema.Struct({
   path: TrimmedNonEmptyString,
   workspaceRoot: TrimmedNonEmptyString,
 });
 export type ServerManagedWorktree = typeof ServerManagedWorktree.Type;
 
+/** 列出所有 Worktree 的结果 */
 export const ServerListWorktreesResult = Schema.Struct({
   worktrees: Schema.Array(ServerManagedWorktree),
 });
 export type ServerListWorktreesResult = typeof ServerListWorktreesResult.Type;
 
+/** Provider 使用量限制信息，包含窗口、已用百分比、重置时间等 */
 export const ServerProviderUsageLimit = Schema.Struct({
   window: TrimmedNonEmptyString,
   usedPercent: Schema.optional(
@@ -115,6 +134,7 @@ export const ServerProviderUsageLimit = Schema.Struct({
 });
 export type ServerProviderUsageLimit = typeof ServerProviderUsageLimit.Type;
 
+/** Provider 使用量信息行（标签-值对） */
 export const ServerProviderUsageLine = Schema.Struct({
   label: TrimmedNonEmptyString,
   value: TrimmedNonEmptyString,
@@ -122,6 +142,7 @@ export const ServerProviderUsageLine = Schema.Struct({
 });
 export type ServerProviderUsageLine = typeof ServerProviderUsageLine.Type;
 
+/** Provider 使用量快照，包含限制和使用量明细 */
 export const ServerProviderUsageSnapshot = Schema.Struct({
   provider: ProviderKind,
   updatedAt: IsoDateTime,
@@ -131,15 +152,18 @@ export const ServerProviderUsageSnapshot = Schema.Struct({
 });
 export type ServerProviderUsageSnapshot = typeof ServerProviderUsageSnapshot.Type;
 
+/** 获取 Provider 使用量快照的输入参数 */
 export const ServerGetProviderUsageSnapshotInput = Schema.Struct({
   provider: ProviderKind,
   homePath: Schema.optional(TrimmedNonEmptyString),
 });
 export type ServerGetProviderUsageSnapshotInput = typeof ServerGetProviderUsageSnapshotInput.Type;
 
+/** 获取 Provider 使用量快照的结果（可能为空） */
 export const ServerGetProviderUsageSnapshotResult = Schema.NullOr(ServerProviderUsageSnapshot);
 export type ServerGetProviderUsageSnapshotResult = typeof ServerGetProviderUsageSnapshotResult.Type;
 
+/** 服务器内存使用诊断信息 */
 export const ServerDiagnosticsMemory = Schema.Struct({
   rssBytes: NonNegativeInt,
   heapTotalBytes: NonNegativeInt,
@@ -149,6 +173,7 @@ export const ServerDiagnosticsMemory = Schema.Struct({
 });
 export type ServerDiagnosticsMemory = typeof ServerDiagnosticsMemory.Type;
 
+/** 子进程诊断信息 */
 export const ServerDiagnosticsChildProcess = Schema.Struct({
   pid: NonNegativeInt,
   ppid: NonNegativeInt,
@@ -159,6 +184,7 @@ export const ServerDiagnosticsChildProcess = Schema.Struct({
 });
 export type ServerDiagnosticsChildProcess = typeof ServerDiagnosticsChildProcess.Type;
 
+/** 服务器诊断结果，包含进程信息、子进程、项目/线程统计 */
 export const ServerDiagnosticsResult = Schema.Struct({
   generatedAt: IsoDateTime,
   process: Schema.Struct({
@@ -176,6 +202,7 @@ export const ServerDiagnosticsResult = Schema.Struct({
 });
 export type ServerDiagnosticsResult = typeof ServerDiagnosticsResult.Type;
 
+/** 语音转录请求输入，包含音频数据和元信息 */
 export const ServerVoiceTranscriptionInput = Schema.Struct({
   provider: ProviderKind,
   cwd: TrimmedNonEmptyString,
@@ -189,36 +216,43 @@ export const ServerVoiceTranscriptionInput = Schema.Struct({
 });
 export type ServerVoiceTranscriptionInput = typeof ServerVoiceTranscriptionInput.Type;
 
+/** 语音转录结果 */
 export const ServerVoiceTranscriptionResult = Schema.Struct({
   text: TrimmedNonEmptyString,
 });
 export type ServerVoiceTranscriptionResult = typeof ServerVoiceTranscriptionResult.Type;
 
+/** 新增或更新快捷键规则的输入 */
 export const ServerUpsertKeybindingInput = KeybindingRule;
 export type ServerUpsertKeybindingInput = typeof ServerUpsertKeybindingInput.Type;
 
+/** 新增或更新快捷键规则的结果，返回更新后的配置和问题列表 */
 export const ServerUpsertKeybindingResult = Schema.Struct({
   keybindings: ResolvedKeybindingsConfig,
   issues: ServerConfigIssues,
 });
 export type ServerUpsertKeybindingResult = typeof ServerUpsertKeybindingResult.Type;
 
+/** 服务器配置更新事件载荷 */
 export const ServerConfigUpdatedPayload = Schema.Struct({
   issues: ServerConfigIssues,
   providers: ServerProviderStatuses,
 });
 export type ServerConfigUpdatedPayload = typeof ServerConfigUpdatedPayload.Type;
 
+/** Provider 状态更新事件载荷 */
 export const ServerProviderStatusesUpdatedPayload = Schema.Struct({
   providers: ServerProviderStatuses,
 });
 export type ServerProviderStatusesUpdatedPayload = typeof ServerProviderStatusesUpdatedPayload.Type;
 
+/** 服务器设置更新事件载荷 */
 export const ServerSettingsUpdatedPayload = Schema.Struct({
   settings: ServerSettings,
 });
 export type ServerSettingsUpdatedPayload = typeof ServerSettingsUpdatedPayload.Type;
 
+/** 服务器生命周期欢迎事件载荷，包含初始项目信息 */
 export const ServerLifecycleWelcomePayload = Schema.Struct({
   cwd: TrimmedNonEmptyString,
   homeDir: Schema.optional(TrimmedNonEmptyString),
@@ -228,6 +262,7 @@ export const ServerLifecycleWelcomePayload = Schema.Struct({
 });
 export type ServerLifecycleWelcomePayload = typeof ServerLifecycleWelcomePayload.Type;
 
+/** 服务器生命周期流事件：欢迎、就绪、维护任务 */
 export const ServerLifecycleStreamEvent = Schema.Union([
   Schema.Struct({
     type: Schema.Literal("welcome"),
@@ -255,6 +290,7 @@ export const ServerLifecycleStreamEvent = Schema.Union([
 ]);
 export type ServerLifecycleStreamEvent = typeof ServerLifecycleStreamEvent.Type;
 
+/** 服务器配置流事件：快照、配置更新、Provider 状态更新、设置更新 */
 export const ServerConfigStreamEvent = Schema.Union([
   Schema.Struct({
     type: Schema.Literal("snapshot"),
@@ -275,14 +311,17 @@ export const ServerConfigStreamEvent = Schema.Union([
 ]);
 export type ServerConfigStreamEvent = typeof ServerConfigStreamEvent.Type;
 
+/** 刷新 Provider 列表的结果 */
 export const ServerRefreshProvidersResult = ServerProviderStatusesUpdatedPayload;
 export type ServerRefreshProvidersResult = typeof ServerRefreshProvidersResult.Type;
 
+/** 更新 Provider 的输入参数 */
 export const ServerProviderUpdateInput = Schema.Struct({
   provider: ProviderKind,
 });
 export type ServerProviderUpdateInput = typeof ServerProviderUpdateInput.Type;
 
+/** Provider 更新失败错误 */
 export class ServerProviderUpdateError extends Schema.TaggedErrorClass<ServerProviderUpdateError>()(
   "ServerProviderUpdateError",
   {
@@ -295,17 +334,22 @@ export class ServerProviderUpdateError extends Schema.TaggedErrorClass<ServerPro
   }
 }
 
+/** Provider 更新结果 */
 export const ServerProviderUpdateResult = ServerProviderStatusesUpdatedPayload;
 export type ServerProviderUpdateResult = typeof ServerProviderUpdateResult.Type;
 
+/** 获取服务器设置的结果 */
 export const ServerGetSettingsResult = ServerSettings;
 export type ServerGetSettingsResult = typeof ServerGetSettingsResult.Type;
 
+/** 获取执行环境描述的结果 */
 export const ServerGetEnvironmentResult = ExecutionEnvironmentDescriptor;
 export type ServerGetEnvironmentResult = typeof ServerGetEnvironmentResult.Type;
 
+/** 更新服务器设置的输入参数 */
 export const ServerUpdateSettingsInput = ServerSettingsPatch;
 export type ServerUpdateSettingsInput = typeof ServerUpdateSettingsInput.Type;
 
+/** 更新服务器设置的结果 */
 export const ServerUpdateSettingsResult = ServerSettings;
 export type ServerUpdateSettingsResult = typeof ServerUpdateSettingsResult.Type;

@@ -165,7 +165,7 @@ pub fn run_migrations(client: &SqliteClient) -> PersistenceResult<()> {
 pub fn get_current_version(client: &SqliteClient) -> PersistenceResult<u32> {
     let version: Option<u32> = client.query_row(
         "SELECT MAX(version) FROM _migrations",
-        [],
+        &[],
         |row| row.get(0),
     ).ok();
 

@@ -36,7 +36,7 @@ export function sanitizeFeatureBranchName(raw: string): string {
 }
 
 const AUTO_FEATURE_BRANCH_FALLBACK = "feature/update";
-const PEAKCODE_BRANCH_FALLBACK = "update";
+const REMICODE_BRANCH_FALLBACK = "update";
 
 /**
  * Resolve a unique `feature/…` branch name that doesn't collide with
