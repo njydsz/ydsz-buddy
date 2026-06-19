@@ -1,3 +1,9 @@
+/**
+ * @file useHandleNewThread.ts
+ * @description 新建线程 Hook - 处理创建新线程的复杂逻辑
+ * @module hooks/useHandleNewThread
+ */
+
 import { type ProjectId, ThreadId } from "@remi-code/contracts";
 import { getDefaultModel } from "@remi-code/shared/model";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,6 +31,29 @@ import { useStore } from "../store";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";
 import { useTerminalStateStore } from "../terminalStateStore";
 
+/**
+ * 新建线程 Hook
+ *
+ * @description
+ * 处理创建新线程的复杂逻辑，包括：
+ * - 复用已存储的草稿线程
+ * - 复用当前活动的草稿线程
+ * - 创建全新的线程
+ * - 处理终端入口点 vs 聊天入口点
+ * - 应用提供商和模型覆盖
+ * - 导航到新线程
+ *
+ * @returns 包含线程创建方法和相关状态的对象
+ *
+ * @example
+ * ```tsx
+ * const { handleNewThread, activeThread, projects } = useHandleNewThread();
+ *
+ * const handleClick = async () => {
+ *   await handleNewThread(projectId, { fresh: true });
+ * };
+ * ```
+ */
 export function useHandleNewThread() {
   const projects = useStore((store) => store.projects);
   const { settings } = useAppSettings();
@@ -39,6 +68,11 @@ export function useHandleNewThread() {
     (projectId: ProjectId, options?: NewThreadOptions): Promise<void> => {
       const entryPoint = options?.entryPoint ?? "chat";
       const wantsTemporaryThread = options?.temporary === true;
+      
+      /**
+       * 应用提供商覆盖
+       * 如果指定了提供商，设置对应的默认模型
+       */
       const applyProviderOverride = (threadId: ThreadId) => {
         if (!options?.provider) {
           return;
@@ -52,6 +86,10 @@ export function useHandleNewThread() {
           model: defaultModel,
         });
       };
+      
+      /**
+       * 恢复编辑器草稿状态
+       */
       const restoreComposerDraft = (
         threadId: ThreadId,
         draftState: ComposerThreadDraftState | null,
@@ -71,6 +109,11 @@ export function useHandleNewThread() {
           };
         });
       };
+      
+      /**
+       * 激活线程入口点
+       * 根据入口点类型打开对应的页面
+       */
       const activateThreadEntryPoint = (threadId: ThreadId) => {
         if (entryPoint === "terminal") {
           openTerminalThreadPage(threadId, { terminalOnly: true });
@@ -78,6 +121,7 @@ export function useHandleNewThread() {
         }
         openChatThreadPage(threadId);
       };
+      
       const {
         clearProjectDraftThreadId,
         getDraftThread,
@@ -89,14 +133,19 @@ export function useHandleNewThread() {
       } = useComposerDraftStore.getState();
       const shouldForceFreshThread = options?.fresh === true;
 
+      // 强制创建新线程时，清除项目的草稿线程 ID
       if (shouldForceFreshThread) {
         clearProjectDraftThreadId(projectId, entryPoint);
       }
 
+      // 获取已存储的草稿线程候选
       const storedDraftThreadCandidate = getDraftThreadByProjectId(projectId, entryPoint);
+      // 获取当前活动的草稿线程候选
       const latestActiveDraftThreadCandidate: DraftThreadState | null = focusedThreadId
         ? getDraftThread(focusedThreadId)
         : null;
+      
+      // 确定使用哪个草稿线程
       const storedDraftThread =
         !shouldForceFreshThread &&
         !wantsTemporaryThread &&
@@ -109,6 +158,8 @@ export function useHandleNewThread() {
         latestActiveDraftThreadCandidate?.isTemporary !== true
           ? latestActiveDraftThreadCandidate
           : null;
+      
+      // 解析线程引导计划
       const bootstrapPlan = resolveThreadBootstrapPlan({
         storedDraftThread,
         latestActiveDraftThread,
@@ -116,7 +167,8 @@ export function useHandleNewThread() {
         projectId,
         routeThreadId: focusedThreadId,
       });
-      // Read from the store at call time so post-sync sidebar flows can use the latest project defaults.
+      
+      // 读取项目的默认模型选择
       const projectDefaultModelSelection =
         useStore.getState().projects.find((project) => project.id === projectId)
           ?.defaultModelSelection ?? null;
@@ -125,6 +177,10 @@ export function useHandleNewThread() {
         activeDraftThread,
         projectId,
       );
+      
+      /**
+       * 解析终端线程创建状态
+       */
       const resolveCreationState = (
         targetThreadId: ThreadId,
         draftThread: DraftThreadState | null,
@@ -141,8 +197,11 @@ export function useHandleNewThread() {
           projectDefaultModelSelection,
           projectId,
         });
-      // Terminal-first threads need a real orchestration thread immediately so
-      // the sidebar can render them as durable rows instead of draft-only routes.
+      
+      /**
+       * 创建终端线程
+       * 终端入口需要立即创建真实的编排线程
+       */
       const createTerminalThread = async (
         threadId: ThreadId,
         creationState: ReturnType<typeof resolveCreationState>,
@@ -170,6 +229,8 @@ export function useHandleNewThread() {
           api,
         );
       };
+      
+      // 情况 1：使用已存储的草稿线程
       if (bootstrapPlan.kind === "stored") {
         return (async () => {
           if (wantsTemporaryThread) {
@@ -225,6 +286,7 @@ export function useHandleNewThread() {
 
       clearProjectDraftThreadId(projectId, entryPoint);
 
+      // 情况 2：使用路由中的线程
       if (bootstrapPlan.kind === "route") {
         if (wantsTemporaryThread) {
           markTemporaryThread(bootstrapPlan.threadId);
@@ -250,6 +312,7 @@ export function useHandleNewThread() {
         return Promise.resolve();
       }
 
+      // 情况 3：创建全新线程
       const threadId = newThreadId();
       if (wantsTemporaryThread) {
         markTemporaryThread(threadId);

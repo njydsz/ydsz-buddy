@@ -16,7 +16,6 @@ use remi_core::models::{Project, ProjectId, ProjectKind, Sequence, Thread, Threa
 use remi_persistence::{EventStore, ProjectionRepository, SqliteEventStore, SqliteProjectionRepository};
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tracing::{info, warn};
-use uuid::Uuid;
 
 use crate::error::{OrchestrationError, OrchestrationResult};
 
@@ -317,14 +316,24 @@ impl OrchestrationEngine {
         let command_id = command.command_id().map(|s| s.to_string());
 
         match command {
+            // ==================== 项目命令 ====================
             OrchestrationCommand::ProjectCreate(c) => {
                 Ok(OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
-                    sequence: 0, // 将在持久化后更新
+                    sequence: 0,
                     occurred_at: now,
                     command_id,
                     project_id: c.project_id,
                     title: c.title,
                     workspace_root: c.workspace_root,
+                }))
+            }
+            OrchestrationCommand::ProjectMetaUpdate(c) => {
+                Ok(OrchestrationEvent::ProjectMetaUpdated(remi_core::events::ProjectMetaUpdatedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    project_id: c.project_id,
+                    title: c.title,
                 }))
             }
             OrchestrationCommand::ProjectDelete(c) => {
@@ -335,6 +344,8 @@ impl OrchestrationEngine {
                     project_id: c.project_id,
                 }))
             }
+
+            // ==================== 线程命令 ====================
             OrchestrationCommand::ThreadCreate(c) => {
                 Ok(OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
                     sequence: 0,
@@ -369,12 +380,247 @@ impl OrchestrationEngine {
                     thread_id: c.thread_id,
                 }))
             }
-            _ => {
-                // 尚未实现的命令类型，返回错误提示
-                Err(OrchestrationError::CommandError(format!(
-                    "未实现的命令类型: {:?}",
-                    std::mem::discriminant(&command)
-                )))
+            OrchestrationCommand::ThreadMetaUpdate(c) => {
+                Ok(OrchestrationEvent::ThreadMetaUpdated(remi_core::events::ThreadMetaUpdatedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    title: c.title,
+                }))
+            }
+            OrchestrationCommand::ThreadRuntimeModeSet(c) => {
+                Ok(OrchestrationEvent::ThreadRuntimeModeSet(remi_core::events::ThreadRuntimeModeSetEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    runtime_mode: c.runtime_mode,
+                }))
+            }
+            OrchestrationCommand::ThreadInteractionModeSet(c) => {
+                Ok(OrchestrationEvent::ThreadInteractionModeSet(remi_core::events::ThreadInteractionModeSetEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    interaction_mode: c.interaction_mode,
+                }))
+            }
+
+            // ==================== Turn 命令 ====================
+            OrchestrationCommand::ThreadTurnStart(c) => {
+                Ok(OrchestrationEvent::ThreadTurnStartRequested(remi_core::events::ThreadTurnStartRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                }))
+            }
+            OrchestrationCommand::ThreadTurnInterrupt(c) => {
+                Ok(OrchestrationEvent::ThreadTurnInterruptRequested(remi_core::events::ThreadTurnInterruptRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                }))
+            }
+            OrchestrationCommand::ThreadTurnDispatchQueued(c) => {
+                Ok(OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                }))
+            }
+
+            // ==================== 审批命令 ====================
+            OrchestrationCommand::ThreadApprovalRespond(c) => {
+                Ok(OrchestrationEvent::ThreadApprovalResponseRequested(remi_core::events::ThreadApprovalResponseRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                    request_id: c.request_id,
+                    approved: c.approved,
+                }))
+            }
+            OrchestrationCommand::ThreadUserInputRespond(c) => {
+                Ok(OrchestrationEvent::ThreadUserInputResponseRequested(remi_core::events::ThreadUserInputResponseRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                    request_id: c.request_id,
+                    response: c.response,
+                }))
+            }
+
+            // ==================== 检查点命令 ====================
+            OrchestrationCommand::ThreadCheckpointRevert(c) => {
+                Ok(OrchestrationEvent::ThreadCheckpointRevertRequested(remi_core::events::ThreadCheckpointRevertRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    checkpoint_id: c.checkpoint_id,
+                }))
+            }
+            OrchestrationCommand::ThreadConversationRollback(c) => {
+                Ok(OrchestrationEvent::ThreadConversationRollbackRequested(remi_core::events::ThreadConversationRollbackRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    message_id: c.message_id,
+                }))
+            }
+
+            // ==================== 消息命令 ====================
+            OrchestrationCommand::ThreadMessageEditAndResend(c) => {
+                Ok(OrchestrationEvent::ThreadMessageEditResendRequested(remi_core::events::ThreadMessageEditResendRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    message_id: c.message_id,
+                    new_text: c.new_text,
+                }))
+            }
+            OrchestrationCommand::ThreadSessionStop(c) => {
+                Ok(OrchestrationEvent::ThreadSessionStopRequested(remi_core::events::ThreadSessionStopRequestedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                }))
+            }
+
+            // ==================== 活动命令 ====================
+            OrchestrationCommand::ThreadActivityAppend(c) => {
+                Ok(OrchestrationEvent::ThreadActivityAppended(remi_core::events::ThreadActivityAppendedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    activity: c.activity,
+                }))
+            }
+
+            // ==================== 内部命令 ====================
+            OrchestrationCommand::ThreadSessionSet(c) => {
+                Ok(OrchestrationEvent::ThreadSessionSet(remi_core::events::ThreadSessionSetEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    session: c.session,
+                }))
+            }
+            OrchestrationCommand::ThreadMessagesImport(c) => {
+                // 导入消息时，为每条消息生成一个事件
+                // 这里简化处理，只生成一个包含所有消息的事件
+                if let Some(first_msg) = c.messages.first() {
+                    Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id,
+                        thread_id: c.thread_id,
+                        message: first_msg.clone(),
+                    }))
+                } else {
+                    Err(OrchestrationError::CommandError("消息列表为空".to_string()))
+                }
+            }
+            OrchestrationCommand::ThreadMessageAssistantDelta(c) => {
+                // 助手消息增量更新，创建一个临时消息
+                let message = remi_core::models::Message {
+                    id: uuid::Uuid::new_v4(),
+                    role: remi_core::models::MessageRole::Assistant,
+                    text: c.delta,
+                    attachments: vec![],
+                    skills: vec![],
+                    mentions: vec![],
+                    dispatch_mode: None,
+                    turn_id: Some(c.turn_id),
+                    streaming: true,
+                    source: None,
+                    created_at: now,
+                    updated_at: now,
+                };
+                Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    message,
+                }))
+            }
+            OrchestrationCommand::ThreadMessageAssistantComplete(c) => {
+                // 助手消息完成，创建一个完整的消息
+                let message = remi_core::models::Message {
+                    id: c.message_id,
+                    role: remi_core::models::MessageRole::Assistant,
+                    text: c.text,
+                    attachments: vec![],
+                    skills: vec![],
+                    mentions: vec![],
+                    dispatch_mode: None,
+                    turn_id: Some(c.turn_id),
+                    streaming: false,
+                    source: None,
+                    created_at: now,
+                    updated_at: now,
+                };
+                Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    message,
+                }))
+            }
+            OrchestrationCommand::ThreadProposedPlanUpsert(c) => {
+                Ok(OrchestrationEvent::ThreadProposedPlanUpserted(remi_core::events::ThreadProposedPlanUpsertedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    plan: c.plan,
+                }))
+            }
+            OrchestrationCommand::ThreadTurnDiffComplete(c) => {
+                Ok(OrchestrationEvent::ThreadTurnDiffCompleted(remi_core::events::ThreadTurnDiffCompletedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    turn_id: c.turn_id,
+                    diff: c.diff,
+                }))
+            }
+            OrchestrationCommand::ThreadRevertComplete(c) => {
+                Ok(OrchestrationEvent::ThreadReverted(remi_core::events::ThreadRevertedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    checkpoint_id: c.checkpoint_id,
+                }))
+            }
+            OrchestrationCommand::ThreadConversationRollbackComplete(c) => {
+                Ok(OrchestrationEvent::ThreadConversationRolledBack(remi_core::events::ThreadConversationRolledBackEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id,
+                    thread_id: c.thread_id,
+                    message_id: c.message_id,
+                }))
             }
         }
     }
@@ -396,8 +642,8 @@ impl OrchestrationEngine {
     /// 成功时返回 `Ok(())`，失败时返回投影相关错误。
     async fn apply_projection(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
         match event {
+            // ==================== 项目事件 ====================
             OrchestrationEvent::ProjectCreated(e) => {
-                // 构造项目实体并保存到投影仓库
                 let project = Project {
                     id: e.project_id,
                     kind: ProjectKind::Local,
@@ -411,12 +657,21 @@ impl OrchestrationEngine {
                 };
                 self.projection_repo.save_project(&project)?;
             }
+            OrchestrationEvent::ProjectMetaUpdated(e) => {
+                if let Some(mut project) = self.projection_repo.get_project(e.project_id)? {
+                    if let Some(ref title) = e.title {
+                        project.title = title.clone();
+                    }
+                    project.updated_at = e.occurred_at;
+                    self.projection_repo.save_project(&project)?;
+                }
+            }
             OrchestrationEvent::ProjectDeleted(e) => {
-                // 从投影仓库中删除项目
                 self.projection_repo.delete_project(e.project_id)?;
             }
+
+            // ==================== 线程事件 ====================
             OrchestrationEvent::ThreadCreated(e) => {
-                // 使用默认配置创建线程实体并保存到投影仓库
                 let thread = Thread {
                     id: e.thread_id,
                     project_id: e.project_id,
@@ -457,12 +712,186 @@ impl OrchestrationEngine {
                 self.projection_repo.save_thread(&thread)?;
             }
             OrchestrationEvent::ThreadDeleted(e) => {
-                // 从投影仓库中删除线程
                 self.projection_repo.delete_thread(e.thread_id)?;
             }
-            _ => {
-                // 其他事件类型暂未实现投影逻辑，记录警告日志
-                warn!("未处理的投影事件: {:?}", std::mem::discriminant(event));
+            OrchestrationEvent::ThreadArchived(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.archived_at = Some(e.occurred_at);
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadUnarchived(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.archived_at = None;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadMetaUpdated(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    if let Some(ref title) = e.title {
+                        thread.title = title.clone();
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadRuntimeModeSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.runtime_mode = e.runtime_mode.clone();
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadInteractionModeSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.interaction_mode = e.interaction_mode.clone();
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+
+            // ==================== 消息事件 ====================
+            OrchestrationEvent::ThreadMessageSent(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.messages.push(e.message.clone());
+                    thread.latest_user_message_at = Some(e.occurred_at);
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+
+            // ==================== Turn 事件 ====================
+            OrchestrationEvent::ThreadTurnQueued(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.latest_turn = Some(remi_core::models::LatestTurn {
+                        id: e.turn_id.clone(),
+                        status: remi_core::models::TurnStatus::Queued,
+                        started_at: e.occurred_at,
+                    });
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadTurnStartRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.latest_turn = Some(remi_core::models::LatestTurn {
+                        id: e.turn_id.clone(),
+                        status: remi_core::models::TurnStatus::Running,
+                        started_at: e.occurred_at,
+                    });
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadTurnInterruptRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    if let Some(ref mut turn) = thread.latest_turn {
+                        if turn.id == e.turn_id {
+                            turn.status = remi_core::models::TurnStatus::Interrupted;
+                        }
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+
+            // ==================== 审批事件 ====================
+            OrchestrationEvent::ThreadApprovalResponseRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.has_pending_approvals = !e.approved;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadUserInputResponseRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.has_pending_user_input = false;
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+
+            // ==================== 检查点事件 ====================
+            OrchestrationEvent::ThreadCheckpointRevertRequested(_) => {
+                // 检查点回退请求，实际回退由 ThreadReverted 事件处理
+            }
+            OrchestrationEvent::ThreadReverted(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 移除指定检查点之后的所有检查点
+                    thread.checkpoints.retain(|cp| cp.id != e.checkpoint_id);
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadTurnDiffCompleted(_) => {
+                // Turn 差异完成，暂不需要更新投影
+            }
+
+            // ==================== 回滚事件 ====================
+            OrchestrationEvent::ThreadConversationRollbackRequested(_) => {
+                // 对话回滚请求，实际回滚由 ThreadConversationRolledBack 事件处理
+            }
+            OrchestrationEvent::ThreadConversationRolledBack(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 移除指定消息之后的所有消息
+                    if let Some(pos) = thread.messages.iter().position(|m| m.id == e.message_id) {
+                        thread.messages.truncate(pos + 1);
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+
+            // ==================== 其他事件 ====================
+            OrchestrationEvent::ThreadMessageEditResendRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 替换指定消息的内容
+                    if let Some(msg) = thread.messages.iter_mut().find(|m| m.id == e.message_id) {
+                        msg.text = e.new_text.clone();
+                        msg.updated_at = e.occurred_at;
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadSessionStopRequested(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    if let Some(ref mut session) = thread.session {
+                        session.status = remi_core::models::SessionStatus::Stopped;
+                        session.updated_at = e.occurred_at;
+                    }
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadSessionSet(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.session = e.session.clone();
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadProposedPlanUpserted(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    // 更新或插入计划
+                    if let Some(existing) = thread.proposed_plans.iter_mut().find(|p| p.id == e.plan.id) {
+                        *existing = e.plan.clone();
+                    } else {
+                        thread.proposed_plans.push(e.plan.clone());
+                    }
+                    thread.has_actionable_proposed_plan = thread.proposed_plans.iter().any(|p| p.status == remi_core::models::ProposedPlanStatus::Pending);
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
+            }
+            OrchestrationEvent::ThreadActivityAppended(e) => {
+                if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
+                    thread.activities.push(e.activity.clone());
+                    thread.updated_at = e.occurred_at;
+                    self.projection_repo.save_thread(&thread)?;
+                }
             }
         }
 

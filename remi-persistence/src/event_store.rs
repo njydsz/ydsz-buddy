@@ -12,12 +12,11 @@
 //! 每个事件包含聚合根信息（aggregate_kind + aggregate_id），便于按聚合查询事件。
 
 use async_trait::async_trait;
-use chrono::Utc;
 use remi_core::events::OrchestrationEvent;
 use remi_core::models::Sequence;
 use uuid::Uuid;
 
-use crate::error::{PersistenceError, PersistenceResult};
+use crate::error::PersistenceResult;
 use crate::sqlite_client::SqliteClient;
 
 /// 事件存储 trait
@@ -282,9 +281,9 @@ impl EventStore for SqliteEventStore {
 mod tests {
     use super::*;
     use crate::migrations::run_migrations;
+    use chrono::Utc;
     use remi_core::events::{ProjectCreatedEvent, OrchestrationEvent};
     use remi_core::models::ProjectId;
-    use std::path::PathBuf;
 
     #[test]
     fn test_event_store() {

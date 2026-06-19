@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tracing::{info, warn};
 
 use crate::core::{GitCore, GitStatusResult};
-use crate::error::{GitError, GitResult};
+use crate::error::GitResult;
 
 /// Git 操作输入
 #[derive(Debug, Clone)]

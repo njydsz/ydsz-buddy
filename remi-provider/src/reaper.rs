@@ -34,8 +34,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use chrono::Utc;
-use remi_core::provider::ProviderKind;
-use tokio::sync::RwLock;
 use tracing::{info, warn};
 
 use crate::error::ProviderResult;

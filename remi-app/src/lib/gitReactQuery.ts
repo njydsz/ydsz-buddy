@@ -1,3 +1,9 @@
+/**
+ * @file Git React Query 集成模块
+ * @description 提供 Git 操作的 React Query 查询和变更配置。
+ *              包含状态查询、分支列表、工作树差异、提交操作等。
+ */
+
 import type {
   GitReadWorkingTreeDiffInput,
   GitStackedAction,
@@ -7,22 +13,38 @@ import { mutationOptions, queryOptions, type QueryClient } from "@tanstack/react
 import { ensureNativeApi } from "../nativeApi";
 import { buildPatchCacheKey } from "./diffRendering";
 
+/** Git 状态查询过期时间（毫秒） */
 const GIT_STATUS_STALE_TIME_MS = 30_000;
+/** Git 状态查询刷新间隔（毫秒） */
 const GIT_STATUS_REFETCH_INTERVAL_MS = 60_000;
+/** Git 分支列表查询过期时间（毫秒） */
 const GIT_BRANCHES_STALE_TIME_MS = 15_000;
+/** Git 分支列表查询刷新间隔（毫秒） */
 const GIT_BRANCHES_REFETCH_INTERVAL_MS = 60_000;
+/** Git 差异摘要缓存保留时间（毫秒，30分钟） */
 const GIT_DIFF_SUMMARY_GC_TIME_MS = 30 * 60_000;
+/** Git 工作树差异查询过期时间（毫秒） */
 const GIT_WORKING_TREE_DIFF_STALE_TIME_MS = 5_000;
+/** Git 工作树差异实时刷新间隔（毫秒） */
 export const GIT_WORKING_TREE_DIFF_LIVE_REFETCH_INTERVAL_MS = 4_000;
 
+/**
+ * Git 查询键工厂
+ * 用于生成 React Query 的查询键
+ */
 export const gitQueryKeys = {
+  /** 所有 Git 查询的根键 */
   all: ["git"] as const,
+  /** Git 状态查询键 */
   status: (cwd: string | null) => ["git", "status", cwd] as const,
+  /** Git 分支列表查询键 */
   branches: (cwd: string | null) => ["git", "branches", cwd] as const,
+  /** Git 工作树差异查询键 */
   workingTreeDiff: (
     cwd: string | null,
     scope: GitReadWorkingTreeDiffInput["scope"] = "workingTree",
   ) => ["git", "working-tree-diff", cwd, scope] as const,
+  /** Git 差异摘要查询键 */
   diffSummary: (
     cacheScope: string | null,
     model: string | null,
@@ -41,16 +63,31 @@ export const gitQueryKeys = {
     ] as const,
 };
 
+/**
+ * Git 变更键工厂
+ * 用于生成 React Query 的变更键
+ */
 export const gitMutationKeys = {
+  /** Git 初始化变更键 */
   init: (cwd: string | null) => ["git", "mutation", "init", cwd] as const,
+  /** Git 检出变更键 */
   checkout: (cwd: string | null) => ["git", "mutation", "checkout", cwd] as const,
+  /** Git 堆叠操作变更键 */
   runStackedAction: (cwd: string | null) => ["git", "mutation", "run-stacked-action", cwd] as const,
+  /** Git 拉取变更键 */
   pull: (cwd: string | null) => ["git", "mutation", "pull", cwd] as const,
+  /** Git 准备拉取请求线程变更键 */
   preparePullRequestThread: (cwd: string | null) =>
     ["git", "mutation", "prepare-pull-request-thread", cwd] as const,
+  /** Git 线程交接变更键 */
   handoffThread: (cwd: string | null) => ["git", "mutation", "handoff-thread", cwd] as const,
 };
 
+/**
+ * 使所有 Git 查询失效
+ * @param queryClient - React Query 客户端
+ * @returns 失效操作的 Promise
+ */
 export function invalidateGitQueries(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: ["git", "status"] as const }),
@@ -60,7 +97,13 @@ export function invalidateGitQueries(queryClient: QueryClient) {
   ]);
 }
 
-// Scope live file-change invalidations so unrelated project/worktree git caches stay warm.
+/**
+ * 使指定工作目录的 Git 查询失效
+ * 限定实时文件变更的失效范围，避免影响不相关的项目/工作树 Git 缓存
+ * @param queryClient - React Query 客户端
+ * @param cwds - 工作目录列表
+ * @returns 失效操作的 Promise
+ */
 export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iterable<string>) {
   const uniqueCwds = [...new Set([...cwds].filter((cwd) => cwd.length > 0))];
   return Promise.all(
@@ -73,6 +116,11 @@ export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iter
   );
 }
 
+/**
+ * Git 状态查询选项
+ * @param cwd - 工作目录
+ * @returns React Query 查询选项
+ */
 export function gitStatusQueryOptions(cwd: string | null) {
   return queryOptions({
     queryKey: gitQueryKeys.status(cwd),
@@ -89,6 +137,11 @@ export function gitStatusQueryOptions(cwd: string | null) {
   });
 }
 
+/**
+ * Git 分支列表查询选项
+ * @param cwd - 工作目录
+ * @returns React Query 查询选项
+ */
 export function gitBranchesQueryOptions(cwd: string | null) {
   return queryOptions({
     queryKey: gitQueryKeys.branches(cwd),
@@ -105,6 +158,13 @@ export function gitBranchesQueryOptions(cwd: string | null) {
   });
 }
 
+/**
+ * Git 解析拉取请求查询选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.reference - Git 引用（分支名、提交哈希等）
+ * @returns React Query 查询选项
+ */
 export function gitResolvePullRequestQueryOptions(input: {
   cwd: string | null;
   reference: string | null;
@@ -125,6 +185,15 @@ export function gitResolvePullRequestQueryOptions(input: {
   });
 }
 
+/**
+ * Git 工作树差异查询选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.scope - 差异范围，默认为 "workingTree"
+ * @param input.enabled - 是否启用查询
+ * @param input.refetchInterval - 刷新间隔
+ * @returns React Query 查询选项
+ */
 export function gitWorkingTreeDiffQueryOptions(input: {
   cwd: string | null;
   scope?: GitReadWorkingTreeDiffInput["scope"];
@@ -150,6 +219,18 @@ export function gitWorkingTreeDiffQueryOptions(input: {
   });
 }
 
+/**
+ * Git 差异摘要查询选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.cacheScope - 缓存作用域
+ * @param input.patch - 补丁文本
+ * @param input.model - 文本生成模型
+ * @param input.codexHomePath - Codex 主目录路径
+ * @param input.providerOptions - 提供商选项
+ * @param input.enabled - 是否启用查询
+ * @returns React Query 查询选项
+ */
 export function gitSummarizeDiffQueryOptions(input: {
   cwd: string | null;
   cacheScope?: string | null;
@@ -159,7 +240,7 @@ export function gitSummarizeDiffQueryOptions(input: {
   providerOptions?: ProviderStartOptions | null;
   enabled?: boolean;
 }) {
-  // Cache summaries by patch hash so reopening the same diff does not regenerate it.
+  // 按补丁哈希缓存摘要，避免重新打开相同差异时重新生成
   const normalizedPatch = input.patch?.trim() ?? null;
   const patchKey =
     normalizedPatch && normalizedPatch.length > 0
@@ -202,6 +283,13 @@ export function gitSummarizeDiffQueryOptions(input: {
   });
 }
 
+/**
+ * Git 初始化变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitInitMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
     mutationKey: gitMutationKeys.init(input.cwd),
@@ -216,6 +304,13 @@ export function gitInitMutationOptions(input: { cwd: string | null; queryClient:
   });
 }
 
+/**
+ * Git 检出变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitCheckoutMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -233,6 +328,16 @@ export function gitCheckoutMutationOptions(input: {
   });
 }
 
+/**
+ * Git 运行堆叠操作变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @param input.model - 文本生成模型
+ * @param input.codexHomePath - Codex 主目录路径
+ * @param input.providerOptions - 提供商选项
+ * @returns React Query 变更选项
+ */
 export function gitRunStackedActionMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -275,6 +380,13 @@ export function gitRunStackedActionMutationOptions(input: {
   });
 }
 
+/**
+ * Git 拉取变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitPullMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
     mutationKey: gitMutationKeys.pull(input.cwd),
@@ -289,6 +401,12 @@ export function gitPullMutationOptions(input: { cwd: string | null; queryClient:
   });
 }
 
+/**
+ * Git 创建工作树变更选项
+ * @param input - 输入参数
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({
@@ -313,6 +431,12 @@ export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClie
   });
 }
 
+/**
+ * Git 创建分离工作树变更选项
+ * @param input - 输入参数
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({ cwd, ref, path }: { cwd: string; ref: string; path?: string | null }) => {
@@ -327,6 +451,12 @@ export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: Q
   });
 }
 
+/**
+ * Git 移除工作树变更选项
+ * @param input - 输入参数
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({ cwd, path, force }: { cwd: string; path: string; force?: boolean }) => {
@@ -341,6 +471,13 @@ export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClie
   });
 }
 
+/**
+ * Git 准备拉取请求线程变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitPreparePullRequestThreadMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -362,6 +499,13 @@ export function gitPreparePullRequestThreadMutationOptions(input: {
   });
 }
 
+/**
+ * Git 线程交接变更选项
+ * @param input - 输入参数
+ * @param input.cwd - 工作目录
+ * @param input.queryClient - React Query 客户端
+ * @returns React Query 变更选项
+ */
 export function gitHandoffThreadMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;

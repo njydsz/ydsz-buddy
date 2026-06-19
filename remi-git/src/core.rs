@@ -1,11 +1,9 @@
 //! Git 核心操作
 
-use std::path::Path;
 use std::process::Stdio;
 
-use async_trait::async_trait;
 use tokio::process::Command;
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
 use crate::error::{GitError, GitResult};
 
@@ -239,7 +237,7 @@ impl GitCore {
 
     /// 创建并提交
     pub async fn commit(&self, cwd: &str, message: &str) -> GitResult<String> {
-        let result = self
+        let _result = self
             .execute(ExecuteGitInput {
                 operation: "commit".to_string(),
                 cwd: cwd.to_string(),

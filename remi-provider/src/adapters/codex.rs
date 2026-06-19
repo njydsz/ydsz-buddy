@@ -37,7 +37,7 @@ use tokio::sync::{broadcast, RwLock};
 use tracing::info;
 
 use crate::adapter::{ProviderAdapter, ProviderCapabilities, SessionModelSwitchMode};
-use crate::error::{ProviderError, ProviderResult};
+use crate::error::ProviderResult;
 
 /// Codex 适配器
 ///

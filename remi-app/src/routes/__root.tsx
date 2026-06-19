@@ -450,10 +450,13 @@ function GlobalShortcutsDialog() {
   );
 }
 
+/**
+ * 全局"新功能"展示面组件
+ * @description 应用会话级别的单一挂载点，负责渲染"新功能"弹窗和弹出卡片
+ */
 function GlobalWhatsNewSurface() {
-  // Single mount point per app session. The hook owns the "popout visible" and
-  // "dialog open" booleans and the seen-marker persistence; this component is
-  // just the plumbing that renders them together so they share one entry.
+  // 单一挂载点，Hook 负责"弹出卡片可见"和"对话框打开"的布尔状态以及已查看标记的持久化
+  // 该组件仅负责将它们组合渲染，共享一个入口
   const {
     currentEntry,
     allEntries,
@@ -466,7 +469,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // Silent-bootstrap or noop �?nothing to render on either surface.
+    // 静默启动或无操作 - 两个展示面都无需渲染
     return null;
   }
 
@@ -491,6 +494,12 @@ function GlobalWhatsNewSurface() {
   );
 }
 
+/**
+ * 根路由错误视图组件
+ * @description 当路由发生错误时显示的错误页面，提供重试和重载应用的选项
+ * @param error - 错误对象
+ * @param reset - 重置函数，用于重试
+ */
 function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
   const message = errorMessage(error);
   const details = errorDetails(error);
@@ -532,6 +541,11 @@ function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
   );
 }
 
+/**
+ * 提取错误消息
+ * @param error - 错误对象
+ * @returns 格式化的错误消息字符串
+ */
 function errorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
@@ -544,6 +558,11 @@ function errorMessage(error: unknown): string {
   return "An unexpected router error occurred.";
 }
 
+/**
+ * 提取错误详情
+ * @param error - 错误对象
+ * @returns 格式化的错误详情字符串，包含堆栈信息或 JSON 序列化结果
+ */
 function errorDetails(error: unknown): string {
   if (error instanceof Error) {
     return error.stack ?? error.message;
@@ -560,6 +579,12 @@ function errorDetails(error: unknown): string {
   }
 }
 
+/**
+ * 合并编排 UI 事件
+ * @description 将连续的相同消息发送事件合并为一个，避免 UI 重复渲染
+ * @param events - 编排事件数组
+ * @returns 合并后的事件数组
+ */
 function coalesceOrchestrationUiEvents(
   events: ReadonlyArray<OrchestrationEvent>,
 ): OrchestrationEvent[] {
@@ -597,6 +622,13 @@ function coalesceOrchestrationUiEvents(
   return coalesced;
 }
 
+/**
+ * 判断是否应该立即刷新领域事件
+ * @description 对于助手消息的首个流式事件，立即刷新以确保 UI 及时响应
+ * @param event - 编排事件对象
+ * @param immediatelyFlushedAssistantMessageIds - 已立即刷新的助手消息 ID 集合
+ * @returns 如果应该立即刷新则返回 true
+ */
 function shouldFlushDomainEventImmediately(
   event: OrchestrationEvent,
   immediatelyFlushedAssistantMessageIds: Set<string>,
@@ -618,6 +650,12 @@ function shouldFlushDomainEventImmediately(
   return true;
 }
 
+/**
+ * 判断事件是否为指定线程的详情事件
+ * @param event - 编排事件对象
+ * @param threadId - 线程 ID
+ * @returns 如果事件属于指定线程的详情事件则返回 true
+ */
 function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: ThreadId): boolean {
   if (event.aggregateKind !== "thread" || event.aggregateId !== threadId) {
     return false;
@@ -636,6 +674,11 @@ function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: Threa
   );
 }
 
+/**
+ * 判断是否应该轮询线程详情追赶
+ * @param threadId - 线程 ID
+ * @returns 如果线程正在运行（会话或最新轮次），则返回 true
+ */
 function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
   const thread = getThreadFromState(useStore.getState(), threadId);
   return (
@@ -643,6 +686,15 @@ function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
   );
 }
 
+/**
+ * 事件路由组件
+ * @description 核心事件订阅和分发组件，负责：
+ * - 订阅 Shell 和线程详情事件流
+ * - 管理线程订阅的生命周期
+ * - 协调缓存失效和查询刷新
+ * - 处理终端事件和欢迎消息
+ * - 维护线程快照序列号和事件缓冲
+ */
 function EventRouter() {
   const messages = useMessages();
   const syncServerShellSnapshot = useStore((store) => store.syncServerShellSnapshot);
@@ -1237,6 +1289,10 @@ function EventRouter() {
   return null;
 }
 
+/**
+ * 桌面项目引导组件
+ * @description 处理桌面应用的项目初始化逻辑，确保项目数据正确加载
+ */
 function DesktopProjectBootstrap() {
   const syncServerReadModel = useStore((store) => store.syncServerReadModel);
   const projects = useStore((store) => store.projects);
@@ -1258,8 +1314,8 @@ function DesktopProjectBootstrap() {
 
     attemptedRecoveryRef.current = true;
 
-    // Shell subscriptions should normally hydrate the sidebar. If project rows
-    // are missing while live threads exist, repair before accepting the snapshot.
+    // Shell 订阅通常会初始化侧边栏数据。如果项目行缺失但存在活跃线程，
+    // 在接受快照之前先进行修复
     void api.orchestration
       .getShellSnapshot()
       .then((snapshot) => {
@@ -1280,6 +1336,6 @@ function DesktopProjectBootstrap() {
       });
   }, [projects, syncServerReadModel, threads, threadsHydrated]);
 
-  // Desktop hydration normally runs through EventRouter project + orchestration sync.
+  // 桌面端的数据初始化通常通过 EventRouter 的项目和编排同步来完成
   return null;
 }

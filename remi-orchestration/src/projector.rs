@@ -24,7 +24,7 @@ use remi_persistence::{EventStore, ProjectionRepository, SqliteEventStore, Sqlit
 use tokio::sync::broadcast;
 use tracing::{info, warn};
 
-use crate::error::{OrchestrationError, OrchestrationResult};
+use crate::error::OrchestrationResult;
 
 /// 异步投影器
 ///
@@ -181,7 +181,7 @@ impl Projector {
     /// # 返回值
     ///
     /// 成功时返回 `Ok(())`，发生错误时返回相应错误。
-    async fn apply_event(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
+    async fn apply_event(&self, _event: &OrchestrationEvent) -> OrchestrationResult<()> {
         // 这里可以实现具体的投影逻辑
         // 目前由 OrchestrationEngine 直接处理，投影器主要用于异步消费
         Ok(())

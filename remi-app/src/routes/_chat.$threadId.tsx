@@ -1,7 +1,9 @@
-// FILE: _chat.$threadId.tsx
-// Purpose: Resolves the active thread route into either a single chat surface or a persisted split view.
-// Layer: Route container
-// Depends on: ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, and pane-scoped browser/diff panels
+/**
+ * @file 聊天线程路由容器模块
+ * @description 将活跃的线程路由解析为单聊天界面或持久化的分割视图
+ * @layer 路由容器层
+ * @depends ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, 以及面板作用域的浏览器/差异对比面板
+ */
 
 import {
   type ProviderKind,
@@ -93,19 +95,31 @@ import { cn } from "~/lib/utils";
 import { Sidebar, SidebarInset, SidebarProvider, SidebarRail } from "~/components/ui/sidebar";
 
 const DiffPanel = lazy(() => import("../components/DiffPanel"));
+/** 差异对比内联布局的媒体查询断点：当视口宽度 ≤ 1180px 时，差异面板以 Sheet 形式展示 */
 const DIFF_INLINE_LAYOUT_MEDIA_QUERY = "(max-width: 1180px)";
-// Keep the inline diff visually near half of the chat area after the fixed left sidebar is counted.
+/** 差异面板内联宽度：固定左侧边栏后，取视口 50% 并限制在 28rem ~ 44rem 之间 */
 const DIFF_INLINE_DEFAULT_WIDTH = "clamp(28rem, calc(50vw - 8rem), 44rem)";
+/** 浏览器面板内联默认宽度：占父容器 50% */
 const BROWSER_INLINE_DEFAULT_WIDTH = "50%";
+/** 分割视图中面板默认宽度（22rem，以 px 计） */
 const SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 22 * 16;
+/** 分割视图中浏览器面板默认宽度（30rem，以 px 计） */
 const BROWSER_SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 30 * 16;
+/** 分割视图中聊天区域最小宽度（20rem），面板扩展时不得侵占此空间 */
 const SPLIT_PANE_CHAT_MIN_WIDTH = 20 * 16;
+/** 单聊模式下右侧面板最小宽度（26rem） */
 const SINGLE_PANEL_MIN_WIDTH = 26 * 16;
+/** 浏览器面板最小宽度（21rem） */
 const BROWSER_PANEL_MIN_WIDTH = 21 * 16;
+/** 输入框紧凑模式下左侧控件最小宽度，用于判断面板是否导致溢出 */
 const COMPOSER_COMPACT_MIN_LEFT_CONTROLS_WIDTH_PX = 208;
+/** 右侧面板宽度持久化到 localStorage 的键名前缀 */
 const RIGHT_PANEL_SIDEBAR_WIDTH_STORAGE_KEY = "chat_right_panel_width";
+/** 面板拖拽调整大小时用于跨 iframe/WebView 同步的自定义事件名 */
 const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "remicode:panel-resize-overlay-sync";
+/** 分割比例下限（25%），防止某侧被压缩到不可见 */
 const SPLIT_RATIO_MIN = 0.25;
+/** 分割比例上限（75%），防止某侧被压缩到不可见 */
 const SPLIT_RATIO_MAX = 0.75;
 
 const allowAnySplitDirection = (_direction: SplitDirection) => true;
@@ -142,6 +156,11 @@ const RightPanelSheet = (props: {
   );
 };
 
+/**
+ * 差异面板懒加载的加载占位组件
+ * @description 在 DiffPanel 代码块加载完成前展示骨架屏
+ * @param props.mode - 面板模式（sidebar / sheet）
+ */
 const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
   return (
     <DiffPanelShell mode={props.mode} header={<DiffPanelHeaderSkeleton />}>
@@ -150,6 +169,16 @@ const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
   );
 };
 
+/**
+ * 懒加载的差异面板组件
+ * @description 包裹 DiffWorkerPoolProvider 和 Suspense，实现差异面板的按需加载
+ * @param props.mode - 面板展示模式（sidebar / sheet）
+ * @param props.threadId - 当前线程 ID
+ * @param props.panelState - 面板状态（面板类型、差异轮次、文件路径）
+ * @param props.onUpdatePanelState - 面板状态更新回调
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.liveRefreshEnabled - 是否启用实时刷新
+ */
 const LazyDiffPanel = (props: {
   mode: DiffPanelMode;
   threadId?: ThreadIdType | null;
@@ -178,6 +207,15 @@ const LazyDiffPanel = (props: {
   );
 };
 
+/**
+ * 检查输入框是否能处理指定的面板宽度
+ * @description 通过临时调整宽度并检测是否溢出，判断面板宽度是否可行
+ * @param input.nextWidth - 目标宽度（像素）
+ * @param input.paneScopeId - 面板作用域 ID（用于定位特定输入框）
+ * @param input.applyWidth - 应用宽度的回调
+ * @param input.resetWidth - 重置宽度的回调
+ * @returns 如果输入框可以处理该宽度则返回 true，否则返回 false
+ */
 function canComposerHandlePanelWidth(input: {
   nextWidth: number;
   paneScopeId?: string;
@@ -226,7 +264,11 @@ function canComposerHandlePanelWidth(input: {
   return !hasComposerOverflow && !overflowsViewport && !violatesMinimumComposerWidth;
 }
 
-// Tauri <webview> can swallow pointermove during drag; this keeps resizing in the React layer.
+/**
+ * 创建面板调整大小的全屏覆盖层
+ * @description Tauri <webview> 在拖拽时可能会吞掉 pointermove 事件；此覆盖层确保 React 层能持续接收事件
+ * @returns 创建的覆盖层 DOM 元素
+ */
 function createPanelResizeOverlay(): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.setAttribute("data-panel-resize-overlay", "true");
@@ -240,11 +282,28 @@ function createPanelResizeOverlay(): HTMLDivElement {
   return overlay;
 }
 
+/**
+ * 移除面板调整大小的覆盖层
+ * @param overlay - 要移除的覆盖层元素
+ */
 function removePanelResizeOverlay(overlay: HTMLDivElement): void {
   overlay.remove();
   window.dispatchEvent(new Event(PANEL_RESIZE_OVERLAY_SYNC_EVENT));
 }
 
+/**
+ * 面板内联侧边栏组件
+ * @description 在单聊模式下展示差异对比或浏览器面板的内联侧边栏，支持拖拽调整宽度
+ * @param props.panelOpen - 面板是否打开
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.onOpenPanel - 打开面板回调
+ * @param props.renderPanelContent - 是否渲染面板内容
+ * @param props.panel - 面板类型（browser / diff / null）
+ * @param props.threadId - 当前线程 ID
+ * @param props.paneScopeId - 面板作用域 ID
+ * @param props.panelState - 面板状态
+ * @param props.onUpdatePanelState - 面板状态更新回调
+ */
 const PanePanelInlineSidebar = (props: {
   panelOpen: boolean;
   onClosePanel: () => void;
@@ -427,8 +486,20 @@ const PanePanelInlineSidebar = (props: {
   );
 };
 
-// Split panes cannot reuse the desktop Sidebar primitive because it positions the panel
-// against the viewport. This embedded shell keeps browser/diff content anchored to the pane.
+/**
+ * 分割视图中嵌入的面板组件
+ * @description 分割面板无法复用桌面版 Sidebar 原语（因为它相对于视口定位），此组件将浏览器/差异内容锚定到具体窗格
+ * @param props.splitViewId - 分割视图 ID
+ * @param props.paneId - 窗格 ID
+ * @param props.paneScopeId - 窗格作用域 ID
+ * @param props.panelOpen - 面板是否打开
+ * @param props.panel - 面板类型
+ * @param props.threadId - 当前线程 ID
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.panelState - 面板状态
+ * @param props.isFocused - 是否聚焦
+ * @param props.onUpdatePanelState - 面板状态更新回调
+ */
 function SplitPaneEmbeddedPanel(props: {
   splitViewId: SplitViewId;
   paneId: PaneId;
@@ -557,6 +628,13 @@ function SplitPaneEmbeddedPanel(props: {
   );
 }
 
+/**
+ * 解析单一项目 ID
+ * @description 优先返回线程关联的项目 ID，其次返回草稿项目 ID
+ * @param input.threadProjectId - 线程关联的项目 ID
+ * @param input.draftProjectId - 草稿项目 ID
+ * @returns 解析后的项目 ID，若无则返回 null
+ */
 function resolveSingleProjectId(input: {
   threadProjectId: ProjectId | null;
   draftProjectId: ProjectId | null;
@@ -564,6 +642,12 @@ function resolveSingleProjectId(input: {
   return input.threadProjectId ?? input.draftProjectId ?? null;
 }
 
+/**
+ * 将面板状态标准化为路由搜索参数
+ * @description 将面板状态转换为 URL 查询参数格式
+ * @param panelState - 面板状态
+ * @returns 路由搜索参数对象
+ */
 function normalizeSingleSearchFromPane(
   panelState: Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">,
 ): DiffRouteSearch {
@@ -583,6 +667,16 @@ function normalizeSingleSearchFromPane(
   return {};
 }
 
+/**
+ * 分割视图空状态组件
+ * @description 当分割窗格中没有线程时展示的选择器界面
+ * @param props.isFocused - 是否聚焦
+ * @param props.onFocus - 聚焦回调
+ * @param props.threads - 可选线程列表
+ * @param props.projects - 项目列表
+ * @param props.excludedThreadIds - 已排除的线程 ID 集合
+ * @param props.onSelectThread - 选择线程回调
+ */
 function SplitPaneEmptyState(props: {
   isFocused: boolean;
   onFocus: () => void;
@@ -645,6 +739,13 @@ function SplitPaneEmptyState(props: {
   );
 }
 
+/**
+ * 分割线组件
+ * @description 可拖拽的分割线，支持水平和垂直方向，拖拽时显示视觉引导线
+ * @param props.splitNodeId - 分割节点 ID
+ * @param props.direction - 分割方向（horizontal / vertical）
+ * @param props.onSetRatio - 设置分割比例的回调
+ */
 function SplitDivider(props: {
   splitNodeId: PaneId;
   direction: SplitDirection;
@@ -760,6 +861,14 @@ function SplitDivider(props: {
   );
 }
 
+/**
+ * 窗格渲染器组件
+ * @description 递归渲染分割视图的树形结构，处理叶子节点和分割节点
+ * @param props.pane - 当前窗格节点
+ * @param props.splitView - 分割视图对象
+ * @param props.renderLeaf - 叶子节点渲染函数
+ * @param props.onSetRatio - 设置分割比例的回调
+ */
 function PaneRenderer(props: {
   pane: Pane;
   splitView: SplitView;
@@ -806,6 +915,10 @@ function PaneRenderer(props: {
   );
 }
 
+/**
+ * 聊天界面挂载骨架屏组件
+ * @description 在 ChatView 组件挂载期间展示占位 UI，模拟真实聊天界面的布局结构
+ */
 function ChatMountSkeleton() {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground [contain:layout_style_paint]">
@@ -850,6 +963,24 @@ function ChatMountSkeleton() {
   );
 }
 
+/**
+ * 延迟挂载的聊天视图组件
+ * @description 通过双 requestAnimationFrame 延迟挂载，避免路由切换时的卡顿
+ * @param props.threadId - 线程 ID
+ * @param props.paneScopeId - 窗格作用域 ID
+ * @param props.deferMount - 是否延迟挂载
+ * @param props.surfaceMode - 表面模式（single / split）
+ * @param props.isFocusedPane - 是否聚焦窗格
+ * @param props.panelState - 面板状态
+ * @param props.onToggleDiff - 切换差异面板回调
+ * @param props.onToggleBrowser - 切换浏览器面板回调
+ * @param props.onOpenTurnDiff - 打开轮次差异回调
+ * @param props.onSplitSurface - 分割表面回调
+ * @param props.onMaximize - 最大化回调
+ * @param props.onChangeThread - 切换线程回调
+ * @param props.onCloseThreadPane - 关闭线程面板回调
+ * @param props.onMounted - 挂载完成回调
+ */
 function DeferredChatView(props: {
   threadId: ThreadIdType;
   paneScopeId: string;
@@ -918,6 +1049,32 @@ function DeferredChatView(props: {
   );
 }
 
+/**
+ * 分割视图窗格表面组件
+ * @description 单个分割窗格的完整容器，包含聊天视图、面板、拖放覆盖层等
+ * @param props.splitView - 分割视图对象
+ * @param props.paneId - 窗格 ID
+ * @param props.threadId - 线程 ID
+ * @param props.panelState - 面板状态
+ * @param props.isFocused - 是否聚焦
+ * @param props.deferChatMount - 是否延迟挂载聊天视图
+ * @param props.canDropInDirection - 判断是否可在指定方向拖放
+ * @param props.excludedThreadIds - 已排除的线程 ID 集合
+ * @param props.threads - 可选线程列表
+ * @param props.projects - 项目列表
+ * @param props.onFocus - 聚焦回调
+ * @param props.onToggleDiff - 切换差异面板回调
+ * @param props.onToggleBrowser - 切换浏览器面板回调
+ * @param props.onOpenTurnDiff - 打开轮次差异回调
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.onUpdatePanelState - 面板状态更新回调
+ * @param props.onMaximize - 最大化回调
+ * @param props.onCloseThreadPane - 关闭线程面板回调
+ * @param props.onChooseThread - 选择线程回调
+ * @param props.onSelectThread - 选择线程回调
+ * @param props.onChatMounted - 聊天挂载完成回调
+ * @param props.onDropThread - 拖放线程回调
+ */
 function SplitPaneSurface(props: {
   splitView: SplitView;
   paneId: PaneId;
@@ -1045,6 +1202,12 @@ function SplitPaneSurface(props: {
   );
 }
 
+/**
+ * 分割聊天表面组件
+ * @description 管理整个分割视图的生命周期和交互，包括窗格聚焦、线程切换、面板控制等
+ * @param props.splitViewId - 分割视图 ID
+ * @param props.routeThreadId - 路由中的线程 ID
+ */
 function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: ThreadIdType }) {
   const navigate = useNavigate();
   const { handleNewChat } = useHandleNewChat();
@@ -1537,6 +1700,13 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
   );
 }
 
+/**
+ * 单聊表面组件
+ * @description 管理单聊模式下的聊天视图、右侧面板、分割视图创建等
+ * @param props.threadId - 线程 ID
+ * @param props.search - 路由搜索参数
+ * @param props.projectId - 项目 ID
+ */
 function SingleChatSurface(props: {
   threadId: ThreadIdType;
   search: DiffRouteSearch;
@@ -1792,6 +1962,10 @@ function SingleChatSurface(props: {
   );
 }
 
+/**
+ * 聊天线程路由视图组件
+ * @description 路由容器的主组件，根据路由参数决定渲染单聊还是分割视图
+ */
 function ChatThreadRouteView() {
   const threadsHydrated = useStore((store) => store.threadsHydrated);
   const threadId = Route.useParams({
@@ -1863,6 +2037,10 @@ function ChatThreadRouteView() {
   return <SingleChatSurface threadId={threadId} search={search} projectId={activeProjectId} />;
 }
 
+/**
+ * 聊天线程路由定义
+ * @description 定义 /_chat/$threadId 路由，支持差异面板相关的搜索参数验证
+ */
 export const Route = createFileRoute("/_chat/$threadId")({
   validateSearch: (search) => parseDiffRouteSearch(search),
   component: ChatThreadRouteView,

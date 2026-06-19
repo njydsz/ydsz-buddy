@@ -9,7 +9,7 @@ use serde_json::Value;
 use tokio::sync::RwLock;
 use tracing::{debug, error, info};
 
-use crate::error::{ServerError, ServerResult};
+use crate::error::ServerResult;
 
 /// JSON-RPC 请求
 #[derive(Debug, Clone, Serialize, Deserialize)]

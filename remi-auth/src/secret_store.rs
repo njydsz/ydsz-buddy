@@ -12,6 +12,7 @@ use crate::error::AuthResult;
 /// 密钥存储
 pub struct SecretStore {
     secrets: RwLock<HashMap<String, Vec<u8>>>,
+    #[allow(dead_code)]
     storage_path: Option<PathBuf>,
 }
 

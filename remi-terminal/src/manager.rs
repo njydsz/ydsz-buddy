@@ -5,10 +5,10 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use tokio::sync::{broadcast, RwLock};
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::error::{TerminalError, TerminalResult};
-use crate::pty::{PtyProcess, PtySize};
+use crate::pty::PtyProcess;
 
 /// 终端会话状态
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -106,6 +106,7 @@ struct TerminalSession {
     cols: u16,
     rows: u16,
     process: Option<PtyProcess>,
+    #[allow(dead_code)]
     env: HashMap<String, String>,
 }
 
@@ -313,7 +314,7 @@ impl TerminalManager {
             let mut sessions = self.sessions.write().await;
             if let Some(session) = sessions.get_mut(&key) {
                 // 停止进程
-                if let Some(process) = session.process.take() {
+                if let Some(_process) = session.process.take() {
                     // TODO: 实际停止进程
                 }
 
@@ -358,7 +359,7 @@ impl TerminalManager {
 
             if let Some(mut session) = sessions.remove(&key) {
                 // 停止进程
-                if let Some(process) = session.process.take() {
+                if let Some(_process) = session.process.take() {
                     // TODO: 实际停止进程
                 }
 
@@ -378,7 +379,7 @@ impl TerminalManager {
 
             for key in keys_to_remove {
                 if let Some(mut session) = sessions.remove(&key) {
-                    if let Some(process) = session.process.take() {
+                    if let Some(_process) = session.process.take() {
                         // TODO: 实际停止进程
                     }
 
@@ -440,7 +441,7 @@ impl TerminalManager {
 
         let mut sessions = self.sessions.write().await;
         for (_, mut session) in sessions.drain() {
-            if let Some(process) = session.process.take() {
+            if let Some(_process) = session.process.take() {
                 // TODO: 实际停止进程
             }
         }

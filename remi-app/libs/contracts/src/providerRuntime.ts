@@ -42,7 +42,7 @@ const TrimmedNonEmptyStringSchema = TrimmedNonEmptyString;
 const UnknownRecordSchema = Schema.Record(Schema.String, Schema.Unknown);
 
 /** 运行时事件原始来源，标识事件来自哪个 Provider 的哪种通信渠道 */
-const RuntimeEventRawSource = Schema.Literals([
+const RuntimeEventRawSource = Schema.Literal(
   "codex.app-server.notification",
   "codex.app-server.request",
   "codex.eventmsg",
@@ -57,7 +57,7 @@ const RuntimeEventRawSource = Schema.Literals([
   "kilo.sdk.event",
   "opencode.sdk.event",
   "pi.sdk.event",
-]);
+);
 export type RuntimeEventRawSource = typeof RuntimeEventRawSource.Type;
 
 /** 运行时原始事件，包含来源、方法、消息类型和负载数据 */
@@ -95,33 +95,33 @@ const ProviderRefs = Schema.Struct({
 export type ProviderRefs = typeof ProviderRefs.Type;
 
 /** 运行时会话状态枚举：启动中、就绪、运行中、等待、已停止、错误 */
-const RuntimeSessionState = Schema.Literals([
+const RuntimeSessionState = Schema.Literal(
   "starting",
   "ready",
   "running",
   "waiting",
   "stopped",
   "error",
-]);
+);
 export type RuntimeSessionState = typeof RuntimeSessionState.Type;
 
 /** 运行时线程状态枚举：活跃、空闲、已归档、已关闭、已压缩、错误 */
-const RuntimeThreadState = Schema.Literals([
+const RuntimeThreadState = Schema.Literal(
   "active",
   "idle",
   "archived",
   "closed",
   "compacted",
   "error",
-]);
+);
 export type RuntimeThreadState = typeof RuntimeThreadState.Type;
 
 /** 运行时轮次状态枚举：已完成、失败、已中断、已取消 */
-const RuntimeTurnState = Schema.Literals(["completed", "failed", "interrupted", "cancelled"]);
+const RuntimeTurnState = Schema.Literal("completed", "failed", "interrupted", "cancelled");
 export type RuntimeTurnState = typeof RuntimeTurnState.Type;
 
 /** 运行时任务状态枚举：待处理、进行中、已完成 */
-const RuntimeTaskStatus = Schema.Literals(["pending", "inProgress", "completed"]);
+const RuntimeTaskStatus = Schema.Literal("pending", "inProgress", "completed");
 export type RuntimeTaskStatus = typeof RuntimeTaskStatus.Type;
 
 /** 运行时项目状态枚举：进行中、已完成、失败、已拒绝 */

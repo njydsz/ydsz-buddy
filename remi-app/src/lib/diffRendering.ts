@@ -1,28 +1,48 @@
-// FILE: diffRendering.ts
-// Purpose: Shared helpers for rendering, caching, copying, and summarizing git patches.
-// Layer: Web diff utilities
-// Depends on: @pierre/diffs patch parsing
+/**
+ * @file 差异渲染模块
+ * @description 提供 git 补丁的渲染、缓存、复制和摘要功能。
+ *              依赖 @pierre/diffs 的补丁解析功能。
+ */
 
 import { parsePatchFiles } from "@pierre/diffs";
 import type { FileDiffMetadata } from "@pierre/diffs/react";
 
+/** 差异主题名称配置 */
 export const DIFF_THEME_NAMES = {
-  // Keep diff syntax highlighting on the bundled GitHub themes for better parity with git tooling.
+  /** 浅色主题（使用 GitHub 浅色主题） */
   light: "github-light",
+  /** 深色主题（使用 GitHub 深色主题） */
   dark: "github-dark",
 } as const;
 
+/** 差异主题名称类型 */
 export type DiffThemeName = (typeof DIFF_THEME_NAMES)[keyof typeof DIFF_THEME_NAMES];
 
+/**
+ * 解析差异主题名称
+ * @param theme - 主题类型（"light" 或 "dark"）
+ * @returns 对应的差异主题名称
+ */
 export function resolveDiffThemeName(theme: "light" | "dark"): DiffThemeName {
   return theme === "dark" ? DIFF_THEME_NAMES.dark : DIFF_THEME_NAMES.light;
 }
 
+/** FNV-1a 32位哈希的偏移基数 */
 const FNV_OFFSET_BASIS_32 = 0x811c9dc5;
+/** FNV-1a 32位哈希的质数 */
 const FNV_PRIME_32 = 0x01000193;
+/** 次要哈希种子 */
 const SECONDARY_HASH_SEED = 0x9e3779b9;
+/** 次要哈希乘数 */
 const SECONDARY_HASH_MULTIPLIER = 0x85ebca6b;
 
+/**
+ * FNV-1a 32位哈希算法
+ * @param input - 输入字符串
+ * @param seed - 哈希种子，默认为 FNV 偏移基数
+ * @param multiplier - 哈希乘数，默认为 FNV 质数
+ * @returns 32位无符号整数哈希值
+ */
 export function fnv1a32(
   input: string,
   seed = FNV_OFFSET_BASIS_32,
@@ -36,6 +56,12 @@ export function fnv1a32(
   return hash >>> 0;
 }
 
+/**
+ * 构建补丁缓存键
+ * @param patch - 补丁文本
+ * @param scope - 缓存作用域，默认为 "diff-panel"
+ * @returns 缓存键字符串
+ */
 export function buildPatchCacheKey(patch: string, scope = "diff-panel"): string {
   const normalizedPatch = patch.trim();
   const primary = fnv1a32(normalizedPatch, FNV_OFFSET_BASIS_32, FNV_PRIME_32).toString(36);
@@ -47,7 +73,12 @@ export function buildPatchCacheKey(patch: string, scope = "diff-panel"): string 
   return `${scope}:${normalizedPatch.length}:${primary}:${secondary}`;
 }
 
-// Returns copyable source text for diff surfaces without depending on virtualized DOM rows.
+/**
+ * 解析差异复制文本
+ * 返回可复制的源文本，不依赖虚拟化的 DOM 行
+ * @param patch - 补丁文本
+ * @returns 可复制的文本，如果无效则返回 null
+ */
 export function resolveDiffCopyText(patch: string | undefined): string | null {
   if (typeof patch !== "string") {
     return null;
@@ -55,6 +86,11 @@ export function resolveDiffCopyText(patch: string | undefined): string | null {
   return patch.trim().length > 0 ? patch : null;
 }
 
+/**
+ * 可渲染补丁类型
+ * - "files": 已解析的文件差异列表
+ * - "raw": 原始补丁文本（当解析失败时）
+ */
 export type RenderablePatch =
   | {
       kind: "files";
@@ -66,6 +102,12 @@ export type RenderablePatch =
       reason: string;
     };
 
+/**
+ * 获取可渲染的补丁
+ * @param patch - 补丁文本
+ * @param cacheScope - 缓存作用域，默认为 "diff-panel"
+ * @returns 可渲染的补丁对象，如果输入为空则返回 null
+ */
 export function getRenderablePatch(
   patch: string | undefined,
   cacheScope = "diff-panel",
@@ -98,7 +140,11 @@ export function getRenderablePatch(
   }
 }
 
-// Summarize parsed hunks for compact, consistent diff stats across panel chrome.
+/**
+ * 摘要文件差异统计
+ * @param files - 文件差异元数据列表
+ * @returns 包含新增行数和删除行数的统计对象
+ */
 export function summarizeFileDiffStats(files: ReadonlyArray<FileDiffMetadata>): {
   additions: number;
   deletions: number;
@@ -115,6 +161,11 @@ export function summarizeFileDiffStats(files: ReadonlyArray<FileDiffMetadata>): 
   );
 }
 
+/**
+ * 摘要补丁统计
+ * @param patch - 补丁文本
+ * @returns 包含新增行数和删除行数的统计对象，如果解析失败则返回 null
+ */
 export function summarizePatchStats(
   patch: string | undefined,
 ): { additions: number; deletions: number } | null {

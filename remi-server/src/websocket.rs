@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use axum::extract::ws::Message;
-use serde_json::Value;
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tracing::{debug, error, info, warn};
 
@@ -109,10 +108,10 @@ impl WebSocketManager {
                 // 发送响应
                 connection.send_response(response).await?;
             }
-            Message::Binary(data) => {
+            Message::Binary(_data) => {
                 warn!("收到不支持的二进制消息");
             }
-            Message::Ping(data) => {
+            Message::Ping(_data) => {
                 debug!("收到 Ping 消息");
                 // 自动回复 Pong（由 tungstenite 处理）
             }

@@ -22,10 +22,9 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::models::{
-    Activity, Checkpoint, InteractionMode, Message, MessageId, ProjectId, ProposedPlan,
+    Activity, InteractionMode, Message, MessageId, ProjectId, ProposedPlan,
     RuntimeMode, Sequence, ThreadId,
 };
 

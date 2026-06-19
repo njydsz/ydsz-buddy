@@ -9,8 +9,6 @@
 //! - [`ProviderCapabilities`]: 适配器能力声明，描述 Provider 支持的功能特性
 //! - [`SessionModelSwitchMode`]: 会话内模型切换模式枚举
 
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use remi_core::provider::{
     ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
@@ -199,7 +197,7 @@ pub trait ProviderAdapter: Send + Sync {
     /// # 默认实现
     ///
     /// 默认返回 `UnsupportedOperation` 错误，支持此功能的适配器应覆盖此方法
-    async fn steer_turn(&self, input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
+    async fn steer_turn(&self, _input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
         Err(crate::error::ProviderError::UnsupportedOperation(
             "steer_turn not supported".to_string(),
         ))
@@ -297,7 +295,7 @@ pub trait ProviderAdapter: Send + Sync {
     /// # 默认实现
     ///
     /// 默认返回 `UnsupportedOperation` 错误，支持此功能的适配器应覆盖此方法
-    async fn rollback_conversation(&self, thread_id: &str, num_turns: u32) -> ProviderResult<()> {
+    async fn rollback_conversation(&self, _thread_id: &str, _num_turns: u32) -> ProviderResult<()> {
         Err(crate::error::ProviderError::UnsupportedOperation(
             "rollback_conversation not supported".to_string(),
         ))
@@ -320,7 +318,7 @@ pub trait ProviderAdapter: Send + Sync {
     /// # 默认实现
     ///
     /// 默认返回 `UnsupportedOperation` 错误，支持此功能的适配器应覆盖此方法
-    async fn compact_thread(&self, thread_id: &str) -> ProviderResult<()> {
+    async fn compact_thread(&self, _thread_id: &str) -> ProviderResult<()> {
         Err(crate::error::ProviderError::UnsupportedOperation(
             "compact_thread not supported".to_string(),
         ))

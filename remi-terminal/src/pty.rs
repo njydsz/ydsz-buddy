@@ -17,7 +17,7 @@ pub struct PtyProcess {
 
 impl PtyProcess {
     /// 创建新的 PTY 进程
-    pub fn new(cwd: &str, size: PtySize, env: &HashMap<String, String>) -> Self {
+    pub fn new(_cwd: &str, size: PtySize, _env: &HashMap<String, String>) -> Self {
         // TODO: 实现实际的 PTY 启动逻辑
         // 需要使用 portable-pty 或类似库
         Self {
@@ -38,7 +38,7 @@ impl PtyProcess {
     }
 
     /// 写入数据
-    pub fn write(&self, data: &str) {
+    pub fn write(&self, _data: &str) {
         // TODO: 实际写入 PTY
     }
 

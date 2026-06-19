@@ -889,6 +889,13 @@ function mergeThemeSeedPatch(
   };
 }
 
+/**
+ * 设置主题字体
+ * @param state - 当前主题状态
+ * @param variant - 目标变体
+ * @param patch - 字体配置补丁
+ * @returns 更新后的主题状态
+ */
 export function setThemeFonts(
   state: ThemeState,
   variant: ThemeVariant,
@@ -910,6 +917,12 @@ export function setThemeFonts(
   };
 }
 
+/**
+ * 重置指定变体的主题为默认值
+ * @param state - 当前主题状态
+ * @param variant - 要重置的变体
+ * @returns 重置后的主题状态
+ */
 export function resetThemeVariant(state: ThemeState, variant: ThemeVariant): ThemeState {
   return {
     ...state,
@@ -924,6 +937,12 @@ export function resetThemeVariant(state: ThemeState, variant: ThemeVariant): The
   };
 }
 
+/**
+ * 解析主题包
+ * @param state - 主题状态
+ * @param variant - 主题变体
+ * @returns 规范化后的主题包对象
+ */
 export function resolveThemePack(state: ThemeState, variant: ThemeVariant): ThemePack {
   return {
     codeThemeId: normalizeCodeThemeId(state.codeThemeIds[variant], variant),
@@ -931,6 +950,12 @@ export function resolveThemePack(state: ThemeState, variant: ThemeVariant): Them
   };
 }
 
+/**
+ * 比较两个主题包是否相等
+ * @param left - 左侧主题包
+ * @param right - 右侧主题包
+ * @returns 如果所有字段都相等则返回 true
+ */
 export function areThemePacksEqual(left: ThemePack, right: ThemePack): boolean {
   return (
     left.codeThemeId === right.codeThemeId &&
@@ -947,8 +972,14 @@ export function areThemePacksEqual(left: ThemePack, right: ThemePack): boolean {
   );
 }
 
-// ─── Theme derivation ─────────────────────────────────────────────────────
+// ─── 主题派生 ─────────────────────────────────────────────────────
 
+/**
+ * 根据主题模式和系统深色模式状态解析实际的主题变体
+ * @param mode - 主题模式(light/dark/system)
+ * @param systemDark - 系统是否处于深色模式
+ * @returns 实际使用的主题变体
+ */
 export function resolveThemeVariant(mode: ThemeMode, systemDark: boolean): ThemeVariant {
   if (mode === "system") {
     return systemDark ? "dark" : "light";
@@ -956,6 +987,14 @@ export function resolveThemeVariant(mode: ThemeMode, systemDark: boolean): Theme
   return mode;
 }
 
+/**
+ * 构建主题 CSS 变量
+ * @description 生成完整的 CSS 变量映射,包括 Codex 变量、令牌别名和应用级变量
+ * @param pack - 主题包
+ * @param variant - 主题变体
+ * @param options - 可选配置,desktop 为 true 时可能使用半透明材质
+ * @returns 包含窗口材质和 CSS 变量映射的对象
+ */
 export function buildThemeCssVariables(
   pack: ThemePack,
   variant: ThemeVariant,
@@ -964,6 +1003,7 @@ export function buildThemeCssVariables(
   const resolvedTokens = buildResolvedThemeTokens(pack, variant);
   const codexVariables = resolvedTokens.codexVariables;
   const readCodexVariable = (name: string) => getRequiredVariable(codexVariables, name);
+  // 桌面端且未启用不透明窗口时使用半透明材质
   const material: WindowMaterial =
     options?.desktop === true && !pack.theme.opaqueWindows ? "translucent" : "opaque";
   const warningColor = variant === "dark" ? "#f5b44a" : "#d97706";
@@ -974,6 +1014,7 @@ export function buildThemeCssVariables(
     variant,
     resolvedTokens.computed.panel,
   );
+  // 应用级 CSS 变量,映射 Codex 变量到应用使用的语义名称
   const appVariables: Record<string, string> = {
     "--accent": readCodexVariable("--color-background-accent"),
     "--accent-foreground": readCodexVariable("--color-text-foreground"),
@@ -1006,8 +1047,8 @@ export function buildThemeCssVariables(
     "--destructive-foreground": pack.theme.surface,
     "--foreground": readCodexVariable("--color-text-foreground"),
     "--info": pack.theme.accent,
-    // Keep legacy app-level "info" consumers on Codex's accent-text path so
-    // links, file labels, and similar affordances inherit the real light/dark logic.
+    // 保持旧版应用级 "info" 消费者使用 Codex 的强调色文本路径,
+    // 使链接、文件标签等类似元素继承真实的浅色/深色逻辑
     "--info-foreground": readCodexVariable("--color-text-accent"),
     "--input": readCodexVariable("--color-background-control-opaque"),
     "--muted": readCodexVariable("--color-background-elevated-secondary"),
@@ -1043,11 +1084,19 @@ export function buildThemeCssVariables(
   };
 }
 
+/**
+ * 构建已解析的主题令牌
+ * @description 从主题包计算出所有派生令牌、Codex 变量和别名
+ * @param pack - 主题包
+ * @param variant - 主题变体
+ * @returns 包含所有已解析令牌的完整对象
+ */
 export function buildResolvedThemeTokens(
   pack: ThemePack,
   variant: ThemeVariant,
 ): ResolvedThemeTokens {
   const computedTheme = buildComputedTheme(pack.theme, variant);
+  // 根据变体选择不同的派生令牌计算逻辑
   const derived =
     variant === "light"
       ? buildLightDerivedTokens(computedTheme)
@@ -1068,6 +1117,13 @@ export function buildResolvedThemeTokens(
   };
 }
 
+/**
+ * 构建计算后的主题
+ * @description 将十六进制颜色转换为 RGB,计算编辑器背景和底层表面色
+ * @param theme - Chrome 主题
+ * @param variant - 主题变体
+ * @returns 计算后的主题对象,包含 RGB 颜色值
+ */
 function buildComputedTheme(theme: ChromeTheme, variant: ThemeVariant) {
   const contrast = normalizeContrastStrength(theme.contrast, variant);
   const surface = parseHexColor(theme.surface);
@@ -1076,6 +1132,7 @@ function buildComputedTheme(theme: ChromeTheme, variant: ThemeVariant) {
   return {
     accent: parseHexColor(theme.accent),
     contrast,
+    // 浅色模式编辑器背景混合白色,深色模式混合墨色
     editorBackground:
       variant === "light" ? mixRgb(surface, WHITE, 0.12) : mixRgb(surface, ink, 0.07),
     ink,
@@ -1086,6 +1143,14 @@ function buildComputedTheme(theme: ChromeTheme, variant: ThemeVariant) {
   };
 }
 
+/**
+ * 构建 Codex CSS 变量
+ * @description 生成所有 Codex 风格的 CSS 变量映射
+ * @param theme - 计算后的主题
+ * @param derivedTokens - 派生令牌
+ * @param panelBackground - 面板背景色
+ * @returns CSS 变量名值对映射
+ */
 function buildCodexCssVariables(
   theme: ReturnType<typeof buildComputedTheme>,
   derivedTokens:
@@ -1130,6 +1195,7 @@ function buildCodexCssVariables(
     "--color-border-light": derivedTokens.borderLight,
     "--color-decoration-added": theme.theme.semanticColors.diffAdded,
     "--color-decoration-deleted": theme.theme.semanticColors.diffRemoved,
+    // 编辑器差异高亮颜色,浅色模式透明度较低
     "--color-editor-added": formatRgba(
       parseHexColor(theme.theme.semanticColors.diffAdded),
       theme.variant === "light" ? 0.15 : 0.23,
@@ -1153,6 +1219,12 @@ function buildCodexCssVariables(
   };
 }
 
+/**
+ * 构建主题令牌别名
+ * @description 为旧版组件提供向后兼容的令牌别名映射
+ * @param codexVariables - Codex CSS 变量
+ * @returns 令牌别名映射
+ */
 function buildThemeTokenAliases(codexVariables: Record<string, string>): Record<string, string> {
   const readCodexVariable = (name: string) => getRequiredVariable(codexVariables, name);
 
@@ -1219,6 +1291,13 @@ function buildThemeTokenAliases(codexVariables: Record<string, string>): Record<
   };
 }
 
+/**
+ * 获取必需的 CSS 变量
+ * @param variables - CSS 变量映射
+ * @param name - 变量名
+ * @returns 变量值
+ * @throws 当变量不存在时抛出错误
+ */
 function getRequiredVariable(variables: Record<string, string>, name: string): string {
   const value = variables[name];
   if (typeof value !== "string") {
@@ -1227,9 +1306,18 @@ function getRequiredVariable(variables: Record<string, string>, name: string): s
   return value;
 }
 
+/**
+ * 构建浅色模式派生令牌
+ * @description 根据对比度和基础颜色计算浅色模式下的所有派生颜色
+ * @param theme - 计算后的主题
+ * @returns 浅色模式派生令牌对象
+ */
 function buildLightDerivedTokens(theme: ReturnType<typeof buildComputedTheme>) {
+  // 控件基础颜色:表面色混合墨色,对比度越高混合越多
   const controlBase = mixRgb(theme.surface, theme.ink, 0.06 + theme.contrast * 0.05);
+  // 焦点基础颜色:强调色混合白色
   const focusBase = mixRgb(theme.accent, WHITE, 0.3 + theme.contrast * 0.15);
+  // 主要提升层级基础颜色
   const elevatedPrimaryBase = mixRgb(theme.surface, theme.ink, 0.08 + theme.contrast * 0.08);
 
   return {
@@ -1278,7 +1366,14 @@ function buildLightDerivedTokens(theme: ReturnType<typeof buildComputedTheme>) {
   };
 }
 
+/**
+ * 构建深色模式派生令牌
+ * @description 根据对比度和基础颜色计算深色模式下的所有派生颜色
+ * @param theme - 计算后的主题
+ * @returns 深色模式派生令牌对象
+ */
 function buildDarkDerivedTokens(theme: ReturnType<typeof buildComputedTheme>) {
+  // 深色模式控件基础颜色:表面色混合白色
   const controlBase = mixRgb(theme.surface, WHITE, 0.09 + theme.contrast * 0.04);
   const elevatedSecondaryBase = mixRgb(theme.surface, WHITE, 0.08 + theme.contrast * 0.08);
   const elevatedPrimaryBase = mixRgb(theme.surface, WHITE, 0.16 + theme.contrast * 0.12);
@@ -1331,6 +1426,15 @@ function buildDarkDerivedTokens(theme: ReturnType<typeof buildComputedTheme>) {
   };
 }
 
+/**
+ * 构建底层表面色
+ * @description 根据对比度计算底层表面颜色,用于侧边栏等区域
+ * @param theme - Chrome 主题
+ * @param surface - 表面色 RGB 值
+ * @param ink - 墨色 RGB 值
+ * @param variant - 主题变体
+ * @returns 计算后的底层表面色(十六进制格式)
+ */
 function buildSurfaceUnder(
   theme: ChromeTheme,
   surface: RgbColor,
@@ -1338,6 +1442,7 @@ function buildSurfaceUnder(
   variant: ThemeVariant,
 ): string {
   const baseline = DEFAULT_CHROME_THEME_BY_VARIANT[variant].contrast;
+  // 根据对比度与基线的差值调整混合量
   const mixAmount =
     SURFACE_UNDER_BASE_ALPHA[variant] +
     (theme.contrast - baseline) * SURFACE_UNDER_CONTRAST_STEP[variant];
@@ -1346,6 +1451,11 @@ function buildSurfaceUnder(
     : mixHex(formatHex(surface), "#000000", mixAmount);
 }
 
+/**
+ * 构建面板背景色
+ * @param theme - 计算后的主题
+ * @returns 面板背景色(十六进制格式)
+ */
 function buildPanelBackground(theme: ReturnType<typeof buildComputedTheme>): string {
   const anchor = theme.variant === "light" ? WHITE : theme.ink;
   return mixHex(
@@ -1355,6 +1465,13 @@ function buildPanelBackground(theme: ReturnType<typeof buildComputedTheme>): str
   );
 }
 
+/**
+ * 构建编辑器焦点边框颜色
+ * @param pack - 主题包
+ * @param variant - 主题变体
+ * @param panelBackground - 面板背景色
+ * @returns 焦点边框颜色(十六进制格式)
+ */
 function buildComposerFocusBorder(
   pack: ThemePack,
   variant: ThemeVariant,
@@ -1367,6 +1484,13 @@ function buildComposerFocusBorder(
   return mixHex(formatHex(panel), formatHex(anchor), mixAmount);
 }
 
+/**
+ * 规范化对比度强度
+ * @description 应用非线性曲线使对比度调整更自然,基线以下和以上使用不同的曲线系数
+ * @param value - 原始对比度值(0-100)
+ * @param variant - 主题变体
+ * @returns 规范化后的对比度比例值
+ */
 function normalizeContrastStrength(value: number, variant: ThemeVariant): number {
   const baseline = DEFAULT_CHROME_THEME_BY_VARIANT[variant].contrast;
   const baselineRatio = baseline / 100;
@@ -1376,11 +1500,18 @@ function normalizeContrastStrength(value: number, variant: ThemeVariant): number
     return curvedValue;
   }
 
+  // 基线以上使用更大的曲线系数,使高对比度变化更明显
   return baselineRatio + (curvedValue - baselineRatio) * CONTRAST_CURVE_ABOVE_BASELINE;
 }
 
-// ─── Parsing helpers ──────────────────────────────────────────────────────
+// ─── 解析辅助函数 ──────────────────────────────────────────────────────
 
+/**
+ * 解析主题分享载荷
+ * @param value - 待解析的值
+ * @returns 解析后的主题分享载荷
+ * @throws 当值不是有效对象或缺少必需字段时抛出错误
+ */
 function parseThemeSharePayload(value: unknown): ThemeSharePayload {
   if (!isRecord(value)) {
     throw new Error("Theme share payload must be an object.");
@@ -1400,6 +1531,12 @@ function parseThemeSharePayload(value: unknown): ThemeSharePayload {
   };
 }
 
+/**
+ * 严格解析 Chrome 主题
+ * @param value - 待解析的值
+ * @returns 解析后的 Chrome 主题
+ * @throws 当值缺少必需字段或格式无效时抛出错误
+ */
 function parseStrictChromeTheme(value: unknown): ChromeTheme {
   if (!isRecord(value)) {
     throw new Error("Theme share theme must be an object.");
@@ -1416,6 +1553,12 @@ function parseStrictChromeTheme(value: unknown): ChromeTheme {
   };
 }
 
+/**
+ * 严格解析主题字体配置
+ * @param value - 待解析的值
+ * @returns 解析后的字体配置
+ * @throws 当值不是有效对象时抛出错误
+ */
 function parseStrictThemeFonts(value: unknown): ThemeFonts {
   if (!isRecord(value)) {
     throw new Error("Theme fonts must be an object.");
@@ -1427,6 +1570,12 @@ function parseStrictThemeFonts(value: unknown): ThemeFonts {
   };
 }
 
+/**
+ * 严格解析语义颜色配置
+ * @param value - 待解析的值
+ * @returns 解析后的语义颜色配置
+ * @throws 当值不是有效对象或缺少必需字段时抛出错误
+ */
 function parseStrictSemanticColors(value: unknown): ThemeSemanticColors {
   if (!isRecord(value)) {
     throw new Error("Theme semanticColors must be an object.");
@@ -1439,6 +1588,12 @@ function parseStrictSemanticColors(value: unknown): ThemeSemanticColors {
   };
 }
 
+/**
+ * 解析必需的对比度值
+ * @param value - 待解析的值
+ * @returns 0-100 之间的整数对比度值
+ * @throws 当值不是 0-100 之间的整数时抛出错误
+ */
 function parseRequiredContrast(value: unknown): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 100) {
     throw new Error("Theme contrast must be an integer between 0 and 100.");
@@ -1446,6 +1601,13 @@ function parseRequiredContrast(value: unknown): number {
   return value;
 }
 
+/**
+ * 解析必需的布尔值
+ * @param value - 待解析的值
+ * @param label - 字段标签,用于错误消息
+ * @returns 布尔值
+ * @throws 当值不是布尔值时抛出错误
+ */
 function parseRequiredBoolean(value: unknown, label: string): boolean {
   if (value !== true && value !== false) {
     throw new Error(`${label} must be a boolean.`);
@@ -1453,6 +1615,13 @@ function parseRequiredBoolean(value: unknown, label: string): boolean {
   return value;
 }
 
+/**
+ * 解析可空的字符串值
+ * @param value - 待解析的值
+ * @param label - 字段标签,用于错误消息
+ * @returns 规范化后的字符串或 null
+ * @throws 当值不是字符串或 null 时抛出错误
+ */
 function parseNullableString(value: unknown, label: string): string | null {
   if (value === null) {
     return null;
@@ -1463,6 +1632,13 @@ function parseNullableString(value: unknown, label: string): string | null {
   return normalizeFontSelection(value);
 }
 
+/**
+ * 规范化必需的字符串
+ * @param value - 待规范化的值
+ * @param label - 字段标签,用于错误消息
+ * @returns 去除首尾空白后的字符串
+ * @throws 当值不是字符串或为空时抛出错误
+ */
 function normalizeRequiredString(value: unknown, label: string): string {
   if (typeof value !== "string") {
     throw new Error(`${label} must be a string.`);
@@ -1474,6 +1650,13 @@ function normalizeRequiredString(value: unknown, label: string): string {
   return trimmedValue;
 }
 
+/**
+ * 解析必需的十六进制颜色
+ * @param value - 待解析的值
+ * @param label - 字段标签,用于错误消息
+ * @returns 规范化后的十六进制颜色字符串
+ * @throws 当值不是有效的 6 位十六进制颜色时抛出错误
+ */
 function parseRequiredHexColor(value: unknown, label: string): string {
   const normalizedColor = normalizeHexColor(value);
   if (!normalizedColor) {
@@ -1482,12 +1665,23 @@ function parseRequiredHexColor(value: unknown, label: string): string {
   return normalizedColor;
 }
 
+/**
+ * 规范化存储的对比度值
+ * @param value - 待规范化的值
+ * @param fallback - 当值无效时使用的回退值
+ * @returns 0-100 之间的整数,或回退值
+ */
 function normalizeStoredContrast(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value)
     ? Math.min(100, Math.max(0, Math.round(value)))
     : fallback;
 }
 
+/**
+ * 规范化十六进制颜色值
+ * @param value - 待规范化的值
+ * @returns 小写的十六进制颜色字符串,如果无效则返回 null
+ */
 function normalizeHexColor(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;
@@ -1496,6 +1690,11 @@ function normalizeHexColor(value: unknown): string | null {
   return HEX_COLOR_RE.test(trimmedValue) ? trimmedValue.toLowerCase() : null;
 }
 
+/**
+ * 规范化字体选择
+ * @param value - 待规范化的值
+ * @returns 去除首尾空白后的字符串,如果为空则返回 null
+ */
 function normalizeFontSelection(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;
@@ -1504,12 +1703,22 @@ function normalizeFontSelection(value: unknown): string | null {
   return trimmedValue.length > 0 ? trimmedValue : null;
 }
 
+/**
+ * 类型守卫:检查值是否为普通对象
+ * @param value - 待检查的值
+ * @returns 如果值是普通对象(非数组、非 null)则返回 true
+ */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-// ─── Color math ───────────────────────────────────────────────────────────
+// ─── 颜色数学运算 ───────────────────────────────────────────────────────
 
+/**
+ * 解析十六进制颜色为 RGB 对象
+ * @param value - 十六进制颜色字符串(如 "#ff0000")
+ * @returns RGB 颜色对象
+ */
 function parseHexColor(value: string): RgbColor {
   const hexValue = value.slice(1);
   return {
@@ -1519,10 +1728,24 @@ function parseHexColor(value: string): RgbColor {
   };
 }
 
+/**
+ * 混合两个十六进制颜色
+ * @param from - 起始颜色
+ * @param to - 目标颜色
+ * @param amount - 混合比例(0-1),0 表示完全使用 from,1 表示完全使用 to
+ * @returns 混合后的十六进制颜色字符串
+ */
 function mixHex(from: string, to: string, amount: number): string {
   return formatHex(mixRgb(parseHexColor(from), parseHexColor(to), amount));
 }
 
+/**
+ * 混合两个 RGB 颜色
+ * @param from - 起始颜色
+ * @param to - 目标颜色
+ * @param amount - 混合比例(0-1),会被限制在有效范围内
+ * @returns 混合后的 RGB 颜色对象
+ */
 function mixRgb(from: RgbColor, to: RgbColor, amount: number): RgbColor {
   const clampedAmount = Math.min(1, Math.max(0, amount));
   return {
@@ -1532,26 +1755,59 @@ function mixRgb(from: RgbColor, to: RgbColor, amount: number): RgbColor {
   };
 }
 
+/**
+ * 混合单个颜色通道
+ * @param from - 起始通道值
+ * @param to - 目标通道值
+ * @param amount - 混合比例(0-1)
+ * @returns 混合后的通道值(0-255)
+ */
 function mixChannel(from: number, to: number, amount: number): number {
   return Math.round(from + (to - from) * amount);
 }
 
+/**
+ * 格式化 RGB 颜色为十六进制字符串
+ * @param color - RGB 颜色对象
+ * @returns 十六进制颜色字符串(如 "#ff0000")
+ */
 function formatHex(color: RgbColor): string {
   return `#${formatHexChannel(color.red)}${formatHexChannel(color.green)}${formatHexChannel(color.blue)}`;
 }
 
+/**
+ * 格式化 RGB 颜色为不透明的 rgb() 字符串
+ * @param color - RGB 颜色对象
+ * @returns rgb() 格式的颜色字符串(如 "rgb(255, 0, 0)")
+ */
 function formatOpaqueRgb(color: RgbColor): string {
   return `rgb(${color.red}, ${color.green}, ${color.blue})`;
 }
 
+/**
+ * 格式化 RGB 颜色为带透明度的 rgba() 字符串
+ * @param color - RGB 颜色对象
+ * @param opacity - 透明度(0-1)
+ * @returns rgba() 格式的颜色字符串(如 "rgba(255, 0, 0, 0.5)")
+ */
 function formatRgba(color: RgbColor, opacity: number): string {
   return `rgba(${color.red}, ${color.green}, ${color.blue}, ${formatAlpha(opacity)})`;
 }
 
+/**
+ * 格式化单个颜色通道为两位十六进制字符串
+ * @param value - 通道值(0-255)
+ * @returns 两位十六进制字符串(如 "ff")
+ */
 function formatHexChannel(value: number): string {
   return value.toString(16).padStart(2, "0");
 }
 
+/**
+ * 格式化透明度值
+ * @param value - 透明度值(0-1)
+ * @returns 格式化后的透明度字符串,移除末尾多余的零
+ */
 function formatAlpha(value: number): string {
   return Math.min(1, Math.max(0, value)).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 }

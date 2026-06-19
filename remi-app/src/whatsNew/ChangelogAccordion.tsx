@@ -3,7 +3,7 @@
 // "Release history" surface and the `WhatsNewDialog` "Complete changelog"
 // secondary view. Each row summarises a release; expanding reveals the
 // FeatureSection cards for that version.
-// Layer: presentational �?it assumes the caller has already sorted entries
+// Layer: presentational �?it assumes the caller has already sorted entries
 // newest-first (see `sortEntriesByVersionDesc`).
 
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function ChangelogAccordion({
   if (entries.length === 0) {
     return (
       <p className={cn("text-xs text-muted-foreground", className)}>
-        No release notes yet �?check back after the next update.
+        No release notes yet �?check back after the next update.
       </p>
     );
   }
@@ -54,19 +54,28 @@ export function ChangelogAccordion({
   );
 }
 
+/**
+ * 更新日志手风琴行组件
+ * @description 渲染单个版本的可折叠行,包含版本信息和功能列表
+ * @param props - 组件属性
+ * @returns 手风琴行组件
+ */
 function ChangelogAccordionRow({
   entry,
   defaultOpen,
   isLast,
 }: {
+  /** 版本条目 */
   readonly entry: WhatsNewEntry;
+  /** 是否默认展开 */
   readonly defaultOpen: boolean;
+  /** 是否为最后一行 */
   readonly isLast: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   const featureCount = entry.features.length;
-  const featureLabel = featureCount === 1 ? "1 update" : `${featureCount} updates`;
+  const featureLabel = featureCount === 1 ? "1 个更新" : `${featureCount} 个更新`;
 
   return (
     <li className={cn(!isLast && "border-b border-border/40")}>
@@ -75,7 +84,7 @@ function ChangelogAccordionRow({
           <DisclosureChevron open={open} />
           <span className="flex flex-1 items-baseline gap-2">
             <span className="text-xs text-muted-foreground">{entry.date}</span>
-            <span className="text-sm font-semibold text-foreground">Version {entry.version}</span>
+            <span className="text-sm font-semibold text-foreground">版本 {entry.version}</span>
             <span className="text-xs text-muted-foreground/70">({featureLabel})</span>
           </span>
         </CollapsibleTrigger>

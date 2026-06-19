@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 use tracing::{debug, info};
 
-use crate::error::{TelemetryError, TelemetryResult};
+use crate::error::TelemetryResult;
 
 /// 事件类型
 #[derive(Debug, Clone, Serialize, Deserialize)]

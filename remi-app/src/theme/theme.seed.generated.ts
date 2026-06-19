@@ -1,10 +1,17 @@
-// FILE: theme.seed.generated.ts
-// Purpose: Stores the exact normalized theme seeds extracted from the packaged Codex theme assets.
-// Layer: Web appearance generated catalog
-// Exports: THEME_SEED_CATALOG for code-theme seed lookup.
+/**
+ * @file 主题种子目录(自动生成)
+ * @description 存储从打包的 Codex 主题资源中提取的精确规范化主题种子
+ * @layer Web 外观生成目录层
+ * @exports THEME_SEED_CATALOG 用于代码主题种子查询
+ */
 
 import type { ChromeTheme, ThemeVariant } from "./theme.logic";
 
+/**
+ * 主题种子目录
+ * @description 包含所有代码主题的原始种子数据,按主题 ID 和变体组织
+ * 每个主题种子包含完整的 ChromeTheme 配置,用于初始化或重置主题
+ */
 export const THEME_SEED_CATALOG: Record<string, Partial<Record<ThemeVariant, ChromeTheme>>> = {
   absolutely: {
     dark: {

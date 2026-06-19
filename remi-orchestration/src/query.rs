@@ -14,7 +14,7 @@ use std::sync::Arc;
 use remi_core::models::{Project, ProjectId, Thread, ThreadId};
 use remi_persistence::{ProjectionRepository, SqliteProjectionRepository};
 
-use crate::error::{OrchestrationError, OrchestrationResult};
+use crate::error::OrchestrationResult;
 use crate::engine::{OrchestrationReadModel, OrchestrationShellSnapshot, ShellProject, ShellThread};
 
 /// 投影快照查询服务
