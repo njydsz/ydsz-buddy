@@ -155,7 +155,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_settings_manager() {
-        let config = ServerConfig::default();
+        let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        let mut config = ServerConfig::default();
+        config.db_path = temp_dir.join("test.db");
         let db = Database::connect(&config).await.expect("Failed to connect");
         db.run_migrations().await.expect("Failed to migrate");
 
@@ -185,7 +188,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_json_settings() {
-        let config = ServerConfig::default();
+        let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        let mut config = ServerConfig::default();
+        config.db_path = temp_dir.join("test.db");
         let db = Database::connect(&config).await.expect("Failed to connect");
         db.run_migrations().await.expect("Failed to migrate");
 

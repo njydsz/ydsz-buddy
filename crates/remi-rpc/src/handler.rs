@@ -69,6 +69,37 @@ pub async fn handle_method(
 
         // Filesystem methods
         RpcMethod::FilesystemBrowse(input) => handle_filesystem_browse(input, state).await,
+        RpcMethod::FilesystemBrowseChunked {
+            input,
+            offset,
+            limit,
+        } => handle_filesystem_browse_chunked(input, offset, limit, state).await,
+        RpcMethod::FilesystemReadFile(input) => handle_filesystem_read_file(input, state).await,
+        RpcMethod::FilesystemWriteFile(input) => handle_filesystem_write_file(input, state).await,
+        RpcMethod::FilesystemCreateDirectory(input) => {
+            handle_filesystem_create_directory(input, state).await
+        }
+        RpcMethod::FilesystemDeletePath(input) => {
+            handle_filesystem_delete_path(input, state).await
+        }
+        RpcMethod::FilesystemSearch { path, query, limit } => {
+            handle_filesystem_search(path, query, limit, state).await
+        }
+
+        // Workspace worktree methods
+        RpcMethod::WorkspaceWorktreeList => handle_workspace_worktree_list(state).await,
+        RpcMethod::WorkspaceWorktreeCreate { label } => {
+            handle_workspace_worktree_create(label, state).await
+        }
+        RpcMethod::WorkspaceWorktreeTouch { id } => {
+            handle_workspace_worktree_touch(id, state).await
+        }
+        RpcMethod::WorkspaceWorktreeRemove { id } => {
+            handle_workspace_worktree_remove(id, state).await
+        }
+        RpcMethod::WorkspaceWorktreeGc { max_age_secs } => {
+            handle_workspace_worktree_gc(max_age_secs, state).await
+        }
 
         // Git methods
         RpcMethod::GitStatus(input) => handle_git_status(input, state).await,
@@ -119,6 +150,22 @@ pub async fn handle_method(
         RpcMethod::TerminalClose(input) => handle_terminal_close(input, state).await,
         RpcMethod::TerminalSubscribeOutput(input) => {
             handle_terminal_subscribe_output(input, state).await
+        }
+        RpcMethod::TerminalList => handle_terminal_list(state).await,
+        RpcMethod::TerminalStatus { session_id } => {
+            handle_terminal_status(session_id, state).await
+        }
+        RpcMethod::TerminalClear { session_id } => {
+            handle_terminal_clear(session_id, state).await
+        }
+        RpcMethod::TerminalRestart { session_id } => {
+            handle_terminal_restart(session_id, state).await
+        }
+        RpcMethod::TerminalTitle { session_id } => {
+            handle_terminal_title(session_id, state).await
+        }
+        RpcMethod::TerminalReplay { session_id } => {
+            handle_terminal_replay(session_id, state).await
         }
 
         // Project methods
@@ -233,6 +280,101 @@ async fn handle_filesystem_browse(
         .await?;
 
     serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_filesystem_browse_chunked(
+    input: remi_contracts::FilesystemBrowseInput,
+    offset: usize,
+    limit: Option<usize>,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let result = state
+        .workspace
+        .browse_chunked(
+            &input.path,
+            input.include_hidden,
+            input.max_depth,
+            offset,
+            limit,
+        )
+        .await?;
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_filesystem_read_file(
+    input: remi_contracts::ReadFileInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let result = state.workspace.read_file(input).await?;
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_filesystem_write_file(
+    input: remi_contracts::WriteFileInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let result = state.workspace.write_file(input).await?;
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_filesystem_create_directory(
+    input: remi_contracts::CreateDirectoryInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.workspace.create_directory(input).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_filesystem_delete_path(
+    input: remi_contracts::DeletePathInput,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.workspace.delete_path(input).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_filesystem_search(
+    path: String,
+    query: String,
+    limit: Option<usize>,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let result = state.workspace.search(&path, &query, limit).await?;
+    serde_json::to_value(result).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_workspace_worktree_list(state: &Arc<RpcState>) -> Result<Value> {
+    let worktrees = state.workspace.list_managed_worktrees().await;
+    serde_json::to_value(worktrees).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_workspace_worktree_create(
+    label: String,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let worktree = state.workspace.create_managed_worktree(&label).await?;
+    serde_json::to_value(worktree).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_workspace_worktree_touch(id: String, state: &Arc<RpcState>) -> Result<Value> {
+    state.workspace.touch_managed_worktree(&id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_workspace_worktree_remove(id: String, state: &Arc<RpcState>) -> Result<Value> {
+    state.workspace.remove_managed_worktree(&id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_workspace_worktree_gc(
+    max_age_secs: u64,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let removed = state
+        .workspace
+        .gc_managed_worktrees(std::time::Duration::from_secs(max_age_secs))
+        .await?;
+    Ok(serde_json::json!({"removed": removed}))
 }
 
 async fn handle_git_status(
@@ -601,6 +743,51 @@ async fn handle_terminal_subscribe_output(
         .subscribe_output(input.session_id)
         .await?;
     Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_list(state: &Arc<RpcState>) -> Result<Value> {
+    let sessions = state.terminal_manager.list_sessions().await;
+    serde_json::to_value(sessions).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_terminal_status(
+    session_id: uuid::Uuid,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let status = state.terminal_manager.status(session_id).await?;
+    serde_json::to_value(status).map_err(|e| Error::Serialization(e.to_string()))
+}
+
+async fn handle_terminal_clear(
+    session_id: uuid::Uuid,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.terminal_manager.clear(session_id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_restart(
+    session_id: uuid::Uuid,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    state.terminal_manager.restart(session_id).await?;
+    Ok(serde_json::json!({"status": "ok"}))
+}
+
+async fn handle_terminal_title(
+    session_id: uuid::Uuid,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let title = state.terminal_manager.title(session_id).await?;
+    Ok(serde_json::json!({"title": title}))
+}
+
+async fn handle_terminal_replay(
+    session_id: uuid::Uuid,
+    state: &Arc<RpcState>,
+) -> Result<Value> {
+    let output = state.terminal_manager.replay(session_id).await?;
+    Ok(serde_json::json!({"output": output}))
 }
 
 async fn handle_projects_list(state: &Arc<RpcState>) -> Result<Value> {

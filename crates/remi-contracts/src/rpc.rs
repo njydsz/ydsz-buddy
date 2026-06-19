@@ -7,18 +7,20 @@ use crate::{
     AuthBootstrapInput, AuthBootstrapOutput, AuthCreatePairingCredentialInput,
     AuthCreatePairingCredentialOutput, AuthRevokeClientSessionInput, AuthRevokePairingLinkInput,
     CloseTerminalInput, CreateProjectInput, CreateTerminalInput, CreateTerminalOutput,
-    FilesystemBrowseInput, FilesystemBrowseResult, GitActionProgressEvent, GitCheckoutInput,
-    GitCreateBranchInput, GitCreateBranchResult, GitCreateDetachedWorktreeInput,
-    GitCreateDetachedWorktreeResult, GitCreateWorktreeInput, GitCreateWorktreeResult,
-    GitHandoffThreadInput, GitHandoffThreadResult, GitInitInput, GitListBranchesInput,
-    GitListBranchesResult, GitPreparePullRequestThreadInput, GitPreparePullRequestThreadResult,
-    GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput, GitReadWorkingTreeDiffResult,
-    GitRemoveIndexLockInput, GitRemoveWorktreeInput, GitResolvePullRequestResult,
-    GitRunStackedActionInput, GitStashAndCheckoutInput, GitStashDropInput, GitStashInfoInput,
-    GitStashInfoResult, GitStatusInput, GitStatusResult, GitSummarizeDiffInput,
-    GitSummarizeDiffResult, OpenInEditorInput, ProjectId, ProviderListCommandsInput,
-    ResizeTerminalInput, SubscribeTerminalOutputInput, TerminalOutputEvent, Thread, ThreadId,
-    ThreadMessage, ThreadSendMessageInput, ThreadSendMessageOutput, ThreadTurn, WriteTerminalInput,
+    FilesystemBrowseChunk, FilesystemBrowseInput, FilesystemBrowseResult, FilesystemEntry,
+    GitActionProgressEvent, GitCheckoutInput, GitCreateBranchInput, GitCreateBranchResult,
+    GitCreateDetachedWorktreeInput, GitCreateDetachedWorktreeResult, GitCreateWorktreeInput,
+    GitCreateWorktreeResult, GitHandoffThreadInput, GitHandoffThreadResult, GitInitInput,
+    GitListBranchesInput, GitListBranchesResult, GitPreparePullRequestThreadInput,
+    GitPreparePullRequestThreadResult, GitPullInput, GitPullResult, GitReadWorkingTreeDiffInput,
+    GitReadWorkingTreeDiffResult, GitRemoveIndexLockInput, GitRemoveWorktreeInput,
+    GitResolvePullRequestResult, GitRunStackedActionInput, GitStashAndCheckoutInput,
+    GitStashDropInput, GitStashInfoInput, GitStashInfoResult, GitStatusInput, GitStatusResult,
+    GitSummarizeDiffInput, GitSummarizeDiffResult, OpenInEditorInput, ProjectId,
+    ProviderListCommandsInput, ReadFileInput, ReadFileResult, ResizeTerminalInput,
+    SubscribeTerminalOutputInput, TerminalOutputEvent, TerminalStatus, Thread, ThreadId,
+    ThreadMessage, ThreadSendMessageInput, ThreadSendMessageOutput, ThreadTurn, WriteFileInput,
+    WriteFileResult, WriteTerminalInput,
 };
 
 /// JSON-RPC request.
@@ -176,6 +178,68 @@ pub enum RpcMethod {
     /// Browse filesystem.
     #[serde(rename = "filesystem.browse")]
     FilesystemBrowse(FilesystemBrowseInput),
+    /// Browse filesystem with pagination.
+    #[serde(rename = "filesystem.browseChunked")]
+    FilesystemBrowseChunked {
+        /// Browse request.
+        input: FilesystemBrowseInput,
+        /// Offset into the result set.
+        offset: usize,
+        /// Maximum number of entries.
+        limit: Option<usize>,
+    },
+    /// Read a single file.
+    #[serde(rename = "filesystem.readFile")]
+    FilesystemReadFile(ReadFileInput),
+    /// Write a single file.
+    #[serde(rename = "filesystem.writeFile")]
+    FilesystemWriteFile(WriteFileInput),
+    /// Create a directory.
+    #[serde(rename = "filesystem.createDirectory")]
+    FilesystemCreateDirectory(crate::CreateDirectoryInput),
+    /// Delete a path.
+    #[serde(rename = "filesystem.deletePath")]
+    FilesystemDeletePath(crate::DeletePathInput),
+    /// Search workspace.
+    #[serde(rename = "filesystem.search")]
+    FilesystemSearch {
+        /// Root directory.
+        path: String,
+        /// Search query.
+        query: String,
+        /// Maximum results.
+        #[serde(default)]
+        limit: Option<usize>,
+    },
+
+    // Workspace worktree methods
+    /// List managed worktrees.
+    #[serde(rename = "workspace.worktree.list")]
+    WorkspaceWorktreeList,
+    /// Create a managed worktree.
+    #[serde(rename = "workspace.worktree.create")]
+    WorkspaceWorktreeCreate {
+        /// Label for the new worktree.
+        label: String,
+    },
+    /// Touch a managed worktree.
+    #[serde(rename = "workspace.worktree.touch")]
+    WorkspaceWorktreeTouch {
+        /// Worktree ID.
+        id: String,
+    },
+    /// Remove a managed worktree.
+    #[serde(rename = "workspace.worktree.remove")]
+    WorkspaceWorktreeRemove {
+        /// Worktree ID.
+        id: String,
+    },
+    /// Garbage collect stale worktrees.
+    #[serde(rename = "workspace.worktree.gc")]
+    WorkspaceWorktreeGc {
+        /// Maximum age in seconds before GC.
+        max_age_secs: u64,
+    },
 
     // Editor methods
     /// Open in editor.
@@ -198,6 +262,39 @@ pub enum RpcMethod {
     /// Subscribe to terminal output.
     #[serde(rename = "terminal.subscribeOutput")]
     TerminalSubscribeOutput(SubscribeTerminalOutputInput),
+    /// List active terminal sessions.
+    #[serde(rename = "terminal.list")]
+    TerminalList,
+    /// Get terminal status.
+    #[serde(rename = "terminal.status")]
+    TerminalStatus {
+        /// Session ID.
+        session_id: uuid::Uuid,
+    },
+    /// Clear terminal screen.
+    #[serde(rename = "terminal.clear")]
+    TerminalClear {
+        /// Session ID.
+        session_id: uuid::Uuid,
+    },
+    /// Restart a terminal session.
+    #[serde(rename = "terminal.restart")]
+    TerminalRestart {
+        /// Session ID.
+        session_id: uuid::Uuid,
+    },
+    /// Get terminal title.
+    #[serde(rename = "terminal.title")]
+    TerminalTitle {
+        /// Session ID.
+        session_id: uuid::Uuid,
+    },
+    /// Replay terminal output buffer.
+    #[serde(rename = "terminal.replay")]
+    TerminalReplay {
+        /// Session ID.
+        session_id: uuid::Uuid,
+    },
 
     // Project methods
     /// List all projects.

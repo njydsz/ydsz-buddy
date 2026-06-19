@@ -71,3 +71,57 @@ pub enum FilesystemEntryType {
     /// Other (device, socket, etc.).
     Other,
 }
+
+/// Input for reading a single file from the workspace.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ReadFileInput {
+    /// Workspace-relative path.
+    pub path: String,
+}
+
+/// Result of reading a single file.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ReadFileResult {
+    /// Workspace-relative path.
+    pub path: String,
+    /// File contents (UTF-8).
+    pub contents: String,
+    /// File size in bytes.
+    pub size: u64,
+    /// Last modified timestamp (ISO 8601).
+    pub modified_at: Option<String>,
+}
+
+/// Input for writing a single file to the workspace.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct WriteFileInput {
+    /// Workspace-relative path.
+    pub path: String,
+    /// New file contents (UTF-8).
+    pub contents: String,
+}
+
+/// Result of writing a single file.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct WriteFileResult {
+    /// Path that was written.
+    pub path: String,
+    /// Bytes written.
+    pub bytes_written: usize,
+}
+
+/// Input for creating a directory.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct CreateDirectoryInput {
+    /// Workspace-relative path of the new directory.
+    pub path: String,
+}
+
+/// Input for deleting a path.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct DeletePathInput {
+    /// Workspace-relative path to delete.
+    pub path: String,
+    /// Recursive delete (required for non-empty directories).
+    pub recursive: bool,
+}

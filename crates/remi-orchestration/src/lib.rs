@@ -9,16 +9,30 @@
 //! - [`projector`] — read-model projection from events.
 //! - [`handoff`] — provider session routing.
 //! - [`event_store`] — event persistence abstraction.
+//! - [`reactors`] — autonomous event-driven side effects (8 built-in).
+//! - [`services`] — high level business services (5 built-in).
 
 pub mod decider;
 pub mod event_store;
 pub mod handoff;
 pub mod projector;
+pub mod reactors;
+pub mod services;
 
 pub use decider::{decide, fold_thread};
 pub use event_store::{EventStore, SqliteEventStore};
 pub use handoff::ProviderHandoff;
 pub use projector::ReadModel;
+pub use reactors::{
+    ApprovalReactor, CheckpointReactor, GitReactor, MetricsReactor, NotificationReactor,
+    PendingApproval, RateLimitReactor, Reactor, ReactorRegistry, RetentionReactor,
+    TelemetryReactor, default_registry, spawn_event_loop,
+};
+pub use services::{
+    Checkpoint, CheckpointService, ConversationContext, ConversationService, DiffService,
+    DiffSummary, MessageService, Plugin, PluginKind, PluginResult, PluginService,
+    ServiceBundle, VoiceService, VoiceState,
+};
 
 use remi_contracts::{
     OrchestrationCommand, OrchestrationEvent, Thread, ThreadId, ThreadMessage,

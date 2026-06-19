@@ -532,8 +532,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_bootstrap_and_pairing_lifecycle() {
+        let temp_dir = std::env::temp_dir().join(format!("remi-auth-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+        let mut config = remi_core::ServerConfig::default();
+        config.db_path = temp_dir.join("test.db");
         let db = Arc::new(
-            Database::connect(&remi_core::ServerConfig::default())
+            Database::connect(&config)
                 .await
                 .expect("DB connect"),
         );

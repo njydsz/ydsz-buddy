@@ -17,8 +17,9 @@ use ignore::WalkBuilder;
 use lru::LruCache;
 use parking_lot::Mutex;
 use remi_contracts::{
-    FilesystemBrowseChunk, FilesystemBrowseResult, FilesystemEntry, FilesystemEntryType,
-    ProjectWriteFileInput, ProjectWriteFileResult,
+    CreateDirectoryInput, DeletePathInput, FilesystemBrowseChunk, FilesystemBrowseResult,
+    FilesystemEntry, FilesystemEntryType, ProjectWriteFileInput, ProjectWriteFileResult,
+    ReadFileInput, ReadFileResult, WriteFileInput, WriteFileResult,
 };
 use remi_core::{Error, Result};
 use tokio::sync::RwLock;
@@ -333,6 +334,148 @@ impl WorkspaceService {
             let _ = self.remove_managed_worktree(&id).await;
         }
         Ok(count)
+    }
+
+    // -----------------------------------------------------------------
+    // File-level read / write / search helpers used by the RPC layer
+    // -----------------------------------------------------------------
+
+    /// Read a file from the workspace root.
+    pub async fn read_file(&self, input: ReadFileInput) -> Result<ReadFileResult> {
+        let full_path = self.resolve_path(&input.path)?;
+        if !full_path.exists() {
+            return Err(Error::Workspace(format!(
+                "File does not exist: {}",
+                full_path.display()
+            )));
+        }
+        if !full_path.is_file() {
+            return Err(Error::Workspace(format!(
+                "Not a regular file: {}",
+                full_path.display()
+            )));
+        }
+        let contents = tokio::fs::read_to_string(&full_path)
+            .await
+            .map_err(|e| Error::Workspace(format!("Failed to read file: {}", e)))?;
+        let metadata = tokio::fs::metadata(&full_path)
+            .await
+            .map_err(|e| Error::Workspace(format!("Failed to stat file: {}", e)))?;
+        let modified_at = metadata
+            .modified()
+            .ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .and_then(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
+            .map(|dt| dt.to_rfc3339());
+        Ok(ReadFileResult {
+            path: input.path,
+            contents,
+            size: metadata.len(),
+            modified_at,
+        })
+    }
+
+    /// Write a file under the workspace root.
+    pub async fn write_file(&self, input: WriteFileInput) -> Result<WriteFileResult> {
+        let full_path = self.resolve_path(&input.path)?;
+        if let Some(parent) = full_path.parent() {
+            tokio::fs::create_dir_all(parent)
+                .await
+                .map_err(|e| Error::Workspace(format!("Failed to create parent dir: {}", e)))?;
+        }
+        let bytes = input.contents.as_bytes();
+        tokio::fs::write(&full_path, bytes)
+            .await
+            .map_err(|e| Error::Workspace(format!("Failed to write file: {}", e)))?;
+        self.invalidate_cache();
+        Ok(WriteFileResult {
+            path: input.path,
+            bytes_written: bytes.len(),
+        })
+    }
+
+    /// Create a directory under the workspace root.
+    pub async fn create_directory(&self, input: CreateDirectoryInput) -> Result<()> {
+        let full_path = self.resolve_path(&input.path)?;
+        tokio::fs::create_dir_all(&full_path)
+            .await
+            .map_err(|e| Error::Workspace(format!("Failed to create directory: {}", e)))?;
+        self.invalidate_cache();
+        Ok(())
+    }
+
+    /// Delete a path (file or directory) from the workspace.
+    pub async fn delete_path(&self, input: DeletePathInput) -> Result<()> {
+        let full_path = self.resolve_path(&input.path)?;
+        if !full_path.exists() {
+            return Ok(());
+        }
+        if full_path.is_file() {
+            tokio::fs::remove_file(&full_path)
+                .await
+                .map_err(|e| Error::Workspace(format!("Failed to delete file: {}", e)))?;
+        } else if input.recursive {
+            tokio::fs::remove_dir_all(&full_path)
+                .await
+                .map_err(|e| Error::Workspace(format!("Failed to delete directory: {}", e)))?;
+        } else {
+            tokio::fs::remove_dir(&full_path)
+                .await
+                .map_err(|e| Error::Workspace(format!("Failed to delete directory: {}", e)))?;
+        }
+        self.invalidate_cache();
+        Ok(())
+    }
+
+    /// Recursive content search.
+    pub async fn search(
+        &self,
+        path: &str,
+        query: &str,
+        limit: Option<usize>,
+    ) -> Result<Vec<FilesystemEntry>> {
+        let full_path = self.resolve_path(path)?;
+        if !full_path.exists() {
+            return Err(Error::Workspace(format!(
+                "Path does not exist: {}",
+                full_path.display()
+            )));
+        }
+        let limit = limit.unwrap_or(100);
+        let mut matches = Vec::new();
+        let mut builder = WalkBuilder::new(&full_path);
+        builder.hidden(false);
+        for entry in builder.build() {
+            match entry {
+                Ok(entry) => {
+                    let entry_path = entry.path();
+                    if entry_path == full_path || !entry_path.is_file() {
+                        continue;
+                    }
+                    let name = entry_path
+                        .file_name()
+                        .and_then(|n| n.to_str())
+                        .unwrap_or("");
+                    if name.to_lowercase().contains(&query.to_lowercase()) {
+                        let metadata = entry.metadata().ok();
+                        let size = metadata.as_ref().map(|m| m.len());
+                        matches.push(FilesystemEntry {
+                            name: name.to_string(),
+                            path: entry_path.to_string_lossy().to_string(),
+                            entry_type: FilesystemEntryType::File,
+                            size,
+                            modified_at: None,
+                            is_hidden: name.starts_with('.'),
+                        });
+                        if matches.len() >= limit {
+                            break;
+                        }
+                    }
+                }
+                Err(e) => warn!("search walker error: {}", e),
+            }
+        }
+        Ok(matches)
     }
 }
 

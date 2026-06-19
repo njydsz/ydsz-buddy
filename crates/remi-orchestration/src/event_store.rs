@@ -51,27 +51,71 @@ impl SqliteEventStore {
             | OrchestrationEvent::TurnCompleted { thread_id, .. } => thread_id.to_string(),
         }
     }
+
+    /// Extract the timestamp string for storage.
+    fn timestamp(event: &OrchestrationEvent) -> Option<String> {
+        match event {
+            OrchestrationEvent::ThreadCreated { timestamp, .. }
+            | OrchestrationEvent::ThreadUpdated { timestamp, .. }
+            | OrchestrationEvent::ThreadDeleted { timestamp, .. }
+            | OrchestrationEvent::MessageAdded { timestamp, .. }
+            | OrchestrationEvent::TurnStarted { timestamp, .. }
+            | OrchestrationEvent::TurnCompleted { timestamp, .. } => Some(timestamp.clone()),
+        }
+    }
 }
 
 #[async_trait::async_trait]
 impl EventStore for SqliteEventStore {
     async fn append(&self, event: &OrchestrationEvent) -> Result<()> {
-        let id = Uuid::new_v4().to_string();
+        let event_id = Uuid::new_v4().to_string();
         let event_type = Self::event_type(event);
         let thread_id = Self::thread_id(event);
-        let payload = serde_json::to_string(event).map_err(|e| {
+        let payload_json = serde_json::to_string(event).map_err(|e| {
             Error::Serialization(format!("Failed to serialize orchestration event: {e}"))
         })?;
-        let now = chrono::Utc::now().to_rfc3339();
+        let occurred_at = Self::timestamp(event).unwrap_or_else(|| chrono::Utc::now().to_rfc3339());
+
+        // Compute the next stream version for this thread aggregate.
+        let stream_version: i64 = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM orchestration_events WHERE aggregate_kind = 'thread' AND stream_id = ?",
+        )
+        .bind(&thread_id)
+        .fetch_one(self.db.pool())
+        .await
+        .map_err(|e| Error::Database(format!("Failed to compute stream version: {e}")))?
+            + 1;
 
         sqlx::query(
-            "INSERT INTO orchestration_events (id, thread_id, event_type, payload, created_at) VALUES (?, ?, ?, ?, ?)",
+            r#"
+            INSERT INTO orchestration_events (
+                event_id,
+                aggregate_kind,
+                stream_id,
+                stream_version,
+                event_type,
+                occurred_at,
+                command_id,
+                causation_event_id,
+                correlation_id,
+                actor_kind,
+                payload_json,
+                metadata_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "#,
         )
-        .bind(&id)
+        .bind(&event_id)
+        .bind("thread")
         .bind(&thread_id)
+        .bind(stream_version)
         .bind(event_type)
-        .bind(&payload)
-        .bind(&now)
+        .bind(&occurred_at)
+        .bind(None::<String>)
+        .bind(None::<String>)
+        .bind(None::<String>)
+        .bind("system")
+        .bind(&payload_json)
+        .bind("{}")
         .execute(self.db.pool())
         .await
         .map_err(|e| Error::Database(format!("Failed to append event: {e}")))?;
@@ -80,16 +124,16 @@ impl EventStore for SqliteEventStore {
     }
 
     async fn read_all(&self) -> Result<Vec<OrchestrationEvent>> {
-        let rows: Vec<(String, String, String, String)> = sqlx::query_as(
-            "SELECT id, thread_id, event_type, payload FROM orchestration_events ORDER BY created_at ASC",
+        let rows: Vec<(String,)> = sqlx::query_as(
+            "SELECT payload_json FROM orchestration_events ORDER BY sequence ASC",
         )
         .fetch_all(self.db.pool())
         .await
         .map_err(|e| Error::Database(format!("Failed to read events: {e}")))?;
 
         let mut events = Vec::with_capacity(rows.len());
-        for (_id, _thread_id, _event_type, payload) in rows {
-            let event: OrchestrationEvent = serde_json::from_str(&payload).map_err(|e| {
+        for (payload_json,) in rows {
+            let event: OrchestrationEvent = serde_json::from_str(&payload_json).map_err(|e| {
                 Error::Serialization(format!("Failed to deserialize orchestration event: {e}"))
             })?;
             events.push(event);

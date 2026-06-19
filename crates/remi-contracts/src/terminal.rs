@@ -106,3 +106,48 @@ pub struct TerminalExitEvent {
     /// Exit code.
     pub exit_code: i32,
 }
+
+/// Terminal title change event.
+///
+/// Emitted whenever the running program sends an OSC 0/1/2 sequence to set
+/// the terminal title (e.g. tmux/zellij panes, vim, etc.).
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct TerminalTitleEvent {
+    /// Session ID.
+    pub session_id: Uuid,
+    /// New title.
+    pub title: String,
+}
+
+/// Terminal status snapshot for `terminal.status` queries.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct TerminalStatus {
+    /// Session ID.
+    pub session_id: Uuid,
+    /// Whether the underlying process is still running.
+    pub running: bool,
+    /// Last observed exit code (if any).
+    pub exit_code: Option<i32>,
+    /// Last reported title.
+    pub title: String,
+    /// Number of bytes received from the process.
+    pub bytes_received: u64,
+    /// Number of bytes sent to the process.
+    pub bytes_sent: u64,
+    /// Session creation timestamp (ISO 8601).
+    pub created_at: String,
+    /// Last activity timestamp (ISO 8601).
+    pub last_activity_at: String,
+}
+
+/// Aggregated stream of events that subscribers can listen for.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum TerminalEvent {
+    /// Plain PTY output.
+    Output(TerminalOutputEvent),
+    /// Title update.
+    Title(TerminalTitleEvent),
+    /// Process exited.
+    Exit(TerminalExitEvent),
+}
