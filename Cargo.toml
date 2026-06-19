@@ -1,17 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/remi-core",
-    "crates/remi-contracts",
-    "crates/remi-persistence",
-    "crates/remi-rpc",
-    "crates/remi-workspace",
-    "crates/remi-git",
-    "crates/remi-pty",
-    "crates/remi-auth",
-    "crates/remi-providers",
-    "crates/remi-orchestration",
-    "crates/remi-server",
+    "remi-core",
+    "remi-contracts",
+    "remi-providers",
+    "remi-orchestration",
+    "remi-workspace",
+    "remi-git",
+    "remi-pty",
+    "remi-auth",
+    "remi-rpc",
+    "remi-server",
+    "remi-diff-apply",
+    "remi-persistence",
 ]
 
 [workspace.package]
@@ -79,16 +80,17 @@ tokio-test = "0.4"
 mockall = "0.13"
 
 # Internal crates
-remi-core = { path = "crates/remi-core" }
-remi-contracts = { path = "crates/remi-contracts" }
-remi-persistence = { path = "crates/remi-persistence" }
-remi-rpc = { path = "crates/remi-rpc" }
-remi-workspace = { path = "crates/remi-workspace" }
-remi-git = { path = "crates/remi-git" }
-remi-pty = { path = "crates/remi-pty" }
-remi-auth = { path = "crates/remi-auth" }
-remi-providers = { path = "crates/remi-providers" }
-remi-orchestration = { path = "crates/remi-orchestration" }
+remi-core = { path = "remi-core" }
+remi-contracts = { path = "remi-contracts" }
+remi-persistence = { path = "remi-persistence" }
+remi-rpc = { path = "remi-rpc" }
+remi-workspace = { path = "remi-workspace" }
+remi-git = { path = "remi-git" }
+remi-pty = { path = "remi-pty" }
+remi-auth = { path = "remi-auth" }
+remi-providers = { path = "remi-providers" }
+remi-orchestration = { path = "remi-orchestration" }
+remi-diff-apply = { path = "remi-diff-apply" }
 
 [profile.release]
 lto = "fat"
