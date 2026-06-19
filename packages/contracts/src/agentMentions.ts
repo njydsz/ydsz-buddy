@@ -1,34 +1,63 @@
 /**
  * Agent Mentions - @alias(task) syntax for subagent delegation.
  *
+ * Agent 提及系统 - 支持 @alias(task) 语法进行子代理委派。
+ *
+ * 本文件定义了 Agent 别名系统，用于在对话中通过 @alias(task) 语法将任务委派给子代理执行。
+ * 提供了 Provider 感知的别名元数据，供 Composer UI 和各 Provider 运行时使用。
+ *
+ * 使用场景：
+ * - 在对话中使用 @explore(查找登录相关代码) 委派代码探索任务
+ * - 使用 @review(检查这段代码的潜在问题) 委派代码审查任务
+ * - 使用 @build(实现这个功能) 委派实现任务
+ * - 使用 @plan(规划重构方案) 委派规划任务
+ *
  * Provides provider-aware alias metadata used by the composer UI and provider runtimes.
  */
 
 import type { ProviderKind } from "./orchestration";
 import type { ModelSlug } from "./model";
 
+/** Agent 别名在 UI 中显示的颜色 */
 type AgentAliasColor = "violet" | "fuchsia" | "teal" | "cyan" | "amber" | "orange";
 
+/** Agent 别名定义的基础接口，包含所有 Provider 共有的属性 */
 interface BaseAgentAliasDefinition {
+  /** 提供该别名的 Provider 类型 */
   readonly provider: ProviderKind;
+  /** 在 UI 中显示的名称 */
   readonly displayName: string;
+  /** 在 UI 中显示的颜色 */
   readonly color: AgentAliasColor;
 }
 
+/** Codex Provider 的 Agent 别名定义，用于委派给特定模型执行 */
 export interface CodexAgentAliasDefinition extends BaseAgentAliasDefinition {
+  /** Provider 类型，固定为 "codex" */
   readonly provider: "codex";
+  /** 别名类型，固定为 "model" */
   readonly kind: "model";
+  /** 要使用的模型标识 */
   readonly model: ModelSlug;
 }
 
+/** Claude Provider 的子代理别名定义，用于委派给特定功能的子代理执行 */
 export interface ClaudeSubagentAliasDefinition extends BaseAgentAliasDefinition {
+  /** Provider 类型，固定为 "claudeAgent" */
   readonly provider: "claudeAgent";
+  /** 别名类型，固定为 "claude-subagent" */
   readonly kind: "claude-subagent";
+  /** 子代理名称标识 */
   readonly agentName: string;
+  /** 子代理功能描述，用于 UI 提示 */
   readonly description: string;
+  /** 子代理的系统提示词 */
   readonly prompt: string;
+  /** 允许子代理使用的工具列表 */
   readonly tools?: readonly string[];
+  /** 禁止子代理使用的工具列表 */
   readonly disallowedTools?: readonly string[];
+  /** 可选的模型覆盖，指定子代理使用的模型 */
   readonly model?: string;
 }
 

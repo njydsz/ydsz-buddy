@@ -1,0 +1,12 @@
+[package]
+name = "remi-terminal"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+remi-core = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }

@@ -1,0 +1,27 @@
+[package]
+name = "remi-server"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+remi-core = { workspace = true }
+remi-config = { workspace = true }
+remi-persistence = { workspace = true }
+remi-orchestration = { workspace = true }
+remi-provider = { workspace = true }
+remi-git = { workspace = true }
+remi-terminal = { workspace = true }
+remi-workspace = { workspace = true }
+remi-auth = { workspace = true }
+remi-checkpoint = { workspace = true }
+remi-telemetry = { workspace = true }
+tokio = { workspace = true }
+axum = { workspace = true }
+tokio-tungstenite = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+async-trait = { workspace = true }

@@ -36,7 +36,7 @@
     "dev": "tsdown src/client.ts src/agent.ts src/_generated/schema.gen.ts src/rpc.ts src/protocol.ts src/terminal.ts --format esm,cjs --dts --watch --clean",
     "build": "tsdown src/client.ts src/agent.ts src/_generated/schema.gen.ts src/rpc.ts src/protocol.ts src/terminal.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit",
-    "generate": "bun run scripts/generate.ts"
+    "generate": "tsx scripts/generate.ts"
   },
   "dependencies": {
     "effect": "catalog:"

@@ -1396,7 +1396,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
           {
             id: "dev-server",
             name: "Dev",
-            command: "bun run dev",
+            command: "npm run dev",
             icon: "play",
             runOnWorktreeCreate: false,
           },
@@ -1687,7 +1687,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
         {
           id: "lint",
           name: "Lint",
-          command: "bun run lint",
+          command: "npm run lint",
           icon: "lint",
           runOnWorktreeCreate: false,
         },
@@ -1729,7 +1729,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
           expect(writeRequest).toMatchObject({
             _tag: WS_METHODS.terminalWrite,
             threadId: THREAD_ID,
-            data: "bun run lint\r",
+            data: "npm run lint\r",
           });
         },
         { timeout: 8_000, interval: 16 },
@@ -1764,7 +1764,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
         {
           id: "test",
           name: "Test",
-          command: "bun run test",
+          command: "npm run test",
           icon: "test",
           runOnWorktreeCreate: false,
         },
@@ -1929,7 +1929,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
         terminalLabel: "Terminal 1",
         lineStart: 1,
         lineEnd: 2,
-        text: "bun i\nno changes",
+        text: "npm i\nno changes",
       }),
     );
 
@@ -2349,7 +2349,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
       // Clear the draft now that the server thread exists (mirrors EventRouter behavior).
       useComposerDraftStore.getState().clearDraftThread(newThreadId);
 
-      // The route should still be on the new thread â€?not redirected away.
+      // The route should still be on the new thread ï¿½?not redirected away.
       await waitForURL(
         mounted.router,
         (path) => path === newThreadPath,

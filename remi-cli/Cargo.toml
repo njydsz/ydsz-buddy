@@ -1,0 +1,18 @@
+[package]
+name = "remi-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "remi-code"
+path = "src/main.rs"
+
+[dependencies]
+remi-core = { workspace = true }
+remi-config = { workspace = true }
+remi-server = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
