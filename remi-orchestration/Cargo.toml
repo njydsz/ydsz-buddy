@@ -6,6 +6,8 @@ edition.workspace = true
 [dependencies]
 remi-core = { workspace = true }
 remi-persistence = { workspace = true }
+remi-provider = { workspace = true }
+remi-checkpoint = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

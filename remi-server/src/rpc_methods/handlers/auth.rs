@@ -20,7 +20,7 @@ pub async fn register_auth_methods(
     // auth.exchangeBootstrapCredential
     let auth_service = services.auth_service.clone();
     router
-        .register("auth.exchangeBootstrapCredential", move |params| {
+        .register("auth.exchangeBootstrapCredential", move |params: Option<Value>| {
             let auth_service = auth_service.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -63,7 +63,7 @@ pub async fn register_auth_methods(
     // auth.issuePairingCredential
     let auth_service = services.auth_service.clone();
     router
-        .register("auth.issuePairingCredential", move |_params| {
+        .register("auth.issuePairingCredential", move |_params: Option<Value>| {
             let auth_service = auth_service.clone();
             async move {
                 let credential = auth_service.issue_pairing_credential(None).await?;
@@ -76,7 +76,7 @@ pub async fn register_auth_methods(
     // auth.issueWebsocketToken
     let auth_service = services.auth_service.clone();
     router
-        .register("auth.issueWebsocketToken", move |params| {
+        .register("auth.issueWebsocketToken", move |params: Option<Value>| {
             let auth_service = auth_service.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -109,7 +109,7 @@ pub async fn register_auth_methods(
     // auth.revokeSession
     let auth_service = services.auth_service.clone();
     router
-        .register("auth.revokeSession", move |params| {
+        .register("auth.revokeSession", move |params: Option<Value>| {
             let auth_service = auth_service.clone();
             async move {
                 let params = params.ok_or_else(|| {

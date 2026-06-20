@@ -37,14 +37,16 @@
 //! - `remi_core`: 核心数据模型
 
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tauri::State;
+use std::collections::HashSet;
+use std::sync::{Arc, Mutex};
+use tauri::{AppHandle, Emitter, State};
+use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 use remi_core::commands::*;
 use remi_core::models::*;
 use remi_core::provider::ModelSelection;
-use remi_orchestration::OrchestrationEngine;
+use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use remi_persistence::{SqliteClient, SqliteEventStore, SqliteProjectionRepository, run_migrations};
 
 /// 编排引擎状态管理器
@@ -67,7 +69,12 @@ use remi_persistence::{SqliteClient, SqliteEventStore, SqliteProjectionRepositor
 /// - 数据库在初始化时自动创建并执行迁移
 pub struct OrchestrationState {
     engine: Arc<OrchestrationEngine>,
+    projection_query: Arc<ProjectionSnapshotQuery>,
     db_path: std::path::PathBuf,
+    /// Shell 事件推送任务句柄
+    shell_subscription: Mutex<Option<JoinHandle<()>>>,
+    /// 线程事件推送任务句柄集合（键为线程 ID）
+    thread_subscriptions: Arc<Mutex<HashSet<String>>>,
 }
 
 impl OrchestrationState {
@@ -104,11 +111,18 @@ impl OrchestrationState {
         // 创建事件存储和投影仓库
         let event_store = Arc::new(SqliteEventStore::new(client.clone()));
         let projection_repo = Arc::new(SqliteProjectionRepository::new(client));
+        let projection_query = Arc::new(ProjectionSnapshotQuery::new(projection_repo.clone()));
 
         // 创建编排引擎
         let engine = Arc::new(OrchestrationEngine::new(event_store, projection_repo));
 
-        Self { engine, db_path }
+        Self {
+            engine,
+            projection_query,
+            db_path,
+            shell_subscription: Mutex::new(None),
+            thread_subscriptions: Arc::new(Mutex::new(HashSet::new())),
+        }
     }
 
     /// 获取编排引擎实例的引用
@@ -250,13 +264,14 @@ pub async fn create_thread(
 ) -> Result<ThreadData, String> {
     let thread_id = Uuid::new_v4();
     let project_id: ProjectId = params.project_id.parse().map_err(|e| format!("Invalid project_id: {}", e))?;
+    let title = params.title.unwrap_or_else(|| "New Thread".to_string());
 
     // 构建创建线程命令
     let command = OrchestrationCommand::ThreadCreate(ThreadCreateCommand {
         command_id: Some(Uuid::new_v4().to_string()),
         thread_id,
         project_id,
-        title: params.title.unwrap_or_else(|| "New Thread".to_string()),
+        title: title.clone(),
         model_selection: ModelSelection {
             provider: remi_core::provider::ProviderKind::Codex,
             model: "default".to_string(),
@@ -289,7 +304,7 @@ pub async fn create_thread(
     Ok(ThreadData {
         id: thread_id.to_string(),
         project_id: project_id.to_string(),
-        title: params.title.unwrap_or_else(|| "New Thread".to_string()),
+        title,
         created_at: now,
         updated_at: now,
     })
@@ -514,5 +529,283 @@ pub async fn rename_thread(
 
     // 分发命令到编排引擎
     state.engine().dispatch(command).await.map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// ========== 以下为前端 bridge 调用的补充命令 ==========
+
+#[tauri::command]
+pub async fn orchestration_get_snapshot(
+    state: State<'_, OrchestrationState>,
+) -> Result<serde_json::Value, String> {
+    let snapshot = state.engine().get_snapshot().await.map_err(|e| e.to_string())?;
+    serde_json::to_value(&snapshot).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn orchestration_get_shell_snapshot(
+    state: State<'_, OrchestrationState>,
+) -> Result<serde_json::Value, String> {
+    let snapshot = state.engine().get_shell_snapshot().await.map_err(|e| e.to_string())?;
+    serde_json::to_value(&snapshot).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn orchestration_dispatch_command(
+    state: State<'_, OrchestrationState>,
+    command: serde_json::Value,
+) -> Result<(), String> {
+    let cmd: OrchestrationCommand = serde_json::from_value(command).map_err(|e| e.to_string())?;
+    state.engine().dispatch(cmd).await.map(|_| ()).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn orchestration_import_thread(
+    _state: State<'_, OrchestrationState>,
+    _input: serde_json::Value,
+) -> Result<ThreadData, String> {
+    let thread_id = Uuid::new_v4();
+    let now = chrono::Utc::now().timestamp();
+    Ok(ThreadData {
+        id: thread_id.to_string(),
+        project_id: String::new(),
+        title: "Imported Thread".to_string(),
+        created_at: now,
+        updated_at: now,
+    })
+}
+
+#[tauri::command]
+pub async fn orchestration_repair_state(
+    _state: State<'_, OrchestrationState>,
+) -> Result<(), String> {
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn orchestration_get_turn_diff(
+    _state: State<'_, OrchestrationState>,
+    _input: serde_json::Value,
+) -> Result<String, String> {
+    Ok(String::new())
+}
+
+#[tauri::command]
+pub async fn orchestration_get_full_thread_diff(
+    _state: State<'_, OrchestrationState>,
+    _input: serde_json::Value,
+) -> Result<String, String> {
+    Ok(String::new())
+}
+
+#[tauri::command]
+pub async fn orchestration_replay_events(
+    _state: State<'_, OrchestrationState>,
+    _from_sequence_exclusive: i64,
+) -> Result<(), String> {
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn orchestration_subscribe_shell(
+    app: AppHandle,
+    state: State<'_, OrchestrationState>,
+) -> Result<(), String> {
+    use tracing::info;
+
+    // 如果已有活跃的 Shell 订阅，先停止
+    {
+        let mut subscription = state
+            .shell_subscription
+            .lock()
+            .map_err(|e| e.to_string())?;
+        if let Some(handle) = subscription.take() {
+            handle.abort();
+        }
+    }
+
+    info!("启动 Shell 事件订阅");
+
+    // 立即推送一次 Shell 快照
+    let snapshot = state
+        .engine()
+        .get_shell_snapshot()
+        .await
+        .map_err(|e| e.to_string())?;
+    let snapshot_value = serde_json::to_value(&snapshot).map_err(|e| e.to_string())?;
+    let _ = app.emit(
+        "orchestration-shell-event",
+        serde_json::json!({
+            "kind": "snapshot",
+            "snapshot": snapshot_value,
+        }),
+    );
+
+    // 启动后台任务，监听领域事件并推送 Shell 事件
+    let engine = state.engine().clone();
+    let handle = tokio::spawn(async move {
+        let mut event_rx = engine.stream_domain_events();
+        loop {
+            match event_rx.recv().await {
+                Ok(event) => {
+                    // 将领域事件序列化后推送为 shell-event
+                    if let Ok(event_value) = serde_json::to_value(&event) {
+                        let _ = app.emit(
+                            "orchestration-shell-event",
+                            serde_json::json!({
+                                "kind": "event",
+                                "event": event_value,
+                            }),
+                        );
+                        // 同时推送为 domain-event
+                        let _ = app.emit("orchestration-domain-event", event_value);
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("Shell 事件订阅接收错误: {}", e);
+                    break;
+                }
+            }
+        }
+    });
+
+    let mut subscription = state
+        .shell_subscription
+        .lock()
+        .map_err(|e| e.to_string())?;
+    *subscription = Some(handle);
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn orchestration_unsubscribe_shell(
+    state: State<'_, OrchestrationState>,
+) -> Result<(), String> {
+    use tracing::info;
+
+    let mut subscription = state
+        .shell_subscription
+        .lock()
+        .map_err(|e| e.to_string())?;
+    if let Some(handle) = subscription.take() {
+        handle.abort();
+        info!("停止 Shell 事件订阅");
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn orchestration_subscribe_thread(
+    app: AppHandle,
+    state: State<'_, OrchestrationState>,
+    input: serde_json::Value,
+) -> Result<(), String> {
+    use tracing::info;
+
+    // 解析线程 ID
+    let thread_id = input
+        .get("threadId")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| "缺少 threadId 参数".to_string())?
+        .to_string();
+
+    // 记录订阅
+    {
+        let mut subs = state
+            .thread_subscriptions
+            .lock()
+            .map_err(|e| e.to_string())?;
+        subs.insert(thread_id.clone());
+    }
+
+    info!("启动线程事件订阅: thread_id={}", thread_id);
+
+    // 立即推送一次线程快照（如果线程存在）
+    let thread_uuid: ThreadId = thread_id
+        .parse()
+        .map_err(|e: uuid::Error| format!("Invalid thread_id: {}", e))?;
+    if let Ok(Some(thread_detail)) = state
+        .projection_query
+        .get_thread_detail(thread_uuid)
+        .await
+    {
+        if let Ok(detail_value) = serde_json::to_value(&thread_detail) {
+            let _ = app.emit(
+                "orchestration-thread-event",
+                serde_json::json!({
+                    "kind": "snapshot",
+                    "snapshot": detail_value,
+                }),
+            );
+        }
+    }
+
+    // 启动后台任务，监听领域事件并过滤该线程的事件
+    let engine = state.engine().clone();
+    let thread_id_for_task = thread_id.clone();
+    let thread_subs = state.thread_subscriptions.clone();
+    tokio::spawn(async move {
+        let mut event_rx = engine.stream_domain_events();
+        loop {
+            match event_rx.recv().await {
+                Ok(event) => {
+                    // 检查订阅是否仍然活跃
+                    {
+                        let subs = match thread_subs.lock() {
+                            Ok(s) => s,
+                            Err(_) => break,
+                        };
+                        if !subs.contains(&thread_id_for_task) {
+                            break;
+                        }
+                    }
+
+                    // 将领域事件序列化后推送为 thread-event
+                    if let Ok(event_value) = serde_json::to_value(&event) {
+                        let _ = app.emit(
+                            "orchestration-thread-event",
+                            serde_json::json!({
+                                "kind": "event",
+                                "event": event_value,
+                            }),
+                        );
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!(
+                        "线程事件订阅接收错误: thread_id={}, error={}",
+                        thread_id_for_task,
+                        e
+                    );
+                    break;
+                }
+            }
+        }
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn orchestration_unsubscribe_thread(
+    state: State<'_, OrchestrationState>,
+    input: serde_json::Value,
+) -> Result<(), String> {
+    use tracing::info;
+
+    let thread_id = input
+        .get("threadId")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| "缺少 threadId 参数".to_string())?
+        .to_string();
+
+    let mut subs = state
+        .thread_subscriptions
+        .lock()
+        .map_err(|e| e.to_string())?;
+    subs.remove(&thread_id);
+    info!("停止线程事件订阅: thread_id={}", thread_id);
+
     Ok(())
 }

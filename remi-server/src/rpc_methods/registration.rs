@@ -12,6 +12,11 @@ use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 use tracing::info;
 
 use crate::rpc::RpcRouter;
+use super::handlers::{
+    register_orchestration_methods, register_provider_methods, register_git_methods,
+    register_terminal_methods, register_workspace_methods, register_auth_methods,
+    register_checkpoint_methods,
+};
 
 /// 服务容器
 pub struct ServiceContainer {

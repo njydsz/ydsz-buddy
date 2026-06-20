@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// 语音转文字输入参数
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct TranscribeVoiceInput {
     /// 音频数据（Base64 编码）
     pub audio_data: String,
@@ -13,6 +14,7 @@ pub struct TranscribeVoiceInput {
 
 /// 语音转文字结果
 #[derive(Debug, Serialize)]
+#[allow(dead_code)]
 pub struct TranscribeVoiceResult {
     /// 识别出的文本
     pub text: String,
@@ -38,6 +40,7 @@ pub struct TranscribeVoiceResult {
 /// 
 /// 如果音频数据无效或识别失败，返回错误
 #[tauri::command]
+#[allow(dead_code)]
 pub async fn transcribe_voice(
     input: TranscribeVoiceInput,
 ) -> Result<TranscribeVoiceResult, String> {

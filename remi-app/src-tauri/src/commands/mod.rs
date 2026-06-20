@@ -42,3 +42,4 @@ pub mod update;        // 自动更新命令
 pub mod window;        // 窗口/系统命令
 pub mod context_menu;  // 右键菜单命令
 pub mod voice;
+pub mod server;        // 服务器命令

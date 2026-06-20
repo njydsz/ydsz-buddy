@@ -32,6 +32,9 @@ portable-pty = "0.8"
 dirs = "5.0"
 open = "5.0"
 chrono = "0.4"
+url = "2"
+urlencoding = "2"
+tracing = "0.1"
 
 # Remi 工作区模块依赖
 remi-core = { path = "../../remi-core" }

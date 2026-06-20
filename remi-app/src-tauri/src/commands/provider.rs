@@ -31,13 +31,17 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tauri::State;
 
+use remi_core::provider::ProviderKind;
+use remi_provider::ProviderService;
+
 /// 提供商状态管理器
 ///
-/// 持有所有 AI 模型提供商的 API Key 配置。
+/// 持有所有 AI 模型提供商的 API Key 配置和 ProviderService 实例。
 ///
 /// # 字段说明
 ///
 /// - `api_keys`: 存储各提供商 API Key 的 HashMap，键为提供商名称，值为 API Key
+/// - `service`: ProviderService 实例，提供模型/Agent 查询和健康检查
 ///
 /// # 使用场景
 ///
@@ -45,6 +49,7 @@ use tauri::State;
 /// 各命令通过 `State<'_, ProviderState>` 参数获取该状态。
 pub struct ProviderState {
     api_keys: Arc<Mutex<HashMap<String, String>>>,
+    service: Arc<ProviderService>,
 }
 
 /// AI 模型信息结构
@@ -73,7 +78,7 @@ pub struct Model {
 impl ProviderState {
     /// 创建新的提供商状态管理器
     ///
-    /// 初始化空的 API Key 存储。
+    /// 初始化空的 API Key 存储和新的 ProviderService 实例。
     ///
     /// # 返回值
     ///
@@ -81,7 +86,16 @@ impl ProviderState {
     pub fn new() -> Self {
         Self {
             api_keys: Arc::new(Mutex::new(HashMap::new())),
+            service: Arc::new(ProviderService::new()),
         }
+    }
+
+    /// 获取 ProviderService 引用
+    ///
+    /// 返回内部持有的 `ProviderService` 的 `Arc` 引用，
+    /// 供需要调用 Provider 查询方法的命令使用。
+    pub fn service(&self) -> Arc<ProviderService> {
+        self.service.clone()
     }
 }
 
@@ -247,4 +261,64 @@ pub async fn get_provider_status(
     }
     
     Ok(serde_json::Value::Object(status))
+}
+
+// ========== 以下为前端 bridge 调用的补充命令 ==========
+
+#[tauri::command]
+pub async fn provider_get_composer_capabilities(
+    input: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    Ok(serde_json::json!({
+        "tools": [],
+        "skills": [],
+        "plugins": []
+    }))
+}
+
+#[tauri::command]
+pub async fn provider_compact_thread(
+    input: serde_json::Value,
+) -> Result<(), String> {
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn provider_list_commands(
+    input: serde_json::Value,
+) -> Result<Vec<serde_json::Value>, String> {
+    Ok(vec![])
+}
+
+#[tauri::command]
+pub async fn provider_list_skills(
+    input: serde_json::Value,
+) -> Result<Vec<serde_json::Value>, String> {
+    Ok(vec![])
+}
+
+#[tauri::command]
+pub async fn provider_list_plugins(
+    input: serde_json::Value,
+) -> Result<Vec<serde_json::Value>, String> {
+    Ok(vec![])
+}
+
+#[tauri::command]
+pub async fn provider_read_plugin(
+    input: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    Ok(serde_json::json!({}))
+}
+
+#[tauri::command]
+pub async fn provider_list_agents(
+    input: serde_json::Value,
+) -> Result<Vec<serde_json::Value>, String> {
+    Ok(vec![])
+}
+
+#[tauri::command]
+pub async fn skills_list_local() -> Result<Vec<serde_json::Value>, String> {
+    Ok(vec![])
 }

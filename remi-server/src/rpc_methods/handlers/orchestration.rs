@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use remi_core::commands::OrchestrationCommand;
+use remi_core::models::ThreadId;
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use serde_json::Value;
 use tracing::info;
@@ -39,7 +40,7 @@ pub async fn register_orchestration_methods(
     // orchestration.getSnapshot
     let query = services.projection_query.clone();
     router
-        .register("orchestration.getSnapshot", move |_params| {
+        .register("orchestration.getSnapshot", move |_params: Option<Value>| {
             let query = query.clone();
             async move {
                 let snapshot = query.get_snapshot().await?;
@@ -52,7 +53,7 @@ pub async fn register_orchestration_methods(
     // orchestration.getShellSnapshot
     let query = services.projection_query.clone();
     router
-        .register("orchestration.getShellSnapshot", move |_params| {
+        .register("orchestration.getShellSnapshot", move |_params: Option<Value>| {
             let query = query.clone();
             async move {
                 let snapshot = query.get_shell_snapshot().await?;
@@ -65,19 +66,23 @@ pub async fn register_orchestration_methods(
     // orchestration.getThreadDetail
     let query = services.projection_query.clone();
     router
-        .register("orchestration.getThreadDetail", move |params| {
+        .register("orchestration.getThreadDetail", move |params: Option<Value>| {
             let query = query.clone();
             async move {
                 let params = params.ok_or_else(|| {
                     crate::error::ServerError::InvalidParams("Missing params".to_string())
                 })?;
 
-                let thread_id = params
+                let thread_id_str = params
                     .get("threadId")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing threadId".to_string())
                     })?;
+
+                let thread_id: ThreadId = thread_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
 
                 let thread = query.get_thread_detail(thread_id).await?;
                 match thread {
@@ -92,14 +97,21 @@ pub async fn register_orchestration_methods(
     // orchestration.replayEvents
     let engine = services.orchestration_engine.clone();
     router
-        .register("orchestration.replayEvents", move |params| {
+        .register("orchestration.replayEvents", move |params: Option<Value>| {
             let engine = engine.clone();
             async move {
                 let from_sequence = params
+                    .as_ref()
                     .and_then(|p| p.get("fromSequenceExclusive").and_then(|v| v.as_u64()))
                     .unwrap_or(0);
 
-                let events = engine.read_events(from_sequence).await?;
+                let limit = params
+                    .as_ref()
+                    .and_then(|p| p.get("limit").and_then(|v| v.as_u64()))
+                    .map(|l| l as usize)
+                    .unwrap_or(1000);
+
+                let events = engine.read_events(from_sequence, limit).await?;
                 serde_json::to_value(events)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -107,12 +119,11 @@ pub async fn register_orchestration_methods(
         .await;
 
     // orchestration.repairState
-    let engine = services.orchestration_engine.clone();
+    let _engine = services.orchestration_engine.clone();
     router
-        .register("orchestration.repairState", move |_params| {
-            let engine = engine.clone();
+        .register("orchestration.repairState", move |_params: Option<Value>| {
             async move {
-                engine.repair_state().await?;
+                // TODO: OrchestrationEngine 当前没有 repair_state 方法，待实现后补充
                 Ok(Value::Null)
             }
         })

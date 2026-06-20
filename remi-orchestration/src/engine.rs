@@ -157,6 +157,7 @@ use remi_core::commands::OrchestrationCommand;
 use remi_core::events::OrchestrationEvent;
 use remi_core::models::{Project, ProjectId, ProjectKind, Sequence, Thread, ThreadId};
 use remi_persistence::{EventStore, ProjectionRepository, SqliteEventStore, SqliteProjectionRepository};
+use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tracing::info;
 
@@ -458,44 +459,44 @@ impl OrchestrationEngine {
     ///
     /// # 返回值
     ///
-    /// 成功时返回对应的领域事件，失败时返回命令处理错误（如未实现的命令类型）。
-    fn command_to_event(&self, command: OrchestrationCommand) -> OrchestrationResult<OrchestrationEvent> {
+    /// 成功时返回对应的领域事件列表（支持单命令产生多事件），失败时返回命令处理错误（如未实现的命令类型）。
+    fn command_to_events(&self, command: OrchestrationCommand) -> OrchestrationResult<Vec<OrchestrationEvent>> {
         let now = Utc::now();
         let command_id = command.command_id().map(|s| s.to_string());
 
         match command {
             // ==================== 项目命令 ====================
             OrchestrationCommand::ProjectCreate(c) => {
-                Ok(OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
+                Ok(vec![OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     project_id: c.project_id,
                     title: c.title,
                     workspace_root: c.workspace_root,
-                }))
+                })])
             }
             OrchestrationCommand::ProjectMetaUpdate(c) => {
-                Ok(OrchestrationEvent::ProjectMetaUpdated(remi_core::events::ProjectMetaUpdatedEvent {
+                Ok(vec![OrchestrationEvent::ProjectMetaUpdated(remi_core::events::ProjectMetaUpdatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     project_id: c.project_id,
                     title: c.title,
-                }))
+                })])
             }
             OrchestrationCommand::ProjectDelete(c) => {
-                Ok(OrchestrationEvent::ProjectDeleted(remi_core::events::ProjectDeletedEvent {
+                Ok(vec![OrchestrationEvent::ProjectDeleted(remi_core::events::ProjectDeletedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     project_id: c.project_id,
-                }))
+                })])
             }
 
             // ==================== 线程命令 ====================
             OrchestrationCommand::ThreadCreate(c) => {
-                Ok(OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                Ok(vec![OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
@@ -529,92 +530,243 @@ impl OrchestrationEngine {
                     sidechat_source_thread_id: c.sidechat_source_thread_id,
                     last_known_pr: c.last_known_pr,
                     handoff: c.handoff,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadDelete(c) => {
-                Ok(OrchestrationEvent::ThreadDeleted(remi_core::events::ThreadDeletedEvent {
+                Ok(vec![OrchestrationEvent::ThreadDeleted(remi_core::events::ThreadDeletedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadArchive(c) => {
-                Ok(OrchestrationEvent::ThreadArchived(remi_core::events::ThreadArchivedEvent {
+                Ok(vec![OrchestrationEvent::ThreadArchived(remi_core::events::ThreadArchivedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadUnarchive(c) => {
-                Ok(OrchestrationEvent::ThreadUnarchived(remi_core::events::ThreadUnarchivedEvent {
+                Ok(vec![OrchestrationEvent::ThreadUnarchived(remi_core::events::ThreadUnarchivedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadMetaUpdate(c) => {
-                Ok(OrchestrationEvent::ThreadMetaUpdated(remi_core::events::ThreadMetaUpdatedEvent {
+                Ok(vec![OrchestrationEvent::ThreadMetaUpdated(remi_core::events::ThreadMetaUpdatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     title: c.title,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadRuntimeModeSet(c) => {
-                Ok(OrchestrationEvent::ThreadRuntimeModeSet(remi_core::events::ThreadRuntimeModeSetEvent {
+                Ok(vec![OrchestrationEvent::ThreadRuntimeModeSet(remi_core::events::ThreadRuntimeModeSetEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     runtime_mode: c.runtime_mode,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadInteractionModeSet(c) => {
-                Ok(OrchestrationEvent::ThreadInteractionModeSet(remi_core::events::ThreadInteractionModeSetEvent {
+                Ok(vec![OrchestrationEvent::ThreadInteractionModeSet(remi_core::events::ThreadInteractionModeSetEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     interaction_mode: c.interaction_mode,
-                }))
+                })])
+            }
+
+            // ==================== 交接/分叉命令 ====================
+            OrchestrationCommand::ThreadHandoffCreate(c) => {
+                // 创建交接线程，产生 thread.created 事件 + N 个 message-sent 事件
+                let mut events = Vec::new();
+                
+                // 1. 创建线程事件（带 handoff 信息）
+                let created_event = OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id: command_id.clone(),
+                    thread_id: c.thread_id,
+                    project_id: c.project_id,
+                    title: c.title,
+                    model_selection: c.model_selection,
+                    runtime_mode: c.runtime_mode,
+                    interaction_mode: c.interaction_mode,
+                    env_mode: c.env_mode,
+                    branch: c.branch.clone(),
+                    worktree_path: c.worktree_path,
+                    associated_worktree: c.associated_worktree_path.map(|path| {
+                        remi_core::models::AssociatedWorktree {
+                            path,
+                            branch: c.associated_worktree_branch.unwrap_or_default(),
+                            r#ref: c.associated_worktree_ref.unwrap_or_default(),
+                        }
+                    }),
+                    is_pinned: false,
+                    parent_thread_id: None,
+                    subagent: None,
+                    fork_source_thread_id: None,
+                    sidechat_source_thread_id: None,
+                    last_known_pr: None,
+                    handoff: Some(remi_core::models::HandoffInfo {
+                        source_thread_id: c.source_thread_id,
+                        target_branch: c.branch.clone().unwrap_or_default(),
+                        created_at: now,
+                    }),
+                });
+                events.push(created_event);
+                
+                // 2. 为每条导入的消息生成 message-sent 事件
+                for msg in c.imported_messages {
+                    let message_event = OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        message: msg,
+                    });
+                    events.push(message_event);
+                }
+                
+                Ok(events)
+            }
+            OrchestrationCommand::ThreadForkCreate(c) => {
+                // 创建分叉线程，产生 thread.created 事件 + N 个 message-sent 事件
+                let mut events = Vec::new();
+                
+                // 1. 创建线程事件（带 fork_source_thread_id）
+                let created_event = OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                    sequence: 0,
+                    occurred_at: now,
+                    command_id: command_id.clone(),
+                    thread_id: c.thread_id,
+                    project_id: c.project_id,
+                    title: c.title,
+                    model_selection: c.model_selection,
+                    runtime_mode: c.runtime_mode,
+                    interaction_mode: c.interaction_mode,
+                    env_mode: c.env_mode,
+                    branch: c.branch,
+                    worktree_path: c.worktree_path,
+                    associated_worktree: c.associated_worktree_path.map(|path| {
+                        remi_core::models::AssociatedWorktree {
+                            path,
+                            branch: c.associated_worktree_branch.unwrap_or_default(),
+                            r#ref: c.associated_worktree_ref.unwrap_or_default(),
+                        }
+                    }),
+                    is_pinned: false,
+                    parent_thread_id: None,
+                    subagent: None,
+                    fork_source_thread_id: Some(c.source_thread_id),
+                    sidechat_source_thread_id: c.sidechat_source_thread_id,
+                    last_known_pr: None,
+                    handoff: None,
+                });
+                events.push(created_event);
+                
+                // 2. 为每条导入的消息生成 message-sent 事件
+                for msg in c.imported_messages {
+                    let message_event = OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        message: msg,
+                    });
+                    events.push(message_event);
+                }
+                
+                Ok(events)
             }
 
             // ==================== Turn 命令 ====================
             OrchestrationCommand::ThreadTurnStart(c) => {
-                Ok(OrchestrationEvent::ThreadTurnStartRequested(remi_core::events::ThreadTurnStartRequestedEvent {
+                // 1. 查询线程状态，判断是否需要排队
+                let thread = self.projection_repo.get_thread(c.thread_id)?;
+                let should_queue = if let Some(ref t) = thread {
+                    // 如果当前有正在运行的 Turn，则需要排队
+                    t.latest_turn.as_ref().map_or(false, |turn| {
+                        turn.status == remi_core::models::TurnStatus::Running
+                    })
+                } else {
+                    false
+                };
+
+                // 2. 生成用户消息事件
+                let user_message = remi_core::models::Message {
+                    id: c.message_id,
+                    role: remi_core::models::MessageRole::User,
+                    text: c.message_text,
+                    attachments: c.attachments.unwrap_or_default(),
+                    skills: vec![],
+                    mentions: vec![],
+                    dispatch_mode: Some(c.dispatch_mode.clone()),
+                    turn_id: None,
+                    streaming: false,
+                    source: None,
+                    created_at: now,
+                    updated_at: now,
+                };
+                let user_event = OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
                     sequence: 0,
                     occurred_at: now,
-                    command_id,
+                    command_id: command_id.clone(),
                     thread_id: c.thread_id,
-                    turn_id: c.turn_id,
-                }))
+                    message: user_message,
+                });
+
+                // 3. 根据排队状态生成 Turn 事件
+                let turn_event = if should_queue {
+                    OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        turn_id: c.turn_id.clone(),
+                    })
+                } else {
+                    OrchestrationEvent::ThreadTurnStartRequested(remi_core::events::ThreadTurnStartRequestedEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        turn_id: c.turn_id.clone(),
+                    })
+                };
+
+                Ok(vec![user_event, turn_event])
             }
             OrchestrationCommand::ThreadTurnInterrupt(c) => {
-                Ok(OrchestrationEvent::ThreadTurnInterruptRequested(remi_core::events::ThreadTurnInterruptRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadTurnInterruptRequested(remi_core::events::ThreadTurnInterruptRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     turn_id: c.turn_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadTurnDispatchQueued(c) => {
-                Ok(OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
+                Ok(vec![OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     turn_id: c.turn_id,
-                }))
+                })])
             }
 
             // ==================== 审批命令 ====================
             OrchestrationCommand::ThreadApprovalRespond(c) => {
-                Ok(OrchestrationEvent::ThreadApprovalResponseRequested(remi_core::events::ThreadApprovalResponseRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadApprovalResponseRequested(remi_core::events::ThreadApprovalResponseRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
@@ -622,10 +774,10 @@ impl OrchestrationEngine {
                     turn_id: c.turn_id,
                     request_id: c.request_id,
                     approved: c.approved,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadUserInputRespond(c) => {
-                Ok(OrchestrationEvent::ThreadUserInputResponseRequested(remi_core::events::ThreadUserInputResponseRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadUserInputResponseRequested(remi_core::events::ThreadUserInputResponseRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
@@ -633,84 +785,82 @@ impl OrchestrationEngine {
                     turn_id: c.turn_id,
                     request_id: c.request_id,
                     response: c.response,
-                }))
+                })])
             }
 
             // ==================== 检查点命令 ====================
             OrchestrationCommand::ThreadCheckpointRevert(c) => {
-                Ok(OrchestrationEvent::ThreadCheckpointRevertRequested(remi_core::events::ThreadCheckpointRevertRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadCheckpointRevertRequested(remi_core::events::ThreadCheckpointRevertRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     checkpoint_id: c.checkpoint_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadConversationRollback(c) => {
-                Ok(OrchestrationEvent::ThreadConversationRollbackRequested(remi_core::events::ThreadConversationRollbackRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadConversationRollbackRequested(remi_core::events::ThreadConversationRollbackRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     message_id: c.message_id,
-                }))
+                })])
             }
 
             // ==================== 消息命令 ====================
             OrchestrationCommand::ThreadMessageEditAndResend(c) => {
-                Ok(OrchestrationEvent::ThreadMessageEditResendRequested(remi_core::events::ThreadMessageEditResendRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadMessageEditResendRequested(remi_core::events::ThreadMessageEditResendRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     message_id: c.message_id,
                     new_text: c.new_text,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadSessionStop(c) => {
-                Ok(OrchestrationEvent::ThreadSessionStopRequested(remi_core::events::ThreadSessionStopRequestedEvent {
+                Ok(vec![OrchestrationEvent::ThreadSessionStopRequested(remi_core::events::ThreadSessionStopRequestedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
-                }))
+                })])
             }
 
             // ==================== 活动命令 ====================
             OrchestrationCommand::ThreadActivityAppend(c) => {
-                Ok(OrchestrationEvent::ThreadActivityAppended(remi_core::events::ThreadActivityAppendedEvent {
+                Ok(vec![OrchestrationEvent::ThreadActivityAppended(remi_core::events::ThreadActivityAppendedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     activity: c.activity,
-                }))
+                })])
             }
 
             // ==================== 内部命令 ====================
             OrchestrationCommand::ThreadSessionSet(c) => {
-                Ok(OrchestrationEvent::ThreadSessionSet(remi_core::events::ThreadSessionSetEvent {
+                Ok(vec![OrchestrationEvent::ThreadSessionSet(remi_core::events::ThreadSessionSetEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     session: c.session,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadMessagesImport(c) => {
-                // 导入消息时，为每条消息生成一个事件
-                // 这里简化处理，只生成一个包含所有消息的事件
-                if let Some(first_msg) = c.messages.first() {
-                    Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                // 为每条消息生成一个独立的事件
+                let events: Vec<OrchestrationEvent> = c.messages.into_iter().map(|msg| {
+                    OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
                         sequence: 0,
                         occurred_at: now,
-                        command_id,
+                        command_id: command_id.clone(),
                         thread_id: c.thread_id,
-                        message: first_msg.clone(),
-                    }))
-                } else {
-                    Err(OrchestrationError::CommandError("消息列表为空".to_string()))
-                }
+                        message: msg,
+                    })
+                }).collect();
+                Ok(events)
             }
             OrchestrationCommand::ThreadMessageAssistantDelta(c) => {
                 // 助手消息增量更新，创建一个临时消息
@@ -728,13 +878,13 @@ impl OrchestrationEngine {
                     created_at: now,
                     updated_at: now,
                 };
-                Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                Ok(vec![OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     message,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadMessageAssistantComplete(c) => {
                 // 助手消息完成，创建一个完整的消息
@@ -752,50 +902,50 @@ impl OrchestrationEngine {
                     created_at: now,
                     updated_at: now,
                 };
-                Ok(OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
+                Ok(vec![OrchestrationEvent::ThreadMessageSent(remi_core::events::ThreadMessageSentEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     message,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadProposedPlanUpsert(c) => {
-                Ok(OrchestrationEvent::ThreadProposedPlanUpserted(remi_core::events::ThreadProposedPlanUpsertedEvent {
+                Ok(vec![OrchestrationEvent::ThreadProposedPlanUpserted(remi_core::events::ThreadProposedPlanUpsertedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     plan: c.plan,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadTurnDiffComplete(c) => {
-                Ok(OrchestrationEvent::ThreadTurnDiffCompleted(remi_core::events::ThreadTurnDiffCompletedEvent {
+                Ok(vec![OrchestrationEvent::ThreadTurnDiffCompleted(remi_core::events::ThreadTurnDiffCompletedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     turn_id: c.turn_id,
                     diff: c.diff,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadRevertComplete(c) => {
-                Ok(OrchestrationEvent::ThreadReverted(remi_core::events::ThreadRevertedEvent {
+                Ok(vec![OrchestrationEvent::ThreadReverted(remi_core::events::ThreadRevertedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     checkpoint_id: c.checkpoint_id,
-                }))
+                })])
             }
             OrchestrationCommand::ThreadConversationRollbackComplete(c) => {
-                Ok(OrchestrationEvent::ThreadConversationRolledBack(remi_core::events::ThreadConversationRolledBackEvent {
+                Ok(vec![OrchestrationEvent::ThreadConversationRolledBack(remi_core::events::ThreadConversationRolledBackEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     thread_id: c.thread_id,
                     message_id: c.message_id,
-                }))
+                })])
             }
         }
     }
@@ -1080,7 +1230,7 @@ impl OrchestrationEngine {
 /// - `projects`: 所有项目的完整列表
 /// - `threads`: 所有线程的完整列表
 /// - `updated_at`: 快照生成时间
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrchestrationReadModel {
     /// 快照序列号，标识当前读模型的版本
     pub snapshot_sequence: Sequence,
@@ -1103,7 +1253,7 @@ pub struct OrchestrationReadModel {
 /// - `projects`: 项目精简信息列表
 /// - `threads`: 线程精简信息列表
 /// - `updated_at`: 快照生成时间（UTC）
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrchestrationShellSnapshot {
     /// 快照序列号
     pub snapshot_sequence: Sequence,
@@ -1124,7 +1274,7 @@ pub struct OrchestrationShellSnapshot {
 /// - `id`: 项目唯一标识
 /// - `title`: 项目标题
 /// - `workspace_root`: 项目工作区根路径
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShellProject {
     /// 项目唯一标识
     pub id: ProjectId,
@@ -1146,7 +1296,7 @@ pub struct ShellProject {
 /// - `runtime_mode`: 运行时模式（Agent / Plan 等）
 /// - `has_pending_approvals`: 是否有待审批的操作
 /// - `has_pending_user_input`: 是否有待用户输入的请求
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ShellThread {
     /// 线程唯一标识
     pub id: ThreadId,

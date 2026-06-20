@@ -43,6 +43,7 @@
 //! }
 //! ```
 
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// Provider 错误类型枚举
@@ -56,7 +57,7 @@ use thiserror::Error;
 /// - **上下文丰富**：每个变体都携带 `String` 类型的上下文信息
 /// - **易于调试**：派生 `Debug` trait，方便打印调试信息
 /// - **兼容标准**：实现 `std::error::Error` trait，可与 `?` 运算符无缝配合
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Serialize, Deserialize)]
 pub enum ProviderError {
     /// Provider 未找到错误
     ///

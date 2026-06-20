@@ -10,6 +10,15 @@ path = "src/main.rs"
 [dependencies]
 remi-core = { workspace = true }
 remi-config = { workspace = true }
+remi-persistence = { workspace = true }
+remi-orchestration = { workspace = true }
+remi-provider = { workspace = true }
+remi-git = { workspace = true }
+remi-terminal = { workspace = true }
+remi-workspace = { workspace = true }
+remi-auth = { workspace = true }
+remi-checkpoint = { workspace = true }
+remi-telemetry = { workspace = true }
 remi-server = { workspace = true }
 tokio = { workspace = true }
 clap = { workspace = true }

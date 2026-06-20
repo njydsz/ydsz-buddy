@@ -2,11 +2,13 @@
 
 use std::sync::Arc;
 
-use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
+use remi_workspace::{
+    BrowseInput, ListDirectoriesInput, SearchEntriesInput, WorkspaceEntries, WorkspaceFileSystem,
+    WriteFileInput,
+};
 use serde_json::Value;
 use tracing::info;
 
-use crate::error::ServerResult;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
@@ -20,7 +22,7 @@ pub async fn register_workspace_methods(
     // workspace.browse
     let workspace_entries = services.workspace_entries.clone();
     router
-        .register("workspace.browse", move |params| {
+        .register("workspace.browse", move |params: Option<Value>| {
             let workspace_entries = workspace_entries.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -32,14 +34,32 @@ pub async fn register_workspace_methods(
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing root".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
-                let path = params
+                let relative_path = params
                     .get("path")
                     .and_then(|v| v.as_str())
-                    .unwrap_or(".");
+                    .map(|s| s.to_string());
 
-                let entries = workspace_entries.browse(root, path).await?;
+                let include_hidden = params
+                    .get("includeHidden")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
+                let max_depth = params
+                    .get("maxDepth")
+                    .and_then(|v| v.as_u64())
+                    .map(|d| d as usize);
+
+                let input = BrowseInput {
+                    cwd: root,
+                    relative_path,
+                    include_hidden,
+                    max_depth,
+                };
+
+                let entries = workspace_entries.browse(input).await?;
                 serde_json::to_value(entries)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -49,7 +69,7 @@ pub async fn register_workspace_methods(
     // workspace.search
     let workspace_entries = services.workspace_entries.clone();
     router
-        .register("workspace.search", move |params| {
+        .register("workspace.search", move |params: Option<Value>| {
             let workspace_entries = workspace_entries.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -61,16 +81,35 @@ pub async fn register_workspace_methods(
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing root".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
                 let pattern = params
                     .get("pattern")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing pattern".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
-                let entries = workspace_entries.search(root, pattern).await?;
+                let max_results = params
+                    .get("maxResults")
+                    .and_then(|v| v.as_u64())
+                    .map(|r| r as usize);
+
+                let file_pattern = params
+                    .get("filePattern")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                let input = SearchEntriesInput {
+                    cwd: root,
+                    query: pattern,
+                    max_results,
+                    file_pattern,
+                };
+
+                let entries = workspace_entries.search(input).await?;
                 serde_json::to_value(entries)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -80,7 +119,7 @@ pub async fn register_workspace_methods(
     // workspace.listDirectories
     let workspace_entries = services.workspace_entries.clone();
     router
-        .register("workspace.listDirectories", move |params| {
+        .register("workspace.listDirectories", move |params: Option<Value>| {
             let workspace_entries = workspace_entries.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -92,9 +131,20 @@ pub async fn register_workspace_methods(
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing root".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
-                let directories = workspace_entries.list_directories(root).await?;
+                let max_depth = params
+                    .get("maxDepth")
+                    .and_then(|v| v.as_u64())
+                    .map(|d| d as usize);
+
+                let input = ListDirectoriesInput {
+                    cwd: root,
+                    max_depth,
+                };
+
+                let directories = workspace_entries.list_directories(input).await?;
                 serde_json::to_value(directories)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -104,7 +154,7 @@ pub async fn register_workspace_methods(
     // workspace.writeFile
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
-        .register("workspace.writeFile", move |params| {
+        .register("workspace.writeFile", move |params: Option<Value>| {
             let workspace_filesystem = workspace_filesystem.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -116,24 +166,40 @@ pub async fn register_workspace_methods(
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing root".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
                 let path = params
                     .get("path")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing path".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
                 let content = params
                     .get("content")
                     .and_then(|v| v.as_str())
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing content".to_string())
-                    })?;
+                    })?
+                    .to_string();
 
-                workspace_filesystem.write_file(root, path, content).await?;
-                Ok(Value::Null)
+                let create_directories = params
+                    .get("createDirectories")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(true);
+
+                let input = WriteFileInput {
+                    cwd: root,
+                    relative_path: path,
+                    content,
+                    create_directories,
+                };
+
+                let result = workspace_filesystem.write_file(input).await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;
@@ -141,7 +207,7 @@ pub async fn register_workspace_methods(
     // workspace.readFile
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
-        .register("workspace.readFile", move |params| {
+        .register("workspace.readFile", move |params: Option<Value>| {
             let workspace_filesystem = workspace_filesystem.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -171,7 +237,7 @@ pub async fn register_workspace_methods(
     // workspace.deleteFile
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
-        .register("workspace.deleteFile", move |params| {
+        .register("workspace.deleteFile", move |params: Option<Value>| {
             let workspace_filesystem = workspace_filesystem.clone();
             async move {
                 let params = params.ok_or_else(|| {

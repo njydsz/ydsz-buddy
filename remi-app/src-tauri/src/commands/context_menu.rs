@@ -42,6 +42,7 @@ use serde::Deserialize;
 ///
 /// 作为 `show_context_menu` 命令的输入参数，用于构建右键菜单。
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct ContextMenuItem {
     /// 菜单项唯一标识符
     pub id: String,
@@ -92,9 +93,9 @@ pub struct ContextMenuItem {
 /// - 后续可考虑支持菜单分隔符、子菜单等高级功能
 #[tauri::command]
 pub async fn show_context_menu(
-    app: tauri::AppHandle,
-    items: Vec<ContextMenuItem>,
-    position: Option<Position>,
+    _app: tauri::AppHandle,
+    _items: Vec<ContextMenuItem>,
+    _position: Option<Position>,
 ) -> Result<Option<String>, String> {
     // Note: Tauri 2.0 context menu implementation would go here
     // For now, return None as placeholder
@@ -114,6 +115,7 @@ pub async fn show_context_menu(
 ///
 /// 作为 `show_context_menu` 命令的可选参数，用于精确控制菜单显示位置。
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Position {
     /// 水平坐标（像素）
     pub x: f64,

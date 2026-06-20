@@ -66,6 +66,8 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use remi_core::provider::ProviderKind;
+use serde::{Deserialize, Serialize};
+use tokio::process::Command;
 use tokio::sync::RwLock;
 use tracing::{info, warn};
 
@@ -81,7 +83,7 @@ use crate::error::ProviderResult;
 /// - `available`: 是否可用，true 表示正常，false 表示异常
 /// - `last_checked`: 最后一次检查的时间戳（UTC）
 /// - `message`: 可选的状态消息，通常用于描述错误原因或诊断信息
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderHealthStatus {
     /// Provider 类型标识
     pub provider: ProviderKind,
@@ -148,8 +150,8 @@ impl ProviderHealth {
 
     /// 检查指定 Provider 的健康状态
     ///
-    /// 执行健康检查并将结果缓存。当前实现为占位逻辑，
-    /// 默认返回可用状态，后续需要实现具体的检查逻辑。
+    /// 通过尝试运行 Provider CLI 的 `--version` 命令验证其可用性。
+    /// 检查结果会写入缓存，后续可通过 `get_cached_status` 快速查询。
     ///
     /// # 参数
     ///
@@ -160,23 +162,17 @@ impl ProviderHealth {
     /// - `Ok(ProviderHealthStatus)`: 健康状态信息
     /// - `Err(ProviderError)`: 检查过程发生错误
     ///
-    /// # TODO
+    /// # 检查策略
     ///
-    /// 当前实现为占位逻辑，需要实现具体的健康检查策略：
-    /// - HTTP Provider: 发送心跳请求
-    /// - WebSocket Provider: 检查连接状态
-    /// - SDK Provider: 验证 SDK 初始化状态
+    /// 1. 根据 ProviderKind 获取对应的 CLI 二进制名称
+    /// 2. 使用 `tokio::time::timeout` 运行 `<binary> --version`（5 秒超时）
+    /// 3. 命令成功执行则标记为可用，并记录版本号
+    /// 4. 命令失败（二进制不存在、超时、非零退出码）则标记为不可用
     pub async fn check_health(&self, provider: ProviderKind) -> ProviderResult<ProviderHealthStatus> {
         info!("检查 Provider 健康状态: {:?}", provider);
 
-        // TODO: 实现具体的健康检查逻辑
-        // 目前返回默认可用状态，实际应根据 Provider 类型执行不同的检查策略
-        let status = ProviderHealthStatus {
-            provider,
-            available: true,
-            last_checked: Utc::now(),
-            message: Some("健康检查未实现".to_string()),
-        };
+        let binary = provider_cli_binary(provider);
+        let status = probe_provider_cli(&binary, provider).await;
 
         // 将检查结果写入缓存，使用写锁保证并发安全
         let mut cache = self.status_cache.write().await;
@@ -256,5 +252,111 @@ impl Default for ProviderHealth {
     /// 默认实现，等同于 `new()`
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// 返回 ProviderKind 对应的 CLI 二进制名称
+///
+/// 此映射与各适配器 `spawn_*_process` 中使用的程序名保持一致。
+/// 若新增 Provider 适配器，需同步更新此映射。
+fn provider_cli_binary(provider: ProviderKind) -> &'static str {
+    match provider {
+        ProviderKind::ClaudeAgent => "claude",
+        ProviderKind::Codex => "codex",
+        ProviderKind::Cursor => "cursor",
+        ProviderKind::Gemini => "gemini",
+        ProviderKind::Grok => "grok",
+        ProviderKind::Kilo => "kilo",
+        ProviderKind::OpenCode => "opencode",
+        ProviderKind::Pi => "pi",
+    }
+}
+
+/// 探测 Provider CLI 可用性
+///
+/// 通过运行 `<binary> --version` 验证 CLI 是否安装且可执行。
+/// 使用 5 秒超时防止长时间阻塞。
+///
+/// # 参数
+///
+/// - `binary`: CLI 二进制名称
+/// - `provider`: Provider 类型（用于构造返回的状态）
+///
+/// # 返回值
+///
+/// 返回 `ProviderHealthStatus`，`available` 字段反映 CLI 是否可用。
+/// 当 CLI 不可用时，`message` 字段包含具体的失败原因。
+async fn probe_provider_cli(binary: &str, provider: ProviderKind) -> ProviderHealthStatus {
+    let probe = async {
+        let output = Command::new(binary)
+            .arg("--version")
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .output()
+            .await?;
+        Ok::<std::process::Output, std::io::Error>(output)
+    };
+
+    match tokio::time::timeout(std::time::Duration::from_secs(5), probe).await {
+        Ok(Ok(output)) => {
+            if output.status.success() {
+                let version = String::from_utf8_lossy(&output.stdout)
+                    .trim()
+                    .lines()
+                    .next()
+                    .unwrap_or("")
+                    .to_string();
+                let message = if version.is_empty() {
+                    None
+                } else {
+                    Some(format!("版本: {}", version))
+                };
+                ProviderHealthStatus {
+                    provider,
+                    available: true,
+                    last_checked: Utc::now(),
+                    message,
+                }
+            } else {
+                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+                let msg = if stderr.is_empty() {
+                    format!("{} 退出码 {}", binary, output.status.code().unwrap_or(-1))
+                } else {
+                    format!("{}: {}", binary, stderr)
+                };
+                warn!("Provider {} 健康检查失败: {}", binary, msg);
+                ProviderHealthStatus {
+                    provider,
+                    available: false,
+                    last_checked: Utc::now(),
+                    message: Some(msg),
+                }
+            }
+        }
+        Ok(Err(e)) => {
+            let msg = if e.kind() == std::io::ErrorKind::NotFound {
+                format!("未找到 {} CLI，请确认已安装并加入 PATH", binary)
+            } else {
+                format!("执行 {} 失败: {}", binary, e)
+            };
+            warn!("Provider {} 健康检查失败: {}", binary, msg);
+            ProviderHealthStatus {
+                provider,
+                available: false,
+                last_checked: Utc::now(),
+                message: Some(msg),
+            }
+        }
+        Err(_) => {
+            let msg = format!("{} --version 执行超时（5 秒）", binary);
+            warn!("Provider {} 健康检查超时", binary);
+            ProviderHealthStatus {
+                provider,
+                available: false,
+                last_checked: Utc::now(),
+                message: Some(msg),
+            }
+        }
     }
 }

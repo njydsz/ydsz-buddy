@@ -9,7 +9,6 @@
 
 use async_trait::async_trait;
 use remi_core::models::{Checkpoint, ThreadId};
-use uuid::Uuid;
 
 use crate::error::PersistenceResult;
 use crate::sqlite_client::SqliteClient;

@@ -19,7 +19,7 @@ pub async fn register_git_methods(
     // git.status
     let broadcaster = services.git_status_broadcaster.clone();
     router
-        .register("git.status", move |params| {
+        .register("git.status", move |params: Option<Value>| {
             let broadcaster = broadcaster.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -43,7 +43,7 @@ pub async fn register_git_methods(
     // git.listBranches
     let git_core = services.git_core.clone();
     router
-        .register("git.listBranches", move |params| {
+        .register("git.listBranches", move |params: Option<Value>| {
             let git_core = git_core.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -116,12 +116,32 @@ pub async fn register_git_methods(
                         crate::error::ServerError::InvalidParams("Missing action".to_string())
                     })?;
 
-                let action: GitAction = action_str
-                    .parse()
-                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+                let action = match action_str {
+                    "commit" => GitAction::Commit,
+                    "push" => GitAction::Push,
+                    "createPr" => GitAction::CreatePr,
+                    "commitPush" => GitAction::CommitPush,
+                    "commitPushPr" => GitAction::CommitPushPr,
+                    _ => return Err(crate::error::ServerError::InvalidParams(
+                        format!("Unknown action: {}", action_str),
+                    ).into()),
+                };
 
                 let message = params
                     .get("message")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                let pr_title = params
+                    .get("prTitle")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+                let pr_body = params
+                    .get("prBody")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+                let pr_base = params
+                    .get("prBase")
                     .and_then(|v| v.as_str())
                     .map(|s| s.to_string());
 
@@ -130,6 +150,9 @@ pub async fn register_git_methods(
                     action,
                     commit_message: message,
                     feature_branch: None,
+                    pr_title,
+                    pr_body,
+                    pr_base,
                 };
 
                 git_manager.run_stacked_action(input).await?;
@@ -142,7 +165,7 @@ pub async fn register_git_methods(
     // git.createBranch
     let git_core = services.git_core.clone();
     router
-        .register("git.createBranch", move |params| {
+        .register("git.createBranch", move |params: Option<Value>| {
             let git_core = git_core.clone();
             async move {
                 let params = params.ok_or_else(|| {

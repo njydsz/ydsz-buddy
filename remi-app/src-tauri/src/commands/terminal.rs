@@ -27,11 +27,23 @@
 //! 本模块依赖 `portable-pty` crate 实现跨平台的 PTY 操作。
 
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
-use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
+use tokio::task::JoinHandle;
+use tracing::{debug, warn};
+
+/// 终端输出事件载荷
+///
+/// 通过 `terminal-output` 事件推送到前端，前端通过 `listen('terminal-output')` 接收。
+#[derive(Debug, Clone, serde::Serialize)]
+struct TerminalOutputPayload {
+    /// 终端会话 ID
+    session_id: String,
+    /// 终端输出内容（UTF-8 字符串，可能包含 ANSI 转义序列）
+    output: String,
+}
 
 /// 终端状态管理器
 ///
@@ -51,21 +63,24 @@ pub struct TerminalState {
 
 /// 单个终端会话
 ///
-/// 封装一个终端会话的所有资源，包括读写流和子进程句柄。
+/// 封装一个终端会话的所有资源，包括 PTY master（用于 resize）、写入流、
+/// 子进程句柄和后台读取任务的 JoinHandle。
 ///
 /// # 字段说明
 ///
-/// - `reader`: 从终端读取输出的读取流（Box<dyn Read + Send>）
-/// - `writer`: 向终端写入输入的写入流（Box<dyn Write + Send>）
+/// - `master`: PTY 主设备，用于 resize 操作
+/// - `writer`: 向终端写入输入的写入流
 /// - `process`: 终端子进程句柄，用于控制进程生命周期
-///
-/// # 设计说明
-///
-/// 该结构体不可序列化（因包含 trait object），仅在 Rust 后端使用。
+/// - `reader_handle`: 后台读取任务的句柄，用于在关闭终端时终止读取循环
+/// - `cwd`: 终端工作目录，用于重启
+/// - `shell`: Shell 程序路径，用于重启
 struct TerminalSession {
-    reader: Box<dyn Read + Send>,
+    master: Box<dyn portable_pty::MasterPty + Send>,
     writer: Box<dyn Write + Send>,
     process: Box<dyn portable_pty::Child + Send>,
+    reader_handle: Option<JoinHandle<()>>,
+    cwd: String,
+    shell: String,
 }
 
 impl TerminalState {
@@ -81,6 +96,50 @@ impl TerminalState {
             terminals: Arc::new(Mutex::new(HashMap::new())),
         }
     }
+}
+
+/// 启动后台 PTY 读取任务
+///
+/// 在独立的 tokio 任务中持续读取 PTY 输出，并通过 `app.emit("terminal-output", payload)`
+/// 推送到前端。读取循环在以下情况退出：
+/// - PTY 已关闭（read 返回 0 字节）
+/// - 读取发生错误
+///
+/// # 参数
+///
+/// - `app`: Tauri 应用句柄，用于发射事件
+/// - `session_id`: 终端会话 ID，包含在事件载荷中
+/// - `reader`: PTY 读取器
+fn spawn_pty_reader(
+    app: AppHandle,
+    session_id: String,
+    mut reader: Box<dyn Read + Send>,
+) -> JoinHandle<()> {
+    tokio::task::spawn_blocking(move || {
+        let mut buf = [0u8; 4096];
+        loop {
+            match reader.read(&mut buf) {
+                Ok(0) => {
+                    debug!("终端 {} 的 PTY 已关闭，停止读取", session_id);
+                    break;
+                }
+                Ok(n) => {
+                    let output = String::from_utf8_lossy(&buf[..n]).to_string();
+                    let payload = TerminalOutputPayload {
+                        session_id: session_id.clone(),
+                        output,
+                    };
+                    if let Err(e) = app.emit("terminal-output", &payload) {
+                        warn!("终端 {} 推送输出事件失败: {}", session_id, e);
+                    }
+                }
+                Err(e) => {
+                    warn!("终端 {} 读取输出失败: {}", session_id, e);
+                    break;
+                }
+            }
+        }
+    })
 }
 
 /// 创建终端会话命令
@@ -112,13 +171,14 @@ impl TerminalState {
 /// ```
 #[tauri::command]
 pub async fn create_terminal(
+    app: AppHandle,
     state: State<'_, TerminalState>,
     cwd: String,
     shell: Option<String>,
 ) -> Result<String, String> {
     // 创建 PTY 系统
     let pty_system = native_pty_system();
-    
+
     // 打开 PTY 对（主从设备），初始大小为 24 行 80 列
     let pty_pair = pty_system
         .openpty(PtySize {
@@ -144,19 +204,25 @@ pub async fn create_terminal(
 
     // 在从 PTY 上启动子进程
     let child = pty_pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
-    
+
     // 克隆读取器并获取写入器
-    let mut reader = pty_pair.master.try_clone_reader().map_err(|e| e.to_string())?;
+    let reader = pty_pair.master.try_clone_reader().map_err(|e| e.to_string())?;
     let writer = pty_pair.master.take_writer().map_err(|e| e.to_string())?;
 
     // 生成唯一的会话 ID
     let terminal_id = uuid::Uuid::new_v4().to_string();
-    
+
+    // 启动后台读取任务，持续推送 PTY 输出到前端
+    let reader_handle = spawn_pty_reader(app, terminal_id.clone(), Box::new(reader));
+
     // 创建会话对象
     let session = TerminalSession {
-        reader: Box::new(reader),
-        writer: Box::new(writer),
+        master: pty_pair.master,
+        writer,
         process: child,
+        reader_handle: Some(reader_handle),
+        cwd: cwd.clone(),
+        shell: shell_cmd.clone(),
     };
 
     // 将会话存入状态管理器
@@ -209,7 +275,7 @@ pub async fn write_terminal(
 
 /// 调整终端大小命令
 ///
-/// 修改指定终端会话的行列数（当前为占位实现）。
+/// 修改指定终端会话的行列数，通过 PTY master 的 `resize` 方法实现。
 ///
 /// # 参数
 ///
@@ -220,13 +286,8 @@ pub async fn write_terminal(
 ///
 /// # 返回值
 ///
-/// - `Ok(())`: 调整成功（当前始终返回成功）
-/// - `Err(String)`: 调整失败
-///
-/// # 注意事项
-///
-/// 当前实现为占位符，实际的 PTY 大小调整需要持有 PTY master 的引用，
-/// 具体实现取决于 `portable-pty` 版本。
+/// - `Ok(())`: 调整成功
+/// - `Err(String)`: 调整失败（会话不存在或 PTY resize 失败）
 #[tauri::command]
 pub async fn resize_terminal(
     state: State<'_, TerminalState>,
@@ -234,9 +295,21 @@ pub async fn resize_terminal(
     rows: u16,
     cols: u16,
 ) -> Result<(), String> {
-    // Note: resize implementation depends on portable-pty version
-    // This is a placeholder - actual resize needs PTY master reference
-    Ok(())
+    let terminals = state.terminals.lock().map_err(|e| e.to_string())?;
+    if let Some(session) = terminals.get(&session_id) {
+        session
+            .master
+            .resize(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("Terminal session not found".to_string())
+    }
 }
 
 /// 关闭终端会话命令
@@ -267,10 +340,86 @@ pub async fn close_terminal(
 ) -> Result<(), String> {
     let mut terminals = state.terminals.lock().map_err(|e| e.to_string())?;
     if let Some(mut session) = terminals.remove(&session_id) {
+        // 终止后台读取任务
+        if let Some(handle) = session.reader_handle.take() {
+            handle.abort();
+        }
         // 尝试终止子进程，忽略错误（进程可能已退出）
         let _ = session.process.kill();
         Ok(())
     } else {
         Ok(())
+    }
+}
+
+/// 清除终端会话命令
+///
+/// 清除指定终端会话的屏幕内容（发送清屏序列）。
+#[tauri::command]
+pub async fn clear_terminal(
+    state: State<'_, TerminalState>,
+    session_id: String,
+) -> Result<(), String> {
+    let mut terminals = state.terminals.lock().map_err(|e| e.to_string())?;
+    if let Some(session) = terminals.get_mut(&session_id) {
+        // 发送 ANSI 清屏序列
+        session.writer.write_all(b"\x1b[2J\x1b[H").map_err(|e| e.to_string())?;
+        session.writer.flush().map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("Terminal session not found".to_string())
+    }
+}
+
+/// 重启终端会话命令
+///
+/// 终止当前终端进程并重新启动一个新的终端会话。
+#[tauri::command]
+pub async fn restart_terminal(
+    app: AppHandle,
+    state: State<'_, TerminalState>,
+    session_id: String,
+) -> Result<(), String> {
+    let mut terminals = state.terminals.lock().map_err(|e| e.to_string())?;
+    if let Some(mut session) = terminals.remove(&session_id) {
+        // 终止旧的后台读取任务
+        if let Some(handle) = session.reader_handle.take() {
+            handle.abort();
+        }
+        // 终止旧进程
+        let _ = session.process.kill();
+
+        // 重新启动
+        let pty_system = native_pty_system();
+        let pty_pair = pty_system
+            .openpty(PtySize {
+                rows: 24,
+                cols: 80,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .map_err(|e| e.to_string())?;
+
+        let mut cmd = CommandBuilder::new(&session.shell);
+        cmd.cwd(std::path::Path::new(&session.cwd));
+        let child = pty_pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
+        let reader = pty_pair.master.try_clone_reader().map_err(|e| e.to_string())?;
+        let writer = pty_pair.master.take_writer().map_err(|e| e.to_string())?;
+
+        // 启动新的后台读取任务
+        let reader_handle = spawn_pty_reader(app, session_id.clone(), Box::new(reader));
+
+        let new_session = TerminalSession {
+            master: pty_pair.master,
+            writer,
+            process: child,
+            reader_handle: Some(reader_handle),
+            cwd: session.cwd,
+            shell: session.shell,
+        };
+        terminals.insert(session_id, new_session);
+        Ok(())
+    } else {
+        Err("Terminal session not found".to_string())
     }
 }

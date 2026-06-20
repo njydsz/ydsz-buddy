@@ -14,6 +14,7 @@
 use async_trait::async_trait;
 use remi_core::events::OrchestrationEvent;
 use remi_core::models::Sequence;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::error::PersistenceResult;
@@ -88,7 +89,7 @@ pub trait EventStore: Send + Sync {
 /// - `occurred_at`: 事件发生的时间戳（RFC3339 格式）
 /// - `command_id`: 触发此事件的命令 ID（可选）
 /// - `metadata`: 事件的额外元数据（可选）
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StoredEvent {
     /// 事件序列号，全局唯一且递增
     pub sequence: Sequence,

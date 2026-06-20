@@ -55,10 +55,11 @@
 
 use std::sync::Arc;
 
+use tokio::process::Command;
 use tracing::{info, warn};
 
 use crate::core::{GitCore, GitStatusResult};
-use crate::error::GitResult;
+use crate::error::{GitError, GitResult};
 
 /// Git 堆叠式操作输入参数
 ///
@@ -70,6 +71,9 @@ use crate::error::GitResult;
 /// - `action`: 要执行的操作类型（提交、推送、创建 PR 等）
 /// - `commit_message`: 提交消息（仅当 action 包含提交操作时使用）
 /// - `feature_branch`: 功能分支名称（如果指定，会先创建并切换到该分支）
+/// - `pr_title`: PR 标题（可选，未指定时使用 commit_message）
+/// - `pr_body`: PR 描述（可选）
+/// - `pr_base`: PR 目标分支（可选，未指定时使用仓库默认分支）
 ///
 /// # 使用示例
 ///
@@ -81,6 +85,9 @@ use crate::error::GitResult;
 ///     action: GitAction::CommitPush,
 ///     commit_message: Some("feat: add login feature".to_string()),
 ///     feature_branch: Some("feature/login".to_string()),
+///     pr_title: None,
+///     pr_body: None,
+///     pr_base: None,
 /// };
 /// ```
 ///
@@ -88,6 +95,7 @@ use crate::error::GitResult;
 ///
 /// - 如果 `feature_branch` 已存在，会直接切换到该分支而不会报错
 /// - 如果 `commit_message` 为 None 且操作需要提交，会使用默认消息 "Update"
+/// - PR 创建通过 `gh` CLI 实现，需要预先安装并登录 GitHub CLI
 #[derive(Debug, Clone)]
 pub struct GitRunStackedActionInput {
     /// Git 操作的工作目录（必须是绝对路径）
@@ -98,6 +106,12 @@ pub struct GitRunStackedActionInput {
     pub commit_message: Option<String>,
     /// 功能分支名称（可选，如果指定则先创建/切换到该分支）
     pub feature_branch: Option<String>,
+    /// PR 标题（可选，未指定时使用 commit_message）
+    pub pr_title: Option<String>,
+    /// PR 描述（可选）
+    pub pr_body: Option<String>,
+    /// PR 目标分支（可选，未指定时使用仓库默认分支）
+    pub pr_base: Option<String>,
 }
 
 /// Git 操作类型枚举
@@ -110,17 +124,17 @@ pub struct GitRunStackedActionInput {
 /// |------|---------|---------|
 /// | `Commit` | `git commit` | 本地提交，不推送 |
 /// | `Push` | `git push` | 推送已有的提交到远程 |
-/// | `CreatePr` | 创建 Pull Request | 在远程仓库创建 PR（TODO: 待实现） |
+/// | `CreatePr` | 创建 Pull Request | 在远程仓库创建 PR（通过 `gh` CLI） |
 /// | `CommitPush` | `commit` → `push` | 提交并推送，最常用的提交流程 |
-/// | `CommitPushPr` | `commit` → `push` → 创建 PR | 完整的代码提交流程（PR 创建待实现） |
+/// | `CommitPushPr` | `commit` → `push` → 创建 PR | 完整的代码提交流程 |
 ///
 /// # 实现状态
 ///
 /// - ✅ `Commit`: 已实现
 /// - ✅ `Push`: 已实现
-/// - ⏳ `CreatePr`: 待实现（需要集成 GitHub/GitLab API）
+/// - ✅ `CreatePr`: 已实现（通过 `gh` CLI）
 /// - ✅ `CommitPush`: 已实现
-/// - ⚠️ `CommitPushPr`: 部分实现（PR 创建待完成）
+/// - ✅ `CommitPushPr`: 已实现
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GitAction {
     /// 仅提交到本地仓库
@@ -137,8 +151,8 @@ pub enum GitAction {
 
     /// 创建 Pull Request
     ///
-    /// 在远程仓库（GitHub/GitLab）创建 Pull Request。
-    /// ⚠️ 此功能尚未实现，需要集成相应的 API。
+    /// 通过 `gh pr create` 在 GitHub 仓库创建 Pull Request。
+    /// 需要预先安装并登录 GitHub CLI (`gh`)。
     CreatePr,
 
     /// 提交并推送
@@ -149,8 +163,7 @@ pub enum GitAction {
 
     /// 提交、推送并创建 Pull Request
     ///
-    /// 完整的代码提交流程：先提交本地更改，再推送到远程，最后创建 PR。
-    /// ⚠️ PR 创建部分尚未实现，目前仅完成提交和推送。
+    /// 完整的代码提交流程：先提交本地更改，再推送到远程，最后通过 `gh` CLI 创建 PR。
     CommitPushPr,
 }
 
@@ -267,7 +280,7 @@ impl GitManager {
     ///
     /// # 参数
     ///
-    /// - `input`: 操作输入参数，包括操作类型、提交消息、功能分支等
+    /// - `input`: 操作输入参数，包括操作类型、提交消息、功能分支、PR 配置等
     ///
     /// # 返回值
     ///
@@ -283,8 +296,8 @@ impl GitManager {
     ///    - `Commit`: 提交更改
     ///    - `Push`: 推送到远程
     ///    - `CommitPush`: 提交后推送
-    ///    - `CreatePr`: 创建 PR（待实现）
-    ///    - `CommitPushPr`: 提交、推送后创建 PR（PR 部分待实现）
+    ///    - `CreatePr`: 通过 `gh` CLI 创建 PR
+    ///    - `CommitPushPr`: 提交、推送后创建 PR
     ///
     /// # 使用示例
     ///
@@ -294,13 +307,17 @@ impl GitManager {
     ///     action: GitAction::CommitPush,
     ///     commit_message: Some("feat: add feature".to_string()),
     ///     feature_branch: Some("feature/new".to_string()),
+    ///     pr_title: None,
+    ///     pr_body: None,
+    ///     pr_base: None,
     /// }).await?;
     /// ```
     ///
     /// # 注意事项
     ///
     /// - 如果 `commit_message` 为 None，会使用默认消息 "Update"
-    /// - PR 创建功能尚未实现，相关操作会返回 `success: false` 或部分成功
+    /// - PR 创建通过 `gh` CLI 实现，需要预先安装并登录
+    /// - PR 标题未指定时使用 `commit_message`，两者都为空时使用 "Update"
     pub async fn run_stacked_action(
         &self,
         input: GitRunStackedActionInput,
@@ -343,14 +360,24 @@ impl GitManager {
                 })
             }
             GitAction::CreatePr => {
-                // TODO: 实现 PR 创建逻辑（需要调用 GitHub API）
-                warn!("PR 创建功能尚未实现");
+                let pr_title = input
+                    .pr_title
+                    .or(input.commit_message.clone())
+                    .unwrap_or_else(|| "Update".to_string());
+                let pr_url = self
+                    .create_pull_request(
+                        &input.cwd,
+                        &pr_title,
+                        input.pr_body.as_deref(),
+                        input.pr_base.as_deref(),
+                    )
+                    .await?;
 
                 Ok(GitRunStackedActionResult {
-                    success: false,
+                    success: true,
                     commit_sha: None,
-                    pr_url: None,
-                    message: "PR 创建功能尚未实现".to_string(),
+                    pr_url: Some(pr_url.clone()),
+                    message: format!("PR 创建成功: {}", pr_url),
                 })
             }
             GitAction::CommitPush => {
@@ -370,17 +397,115 @@ impl GitManager {
                 let commit_sha = self.core.commit(&input.cwd, message).await?;
                 self.core.push_current_branch(&input.cwd).await?;
 
-                // TODO: 实现 PR 创建逻辑
-                warn!("PR 创建功能尚未实现");
+                let pr_title = input
+                    .pr_title
+                    .or(input.commit_message.clone())
+                    .unwrap_or_else(|| "Update".to_string());
+                let pr_url = self
+                    .create_pull_request(
+                        &input.cwd,
+                        &pr_title,
+                        input.pr_body.as_deref(),
+                        input.pr_base.as_deref(),
+                    )
+                    .await?;
 
                 Ok(GitRunStackedActionResult {
                     success: true,
                     commit_sha: Some(commit_sha),
-                    pr_url: None,
-                    message: "提交并推送成功，PR 创建功能尚未实现".to_string(),
+                    pr_url: Some(pr_url.clone()),
+                    message: format!("提交、推送并创建 PR 成功: {}", pr_url),
                 })
             }
         }
+    }
+
+    /// 创建 Pull Request
+    ///
+    /// 通过 GitHub CLI (`gh`) 在远程仓库创建 Pull Request。
+    /// 调用前需确保：
+    /// 1. 已安装 `gh` CLI 并完成认证（`gh auth login`）
+    /// 2. 当前分支已推送到远程
+    /// 3. 仓库已关联 GitHub 远程仓库
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录的绝对路径
+    /// - `title`: PR 标题
+    /// - `body`: PR 描述（可选，为 None 时留空）
+    /// - `base`: PR 目标分支（可选，为 None 时使用仓库默认分支）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: 创建的 PR URL
+    /// - `Err(GitError)`: 创建失败（`gh` 未安装、未认证、网络错误等）
+    ///
+    /// # 错误处理
+    ///
+    /// - 如果 `gh` 命令不存在，返回包含安装提示的 `GitError::CommandError`
+    /// - 如果 `gh` 返回非零退出码，返回包含 stderr 的 `GitError::CommandError`
+    /// - 如果输出无法解析为 URL，返回 `GitError::InternalError`
+    pub async fn create_pull_request(
+        &self,
+        cwd: &str,
+        title: &str,
+        body: Option<&str>,
+        base: Option<&str>,
+    ) -> GitResult<String> {
+        info!("创建 PR: title={}, base={:?}", title, base);
+
+        let mut cmd = Command::new("gh");
+        cmd.current_dir(cwd)
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .args(["pr", "create", "--title", title]);
+
+        if let Some(body_content) = body {
+            cmd.arg("--body").arg(body_content);
+        } else {
+            // gh pr create 要求 --body 或 --fill，使用空 body 避免交互式编辑器
+            cmd.arg("--body").arg("");
+        }
+
+        if let Some(base_branch) = base {
+            cmd.arg("--base").arg(base_branch);
+        }
+
+        let output = cmd.output().await.map_err(|e| {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                GitError::CommandError(
+                    "未找到 gh CLI，请安装 GitHub CLI (https://cli.github.com) 并执行 gh auth login".to_string(),
+                )
+            } else {
+                GitError::CommandError(format!("执行 gh 命令失败: {}", e))
+            }
+        })?;
+
+        let code = output.status.code().unwrap_or(-1);
+        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+
+        if code != 0 {
+            warn!("gh pr create 失败 (exit {}): {}", code, stderr);
+            return Err(GitError::CommandError(format!(
+                "gh pr create 失败 (exit {}): {}",
+                code, stderr
+            )));
+        }
+
+        // gh pr create 成功时输出 PR URL
+        if stdout.is_empty() {
+            return Err(GitError::InternalError(
+                "gh pr create 未返回 PR URL".to_string(),
+            ));
+        }
+
+        // 取第一行作为 URL（避免多余输出干扰）
+        let pr_url = stdout.lines().next().unwrap_or(&stdout).to_string();
+        info!("PR 创建成功: {}", pr_url);
+
+        Ok(pr_url)
     }
 
     /// 读取工作区差异

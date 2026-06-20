@@ -361,84 +361,33 @@ impl ProjectionRepository for SqliteProjectionRepository {
 
     /// 从数据库获取线程
     ///
+    /// 查询线程的完整字段（与 `save_thread` 写入的字段一一对应），
+    /// 确保读取后的 Thread 对象不丢失任何已持久化的状态。
+    ///
     /// 实现步骤：
-    /// 1. 执行 SELECT 查询（仅查询基础字段，不包含所有嵌套数据）
+    /// 1. 执行 SELECT 查询，覆盖全部 31 个字段
     /// 2. 将数据库行映射为 Thread 对象
-    /// 3. 反序列化 JSON 字段
-    /// 4. 对于未查询的字段，设置为默认值（None 或 false）
+    /// 3. 反序列化 JSON 字段（model_selection、messages、plans 等）
+    /// 4. 解析时间戳字符串为 DateTime 对象
     fn get_thread(&self, id: ThreadId) -> PersistenceResult<Option<Thread>> {
         let rows = self.client.query_map(
             "SELECT id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
-                    branch, worktree_path, is_pinned, messages, proposed_plans, activities, checkpoints,
-                    session, created_at, updated_at
+                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
+                    latest_user_message_at, has_pending_approvals, has_pending_user_input,
+                    has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
+                    session, created_at, updated_at, archived_at, deleted_at, handoff
              FROM projection_threads WHERE id = ?1",
             &[&id.to_string()],
-            |row| {
-                // 从数据库行提取各字段
-                let id_str: String = row.get(0)?;
-                let project_id_str: String = row.get(1)?;
-                let title: String = row.get(2)?;
-                let model_json: String = row.get(3)?;
-                let runtime_mode_str: String = row.get(4)?;
-                let interaction_mode_str: String = row.get(5)?;
-                let env_mode_str: String = row.get(6)?;
-                let branch: Option<String> = row.get(7)?;
-                let worktree_path: Option<String> = row.get(8)?;
-                let is_pinned: i32 = row.get(9)?;
-                let messages_json: String = row.get(10)?;
-                let plans_json: String = row.get(11)?;
-                let activities_json: String = row.get(12)?;
-                let checkpoints_json: String = row.get(13)?;
-                let session_json: Option<String> = row.get(14)?;
-                let created_at_str: String = row.get(15)?;
-                let updated_at_str: String = row.get(16)?;
-
-                Ok((id_str, project_id_str, title, model_json, runtime_mode_str, interaction_mode_str, env_mode_str, branch, worktree_path, is_pinned, messages_json, plans_json, activities_json, checkpoints_json, session_json, created_at_str, updated_at_str))
-            },
+            row_to_thread,
         )?;
 
-        // 如果没有查询到结果，返回 None
         if rows.is_empty() {
             return Ok(None);
         }
 
-        let row = &rows[0];
-        // 构造 Thread 对象
-        let thread = Thread {
-            id: row.0.parse().map_err(|e| crate::error::PersistenceError::SerializationError(format!("UUID 解析错误: {}", e)))?,
-            project_id: row.1.parse().map_err(|e| crate::error::PersistenceError::SerializationError(format!("UUID 解析错误: {}", e)))?,
-            title: row.2.clone(),
-            model_selection: serde_json::from_str(&row.3)?,
-            runtime_mode: serde_json::from_str(&row.4)?,
-            interaction_mode: serde_json::from_str(&row.5)?,
-            env_mode: serde_json::from_str(&row.6)?,
-            branch: row.7.clone(),
-            worktree_path: row.8.clone(),
-            associated_worktree: None,
-            is_pinned: row.9 != 0,
-            parent_thread_id: None,
-            subagent: None,
-            fork_source_thread_id: None,
-            sidechat_source_thread_id: None,
-            last_known_pr: None,
-            latest_turn: None,
-            latest_user_message_at: None,
-            has_pending_approvals: false,
-            has_pending_user_input: false,
-            has_actionable_proposed_plan: false,
-            messages: serde_json::from_str(&row.10)?,
-            proposed_plans: serde_json::from_str(&row.11)?,
-            activities: serde_json::from_str(&row.12)?,
-            checkpoints: serde_json::from_str(&row.13)?,
-            session: row.14.as_ref().map(|s| serde_json::from_str(s)).transpose()?,
-            created_at: row.15.parse().map_err(|e| crate::error::PersistenceError::SerializationError(format!("日期解析错误: {}", e)))?,
-            updated_at: row.16.parse().map_err(|e| crate::error::PersistenceError::SerializationError(format!("日期解析错误: {}", e)))?,
-            archived_at: None,
-            deleted_at: None,
-            handoff: None,
-        };
-
-        Ok(Some(thread))
+        // query_map 已收集所有行，取第一行即可
+        Ok(Some(rows.into_iter().next().unwrap()))
     }
 
     /// 列出所有未被软删除的项目
@@ -483,73 +432,27 @@ impl ProjectionRepository for SqliteProjectionRepository {
 
     /// 列出所有未被软删除的线程
     ///
+    /// 查询线程的完整字段（与 `save_thread` 写入的字段一一对应），
+    /// 确保读取后的 Thread 对象不丢失任何已持久化的状态。
+    ///
     /// 实现步骤：
-    /// 1. 执行 SELECT 查询，过滤条件为 `deleted_at IS NULL`
+    /// 1. 执行 SELECT 查询，过滤条件为 `deleted_at IS NULL`，覆盖全部 31 个字段
     /// 2. 按创建时间倒序排列
     /// 3. 将每行数据映射为 Thread 对象
     fn list_threads(&self) -> PersistenceResult<Vec<Thread>> {
         let rows = self.client.query_map(
             "SELECT id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
-                    branch, worktree_path, is_pinned, messages, proposed_plans, activities, checkpoints,
-                    session, created_at, updated_at
+                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
+                    latest_user_message_at, has_pending_approvals, has_pending_user_input,
+                    has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
+                    session, created_at, updated_at, archived_at, deleted_at, handoff
              FROM projection_threads WHERE deleted_at IS NULL ORDER BY created_at DESC",
             &[],
-            |row| {
-                // 从数据库行提取并构造 Thread 对象
-                let id_str: String = row.get(0)?;
-                let project_id_str: String = row.get(1)?;
-                let title: String = row.get(2)?;
-                let model_json: String = row.get(3)?;
-                let runtime_mode_str: String = row.get(4)?;
-                let interaction_mode_str: String = row.get(5)?;
-                let env_mode_str: String = row.get(6)?;
-                let branch: Option<String> = row.get(7)?;
-                let worktree_path: Option<String> = row.get(8)?;
-                let is_pinned: i32 = row.get(9)?;
-                let messages_json: String = row.get(10)?;
-                let plans_json: String = row.get(11)?;
-                let activities_json: String = row.get(12)?;
-                let checkpoints_json: String = row.get(13)?;
-                let session_json: Option<String> = row.get(14)?;
-                let created_at_str: String = row.get(15)?;
-                let updated_at_str: String = row.get(16)?;
-
-                Ok(Thread {
-                    id: id_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    project_id: project_id_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    title,
-                    model_selection: serde_json::from_str(&model_json).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    runtime_mode: serde_json::from_str(&runtime_mode_str).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    interaction_mode: serde_json::from_str(&interaction_mode_str).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    env_mode: serde_json::from_str(&env_mode_str).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    branch,
-                    worktree_path,
-                    associated_worktree: None,
-                    is_pinned: is_pinned != 0,
-                    parent_thread_id: None,
-                    subagent: None,
-                    fork_source_thread_id: None,
-                    sidechat_source_thread_id: None,
-                    last_known_pr: None,
-                    latest_turn: None,
-                    latest_user_message_at: None,
-                    has_pending_approvals: false,
-                    has_pending_user_input: false,
-                    has_actionable_proposed_plan: false,
-                    messages: serde_json::from_str(&messages_json).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    proposed_plans: serde_json::from_str(&plans_json).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    activities: serde_json::from_str(&activities_json).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    checkpoints: serde_json::from_str(&checkpoints_json).map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    session: session_json.as_ref().map(|s| serde_json::from_str(s)).transpose().map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    created_at: created_at_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    updated_at: updated_at_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(0))?,
-                    archived_at: None,
-                    deleted_at: None,
-                    handoff: None,
-                })
-            },
+            row_to_thread,
         )?;
 
+        // query_map 已收集所有行并处理错误
         Ok(rows)
     }
 
@@ -600,6 +503,187 @@ impl ProjectionRepository for SqliteProjectionRepository {
         )?;
         Ok(())
     }
+}
+
+/// 将数据库行映射为 Thread 对象
+///
+/// 此函数查询结果的列顺序必须与 `save_thread` 中的 INSERT 语句字段顺序一致，
+/// 共 31 个字段。所有 JSON 字段都会被反序列化为对应的 Rust 类型。
+///
+/// # 列顺序
+///
+/// 0. id, 1. project_id, 2. title, 3. model_selection, 4. runtime_mode,
+/// 5. interaction_mode, 6. env_mode, 7. branch, 8. worktree_path,
+/// 9. associated_worktree, 10. is_pinned, 11. parent_thread_id, 12. subagent,
+/// 13. fork_source_thread_id, 14. sidechat_source_thread_id, 15. last_known_pr,
+/// 16. latest_turn, 17. latest_user_message_at, 18. has_pending_approvals,
+/// 19. has_pending_user_input, 20. has_actionable_proposed_plan, 21. messages,
+/// 22. proposed_plans, 23. activities, 24. checkpoints, 25. session,
+/// 26. created_at, 27. updated_at, 28. archived_at, 29. deleted_at, 30. handoff
+fn row_to_thread(row: &rusqlite::Row<'_>) -> rusqlite::Result<Thread> {
+    // 提取所有基础字段
+    let id_str: String = row.get(0)?;
+    let project_id_str: String = row.get(1)?;
+    let title: String = row.get(2)?;
+    let model_json: String = row.get(3)?;
+    let runtime_mode_str: String = row.get(4)?;
+    let interaction_mode_str: String = row.get(5)?;
+    let env_mode_str: String = row.get(6)?;
+    let branch: Option<String> = row.get(7)?;
+    let worktree_path: Option<String> = row.get(8)?;
+    let worktree_json: Option<String> = row.get(9)?;
+    let is_pinned: i32 = row.get(10)?;
+    let parent_thread_id_str: Option<String> = row.get(11)?;
+    let subagent_json: Option<String> = row.get(12)?;
+    let fork_source_thread_id_str: Option<String> = row.get(13)?;
+    let sidechat_source_thread_id_str: Option<String> = row.get(14)?;
+    let pr_json: Option<String> = row.get(15)?;
+    let turn_json: Option<String> = row.get(16)?;
+    let latest_user_message_at_str: Option<String> = row.get(17)?;
+    let has_pending_approvals: i32 = row.get(18)?;
+    let has_pending_user_input: i32 = row.get(19)?;
+    let has_actionable_proposed_plan: i32 = row.get(20)?;
+    let messages_json: String = row.get(21)?;
+    let plans_json: String = row.get(22)?;
+    let activities_json: String = row.get(23)?;
+    let checkpoints_json: String = row.get(24)?;
+    let session_json: Option<String> = row.get(25)?;
+    let created_at_str: String = row.get(26)?;
+    let updated_at_str: String = row.get(27)?;
+    let archived_at_str: Option<String> = row.get(28)?;
+    let deleted_at_str: Option<String> = row.get(29)?;
+    let handoff_json: Option<String> = row.get(30)?;
+
+    // 辅助闭包：将 serde_json::Error 转换为 rusqlite::Error
+    let json_err = |e: serde_json::Error| {
+        rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            Box::new(e),
+        )
+    };
+    // 辅助闭包：将 chrono::ParseError 转换为 rusqlite::Error
+    let date_err = |e: chrono::ParseError| {
+        rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            Box::new(e),
+        )
+    };
+    // 辅助闭包：将 UUID 解析错误转换为 rusqlite::Error
+    let uuid_err = |e: uuid::Error| {
+        rusqlite::Error::FromSqlConversionFailure(
+            0,
+            rusqlite::types::Type::Text,
+            Box::new(e),
+        )
+    };
+
+    // 解析 UUID 字段
+    let id = id_str.parse::<uuid::Uuid>().map_err(uuid_err)?;
+    let project_id = project_id_str.parse::<uuid::Uuid>().map_err(uuid_err)?;
+    let parent_thread_id = parent_thread_id_str
+        .map(|s| s.parse::<uuid::Uuid>())
+        .transpose()
+        .map_err(uuid_err)?;
+    let fork_source_thread_id = fork_source_thread_id_str
+        .map(|s| s.parse::<uuid::Uuid>())
+        .transpose()
+        .map_err(uuid_err)?;
+    let sidechat_source_thread_id = sidechat_source_thread_id_str
+        .map(|s| s.parse::<uuid::Uuid>())
+        .transpose()
+        .map_err(uuid_err)?;
+
+    // 反序列化 JSON 字段
+    let model_selection = serde_json::from_str(&model_json).map_err(json_err)?;
+    let runtime_mode = serde_json::from_str(&runtime_mode_str).map_err(json_err)?;
+    let interaction_mode = serde_json::from_str(&interaction_mode_str).map_err(json_err)?;
+    let env_mode = serde_json::from_str(&env_mode_str).map_err(json_err)?;
+    let associated_worktree = worktree_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+    let subagent = subagent_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+    let last_known_pr = pr_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+    let latest_turn = turn_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+    let messages = serde_json::from_str(&messages_json).map_err(json_err)?;
+    let proposed_plans = serde_json::from_str(&plans_json).map_err(json_err)?;
+    let activities = serde_json::from_str(&activities_json).map_err(json_err)?;
+    let checkpoints = serde_json::from_str(&checkpoints_json).map_err(json_err)?;
+    let session = session_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+    let handoff = handoff_json
+        .as_ref()
+        .map(|s| serde_json::from_str(s))
+        .transpose()
+        .map_err(json_err)?;
+
+    // 解析时间戳字段
+    let created_at = created_at_str.parse().map_err(date_err)?;
+    let updated_at = updated_at_str.parse().map_err(date_err)?;
+    let latest_user_message_at = latest_user_message_at_str
+        .map(|s| s.parse())
+        .transpose()
+        .map_err(date_err)?;
+    let archived_at = archived_at_str
+        .map(|s| s.parse())
+        .transpose()
+        .map_err(date_err)?;
+    let deleted_at = deleted_at_str
+        .map(|s| s.parse())
+        .transpose()
+        .map_err(date_err)?;
+
+    Ok(Thread {
+        id,
+        project_id,
+        title,
+        model_selection,
+        runtime_mode,
+        interaction_mode,
+        env_mode,
+        branch,
+        worktree_path,
+        associated_worktree,
+        is_pinned: is_pinned != 0,
+        parent_thread_id,
+        subagent,
+        fork_source_thread_id,
+        sidechat_source_thread_id,
+        last_known_pr,
+        latest_turn,
+        latest_user_message_at,
+        has_pending_approvals: has_pending_approvals != 0,
+        has_pending_user_input: has_pending_user_input != 0,
+        has_actionable_proposed_plan: has_actionable_proposed_plan != 0,
+        messages,
+        proposed_plans,
+        activities,
+        checkpoints,
+        session,
+        created_at,
+        updated_at,
+        archived_at,
+        deleted_at,
+        handoff,
+    })
 }
 
 #[cfg(test)]

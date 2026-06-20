@@ -54,6 +54,7 @@
 
 use std::path::{Path, PathBuf};
 
+use serde::{Deserialize, Serialize};
 use tokio::fs;
 use tracing::{debug, info};
 
@@ -115,7 +116,7 @@ pub struct WriteFileInput {
 /// - 确认文件写入是否成功
 /// - 获取写入的文件路径和大小信息
 /// - 区分是新建文件还是覆盖现有文件
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WriteFileResult {
     /// 写入的文件的绝对路径
     pub absolute_path: String,

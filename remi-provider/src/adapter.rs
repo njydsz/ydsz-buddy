@@ -82,6 +82,7 @@ use remi_core::provider::{
     ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
     ProviderTurnStartResult, TurnInput,
 };
+use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
 
 use crate::error::ProviderResult;
@@ -99,7 +100,7 @@ use crate::error::ProviderResult;
 /// - `supports_native_slash_command_discovery`: 是否支持原生命令发现（/command 形式）
 /// - `supports_runtime_model_list`: 是否支持运行时获取可用模型列表
 /// - `supports_turn_steering`: 是否支持 Turn 转向（在运行中重定向对话方向）
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderCapabilities {
     /// 会话中模型切换模式，决定切换模型时是否需要重启会话
     pub session_model_switch: SessionModelSwitchMode,
@@ -134,7 +135,7 @@ pub struct ProviderCapabilities {
 ///
 /// 定义了在会话进行中切换 AI 模型时的行为模式，
 /// 不同 Provider 对模型切换的支持程度不同。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SessionModelSwitchMode {
     /// 会话内直接切换
     ///

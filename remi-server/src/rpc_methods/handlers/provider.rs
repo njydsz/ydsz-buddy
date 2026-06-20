@@ -20,10 +20,10 @@ pub async fn register_provider_methods(
     // provider.listProviders
     let provider_service = services.provider_service.clone();
     router
-        .register("provider.listProviders", move |_params| {
+        .register("provider.listProviders", move |_params: Option<Value>| {
             let provider_service = provider_service.clone();
             async move {
-                let providers = provider_service.list_providers().await;
+                let providers = provider_service.list_providers().await?;
                 serde_json::to_value(providers)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -33,7 +33,7 @@ pub async fn register_provider_methods(
     // provider.getCapabilities
     let provider_service = services.provider_service.clone();
     router
-        .register("provider.getCapabilities", move |params| {
+        .register("provider.getCapabilities", move |params: Option<Value>| {
             let provider_service = provider_service.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -47,8 +47,7 @@ pub async fn register_provider_methods(
                         crate::error::ServerError::InvalidParams("Missing provider".to_string())
                     })?;
 
-                let provider: ProviderKind = provider_str
-                    .parse()
+                let provider: ProviderKind = serde_json::from_str(provider_str)
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
                 let capabilities = provider_service.get_capabilities(provider).await?;
@@ -61,7 +60,7 @@ pub async fn register_provider_methods(
     // provider.listModels
     let provider_service = services.provider_service.clone();
     router
-        .register("provider.listModels", move |params| {
+        .register("provider.listModels", move |params: Option<Value>| {
             let provider_service = provider_service.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -75,8 +74,7 @@ pub async fn register_provider_methods(
                         crate::error::ServerError::InvalidParams("Missing provider".to_string())
                     })?;
 
-                let provider: ProviderKind = provider_str
-                    .parse()
+                let provider: ProviderKind = serde_json::from_str(provider_str)
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
                 let models = provider_service.list_models(provider).await?;
@@ -89,7 +87,7 @@ pub async fn register_provider_methods(
     // provider.listAgents
     let provider_service = services.provider_service.clone();
     router
-        .register("provider.listAgents", move |params| {
+        .register("provider.listAgents", move |params: Option<Value>| {
             let provider_service = provider_service.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -103,8 +101,7 @@ pub async fn register_provider_methods(
                         crate::error::ServerError::InvalidParams("Missing provider".to_string())
                     })?;
 
-                let provider: ProviderKind = provider_str
-                    .parse()
+                let provider: ProviderKind = serde_json::from_str(provider_str)
                     .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
 
                 let agents = provider_service.list_agents(provider).await?;
@@ -117,7 +114,7 @@ pub async fn register_provider_methods(
     // provider.refreshProviders
     let provider_service = services.provider_service.clone();
     router
-        .register("provider.refreshProviders", move |_params| {
+        .register("provider.refreshProviders", move |_params: Option<Value>| {
             let provider_service = provider_service.clone();
             async move {
                 provider_service.refresh_providers().await?;

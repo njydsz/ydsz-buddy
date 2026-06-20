@@ -90,11 +90,13 @@ use remi_core::provider::{
     ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
     ProviderTurnStartResult, TurnInput,
 };
+use serde_json::{json, Value};
 use tokio::sync::{broadcast, RwLock};
 use tracing::{info, warn};
 
 use crate::adapter::ProviderAdapter;
 use crate::error::{ProviderError, ProviderResult};
+use crate::health::ProviderHealth;
 
 /// Provider 服务
 ///
@@ -139,6 +141,11 @@ pub struct ProviderService {
     /// 用于广播 Provider 运行时事件，支持多个订阅者。
     /// 通道容量为 10000，足以应对高并发场景。
     event_tx: broadcast::Sender<ProviderRuntimeEvent>,
+
+    /// 健康检查服务
+    ///
+    /// 用于检查和缓存 Provider 的健康状态，支持批量检查和缓存查询。
+    health: ProviderHealth,
 }
 
 impl ProviderService {
@@ -162,6 +169,7 @@ impl ProviderService {
         Self {
             adapters: Arc::new(RwLock::new(HashMap::new())),
             event_tx,
+            health: ProviderHealth::new(),
         }
     }
 
@@ -431,17 +439,36 @@ impl ProviderService {
     /// 列出所有已知的 Provider 状态
     ///
     /// 遍历所有已注册的 Provider 类型，返回它们的状态快照。
+    /// 优先返回缓存的健康状态，若缓存不存在则触发一次健康检查。
     ///
     /// # 返回值
     ///
-    /// - `Ok(Vec<ProviderStatus>)`: Provider 状态列表
+    /// - `Ok(Vec<ProviderHealthStatus>)`: Provider 状态列表
     /// - `Err(ProviderError)`: 查询失败
     pub async fn list_providers(&self) -> ProviderResult<Vec<crate::health::ProviderHealthStatus>> {
-        // TODO: 实现完整的 Provider 状态查询
-        Ok(vec![])
+        let adapters = self.adapters.read().await;
+        let mut kinds: Vec<ProviderKind> = adapters.keys().copied().collect();
+        // 保证返回顺序稳定，便于前端渲染和测试
+        kinds.sort_by_key(|k| format!("{}", k));
+        drop(adapters);
+
+        // 优先返回缓存状态，缺失的触发一次检查
+        let mut statuses = Vec::with_capacity(kinds.len());
+        for kind in kinds {
+            if let Some(cached) = self.health.get_cached_status(kind).await {
+                statuses.push(cached);
+            } else {
+                let status = self.health.check_health(kind).await?;
+                statuses.push(status);
+            }
+        }
+        Ok(statuses)
     }
 
     /// 列出指定 Provider 支持的模型
+    ///
+    /// 返回指定 Provider 支持的模型静态目录。
+    /// 当前实现基于内置目录，后续可扩展为通过适配器动态查询。
     ///
     /// # 参数
     ///
@@ -451,12 +478,14 @@ impl ProviderService {
     ///
     /// - `Ok(Vec<serde_json::Value>)`: 模型列表
     /// - `Err(ProviderError)`: 查询失败
-    pub async fn list_models(&self, _provider: ProviderKind) -> ProviderResult<Vec<serde_json::Value>> {
-        // TODO: 通过适配器获取模型列表
-        Ok(vec![])
+    pub async fn list_models(&self, provider: ProviderKind) -> ProviderResult<Vec<Value>> {
+        Ok(static_models_for(provider))
     }
 
     /// 列出指定 Provider 支持的 Agent
+    ///
+    /// 返回指定 Provider 支持的 Agent 静态目录。
+    /// 当前实现基于内置目录，后续可扩展为通过适配器动态查询。
     ///
     /// # 参数
     ///
@@ -466,19 +495,37 @@ impl ProviderService {
     ///
     /// - `Ok(Vec<serde_json::Value>)`: Agent 列表
     /// - `Err(ProviderError)`: 查询失败
-    pub async fn list_agents(&self, _provider: ProviderKind) -> ProviderResult<Vec<serde_json::Value>> {
-        // TODO: 通过适配器获取 Agent 列表
-        Ok(vec![])
+    pub async fn list_agents(&self, provider: ProviderKind) -> ProviderResult<Vec<Value>> {
+        Ok(static_agents_for(provider))
     }
 
     /// 刷新所有 Provider 的状态
+    ///
+    /// 对所有已注册的 Provider 执行健康检查并更新缓存。
+    /// 单个 Provider 检查失败不会中断整体刷新流程。
     ///
     /// # 返回值
     ///
     /// - `Ok(())`: 刷新成功
     /// - `Err(ProviderError)`: 刷新失败
     pub async fn refresh_providers(&self) -> ProviderResult<()> {
-        // TODO: 实现 Provider 状态刷新
+        let adapters = self.adapters.read().await;
+        let kinds: Vec<ProviderKind> = adapters.keys().copied().collect();
+        drop(adapters);
+
+        if kinds.is_empty() {
+            info!("刷新 Provider 状态：当前无已注册适配器");
+            return Ok(());
+        }
+
+        info!("刷新 {} 个 Provider 的健康状态", kinds.len());
+        let statuses = self.health.check_all_health(&kinds).await;
+        let available = statuses.iter().filter(|s| s.available).count();
+        info!(
+            "Provider 健康状态刷新完成：可用 {}/{}",
+            available,
+            statuses.len()
+        );
         Ok(())
     }
 
@@ -527,5 +574,196 @@ impl Default for ProviderService {
     /// 默认实现，等同于 `new()`
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// 返回指定 Provider 的静态模型目录
+///
+/// 基于 ProviderKind 返回该 Provider 常用的模型列表。
+/// 此目录为内置静态数据，不依赖运行时查询，适用于：
+/// - 前端模型选择器初始化
+/// - 未启动会话时的模型预览
+/// - 适配器未注册时的降级展示
+fn static_models_for(provider: ProviderKind) -> Vec<Value> {
+    match provider {
+        ProviderKind::ClaudeAgent => vec![
+            json!({
+                "id": "claude-sonnet-4-5",
+                "name": "Claude Sonnet 4.5",
+                "provider": "claudeAgent",
+                "contextWindow": 200_000,
+                "description": "Anthropic 旗舰模型，擅长代码生成与复杂推理"
+            }),
+            json!({
+                "id": "claude-opus-4-1",
+                "name": "Claude Opus 4.1",
+                "provider": "claudeAgent",
+                "contextWindow": 200_000,
+                "description": "Anthropic 高端模型，适合长上下文与高精度任务"
+            }),
+            json!({
+                "id": "claude-haiku-4",
+                "name": "Claude Haiku 4",
+                "provider": "claudeAgent",
+                "contextWindow": 200_000,
+                "description": "Anthropic 轻量模型，响应快速、成本更低"
+            }),
+        ],
+        ProviderKind::Codex => vec![
+            json!({
+                "id": "gpt-5",
+                "name": "GPT-5",
+                "provider": "codex",
+                "contextWindow": 200_000,
+                "description": "OpenAI 旗舰模型，多模态能力强"
+            }),
+            json!({
+                "id": "gpt-5-mini",
+                "name": "GPT-5 Mini",
+                "provider": "codex",
+                "contextWindow": 128_000,
+                "description": "OpenAI 轻量模型，适合常规任务"
+            }),
+            json!({
+                "id": "o3",
+                "name": "o3",
+                "provider": "codex",
+                "contextWindow": 200_000,
+                "description": "OpenAI 推理增强模型，适合复杂逻辑任务"
+            }),
+        ],
+        ProviderKind::Cursor => vec![
+            json!({
+                "id": "cursor-default",
+                "name": "Cursor Default",
+                "provider": "cursor",
+                "contextWindow": 128_000,
+                "description": "Cursor 默认模型"
+            }),
+            json!({
+                "id": "cursor-small",
+                "name": "Cursor Small",
+                "provider": "cursor",
+                "contextWindow": 128_000,
+                "description": "Cursor 轻量模型"
+            }),
+        ],
+        ProviderKind::Gemini => vec![
+            json!({
+                "id": "gemini-2-5-pro",
+                "name": "Gemini 2.5 Pro",
+                "provider": "gemini",
+                "contextWindow": 2_000_000,
+                "description": "Google 旗舰模型，超长上下文"
+            }),
+            json!({
+                "id": "gemini-2-5-flash",
+                "name": "Gemini 2.5 Flash",
+                "provider": "gemini",
+                "contextWindow": 1_000_000,
+                "description": "Google 轻量模型，响应快速"
+            }),
+        ],
+        ProviderKind::Grok => vec![
+            json!({
+                "id": "grok-4",
+                "name": "Grok 4",
+                "provider": "grok",
+                "contextWindow": 256_000,
+                "description": "xAI 旗舰模型"
+            }),
+            json!({
+                "id": "grok-4-fast",
+                "name": "Grok 4 Fast",
+                "provider": "grok",
+                "contextWindow": 128_000,
+                "description": "xAI 快速响应模型"
+            }),
+        ],
+        ProviderKind::Kilo => vec![
+            json!({
+                "id": "kilo-code",
+                "name": "Kilo Code",
+                "provider": "kilo",
+                "contextWindow": 128_000,
+                "description": "Kilo AI 代码模型"
+            }),
+        ],
+        ProviderKind::OpenCode => vec![
+            json!({
+                "id": "opencode-default",
+                "name": "OpenCode Default",
+                "provider": "opencode",
+                "contextWindow": 128_000,
+                "description": "OpenCode 默认模型"
+            }),
+        ],
+        ProviderKind::Pi => vec![
+            json!({
+                "id": "pi-default",
+                "name": "Pi Default",
+                "provider": "pi",
+                "contextWindow": 32_000,
+                "description": "Inflection Pi 对话模型"
+            }),
+        ],
+    }
+}
+
+/// 返回指定 Provider 的静态 Agent 目录
+///
+/// 基于 ProviderKind 返回该 Provider 支持的 Agent 列表。
+/// Agent 是 Provider 提供的预设角色，包含特定的系统提示词和工具配置。
+fn static_agents_for(provider: ProviderKind) -> Vec<Value> {
+    match provider {
+        ProviderKind::ClaudeAgent => vec![
+            json!({
+                "id": "claude-software-engineer",
+                "name": "Software Engineer",
+                "provider": "claudeAgent",
+                "description": "通用软件工程 Agent，擅长代码编写、调试、重构"
+            }),
+            json!({
+                "id": "claude-code-reviewer",
+                "name": "Code Reviewer",
+                "provider": "claudeAgent",
+                "description": "代码审查 Agent，专注代码质量与最佳实践"
+            }),
+        ],
+        ProviderKind::Codex => vec![
+            json!({
+                "id": "codex-assistant",
+                "name": "Codex Assistant",
+                "provider": "codex",
+                "description": "OpenAI Codex 通用助手"
+            }),
+        ],
+        ProviderKind::Cursor => vec![
+            json!({
+                "id": "cursor-assistant",
+                "name": "Cursor Assistant",
+                "provider": "cursor",
+                "description": "Cursor 内置助手"
+            }),
+        ],
+        ProviderKind::Gemini => vec![
+            json!({
+                "id": "gemini-assistant",
+                "name": "Gemini Assistant",
+                "provider": "gemini",
+                "description": "Gemini 通用助手"
+            }),
+        ],
+        ProviderKind::Grok => vec![
+            json!({
+                "id": "grok-assistant",
+                "name": "Grok Assistant",
+                "provider": "grok",
+                "description": "Grok 通用助手"
+            }),
+        ],
+        ProviderKind::Kilo => vec![],
+        ProviderKind::OpenCode => vec![],
+        ProviderKind::Pi => vec![],
     }
 }

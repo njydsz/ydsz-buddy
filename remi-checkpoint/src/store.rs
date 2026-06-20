@@ -49,7 +49,6 @@ use remi_persistence::{CheckpointStore as CheckpointStoreTrait, SqliteCheckpoint
 use tracing::{debug, info};
 
 use crate::error::{CheckpointError, CheckpointResult};
-
 /// # 检查点存储服务
 ///
 /// 负责检查点（Checkpoint）的完整生命周期管理，包括创建、查询、列举、删除和回滚。
@@ -137,7 +136,7 @@ impl CheckpointStore {
     ///
     /// ## 实现状态
     ///
-    /// > ⚠️ **TODO**：当前仅在内存中构造检查点对象，尚未持久化到数据库。
+    /// ✅ 已完成数据库持久化实现，检查点会通过 [`SqliteCheckpointStore`] 写入 SQLite。
     pub async fn create_checkpoint(
         &self,
         thread_id: ThreadId,
@@ -156,8 +155,11 @@ impl CheckpointStore {
             created_at: Utc::now(),
         };
 
-        // TODO: 持久化到数据库
-        debug!("检查点已创建: {:?}", checkpoint);
+        // 持久化到数据库
+        self.checkpoint_store
+            .save_checkpoint(&checkpoint)
+            .map_err(|e| CheckpointError::DatabaseError(e.to_string()))?;
+        debug!("检查点已持久化: id={}", checkpoint.id);
 
         Ok(checkpoint)
     }
@@ -180,12 +182,13 @@ impl CheckpointStore {
     ///
     /// ## 实现状态
     ///
-    /// > ⚠️ **TODO**：当前为桩实现，始终返回 `None`。需接入数据库查询。
+    /// ✅ 已接入 [`SqliteCheckpointStore`] 进行数据库查询。
     pub async fn get_checkpoint(&self, checkpoint_id: String) -> CheckpointResult<Option<Checkpoint>> {
         debug!("获取检查点: {}", checkpoint_id);
 
-        // TODO: 从数据库查询
-        Ok(None)
+        self.checkpoint_store
+            .get_checkpoint(&checkpoint_id)
+            .map_err(|e| CheckpointError::DatabaseError(e.to_string()))
     }
 
     /// # 列举线程的所有检查点
@@ -211,12 +214,13 @@ impl CheckpointStore {
     ///
     /// ## 实现状态
     ///
-    /// > ⚠️ **TODO**：当前为桩实现，始终返回空列表。需接入数据库查询。
+    /// ✅ 已接入 [`SqliteCheckpointStore`] 进行数据库查询。
     pub async fn list_checkpoints(&self, thread_id: ThreadId) -> CheckpointResult<Vec<Checkpoint>> {
         debug!("列出检查点: thread_id={}", thread_id);
 
-        // TODO: 从数据库查询
-        Ok(vec![])
+        self.checkpoint_store
+            .list_checkpoints(thread_id)
+            .map_err(|e| CheckpointError::DatabaseError(e.to_string()))
     }
 
     /// # 删除检查点
@@ -241,12 +245,13 @@ impl CheckpointStore {
     ///
     /// ## 实现状态
     ///
-    /// > ⚠️ **TODO**：当前为桩实现，未执行实际删除。需接入数据库删除操作。
+    /// ✅ 已接入 [`SqliteCheckpointStore`] 进行数据库删除。
     pub async fn delete_checkpoint(&self, checkpoint_id: String) -> CheckpointResult<()> {
         info!("删除检查点: {}", checkpoint_id);
 
-        // TODO: 从数据库删除
-        Ok(())
+        self.checkpoint_store
+            .delete_checkpoint(&checkpoint_id)
+            .map_err(|e| CheckpointError::DatabaseError(e.to_string()))
     }
 
     /// # 回滚到指定检查点

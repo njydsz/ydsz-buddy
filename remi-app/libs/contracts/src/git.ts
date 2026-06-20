@@ -145,6 +145,12 @@ export interface GitRunStackedActionInput {
   codexHomePath?: TrimmedNonEmptyString;
   providerOptions?: ProviderStartOptions;
   textGenerationModel?: TrimmedNonEmptyString;
+  /** PR 标题（未指定时使用 commitMessage） */
+  prTitle?: TrimmedNonEmptyString;
+  /** PR 描述 */
+  prBody?: string;
+  /** PR 目标分支（未指定时使用仓库默认分支） */
+  prBase?: TrimmedNonEmptyString;
 }
 
 /** Git 列出分支输入：指定工作目录 */

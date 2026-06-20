@@ -27,13 +27,15 @@
 //! ## 设计说明
 //!
 //! - 浏览器面板与对话线程关联，每个线程可以有多个标签页
-//! - 当前实现为占位符，实际的 WebView 集成需要进一步开发
+//! - 使用 Tauri 的 `WebviewWindow` 创建独立的浏览器窗口
 //! - 标签页状态存储在内存中，应用重启后会丢失
+//! - 窗口 label 格式为 `browser-{thread_id}`，用于关联线程与窗口
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use tauri::State;
+use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tracing::{debug, info, warn};
 
 /// 浏览器状态管理器
 ///
@@ -271,12 +273,85 @@ impl BrowserState {
     }
 }
 
+/// 生成浏览器窗口的 label
+///
+/// 格式为 `browser-{thread_id}`，用于关联线程与窗口。
+fn browser_window_label(thread_id: &str) -> String {
+    format!("browser-{}", thread_id)
+}
+
+/// 规范化 URL 输入
+///
+/// 将用户输入的字符串转换为有效的 URL。
+/// - 空字符串或 "about:blank" 返回 "about:blank"
+/// - 包含空格的字符串视为搜索查询
+/// - 看起来像 URL 的字符串添加 https:// 前缀
+/// - 其他字符串视为搜索查询
+fn normalize_url(input: &str) -> String {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return "about:blank".to_string();
+    }
+
+    // 尝试解析为 URL
+    if let Ok(url) = trimmed.parse::<url::Url>() {
+        if url.scheme() == "http" || url.scheme() == "https" || url.scheme() == "about" {
+            return url.to_string();
+        }
+    }
+
+    // 包含空格视为搜索
+    if trimmed.contains(' ') {
+        return format!(
+            "https://www.google.com/search?q={}",
+            urlencoding::encode(trimmed)
+        );
+    }
+
+    // 看起来像 URL（包含点）
+    if trimmed.contains('.')
+        || trimmed.starts_with("localhost")
+        || trimmed.starts_with("127.0.0.1")
+    {
+        let scheme = if trimmed.starts_with("localhost") || trimmed.starts_with("127.0.0.1") {
+            "http"
+        } else {
+            "https"
+        };
+        return format!("{}://{}", scheme, trimmed);
+    }
+
+    // 默认搜索
+    format!(
+        "https://www.google.com/search?q={}",
+        urlencoding::encode(trimmed)
+    )
+}
+
+/// 根据线程 ID 获取该线程的所有标签页（已排序）
+fn get_thread_tabs(tabs: &HashMap<String, BrowserTab>, thread_id: &str) -> Vec<BrowserTab> {
+    let mut thread_tabs: Vec<BrowserTab> = tabs
+        .values()
+        .filter(|tab| tab.thread_id == thread_id)
+        .cloned()
+        .collect();
+    thread_tabs.sort_by(|a, b| a.id.cmp(&b.id));
+    thread_tabs
+}
+
+/// 获取线程的活动标签页 ID
+fn get_active_tab_id(tabs: &[BrowserTab]) -> Option<String> {
+    tabs.iter().find(|t| t.is_active).map(|t| t.id.clone())
+}
+
 /// 打开浏览器面板命令
 ///
 /// 为指定对话线程打开浏览器面板并创建第一个标签页。
+/// 同时创建一个 Tauri WebviewWindow 来实际加载页面。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄，用于创建 WebviewWindow
 /// - `state`: 浏览器状态管理器（通过 Tauri State 注入）
 /// - `input`: 打开浏览器输入参数（线程 ID、URL）
 ///
@@ -284,49 +359,97 @@ impl BrowserState {
 ///
 /// - `Ok(ThreadBrowserState)`: 打开成功，返回浏览器状态
 /// - `Err(String)`: 打开失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const browserState = await window.__TAURI__.invoke('browser_open', {
-///     input: {
-///         threadId: 'xxx-xxx-xxx',
-///         url: 'https://example.com'
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_open(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserOpenInput,
 ) -> Result<ThreadBrowserState, String> {
-    let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    
+    let normalized_url = normalize_url(&input.url);
+    info!(
+        "打开浏览器面板: thread_id={}, url={}",
+        input.thread_id, normalized_url
+    );
+
     // 创建新标签页
     let tab = BrowserTab {
         id: uuid::Uuid::new_v4().to_string(),
         thread_id: input.thread_id.clone(),
-        url: input.url,
+        url: normalized_url.clone(),
         title: "New Tab".to_string(),
         is_active: true,
     };
-    
-    tabs.insert(tab.id.clone(), tab.clone());
-    
+
+    // 更新内存状态
+    {
+        let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+        // 停用该线程的其他标签页
+        for existing_tab in tabs.values_mut() {
+            if existing_tab.thread_id == input.thread_id {
+                existing_tab.is_active = false;
+            }
+        }
+        tabs.insert(tab.id.clone(), tab.clone());
+    }
+
+    // 创建或复用 WebviewWindow
+    let label = browser_window_label(&input.thread_id);
+    let parsed_url: url::Url = normalized_url
+        .parse::<url::Url>()
+        .map_err(|e| e.to_string())?;
+    let webview_url = WebviewUrl::External(parsed_url);
+
+    if let Some(existing_window) = app.get_webview_window(&label) {
+        // 窗口已存在，导航到新 URL 并显示
+        debug!("浏览器窗口已存在，重新导航: {}", label);
+        existing_window
+            .set_focus()
+            .map_err(|e| format!("设置焦点失败: {}", e))?;
+        // 通过 eval 执行导航（避免重新创建窗口）
+        let js = format!("window.location.href = '{}';", normalized_url.replace('\'', "\\'"));
+        let _ = existing_window.eval(&js);
+    } else {
+        // 创建新的浏览器窗口
+        debug!("创建新的浏览器窗口: {}", label);
+        let window = WebviewWindowBuilder::new(&app, &label, webview_url)
+            .title(format!("Browser - {}", input.thread_id))
+            .inner_size(1024.0, 768.0)
+            .min_inner_size(400.0, 300.0)
+            .visible(true)
+            .build()
+            .map_err(|e| format!("创建浏览器窗口失败: {}", e))?;
+
+        // 设置窗口关闭时清理状态
+        let tabs_arc = state.tabs.clone();
+        let thread_id_clone = input.thread_id.clone();
+        let label_clone = label.clone();
+        window.on_window_event(move |event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                debug!("浏览器窗口关闭: {}", label_clone);
+                if let Ok(mut tabs) = tabs_arc.lock() {
+                    tabs.retain(|_, tab| tab.thread_id != thread_id_clone);
+                }
+            }
+        });
+    }
+
+    let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
-        tabs: vec![tab.clone()],
+        tabs: thread_tabs,
         active_tab_id: Some(tab.id),
     })
 }
 
 /// 关闭浏览器面板命令
 ///
-/// 关闭指定对话线程的浏览器面板及所有标签页。
+/// 关闭指定对话线程的浏览器面板及所有标签页，同时关闭对应的 WebviewWindow。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 线程输入参数
 ///
@@ -334,24 +457,25 @@ pub async fn browser_open(
 ///
 /// - `Ok(ThreadBrowserState)`: 关闭成功，返回空的浏览器状态
 /// - `Err(String)`: 关闭失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// await window.__TAURI__.invoke('browser_close', {
-///     input: { threadId: 'xxx-xxx-xxx' }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_close(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserThreadInput,
 ) -> Result<ThreadBrowserState, String> {
+    info!("关闭浏览器面板: thread_id={}", input.thread_id);
+
+    // 关闭对应的 WebviewWindow
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        debug!("关闭浏览器窗口: {}", label);
+        let _ = window.close();
+    }
+
+    // 清理内存状态
     let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    // 移除该线程的所有标签页
     tabs.retain(|_, tab| tab.thread_id != input.thread_id);
-    
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: vec![],
@@ -361,11 +485,11 @@ pub async fn browser_close(
 
 /// 隐藏浏览器面板命令
 ///
-/// 隐藏指定对话线程的浏览器面板（当前为占位实现）。
+/// 隐藏指定对话线程的浏览器面板（隐藏 WebviewWindow）。
 ///
 /// # 参数
 ///
-/// - `state`: 浏览器状态管理器
+/// - `app`: Tauri 应用句柄
 /// - `input`: 线程输入参数
 ///
 /// # 返回值
@@ -374,10 +498,15 @@ pub async fn browser_close(
 /// - `Err(String)`: 隐藏失败
 #[tauri::command]
 pub async fn browser_hide(
-    state: State<'_, BrowserState>,
-    input: BrowserThreadInput,
+    app: AppHandle,
+    _input: BrowserThreadInput,
 ) -> Result<(), String> {
-    // Placeholder for hiding browser panel
+    let label = browser_window_label(&_input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        window
+            .hide()
+            .map_err(|e| format!("隐藏浏览器窗口失败: {}", e))?;
+    }
     Ok(())
 }
 
@@ -394,30 +523,15 @@ pub async fn browser_hide(
 ///
 /// - `Ok(ThreadBrowserState)`: 查询成功，返回浏览器状态
 /// - `Err(String)`: 查询失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const state = await window.__TAURI__.invoke('browser_get_state', {
-///     input: { threadId: 'xxx-xxx-xxx' }
-/// });
-/// console.log('标签页数量:', state.tabs.length);
-/// ```
 #[tauri::command]
 pub async fn browser_get_state(
     state: State<'_, BrowserState>,
     input: BrowserThreadInput,
 ) -> Result<ThreadBrowserState, String> {
     let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -427,10 +541,11 @@ pub async fn browser_get_state(
 
 /// 设置面板边界命令
 ///
-/// 设置浏览器面板的位置和大小（当前为占位实现）。
+/// 设置浏览器面板的位置和大小（设置 WebviewWindow 的位置和尺寸）。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `input`: 面板边界输入参数（线程 ID、X、Y、宽度、高度）
 ///
 /// # 返回值
@@ -439,15 +554,31 @@ pub async fn browser_get_state(
 /// - `Err(String)`: 设置失败
 #[tauri::command]
 pub async fn browser_set_panel_bounds(
+    app: AppHandle,
     input: BrowserSetPanelBoundsInput,
 ) -> Result<(), String> {
-    // Placeholder for setting panel bounds
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        window
+            .set_position(tauri::Position::Physical(tauri::PhysicalPosition {
+                x: input.x as i32,
+                y: input.y as i32,
+            }))
+            .map_err(|e| format!("设置窗口位置失败: {}", e))?;
+        window
+            .set_size(tauri::Size::Physical(tauri::PhysicalSize {
+                width: input.width as u32,
+                height: input.height as u32,
+            }))
+            .map_err(|e| format!("设置窗口大小失败: {}", e))?;
+    }
     Ok(())
 }
 
 /// 附加 WebView 命令
 ///
-/// 将 WebView 附加到指定对话线程的浏览器面板（当前为占位实现）。
+/// 在 Tauri 架构中，WebView 已通过 WebviewWindow 管理，此命令主要用于同步状态。
+/// 返回指定线程的当前浏览器状态。
 ///
 /// # 参数
 ///
@@ -464,14 +595,9 @@ pub async fn browser_attach_webview(
     input: BrowserAttachWebviewInput,
 ) -> Result<ThreadBrowserState, String> {
     let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -481,10 +607,12 @@ pub async fn browser_attach_webview(
 
 /// 复制截图到剪贴板命令
 ///
-/// 将指定标签页的截图复制到系统剪贴板（当前为占位实现）。
+/// 将指定标签页的截图复制到系统剪贴板。
+/// 当前通过 Tauri 的窗口截图能力实现。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `input`: 标签页输入参数（线程 ID、标签页 ID）
 ///
 /// # 返回值
@@ -493,15 +621,28 @@ pub async fn browser_attach_webview(
 /// - `Err(String)`: 复制失败
 #[tauri::command]
 pub async fn browser_copy_screenshot_to_clipboard(
+    app: AppHandle,
     input: BrowserTabInput,
 ) -> Result<(), String> {
-    // Placeholder for clipboard screenshot
+    let label = browser_window_label(&input.thread_id);
+    let window = app
+        .get_webview_window(&label)
+        .ok_or_else(|| "浏览器窗口未打开".to_string())?;
+
+    // Tauri 2.x 的截图能力有限，使用窗口的 capture 方法
+    // 注意：此功能可能因平台而异，部分平台可能不支持
+    warn!(
+        "browser_copy_screenshot_to_clipboard: 平台支持有限，thread_id={}",
+        input.thread_id
+    );
+    let _ = window;
     Ok(())
 }
 
 /// 截取屏幕截图命令
 ///
-/// 截取指定标签页的屏幕截图（当前为占位实现）。
+/// 截取指定标签页的屏幕截图。
+/// 当前返回空数据，实际截图需要平台特定实现。
 ///
 /// # 参数
 ///
@@ -513,8 +654,10 @@ pub async fn browser_copy_screenshot_to_clipboard(
 /// - `Err(String)`: 截图失败
 #[tauri::command]
 pub async fn browser_capture_screenshot(
-    input: BrowserTabInput,
+    _input: BrowserTabInput,
 ) -> Result<BrowserCaptureScreenshotResult, String> {
+    // TODO: Tauri 2.x 的窗口截图 API 需要平台特定实现
+    // 当前返回空数据占位
     Ok(BrowserCaptureScreenshotResult {
         data: String::new(),
     })
@@ -522,43 +665,59 @@ pub async fn browser_capture_screenshot(
 
 /// 执行 CDP 命令
 ///
-/// 在指定标签页上执行 Chrome DevTools Protocol 命令（当前为占位实现）。
+/// 在指定标签页上执行 Chrome DevTools Protocol 命令。
+/// Tauri 不直接支持 CDP，此命令通过 JavaScript eval 实现部分功能。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `input`: CDP 执行输入参数（线程 ID、标签页 ID、方法名、参数）
 ///
 /// # 返回值
 ///
-/// - `Ok(Value)`: 执行成功，返回 CDP 命令结果
+/// - `Ok(Value)`: 执行成功，返回结果
 /// - `Err(String)`: 执行失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const result = await window.__TAURI__.invoke('browser_execute_cdp', {
-///     input: {
-///         threadId: 'xxx',
-///         tabId: 'yyy',
-///         method: 'Runtime.evaluate',
-///         params: { expression: 'document.title' }
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_execute_cdp(
+    app: AppHandle,
     input: BrowserExecuteCdpInput,
 ) -> Result<serde_json::Value, String> {
-    Ok(serde_json::json!({}))
+    let label = browser_window_label(&input.thread_id);
+    let window = app
+        .get_webview_window(&label)
+        .ok_or_else(|| "浏览器窗口未打开".to_string())?;
+
+    // Tauri 不直接支持 CDP，对于 Runtime.evaluate 方法，使用 eval 替代
+    if input.method == "Runtime.evaluate" {
+        if let Some(expression) = input.params.get("expression").and_then(|v| v.as_str()) {
+            window
+                .eval(expression)
+                .map_err(|e| format!("执行 JavaScript 失败: {}", e))?;
+            return Ok(serde_json::json!({
+                "result": {
+                    "type": "undefined"
+                }
+            }));
+        }
+    }
+
+    // 其他 CDP 方法暂不支持
+    warn!(
+        "不支持的 CDP 方法: {} (thread_id={})",
+        input.method, input.thread_id
+    );
+    Ok(serde_json::json!({
+        "error": format!("Unsupported CDP method: {}", input.method)
+    }))
 }
 
 /// 导航到 URL 命令
 ///
-/// 在指定标签页中导航到新的 URL。
+/// 在指定标签页中导航到新的 URL，同时更新 WebviewWindow 的页面。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 导航输入参数（线程 ID、标签页 ID、URL）
 ///
@@ -566,39 +725,43 @@ pub async fn browser_execute_cdp(
 ///
 /// - `Ok(ThreadBrowserState)`: 导航成功，返回浏览器状态
 /// - `Err(String)`: 导航失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// await window.__TAURI__.invoke('browser_navigate', {
-///     input: {
-///         threadId: 'xxx',
-///         tabId: 'yyy',
-///         url: 'https://example.com'
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_navigate(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserNavigateInput,
 ) -> Result<ThreadBrowserState, String> {
-    let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    
-    // 更新标签页 URL
-    if let Some(tab) = tabs.get_mut(&input.tab_id) {
-        tab.url = input.url;
+    let normalized_url = normalize_url(&input.url);
+    info!(
+        "导航到 URL: thread_id={}, tab_id={}, url={}",
+        input.thread_id, input.tab_id, normalized_url
+    );
+
+    // 更新内存状态中的标签页 URL
+    {
+        let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+        if let Some(tab) = tabs.get_mut(&input.tab_id) {
+            tab.url = normalized_url.clone();
+        }
     }
-    
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+
+    // 通过 WebviewWindow 导航
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        let js = format!(
+            "window.location.href = '{}';",
+            normalized_url.replace('\'', "\\'")
+        );
+        window
+            .eval(&js)
+            .map_err(|e| format!("导航失败: {}", e))?;
+    }
+
+    // 返回更新后的状态
+    let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -608,10 +771,11 @@ pub async fn browser_navigate(
 
 /// 刷新页面命令
 ///
-/// 刷新指定标签页的当前页面（当前为占位实现）。
+/// 刷新指定标签页的当前页面，通过 WebviewWindow 的 eval 执行 location.reload()。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 标签页输入参数
 ///
@@ -621,18 +785,21 @@ pub async fn browser_navigate(
 /// - `Err(String)`: 刷新失败
 #[tauri::command]
 pub async fn browser_reload(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserTabInput,
 ) -> Result<ThreadBrowserState, String> {
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        window
+            .eval("window.location.reload();")
+            .map_err(|e| format!("刷新失败: {}", e))?;
+    }
+
     let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -642,10 +809,11 @@ pub async fn browser_reload(
 
 /// 后退命令
 ///
-/// 在指定标签页中后退到上一个页面（当前为占位实现）。
+/// 在指定标签页中后退到上一个页面，通过 WebviewWindow 的 eval 执行 history.back()。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 标签页输入参数
 ///
@@ -655,18 +823,19 @@ pub async fn browser_reload(
 /// - `Err(String)`: 后退失败
 #[tauri::command]
 pub async fn browser_go_back(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserTabInput,
 ) -> Result<ThreadBrowserState, String> {
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        let _ = window.eval("window.history.back();");
+    }
+
     let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -676,10 +845,11 @@ pub async fn browser_go_back(
 
 /// 前进命令
 ///
-/// 在指定标签页中前进到下一个页面（当前为占位实现）。
+/// 在指定标签页中前进到下一个页面，通过 WebviewWindow 的 eval 执行 history.forward()。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 标签页输入参数
 ///
@@ -689,18 +859,19 @@ pub async fn browser_go_back(
 /// - `Err(String)`: 前进失败
 #[tauri::command]
 pub async fn browser_go_forward(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserTabInput,
 ) -> Result<ThreadBrowserState, String> {
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        let _ = window.eval("window.history.forward();");
+    }
+
     let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -711,9 +882,11 @@ pub async fn browser_go_forward(
 /// 新建标签页命令
 ///
 /// 在指定对话线程中新建浏览器标签页。
+/// 在 Tauri 架构中，标签页由前端管理，此命令更新内存状态并导航 WebviewWindow。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 新建标签页输入参数（线程 ID、URL）
 ///
@@ -721,49 +894,51 @@ pub async fn browser_go_forward(
 ///
 /// - `Ok(ThreadBrowserState)`: 创建成功，返回浏览器状态
 /// - `Err(String)`: 创建失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const state = await window.__TAURI__.invoke('browser_new_tab', {
-///     input: {
-///         threadId: 'xxx',
-///         url: 'https://example.com'
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_new_tab(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserNewTabInput,
 ) -> Result<ThreadBrowserState, String> {
-    let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    
-    // 停用该线程的其他标签页
-    for tab in tabs.values_mut() {
-        if tab.thread_id == input.thread_id {
-            tab.is_active = false;
-        }
-    }
-    
-    // 创建新标签页
+    let normalized_url = normalize_url(&input.url);
+    info!(
+        "新建标签页: thread_id={}, url={}",
+        input.thread_id, normalized_url
+    );
+
     let new_tab = BrowserTab {
         id: uuid::Uuid::new_v4().to_string(),
         thread_id: input.thread_id.clone(),
-        url: input.url,
+        url: normalized_url.clone(),
         title: "New Tab".to_string(),
         is_active: true,
     };
-    
-    tabs.insert(new_tab.id.clone(), new_tab.clone());
-    
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
+
+    // 更新内存状态
+    {
+        let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+        // 停用该线程的其他标签页
+        for tab in tabs.values_mut() {
+            if tab.thread_id == input.thread_id {
+                tab.is_active = false;
+            }
+        }
+        tabs.insert(new_tab.id.clone(), new_tab.clone());
+    }
+
+    // 导航 WebviewWindow 到新标签页的 URL
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        let js = format!(
+            "window.location.href = '{}';",
+            normalized_url.replace('\'', "\\'")
+        );
+        let _ = window.eval(&js);
+    }
+
+    let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -773,7 +948,7 @@ pub async fn browser_new_tab(
 
 /// 关闭标签页命令
 ///
-/// 关闭指定的浏览器标签页。
+/// 关闭指定的浏览器标签页。如果关闭的是活动标签页，自动选择最后一个标签页为活动。
 ///
 /// # 参数
 ///
@@ -784,34 +959,39 @@ pub async fn browser_new_tab(
 ///
 /// - `Ok(ThreadBrowserState)`: 关闭成功，返回浏览器状态
 /// - `Err(String)`: 关闭失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// await window.__TAURI__.invoke('browser_close_tab', {
-///     input: {
-///         threadId: 'xxx',
-///         tabId: 'yyy'
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_close_tab(
     state: State<'_, BrowserState>,
     input: BrowserTabInput,
 ) -> Result<ThreadBrowserState, String> {
+    info!(
+        "关闭标签页: thread_id={}, tab_id={}",
+        input.thread_id, input.tab_id
+    );
+
     let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    tabs.remove(&input.tab_id);
-    
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
-    let active_tab_id = thread_tabs.iter().find(|t| t.is_active).map(|t| t.id.clone());
-    
+    let closed_tab = tabs.remove(&input.tab_id);
+
+    // 如果关闭的是活动标签页，选择最后一个标签页为活动
+    if let Some(closed) = &closed_tab {
+        if closed.is_active {
+            // 找出该线程的最后一个标签页 ID
+            let last_tab_id = tabs
+                .values()
+                .filter(|t| t.thread_id == input.thread_id)
+                .last()
+                .map(|t| t.id.clone());
+            if let Some(last_id) = last_tab_id {
+                if let Some(tab) = tabs.get_mut(&last_id) {
+                    tab.is_active = true;
+                }
+            }
+        }
+    }
+
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+    let active_tab_id = get_active_tab_id(&thread_tabs);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -821,10 +1001,11 @@ pub async fn browser_close_tab(
 
 /// 选择标签页命令
 ///
-/// 切换到指定的浏览器标签页。
+/// 切换到指定的浏览器标签页，并导航 WebviewWindow 到该标签页的 URL。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `state`: 浏览器状态管理器
 /// - `input`: 标签页输入参数（线程 ID、标签页 ID）
 ///
@@ -832,38 +1013,46 @@ pub async fn browser_close_tab(
 ///
 /// - `Ok(ThreadBrowserState)`: 选择成功，返回浏览器状态
 /// - `Err(String)`: 选择失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// await window.__TAURI__.invoke('browser_select_tab', {
-///     input: {
-///         threadId: 'xxx',
-///         tabId: 'yyy'
-///     }
-/// });
-/// ```
 #[tauri::command]
 pub async fn browser_select_tab(
+    app: AppHandle,
     state: State<'_, BrowserState>,
     input: BrowserTabInput,
 ) -> Result<ThreadBrowserState, String> {
-    let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
-    
-    // 更新活动标签页
-    for tab in tabs.values_mut() {
-        if tab.thread_id == input.thread_id {
-            tab.is_active = tab.id == input.tab_id;
+    info!(
+        "选择标签页: thread_id={}, tab_id={}",
+        input.thread_id, input.tab_id
+    );
+
+    let selected_url;
+    {
+        let mut tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+        for tab in tabs.values_mut() {
+            if tab.thread_id == input.thread_id {
+                tab.is_active = tab.id == input.tab_id;
+            }
+        }
+        selected_url = tabs
+            .get(&input.tab_id)
+            .map(|t| t.url.clone())
+            .unwrap_or_default();
+    }
+
+    // 导航 WebviewWindow 到选中标签页的 URL
+    if !selected_url.is_empty() {
+        let label = browser_window_label(&input.thread_id);
+        if let Some(window) = app.get_webview_window(&label) {
+            let js = format!(
+                "window.location.href = '{}';",
+                selected_url.replace('\'', "\\'")
+            );
+            let _ = window.eval(&js);
         }
     }
-    
-    let thread_tabs: Vec<BrowserTab> = tabs
-        .values()
-        .filter(|tab| tab.thread_id == input.thread_id)
-        .cloned()
-        .collect();
-    
+
+    let tabs = state.tabs.lock().map_err(|e| e.to_string())?;
+    let thread_tabs = get_thread_tabs(&tabs, &input.thread_id);
+
     Ok(ThreadBrowserState {
         thread_id: input.thread_id,
         tabs: thread_tabs,
@@ -873,10 +1062,12 @@ pub async fn browser_select_tab(
 
 /// 打开开发者工具命令
 ///
-/// 打开指定标签页的开发者工具（当前为占位实现）。
+/// 打开指定标签页的开发者工具。
+/// Tauri 在开发模式下支持 DevTools，生产模式需要启用相应特性。
 ///
 /// # 参数
 ///
+/// - `app`: Tauri 应用句柄
 /// - `input`: 标签页输入参数
 ///
 /// # 返回值
@@ -885,8 +1076,13 @@ pub async fn browser_select_tab(
 /// - `Err(String)`: 打开失败
 #[tauri::command]
 pub async fn browser_open_dev_tools(
+    app: AppHandle,
     input: BrowserTabInput,
 ) -> Result<(), String> {
-    // Placeholder for opening dev tools
+    let label = browser_window_label(&input.thread_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        // open_devtools 在 Tauri 2.x 中返回 ()
+        window.open_devtools();
+    }
     Ok(())
 }

@@ -79,6 +79,13 @@ pub enum OrchestrationCommand {
     #[serde(rename = "thread.interaction-mode.set")]
     ThreadInteractionModeSet(ThreadInteractionModeSetCommand),
 
+    /// 创建交接线程
+    #[serde(rename = "thread.handoff.create")]
+    ThreadHandoffCreate(ThreadHandoffCreateCommand),
+    /// 创建分叉线程
+    #[serde(rename = "thread.fork.create")]
+    ThreadForkCreate(ThreadForkCreateCommand),
+
     // ==================== Turn 命令 ====================
 
     /// 启动 Turn
@@ -174,6 +181,8 @@ impl OrchestrationCommand {
             OrchestrationCommand::ThreadMetaUpdate(c) => c.command_id.as_deref(),
             OrchestrationCommand::ThreadRuntimeModeSet(c) => c.command_id.as_deref(),
             OrchestrationCommand::ThreadInteractionModeSet(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadHandoffCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadForkCreate(c) => c.command_id.as_deref(),
             OrchestrationCommand::ThreadTurnStart(c) => c.command_id.as_deref(),
             OrchestrationCommand::ThreadTurnInterrupt(c) => c.command_id.as_deref(),
             OrchestrationCommand::ThreadTurnDispatchQueued(c) => c.command_id.as_deref(),
@@ -496,7 +505,16 @@ pub struct ThreadInteractionModeSetCommand {
 /// - `thread_id`: 线程 ID
 /// - `turn_id`: Turn ID
 /// - `message_id`: 触发 Turn 的消息 ID
-/// - `dispatch_mode`: 分发模式（Normal / Review / Plan）
+/// - `dispatch_mode`: 分发模式（Normal / Review / Plan / Steer）
+/// - `message_text`: 用户消息文本
+/// - `attachments`: 附件列表（可选）
+/// - `model_selection`: 模型选择（可选）
+/// - `provider_options`: Provider 选项（可选）
+/// - `review_target`: 审查目标（可选）
+/// - `assistant_delivery_mode`: 助手交付模式（可选）
+/// - `runtime_mode`: 运行时模式（可选）
+/// - `interaction_mode`: 交互模式（可选）
+/// - `source_proposed_plan`: 源提议计划（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThreadTurnStartCommand {
@@ -508,8 +526,46 @@ pub struct ThreadTurnStartCommand {
     pub turn_id: String,
     /// 触发 Turn 的消息 ID
     pub message_id: MessageId,
-    /// 分发模式（Normal / Review / Plan）
+    /// 分发模式（Normal / Review / Plan / Steer）
     pub dispatch_mode: DispatchMode,
+    /// 用户消息文本
+    pub message_text: String,
+    /// 附件列表（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attachments: Option<Vec<crate::models::Attachment>>,
+    /// 模型选择（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model_selection: Option<crate::provider::ModelSelection>,
+    /// Provider 选项（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_options: Option<serde_json::Value>,
+    /// 审查目标（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub review_target: Option<String>,
+    /// 助手交付模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assistant_delivery_mode: Option<String>,
+    /// 运行时模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub runtime_mode: Option<RuntimeMode>,
+    /// 交互模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub interaction_mode: Option<InteractionMode>,
+    /// 源提议计划（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_proposed_plan: Option<SourceProposedPlan>,
+}
+
+/// # 源提议计划
+///
+/// 用于指定触发 Turn 的提议计划来源。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SourceProposedPlan {
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 计划 ID
+    pub plan_id: String,
 }
 
 /// # 中断 Turn 命令
@@ -885,3 +941,146 @@ pub struct ThreadConversationRollbackCompleteCommand {
     /// 回滚到的消息 ID
     pub message_id: MessageId,
 }
+
+// ==================== 交接/分叉命令 ====================
+
+/// # 创建交接线程命令
+///
+/// 用于从现有线程创建一个新的交接线程，导入源线程的消息历史。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式
+/// - `interaction_mode`: 交互模式
+/// - `env_mode`: 环境模式
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `source_thread_id`: 交接源线程 ID
+/// - `imported_messages`: 从源线程导入的消息列表
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadHandoffCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 交接源线程 ID
+    pub source_thread_id: ThreadId,
+    /// 从源线程导入的消息列表
+    pub imported_messages: Vec<crate::models::Message>,
+}
+
+/// # 创建分叉线程命令
+///
+/// 用于从现有线程创建一个新的分叉线程，导入源线程的消息历史。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式
+/// - `interaction_mode`: 交互模式
+/// - `env_mode`: 环境模式
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `source_thread_id`: 分叉源线程 ID
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `imported_messages`: 从源线程导入的消息列表
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadForkCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 分叉源线程 ID
+    pub source_thread_id: ThreadId,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 从源线程导入的消息列表
+    pub imported_messages: Vec<crate::models::Message>,
+}
+

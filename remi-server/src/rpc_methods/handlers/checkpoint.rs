@@ -20,7 +20,7 @@ pub async fn register_checkpoint_methods(
     // checkpoint.create
     let checkpoint_store = services.checkpoint_store.clone();
     router
-        .register("checkpoint.create", move |params| {
+        .register("checkpoint.create", move |params: Option<Value>| {
             let checkpoint_store = checkpoint_store.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -60,7 +60,7 @@ pub async fn register_checkpoint_methods(
     // checkpoint.get
     let checkpoint_store = services.checkpoint_store.clone();
     router
-        .register("checkpoint.get", move |params| {
+        .register("checkpoint.get", move |params: Option<Value>| {
             let checkpoint_store = checkpoint_store.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -74,7 +74,7 @@ pub async fn register_checkpoint_methods(
                         crate::error::ServerError::InvalidParams("Missing checkpointId".to_string())
                     })?;
 
-                let checkpoint = checkpoint_store.get_checkpoint(checkpoint_id).await?;
+                let checkpoint = checkpoint_store.get_checkpoint(checkpoint_id.to_string()).await?;
                 match checkpoint {
                     Some(c) => serde_json::to_value(c)
                         .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
@@ -87,7 +87,7 @@ pub async fn register_checkpoint_methods(
     // checkpoint.list
     let checkpoint_store = services.checkpoint_store.clone();
     router
-        .register("checkpoint.list", move |params| {
+        .register("checkpoint.list", move |params: Option<Value>| {
             let checkpoint_store = checkpoint_store.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -100,6 +100,10 @@ pub async fn register_checkpoint_methods(
                     .ok_or_else(|| {
                         crate::error::ServerError::InvalidParams("Missing threadId".to_string())
                     })?;
+
+                let thread_id: remi_core::models::ThreadId = thread_id
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
 
                 let checkpoints = checkpoint_store.list_checkpoints(thread_id).await?;
                 serde_json::to_value(checkpoints)
@@ -111,7 +115,7 @@ pub async fn register_checkpoint_methods(
     // checkpoint.delete
     let checkpoint_store = services.checkpoint_store.clone();
     router
-        .register("checkpoint.delete", move |params| {
+        .register("checkpoint.delete", move |params: Option<Value>| {
             let checkpoint_store = checkpoint_store.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -125,7 +129,7 @@ pub async fn register_checkpoint_methods(
                         crate::error::ServerError::InvalidParams("Missing checkpointId".to_string())
                     })?;
 
-                checkpoint_store.delete_checkpoint(checkpoint_id).await?;
+                checkpoint_store.delete_checkpoint(checkpoint_id.to_string()).await?;
                 Ok(Value::Null)
             }
         })
@@ -134,7 +138,7 @@ pub async fn register_checkpoint_methods(
     // checkpoint.revert
     let checkpoint_store = services.checkpoint_store.clone();
     router
-        .register("checkpoint.revert", move |params| {
+        .register("checkpoint.revert", move |params: Option<Value>| {
             let checkpoint_store = checkpoint_store.clone();
             async move {
                 let params = params.ok_or_else(|| {
@@ -155,8 +159,12 @@ pub async fn register_checkpoint_methods(
                         crate::error::ServerError::InvalidParams("Missing checkpointId".to_string())
                     })?;
 
+                let thread_id: remi_core::models::ThreadId = thread_id
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+
                 let git_ref = checkpoint_store
-                    .revert_to_checkpoint(thread_id, checkpoint_id)
+                    .revert_to_checkpoint(thread_id, checkpoint_id.to_string())
                     .await?;
                 Ok(serde_json::json!({ "gitRef": git_ref }))
             }

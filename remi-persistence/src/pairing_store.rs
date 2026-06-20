@@ -4,7 +4,7 @@
 //! 配对链接用于客户端与服务端之间的安全配对流程。
 
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use remi_core::models::PairingLink;
 
 use crate::error::PersistenceResult;

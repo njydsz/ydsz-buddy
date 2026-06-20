@@ -168,7 +168,7 @@ impl SecretStore {
         }
 
         info!("创建随机密钥: {} ({} 字节)", name, bytes);
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rngs::OsRng;
         let value: Vec<u8> = (0..bytes).map(|_| rng.gen()).collect();
 
         self.set(name, &value).await?;
