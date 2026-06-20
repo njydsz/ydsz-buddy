@@ -56,7 +56,8 @@ function compareActivitiesByOrder(
   left: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
   right: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
 ): number {
-  // 如果没有 sequence，使用最大值确保排在最  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
+  // 如果没有 sequence，使用最大值确保排在最后
+  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
   const rightSequence = right.sequence ?? Number.MAX_SAFE_INTEGER;
   return (
     leftSequence - rightSequence ||
@@ -67,8 +68,9 @@ function compareActivitiesByOrder(
 
 /**
  * @function toPayloadRecord
- * @description 将未知类型的 payload 转换为记录对 * @param {unknown} payload - 待转换的 payload
- * @returns {Record<string, unknown> | null} 如果是对象则返回记录，否则返null
+ * @description 将未知类型的 payload 转换为记录对象
+ * @param {unknown} payload - 待转换的 payload
+ * @returns {Record<string, unknown> | null} 如果是对象则返回记录，否则返回 null
  */
 function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
   return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
@@ -76,7 +78,9 @@ function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
 
 /**
  * @function requestKindFromRequestType
- * @description 根据请求类型字符串推导请求种 * @param {unknown} requestType - 请求类型字符 * @returns {"command" | "file-read" | "file-change" | null} 请求种类，未识别返回 null
+ * @description 根据请求类型字符串推导请求种类
+ * @param {unknown} requestType - 请求类型字符串
+ * @returns {"command" | "file-read" | "file-change" | null} 请求种类，未识别返回 null
  * @note 支持多种请求类型命名格式
  */
 function requestKindFromRequestType(
@@ -219,13 +223,15 @@ export function deriveThreadSummaryState(input: {
   // 2. 追踪待审批和待用户输入的请求
   const openApprovals = new Map<string, true>();
   const openUserInputs = new Map<string, true>();
-  // 按顺序排序活动，确保事件处理的正确  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
+  // 按顺序排序活动，确保事件处理的正确性
+  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
   for (const activity of orderedActivities) {
     const payload = toPayloadRecord(activity.payload);
     const requestId = typeof payload?.requestId === "string" ? payload.requestId : null;
     const detail = typeof payload?.detail === "string" ? payload.detail : undefined;
 
-    // 处理审批请求开    if (activity.kind === "approval.requested" && requestId) {
+    // 处理审批请求开启
+    if (activity.kind === "approval.requested" && requestId) {
       const requestKind =
         payload?.requestKind === "command" ||
         payload?.requestKind === "file-read" ||
@@ -254,7 +260,8 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 处理用户输入请求开    if (activity.kind === "user-input.requested" && requestId) {
+    // 处理用户输入请求开启
+    if (activity.kind === "user-input.requested" && requestId) {
       if (hasStructuredUserInputQuestions(payload)) {
         openUserInputs.set(requestId, true);
       }
