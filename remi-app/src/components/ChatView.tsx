@@ -356,6 +356,7 @@ import {
   revokeUserMessagePreviewUrls,
 } from "./ChatView.logic";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { tauriBridge } from "../lib/tauri-bridge";
 import { useComposerSlashCommands } from "../hooks/useComposerSlashCommands";
 import { useFeatureFlags } from "../featureFlags";
 import { collapseCursorModelVariants } from "../cursorModelVariants";
@@ -1007,16 +1008,19 @@ export default function ChatView({
   const [selectedComposerMentions, setSelectedComposerMentions] = useState<
     ProviderMentionReference[]
   >([]);
-  const [lastInvokedScriptByProjectId, setLastInvokedScriptByProjectId] = useLocalStorage(
+  const [lastInvokedScriptByProjectId, setLastInvokedScriptByProjectId] = useLocalStorage<
+    Record<ProjectId, string>
+  >(
     LAST_INVOKED_SCRIPT_BY_PROJECT_KEY,
     {},
     LastInvokedScriptByProjectSchema,
   );
-  const [dismissedProviderHealthBannerKeys, setDismissedProviderHealthBannerKeys] = useLocalStorage(
-    DISMISSED_PROVIDER_HEALTH_BANNERS_KEY,
-    [],
-    DismissedProviderHealthBannersSchema,
-  );
+  const [dismissedProviderHealthBannerKeys, setDismissedProviderHealthBannerKeys] =
+    useLocalStorage<string[]>(
+      DISMISSED_PROVIDER_HEALTH_BANNERS_KEY,
+      [],
+      DismissedProviderHealthBannersSchema,
+    );
   const [dismissedRateLimitBannerKey, setDismissedRateLimitBannerKey] = useState<string | null>(
     null,
   );

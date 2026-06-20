@@ -748,9 +748,15 @@ pub struct HandoffInfo {
 pub type Sequence = u64;
 
 /// 检查点唯一标识类型
+///
+/// 每个检查点对应一个 Git commit，用于将代码状态回滚到特定时间点。
+/// 标识符通常由系统自动生成（如 UUID），在回退操作中作为目标引用。
 pub type CheckpointId = String;
 
 /// Turn 唯一标识类型
+///
+/// 每个交互轮次（Turn）拥有唯一标识，用于关联消息、活动和检查点。
+/// 标识符通常由系统在创建 Turn 时自动生成。
 pub type TurnId = String;
 
 /// # 配对链接

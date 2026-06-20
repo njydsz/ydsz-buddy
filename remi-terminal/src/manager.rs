@@ -396,7 +396,7 @@ impl TerminalManager {
     pub async fn open(&self, input: TerminalOpenInput) -> TerminalResult<TerminalSessionSnapshot> {
         let key = Self::session_key(&input.thread_id, &input.terminal_id);
 
-        // 检查是否已存在
+        // 先以读锁检查是否已存在，避免不必要的写锁竞争
         {
             let sessions = self.sessions.read().await;
             if let Some(session) = sessions.get(&key) {
@@ -410,7 +410,7 @@ impl TerminalManager {
         let cols = input.cols.unwrap_or(80);
         let rows = input.rows.unwrap_or(24);
 
-        // 创建新会话
+        // 构建会话对象，初始状态为 Starting，PTY 进程启动后切换为 Running
         let mut session = TerminalSession {
             thread_id: input.thread_id.clone(),
             terminal_id: input.terminal_id.clone(),
@@ -439,15 +439,16 @@ impl TerminalManager {
         session.process = Some(process);
         session.updated_at = Utc::now();
 
+        // 在写入会话存储前先创建快照，避免在写锁内执行克隆操作
         let snapshot = self.create_snapshot(&session);
 
-        // 保存会话
+        // 保存会话到存储，此处需要写锁
         {
             let mut sessions = self.sessions.write().await;
             sessions.insert(key.clone(), session);
         }
 
-        // 广播启动事件
+        // 广播启动事件，忽略发送失败（可能没有订阅者）
         let _ = self.event_tx.send(TerminalEvent::Started {
             thread_id: input.thread_id,
             terminal_id: input.terminal_id,
@@ -483,7 +484,7 @@ impl TerminalManager {
             return Err(TerminalError::TerminalNotStarted);
         }
 
-        // 实际写入 PTY
+        // 实际写入 PTY，若进程引用不存在则静默跳过
         if let Some(ref process) = session.process {
             process.write(&input.data);
         }
@@ -522,7 +523,7 @@ impl TerminalManager {
         session.rows = input.rows;
         session.updated_at = Utc::now();
 
-        // 实际调整 PTY 大小
+        // 同步调整底层 PTY 的实际窗口大小，若进程不存在则仅更新内部记录
         if let Some(ref mut process) = session.process {
             process.resize(crate::pty::PtySize {
                 cols: input.cols,
@@ -564,7 +565,7 @@ impl TerminalManager {
         session.history.clear();
         session.updated_at = Utc::now();
 
-        // 广播清屏事件
+        // 广播清屏事件，忽略发送失败（可能没有订阅者）
         let _ = self.event_tx.send(TerminalEvent::Cleared {
             thread_id: thread_id.to_string(),
             terminal_id: terminal_id.to_string(),
@@ -602,11 +603,11 @@ impl TerminalManager {
 
         info!("重启终端: {}", key);
 
-        // 先关闭现有会话
+        // 先关闭现有会话，需要写锁来修改会话状态
         {
             let mut sessions = self.sessions.write().await;
             if let Some(session) = sessions.get_mut(&key) {
-                // 停止进程
+                // 先终止进程再清空状态，避免进程在清空后仍产生输出
                 if let Some(mut process) = session.process.take() {
                     process.kill();
                 }
@@ -618,7 +619,7 @@ impl TerminalManager {
             }
         }
 
-        // 重新打开
+        // 重新打开终端，open 方法会复用已有的会话键并创建新的 PTY 进程
         let snapshot = self
             .open(TerminalOpenInput {
                 thread_id: input.thread_id.clone(),
@@ -630,7 +631,7 @@ impl TerminalManager {
             })
             .await?;
 
-        // 广播重启事件
+        // 广播重启事件，忽略发送失败（可能没有订阅者）
         let _ = self.event_tx.send(TerminalEvent::Restarted {
             thread_id: input.thread_id,
             terminal_id: input.terminal_id,
@@ -664,7 +665,7 @@ impl TerminalManager {
             info!("关闭终端: {}", key);
 
             if let Some(mut session) = sessions.remove(&key) {
-                // 停止进程
+                // 终止 PTY 子进程，防止进程在会话移除后继续运行
                 if let Some(mut process) = session.process.take() {
                     process.kill();
                 }
@@ -677,6 +678,7 @@ impl TerminalManager {
             // 关闭该线程的所有终端
             info!("关闭线程 {} 的所有终端", input.thread_id);
 
+            // 先收集要删除的键，避免在迭代过程中修改 HashMap
             let keys_to_remove: Vec<String> = sessions
                 .keys()
                 .filter(|k| k.starts_with(&format!("{}:", input.thread_id)))
@@ -685,6 +687,7 @@ impl TerminalManager {
 
             for key in keys_to_remove {
                 if let Some(mut session) = sessions.remove(&key) {
+                    // 终止 PTY 子进程，防止进程在会话移除后继续运行
                     if let Some(mut process) = session.process.take() {
                         process.kill();
                     }
@@ -795,6 +798,7 @@ impl TerminalManager {
         info!("释放所有终端资源");
 
         let mut sessions = self.sessions.write().await;
+        // drain() 会逐个取出并清空 HashMap，同时确保每个进程都被正确终止
         for (_, mut session) in sessions.drain() {
             if let Some(mut process) = session.process.take() {
                 process.kill();
@@ -804,6 +808,10 @@ impl TerminalManager {
 }
 
 impl Default for TerminalManager {
+    /// 提供 `TerminalManager` 的默认实现
+    ///
+    /// 等价于调用 [`TerminalManager::new()`]，创建一个空的终端管理器实例。
+    /// 实现 `Default` trait 使得 `TerminalManager` 可用于需要默认值的泛型场景。
     fn default() -> Self {
         Self::new()
     }

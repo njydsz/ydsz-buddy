@@ -1,4 +1,7 @@
-//! RPC 方法注册器
+//! # 服务容器与全局方法注册模块
+//!
+//! 本模块定义了 [`ServiceContainer`] 服务容器，集中管理所有业务服务的依赖实例，
+//! 并提供 [`register_all_methods`] 全局注册入口，将所有 RPC 方法注册到路由器。
 
 use std::sync::Arc;
 
@@ -20,6 +23,10 @@ use super::handlers::{
 };
 
 /// 服务容器
+///
+/// 集中管理所有业务服务的依赖实例，通过 `Arc` 实现共享所有权。
+/// 在引导阶段由 [`build_service_container`](crate::bootstrap::build_service_container) 创建，
+/// 并传递给各 RPC 方法注册函数使用。
 pub struct ServiceContainer {
     /// 编排引擎
     pub orchestration_engine: Arc<OrchestrationEngine>,
@@ -50,6 +57,14 @@ pub struct ServiceContainer {
 }
 
 /// 注册所有 RPC 方法
+///
+/// 按业务域依次调用各注册函数，将所有 RPC 方法注册到路由器。
+/// 注册顺序：编排引擎 → Provider → Git → 终端 → 工作空间 → 认证 → 检查点 → 服务器 → 遥测。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器实例，提供各业务服务的依赖
 pub async fn register_all_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,

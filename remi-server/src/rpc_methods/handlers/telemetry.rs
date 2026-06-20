@@ -1,4 +1,17 @@
-//! 遥测 RPC 方法
+//! # 遥测 RPC 方法模块
+//!
+//! 本模块注册与遥测数据相关的 RPC 方法，包括使用统计查询、事件查询和清理、
+//! 指标数据查询和清理等。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `telemetry.getUsageStats` | 获取使用统计数据 |
+//! | `telemetry.getEvents` | 获取遥测事件列表 |
+//! | `telemetry.clearEvents` | 清空遥测事件 |
+//! | `telemetry.getMetrics` | 获取指标数据 |
+//! | `telemetry.clearMetrics` | 清空指标数据 |
 
 use std::sync::Arc;
 
@@ -9,13 +22,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册遥测相关 RPC 方法
+///
+/// 将所有遥测方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 AnalyticsService 和 MetricsCollector 实例
 pub async fn register_telemetry_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册遥测 RPC 方法...");
 
-    // telemetry.getUsageStats
+    // telemetry.getUsageStats - 获取使用统计数据
+    // 参数: 无
+    // 返回: UsageStats
     let analytics = services.analytics_service.clone();
     router
         .register("telemetry.getUsageStats", move |_params: Option<Value>| {
@@ -28,7 +50,9 @@ pub async fn register_telemetry_methods(
         })
         .await;
 
-    // telemetry.getEvents
+    // telemetry.getEvents - 获取遥测事件列表
+    // 参数: { limit?: number }
+    // 返回: Event[]
     let analytics = services.analytics_service.clone();
     router
         .register("telemetry.getEvents", move |params: Option<Value>| {
@@ -46,7 +70,9 @@ pub async fn register_telemetry_methods(
         })
         .await;
 
-    // telemetry.clearEvents
+    // telemetry.clearEvents - 清空遥测事件
+    // 参数: 无
+    // 返回: null
     let analytics = services.analytics_service.clone();
     router
         .register("telemetry.clearEvents", move |_params: Option<Value>| {
@@ -58,7 +84,9 @@ pub async fn register_telemetry_methods(
         })
         .await;
 
-    // telemetry.getMetrics
+    // telemetry.getMetrics - 获取指标数据
+    // 参数: 无
+    // 返回: MetricsData
     let metrics = services.metrics_collector.clone();
     router
         .register("telemetry.getMetrics", move |_params: Option<Value>| {
@@ -71,7 +99,9 @@ pub async fn register_telemetry_methods(
         })
         .await;
 
-    // telemetry.clearMetrics
+    // telemetry.clearMetrics - 清空指标数据
+    // 参数: 无
+    // 返回: null
     let metrics = services.metrics_collector.clone();
     router
         .register("telemetry.clearMetrics", move |_params: Option<Value>| {

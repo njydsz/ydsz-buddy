@@ -14,7 +14,8 @@
 //! ## 架构设计
 //!
 //! [`CheckpointStore`] 作为存储服务入口，内部依赖 [`remi_git::GitCore`] 执行
-//! 底层 Git 操作（如回滚）。检查点元数据当前为内存桩实现，后续将持久化到数据库。
+//! 底层 Git 操作（如回滚），并通过 [`SqliteCheckpointStore`] 实现检查点元数据的
+//! 持久化存储。
 //!
 //! ## 线程安全
 //!
@@ -26,9 +27,11 @@
 //! use std::sync::Arc;
 //! use remi_checkpoint::store::CheckpointStore;
 //! use remi_git::GitCore;
+//! use remi_persistence::SqliteCheckpointStore;
 //!
 //! let git_core = Arc::new(GitCore::new("/path/to/repo")?);
-//! let store = CheckpointStore::new(git_core);
+//! let sqlite_store = Arc::new(SqliteCheckpointStore::new("/path/to/db")?);
+//! let store = CheckpointStore::new(git_core, sqlite_store);
 //!
 //! // 创建检查点
 //! let checkpoint = store.create_checkpoint(
@@ -82,13 +85,14 @@ pub struct CheckpointStore {
 impl CheckpointStore {
     /// # 创建新的检查点存储服务实例
     ///
-    /// 通过注入 Git 核心服务来构造存储服务。
+    /// 通过注入 Git 核心服务和检查点持久化存储来构造存储服务。
     ///
     /// ## 参数
     ///
     /// | 参数 | 类型 | 说明 |
     /// |------|------|------|
     /// | `git_core` | `Arc<GitCore>` | Git 核心服务的共享引用，用于后续的回滚操作 |
+    /// | `checkpoint_store` | `Arc<SqliteCheckpointStore>` | 检查点持久化存储的共享引用，用于检查点的 CRUD 操作 |
     ///
     /// ## 返回值
     ///
@@ -98,7 +102,8 @@ impl CheckpointStore {
     ///
     /// ```rust,ignore
     /// let git_core = Arc::new(GitCore::new("/path/to/repo")?);
-    /// let store = CheckpointStore::new(git_core);
+    /// let sqlite_store = Arc::new(SqliteCheckpointStore::new("/path/to/db")?);
+    /// let store = CheckpointStore::new(git_core, sqlite_store);
     /// ```
     pub fn new(git_core: Arc<GitCore>, checkpoint_store: Arc<SqliteCheckpointStore>) -> Self {
         Self { git_core, checkpoint_store }

@@ -73,10 +73,10 @@ export function TerminalChromeActions(props: {
 }) {
   const itemClassName =
     props.variant === "workspace"
-      ? "inline-flex h-full items-center bg-background px-2 text-foreground/90 transition-colors hover:bg-[var(--sidebar-accent)]"
+      ? "inline-flex h-full items-center bg-background px-2 text-foreground/90 transition-colors hover:bg-(--sidebar-accent)"
       : props.variant === "sidebar"
-        ? "inline-flex h-full items-center bg-background px-1 text-foreground/90 transition-colors hover:bg-[var(--sidebar-accent)]"
-        : "bg-background p-1 text-foreground/90 transition-colors hover:bg-[var(--sidebar-accent)]";
+        ? "inline-flex h-full items-center bg-background px-1 text-foreground/90 transition-colors hover:bg-(--sidebar-accent)"
+        : "bg-background p-1 text-foreground/90 transition-colors hover:bg-(--sidebar-accent)";
 
   return (
     <div
@@ -124,7 +124,7 @@ export function TerminalWorkspaceTabBar(props: {
 }) {
   return (
     <div className="flex min-w-0 items-stretch justify-between bg-background">
-      <div className="flex min-w-0 items-stretch overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex min-w-0 items-stretch overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
         {props.terminalGroups.map((terminalGroup) => {
           const isActive = terminalGroup.id === props.activeGroupId;
           const previewTerminalId =
@@ -148,7 +148,7 @@ export function TerminalWorkspaceTabBar(props: {
                 "group relative flex h-8 shrink-0 items-center gap-2 border-r border-border/70 px-2.5 transition-colors first:border-l first:border-l-border/70",
                 isActive
                   ? "shadow-[inset_0_1px_0_var(--color-text-foreground)] bg-background text-foreground"
-                  : "border-b border-border/70 bg-transparent text-muted-foreground hover:bg-[var(--sidebar-accent)] hover:text-foreground",
+                  : "border-b border-border/70 bg-transparent text-muted-foreground hover:bg-(--sidebar-accent) hover:text-foreground",
               )}
             >
               <button
@@ -234,8 +234,8 @@ export function TerminalSidebar(props: {
                   type="button"
                   className={`flex w-full items-center px-1 py-0.5 text-[10px] uppercase tracking-[0.08em] ${
                     isGroupActive
-                      ? "bg-[var(--sidebar-accent)] text-foreground"
-                      : "text-muted-foreground hover:bg-[var(--sidebar-accent)] hover:text-foreground"
+                      ? "bg-(--sidebar-accent) text-foreground"
+                      : "text-muted-foreground hover:bg-(--sidebar-accent) hover:text-foreground"
                   }`}
                   onClick={() => props.onActiveTerminalChange(groupActiveTerminalId)}
                 >
@@ -260,8 +260,8 @@ export function TerminalSidebar(props: {
                       key={terminalId}
                       className={`group flex items-center gap-1 px-1 py-0.5 text-[11px] ${
                         isActive
-                          ? "bg-[var(--sidebar-accent)] text-foreground"
-                          : "text-muted-foreground hover:bg-[var(--sidebar-accent)] hover:text-foreground"
+                          ? "bg-(--sidebar-accent) text-foreground"
+                          : "text-muted-foreground hover:bg-(--sidebar-accent) hover:text-foreground"
                       }`}
                     >
                       {props.showGroupHeaders && (
@@ -291,7 +291,7 @@ export function TerminalSidebar(props: {
                             render={
                               <button
                                 type="button"
-                                className="inline-flex size-3.5 items-center justify-center rounded text-xs font-medium leading-none text-muted-foreground opacity-0 transition hover:bg-[var(--sidebar-accent)] hover:text-foreground group-hover:opacity-100"
+                                className="inline-flex size-3.5 items-center justify-center rounded text-xs font-medium leading-none text-muted-foreground opacity-0 transition hover:bg-(--sidebar-accent) hover:text-foreground group-hover:opacity-100"
                                 onClick={() => props.onCloseTerminal(terminalId)}
                                 aria-label={closeTerminalLabel}
                               />

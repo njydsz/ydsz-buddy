@@ -306,6 +306,9 @@ impl AnalyticsService {
         debug!("记录分析事件: {:?}", event.event_type);
 
         // 将事件追加到内部事件历史列表。
+        // 事件写入与统计更新分为两个独立的写锁作用域，目的是在事件写入完成后
+        // 立即释放 events 锁，避免在持有 events 写锁的同时再获取 stats 写锁，
+        // 从而缩短单次锁持有时间、降低并发场景下的锁竞争。
         {
             let mut events = self.events.write().await;
             events.push(event.clone());
@@ -318,6 +321,10 @@ impl AnalyticsService {
                 AnalyticsEventType::ThreadCreated => {
                     stats.total_threads += 1;
                 }
+                // TurnStarted 和 TurnCompleted 均会使 total_turns 自增，
+                // 这是有意设计：total_turns 统计的是 Turn 相关事件的总发生次数，
+                // 而非唯一 Turn 数。一次完整的 Turn 会产生两条事件（开始+完成），
+                // 因此 total_turns 会增加 2，用于反映 Turn 交互的总活跃度。
                 AnalyticsEventType::TurnStarted | AnalyticsEventType::TurnCompleted => {
                     stats.total_turns += 1;
                 }
@@ -380,7 +387,9 @@ impl AnalyticsService {
     /// 用于事件审计、用户行为回溯、问题排查等场景。结合 `limit` 参数可实现分页查询。
     pub async fn get_events(&self, limit: usize) -> TelemetryResult<Vec<AnalyticsEvent>> {
         let events = self.events.read().await;
-        // 反向迭代（最新事件在前），取前 `limit` 条，收集为 Vec。
+        // 采用反向迭代（最新事件在前）而非正序，是因为在实际使用场景中
+        // 调用方通常更关心最近发生的事件（如排查问题、查看最新状态），
+        // 倒序返回可避免调用方再自行反转列表。
         let result: Vec<AnalyticsEvent> = events.iter().rev().take(limit).cloned().collect();
         Ok(result)
     }
@@ -389,6 +398,8 @@ impl AnalyticsService {
     ///
     /// 清空内部事件列表中的所有已记录事件，并输出一条 INFO 级别日志。
     /// 注意：此操作仅清除事件历史，**不会**重置使用统计（[`UsageStats`]）。
+    /// 这是因为使用统计反映的是系统从启动以来的累计指标，属于长期聚合数据，
+    /// 而事件历史属于可定期清理的明细数据，两者生命周期不同。
     ///
     /// ## 返回值
     ///
@@ -409,6 +420,11 @@ impl AnalyticsService {
     ///
     /// 构造一个 [`AnalyticsEventType::ThreadCreated`] 类型的 [`AnalyticsEvent`] 实例。
     /// 事件 ID 由 UUID v4 自动生成，时间戳为当前 UTC 时间，`provider`/`model`/`metadata` 均为空。
+    ///
+    /// ## 设计说明
+    ///
+    /// 提供工厂方法而非让调用方直接构造 `AnalyticsEvent`，是为了集中管理事件 ID 生成
+    /// 和时间戳填充逻辑，确保所有事件的构造方式一致，避免调用方遗漏必要字段。
     ///
     /// ## 参数
     ///
@@ -433,6 +449,11 @@ impl AnalyticsService {
     ///
     /// 构造一个 [`AnalyticsEventType::TurnStarted`] 类型的 [`AnalyticsEvent`] 实例。
     /// 事件 ID 由 UUID v4 自动生成，时间戳为当前 UTC 时间，`metadata` 为空。
+    ///
+    /// ## 设计说明
+    ///
+    /// 提供工厂方法而非让调用方直接构造 `AnalyticsEvent`，是为了集中管理事件 ID 生成
+    /// 和时间戳填充逻辑，确保所有事件的构造方式一致，避免调用方遗漏必要字段。
     ///
     /// ## 参数
     ///
@@ -463,6 +484,11 @@ impl AnalyticsService {
     ///
     /// 构造一个 [`AnalyticsEventType::ProviderInvoked`] 类型的 [`AnalyticsEvent`] 实例。
     /// 事件 ID 由 UUID v4 自动生成，时间戳为当前 UTC 时间，`metadata` 为空。
+    ///
+    /// ## 设计说明
+    ///
+    /// 提供工厂方法而非让调用方直接构造 `AnalyticsEvent`，是为了集中管理事件 ID 生成
+    /// 和时间戳填充逻辑，确保所有事件的构造方式一致，避免调用方遗漏必要字段。
     ///
     /// ## 参数
     ///

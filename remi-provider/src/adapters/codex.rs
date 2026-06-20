@@ -66,18 +66,34 @@ use crate::adapter::{ProviderAdapter, ProviderCapabilities, SessionModelSwitchMo
 use crate::error::{ProviderError, ProviderResult};
 use crate::jsonrpc_client::JsonRpcClient;
 
-/// Codex 适配器
+/// Codex Provider 适配器
 ///
-/// 通过 JSON-RPC over stdio 与 Codex Provider 进程通信
+/// 通过 JSON-RPC over stdio 与 Codex Provider 进程通信。
+/// 内部维护活跃会话列表和事件广播通道。
+///
+/// # 能力特性
+///
+/// Codex 是功能最基础的 Provider，不支持任何可选能力。
 pub struct CodexAdapter {
     /// 活跃会话列表
+    ///
+    /// 键为 thread_id，值为对应的 JSON-RPC 客户端实例。
+    /// 每个会话对应一个独立的 Codex 子进程。
     sessions: Arc<RwLock<HashMap<String, Arc<JsonRpcClient>>>>,
     /// 事件广播发送器
+    ///
+    /// 将 Codex 推送的通知转换为 `ProviderRuntimeEvent` 后广播给订阅者。
     event_tx: broadcast::Sender<ProviderRuntimeEvent>,
 }
 
 impl CodexAdapter {
     /// 创建新的 Codex 适配器实例
+    ///
+    /// 初始化空的会话列表和事件广播通道。
+    ///
+    /// # 返回值
+    ///
+    /// 返回新创建的 `CodexAdapter` 实例
     pub fn new() -> Self {
         let (event_tx, _) = broadcast::channel(10000);
 
@@ -87,7 +103,20 @@ impl CodexAdapter {
         }
     }
 
-    /// 启动 Codex 进程并建立连接
+    /// 启动 Codex 进程并建立 JSON-RPC 连接
+    ///
+    /// 启动 Codex CLI 子进程，传入模型和工作目录参数，
+    /// 并启动后台事件监听线程。
+    ///
+    /// # 参数
+    ///
+    /// - `model`: 要使用的 Codex 模型名称（如 "gpt-5"）
+    /// - `cwd`: 子进程的工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(JsonRpcClient)`: 进程启动成功，返回 JSON-RPC 客户端
+    /// - `Err(ProviderError)`: 进程启动失败
     async fn spawn_codex_process(
         &self,
         model: &str,
@@ -112,7 +141,22 @@ impl CodexAdapter {
         Ok(client)
     }
 
-    /// 监听 Provider 事件
+    /// 监听 Codex Provider 事件
+    ///
+    /// 后台任务，持续从 JSON-RPC 客户端接收通知并转换为 `ProviderRuntimeEvent`。
+    /// 支持的通知类型：
+    /// - `session.update` → `SessionUpdate`：会话更新事件
+    /// - `turn.complete` → `TurnComplete`：Turn 完成事件
+    /// - `error` → `Error`：错误事件
+    ///
+    /// # 参数
+    ///
+    /// - `client`: JSON-RPC 客户端的共享引用
+    /// - `event_tx`: 事件广播发送器
+    ///
+    /// # 退出条件
+    ///
+    /// 当 `recv_notification` 返回 None（事件流关闭）时退出循环
     async fn listen_events(
         client: Arc<JsonRpcClient>,
         event_tx: broadcast::Sender<ProviderRuntimeEvent>,
@@ -187,18 +231,33 @@ impl CodexAdapter {
     }
 }
 
+/// 默认实现，等同于 `new()`
 impl Default for CodexAdapter {
     fn default() -> Self {
         Self::new()
     }
 }
 
+/// 实现 ProviderAdapter trait
+///
+/// 为 CodexAdapter 提供基础的 Provider 适配器接口实现。
+/// Codex 不支持 Turn 转向、技能提及等高级功能。
 #[async_trait]
 impl ProviderAdapter for CodexAdapter {
+    /// 获取 Provider 类型标识
+    ///
+    /// 返回 `ProviderKind::Codex`，标识此适配器对应的 Provider 类型。
     fn provider_kind(&self) -> ProviderKind {
         ProviderKind::Codex
     }
 
+    /// 获取适配器能力声明
+    ///
+    /// Codex 是功能最基础的 Provider，所有可选能力均不支持。
+    ///
+    /// # 返回值
+    ///
+    /// 返回所有可选能力关闭的 `ProviderCapabilities` 实例
     fn capabilities(&self) -> ProviderCapabilities {
         ProviderCapabilities {
             session_model_switch: SessionModelSwitchMode::Unsupported,
@@ -210,8 +269,20 @@ impl ProviderAdapter for CodexAdapter {
         }
     }
 
+    /// 启动新的 Codex 会话
+    ///
+    /// 启动 Codex 子进程，初始化会话，并将客户端保存到会话列表。
+    ///
+    /// # 参数
+    ///
+    /// - `input`: 会话启动输入参数，包含 thread_id、模型选择等
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(ProviderSession)`: 会话创建成功
+    /// - `Err(ProviderError::SessionAlreadyExists)`: 会话已存在
+    /// - `Err(ProviderError::AdapterError)`: 进程启动或初始化失败
     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
-        info!("CodexAdapter: 启动会话 thread_id={}", input.thread_id);
 
         // 检查会话是否已存在
         {
@@ -266,8 +337,20 @@ impl ProviderAdapter for CodexAdapter {
         Ok(session)
     }
 
+    /// 发送 Turn（对话轮次）
+    ///
+    /// 向 Codex 发送用户消息，启动一个新的对话轮次。
+    ///
+    /// # 参数
+    ///
+    /// - `input`: Turn 输入参数，包含 thread_id、turn_id、消息内容等
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(ProviderTurnStartResult)`: Turn 发送成功
+    /// - `Err(ProviderError::SessionNotFound)`: 会话不存在
+    /// - `Err(ProviderError::AdapterError)`: 发送失败
     async fn send_turn(&self, input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
-        info!("CodexAdapter: 发送 Turn thread_id={}", input.thread_id);
 
         let sessions = self.sessions.read().await;
         let client = sessions
@@ -298,8 +381,21 @@ impl ProviderAdapter for CodexAdapter {
         })
     }
 
+    /// 中断正在执行的 Turn
+    ///
+    /// 向 Codex 发送中断请求，停止指定 Turn 的执行。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 会话线程 ID
+    /// - `turn_id`: 可选的 Turn ID，为 None 时中断该会话所有正在执行的 Turn
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 中断成功
+    /// - `Err(ProviderError::SessionNotFound)`: 会话不存在
+    /// - `Err(ProviderError::AdapterError)`: 中断失败
     async fn interrupt_turn(&self, thread_id: &str, turn_id: Option<&str>) -> ProviderResult<()> {
-        info!("CodexAdapter: 中断 Turn thread_id={}, turn_id={:?}", thread_id, turn_id);
 
         let sessions = self.sessions.read().await;
         let client = sessions
@@ -326,8 +422,20 @@ impl ProviderAdapter for CodexAdapter {
         Ok(())
     }
 
+    /// 停止指定会话
+    ///
+    /// 从会话列表中移除并关闭对应的 Codex 子进程。
+    /// 先尝试发送 `session.close` 请求，然后关闭客户端连接。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 要停止的会话线程 ID
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 停止成功（即使会话不存在也返回 Ok）
+    /// - `Err(ProviderError::AdapterError)`: 关闭客户端失败
     async fn stop_session(&self, thread_id: &str) -> ProviderResult<()> {
-        info!("CodexAdapter: 停止会话 thread_id={}", thread_id);
 
         let client = {
             let mut sessions = self.sessions.write().await;
@@ -345,8 +453,15 @@ impl ProviderAdapter for CodexAdapter {
         Ok(())
     }
 
+    /// 停止所有会话
+    ///
+    /// 清空会话列表并关闭所有 Codex 子进程。
+    /// 单个会话关闭失败不会影响其他会话的关闭。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 所有会话已处理完毕（部分可能关闭失败，错误记录在日志中）
     async fn stop_all(&self) -> ProviderResult<()> {
-        info!("CodexAdapter: 停止所有会话");
 
         let sessions = {
             let mut sessions = self.sessions.write().await;
@@ -362,6 +477,14 @@ impl ProviderAdapter for CodexAdapter {
         Ok(())
     }
 
+    /// 列出所有活跃会话
+    ///
+    /// 返回当前管理的所有 Codex 会话信息。
+    /// 注意：返回的 `model` 字段为空字符串，因为客户端未持久化模型信息。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<ProviderSession>)`: 会话列表
     async fn list_sessions(&self) -> ProviderResult<Vec<ProviderSession>> {
         let sessions = self.sessions.read().await;
         let mut result = Vec::new();
@@ -380,11 +503,31 @@ impl ProviderAdapter for CodexAdapter {
         Ok(result)
     }
 
+    /// 检查指定会话是否存在
+    ///
+    /// 快速检查 thread_id 对应的会话是否在活跃列表中。
+    ///
+    /// # 参数
+    ///
+    /// - `thread_id`: 要检查的会话线程 ID
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(true)`: 会话存在
+    /// - `Ok(false)`: 会话不存在
     async fn has_session(&self, thread_id: &str) -> ProviderResult<bool> {
         let sessions = self.sessions.read().await;
         Ok(sessions.contains_key(thread_id))
     }
 
+    /// 订阅 Codex Provider 事件流
+    ///
+    /// 创建新的事件接收器，用于接收 Codex 推送的运行时事件。
+    /// 多个订阅者可以同时接收相同的事件。
+    ///
+    /// # 返回值
+    ///
+    /// 返回 `broadcast::Receiver<ProviderRuntimeEvent>`，用于异步接收事件
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
     }

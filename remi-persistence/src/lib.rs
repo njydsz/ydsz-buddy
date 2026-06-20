@@ -46,6 +46,18 @@ pub mod sqlite_client;
 pub mod checkpoint_store;
 // 配对链接存储模块
 pub mod pairing_store;
+// 待审批请求投影仓库
+pub mod projection_pending_approvals;
+// 线程会话投影仓库
+pub mod projection_thread_sessions;
+// 对话轮次投影仓库
+pub mod projection_turns;
+// 线程活动投影仓库
+pub mod projection_thread_activities;
+// 线程提议计划投影仓库
+pub mod projection_thread_proposed_plans;
+// 编排命令收据仓库
+pub mod orchestration_command_receipts;
 
 // 重导出所有模块的公开类型，简化外部引用路径
 pub use error::*;
@@ -55,3 +67,9 @@ pub use projection_repo::*;
 pub use sqlite_client::*;
 pub use checkpoint_store::*;
 pub use pairing_store::*;
+pub use projection_pending_approvals::*;
+pub use projection_thread_sessions::*;
+pub use projection_turns::*;
+pub use projection_thread_activities::*;
+pub use projection_thread_proposed_plans::*;
+pub use orchestration_command_receipts::*;

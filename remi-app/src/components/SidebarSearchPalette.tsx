@@ -316,7 +316,7 @@ function HighlightedText(props: { text: string; query: string; className?: strin
         segment.highlighted ? (
           <mark
             key={segment.key}
-            className="rounded-[3px] bg-amber-200/80 px-[1px] text-current dark:bg-amber-300/25"
+            className="rounded-[3px] bg-amber-200/80 px-px text-current dark:bg-amber-300/25"
           >
             {segment.text}
           </mark>
@@ -730,7 +730,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                       variant="outline"
                       size="xs"
                       tabIndex={-1}
-                      className="-translate-y-1/2 absolute end-3 top-1/2 gap-1.5 pe-1 ps-2"
+                      className="-translate-y-1/2 absolute inset-e-3 top-1/2 gap-1.5 pe-1 ps-2"
                       disabled={
                         isAddingProject ||
                         unsupportedWindowsPath ||
@@ -809,7 +809,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                           </div>
                         ) : null}
                         {willCreateMissingFolder ? (
-                          <div className="mx-1.5 mt-2 rounded-md border border-dashed border-[color:var(--color-border)] px-3 py-2 text-sm text-muted-foreground">
+                          <div className="mx-1.5 mt-2 rounded-md border border-dashed border-(--color-border) px-3 py-2 text-sm text-muted-foreground">
                             Press Enter to create{" "}
                             <span className="text-foreground">{trimmedQuery}</span> and add it as a
                             project.
@@ -901,17 +901,17 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                             )}
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline gap-3">
-                                <div className="min-w-0 flex-1 truncate text-[length:var(--app-font-size-ui,12px)] text-foreground">
+                                <div className="min-w-0 flex-1 truncate text-(length:--app-font-size-ui,12px) text-foreground">
                                   <HighlightedText
                                     text={thread.title || "Untitled thread"}
                                     query={query}
                                   />
                                 </div>
-                                <span className="w-24 shrink-0 truncate text-right text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/79">
+                                <span className="w-24 shrink-0 truncate text-right text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/79">
                                   {thread.projectName}
                                 </span>
                                 {thread.updatedAt || thread.createdAt ? (
-                                  <span className="w-10 shrink-0 text-right text-[length:var(--app-font-size-ui-timestamp,10px)] text-muted-foreground/79">
+                                  <span className="w-10 shrink-0 text-right text-(length:--app-font-size-ui-timestamp,10px) text-muted-foreground/79">
                                     {formatRelativeTime(thread.updatedAt ?? thread.createdAt)}
                                   </span>
                                 ) : (
@@ -920,19 +920,19 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                               </div>
                               {snippet ? (
                                 <div className="mt-0.5 flex items-start gap-3">
-                                  <div className="min-w-0 flex-1 line-clamp-1 text-[length:var(--app-font-size-ui-meta,10px)] leading-5 text-muted-foreground/78">
+                                  <div className="min-w-0 flex-1 line-clamp-1 text-(length:--app-font-size-ui-meta,10px) leading-5 text-muted-foreground/78">
                                     <HighlightedText text={snippet} query={query} />
                                   </div>
-                                  <div className="flex w-[8.5rem] shrink-0 justify-end">
+                                  <div className="flex w-34 shrink-0 justify-end">
                                     {threadMatchLabel({ matchKind, messageMatchCount }) ? (
-                                      <span className="truncate text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/58">
+                                      <span className="truncate text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/58">
                                         {threadMatchLabel({ matchKind, messageMatchCount })}
                                       </span>
                                     ) : null}
                                   </div>
                                 </div>
                               ) : threadMatchLabel({ matchKind, messageMatchCount }) ? (
-                                <div className="mt-0.5 text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/58">
+                                <div className="mt-0.5 text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/58">
                                   {threadMatchLabel({ matchKind, messageMatchCount })}
                                 </div>
                               ) : null}
@@ -967,10 +967,10 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                         >
                           <PaletteIcon icon={HiOutlineFolderOpen} />
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-[length:var(--app-font-size-ui,12px)] text-foreground">
+                            <div className="truncate text-(length:--app-font-size-ui,12px) text-foreground">
                               {project.name || "Untitled project"}
                             </div>
-                            <div className="truncate text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/79">
+                            <div className="truncate text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/79">
                               {project.localName
                                 ? `${project.folderName} · ${project.cwd}`
                                 : project.cwd}
@@ -1002,7 +1002,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                             }}
                           >
                             <PaletteIcon icon={THEME_MODE_ICONS[themeCommandItem.mode]} />
-                            <span className="min-w-0 flex-1 truncate text-[length:var(--app-font-size-ui,12px)] text-foreground">
+                            <span className="min-w-0 flex-1 truncate text-(length:--app-font-size-ui,12px) text-foreground">
                               {themeCommandItem.label}
                             </span>
                             {themeCommandItem.isActive ? (
@@ -1042,10 +1042,10 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                                     foreground={seed.ink}
                                   />
                                 ) : null}
-                                <span className="min-w-0 flex-1 truncate text-[length:var(--app-font-size-ui,12px)] text-foreground">
+                                <span className="min-w-0 flex-1 truncate text-(length:--app-font-size-ui,12px) text-foreground">
                                   {themeItem.label}
                                 </span>
-                                <span className="shrink-0 text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/79">
+                                <span className="shrink-0 text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/79">
                                   {resolvedTheme === "dark"
                                     ? "Dark color theme"
                                     : "Light color theme"}

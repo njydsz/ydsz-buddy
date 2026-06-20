@@ -26,8 +26,9 @@
 //!
 //! ```text
 //! main.rs → lib.rs::run()
+//!              ├─ 启动嵌入式 remi-server（bootstrap_embedded）
 //!              ├─ 注册插件（shell/dialog/fs/clipboard/notification/updater/process）
-//!              ├─ 注入状态（Terminal/Browser/Update）
+//!              ├─ 注入状态（Terminal/Browser/Update/Server）
 //!              ├─ 绑定命令（greet + 所有 commands 模块导出的命令）
 //!              └─ 启动事件循环
 //! ```
@@ -47,6 +48,46 @@ use commands::{
     context_menu::*,   // 右键上下文菜单命令
     voice::*,          // 语音识别命令
 };
+
+use std::net::SocketAddr;
+use std::sync::Arc;
+use remi_config::ServerConfig;
+use remi_server::{bootstrap_embedded, start_server, BootstrapResult, shutdown_reactors};
+use tracing::{info, error};
+
+/// 嵌入式服务器状态
+///
+/// 保存嵌入式 remi-server 的运行时信息，供前端获取 WebSocket 服务器地址
+#[derive(Clone)]
+pub struct ServerState {
+    /// WebSocket 服务器地址
+    pub addr: SocketAddr,
+    /// 引导结果（包含 Reactor 句柄等）
+    pub bootstrap_result: Arc<BootstrapResult>,
+}
+
+impl ServerState {
+    /// 创建新的服务器状态
+    pub fn new(addr: SocketAddr, bootstrap_result: Arc<BootstrapResult>) -> Self {
+        Self {
+            addr,
+            bootstrap_result,
+        }
+    }
+
+    /// 获取 WebSocket 服务器 URL
+    pub fn ws_url(&self) -> String {
+        format!("ws://{}", self.addr)
+    }
+}
+
+/// 获取 WebSocket 服务器地址
+///
+/// 前端通过此命令获取嵌入式 remi-server 的 WebSocket 地址
+#[tauri::command]
+fn get_server_ws_url(state: tauri::State<ServerState>) -> String {
+    state.ws_url()
+}
 
 /// 示例问候命令（Tauri 脚手架生成的默认命令）
 ///
@@ -68,8 +109,9 @@ fn greet(name: &str) -> String {
 ///
 /// 本函数是整个应用的核心初始化入口，完成以下工作：
 ///
-/// 1. **创建 Tauri Builder**：使用默认配置初始化构建器
-/// 2. **注册插件**：
+/// 1. **启动嵌入式 remi-server**：调用 `bootstrap_embedded` 启动 WebSocket 服务器
+/// 2. **创建 Tauri Builder**：使用默认配置初始化构建器
+/// 3. **注册插件**：
 ///    - `tauri_plugin_shell`：提供系统 Shell 能力（如打开外部链接）
 ///    - `tauri_plugin_dialog`：提供文件选择、保存、消息对话框
 ///    - `tauri_plugin_fs`：提供文件系统访问能力
@@ -77,9 +119,9 @@ fn greet(name: &str) -> String {
 ///    - `tauri_plugin_notification`：提供系统通知
 ///    - `tauri_plugin_updater`：提供应用自动更新
 ///    - `tauri_plugin_process`：提供进程管理
-/// 3. **注入全局状态**：通过 `.manage()` 将各模块的状态对象注入 Tauri 运行时
-/// 4. **注册命令**：通过 `invoke_handler` 将所有 Rust 命令暴露给前端
-/// 5. **启动事件循环**：调用 `.run()` 进入 Tauri 主事件循环，阻塞直到应用退出
+/// 4. **注入全局状态**：通过 `.manage()` 将各模块的状态对象注入 Tauri 运行时
+/// 5. **注册命令**：通过 `invoke_handler` 将所有 Rust 命令暴露给前端
+/// 6. **启动事件循环**：调用 `.run()` 进入 Tauri 主事件循环，阻塞直到应用退出
 ///
 /// # Panics
 ///
@@ -89,6 +131,37 @@ fn greet(name: &str) -> String {
 ///
 /// 由 `main.rs` 中的 `main()` 函数调用，不应在其他位置重复调用。
 pub fn run() {
+    // 初始化日志系统
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+
+    info!("启动 Remi Code Tauri 应用");
+
+    // 创建 Tokio 运行时
+    let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    let _guard = runtime.enter();
+
+    // 启动嵌入式 remi-server
+    info!("启动嵌入式 remi-server...");
+    let config = ServerConfig::default();
+    let bootstrap_result = runtime.block_on(async {
+        bootstrap_embedded(&config).await
+    }).expect("Failed to bootstrap embedded server");
+
+    let server_addr = bootstrap_result.server_addr;
+    info!("嵌入式服务器地址: {}", server_addr);
+
+    // 在后台启动 WebSocket 服务器
+    let rpc_router = bootstrap_result.rpc_router.clone();
+    runtime.spawn(async move {
+        if let Err(e) = start_server(server_addr, rpc_router).await {
+            error!("WebSocket 服务器错误: {}", e);
+        }
+    });
+
+    let bootstrap_result = Arc::new(bootstrap_result);
+
     tauri::Builder::default()
         // ========== 插件注册 ==========
         .plugin(tauri_plugin_shell::init())          // Shell 能力（打开外部 URL/文件）
@@ -103,12 +176,16 @@ pub fn run() {
         .manage(TerminalState::new())        // 终端会话状态（管理多个 PTY 会话）
         .manage(BrowserState::new())         // 内嵌浏览器状态（标签页管理）
         .manage(UpdateState::new())          // 自动更新状态（版本检查、下载进度）
+        .manage(ServerState::new(server_addr, bootstrap_result)) // 嵌入式服务器状态
 
         // ========== 命令注册 ==========
         // 将 Rust 函数注册为前端可通过 `invoke()` 调用的 IPC 命令
         .invoke_handler(tauri::generate_handler![
             // 示例命令
             greet,
+
+            // 服务器命令
+            get_server_ws_url,               // 获取 WebSocket 服务器地址
 
             // 对话框命令
             pick_folder,                     // 选择文件夹

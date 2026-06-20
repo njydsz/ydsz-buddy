@@ -835,7 +835,7 @@ function ProjectSortMenu({
       <MenuPopup
         align="end"
         side="bottom"
-        className="min-w-44 rounded-lg border-[color:var(--color-border)] bg-[var(--color-background-elevated-primary-opaque)] shadow-lg"
+        className="min-w-44 rounded-lg border-(--color-border) bg-(--color-background-elevated-primary-opaque) shadow-lg"
       >
         <MenuGroup>
           <div className="px-2 py-1 sm:text-xs font-medium text-muted-foreground">
@@ -917,7 +917,7 @@ function ChatSortMenu({
       <MenuPopup
         align="end"
         side="bottom"
-        className="min-w-44 rounded-lg border-[color:var(--color-border)] bg-[var(--color-background-elevated-primary-opaque)] shadow-lg"
+        className="min-w-44 rounded-lg border-(--color-border) bg-(--color-background-elevated-primary-opaque) shadow-lg"
       >
         <MenuGroup>
           <div className="px-2 py-1 sm:text-xs font-medium text-muted-foreground">
@@ -956,7 +956,7 @@ function SidebarPrimaryAction({
         size="default"
         data-active={active}
         aria-current={active ? "page" : undefined}
-        className="group/sidebar-primary-action h-8 gap-2.5 rounded-lg px-2 font-system-ui text-[length:var(--app-font-size-ui,12px)] font-normal text-foreground/89 transition-colors hover:bg-[var(--sidebar-accent)] data-[active=true]:bg-[var(--sidebar-accent-active)] data-[active=true]:text-[var(--sidebar-accent-foreground)]"
+        className="group/sidebar-primary-action h-8 gap-2.5 rounded-lg px-2 font-system-ui text-(length:--app-font-size-ui,12px) font-normal text-foreground/89 transition-colors hover:bg-(--sidebar-accent) data-[active=true]:bg-(--sidebar-accent-active) data-[active=true]:text-(--sidebar-accent-foreground)"
         aria-disabled={disabled || undefined}
         disabled={disabled}
         onClick={onClick}
@@ -1025,7 +1025,7 @@ function SidebarSegmentedPicker({
 }) {
   return (
     <div className="px-3 pb-2.5">
-      <div className="inline-flex w-full rounded-md bg-[var(--color-background-elevated-secondary)] p-0.5">
+      <div className="inline-flex w-full rounded-md bg-(--color-background-elevated-secondary) p-0.5">
         {(["threads", "workspace"] as const).map((view) => {
           const active = activeView === view;
           return (
@@ -1035,8 +1035,8 @@ function SidebarSegmentedPicker({
               className={cn(
                 "flex-1 rounded-sm px-2.5 py-1 text-[11.5px] font-medium transition-colors",
                 active
-                  ? "bg-[var(--composer-surface)] text-[var(--color-text-foreground)] shadow-xs"
-                  : "text-[var(--color-text-foreground-secondary)] hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]",
+                  ? "bg-(--composer-surface) text-(--color-text-foreground) shadow-xs"
+                  : "text-(--color-text-foreground-secondary) hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)",
               )}
               onClick={() => onSelectView(view)}
             >
@@ -4004,13 +4004,13 @@ export default function Sidebar() {
           tabIndex={0}
           data-thread-item
           className={cn(
-            "grid h-8 w-full items-center gap-x-1.5 rounded-md px-2 text-left text-[length:var(--app-font-size-ui,12px)] transition-colors cursor-pointer",
+            "grid h-8 w-full items-center gap-x-1.5 rounded-md px-2 text-left text-(length:--app-font-size-ui,12px) transition-colors cursor-pointer",
             showThreadIdentityGlyph
               ? "grid-cols-[auto_auto_minmax(0,1fr)_auto_3.5rem]"
               : "grid-cols-[auto_minmax(0,1fr)_auto_3.5rem]",
             isActive
-              ? "bg-[var(--sidebar-accent-active)] text-[var(--sidebar-accent-foreground)]"
-              : "text-foreground/89 hover:bg-[var(--sidebar-accent)]",
+              ? "bg-(--sidebar-accent-active) text-(--sidebar-accent-foreground)"
+              : "text-foreground/89 hover:bg-(--sidebar-accent)",
           )}
           onPointerDown={(event) => primeThreadActivation(event, thread.id)}
           onClick={() => activateThreadFromSidebarIntent(thread.id)}
@@ -4105,9 +4105,9 @@ export default function Sidebar() {
             ) : null}
           </div>
           {/* Keep pinned rows on stable columns even when badges/timestamps differ. */}
-          <div className="flex min-w-0 max-w-[3rem] shrink items-center justify-end">
+          <div className="flex min-w-0 max-w-12 shrink items-center justify-end">
             {projectLabel ? (
-              <span className="truncate text-right text-[length:var(--app-font-size-ui-meta,10px)] text-muted-foreground/38">
+              <span className="truncate text-right text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/38">
                 {projectLabel}
               </span>
             ) : null}
@@ -4209,8 +4209,8 @@ export default function Sidebar() {
           secondaryMetaClass,
         );
     const toggleButtonClassName = isHighlighted
-      ? "border-[color:var(--color-border)] bg-[var(--color-background-button-secondary)] text-[var(--color-text-foreground-secondary)] hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
-      : "border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)] text-[var(--color-text-foreground-secondary)] hover:border-[color:var(--color-border)] hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]";
+      ? "border-(--color-border) bg-(--color-background-button-secondary) text-(--color-text-foreground-secondary) hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
+      : "border-(--color-border-light) bg-(--color-background-elevated-secondary) text-(--color-text-foreground-secondary) hover:border-(--color-border) hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)";
 
     return (
       <SidebarMenuSubItem key={thread.id} className="group/thread-row w-full" data-thread-item>
@@ -4357,7 +4357,7 @@ export default function Sidebar() {
                     el.select();
                   }
                 }}
-                className="min-w-0 flex-1 truncate rounded-md border border-ring bg-transparent px-1.5 py-0.5 text-[length:var(--app-font-size-ui,12px)] outline-none"
+                className="min-w-0 flex-1 truncate rounded-md border border-ring bg-transparent px-1.5 py-0.5 text-(length:--app-font-size-ui,12px) outline-none"
                 value={renamingTitle}
                 onChange={(e) => setRenamingTitle(e.target.value)}
                 onKeyDown={(e) => {
@@ -4382,7 +4382,7 @@ export default function Sidebar() {
             ) : (
               <span
                 className={cn(
-                  "min-w-0 flex-1 truncate text-[length:var(--app-font-size-ui,12px)]",
+                  "min-w-0 flex-1 truncate text-(length:--app-font-size-ui,12px)",
                   // Inactive thread names sit at 92% foreground so they read
                   // clearly without competing with the active row, which still
                   // pops via the row background and full-foreground color from
@@ -4517,7 +4517,7 @@ export default function Sidebar() {
           <SidebarMenuButton
             ref={isManualProjectSorting ? dragHandleProps?.setActivatorNodeRef : undefined}
             size="sm"
-            className={`h-8 gap-2 rounded-md px-2 py-0.5 text-left text-[length:var(--app-font-size-ui,12px)] font-normal transition-[padding] duration-150 ease-out hover:bg-[var(--sidebar-accent)] group-hover/project-header:bg-[var(--sidebar-accent)] group-hover/project-header:pr-[4.75rem] group-hover/project-header:text-[var(--sidebar-accent-foreground)] group-focus-within/project-header:pr-[4.75rem] ${
+            className={`h-8 gap-2 rounded-md px-2 py-0.5 text-left text-(length:--app-font-size-ui,12px) font-normal transition-[padding] duration-150 ease-out hover:bg-(--sidebar-accent) group-hover/project-header:bg-(--sidebar-accent) group-hover/project-header:pr-19 group-hover/project-header:text-(--sidebar-accent-foreground) group-focus-within/project-header:pr-19 ${
               isManualProjectSorting ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
             }`}
             {...(isManualProjectSorting && dragHandleProps ? dragHandleProps.attributes : {})}
@@ -4557,7 +4557,7 @@ export default function Sidebar() {
                       element.select();
                     }
                   }}
-                  className="min-w-0 flex-1 rounded-md border border-ring bg-transparent px-1.5 py-0.5 text-[length:var(--app-font-size-ui,12px)] font-normal text-foreground outline-none"
+                  className="min-w-0 flex-1 rounded-md border border-ring bg-transparent px-1.5 py-0.5 text-(length:--app-font-size-ui,12px) font-normal text-foreground outline-none"
                   value={renamingProjectName}
                   placeholder={project.folderName}
                   onChange={(event) => setRenamingProjectName(event.target.value)}
@@ -4585,11 +4585,11 @@ export default function Sidebar() {
                 />
               ) : (
                 <>
-                  <span className="truncate font-system-ui text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79">
+                  <span className="truncate font-system-ui text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79">
                     {project.name}
                   </span>
                   {project.localName ? (
-                    <span className="shrink-0 truncate text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/40">
+                    <span className="shrink-0 truncate text-(length:--app-font-size-ui,12px) text-muted-foreground/40">
                       {project.folderName}
                     </span>
                   ) : null}
@@ -4608,7 +4608,7 @@ export default function Sidebar() {
                     />
                   }
                   showOnHover
-                  className="sidebar-icon-button top-1 right-[1.875rem] size-5 p-0"
+                  className="sidebar-icon-button top-1 right-7.5 size-5 p-0"
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -4641,7 +4641,7 @@ export default function Sidebar() {
                     />
                   }
                   showOnHover
-                  className="sidebar-icon-button top-1 right-[3.375rem] size-5 p-0"
+                  className="sidebar-icon-button top-1 right-13.5 size-5 p-0"
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -4723,7 +4723,7 @@ export default function Sidebar() {
                     render={<button type="button" />}
                     data-thread-selection-safe
                     size="sm"
-                    className="h-7 w-full translate-x-0 justify-start rounded-lg pr-2 pl-8 text-left text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/79 hover:bg-[var(--sidebar-accent)]"
+                    className="h-7 w-full translate-x-0 justify-start rounded-lg pr-2 pl-8 text-left text-(length:--app-font-size-ui,12px) text-muted-foreground/79 hover:bg-(--sidebar-accent)"
                     onClick={() => {
                       expandThreadListForProject(project.cwd);
                     }}
@@ -4738,7 +4738,7 @@ export default function Sidebar() {
                     render={<button type="button" />}
                     data-thread-selection-safe
                     size="sm"
-                    className="h-7 w-full translate-x-0 justify-start rounded-lg pr-2 pl-8 text-left text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/79 hover:bg-[var(--sidebar-accent)]"
+                    className="h-7 w-full translate-x-0 justify-start rounded-lg pr-2 pl-8 text-left text-(length:--app-font-size-ui,12px) text-muted-foreground/79 hover:bg-(--sidebar-accent)"
                     onClick={() => {
                       collapseThreadListForProject(project.cwd);
                     }}
@@ -5367,7 +5367,7 @@ export default function Sidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   size="default"
-                  className="h-8 gap-2.5 rounded-lg px-2 text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79 hover:bg-[var(--sidebar-accent)] hover:text-foreground"
+                  className="h-8 gap-2.5 rounded-lg px-2 text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79 hover:bg-(--sidebar-accent) hover:text-foreground"
                   onClick={() => handleSidebarViewChange("threads")}
                 >
                   <ArrowLeftIcon className="size-[15px]" />
@@ -5387,7 +5387,7 @@ export default function Sidebar() {
                 return (
                   <div key={group.id} className={groupIndex > 0 ? "pt-4" : undefined}>
                     <div className="mb-1.5 px-2">
-                      <span className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">
+                      <span className="text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/58">
                         {group.label}
                       </span>
                     </div>
@@ -5402,7 +5402,7 @@ export default function Sidebar() {
                               render={<button type="button" />}
                               size="sm"
                               isActive={isActive}
-                              className="group/settings-nav-item h-7.5 w-full justify-start gap-2 rounded-lg px-2 py-0.5 text-[length:var(--app-font-size-ui,12px)] font-normal hover:bg-[var(--sidebar-accent)]"
+                              className="group/settings-nav-item h-7.5 w-full justify-start gap-2 rounded-lg px-2 py-0.5 text-(length:--app-font-size-ui,12px) font-normal hover:bg-(--sidebar-accent)"
                               onClick={() => {
                                 void navigate({
                                   to: "/settings",
@@ -5416,7 +5416,7 @@ export default function Sidebar() {
                               <Icon className="size-3.5 shrink-0" />
                               <span
                                 className={cn(
-                                  "truncate text-[length:var(--app-font-size-ui,12px)] leading-5",
+                                  "truncate text-(length:--app-font-size-ui,12px) leading-5",
                                   // Matches the constant 89% foreground used by
                                   // SidebarPrimaryAction ("New chat" / "Search")
                                   // so settings nav labels sit at the same
@@ -5479,7 +5479,7 @@ export default function Sidebar() {
               <SidebarGroup className="px-1.5 pt-1 pb-1.5">
                 <div className="my-2 h-px w-full bg-border" />
                 <div className="mb-1.5 flex items-center px-2">
-                  <span className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">
+                  <span className="text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/58">
                     Workspace
                   </span>
                 </div>
@@ -5521,7 +5521,7 @@ export default function Sidebar() {
                                         setRenamingWorkspaceTitle(workspace.title);
                                       }
                                     }}
-                                    className="h-7 w-full rounded-md border border-[color:var(--color-border)] bg-[var(--color-background-control-opaque)] px-2 text-[length:var(--app-font-size-ui,12px)] text-[var(--color-text-foreground)] outline-none focus:border-[color:var(--color-border-focus)]"
+                                    className="h-7 w-full rounded-md border border-(--color-border) bg-[var(--color-background-control-opaque)] px-2 text-(length:--app-font-size-ui,12px) text-(--color-text-foreground) outline-none focus:border-[color:var(--color-border-focus)]"
                                   />
                                 </div>
                               ) : (
@@ -5529,7 +5529,7 @@ export default function Sidebar() {
                                   <SidebarMenuButton
                                     size="sm"
                                     isActive={isActive}
-                                    className="group/ws h-8 gap-2 rounded-lg px-2 font-system-ui text-[length:var(--app-font-size-ui,12px)] font-normal text-foreground/89 transition-colors hover:bg-[var(--sidebar-accent)] data-[active=true]:bg-[var(--sidebar-accent-active)] data-[active=true]:text-[var(--sidebar-accent-foreground)]"
+                                    className="group/ws h-8 gap-2 rounded-lg px-2 font-system-ui text-(length:--app-font-size-ui,12px) font-normal text-foreground/89 transition-colors hover:bg-(--sidebar-accent) data-[active=true]:bg-(--sidebar-accent-active) data-[active=true]:text-(--sidebar-accent-foreground)"
                                     onClick={() => {
                                       navigateToWorkspace(workspace.id);
                                     }}
@@ -5594,7 +5594,7 @@ export default function Sidebar() {
                 {pinnedThreads.length > 0 ? (
                   <>
                     <div className="my-1 flex items-center justify-between px-2 py-1">
-                      <span className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">
+                      <span className="text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/58">
                         Pinned
                       </span>
                     </div>
@@ -5607,7 +5607,7 @@ export default function Sidebar() {
                   <div className="-mx-1.5 my-1 h-px bg-border" />
                 )}
                 <div className="my-1 flex items-center justify-between px-2 py-1">
-                  <span className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">
+                  <span className="text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/58">
                     {messages.sidebar.threads}
                   </span>
                   <div className="-mr-1 flex items-center gap-1.5">
@@ -5687,7 +5687,7 @@ export default function Sidebar() {
                   <div className="mb-2.5 px-1">
                     <button
                       type="button"
-                      className="flex h-8 w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-background-elevated-secondary)] px-2 text-[length:var(--app-font-size-ui,12px)] font-normal text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)] disabled:opacity-50"
+                      className="flex h-8 w-full items-center justify-center gap-2 rounded-lg bg-(--color-background-elevated-secondary) px-2 text-(length:--app-font-size-ui,12px) font-normal text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground) disabled:opacity-50"
                       onClick={() => void handlePickFolder()}
                       disabled={isPickingFolder || isAddingProject}
                     >
@@ -5739,7 +5739,7 @@ export default function Sidebar() {
                     aria-live="polite"
                     aria-label={messages.sidebar.loadingProjects}
                   >
-                    <div className="text-center text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/58">
+                    <div className="text-center text-(length:--app-font-size-ui,12px) text-muted-foreground/58">
                       {messages.sidebar.loadingProjects}
                     </div>
                     <div className="mx-auto grid w-full max-w-42 gap-1.5 opacity-70">
@@ -5752,15 +5752,15 @@ export default function Sidebar() {
 
                 {projectEmptyState === "empty" && (
                   <div className="px-2 pt-4 text-center">
-                    <div className="text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/79">
+                    <div className="text-(length:--app-font-size-ui,12px) text-muted-foreground/79">
                       {messages.sidebar.noProjectsYet}
                     </div>
-                    <div className="mx-auto mt-1 max-w-45 text-[length:var(--app-font-size-ui-meta,10px)] leading-4 text-muted-foreground/58">
+                    <div className="mx-auto mt-1 max-w-45 text-(length:--app-font-size-ui-meta,10px) leading-4 text-muted-foreground/58">
                       {messages.sidebar.noProjectsYetDescription}
                     </div>
                     <button
                       type="button"
-                      className="mx-auto mt-3 inline-flex h-8 items-center justify-center gap-2 rounded-lg bg-[var(--color-background-elevated-secondary)] px-3 text-[length:var(--app-font-size-ui,12px)] font-normal text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)] disabled:opacity-50"
+                      className="mx-auto mt-3 inline-flex h-8 items-center justify-center gap-2 rounded-lg bg-(--color-background-elevated-secondary) px-3 text-(length:--app-font-size-ui,12px) font-normal text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground) disabled:opacity-50"
                       onClick={() => {
                         if (isDesktop) {
                           void handlePickFolder();
@@ -5792,7 +5792,7 @@ export default function Sidebar() {
             <div className="group/project-header relative">
               <SidebarMenuButton
                 size="sm"
-                className="h-7.5 gap-2 rounded-lg px-2 py-0.5 text-left text-[length:var(--app-font-size-ui,12px)] font-normal hover:bg-[var(--sidebar-accent)] group-hover/project-header:bg-[var(--sidebar-accent)] cursor-pointer"
+                className="h-7.5 gap-2 rounded-lg px-2 py-0.5 text-left text-(length:--app-font-size-ui,12px) font-normal hover:bg-(--sidebar-accent) group-hover/project-header:bg-(--sidebar-accent) cursor-pointer"
                 onClick={() => setChatSectionExpanded((current) => !current)}
                 onKeyDown={(event) => {
                   if (event.key !== "Enter" && event.key !== " ") return;
@@ -5804,7 +5804,7 @@ export default function Sidebar() {
                   <BsChat className="size-3.5" />
                 </span>
                 <div className="flex min-w-0 flex-1 items-baseline gap-2 overflow-hidden">
-                  <span className="truncate font-system-ui text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79">
+                  <span className="truncate font-system-ui text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79">
                     {messages.sidebar.chats}
                   </span>
                 </div>
@@ -5854,7 +5854,7 @@ export default function Sidebar() {
                   {visibleChatThreadRows.length > 0 ? (
                     renderedChatEntries.map((entry) => renderChatItem(entry.row))
                   ) : (
-                    <div className="px-2 py-2 text-[length:var(--app-font-size-ui,12px)] text-muted-foreground/48">
+                    <div className="px-2 py-2 text-(length:--app-font-size-ui,12px) text-muted-foreground/48">
                       No chats yet
                     </div>
                   )}
@@ -5862,7 +5862,7 @@ export default function Sidebar() {
                     <SidebarMenuItem className="w-full">
                       <SidebarMenuButton
                         size="sm"
-                        className="h-7 w-full justify-start rounded-lg pr-2 pl-8 text-left text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79 hover:bg-[var(--sidebar-accent)]"
+                        className="h-7 w-full justify-start rounded-lg pr-2 pl-8 text-left text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79 hover:bg-(--sidebar-accent)"
                         onClick={() => setChatThreadListExpanded(true)}
                       >
                         <span>{messages.sidebar.showMore}</span>
@@ -5873,7 +5873,7 @@ export default function Sidebar() {
                     <SidebarMenuItem className="w-full">
                       <SidebarMenuButton
                         size="sm"
-                        className="h-7 w-full justify-start rounded-lg pr-2 pl-8 text-left text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79 hover:bg-[var(--sidebar-accent)]"
+                        className="h-7 w-full justify-start rounded-lg pr-2 pl-8 text-left text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79 hover:bg-(--sidebar-accent)"
                         onClick={() => setChatThreadListExpanded(false)}
                       >
                         <span>{messages.sidebar.showLess}</span>
@@ -5897,7 +5897,7 @@ export default function Sidebar() {
                 {!isOnSettings && (
                   <SidebarMenuButton
                     size="default"
-                    className="h-8 flex-1 gap-2.5 rounded-lg px-2 text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/79 hover:bg-[var(--sidebar-accent)]"
+                    className="h-8 flex-1 gap-2.5 rounded-lg px-2 text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79 hover:bg-(--sidebar-accent)"
                     onClick={() => void navigate({ to: "/settings" })}
                   >
                     <SettingsIcon className="size-[15px]" />

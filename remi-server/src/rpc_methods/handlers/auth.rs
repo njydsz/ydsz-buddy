@@ -1,4 +1,21 @@
-//! Auth RPC 方法
+//! # 认证 RPC 方法模块
+//!
+//! 本模块注册所有与认证授权相关的 RPC 方法，包括引导凭证交换、
+//! 配对凭证签发、WebSocket 令牌签发、会话管理和配对链接管理等。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `auth.exchangeBootstrapCredential` | 交换引导凭证为会话 |
+//! | `auth.issuePairingCredential` | 签发配对凭证 |
+//! | `auth.issueWebsocketToken` | 签发 WebSocket 连接令牌 |
+//! | `auth.revokeSession` | 撤销指定会话 |
+//! | `auth.listPairingLinks` | 列出所有配对链接 |
+//! | `auth.revokePairingLink` | 撤销指定配对链接 |
+//! | `auth.listClientSessions` | 列出所有客户端会话 |
+//! | `auth.revokeOtherSessions` | 撤销除当前会话外的所有会话 |
+//! | `auth.getDescriptor` | 获取认证描述符 |
 
 use std::sync::Arc;
 
@@ -10,13 +27,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册认证相关 RPC 方法
+///
+/// 将所有认证方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 AuthService 实例
 pub async fn register_auth_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册认证 RPC 方法...");
 
-    // auth.exchangeBootstrapCredential
+    // auth.exchangeBootstrapCredential - 交换引导凭证为认证会话
+    // 参数: { credential: string, clientMetadata?: ClientMetadata }
+    // 返回: AuthenticatedSession
     let auth_service = services.auth_service.clone();
     router
         .register("auth.exchangeBootstrapCredential", move |params: Option<Value>| {
@@ -59,7 +85,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.issuePairingCredential
+    // auth.issuePairingCredential - 签发配对凭证，用于新设备配对
+    // 参数: 无
+    // 返回: PairingCredential
     let auth_service = services.auth_service.clone();
     router
         .register("auth.issuePairingCredential", move |_params: Option<Value>| {
@@ -72,7 +100,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.issueWebsocketToken
+    // auth.issueWebsocketToken - 签发 WebSocket 连接令牌
+    // 参数: { sessionId: string }
+    // 返回: WebsocketToken
     let auth_service = services.auth_service.clone();
     router
         .register("auth.issueWebsocketToken", move |params: Option<Value>| {
@@ -105,7 +135,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.revokeSession
+    // auth.revokeSession - 撤销指定会话
+    // 参数: { sessionId: string }
+    // 返回: null
     let auth_service = services.auth_service.clone();
     router
         .register("auth.revokeSession", move |params: Option<Value>| {
@@ -128,7 +160,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.listPairingLinks
+    // auth.listPairingLinks - 列出所有配对链接
+    // 参数: 无
+    // 返回: PairingLink[]
     let auth_service = services.auth_service.clone();
     router
         .register("auth.listPairingLinks", move |_params: Option<Value>| {
@@ -141,7 +175,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.revokePairingLink
+    // auth.revokePairingLink - 撤销指定配对链接
+    // 参数: { id: string }
+    // 返回: null
     let auth_service = services.auth_service.clone();
     router
         .register("auth.revokePairingLink", move |params: Option<Value>| {
@@ -164,7 +200,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.listClientSessions
+    // auth.listClientSessions - 列出所有客户端会话
+    // 参数: { currentSessionId?: string }
+    // 返回: ClientSession[]
     let auth_service = services.auth_service.clone();
     router
         .register("auth.listClientSessions", move |params: Option<Value>| {
@@ -186,7 +224,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.revokeOtherSessions
+    // auth.revokeOtherSessions - 撤销除当前会话外的所有会话
+    // 参数: { currentSessionId: string }
+    // 返回: { revokedCount: number }
     let auth_service = services.auth_service.clone();
     router
         .register("auth.revokeOtherSessions", move |params: Option<Value>| {
@@ -209,7 +249,9 @@ pub async fn register_auth_methods(
         })
         .await;
 
-    // auth.getDescriptor
+    // auth.getDescriptor - 获取认证描述符，包含认证配置信息
+    // 参数: 无
+    // 返回: AuthDescriptor
     let auth_service = services.auth_service.clone();
     router
         .register("auth.getDescriptor", move |_params: Option<Value>| {

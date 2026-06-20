@@ -333,12 +333,16 @@ mod tests {
     use std::sync::Arc;
     use tempfile::TempDir;
 
+    /// 创建测试用的 SQLite 投影仓库
+    ///
+    /// 使用临时目录创建独立的数据库文件，确保测试之间互不影响
     fn setup_test_repo() -> Arc<SqliteProjectionRepository> {
         let temp_dir = TempDir::new().unwrap();
         let db_path = temp_dir.path().join("test.db");
         Arc::new(SqliteProjectionRepository::new(db_path.to_str().unwrap()).unwrap())
     }
 
+    /// 测试项目存在性校验：不存在的项目应返回错误
     #[test]
     fn test_require_project_exists() {
         let repo = setup_test_repo();
@@ -349,6 +353,7 @@ mod tests {
         assert!(result.is_err());
     }
 
+    /// 测试线程不存在性校验：不存在的线程应通过校验
     #[test]
     fn test_require_thread_not_exists() {
         let repo = setup_test_repo();

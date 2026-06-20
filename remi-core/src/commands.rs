@@ -367,17 +367,26 @@ pub struct ThreadCreateCommand {
     pub handoff: Option<HandoffInfo>,
 }
 
-/// 默认运行时模式
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `runtime_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`RuntimeMode::Agent`]（自主执行模式），因为大多数对话场景下用户期望 AI 主动执行操作，
+/// 而非仅回答问题或生成计划。
 fn default_runtime_mode() -> RuntimeMode {
     RuntimeMode::Agent
 }
 
-/// 默认交互模式
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `interaction_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`InteractionMode::Chat`]（普通对话模式），这是最常用的交互方式，
+/// 代码审查模式（Review）需要用户显式选择。
 fn default_interaction_mode() -> InteractionMode {
     InteractionMode::Chat
 }
 
-/// 默认环境模式
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `env_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`EnvMode::Local`]（本地目录模式），即直接在项目工作区中操作，
+/// Git Worktree 隔离环境需要用户显式选择以避免意外创建工作树。
 fn default_env_mode() -> EnvMode {
     EnvMode::Local
 }

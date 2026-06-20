@@ -222,13 +222,17 @@ impl WorkspaceFileSystem {
     /// // Err(WorkspaceError::PathOutsideRoot)
     /// ```
     pub fn validate_path(cwd: &str, relative_path: &str) -> WorkspaceResult<PathBuf> {
+        // 将 cwd 规范化为绝对路径，如果 cwd 不存在则说明工作空间根目录无效
         let root = Path::new(cwd).canonicalize().map_err(|e| {
             WorkspaceError::DirectoryNotFound(format!("{}: {}", cwd, e))
         })?;
 
         let full_path = root.join(relative_path);
+        // canonicalize 在路径不存在时会失败，此处使用 unwrap_or 回退到原始拼接路径
+        // 以便后续的 starts_with 检查仍能对尚未创建的文件路径进行安全校验
         let canonical = full_path.canonicalize().unwrap_or(full_path.clone());
 
+        // 安全校验：确保解析后的路径仍在工作空间根目录内，防止路径穿越攻击
         if !canonical.starts_with(&root) {
             return Err(WorkspaceError::PathOutsideRoot(format!(
                 "{} 不在 {} 内",
@@ -282,10 +286,12 @@ impl WorkspaceFileSystem {
 
         info!("写入文件: {}", absolute_path.display());
 
-        // 检查文件是否已存在
+        // 在写入前先检查文件是否存在，用于返回结果中的 created 标识
+        // 注意：必须在写入操作之前检查，否则写入后文件必然存在
         let created = !absolute_path.exists();
 
-        // 创建中间目录
+        // 创建中间目录：当 create_directories 为 true 时，自动创建文件路径中不存在的父目录
+        // 这对于代码生成等场景很有用，目标文件的父目录可能尚未创建
         if input.create_directories {
             if let Some(parent) = absolute_path.parent() {
                 fs::create_dir_all(parent).await.map_err(|e| {
@@ -343,6 +349,8 @@ impl WorkspaceFileSystem {
         debug!("读取文件: {}", absolute_path.display());
 
         let content = fs::read_to_string(&absolute_path).await.map_err(|e| {
+            // 将 NotFound 类型的 I/O 错误转换为更具体的 FileNotFound 错误
+            // 便于上层调用方区分"文件不存在"和其他 I/O 异常
             if e.kind() == std::io::ErrorKind::NotFound {
                 WorkspaceError::FileNotFound(relative_path.to_string())
             } else {
@@ -389,6 +397,8 @@ impl WorkspaceFileSystem {
         info!("删除文件: {}", absolute_path.display());
 
         fs::remove_file(&absolute_path).await.map_err(|e| {
+            // 将 NotFound 类型的 I/O 错误转换为更具体的 FileNotFound 错误
+            // 便于上层调用方区分"文件不存在"和其他 I/O 异常
             if e.kind() == std::io::ErrorKind::NotFound {
                 WorkspaceError::FileNotFound(relative_path.to_string())
             } else {
@@ -434,6 +444,8 @@ impl WorkspaceFileSystem {
     /// ```
     pub async fn file_exists(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<bool> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
+        // 使用同步的 exists() 检查文件是否存在，避免额外的异步 I/O 开销
+        // 对于已通过路径校验的情况，exists() 的性能优于先 open 再 close
         Ok(absolute_path.exists())
     }
 }

@@ -43,9 +43,13 @@ use portable_pty::{native_pty_system, CommandBuilder};
 use tracing::{debug, error};
 
 /// PTY 大小配置
+///
+/// 定义伪终端的窗口尺寸，用于创建和调整 PTY 时指定列数和行数。
 #[derive(Debug, Clone, Copy)]
 pub struct PtySize {
+    /// 终端列数（窗口宽度），即每行可显示的字符数
     pub cols: u16,
+    /// 终端行数（窗口高度），即终端可显示的文本行数
     pub rows: u16,
 }
 
@@ -124,8 +128,10 @@ impl PtyProcess {
     /// 本方法不会返回错误，而是在失败时记录错误日志并返回未初始化的实例。
     /// 调用方应检查 `pid()` 是否为 0 来判断创建是否成功。
     pub fn new(cwd: &str, size: PtySize, env: &HashMap<String, String>) -> Self {
+        // 获取当前平台原生的 PTY 系统实现（Windows 为 ConPTY，Unix 为 POSIX PTY）
         let pty_system = native_pty_system();
-        
+
+        // 打开 PTY 设备对（master/slave），失败时返回未初始化实例
         let pty_pair = match pty_system.openpty(portable_pty::PtySize {
             rows: size.rows,
             cols: size.cols,
@@ -145,7 +151,7 @@ impl PtyProcess {
             }
         };
 
-        // 确定 shell 命令
+        // 根据平台选择默认 shell：Windows 使用 COMSPEC 或 cmd.exe，Unix 使用 SHELL 或 /bin/bash
         let shell_cmd = if cfg!(windows) {
             std::env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string())
         } else {
@@ -155,12 +161,12 @@ impl PtyProcess {
         let mut cmd = CommandBuilder::new(&shell_cmd);
         cmd.cwd(std::path::Path::new(cwd));
 
-        // 设置环境变量
+        // 将自定义环境变量合并到子进程环境中，覆盖同名默认变量
         for (key, value) in env {
             cmd.env(key, value);
         }
 
-        // 启动子进程
+        // 在 PTY slave 端启动子进程，失败时返回未初始化实例
         let child = match pty_pair.slave.spawn_command(cmd) {
             Ok(c) => c,
             Err(e) => {
@@ -175,6 +181,7 @@ impl PtyProcess {
             }
         };
 
+        // 从 master 端获取写入和读取句柄，用于与子进程通信
         let writer = pty_pair.master.take_writer().ok();
         let reader = pty_pair.master.try_clone_reader().ok();
 
@@ -242,9 +249,11 @@ impl PtyProcess {
     pub fn write(&self, data: &str) {
         if let Some(ref writer) = self.writer {
             if let Ok(mut w) = writer.lock() {
+                // 写入全部数据，失败时仅记录日志不中断流程
                 if let Err(e) = w.write_all(data.as_bytes()) {
                     error!("Failed to write to PTY: {}", e);
                 }
+                // 立即刷新缓冲区，确保数据及时传递给子进程
                 if let Err(e) = w.flush() {
                     error!("Failed to flush PTY: {}", e);
                 }
@@ -280,6 +289,7 @@ impl PtyProcess {
                 match r.read(buf) {
                     Ok(n) => return Some(n),
                     Err(e) => {
+                        // WouldBlock 表示当前无数据可读，属于正常情况，无需记录错误
                         if e.kind() != std::io::ErrorKind::WouldBlock {
                             error!("Failed to read from PTY: {}", e);
                         }
@@ -329,7 +339,7 @@ impl PtyProcess {
     pub fn is_alive(&self) -> bool {
         if let Some(ref child) = self.child {
             if let Ok(mut c) = child.lock() {
-                // 尝试等待，如果返回 None 说明还在运行
+                // try_wait() 返回 None 表示进程仍在运行，返回 Some 表示进程已退出
                 return c.try_wait().ok().flatten().is_none();
             }
         }

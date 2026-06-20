@@ -1,4 +1,18 @@
-//! Git RPC 方法
+//! # Git RPC 方法模块
+//!
+//! 本模块注册所有与 Git 版本控制相关的 RPC 方法，包括状态查询、分支操作、
+//! 代码拉取和堆叠操作（commit/push/PR）等。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `git.status` | 获取指定仓库的 Git 状态 |
+//! | `git.listBranches` | 列出指定仓库的所有分支 |
+//! | `git.pull` | 拉取当前分支的最新代码 |
+//! | `git.runStackedAction` | 执行堆叠 Git 操作（commit/push/PR） |
+//! | `git.createBranch` | 创建新分支 |
+//! | `git.checkout` | 切换到指定分支 |
 
 use std::sync::Arc;
 
@@ -10,13 +24,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册 Git 相关 RPC 方法
+///
+/// 将所有 Git 方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 GitCore、GitManager 和 GitStatusBroadcaster 实例
 pub async fn register_git_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册 Git RPC 方法...");
 
-    // git.status
+    // git.status - 获取指定仓库的 Git 状态
+    // 参数: { cwd: string }
+    // 返回: GitStatus
     let broadcaster = services.git_status_broadcaster.clone();
     router
         .register("git.status", move |params: Option<Value>| {
@@ -40,7 +63,9 @@ pub async fn register_git_methods(
         })
         .await;
 
-    // git.listBranches
+    // git.listBranches - 列出指定仓库的所有分支
+    // 参数: { cwd: string }
+    // 返回: Branch[]
     let git_core = services.git_core.clone();
     router
         .register("git.listBranches", move |params: Option<Value>| {
@@ -64,7 +89,9 @@ pub async fn register_git_methods(
         })
         .await;
 
-    // git.pull
+    // git.pull - 拉取当前分支的最新代码，并刷新状态广播
+    // 参数: { cwd: string }
+    // 返回: null
     let git_core = services.git_core.clone();
     let broadcaster = services.git_status_broadcaster.clone();
     router
@@ -90,7 +117,10 @@ pub async fn register_git_methods(
         })
         .await;
 
-    // git.runStackedAction
+    // git.runStackedAction - 执行堆叠 Git 操作（commit/push/PR 组合）
+    // 参数: { cwd: string, action: "commit"|"push"|"createPr"|"commitPush"|"commitPushPr",
+    //         message?: string, prTitle?: string, prBody?: string, prBase?: string }
+    // 返回: null
     let git_manager = services.git_manager.clone();
     let broadcaster = services.git_status_broadcaster.clone();
     router
@@ -162,7 +192,9 @@ pub async fn register_git_methods(
         })
         .await;
 
-    // git.createBranch
+    // git.createBranch - 创建新分支
+    // 参数: { cwd: string, branch: string }
+    // 返回: null
     let git_core = services.git_core.clone();
     router
         .register("git.createBranch", move |params: Option<Value>| {
@@ -192,7 +224,9 @@ pub async fn register_git_methods(
         })
         .await;
 
-    // git.checkout
+    // git.checkout - 切换到指定分支
+    // 参数: { cwd: string, branch: string }
+    // 返回: null
     let git_core = services.git_core.clone();
     router
         .register("git.checkout", move |params: Option<Value>| {
@@ -217,6 +251,108 @@ pub async fn register_git_methods(
                     })?;
 
                 git_core.checkout_branch(cwd, branch).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.diff
+    let git_core = services.git_core.clone();
+    router
+        .register("git.diff", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let staged = params
+                    .get("staged")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
+                let diff = git_core.diff(cwd, staged).await?;
+                Ok(serde_json::json!({ "diff": diff }))
+            }
+        })
+        .await;
+
+    // git.log
+    let git_core = services.git_core.clone();
+    router
+        .register("git.log", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let max_count = params
+                    .get("maxCount")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(50) as usize;
+
+                let log = git_core.log(cwd, max_count).await?;
+                Ok(serde_json::json!({ "log": log }))
+            }
+        })
+        .await;
+
+    // git.stash
+    let git_core = services.git_core.clone();
+    router
+        .register("git.stash", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                git_core.stash(cwd).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.stashPop
+    let git_core = services.git_core.clone();
+    router
+        .register("git.stashPop", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                git_core.stash_pop(cwd).await?;
                 Ok(Value::Null)
             }
         })

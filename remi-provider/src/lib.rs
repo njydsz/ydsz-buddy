@@ -89,6 +89,11 @@ pub mod reaper;
 /// 提供跨 Provider 的统一操作接口，是上层业务与 Provider 交互的主要入口。
 pub mod service;
 
+/// ACP (Agent Client Protocol) 支持模块
+///
+/// 提供与 ACP 协议兼容的 Provider 集成能力，支持 Cursor、Grok 等 ACP 客户端。
+pub mod acp;
+
 // 重新导出所有公共 API，方便外部使用
 pub use adapter::*;
 pub use error::*;
@@ -96,3 +101,4 @@ pub use health::*;
 pub use jsonrpc_client::*;
 pub use reaper::*;
 pub use service::*;
+pub use acp::*;

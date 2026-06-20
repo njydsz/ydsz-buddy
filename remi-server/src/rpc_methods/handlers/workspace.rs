@@ -1,7 +1,22 @@
-//! Workspace RPC 方法
+//! # 工作空间 RPC 方法模块
+//!
+//! 本模块注册所有与工作空间文件操作相关的 RPC 方法，包括文件浏览、
+//! 搜索、读写和删除等操作。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `workspace.browse` | 浏览工作空间目录树 |
+//! | `workspace.search` | 搜索工作空间中的文件 |
+//! | `workspace.listDirectories` | 列出工作空间目录结构 |
+//! | `workspace.writeFile` | 写入文件 |
+//! | `workspace.readFile` | 读取文件内容 |
+//! | `workspace.deleteFile` | 删除文件 |
 
 use std::sync::Arc;
 
+use remi_core::commands::{OrchestrationCommand, ProjectCreateCommand, ProjectDeleteCommand};
 use remi_workspace::{
     BrowseInput, ListDirectoriesInput, SearchEntriesInput, WriteFileInput,
 };
@@ -12,13 +27,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册工作空间相关 RPC 方法
+///
+/// 将所有工作空间方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 WorkspaceEntries 和 WorkspaceFileSystem 实例
 pub async fn register_workspace_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册工作空间 RPC 方法...");
 
-    // workspace.browse
+    // workspace.browse - 浏览工作空间目录树
+    // 参数: { root: string, path?: string, includeHidden?: boolean, maxDepth?: number }
+    // 返回: Entry[]
     let workspace_entries = services.workspace_entries.clone();
     router
         .register("workspace.browse", move |params: Option<Value>| {
@@ -65,7 +89,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.search
+    // workspace.search - 搜索工作空间中的文件
+    // 参数: { root: string, pattern: string, maxResults?: number, filePattern?: string }
+    // 返回: Entry[]
     let workspace_entries = services.workspace_entries.clone();
     router
         .register("workspace.search", move |params: Option<Value>| {
@@ -115,7 +141,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.listDirectories
+    // workspace.listDirectories - 列出工作空间目录结构
+    // 参数: { root: string, maxDepth?: number }
+    // 返回: Directory[]
     let workspace_entries = services.workspace_entries.clone();
     router
         .register("workspace.listDirectories", move |params: Option<Value>| {
@@ -150,7 +178,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.writeFile
+    // workspace.writeFile - 写入文件
+    // 参数: { root: string, path: string, content: string, createDirectories?: boolean }
+    // 返回: WriteResult
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
         .register("workspace.writeFile", move |params: Option<Value>| {
@@ -203,7 +233,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.readFile
+    // workspace.readFile - 读取文件内容
+    // 参数: { root: string, path: string }
+    // 返回: { content: string }
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
         .register("workspace.readFile", move |params: Option<Value>| {
@@ -233,7 +265,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.deleteFile
+    // workspace.deleteFile - 删除文件
+    // 参数: { root: string, path: string }
+    // 返回: null
     let workspace_filesystem = services.workspace_filesystem.clone();
     router
         .register("workspace.deleteFile", move |params: Option<Value>| {
@@ -258,6 +292,93 @@ pub async fn register_workspace_methods(
                     })?;
 
                 workspace_filesystem.delete_file(root, path).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // workspace.listProjects
+    let projection_query = services.projection_query.clone();
+    router
+        .register("workspace.listProjects", move |_params: Option<Value>| {
+            let projection_query = projection_query.clone();
+            async move {
+                let snapshot = projection_query.get_snapshot().await?;
+                serde_json::to_value(snapshot.projects)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // workspace.addProject - 添加项目
+    // 参数: { path: string }
+    // 返回: null
+    let engine = services.orchestration_engine.clone();
+    router
+        .register("workspace.addProject", move |params: Option<Value>| {
+            let engine = engine.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let path = params
+                    .get("path")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing path".to_string())
+                    })?
+                    .to_string();
+
+                // 从路径中提取项目名
+                let title = path
+                    .split('\\')
+                    .last()
+                    .or_else(|| path.split('/').last())
+                    .unwrap_or(&path)
+                    .to_string();
+
+                let project_id = uuid::Uuid::new_v4();
+                let command = OrchestrationCommand::ProjectCreate(ProjectCreateCommand {
+                    command_id: None,
+                    project_id,
+                    title,
+                    workspace_root: path,
+                });
+                engine.dispatch(command).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // workspace.removeProject - 移除项目
+    // 参数: { projectId: string }
+    // 返回: null
+    let engine = services.orchestration_engine.clone();
+    router
+        .register("workspace.removeProject", move |params: Option<Value>| {
+            let engine = engine.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let project_id_str = params
+                    .get("projectId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing projectId".to_string())
+                    })?;
+
+                let project_id: uuid::Uuid = project_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid projectId: {}", e)))?;
+
+                let command = OrchestrationCommand::ProjectDelete(ProjectDeleteCommand {
+                    command_id: None,
+                    project_id,
+                });
+                engine.dispatch(command).await?;
                 Ok(Value::Null)
             }
         })

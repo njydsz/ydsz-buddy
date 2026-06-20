@@ -350,6 +350,7 @@ impl WorkspaceEntries {
     /// }).await?;
     /// ```
     pub async fn browse(&self, input: BrowseInput) -> WorkspaceResult<BrowseResult> {
+        // 拼接基础路径：如果指定了相对路径则拼接，否则直接使用 cwd
         let base_path = if let Some(ref rel) = input.relative_path {
             Path::new(&input.cwd).join(rel)
         } else {
@@ -367,6 +368,7 @@ impl WorkspaceEntries {
         let max_depth = input.max_depth.unwrap_or(1);
         let mut entries = Vec::new();
 
+        // min_depth(1) 跳过根目录本身，只返回其子条目
         let walker = WalkDir::new(&base_path)
             .max_depth(max_depth)
             .min_depth(1)
@@ -375,6 +377,7 @@ impl WorkspaceEntries {
                 if input.include_hidden {
                     return true;
                 }
+                // 过滤以 '.' 开头的隐藏文件/目录，unwrap_or(true) 确保无法解析文件名时保留该条目
                 e.file_name()
                     .to_str()
                     .map(|s| !s.starts_with('.'))
@@ -389,6 +392,7 @@ impl WorkspaceEntries {
 
             let file_type = entry.file_type();
             let name = entry.file_name().to_string_lossy().to_string();
+            // 计算相对于工作空间根目录的路径，unwrap_or 兜底处理路径不在 cwd 下的情况
             let relative = entry
                 .path()
                 .strip_prefix(&input.cwd)
@@ -396,6 +400,7 @@ impl WorkspaceEntries {
                 .to_string_lossy()
                 .to_string();
 
+            // 仅对文件获取大小，目录大小无意义故设为 None
             let size = if file_type.is_file() {
                 entry.metadata().ok().map(|m| m.len())
             } else {
@@ -464,7 +469,7 @@ impl WorkspaceEntries {
         let mut entries = Vec::new();
         let query_lower = input.query.to_lowercase();
 
-        // 构建文件类型过滤器
+        // 构建文件类型过滤器：使用 GlobSet 实现高效的 glob 模式匹配
         let mut glob_builder = GlobSetBuilder::new();
         if let Some(ref pattern) = input.file_pattern {
             if let Ok(glob) = Glob::new(pattern) {
@@ -476,6 +481,7 @@ impl WorkspaceEntries {
         let walker = WalkDir::new(&input.cwd)
             .into_iter()
             .filter_entry(|e| {
+                // 搜索时始终过滤隐藏文件，避免搜索结果中出现 .git 等干扰目录
                 e.file_name()
                     .to_str()
                     .map(|s| !s.starts_with('.'))
@@ -495,13 +501,14 @@ impl WorkspaceEntries {
                 continue;
             }
 
-            // 文件类型过滤
+            // 文件类型过滤：仅对文件应用 glob 模式，目录始终通过以允许递归进入子目录搜索
             if let Some(ref filter) = file_filter {
                 if entry.file_type().is_file() && !filter.is_empty() && !filter.is_match(&name) {
                     continue;
                 }
             }
 
+            // 计算相对于工作空间根目录的路径，unwrap_or 兜底处理路径不在 cwd 下的情况
             let relative = entry
                 .path()
                 .strip_prefix(&input.cwd)
@@ -509,6 +516,7 @@ impl WorkspaceEntries {
                 .to_string_lossy()
                 .to_string();
 
+            // 仅对文件获取大小，目录大小无意义故设为 None
             let size = if entry.file_type().is_file() {
                 entry.metadata().ok().map(|m| m.len())
             } else {
@@ -522,6 +530,7 @@ impl WorkspaceEntries {
                 size,
             });
 
+            // 达到最大结果数时提前终止遍历，避免不必要的文件系统访问
             if entries.len() >= max_results {
                 break;
             }
@@ -575,11 +584,13 @@ impl WorkspaceEntries {
         let max_depth = input.max_depth.unwrap_or(3);
         let mut directories = Vec::new();
 
+        // min_depth(1) 跳过根目录本身，只返回其子目录
         let walker = WalkDir::new(&input.cwd)
             .max_depth(max_depth)
             .min_depth(1)
             .into_iter()
             .filter_entry(|e| {
+                // 始终过滤隐藏目录，避免列出 .git 等干扰目录
                 e.file_name()
                     .to_str()
                     .map(|s| !s.starts_with('.'))
@@ -592,6 +603,7 @@ impl WorkspaceEntries {
                 Err(_) => continue,
             };
 
+            // 跳过非目录条目，此方法只返回目录结构
             if !entry.file_type().is_dir() {
                 continue;
             }
@@ -612,6 +624,7 @@ impl WorkspaceEntries {
             });
         }
 
+        // 按路径排序，便于上层构建有序的目录树
         directories.sort_by(|a, b| a.path.cmp(&b.path));
 
         Ok(ListDirectoriesResult { directories })

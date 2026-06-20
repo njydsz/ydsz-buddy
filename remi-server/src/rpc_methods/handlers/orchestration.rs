@@ -1,4 +1,20 @@
-//! 编排引擎 RPC 方法
+//! # 编排引擎 RPC 方法模块
+//!
+//! 本模块注册所有与编排引擎相关的 RPC 方法，包括命令分发、快照查询、
+//! 线程/项目详情查询、事件回放和状态修复等。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `orchestration.dispatchCommand` | 分发编排命令，返回事件序列号 |
+//! | `orchestration.getSnapshot` | 获取当前投影快照 |
+//! | `orchestration.getShellSnapshot` | 获取 Shell 投影快照 |
+//! | `orchestration.getThreadDetail` | 获取指定线程的详情 |
+//! | `orchestration.getProjectDetail` | 获取指定项目的详情 |
+//! | `orchestration.getCounts` | 获取线程和项目的计数统计 |
+//! | `orchestration.replayEvents` | 回放指定范围的事件 |
+//! | `orchestration.repairState` | 修复投影状态（待实现） |
 
 use std::sync::Arc;
 
@@ -11,13 +27,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册编排引擎相关 RPC 方法
+///
+/// 将所有编排引擎方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供编排引擎和投影查询服务
 pub async fn register_orchestration_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册编排引擎 RPC 方法...");
 
-    // orchestration.dispatchCommand
+    // orchestration.dispatchCommand - 分发编排命令到引擎，返回事件序列号
+    // 参数: { command: OrchestrationCommand }
+    // 返回: { sequence: u64 }
     let engine = services.orchestration_engine.clone();
     router
         .register("orchestration.dispatchCommand", move |params: Option<Value>| {
@@ -36,7 +61,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.getSnapshot
+    // orchestration.getSnapshot - 获取当前投影快照
+    // 参数: 无
+    // 返回: ProjectionSnapshot
     let query = services.projection_query.clone();
     router
         .register("orchestration.getSnapshot", move |_params: Option<Value>| {
@@ -49,7 +76,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.getShellSnapshot
+    // orchestration.getShellSnapshot - 获取 Shell 投影快照
+    // 参数: 无
+    // 返回: ShellSnapshot
     let query = services.projection_query.clone();
     router
         .register("orchestration.getShellSnapshot", move |_params: Option<Value>| {
@@ -62,7 +91,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.getThreadDetail
+    // orchestration.getThreadDetail - 获取指定线程的详情
+    // 参数: { threadId: string }
+    // 返回: ThreadDetail | null
     let query = services.projection_query.clone();
     router
         .register("orchestration.getThreadDetail", move |params: Option<Value>| {
@@ -93,7 +124,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.getProjectDetail
+    // orchestration.getProjectDetail - 获取指定项目的详情
+    // 参数: { projectId: string }
+    // 返回: ProjectDetail | null
     let query = services.projection_query.clone();
     router
         .register("orchestration.getProjectDetail", move |params: Option<Value>| {
@@ -124,7 +157,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.getCounts
+    // orchestration.getCounts - 获取线程和项目的计数统计
+    // 参数: 无
+    // 返回: Counts
     let query = services.projection_query.clone();
     router
         .register("orchestration.getCounts", move |_params: Option<Value>| {
@@ -137,7 +172,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.replayEvents
+    // orchestration.replayEvents - 回放指定范围的事件
+    // 参数: { fromSequenceExclusive?: number, limit?: number }
+    // 返回: Event[]
     let engine = services.orchestration_engine.clone();
     router
         .register("orchestration.replayEvents", move |params: Option<Value>| {
@@ -161,7 +198,9 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.repairState
+    // orchestration.repairState - 修复投影状态（待实现）
+    // 参数: 无
+    // 返回: null（当前为占位实现）
     let _engine = services.orchestration_engine.clone();
     router
         .register("orchestration.repairState", move |_params: Option<Value>| {

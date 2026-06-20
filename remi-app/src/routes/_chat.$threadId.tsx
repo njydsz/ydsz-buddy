@@ -715,7 +715,7 @@ function SplitPaneEmptyState(props: {
                   "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
                   isUsed
                     ? "cursor-default border-border/30 opacity-35"
-                    : "border-[color:var(--color-border-light)] hover:bg-[var(--sidebar-accent)]",
+                    : "border-(--color-border-light) hover:bg-(--sidebar-accent)",
                 )}
                 onClick={() => {
                   if (!isUsed) props.onSelectThread(thread.id);
@@ -922,22 +922,22 @@ function PaneRenderer(props: {
  */
 function ChatMountSkeleton() {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground [contain:layout_style_paint]">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground contain-[layout_style_paint]">
       {/* Mirrors the real chat shell so route changes paint immediately while ChatView mounts
           on the next frames. */}
-      <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-[color:var(--color-border-light)] px-4">
+      <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-(--color-border-light) px-4">
         <div className="size-5 rounded-full bg-muted" />
         <div className="min-w-0 flex-1 space-y-1.5">
           <div className="h-3.5 w-44 max-w-[48%] rounded-full bg-muted" />
           <div className="h-2 w-24 max-w-[32%] rounded-full bg-muted/65" />
         </div>
         <div className="hidden items-center gap-1.5 sm:flex">
-          <div className="size-7 rounded-md border border-[color:var(--color-border-light)] bg-muted/35" />
-          <div className="size-7 rounded-md border border-[color:var(--color-border-light)] bg-muted/35" />
+          <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
+          <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
         </div>
       </div>
       <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 py-4">
-        <div className="max-w-[82%] space-y-2 rounded-2xl border border-[color:var(--color-border-light)] bg-muted/22 p-3">
+        <div className="max-w-[82%] space-y-2 rounded-2xl border border-(--color-border-light) bg-muted/22 p-3">
           <div className="h-2.5 w-11/12 rounded-full bg-muted/75" />
           <div className="h-2.5 w-7/12 rounded-full bg-muted/60" />
         </div>
@@ -945,14 +945,14 @@ function ChatMountSkeleton() {
           <div className="h-2.5 w-48 max-w-full rounded-full bg-muted-foreground/14" />
           <div className="h-2.5 w-32 max-w-[78%] rounded-full bg-muted-foreground/12" />
         </div>
-        <div className="max-w-[88%] space-y-2 rounded-2xl border border-[color:var(--color-border-light)] bg-muted/22 p-3">
+        <div className="max-w-[88%] space-y-2 rounded-2xl border border-(--color-border-light) bg-muted/22 p-3">
           <div className="h-2.5 w-full rounded-full bg-muted/75" />
           <div className="h-2.5 w-10/12 rounded-full bg-muted/60" />
           <div className="h-2.5 w-5/12 rounded-full bg-muted/50" />
         </div>
       </div>
-      <div className="shrink-0 border-t border-[color:var(--color-border-light)] p-3">
-        <div className="rounded-2xl border border-[color:var(--color-border-light)] bg-background p-3 shadow-xs">
+      <div className="shrink-0 border-t border-(--color-border-light) p-3">
+        <div className="rounded-2xl border border-(--color-border-light) bg-background p-3 shadow-xs">
           <div className="h-3 w-40 max-w-[50%] rounded-full bg-muted" />
           <div className="mt-8 flex items-center justify-between">
             <div className="h-2.5 w-24 rounded-full bg-muted/65" />
@@ -1130,7 +1130,7 @@ function SplitPaneSurface(props: {
   return (
     <div
       className={cn(
-        "group relative flex min-h-0 min-w-0 flex-1 bg-background [contain:layout_style_paint]",
+        "group relative flex min-h-0 min-w-0 flex-1 bg-background contain-[layout_style_paint]",
       )}
     >
       <ChatPaneDropOverlay
@@ -1196,7 +1196,7 @@ function SplitPaneSurface(props: {
       {!props.isFocused ? (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-10 bg-foreground/[0.060] transition-opacity duration-150"
+          className="pointer-events-none absolute inset-0 z-10 bg-foreground/6 transition-opacity duration-150"
         />
       ) : null}
     </div>
@@ -1670,8 +1670,8 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
                       isSelected
-                        ? "border-[color:var(--color-border)] bg-[var(--sidebar-accent)]"
-                        : "border-[color:var(--color-border-light)] hover:bg-[var(--sidebar-accent)]",
+                        ? "border-(--color-border) bg-(--sidebar-accent)"
+                        : "border-(--color-border-light) hover:bg-(--sidebar-accent)",
                     )}
                     onClick={() => chooseThreadForPane(thread.id)}
                   >

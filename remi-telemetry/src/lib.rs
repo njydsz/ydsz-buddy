@@ -30,6 +30,12 @@
 //! | [`metrics`] | 性能指标类型定义、指标记录与收集器 |
 //! | [`error`] | 遥测子系统统一错误类型与 Result 别名 |
 //!
+//! ## 架构定位
+//!
+//! 本 crate 位于 Remi 系统的基础设施层，向上依赖 `remi-core` 中的领域模型
+//! （如 [`ThreadId`](remi_core::models::ThreadId)），向下不依赖任何业务模块，
+//! 确保遥测能力可被所有上层服务无冲突地引入。
+//!
 //! ## 并发安全
 //!
 //! 所有服务内部状态均通过 `Arc<RwLock<_>>` 保护，支持在异步 Tokio 运行时中
@@ -44,7 +50,8 @@ pub mod error;
 /// 性能指标采集 —— 支持 Counter/Gauge/Histogram 三种指标类型的记录与查询。
 pub mod metrics;
 
-// 重导出所有子模块的公共 API，方便调用方通过 `remi_telemetry::*` 直接引用。
+// 重导出所有子模块的公共 API，方便调用方通过 `remi_telemetry::*` 直接引用，
+// 避免调用方需要逐层写全路径（如 `remi_telemetry::analytics::AnalyticsService`）。
 pub use analytics::*;
 pub use error::*;
 pub use metrics::*;

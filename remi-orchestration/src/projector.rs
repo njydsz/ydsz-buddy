@@ -315,6 +315,10 @@ impl Projector {
 
             // 线程事件
             ThreadCreated(e) => {
+                // 注意：此处使用默认值初始化线程，而非从事件中提取完整字段。
+                // 这是因为 Projector 的投影逻辑与 Engine 内的投影逻辑不同，
+                // Engine 内投影会从事件中提取完整字段，而 Projector 使用默认值。
+                // 后续事件（如 ThreadRuntimeModeSet 等）会逐步更新这些字段。
                 let thread = remi_core::models::Thread {
                     id: e.thread_id,
                     project_id: e.project_id,
@@ -396,22 +400,26 @@ impl Projector {
             }
             ThreadMessageSent(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 检查消息是否已存在（流式更新场景）
+                    // 检查消息是否已存在（流式更新场景：同一消息可能多次发送增量内容）
                     if let Some(existing) = thread.messages.iter_mut().find(|m| m.id == e.message.id) {
                         if e.message.streaming {
+                            // 流式消息：追加增量文本到已有消息
                             existing.text.push_str(&e.message.text);
                         } else if !e.message.text.is_empty() {
+                            // 非流式消息：直接替换文本内容（完整消息覆盖增量消息）
                             existing.text = e.message.text.clone();
                         }
                         existing.streaming = e.message.streaming;
                         existing.updated_at = e.message.updated_at;
                     } else {
+                        // 新消息：追加到消息列表
                         thread.messages.push(e.message.clone());
-                        // 限制消息数量
+                        // 限制消息数量，防止内存无限增长
                         if thread.messages.len() > 2000 {
                             thread.messages = thread.messages.split_off(thread.messages.len() - 2000);
                         }
                     }
+                    // 仅当消息角色为 User 时更新最新用户消息时间
                     thread.latest_user_message_at = if e.message.role == remi_core::models::MessageRole::User {
                         Some(e.occurred_at)
                     } else {
@@ -437,10 +445,10 @@ impl Projector {
             }
             ThreadProposedPlanUpserted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 移除同 ID 的旧计划，添加新计划
+                    // 移除同 ID 的旧计划，添加新计划（Upsert 语义）
                     thread.proposed_plans.retain(|p| p.id != e.plan.id);
                     thread.proposed_plans.push(e.plan.clone());
-                    // 限制计划数量
+                    // 限制计划数量，防止内存无限增长
                     if thread.proposed_plans.len() > 200 {
                         thread.proposed_plans = thread.proposed_plans.split_off(thread.proposed_plans.len() - 200);
                     }
@@ -450,10 +458,10 @@ impl Projector {
             }
             ThreadActivityAppended(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 移除同 ID 的旧活动，添加新活动
+                    // 移除同 ID 的旧活动，添加新活动（去重 + 追加）
                     thread.activities.retain(|a| a.id != e.activity.id);
                     thread.activities.push(e.activity.clone());
-                    // 限制活动数量
+                    // 限制活动数量，防止内存无限增长
                     if thread.activities.len() > 500 {
                         thread.activities = thread.activities.split_off(thread.activities.len() - 500);
                     }
@@ -463,7 +471,7 @@ impl Projector {
             }
             ThreadTurnDiffCompleted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 更新或添加检查点
+                    // 更新或添加检查点：移除同一 turn_id 的旧检查点，添加新检查点
                     let checkpoint = remi_core::models::Checkpoint {
                         id: String::new(),
                         thread_id: e.thread_id,
@@ -474,7 +482,7 @@ impl Projector {
                     };
                     thread.checkpoints.retain(|c| c.turn_id != e.turn_id);
                     thread.checkpoints.push(checkpoint);
-                    // 限制检查点数量
+                    // 限制检查点数量，防止内存无限增长
                     if thread.checkpoints.len() > 500 {
                         thread.checkpoints = thread.checkpoints.split_off(thread.checkpoints.len() - 500);
                     }
@@ -484,7 +492,8 @@ impl Projector {
             }
             ThreadReverted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 回滚时清空消息、计划、活动、检查点
+                    // 回滚时清空所有可变状态，恢复到初始状态
+                    // 注意：这与 Engine 内投影的处理不同，Engine 仅移除指定检查点之后的数据
                     thread.messages.clear();
                     thread.proposed_plans.clear();
                     thread.activities.clear();
@@ -496,7 +505,7 @@ impl Projector {
             }
             ThreadConversationRolledBack(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 找到目标消息索引，截断之后的消息
+                    // 找到目标消息索引，保留该消息及之前的所有消息，截断之后的消息
                     if let Some(idx) = thread.messages.iter().position(|m| m.id == e.message_id) {
                         thread.messages.truncate(idx + 1);
                     }
@@ -504,7 +513,7 @@ impl Projector {
                     self.projection_repo.save_thread(&thread)?;
                 }
             }
-            // 其他事件暂不处理投影
+            // 其他事件暂不处理投影（如审批请求、中断请求等，由 Engine 内投影处理）
             _ => {}
         }
 

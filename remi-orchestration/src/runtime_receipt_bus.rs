@@ -221,6 +221,8 @@ impl RuntimeReceiptBus {
     }
 }
 
+/// 实现 Clone trait，允许多个组件共享同一个广播通道发送端。
+/// 克隆后的实例与原实例共享相同的广播通道，发布的消息对所有订阅者可见。
 impl Clone for RuntimeReceiptBus {
     fn clone(&self) -> Self {
         Self {
@@ -234,6 +236,9 @@ mod tests {
     use super::*;
     use uuid::Uuid;
 
+    /// 测试发布和订阅的基本功能
+    ///
+    /// 验证：发布一条检查点基线捕获收据后，订阅者能正确接收到该收据
     #[tokio::test]
     async fn test_publish_and_subscribe() {
         let bus = RuntimeReceiptBus::new(100);
@@ -259,6 +264,9 @@ mod tests {
         }
     }
 
+    /// 测试多订阅者并发消费
+    ///
+    /// 验证：发布一条收据后，多个订阅者都能独立接收到该收据的副本
     #[tokio::test]
     async fn test_multiple_subscribers() {
         let bus = RuntimeReceiptBus::new(100);

@@ -10,6 +10,42 @@
 //! | [`ProviderCommandReactor`] | Provider 命令反应器 | Turn 启动/中断、会话停止 |
 //! | [`CheckpointReactor`] | 检查点反应器 | 检查点回滚请求 |
 //! | [`ThreadDeletionReactor`] | 线程删除反应器 | 线程删除事件 |
+//!
+//! # 架构设计
+//!
+//! ```text
+//! ┌──────────────────────────────────────────────────────────────┐
+//! │                   OrchestrationEngine                         │
+//! │                                                               │
+//! │  ┌──────────────────┐                                        │
+//! │  │  broadcast::Sender │ ← 事件广播发送端                      │
+//! │  └────────┬─────────┘                                        │
+//! └───────────┼──────────────────────────────────────────────────┘
+//!              │
+//!              │ 事件广播
+//!              ↓
+//! ┌──────────────────────────────────────────────────────────────┐
+//! │                    Reactor 层                                 │
+//! │                                                               │
+//! │  ┌────────────────────┐  ┌──────────────┐  ┌──────────────┐ │
+//! │  │ ProviderCommand    │  │ Checkpoint   │  │ ThreadDeletion│ │
+//! │  │ Reactor            │  │ Reactor      │  │ Reactor      │ │
+//! │  ├────────────────────┤  ├──────────────┤  ├──────────────┤ │
+//! │  │ TurnStart → 调用   │  │ Revert →     │  │ Delete →     │ │
+//! │  │   Provider         │  │   回滚检查点  │  │   清理资源   │ │
+//! │  │ TurnInterrupt →    │  │              │  │              │ │
+//! │  │   中断 Provider    │  │              │  │              │ │
+//! │  │ SessionStop →      │  │              │  │              │ │
+//! │  │   停止会话         │  │              │  │              │ │
+//! │  └────────────────────┘  └──────────────┘  └──────────────┘ │
+//! └──────────────────────────────────────────────────────────────┘
+//! ```
+//!
+//! # 错误处理策略
+//!
+//! - 反应器处理单个事件失败时仅记录警告日志，不影响后续事件的处理
+//! - 事件接收错误（如通道 lagged）仅记录警告，反应器继续运行
+//! - 收到关闭信号后优雅退出当前循环
 
 use std::sync::Arc;
 
@@ -41,6 +77,16 @@ pub struct ProviderCommandReactor {
 
 impl ProviderCommandReactor {
     /// 创建新的 Provider 命令反应器
+    ///
+    /// # 参数
+    ///
+    /// - `engine`: 编排引擎实例，用于订阅领域事件流
+    /// - `provider_service`: Provider 服务实例，用于调用 AI 模型
+    /// - `projection_query`: 投影查询服务，用于获取线程的 provider 配置
+    ///
+    /// # 返回值
+    ///
+    /// 返回配置完成的反应器实例，需调用 [`ProviderCommandReactor::run`] 启动运行。
     pub fn new(
         engine: Arc<OrchestrationEngine>,
         provider_service: Arc<ProviderService>,
@@ -54,6 +100,23 @@ impl ProviderCommandReactor {
     }
 
     /// 启动反应器主循环
+    ///
+    /// 订阅编排引擎的领域事件流，持续监听并处理与 Provider 相关的事件。
+    /// 收到关闭信号后优雅退出。
+    ///
+    /// # 参数
+    ///
+    /// - `shutdown`: 关闭信号接收器，当收到信号时反应器将优雅退出
+    ///
+    /// # 返回值
+    ///
+    /// 正常关闭时返回 `Ok(())`，发生不可恢复错误时返回相应错误。
+    ///
+    /// # 事件处理
+    ///
+    /// - `ThreadTurnStartRequested`: 查询线程信息，构建 TurnInput 并调用 Provider 启动 Turn
+    /// - `ThreadTurnInterruptRequested`: 查询线程信息，调用 Provider 中断指定 Turn
+    /// - `ThreadSessionStopRequested`: 查询线程信息，调用 Provider 停止会话
     pub async fn run(&self, mut shutdown: broadcast::Receiver<()>) -> OrchestrationResult<()> {
         info!("ProviderCommandReactor 启动");
 
@@ -84,7 +147,21 @@ impl ProviderCommandReactor {
         Ok(())
     }
 
-    /// 处理单个领域事件
+    /// 处理单个领域事件（内部方法）
+    ///
+    /// 根据事件类型执行相应的 Provider 调用：
+    /// - `ThreadTurnStartRequested`: 查询线程的 Provider 配置，构建 TurnInput 并发送
+    /// - `ThreadTurnInterruptRequested`: 查询线程的 Provider 配置，发送中断请求
+    /// - `ThreadSessionStopRequested`: 查询线程的 Provider 配置，发送停止会话请求
+    /// - 其他事件类型：忽略
+    ///
+    /// # 参数
+    ///
+    /// - `event`: 待处理的领域事件
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 `Ok(())`。Provider 调用失败时仅记录警告日志，不返回错误。
     async fn handle_event(&self, event: OrchestrationEvent) -> OrchestrationResult<()> {
         match event {
             OrchestrationEvent::ThreadTurnStartRequested(e) => {
@@ -200,6 +277,15 @@ pub struct CheckpointReactor {
 
 impl CheckpointReactor {
     /// 创建新的检查点反应器
+    ///
+    /// # 参数
+    ///
+    /// - `engine`: 编排引擎实例，用于订阅领域事件流
+    /// - `checkpoint_store`: 检查点存储服务，用于执行回滚操作
+    ///
+    /// # 返回值
+    ///
+    /// 返回配置完成的反应器实例，需调用 [`CheckpointReactor::run`] 启动运行。
     pub fn new(engine: Arc<OrchestrationEngine>, checkpoint_store: Arc<CheckpointStore>) -> Self {
         Self {
             engine,
@@ -208,6 +294,17 @@ impl CheckpointReactor {
     }
 
     /// 启动反应器主循环
+    ///
+    /// 订阅编排引擎的领域事件流，持续监听并处理检查点相关的事件。
+    /// 收到关闭信号后优雅退出。
+    ///
+    /// # 参数
+    ///
+    /// - `shutdown`: 关闭信号接收器，当收到信号时反应器将优雅退出
+    ///
+    /// # 返回值
+    ///
+    /// 正常关闭时返回 `Ok(())`，发生不可恢复错误时返回相应错误。
     pub async fn run(&self, mut shutdown: broadcast::Receiver<()>) -> OrchestrationResult<()> {
         info!("CheckpointReactor 启动");
 
@@ -238,7 +335,19 @@ impl CheckpointReactor {
         Ok(())
     }
 
-    /// 处理单个领域事件
+    /// 处理单个领域事件（内部方法）
+    ///
+    /// 根据事件类型执行相应的检查点操作：
+    /// - `ThreadCheckpointRevertRequested`: 调用检查点存储执行回滚操作
+    /// - 其他事件类型：忽略
+    ///
+    /// # 参数
+    ///
+    /// - `event`: 待处理的领域事件
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 `Ok(())`。检查点回滚失败时仅记录警告日志，不返回错误。
     async fn handle_event(&self, event: OrchestrationEvent) -> OrchestrationResult<()> {
         match event {
             OrchestrationEvent::ThreadCheckpointRevertRequested(e) => {
@@ -285,6 +394,17 @@ pub struct ThreadDeletionReactor {
 
 impl ThreadDeletionReactor {
     /// 创建新的线程删除反应器
+    ///
+    /// # 参数
+    ///
+    /// - `engine`: 编排引擎实例，用于订阅领域事件流
+    /// - `provider_service`: Provider 服务实例，用于停止已删除线程的会话
+    /// - `checkpoint_store`: 检查点存储服务，用于清理已删除线程的检查点
+    /// - `projection_query`: 投影查询服务，用于获取线程的 provider 配置
+    ///
+    /// # 返回值
+    ///
+    /// 返回配置完成的反应器实例，需调用 [`ThreadDeletionReactor::run`] 启动运行。
     pub fn new(
         engine: Arc<OrchestrationEngine>,
         provider_service: Arc<ProviderService>,
@@ -300,6 +420,17 @@ impl ThreadDeletionReactor {
     }
 
     /// 启动反应器主循环
+    ///
+    /// 订阅编排引擎的领域事件流，持续监听并处理线程删除相关的事件。
+    /// 收到关闭信号后优雅退出。
+    ///
+    /// # 参数
+    ///
+    /// - `shutdown`: 关闭信号接收器，当收到信号时反应器将优雅退出
+    ///
+    /// # 返回值
+    ///
+    /// 正常关闭时返回 `Ok(())`，发生不可恢复错误时返回相应错误。
     pub async fn run(&self, mut shutdown: broadcast::Receiver<()>) -> OrchestrationResult<()> {
         info!("ThreadDeletionReactor 启动");
 
@@ -330,7 +461,24 @@ impl ThreadDeletionReactor {
         Ok(())
     }
 
-    /// 处理单个领域事件
+    /// 处理单个领域事件（内部方法）
+    ///
+    /// 根据事件类型执行相应的资源清理操作：
+    /// - `ThreadDeleted`: 停止已删除线程的 Provider 会话，清理关联的检查点数据
+    /// - 其他事件类型：忽略
+    ///
+    /// # 参数
+    ///
+    /// - `event`: 待处理的领域事件
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 `Ok(())`。资源清理失败时仅记录警告日志，不返回错误。
+    ///
+    /// # 清理步骤
+    ///
+    /// 1. 尝试停止已删除线程的 Provider 会话（容错处理，线程可能已被投影删除）
+    /// 2. 列出并删除该线程的所有检查点数据
     async fn handle_event(&self, event: OrchestrationEvent) -> OrchestrationResult<()> {
         match event {
             OrchestrationEvent::ThreadDeleted(e) => {

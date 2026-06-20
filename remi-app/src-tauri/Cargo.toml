@@ -49,6 +49,7 @@ remi-workspace = { path = "../../remi-workspace" }
 remi-auth = { path = "../../remi-auth" }
 remi-checkpoint = { path = "../../remi-checkpoint" }
 remi-telemetry = { path = "../../remi-telemetry" }
+remi-server = { path = "../../remi-server" }
 
 [features]
 # This feature is used for production builds or when `devPath` points to the filesystem

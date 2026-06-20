@@ -169,6 +169,18 @@ pub struct PullRequestInfo {
 /// 详细 Git 状态信息
 ///
 /// 包含比 `GitStatusResult` 更详细的仓库状态，包括分支计数和上游跟踪状态。
+///
+/// # 与 `GitStatusResult` 的区别
+///
+/// - `GitStatusResult` 面向前端 UI 展示，包含 PR 信息（预留字段）
+/// - `GitStatusDetails` 面向内部逻辑，包含 `has_upstream` 标志位，便于判断是否需要设置上游跟踪
+/// - `GitStatusDetails` 的 `branch` 字段在 detached HEAD 状态下返回 None（而非 "HEAD" 字符串）
+///
+/// # 使用场景
+///
+/// - 判断分支是否需要设置上游跟踪（`has_upstream == false` 时调用 `set_branch_upstream`）
+/// - 获取 ahead/behind 计数用于同步状态展示
+/// - 作为 `read_branch_patch` 等方法的基础数据来源
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitStatusDetails {
     /// 当前分支名称（detached HEAD 状态下为 None）
@@ -194,6 +206,20 @@ pub struct GitStatusDetails {
 /// 工作区补丁
 ///
 /// 封装工作区与 HEAD 之间的统一补丁格式差异。
+///
+/// # 使用场景
+///
+/// - AI Agent 分析当前工作区的完整代码变更
+/// - 生成代码审查所需的差异上下文
+/// - 作为提交前预览或 PR 描述的数据来源
+///
+/// # 补丁来源
+///
+/// 可通过以下方法获取：
+/// - `read_working_tree_patch`: 工作区（含未跟踪文件）与 HEAD 的差异
+/// - `read_unstaged_patch`: 未暂存更改（含未跟踪文件）的补丁
+/// - `read_staged_patch`: 暂存区与 HEAD 的差异
+/// - `read_branch_patch`: 当前分支与基础分支的差异
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitWorkingTreePatch {
     /// 统一补丁格式的差异内容
@@ -202,7 +228,19 @@ pub struct GitWorkingTreePatch {
 
 /// 准备提交上下文
 ///
-/// 包含提交所需的暂存摘要和补丁信息。
+/// 包含提交所需的暂存摘要和补丁信息，用于在执行实际提交前预览将要提交的内容。
+///
+/// # 字段说明
+///
+/// - `staged_summary`: 暂存文件的状态摘要，格式为 name-status（如 `M\tsrc/main.rs`），
+///   其中状态码含义：`A`=新增，`M`=修改，`D`=删除，`R`=重命名
+/// - `staged_patch`: 暂存文件的完整补丁内容，包含具体的增删行信息
+///
+/// # 使用场景
+///
+/// - AI Agent 在提交前分析变更内容，生成合适的提交消息
+/// - 代码审查时展示即将提交的完整差异
+/// - 确认暂存区内容是否符合预期后再执行提交
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitPreparedCommitContext {
     /// 暂存文件的状态摘要（name-status 格式）
@@ -213,7 +251,18 @@ pub struct GitPreparedCommitContext {
 
 /// 范围上下文
 ///
-/// 包含基础分支与当前 HEAD 之间的提交列表和差异补丁。
+/// 包含基础分支与当前 HEAD 之间的提交列表和差异补丁，用于描述一个分支范围内的完整变更。
+///
+/// # 字段说明
+///
+/// - `commits`: 提交列表，每行格式为 `<abbreviated-sha> <message>`（oneline 格式）
+/// - `patch`: 基础分支与 HEAD 之间的完整差异补丁
+///
+/// # 使用场景
+///
+/// - 生成 PR 描述时提供变更范围和具体差异
+/// - AI Agent 分析分支上的所有变更以生成摘要
+/// - 代码审查时展示分支的完整变更历史
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitRangeContext {
     /// 提交列表（oneline 格式）
@@ -453,13 +502,18 @@ impl GitCore {
                 continue;
             }
 
+            // porcelain 格式：前2字符为状态码，第3字符为空格，之后为文件路径
+            // 状态码分为两列：第1列表示暂存区状态，第2列表示工作区状态
             let status = &line[0..2];
             let file = line[3..].to_string();
 
             match status {
                 "??" => untracked_files.push(file),
+                // 第1列非空、第2列为空格：仅暂存区有变更
                 "M " | "A " | "D " => staged_files.push(file),
+                // 第1列为空格、第2列非空：仅工作区有变更（未暂存）
                 " M" | " A" | " D" => modified_files.push(file),
+                // 两列都有值：暂存区和工作区都有变更（部分暂存后又有新的修改）
                 "MM" | "AM" | "DM" => {
                     staged_files.push(file.clone());
                     modified_files.push(file);
@@ -991,6 +1045,7 @@ impl GitCore {
     /// - 已经备份重要更改
     /// - 确认目标 commit 是正确的
     pub async fn revert_to_commit(&self, commit_sha: &str) -> GitResult<()> {
+        // TODO: cwd 硬编码为 "."，应改为接受参数以支持指定工作目录
         self.execute(ExecuteGitInput {
             operation: "reset --hard".to_string(),
             cwd: ".".to_string(),
@@ -1032,6 +1087,7 @@ impl GitCore {
         from_commit: &str,
         to_commit: &str,
     ) -> GitResult<String> {
+        // TODO: cwd 硬编码为 "."，应改为接受参数以支持指定工作目录
         let result = self
             .execute(ExecuteGitInput {
                 operation: "diff".to_string(),
@@ -1106,7 +1162,8 @@ impl GitCore {
         remote_name: &str,
         remote_url: &str,
     ) -> GitResult<()> {
-        // 先检查远程仓库是否存在
+        // 先检查远程仓库是否存在：使用 get-url 子命令查询指定远程的 URL
+        // 如果远程不存在，该命令会返回非零退出码
         let check_result = self
             .execute(ExecuteGitInput {
                 operation: "remote".to_string(),
@@ -1348,6 +1405,12 @@ impl GitCore {
     ///
     /// 删除 `.git/index.lock` 文件，用于解决 Git 索引锁定问题。
     ///
+    /// # 问题背景
+    ///
+    /// 当 Git 操作异常中断（如进程崩溃、用户手动终止）时，可能会残留 `.git/index.lock` 文件，
+    /// 导致后续所有 Git 操作都被阻塞并报错 "Unable to create index.lock: File exists"。
+    /// 此方法用于安全地移除该锁文件，恢复仓库的正常操作。
+    ///
     /// # 参数
     ///
     /// - `cwd`: 仓库工作目录
@@ -1356,6 +1419,11 @@ impl GitCore {
     ///
     /// - `Ok(())`: 移除成功或文件不存在
     /// - `Err(GitError::CommandError)`: 移除失败
+    ///
+    /// # 安全性
+    ///
+    /// 仅当锁文件存在时才尝试删除。如果当前确实有其他 Git 进程在运行，
+    /// 删除锁文件可能导致数据损坏，调用方应确保没有其他 Git 操作正在进行。
     pub async fn remove_index_lock(&self, cwd: &str) -> GitResult<()> {
         let lock_path = std::path::Path::new(cwd).join(".git").join("index.lock");
         
@@ -1432,6 +1500,7 @@ impl GitCore {
 
         let branch = if branch_result.code == 0 {
             let b = branch_result.stdout.trim();
+            // "HEAD" 表示 detached HEAD 状态（不在任何分支上），转换为 None
             if b == "HEAD" { None } else { Some(b.to_string()) }
         } else {
             None
@@ -1570,9 +1639,12 @@ impl GitCore {
             .await?;
 
         let tracked_patch = if head_exists.code == 0 {
+            // 仓库有提交历史，直接获取工作区与 HEAD 的差异
             self.diff(cwd, false).await?
         } else {
-            // 空仓库，使用空树对象
+            // 空仓库（没有任何提交），HEAD 不存在，无法使用 git diff
+            // 尝试使用空树对象作为基准，获取所有已跟踪文件的差异
+            // 注意：此命令在空仓库中可能返回非零退出码，因此 allow_non_zero_exit 设为 true
             let result = self
                 .execute(ExecuteGitInput {
                     operation: "diff HEAD".to_string(),
@@ -1737,7 +1809,9 @@ impl GitCore {
         // 暂存文件
         if let Some(paths) = file_paths {
             if !paths.is_empty() {
-                // 先重置暂存区
+                // 先重置暂存区，确保只有指定的文件被暂存
+                // 这样做是因为之前可能有其他文件已在暂存区中，
+                // 如果不重置，提交时会包含不相关的文件
                 let _ = self
                     .execute(ExecuteGitInput {
                         operation: "reset".to_string(),
@@ -1969,6 +2043,11 @@ impl GitCore {
     ///
     /// - `Ok(())`: 操作成功
     /// - `Err(GitError::CommandError)`: 操作失败
+    ///
+    /// # 注意事项
+    ///
+    /// 无论分支切换是否成功，都会尝试恢复暂存的更改，以避免数据丢失。
+    /// 如果恢复失败（如产生冲突），仅记录警告日志，不会中断操作。
     pub async fn stash_and_checkout(&self, cwd: &str, branch_name: &str) -> GitResult<()> {
         // 暂存当前更改
         self.stash(cwd).await?;
@@ -1976,13 +2055,26 @@ impl GitCore {
         // 切换分支
         let checkout_result = self.checkout_branch(cwd, branch_name).await;
 
-        // 恢复暂存
+        // 无论切换是否成功，都尝试恢复暂存，避免用户的更改丢失在 stash 栈中
         let _ = self.stash_pop(cwd).await;
 
         checkout_result
     }
 
     /// 读取未跟踪文件的补丁（内部辅助方法）
+    ///
+    /// 为每个未跟踪文件生成统一格式的补丁。由于 `git diff` 默认不包含未跟踪文件，
+    /// 需要使用 `git diff --no-index /dev/null <file>` 的技巧来生成补丁，
+    /// 这样可以将未跟踪文件视为"从空文件新增"，使其补丁格式与已跟踪文件一致。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Vec<String>)`: 每个未跟踪文件的补丁内容列表
+    /// - `Err(GitError)`: 命令执行失败
     async fn read_untracked_patches(&self, cwd: &str) -> GitResult<Vec<String>> {
         // 获取未跟踪文件列表
         let status_result = self
@@ -2005,7 +2097,9 @@ impl GitCore {
 
         let mut patches = Vec::new();
         for file in untracked_files {
-            // 为每个未跟踪文件生成补丁
+            // 使用 --no-index 比较 /dev/null 和文件，模拟"从空文件新增"的补丁
+            // --src-prefix=a/ 和 --dst-prefix=b/ 使补丁路径格式与普通 diff 一致
+            // --no-index 的退出码为 1（有差异时），因此需要 allow_non_zero_exit: true
             let result = self
                 .execute(ExecuteGitInput {
                     operation: "diff /dev/null file".to_string(),
@@ -2036,6 +2130,25 @@ impl GitCore {
     }
 
     /// 解析基础分支（内部辅助方法）
+    ///
+    /// 尝试从常见的默认分支名称（main、master、develop）中找到与当前分支
+    /// 存在共同祖先的基础分支。通过 `git merge-base` 命令验证分支间是否有共同历史。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `branch`: 当前分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: 找到的基础分支名称
+    /// - `Err(GitError::CommandError)`: 所有候选分支都不适用
+    ///
+    /// # 实现策略
+    ///
+    /// 按优先级依次尝试 "main"、"master"、"develop" 三个常见的默认分支名称。
+    /// 如果 `git merge-base` 返回成功（退出码 0），说明该分支与当前分支有共同祖先，
+    /// 即可作为基础分支使用。
     async fn resolve_base_branch(&self, cwd: &str, branch: &str) -> GitResult<String> {
         // 尝试常见的 base 分支
         for base in &["main", "master", "develop"] {

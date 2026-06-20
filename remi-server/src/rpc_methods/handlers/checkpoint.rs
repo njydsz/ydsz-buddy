@@ -1,4 +1,17 @@
-//! Checkpoint RPC 方法
+//! # 检查点 RPC 方法模块
+//!
+//! 本模块注册所有与检查点相关的 RPC 方法，包括检查点的创建、查询、
+//! 列表、删除和回滚等操作。检查点用于保存和恢复工作空间状态。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `checkpoint.create` | 创建检查点 |
+//! | `checkpoint.get` | 获取指定检查点详情 |
+//! | `checkpoint.list` | 列出指定线程的所有检查点 |
+//! | `checkpoint.delete` | 删除指定检查点 |
+//! | `checkpoint.revert` | 回滚到指定检查点 |
 
 use std::sync::Arc;
 
@@ -9,13 +22,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册检查点相关 RPC 方法
+///
+/// 将所有检查点方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 CheckpointStore 实例
 pub async fn register_checkpoint_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册检查点 RPC 方法...");
 
-    // checkpoint.create
+    // checkpoint.create - 创建检查点
+    // 参数: { threadId: string, commitSha?: string, message?: string }
+    // 返回: Checkpoint
     let checkpoint_store = services.checkpoint_store.clone();
     router
         .register("checkpoint.create", move |params: Option<Value>| {
@@ -55,7 +77,9 @@ pub async fn register_checkpoint_methods(
         })
         .await;
 
-    // checkpoint.get
+    // checkpoint.get - 获取指定检查点详情
+    // 参数: { checkpointId: string }
+    // 返回: Checkpoint | null
     let checkpoint_store = services.checkpoint_store.clone();
     router
         .register("checkpoint.get", move |params: Option<Value>| {
@@ -82,7 +106,9 @@ pub async fn register_checkpoint_methods(
         })
         .await;
 
-    // checkpoint.list
+    // checkpoint.list - 列出指定线程的所有检查点
+    // 参数: { threadId: string }
+    // 返回: Checkpoint[]
     let checkpoint_store = services.checkpoint_store.clone();
     router
         .register("checkpoint.list", move |params: Option<Value>| {
@@ -110,7 +136,9 @@ pub async fn register_checkpoint_methods(
         })
         .await;
 
-    // checkpoint.delete
+    // checkpoint.delete - 删除指定检查点
+    // 参数: { checkpointId: string }
+    // 返回: null
     let checkpoint_store = services.checkpoint_store.clone();
     router
         .register("checkpoint.delete", move |params: Option<Value>| {
@@ -133,7 +161,9 @@ pub async fn register_checkpoint_methods(
         })
         .await;
 
-    // checkpoint.revert
+    // checkpoint.revert - 回滚到指定检查点，返回回滚后的 Git 引用
+    // 参数: { threadId: string, checkpointId: string }
+    // 返回: { gitRef: string }
     let checkpoint_store = services.checkpoint_store.clone();
     router
         .register("checkpoint.revert", move |params: Option<Value>| {

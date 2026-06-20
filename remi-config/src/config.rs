@@ -287,6 +287,11 @@ impl ServerConfig {
     /// # 返回值
     ///
     /// - `Ok(DerivedPaths)` — 包含所有派生路径的结构体
+    ///
+    /// # 注意
+    ///
+    /// 本方法仅计算路径，**不会**在磁盘上创建任何目录或文件。
+    /// 调用方需在适当时机自行确保这些目录的存在（如使用 `std::fs::create_dir_all`）。
     pub fn derive_paths(base_dir: &Path) -> ConfigResult<DerivedPaths> {
         // 状态数据根目录：存放数据库、日志、密钥等运行时数据
         let state_dir = base_dir.join("userdata");
@@ -323,6 +328,11 @@ impl ServerConfig {
     /// - `Ok(())` — 配置校验通过
     /// - `Err(ConfigError::ValidationError)` — 端口号校验失败
     /// - `Err(ConfigError::PathError)` — 基础目录路径无效
+    ///
+    /// # 注意
+    ///
+    /// 本方法仅校验配置值本身的合法性，**不会**检查目录是否真实存在于磁盘、
+    /// 是否具有读写权限等文件系统状态。调用方需在启动服务前另行检查。
     pub fn validate(&self) -> ConfigResult<()> {
         if self.port == 0 {
             return Err(ConfigError::ValidationError("端口不能为 0".to_string()));
@@ -379,6 +389,10 @@ pub struct DerivedPaths {
 
 #[cfg(test)]
 mod tests {
+    //! # 配置模块单元测试
+    //!
+    //! 覆盖路径派生逻辑和配置校验逻辑的核心测试用例。
+
     use super::*;
 
     /// 测试路径派生逻辑

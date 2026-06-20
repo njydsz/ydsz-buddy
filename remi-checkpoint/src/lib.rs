@@ -36,6 +36,7 @@
 //!
 //! - [`remi_core`]：提供核心数据模型（如 [`Checkpoint`]、[`ThreadId`]）。
 //! - [`remi_git`]：提供底层 Git 操作能力（如 Diff 计算、Commit 回滚）。
+//! - [`remi_persistence`]：提供检查点持久化存储能力（如 [`SqliteCheckpointStore`]）。
 //! - [`chrono`]：时间戳处理。
 //! - [`uuid`]：检查点唯一 ID 生成。
 //! - [`tracing`]：结构化日志记录。

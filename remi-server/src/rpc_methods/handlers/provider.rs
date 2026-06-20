@@ -1,4 +1,23 @@
-//! Provider RPC 方法
+//! # Provider RPC 方法模块
+//!
+//! 本模块注册所有与 Provider（AI 模型提供者）相关的 RPC 方法，包括
+//! Provider 列表查询、能力查询、模型/代理/技能/插件/命令管理等。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `provider.listProviders` | 列出所有可用的 Provider |
+//! | `provider.getCapabilities` | 获取指定 Provider 的能力 |
+//! | `provider.listModels` | 列出指定 Provider 支持的模型 |
+//! | `provider.listAgents` | 列出指定 Provider 支持的代理 |
+//! | `provider.refreshProviders` | 刷新 Provider 列表 |
+//! | `provider.listSkills` | 列出指定 Provider 的技能 |
+//! | `provider.listCommands` | 列出指定 Provider 的命令 |
+//! | `provider.listPlugins` | 列出指定 Provider 的插件 |
+//! | `provider.readPlugin` | 读取指定插件的详情 |
+//! | `provider.getComposerCapabilities` | 获取 Composer 能力 |
+//! | `provider.compactThread` | 压缩指定线程的上下文 |
 
 use std::sync::Arc;
 
@@ -10,13 +29,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册 Provider 相关 RPC 方法
+///
+/// 将所有 Provider 方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 ProviderService 实例
 pub async fn register_provider_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册 Provider RPC 方法...");
 
-    // provider.listProviders
+    // provider.listProviders - 列出所有可用的 Provider
+    // 参数: 无
+    // 返回: Provider[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listProviders", move |_params: Option<Value>| {
@@ -29,7 +57,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.getCapabilities
+    // provider.getCapabilities - 获取指定 Provider 的能力
+    // 参数: { provider: string }
+    // 返回: Capabilities
     let provider_service = services.provider_service.clone();
     router
         .register("provider.getCapabilities", move |params: Option<Value>| {
@@ -56,7 +86,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.listModels
+    // provider.listModels - 列出指定 Provider 支持的模型
+    // 参数: { provider: string }
+    // 返回: Model[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listModels", move |params: Option<Value>| {
@@ -83,7 +115,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.listAgents
+    // provider.listAgents - 列出指定 Provider 支持的代理
+    // 参数: { provider: string }
+    // 返回: Agent[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listAgents", move |params: Option<Value>| {
@@ -110,7 +144,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.refreshProviders
+    // provider.refreshProviders - 刷新 Provider 列表
+    // 参数: 无
+    // 返回: null
     let provider_service = services.provider_service.clone();
     router
         .register("provider.refreshProviders", move |_params: Option<Value>| {
@@ -122,7 +158,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.listSkills
+    // provider.listSkills - 列出指定 Provider 的技能
+    // 参数: { provider: string, cwd: string, threadId?: string, forceReload?: boolean }
+    // 返回: Skill[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listSkills", move |params: Option<Value>| {
@@ -164,7 +202,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.listCommands
+    // provider.listCommands - 列出指定 Provider 的命令
+    // 参数: { provider: string, cwd: string, threadId?: string, forceReload?: boolean }
+    // 返回: Command[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listCommands", move |params: Option<Value>| {
@@ -206,7 +246,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.listPlugins
+    // provider.listPlugins - 列出指定 Provider 的插件
+    // 参数: { provider: string, cwd?: string, forceRemoteSync?: boolean, forceReload?: boolean }
+    // 返回: Plugin[]
     let provider_service = services.provider_service.clone();
     router
         .register("provider.listPlugins", move |params: Option<Value>| {
@@ -241,7 +283,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.readPlugin
+    // provider.readPlugin - 读取指定插件的详情
+    // 参数: { provider: string, marketplacePath: string, pluginName: string }
+    // 返回: PluginDetail
     let provider_service = services.provider_service.clone();
     router
         .register("provider.readPlugin", move |params: Option<Value>| {
@@ -289,7 +333,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.getComposerCapabilities
+    // provider.getComposerCapabilities - 获取 Composer 能力
+    // 参数: { provider: string }
+    // 返回: ComposerCapabilities
     let provider_service = services.provider_service.clone();
     router
         .register("provider.getComposerCapabilities", move |params: Option<Value>| {
@@ -317,7 +363,9 @@ pub async fn register_provider_methods(
         })
         .await;
 
-    // provider.compactThread
+    // provider.compactThread - 压缩指定线程的上下文，减少 token 消耗
+    // 参数: { provider: string, threadId: string }
+    // 返回: null
     let provider_service = services.provider_service.clone();
     router
         .register("provider.compactThread", move |params: Option<Value>| {

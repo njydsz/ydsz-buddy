@@ -185,6 +185,9 @@ pub struct ProviderCapabilities {
 #[serde(tag = "_tag", rename_all = "camelCase")]
 pub enum ProviderRuntimeEvent {
     /// 会话已启动
+    ///
+    /// 当 Provider 成功建立会话连接后触发，标识会话进入可用状态。
+    /// 后续可以在此会话上启动 Turn 进行交互。
     SessionStarted {
         /// 会话 ID
         session_id: String,
@@ -192,6 +195,9 @@ pub enum ProviderRuntimeEvent {
         thread_id: String,
     },
     /// 会话状态更新
+    ///
+    /// 当 Provider 会话的内部状态发生变化时触发（如配置变更、上下文更新等）。
+    /// 更新数据以 JSON 格式传递，具体结构取决于 Provider 实现。
     SessionUpdate {
         /// 会话 ID
         session_id: String,
@@ -199,11 +205,16 @@ pub enum ProviderRuntimeEvent {
         data: serde_json::Value,
     },
     /// 会话已停止
+    ///
+    /// 当 Provider 会话正常关闭或异常终止时触发。
+    /// 会话停止后，关联的线程将无法继续交互，需要重新启动会话。
     SessionStopped {
         /// 会话 ID
         session_id: String,
     },
     /// Turn 已开始
+    ///
+    /// 当 Provider 开始处理一个交互轮次时触发，标识 AI 正在生成响应。
     TurnStarted {
         /// 会话 ID
         session_id: String,
@@ -211,6 +222,8 @@ pub enum ProviderRuntimeEvent {
         turn_id: String,
     },
     /// Turn 已完成
+    ///
+    /// 当 Provider 成功完成一个交互轮次时触发，标识 AI 响应已完整生成。
     TurnCompleted {
         /// 会话 ID
         session_id: String,
@@ -218,6 +231,9 @@ pub enum ProviderRuntimeEvent {
         turn_id: String,
     },
     /// Turn 完成（携带结果数据）
+    ///
+    /// 与 [`TurnCompleted`](ProviderRuntimeEvent::TurnCompleted) 类似，但额外携带结果数据。
+    /// 用于需要返回结构化结果的场景（如工具调用的返回值）。
     TurnComplete {
         /// Turn ID
         turn_id: String,
@@ -225,6 +241,9 @@ pub enum ProviderRuntimeEvent {
         result: serde_json::Value,
     },
     /// Turn 流式输出增量
+    ///
+    /// 当 Provider 在流式传输模式下输出增量文本时触发。
+    /// 每次触发携带一小段文本片段，前端应拼接显示以实现打字机效果。
     TurnDelta {
         /// 会话 ID
         session_id: String,
@@ -234,6 +253,9 @@ pub enum ProviderRuntimeEvent {
         delta: String,
     },
     /// Turn 被中断
+    ///
+    /// 当用户主动中断正在执行的 Turn 时触发，AI 将停止当前操作。
+    /// 中断后已生成的部分内容仍然保留。
     TurnInterrupted {
         /// 会话 ID
         session_id: String,
@@ -241,6 +263,9 @@ pub enum ProviderRuntimeEvent {
         turn_id: String,
     },
     /// 请求用户审批
+    ///
+    /// 当 AI 代理需要执行敏感操作（如修改文件、执行命令）时，
+    /// 向用户请求审批。用户可以批准或拒绝该请求。
     ApprovalRequested {
         /// 会话 ID
         session_id: String,
@@ -252,6 +277,9 @@ pub enum ProviderRuntimeEvent {
         description: String,
     },
     /// 请求用户输入
+    ///
+    /// 当 AI 代理需要用户提供额外信息（如选择项、确认文本等）时触发。
+    /// 用户需要根据提示提供输入，AI 才能继续执行。
     UserInputRequested {
         /// 会话 ID
         session_id: String,
@@ -263,6 +291,9 @@ pub enum ProviderRuntimeEvent {
         prompt: String,
     },
     /// 发生错误
+    ///
+    /// 当 Provider 运行过程中发生不可恢复的错误时触发。
+    /// 错误信息可用于展示给用户或记录日志，会话可能需要重启。
     Error {
         /// 会话 ID
         session_id: String,
@@ -389,16 +420,23 @@ pub struct ProviderTurnStartResult {
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum ProviderReviewTarget {
     /// 审查指定分支
+    ///
+    /// 对指定分支的最新提交进行代码审查，通常用于审查功能分支的完整变更。
     Branch {
         /// 分支名称
         branch: String,
     },
     /// 审查指定提交
+    ///
+    /// 对指定的单个 Git 提交进行代码审查，适用于审查特定的代码变更。
     Commit {
         /// 提交 SHA
         commit_sha: String,
     },
     /// 审查差异范围
+    ///
+    /// 对两个 Git 引用之间的差异进行代码审查，适用于审查 PR 或比较分支间的变更。
+    /// `base_ref` 为基准引用（通常是主分支），`head_ref` 为目标引用（通常是功能分支）。
     Diff {
         /// 基础引用（如分支名、提交 SHA）
         base_ref: String,
@@ -421,16 +459,25 @@ pub struct ProviderStartReviewInput {
 /// # Provider 审批决策
 ///
 /// 用户对 Provider 审批请求的决策。
+///
+/// 每种决策都有"记住"变体，选择后系统会将该决策持久化，
+/// 后续遇到相同类型的审批请求时自动应用，无需用户重复确认。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ProviderApprovalDecision {
-    /// 批准请求
+    /// 批准请求，允许 AI 执行该操作
     Approve,
-    /// 拒绝请求
+    /// 拒绝请求，阻止 AI 执行该操作
     Deny,
     /// 批准并记住此决策（后续类似请求自动批准）
+    ///
+    /// 适用于用户信任 AI 对某类操作的判断，希望减少审批弹窗的场景。
+    /// 例如：批准所有文件读取操作。
     ApproveAndRemember,
     /// 拒绝并记住此决策（后续类似请求自动拒绝）
+    ///
+    /// 适用于用户不希望 AI 执行某类操作的场景。
+    /// 例如：拒绝所有涉及生产环境文件修改的操作。
     DenyAndRemember,
 }
 

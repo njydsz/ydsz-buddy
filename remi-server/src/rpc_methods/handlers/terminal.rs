@@ -1,4 +1,18 @@
-//! Terminal RPC 方法
+//! # 终端 RPC 方法模块
+//!
+//! 本模块注册所有与终端会话相关的 RPC 方法，包括终端的创建、写入、
+//! 调整大小、关闭、清屏和重启等操作。
+//!
+//! ## 注册的方法
+//!
+//! | 方法名 | 说明 |
+//! |--------|------|
+//! | `terminal.open` | 打开新的终端会话 |
+//! | `terminal.write` | 向终端写入数据 |
+//! | `terminal.resize` | 调整终端大小 |
+//! | `terminal.close` | 关闭终端会话 |
+//! | `terminal.clear` | 清空终端屏幕 |
+//! | `terminal.restart` | 重启终端会话 |
 
 use std::sync::Arc;
 
@@ -13,13 +27,22 @@ use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
 /// 注册终端相关 RPC 方法
+///
+/// 将所有终端方法注册到路由器，每个方法绑定对应的服务实例。
+///
+/// # 参数
+///
+/// - `router`: RPC 路由器实例
+/// - `services`: 服务容器，提供 TerminalManager 实例
 pub async fn register_terminal_methods(
     router: Arc<RpcRouter>,
     services: Arc<ServiceContainer>,
 ) {
     info!("注册终端 RPC 方法...");
 
-    // terminal.open
+    // terminal.open - 打开新的终端会话
+    // 参数: { threadId: string, terminalId?: string, cwd: string, cols?: number, rows?: number, env?: Record<string, string> }
+    // 返回: TerminalSnapshot
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.open", move |params: Option<Value>| {
@@ -86,7 +109,9 @@ pub async fn register_terminal_methods(
         })
         .await;
 
-    // terminal.write
+    // terminal.write - 向终端写入数据
+    // 参数: { threadId: string, terminalId?: string, data: string }
+    // 返回: null
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.write", move |params: Option<Value>| {
@@ -130,7 +155,9 @@ pub async fn register_terminal_methods(
         })
         .await;
 
-    // terminal.resize
+    // terminal.resize - 调整终端大小
+    // 参数: { threadId: string, terminalId?: string, cols: number, rows: number }
+    // 返回: null
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.resize", move |params: Option<Value>| {
@@ -181,7 +208,9 @@ pub async fn register_terminal_methods(
         })
         .await;
 
-    // terminal.close
+    // terminal.close - 关闭终端会话
+    // 参数: { threadId: string, terminalId?: string, deleteHistory?: boolean }
+    // 返回: null
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.close", move |params: Option<Value>| {
@@ -221,7 +250,9 @@ pub async fn register_terminal_methods(
         })
         .await;
 
-    // terminal.clear
+    // terminal.clear - 清空终端屏幕
+    // 参数: { threadId: string, terminalId?: string }
+    // 返回: null
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.clear", move |params: Option<Value>| {
@@ -249,7 +280,9 @@ pub async fn register_terminal_methods(
         })
         .await;
 
-    // terminal.restart
+    // terminal.restart - 重启终端会话
+    // 参数: { threadId: string, terminalId?: string, cwd: string, cols?: number, rows?: number, env?: Record<string, string> }
+    // 返回: TerminalSnapshot
     let terminal_manager = services.terminal_manager.clone();
     router
         .register("terminal.restart", move |params: Option<Value>| {

@@ -325,10 +325,12 @@ impl GitManager {
         info!("运行 Git 堆叠操作: {:?}", input.action);
 
         // 如果有功能分支，先创建并切换
+        // 这允许在执行堆叠操作前自动切换到目标功能分支
         if let Some(branch_name) = &input.feature_branch {
             info!("创建功能分支: {}", branch_name);
 
             // 检查分支是否已存在
+            // 如果已存在则直接切换，避免因重复创建而报错
             let branches = self.core.list_branches(&input.cwd).await?;
             if !branches.contains(branch_name) {
                 self.core.create_branch(&input.cwd, branch_name).await?;
@@ -338,6 +340,7 @@ impl GitManager {
         }
 
         match input.action {
+            // 仅提交：将暂存区更改提交到本地仓库
             GitAction::Commit => {
                 let message = input.commit_message.as_deref().unwrap_or("Update");
                 let commit_sha = self.core.commit(&input.cwd, message).await?;
@@ -349,6 +352,7 @@ impl GitManager {
                     message: "提交成功".to_string(),
                 })
             }
+            // 仅推送：将本地提交推送到远程仓库
             GitAction::Push => {
                 self.core.push_current_branch(&input.cwd).await?;
 
@@ -359,7 +363,9 @@ impl GitManager {
                     message: "推送成功".to_string(),
                 })
             }
+            // 仅创建 PR：通过 gh CLI 创建 Pull Request
             GitAction::CreatePr => {
+                // PR 标题优先级：pr_title > commit_message > 默认值 "Update"
                 let pr_title = input
                     .pr_title
                     .or(input.commit_message.clone())
@@ -380,6 +386,7 @@ impl GitManager {
                     message: format!("PR 创建成功: {}", pr_url),
                 })
             }
+            // 提交并推送：先提交到本地，再推送到远程
             GitAction::CommitPush => {
                 let message = input.commit_message.as_deref().unwrap_or("Update");
                 let commit_sha = self.core.commit(&input.cwd, message).await?;
@@ -392,11 +399,13 @@ impl GitManager {
                     message: "提交并推送成功".to_string(),
                 })
             }
+            // 完整流程：提交 → 推送 → 创建 PR
             GitAction::CommitPushPr => {
                 let message = input.commit_message.as_deref().unwrap_or("Update");
                 let commit_sha = self.core.commit(&input.cwd, message).await?;
                 self.core.push_current_branch(&input.cwd).await?;
 
+                // PR 标题优先级：pr_title > commit_message > 默认值 "Update"
                 let pr_title = input
                     .pr_title
                     .or(input.commit_message.clone())
@@ -464,7 +473,8 @@ impl GitManager {
         if let Some(body_content) = body {
             cmd.arg("--body").arg(body_content);
         } else {
-            // gh pr create 要求 --body 或 --fill，使用空 body 避免交互式编辑器
+            // gh pr create 要求必须提供 --body 或 --fill 参数，否则会打开交互式编辑器
+            // 在非交互式环境中，使用空 body 避免阻塞等待用户输入
             cmd.arg("--body").arg("");
         }
 
@@ -502,6 +512,8 @@ impl GitManager {
         }
 
         // 取第一行作为 URL（避免多余输出干扰）
+        // gh pr create 成功时输出格式为：PR URL 后可能跟随其他提示信息
+        // 仅取第一行确保获取的是纯 URL
         let pr_url = stdout.lines().next().unwrap_or(&stdout).to_string();
         info!("PR 创建成功: {}", pr_url);
 
@@ -591,6 +603,7 @@ impl GitManager {
         pr_number: u64,
         worktree_path: &str,
     ) -> GitResult<String> {
+        // 分支命名约定：pr-<number>，便于识别 PR 对应的 worktree
         let branch_name = format!("pr-{}", pr_number);
 
         info!("准备 PR 线程: PR #{}, 分支: {}", pr_number, branch_name);
@@ -664,6 +677,8 @@ impl GitManager {
             self.core.checkout_branch(cwd, target_branch).await?;
 
             // 恢复暂存
+            // stash pop 失败时仅记录警告，不中断操作
+            // 常见失败原因：新分支上的文件与暂存内容冲突，需要用户手动解决
             if let Err(e) = self.core.stash_pop(cwd).await {
                 warn!("恢复暂存失败: {}", e);
             }
@@ -710,27 +725,31 @@ impl GitManager {
         let mut total_deletions = 0;
 
         // 解析 diff 输出
+        // 遍历每一行，跟踪当前文件名，统计每个文件的增删行数
         let mut current_file = None;
         let mut file_additions = 0;
         let mut file_deletions = 0;
 
         for line in diff.lines() {
             if line.starts_with("diff --git") {
-                // 保存上一个文件的统计
+                // 遇到新文件的 diff 头，先保存上一个文件的统计
                 if let Some(file) = current_file.take() {
                     files_changed.push((file, file_additions, file_deletions));
                     file_additions = 0;
                     file_deletions = 0;
                 }
 
-                // 提取文件名
+                // 从 "diff --git a/path b/path" 格式中提取文件名
+                // 取 " b/" 之后的部分作为文件路径
                 if let Some(parts) = line.split(" b/").nth(1) {
                     current_file = Some(parts.to_string());
                 }
             } else if line.starts_with('+') && !line.starts_with("+++") {
+                // 以 '+' 开头但不是 "+++"（文件头），计为新增行
                 file_additions += 1;
                 total_additions += 1;
             } else if line.starts_with('-') && !line.starts_with("---") {
+                // 以 '-' 开头但不是 "---"（文件头），计为删除行
                 file_deletions += 1;
                 total_deletions += 1;
             }
@@ -798,10 +817,13 @@ impl GitManager {
         info!("解析 PR 引用: {}", pr_ref);
 
         // 尝试解析 PR 编号
+        // 支持三种输入格式：纯数字编号、GitHub PR URL、其他格式（报错）
         let pr_number = if let Ok(num) = pr_ref.parse::<u64>() {
+            // 格式1：纯数字，直接作为 PR 编号
             num
         } else if pr_ref.contains("/pull/") {
-            // 从 URL 中提取 PR 编号
+            // 格式2：GitHub PR URL，从中提取编号
+            // 例如 "https://github.com/owner/repo/pull/123" -> 123
             pr_ref
                 .split("/pull/")
                 .nth(1)
@@ -818,6 +840,7 @@ impl GitManager {
         };
 
         // 使用 gh CLI 获取 PR 信息
+        // --json 参数指定需要返回的字段，避免获取不必要的数据
         let mut cmd = Command::new("gh");
         cmd.current_dir(cwd)
             .stdin(std::process::Stdio::null())
@@ -853,6 +876,7 @@ impl GitManager {
         let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         // 解析 JSON 输出
+        // gh pr view --json 返回的 JSON 中可能缺少某些字段，使用 unwrap_or 提供默认值
         let pr_info: serde_json::Value = serde_json::from_str(&stdout).map_err(|e| {
             GitError::InternalError(format!("解析 PR 信息失败: {}", e))
         })?;
@@ -890,7 +914,27 @@ impl GitManager {
 
 /// Pull Request 信息
 ///
-/// 封装从 GitHub CLI 获取的 PR 元数据。
+/// 封装从 GitHub CLI 获取的 PR 元数据，用于 PR 审查和线程管理。
+///
+/// # 字段说明
+///
+/// - `number`: PR 编号（在仓库内唯一标识）
+/// - `title`: PR 标题
+/// - `head_ref`: 源分支名称（PR 的来源分支）
+/// - `base_ref`: 目标分支名称（PR 要合并到的分支）
+/// - `state`: PR 当前状态（"open"、"closed"、"merged"）
+/// - `url`: PR 的 Web 访问链接
+/// - `author`: PR 创建者的 GitHub 用户名（可能为 None，如 API 返回格式异常）
+///
+/// # 数据来源
+///
+/// 通过 `gh pr view --json` 命令获取，由 `resolve_pull_request` 方法解析。
+///
+/// # 使用场景
+///
+/// - 获取 PR 的源分支和目标分支，用于创建 worktree 或切换分支
+/// - 判断 PR 状态是否为 open，决定是否可以进行审查
+/// - 展示 PR 的基本信息（标题、作者、URL）
 #[derive(Debug, Clone)]
 pub struct GitPullRequestInfo {
     /// PR 编号

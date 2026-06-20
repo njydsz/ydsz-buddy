@@ -24,6 +24,7 @@ import type {
   BrowserNewTabInput,
   ThreadBrowserState
 } from '@remi-code/contracts';
+import { WsTransport } from '../wsTransport';
 
 // TODO: 迁移完成后替换为 contracts 中的正式类型
 type Thread = unknown;
@@ -31,6 +32,20 @@ type Message = unknown;
 type Model = unknown;
 type CreateThreadParams = unknown;
 type SendMessageParams = unknown;
+
+// 全局 WebSocket 传输实例
+let wsTransport: WsTransport | null = null;
+
+/**
+ * 获取或创建 WebSocket 传输实例
+ */
+async function getWsTransport(): Promise<WsTransport> {
+  if (!wsTransport) {
+    const wsUrl = await invoke<string>('get_server_ws_url');
+    wsTransport = new WsTransport(wsUrl);
+  }
+  return wsTransport;
+}
 
 /**
  * 将 Tauri 异步 listen 包装为同步 cleanup 函数。
@@ -225,53 +240,64 @@ export const tauriBridge = {
   },
 
   /**
-   * 服务器模块
+   * 服务器模块 - 通过 WebSocket 调用
    */
   server: {
     transcribeVoice: async (
       input: ServerVoiceTranscriptionInput
     ): Promise<ServerVoiceTranscriptionResult> => {
-      return await invoke<ServerVoiceTranscriptionResult>('transcribe_voice', { ...input });
+      const transport = await getWsTransport();
+      return await transport.request<ServerVoiceTranscriptionResult>('server.transcribeVoice', input);
     },
 
     getConfig: async (): Promise<any> => {
-      return await invoke('server_get_config');
+      const transport = await getWsTransport();
+      return await transport.request('server.getConfig');
     },
 
     getEnvironment: async (): Promise<any> => {
-      return await invoke('server_get_environment');
+      const transport = await getWsTransport();
+      return await transport.request('server.getEnvironment');
     },
 
     getSettings: async (): Promise<any> => {
-      return await invoke('server_get_settings');
+      const transport = await getWsTransport();
+      return await transport.request('server.getSettings');
     },
 
     updateSettings: async (settings: any): Promise<void> => {
-      return await invoke<void>('server_update_settings', { settings });
+      const transport = await getWsTransport();
+      return await transport.request<void>('server.updateSettings', { settings });
     },
 
     refreshProviders: async (): Promise<void> => {
-      return await invoke<void>('server_refresh_providers');
+      const transport = await getWsTransport();
+      return await transport.request<void>('server.refreshProviders');
     },
 
     updateProvider: async (provider: any): Promise<void> => {
-      return await invoke<void>('server_update_provider', { provider });
+      const transport = await getWsTransport();
+      return await transport.request<void>('server.updateProvider', { provider });
     },
 
     listWorktrees: async (): Promise<any[]> => {
-      return await invoke('server_list_worktrees');
+      const transport = await getWsTransport();
+      return await transport.request('server.listWorktrees');
     },
 
     getProviderUsageSnapshot: async (): Promise<any> => {
-      return await invoke('server_get_provider_usage_snapshot');
+      const transport = await getWsTransport();
+      return await transport.request('server.getProviderUsageSnapshot');
     },
 
     getDiagnostics: async (): Promise<any> => {
-      return await invoke('server_get_diagnostics');
+      const transport = await getWsTransport();
+      return await transport.request('server.getDiagnostics');
     },
 
     upsertKeybinding: async (keybinding: any): Promise<void> => {
-      return await invoke<void>('server_upsert_keybinding', { keybinding });
+      const transport = await getWsTransport();
+      return await transport.request<void>('server.upsertKeybinding', { keybinding });
     },
   },
 
@@ -361,83 +387,85 @@ export const tauriBridge = {
   },
 
   /**
-   * 编排引擎相关命令
+   * 编排引擎相关命令 - 通过 WebSocket 调用
    */
   orchestration: {
-    createThread: async (params: CreateThreadParams): Promise<Thread> => {
-      return await invoke<Thread>('create_thread', { params });
+    /**
+     * 通用命令分发器 - 所有编排操作都通过此方法
+     */
+    dispatchCommand: async (command: any): Promise<{ sequence: number }> => {
+      const transport = await getWsTransport();
+      return await transport.request<{ sequence: number }>('orchestration.dispatchCommand', command);
     },
 
-    sendMessage: async (params: SendMessageParams): Promise<void> => {
-      return await invoke<void>('send_message', params as Record<string, unknown>);
-    },
-
-    listThreads: async (projectId: string): Promise<Thread[]> => {
-      return await invoke<Thread[]>('list_threads', { projectId });
-    },
-
-    deleteThread: async (threadId: string): Promise<void> => {
-      return await invoke<void>('delete_thread', { threadId });
-    },
-
-    renameThread: async (threadId: string, title: string): Promise<void> => {
-      return await invoke<void>('rename_thread', { threadId, title });
-    },
-
+    /**
+     * 获取完整快照
+     */
     getSnapshot: async (): Promise<any> => {
-      return await invoke('orchestration_get_snapshot');
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.getSnapshot');
     },
 
+    /**
+     * 获取 Shell 快照
+     */
     getShellSnapshot: async (): Promise<any> => {
-      return await invoke('orchestration_get_shell_snapshot');
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.getShellSnapshot');
     },
 
-    dispatchCommand: async (command: any): Promise<void> => {
-      return await invoke<void>('orchestration_dispatch_command', { command });
+    /**
+     * 获取线程详情
+     */
+    getThreadDetail: async (threadId: string): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.getThreadDetail', { threadId });
     },
 
-    importThread: async (input: any): Promise<Thread> => {
-      return await invoke<Thread>('orchestration_import_thread', input);
+    /**
+     * 获取项目详情
+     */
+    getProjectDetail: async (projectId: string): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.getProjectDetail', { projectId });
     },
 
+    /**
+     * 获取统计数据
+     */
+    getCounts: async (): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.getCounts');
+    },
+
+    /**
+     * 重放事件
+     */
+    replayEvents: async (fromSequenceExclusive: number, limit?: number): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('orchestration.replayEvents', { fromSequenceExclusive, limit });
+    },
+
+    /**
+     * 修复状态（预留接口）
+     */
     repairState: async (): Promise<void> => {
-      return await invoke<void>('orchestration_repair_state');
+      const transport = await getWsTransport();
+      await transport.request<void>('orchestration.repairState');
     },
 
-    getTurnDiff: async (input: any): Promise<string> => {
-      return await invoke<string>('orchestration_get_turn_diff', input);
-    },
-
-    getFullThreadDiff: async (input: any): Promise<string> => {
-      return await invoke<string>('orchestration_get_full_thread_diff', input);
-    },
-
-    replayEvents: async (fromSequenceExclusive: number): Promise<void> => {
-      return await invoke<void>('orchestration_replay_events', { fromSequenceExclusive });
-    },
-
-    subscribeShell: async (): Promise<void> => {
-      return await invoke<void>('orchestration_subscribe_shell');
-    },
-
-    unsubscribeShell: async (): Promise<void> => {
-      return await invoke<void>('orchestration_unsubscribe_shell');
-    },
-
-    subscribeThread: async (input: any): Promise<void> => {
-      return await invoke<void>('orchestration_subscribe_thread', input);
-    },
-
-    unsubscribeThread: async (input: any): Promise<void> => {
-      return await invoke<void>('orchestration_unsubscribe_thread', input);
-    },
-
+    /**
+     * 监听域事件
+     */
     onDomainEvent: (listener: (event: any) => void) => {
       return syncListen('orchestration-domain-event', (event) => {
         listener(event.payload);
       });
     },
 
+    /**
+     * 监听 Shell 事件
+     */
     onShellEvent: (listener: (event: any) => void) => {
       return syncListen('orchestration-shell-event', (event) => {
         listener(event.payload);
@@ -452,56 +480,67 @@ export const tauriBridge = {
   },
 
   /**
-   * AI 提供商相关命令
+   * AI 提供商相关命令 - 通过 WebSocket 调用
    */
   provider: {
     listModels: async (provider?: string): Promise<Model[]> => {
-      return await invoke<Model[]>('list_models', { provider });
+      const transport = await getWsTransport();
+      return await transport.request<Model[]>('provider.listModels', { provider });
     },
 
     setApiKey: async (provider: string, key: string): Promise<void> => {
-      return await invoke<void>('set_api_key', { provider, key });
+      const transport = await getWsTransport();
+      return await transport.request<void>('provider.setApiKey', { provider, key });
     },
 
     getProviderStatus: async (): Promise<Record<string, any>> => {
-      return await invoke('get_provider_status');
+      const transport = await getWsTransport();
+      return await transport.request('provider.getProviderStatus');
     },
 
     getComposerCapabilities: async (input: any): Promise<any> => {
-      return await invoke('provider_get_composer_capabilities', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.getComposerCapabilities', input);
     },
 
     compactThread: async (input: any): Promise<void> => {
-      return await invoke<void>('provider_compact_thread', input);
+      const transport = await getWsTransport();
+      return await transport.request<void>('provider.compactThread', input);
     },
 
     listCommands: async (input: any): Promise<any[]> => {
-      return await invoke('provider_list_commands', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.listCommands', input);
     },
 
     listSkills: async (input: any): Promise<any[]> => {
-      return await invoke('provider_list_skills', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.listSkills', input);
     },
 
     listPlugins: async (input: any): Promise<any[]> => {
-      return await invoke('provider_list_plugins', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.listPlugins', input);
     },
 
     readPlugin: async (input: any): Promise<any> => {
-      return await invoke('provider_read_plugin', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.readPlugin', input);
     },
 
     listAgents: async (input: any): Promise<any[]> => {
-      return await invoke('provider_list_agents', input);
+      const transport = await getWsTransport();
+      return await transport.request('provider.listAgents', input);
     },
   },
 
   /**
-   * 技能模块
+   * 技能模块 - 通过 WebSocket 调用
    */
   skills: {
     listLocal: async (): Promise<any[]> => {
-      return await invoke('skills_list_local');
+      const transport = await getWsTransport();
+      return await transport.request('skills.listLocal');
     },
   },
 
@@ -510,27 +549,33 @@ export const tauriBridge = {
    */
   terminal: {
     create: async (cwd: string, shell?: string): Promise<string> => {
-      return await invoke<string>('create_terminal', { cwd, shell });
+      const transport = await getWsTransport();
+      return await transport.request<string>('terminal.open', { cwd, shell });
     },
 
     write: async (sessionId: string, data: string): Promise<void> => {
-      return await invoke<void>('write_terminal', { sessionId, data });
+      const transport = await getWsTransport();
+      await transport.request<void>('terminal.write', { sessionId, data });
     },
 
     resize: async (sessionId: string, rows: number, cols: number): Promise<void> => {
-      return await invoke<void>('resize_terminal', { sessionId, rows, cols });
+      const transport = await getWsTransport();
+      await transport.request<void>('terminal.resize', { sessionId, rows, cols });
     },
 
     close: async (sessionId: string): Promise<void> => {
-      return await invoke<void>('close_terminal', { sessionId });
+      const transport = await getWsTransport();
+      await transport.request<void>('terminal.close', { sessionId });
     },
 
     clear: async (sessionId: string): Promise<void> => {
-      return await invoke<void>('clear_terminal', { sessionId });
+      const transport = await getWsTransport();
+      await transport.request<void>('terminal.clear', { sessionId });
     },
 
     restart: async (sessionId: string): Promise<void> => {
-      return await invoke<void>('restart_terminal', { sessionId });
+      const transport = await getWsTransport();
+      await transport.request<void>('terminal.restart', { sessionId });
     },
   },
 
@@ -539,51 +584,66 @@ export const tauriBridge = {
    */
   git: {
     getStatus: async (cwd: string): Promise<any> => {
-      return await invoke('git_status', { cwd });
+      const transport = await getWsTransport();
+      return await transport.request('git.status', { cwd });
     },
 
     listBranches: async (cwd: string): Promise<string[]> => {
-      return await invoke<string[]>('git_list_branches', { cwd });
+      const transport = await getWsTransport();
+      return await transport.request<string[]>('git.listBranches', { cwd });
     },
 
     checkoutBranch: async (cwd: string, branch: string): Promise<void> => {
-      return await invoke<void>('git_checkout', { cwd, branch });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.checkout', { cwd, branch });
     },
 
     commit: async (cwd: string, message: string): Promise<void> => {
-      return await invoke<void>('git_commit', { cwd, message });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.runStackedAction', { cwd, action: 'commit', message });
     },
 
     pull: async (cwd: string): Promise<void> => {
-      return await invoke<void>('git_pull', { cwd });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.pull', { cwd });
     },
 
     push: async (cwd: string): Promise<void> => {
-      return await invoke<void>('git_push', { cwd });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.runStackedAction', { cwd, action: 'push' });
     },
 
     readWorkingTreeDiff: async (cwd: string): Promise<string> => {
-      return await invoke<string>('git_diff', { cwd, staged: false });
+      const transport = await getWsTransport();
+      const result = await transport.request<{ diff: string }>('git.diff', { cwd, staged: false });
+      return result.diff;
     },
 
     summarizeDiff: async (cwd: string): Promise<string> => {
-      return await invoke<string>('git_diff', { cwd, staged: true });
+      const transport = await getWsTransport();
+      const result = await transport.request<{ diff: string }>('git.diff', { cwd, staged: true });
+      return result.diff;
     },
 
     createBranch: async (cwd: string, branchName: string): Promise<void> => {
-      return await invoke<void>('git_create_branch', { cwd, branchName });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.createBranch', { cwd, branch: branchName });
     },
 
     stash: async (cwd: string): Promise<void> => {
-      return await invoke<void>('git_stash', { cwd });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.stash', { cwd });
     },
 
     stashPop: async (cwd: string): Promise<void> => {
-      return await invoke<void>('git_stash_pop', { cwd });
+      const transport = await getWsTransport();
+      await transport.request<void>('git.stashPop', { cwd });
     },
 
     log: async (cwd: string, maxCount?: number): Promise<string> => {
-      return await invoke<string>('git_log', { cwd, maxCount });
+      const transport = await getWsTransport();
+      const result = await transport.request<{ log: string }>('git.log', { cwd, maxCount: maxCount ?? 50 });
+      return result.log;
     },
   },
 
@@ -592,23 +652,29 @@ export const tauriBridge = {
    */
   workspace: {
     listProjects: async (): Promise<any[]> => {
-      return await invoke('list_projects');
+      const transport = await getWsTransport();
+      return await transport.request('workspace.listProjects', {});
     },
 
     addProject: async (path: string): Promise<void> => {
-      return await invoke<void>('add_project', { path });
+      const transport = await getWsTransport();
+      await transport.request('workspace.addProject', { path });
     },
 
     removeProject: async (projectId: string): Promise<void> => {
-      return await invoke<void>('remove_project', { projectId });
+      const transport = await getWsTransport();
+      await transport.request('workspace.removeProject', { projectId });
     },
 
-    readFile: async (path: string): Promise<string> => {
-      return await invoke<string>('read_file', { path });
+    readFile: async (root: string, path: string): Promise<string> => {
+      const transport = await getWsTransport();
+      const result = await transport.request<{ content: string }>('workspace.readFile', { root, path });
+      return result.content;
     },
 
-    writeFile: async (path: string, content: string): Promise<void> => {
-      return await invoke<void>('write_file', { path, content });
+    writeFile: async (root: string, path: string, content: string): Promise<void> => {
+      const transport = await getWsTransport();
+      await transport.request('workspace.writeFile', { root, path, content });
     },
   },
 
@@ -617,11 +683,73 @@ export const tauriBridge = {
    */
   settings: {
     get: async (): Promise<any> => {
-      return await invoke('get_settings');
+      const transport = await getWsTransport();
+      return await transport.request('server.getSettings', {});
     },
 
     save: async (settings: any): Promise<void> => {
-      return await invoke<void>('save_settings', { settings });
+      const transport = await getWsTransport();
+      await transport.request('server.updateSettings', settings);
+    },
+  },
+
+  /**
+   * 检查点管理相关命令
+   */
+  checkpoint: {
+    create: async (threadId: string, commitSha: string, message: string): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('checkpoint.create', { threadId, commitSha, message });
+    },
+
+    get: async (checkpointId: string): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('checkpoint.get', { checkpointId });
+    },
+
+    list: async (threadId: string): Promise<any[]> => {
+      const transport = await getWsTransport();
+      return await transport.request('checkpoint.list', { threadId });
+    },
+
+    delete: async (checkpointId: string): Promise<void> => {
+      const transport = await getWsTransport();
+      await transport.request('checkpoint.delete', { checkpointId });
+    },
+
+    revert: async (threadId: string, checkpointId: string): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('checkpoint.revert', { threadId, checkpointId });
+    },
+  },
+
+  /**
+   * 遥测管理相关命令
+   */
+  telemetry: {
+    getUsageStats: async (): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('telemetry.getUsageStats', {});
+    },
+
+    getEvents: async (limit: number = 100): Promise<any[]> => {
+      const transport = await getWsTransport();
+      return await transport.request('telemetry.getEvents', { limit });
+    },
+
+    clearEvents: async (): Promise<void> => {
+      const transport = await getWsTransport();
+      await transport.request('telemetry.clearEvents', {});
+    },
+
+    getMetrics: async (): Promise<any> => {
+      const transport = await getWsTransport();
+      return await transport.request('telemetry.getMetrics', {});
+    },
+
+    clearMetrics: async (): Promise<void> => {
+      const transport = await getWsTransport();
+      await transport.request('telemetry.clearMetrics', {});
     },
   },
 

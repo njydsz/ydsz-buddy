@@ -103,16 +103,32 @@
 //! 所有核心类型均使用 `Arc` + `RwLock`/`Mutex` 管理内部状态，支持在多线程/异步环境中安全共享。
 //! Engine 内部通过 MPSC 通道串行处理命令，对外暴露的查询接口可并发调用。
 
+// ==================== 子模块声明 ====================
+
+/// 编排引擎核心模块：命令处理、事件持久化与投影应用
 pub mod engine;
+/// 错误类型定义与统一结果类型
 pub mod error;
+/// 异步投影器，从事件存储消费事件并更新读模型
 pub mod projector;
+/// 读模型查询服务，提供快照与详情查询接口
 pub mod query;
+/// 反应器，监听事件流并触发外部系统调用
 pub mod reactor;
+/// 运行时收据总线，发布-订阅运行时事件
 pub mod runtime_receipt_bus;
 
+// ==================== 公开导出 ====================
+
+/// 导出编排引擎核心类型（引擎、读模型、Shell 快照等）
 pub use engine::*;
+/// 导出错误类型（OrchestrationError、OrchestrationResult）
 pub use error::*;
+/// 导出投影器类型（Projector）
 pub use projector::*;
+/// 导出查询服务类型（ProjectionSnapshotQuery、ProjectionCounts）
 pub use query::*;
+/// 导出反应器类型（ProviderCommandReactor、CheckpointReactor、ThreadDeletionReactor）
 pub use reactor::*;
+/// 导出运行时收据总线类型（RuntimeReceiptBus、OrchestrationRuntimeReceipt 等）
 pub use runtime_receipt_bus::*;

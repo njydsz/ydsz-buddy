@@ -13,6 +13,16 @@
 //! - [`TelemetryResult<T>`]：基于 `TelemetryError` 的 `Result` 类型别名，
 //!   作为本模块所有公共 API 的默认返回类型，简化调用方代码。
 //!
+//! ## 错误层次结构
+//!
+//! ```text
+//! TelemetryError (顶层错误枚举)
+//! ├── AnalyticsError(String)    ← 分析服务层错误
+//! ├── MetricsError(String)      ← 指标采集层错误
+//! ├── SerializationError(String) ← 序列化/反序列化层错误
+//! └── IoError(std::io::Error)   ← 底层 IO 错误（支持 From 自动转换）
+//! ```
+//!
 //! ## 使用场景
 //!
 //! 1. 在 `AnalyticsService`、`MetricsCollector` 等服务的公共方法中，
@@ -75,6 +85,14 @@ pub enum TelemetryError {
     /// 封装标准库 `std::io::Error`，用于透传底层文件读写、网络通信等 IO 操作的失败。
     /// 已通过 `#[from]` 属性实现 `From<std::io::Error>` 自动转换，
     /// 支持在函数中使用 `?` 运算符直接传播。
+    ///
+    /// ## 设计说明
+    ///
+    /// 使用 `#[from]` 而非手动实现 `From` 转换，是因为 `thiserror` 的 `#[from]` 属性
+    /// 会同时自动生成 `From<std::io::Error> for TelemetryError` 实现和
+    /// `std::error::Error::source()` 方法，确保错误链完整可追溯。
+    /// 其他变体（如 `AnalyticsError`、`MetricsError`）使用 `String` 而非具体错误类型，
+    /// 是因为这些错误场景目前不需要向下追溯错误源，简化了类型定义。
     #[error("IO 错误: {0}")]
     IoError(#[from] std::io::Error),
 }
