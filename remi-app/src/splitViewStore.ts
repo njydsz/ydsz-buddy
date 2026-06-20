@@ -1,7 +1,7 @@
 /**
  * @file splitViewStore.ts
- * @description 鍒嗗睆瑙嗗浘鐨?Zustand 鎸佷箙鍖栫姸鎬佸瓨鍌ㄣ€? * 浠ラ€掑綊闈㈡澘鏍戯紙娣卞害涓婇檺 2锛屾渶澶?2脳2 缃戞牸锛夌鐞嗗垎灞忚亰澶╃晫闈紝
- * 鎻愪緵闈㈡澘/鍒嗗壊绫诲瀷銆佹爲鎰熺煡閫夋嫨鍣ㄥ拰鍩轰簬 ID 鐨勫彉鏇存搷浣溿€? */
+ * @description 閸掑棗鐫嗙憴鍡楁禈閻?Zustand 閹镐椒绠欓崠鏍Ц閹礁鐡ㄩ崒銊ｂ偓? * 娴犮儵鈧帒缍婇棃銏℃緲閺嶆埊绱欏ǎ鍗炲娑撳﹪妾?2閿涘本娓舵径?2鑴? 缂冩垶鐗搁敍澶岊吀閻炲棗鍨庣仦蹇氫喊婢垛晝鏅棃顫礉
+ * 閹绘劒绶甸棃銏℃緲/閸掑棗澹婄猾璇茬€烽妴浣圭埐閹扮喓鐓￠柅澶嬪閸ｃ劌鎷伴崺杞扮艾 ID 閻ㄥ嫬褰夐弴瀛樻惙娴ｆ嚎鈧? */
 
 import { type ProjectId, type ThreadId, type TurnId } from "~/contracts";
 import { create } from "zustand";
@@ -22,74 +22,73 @@ import {
   type LegacySplitViewLike,
 } from "./splitView.logic";
 
-/** 鍒嗗睆瑙嗗浘鍞竴鏍囪瘑 */
+/** 閸掑棗鐫嗙憴鍡楁禈閸烆垯绔撮弽鍥槕 */
 export type SplitViewId = string;
-/** 闈㈡澘鍞竴鏍囪瘑 */
+/** 闂堛垺婢橀崬顖欑閺嶅洩鐦?*/
 export type PaneId = string;
-/** 鍒嗗壊鏂瑰悜锛歚"horizontal"` 姘村钩鍒嗗壊锛堝乏鍙筹級锛宍"vertical"` 鍨傜洿鍒嗗壊锛堜笂涓嬶級 */
+/** 閸掑棗澹婇弬鐟版倻閿涙瓪"horizontal"` 濮樻潙閽╅崚鍡楀閿涘牆涔忛崣绛圭礆閿涘畭"vertical"` 閸ㄥ倻娲块崚鍡楀閿涘牅绗傛稉瀣剁礆 */
 export type SplitDirection = "horizontal" | "vertical";
 /**
- * 鍒嗗壊鏀剧疆渚э細`"first"` 瀵瑰簲鍒嗗壊鐨勪笂/宸︿晶锛宍"second"` 瀵瑰簲涓?鍙充晶
- */
+ * 閸掑棗澹婇弨鍓х枂娓氀嶇窗`"first"` 鐎电懓绨查崚鍡楀閻ㄥ嫪绗?瀹革缚鏅堕敍瀹?second"` 鐎电懓绨叉稉?閸欏厖鏅? */
 export type SplitDropSide = "first" | "second";
 
-/** 闈㈡澘鍙充晶闈㈡澘鐘舵€侊紙娴忚鍣?宸紓瑙嗗浘绛夛級 */
+/** 闂堛垺婢橀崣鍏呮櫠闂堛垺婢橀悩鑸碘偓渚婄礄濞村繗顫嶉崳?瀹割喖绱撶憴鍡楁禈缁涘绱?*/
 export interface SplitViewPanePanelState {
-  /** 褰撳墠鎵撳紑鐨勯潰鏉跨被鍨?*/
+  /** 瑜版挸澧犻幍鎾崇磻閻ㄥ嫰娼伴弶璺ㄨ閸?*/
   panel: ChatRightPanel | null;
-  /** 宸紓瑙嗗浘鐨勮疆娆?ID */
+  /** 瀹割喖绱撶憴鍡楁禈閻ㄥ嫯鐤嗗▎?ID */
   diffTurnId: TurnId | null;
-  /** 宸紓瑙嗗浘鐨勬枃浠惰矾寰?*/
+  /** 瀹割喖绱撶憴鍡楁禈閻ㄥ嫭鏋冩禒鎯扮熅瀵?*/
   diffFilePath: string | null;
-  /** 鏄惁鏇炬墦寮€杩囬潰鏉?*/
+  /** 閺勵垰鎯侀弴鐐ⅵ瀵偓鏉╁洭娼伴弶?*/
   hasOpenedPanel: boolean;
-  /** 鏈€杩戞墦寮€鐨勯潰鏉跨被鍨?*/
+  /** 閺堚偓鏉╂垶澧﹀鈧惃鍕桨閺夎法琚崹?*/
   lastOpenPanel: ChatRightPanel;
 }
 
-/** 鍙跺瓙闈㈡澘锛屼唬琛ㄤ竴涓嚎绋嬬殑鏄剧ず鍖哄煙 */
+/** 閸欒泛鐡欓棃銏℃緲閿涘奔鍞悰銊ょ娑擃亞鍤庣粙瀣畱閺勫墽銇氶崠鍝勭厵 */
 export interface LeafPane {
   kind: "leaf";
-  /** 闈㈡澘鍞竴 ID */
+  /** 闂堛垺婢橀崬顖欑 ID */
   id: PaneId;
-  /** 鍏宠仈鐨勭嚎绋?ID锛屼负 null 鏃惰〃绀虹┖闈㈡澘 */
+  /** 閸忓疇浠堥惃鍕殠缁?ID閿涘奔璐?null 閺冩儼銆冪粈铏光敄闂堛垺婢?*/
   threadId: ThreadId | null;
-  /** 闈㈡澘鍙充晶闈㈡澘鐘舵€?*/
+  /** 闂堛垺婢橀崣鍏呮櫠闂堛垺婢橀悩鑸碘偓?*/
   panel: SplitViewPanePanelState;
 }
 
-/** 鍒嗗壊鑺傜偣锛屼唬琛ㄤ竴涓按骞虫垨鍨傜洿鐨勫垎鍓?*/
+/** 閸掑棗澹婇懞鍌滃仯閿涘奔鍞悰銊ょ娑擃亝鎸夐獮铏灗閸ㄥ倻娲块惃鍕瀻閸?*/
 export interface SplitNode {
   kind: "split";
-  /** 鑺傜偣鍞竴 ID */
+  /** 閼哄倻鍋ｉ崬顖欑 ID */
   id: PaneId;
-  /** 鍒嗗壊鏂瑰悜 */
+  /** 閸掑棗澹婇弬鐟版倻 */
   direction: SplitDirection;
-  /** first = 宸︼紙姘村钩锛? 涓婏紙鍨傜洿锛夛紱second = 鍙?/ 涓?*/
+  /** first = 瀹革讣绱欏鏉戦挬閿? 娑撳绱欓崹鍌滄纯閿涘绱眘econd = 閸?/ 娑?*/
   first: Pane;
   second: Pane;
-  /** 鍒嗗壊姣斾緥锛?.25 ~ 0.75锛?*/
+  /** 閸掑棗澹婂В鏂剧伐閿?.25 ~ 0.75閿?*/
   ratio: number;
 }
 
-/** 闈㈡澘鑺傜偣鑱斿悎绫诲瀷锛堝彾瀛愭垨鍒嗗壊锛?*/
+/** 闂堛垺婢橀懞鍌滃仯閼辨柨鎮庣猾璇茬€烽敍鍫濆骄鐎涙劖鍨ㄩ崚鍡楀閿?*/
 export type Pane = LeafPane | SplitNode;
 
-/** 鍒嗗睆瑙嗗浘锛屽寘鍚潰鏉挎爲鍜岃仛鐒︾姸鎬?*/
+/** 閸掑棗鐫嗙憴鍡楁禈閿涘苯瀵橀崥顐︽桨閺夋寧鐖查崪宀冧粵閻掞妇濮搁幀?*/
 export interface SplitView {
-  /** 鍒嗗睆瑙嗗浘鍞竴 ID */
+  /** 閸掑棗鐫嗙憴鍡楁禈閸烆垯绔?ID */
   id: SplitViewId;
-  /** 婧愮嚎绋?ID */
+  /** 濠ф劗鍤庣粙?ID */
   sourceThreadId: ThreadId;
-  /** 鎵€灞為」鐩?ID */
+  /** 閹碘偓鐏炵偤銆嶉惄?ID */
   ownerProjectId: ProjectId;
-  /** 闈㈡澘鏍戞牴鑺傜偣 */
+  /** 闂堛垺婢橀弽鎴炵壌閼哄倻鍋?*/
   root: Pane;
-  /** 褰撳墠鑱氱劍鐨勯潰鏉?ID */
+  /** 瑜版挸澧犻懕姘卞妽閻ㄥ嫰娼伴弶?ID */
   focusedPaneId: PaneId;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt: string;
 }
 
@@ -338,9 +337,9 @@ function resolveNextSourceThreadId(input: {
 // --- selectors ---
 
 /**
- * 瑙ｆ瀽鍒嗗睆瑙嗗浘涓仛鐒︾殑绾跨▼ ID銆? * 浼樺厛杩斿洖鑱氱劍闈㈡澘鐨勭嚎绋?ID锛岃嫢鑱氱劍闈㈡澘涓虹┖鍒欏洖閫€鍒扮涓€涓潪绌哄彾瀛愰潰鏉裤€? *
- * @param splitView - 鍒嗗睆瑙嗗浘
- * @returns 鑱氱劍鐨勭嚎绋?ID锛屾墍鏈夐潰鏉夸负绌烘椂杩斿洖 null
+ * 鐟欙絾鐎介崚鍡楃潌鐟欏棗娴樻稉顓′粵閻掞妇娈戠痪璺ㄢ柤 ID閵? * 娴兼ê鍘涙潻鏂挎礀閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID閿涘矁瀚㈤懕姘卞妽闂堛垺婢樻稉铏光敄閸掓瑥娲栭柅鈧崚鎵儑娑撯偓娑擃亪娼粚鍝勫骄鐎涙劙娼伴弶瑁も偓? *
+ * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
+ * @returns 閼辨氨鍔嶉惃鍕殠缁?ID閿涘本澧嶉張澶愭桨閺夊じ璐熺粚鐑樻鏉╂柨娲?null
  */
 export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId | null {
   const focused = findLeafPaneById(splitView.root, splitView.focusedPaneId);
@@ -354,21 +353,20 @@ export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId 
 }
 
 /**
- * 涓ユ牸鑾峰彇鑱氱劍闈㈡澘鐨勭嚎绋?ID锛堟棤鍥為€€锛夛紝鐢ㄤ簬璺敱浜ゆ帴
- *
- * @param splitView - 鍒嗗睆瑙嗗浘
- * @returns 鑱氱劍闈㈡澘鐨勭嚎绋?ID
+ * 娑撱儲鐗搁懢宄板絿閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID閿涘牊妫ら崶鐐衡偓鈧敍澶涚礉閻劋绨捄顖滄暠娴溿倖甯? *
+ * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
+ * @returns 閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID
  */
 export function resolveSplitViewFocusedPaneThreadId(splitView: SplitView): ThreadId | null {
   return findLeafPaneById(splitView.root, splitView.focusedPaneId)?.threadId ?? null;
 }
 
 /**
- * 鑾峰彇鎸囧畾闈㈡澘 ID 鍏宠仈鐨勭嚎绋?ID
+ * 閼惧嘲褰囬幐鍥х暰闂堛垺婢?ID 閸忓疇浠堥惃鍕殠缁?ID
  *
- * @param splitView - 鍒嗗睆瑙嗗浘
- * @param paneId - 闈㈡澘 ID
- * @returns 绾跨▼ ID
+ * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
+ * @param paneId - 闂堛垺婢?ID
+ * @returns 缁捐法鈻?ID
  */
 export function resolveSplitViewPaneThreadId(
   splitView: SplitView,
@@ -378,11 +376,10 @@ export function resolveSplitViewPaneThreadId(
 }
 
 /**
- * 鑾峰彇鍒嗗睆瑙嗗浘涓墍鏈夐潪绌虹殑绾跨▼ ID锛堝幓閲嶏級
+ * 閼惧嘲褰囬崚鍡楃潌鐟欏棗娴樻稉顓熷閺堝娼粚铏规畱缁捐法鈻?ID閿涘牆骞撻柌宥忕礆
  *
- * @param splitView - 鍒嗗睆瑙嗗浘
- * @returns 绾跨▼ ID 鏁扮粍
- */
+ * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
+ * @returns 缁捐法鈻?ID 閺佹壆绮? */
 export function resolveSplitViewThreadIds(splitView: SplitView): ThreadId[] {
   const ids = collectLeaves(splitView.root)
     .map((leaf) => leaf.threadId)
@@ -391,11 +388,11 @@ export function resolveSplitViewThreadIds(splitView: SplitView): ThreadId[] {
 }
 
 /**
- * 鏍规嵁绾跨▼ ID 鏌ユ壘瀵瑰簲鐨勯潰鏉?ID
+ * 閺嶈宓佺痪璺ㄢ柤 ID 閺屻儲澹樼€电懓绨查惃鍕桨閺?ID
  *
- * @param splitView - 鍒嗗睆瑙嗗浘
- * @param threadId - 绾跨▼ ID
- * @returns 闈㈡澘 ID锛屾湭鎵惧埌鏃惰繑鍥?null
+ * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
+ * @param threadId - 缁捐法鈻?ID
+ * @returns 闂堛垺婢?ID閿涘本婀幍鎯у煂閺冩儼绻戦崶?null
  */
 export function resolveSplitViewPaneIdForThread(
   splitView: SplitView,
@@ -409,18 +406,18 @@ export function resolveSplitViewPaneIdForThread(
 }
 
 /**
- * 鏀堕泦鍒嗗睆瑙嗗浘涓墍鏈夊彾瀛愰潰鏉裤€? *
- * 閬嶅巻鍒嗗睆瑙嗗浘鐨勬牴鑺傜偣锛岄€掑綊鏀堕泦鎵€鏈夊彾瀛愰潰鏉匡紙LeafPane锛夈€? *
- * @param splitView - 瑕佹敹闆嗗彾瀛愰潰鏉跨殑鍒嗗睆瑙嗗浘
- * @returns 鍙跺瓙闈㈡澘鏁扮粍锛屾寜鏍戦亶鍘嗛『搴忔帓鍒? */
+ * 閺€鍫曟肠閸掑棗鐫嗙憴鍡楁禈娑擃厽澧嶉張澶婂骄鐎涙劙娼伴弶瑁も偓? *
+ * 闁秴宸婚崚鍡楃潌鐟欏棗娴橀惃鍕壌閼哄倻鍋ｉ敍宀勨偓鎺戠秺閺€鍫曟肠閹碘偓閺堝褰剧€涙劙娼伴弶鍖＄礄LeafPane閿涘鈧? *
+ * @param splitView - 鐟曚焦鏁归梿鍡楀骄鐎涙劙娼伴弶璺ㄦ畱閸掑棗鐫嗙憴鍡楁禈
+ * @returns 閸欒泛鐡欓棃銏℃緲閺佹壆绮嶉敍灞惧瘻閺嶆垿浜堕崢鍡涖€庢惔蹇斿笓閸? */
 export function resolveSplitViewLeaves(splitView: SplitView): LeafPane[] {
   return collectLeaves(splitView.root);
 }
 
 /**
- * 鍒涘缓涓€涓?Zustand 閫夋嫨鍣紝鏍规嵁鍒嗗睆瑙嗗浘 ID 閫夊彇瀵瑰簲鐨勫垎灞忚鍥俱€? *
- * @param splitViewId - 瑕侀€夊彇鐨勫垎灞忚鍥?ID锛屼负 null 鏃惰繑鍥?null
- * @returns Zustand 閫夋嫨鍣ㄥ嚱鏁帮紝鎺ユ敹 store 杩斿洖瀵瑰簲鐨?SplitView 鎴?null
+ * 閸掓稑缂撴稉鈧稉?Zustand 闁瀚ㄩ崳顭掔礉閺嶈宓侀崚鍡楃潌鐟欏棗娴?ID 闁褰囩€电懓绨查惃鍕瀻鐏炲繗顫嬮崶淇扁偓? *
+ * @param splitViewId - 鐟曚線鈧褰囬惃鍕瀻鐏炲繗顫嬮崶?ID閿涘奔璐?null 閺冩儼绻戦崶?null
+ * @returns Zustand 闁瀚ㄩ崳銊ュ毐閺佸府绱濋幒銉︽暪 store 鏉╂柨娲栫€电懓绨查惃?SplitView 閹?null
  */
 export function selectSplitView(splitViewId: SplitViewId | null) {
   return (store: SplitViewStore) =>
@@ -428,10 +425,10 @@ export function selectSplitView(splitViewId: SplitViewId | null) {
 }
 
 /**
- * 鍒涘缓涓€涓?Zustand 閫夋嫨鍣紝鏍规嵁婧愮嚎绋?ID 鏌ユ壘鍏舵墍灞炵殑鍒嗗睆瑙嗗浘 ID銆? *
- * 閫氳繃 splitViewIdBySourceThreadId 鏄犲皠琛ㄦ煡鎵炬簮绾跨▼瀵瑰簲鐨勫垎灞忚鍥俱€? *
- * @param threadId - 婧愮嚎绋?ID锛屼负 null 鏃惰繑鍥?null
- * @returns Zustand 閫夋嫨鍣ㄥ嚱鏁帮紝鎺ユ敹 store 杩斿洖瀵瑰簲鐨?SplitViewId 鎴?null
+ * 閸掓稑缂撴稉鈧稉?Zustand 闁瀚ㄩ崳顭掔礉閺嶈宓佸┃鎰殠缁?ID 閺屻儲澹橀崗鑸靛鐏炵偟娈戦崚鍡楃潌鐟欏棗娴?ID閵? *
+ * 闁俺绻?splitViewIdBySourceThreadId 閺勭姴鐨犵悰銊︾叀閹电偓绨痪璺ㄢ柤鐎电懓绨查惃鍕瀻鐏炲繗顫嬮崶淇扁偓? *
+ * @param threadId - 濠ф劗鍤庣粙?ID閿涘奔璐?null 閺冩儼绻戦崶?null
+ * @returns Zustand 闁瀚ㄩ崳銊ュ毐閺佸府绱濋幒銉︽暪 store 鏉╂柨娲栫€电懓绨查惃?SplitViewId 閹?null
  */
 export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
   return (store: SplitViewStore) =>
@@ -439,13 +436,11 @@ export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
 }
 
 /**
- * 纭畾鎬ф垚鍛樻煡鎵撅細浠呭綋绾跨▼鏈夊敮涓€鏄庣‘鐨勫垎灞忚鍥惧綊灞烇紝鎴栦綔涓烘煇涓垎灞忕殑婧愮嚎绋嬫椂鎵嶆仮澶嶃€? * 妯＄硦鐨勯潪婧愮嚎绋嬫垚鍛樺叧绯诲洖閫€鍒板崟鑱婃ā寮忥紝鑰岄潪鎸夋渶杩戜娇鐢ㄧ寽娴嬨€? *
- * 鏌ユ壘绾跨▼棣栭€夊綊灞炵殑鍒嗗睆瑙嗗浘 ID銆備紭鍏堜娇鐢ㄦ簮绾跨▼鏄犲皠琛ㄦ煡鎵撅紱
- * 鑻ョ嚎绋嬪悓鏃跺嚭鐜板湪澶氫釜鍒嗗睆瑙嗗浘涓笖涓嶆槸浠讳綍鍒嗗睆鐨勬簮绾跨▼锛屽垯浠呭綋鍞竴鍖归厤鏃惰繑鍥炪€? *
- * @param input - 鏌ユ壘鍙傛暟
- * @param input.splitViewsById - 鎵€鏈夊垎灞忚鍥剧殑鏄犲皠琛? * @param input.splitViewIdBySourceThreadId - 婧愮嚎绋嬪埌鍒嗗睆瑙嗗浘 ID 鐨勬槧灏勮〃
- * @param input.threadId - 瑕佹煡鎵惧綊灞炵殑绾跨▼ ID锛屼负 null 鏃惰繑鍥?null
- * @returns 绾跨▼棣栭€夊綊灞炵殑鍒嗗睆瑙嗗浘 ID锛屾棤娉曠‘瀹氭椂杩斿洖 null
+ * 绾喖鐣鹃幀褎鍨氶崨妯荤叀閹垫拝绱版禒鍛秼缁捐法鈻奸張澶婃暜娑撯偓閺勫海鈥橀惃鍕瀻鐏炲繗顫嬮崶鎯х秺鐏炵儑绱濋幋鏍︾稊娑撶儤鐓囨稉顏勫瀻鐏炲繒娈戝┃鎰殠缁嬪妞傞幍宥嗕划婢跺秲鈧? * 濡紕纭﹂惃鍕姜濠ф劗鍤庣粙瀣灇閸涙ê鍙х化璇叉礀闁偓閸掓澘宕熼懕濠兡佸蹇ョ礉閼板矂娼幐澶嬫付鏉╂垳濞囬悽銊у濞村鈧? *
+ * 閺屻儲澹樼痪璺ㄢ柤妫ｆ牠鈧缍婄仦鐐垫畱閸掑棗鐫嗙憴鍡楁禈 ID閵嗗倷绱崗鍫滃▏閻劍绨痪璺ㄢ柤閺勭姴鐨犵悰銊︾叀閹垫拝绱? * 閼汇儳鍤庣粙瀣倱閺冭泛鍤悳鏉挎躬婢舵矮閲滈崚鍡楃潌鐟欏棗娴樻稉顓濈瑬娑撳秵妲告禒璁崇秿閸掑棗鐫嗛惃鍕爱缁捐法鈻奸敍灞藉灟娴犲懎缍嬮崬顖欑閸栧綊鍘ら弮鎯扮箲閸ョ偑鈧? *
+ * @param input - 閺屻儲澹橀崣鍌涙殶
+ * @param input.splitViewsById - 閹碘偓閺堝鍨庣仦蹇氼潒閸ュ墽娈戦弰鐘茬殸鐞? * @param input.splitViewIdBySourceThreadId - 濠ф劗鍤庣粙瀣煂閸掑棗鐫嗙憴鍡楁禈 ID 閻ㄥ嫭妲х亸鍕€? * @param input.threadId - 鐟曚焦鐓￠幍鎯х秺鐏炵偟娈戠痪璺ㄢ柤 ID閿涘奔璐?null 閺冩儼绻戦崶?null
+ * @returns 缁捐法鈻兼＃鏍偓澶婄秺鐏炵偟娈戦崚鍡楃潌鐟欏棗娴?ID閿涘本妫ゅ▔鏇犫€樼€规碍妞傛潻鏂挎礀 null
  */
 export function resolvePreferredSplitViewIdForThread(input: {
   splitViewsById: Record<SplitViewId, SplitView | undefined>;
@@ -477,13 +472,11 @@ export function resolvePreferredSplitViewIdForThread(input: {
 // --- store ---
 
 /**
- * 鍒嗗睆瑙嗗浘 Zustand 鐘舵€佺鐞?store銆? *
- * 浣跨敤 persist 涓棿浠跺皢鍒嗗睆瑙嗗浘鏁版嵁鎸佷箙鍖栧埌 localStorage锛? * 鏀寔浠庢棫鐗堟墎骞冲乏鍙抽潰鏉跨粨鏋勮縼绉诲埌鏍戝舰缁撴瀯銆? *
- * 涓昏鍔熻兘锛? * - createFromThread锛氫粠婧愮嚎绋嬪垱寤哄垎灞忚鍥? * - createFromDrop锛氫粠鎷栨斁鎿嶄綔鍒涘缓鍒嗗睆瑙嗗浘
- * - removeSplitView锛氬垹闄ゅ垎灞忚鍥? * - replacePaneThread锛氭浛鎹㈤潰鏉夸腑鐨勭嚎绋? * - dropThreadOnPane锛氬皢绾跨▼鎷栨斁鍒伴潰鏉夸笂浠ュ垱寤哄垎灞? * - removePaneFromSplitView锛氫粠鍒嗗睆瑙嗗浘涓Щ闄ら潰鏉? * - setFocusedPane锛氳缃仛鐒﹂潰鏉? * - setRatioForNode锛氳缃垎灞忚妭鐐圭殑鍒嗗壊姣斾緥
- * - setPanePanelState锛氳缃潰鏉跨殑 UI 鐘舵€侊紙濡?diff 瑙嗗浘銆侀潰鏉垮睍寮€绛夛級
- * - removeThreadFromSplitViews锛氫粠鎵€鏈夊垎灞忚鍥句腑绉婚櫎鎸囧畾绾跨▼
- */
+ * 閸掑棗鐫嗙憴鍡楁禈 Zustand 閻樿埖鈧胶顓搁悶?store閵? *
+ * 娴ｈ法鏁?persist 娑擃參妫挎禒璺虹殺閸掑棗鐫嗙憴鍡楁禈閺佺増宓侀幐浣风畽閸栨牕鍩?localStorage閿? * 閺€顖涘瘮娴犲孩妫悧鍫熷楠炲啿涔忛崣鎶芥桨閺夎法绮ㄩ弸鍕讣缁夎鍩岄弽鎴濊埌缂佹挻鐎妴? *
+ * 娑撴槒顩﹂崝鐔诲厴閿? * - createFromThread閿涙矮绮犲┃鎰殠缁嬪鍨卞鍝勫瀻鐏炲繗顫嬮崶? * - createFromDrop閿涙矮绮犻幏鏍ㄦ杹閹垮秳缍旈崚娑樼紦閸掑棗鐫嗙憴鍡楁禈
+ * - removeSplitView閿涙艾鍨归梽銈呭瀻鐏炲繗顫嬮崶? * - replacePaneThread閿涙碍娴涢幑銏ゆ桨閺夊じ鑵戦惃鍕殠缁? * - dropThreadOnPane閿涙艾鐨㈢痪璺ㄢ柤閹锋牗鏂侀崚浼存桨閺夊じ绗傛禒銉ュ灡瀵ゅ搫鍨庣仦? * - removePaneFromSplitView閿涙矮绮犻崚鍡楃潌鐟欏棗娴樻稉顓犘╅梽銈夋桨閺? * - setFocusedPane閿涙俺顔曠純顔夸粵閻掞箓娼伴弶? * - setRatioForNode閿涙俺顔曠純顔煎瀻鐏炲繗濡悙鍦畱閸掑棗澹婂В鏂剧伐
+ * - setPanePanelState閿涙俺顔曠純顕€娼伴弶璺ㄦ畱 UI 閻樿埖鈧緤绱欐俊?diff 鐟欏棗娴橀妴渚€娼伴弶鍨潔瀵偓缁涘绱? * - removeThreadFromSplitViews閿涙矮绮犻幍鈧張澶婂瀻鐏炲繗顫嬮崶鍙ヨ厬缁夊娅庨幐鍥х暰缁捐法鈻? */
 export const useSplitViewStore = create<SplitViewStore>()(
   persist(
     (set, get) => ({
@@ -855,7 +848,7 @@ export const useSplitViewStore = create<SplitViewStore>()(
           state?.setHasHydrated(true);
         };
       },
-      // v2 涔嬪墠鐨勫瓨鍌ㄤ娇鐢ㄦ墎骞崇殑宸﹀彸闈㈡澘缁撴瀯銆傛澶勫皢鎸佷箙鍖栫姸鎬佽縼绉诲埌鏍戝舰缁撴瀯锛?      // 濡傛灉杩佺Щ鏃犳硶鎭㈠浠讳綍鏈夋晥鏁版嵁锛屽垯闈欓粯涓㈠純鑰岄潪宕╂簝銆?      migrate: (persistedState, version) => {
+      // v2 娑斿澧犻惃鍕摠閸屻劋濞囬悽銊﹀楠炲磭娈戝锕€褰搁棃銏℃緲缂佹挻鐎妴鍌涱劃婢跺嫬鐨㈤幐浣风畽閸栨牜濮搁幀浣界讣缁夎鍩岄弽鎴濊埌缂佹挻鐎敍?      // 婵″倹鐏夋潻浣盒╅弮鐘崇《閹垹顦叉禒璁崇秿閺堝鏅ラ弫鐗堝祦閿涘苯鍨棃娆撶帛娑撱垹绱旈懓宀勬姜瀹曗晜绨濋妴?      migrate: (persistedState, version) => {
         if (version >= SPLIT_VIEW_STORAGE_VERSION) {
           return persistedState as SplitViewStoreState;
         }

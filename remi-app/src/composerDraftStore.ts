@@ -3,7 +3,7 @@
 // Purpose: Stores composer drafts, model selections, queued turns, and sticky provider choices.
 // Layer: Web state store
 // Depends on: contracts schemas, app model resolution helpers, and zustand persistence.
-// TODO: 杩佺Щ鏈熼棿涓存椂璺宠繃绫诲瀷妫€鏌ャ€傚綋鍓嶄粛浣跨敤鏃х増 Effect Schema API锛?// 闇€鍚庣画鏀瑰啓涓?zod 鎴栨柊鐗?Effect Schema銆?
+// TODO: 鏉╀胶些閺堢喖妫挎稉瀛樻鐠哄疇绻冪猾璇茬€峰Λ鈧弻銉ｂ偓鍌氱秼閸撳秳绮涙担璺ㄦ暏閺冄呭 Effect Schema API閿?// 闂団偓閸氬海鐢婚弨鐟板晸娑?zod 閹存牗鏌婇悧?Effect Schema閵?
 import {
   type ClaudeCodeEffort,
   type CodexReasoningEffort,
@@ -56,11 +56,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-/** Composer 鑽夌ǹ鎸佷箙鍖栧瓨鍌ㄧ殑 localStorage 閿悕 */
+/** Composer 閼藉枪閹镐椒绠欓崠鏍х摠閸屻劎娈?localStorage 闁款喖鎮?*/
 export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
-/** 鑽夌ǹ绾跨▼鐨勭幆澧冩ā寮忥細`"local"` 涓烘湰鍦扮幆澧冿紝`"worktree"` 涓?worktree 鐜 */
+/** 閼藉枪缁捐法鈻奸惃鍕箚婢у啯膩瀵骏绱癭"local"` 娑撶儤婀伴崷鎵箚婢у喛绱漙"worktree"` 娑?worktree 閻滎垰顣?*/
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
 const DraftThreadEntryPointSchema = Schema.Literals(["chat", "terminal"]);
 const COMPOSER_PROVIDER_KINDS = [
@@ -91,7 +91,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** 鎸佷箙鍖栫殑鍥剧墖闄勪欢 Schema锛岀敤浜?localStorage 搴忓垪鍖?*/
+/** 閹镐椒绠欓崠鏍畱閸ュ墽澧栭梽鍕 Schema閿涘瞼鏁ゆ禍?localStorage 鎼村繐鍨崠?*/
 export const PersistedComposerImageAttachment = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -99,21 +99,21 @@ export const PersistedComposerImageAttachment = Schema.Struct({
   sizeBytes: Schema.Number,
   dataUrl: Schema.String,
 });
-/** 鎸佷箙鍖栧浘鐗囬檮浠剁殑绫诲瀷锛屼粠 Schema 鎺ㄥ */
+/** 閹镐椒绠欓崠鏍ф禈閻楀洭妾禒鍓佹畱缁鐎烽敍灞肩矤 Schema 閹恒劌顕?*/
 export type PersistedComposerImageAttachment = typeof PersistedComposerImageAttachment.Type;
 
 /**
- * Composer 鍥剧墖闄勪欢锛屽寘鍚繍琛屾椂淇℃伅锛團ile 瀵硅薄鍜岄瑙?URL锛夈€? * 涓?PersistedComposerImageAttachment 涓嶅悓锛屾绫诲瀷鍖呭惈涓嶅彲搴忓垪鍖栫殑 File 瀵硅薄銆? */
+ * Composer 閸ュ墽澧栭梽鍕閿涘苯瀵橀崥顐ョ箥鐞涘本妞傛穱鈩冧紖閿涘湗ile 鐎电钖勯崪宀勵暕鐟?URL閿涘鈧? * 娑?PersistedComposerImageAttachment 娑撳秴鎮撻敍灞绢劃缁鐎烽崠鍛儓娑撳秴褰叉惔蹇撳灙閸栨牜娈?File 鐎电钖勯妴? */
 export interface ComposerImageAttachment extends Omit<ChatImageAttachment, "previewUrl"> {
   previewUrl: string;
   file: File;
 }
 
-/** Composer 鍔╂墜閫夋嫨闄勪欢绫诲瀷锛屼笌 ChatAssistantSelectionAttachment 涓€鑷?*/
+/** Composer 閸斺晜澧滈柅澶嬪闂勫嫪娆㈢猾璇茬€烽敍灞肩瑢 ChatAssistantSelectionAttachment 娑撯偓閼?*/
 export type ComposerAssistantSelectionAttachment = ChatAssistantSelectionAttachment;
 
 /**
- * 鎺掗槦涓殑 Composer 鑱婂ぉ杞銆? * 褰撶敤鎴峰湪褰撳墠杞鏈畬鎴愭椂鍙戦€佹柊娑堟伅锛屾秷鎭細琚斁鍏ラ槦鍒楃瓑寰呭鐞嗐€? */
+ * 閹烘帡妲︽稉顓犳畱 Composer 閼卞﹤銇夋潪顔筋偧閵? * 瑜版挾鏁ら幋宄版躬瑜版挸澧犳潪顔筋偧閺堫亜鐣幋鎰閸欐垿鈧焦鏌婂☉鍫熶紖閿涘本绉烽幁顖欑窗鐞氼偅鏂侀崗銉╂Е閸掓鐡戝鍛槱閻炲棎鈧? */
 export interface QueuedComposerChatTurn {
   id: string;
   kind: "chat";
@@ -135,7 +135,7 @@ export interface QueuedComposerChatTurn {
   envMode: DraftThreadEnvMode;
 }
 
-/** 鎺掗槦涓殑璁″垝璺熻繘杞锛岀敤浜?plan 妯″紡涓嬬殑鍚庣画鎿嶄綔 */
+/** 閹烘帡妲︽稉顓犳畱鐠佲€冲灊鐠虹喕绻樻潪顔筋偧閿涘瞼鏁ゆ禍?plan 濡€崇础娑撳娈戦崥搴ｇ敾閹垮秳缍?*/
 export interface QueuedComposerPlanFollowUp {
   id: string;
   kind: "plan-follow-up";
@@ -151,7 +151,7 @@ export interface QueuedComposerPlanFollowUp {
   runtimeMode: RuntimeMode;
 }
 
-/** 鎺掗槦涓殑 Composer 杞鑱斿悎绫诲瀷锛堣亰澶╄疆娆℃垨璁″垝璺熻繘杞锛?*/
+/** 閹烘帡妲︽稉顓犳畱 Composer 鏉烆喗顐奸懕鏂挎値缁鐎烽敍鍫ｄ喊婢垛晞鐤嗗▎鈩冨灗鐠佲€冲灊鐠虹喕绻樻潪顔筋偧閿?*/
 export type QueuedComposerTurn = QueuedComposerChatTurn | QueuedComposerPlanFollowUp;
 
 const PersistedTerminalContextDraft = Schema.Struct({
@@ -324,7 +324,7 @@ const PersistedComposerDraftStoreStorage = Schema.Struct({
 });
 
 /**
- * Composer 绾跨▼鑽夌ǹ鐘舵€侊紝鍖呭惈缂栬緫鍣ㄥ唴瀹广€侀檮浠躲€佹ā鍨嬮€夋嫨绛夎繍琛屾椂淇℃伅銆? * 姣忎釜绾跨▼瀵瑰簲涓€涓崏绋跨姸鎬侊紝鐢ㄤ簬鍦ㄧ敤鎴峰垏鎹㈢嚎绋嬫椂淇濈暀鏈彂閫佺殑鍐呭銆? */
+ * Composer 缁捐法鈻奸懡澶屒归悩鑸碘偓渚婄礉閸栧懎鎯堢紓鏍帆閸ｃ劌鍞寸€瑰箍鈧線妾禒韬测偓浣鼓侀崹瀣偓澶嬪缁涘绻嶇悰灞炬娣団剝浼呴妴? * 濮ｅ繋閲滅痪璺ㄢ柤鐎电懓绨叉稉鈧稉顏囧磸缁嬭法濮搁幀渚婄礉閻劋绨崷銊ф暏閹村嘲鍨忛幑銏㈠殠缁嬪妞傛穱婵堟殌閺堫亜褰傞柅浣烘畱閸愬懎顔愰妴? */
 export interface ComposerThreadDraftState {
   prompt: string;
   images: ComposerImageAttachment[];
@@ -340,7 +340,7 @@ export interface ComposerThreadDraftState {
 }
 
 /**
- * 鑽夌ǹ绾跨▼鐘舵€侊紝璁板綍绾跨▼鐨勯」鐩綊灞炪€佸垎鏀€佺幆澧冩ā寮忕瓑鍏冧俊鎭€? * 涓?ComposerThreadDraftState 涓嶅悓锛屾鎺ュ彛鍏虫敞绾跨▼鐨勪笂涓嬫枃淇℃伅鑰岄潪缂栬緫鍣ㄥ唴瀹广€? */
+ * 閼藉枪缁捐法鈻奸悩鑸碘偓渚婄礉鐠佹澘缍嶇痪璺ㄢ柤閻ㄥ嫰銆嶉惄顔肩秺鐏炵偑鈧礁鍨庨弨顖樷偓浣哄箚婢у啯膩瀵繒鐡戦崗鍐т繆閹垬鈧? * 娑?ComposerThreadDraftState 娑撳秴鎮撻敍灞绢劃閹恒儱褰涢崗铏暈缁捐法鈻奸惃鍕瑐娑撳鏋冩穱鈩冧紖閼板矂娼紓鏍帆閸ｃ劌鍞寸€瑰箍鈧? */
 export interface DraftThreadState {
   projectId: ProjectId;
   createdAt: string;
@@ -360,7 +360,7 @@ interface ProjectDraftThread extends DraftThreadState {
 }
 
 /**
- * Composer 鑽夌ǹ瀛樺偍鐨勫畬鏁寸姸鎬佹帴鍙ｃ€? * 绠＄悊鎵€鏈夌嚎绋嬬殑鑽夌ǹ鍐呭銆佽崏绋跨嚎绋嬪厓淇℃伅銆侀」鐩槧灏勪互鍙婄矘鎬фā鍨嬮€夋嫨銆? */
+ * Composer 閼藉枪鐎涙ê鍋嶉惃鍕暚閺佸濮搁幀浣瑰复閸欙絻鈧? * 缁狅紕鎮婇幍鈧張澶屽殠缁嬪娈戦懡澶屒归崘鍛啇閵嗕浇宕忕粙璺ㄥ殠缁嬪鍘撴穱鈩冧紖閵嗕線銆嶉惄顔芥Ё鐏忓嫪浜掗崣濠勭煒閹勀侀崹瀣偓澶嬪閵? */
 export interface ComposerDraftStoreState {
   draftsByThreadId: Record<ThreadId, ComposerThreadDraftState>;
   draftThreadsByThreadId: Record<ThreadId, DraftThreadState>;
@@ -466,7 +466,7 @@ export interface ComposerDraftStoreState {
 }
 
 /**
- * 鏈夋晥鐨?Composer 妯″瀷鐘舵€侊紝鍖呭惈褰撳墠閫変腑鐨勬ā鍨嬪拰妯″瀷閫夐」銆? * 鐢?deriveEffectiveComposerModelState 璁＄畻寰楀嚭銆? */
+ * 閺堝鏅ラ惃?Composer 濡€崇€烽悩鑸碘偓渚婄礉閸栧懎鎯堣ぐ鎾冲闁鑵戦惃鍕侀崹瀣嫲濡€崇€烽柅澶愩€嶉妴? * 閻?deriveEffectiveComposerModelState 鐠侊紕鐣诲妤€鍤妴? */
 export interface EffectiveComposerModelState {
   selectedModel: ModelSlug;
   modelOptions: ProviderModelOptions | null;
@@ -1085,7 +1085,7 @@ function normalizeModelSelection(
   return makeModelSelection(provider, model, options);
 }
 
-// 鈹€鈹€ Legacy sync helpers (used only during migration from v2 storage) 鈹€鈹€
+// 閳光偓閳光偓 Legacy sync helpers (used only during migration from v2 storage) 閳光偓閳光偓
 
 function legacySyncModelSelectionOptions(
   modelSelection: ModelSelection | null,
@@ -1130,7 +1130,7 @@ function legacyReplaceProviderModelOptions(
   });
 }
 
-// 鈹€鈹€ New helpers for the consolidated representation 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 New helpers for the consolidated representation 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 function legacyToModelSelectionByProvider(
   modelSelection: ModelSelection | null,
@@ -1158,15 +1158,12 @@ function legacyToModelSelectionByProvider(
 }
 
 /**
- * 鎺ㄥ鏈夋晥鐨?Composer 妯″瀷鐘舵€併€? *
- * 鎸変紭鍏堢骇鍚堝苟澶氫釜鏉ユ簮鐨勬ā鍨嬮€夋嫨锛氳崏绋?> 绾跨▼ > 椤圭洰 > 榛樿鍊笺€? * 鍚屾椂鑰冭檻鍙敤妯″瀷鍒楄〃锛岀‘淇濇渶缁堥€変腑鐨勬ā鍨嬫槸鍙敤鐨勩€? *
- * @param input.draft - 鑽夌ǹ鐘舵€佷腑鐨勬ā鍨嬮€夋嫨淇℃伅
- * @param input.selectedProvider - 褰撳墠閫変腑鐨?Provider
- * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.customModelsByProvider - 鍚?Provider 鐨勮嚜瀹氫箟妯″瀷鍒楄〃
- * @param input.availableModelOptionsByProvider - 鍚?Provider 鐨勫彲鐢ㄦā鍨嬮€夐」
- * @returns 鏈夋晥鐨勬ā鍨嬬姸鎬? */
+ * 閹恒劌顕遍張澶嬫櫏閻?Composer 濡€崇€烽悩鑸碘偓浣碘偓? *
+ * 閹稿绱崗鍫㈤獓閸氬牆鑻熸径姘嚋閺夈儲绨惃鍕侀崹瀣偓澶嬪閿涙俺宕忕粙?> 缁捐法鈻?> 妞ゅ湱娲?> 姒涙顓婚崐绗衡偓? * 閸氬本妞傞懓鍐閸欘垳鏁ゅΟ鈥崇€烽崚妤勩€冮敍宀€鈥樻穱婵囨付缂佸牓鈧鑵戦惃鍕侀崹瀣Ц閸欘垳鏁ら惃鍕┾偓? *
+ * @param input.draft - 閼藉枪閻樿埖鈧椒鑵戦惃鍕侀崹瀣偓澶嬪娣団剝浼? * @param input.selectedProvider - 瑜版挸澧犻柅澶夎厬閻?Provider
+ * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.customModelsByProvider - 閸?Provider 閻ㄥ嫯鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€? * @param input.availableModelOptionsByProvider - 閸?Provider 閻ㄥ嫬褰查悽銊δ侀崹瀣偓澶愩€? * @returns 閺堝鏅ラ惃鍕侀崹瀣Ц閹? */
 export function deriveEffectiveComposerModelState(input: {
   draft:
     | Pick<ComposerThreadDraftState, "modelSelectionByProvider" | "activeProvider">
@@ -1245,11 +1242,11 @@ export function deriveEffectiveComposerModelState(input: {
 }
 
 /**
- * 瑙ｆ瀽棣栭€夌殑 Composer 妯″瀷閫夋嫨锛岀敤浜庤崏绋跨嚎绋嬫彁鍗囦负姝ｅ紡绾跨▼鏃剁殑妯″瀷鎸佷箙鍖栥€? * 淇濇寔缁堢浼樺厛鐨勭嚎绋嬪垱寤轰笌 Composer 鐨勪紭鍏堢骇涓€鑷淬€? *
- * @param input.draft - 鑽夌ǹ鐘舵€? * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.defaultProvider - 榛樿 Provider
- * @returns 棣栭€夌殑妯″瀷閫夋嫨
+ * 鐟欙絾鐎芥＃鏍偓澶屾畱 Composer 濡€崇€烽柅澶嬪閿涘瞼鏁ゆ禍搴ゅ磸缁嬭法鍤庣粙瀣絹閸楀洣璐熷锝呯础缁捐法鈻奸弮鍓佹畱濡€崇€烽幐浣风畽閸栨牓鈧? * 娣囨繃瀵旂紒鍫㈩伂娴兼ê鍘涢惃鍕殠缁嬪鍨卞杞扮瑢 Composer 閻ㄥ嫪绱崗鍫㈤獓娑撯偓閼锋番鈧? *
+ * @param input.draft - 閼藉枪閻樿埖鈧? * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.defaultProvider - 姒涙顓?Provider
+ * @returns 妫ｆ牠鈧娈戝Ο鈥崇€烽柅澶嬪
  */
 export function resolvePreferredComposerModelSelection(input: {
   draft:
@@ -2237,7 +2234,7 @@ function toHydratedThreadDraft(
   };
 }
 
-/** Composer 鑽夌ǹ瀛樺偍鐨?Zustand hook锛屽熀浜?persist 涓棿浠跺疄鐜?localStorage 鎸佷箙鍖?*/
+/** Composer 閼藉枪鐎涙ê鍋嶉惃?Zustand hook閿涘苯鐔€娴?persist 娑擃參妫挎禒璺虹杽閻?localStorage 閹镐椒绠欓崠?*/
 export const useComposerDraftStore = create<ComposerDraftStoreState>()(
   persist(
     (set, get) => ({
@@ -2746,10 +2743,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided —use them
+              // Explicit options provided 鈥攗se them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection —preserve existing options, update provider+model
+              // No options in selection 鈥攑reserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
@@ -3457,22 +3454,20 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
 );
 
 /**
- * 鑾峰彇鎸囧畾绾跨▼鐨勮崏绋跨姸鎬併€? * 濡傛灉绾跨▼娌℃湁鑽夌ǹ锛岃繑鍥炵┖鑽夌ǹ鐘舵€侊紙EMPTY_THREAD_DRAFT锛夈€? *
- * @param threadId - 绾跨▼ ID
- * @returns 绾跨▼鑽夌ǹ鐘舵€? */
+ * 閼惧嘲褰囬幐鍥х暰缁捐法鈻奸惃鍕磸缁嬭法濮搁幀浣碘偓? * 婵″倹鐏夌痪璺ㄢ柤濞屸剝婀侀懡澶屒归敍宀冪箲閸ョ偟鈹栭懡澶屒归悩鑸碘偓渚婄礄EMPTY_THREAD_DRAFT閿涘鈧? *
+ * @param threadId - 缁捐法鈻?ID
+ * @returns 缁捐法鈻奸懡澶屒归悩鑸碘偓? */
 export function useComposerThreadDraft(threadId: ThreadId): ComposerThreadDraftState {
   return useComposerDraftStore((state) => state.draftsByThreadId[threadId] ?? EMPTY_THREAD_DRAFT);
 }
 
 /**
- * React hook锛氳幏鍙栨寚瀹氱嚎绋嬬殑鏈夋晥妯″瀷鐘舵€併€? * 鍐呴儴浣跨敤 useMemo 缂撳瓨璁＄畻缁撴灉锛岄伩鍏嶄笉蹇呰鐨勯噸娓叉煋銆? *
- * @param input.threadId - 绾跨▼ ID
- * @param input.selectedProvider - 褰撳墠閫変腑鐨?Provider
- * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
- * @param input.customModelsByProvider - 鍚?Provider 鐨勮嚜瀹氫箟妯″瀷鍒楄〃
- * @param input.availableModelOptionsByProvider - 鍚?Provider 鐨勫彲鐢ㄦā鍨嬮€夐」
- * @returns 鏈夋晥鐨勬ā鍨嬬姸鎬? */
+ * React hook閿涙俺骞忛崣鏍ㄥ瘹鐎规氨鍤庣粙瀣畱閺堝鏅ュΟ鈥崇€烽悩鑸碘偓浣碘偓? * 閸愬懘鍎存担璺ㄦ暏 useMemo 缂傛挸鐡ㄧ拋锛勭暬缂佹挻鐏夐敍宀勪缉閸忓秳绗夎箛鍛邦洣閻ㄥ嫰鍣稿〒鍙夌厠閵? *
+ * @param input.threadId - 缁捐法鈻?ID
+ * @param input.selectedProvider - 瑜版挸澧犻柅澶夎厬閻?Provider
+ * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
+ * @param input.customModelsByProvider - 閸?Provider 閻ㄥ嫯鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€? * @param input.availableModelOptionsByProvider - 閸?Provider 閻ㄥ嫬褰查悽銊δ侀崹瀣偓澶愩€? * @returns 閺堝鏅ラ惃鍕侀崹瀣Ц閹? */
 export function useEffectiveComposerModelState(input: {
   threadId: ThreadId;
   selectedProvider: ProviderKind;
@@ -3509,9 +3504,8 @@ export function useEffectiveComposerModelState(input: {
 }
 
 /**
- * 灏嗗凡鎻愬崌涓烘湇鍔＄绾跨▼鐨勮崏绋挎爣璁颁负"姝ｅ湪鎻愬崌"鐘舵€併€? * 鍏堟爣璁板啀鐢辫矾鐢?Composer 鍦ㄦ湇鍔＄绾跨▼鍚姩鍚庢墽琛屾竻鐞嗐€? *
- * @param serverThreadIds - 宸叉彁鍗囩殑鏈嶅姟绔嚎绋?ID 闆嗗悎
- */
+ * 鐏忓棗鍑￠幓鎰磳娑撶儤婀囬崝锛勵伂缁捐法鈻奸惃鍕磸缁嬫寧鐖ｇ拋棰佽礋"濮濓絽婀幓鎰磳"閻樿埖鈧降鈧? * 閸忓牊鐖ｇ拋鏉垮晙閻㈣精鐭鹃悽?Composer 閸︺劍婀囬崝锛勵伂缁捐法鈻奸崥顖氬З閸氬孩澧界悰灞剧閻炲棎鈧? *
+ * @param serverThreadIds - 瀹稿弶褰侀崡鍥╂畱閺堝秴濮熺粩顖滃殠缁?ID 闂嗗棗鎮? */
 export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
   const draftThreadIds = Object.keys(store.draftThreadsByThreadId) as ThreadId[];
@@ -3523,9 +3517,8 @@ export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>)
 }
 
 /**
- * 瀹屾垚宸叉彁鍗囪崏绋跨嚎绋嬬殑娓呯悊宸ヤ綔锛屽垹闄ゅ搴旂殑鑽夌ǹ鏁版嵁銆? *
- * @param serverThreadIds - 宸叉彁鍗囩殑鏈嶅姟绔嚎绋?ID 闆嗗悎
- */
+ * 鐎瑰本鍨氬鍙夊絹閸楀洩宕忕粙璺ㄥ殠缁嬪娈戝〒鍛倞瀹搞儰缍旈敍灞藉灩闂勩倕顕惔鏃傛畱閼藉枪閺佺増宓侀妴? *
+ * @param serverThreadIds - 瀹稿弶褰侀崡鍥╂畱閺堝秴濮熺粩顖滃殠缁?ID 闂嗗棗鎮? */
 export function finalizePromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
   for (const threadId of serverThreadIds) {

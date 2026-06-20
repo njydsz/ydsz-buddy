@@ -1,6 +1,5 @@
 /**
- * @file 搴旂敤璁剧疆绠＄悊
- * @description 绠＄悊搴旂敤鐨勬湰鍦拌缃笌鏈嶅姟鍣ㄨ缃紝鍖呮嫭 Schema 瀹氫箟銆佸綊涓€鍖栥€? * 鏈嶅姟鍣ㄥ悓姝ャ€佽嚜瀹氫箟妯″瀷绠＄悊銆佹彁渚涜€呴厤缃瓑銆? * 璁剧疆鍒嗕负涓ょ被锛? * - 鏈湴璁剧疆锛氫粎瀛樺偍鍦?localStorage 涓紙濡備晶杈规爮浣嶇疆銆佸瓧浣撳ぇ灏忕瓑 UI 鍋忓ソ锛? * - 鏈嶅姟鍣ㄨ缃細鍚屾鍒版湇鍔″櫒绔紙濡備簩杩涘埗璺緞銆佽嚜瀹氫箟妯″瀷鍒楄〃绛夛級
+ * @file 鎼存梻鏁ょ拋鍓х枂缁狅紕鎮? * @description 缁狅紕鎮婃惔鏃傛暏閻ㄥ嫭婀伴崷鎷岊啎缂冾喕绗岄張宥呭閸ｃ劏顔曠純顕嗙礉閸栧懏瀚?Schema 鐎规矮绠熼妴浣哥秺娑撯偓閸栨牓鈧? * 閺堝秴濮熼崳銊ユ倱濮濄儯鈧浇鍤滅€规矮绠熷Ο鈥崇€风粻锛勬倞閵嗕焦褰佹笟娑溾偓鍛村帳缂冾喚鐡戦妴? * 鐠佸墽鐤嗛崚鍡曡礋娑撱倗琚敍? * - 閺堫剙婀寸拋鍓х枂閿涙矮绮庣€涙ê鍋嶉崷?localStorage 娑擃叏绱欐俊鍌欐櫠鏉堣鐖担宥囩枂閵嗕礁鐡ф担鎾炽亣鐏忓繒鐡?UI 閸嬪繐銈介敍? * - 閺堝秴濮熼崳銊啎缂冾噯绱伴崥灞绢劄閸掔増婀囬崝鈥虫珤缁旑垽绱欐俊鍌欑癌鏉╂稑鍩楃捄顖氱窞閵嗕浇鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€冪粵澶涚礆
  */
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -32,63 +31,63 @@ import { ensureNativeApi } from "./nativeApi";
 import { serverQueryKeys, serverSettingsQueryOptions } from "./lib/serverReactQuery";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "./i18n";
 
-/** 鏈湴璁剧疆鐨?localStorage key */
+/** 閺堫剙婀寸拋鍓х枂閻?localStorage key */
 const APP_SETTINGS_STORAGE_KEY = "remicode:app-settings:v1";
-/** 鏈嶅姟鍣ㄨ缃縼绉诲畬鎴愮殑 localStorage 鏍囪 key */
+/** 閺堝秴濮熼崳銊啎缂冾喛绺肩粔璇茬暚閹存劗娈?localStorage 閺嶅洩顔?key */
 const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "remicode:server-settings-migrated:v1";
-/** 姣忎釜鎻愪緵鑰呭厑璁哥殑鏈€澶ц嚜瀹氫箟妯″瀷鏁伴噺 */
+/** 濮ｅ繋閲滈幓鎰返閼板懎鍘戠拋鍝ユ畱閺堚偓婢堆嗗殰鐎规矮绠熷Ο鈥崇€烽弫浼村櫤 */
 const MAX_CUSTOM_MODEL_COUNT = 32;
-/** 鑷畾涔夋ā鍨?slug 鐨勬渶澶ч暱搴?*/
+/** 閼奉亜鐣炬稊澶嬆侀崹?slug 閻ㄥ嫭娓舵径褔鏆辨惔?*/
 export const MAX_CUSTOM_MODEL_LENGTH = 256;
-/** 鑱婂ぉ瀛椾綋鏈€灏忓儚绱犲€?*/
+/** 閼卞﹤銇夌€涙ぞ缍嬮張鈧亸蹇撳剼缁辩姴鈧?*/
 export const MIN_CHAT_FONT_SIZE_PX = 11;
-/** 鑱婂ぉ瀛椾綋鏈€澶у儚绱犲€?*/
+/** 閼卞﹤銇夌€涙ぞ缍嬮張鈧径褍鍎氱槐鐘测偓?*/
 export const MAX_CHAT_FONT_SIZE_PX = 18;
-/** 鑱婂ぉ瀛椾綋榛樿鍍忕礌鍊?*/
+/** 閼卞﹤銇夌€涙ぞ缍嬫妯款吇閸嶅繒绀岄崐?*/
 export const DEFAULT_CHAT_FONT_SIZE_PX = 12;
 
-/** 鏃堕棿鎴虫牸寮?Schema锛歭ocale锛堟湰鍦板寲锛夈€?2-hour锛?2灏忔椂鍒讹級銆?4-hour锛?4灏忔椂鍒讹級 */
+/** 閺冨爼妫块幋铏壐瀵?Schema閿涙ocale閿涘牊婀伴崷鏉垮閿涘鈧?2-hour閿?2鐏忓繑妞傞崚璁圭礆閵?4-hour閿?4鐏忓繑妞傞崚璁圭礆 */
 export const TimestampFormat = Schema.Literal("locale", "12-hour", "24-hour");
-/** 鏃堕棿鎴虫牸寮忕被鍨?*/
+/** 閺冨爼妫块幋铏壐瀵繒琚崹?*/
 export type TimestampFormat = typeof TimestampFormat.Type;
-/** 榛樿鏃堕棿鎴虫牸寮?*/
+/** 姒涙顓婚弮鍫曟？閹磋櫕鐗稿?*/
 export const DEFAULT_TIMESTAMP_FORMAT: TimestampFormat = "locale";
-/** 渚ц竟鏍忎綅缃?Schema锛歭eft锛堝乏渚э級銆乺ight锛堝彸渚э級 */
+/** 娓氀嗙珶閺嶅繋缍呯純?Schema閿涙eft閿涘牆涔忔笟褝绱氶妴涔篿ght閿涘牆褰告笟褝绱?*/
 export const SidebarSide = Schema.Literal("left", "right");
-/** 渚ц竟鏍忎綅缃被鍨?*/
+/** 娓氀嗙珶閺嶅繋缍呯純顔捐閸?*/
 export type SidebarSide = typeof SidebarSide.Type;
-/** 榛樿渚ц竟鏍忎綅缃?*/
+/** 姒涙顓绘笟褑绔熼弽蹇庣秴缂?*/
 export const DEFAULT_SIDEBAR_SIDE: SidebarSide = "left";
-/** 渚ц竟鏍忛」鐩帓搴?Schema锛歶pdated_at锛堟寜鏇存柊鏃堕棿锛夈€乧reated_at锛堟寜鍒涘缓鏃堕棿锛夈€乵anual锛堟墜鍔ㄦ帓搴忥級 */
+/** 娓氀嗙珶閺嶅繘銆嶉惄顔藉笓鎼?Schema閿涙pdated_at閿涘牊瀵滈弴瀛樻煀閺冨爼妫块敍澶堚偓涔eated_at閿涘牊瀵滈崚娑樼紦閺冨爼妫块敍澶堚偓涔礱nual閿涘牊澧滈崝銊﹀笓鎼村骏绱?*/
 export const SidebarProjectSortOrder = Schema.Literal("updated_at", "created_at", "manual");
-/** 渚ц竟鏍忛」鐩帓搴忕被鍨?*/
+/** 娓氀嗙珶閺嶅繘銆嶉惄顔藉笓鎼村繒琚崹?*/
 export type SidebarProjectSortOrder = typeof SidebarProjectSortOrder.Type;
-/** 榛樿渚ц竟鏍忛」鐩帓搴忔柟寮?*/
+/** 姒涙顓绘笟褑绔熼弽蹇涖€嶉惄顔藉笓鎼村繑鏌熷?*/
 export const DEFAULT_SIDEBAR_PROJECT_SORT_ORDER: SidebarProjectSortOrder = "manual";
-/** 渚ц竟鏍忕嚎绋嬫帓搴?Schema锛歶pdated_at锛堟寜鏇存柊鏃堕棿锛夈€乧reated_at锛堟寜鍒涘缓鏃堕棿锛?*/
+/** 娓氀嗙珶閺嶅繒鍤庣粙瀣笓鎼?Schema閿涙pdated_at閿涘牊瀵滈弴瀛樻煀閺冨爼妫块敍澶堚偓涔eated_at閿涘牊瀵滈崚娑樼紦閺冨爼妫块敍?*/
 export const SidebarThreadSortOrder = Schema.Literal("updated_at", "created_at");
-/** 渚ц竟鏍忕嚎绋嬫帓搴忕被鍨?*/
+/** 娓氀嗙珶閺嶅繒鍤庣粙瀣笓鎼村繒琚崹?*/
 export type SidebarThreadSortOrder = typeof SidebarThreadSortOrder.Type;
-/** 榛樿渚ц竟鏍忕嚎绋嬫帓搴忔柟寮?*/
+/** 姒涙顓绘笟褑绔熼弽蹇曞殠缁嬪甯撴惔蹇旀煙瀵?*/
 export const DEFAULT_SIDEBAR_THREAD_SORT_ORDER: SidebarThreadSortOrder = "updated_at";
-/** 璇█璁剧疆 Schema */
+/** 鐠囶叀鈻堢拋鍓х枂 Schema */
 export const LanguageSchema = Schema.Literal("en", "zh");
-/** 璇█璁剧疆绫诲瀷 */
+/** 鐠囶叀鈻堢拋鍓х枂缁鐎?*/
 export type LanguageSetting = typeof LanguageSchema.Type;
-/** 榛樿璇█璁剧疆 */
+/** 姒涙顓荤拠顓♀枅鐠佸墽鐤?*/
 export const DEFAULT_LANGUAGE_SETTING: LanguageSetting = DEFAULT_LANGUAGE;
 
 /**
- * 鑾峰彇榛樿鐨勫師鐢熷瓧浣撳钩婊戣缃? *
- * @description macOS/iOS 榛樿鍚敤瀛椾綋骞虫粦锛屽叾浠栧钩鍙伴粯璁ゅ叧闂€? *
- * @param platform - 骞冲彴鏍囪瘑瀛楃涓诧紝榛樿鍙?navigator.platform
- * @returns 鏄惁鍚敤鍘熺敓瀛椾綋骞虫粦
+ * 閼惧嘲褰囨妯款吇閻ㄥ嫬甯悽鐔风摟娴ｆ挸閽╁鎴ｎ啎缂? *
+ * @description macOS/iOS 姒涙顓婚崥顖滄暏鐎涙ぞ缍嬮獮铏拨閿涘苯鍙炬禒鏍ч挬閸欎即绮拋銈呭彠闂傤厹鈧? *
+ * @param platform - 楠炲啿褰撮弽鍥槕鐎涙顑佹稉璇х礉姒涙顓婚崣?navigator.platform
+ * @returns 閺勵垰鎯侀崥顖滄暏閸樼喓鏁撶€涙ぞ缍嬮獮铏拨
  */
 export function getDefaultNativeFontSmoothing(platform = globalThis.navigator?.platform ?? "") {
   return /mac|iphone|ipad|ipod/i.test(platform);
 }
 
-/** 鑷畾涔夋ā鍨嬭缃瓧娈靛悕鑱斿悎绫诲瀷 */
+/** 閼奉亜鐣炬稊澶嬆侀崹瀣啎缂冾喖鐡у▓闈涙倳閼辨柨鎮庣猾璇茬€?*/
 type CustomModelSettingsKey =
   | "customCodexModels"
   | "customClaudeModels"
@@ -99,25 +98,25 @@ type CustomModelSettingsKey =
   | "customOpenCodeModels"
   | "customPiModels";
 
-/** 鎻愪緵鑰呰嚜瀹氫箟妯″瀷閰嶇疆 */
+/** 閹绘劒绶甸懓鍛板殰鐎规矮绠熷Ο鈥崇€烽柊宥囩枂 */
 export type ProviderCustomModelConfig = {
-  /** 鎻愪緵鑰呯被鍨?*/
+  /** 閹绘劒绶甸懓鍛閸?*/
   provider: ProviderKind;
-  /** 瀵瑰簲鐨勮缃瓧娈靛悕 */
+  /** 鐎电懓绨查惃鍕啎缂冾喖鐡у▓闈涙倳 */
   settingsKey: CustomModelSettingsKey;
-  /** 瀵瑰簲鐨勯粯璁よ缃瓧娈靛悕 */
+  /** 鐎电懓绨查惃鍕帛鐠併倛顔曠純顔肩摟濞堥潧鎮?*/
   defaultSettingsKey: CustomModelSettingsKey;
-  /** 閰嶇疆鏍囬 */
+  /** 闁板秶鐤嗛弽鍥暯 */
   title: string;
-  /** 閰嶇疆鎻忚堪 */
+  /** 闁板秶鐤嗛幓蹇氬牚 */
   description: string;
-  /** 杈撳叆妗嗗崰浣嶆枃鏈?*/
+  /** 鏉堟挸鍙嗗鍡楀窗娴ｅ秵鏋冮張?*/
   placeholder: string;
-  /** 杈撳叆绀轰緥 */
+  /** 鏉堟挸鍙嗙粈杞扮伐 */
   example: string;
 };
 
-/** 鍚勬彁渚涜€呯殑鍐呯疆妯″瀷 slug 闆嗗悎锛岀敤浜庡幓閲嶈嚜瀹氫箟妯″瀷 */
+/** 閸氬嫭褰佹笟娑溾偓鍛畱閸愬懐鐤嗗Ο鈥崇€?slug 闂嗗棗鎮庨敍宀€鏁ゆ禍搴″箵闁插秷鍤滅€规矮绠熷Ο鈥崇€?*/
 const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>> = {
   codex: new Set(getModelOptions("codex").map((option) => option.slug)),
   claudeAgent: new Set(getModelOptions("claudeAgent").map((option) => option.slug)),
@@ -129,7 +128,7 @@ const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>
   pi: new Set(getModelOptions("pi").map((option) => option.slug)),
 };
 
-/** Provider 绫诲瀷 Schema */
+/** Provider 缁鐎?Schema */
 const ProviderKindSchema = Schema.Literal(
   "codex",
   "claudeAgent",
@@ -149,7 +148,7 @@ const withDefaults =
       Schema.withConstructorDefault(() => fallback() as never),
     );
 
-/** 搴旂敤璁剧疆 Schema锛屼娇鐢?Effect Schema 瀹氫箟鎵€鏈夊瓧娈靛強榛樿鍊?*/
+/** 鎼存梻鏁ょ拋鍓х枂 Schema閿涘奔濞囬悽?Effect Schema 鐎规矮绠熼幍鈧張澶婄摟濞堥潧寮锋妯款吇閸?*/
 export const AppSettingsSchema = Schema.Struct({
   claudeBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
   chatFontSizePx: Schema.Number.pipe(withDefaults(() => DEFAULT_CHAT_FONT_SIZE_PX)),
@@ -215,17 +214,17 @@ export const AppSettingsSchema = Schema.Struct({
     }),
   ).pipe(withDefaults(() => [])),
 });
-/** 搴旂敤璁剧疆绫诲瀷锛屼粠 Schema 鑷姩鎺ㄥ */
+/** 鎼存梻鏁ょ拋鍓х枂缁鐎烽敍灞肩矤 Schema 閼奉亜濮╅幒銊ヮ嚤 */
 export type AppSettings = typeof AppSettingsSchema.Type;
 type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
 type MutableServerSettingsPatch = Mutable<ServerSettingsPatch>;
 type MutableServerSettingsProvidersPatch = Mutable<NonNullable<ServerSettingsPatch["providers"]>>;
 
-/** 搴旂敤妯″瀷閫夐」锛屾墿灞?ProviderModelOption 澧炲姞鎻愪緵鑰呭拰鑷畾涔夋爣璇?*/
+/** 鎼存梻鏁ゅΟ鈥崇€烽柅澶愩€嶉敍灞惧⒖鐏?ProviderModelOption 婢х偛濮為幓鎰返閼板懎鎷伴懛顏勭暰娑斿鐖ｇ拠?*/
 export interface AppModelOption extends ProviderModelOption {
-  /** 鎻愪緵鑰呯被鍨?*/
+  /** 閹绘劒绶甸懓鍛閸?*/
   provider: ProviderKind;
-  /** 鏄惁涓虹敤鎴疯嚜瀹氫箟妯″瀷 */
+  /** 閺勵垰鎯佹稉铏规暏閹寸柉鍤滅€规矮绠熷Ο鈥崇€?*/
   isCustom: boolean;
 }
 
@@ -307,16 +306,14 @@ const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConf
   },
 };
 
-/** 鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬮厤缃垪琛?*/
+/** 閹碘偓閺堝褰佹笟娑溾偓鍛畱閼奉亜鐣炬稊澶嬆侀崹瀣帳缂冾喖鍨悰?*/
 export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFIG);
 
 /**
- * 褰掍竴鍖栬嚜瀹氫箟妯″瀷 slug 鍒楄〃
- *
- * @description 瀵硅緭鍏ョ殑妯″瀷 slug 鍒楄〃杩涜鍘婚噸銆侀暱搴﹂檺鍒躲€佸唴缃ā鍨嬭繃婊ょ瓑褰掍竴鍖栧鐞嗐€? *
- * @param models - 寰呭綊涓€鍖栫殑妯″瀷 slug 鍙凯浠ｅ璞? * @param provider - 鎻愪緵鑰呯被鍨嬶紝榛樿涓?"codex"
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨?slug 鏁扮粍
- */
+ * 瑜版帊绔撮崠鏍殰鐎规矮绠熷Ο鈥崇€?slug 閸掓銆? *
+ * @description 鐎电绶崗銉ф畱濡€崇€?slug 閸掓銆冩潻娑滎攽閸樺鍣搁妴渚€鏆辨惔锕傛閸掕翰鈧礁鍞寸純顔侥侀崹瀣箖濠娿倗鐡戣ぐ鎺嶇閸栨牕顦╅悶鍡愨偓? *
+ * @param models - 瀵板懎缍婃稉鈧崠鏍畱濡€崇€?slug 閸欘垵鍑禒锝咁嚠鐠? * @param provider - 閹绘劒绶甸懓鍛閸ㄥ绱濇妯款吇娑?"codex"
+ * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸?slug 閺佹壆绮? */
 export function normalizeCustomModelSlugs(
   models: Iterable<string | null | undefined>,
   provider: ProviderKind = "codex",
@@ -347,10 +344,10 @@ export function normalizeCustomModelSlugs(
 }
 
 /**
- * 褰掍竴鍖栬亰澶╁瓧浣撳ぇ灏? *
- * @description 灏嗗瓧浣撳ぇ灏忛檺鍒跺湪 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 鑼冨洿鍐咃紝
- * 鏃犳晥鍊煎洖閫€涓洪粯璁ゅ€笺€? *
- * @param value - 杈撳叆鐨勫瓧浣撳ぇ灏忓€? * @returns 褰掍竴鍖栧悗鐨勫瓧浣撳ぇ灏? */
+ * 瑜版帊绔撮崠鏍喊婢垛晛鐡ф担鎾炽亣鐏? *
+ * @description 鐏忓棗鐡ф担鎾炽亣鐏忓繘妾洪崚璺烘躬 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 閼煎啫娲块崘鍜冪礉
+ * 閺冪姵鏅ラ崐鐓庢礀闁偓娑撴椽绮拋銈呪偓绗衡偓? *
+ * @param value - 鏉堟挸鍙嗛惃鍕摟娴ｆ挸銇囩亸蹇撯偓? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫬鐡ф担鎾炽亣鐏? */
 export function normalizeChatFontSizePx(value: number | null | undefined): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return DEFAULT_CHAT_FONT_SIZE_PX;
@@ -601,21 +598,18 @@ function buildInitialServerSettingsMigrationPatch(settings: AppSettings): Server
 }
 
 /**
- * 褰掍竴鍖栧瓨鍌ㄧ殑搴旂敤璁剧疆
- *
- * @description 瀵逛粠 localStorage 璇诲彇鐨勮缃繘琛屽綊涓€鍖栧鐞嗭紝
- * 纭繚鑷畾涔夋ā鍨嬨€佸瓧浣撳ぇ灏忋€佹彁渚涜€呴『搴忕瓑瀛楁绗﹀悎绾︽潫銆? *
- * @param settings - 寰呭綊涓€鍖栫殑搴旂敤璁剧疆
- * @returns 褰掍竴鍖栧悗鐨勫簲鐢ㄨ缃? */
+ * 瑜版帊绔撮崠鏍х摠閸屻劎娈戞惔鏃傛暏鐠佸墽鐤? *
+ * @description 鐎甸€涚矤 localStorage 鐠囪褰囬惃鍕啎缂冾喛绻樼悰灞界秺娑撯偓閸栨牕顦╅悶鍡礉
+ * 绾喕绻氶懛顏勭暰娑斿膩閸ㄥ鈧礁鐡ф担鎾炽亣鐏忓繈鈧焦褰佹笟娑溾偓鍛淬€庢惔蹇曠搼鐎涙顔岀粭锕€鎮庣痪锔芥将閵? *
+ * @param settings - 瀵板懎缍婃稉鈧崠鏍畱鎼存梻鏁ょ拋鍓х枂
+ * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫬绨查悽銊啎缂? */
 export function normalizeStoredAppSettings(settings: AppSettings): AppSettings {
   return normalizeAppSettings(settings);
 }
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑鑷畾涔夋ā鍨嬪垪琛? *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
- * @param provider - 鎻愪緵鑰呯被鍨? * @returns 鑷畾涔夋ā鍨?slug 鍒楄〃
- */
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸懓鍛畱閼奉亜鐣炬稊澶嬆侀崹瀣灙鐞? *
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧懛顏勭暰娑斿膩閸ㄥ娴夐崗鍐茬摟濞堢绱? * @param provider - 閹绘劒绶甸懓鍛閸? * @returns 閼奉亜鐣炬稊澶嬆侀崹?slug 閸掓銆? */
 export function getCustomModelsForProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
   provider: ProviderKind,
@@ -624,10 +618,8 @@ export function getCustomModelsForProvider(
 }
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑榛樿鑷畾涔夋ā鍨嬪垪琛? *
- * @param defaults - 榛樿璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
- * @param provider - 鎻愪緵鑰呯被鍨? * @returns 榛樿鑷畾涔夋ā鍨?slug 鍒楄〃
- */
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸懓鍛畱姒涙顓婚懛顏勭暰娑斿膩閸ㄥ鍨悰? *
+ * @param defaults - 姒涙顓荤拋鍓х枂閿涘牅绮庨棁鈧懛顏勭暰娑斿膩閸ㄥ娴夐崗鍐茬摟濞堢绱? * @param provider - 閹绘劒绶甸懓鍛閸? * @returns 姒涙顓婚懛顏勭暰娑斿膩閸?slug 閸掓銆? */
 export function getDefaultCustomModelsForProvider(
   defaults: Pick<AppSettings, CustomModelSettingsKey>,
   provider: ProviderKind,
@@ -636,8 +628,8 @@ export function getDefaultCustomModelsForProvider(
 }
 
 /**
- * 鏋勯€犳寚瀹氭彁渚涜€呯殑鑷畾涔夋ā鍨嬭ˉ涓? *
- * @param provider - 鎻愪緵鑰呯被鍨? * @param models - 鏂扮殑鑷畾涔夋ā鍨嬪垪琛? * @returns 浠呭寘鍚鎻愪緵鑰呰嚜瀹氫箟妯″瀷瀛楁鐨勮缃ˉ涓? */
+ * 閺嬪嫰鈧姵瀵氱€规碍褰佹笟娑溾偓鍛畱閼奉亜鐣炬稊澶嬆侀崹瀣夋稉? *
+ * @param provider - 閹绘劒绶甸懓鍛閸? * @param models - 閺傛壆娈戦懛顏勭暰娑斿膩閸ㄥ鍨悰? * @returns 娴犲懎瀵橀崥顐ヮ嚉閹绘劒绶甸懓鍛板殰鐎规矮绠熷Ο鈥崇€风€涙顔岄惃鍕啎缂冾喛藟娑? */
 export function patchCustomModels(
   provider: ProviderKind,
   models: string[],
@@ -648,9 +640,8 @@ export function patchCustomModels(
 }
 
 /**
- * 鑾峰彇鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬫槧灏? *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
- * @returns 鎸夋彁渚涜€呯被鍨嬬储寮曠殑鑷畾涔夋ā鍨嬪垪琛ㄦ槧灏? */
+ * 閼惧嘲褰囬幍鈧張澶嬪絹娓氭稖鈧懐娈戦懛顏勭暰娑斿膩閸ㄥ妲х亸? *
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧懛顏勭暰娑斿膩閸ㄥ娴夐崗鍐茬摟濞堢绱? * @returns 閹稿褰佹笟娑溾偓鍛閸ㄥ鍌ㄥ鏇犳畱閼奉亜鐣炬稊澶嬆侀崹瀣灙鐞涖劍妲х亸? */
 export function getCustomModelsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
 ): Record<ProviderKind, readonly string[]> {
@@ -667,12 +658,9 @@ export function getCustomModelsByProvider(
 }
 
 /**
- * 鑾峰彇搴旂敤妯″瀷閫夐」鍒楄〃
- *
- * @description 鍚堝苟鍐呯疆妯″瀷鍜岃嚜瀹氫箟妯″瀷锛屽幓閲嶅悗杩斿洖瀹屾暣鐨勬ā鍨嬮€夐」鍒楄〃銆? * 鑻ュ綋鍓嶉€変腑鐨勬ā鍨嬩笉鍦ㄥ垪琛ㄤ腑锛屼細鑷姩杩藉姞銆? *
- * @param provider - 鎻愪緵鑰呯被鍨? * @param customModels - 鑷畾涔夋ā鍨?slug 鍒楄〃
- * @param selectedModel - 褰撳墠閫変腑鐨勬ā鍨?slug锛屽彲閫? * @returns 妯″瀷閫夐」鍒楄〃
- */
+ * 閼惧嘲褰囨惔鏃傛暏濡€崇€烽柅澶愩€嶉崚妤勩€? *
+ * @description 閸氬牆鑻熼崘鍛枂濡€崇€烽崪宀冨殰鐎规矮绠熷Ο鈥崇€烽敍灞藉箵闁插秴鎮楁潻鏂挎礀鐎瑰本鏆ｉ惃鍕侀崹瀣偓澶愩€嶉崚妤勩€冮妴? * 閼汇儱缍嬮崜宥夆偓澶夎厬閻ㄥ嫭膩閸ㄥ绗夐崷銊ュ灙鐞涖劋鑵戦敍灞肩窗閼奉亜濮╂潻钘夊閵? *
+ * @param provider - 閹绘劒绶甸懓鍛閸? * @param customModels - 閼奉亜鐣炬稊澶嬆侀崹?slug 閸掓銆? * @param selectedModel - 瑜版挸澧犻柅澶夎厬閻ㄥ嫭膩閸?slug閿涘苯褰查柅? * @returns 濡€崇€烽柅澶愩€嶉崚妤勩€? */
 export function getAppModelOptions(
   provider: ProviderKind,
   customModels: readonly string[],
@@ -722,11 +710,9 @@ export function getAppModelOptions(
 }
 
 /**
- * 鑾峰彇 Git 鏂囨湰鐢熸垚妯″瀷閫夐」鍒楄〃
- *
- * @description 鍚堝苟 Codex銆並ilo銆丱penCode 涓変釜鎻愪緵鑰呯殑妯″瀷閫夐」锛? * 鍘婚噸鍚庤繑鍥炲畬鏁寸殑鏂囨湰鐢熸垚妯″瀷鍒楄〃銆? *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€鐩稿叧瀛楁锛? * @returns 鍘婚噸鍚庣殑鏂囨湰鐢熸垚妯″瀷閫夐」鍒楄〃
- */
+ * 閼惧嘲褰?Git 閺傚洦婀伴悽鐔稿灇濡€崇€烽柅澶愩€嶉崚妤勩€? *
+ * @description 閸氬牆鑻?Codex閵嗕甫ilo閵嗕副penCode 娑撳閲滈幓鎰返閼板懐娈戝Ο鈥崇€烽柅澶愩€嶉敍? * 閸樺鍣搁崥搴ょ箲閸ョ偛鐣弫瀵告畱閺傚洦婀伴悽鐔稿灇濡€崇€烽崚妤勩€冮妴? *
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧惄绋垮彠鐎涙顔岄敍? * @returns 閸樺鍣搁崥搴ｆ畱閺傚洦婀伴悽鐔稿灇濡€崇€烽柅澶愩€嶉崚妤勩€? */
 export function getGitTextGenerationModelOptions(
   settings: Pick<
     AppSettings,
@@ -771,11 +757,11 @@ export function getGitTextGenerationModelOptions(
 }
 
 /**
- * 瑙ｆ瀽搴旂敤妯″瀷閫夋嫨
+ * 鐟欙絾鐎芥惔鏃傛暏濡€崇€烽柅澶嬪
  *
- * @description 鏍规嵁鎻愪緵鑰呫€佽嚜瀹氫箟妯″瀷鍒楄〃鍜屽綋鍓嶉€変腑妯″瀷锛? * 瑙ｆ瀽鍑烘渶缁堝彲鐢ㄧ殑妯″瀷 slug銆? *
- * @param provider - 鎻愪緵鑰呯被鍨? * @param customModels - 鍚勬彁渚涜€呯殑鑷畾涔夋ā鍨嬫槧灏? * @param selectedModel - 褰撳墠閫変腑鐨勬ā鍨?slug
- * @returns 瑙ｆ瀽鍚庣殑妯″瀷 slug 瀛楃涓? */
+ * @description 閺嶈宓侀幓鎰返閼板懌鈧浇鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€冮崪灞界秼閸撳秹鈧鑵戝Ο鈥崇€烽敍? * 鐟欙絾鐎介崙鐑樻付缂佸牆褰查悽銊ф畱濡€崇€?slug閵? *
+ * @param provider - 閹绘劒绶甸懓鍛閸? * @param customModels - 閸氬嫭褰佹笟娑溾偓鍛畱閼奉亜鐣炬稊澶嬆侀崹瀣Ё鐏? * @param selectedModel - 瑜版挸澧犻柅澶夎厬閻ㄥ嫭膩閸?slug
+ * @returns 鐟欙絾鐎介崥搴ｆ畱濡€崇€?slug 鐎涙顑佹稉? */
 export function resolveAppModelSelection(
   provider: ProviderKind,
   customModels: Record<ProviderKind, readonly string[]>,
@@ -789,10 +775,9 @@ export function resolveAppModelSelection(
 }
 
 /**
- * 鑾峰彇鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬮€夐」鏄犲皠
+ * 閼惧嘲褰囬幍鈧張澶嬪絹娓氭稖鈧懐娈戦懛顏勭暰娑斿膩閸ㄥ鈧銆嶉弰鐘茬殸
  *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
- * @returns 鎸夋彁渚涜€呯被鍨嬬储寮曠殑妯″瀷閫夐」鍒楄〃鏄犲皠
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧懛顏勭暰娑斿膩閸ㄥ娴夐崗鍐茬摟濞堢绱? * @returns 閹稿褰佹笟娑溾偓鍛閸ㄥ鍌ㄥ鏇犳畱濡€崇€烽柅澶愩€嶉崚妤勩€冮弰鐘茬殸
  */
 export function getCustomModelOptionsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
@@ -811,12 +796,11 @@ export function getCustomModelOptionsByProvider(
 }
 
 /**
- * 鑾峰彇鎻愪緵鑰呭惎鍔ㄩ€夐」
- *
- * @description 浠庡簲鐢ㄨ缃腑鎻愬彇鍚勬彁渚涜€呯殑浜岃繘鍒惰矾寰勩€佹湇鍔″櫒 URL 绛夐厤缃紝
- * 鏋勯€?ProviderStartOptions 瀵硅薄鐢ㄤ簬鍚姩鎻愪緵鑰呰繘绋嬨€? *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€浜岃繘鍒惰矾寰勭浉鍏冲瓧娈碉級
- * @returns 鎻愪緵鑰呭惎鍔ㄩ€夐」锛屾棤閰嶇疆鏃惰繑鍥?undefined
+ * 閼惧嘲褰囬幓鎰返閼板懎鎯庨崝銊┾偓澶愩€? *
+ * @description 娴犲骸绨查悽銊啎缂冾喕鑵戦幓鎰絿閸氬嫭褰佹笟娑溾偓鍛畱娴滃矁绻橀崚鎯扮熅瀵板嫨鈧焦婀囬崝鈥虫珤 URL 缁涘鍘ょ純顕嗙礉
+ * 閺嬪嫰鈧?ProviderStartOptions 鐎电钖勯悽銊ょ艾閸氼垰濮╅幓鎰返閼板懓绻樼粙瀣ㄢ偓? *
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧禍宀冪箻閸掓儼鐭惧鍕祲閸忓啿鐡у▓纰夌礆
+ * @returns 閹绘劒绶甸懓鍛儙閸斻劑鈧銆嶉敍灞炬￥闁板秶鐤嗛弮鎯扮箲閸?undefined
  */
 export function getProviderStartOptions(
   settings: Pick<
@@ -910,10 +894,10 @@ export function getProviderStartOptions(
 }
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑鑷畾涔変簩杩涘埗璺緞
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸懓鍛畱閼奉亜鐣炬稊澶夌癌鏉╂稑鍩楃捄顖氱窞
  *
- * @param settings - 搴旂敤璁剧疆锛堜粎闇€浜岃繘鍒惰矾寰勭浉鍏冲瓧娈碉級
- * @param provider - 鎻愪緵鑰呯被鍨? * @returns 鑷畾涔変簩杩涘埗璺緞瀛楃涓? */
+ * @param settings - 鎼存梻鏁ょ拋鍓х枂閿涘牅绮庨棁鈧禍宀冪箻閸掓儼鐭惧鍕祲閸忓啿鐡у▓纰夌礆
+ * @param provider - 閹绘劒绶甸懓鍛閸? * @returns 閼奉亜鐣炬稊澶夌癌鏉╂稑鍩楃捄顖氱窞鐎涙顑佹稉? */
 export function getCustomBinaryPathForProvider(
   settings: Pick<
     AppSettings,
@@ -949,12 +933,10 @@ export function getCustomBinaryPathForProvider(
 }
 
 /**
- * React Hook锛氳幏鍙栧拰鏇存柊搴旂敤璁剧疆
- *
- * @description 鍚堝苟鏈湴 localStorage 璁剧疆鍜屾湇鍔″櫒璁剧疆锛? * 鎻愪緵鏇存柊鍜岄噸缃柟娉曘€傞娆″姞杞芥椂鑷姩灏嗘湰鍦拌缃縼绉诲埌鏈嶅姟鍣ㄣ€? *
- * @returns 璁剧疆瀵硅薄鍙婃搷浣滄柟娉? * @returns settings - 鍚堝苟鍚庣殑搴旂敤璁剧疆
- * @returns updateSettings - 鏇存柊璁剧疆鐨勫嚱鏁帮紙鍚屾椂鏇存柊鏈湴鍜屾湇鍔″櫒锛? * @returns resetSettings - 閲嶇疆涓洪粯璁よ缃殑鍑芥暟
- * @returns defaults - 鍚堝苟浜嗘湇鍔″櫒榛樿鍊肩殑榛樿璁剧疆
+ * React Hook閿涙俺骞忛崣鏍ф嫲閺囧瓨鏌婃惔鏃傛暏鐠佸墽鐤? *
+ * @description 閸氬牆鑻熼張顒€婀?localStorage 鐠佸墽鐤嗛崪灞炬箛閸斺€虫珤鐠佸墽鐤嗛敍? * 閹绘劒绶甸弴瀛樻煀閸滃矂鍣哥純顔芥煙濞夋洏鈧倿顩诲▎鈥冲鏉炶姤妞傞懛顏勫З鐏忓棙婀伴崷鎷岊啎缂冾喛绺肩粔璇插煂閺堝秴濮熼崳銊ｂ偓? *
+ * @returns 鐠佸墽鐤嗙€电钖勯崣濠冩惙娴ｆ粍鏌熷▔? * @returns settings - 閸氬牆鑻熼崥搴ｆ畱鎼存梻鏁ょ拋鍓х枂
+ * @returns updateSettings - 閺囧瓨鏌婄拋鍓х枂閻ㄥ嫬鍤遍弫甯礄閸氬本妞傞弴瀛樻煀閺堫剙婀撮崪灞炬箛閸斺€虫珤閿? * @returns resetSettings - 闁插秶鐤嗘稉娲帛鐠併倛顔曠純顔炬畱閸戣姤鏆? * @returns defaults - 閸氬牆鑻熸禍鍡樻箛閸斺€虫珤姒涙顓婚崐鑲╂畱姒涙顓荤拋鍓х枂
  */
 export function useAppSettings() {
   const queryClient = useQueryClient();

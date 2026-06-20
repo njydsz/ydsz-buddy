@@ -1,7 +1,7 @@
 /**
  * @file workspaceStore.ts
- * @description 鎸佷箙鍖栫殑缁堢宸ヤ綔鍖洪〉闈㈢姸鎬佺鐞?Store銆? *
- * 绠＄悊缁堢涓撳睘鐨勫伐浣滃尯椤甸潰锛屾瘡涓伐浣滃尯椤甸潰鎷ユ湁鐙珛鐨勭粓绔竷灞€棰勮銆? * 鍚屾椂缁存姢鐢ㄦ埛涓荤洰褰曡矾寰勶紝渚涚粓绔矾寰勮В鏋愪娇鐢ㄣ€? * 鐘舵€侀€氳繃 localStorage 鎸佷箙鍖栥€? */
+ * @description 閹镐椒绠欓崠鏍畱缂佸牏顏銉ょ稊閸栨椽銆夐棃銏㈠Ц閹胶顓搁悶?Store閵? *
+ * 缁狅紕鎮婄紒鍫㈩伂娑撴挸鐫橀惃鍕紣娴ｆ粌灏い鐢告桨閿涘本鐦℃稉顏勪紣娴ｆ粌灏い鐢告桨閹枫儲婀侀悪顒傜彌閻ㄥ嫮绮撶粩顖氱鐏炩偓妫板嫯顔曢妴? * 閸氬本妞傜紒瀛樺Б閻劍鍩涙稉鑽ゆ窗瑜版洝鐭惧鍕剁礉娓氭稓绮撶粩顖濈熅瀵板嫯袙閺嬫劒濞囬悽銊ｂ偓? * 閻樿埖鈧線鈧俺绻?localStorage 閹镐椒绠欓崠鏍モ偓? */
 
 import { type ThreadId } from "~/contracts";
 import { create } from "zustand";
@@ -13,17 +13,17 @@ import {
 } from "./workspaceTerminalLayoutPresets";
 
 /**
- * 宸ヤ綔鍖洪〉闈㈡暟鎹紝鍖呭惈 ID銆佹爣棰樸€佸竷灞€棰勮鍜屾椂闂存埑銆? */
+ * 瀹搞儰缍旈崠娲€夐棃銏℃殶閹诡噯绱濋崠鍛儓 ID閵嗕焦鐖ｆ０妯糕偓浣哥鐏炩偓妫板嫯顔曢崪灞炬闂傚瓨鍩戦妴? */
 interface WorkspacePage {
-  /** 宸ヤ綔鍖哄敮涓€鏍囪瘑 */
+  /** 瀹搞儰缍旈崠鍝勬暜娑撯偓閺嶅洩鐦?*/
   id: string;
-  /** 宸ヤ綔鍖烘樉绀烘爣棰?*/
+  /** 瀹搞儰缍旈崠鐑樻▔缁€鐑樼垼妫?*/
   title: string;
-  /** 缁堢甯冨眬棰勮 ID */
+  /** 缂佸牏顏敮鍐ㄧ湰妫板嫯顔?ID */
   layoutPresetId: WorkspaceLayoutPresetId;
-  /** 鍒涘缓鏃堕棿锛圛SO 鏍煎紡锛?*/
+  /** 閸掓稑缂撻弮鍫曟？閿涘湜SO 閺嶇厧绱￠敍?*/
   createdAt: string;
-  /** 鏈€鍚庢洿鏂版椂闂达紙ISO 鏍煎紡锛?*/
+  /** 閺堚偓閸氬孩娲块弬鐗堟闂傝揪绱橧SO 閺嶇厧绱￠敍?*/
   updatedAt: string;
 }
 
@@ -39,7 +39,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-/** localStorage 鎸佷箙鍖栭敭鍚?*/
+/** localStorage 閹镐椒绠欓崠鏍暛閸?*/
 const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
@@ -136,9 +136,9 @@ function reorderAtIndex<T>(items: readonly T[], fromIndex: number, toIndex: numb
 }
 
 /**
- * 灏嗗伐浣滃尯 ID 杞崲涓哄悎鎴愮殑绾跨▼ ID銆? * 宸ヤ綔鍖洪〉闈娇鐢ㄥ悎鎴愮殑绾跨▼ ID 涓庣粓绔姸鎬?Store 鍏宠仈锛? * 浣垮緱宸ヤ綔鍖洪〉闈㈠彲浠ュ鐢ㄧ嚎绋嬬骇鍒殑缁堢鐘舵€佺鐞嗐€? *
- * @param workspaceId - 宸ヤ綔鍖?ID
- * @returns 鍚堟垚鐨勭嚎绋?ID锛屾牸寮忎负 "workspace:{workspaceId}"
+ * 鐏忓棗浼愭担婊冨隘 ID 鏉烆剚宕叉稉鍝勬値閹存劗娈戠痪璺ㄢ柤 ID閵? * 瀹搞儰缍旈崠娲€夐棃顫▏閻劌鎮庨幋鎰畱缁捐法鈻?ID 娑撳海绮撶粩顖滃Ц閹?Store 閸忓疇浠堥敍? * 娴ｅ灝绶卞銉ょ稊閸栨椽銆夐棃銏犲讲娴犮儱顦查悽銊у殠缁嬪楠囬崚顐ゆ畱缂佸牏顏悩鑸碘偓浣侯吀閻炲棎鈧? *
+ * @param workspaceId - 瀹搞儰缍旈崠?ID
+ * @returns 閸氬牊鍨氶惃鍕殠缁?ID閿涘本鐗稿蹇庤礋 "workspace:{workspaceId}"
  *
  * @example
  * ```ts
@@ -150,7 +150,7 @@ export function workspaceThreadId(workspaceId: string): ThreadId {
 }
 
 /**
- * 宸ヤ綔鍖洪〉闈㈢姸鎬?Zustand Store銆? * 绠＄悊宸ヤ綔鍖洪〉闈㈢殑澧炲垹鏀规煡銆侀噸鍛藉悕銆佹帓搴忓拰甯冨眬棰勮鍒囨崲銆? * 閫氳繃 persist 涓棿浠跺皢鐘舵€佹寔涔呭寲鍒?localStorage銆? *
+ * 瀹搞儰缍旈崠娲€夐棃銏㈠Ц閹?Zustand Store閵? * 缁狅紕鎮婂銉ょ稊閸栨椽銆夐棃銏㈡畱婢х偛鍨归弨瑙勭叀閵嗕線鍣搁崨钘夋倳閵嗕焦甯撴惔蹇撴嫲鐢啫鐪０鍕啎閸掑洦宕查妴? * 闁俺绻?persist 娑擃參妫挎禒璺虹殺閻樿埖鈧焦瀵旀稊鍛閸?localStorage閵? *
  * @example
  * ```tsx
  * const { workspacePages, createWorkspace, deleteWorkspace } = useWorkspaceStore();

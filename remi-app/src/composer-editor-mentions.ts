@@ -1,7 +1,7 @@
 /**
  * @file composer-editor-mentions.ts
- * @description Composer 缂栬緫鍣ㄧ殑鏂囨湰鍒嗘瑙ｆ瀽妯″潡銆? * 灏嗙紪杈戝櫒鏂囨湰鎷嗗垎涓虹粨鏋勫寲鐨勬钀藉簭鍒楋紙鏂囨湰銆佹彁鍙娿€佹妧鑳姐€佺粓绔笂涓嬫枃銆丄gent 鎻愬強锛夛紝
- * 鐢ㄤ簬鍦ㄧ紪杈戝櫒涓覆鏌撳唴鑱?chip 浠ュ強杩涜鍏夋爣浣嶇疆璁＄畻銆? */
+ * @description Composer 缂傛牞绶崳銊ф畱閺傚洦婀伴崚鍡橆唽鐟欙絾鐎藉Ο鈥虫健閵? * 鐏忓棛绱潏鎴濇珤閺傚洦婀伴幏鍡楀瀻娑撹櫣绮ㄩ弸鍕閻ㄥ嫭顔岄拃钘夌碍閸掓绱欓弬鍥ㄦ拱閵嗕焦褰侀崣濞库偓浣瑰Η閼冲鈧胶绮撶粩顖欑瑐娑撳鏋冮妴涓刧ent 閹绘劕寮烽敍澶涚礉
+ * 閻劋绨崷銊х椽鏉堟垵娅掓稉顓熻閺屾挸鍞撮懕?chip 娴犮儱寮锋潻娑滎攽閸忓鐖ｆ担宥囩枂鐠侊紕鐣婚妴? */
 
 import { isBuiltInComposerSlashCommand } from "./composerSlashCommands";
 import {
@@ -16,57 +16,57 @@ import { resolveAgentAlias } from "~/contracts";
 import type { ProviderMentionReference } from "~/contracts";
 
 /**
- * Composer 鎻愮ず鏂囨湰鐨勬钀界被鍨嬨€? * 姣忎釜娈佃惤浠ｈ〃鏂囨湰涓殑涓€涓涔夊崟鍏冿紝鐢ㄤ簬缂栬緫鍣ㄦ覆鏌撳拰鍏夋爣璁＄畻銆? */
+ * Composer 閹绘劗銇氶弬鍥ㄦ拱閻ㄥ嫭顔岄拃鐣岃閸ㄥ鈧? * 濮ｅ繋閲滃▓浣冩儰娴狅綀銆冮弬鍥ㄦ拱娑擃厾娈戞稉鈧稉顏囶嚔娑斿宕熼崗鍐跨礉閻劋绨紓鏍帆閸ｃ劍瑕嗛弻鎾虫嫲閸忓鐖ｇ拋锛勭暬閵? */
 export type ComposerPromptSegment =
   | {
-      /** 绾枃鏈钀?*/
+      /** 缁绢垱鏋冮張顒侇唽閽€?*/
       type: "text";
-      /** 鏂囨湰鍐呭 */
+      /** 閺傚洦婀伴崘鍛啇 */
       text: string;
     }
   | {
-      /** 鏂囦欢/璺緞鎻愬強娈佃惤 */
+      /** 閺傚洣娆?鐠侯垰绶為幓鎰挤濞堜絻鎯?*/
       type: "mention";
-      /** 鎻愬強鐨勮矾寰?*/
+      /** 閹绘劕寮烽惃鍕熅瀵?*/
       path: string;
-      /** 鎻愬強绫诲瀷锛歚"path"` 涓鸿矾寰勬彁鍙婏紝`"plugin"` 涓烘彃浠舵彁鍙?*/
+      /** 閹绘劕寮风猾璇茬€烽敍姝?path"` 娑撻缚鐭惧鍕絹閸欏绱漙"plugin"` 娑撶儤褰冩禒鑸靛絹閸?*/
       kind?: "path" | "plugin";
     }
   | {
-      /** 鎶€鑳芥钀?*/
+      /** 閹垛偓閼宠姤顔岄拃?*/
       type: "skill";
-      /** 鎶€鑳藉悕绉?*/
+      /** 閹垛偓閼宠棄鎮曠粔?*/
       name: string;
-      /** 鎶€鑳藉墠缂€锛坄$` 鎴?`/`锛?*/
+      /** 閹垛偓閼宠棄澧犵紓鈧敍鍧?` 閹?`/`閿?*/
       prefix?: string;
     }
   | {
-      /** 缁堢涓婁笅鏂囨钀?*/
+      /** 缂佸牏顏稉濠佺瑓閺傚洦顔岄拃?*/
       type: "terminal-context";
-      /** 鍏宠仈鐨勭粓绔笂涓嬫枃鑽夌ǹ */
+      /** 閸忓疇浠堥惃鍕矒缁旑垯绗傛稉瀣瀮閼藉枪 */
       context: TerminalContextDraft | null;
     }
   | {
-      /** Agent 鎻愬強娈佃惤锛欯alias - 瀛愪唬鐞嗗紩鐢ㄧ殑 chip锛堟嫭鍙蜂负绾枃鏈級 */
+      /** Agent 閹绘劕寮峰▓浣冩儰閿涙alias - 鐎涙劒鍞悶鍡楃穿閻劎娈?chip閿涘牊瀚崣铚傝礋缁绢垱鏋冮張顒婄礆 */
       type: "agent-mention";
-      /** Agent 鍒悕 */
+      /** Agent 閸掝偄鎮?*/
       alias: string;
-      /** Agent 鏍囪瘑棰滆壊 */
+      /** Agent 閺嶅洩鐦戞０婊嗗 */
       color: string;
     };
 
-/** 鎶€鑳?token 姝ｅ垯锛堜粎鍖归厤鍚庨潰璺熺┖鏍肩殑锛岀敤浜庡唴閮ㄨВ鏋愶級 */
+/** 閹垛偓閼?token 濮濓絽鍨敍鍫滅矌閸栧綊鍘ら崥搴ㄦ桨鐠虹喓鈹栭弽鑲╂畱閿涘瞼鏁ゆ禍搴″敶闁劏袙閺嬫劧绱?*/
 const SKILL_TOKEN_REGEX = /(^|\s)([$/])([a-zA-Z][a-zA-Z0-9_:-]*)(?=\s)/g;
-/** 鎶€鑳?token 姝ｅ垯锛堜篃鍖归厤琛屽熬鐨勶紝鐢ㄤ簬鏄剧ず灞傝В鏋愶級 */
+/** 閹垛偓閼?token 濮濓絽鍨敍鍫滅瘍閸栧綊鍘ょ悰灞界啲閻ㄥ嫸绱濋悽銊ょ艾閺勫墽銇氱仦鍌澬掗弸鎰剁礆 */
 const DISPLAY_SKILL_TOKEN_REGEX = /(^|\s)([$/])([a-zA-Z][a-zA-Z0-9_:-]*)(?=\s|$)/g;
 
 /**
- * Agent 鎻愬強 chip 姝ｅ垯锛欯alias(
- * 淇濇寔绾?@alias 鏂囨湰鍦ㄨ緭鍏ユ椂鍙紪杈戯紝浠ヤ究閫夋嫨鍣ㄤ繚鎸佹墦寮€鐘舵€併€? */
+ * Agent 閹绘劕寮?chip 濮濓絽鍨敍娆痑lias(
+ * 娣囨繃瀵旂痪?@alias 閺傚洦婀伴崷銊ㄧ翻閸忋儲妞傞崣顖滅椽鏉堟埊绱濇禒銉ょ┒闁瀚ㄩ崳銊ょ箽閹镐焦澧﹀鈧悩鑸碘偓浣碘偓? */
 const AGENT_MENTION_TOKEN_REGEX = /(^|\s)@([a-zA-Z0-9._-]+)(?=\()/g;
 
 /**
- * 鍚戞钀藉垪琛ㄤ腑杩藉姞绾枃鏈钀姐€? * 濡傛灉鏈€鍚庝竴涓钀戒篃鏄函鏂囨湰锛屽垯鍚堝苟鍒拌娈佃惤涓紝閬垮厤浜х敓杩囧纰庣墖銆? */
+ * 閸氭垶顔岄拃钘夊灙鐞涖劋鑵戞潻钘夊缁绢垱鏋冮張顒侇唽閽€濮愨偓? * 婵″倹鐏夐張鈧崥搴濈娑擃亝顔岄拃鎴掔瘍閺勵垳鍑介弬鍥ㄦ拱閿涘苯鍨崥鍫濊嫙閸掓媽顕氬▓浣冩儰娑擃叏绱濋柆鍨帳娴溠呮晸鏉╁洤顦跨喊搴ｅ閵? */
 function pushTextSegment(segments: ComposerPromptSegment[], text: string): void {
   if (!text) return;
   const last = segments[segments.length - 1];
@@ -78,7 +78,7 @@ function pushTextSegment(segments: ComposerPromptSegment[], text: string): void 
 }
 
 /**
- * 鍐呰仈 token 鍖归厤缁撴灉绫诲瀷銆? * 鐢ㄤ簬鍦ㄦ枃鏈В鏋愯繃绋嬩腑璁板綍 mention銆乻kill 鍜?agent-mention 鐨勪綅缃俊鎭€? */
+ * 閸愬懓浠?token 閸栧綊鍘ょ紒鎾寸亯缁鐎烽妴? * 閻劋绨崷銊︽瀮閺堫剝袙閺嬫劘绻冪粙瀣╄厬鐠佹澘缍?mention閵嗕够kill 閸?agent-mention 閻ㄥ嫪缍呯純顔讳繆閹垬鈧? */
 type InlineTokenMatch =
   | {
       kind: "mention" | "skill";
@@ -96,11 +96,10 @@ type InlineTokenMatch =
     };
 
 /**
- * 鏀堕泦鏂囨湰涓墍鏈夊唴鑱?token 鐨勫尮閰嶇粨鏋溿€? *
- * 鎸変紭鍏堢骇渚濇鍖归厤锛歛gent-mention 鈫?mention 鈫?skill銆? * agent-mention 鐨勮寖鍥翠細琚褰曪紝鍚庣画鍖归厤鏃惰烦杩囬噸鍙犲尯鍩熶互閬垮厤鍙岄噸鍖归厤銆? * 鍐呯疆鏂滄潬鍛戒护锛堝 /clear銆?plan锛変笉浼氳璇嗗埆涓?skill銆? *
- * @param text - 寰呰В鏋愮殑鏂囨湰
- * @param options.includeTrailingTokenAtEnd - 鏄惁鍖归厤琛屽熬鐨?token锛堟樉绀烘ā寮忛渶瑕侊紝鍐呴儴瑙ｆ瀽涓嶉渶瑕侊級
- * @returns 鎸変綅缃帓搴忕殑鍖归厤缁撴灉鏁扮粍
+ * 閺€鍫曟肠閺傚洦婀版稉顓熷閺堝鍞撮懕?token 閻ㄥ嫬灏柊宥囩波閺嬫嚎鈧? *
+ * 閹稿绱崗鍫㈤獓娓氭繃顐奸崠褰掑帳閿涙瓫gent-mention 閳?mention 閳?skill閵? * agent-mention 閻ㄥ嫯瀵栭崶缈犵窗鐞氼偉顔囪ぐ鏇礉閸氬海鐢婚崠褰掑帳閺冩儼鐑︽潻鍥櫢閸欑姴灏崺鐔朵簰闁灝鍘ら崣宀勫櫢閸栧綊鍘ら妴? * 閸愬懐鐤嗛弬婊勬浆閸涙垝鎶ら敍鍫濐洤 /clear閵?plan閿涘绗夋导姘愁潶鐠囧棗鍩嗘稉?skill閵? *
+ * @param text - 瀵板懓袙閺嬫劗娈戦弬鍥ㄦ拱
+ * @param options.includeTrailingTokenAtEnd - 閺勵垰鎯侀崠褰掑帳鐞涘苯鐔惃?token閿涘牊妯夌粈鐑樐佸蹇涙付鐟曚緤绱濋崘鍛村劥鐟欙絾鐎芥稉宥夋付鐟曚緤绱? * @returns 閹稿缍呯純顔藉笓鎼村繒娈戦崠褰掑帳缂佹挻鐏夐弫鎵矋
  */
 function collectInlineTokenMatches(
   text: string,
@@ -188,11 +187,9 @@ function collectInlineTokenMatches(
 }
 
 /**
- * 灏嗘枃鏈媶鍒嗕负 Composer 鎻愮ず娈佃惤搴忓垪銆? *
- * @param text - 寰呮媶鍒嗙殑鏂囨湰
- * @param options.includeTrailingTokenAtEnd - 鏄惁鍖归厤琛屽熬鐨?token
- * @param options.mentionReferences - 鍙敤鐨勬彁鍙婂紩鐢ㄥ垪琛紝鐢ㄤ簬鍖哄垎鎻掍欢鎻愬強
- * @returns 娈佃惤搴忓垪
+ * 鐏忓棙鏋冮張顒佸閸掑棔璐?Composer 閹绘劗銇氬▓浣冩儰鎼村繐鍨妴? *
+ * @param text - 瀵板懏濯堕崚鍡欐畱閺傚洦婀? * @param options.includeTrailingTokenAtEnd - 閺勵垰鎯侀崠褰掑帳鐞涘苯鐔惃?token
+ * @param options.mentionReferences - 閸欘垳鏁ら惃鍕絹閸欏﹤绱╅悽銊ュ灙鐞涱煉绱濋悽銊ょ艾閸栧搫鍨庨幓鎺嶆閹绘劕寮? * @returns 濞堜絻鎯ゆ惔蹇撳灙
  */
 function splitTextIntoPromptSegments(
   text: string,
@@ -252,9 +249,9 @@ function splitTextIntoPromptSegments(
 }
 
 /**
- * 灏嗘彁绀烘枃鏈媶鍒嗕负鏄剧ず鐢ㄧ殑娈佃惤搴忓垪銆? * 涓?splitPromptIntoComposerSegments 涓嶅悓锛屾鍑芥暟浼氬尮閰嶈灏剧殑 token锛? * 閫傜敤浜庣紪杈戝櫒鏄剧ず灞傜殑娓叉煋銆? *
- * @param prompt - 鎻愮ず鏂囨湰
- * @returns 娈佃惤搴忓垪
+ * 鐏忓棙褰佺粈鐑樻瀮閺堫剚濯堕崚鍡曡礋閺勫墽銇氶悽銊ф畱濞堜絻鎯ゆ惔蹇撳灙閵? * 娑?splitPromptIntoComposerSegments 娑撳秴鎮撻敍灞绢劃閸戣姤鏆熸导姘爱闁板秷顢戠亸鍓ф畱 token閿? * 闁倻鏁ゆ禍搴ｇ椽鏉堟垵娅掗弰鍓с仛鐏炲倻娈戝〒鍙夌厠閵? *
+ * @param prompt - 閹绘劗銇氶弬鍥ㄦ拱
+ * @returns 濞堜絻鎯ゆ惔蹇撳灙
  */
 export function splitPromptIntoDisplaySegments(prompt: string): ComposerPromptSegment[] {
   return splitTextIntoPromptSegments(prompt, {
@@ -263,12 +260,10 @@ export function splitPromptIntoDisplaySegments(prompt: string): ComposerPromptSe
 }
 
 /**
- * 灏嗘彁绀烘枃鏈媶鍒嗕负 Composer 閫昏緫鐢ㄧ殑娈佃惤搴忓垪銆? *
- * 澶勭悊缁堢涓婁笅鏂囧崰浣嶇锛屽皢鍏朵粠鏂囨湰涓垎绂诲苟鏄犲皠鍒板搴旂殑缁堢涓婁笅鏂囪崏绋裤€? * 涓嶅尮閰嶈灏剧殑 token锛堥伩鍏嶅皢姝ｅ湪杈撳叆鐨?token 璇瘑鍒负宸插畬鎴愶級銆? *
- * @param prompt - 鎻愮ず鏂囨湰
- * @param terminalContexts - 缁堢涓婁笅鏂囪崏绋垮垪琛紝涓庢枃鏈腑鐨勫崰浣嶇涓€涓€瀵瑰簲
- * @param mentionReferences - 鍙敤鐨勬彁鍙婂紩鐢ㄥ垪琛紝鐢ㄤ簬鍖哄垎鎻掍欢鎻愬強
- * @returns 娈佃惤搴忓垪
+ * 鐏忓棙褰佺粈鐑樻瀮閺堫剚濯堕崚鍡曡礋 Composer 闁槒绶悽銊ф畱濞堜絻鎯ゆ惔蹇撳灙閵? *
+ * 婢跺嫮鎮婄紒鍫㈩伂娑撳﹣绗呴弬鍥у窗娴ｅ秶顑侀敍灞界殺閸忔湹绮犻弬鍥ㄦ拱娑擃厼鍨庣粋璇茶嫙閺勭姴鐨犻崚鏉款嚠鎼存梻娈戠紒鍫㈩伂娑撳﹣绗呴弬鍥磸缁嬭￥鈧? * 娑撳秴灏柊宥堫攽鐏忓墽娈?token閿涘牓浼╅崗宥呯殺濮濓絽婀潏鎾冲弳閻?token 鐠囶垵鐦戦崚顐¤礋瀹告彃鐣幋鎰剁礆閵? *
+ * @param prompt - 閹绘劗銇氶弬鍥ㄦ拱
+ * @param terminalContexts - 缂佸牏顏稉濠佺瑓閺傚洩宕忕粙鍨灙鐞涱煉绱濇稉搴㈡瀮閺堫兛鑵戦惃鍕窗娴ｅ秶顑佹稉鈧稉鈧€电懓绨? * @param mentionReferences - 閸欘垳鏁ら惃鍕絹閸欏﹤绱╅悽銊ュ灙鐞涱煉绱濋悽銊ょ艾閸栧搫鍨庨幓鎺嶆閹绘劕寮? * @returns 濞堜絻鎯ゆ惔蹇撳灙
  */
 export function splitPromptIntoComposerSegments(
   prompt: string,

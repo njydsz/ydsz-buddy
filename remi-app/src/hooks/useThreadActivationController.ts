@@ -1,7 +1,6 @@
 /**
  * @file useThreadActivationController.ts
- * @description 绾跨▼婵€娲绘帶鍒跺櫒 Hook - 闆嗕腑绠＄悊渚ц竟鏍忕嚎绋嬫縺娲荤殑鍓綔鐢ㄩ摼
- * @module hooks/useThreadActivationController
+ * @description 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅?Hook - 闂嗗棔鑵戠粻锛勬倞娓氀嗙珶閺嶅繒鍤庣粙瀣负濞茶崵娈戦崜顖欑稊閻劑鎽? * @module hooks/useThreadActivationController
  */
 
 import { useCallback } from "react";
@@ -24,55 +23,53 @@ type SidebarThreadActivationSummary = Pick<
 >;
 
 /**
- * 绾跨▼婵€娲绘帶鍒跺櫒杈撳叆鍙傛暟绫诲瀷
- */
+ * 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅掓潏鎾冲弳閸欏倹鏆熺猾璇茬€? */
 export type ThreadActivationControllerInput = {
-  /** 褰撳墠娲诲姩鐨勫垎灞忚鍥?*/
+  /** 瑜版挸澧犲ú璇插З閻ㄥ嫬鍨庣仦蹇氼潒閸?*/
   activeSplitView: SplitView | null;
-  /** 娓呴櫎褰撳墠閫夋嫨 */
+  /** 濞撳懘娅庤ぐ鎾冲闁瀚?*/
   clearSelection: () => void;
-  /** 璺敱瀵艰埅鍑芥暟 */
+  /** 鐠侯垳鏁辩€佃壈鍩呴崙鑺ユ殶 */
   navigate: Navigate;
-  /** 鎵撳紑鑱婂ぉ绾跨▼椤甸潰 */
+  /** 閹垫挸绱戦懕濠傘亯缁捐法鈻兼い鐢告桨 */
   openChatThreadPage: (threadId: ThreadId) => void;
-  /** 鎵撳紑渚ц竟鑱婂ぉ鍒嗗睆 */
+  /** 閹垫挸绱戞笟褑绔熼懕濠傘亯閸掑棗鐫?*/
   openSidechatSplit: (input: {
     sidechatThreadId: ThreadId;
     sourceThreadId: ThreadId;
     ownerProjectId: ProjectId;
   }) => SplitViewId;
-  /** 鎵撳紑缁堢绾跨▼椤甸潰 */
+  /** 閹垫挸绱戠紒鍫㈩伂缁捐法鈻兼い鐢告桨 */
   openTerminalThreadPage: (threadId: ThreadId) => void;
-  /** 棰勭儹绾跨▼璇︽儏锛堟彁鍓嶅姞杞芥暟鎹級 */
+  /** 妫板嫮鍎圭痪璺ㄢ柤鐠囷附鍎忛敍鍫熷絹閸撳秴濮炴潪鑺ユ殶閹诡噯绱?*/
   prewarmThreadDetailForIntent: (threadId: ThreadId) => void;
-  /** 璁颁綇涓婁竴娆＄殑璺敱淇℃伅 */
+  /** 鐠侀缍囨稉濠佺濞嗭紕娈戠捄顖滄暠娣団剝浼?*/
   rememberLastThreadRouteNow: (nextLastThreadRoute: LastThreadRoute) => void;
-  /** 璺敱涓殑鍒嗗睆瑙嗗浘 ID */
+  /** 鐠侯垳鏁辨稉顓犳畱閸掑棗鐫嗙憴鍡楁禈 ID */
   routeSplitViewId: string | null | undefined;
-  /** 璺敱涓殑绾跨▼ ID */
+  /** 鐠侯垳鏁辨稉顓犳畱缁捐法鈻?ID */
   routeThreadId: ThreadId | null | undefined;
-  /** 褰撳墠閫変腑鐨勭嚎绋嬫暟閲?*/
+  /** 瑜版挸澧犻柅澶夎厬閻ㄥ嫮鍤庣粙瀣殶闁?*/
   selectedThreadCount: number;
-  /** 涔愯璁剧疆娲诲姩绾跨▼ ID */
+  /** 娑旀劘顫囩拋鍓х枂濞茶濮╃痪璺ㄢ柤 ID */
   setOptimisticActiveThreadId: (threadId: ThreadId) => void;
-  /** 璁剧疆閫夋嫨閿氱偣 */
+  /** 鐠佸墽鐤嗛柅澶嬪闁挎氨鍋?*/
   setSelectionAnchor: (threadId: ThreadId) => void;
-  /** 璁剧疆鍒嗗睆鑱氱劍闈㈡澘 */
+  /** 鐠佸墽鐤嗛崚鍡楃潌閼辨氨鍔嶉棃銏℃緲 */
   setSplitFocusedPane: (splitViewId: SplitViewId, paneId: PaneId) => void;
-  /** 渚ц竟鏍忕嚎绋嬫憳瑕佹槧灏?*/
+  /** 娓氀嗙珶閺嶅繒鍤庣粙瀣喅鐟曚焦妲х亸?*/
   sidebarThreadSummaryById: Readonly<Partial<Record<ThreadId, SidebarThreadActivationSummary>>>;
-  /** 鍒嗗睆瑙嗗浘鏄犲皠 */
+  /** 閸掑棗鐫嗙憴鍡楁禈閺勭姴鐨?*/
   splitViewsById: Record<SplitViewId, SplitView | undefined>;
-  /** 缁堢鐘舵€佹槧灏?*/
+  /** 缂佸牏顏悩鑸碘偓浣规Ё鐏?*/
   terminalStateByThreadId: ThreadTerminalStateById;
 };
 
 /**
- * 浠庝晶杈规爮鎰忓浘婵€娲荤嚎绋? *
+ * 娴犲簼鏅舵潏瑙勭埉閹板繐娴樺┑鈧ú鑽ゅ殠缁? *
  * @description
- * 鎵ц瀹屾暣鐨勪晶杈规爮绾跨▼婵€娲诲壇浣滅敤閾俱€傚鐞嗛€昏緫锛? * 1. 纭畾棣栭€夊垎灞忚鍥撅紙娲诲姩鍒嗗睆浼樺厛锛? * 2. 瑙ｆ瀽婵€娲荤被鍨嬶紙蹇界暐/鍗曢〉/鍒嗗睆锛? * 3. 澶勭悊渚ц竟鑱婂ぉ鐨勭壒娈婂垎灞忛€昏緫
- * 4. 鎵ц瀵艰埅鍜岀姸鎬佹洿鏂? *
- * @param input - 鎺у埗鍣ㄨ緭鍏ュ弬鏁? * @param threadId - 瑕佹縺娲荤殑绾跨▼ ID
+ * 閹笛嗩攽鐎瑰本鏆ｉ惃鍕櫠鏉堣鐖痪璺ㄢ柤濠碘偓濞茶澹囨担婊呮暏闁句勘鈧倸顦╅悶鍡涒偓鏄忕帆閿? * 1. 绾喖鐣炬＃鏍偓澶婂瀻鐏炲繗顫嬮崶鎾呯礄濞茶濮╅崚鍡楃潌娴兼ê鍘涢敍? * 2. 鐟欙絾鐎藉┑鈧ú鑽よ閸ㄥ绱欒箛鐣屾殣/閸楁洟銆?閸掑棗鐫嗛敍? * 3. 婢跺嫮鎮婃笟褑绔熼懕濠傘亯閻ㄥ嫮澹掑▓濠傚瀻鐏炲繘鈧槒绶? * 4. 閹笛嗩攽鐎佃壈鍩呴崪宀€濮搁幀浣规纯閺? *
+ * @param input - 閹貉冨煑閸ｃ劏绶崗銉ュ棘閺? * @param threadId - 鐟曚焦绺哄ú鑽ゆ畱缁捐法鈻?ID
  */
 export function activateThreadFromSidebarIntent(
   input: ThreadActivationControllerInput,
@@ -97,8 +94,7 @@ export function activateThreadFromSidebarIntent(
     terminalStateByThreadId,
   } = input;
 
-  // 娲诲姩鍒嗗睆浼樺厛锛涘惁鍒欐瘡涓寔涔呭寲鐨勫垎灞忓潡閮藉彲浠ョ‘瀹氭€у湴鎭㈠
-  const preferredSplit = resolvePreferredSplitForCommand({
+  // 濞茶濮╅崚鍡楃潌娴兼ê鍘涢敍娑樻儊閸掓瑦鐦℃稉顏呭瘮娑斿懎瀵查惃鍕瀻鐏炲繐娼￠柈钘夊讲娴犮儳鈥樼€规碍鈧冩勾閹垹顦?  const preferredSplit = resolvePreferredSplitForCommand({
     activeSplitView,
     splitViewsById,
     threadId,
@@ -112,7 +108,7 @@ export function activateThreadFromSidebarIntent(
     splitPaneId: preferredSplit?.paneId ?? null,
   });
 
-  // 妫€鏌ユ槸鍚︿负渚ц竟鑱婂ぉ鍒嗗睆婵€娲?  const sidechatSplitActivation = resolveSidechatSplitActivation(input, {
+  // 濡偓閺屻儲妲搁崥锔胯礋娓氀嗙珶閼卞﹤銇夐崚鍡楃潌濠碘偓濞?  const sidechatSplitActivation = resolveSidechatSplitActivation(input, {
     threadId,
     targetThread,
   });
@@ -121,21 +117,20 @@ export function activateThreadFromSidebarIntent(
     return;
   }
 
-  // 蹇界暐璇ユ縺娲昏姹?  if (activation.kind === "ignore") {
+  // 韫囩晫鏆愮拠銉︾负濞叉槒顕Ч?  if (activation.kind === "ignore") {
     return;
   }
 
-  // 鍗曢〉婵€娲绘ā寮?  if (activation.kind === "single") {
+  // 閸楁洟銆夊┑鈧ú缁樐佸?  if (activation.kind === "single") {
     activateThreadSingle(input, activation.threadId);
     return;
   }
 
-  // 濡傛灉宸茬粡鍦ㄧ洰鏍囦綅缃紝鏃犻渶瀵艰埅
-  if (routeThreadId === activation.threadId && routeSplitViewId === activation.splitViewId) {
+  // 婵″倹鐏夊鑼病閸︺劎娲伴弽鍥︾秴缂冾噯绱濋弮鐘绘付鐎佃壈鍩?  if (routeThreadId === activation.threadId && routeSplitViewId === activation.splitViewId) {
     return;
   }
 
-  // 鎵ц瀹屾暣鐨勬縺娲绘祦绋?  prewarmThreadDetailForIntent(activation.threadId);
+  // 閹笛嗩攽鐎瑰本鏆ｉ惃鍕负濞茬粯绁︾粙?  prewarmThreadDetailForIntent(activation.threadId);
   setOptimisticActiveThreadId(activation.threadId);
   if (selectedThreadCount > 0) {
     clearSelection();
@@ -157,9 +152,9 @@ export function activateThreadFromSidebarIntent(
 }
 
 /**
- * 瑙ｆ瀽渚ц竟鑱婂ぉ鍒嗗睆婵€娲绘潯浠? *
+ * 鐟欙絾鐎芥笟褑绔熼懕濠傘亯閸掑棗鐫嗗┑鈧ú缁樻蒋娴? *
  * @description
- * 褰撶洰鏍囩嚎绋嬫槸渚ц竟鑱婂ぉ涓旀湁婧愮嚎绋嬶紝涓斿綋鍓嶆病鏈夊垎灞忚矾鐢辨椂锛岃繑鍥炴縺娲讳俊鎭? */
+ * 瑜版挾娲伴弽鍥╁殠缁嬪妲告笟褑绔熼懕濠傘亯娑撴梹婀佸┃鎰殠缁嬪绱濇稉鏂跨秼閸撳秵鐥呴張澶婂瀻鐏炲繗鐭鹃悽杈ㄦ閿涘矁绻戦崶鐐寸负濞茶淇婇幁? */
 function resolveSidechatSplitActivation(
   input: ThreadActivationControllerInput,
   options: {
@@ -182,10 +177,9 @@ function resolveSidechatSplitActivation(
 }
 
 /**
- * 婵€娲讳晶杈硅亰澶╁垎灞? *
+ * 濠碘偓濞茶鏅舵潏纭呬喊婢垛晛鍨庣仦? *
  * @description
- * 褰撴病鏈夊垎灞忚矾鐢辨縺娲绘椂锛屼晶杈硅亰澶╄閲嶆柊鎵撳紑涓?婧愮嚎绋嬪湪宸?+ 渚ц竟鑱婂ぉ鍦ㄥ彸"鐨勫竷灞€
- */
+ * 瑜版挻鐥呴張澶婂瀻鐏炲繗鐭鹃悽杈ㄧ负濞茬粯妞傞敍灞兼櫠鏉堢浜版径鈺勵攽闁插秵鏌婇幍鎾崇磻娑?濠ф劗鍤庣粙瀣躬瀹?+ 娓氀嗙珶閼卞﹤銇夐崷銊ュ礁"閻ㄥ嫬绔风仦鈧? */
 function activateSidechatSplit(
   input: ThreadActivationControllerInput,
   activation: {
@@ -194,7 +188,7 @@ function activateSidechatSplit(
     ownerProjectId: ProjectId;
   },
 ): void {
-  // 棰勭儹涓や釜绾跨▼鐨勮鎯?  input.prewarmThreadDetailForIntent(activation.sourceThreadId);
+  // 妫板嫮鍎规稉銈勯嚋缁捐法鈻奸惃鍕嚊閹?  input.prewarmThreadDetailForIntent(activation.sourceThreadId);
   input.prewarmThreadDetailForIntent(activation.threadId);
   input.setOptimisticActiveThreadId(activation.threadId);
   if (input.selectedThreadCount > 0) {
@@ -202,8 +196,7 @@ function activateSidechatSplit(
   }
   input.setSelectionAnchor(activation.threadId);
 
-  // 鎵撳紑渚ц竟鑱婂ぉ鍒嗗睆
-  const splitViewId = input.openSidechatSplit({
+  // 閹垫挸绱戞笟褑绔熼懕濠傘亯閸掑棗鐫?  const splitViewId = input.openSidechatSplit({
     sourceThreadId: activation.sourceThreadId,
     ownerProjectId: activation.ownerProjectId,
     sidechatThreadId: activation.threadId,
@@ -223,9 +216,9 @@ function activateSidechatSplit(
 }
 
 /**
- * 浠ュ崟椤垫ā寮忔縺娲荤嚎绋? *
+ * 娴犮儱宕熸い鍨佸蹇旂负濞茶崵鍤庣粙? *
  * @description
- * 灏嗙洰鏍囦綔涓哄崟涓亰澶╂墦寮€锛屽悓鏃朵繚鐣欒亰澶?vs 缁堢鐨勫叆鍙ｇ偣閫夋嫨
+ * 鐏忓棛娲伴弽鍥︾稊娑撳搫宕熸稉顏囦喊婢垛晜澧﹀鈧敍灞芥倱閺冩湹绻氶悾娆掍喊婢?vs 缂佸牏顏惃鍕弳閸欙絿鍋ｉ柅澶嬪
  */
 function activateThreadSingle(input: ThreadActivationControllerInput, threadId: ThreadId): void {
   if (!input.sidebarThreadSummaryById[threadId]) return;
@@ -237,7 +230,7 @@ function activateThreadSingle(input: ThreadActivationControllerInput, threadId: 
   }
   input.setSelectionAnchor(threadId);
 
-  // 鏍规嵁鍏ュ彛鐐圭被鍨嬫墦寮€瀵瑰簲椤甸潰
+  // 閺嶈宓侀崗銉ュ經閻愬湱琚崹瀣ⅵ瀵偓鐎电懓绨叉い鐢告桨
   const threadEntryPoint = selectThreadTerminalState(
     input.terminalStateByThreadId,
     threadId,
@@ -259,21 +252,20 @@ function activateThreadSingle(input: ThreadActivationControllerInput, threadId: 
 }
 
 /**
- * 绾跨▼婵€娲绘帶鍒跺櫒 Hook
+ * 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅?Hook
  *
  * @description
- * 闆嗕腑绠＄悊渚ц竟鏍忕嚎绋嬫縺娲荤殑鍓綔鐢ㄩ摼銆? * 灏嗙函婵€娲荤瓥鐣ヤ笌 React 鍓綔鐢ㄧ粦瀹氬湪涓€璧枫€? *
- * @param input - 鎺у埗鍣ㄨ緭鍏ュ弬鏁? * @returns 鍖呭惈婵€娲绘柟娉曠殑瀵硅薄
- *
+ * 闂嗗棔鑵戠粻锛勬倞娓氀嗙珶閺嶅繒鍤庣粙瀣负濞茶崵娈戦崜顖欑稊閻劑鎽奸妴? * 鐏忓棛鍑藉┑鈧ú鑽ょ摜閻ｃ儰绗?React 閸擃垯缍旈悽銊х拨鐎规艾婀稉鈧挧鏋偓? *
+ * @param input - 閹貉冨煑閸ｃ劏绶崗銉ュ棘閺? * @returns 閸栧懎鎯堝┑鈧ú缁樻煙濞夋洜娈戠€电钖? *
  * @example
  * ```tsx
  * const { activateThreadFromSidebarIntent } = useThreadActivationController({
  *   activeSplitView,
  *   navigate,
- *   // ... 鍏朵粬鍙傛暟
+ *   // ... 閸忔湹绮崣鍌涙殶
  * });
  *
- * // 婵€娲绘煇涓嚎绋? * activateThreadFromSidebarIntent(threadId);
+ * // 濠碘偓濞茬粯鐓囨稉顏嗗殠缁? * activateThreadFromSidebarIntent(threadId);
  * ```
  */
 export function useThreadActivationController(input: ThreadActivationControllerInput): {

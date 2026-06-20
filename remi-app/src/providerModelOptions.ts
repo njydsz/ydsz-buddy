@@ -1,7 +1,7 @@
 /**
- * @file Provider 妯″瀷閫夐」绠＄悊
+ * @file Provider 濡€崇€烽柅澶愩€嶇粻锛勬倞
  *
- * 鎻愪緵鍚?Provider 妯″瀷閫夐」鐨勬牸寮忓寲銆佸悎骞躲€佸垎缁勫拰鏋勫缓宸ュ叿鍑芥暟銆? * 鏀寔澶氱 Provider锛圕odex銆丆laude銆丆ursor銆丟emini銆丟rok銆丱penCode銆丳i銆並ilo锛? * 鐨勬ā鍨嬮€夐」澶勭悊锛屽寘鎷ā鍨嬪悕绉版牸寮忓寲銆侀€夐」鍚堝苟鍘婚噸銆佹寜涓婃父 Provider 鍒嗙粍銆? * 鏀惰棌妯″瀷鍒嗙粍浠ュ強妯″瀷閫夐」琛ヤ竵鏋勫缓銆? */
+ * 閹绘劒绶甸崥?Provider 濡€崇€烽柅澶愩€嶉惃鍕壐瀵繐瀵查妴浣告値楠炶翰鈧礁鍨庣紒鍕嫲閺嬪嫬缂撳銉ュ徔閸戣姤鏆熼妴? * 閺€顖涘瘮婢舵氨顫?Provider閿涘湑odex閵嗕竼laude閵嗕竼ursor閵嗕笩emini閵嗕笩rok閵嗕副penCode閵嗕赋i閵嗕甫ilo閿? * 閻ㄥ嫭膩閸ㄥ鈧銆嶆径鍕倞閿涘苯瀵橀幏顒伳侀崹瀣倳缁夌増鐗稿蹇撳閵嗕線鈧銆嶉崥鍫濊嫙閸樺鍣搁妴浣瑰瘻娑撳﹥鐖?Provider 閸掑棛绮嶉妴? * 閺€鎯版濡€崇€烽崚鍡欑矋娴犮儱寮峰Ο鈥崇€烽柅澶愩€嶇悰銉ょ閺嬪嫬缂撻妴? */
 
 import { formatModelDisplayName, geminiModelOptionsFromEffortValue } from "~/shared/model";
 import type {
@@ -25,53 +25,53 @@ import type {
   ProviderModelOptions,
 } from "~/contracts";
 
-/** 鏍规嵁 ProviderKind 绱㈠紩鐨勬ā鍨嬮€夐」绫诲瀷 */
+/** 閺嶈宓?ProviderKind 缁便垹绱╅惃鍕侀崹瀣偓澶愩€嶇猾璇茬€?*/
 export type ProviderOptions = ProviderModelOptions[ProviderKind];
 
 /**
- * Provider 妯″瀷閫夐」锛岃〃绀洪€夋嫨鍣ㄤ腑鐨勪竴涓彲閫夐」銆? */
+ * Provider 濡€崇€烽柅澶愩€嶉敍宀冦€冪粈娲偓澶嬪閸ｃ劋鑵戦惃鍕娑擃亜褰查柅澶愩€嶉妴? */
 export interface ProviderModelOption {
-  /** 妯″瀷鐨勫敮涓€鏍囪瘑 slug */
+  /** 濡€崇€烽惃鍕暜娑撯偓閺嶅洩鐦?slug */
   slug: string;
-  /** 妯″瀷鐨勬樉绀哄悕绉?*/
+  /** 濡€崇€烽惃鍕▔缁€鍝勬倳缁?*/
   name: string;
-  /** 涓婃父 Provider ID锛堝 "anthropic"銆?openai"锛?*/
+  /** 娑撳﹥鐖?Provider ID閿涘牆顩?"anthropic"閵?openai"閿?*/
   upstreamProviderId?: string;
-  /** 涓婃父 Provider 鏄剧ず鍚嶇О */
+  /** 娑撳﹥鐖?Provider 閺勫墽銇氶崥宥囆?*/
   upstreamProviderName?: string;
 }
 
 /**
- * Provider 妯″瀷閫夐」鍒嗙粍锛岀敤浜庡湪閫夋嫨鍣ㄤ腑鎸変笂娓?Provider 褰掔被鏄剧ず銆? */
+ * Provider 濡€崇€烽柅澶愩€嶉崚鍡欑矋閿涘瞼鏁ゆ禍搴℃躬闁瀚ㄩ崳銊よ厬閹稿绗傚〒?Provider 瑜版帞琚弰鍓с仛閵? */
 export interface ProviderModelOptionGroup {
-  /** 鍒嗙粍鐨勫敮涓€閿?*/
+  /** 閸掑棛绮嶉惃鍕暜娑撯偓闁?*/
   key: string;
-  /** 鍒嗙粍鐨勬樉绀烘爣绛撅紝null 琛ㄧず鏃犲垎缁勬爣绛?*/
+  /** 閸掑棛绮嶉惃鍕▔缁€鐑樼垼缁涙拝绱漬ull 鐞涖劎銇氶弮鐘插瀻缂佸嫭鐖ｇ粵?*/
   label: string | null;
-  /** 鍒嗙粍鍐呯殑妯″瀷閫夐」鍒楄〃 */
+  /** 閸掑棛绮嶉崘鍛畱濡€崇€烽柅澶愩€嶉崚妤勩€?*/
   options: ProviderModelOption[];
 }
 
 /**
- * 灏嗘ā鍨嬫爣璇嗙浜烘€у寲鏄剧ず銆傚皢鍒嗛殧绗︽浛鎹负绌烘牸骞堕瀛楁瘝澶у啓銆? *
- * @param value - 鍘熷妯″瀷鏍囪瘑绗? * @returns 浜烘€у寲鍚庣殑鏄剧ず鍚嶇О
+ * 鐏忓棙膩閸ㄥ鐖ｇ拠鍡欘儊娴滅儤鈧冨閺勫墽銇氶妴鍌氱殺閸掑棝娈х粭锔芥禌閹诡澀璐熺粚鐑樼壐楠炲爼顩荤€涙鐦濇径褍鍟撻妴? *
+ * @param value - 閸樼喎顫愬Ο鈥崇€烽弽鍥槕缁? * @returns 娴滅儤鈧冨閸氬海娈戦弰鍓с仛閸氬秶袨
  */
 function humanizeModelIdentifier(value: string): string {
   return value.replace(/[-_/]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-/** 鐢熸垚妯″瀷閫夐」鐨勫幓閲嶉敭锛屽熀浜?slug 鐨勫皬鍐欐爣鍑嗗寲 */
+/** 閻㈢喐鍨氬Ο鈥崇€烽柅澶愩€嶉惃鍕箵闁插秹鏁敍灞界唨娴?slug 閻ㄥ嫬鐨崘娆愮垼閸戝棗瀵?*/
 function modelOptionKey(option: Pick<ProviderModelOption, "slug">): string {
   return option.slug.trim().toLowerCase();
 }
 
 /**
- * 鏍煎紡鍖?Provider 妯″瀷閫夐」鐨勬樉绀哄悕绉般€? * 涓嶅悓 Provider 鏈変笉鍚岀殑鍚嶇О鏍煎紡鍖栫瓥鐣ワ細
- * - Cursor: 鍘婚櫎鏂规嫭鍙峰悗缂€鍙傛暟
- * - Kilo/OpenCode/Pi: 鎻愬彇璺緞鏈€鍚庝竴娈靛苟浜烘€у寲
- * - 鍏朵粬: 浣跨敤鍏变韩鐨?formatModelDisplayName
+ * 閺嶇厧绱￠崠?Provider 濡€崇€烽柅澶愩€嶉惃鍕▔缁€鍝勬倳缁夎埇鈧? * 娑撳秴鎮?Provider 閺堝绗夐崥宀€娈戦崥宥囆為弽鐓庣础閸栨牜鐡ラ悾銉窗
+ * - Cursor: 閸樺娅庨弬瑙勫閸欏嘲鎮楃紓鈧崣鍌涙殶
+ * - Kilo/OpenCode/Pi: 閹绘劕褰囩捄顖氱窞閺堚偓閸氬簼绔村▓闈涜嫙娴滅儤鈧冨
+ * - 閸忔湹绮? 娴ｈ法鏁ら崗鍙橀煩閻?formatModelDisplayName
  *
- * @param input - 鍖呭惈 provider 鍜?slug 鐨勮緭鍏ュ璞? * @returns 鏍煎紡鍖栧悗鐨勬ā鍨嬫樉绀哄悕绉? */
+ * @param input - 閸栧懎鎯?provider 閸?slug 閻ㄥ嫯绶崗銉ヮ嚠鐠? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭膩閸ㄥ妯夌粈鍝勬倳缁? */
 export function formatProviderModelOptionName(input: {
   provider: ProviderKind;
   slug: string;
@@ -96,10 +96,8 @@ export function formatProviderModelOptionName(input: {
 }
 
 /**
- * 鍚堝苟涓ょ粍妯″瀷閫夐」锛屼紭鍏堜繚鐣?preferred 涓殑閫夐」锛宖allback 涓笉閲嶅鐨勯€夐」杩藉姞鍒版湯灏俱€? *
- * @param preferred - 浼樺厛鐨勬ā鍨嬮€夐」鍒楄〃
- * @param fallback - 鍥為€€鐨勬ā鍨嬮€夐」鍒楄〃
- * @returns 鍚堝苟鍚庣殑妯″瀷閫夐」鏁扮粍
+ * 閸氬牆鑻熸稉銈囩矋濡€崇€烽柅澶愩€嶉敍灞肩喘閸忓牅绻氶悾?preferred 娑擃厾娈戦柅澶愩€嶉敍瀹朼llback 娑擃厺绗夐柌宥咁槻閻ㄥ嫰鈧銆嶆潻钘夊閸掔増婀亸淇扁偓? *
+ * @param preferred - 娴兼ê鍘涢惃鍕侀崹瀣偓澶愩€嶉崚妤勩€? * @param fallback - 閸ョ偤鈧偓閻ㄥ嫭膩閸ㄥ鈧銆嶉崚妤勩€? * @returns 閸氬牆鑻熼崥搴ｆ畱濡€崇€烽柅澶愩€嶉弫鎵矋
  */
 export function mergeProviderModelOptions(
   preferred: ReadonlyArray<ProviderModelOption>,
@@ -121,10 +119,9 @@ export function mergeProviderModelOptions(
 }
 
 /**
- * 灏嗘ā鍨嬮€夐」鎸変笂娓?Provider 鍒嗙粍銆傜浉鍚?upstreamProviderId 鐨勯€夐」褰掑叆鍚屼竴缁勶紝
- * 鏃犱笂娓?Provider 淇℃伅鐨勯€夐」褰掑叆 "__ungrouped__" 缁勩€? *
- * @param options - 妯″瀷閫夐」鍒楄〃
- * @returns 鍒嗙粍鍚庣殑妯″瀷閫夐」鏁扮粍
+ * 鐏忓棙膩閸ㄥ鈧銆嶉幐澶夌瑐濞?Provider 閸掑棛绮嶉妴鍌滄祲閸?upstreamProviderId 閻ㄥ嫰鈧銆嶈ぐ鎺戝弳閸氬奔绔寸紒鍕剁礉
+ * 閺冪姳绗傚〒?Provider 娣団剝浼呴惃鍕偓澶愩€嶈ぐ鎺戝弳 "__ungrouped__" 缂佸嫨鈧? *
+ * @param options - 濡€崇€烽柅澶愩€嶉崚妤勩€? * @returns 閸掑棛绮嶉崥搴ｆ畱濡€崇€烽柅澶愩€嶉弫鎵矋
  */
 export function groupProviderModelOptions(
   options: ReadonlyArray<ProviderModelOption>,
@@ -163,10 +160,8 @@ export function groupProviderModelOptions(
 }
 
 /**
- * 灏嗘ā鍨嬮€夐」鎸変笂娓?Provider 鍒嗙粍锛屽苟灏嗘敹钘忕殑妯″瀷鎻愬彇鍒扮嫭绔嬬殑 "Favourites" 鍒嗙粍涓€? * 濡傛灉娌℃湁鏀惰棌妯″瀷锛岃涓轰笌 groupProviderModelOptions 涓€鑷淬€? *
- * @param input - 鍖呭惈閫夐」鍒楄〃銆佹敹钘?slug 闆嗗悎鍜屽彲閫夊垎缁勬爣绛剧殑杈撳叆瀵硅薄
- * @returns 甯︽敹钘忓垎缁勭殑妯″瀷閫夐」鍒嗙粍鏁扮粍
- */
+ * 鐏忓棙膩閸ㄥ鈧銆嶉幐澶夌瑐濞?Provider 閸掑棛绮嶉敍灞借嫙鐏忓棙鏁归挊蹇曟畱濡€崇€烽幓鎰絿閸掓壆瀚粩瀣畱 "Favourites" 閸掑棛绮嶆稉顓溾偓? * 婵″倹鐏夊▽鈩冩箒閺€鎯版濡€崇€烽敍宀冾攽娑撹桨绗?groupProviderModelOptions 娑撯偓閼锋番鈧? *
+ * @param input - 閸栧懎鎯堥柅澶愩€嶉崚妤勩€冮妴浣规暪閽?slug 闂嗗棗鎮庨崪灞藉讲闁鍨庣紒鍕垼缁涘墽娈戞潏鎾冲弳鐎电钖? * @returns 鐢附鏁归挊蹇撳瀻缂佸嫮娈戝Ο鈥崇€烽柅澶愩€嶉崚鍡欑矋閺佹壆绮? */
 export function groupProviderModelOptionsWithFavorites(input: {
   options: ReadonlyArray<ProviderModelOption>;
   favoriteSlugs: ReadonlySet<string>;
@@ -195,12 +190,9 @@ export function groupProviderModelOptionsWithFavorites(input: {
 }
 
 /**
- * 鏍规嵁琛ヤ竵鏋勫缓鎸囧畾 Provider 鐨勪笅涓€涓ā鍨嬮€夐」鐘舵€併€? * 瀵逛簬 Gemini锛屽垏鎹?thinkingLevel/thinkingBudget 鏃朵細娓呴櫎涔嬪墠鐨勬€濈淮鐩稿叧閰嶇疆銆? *
- * @param provider - Provider 绫诲瀷
- * @param modelOptions - 褰撳墠妯″瀷閫夐」
- * @param patch - 瑕佸簲鐢ㄧ殑閫夐」琛ヤ竵
- * @returns 鍚堝苟鍚庣殑妯″瀷閫夐」
- */
+ * 閺嶈宓佺悰銉ょ閺嬪嫬缂撻幐鍥х暰 Provider 閻ㄥ嫪绗呮稉鈧稉顏吥侀崹瀣偓澶愩€嶉悩鑸碘偓浣碘偓? * 鐎甸€涚艾 Gemini閿涘苯鍨忛幑?thinkingLevel/thinkingBudget 閺冩湹绱板〒鍛存珟娑斿澧犻惃鍕偓婵堟樊閻╃鍙ч柊宥囩枂閵? *
+ * @param provider - Provider 缁鐎? * @param modelOptions - 瑜版挸澧犲Ο鈥崇€烽柅澶愩€? * @param patch - 鐟曚礁绨查悽銊ф畱闁銆嶇悰銉ょ
+ * @returns 閸氬牆鑻熼崥搴ｆ畱濡€崇€烽柅澶愩€? */
 export function buildNextProviderOptions(
   provider: ProviderKind,
   modelOptions: ProviderOptions | null | undefined,
@@ -242,11 +234,9 @@ export function buildNextProviderOptions(
 }
 
 /**
- * 鏍规嵁閫夐」 ID 鍜屽€兼瀯寤烘ā鍨嬮€夐」琛ヤ竵銆? * 瀵逛簬 Gemini 鐨?thinkingLevel/thinkingBudget锛屼細閫氳繃 effort 鍊兼帹瀵煎嚭瀹屾暣鐨勯€夐」闆嗐€? *
- * @param provider - Provider 绫诲瀷
- * @param optionId - 閫夐」 ID
- * @param value - 閫夐」鍊? * @returns 閫夐」琛ヤ竵瀵硅薄
- */
+ * 閺嶈宓侀柅澶愩€?ID 閸滃苯鈧吋鐎鐑樐侀崹瀣偓澶愩€嶇悰銉ょ閵? * 鐎甸€涚艾 Gemini 閻?thinkingLevel/thinkingBudget閿涘奔绱伴柅姘崇箖 effort 閸婂吋甯圭€电厧鍤€瑰本鏆ｉ惃鍕偓澶愩€嶉梿鍡愨偓? *
+ * @param provider - Provider 缁鐎? * @param optionId - 闁銆?ID
+ * @param value - 闁銆嶉崐? * @returns 闁銆嶇悰銉ょ鐎电钖? */
 export function buildProviderOptionPatch(
   provider: ProviderKind,
   optionId: string,
@@ -263,12 +253,9 @@ export function buildProviderOptionPatch(
 }
 
 /**
- * 鏋勫缓妯″瀷閫夋嫨瀵硅薄銆傛牴鎹?Provider 绫诲瀷杩斿洖瀵瑰簲鐨勫己绫诲瀷 ModelSelection銆? * 鍖呭惈澶氫釜閲嶈浇绛惧悕浠ョ‘淇濈被鍨嬪畨鍏ㄣ€? *
- * @param provider - Provider 绫诲瀷
- * @param model - 妯″瀷鏍囪瘑
- * @param options - 鍙€夌殑妯″瀷閫夐」
- * @returns 瀵瑰簲绫诲瀷鐨勬ā鍨嬮€夋嫨瀵硅薄
- */
+ * 閺嬪嫬缂撳Ο鈥崇€烽柅澶嬪鐎电钖勯妴鍌涚壌閹?Provider 缁鐎锋潻鏂挎礀鐎电懓绨查惃鍕繁缁鐎?ModelSelection閵? * 閸栧懎鎯堟径姘嚋闁插秷娴囩粵鎯ф倳娴犮儳鈥樻穱婵堣閸ㄥ鐣ㄩ崗銊ｂ偓? *
+ * @param provider - Provider 缁鐎? * @param model - 濡€崇€烽弽鍥槕
+ * @param options - 閸欘垶鈧娈戝Ο鈥崇€烽柅澶愩€? * @returns 鐎电懓绨茬猾璇茬€烽惃鍕侀崹瀣偓澶嬪鐎电钖? */
 export function buildModelSelection(
   provider: "codex",
   model: string,

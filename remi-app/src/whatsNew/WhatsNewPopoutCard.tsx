@@ -72,9 +72,9 @@ export function WhatsNewPopoutCard({
         onKeyDown={onKeyDown}
         className={cn(
           "group relative flex cursor-pointer flex-col overflow-hidden rounded-xl",
-          "border border-white/[0.08] bg-popover/90 text-popover-foreground shadow-xl backdrop-blur-xl",
+          "border border-white/8 bg-popover/90 text-popover-foreground shadow-xl backdrop-blur-xl",
           "transition-[transform,box-shadow,border-color] duration-150",
-          "hover:border-primary/40 hover:shadow-2xl hover:[transform:translateY(-1px)]",
+          "hover:border-primary/40 hover:shadow-2xl hover:transform-[translateY(-1px)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         )}
       >
@@ -88,9 +88,9 @@ export function WhatsNewPopoutCard({
             onDismiss();
           }}
           className={cn(
-            "absolute end-1.5 top-1.5 z-10 inline-flex size-6 items-center justify-center rounded-full",
+            "absolute inset-e-1.5 top-1.5 z-10 inline-flex size-6 items-center justify-center rounded-full",
             "text-muted-foreground/80 transition-colors",
-            "hover:bg-[var(--sidebar-accent)] hover:text-foreground",
+            "hover:bg-(--sidebar-accent) hover:text-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
           )}
         >
@@ -127,7 +127,7 @@ export function WhatsNewPopoutCard({
           {/* Subtle bottom gradient so text below the band always reads. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-b from-transparent to-popover/90"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-linear-to-b from-transparent to-popover/90"
           />
         </div>
 

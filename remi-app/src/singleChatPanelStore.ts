@@ -1,7 +1,7 @@
 /**
- * @file 鍗曡亰闈㈡澘鐘舵€佺鐞? *
- * 绠＄悊鍗曠嚎绋嬭亰澶╃晫闈㈠彸渚ч潰鏉跨殑鐘舵€佹寔涔呭寲銆? * 姣忎釜绾跨▼鐙珛缁存姢闈㈡澘绫诲瀷锛堟祻瑙堝櫒/Diff锛夈€丏iff 杞 ID銆丏iff 鏂囦欢璺緞绛夌姸鎬侊紝
- * 浣跨敤 Zustand + persist 涓棿浠舵寔涔呭寲鍒?localStorage銆? */
+ * @file 閸楁洝浜伴棃銏℃緲閻樿埖鈧胶顓搁悶? *
+ * 缁狅紕鎮婇崡鏇犲殠缁嬪浜版径鈺冩櫕闂堛垹褰告笟褔娼伴弶璺ㄦ畱閻樿埖鈧焦瀵旀稊鍛閵? * 濮ｅ繋閲滅痪璺ㄢ柤閻欘剛鐝涚紒瀛樺Б闂堛垺婢樼猾璇茬€烽敍鍫熺セ鐟欏牆娅?Diff閿涘鈧笍iff 鏉烆喗顐?ID閵嗕笍iff 閺傚洣娆㈢捄顖氱窞缁涘濮搁幀渚婄礉
+ * 娴ｈ法鏁?Zustand + persist 娑擃參妫挎禒鑸靛瘮娑斿懎瀵查崚?localStorage閵? */
 
 import type { ThreadId, TurnId } from "~/contracts";
 import { create } from "zustand";
@@ -9,36 +9,36 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { ChatRightPanel } from "./diffRouteSearch";
 
 /**
- * 鍗曡亰闈㈡澘鐨勭姸鎬侊紝璁板綍姣忎釜绾跨▼鐨勫彸渚ч潰鏉块厤缃€? */
+ * 閸楁洝浜伴棃銏℃緲閻ㄥ嫮濮搁幀渚婄礉鐠佹澘缍嶅В蹇庨嚋缁捐法鈻奸惃鍕礁娓氀囨桨閺夊潡鍘ょ純顔衡偓? */
 export interface SingleChatPanelState {
-  /** 褰撳墠鎵撳紑鐨勯潰鏉跨被鍨嬶紝null 琛ㄧず闈㈡澘鍏抽棴 */
+  /** 瑜版挸澧犻幍鎾崇磻閻ㄥ嫰娼伴弶璺ㄨ閸ㄥ绱漬ull 鐞涖劎銇氶棃銏℃緲閸忔娊妫?*/
   panel: ChatRightPanel | null;
-  /** 褰撳墠鏌ョ湅鐨?Diff 杞 ID */
+  /** 瑜版挸澧犻弻銉ф箙閻?Diff 鏉烆喗顐?ID */
   diffTurnId: TurnId | null;
-  /** 褰撳墠鏌ョ湅鐨?Diff 鏂囦欢璺緞 */
+  /** 瑜版挸澧犻弻銉ф箙閻?Diff 閺傚洣娆㈢捄顖氱窞 */
   diffFilePath: string | null;
-  /** 鐢ㄦ埛鏄惁鏇剧粡鎵撳紑杩囬潰鏉匡紙鐢ㄤ簬棣栨鎵撳紑鎻愮ず锛?*/
+  /** 閻劍鍩涢弰顖氭儊閺囧墽绮￠幍鎾崇磻鏉╁洭娼伴弶鍖＄礄閻劋绨＃鏍偧閹垫挸绱戦幓鎰仛閿?*/
   hasOpenedPanel: boolean;
-  /** 涓婃鎵撳紑鐨勯潰鏉跨被鍨嬶紙鐢ㄤ簬闈㈡澘鍒囨崲鏃舵仮澶嶏級 */
+  /** 娑撳﹥顐奸幍鎾崇磻閻ㄥ嫰娼伴弶璺ㄨ閸ㄥ绱欓悽銊ょ艾闂堛垺婢橀崚鍥ㄥ床閺冭埖浠径宥忕礆 */
   lastOpenPanel: ChatRightPanel;
 }
 
-/** 鍗曡亰闈㈡澘 Store 鐨勭姸鎬佹帴鍙?*/
+/** 閸楁洝浜伴棃銏℃緲 Store 閻ㄥ嫮濮搁幀浣瑰复閸?*/
 interface SingleChatPanelStore {
-  /** 鎸夌嚎绋?ID 绱㈠紩鐨勯潰鏉跨姸鎬佹槧灏?*/
+  /** 閹稿鍤庣粙?ID 缁便垹绱╅惃鍕桨閺夎法濮搁幀浣规Ё鐏?*/
   panelStateByThreadId: Record<string, SingleChatPanelState | undefined>;
-  /** 鏇存柊鎸囧畾绾跨▼鐨勯潰鏉跨姸鎬侊紙閮ㄥ垎鏇存柊锛?*/
+  /** 閺囧瓨鏌婇幐鍥х暰缁捐法鈻奸惃鍕桨閺夎法濮搁幀渚婄礄闁劌鍨庨弴瀛樻煀閿?*/
   setThreadPanelState: (threadId: ThreadId, patch: Partial<SingleChatPanelState>) => void;
-  /** 娓呴櫎鎸囧畾绾跨▼鐨勯潰鏉跨姸鎬?*/
+  /** 濞撳懘娅庨幐鍥х暰缁捐法鈻奸惃鍕桨閺夎法濮搁幀?*/
   clearThreadPanelState: (threadId: ThreadId) => void;
 }
 
-/** localStorage 涓殑瀛樺偍閿?*/
+/** localStorage 娑擃厾娈戠€涙ê鍋嶉柨?*/
 const SINGLE_CHAT_PANEL_STORAGE_KEY = "remicode:single-chat-panel-state:v1";
 
 /**
- * 鍒涘缓榛樿鐨勫崟鑱婇潰鏉跨姸鎬併€? *
- * @returns 榛樿闈㈡澘鐘舵€佸璞? */
+ * 閸掓稑缂撴妯款吇閻ㄥ嫬宕熼懕濠囨桨閺夎法濮搁幀浣碘偓? *
+ * @returns 姒涙顓婚棃銏℃緲閻樿埖鈧礁顕挒? */
 export function createDefaultSingleChatPanelState(): SingleChatPanelState {
   return {
     panel: null,
@@ -49,16 +49,16 @@ export function createDefaultSingleChatPanelState(): SingleChatPanelState {
   };
 }
 
-/** 榛樿闈㈡澘鐘舵€佺殑鍗曚緥缂撳瓨 */
+/** 姒涙顓婚棃銏℃緲閻樿埖鈧胶娈戦崡鏇氱伐缂傛挸鐡?*/
 const DEFAULT_SINGLE_CHAT_PANEL_STATE = createDefaultSingleChatPanelState();
 
-/** 鑾峰彇榛樿闈㈡澘鐘舵€佺殑寮曠敤锛堜繚鎸佸紩鐢ㄧǔ瀹氫互閬垮厤涓嶅繀瑕佺殑閲嶆覆鏌擄級 */
+/** 閼惧嘲褰囨妯款吇闂堛垺婢橀悩鑸碘偓浣烘畱瀵洜鏁ら敍鍫滅箽閹镐礁绱╅悽銊旂€规矮浜掗柆鍨帳娑撳秴绻€鐟曚胶娈戦柌宥嗚閺屾搫绱?*/
 function getDefaultSingleChatPanelState(): SingleChatPanelState {
   return DEFAULT_SINGLE_CHAT_PANEL_STATE;
 }
 
 /**
- * 鍗曡亰闈㈡澘 Zustand Store銆? * 鎸佷箙鍖栧埌 localStorage锛屾寜绾跨▼ ID 鐙珛绠＄悊闈㈡澘鐘舵€併€? * 鐘舵€佹湭鍙樺寲鏃惰烦杩囨洿鏂颁互閬垮厤涓嶅繀瑕佺殑閲嶆覆鏌撱€? */
+ * 閸楁洝浜伴棃銏℃緲 Zustand Store閵? * 閹镐椒绠欓崠鏍у煂 localStorage閿涘本瀵滅痪璺ㄢ柤 ID 閻欘剛鐝涚粻锛勬倞闂堛垺婢橀悩鑸碘偓浣碘偓? * 閻樿埖鈧焦婀崣妯哄閺冩儼鐑︽潻鍥ㄦ纯閺傞浜掗柆鍨帳娑撳秴绻€鐟曚胶娈戦柌宥嗚閺屾挶鈧? */
 export const useSingleChatPanelStore = create<SingleChatPanelStore>()(
   persist(
     (set) => ({
@@ -106,9 +106,9 @@ export const useSingleChatPanelStore = create<SingleChatPanelStore>()(
 );
 
 /**
- * 鍒涘缓閫夋嫨鍣ㄥ嚱鏁帮紝鑾峰彇鎸囧畾绾跨▼鐨勯潰鏉跨姸鎬併€? * 鏈寔涔呭寲鐘舵€佺殑绾跨▼杩斿洖榛樿鐘舵€佺殑绋冲畾寮曠敤锛岄伩鍏?React 妫€娴嬪埌骞诲奖鍙樻洿銆? *
- * @param threadId - 绾跨▼ ID
- * @returns Zustand 閫夋嫨鍣ㄥ嚱鏁? */
+ * 閸掓稑缂撻柅澶嬪閸ｃ劌鍤遍弫甯礉閼惧嘲褰囬幐鍥х暰缁捐法鈻奸惃鍕桨閺夎法濮搁幀浣碘偓? * 閺堫亝瀵旀稊鍛閻樿埖鈧胶娈戠痪璺ㄢ柤鏉╂柨娲栨妯款吇閻樿埖鈧胶娈戠粙鍐茬暰瀵洜鏁ら敍宀勪缉閸?React 濡偓濞村鍩岄獮璇插閸欐ɑ娲块妴? *
+ * @param threadId - 缁捐法鈻?ID
+ * @returns Zustand 闁瀚ㄩ崳銊ュ毐閺? */
 export function selectSingleChatPanelState(threadId: ThreadId) {
   return (store: SingleChatPanelStore) =>
     // Keep the fallback snapshot stable so React does not observe a phantom store change

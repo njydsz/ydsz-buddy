@@ -1,6 +1,6 @@
 /**
  * @file ChatView.logic.ts
- * @description ChatView 缁勪欢鐨勭函閫昏緫灞傦紝鍖呭惈瀵硅瘽绾跨▼鏋勫缓銆佽闊宠緭鍏ュ鐞嗐€佹秷鎭檮浠剁鐞嗐€? *              鍙戦€佺姸鎬佹帹瀵笺€佺粓绔笂涓嬫枃杩囨护绛変笌 UI 娓叉煋鏃犲叧鐨勪笟鍔￠€昏緫鍑芥暟銆? *              鎵€鏈夊嚱鏁板潎涓虹函鍑芥暟鎴栨棤鍓綔鐢ㄧ殑宸ュ叿鍑芥暟锛屼究浜庡崟鍏冩祴璇曘€? */
+ * @description ChatView 缂佸嫪娆㈤惃鍕嚱闁槒绶仦鍌︾礉閸栧懎鎯堢€电鐦界痪璺ㄢ柤閺嬪嫬缂撻妴浣筋嚔闂婂疇绶崗銉ヮ槱閻炲棎鈧焦绉烽幁顖炴娴犲墎顓搁悶鍡愨偓? *              閸欐垿鈧胶濮搁幀浣瑰腹鐎电鈧胶绮撶粩顖欑瑐娑撳鏋冩潻鍥ㄦ姢缁涘绗?UI 濞撳弶鐓嬮弮鐘插彠閻ㄥ嫪绗熼崝锟犫偓鏄忕帆閸戣姤鏆熼妴? *              閹碘偓閺堝鍤遍弫鏉挎綆娑撹櫣鍑介崙鑺ユ殶閹存牗妫ら崜顖欑稊閻劎娈戝銉ュ徔閸戣姤鏆熼敍灞肩┒娴滃骸宕熼崗鍐╃ゴ鐠囨洏鈧? */
 
 import {
   ThreadId,
@@ -36,21 +36,20 @@ import { hasLiveTurnTailWork, type WorkLogEntry } from "../session-logic";
 import { localSubagentThreadId } from "./ChatView.selectors";
 import type { ProviderModelOption } from "../providerModelOptions";
 
-/** localStorage 閿細鎸夐」鐩褰曚笂娆¤皟鐢ㄧ殑鑴氭湰 */
+/** localStorage 闁款噯绱伴幐澶愩€嶉惄顔款唶瑜版洑绗傚▎陇鐨熼悽銊ф畱閼存碍婀?*/
 export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remicode:last-invoked-script-by-project";
-/** localStorage 閿細宸插叧闂殑 Provider 鍋ュ悍鍛婅鏍囪瘑鍒楄〃 */
+/** localStorage 闁款噯绱板鎻掑彠闂傤厾娈?Provider 閸嬨儱鎮嶉崨濠咁劅閺嶅洩鐦戦崚妤勩€?*/
 export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remicode:dismissed-provider-health-banners";
 
-/** 鎸夐」鐩褰曚笂娆¤皟鐢ㄨ剼鏈殑 Schema锛岀敤浜?localStorage 鏁版嵁鏍￠獙 */
+/** 閹稿銆嶉惄顔款唶瑜版洑绗傚▎陇鐨熼悽銊ㄥ壖閺堫剛娈?Schema閿涘瞼鏁ゆ禍?localStorage 閺佺増宓侀弽锟犵崣 */
 export const LastInvokedScriptByProjectSchema = Schema.Record({ key: Schema.String, value: Schema.String });
-/** 宸插叧闂殑 Provider 鍋ュ悍鍛婅 Schema锛岀敤浜?localStorage 鏁版嵁鏍￠獙 */
+/** 瀹告彃鍙ч梻顓犳畱 Provider 閸嬨儱鎮嶉崨濠咁劅 Schema閿涘瞼鏁ゆ禍?localStorage 閺佺増宓侀弽锟犵崣 */
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
 
 /**
- * 鏍规嵁鏈湴鑽夌ǹ鐘舵€佹瀯寤轰竴涓湰鍦?Thread 瀵硅薄锛岀敤浜庡湪鏈嶅姟绔嚎绋嬪皻鏈垱寤烘椂鎻愪緵 UI 娓叉煋鎵€闇€鐨勬暟鎹粨鏋勩€? * @param threadId - 鏈湴鐢熸垚鐨勭嚎绋?ID
- * @param draftThread - 鏈湴鑽夌ǹ绾跨▼鐘舵€? * @param fallbackModelSelection - 褰撹崏绋挎湭鎸囧畾妯″瀷鏃剁殑鍥為€€妯″瀷閫夋嫨
- * @param error - 鍙€夌殑閿欒淇℃伅锛岀敤浜庡睍绀哄垱寤哄け璐ョ姸鎬? * @returns 鏋勫缓瀹屾垚鐨?Thread 瀵硅薄锛屽寘鍚┖鐨勬秷鎭垪琛ㄥ拰浼氳瘽
- */
+ * 閺嶈宓侀張顒€婀撮懡澶屒归悩鑸碘偓浣圭€杞扮娑擃亝婀伴崷?Thread 鐎电钖勯敍宀€鏁ゆ禍搴℃躬閺堝秴濮熺粩顖滃殠缁嬪鐨婚張顏勫灡瀵ょ儤妞傞幓鎰返 UI 濞撳弶鐓嬮幍鈧棁鈧惃鍕殶閹诡喚绮ㄩ弸鍕┾偓? * @param threadId - 閺堫剙婀撮悽鐔稿灇閻ㄥ嫮鍤庣粙?ID
+ * @param draftThread - 閺堫剙婀撮懡澶屒圭痪璺ㄢ柤閻樿埖鈧? * @param fallbackModelSelection - 瑜版捁宕忕粙鎸庢弓閹稿洤鐣惧Ο鈥崇€烽弮鍓佹畱閸ョ偤鈧偓濡€崇€烽柅澶嬪
+ * @param error - 閸欘垶鈧娈戦柨娆掝嚖娣団剝浼呴敍宀€鏁ゆ禍搴＄潔缁€鍝勫灡瀵ゅ搫銇戠拹銉уЦ閹? * @returns 閺嬪嫬缂撶€瑰本鍨氶惃?Thread 鐎电钖勯敍灞藉瘶閸氼偆鈹栭惃鍕Х閹垰鍨悰銊ユ嫲娴兼俺鐦? */
 export function buildLocalDraftThread(
   threadId: ThreadId,
   draftThread: DraftThreadState,
@@ -83,9 +82,7 @@ export function buildLocalDraftThread(
 }
 
 /**
- * 瑙ｆ瀽褰撳墠娲昏穬绾跨▼鐨勬樉绀烘爣棰橈紝浼樺厛浣跨敤瀛愪唬鐞嗘爣棰橈紝瀵圭┖鐧界殑 Home Chat 浣跨敤 "New Chat"銆? * @param input.title - 绾跨▼鍘熷鏍囬
- * @param input.subagentTitle - 瀛愪唬鐞嗘爣棰橈紙濡傛湁锛? * @param input.isHomeChat - 鏄惁涓?Home Chat 瀹瑰櫒
- * @param input.isEmpty - 绾跨▼鏄惁涓虹┖锛堟棤娑堟伅锛? * @returns 鏈€缁堝睍绀虹粰鐢ㄦ埛鐨勬爣棰樻枃鏈? */
+ * 鐟欙絾鐎借ぐ鎾冲濞叉槒绌痪璺ㄢ柤閻ㄥ嫭妯夌粈鐑樼垼妫版﹫绱濇导妯哄帥娴ｈ法鏁ょ€涙劒鍞悶鍡樼垼妫版﹫绱濈€靛湱鈹栭惂鐣屾畱 Home Chat 娴ｈ法鏁?"New Chat"閵? * @param input.title - 缁捐法鈻奸崢鐔奉潗閺嶅洭顣? * @param input.subagentTitle - 鐎涙劒鍞悶鍡樼垼妫版﹫绱欐俊鍌涙箒閿? * @param input.isHomeChat - 閺勵垰鎯佹稉?Home Chat 鐎圭懓娅? * @param input.isEmpty - 缁捐法鈻奸弰顖氭儊娑撹櫣鈹栭敍鍫熸￥濞戝牊浼呴敍? * @returns 閺堚偓缂佸牆鐫嶇粈铏圭舶閻劍鍩涢惃鍕垼妫版ɑ鏋冮張? */
 export function resolveActiveThreadTitle(input: {
   title: string;
   subagentTitle: string | null;
@@ -101,11 +98,9 @@ export function resolveActiveThreadTitle(input: {
   return input.title;
 }
 
-// 鏃佽亰锛坰idechat锛夋惡甯︿簡浠?fork 瀵煎叆鐨勫巻鍙叉秷鎭敤浜?Provider 涓婁笅鏂囷紝浣嗗叾瀵硅瘽闈㈡澘搴斿彧灞曠ず
-// 鏂扮殑鏃佽亰娑堟伅锛屽洜姝ら渶瑕佽繃婊ゆ帀 fork-import 鏉ユ簮鐨勬秷鎭€?/**
- * 杩囨护鏃佽亰娑堟伅鍒楄〃锛岀Щ闄や粠 fork 瀵煎叆鐨勫巻鍙叉秷鎭紝浠呬繚鐣欐梺鑱婅嚜韬骇鐢熺殑鏂版秷鎭€? * @param messages - 鍘熷娑堟伅鍒楄〃
- * @param isSidechat - 鏄惁涓烘梺鑱婄嚎绋? * @returns 杩囨护鍚庣殑娑堟伅鍒楄〃
- */
+// 閺冧浇浜伴敍鍧癷dechat閿涘鎯＄敮锔跨啊娴?fork 鐎电厧鍙嗛惃鍕坊閸欏弶绉烽幁顖滄暏娴?Provider 娑撳﹣绗呴弬鍥风礉娴ｅ棗鍙剧€电鐦介棃銏℃緲鎼存柨褰х仦鏇犮仛
+// 閺傛壆娈戦弮浣戒喊濞戝牊浼呴敍灞芥礈濮濄倝娓剁憰浣界箖濠娿倖甯€ fork-import 閺夈儲绨惃鍕Х閹垬鈧?/**
+ * 鏉╁洦鎶ら弮浣戒喊濞戝牊浼呴崚妤勩€冮敍宀€些闂勩倓绮?fork 鐎电厧鍙嗛惃鍕坊閸欏弶绉烽幁顖ょ礉娴犲懍绻氶悾娆愭⒑閼卞﹨鍤滈煬顐￠獓閻㈢喓娈戦弬鐗堢Х閹垬鈧? * @param messages - 閸樼喎顫愬☉鍫熶紖閸掓銆? * @param isSidechat - 閺勵垰鎯佹稉鐑樻⒑閼卞﹦鍤庣粙? * @returns 鏉╁洦鎶ら崥搴ｆ畱濞戝牊浼呴崚妤勩€? */
 export function filterSidechatTranscriptMessages(
   messages: readonly ChatMessage[],
   isSidechat: boolean,
@@ -115,7 +110,7 @@ export function filterSidechatTranscriptMessages(
     : [...messages];
 }
 
-/** 閲婃斁 blob: 棰勮 URL锛岄槻姝㈠唴瀛樻硠婕忋€備粎瀵?blob: 鍗忚鐨?URL 鎵ц revokeObjectURL銆?*/
+/** 闁插﹥鏂?blob: 妫板嫯顫?URL閿涘矂妲诲銏犲敶鐎涙ɑ纭犲蹇嬧偓鍌欑矌鐎?blob: 閸楀繗顔呴惃?URL 閹笛嗩攽 revokeObjectURL閵?*/
 export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   if (!previewUrl || typeof URL === "undefined" || !previewUrl.startsWith("blob:")) {
     return;
@@ -123,7 +118,7 @@ export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   URL.revokeObjectURL(previewUrl);
 }
 
-/** 閲婃斁鐢ㄦ埛娑堟伅涓墍鏈夊浘鐗囬檮浠剁殑 blob: 棰勮 URL锛岄槻姝㈠唴瀛樻硠婕?*/
+/** 闁插﹥鏂侀悽銊﹀煕濞戝牊浼呮稉顓熷閺堝娴橀悧鍥娴犲墎娈?blob: 妫板嫯顫?URL閿涘矂妲诲銏犲敶鐎涙ɑ纭犲?*/
 export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   if (message.role !== "user" || !message.attachments) {
     return;
@@ -136,7 +131,7 @@ export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   }
 }
 
-/** 鏀堕泦鐢ㄦ埛娑堟伅涓墍鏈夊浘鐗囬檮浠剁殑 blob: 棰勮 URL锛岀敤浜庢壒閲忛噴鏀?*/
+/** 閺€鍫曟肠閻劍鍩涘☉鍫熶紖娑擃厽澧嶉張澶婃禈閻楀洭妾禒鍓佹畱 blob: 妫板嫯顫?URL閿涘瞼鏁ゆ禍搴㈠闁插繘鍣撮弨?*/
 export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[] {
   if (message.role !== "user" || !message.attachments) {
     return [];
@@ -151,10 +146,9 @@ export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[
 }
 
 /**
- * 灏嗚闊宠浆褰曟枃鏈拷鍔犲埌褰撳墠鎻愮ず璇嶆湯灏撅紝鐢ㄦ崲琛岀鍒嗛殧銆? * @param currentPrompt - 褰撳墠杈撳叆妗嗕腑鐨勬彁绀鸿瘝
- * @param transcript - 璇煶杞綍鏂囨湰
- * @returns 鍚堝苟鍚庣殑鎻愮ず璇嶏紱鑻ヨ浆褰曚负绌哄垯杩斿洖 null 琛ㄧず鏃犻渶杩藉姞
- */
+ * 鐏忓棜顕㈤棅瀹犳祮瑜版洘鏋冮張顒冩嫹閸旂姴鍩岃ぐ鎾冲閹绘劗銇氱拠宥嗘汞鐏忔拝绱濋悽銊﹀床鐞涘瞼顑侀崚鍡涙閵? * @param currentPrompt - 瑜版挸澧犳潏鎾冲弳濡楀棔鑵戦惃鍕絹缁€楦跨槤
+ * @param transcript - 鐠囶參鐓舵潪顒€缍嶉弬鍥ㄦ拱
+ * @returns 閸氬牆鑻熼崥搴ｆ畱閹绘劗銇氱拠宥忕幢閼汇儴娴嗚ぐ鏇氳礋缁屽搫鍨潻鏂挎礀 null 鐞涖劎銇氶弮鐘绘付鏉╄棄濮? */
 export function appendVoiceTranscriptToPrompt(
   currentPrompt: string,
   transcript: string,
@@ -169,9 +163,7 @@ export function appendVoiceTranscriptToPrompt(
 }
 
 /**
- * 娓呮礂璇煶杈撳叆閿欒淇℃伅锛岀Щ闄ゅ爢鏍堣窡韪拰閲嶅鐨?Error 鍓嶇紑锛岃繑鍥炵敤鎴峰弸濂界殑閿欒鎻忚堪銆? * @param message - 鍘熷閿欒娑堟伅
- * @returns 娓呮礂鍚庣殑閿欒娑堟伅锛涜嫢娓呮礂鍚庝负绌哄垯杩斿洖榛樿鎻愮ず
- */
+ * 濞撳懏绀傜拠顓㈢叾鏉堟挸鍙嗛柨娆掝嚖娣団剝浼呴敍宀€些闂勩倕鐖㈤弽鍫ｇ闊亜鎷伴柌宥咁槻閻?Error 閸撳秶绱戦敍宀冪箲閸ョ偟鏁ら幋宄板几婵傜晫娈戦柨娆掝嚖閹诲繗鍫妴? * @param message - 閸樼喎顫愰柨娆掝嚖濞戝牊浼? * @returns 濞撳懏绀傞崥搴ｆ畱闁挎瑨顕ゅ☉鍫熶紖閿涙稖瀚㈠〒鍛閸氬簼璐熺粚鍝勫灟鏉╂柨娲栨妯款吇閹绘劗銇? */
 export function sanitizeVoiceErrorMessage(message: string): string {
   const normalized = message.trim();
   if (normalized.length === 0) {
@@ -191,15 +183,14 @@ export function sanitizeVoiceErrorMessage(message: string): string {
     : "The voice note could not be transcribed.";
 }
 
-/** 鍒ゆ柇璇煶閿欒娑堟伅鏄惁琛ㄧず璁よ瘉宸茶繃鏈燂紝闇€瑕佺敤鎴烽噸鏂扮櫥褰?*/
+/** 閸掋倖鏌囩拠顓㈢叾闁挎瑨顕ゅ☉鍫熶紖閺勵垰鎯佺悰銊с仛鐠併倛鐦夊鑼剁箖閺堢噦绱濋棁鈧憰浣烘暏閹寸兘鍣搁弬鎵瑜?*/
 export function isVoiceAuthExpiredMessage(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("chatgpt login has expired") || normalized.includes("sign in again");
 }
 
 /**
- * 鏍规嵁楹﹀厠椋庡惎鍔ㄩ敊璇被鍨嬬敓鎴愮敤鎴峰弸濂界殑閿欒鎻忚堪锛岃鐩栨潈闄愭嫆缁濄€佽澶囨湭鎵惧埌銆佽澶囩箒蹇欑瓑甯歌鍦烘櫙銆? * @param error - 鎹曡幏鍒扮殑閿欒瀵硅薄
- * @returns 闈㈠悜鐢ㄦ埛鐨勯敊璇彁绀烘枃鏈? */
+ * 閺嶈宓佹ス锕€鍘犳搴℃儙閸斻劑鏁婄拠顖滆閸ㄥ鏁撻幋鎰暏閹村嘲寮告總鐣屾畱闁挎瑨顕ら幓蹇氬牚閿涘矁顩惄鏍ㄦ綀闂勬劖瀚嗙紒婵勨偓浣筋啎婢跺洦婀幍鎯у煂閵嗕浇顔曟径鍥╃畳韫囨瑧鐡戠敮姝岊潌閸︾儤娅欓妴? * @param error - 閹规洝骞忛崚鎵畱闁挎瑨顕ょ€电钖? * @returns 闂堛垹鎮滈悽銊﹀煕閻ㄥ嫰鏁婄拠顖涘絹缁€鐑樻瀮閺? */
 export function describeVoiceRecordingStartError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "The microphone could not be opened.";
@@ -228,10 +219,7 @@ export function describeVoiceRecordingStartError(error: unknown): string {
 }
 
 /**
- * 鎺ㄥ璇煶绗旇鍔熻兘鐨?UI 鐘舵€侊紝鍒ゆ柇鏄惁鍙覆鏌撱€佸彲鍚姩璇煶绗旇锛屼互鍙婃槸鍚︽樉绀烘帶鍒舵寜閽€? * @param input.authStatus - 鏈嶅姟绔璇佺姸鎬? * @param input.voiceTranscriptionAvailable - 璇煶杞綍鏄惁鍙敤
- * @param input.isRecording - 鏄惁姝ｅ湪褰曢煶
- * @param input.isTranscribing - 鏄惁姝ｅ湪杞綍
- * @returns 璇煶绗旇 UI 鐘舵€侊細canRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
+ * 閹恒劌顕辩拠顓㈢叾缁楁棁顔囬崝鐔诲厴閻?UI 閻樿埖鈧緤绱濋崚銈嗘焽閺勵垰鎯侀崣顖涜閺屾挶鈧礁褰查崥顖氬З鐠囶參鐓剁粭鏃囶唶閿涘奔浜掗崣濠冩Ц閸氾附妯夌粈鐑樺付閸掕埖瀵滈柦顔衡偓? * @param input.authStatus - 閺堝秴濮熺粩顖濐吇鐠囦胶濮搁幀? * @param input.voiceTranscriptionAvailable - 鐠囶參鐓舵潪顒€缍嶉弰顖氭儊閸欘垳鏁? * @param input.isRecording - 閺勵垰鎯佸锝呮躬瑜版洟鐓? * @param input.isTranscribing - 閺勵垰鎯佸锝呮躬鏉烆剙缍? * @returns 鐠囶參鐓剁粭鏃囶唶 UI 閻樿埖鈧緤绱癱anRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
  */
 export function deriveComposerVoiceState(input: {
   authStatus: ServerProviderAuthStatus | null | undefined;
@@ -254,8 +242,7 @@ export function deriveComposerVoiceState(input: {
 }
 
 /**
- * 鍒ゆ柇 Composer 妯″瀷閫夋嫨鍣ㄦ槸鍚﹀簲鏄剧ず楠ㄦ灦灞忓姞杞界姸鎬併€? * 褰?Provider 闇€瑕佸姩鎬佸彂鐜版ā鍨嬪垪琛ㄤ笖浠嶅湪鍔犺浇涓紝鎴栨寔涔呭寲鐨勬ā鍨嬮€夋嫨涓庡綋鍓嶉€夋嫨涓嶄竴鑷存椂鏄剧ず楠ㄦ灦灞忋€? * @param input - 鍖呭惈褰撳墠閫変腑鐨?Provider/妯″瀷銆佹寔涔呭寲/鑽夌ǹ妯″瀷閫夋嫨銆佸姞杞界姸鎬佺瓑
- * @returns 鏄惁搴旀樉绀洪鏋跺睆
+ * 閸掋倖鏌?Composer 濡€崇€烽柅澶嬪閸ｃ劍妲搁崥锕€绨查弰鍓с仛妤犮劍鐏︾仦蹇撳鏉炵晫濮搁幀浣碘偓? * 瑜?Provider 闂団偓鐟曚礁濮╅幀浣稿絺閻滅増膩閸ㄥ鍨悰銊ょ瑬娴犲秴婀崝鐘烘祰娑擃叏绱濋幋鏍ㄥ瘮娑斿懎瀵查惃鍕侀崹瀣偓澶嬪娑撳骸缍嬮崜宥夆偓澶嬪娑撳秳绔撮懛瀛樻閺勫墽銇氭銊︾仸鐏炲繈鈧? * @param input - 閸栧懎鎯堣ぐ鎾冲闁鑵戦惃?Provider/濡€崇€烽妴浣瑰瘮娑斿懎瀵?閼藉枪濡€崇€烽柅澶嬪閵嗕礁濮炴潪鐣屽Ц閹胶鐡? * @returns 閺勵垰鎯佹惔鏃€妯夌粈娲€囬弸璺虹潌
  */
 export function shouldShowComposerModelBootstrapSkeleton(input: {
   selectedProvider: ProviderKind;
@@ -297,10 +284,8 @@ export function shouldShowComposerModelBootstrapSkeleton(input: {
 }
 
 /**
- * 瑙ｆ瀽鏈€缁堟彁浜ょ粰 Provider 鐨勬ā鍨嬫爣璇嗭紝浼樺厛鍖归厤杩愯鏃跺彲鐢ㄩ€夐」鍒楄〃涓殑 slug锛屽惁鍒欎娇鐢ㄥ洖閫€鍊笺€? * @param input.selectedModel - 鐢ㄦ埛閫夋嫨鐨勬ā鍨?slug
- * @param input.availableOptions - 褰撳墠鍙敤鐨勬ā鍨嬮€夐」鍒楄〃
- * @param input.fallback - 褰撴棤娉曞尮閰嶆椂鐨勫洖閫€鍑芥暟
- * @returns 鏈€缁堜娇鐢ㄧ殑妯″瀷 slug
+ * 鐟欙絾鐎介張鈧紒鍫熷絹娴溿倗绮?Provider 閻ㄥ嫭膩閸ㄥ鐖ｇ拠鍡礉娴兼ê鍘涢崠褰掑帳鏉╂劘顢戦弮璺哄讲閻劑鈧銆嶉崚妤勩€冩稉顓犳畱 slug閿涘苯鎯侀崚娆庡▏閻劌娲栭柅鈧崐绗衡偓? * @param input.selectedModel - 閻劍鍩涢柅澶嬪閻ㄥ嫭膩閸?slug
+ * @param input.availableOptions - 瑜版挸澧犻崣顖滄暏閻ㄥ嫭膩閸ㄥ鈧銆嶉崚妤勩€? * @param input.fallback - 瑜版挻妫ゅ▔鏇炲爱闁板秵妞傞惃鍕礀闁偓閸戣姤鏆? * @returns 閺堚偓缂佸牅濞囬悽銊ф畱濡€崇€?slug
  */
 export function resolveCommittedProviderModel(input: {
   selectedModel: ModelSlug;

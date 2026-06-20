@@ -1,6 +1,6 @@
 /**
  * @file session-logic.ts
- * @description 浼氳瘽閫昏緫妯″潡锛岃礋璐ｄ粠缂栨帓娲诲姩娴佷腑鎺ㄥ UI 鐘舵€併€? * 鍖呮嫭宸ヤ綔鏃ュ織鏉＄洰鎺ㄥ銆佸緟瀹℃壒璇锋眰绠＄悊銆佸緟澶勭悊鐢ㄦ埛杈撳叆銆? * 娲昏穬浠诲姟鍒楄〃銆佹彁璁鍒掔姸鎬併€佹椂闂寸嚎鏉＄洰缁勮浠ュ強浼氳瘽闃舵鍒ゆ柇銆? */
+ * @description 娴兼俺鐦介柅鏄忕帆濡€虫健閿涘矁绀嬬拹锝勭矤缂傛牗甯撳ú璇插З濞翠椒鑵戦幒銊ヮ嚤 UI 閻樿埖鈧降鈧? * 閸栧懏瀚銉ょ稊閺冦儱绻旈弶锛勬窗閹恒劌顕遍妴浣哥窡鐎光剝澹掔拠閿嬬湴缁狅紕鎮婇妴浣哥窡婢跺嫮鎮婇悽銊﹀煕鏉堟挸鍙嗛妴? * 濞叉槒绌禒璇插閸掓銆冮妴浣瑰絹鐠侇喛顓搁崚鎺斿Ц閹降鈧焦妞傞梻瀵稿殠閺夛紕娲扮紒鍕棅娴犮儱寮锋导姘崇樈闂冭埖顔岄崚銈嗘焽閵? */
 
 import {
   ApprovalRequestId,
@@ -33,11 +33,11 @@ import type {
   TurnDiffSummary,
 } from "./types";
 
-/** Provider 閫夋嫨鍣ㄧ被鍨嬪埆鍚?*/
+/** Provider 闁瀚ㄩ崳銊ц閸ㄥ鍩嗛崥?*/
 export type ProviderPickerKind = ProviderKind;
 
 /**
- * 鍙€夌殑 Provider 鍒楄〃锛岀敤浜?Composer 鐨?Provider 閫夋嫨鍣? */
+ * 閸欘垶鈧娈?Provider 閸掓銆冮敍宀€鏁ゆ禍?Composer 閻?Provider 闁瀚ㄩ崳? */
 export const PROVIDER_OPTIONS: Array<{
   value: ProviderPickerKind;
   label: string;
@@ -54,48 +54,48 @@ export const PROVIDER_OPTIONS: Array<{
 ];
 
 /**
- * 宸ヤ綔鏃ュ織鏉＄洰锛岃〃绀虹嚎绋嬫椿鍔ㄦ祦涓殑涓€鏉″彲灞曠ず璁板綍
+ * 瀹搞儰缍旈弮銉ョ箶閺夛紕娲伴敍宀冦€冪粈铏瑰殠缁嬪妞块崝銊︾ウ娑擃厾娈戞稉鈧弶鈥冲讲鐏炴洜銇氱拋鏉跨秿
  */
 export interface WorkLogEntry {
-  /** 鏉＄洰鍞竴 ID */
+  /** 閺夛紕娲伴崬顖欑 ID */
   id: string;
-  /** 鍒涘缓鏃堕棿锛圛SO 鏍煎紡锛?*/
+  /** 閸掓稑缂撻弮鍫曟？閿涘湜SO 閺嶇厧绱￠敍?*/
   createdAt: string;
-  /** 鏄剧ず鏍囩 */
+  /** 閺勫墽銇氶弽鍥╊劮 */
   label: string;
-  /** 璇︾粏淇℃伅 */
+  /** 鐠囷妇绮忔穱鈩冧紖 */
   detail?: string;
-  /** 鎵ц鐨勫懡浠わ紙鍙鏍煎紡锛?*/
+  /** 閹笛嗩攽閻ㄥ嫬鎳℃禒銈忕礄閸欘垵顕伴弽鐓庣础閿?*/
   command?: string;
-  /** 鍘熷鍛戒护鏂囨湰 */
+  /** 閸樼喎顫愰崨鎴掓姢閺傚洦婀?*/
   rawCommand?: string;
-  /** 鍛戒护棰勮鏂囨湰 */
+  /** 閸涙垝鎶ゆ０鍕潔閺傚洦婀?*/
   preview?: string;
-  /** 鍙樻洿鐨勬枃浠跺垪琛?*/
+  /** 閸欐ɑ娲块惃鍕瀮娴犺泛鍨悰?*/
   changedFiles?: ReadonlyArray<string>;
-  /** 鏉＄洰璇皵锛歚"thinking"` 鎬濊€冧腑銆乣"tool"` 宸ュ叿璋冪敤銆乣"info"` 淇℃伅銆乣"error"` 閿欒 */
+  /** 閺夛紕娲扮拠顓熺毜閿涙瓪"thinking"` 閹繆鈧啩鑵戦妴涔?tool"` 瀹搞儱鍙跨拫鍐暏閵嗕梗"info"` 娣団剝浼呴妴涔?error"` 闁挎瑨顕?*/
   tone: "thinking" | "tool" | "info" | "error";
-  /** 宸ュ叿鍙鏍囬 */
+  /** 瀹搞儱鍙块崣顖濐嚢閺嶅洭顣?*/
   toolTitle?: string;
-  /** 宸ュ叿鍚嶇О */
+  /** 瀹搞儱鍙块崥宥囆?*/
   toolName?: string;
-  /** 宸ュ叿璋冪敤 ID */
+  /** 瀹搞儱鍙跨拫鍐暏 ID */
   toolCallId?: string;
-  /** 宸ュ叿鐢熷懡鍛ㄦ湡椤圭被鍨?*/
+  /** 瀹搞儱鍙块悽鐔锋嚒閸涖劍婀℃い鍦閸?*/
   itemType?: ToolLifecycleItemType;
-  /** 寰呭鎵硅姹傜被鍨?*/
+  /** 瀵板懎顓搁幍纭咁嚞濮瑰倻琚崹?*/
   requestKind?: PendingApproval["requestKind"];
-  /** 瀛愪唬鐞嗗垪琛?*/
+  /** 鐎涙劒鍞悶鍡楀灙鐞?*/
   subagents?: ReadonlyArray<WorkLogSubagent>;
-  /** 瀛愪唬鐞嗘搷浣滀俊鎭?*/
+  /** 鐎涙劒鍞悶鍡樻惙娴ｆ粈淇婇幁?*/
   subagentAction?: WorkLogSubagentAction;
 }
 
-/** 宸ヤ綔鏃ュ織灞曠ず鐗堟湰鍙凤紝鐢ㄤ簬缂撳瓨澶辨晥 */
+/** 瀹搞儰缍旈弮銉ョ箶鐏炴洜銇氶悧鍫熸拱閸欏嚖绱濋悽銊ょ艾缂傛挸鐡ㄦ径杈ㄦ櫏 */
 export const WORK_LOG_PRESENTATION_VERSION = 5;
 
 /**
- * 宸ヤ綔鏃ュ織涓殑瀛愪唬鐞嗕俊鎭? */
+ * 瀹搞儰缍旈弮銉ョ箶娑擃厾娈戠€涙劒鍞悶鍡曚繆閹? */
 export interface WorkLogSubagent {
   threadId: string;
   providerThreadId?: string | undefined;
@@ -112,7 +112,7 @@ export interface WorkLogSubagent {
   isActive?: boolean | undefined;
 }
 
-/** 瀛愪唬鐞嗘搷浣滀俊鎭紝鎻忚堪瀛愪唬鐞嗙殑宸ュ叿璋冪敤鐘舵€?*/
+/** 鐎涙劒鍞悶鍡樻惙娴ｆ粈淇婇幁顖ょ礉閹诲繗鍫€涙劒鍞悶鍡欐畱瀹搞儱鍙跨拫鍐暏閻樿埖鈧?*/
 export interface WorkLogSubagentAction {
   tool: string;
   status: string;
@@ -128,7 +128,7 @@ interface DerivedWorkLogEntry extends WorkLogEntry {
   toolName?: string;
 }
 
-/** 寰呭鎵硅姹傦紝琛ㄧず闇€瑕佺敤鎴锋壒鍑嗙殑鎿嶄綔 */
+/** 瀵板懎顓搁幍纭咁嚞濮瑰偊绱濈悰銊с仛闂団偓鐟曚胶鏁ら幋閿嬪閸戝棛娈戦幙宥勭稊 */
 export interface PendingApproval {
   requestId: ApprovalRequestId;
   requestKind: "command" | "file-read" | "file-change";
@@ -136,14 +136,14 @@ export interface PendingApproval {
   detail?: string;
 }
 
-/** 寰呭鐞嗙殑鐢ㄦ埛杈撳叆璇锋眰锛屽寘鍚渶瑕佺敤鎴峰洖绛旂殑闂 */
+/** 瀵板懎顦╅悶鍡欐畱閻劍鍩涙潏鎾冲弳鐠囬攱鐪伴敍灞藉瘶閸氼偊娓剁憰浣烘暏閹村嘲娲栫粵鏃傛畱闂傤噣顣?*/
 export interface PendingUserInput {
   requestId: ApprovalRequestId;
   createdAt: string;
   questions: ReadonlyArray<UserInputQuestion>;
 }
 
-/** 娲昏穬浠诲姟鍒楄〃鐘舵€侊紝琛ㄧず褰撳墠杞鐨勪换鍔¤繘搴?*/
+/** 濞叉槒绌禒璇插閸掓銆冮悩鑸碘偓渚婄礉鐞涖劎銇氳ぐ鎾冲鏉烆喗顐奸惃鍕崲閸斅ょ箻鎼?*/
 export interface ActiveTaskListState {
   createdAt: string;
   turnId: TurnId | null;
@@ -154,12 +154,12 @@ export interface ActiveTaskListState {
   }>;
 }
 
-/** 娲昏穬鍚庡彴浠诲姟鐘舵€侊紝缁熻褰撳墠姝ｅ湪杩愯鐨勫悗鍙颁换鍔℃暟閲?*/
+/** 濞叉槒绌崥搴″酱娴犺濮熼悩鑸碘偓渚婄礉缂佺喕顓歌ぐ鎾冲濮濓絽婀潻鎰攽閻ㄥ嫬鎮楅崣棰佹崲閸斺剝鏆熼柌?*/
 export interface ActiveBackgroundTasksState {
   activeCount: number;
 }
 
-/** 鏈€鏂扮殑鎻愯璁″垝鐘舵€?*/
+/** 閺堚偓閺傛壆娈戦幓鎰唴鐠佲€冲灊閻樿埖鈧?*/
 export interface LatestProposedPlanState {
   id: OrchestrationProposedPlanId;
   createdAt: string;
@@ -171,7 +171,7 @@ export interface LatestProposedPlanState {
 }
 
 /**
- * 鏃堕棿绾挎潯鐩被鍨嬶紝鐢ㄤ簬鑱婂ぉ鐣岄潰鐨勬椂闂寸嚎娓叉煋銆? * 鍖呭惈娑堟伅銆佹彁璁鍒掑拰宸ヤ綔鏃ュ織涓夌绫诲瀷銆? */
+ * 閺冨爼妫跨痪鎸庢蒋閻╊喚琚崹瀣剁礉閻劋绨懕濠傘亯閻ｅ矂娼伴惃鍕闂傚鍤庡〒鍙夌厠閵? * 閸栧懎鎯堝☉鍫熶紖閵嗕焦褰佺拋顔款吀閸掓帒鎷板銉ょ稊閺冦儱绻旀稉澶岊潚缁鐎烽妴? */
 export type TimelineEntry =
   | {
       id: string;
@@ -193,9 +193,9 @@ export type TimelineEntry =
     };
 
 /**
- * 鏍煎紡鍖栨寔缁椂闂翠负浜哄彲璇荤殑瀛楃涓? *
- * @param durationMs - 鎸佺画鏃堕棿锛堟绉掞級
- * @returns 鏍煎紡鍖栧悗鐨勫瓧绗︿覆锛堝 "1.5s"銆?2m 30s"锛? *
+ * 閺嶇厧绱￠崠鏍ㄥ瘮缂侇厽妞傞梻缈犺礋娴滃搫褰茬拠鑽ゆ畱鐎涙顑佹稉? *
+ * @param durationMs - 閹镐胶鐢婚弮鍫曟？閿涘牊顕犵粔鎺炵礆
+ * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫬鐡х粭锔胯閿涘牆顩?"1.5s"閵?2m 30s"閿? *
  * @example
  * formatDuration(500)   // => "500ms"
  * formatDuration(1500)  // => "1.5s"
@@ -214,9 +214,9 @@ export function formatDuration(durationMs: number): string {
 }
 
 /**
- * 鏍煎紡鍖栦袱涓椂闂寸偣涔嬮棿鐨勭粡杩囨椂闂? *
- * @param startIso - 寮€濮嬫椂闂达紙ISO 鏍煎紡锛? * @param endIso - 缁撴潫鏃堕棿锛圛SO 鏍煎紡锛夛紝鏈彁渚涙椂杩斿洖 null
- * @returns 鏍煎紡鍖栧悗鐨勭粡杩囨椂闂达紝鏃堕棿鏃犳晥鏃惰繑鍥?null
+ * 閺嶇厧绱￠崠鏍﹁⒈娑擃亝妞傞梻瀵稿仯娑斿妫块惃鍕病鏉╁洦妞傞梻? *
+ * @param startIso - 瀵偓婵妞傞梻杈剧礄ISO 閺嶇厧绱￠敍? * @param endIso - 缂佹挻娼弮鍫曟？閿涘湜SO 閺嶇厧绱￠敍澶涚礉閺堫亝褰佹笟娑欐鏉╂柨娲?null
+ * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫮绮℃潻鍥ㄦ闂傝揪绱濋弮鍫曟？閺冪姵鏅ラ弮鎯扮箲閸?null
  */
 export function formatElapsed(startIso: string, endIso: string | undefined): string | null {
   if (!endIso) return null;
@@ -235,9 +235,9 @@ type LatestTurnTiming = Pick<
 type SessionActivityState = Pick<ThreadSession, "orchestrationStatus" | "activeTurnId">;
 
 /**
- * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫锛堝畬鎴愩€佷腑鏂垨鍑洪敊锛? *
- * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
- * @param session - 浼氳瘽娲诲姩鐘舵€? * @returns 鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫
+ * 閸掋倖鏌囬張鈧弬鎷岀枂濞嗏剝妲搁崥锕€鍑＄紒鎾存将閿涘牆鐣幋鎰┾偓浣疯厬閺傤厽鍨ㄩ崙娲晩閿? *
+ * @param latestTurn - 閺堚偓閺傛媽鐤嗗▎锛勬畱閺冨爼妫挎穱鈩冧紖
+ * @param session - 娴兼俺鐦藉ú璇插З閻樿埖鈧? * @returns 閺堚偓閺傛媽鐤嗗▎鈩冩Ц閸氾箑鍑＄紒鎾存将
  */
 export function isLatestTurnSettled(
   latestTurn: LatestTurnTiming | null,
@@ -254,10 +254,9 @@ export function isLatestTurnSettled(
 }
 
 /**
- * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚︿粛鍦ㄦ椿璺冿紙涓?isLatestTurnSettled 浜掍负鍙嶅嚱鏁帮級
- *
- * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
- * @param session - 浼氳瘽娲诲姩鐘舵€? * @returns 鏈€鏂拌疆娆℃槸鍚︿粛鍦ㄦ椿璺? */
+ * 閸掋倖鏌囬張鈧弬鎷岀枂濞嗏剝妲搁崥锔跨矝閸︺劍妞跨捄鍐跨礄娑?isLatestTurnSettled 娴滄帊璐熼崣宥呭毐閺佸府绱? *
+ * @param latestTurn - 閺堚偓閺傛媽鐤嗗▎锛勬畱閺冨爼妫挎穱鈩冧紖
+ * @param session - 娴兼俺鐦藉ú璇插З閻樿埖鈧? * @returns 閺堚偓閺傛媽鐤嗗▎鈩冩Ц閸氾缚绮涢崷銊︽た鐠? */
 export function hasLiveLatestTurn(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -269,9 +268,9 @@ export function hasLiveLatestTurn(
 }
 
 /**
- * 鎺ㄥ娲昏穬宸ヤ綔鐨勫紑濮嬫椂闂淬€? * 浼樺厛浣跨敤姝ｅ湪杩愯鐨勮疆娆″紑濮嬫椂闂达紝鍏舵浣跨敤娑堟伅鍙戦€佹椂闂淬€? *
- * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
- * @param session - 浼氳瘽娲诲姩鐘舵€? * @param sendStartedAt - 娑堟伅鍙戦€佺殑寮€濮嬫椂闂? * @returns 娲昏穬宸ヤ綔鐨勫紑濮嬫椂闂? */
+ * 閹恒劌顕卞ú鏄忕┈瀹搞儰缍旈惃鍕磻婵妞傞梻娣偓? * 娴兼ê鍘涙担璺ㄦ暏濮濓絽婀潻鎰攽閻ㄥ嫯鐤嗗▎鈥崇磻婵妞傞梻杈剧礉閸忚埖顐兼担璺ㄦ暏濞戝牊浼呴崣鎴︹偓浣规闂傛番鈧? *
+ * @param latestTurn - 閺堚偓閺傛媽鐤嗗▎锛勬畱閺冨爼妫挎穱鈩冧紖
+ * @param session - 娴兼俺鐦藉ú璇插З閻樿埖鈧? * @param sendStartedAt - 濞戝牊浼呴崣鎴︹偓浣烘畱瀵偓婵妞傞梻? * @returns 濞叉槒绌銉ょ稊閻ㄥ嫬绱戞慨瀣闂? */
 export function deriveActiveWorkStartedAt(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -321,8 +320,8 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 }
 
 /**
- * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶅緟瀹℃壒鐨勮姹傚垪琛ㄣ€? * 璺熻釜瀹℃壒璇锋眰鐨勫紑鍚拰瑙ｅ喅浜嬩欢锛岃嚜鍔ㄦ竻鐞嗚繃鏈熺殑寰呭鎵归」銆? *
- * @param activities - 缂栨帓娲诲姩娴? * @returns 鎸夊垱寤烘椂闂存帓搴忕殑寰呭鎵硅姹傚垪琛? */
+ * 娴犲孩妞块崝銊︾ウ娑擃厽甯圭€电厧缍嬮崜宥呯窡鐎光剝澹掗惃鍕嚞濮瑰倸鍨悰銊ｂ偓? * 鐠虹喕閲滅€光剝澹掔拠閿嬬湴閻ㄥ嫬绱戦崥顖氭嫲鐟欙絽鍠呮禍瀣╂閿涘矁鍤滈崝銊︾閻炲棜绻冮張鐔烘畱瀵板懎顓搁幍褰掋€嶉妴? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @returns 閹稿鍨卞鐑樻闂傚瓨甯撴惔蹇曟畱瀵板懎顓搁幍纭咁嚞濮瑰倸鍨悰? */
 export function derivePendingApprovals(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingApproval[] {
@@ -430,8 +429,8 @@ function parseUserInputQuestions(
 }
 
 /**
- * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶅緟澶勭悊鐨勭敤鎴疯緭鍏ヨ姹傚垪琛ㄣ€? * 璺熻釜鐢ㄦ埛杈撳叆璇锋眰鐨勫紑鍚拰瑙ｅ喅浜嬩欢锛岃嚜鍔ㄦ竻鐞嗚繃鏈熺殑璇锋眰銆? *
- * @param activities - 缂栨帓娲诲姩娴? * @returns 鎸夊垱寤烘椂闂存帓搴忕殑寰呭鐞嗙敤鎴疯緭鍏ュ垪琛? */
+ * 娴犲孩妞块崝銊︾ウ娑擃厽甯圭€电厧缍嬮崜宥呯窡婢跺嫮鎮婇惃鍕暏閹寸柉绶崗銉嚞濮瑰倸鍨悰銊ｂ偓? * 鐠虹喕閲滈悽銊﹀煕鏉堟挸鍙嗙拠閿嬬湴閻ㄥ嫬绱戦崥顖氭嫲鐟欙絽鍠呮禍瀣╂閿涘矁鍤滈崝銊︾閻炲棜绻冮張鐔烘畱鐠囬攱鐪伴妴? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @returns 閹稿鍨卞鐑樻闂傚瓨甯撴惔蹇曟畱瀵板懎顦╅悶鍡欐暏閹寸柉绶崗銉ュ灙鐞? */
 export function derivePendingUserInputs(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingUserInput[] {
@@ -526,9 +525,9 @@ function toActiveTaskListState(activity: OrchestrationThreadActivity): ActiveTas
 }
 
 /**
- * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶆椿璺冪殑浠诲姟鍒楄〃鐘舵€併€? * 浼樺厛鏄剧ず褰撳墠杞鐨勪换鍔★紝鑻ユ棤鍒欏洖閫€鍒版渶杩戞湭瀹屾垚鐨勫厛鍓嶈疆娆′换鍔°€? *
- * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID
- * @returns 娲昏穬浠诲姟鍒楄〃鐘舵€侊紝鏃犳椿璺冧换鍔℃椂杩斿洖 null
+ * 娴犲孩妞块崝銊︾ウ娑擃厽甯圭€电厧缍嬮崜宥嗘た鐠哄啰娈戞禒璇插閸掓銆冮悩鑸碘偓浣碘偓? * 娴兼ê鍘涢弰鍓с仛瑜版挸澧犳潪顔筋偧閻ㄥ嫪鎹㈤崝鈽呯礉閼汇儲妫ら崚娆忔礀闁偓閸掔増娓舵潻鎴炴弓鐎瑰本鍨氶惃鍕帥閸撳秷鐤嗗▎鈥叉崲閸斅扳偓? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @param latestTurnId - 閺堚偓閺傛媽鐤嗗▎?ID
+ * @returns 濞叉槒绌禒璇插閸掓銆冮悩鑸碘偓渚婄礉閺冪姵妞跨捄鍐ф崲閸斺剝妞傛潻鏂挎礀 null
  */
 export function deriveActiveTaskListState(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -579,9 +578,9 @@ export function deriveActiveTaskListState(
 }
 
 /**
- * 缁熻褰撳墠娲昏穬鐨勫悗鍙颁换鍔℃暟閲忥紙鎺掗櫎 plan 绫诲瀷浠诲姟锛夈€? * 鐢ㄤ簬绱у噾 UI 涓睍绀轰唬鐞嗘椿鍔ㄧ姸鎬併€? *
- * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID
- * @returns 娲昏穬鍚庡彴浠诲姟鐘舵€侊紝鏃犳椿璺冧换鍔℃椂杩斿洖 null
+ * 缂佺喕顓歌ぐ鎾冲濞叉槒绌惃鍕倵閸欓鎹㈤崝鈩冩殶闁插骏绱欓幒鎺楁珟 plan 缁鐎锋禒璇插閿涘鈧? * 閻劋绨槐褍鍣?UI 娑擃厼鐫嶇粈杞板敩閻炲棙妞块崝銊уЦ閹降鈧? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @param latestTurnId - 閺堚偓閺傛媽鐤嗗▎?ID
+ * @returns 濞叉槒绌崥搴″酱娴犺濮熼悩鑸碘偓渚婄礉閺冪姵妞跨捄鍐ф崲閸斺剝妞傛潻鏂挎礀 null
  */
 export function deriveActiveBackgroundTasksState(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -634,9 +633,8 @@ export function deriveActiveBackgroundTasksState(
 }
 
 /**
- * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚︿粛鏈?灏鹃儴宸ヤ綔"姝ｅ湪杩涜銆? * 褰?Provider 浠嶆湁鍙鐨勫姪鎵嬫枃鏈湪娴佸紡杈撳嚭鎴栧悗鍙颁换鍔℃洿鏂版椂锛孶I 搴斾繚鎸?宸ヤ綔涓?鐘舵€併€? *
- * @param input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @param input.messages - 娑堟伅鍒楄〃
- * @param input.activities - 娲诲姩娴? * @param input.session - 浼氳瘽鐘舵€? * @returns 鏄惁浠嶆湁灏鹃儴宸ヤ綔
+ * 閸掋倖鏌囬張鈧弬鎷岀枂濞嗏剝妲搁崥锔跨矝閺?鐏忛箖鍎村銉ょ稊"濮濓絽婀潻娑滎攽閵? * 瑜?Provider 娴犲秵婀侀崣顖濐潌閻ㄥ嫬濮幍瀣瀮閺堫剙婀ù浣哥础鏉堟挸鍤幋鏍ф倵閸欓鎹㈤崝鈩冩纯閺傜増妞傞敍瀛禝 鎼存柧绻氶幐?瀹搞儰缍旀稉?閻樿埖鈧降鈧? *
+ * @param input.latestTurn - 閺堚偓閺傛媽鐤嗗▎鈥蹭繆閹? * @param input.messages - 濞戝牊浼呴崚妤勩€? * @param input.activities - 濞茶濮╁ù? * @param input.session - 娴兼俺鐦介悩鑸碘偓? * @returns 閺勵垰鎯佹禒宥嗘箒鐏忛箖鍎村銉ょ稊
  */
 export function hasLiveTurnTailWork(input: {
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "completedAt"> | null;
@@ -679,10 +677,9 @@ function isCollabAgentToolActivity(activity: OrchestrationThreadActivity): boole
 }
 
 /**
- * 鏌ユ壘鏈€鏂扮殑鎻愯璁″垝鐘舵€併€? * 浼樺厛鏌ユ壘褰撳墠杞鐨勮鍒掞紝鑻ユ棤鍒欏洖閫€鍒板叏灞€鏈€鏂拌鍒掋€? *
- * @param proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param latestTurnId - 鏈€鏂拌疆娆?ID
- * @returns 鏈€鏂扮殑鎻愯璁″垝鐘舵€侊紝鏃犺鍒掓椂杩斿洖 null
+ * 閺屻儲澹橀張鈧弬鎵畱閹绘劘顔呯拋鈥冲灊閻樿埖鈧降鈧? * 娴兼ê鍘涢弻銉﹀瑜版挸澧犳潪顔筋偧閻ㄥ嫯顓搁崚鎺炵礉閼汇儲妫ら崚娆忔礀闁偓閸掓澘鍙忕仦鈧張鈧弬鎷岊吀閸掓帇鈧? *
+ * @param proposedPlans - 閹绘劘顔呯拋鈥冲灊閸掓銆? * @param latestTurnId - 閺堚偓閺傛媽鐤嗗▎?ID
+ * @returns 閺堚偓閺傛壆娈戦幓鎰唴鐠佲€冲灊閻樿埖鈧緤绱濋弮鐘侯吀閸掓帗妞傛潻鏂挎礀 null
  */
 export function findLatestProposedPlan(
   proposedPlans: ReadonlyArray<ProposedPlan>,
@@ -715,11 +712,10 @@ export function findLatestProposedPlan(
 }
 
 /**
- * 鏌ユ壘渚ц竟鏍忓簲鏄剧ず鐨勬彁璁鍒掋€? * 褰撴渶鏂拌疆娆℃湭缁撴潫鏃讹紝浼樺厛鏄剧ず鍏跺叧鑱旂殑婧愯鍒掋€? *
- * @param input.threads - 绾跨▼鍒楄〃
- * @param input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @param input.latestTurnSettled - 鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫
- * @param input.threadId - 褰撳墠绾跨▼ ID
- * @returns 渚ц竟鏍忓簲鏄剧ず鐨勬彁璁鍒掔姸鎬? */
+ * 閺屻儲澹樻笟褑绔熼弽蹇撶安閺勫墽銇氶惃鍕絹鐠侇喛顓搁崚鎺嬧偓? * 瑜版挻娓堕弬鎷岀枂濞嗏剝婀紒鎾存将閺冭绱濇导妯哄帥閺勫墽銇氶崗璺哄彠閼辨梻娈戝┃鎰吀閸掓帇鈧? *
+ * @param input.threads - 缁捐法鈻奸崚妤勩€? * @param input.latestTurn - 閺堚偓閺傛媽鐤嗗▎鈥蹭繆閹? * @param input.latestTurnSettled - 閺堚偓閺傛媽鐤嗗▎鈩冩Ц閸氾箑鍑＄紒鎾存将
+ * @param input.threadId - 瑜版挸澧犵痪璺ㄢ柤 ID
+ * @returns 娓氀嗙珶閺嶅繐绨查弰鍓с仛閻ㄥ嫭褰佺拋顔款吀閸掓帞濮搁幀? */
 export function findSidebarProposedPlan(input: {
   threads: ReadonlyArray<Pick<Thread, "id" | "proposedPlans">>;
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "sourceProposedPlan"> | null;
@@ -745,8 +741,8 @@ export function findSidebarProposedPlan(input: {
 }
 
 /**
- * 鍒ゆ柇鎻愯璁″垝鏄惁鍙搷浣滐紙灏氭湭瀹炴柦锛? *
- * @param proposedPlan - 鎻愯璁″垝鐘舵€? * @returns 鏄惁鍙搷浣? */
+ * 閸掋倖鏌囬幓鎰唴鐠佲€冲灊閺勵垰鎯侀崣顖涙惙娴ｆ粣绱欑亸姘弓鐎圭偞鏌﹂敍? *
+ * @param proposedPlan - 閹绘劘顔呯拋鈥冲灊閻樿埖鈧? * @returns 閺勵垰鎯侀崣顖涙惙娴? */
 export function hasActionableProposedPlan(
   proposedPlan: LatestProposedPlanState | Pick<ProposedPlan, "implementedAt"> | null,
 ): boolean {
@@ -754,9 +750,8 @@ export function hasActionableProposedPlan(
 }
 
 /**
- * 浠庢椿鍔ㄦ祦涓帹瀵煎伐浣滄棩蹇楁潯鐩垪琛ㄣ€? * 杩囨护鎺変笉闇€瑕佸睍绀虹殑娲诲姩绫诲瀷锛堝浠诲姟鐢熷懡鍛ㄦ湡銆侀€熺巼闄愬埗鏇存柊绛夛級锛? * 骞跺皢鍚屼竴宸ュ叿璋冪敤鐨勫涓敓鍛藉懆鏈熶簨浠跺悎骞朵负鍗曟潯鐩€? *
- * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID锛屼负 undefined 鏃舵樉绀烘墍鏈夎疆娆? * @returns 宸ヤ綔鏃ュ織鏉＄洰鍒楄〃
- */
+ * 娴犲孩妞块崝銊︾ウ娑擃厽甯圭€电厧浼愭担婊勬）韫囨娼惄顔煎灙鐞涖劊鈧? * 鏉╁洦鎶ら幒澶夌瑝闂団偓鐟曚礁鐫嶇粈铏规畱濞茶濮╃猾璇茬€烽敍鍫濐洤娴犺濮熼悽鐔锋嚒閸涖劍婀￠妴渚€鈧喓宸奸梽鎰煑閺囧瓨鏌婄粵澶涚礆閿? * 楠炶泛鐨㈤崥灞肩瀹搞儱鍙跨拫鍐暏閻ㄥ嫬顦挎稉顏嗘晸閸涜棄鎳嗛張鐔剁皑娴犺泛鎮庨獮鏈佃礋閸楁洘娼惄顔衡偓? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @param latestTurnId - 閺堚偓閺傛媽鐤嗗▎?ID閿涘奔璐?undefined 閺冭埖妯夌粈鐑樺閺堝鐤嗗▎? * @returns 瀹搞儰缍旈弮銉ョ箶閺夛紕娲伴崚妤勩€? */
 export function deriveWorkLogEntries(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
   latestTurnId: TurnId | undefined,
@@ -1763,9 +1758,9 @@ function compareActivityLifecycleRank(kind: string): number {
 }
 
 /**
- * 鍒ゆ柇鎸囧畾杞鏄惁鏈夊伐鍏锋椿鍔? *
- * @param activities - 缂栨帓娲诲姩娴? * @param turnId - 杞 ID
- * @returns 鏄惁鏈夊伐鍏锋椿鍔? */
+ * 閸掋倖鏌囬幐鍥х暰鏉烆喗顐奸弰顖氭儊閺堝浼愰崗閿嬫た閸? *
+ * @param activities - 缂傛牗甯撳ú璇插З濞? * @param turnId - 鏉烆喗顐?ID
+ * @returns 閺勵垰鎯侀張澶婁紣閸忛攱妞块崝? */
 export function hasToolActivityForTurn(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
   turnId: TurnId | null | undefined,
@@ -1775,11 +1770,8 @@ export function hasToolActivityForTurn(
 }
 
 /**
- * 灏嗘秷鎭€佹彁璁鍒掑拰宸ヤ綔鏃ュ織鍚堝苟涓虹粺涓€鐨勬椂闂寸嚎鏉＄洰鍒楄〃锛屾寜鍒涘缓鏃堕棿鎺掑簭銆? * 濡傛灉鍔╂墜娑堟伅鍏宠仈浜嗘彁璁鍒掞紝浼氫粠娑堟伅鏂囨湰涓Щ闄よ鍒掑潡銆? *
- * @param messages - 鑱婂ぉ娑堟伅鍒楄〃
- * @param proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param workEntries - 宸ヤ綔鏃ュ織鏉＄洰鍒楄〃
- * @returns 鎸夋椂闂存帓搴忕殑鏃堕棿绾挎潯鐩垪琛? */
+ * 鐏忓棙绉烽幁顖樷偓浣瑰絹鐠侇喛顓搁崚鎺戞嫲瀹搞儰缍旈弮銉ョ箶閸氬牆鑻熸稉铏圭埠娑撯偓閻ㄥ嫭妞傞梻瀵稿殠閺夛紕娲伴崚妤勩€冮敍灞惧瘻閸掓稑缂撻弮鍫曟？閹烘帒绨妴? * 婵″倹鐏夐崝鈺傚濞戝牊浼呴崗瀹犱粓娴滃棙褰佺拋顔款吀閸掓帪绱濇导姘矤濞戝牊浼呴弬鍥ㄦ拱娑擃厾些闂勩倛顓搁崚鎺戞健閵? *
+ * @param messages - 閼卞﹤銇夊☉鍫熶紖閸掓銆? * @param proposedPlans - 閹绘劘顔呯拋鈥冲灊閸掓銆? * @param workEntries - 瀹搞儰缍旈弮銉ョ箶閺夛紕娲伴崚妤勩€? * @returns 閹稿妞傞梻瀛樺笓鎼村繒娈戦弮鍫曟？缁炬寧娼惄顔煎灙鐞? */
 export function deriveTimelineEntries(
   messages: ChatMessage[],
   proposedPlans: ProposedPlan[],
@@ -1828,10 +1820,9 @@ export function deriveTimelineEntries(
 }
 
 /**
- * 鏍规嵁杞宸紓鎽樿鎺ㄦ柇姣忎釜杞鐨勬鏌ョ偣搴忓彿
+ * 閺嶈宓佹潪顔筋偧瀹割喖绱撻幗妯款洣閹恒劍鏌囧В蹇庨嚋鏉烆喗顐奸惃鍕梾閺屻儳鍋ｆ惔蹇撳娇
  *
- * @param summaries - 杞宸紓鎽樿鍒楄〃
- * @returns 杞 ID 鍒版鏌ョ偣搴忓彿鐨勬槧灏? */
+ * @param summaries - 鏉烆喗顐煎顔肩磽閹芥顩﹂崚妤勩€? * @returns 鏉烆喗顐?ID 閸掔増顥呴弻銉у仯鎼村繐褰块惃鍕Ё鐏? */
 export function inferCheckpointTurnCountByTurnId(
   summaries: TurnDiffSummary[],
 ): Record<TurnId, number> {
@@ -1846,9 +1837,8 @@ export function inferCheckpointTurnCountByTurnId(
 }
 
 /**
- * 浠庝細璇濈姸鎬佹帹瀵间細璇濋樁娈? *
- * @param session - 绾跨▼浼氳瘽鐘舵€? * @returns 浼氳瘽闃舵锛歚"disconnected"` 宸叉柇寮€銆乣"connecting"` 杩炴帴涓€乣"running"` 杩愯涓€乣"ready"` 灏辩华
- */
+ * 娴犲簼绱扮拠婵堝Ц閹焦甯圭€甸棿绱扮拠婵嬫▉濞? *
+ * @param session - 缁捐法鈻兼导姘崇樈閻樿埖鈧? * @returns 娴兼俺鐦介梼鑸殿唽閿涙瓪"disconnected"` 瀹稿弶鏌囧鈧妴涔?connecting"` 鏉╃偞甯存稉顓溾偓涔?running"` 鏉╂劘顢戞稉顓溾偓涔?ready"` 鐏忚京鍗? */
 export function derivePhase(session: ThreadSession | null): SessionPhase {
   if (!session || session.status === "closed") return "disconnected";
   if (session.status === "connecting") return "connecting";

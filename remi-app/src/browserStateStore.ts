@@ -1,51 +1,49 @@
 /**
- * @file 娴忚鍣ㄧ姸鎬佽交閲忕紦瀛? * @description 鎸夌嚎绋嬬淮搴︾紦瀛樻祻瑙堝櫒鍏冩暟鎹€? * 瀹為檯鐨勬祻瑙堝櫒娓叉煋闈㈠湪 Tauri 妗岄潰绔紝Web 绔粎淇濈暀瓒冲鐨勭姸鎬? * 浠ユ覆鏌撴爣绛鹃〉/宸ュ叿鏍忥紝骞跺湪绾跨▼鍒囨崲鏃朵繚鎸佸彲棰勬祴鐨勮涓恒€? */
+ * @file 濞村繗顫嶉崳銊уЦ閹浇浜ら柌蹇曠处鐎? * @description 閹稿鍤庣粙瀣樊鎼达妇绱︾€涙ɑ绁荤憴鍫濇珤閸忓啯鏆熼幑顔衡偓? * 鐎圭偤妾惃鍕セ鐟欏牆娅掑〒鍙夌厠闂堛垹婀?Tauri 濡楀矂娼扮粩顖ょ礉Web 缁旑垯绮庢穱婵堟殌鐡掑啿顧勯惃鍕Ц閹? * 娴犮儲瑕嗛弻鎾寸垼缁涢箖銆?瀹搞儱鍙块弽蹇ョ礉楠炶泛婀痪璺ㄢ柤閸掑洦宕查弮鏈电箽閹镐礁褰叉０鍕ゴ閻ㄥ嫯顢戞稉鎭掆偓? */
 
 import type { ThreadBrowserState, ThreadId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** localStorage 鎸佷箙鍖?key */
+/** localStorage 閹镐椒绠欓崠?key */
 const BROWSER_STATE_STORAGE_KEY = "remicode:browser-state:v1";
-/** 姣忎釜绾跨▼淇濈暀鐨勬渶澶у巻鍙茶褰曟潯鏁?*/
+/** 濮ｅ繋閲滅痪璺ㄢ柤娣囨繄鏆€閻ㄥ嫭娓舵径褍宸婚崣鑼额唶瑜版洘娼弫?*/
 const BROWSER_HISTORY_LIMIT = 12;
-/** 绌哄巻鍙茶褰曠殑甯搁噺寮曠敤锛岄伩鍏嶉噸澶嶅垱寤虹┖鏁扮粍 */
+/** 缁屽搫宸婚崣鑼额唶瑜版洜娈戠敮鎼佸櫤瀵洜鏁ら敍宀勪缉閸忓秹鍣告径宥呭灡瀵よ櫣鈹栭弫鎵矋 */
 const EMPTY_BROWSER_HISTORY: BrowserHistoryEntry[] = [];
 
-/** 娴忚鍣ㄥ巻鍙茶褰曟潯鐩?*/
+/** 濞村繗顫嶉崳銊ュ坊閸欒尪顔囪ぐ鏇熸蒋閻?*/
 export interface BrowserHistoryEntry {
-  /** 椤甸潰 URL */
+  /** 妞ょ敻娼?URL */
   url: string;
-  /** 椤甸潰鏍囬 */
+  /** 妞ょ敻娼伴弽鍥暯 */
   title: string;
-  /** 鏍囩椤?ID */
+  /** 閺嶅洨顒锋い?ID */
   tabId: string;
 }
 
-/** 娴忚鍣ㄧ姸鎬?store 鍐呴儴鎺ュ彛 */
+/** 濞村繗顫嶉崳銊уЦ閹?store 閸愬懘鍎撮幒銉ュ經 */
 interface BrowserStateStore {
-  /** 鎸夌嚎绋?ID 绱㈠紩鐨勬祻瑙堝櫒鐘舵€?*/
+  /** 閹稿鍤庣粙?ID 缁便垹绱╅惃鍕セ鐟欏牆娅掗悩鑸碘偓?*/
   threadStatesByThreadId: Record<string, ThreadBrowserState | undefined>;
-  /** 鎸夌嚎绋?ID 绱㈠紩鐨勬渶杩戞祻瑙堝巻鍙?*/
+  /** 閹稿鍤庣粙?ID 缁便垹绱╅惃鍕付鏉╂垶绁荤憴鍫濆坊閸?*/
   recentHistoryByThreadId: Record<string, BrowserHistoryEntry[] | undefined>;
-  /** 鏇存柊鎴栨彃鍏ョ嚎绋嬫祻瑙堝櫒鐘舵€?*/
+  /** 閺囧瓨鏌婇幋鏍ㄥ絻閸忋儳鍤庣粙瀣セ鐟欏牆娅掗悩鑸碘偓?*/
   upsertThreadState: (state: ThreadBrowserState) => void;
-  /** 绉婚櫎绾跨▼娴忚鍣ㄧ姸鎬?*/
+  /** 缁夊娅庣痪璺ㄢ柤濞村繗顫嶉崳銊уЦ閹?*/
   removeThreadState: (threadId: ThreadId) => void;
 }
 
-/** 褰掍竴鍖栧巻鍙?URL锛屽皢 about:blank 瑙嗕负绌?URL */
+/** 瑜版帊绔撮崠鏍у坊閸?URL閿涘苯鐨?about:blank 鐟欏棔璐熺粚?URL */
 function normalizeHistoryUrl(url: string): string {
   const trimmed = url.trim();
   return trimmed === "about:blank" ? "" : trimmed;
 }
 
 /**
- * 鏇存柊鎴栨彃鍏ユ渶杩戞祻瑙堝巻鍙叉潯鐩? *
- * @description 灏嗘柊鏉＄洰鎻掑叆鍒楄〃澶撮儴锛屽幓閲嶅悓 URL 鐨勬棫鏉＄洰锛? * 骞堕檺鍒跺垪琛ㄩ暱搴︿笉瓒呰繃 BROWSER_HISTORY_LIMIT銆? *
- * @param entries - 宸叉湁鐨勫巻鍙叉潯鐩垪琛? * @param nextEntry - 鏂扮殑鍘嗗彶鏉＄洰
- * @returns 鏇存柊鍚庣殑鍘嗗彶鏉＄洰鍒楄〃
- */
+ * 閺囧瓨鏌婇幋鏍ㄥ絻閸忋儲娓舵潻鎴炵セ鐟欏牆宸婚崣鍙夋蒋閻? *
+ * @description 鐏忓棙鏌婇弶锛勬窗閹绘帒鍙嗛崚妤勩€冩径鎾劥閿涘苯骞撻柌宥呮倱 URL 閻ㄥ嫭妫弶锛勬窗閿? * 楠炲爼妾洪崚璺哄灙鐞涖劑鏆辨惔锔跨瑝鐡掑懓绻?BROWSER_HISTORY_LIMIT閵? *
+ * @param entries - 瀹稿弶婀侀惃鍕坊閸欏弶娼惄顔煎灙鐞? * @param nextEntry - 閺傛壆娈戦崢鍡楀蕉閺夛紕娲? * @returns 閺囧瓨鏌婇崥搴ｆ畱閸樺棗褰堕弶锛勬窗閸掓銆? */
 function upsertRecentHistoryEntry(
   entries: BrowserHistoryEntry[] | undefined,
   nextEntry: BrowserHistoryEntry,
@@ -66,11 +64,10 @@ function upsertRecentHistoryEntry(
 }
 
 /**
- * 鍒ゆ柇涓や唤鍘嗗彶璁板綍鏄惁鐩稿悓
+ * 閸掋倖鏌囨稉銈勫敜閸樺棗褰剁拋鏉跨秿閺勵垰鎯侀惄绋挎倱
  *
- * @description 鐢ㄤ簬閬垮厤鍦ㄥ巻鍙插唴瀹规湭鍙樻椂浜х敓鏂扮殑寮曠敤锛屽噺灏戜笉蹇呰鐨勯噸娓叉煋銆? *
- * @param previousEntries - 涔嬪墠鐨勫巻鍙叉潯鐩? * @param nextEntries - 鏂扮殑鍘嗗彶鏉＄洰
- * @returns 鏄惁瀹屽叏鐩稿悓
+ * @description 閻劋绨柆鍨帳閸︺劌宸婚崣鎻掑敶鐎硅婀崣妯绘娴溠呮晸閺傛壆娈戝鏇犳暏閿涘苯鍣虹亸鎴滅瑝韫囧懓顩﹂惃鍕櫢濞撳弶鐓嬮妴? *
+ * @param previousEntries - 娑斿澧犻惃鍕坊閸欏弶娼惄? * @param nextEntries - 閺傛壆娈戦崢鍡楀蕉閺夛紕娲? * @returns 閺勵垰鎯佺€瑰苯鍙忛惄绋挎倱
  */
 function sameBrowserHistoryEntries(
   previousEntries: BrowserHistoryEntry[] | undefined,
@@ -97,7 +94,7 @@ function sameBrowserHistoryEntries(
   });
 }
 
-/** 娴忚鍣ㄧ姸鎬?Zustand store锛屽甫 localStorage 鎸佷箙鍖?*/
+/** 濞村繗顫嶉崳銊уЦ閹?Zustand store閿涘苯鐢?localStorage 閹镐椒绠欓崠?*/
 export const useBrowserStateStore = create<BrowserStateStore>()(
   persist(
     (set) => ({
@@ -169,9 +166,9 @@ export const useBrowserStateStore = create<BrowserStateStore>()(
 );
 
 /**
- * 閫夋嫨鎸囧畾绾跨▼鐨勬祻瑙堝櫒鐘舵€? *
- * @param threadId - 绾跨▼ ID
- * @returns Zustand 閫夋嫨鍣紝杩斿洖璇ョ嚎绋嬬殑娴忚鍣ㄧ姸鎬? */
+ * 闁瀚ㄩ幐鍥х暰缁捐法鈻奸惃鍕セ鐟欏牆娅掗悩鑸碘偓? *
+ * @param threadId - 缁捐法鈻?ID
+ * @returns Zustand 闁瀚ㄩ崳顭掔礉鏉╂柨娲栫拠銉у殠缁嬪娈戝ù蹇氼潔閸ｃ劎濮搁幀? */
 export function selectThreadBrowserState(
   threadId: ThreadId,
 ): (store: BrowserStateStore) => ThreadBrowserState | undefined {
@@ -179,11 +176,9 @@ export function selectThreadBrowserState(
 }
 
 /**
- * 閫夋嫨鎸囧畾绾跨▼鐨勬祻瑙堝櫒鍘嗗彶璁板綍
- *
- * @param threadId - 绾跨▼ ID
- * @returns Zustand 閫夋嫨鍣紝杩斿洖璇ョ嚎绋嬬殑娴忚鍘嗗彶鍒楄〃
- */
+ * 闁瀚ㄩ幐鍥х暰缁捐法鈻奸惃鍕セ鐟欏牆娅掗崢鍡楀蕉鐠佹澘缍? *
+ * @param threadId - 缁捐法鈻?ID
+ * @returns Zustand 闁瀚ㄩ崳顭掔礉鏉╂柨娲栫拠銉у殠缁嬪娈戝ù蹇氼潔閸樺棗褰堕崚妤勩€? */
 export function selectThreadBrowserHistory(
   threadId: ThreadId,
 ): (store: BrowserStateStore) => BrowserHistoryEntry[] {

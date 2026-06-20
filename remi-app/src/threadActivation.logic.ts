@@ -1,8 +1,7 @@
 /**
  * @file threadActivation.logic.ts
- * 绾跨▼婵€娲荤殑绾矾鐢卞喅绛栨ā鍧椼€? *
- * 璐熻矗鍐冲畾渚ц竟鏍忕偣鍑汇€侀敭鐩樺揩鎹烽敭銆佹悳绱㈢瓑鎿嶄綔鎵撳紑绾跨▼鏃讹紝
- * 搴斾互鍗曡亰妯″紡杩樻槸鍒嗗睆闈㈡澘妯″紡鍛堢幇銆傚鍑哄垎灞忔劅鐭ョ殑婵€娲昏В鏋愬櫒锛? * 渚涗晶杈规爮鐐瑰嚮銆侀敭鐩樺鑸拰鎼滅储娴佺▼鍏变韩浣跨敤銆? */
+ * 缁捐法鈻煎┑鈧ú鑽ゆ畱缁绢垵鐭鹃悽鍗炲枀缁涙牗膩閸фぜ鈧? *
+ * 鐠愮喕鐭楅崘鍐茬暰娓氀嗙珶閺嶅繒鍋ｉ崙姹団偓渚€鏁惄妯烘彥閹圭兘鏁妴浣规偝缁便垻鐡戦幙宥勭稊閹垫挸绱戠痪璺ㄢ柤閺冭绱? * 鎼存柧浜掗崡鏇′喊濡€崇础鏉╂ɑ妲搁崚鍡楃潌闂堛垺婢樺Ο鈥崇础閸涘牏骞囬妴鍌氼嚤閸戝搫鍨庣仦蹇斿妳閻儳娈戝┑鈧ú鏄徯掗弸鎰珤閿? * 娓氭稐鏅舵潏瑙勭埉閻愮懓鍤妴渚€鏁惄妯侯嚤閼割亜鎷伴幖婊呭偍濞翠胶鈻奸崗鍙橀煩娴ｈ法鏁ら妴? */
 
 import type { ThreadId } from "~/contracts";
 import {
@@ -13,40 +12,36 @@ import {
 } from "./splitViewStore";
 
 /**
- * 绾跨▼鍛戒护婵€娲荤粨鏋滅被鍨嬨€? *
- * 鎻忚堪渚ц竟鏍?鎼滅储/閿洏婵€娲荤嚎绋嬫椂搴旀墽琛岀殑鎿嶄綔锛? * - `ignore`锛氬拷鐣ユ縺娲伙紙绾跨▼涓嶅瓨鍦ㄦ垨宸叉槸褰撳墠娲昏穬绾跨▼锛? * - `single`锛氫互鍗曡亰妯″紡鎵撳紑绾跨▼
- * - `split`锛氬湪鍒嗗睆闈㈡澘涓墦寮€绾跨▼
- */
+ * 缁捐法鈻奸崨鎴掓姢濠碘偓濞茶崵绮ㄩ弸婊呰閸ㄥ鈧? *
+ * 閹诲繗鍫笟褑绔熼弽?閹兼粎鍌?闁款喚娲忓┑鈧ú鑽ゅ殠缁嬪妞傛惔鏃€澧界悰宀€娈戦幙宥勭稊閿? * - `ignore`閿涙艾鎷烽悾銉︾负濞蹭紮绱欑痪璺ㄢ柤娑撳秴鐡ㄩ崷銊﹀灗瀹稿弶妲歌ぐ鎾冲濞叉槒绌痪璺ㄢ柤閿? * - `single`閿涙矮浜掗崡鏇′喊濡€崇础閹垫挸绱戠痪璺ㄢ柤
+ * - `split`閿涙艾婀崚鍡楃潌闂堛垺婢樻稉顓熷ⅵ瀵偓缁捐法鈻? */
 export type ThreadCommandActivation =
   | { kind: "ignore" }
   | { kind: "single"; threadId: ThreadId }
   | { kind: "split"; threadId: ThreadId; splitViewId: SplitViewId; paneId: PaneId };
 
 /**
- * 瑙ｆ瀽渚ц竟鏍?鎼滅储/閿洏婵€娲荤嚎绋嬫椂搴旀墽琛岀殑鎿嶄綔銆? *
- * 璋冪敤鏂瑰喅瀹氬摢涓垎灞忥紙濡傛灉鏈夛級鏄?棣栭€?鐨勩€傞閫夐『搴忎负锛? * 褰撳墠娲昏穬鐨勫垎灞忎紭鍏堬紝鍏舵鎸夌‘瀹氭€у綊灞炶鍒欐煡鎵炬寔涔呭寲鐨勫垎灞忋€? *
- * 鍐崇瓥閫昏緫锛? * 1. 绾跨▼涓嶅瓨鍦?鈫?蹇界暐
- * 2. 绾跨▼鏈夐閫夊垎灞忓拰闈㈡澘 鈫?鍒嗗睆妯″紡
- * 3. 绾跨▼宸叉槸褰撳墠渚ц竟鏍忔椿璺冪嚎绋?鈫?蹇界暐锛堥伩鍏嶉噸澶嶆縺娲伙級
- * 4. 鍏朵粬鎯呭喌 鈫?鍗曡亰妯″紡
+ * 鐟欙絾鐎芥笟褑绔熼弽?閹兼粎鍌?闁款喚娲忓┑鈧ú鑽ゅ殠缁嬪妞傛惔鏃€澧界悰宀€娈戦幙宥勭稊閵? *
+ * 鐠嬪啰鏁ら弬鐟板枀鐎规艾鎽㈡稉顏勫瀻鐏炲骏绱欐俊鍌涚亯閺堝绱氶弰?妫ｆ牠鈧?閻ㄥ嫨鈧倿顩婚柅澶愩€庢惔蹇庤礋閿? * 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣仦蹇庣喘閸忓牞绱濋崗鑸殿偧閹稿鈥樼€规碍鈧冪秺鐏炵偠顫夐崚娆愮叀閹电偓瀵旀稊鍛閻ㄥ嫬鍨庣仦蹇嬧偓? *
+ * 閸愬磭鐡ラ柅鏄忕帆閿? * 1. 缁捐法鈻兼稉宥呯摠閸?閳?韫囩晫鏆? * 2. 缁捐法鈻奸張澶愵浕闁鍨庣仦蹇撴嫲闂堛垺婢?閳?閸掑棗鐫嗗Ο鈥崇础
+ * 3. 缁捐法鈻煎鍙夋Ц瑜版挸澧犳笟褑绔熼弽蹇旀た鐠哄啰鍤庣粙?閳?韫囩晫鏆愰敍鍫ヤ缉閸忓秹鍣告径宥嗙负濞蹭紮绱? * 4. 閸忔湹绮幆鍛枌 閳?閸楁洝浜板Ο鈥崇础
  *
- * @param input - 婵€娲诲弬鏁? * @param input.threadId - 瑕佹縺娲荤殑绾跨▼ ID
- * @param input.threadExists - 绾跨▼鏄惁瀛樺湪
- * @param input.activeSidebarThreadId - 褰撳墠渚ц竟鏍忔椿璺冪嚎绋?ID
- * @param input.preferredSplitViewId - 棣栭€夊垎灞忚鍥?ID
- * @param input.splitPaneId - 棣栭€夐潰鏉?ID
- * @returns 婵€娲荤粨鏋滐紝鍖呭惈鎿嶄綔绫诲瀷鍜岀浉鍏充俊鎭? *
+ * @param input - 濠碘偓濞茶寮弫? * @param input.threadId - 鐟曚焦绺哄ú鑽ゆ畱缁捐法鈻?ID
+ * @param input.threadExists - 缁捐法鈻奸弰顖氭儊鐎涙ê婀? * @param input.activeSidebarThreadId - 瑜版挸澧犳笟褑绔熼弽蹇旀た鐠哄啰鍤庣粙?ID
+ * @param input.preferredSplitViewId - 妫ｆ牠鈧鍨庣仦蹇氼潒閸?ID
+ * @param input.splitPaneId - 妫ｆ牠鈧娼伴弶?ID
+ * @returns 濠碘偓濞茶崵绮ㄩ弸婊愮礉閸栧懎鎯堥幙宥勭稊缁鐎烽崪宀€娴夐崗鍏呬繆閹? *
  * @example
- * // 绾跨▼涓嶅瓨鍦ㄦ椂蹇界暐
+ * // 缁捐法鈻兼稉宥呯摠閸︺劍妞傝箛鐣屾殣
  * resolveThreadCommandActivation({ threadId: "t1", threadExists: false, ... })
- * // 鈫?{ kind: "ignore" }
+ * // 閳?{ kind: "ignore" }
  *
  * @example
- * // 绾跨▼鍦ㄥ垎灞忎腑鏃惰繑鍥炲垎灞忔縺娲? * resolveThreadCommandActivation({
+ * // 缁捐法鈻奸崷銊ュ瀻鐏炲繋鑵戦弮鎯扮箲閸ョ偛鍨庣仦蹇旂负濞? * resolveThreadCommandActivation({
  *   threadId: "t1", threadExists: true,
  *   preferredSplitViewId: "sv1", splitPaneId: "p1", ...
  * })
- * // 鈫?{ kind: "split", threadId: "t1", splitViewId: "sv1", paneId: "p1" }
+ * // 閳?{ kind: "split", threadId: "t1", splitViewId: "sv1", paneId: "p1" }
  */
 export function resolveThreadCommandActivation(input: {
   threadId: ThreadId;
@@ -55,11 +50,11 @@ export function resolveThreadCommandActivation(input: {
   preferredSplitViewId: SplitViewId | null;
   splitPaneId: PaneId | null;
 }): ThreadCommandActivation {
-  // 绾跨▼涓嶅瓨鍦ㄦ椂蹇界暐婵€娲?  if (!input.threadExists) {
+  // 缁捐法鈻兼稉宥呯摠閸︺劍妞傝箛鐣屾殣濠碘偓濞?  if (!input.threadExists) {
     return { kind: "ignore" };
   }
 
-  // 鏈夐閫夊垎灞忓拰闈㈡澘鏃讹紝浠ュ垎灞忔ā寮忔縺娲?  if (input.preferredSplitViewId && input.splitPaneId) {
+  // 閺堝顩婚柅澶婂瀻鐏炲繐鎷伴棃銏℃緲閺冭绱濇禒銉ュ瀻鐏炲繑膩瀵繑绺哄ú?  if (input.preferredSplitViewId && input.splitPaneId) {
     return {
       kind: "split",
       threadId: input.threadId,
@@ -68,23 +63,21 @@ export function resolveThreadCommandActivation(input: {
     };
   }
 
-  // 绾跨▼宸叉槸褰撳墠渚ц竟鏍忔椿璺冪嚎绋嬫椂蹇界暐锛岄伩鍏嶉噸澶嶆縺娲?  if (input.threadId === input.activeSidebarThreadId) {
+  // 缁捐法鈻煎鍙夋Ц瑜版挸澧犳笟褑绔熼弽蹇旀た鐠哄啰鍤庣粙瀣韫囩晫鏆愰敍宀勪缉閸忓秹鍣告径宥嗙负濞?  if (input.threadId === input.activeSidebarThreadId) {
     return { kind: "ignore" };
   }
 
-  // 榛樿浠ュ崟鑱婃ā寮忔縺娲?  return { kind: "single", threadId: input.threadId };
+  // 姒涙顓绘禒銉ュ礋閼卞﹥膩瀵繑绺哄ú?  return { kind: "single", threadId: input.threadId };
 }
 
 /**
- * 瑙ｆ瀽绾跨▼婵€娲绘椂搴旇惤鍏ュ摢涓垎灞忛潰鏉裤€? *
- * 褰撳瓨鍦ㄦ椿璺冨垎灞忔椂锛屼紭鍏堝湪璇ュ垎灞忎腑鏌ユ壘绾跨▼瀵瑰簲鐨勯潰鏉匡紱
- * 鍚﹀垯閬嶅巻鎵€鏈夋寔涔呭寲鐨勫垎灞忚鍥撅紝鎸夌‘瀹氭€у綊灞炶鍒欐煡鎵撅細
- * 浼樺厛鍖归厤婧愮嚎绋嬶紝鑻ラ潪婧愮嚎绋嬩笖瀛樺湪澶氫釜鍖归厤鍒欏洖閫€鍒板崟鑱婃ā寮忥紝
- * 閬垮厤鎸夋渶杩戜娇鐢ㄧ寽娴嬪鑷翠笉纭畾鎬с€? *
- * @param input - 鏌ユ壘鍙傛暟
- * @param input.activeSplitView - 褰撳墠娲昏穬鐨勫垎灞忚鍥撅紝鏃犳椿璺冨垎灞忔椂涓?null
- * @param input.splitViewsById - 鎵€鏈夊垎灞忚鍥剧殑鏄犲皠琛? * @param input.threadId - 瑕佹煡鎵剧殑绾跨▼ ID
- * @returns 鍖归厤鐨勫垎灞忚鍥?ID 鍜岄潰鏉?ID锛屾湭鎵惧埌鏃惰繑鍥?null
+ * 鐟欙絾鐎界痪璺ㄢ柤濠碘偓濞茬粯妞傛惔鏃囨儰閸忋儱鎽㈡稉顏勫瀻鐏炲繘娼伴弶瑁も偓? *
+ * 瑜版挸鐡ㄩ崷銊︽た鐠哄啫鍨庣仦蹇旀閿涘奔绱崗鍫濇躬鐠囥儱鍨庣仦蹇庤厬閺屻儲澹樼痪璺ㄢ柤鐎电懓绨查惃鍕桨閺夊尅绱? * 閸氾箑鍨柆宥呭坊閹碘偓閺堝瀵旀稊鍛閻ㄥ嫬鍨庣仦蹇氼潒閸ユ拝绱濋幐澶屸€樼€规碍鈧冪秺鐏炵偠顫夐崚娆愮叀閹垫拝绱? * 娴兼ê鍘涢崠褰掑帳濠ф劗鍤庣粙瀣剁礉閼汇儵娼┃鎰殠缁嬪绗栫€涙ê婀径姘嚋閸栧綊鍘ら崚娆忔礀闁偓閸掓澘宕熼懕濠兡佸蹇ョ礉
+ * 闁灝鍘ら幐澶嬫付鏉╂垳濞囬悽銊у濞村顕遍懛缈犵瑝绾喖鐣鹃幀褋鈧? *
+ * @param input - 閺屻儲澹橀崣鍌涙殶
+ * @param input.activeSplitView - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣仦蹇氼潒閸ユ拝绱濋弮鐘虫た鐠哄啫鍨庣仦蹇旀娑?null
+ * @param input.splitViewsById - 閹碘偓閺堝鍨庣仦蹇氼潒閸ュ墽娈戦弰鐘茬殸鐞? * @param input.threadId - 鐟曚焦鐓￠幍鍓ф畱缁捐法鈻?ID
+ * @returns 閸栧綊鍘ら惃鍕瀻鐏炲繗顫嬮崶?ID 閸滃矂娼伴弶?ID閿涘本婀幍鎯у煂閺冩儼绻戦崶?null
  */
 export function resolvePreferredSplitForCommand(input: {
   activeSplitView: SplitView | null;
@@ -92,13 +85,13 @@ export function resolvePreferredSplitForCommand(input: {
   threadId: ThreadId;
 }): { splitViewId: SplitViewId; paneId: PaneId } | null {
   if (input.activeSplitView) {
-    // 娲昏穬鍒嗗睆浼樺厛锛氬鏋滅嚎绋嬪湪褰撳墠娲昏穬鐨勫垎灞忎腑锛岀洿鎺ヨ繑鍥炲搴旈潰鏉?    const paneId = resolveSplitViewPaneIdForThread(input.activeSplitView, input.threadId);
+    // 濞叉槒绌崚鍡楃潌娴兼ê鍘涢敍姘洤閺嬫粎鍤庣粙瀣躬瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣仦蹇庤厬閿涘瞼娲块幒銉ㄧ箲閸ョ偛顕惔鏃堟桨閺?    const paneId = resolveSplitViewPaneIdForThread(input.activeSplitView, input.threadId);
     if (paneId) {
       return { splitViewId: input.activeSplitView.id, paneId };
     }
   }
 
-  // 閬嶅巻鎵€鏈夋寔涔呭寲鍒嗗睆锛屾敹闆嗗寘鍚绾跨▼鐨勫垎灞忓強闈㈡澘淇℃伅
+  // 闁秴宸婚幍鈧張澶嬪瘮娑斿懎瀵查崚鍡楃潌閿涘本鏁归梿鍡楀瘶閸氼偉顕氱痪璺ㄢ柤閻ㄥ嫬鍨庣仦蹇撳挤闂堛垺婢樻穱鈩冧紖
   const matchingSplits = Object.values(input.splitViewsById)
     .filter((splitView): splitView is SplitView => splitView !== undefined)
     .map((splitView) => ({
@@ -107,7 +100,7 @@ export function resolvePreferredSplitForCommand(input: {
     }))
     .filter((match): match is { splitView: SplitView; paneId: PaneId } => match.paneId !== null);
 
-  // 浼樺厛鍖归厤婧愮嚎绋嬪綊灞烇紱鑻ラ潪婧愮嚎绋嬩笖瀛樺湪澶氫釜鍖归厤鍒欐斁寮冿紝閬垮厤涓嶇‘瀹氭€?  const sourceMatch = matchingSplits.find(
+  // 娴兼ê鍘涢崠褰掑帳濠ф劗鍤庣粙瀣秺鐏炵儑绱遍懟銉╂姜濠ф劗鍤庣粙瀣╃瑬鐎涙ê婀径姘嚋閸栧綊鍘ら崚娆愭杹瀵喛绱濋柆鍨帳娑撳秶鈥樼€规碍鈧?  const sourceMatch = matchingSplits.find(
     ({ splitView }) => splitView.sourceThreadId === input.threadId,
   );
   const match = sourceMatch ?? (matchingSplits.length === 1 ? matchingSplits[0] : null);

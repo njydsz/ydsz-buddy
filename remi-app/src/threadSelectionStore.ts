@@ -1,8 +1,7 @@
 /**
  * @file threadSelectionStore.ts
- * @description 渚ц竟鏍忕嚎绋嬪閫夌姸鎬佺殑 Zustand Store銆? *
- * 鏀寔涓夌閫夋嫨妯″紡锛? * - Cmd/Ctrl+Click锛氬垏鎹㈠崟涓嚎绋嬬殑閫変腑鐘舵€? * - Shift+Click锛氳寖鍥撮€夋嫨锛堜粠閿氱偣绾跨▼鍒扮洰鏍囩嚎绋嬩箣闂寸殑鎵€鏈夌嚎绋嬶級
- * - 鎵归噺鎿嶄綔锛氬宸查€変腑鐨勭嚎绋嬮泦鍚堟墽琛屾壒閲忔搷浣? *
+ * @description 娓氀嗙珶閺嶅繒鍤庣粙瀣樋闁濮搁幀浣烘畱 Zustand Store閵? *
+ * 閺€顖涘瘮娑撳顫掗柅澶嬪濡€崇础閿? * - Cmd/Ctrl+Click閿涙艾鍨忛幑銏犲礋娑擃亞鍤庣粙瀣畱闁鑵戦悩鑸碘偓? * - Shift+Click閿涙俺瀵栭崶鎾偓澶嬪閿涘牅绮犻柨姘卞仯缁捐法鈻奸崚鎵窗閺嶅洨鍤庣粙瀣╃闂傚娈戦幍鈧張澶屽殠缁嬪绱? * - 閹靛綊鍣洪幙宥勭稊閿涙艾顕鏌モ偓澶夎厬閻ㄥ嫮鍤庣粙瀣肠閸氬牊澧界悰灞惧闁插繑鎼锋担? *
  * @example
  * ```tsx
  * const { selectedThreadIds, toggleThread, rangeSelectTo, clearSelection } = useThreadSelectionStore();
@@ -38,11 +37,11 @@ interface ThreadSelectionStore extends ThreadSelectionState {
   hasSelection: () => boolean;
 }
 
-/** 绌洪泦鍚堝父閲忥紝鐢ㄤ簬 clearSelection 鏃堕伩鍏嶅垱寤烘柊鐨?Set 瀹炰緥 */
+/** 缁屾椽娉﹂崥鍫濈埗闁插骏绱濋悽銊ょ艾 clearSelection 閺冨爼浼╅崗宥呭灡瀵ょ儤鏌婇惃?Set 鐎圭偘绶?*/
 const EMPTY_SET = new Set<ThreadId>();
 
 /**
- * 绾跨▼澶氶€夌姸鎬?Store锛屾彁渚涢€夋嫨銆佸彇娑堥€夋嫨銆佽寖鍥撮€夋嫨绛夋搷浣溿€? *
+ * 缁捐法鈻兼径姘垛偓澶屽Ц閹?Store閿涘本褰佹笟娑⑩偓澶嬪閵嗕礁褰囧☉鍫モ偓澶嬪閵嗕浇瀵栭崶鎾偓澶嬪缁涘鎼锋担婧库偓? *
  * @example
  * ```tsx
  * function Sidebar() {
@@ -75,7 +74,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
     set((state) => {
       const anchor = state.anchorThreadId;
       if (anchor === null) {
-        // No anchor yet —treat as a single toggle
+        // No anchor yet 鈥攖reat as a single toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };
@@ -84,7 +83,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
       const anchorIndex = orderedThreadIds.indexOf(anchor);
       const targetIndex = orderedThreadIds.indexOf(threadId);
       if (anchorIndex === -1 || targetIndex === -1) {
-        // Anchor or target not in this list (different project?) —fallback to toggle
+        // Anchor or target not in this list (different project?) 鈥攆allback to toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };

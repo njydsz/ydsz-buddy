@@ -1,34 +1,34 @@
 /**
- * @file 涓婁笅鏂囩獥鍙ｇ鐞嗘ā鍧? * @description 鎻愪緵涓婁笅鏂囩獥鍙ｄ娇鐢ㄦ儏鍐电殑蹇収銆佽绠楀拰鏍煎紡鍖栧姛鑳姐€? *              鐢ㄤ簬璺熻釜鍜屽睍绀烘ā鍨嬩笂涓嬫枃绐楀彛鐨?token 浣跨敤鎯呭喌銆? */
+ * @file 娑撳﹣绗呴弬鍥╃崶閸欙絿顓搁悶鍡樐侀崸? * @description 閹绘劒绶垫稉濠佺瑓閺傚洨鐛ラ崣锝勫▏閻劍鍎忛崘鐢垫畱韫囶偆鍙庨妴浣筋吀缁犳鎷伴弽鐓庣础閸栨牕濮涢懗濮愨偓? *              閻劋绨捄鐔婚嚋閸滃苯鐫嶇粈鐑樐侀崹瀣╃瑐娑撳鏋冪粣妤€褰涢惃?token 娴ｈ法鏁ら幆鍛枌閵? */
 
 import type { OrchestrationThreadActivity, ThreadTokenUsageSnapshot } from "~/contracts";
 
 /**
- * 灏嗘湭鐭ュ€艰浆鎹负璁板綍瀵硅薄锛堝唴閮ㄥ嚱鏁帮級
- * @param value - 鏈煡鍊? * @returns 濡傛灉鏄璞″垯杩斿洖璁板綍锛屽惁鍒欒繑鍥?null
+ * 鐏忓棙婀惌銉モ偓鑹版祮閹诡澀璐熺拋鏉跨秿鐎电钖勯敍鍫濆敶闁劌鍤遍弫甯礆
+ * @param value - 閺堫亞鐓￠崐? * @returns 婵″倹鐏夐弰顖氼嚠鐠炩€冲灟鏉╂柨娲栫拋鏉跨秿閿涘苯鎯侀崚娆掔箲閸?null
  */
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 }
 
 /**
- * 灏嗘湭鐭ュ€艰浆鎹负鏈夐檺鏁板瓧锛堝唴閮ㄥ嚱鏁帮級
- * @param value - 鏈煡鍊? * @returns 濡傛灉鏄湁闄愭暟瀛楀垯杩斿洖锛屽惁鍒欒繑鍥?null
+ * 鐏忓棙婀惌銉モ偓鑹版祮閹诡澀璐熼張澶愭閺佹澘鐡ч敍鍫濆敶闁劌鍤遍弫甯礆
+ * @param value - 閺堫亞鐓￠崐? * @returns 婵″倹鐏夐弰顖涙箒闂勬劖鏆熺€涙鍨潻鏂挎礀閿涘苯鎯侀崚娆掔箲閸?null
  */
 function asFiniteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 /**
- * 灏嗘湭鐭ュ€艰浆鎹负甯冨皵鍊硷紙鍐呴儴鍑芥暟锛? * @param value - 鏈煡鍊? * @returns 濡傛灉鏄竷灏斿€煎垯杩斿洖锛屽惁鍒欒繑鍥?null
+ * 鐏忓棙婀惌銉モ偓鑹版祮閹诡澀璐熺敮鍐ㄧ毜閸婄》绱欓崘鍛村劥閸戣姤鏆熼敍? * @param value - 閺堫亞鐓￠崐? * @returns 婵″倹鐏夐弰顖氱鐏忔柨鈧厧鍨潻鏂挎礀閿涘苯鎯侀崚娆掔箲閸?null
  */
 function asBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
 }
 
 /**
- * 灏嗘湭鐭ュ€艰浆鎹负涓婁笅鏂囩獥鍙ｇ櫨鍒嗘瘮锛堝唴閮ㄥ嚱鏁帮級
- * @param value - 鏈煡鍊? * @returns 闄愬埗鍦?0-100 鑼冨洿鍐呯殑鐧惧垎姣斿€硷紝濡傛灉鏃犳晥鍒欒繑鍥?null
+ * 鐏忓棙婀惌銉モ偓鑹版祮閹诡澀璐熸稉濠佺瑓閺傚洨鐛ラ崣锝囨閸掑棙鐦敍鍫濆敶闁劌鍤遍弫甯礆
+ * @param value - 閺堫亞鐓￠崐? * @returns 闂勬劕鍩楅崷?0-100 閼煎啫娲块崘鍛畱閻ф儳鍨庡В鏂库偓纭风礉婵″倹鐏夐弮鐘虫櫏閸掓瑨绻戦崶?null
  */
 function asContextWindowPercent(value: unknown): number | null {
   const percent = asFiniteNumber(value);
@@ -39,8 +39,7 @@ function asContextWindowPercent(value: unknown): number | null {
 }
 
 /**
- * 鍙┖涓婁笅鏂囩獥鍙ｄ娇鐢ㄩ噺绫诲瀷
- * 灏?ThreadTokenUsageSnapshot 涓彲閫夌殑瀛楁涔熸爣璁颁负鍙┖
+ * 閸欘垳鈹栨稉濠佺瑓閺傚洨鐛ラ崣锝勫▏閻劑鍣虹猾璇茬€? * 鐏?ThreadTokenUsageSnapshot 娑擃厼褰查柅澶屾畱鐎涙顔屾稊鐔哥垼鐠侀璐熼崣顖溾敄
  */
 type NullableContextWindowUsage = {
   readonly [Key in keyof ThreadTokenUsageSnapshot]: undefined extends ThreadTokenUsageSnapshot[Key]
@@ -49,61 +48,59 @@ type NullableContextWindowUsage = {
 };
 
 /**
- * 涓婁笅鏂囩獥鍙ｅ揩鐓ф帴鍙? * 鍖呭惈 token 浣跨敤閲忋€佸墿浣欓噺銆佺櫨鍒嗘瘮绛変俊鎭? */
+ * 娑撳﹣绗呴弬鍥╃崶閸欙絽鎻╅悡褎甯撮崣? * 閸栧懎鎯?token 娴ｈ法鏁ら柌蹇嬧偓浣稿⒖娴ｆ瑩鍣洪妴浣烘閸掑棙鐦粵澶変繆閹? */
 export type ContextWindowSnapshot = NullableContextWindowUsage & {
-  /** 鍓╀綑 token 鏁伴噺 */
+  /** 閸撯晙缍?token 閺佷即鍣?*/
   readonly remainingTokens: number | null;
-  /** 宸蹭娇鐢ㄧ櫨鍒嗘瘮 */
+  /** 瀹歌弓濞囬悽銊ф閸掑棙鐦?*/
   readonly usedPercentage: number | null;
-  /** 鍓╀綑鐧惧垎姣?*/
+  /** 閸撯晙缍戦惂鎯у瀻濮?*/
   readonly remainingPercentage: number | null;
-  /** 鏇存柊鏃堕棿鎴?*/
+  /** 閺囧瓨鏌婇弮鍫曟？閹?*/
   readonly updatedAt: string;
 };
 
 /**
- * 涓婁笅鏂囩獥鍙ｉ€夋嫨鐘舵€佹帴鍙? */
+ * 娑撳﹣绗呴弬鍥╃崶閸欙綁鈧瀚ㄩ悩鑸碘偓浣瑰复閸? */
 export interface ContextWindowSelectionStatus {
-  /** 褰撳墠娲诲姩鐨勪笂涓嬫枃绐楀彛鏍囩 */
+  /** 瑜版挸澧犲ú璇插З閻ㄥ嫪绗傛稉瀣瀮缁愭褰涢弽鍥╊劮 */
   readonly activeLabel: string | null;
-  /** 宸查€夋嫨鐨勪笂涓嬫枃绐楀彛鏍囩 */
+  /** 瀹告煡鈧瀚ㄩ惃鍕瑐娑撳鏋冪粣妤€褰涢弽鍥╊劮 */
   readonly selectedLabel: string | null;
-  /** 寰呯敓鏁堢殑閫夋嫨鏍囩锛堜笌褰撳墠娲诲姩涓嶅悓鏃舵樉绀猴級 */
+  /** 瀵板懐鏁撻弫鍫㈡畱闁瀚ㄩ弽鍥╊劮閿涘牅绗岃ぐ鎾冲濞茶濮╂稉宥呮倱閺冭埖妯夌粈鐚寸礆 */
   readonly pendingSelectedLabel: string | null;
 }
 
 /**
- * 涓婁笅鏂囩獥鍙ｄ华琛ㄦ樉绀轰俊鎭帴鍙? */
+ * 娑撳﹣绗呴弬鍥╃崶閸欙絼鍗庣悰銊︽▔缁€杞颁繆閹垱甯撮崣? */
 export interface ContextWindowMeterDisplay {
-  /** 宸蹭娇鐢ㄧ櫨鍒嗘瘮鏍囩 */
+  /** 瀹歌弓濞囬悽銊ф閸掑棙鐦弽鍥╊劮 */
   readonly usedPercentageLabel: string | null;
-  /** token 浣跨敤閲忔爣绛?*/
+  /** token 娴ｈ法鏁ら柌蹇旂垼缁?*/
   readonly tokenUsageLabel: string;
-  /** 鏄惁鏈夊彲闈犵殑 token 姣斾緥鏁版嵁 */
+  /** 閺勵垰鎯侀張澶婂讲闂堢姷娈?token 濮ｆ柧绶ラ弫鐗堝祦 */
   readonly hasReliableTokenRatio: boolean;
-  /** 瑙勮寖鍖栧悗鐨勭櫨鍒嗘瘮锛?-100锛?*/
+  /** 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫮娅ㄩ崚鍡樼槷閿?-100閿?*/
   readonly normalizedPercentage: number;
-  /** 绱у噾鏍囩 */
+  /** 缁毖冨櫨閺嶅洨顒?*/
   readonly compactLabel: string;
-  /** 鏃犻殰纰嶆爣绛?*/
+  /** 閺冪娀娈扮喊宥嗙垼缁?*/
   readonly ariaLabel: string;
 }
 
-/** 宸茬煡鐨勪笂涓嬫枃绐楀彛鏈€澶?token 閰嶇疆 */
+/** 瀹歌尙鐓￠惃鍕瑐娑撳鏋冪粣妤€褰涢張鈧径?token 闁板秶鐤?*/
 const KNOWN_CONTEXT_WINDOW_MAX_TOKENS = {
   "200k": 200_000,
   "1m": 1_000_000,
 } as const;
 
 /**
- * 浠庢椿鍔ㄥ垪琛ㄤ腑鎻愬彇鏈€鏂扮殑浣跨敤閲忓揩鐓э紙鍐呴儴鍑芥暟锛? * @param activities - 绾跨▼娲诲姩鍒楄〃
- * @returns 鏈€鏂扮殑涓婁笅鏂囩獥鍙ｄ娇鐢ㄩ噺蹇収锛屽鏋滄湭鎵惧埌鍒欒繑鍥?null
+ * 娴犲孩妞块崝銊ュ灙鐞涖劋鑵戦幓鎰絿閺堚偓閺傛壆娈戞担璺ㄦ暏闁插繐鎻╅悡褝绱欓崘鍛村劥閸戣姤鏆熼敍? * @param activities - 缁捐法鈻煎ú璇插З閸掓銆? * @returns 閺堚偓閺傛壆娈戞稉濠佺瑓閺傚洨鐛ラ崣锝勫▏閻劑鍣鸿箛顐ゅ弾閿涘苯顩ч弸婊勬弓閹垫儳鍩岄崚娆掔箲閸?null
  */
 function deriveLatestUsageContextWindowSnapshot(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): ContextWindowSnapshot | null {
-  // 浠庡悗鍚戝墠閬嶅巻锛屾壘鍒版渶鏂扮殑 context-window.updated 娲诲姩
-  for (let index = activities.length - 1; index >= 0; index -= 1) {
+  // 娴犲骸鎮楅崥鎴濆闁秴宸婚敍灞惧閸掔増娓堕弬鎵畱 context-window.updated 濞茶濮?  for (let index = activities.length - 1; index >= 0; index -= 1) {
     const activity = activities[index];
     if (!activity || activity.kind !== "context-window.updated") {
       continue;
@@ -115,21 +112,20 @@ function deriveLatestUsageContextWindowSnapshot(
     const payloadUsedPercent = asContextWindowPercent(payload?.usedPercent);
     const maxTokens = asFiniteNumber(payload?.maxTokens);
     
-    // 璺宠繃鏃犳晥鐨勪娇鐢ㄩ噺鏁版嵁
-    if (usedTokens <= 0 && payloadUsedPercent === null && (maxTokens === null || maxTokens <= 0)) {
+    // 鐠哄疇绻冮弮鐘虫櫏閻ㄥ嫪濞囬悽銊╁櫤閺佺増宓?    if (usedTokens <= 0 && payloadUsedPercent === null && (maxTokens === null || maxTokens <= 0)) {
       continue;
     }
 
-    // 璁＄畻宸蹭娇鐢ㄧ櫨鍒嗘瘮
+    // 鐠侊紕鐣诲韫▏閻劎娅ㄩ崚鍡樼槷
     const usedPercentage =
       payloadUsedPercent ??
       (maxTokens !== null && maxTokens > 0 ? Math.min(100, (usedTokens / maxTokens) * 100) : null);
     
-    // 鍒ゆ柇 token 浣跨敤閲忔槸鍚﹀彲闈?    const hasReliableTokenUsage =
+    // 閸掋倖鏌?token 娴ｈ法鏁ら柌蹇旀Ц閸氾箑褰查棃?    const hasReliableTokenUsage =
       rawUsedTokens !== null &&
       (usedTokens > 0 || payloadUsedPercent === null || (maxTokens !== null && maxTokens > 0));
     
-    // 璁＄畻鍓╀綑 token 鍜岀櫨鍒嗘瘮
+    // 鐠侊紕鐣婚崜鈺€缍?token 閸滃瞼娅ㄩ崚鍡樼槷
     const remainingTokens =
       maxTokens !== null && hasReliableTokenUsage
         ? Math.max(0, Math.round(maxTokens - usedTokens))
@@ -164,14 +160,12 @@ function deriveLatestUsageContextWindowSnapshot(
 }
 
 /**
- * 浠庢椿鍔ㄥ垪琛ㄤ腑鎻愬彇鏈€鏂扮殑閰嶇疆鏈€澶?token 鏁帮紙鍐呴儴鍑芥暟锛? * @param activities - 绾跨▼娲诲姩鍒楄〃
- * @returns 閰嶇疆鐨勬渶澶?token 鏁帮紝濡傛灉鏈壘鍒板垯杩斿洖 null
+ * 娴犲孩妞块崝銊ュ灙鐞涖劋鑵戦幓鎰絿閺堚偓閺傛壆娈戦柊宥囩枂閺堚偓婢?token 閺佸府绱欓崘鍛村劥閸戣姤鏆熼敍? * @param activities - 缁捐法鈻煎ú璇插З閸掓銆? * @returns 闁板秶鐤嗛惃鍕付婢?token 閺佸府绱濇俊鍌涚亯閺堫亝澹橀崚鏉垮灟鏉╂柨娲?null
  */
 function deriveLatestConfiguredContextWindowMaxTokens(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): number | null {
-  // 浠庡悗鍚戝墠閬嶅巻锛屾壘鍒版渶鏂扮殑 context-window.configured 娲诲姩
-  for (let index = activities.length - 1; index >= 0; index -= 1) {
+  // 娴犲骸鎮楅崥鎴濆闁秴宸婚敍灞惧閸掔増娓堕弬鎵畱 context-window.configured 濞茶濮?  for (let index = activities.length - 1; index >= 0; index -= 1) {
     const activity = activities[index];
     if (!activity || activity.kind !== "context-window.configured") {
       continue;
@@ -188,8 +182,7 @@ function deriveLatestConfiguredContextWindowMaxTokens(
 }
 
 /**
- * 浠庢椿鍔ㄥ垪琛ㄤ腑娲剧敓鏈€鏂扮殑涓婁笅鏂囩獥鍙ｅ揩鐓? * @param activities - 绾跨▼娲诲姩鍒楄〃
- * @returns 鏈€鏂扮殑涓婁笅鏂囩獥鍙ｅ揩鐓э紝濡傛灉鏈壘鍒板垯杩斿洖 null
+ * 娴犲孩妞块崝銊ュ灙鐞涖劋鑵戝ú鍓ф晸閺堚偓閺傛壆娈戞稉濠佺瑓閺傚洨鐛ラ崣锝呮彥閻? * @param activities - 缁捐法鈻煎ú璇插З閸掓銆? * @returns 閺堚偓閺傛壆娈戞稉濠佺瑓閺傚洨鐛ラ崣锝呮彥閻撗嶇礉婵″倹鐏夐張顏呭閸掓澘鍨潻鏂挎礀 null
  */
 export function deriveLatestContextWindowSnapshot(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -201,7 +194,7 @@ export function deriveLatestContextWindowSnapshot(
     return null;
   }
 
-  // 浼樺厛浣跨敤閰嶇疆鐨勬渶澶?token 鏁?  const usedTokens = usageSnapshot?.usedTokens ?? 0;
+  // 娴兼ê鍘涙担璺ㄦ暏闁板秶鐤嗛惃鍕付婢?token 閺?  const usedTokens = usageSnapshot?.usedTokens ?? 0;
   const maxTokens = configuredMaxTokens ?? usageSnapshot?.maxTokens ?? null;
   const usedPercentage =
     usageSnapshot?.usedPercent ??
@@ -242,8 +235,8 @@ export function deriveLatestContextWindowSnapshot(
 }
 
 /**
- * 鏍规嵁閫夋嫨鍊兼淳鐢熶笂涓嬫枃绐楀彛蹇収
- * @param selectedValue - 閫夋嫨鐨勪笂涓嬫枃绐楀彛鍊硷紙濡?"200k" 鎴?"1m"锛? * @returns 瀵瑰簲鐨勪笂涓嬫枃绐楀彛蹇収锛屽鏋滃€兼棤鏁堝垯杩斿洖 null
+ * 閺嶈宓侀柅澶嬪閸婂吋娣抽悽鐔剁瑐娑撳鏋冪粣妤€褰涜箛顐ゅ弾
+ * @param selectedValue - 闁瀚ㄩ惃鍕瑐娑撳鏋冪粣妤€褰涢崐纭风礄婵?"200k" 閹?"1m"閿? * @returns 鐎电懓绨查惃鍕瑐娑撳鏋冪粣妤€褰涜箛顐ゅ弾閿涘苯顩ч弸婊冣偓鍏兼￥閺佸牆鍨潻鏂挎礀 null
  */
 export function deriveSelectedContextWindowSnapshot(
   selectedValue: string | null | undefined,
@@ -259,7 +252,7 @@ export function deriveSelectedContextWindowSnapshot(
     return null;
   }
 
-  // 杩斿洖涓€涓垵濮嬬姸鎬佺殑蹇収锛岃〃绀哄皻鏈娇鐢?  return {
+  // 鏉╂柨娲栨稉鈧稉顏勫灥婵濮搁幀浣烘畱韫囶偆鍙庨敍宀冦€冪粈鍝勭毣閺堫亙濞囬悽?  return {
     usedTokens: 0,
     usedPercent: null,
     totalProcessedTokens: null,
@@ -284,7 +277,7 @@ export function deriveSelectedContextWindowSnapshot(
 }
 
 /**
- * 鏍煎紡鍖栫櫨鍒嗘瘮鍊硷紙鍐呴儴鍑芥暟锛? * @param value - 鐧惧垎姣斿€? * @returns 鏍煎紡鍖栧悗鐨勭櫨鍒嗘瘮瀛楃涓诧紝濡傛灉鏃犳晥鍒欒繑鍥?null
+ * 閺嶇厧绱￠崠鏍閸掑棙鐦崐纭风礄閸愬懘鍎撮崙鑺ユ殶閿? * @param value - 閻ф儳鍨庡В鏂库偓? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫮娅ㄩ崚鍡樼槷鐎涙顑佹稉璇х礉婵″倹鐏夐弮鐘虫櫏閸掓瑨绻戦崶?null
  */
 function formatPercentage(value: number | null): string | null {
   if (value === null || !Number.isFinite(value)) {
@@ -297,8 +290,7 @@ function formatPercentage(value: number | null): string | null {
 }
 
 /**
- * 娲剧敓涓婁笅鏂囩獥鍙ｄ华琛ㄦ樉绀轰俊鎭? * @param usage - 涓婁笅鏂囩獥鍙ｅ揩鐓? * @returns 浠〃鏄剧ず淇℃伅瀵硅薄
- */
+ * 濞插墽鏁撴稉濠佺瑓閺傚洨鐛ラ崣锝勫崕鐞涖劍妯夌粈杞颁繆閹? * @param usage - 娑撳﹣绗呴弬鍥╃崶閸欙絽鎻╅悡? * @returns 娴狀亣銆冮弰鍓с仛娣団剝浼呯€电钖? */
 export function deriveContextWindowMeterDisplay(
   usage: ContextWindowSnapshot,
 ): ContextWindowMeterDisplay {
@@ -322,9 +314,7 @@ export function deriveContextWindowMeterDisplay(
 }
 
 /**
- * 娲剧敓绱鎴愭湰锛堢編鍏冿級
- * @param activities - 绾跨▼娲诲姩鍒楄〃
- * @returns 绱鎴愭湰锛屽鏋滄湭鎵惧埌鍒欒繑鍥?null
+ * 濞插墽鏁撶槐顖濐吀閹存劖婀伴敍鍫㈢法閸忓喛绱? * @param activities - 缁捐法鈻煎ú璇插З閸掓銆? * @returns 缁鳖垵顓搁幋鎰拱閿涘苯顩ч弸婊勬弓閹垫儳鍩岄崚娆掔箲閸?null
  */
 export function deriveCumulativeCostUsd(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -333,7 +323,7 @@ export function deriveCumulativeCostUsd(
   let latestCumulative: number | null = null;
   let foundTurnDelta = false;
   
-  // 閬嶅巻鎵€鏈?turn.completed 娲诲姩锛岀疮璁℃垚鏈?  for (const activity of activities) {
+  // 闁秴宸婚幍鈧張?turn.completed 濞茶濮╅敍宀€鐤拋鈩冨灇閺?  for (const activity of activities) {
     if (activity.kind !== "turn.completed") continue;
     const payload = asRecord(activity.payload);
     const cumulativeCost = asFiniteNumber(payload?.cumulativeCostUsd);
@@ -354,8 +344,7 @@ export function deriveCumulativeCostUsd(
 }
 
 /**
- * 鏍煎紡鍖栦笂涓嬫枃绐楀彛閫夋嫨鏍囩
- * @param value - 閫夋嫨鍊? * @returns 鏍煎紡鍖栧悗鐨勬爣绛撅紝濡傛灉鏃犳晥鍒欒繑鍥?null
+ * 閺嶇厧绱￠崠鏍︾瑐娑撳鏋冪粣妤€褰涢柅澶嬪閺嶅洨顒? * @param value - 闁瀚ㄩ崐? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭鐖ｇ粵鎾呯礉婵″倹鐏夐弮鐘虫櫏閸掓瑨绻戦崶?null
  */
 export function formatContextWindowSelectionLabel(value: string | null | undefined): string | null {
   if (typeof value !== "string") {
@@ -375,7 +364,7 @@ export function formatContextWindowSelectionLabel(value: string | null | undefin
 }
 
 /**
- * 浠庢渶澶?token 鏁版帹鏂€夋嫨鍊? * @param maxTokens - 鏈€澶?token 鏁? * @returns 鍖归厤鐨勯€夋嫨鍊硷紝濡傛灉鏃犲尮閰嶅垯杩斿洖 null
+ * 娴犲孩娓舵径?token 閺佺増甯归弬顓⑩偓澶嬪閸? * @param maxTokens - 閺堚偓婢?token 閺? * @returns 閸栧綊鍘ら惃鍕偓澶嬪閸婄》绱濇俊鍌涚亯閺冪姴灏柊宥呭灟鏉╂柨娲?null
  */
 export function inferContextWindowSelectionValue(
   maxTokens: number | null | undefined,
@@ -384,7 +373,7 @@ export function inferContextWindowSelectionValue(
     return null;
   }
   
-  // 鎵惧埌鏈€鎺ヨ繎鐨勫凡鐭ラ厤缃?  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
+  // 閹垫儳鍩岄張鈧幒銉ㄧ箮閻ㄥ嫬鍑￠惌銉╁帳缂?  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
     value: string | null;
     relativeDistance: number;
   }>(
@@ -395,12 +384,12 @@ export function inferContextWindowSelectionValue(
     { value: null, relativeDistance: Number.POSITIVE_INFINITY },
   );
   
-  // 浠呭綋鐩稿璺濈鍦?20% 浠ュ唴鏃舵墠杩斿洖鍖归厤鍊?  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
+  // 娴犲懎缍嬮惄绋款嚠鐠烘繄顬囬崷?20% 娴犮儱鍞撮弮鑸靛鏉╂柨娲栭崠褰掑帳閸?  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
 }
 
 /**
- * 娲剧敓涓婁笅鏂囩獥鍙ｉ€夋嫨鐘舵€? * @param input - 杈撳叆鍙傛暟
- * @param input.activeSnapshot - 褰撳墠娲诲姩鐨勫揩鐓? * @param input.selectedValue - 鐢ㄦ埛閫夋嫨鐨勫€? * @returns 閫夋嫨鐘舵€佸璞? */
+ * 濞插墽鏁撴稉濠佺瑓閺傚洨鐛ラ崣锝夆偓澶嬪閻樿埖鈧? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.activeSnapshot - 瑜版挸澧犲ú璇插З閻ㄥ嫬鎻╅悡? * @param input.selectedValue - 閻劍鍩涢柅澶嬪閻ㄥ嫬鈧? * @returns 闁瀚ㄩ悩鑸碘偓浣割嚠鐠? */
 export function deriveContextWindowSelectionStatus(input: {
   activeSnapshot: ContextWindowSnapshot | null;
   selectedValue: string | null | undefined;
@@ -426,7 +415,7 @@ export function deriveContextWindowSelectionStatus(input: {
 }
 
 /**
- * 鏍煎紡鍖栨垚鏈紙缇庡厓锛? * @param value - 鎴愭湰鍊? * @returns 鏍煎紡鍖栧悗鐨勬垚鏈瓧绗︿覆
+ * 閺嶇厧绱￠崠鏍ㄥ灇閺堫剨绱欑紘搴″帗閿? * @param value - 閹存劖婀伴崐? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭鍨氶張顒€鐡х粭锔胯
  */
 export function formatCostUsd(value: number): string {
   if (value < 0.0001) return `$${value.toFixed(6)}`;
@@ -437,9 +426,7 @@ export function formatCostUsd(value: number): string {
 }
 
 /**
- * 鏍煎紡鍖栦笂涓嬫枃绐楀彛 token 鏁伴噺
- * @param value - token 鏁伴噺
- * @returns 鏍煎紡鍖栧悗鐨勫瓧绗︿覆锛堝 "1.5k" 鎴?"2m"锛? */
+ * 閺嶇厧绱￠崠鏍︾瑐娑撳鏋冪粣妤€褰?token 閺佷即鍣? * @param value - token 閺佷即鍣? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫬鐡х粭锔胯閿涘牆顩?"1.5k" 閹?"2m"閿? */
 export function formatContextWindowTokens(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) {
     return "0";

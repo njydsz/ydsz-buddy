@@ -1,6 +1,6 @@
 /**
- * @file 鏍硅矾鐢辨ā鍧? * @description 搴旂敤鏍硅矾鐢憋紝璐熻矗鍒濆鍖栧叏灞€鐘舵€併€佷簨浠惰闃呫€佷富棰樼鐞嗐€佸浗闄呭寲绛夋牳蹇冨姛鑳? * @layer 鏍硅矾鐢卞眰
- * @exports Route - 鏍硅矾鐢遍厤缃? */
+ * @file 閺嶇鐭鹃悽杈侀崸? * @description 鎼存梻鏁ら弽纭呯熅閻㈡唻绱濈拹鐔荤煑閸掓繂顫愰崠鏍у弿鐏炩偓閻樿埖鈧降鈧椒绨ㄦ禒鎯邦吂闂冨懌鈧椒瀵屾０妯碱吀閻炲棎鈧礁娴楅梽鍛缁涘鐗宠箛鍐ㄥ閼? * @layer 閺嶇鐭鹃悽鍗炵湴
+ * @exports Route - 閺嶇鐭鹃悽閬嶅帳缂? */
 
 import {
   PROVIDER_DISPLAY_NAMES,
@@ -89,32 +89,29 @@ import {
   shouldInvalidateProviderQueriesForEvent,
 } from "./-rootEventInvalidation";
 
-/** Shell 蹇収寮曞闄嶇骇寤惰繜鏃堕棿锛堟绉掞級 */
+/** Shell 韫囶偆鍙庡鏇烆嚤闂勫秶楠囧鎯扮箿閺冨爼妫块敍鍫燁嚑缁夋帪绱?*/
 const SHELL_SNAPSHOT_BOOTSTRAP_FALLBACK_DELAY_MS = 1_500;
-/** 绾跨▼璇︽儏杩借刀杞闂撮殧锛堟绉掞級 */
+/** 缁捐法鈻肩拠锔藉剰鏉╁€熷垁鏉烆喛顕楅梻鎾閿涘牊顕犵粔鎺炵礆 */
 const THREAD_DETAIL_CATCHUP_INTERVAL_MS = 1_500;
-/** 宸茶杩囩殑鎻愪緵鑰呮洿鏂伴€氱煡閿泦鍚堬紝鐢ㄤ簬閬垮厤閲嶅閫氱煡 */
+/** 瀹歌尪顫嗘潻鍥╂畱閹绘劒绶甸懓鍛纯閺備即鈧氨鐓￠柨顕€娉﹂崥鍫礉閻劋绨柆鍨帳闁插秴顦查柅姘辩叀 */
 const seenProviderUpdateNotificationKeys = new Set<string>();
 
 /**
- * 鍒ゆ柇 Shell 绾跨▼鏄惁宸插惎鍔? * @param thread - Shell 蹇収涓殑绾跨▼瀵硅薄
- * @returns 濡傛灉绾跨▼鏈夋渶鏂扮殑杞鎴栦細璇濓紝鍒欒繑鍥?true
+ * 閸掋倖鏌?Shell 缁捐法鈻奸弰顖氭儊瀹告彃鎯庨崝? * @param thread - Shell 韫囶偆鍙庢稉顓犳畱缁捐法鈻肩€电钖? * @returns 婵″倹鐏夌痪璺ㄢ柤閺堝娓堕弬鎵畱鏉烆喗顐奸幋鏍︾窗鐠囨繐绱濋崚娆掔箲閸?true
  */
 function shellThreadHasStarted(thread: OrchestrationShellSnapshot["threads"][number]): boolean {
   return thread.latestTurn !== null || thread.session !== null;
 }
 
 /**
- * 鍒ゆ柇璇︽儏绾跨▼鏄惁宸插惎鍔? * @param thread - 缂栨帓绾跨▼瀵硅薄
- * @returns 濡傛灉绾跨▼宸插惎鍔ㄦ垨鍖呭惈娑堟伅锛屽垯杩斿洖 true
+ * 閸掋倖鏌囩拠锔藉剰缁捐法鈻奸弰顖氭儊瀹告彃鎯庨崝? * @param thread - 缂傛牗甯撶痪璺ㄢ柤鐎电钖? * @returns 婵″倹鐏夌痪璺ㄢ柤瀹告彃鎯庨崝銊﹀灗閸栧懎鎯堝☉鍫熶紖閿涘苯鍨潻鏂挎礀 true
  */
 function detailThreadHasStarted(thread: OrchestrationThread): boolean {
   return shellThreadHasStarted(thread) || thread.messages.length > 0;
 }
 
 /**
- * 浠?Shell 绾跨▼鍒楄〃涓崗璋冨凡鎻愬崌鐨勮崏绋跨嚎绋? * @param threads - Shell 蹇収涓殑绾跨▼鍒楄〃
- * @description 鏍囪鎵€鏈夌嚎绋嬩负宸叉彁鍗囷紝骞跺皢宸插惎鍔ㄧ殑绾跨▼鏍囪涓哄凡鏈€缁堝寲
+ * 娴?Shell 缁捐法鈻奸崚妤勩€冩稉顓炲礂鐠嬪啫鍑￠幓鎰磳閻ㄥ嫯宕忕粙璺ㄥ殠缁? * @param threads - Shell 韫囶偆鍙庢稉顓犳畱缁捐法鈻奸崚妤勩€? * @description 閺嶅洩顔囬幍鈧張澶屽殠缁嬪璐熷鍙夊絹閸楀浄绱濋獮璺虹殺瀹告彃鎯庨崝銊ф畱缁捐法鈻奸弽鍥唶娑撳搫鍑￠張鈧紒鍫濆
  */
 function reconcilePromotedDraftsFromShellThreads(
   threads: ReadonlyArray<OrchestrationShellSnapshot["threads"][number]>,
@@ -126,9 +123,7 @@ function reconcilePromotedDraftsFromShellThreads(
 }
 
 /**
- * 浠庣嚎绋嬭鎯呭崗璋冨凡鎻愬崌鐨勮崏绋跨嚎绋? * @param thread - 缂栨帓绾跨▼瀵硅薄
- * @description 鏍囪绾跨▼涓哄凡鎻愬崌锛屽鏋滃凡鍚姩鍒欐爣璁颁负宸叉渶缁堝寲
- */
+ * 娴犲海鍤庣粙瀣嚊閹懎宕楃拫鍐ㄥ嚒閹绘劕宕岄惃鍕磸缁嬭法鍤庣粙? * @param thread - 缂傛牗甯撶痪璺ㄢ柤鐎电钖? * @description 閺嶅洩顔囩痪璺ㄢ柤娑撳搫鍑￠幓鎰磳閿涘苯顩ч弸婊冨嚒閸氼垰濮╅崚娆愮垼鐠侀璐熷鍙夋付缂佸牆瀵? */
 function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): void {
   markPromotedDraftThreads(new Set([thread.id]));
   if (detailThreadHasStarted(thread)) {
@@ -137,8 +132,7 @@ function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): vo
 }
 
 /**
- * 鏍硅矾鐢遍厤缃? * @description 鍒涘缓甯︽湁 QueryClient 涓婁笅鏂囩殑鏍硅矾鐢憋紝瀹氫箟鏍硅鍥惧拰閿欒瑙嗗浘
- */
+ * 閺嶇鐭鹃悽閬嶅帳缂? * @description 閸掓稑缂撶敮锔芥箒 QueryClient 娑撳﹣绗呴弬鍥╂畱閺嶇鐭鹃悽鎲嬬礉鐎规矮绠熼弽纭咁潒閸ユ儳鎷伴柨娆掝嚖鐟欏棗娴? */
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
@@ -150,8 +144,7 @@ export const Route = createRootRouteWithContext<{
 });
 
 /**
- * 鏍硅矾鐢辫鍥剧粍浠? * @description 鍒濆鍖栧叏灞€鏍峰紡銆佷富棰樸€佸瓧浣撱€佸浗闄呭寲绛夛紝骞舵覆鏌撳叏灞€缁勪欢
- */
+ * 閺嶇鐭鹃悽杈潒閸ュ墽绮嶆禒? * @description 閸掓繂顫愰崠鏍у弿鐏炩偓閺嶅嘲绱￠妴浣峰瘜妫版ǜ鈧礁鐡ф担鎾扁偓浣告禇闂勫懎瀵茬粵澶涚礉楠炶埖瑕嗛弻鎾冲弿鐏炩偓缂佸嫪娆? */
 function RootRouteView() {
   useAppTypography();
   useChatCodeFont();
@@ -190,9 +183,8 @@ function RootRouteView() {
 }
 
 /**
- * 鎻愪緵鑰呮洿鏂伴€氱煡缁勪欢
- * @description 鐩戞帶鎻愪緵鑰呯増鏈姸鎬侊紝褰撴湁鍙敤鏇存柊鏃舵樉绀洪€氱煡锛屾敮鎸佸崟涓垨鎵归噺鏇存柊
- */
+ * 閹绘劒绶甸懓鍛纯閺備即鈧氨鐓＄紒鍕
+ * @description 閻╂垶甯堕幓鎰返閼板懐澧楅張顒傚Ц閹緤绱濊ぐ鎾存箒閸欘垳鏁ら弴瀛樻煀閺冭埖妯夌粈娲偓姘辩叀閿涘本鏁幐浣稿礋娑擃亝鍨ㄩ幍褰掑櫤閺囧瓨鏌? */
 function ProviderUpdateNotifications() {
   const messages = useMessages();
   const navigate = useNavigate();
@@ -200,7 +192,7 @@ function ProviderUpdateNotifications() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const updateToastIdRef = useRef<ReturnType<typeof toastManager.add> | null>(null);
-  // 杩囨护鍑烘湁鍙敤鏇存柊鐨勬彁渚涜€?  const outdatedProviders = useMemo(
+  // 鏉╁洦鎶ら崙鐑樻箒閸欘垳鏁ら弴瀛樻煀閻ㄥ嫭褰佹笟娑溾偓?  const outdatedProviders = useMemo(
     () =>
       (serverConfigQuery.data?.providers ?? []).filter(
         (provider) =>
@@ -211,7 +203,7 @@ function ProviderUpdateNotifications() {
   );
 
   /**
-   * 鎵归噺鏇存柊鎵€鏈夎繃鏃剁殑鎻愪緵鑰?   * @param providers - 闇€瑕佹洿鏂扮殑鎻愪緵鑰呭垪琛?   * @description 渚濇鏇存柊姣忎釜鎻愪緵鑰咃紝鏀堕泦澶辫触淇℃伅锛屽苟鏄剧ず鐩稿簲鐨勯€氱煡
+   * 閹靛綊鍣洪弴瀛樻煀閹碘偓閺堝绻冮弮鍓佹畱閹绘劒绶甸懓?   * @param providers - 闂団偓鐟曚焦娲块弬鎵畱閹绘劒绶甸懓鍛灙鐞?   * @description 娓氭繃顐奸弴瀛樻煀濮ｅ繋閲滈幓鎰返閼板拑绱濋弨鍫曟肠婢惰精瑙︽穱鈩冧紖閿涘苯鑻熼弰鍓с仛閻╃绨查惃鍕偓姘辩叀
    */
   const updateAll = useCallback(
     async (providers: ReadonlyArray<ServerProviderStatus>) => {
@@ -384,8 +376,7 @@ function ProviderUpdateNotifications() {
 }
 
 /**
- * 鍏ㄥ眬蹇嵎閿璇濇缁勪欢
- * @description 绠＄悊鍏ㄥ眬蹇嵎閿璇濇鐨勬樉绀猴紝鍝嶅簲鑿滃崟鍔ㄤ綔鍜岄敭鐩樹簨浠? */
+ * 閸忋劌鐪箛顐ｅ祹闁款喖顕拠婵囶攱缂佸嫪娆? * @description 缁狅紕鎮婇崗銊ョ湰韫囶偅宓庨柨顔碱嚠鐠囨繃顢嬮惃鍕▔缁€鐚寸礉閸濆秴绨查懣婊冨礋閸斻劋缍旈崪宀勬暛閻╂ü绨ㄦ禒? */
 function GlobalShortcutsDialog() {
   const [open, setOpen] = useState(false);
   const { focusedThreadId, activeProject } = useFocusedChatContext();
@@ -439,10 +430,10 @@ function GlobalShortcutsDialog() {
 }
 
 /**
- * 鍏ㄥ眬"鏂板姛鑳?灞曠ず闈㈢粍浠? * @description 搴旂敤浼氳瘽绾у埆鐨勫崟涓€鎸傝浇鐐癸紝璐熻矗娓叉煋"鏂板姛鑳?寮圭獥鍜屽脊鍑哄崱鐗? */
+ * 閸忋劌鐪?閺傛澘濮涢懗?鐏炴洜銇氶棃銏㈢矋娴? * @description 鎼存梻鏁ゆ导姘崇樈缁狙冨焼閻ㄥ嫬宕熸稉鈧幐鍌濇祰閻愮櫢绱濈拹鐔荤煑濞撳弶鐓?閺傛澘濮涢懗?瀵湱鐛ラ崪灞借剨閸戝搫宕遍悧? */
 function GlobalWhatsNewSurface() {
-  // 鍗曚竴鎸傝浇鐐癸紝Hook 璐熻矗"寮瑰嚭鍗＄墖鍙"鍜?瀵硅瘽妗嗘墦寮€"鐨勫竷灏旂姸鎬佷互鍙婂凡鏌ョ湅鏍囪鐨勬寔涔呭寲
-  // 璇ョ粍浠朵粎璐熻矗灏嗗畠浠粍鍚堟覆鏌擄紝鍏变韩涓€涓叆鍙?  const {
+  // 閸楁洑绔撮幐鍌濇祰閻愮櫢绱滺ook 鐠愮喕鐭?瀵懓鍤崡锛勫閸欘垵顫?閸?鐎电鐦藉鍡樺ⅵ瀵偓"閻ㄥ嫬绔风亸鏃傚Ц閹椒浜掗崣濠傚嚒閺屻儳婀呴弽鍥唶閻ㄥ嫭瀵旀稊鍛
+  // 鐠囥儳绮嶆禒鏈电矌鐠愮喕鐭楃亸鍡楃暊娴狀剛绮嶉崥鍫熻閺屾搫绱濋崗鍙橀煩娑撯偓娑擃亜鍙嗛崣?  const {
     currentEntry,
     allEntries,
     currentVersion,
@@ -454,8 +445,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // 闈欓粯鍚姩鎴栨棤鎿嶄綔 - 涓や釜灞曠ず闈㈤兘鏃犻渶娓叉煋
-    return null;
+    // 闂堟瑩绮崥顖氬З閹存牗妫ら幙宥勭稊 - 娑撱倓閲滅仦鏇犮仛闂堛垽鍏橀弮鐘绘付濞撳弶鐓?    return null;
   }
 
   return (
@@ -480,9 +470,7 @@ function GlobalWhatsNewSurface() {
 }
 
 /**
- * 鏍硅矾鐢遍敊璇鍥剧粍浠? * @description 褰撹矾鐢卞彂鐢熼敊璇椂鏄剧ず鐨勯敊璇〉闈紝鎻愪緵閲嶈瘯鍜岄噸杞藉簲鐢ㄧ殑閫夐」
- * @param error - 閿欒瀵硅薄
- * @param reset - 閲嶇疆鍑芥暟锛岀敤浜庨噸璇? */
+ * 閺嶇鐭鹃悽閬嶆晩鐠囶垵顫嬮崶鍓х矋娴? * @description 瑜版捁鐭鹃悽鍗炲絺閻㈢喖鏁婄拠顖涙閺勫墽銇氶惃鍕晩鐠囶垶銆夐棃顫礉閹绘劒绶甸柌宥堢槸閸滃矂鍣告潪钘夌安閻劎娈戦柅澶愩€? * @param error - 闁挎瑨顕ょ€电钖? * @param reset - 闁插秶鐤嗛崙鑺ユ殶閿涘瞼鏁ゆ禍搴ㄥ櫢鐠? */
 function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
   const message = errorMessage(error);
   const details = errorDetails(error);
@@ -525,9 +513,7 @@ function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
 }
 
 /**
- * 鎻愬彇閿欒娑堟伅
- * @param error - 閿欒瀵硅薄
- * @returns 鏍煎紡鍖栫殑閿欒娑堟伅瀛楃涓? */
+ * 閹绘劕褰囬柨娆掝嚖濞戝牊浼? * @param error - 闁挎瑨顕ょ€电钖? * @returns 閺嶇厧绱￠崠鏍畱闁挎瑨顕ゅ☉鍫熶紖鐎涙顑佹稉? */
 function errorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
@@ -541,9 +527,7 @@ function errorMessage(error: unknown): string {
 }
 
 /**
- * 鎻愬彇閿欒璇︽儏
- * @param error - 閿欒瀵硅薄
- * @returns 鏍煎紡鍖栫殑閿欒璇︽儏瀛楃涓诧紝鍖呭惈鍫嗘爤淇℃伅鎴?JSON 搴忓垪鍖栫粨鏋? */
+ * 閹绘劕褰囬柨娆掝嚖鐠囷附鍎? * @param error - 闁挎瑨顕ょ€电钖? * @returns 閺嶇厧绱￠崠鏍畱闁挎瑨顕ょ拠锔藉剰鐎涙顑佹稉璇х礉閸栧懎鎯堥崼鍡樼垽娣団剝浼呴幋?JSON 鎼村繐鍨崠鏍波閺? */
 function errorDetails(error: unknown): string {
   if (error instanceof Error) {
     return error.stack ?? error.message;
@@ -561,10 +545,8 @@ function errorDetails(error: unknown): string {
 }
 
 /**
- * 鍚堝苟缂栨帓 UI 浜嬩欢
- * @description 灏嗚繛缁殑鐩稿悓娑堟伅鍙戦€佷簨浠跺悎骞朵负涓€涓紝閬垮厤 UI 閲嶅娓叉煋
- * @param events - 缂栨帓浜嬩欢鏁扮粍
- * @returns 鍚堝苟鍚庣殑浜嬩欢鏁扮粍
+ * 閸氬牆鑻熺紓鏍ㄥ笓 UI 娴滃娆? * @description 鐏忓棜绻涚紒顓犳畱閻╃鎮撳☉鍫熶紖閸欐垿鈧椒绨ㄦ禒璺烘値楠炴湹璐熸稉鈧稉顏庣礉闁灝鍘?UI 闁插秴顦插〒鍙夌厠
+ * @param events - 缂傛牗甯撴禍瀣╂閺佹壆绮? * @returns 閸氬牆鑻熼崥搴ｆ畱娴滃娆㈤弫鎵矋
  */
 function coalesceOrchestrationUiEvents(
   events: ReadonlyArray<OrchestrationEvent>,
@@ -604,11 +586,8 @@ function coalesceOrchestrationUiEvents(
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旇绔嬪嵆鍒锋柊棰嗗煙浜嬩欢
- * @description 瀵逛簬鍔╂墜娑堟伅鐨勯涓祦寮忎簨浠讹紝绔嬪嵆鍒锋柊浠ョ‘淇?UI 鍙婃椂鍝嶅簲
- * @param event - 缂栨帓浜嬩欢瀵硅薄
- * @param immediatelyFlushedAssistantMessageIds - 宸茬珛鍗冲埛鏂扮殑鍔╂墜娑堟伅 ID 闆嗗悎
- * @returns 濡傛灉搴旇绔嬪嵆鍒锋柊鍒欒繑鍥?true
+ * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氱粩瀣祮閸掗攱鏌婃０鍡楃厵娴滃娆? * @description 鐎甸€涚艾閸斺晜澧滃☉鍫熶紖閻ㄥ嫰顩绘稉顏呯ウ瀵繋绨ㄦ禒璁圭礉缁斿宓嗛崚閿嬫煀娴犮儳鈥樻穱?UI 閸欏﹥妞傞崫宥呯安
+ * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @param immediatelyFlushedAssistantMessageIds - 瀹歌尙鐝涢崡鍐插煕閺傛壆娈戦崝鈺傚濞戝牊浼?ID 闂嗗棗鎮? * @returns 婵″倹鐏夋惔鏃囶嚉缁斿宓嗛崚閿嬫煀閸掓瑨绻戦崶?true
  */
 function shouldFlushDomainEventImmediately(
   event: OrchestrationEvent,
@@ -632,10 +611,9 @@ function shouldFlushDomainEventImmediately(
 }
 
 /**
- * 鍒ゆ柇浜嬩欢鏄惁涓烘寚瀹氱嚎绋嬬殑璇︽儏浜嬩欢
- * @param event - 缂栨帓浜嬩欢瀵硅薄
- * @param threadId - 绾跨▼ ID
- * @returns 濡傛灉浜嬩欢灞炰簬鎸囧畾绾跨▼鐨勮鎯呬簨浠跺垯杩斿洖 true
+ * 閸掋倖鏌囨禍瀣╂閺勵垰鎯佹稉鐑樺瘹鐎规氨鍤庣粙瀣畱鐠囷附鍎忔禍瀣╂
+ * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @param threadId - 缁捐法鈻?ID
+ * @returns 婵″倹鐏夋禍瀣╂鐏炵偘绨幐鍥х暰缁捐法鈻奸惃鍕嚊閹懍绨ㄦ禒璺哄灟鏉╂柨娲?true
  */
 function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: ThreadId): boolean {
   if (event.aggregateKind !== "thread" || event.aggregateId !== threadId) {
@@ -656,9 +634,9 @@ function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: Threa
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旇杞绾跨▼璇︽儏杩借刀
- * @param threadId - 绾跨▼ ID
- * @returns 濡傛灉绾跨▼姝ｅ湪杩愯锛堜細璇濇垨鏈€鏂拌疆娆★級锛屽垯杩斿洖 true
+ * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氭潪顔款嚄缁捐法鈻肩拠锔藉剰鏉╁€熷垁
+ * @param threadId - 缁捐法鈻?ID
+ * @returns 婵″倹鐏夌痪璺ㄢ柤濮濓絽婀潻鎰攽閿涘牅绱扮拠婵囧灗閺堚偓閺傛媽鐤嗗▎鈽呯礆閿涘苯鍨潻鏂挎礀 true
  */
 function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
   const thread = getThreadFromState(useStore.getState(), threadId);
@@ -668,10 +646,8 @@ function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
 }
 
 /**
- * 浜嬩欢璺敱缁勪欢
- * @description 鏍稿績浜嬩欢璁㈤槄鍜屽垎鍙戠粍浠讹紝璐熻矗锛? * - 璁㈤槄 Shell 鍜岀嚎绋嬭鎯呬簨浠舵祦
- * - 绠＄悊绾跨▼璁㈤槄鐨勭敓鍛藉懆鏈? * - 鍗忚皟缂撳瓨澶辨晥鍜屾煡璇㈠埛鏂? * - 澶勭悊缁堢浜嬩欢鍜屾杩庢秷鎭? * - 缁存姢绾跨▼蹇収搴忓垪鍙峰拰浜嬩欢缂撳啿
- */
+ * 娴滃娆㈢捄顖滄暠缂佸嫪娆? * @description 閺嶇绺炬禍瀣╂鐠併垽妲勯崪灞藉瀻閸欐垹绮嶆禒璁圭礉鐠愮喕鐭楅敍? * - 鐠併垽妲?Shell 閸滃瞼鍤庣粙瀣嚊閹懍绨ㄦ禒鑸电ウ
+ * - 缁狅紕鎮婄痪璺ㄢ柤鐠併垽妲勯惃鍕晸閸涜棄鎳嗛張? * - 閸楀繗鐨熺紓鎾崇摠婢惰鲸鏅ラ崪灞剧叀鐠囥垹鍩涢弬? * - 婢跺嫮鎮婄紒鍫㈩伂娴滃娆㈤崪灞绢偨鏉╁孩绉烽幁? * - 缂佸瓨濮㈢痪璺ㄢ柤韫囶偆鍙庢惔蹇撳灙閸欏嘲鎷版禍瀣╂缂傛挸鍟? */
 function EventRouter() {
   const messages = useMessages();
   const syncServerShellSnapshot = useStore((store) => store.syncServerShellSnapshot);
@@ -1267,8 +1243,8 @@ function EventRouter() {
 }
 
 /**
- * 妗岄潰椤圭洰寮曞缁勪欢
- * @description 澶勭悊妗岄潰搴旂敤鐨勯」鐩垵濮嬪寲閫昏緫锛岀‘淇濋」鐩暟鎹纭姞杞? */
+ * 濡楀矂娼版い鍦窗瀵洖顕辩紒鍕
+ * @description 婢跺嫮鎮婂宀勬桨鎼存梻鏁ら惃鍕€嶉惄顔煎灥婵瀵查柅鏄忕帆閿涘瞼鈥樻穱婵嬨€嶉惄顔芥殶閹诡喗顒滅涵顔煎鏉? */
 function DesktopProjectBootstrap() {
   const syncServerReadModel = useStore((store) => store.syncServerReadModel);
   const projects = useStore((store) => store.projects);
@@ -1290,8 +1266,7 @@ function DesktopProjectBootstrap() {
 
     attemptedRecoveryRef.current = true;
 
-    // Shell 璁㈤槄閫氬父浼氬垵濮嬪寲渚ц竟鏍忔暟鎹€傚鏋滈」鐩缂哄け浣嗗瓨鍦ㄦ椿璺冪嚎绋嬶紝
-    // 鍦ㄦ帴鍙楀揩鐓т箣鍓嶅厛杩涜淇
+    // Shell 鐠併垽妲勯柅姘埗娴兼艾鍨垫慨瀣娓氀嗙珶閺嶅繑鏆熼幑顔衡偓鍌氼洤閺嬫粓銆嶉惄顔款攽缂傚搫銇戞担鍡楃摠閸︺劍妞跨捄鍐殠缁嬪绱?    // 閸︺劍甯撮崣妤€鎻╅悡褌绠ｉ崜宥呭帥鏉╂稖顢戞穱顔碱槻
     void api.orchestration
       .getShellSnapshot()
       .then((snapshot) => {
@@ -1312,5 +1287,5 @@ function DesktopProjectBootstrap() {
       });
   }, [projects, syncServerReadModel, threads, threadsHydrated]);
 
-  // 妗岄潰绔殑鏁版嵁鍒濆鍖栭€氬父閫氳繃 EventRouter 鐨勯」鐩拰缂栨帓鍚屾鏉ュ畬鎴?  return null;
+  // 濡楀矂娼扮粩顖滄畱閺佺増宓侀崚婵嗩潗閸栨牠鈧艾鐖堕柅姘崇箖 EventRouter 閻ㄥ嫰銆嶉惄顔兼嫲缂傛牗甯撻崥灞绢劄閺夈儱鐣幋?  return null;
 }

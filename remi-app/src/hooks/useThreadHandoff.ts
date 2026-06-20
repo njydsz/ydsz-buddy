@@ -1,6 +1,6 @@
 /**
  * @file useThreadHandoff.ts
- * @description 绾跨▼浜ゆ帴 Hook - 鍒涘缓浠庝竴涓彁渚涘晢鍒板彟涓€涓彁渚涘晢鐨勪氦鎺ョ嚎绋? * @module hooks/useThreadHandoff
+ * @description 缁捐法鈻兼禍銈嗗复 Hook - 閸掓稑缂撴禒搴濈娑擃亝褰佹笟娑樻櫌閸掓澘褰熸稉鈧稉顏呭絹娓氭稑鏅㈤惃鍕唉閹恒儳鍤庣粙? * @module hooks/useThreadHandoff
  * @layer Web Hook
  */
 
@@ -29,17 +29,16 @@ import { useStore } from "../store";
 import { type Thread } from "../types";
 
 /**
- * 绾跨▼浜ゆ帴 Hook
+ * 缁捐法鈻兼禍銈嗗复 Hook
  *
  * @description
- * 浠庡綋鍓嶆椿鍔ㄧ殑 Web 鐘舵€佸垱寤烘彁渚涘晢鍒版彁渚涘晢鐨勪氦鎺ョ嚎绋嬨€? * 浜ゆ帴鎿嶄綔浼氬皢褰撳墠绾跨▼鐨勬秷鎭€佹椿鍔ㄥ拰閰嶇疆澶嶅埗鍒版柊绾跨▼涓紝
- * 骞跺垏鎹㈠埌鐩爣鎻愪緵鍟嗐€? *
- * @returns 鍖呭惈浜ゆ帴鏂规硶鐨勫璞? * @returns.createThreadHandoff - 鍒涘缓浜ゆ帴绾跨▼鐨勬柟娉? *
+ * 娴犲骸缍嬮崜宥嗘た閸斻劎娈?Web 閻樿埖鈧礁鍨卞鐑樺絹娓氭稑鏅㈤崚鐗堝絹娓氭稑鏅㈤惃鍕唉閹恒儳鍤庣粙瀣ㄢ偓? * 娴溿倖甯撮幙宥勭稊娴兼艾鐨㈣ぐ鎾冲缁捐法鈻奸惃鍕Х閹垬鈧焦妞块崝銊ユ嫲闁板秶鐤嗘径宥呭煑閸掔増鏌婄痪璺ㄢ柤娑擃叏绱? * 楠炶泛鍨忛幑銏犲煂閻╊喗鐖ｉ幓鎰返閸熷棎鈧? *
+ * @returns 閸栧懎鎯堟禍銈嗗复閺傝纭堕惃鍕嚠鐠? * @returns.createThreadHandoff - 閸掓稑缂撴禍銈嗗复缁捐法鈻奸惃鍕煙濞? *
  * @example
  * ```tsx
  * const { createThreadHandoff } = useThreadHandoff();
  *
- * // 灏嗗綋鍓嶇嚎绋嬩氦鎺ュ埌 claude 鎻愪緵鍟? * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
+ * // 鐏忓棗缍嬮崜宥囧殠缁嬪姘﹂幒銉ュ煂 claude 閹绘劒绶甸崯? * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
  * ```
  */
 export function useThreadHandoff() {
@@ -50,15 +49,12 @@ export function useThreadHandoff() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
 
   /**
-   * 鍒涘缓绾跨▼浜ゆ帴
-   *
+   * 閸掓稑缂撶痪璺ㄢ柤娴溿倖甯?   *
    * @description
-   * 鎵ц瀹屾暣鐨勭嚎绋嬩氦鎺ユ祦绋嬶細
-   * 1. 楠岃瘉婧愮嚎绋嬪拰鐩爣鎻愪緵鍟嗙殑鍙敤鎬?   * 2. 鏋勫缓瀵煎叆鐨勬秷鎭拰娲诲姩
-   * 3. 鍒涘缓浜ゆ帴绾跨▼骞跺鍒剁姸鎬?   * 4. 瀵艰埅鍒版柊绾跨▼
-   *
-   * @param thread - 婧愮嚎绋?   * @param targetProvider - 鐩爣鎻愪緵鍟?   * @returns 鏂板垱寤虹殑绾跨▼ ID
-   * @throws 褰撴潯浠朵笉婊¤冻鏃舵姏鍑洪敊璇?   */
+   * 閹笛嗩攽鐎瑰本鏆ｉ惃鍕殠缁嬪姘﹂幒銉︾ウ缁嬪绱?   * 1. 妤犲矁鐦夊┃鎰殠缁嬪鎷伴惄顔界垼閹绘劒绶甸崯鍡欐畱閸欘垳鏁ら幀?   * 2. 閺嬪嫬缂撶€电厧鍙嗛惃鍕Х閹垰鎷板ú璇插З
+   * 3. 閸掓稑缂撴禍銈嗗复缁捐法鈻奸獮璺侯槻閸掑墎濮搁幀?   * 4. 鐎佃壈鍩呴崚鐗堟煀缁捐法鈻?   *
+   * @param thread - 濠ф劗鍤庣粙?   * @param targetProvider - 閻╊喗鐖ｉ幓鎰返閸?   * @returns 閺傛澘鍨卞铏规畱缁捐法鈻?ID
+   * @throws 瑜版挻娼禒鏈电瑝濠娐ゅ喕閺冭埖濮忛崙娲晩鐠?   */
   const createThreadHandoff = useCallback(
     async (thread: Thread, targetProvider: ProviderKind): Promise<Thread["id"]> => {
       const api = readNativeApi();
@@ -66,23 +62,22 @@ export function useThreadHandoff() {
         throw new Error("Native API not found");
       }
 
-      // 鏌ユ壘婧愮嚎绋嬫墍灞炵殑椤圭洰
-      const project = projects.find((entry) => entry.id === thread.projectId);
+      // 閺屻儲澹樺┃鎰殠缁嬪澧嶇仦鐐垫畱妞ゅ湱娲?      const project = projects.find((entry) => entry.id === thread.projectId);
       if (!project) {
         throw new Error("Project not found for handoff thread.");
       }
 
-      // 楠岃瘉婧愮嚎绋嬫槸鍚﹀彲浠ヨ繘琛屼氦鎺?      if (!canCreateThreadHandoff({ thread })) {
+      // 妤犲矁鐦夊┃鎰殠缁嬪妲搁崥锕€褰叉禒銉ㄧ箻鐞涘奔姘﹂幒?      if (!canCreateThreadHandoff({ thread })) {
         throw new Error("This thread cannot be handed off yet.");
       }
-      // 楠岃瘉鐩爣鎻愪緵鍟嗘槸鍚﹀彲鐢?      if (
+      // 妤犲矁鐦夐惄顔界垼閹绘劒绶甸崯鍡樻Ц閸氾箑褰查悽?      if (
         !resolveAvailableHandoffTargetProviders(thread.modelSelection.provider).includes(
           targetProvider,
         )
       ) {
         throw new Error("This handoff target is not available for the current thread.");
       }
-      // 妫€鏌ョ洰鏍囨彁渚涘晢鐨勫彲鐢ㄦ€х姸鎬?      const targetStatus = normalizeProviderStatusForLocalConfig({
+      // 濡偓閺屻儳娲伴弽鍥ㄥ絹娓氭稑鏅㈤惃鍕讲閻劍鈧呭Ц閹?      const targetStatus = normalizeProviderStatusForLocalConfig({
         provider: targetProvider,
         status:
           serverConfigQuery.data?.providers.find((entry) => entry.provider === targetProvider) ??
@@ -95,13 +90,12 @@ export function useThreadHandoff() {
 
       const nextThreadId = newThreadId();
       const createdAt = new Date().toISOString();
-      // 鏋勫缓瑕佸鍏ョ殑娑堟伅鍜屾椿鍔?      const importedMessages = buildThreadHandoffImportedMessages(thread);
+      // 閺嬪嫬缂撶憰浣割嚤閸忋儳娈戝☉鍫熶紖閸滃本妞块崝?      const importedMessages = buildThreadHandoffImportedMessages(thread);
       const importedActivities = buildThreadHandoffImportedActivities(thread);
       const { copyTransferableComposerState, stickyModelSelectionByProvider } =
         useComposerDraftStore.getState();
 
-      // 鍒涘缓浜ゆ帴绾跨▼
-      await api.orchestration.dispatchCommand({
+      // 閸掓稑缂撴禍銈嗗复缁捐法鈻?      await api.orchestration.dispatchCommand({
         type: "thread.handoff.create",
         commandId: newCommandId(),
         threadId: nextThreadId,
@@ -128,7 +122,7 @@ export function useThreadHandoff() {
         createdAt,
       });
 
-      // 閫愪釜杩藉姞瀵煎叆鐨勬椿鍔?      for (const activity of importedActivities) {
+      // 闁劒閲滄潻钘夊鐎电厧鍙嗛惃鍕た閸?      for (const activity of importedActivities) {
         await api.orchestration.dispatchCommand({
           type: "thread.activity.append",
           commandId: newCommandId(),
@@ -138,9 +132,9 @@ export function useThreadHandoff() {
         });
       }
 
-      // 澶嶅埗鍙浆绉荤殑缂栬緫鍣ㄧ姸鎬佸埌鏂扮嚎绋?      copyTransferableComposerState(thread.id, nextThreadId);
+      // 婢跺秴鍩楅崣顖濇祮缁夎崵娈戠紓鏍帆閸ｃ劎濮搁幀浣稿煂閺傛壆鍤庣粙?      copyTransferableComposerState(thread.id, nextThreadId);
 
-      // 鍚屾 Shell 蹇収骞跺鑸埌鏂扮嚎绋?      const snapshot = await api.orchestration.getShellSnapshot();
+      // 閸氬本顒?Shell 韫囶偆鍙庨獮璺侯嚤閼割亜鍩岄弬鎵殠缁?      const snapshot = await api.orchestration.getShellSnapshot();
       syncServerShellSnapshot(snapshot);
       await navigate({
         to: "/$threadId",

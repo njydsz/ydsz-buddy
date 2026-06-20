@@ -1,12 +1,12 @@
 /**
- * @file Provider 鎺掑簭绠＄悊
+ * @file Provider 閹烘帒绨粻锛勬倞
  *
- * 缁存姢 Provider 閫夋嫨鍣ㄤ腑鐨勬帓搴忕ǔ瀹氭€э紝纭繚璁剧疆椤甸潰銆佹悳绱㈠拰鑿滃崟涓殑椤哄簭涓€鑷淬€? * 鎻愪緵榛樿鎺掑簭銆佹帓搴忔爣鍑嗗寲銆佹帓搴忔瘮杈冪瓑宸ュ叿鍑芥暟銆? */
+ * 缂佸瓨濮?Provider 闁瀚ㄩ崳銊よ厬閻ㄥ嫭甯撴惔蹇暻旂€规碍鈧嶇礉绾喕绻氱拋鍓х枂妞ょ敻娼伴妴浣规偝缁便垹鎷伴懣婊冨礋娑擃厾娈戞い鍝勭碍娑撯偓閼锋番鈧? * 閹绘劒绶垫妯款吇閹烘帒绨妴浣瑰笓鎼村繑鐖ｉ崙鍡楀閵嗕焦甯撴惔蹇旂槷鏉堝啰鐡戝銉ュ徔閸戣姤鏆熼妴? */
 
 import type { ProviderKind } from "~/contracts";
 
 /**
- * Provider 鐨勯粯璁ゆ樉绀洪『搴忋€? * 姝ら『搴忓喅瀹氫簡渚ц竟鏍忋€侀€夋嫨鍣ㄧ瓑 UI 涓?Provider 鐨勬帓鍒椾綅缃€? */
+ * Provider 閻ㄥ嫰绮拋銈嗘▔缁€娲€庢惔蹇嬧偓? * 濮濄倝銆庢惔蹇撳枀鐎规矮绨℃笟褑绔熼弽蹇嬧偓渚€鈧瀚ㄩ崳銊х搼 UI 娑?Provider 閻ㄥ嫭甯撻崚妞剧秴缂冾喓鈧? */
 export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "codex",
   "claudeAgent",
@@ -18,22 +18,20 @@ export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "pi",
 ];
 
-/** 鍩轰簬 DEFAULT_PROVIDER_ORDER 鏋勫缓鐨?Provider 绫诲瀷闆嗗悎锛岀敤浜庡揩閫熸煡鎵?*/
+/** 閸╄桨绨?DEFAULT_PROVIDER_ORDER 閺嬪嫬缂撻惃?Provider 缁鐎烽梿鍡楁値閿涘瞼鏁ゆ禍搴℃彥闁喐鐓￠幍?*/
 const PROVIDER_KIND_SET: ReadonlySet<ProviderKind> = new Set(DEFAULT_PROVIDER_ORDER);
 
 /**
- * 鍒ゆ柇缁欏畾瀛楃涓叉槸鍚︿负鏈夋晥鐨?ProviderKind 绫诲瀷銆? *
- * @param value - 寰呭垽鏂殑瀛楃涓? * @returns 鏄惁涓烘湁鏁堢殑 ProviderKind
+ * 閸掋倖鏌囩紒娆忕暰鐎涙顑佹稉鍙夋Ц閸氾缚璐熼張澶嬫櫏閻?ProviderKind 缁鐎烽妴? *
+ * @param value - 瀵板懎鍨介弬顓犳畱鐎涙顑佹稉? * @returns 閺勵垰鎯佹稉鐑樻箒閺佸牏娈?ProviderKind
  */
 export function isProviderKind(value: string): value is ProviderKind {
   return PROVIDER_KIND_SET.has(value as ProviderKind);
 }
 
 /**
- * 鏍囧噯鍖栭殣钘忕殑 Provider 鍒楄〃銆? * 杩囨护鏃犳晥鍊煎拰閲嶅椤癸紝浠呬繚鐣欐湁鏁堢殑 ProviderKind銆? *
- * @param hiddenProviders - 鍘熷闅愯棌 Provider 鍒楄〃
- * @returns 鍘婚噸鍚庣殑鏈夋晥 ProviderKind 鏁扮粍
- */
+ * 閺嶅洤鍣崠鏍閽樺繒娈?Provider 閸掓銆冮妴? * 鏉╁洦鎶ら弮鐘虫櫏閸婄厧鎷伴柌宥咁槻妞ょ櫢绱濇禒鍛箽閻ｆ瑦婀侀弫鍫㈡畱 ProviderKind閵? *
+ * @param hiddenProviders - 閸樼喎顫愰梾鎰 Provider 閸掓銆? * @returns 閸樺鍣搁崥搴ｆ畱閺堝鏅?ProviderKind 閺佹壆绮? */
 export function normalizeHiddenProviders(hiddenProviders: ReadonlyArray<string>): ProviderKind[] {
   const seen = new Set<ProviderKind>();
   const result: ProviderKind[] = [];
@@ -47,9 +45,8 @@ export function normalizeHiddenProviders(hiddenProviders: ReadonlyArray<string>)
 }
 
 /**
- * 鏍囧噯鍖?Provider 鎺掑簭鍒楄〃銆? * 杩囨护鏃犳晥鍊煎拰閲嶅椤癸紝骞跺皢鐢ㄦ埛鏈寚瀹氱殑 Provider 鎸夐粯璁ら『搴忚拷鍔犲埌鏈熬銆? *
- * @param providerOrder - 鍘熷 Provider 鎺掑簭鍒楄〃
- * @returns 鏍囧噯鍖栧悗鐨勫畬鏁?ProviderKind 鎺掑簭鏁扮粍
+ * 閺嶅洤鍣崠?Provider 閹烘帒绨崚妤勩€冮妴? * 鏉╁洦鎶ら弮鐘虫櫏閸婄厧鎷伴柌宥咁槻妞ょ櫢绱濋獮璺虹殺閻劍鍩涢張顏呭瘹鐎规氨娈?Provider 閹稿绮拋銈夈€庢惔蹇氭嫹閸旂姴鍩岄張顐㈢啲閵? *
+ * @param providerOrder - 閸樼喎顫?Provider 閹烘帒绨崚妤勩€? * @returns 閺嶅洤鍣崠鏍ф倵閻ㄥ嫬鐣弫?ProviderKind 閹烘帒绨弫鎵矋
  */
 export function normalizeProviderOrder(providerOrder: ReadonlyArray<string>): ProviderKind[] {
   const seen = new Set<ProviderKind>();
@@ -69,8 +66,8 @@ export function normalizeProviderOrder(providerOrder: ReadonlyArray<string>): Pr
 }
 
 /**
- * 鍒ゆ柇涓や釜 Provider 鎺掑簭鍒楄〃鏄惁瀹屽叏鐩稿悓锛堥『搴忓拰鍏冪礌涓€鑷达級銆? *
- * @param left - 绗竴涓帓搴忓垪琛? * @param right - 绗簩涓帓搴忓垪琛? * @returns 鏄惁鐩稿悓
+ * 閸掋倖鏌囨稉銈勯嚋 Provider 閹烘帒绨崚妤勩€冮弰顖氭儊鐎瑰苯鍙忛惄绋挎倱閿涘牓銆庢惔蹇撴嫲閸忓啰绀屾稉鈧懛杈剧礆閵? *
+ * @param left - 缁楊兛绔存稉顏呭笓鎼村繐鍨悰? * @param right - 缁楊兛绨╂稉顏呭笓鎼村繐鍨悰? * @returns 閺勵垰鎯侀惄绋挎倱
  */
 export function sameProviderOrder(
   left: ReadonlyArray<ProviderKind>,
@@ -80,11 +77,10 @@ export function sameProviderOrder(
 }
 
 /**
- * 鎸夌収鎸囧畾鎺掑簭姣旇緝涓や釜 Provider 鐨勫厛鍚庨『搴忋€? * 涓嶅湪鎺掑簭鍒楄〃涓殑 Provider 鎺掑湪鏈熬锛屾寜榛樿椤哄簭鎺掑垪銆? *
- * @param providerOrder - 鎺掑簭瑙勫垯鍒楄〃
- * @param left - 绗竴涓?Provider
- * @param right - 绗簩涓?Provider
- * @returns 璐熸暟琛ㄧず left 鍦ㄥ墠锛屾鏁拌〃绀?right 鍦ㄥ墠锛? 琛ㄧず鐩稿悓
+ * 閹稿鍙庨幐鍥х暰閹烘帒绨В鏃囩窛娑撱倓閲?Provider 閻ㄥ嫬鍘涢崥搴ㄣ€庢惔蹇嬧偓? * 娑撳秴婀幒鎺戠碍閸掓銆冩稉顓犳畱 Provider 閹烘帒婀張顐㈢啲閿涘本瀵滄妯款吇妞ゅ搫绨幒鎺戝灙閵? *
+ * @param providerOrder - 閹烘帒绨憴鍕灟閸掓銆? * @param left - 缁楊兛绔存稉?Provider
+ * @param right - 缁楊兛绨╂稉?Provider
+ * @returns 鐠愮喐鏆熺悰銊с仛 left 閸︺劌澧犻敍灞绢劀閺佹媽銆冪粈?right 閸︺劌澧犻敍? 鐞涖劎銇氶惄绋挎倱
  */
 export function compareProvidersByOrder(
   providerOrder: ReadonlyArray<ProviderKind>,

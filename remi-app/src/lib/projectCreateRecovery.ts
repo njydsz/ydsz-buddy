@@ -1,54 +1,54 @@
 /**
  * @file projectCreateRecovery.ts
- * @description 闆嗕腑澶勭悊 project.create 閲嶅閿欒鐨勮В鏋愪笌鎭㈠閫昏緫銆? * 鎻愪緵閲嶅鍒涘缓閿欒妫€娴嬨€侀」鐩?ID 鎻愬彇銆佸揩鐓у尮閰嶅強閲嶈瘯绛夊緟绛夋仮澶嶅伐鍏峰嚱鏁般€? */
+ * @description 闂嗗棔鑵戞径鍕倞 project.create 闁插秴顦查柨娆掝嚖閻ㄥ嫯袙閺嬫劒绗岄幁銏狀槻闁槒绶妴? * 閹绘劒绶甸柌宥咁槻閸掓稑缂撻柨娆掝嚖濡偓濞村鈧線銆嶉惄?ID 閹绘劕褰囬妴浣告彥閻撗冨爱闁板秴寮烽柌宥堢槸缁涘绶熺粵澶嬩划婢跺秴浼愰崗宄板毐閺佽埇鈧? */
 
 import type { OrchestrationReadModel } from "~/contracts";
 import { workspaceRootsEqual } from "~/shared/threadWorkspace";
 
-/** 閲嶅椤圭洰鍒涘缓閿欒娑堟伅鐨勫墠缂€ */
+/** 闁插秴顦叉い鍦窗閸掓稑缂撻柨娆掝嚖濞戝牊浼呴惃鍕缂傗偓 */
 const DUPLICATE_PROJECT_CREATE_ERROR_PREFIX =
   "Orchestration command invariant failed (project.create): Project '";
-/** 榛樿鏈€澶ф仮澶嶉噸璇曟鏁?*/
+/** 姒涙顓婚張鈧径褎浠径宥夊櫢鐠囨洘顐奸弫?*/
 const DEFAULT_RECOVERY_MAX_ATTEMPTS = 6;
-/** 榛樿閲嶈瘯闂撮殧锛堟绉掞級 */
+/** 姒涙顓婚柌宥堢槸闂傛挳娈ч敍鍫燁嚑缁夋帪绱?*/
 const DEFAULT_RECOVERY_DELAY_MS = 50;
 
-/** 鍙仮澶嶇殑椤圭洰鍊欓€夊璞★紝鍖呭惈 ID銆佺被鍨嬨€佸伐浣滃尯鏍硅矾寰勫強鍒犻櫎鏃堕棿 */
+/** 閸欘垱浠径宥囨畱妞ゅ湱娲伴崐娆撯偓澶婎嚠鐠炩槄绱濋崠鍛儓 ID閵嗕胶琚崹瀣ㄢ偓浣镐紣娴ｆ粌灏弽纭呯熅瀵板嫬寮烽崚鐘绘珟閺冨爼妫?*/
 export interface DuplicateProjectCreateRecoveryCandidate {
-  /** 椤圭洰 ID */
+  /** 妞ゅ湱娲?ID */
   readonly id: string;
-  /** 椤圭洰绫诲瀷锛岄粯璁や负 "project" */
+  /** 妞ゅ湱娲扮猾璇茬€烽敍宀勭帛鐠併倓璐?"project" */
   readonly kind?: string | undefined;
-  /** 宸ヤ綔鍖烘牴璺緞 */
+  /** 瀹搞儰缍旈崠鐑樼壌鐠侯垰绶?*/
   readonly workspaceRoot: string;
-  /** 椤圭洰鍒犻櫎鏃堕棿锛屾湭鍒犻櫎鍒欎负 null */
+  /** 妞ゅ湱娲伴崚鐘绘珟閺冨爼妫块敍灞炬弓閸掔娀娅庨崚娆庤礋 null */
   readonly deletedAt?: string | null | undefined;
 }
 
-/** 鍖呭惈椤圭洰鍒楄〃鐨勫揩鐓х粨鏋?*/
+/** 閸栧懎鎯堟い鍦窗閸掓銆冮惃鍕彥閻撗呯波閺?*/
 interface SnapshotWithProjects<T extends DuplicateProjectCreateRecoveryCandidate> {
   readonly projects: readonly T[];
 }
 
-/** 椤圭洰鏌ユ壘杈撳叆鍙傛暟 */
+/** 妞ゅ湱娲伴弻銉﹀鏉堟挸鍙嗛崣鍌涙殶 */
 interface ProjectLookupInput {
-  /** 椤圭洰 ID */
+  /** 妞ゅ湱娲?ID */
   readonly projectId?: string | null | undefined;
-  /** 宸ヤ綔鍖烘牴璺緞 */
+  /** 瀹搞儰缍旈崠鐑樼壌鐠侯垰绶?*/
   readonly workspaceRoot?: string | null | undefined;
 }
 
-/** 鍒ゆ柇椤圭洰绫诲瀷鏄惁鍙仮澶嶏紙浠?"project" 绫诲瀷鍙仮澶嶏級 */
+/** 閸掋倖鏌囨い鍦窗缁鐎烽弰顖氭儊閸欘垱浠径宥忕礄娴?"project" 缁鐎烽崣顖涗划婢跺稄绱?*/
 function isRecoverableProjectKind(kind: string | undefined): boolean {
   return (kind ?? "project") === "project";
 }
 
-/** 鍒ゆ柇椤圭洰鏄惁涓哄彲鎭㈠鐨勬椿璺冮」鐩紙鏈垹闄や笖绫诲瀷鍙仮澶嶏級 */
+/** 閸掋倖鏌囨い鍦窗閺勵垰鎯佹稉鍝勫讲閹垹顦查惃鍕た鐠哄啴銆嶉惄顕嗙礄閺堫亜鍨归梽銈勭瑬缁鐎烽崣顖涗划婢跺稄绱?*/
 function isRecoverableActiveProject(project: DuplicateProjectCreateRecoveryCandidate): boolean {
   return (project.deletedAt ?? null) === null && isRecoverableProjectKind(project.kind);
 }
 
-/** 绛夊緟鎸囧畾姣鏁?*/
+/** 缁涘绶熼幐鍥х暰濮ｎ偆顫楅弫?*/
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -56,8 +56,8 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * 鍒ゆ柇閿欒娑堟伅鏄惁涓洪噸澶嶉」鐩垱寤洪敊璇? *
- * @param message - 閿欒娑堟伅瀛楃涓? * @returns 鏄惁涓洪噸澶嶉」鐩垱寤洪敊璇? */
+ * 閸掋倖鏌囬柨娆掝嚖濞戝牊浼呴弰顖氭儊娑撴椽鍣告径宥夈€嶉惄顔煎灡瀵ゆ椽鏁婄拠? *
+ * @param message - 闁挎瑨顕ゅ☉鍫熶紖鐎涙顑佹稉? * @returns 閺勵垰鎯佹稉娲櫢婢跺秹銆嶉惄顔煎灡瀵ゆ椽鏁婄拠? */
 export function isDuplicateProjectCreateError(message: string): boolean {
   if (!message.startsWith(DUPLICATE_PROJECT_CREATE_ERROR_PREFIX)) {
     return false;
@@ -68,9 +68,9 @@ export function isDuplicateProjectCreateError(message: string): boolean {
 }
 
 /**
- * 浠庨噸澶嶉」鐩垱寤洪敊璇秷鎭腑鎻愬彇椤圭洰 ID
+ * 娴犲酣鍣告径宥夈€嶉惄顔煎灡瀵ゆ椽鏁婄拠顖涚Х閹垯鑵戦幓鎰絿妞ゅ湱娲?ID
  *
- * @param message - 閿欒娑堟伅瀛楃涓? * @returns 鎻愬彇鍒扮殑椤圭洰 ID锛岃嫢娑堟伅鏍煎紡涓嶅尮閰嶅垯杩斿洖 null
+ * @param message - 闁挎瑨顕ゅ☉鍫熶紖鐎涙顑佹稉? * @returns 閹绘劕褰囬崚鎵畱妞ゅ湱娲?ID閿涘矁瀚㈠☉鍫熶紖閺嶇厧绱℃稉宥呭爱闁板秴鍨潻鏂挎礀 null
  */
 export function extractDuplicateProjectCreateProjectId(message: string): string | null {
   if (!isDuplicateProjectCreateError(message)) {
@@ -82,12 +82,12 @@ export function extractDuplicateProjectCreateProjectId(message: string): string 
 }
 
 /**
- * 鍦ㄩ」鐩垪琛ㄤ腑鏌ユ壘鍙仮澶嶇殑娲昏穬椤圭洰
+ * 閸︺劑銆嶉惄顔煎灙鐞涖劋鑵戦弻銉﹀閸欘垱浠径宥囨畱濞叉槒绌い鍦窗
  *
- * @typeParam T - 椤圭洰鍊欓€夌被鍨? * @param input - 鏌ユ壘杈撳叆锛屽寘鍚」鐩垪琛ㄥ強鍙€夌殑 projectId/workspaceRoot
- * @returns 鍖归厤鍒扮殑椤圭洰锛岃嫢鏈壘鍒板垯杩斿洖 null
+ * @typeParam T - 妞ゅ湱娲伴崐娆撯偓澶岃閸? * @param input - 閺屻儲澹樻潏鎾冲弳閿涘苯瀵橀崥顐︺€嶉惄顔煎灙鐞涖劌寮烽崣顖炩偓澶屾畱 projectId/workspaceRoot
+ * @returns 閸栧綊鍘ら崚鎵畱妞ゅ湱娲伴敍宀冨閺堫亝澹橀崚鏉垮灟鏉╂柨娲?null
  *
- * @remarks 浼樺厛鎸?projectId 绮剧‘鍖归厤锛屽叾娆℃寜 workspaceRoot 妯＄硦鍖归厤
+ * @remarks 娴兼ê鍘涢幐?projectId 缁墽鈥橀崠褰掑帳閿涘苯鍙惧▎鈩冨瘻 workspaceRoot 濡紕纭﹂崠褰掑帳
  */
 export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryCandidate>(
   input: ProjectLookupInput & {
@@ -118,11 +118,10 @@ export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryC
 }
 
 /**
- * 浠庨噸澶嶅垱寤洪敊璇秷鎭腑鏌ユ壘鍙仮澶嶇殑椤圭洰
+ * 娴犲酣鍣告径宥呭灡瀵ゆ椽鏁婄拠顖涚Х閹垯鑵戦弻銉﹀閸欘垱浠径宥囨畱妞ゅ湱娲? *
+ * @typeParam T - 妞ゅ湱娲伴崐娆撯偓澶岃閸? * @param input - 閸栧懎鎯堥柨娆掝嚖濞戝牊浼呴妴渚€銆嶉惄顔煎灙鐞涖劌鎷板銉ょ稊閸栫儤鐗寸捄顖氱窞閻ㄥ嫯绶崗? * @returns 閸栧綊鍘ら崚鎵畱閸欘垱浠径宥夈€嶉惄顕嗙礉閼汇儲婀幍鎯у煂閸掓瑨绻戦崶?null
  *
- * @typeParam T - 椤圭洰鍊欓€夌被鍨? * @param input - 鍖呭惈閿欒娑堟伅銆侀」鐩垪琛ㄥ拰宸ヤ綔鍖烘牴璺緞鐨勮緭鍏? * @returns 鍖归厤鍒扮殑鍙仮澶嶉」鐩紝鑻ユ湭鎵惧埌鍒欒繑鍥?null
- *
- * @remarks 浼樺厛浣跨敤閿欒娑堟伅涓彁鍙栫殑閲嶅椤圭洰 ID锛屽洖閫€鍒板伐浣滃尯鏍硅矾寰勫尮閰? */
+ * @remarks 娴兼ê鍘涙担璺ㄦ暏闁挎瑨顕ゅ☉鍫熶紖娑擃厽褰侀崣鏍畱闁插秴顦叉い鍦窗 ID閿涘苯娲栭柅鈧崚鏉夸紣娴ｆ粌灏弽纭呯熅瀵板嫬灏柊? */
 export function findRecoverableProjectForDuplicateCreate<
   T extends DuplicateProjectCreateRecoveryCandidate,
 >(input: {
@@ -142,12 +141,11 @@ export function findRecoverableProjectForDuplicateCreate<
 }
 
 /**
- * 鍦ㄨ妯″瀷涓疆璇㈢瓑寰呭彲鎭㈠鐨勯」鐩嚭鐜? *
- * @typeParam TSnapshot - 蹇収绫诲瀷锛岄渶鍖呭惈 projects 鏁扮粍
- * @param input - 鍖呭惈蹇収鍔犺浇鍑芥暟銆佹煡鎵惧弬鏁板強鍙€夌殑閲嶈瘯/淇閰嶇疆
- * @returns 鎵惧埌鐨勯」鐩強鏈€鏂板揩鐓э紝鑻ヨ秴鏃舵湭鎵惧埌鍒欓」鐩负 null
+ * 閸︺劏顕板Ο鈥崇€锋稉顓＄枂鐠囥垻鐡戝鍛讲閹垹顦查惃鍕€嶉惄顔煎毉閻? *
+ * @typeParam TSnapshot - 韫囶偆鍙庣猾璇茬€烽敍宀勬付閸栧懎鎯?projects 閺佹壆绮? * @param input - 閸栧懎鎯堣箛顐ゅ弾閸旂姾娴囬崙鑺ユ殶閵嗕焦鐓￠幍鎯у棘閺佹澘寮烽崣顖炩偓澶屾畱闁插秷鐦?娣囶喖顦查柊宥囩枂
+ * @returns 閹垫儳鍩岄惃鍕€嶉惄顔煎挤閺堚偓閺傛澘鎻╅悡褝绱濋懟銉ㄧТ閺冭埖婀幍鎯у煂閸掓瑩銆嶉惄顔昏礋 null
  *
- * @remarks 鍏堣繘琛屾湁闄愭閲嶈瘯杞锛岃嫢浠嶅け璐ュ垯灏濊瘯璋冪敤 repairSnapshot 淇蹇収鍚庡啀娆℃煡鎵? */
+ * @remarks 閸忓牐绻樼悰灞炬箒闂勬劖顐奸柌宥堢槸鏉烆喛顕楅敍宀冨娴犲秴銇戠拹銉ュ灟鐏忔繆鐦拫鍐暏 repairSnapshot 娣囶喖顦茶箛顐ゅ弾閸氬骸鍟€濞嗏剝鐓￠幍? */
 export async function waitForRecoverableProjectInReadModel<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate> =
     OrchestrationReadModel,
@@ -210,12 +208,11 @@ export async function waitForRecoverableProjectInReadModel<
 }
 
 /**
- * 閽堝閲嶅椤圭洰鍒涘缓閿欒锛岃疆璇㈢瓑寰呭彲鎭㈠鐨勯」鐩嚭鐜? *
- * @typeParam TSnapshot - 蹇収绫诲瀷锛岄渶鍖呭惈 projects 鏁扮粍
- * @param input - 鍖呭惈閿欒娑堟伅銆佸伐浣滃尯鏍硅矾寰勩€佸揩鐓у姞杞藉嚱鏁板強鍙€夌殑閲嶈瘯/淇閰嶇疆
- * @returns 鎵惧埌鐨勯」鐩強鏈€鏂板揩鐓э紝鑻ヨ秴鏃舵湭鎵惧埌鍒欓」鐩负 null
+ * 闁藉牆顕柌宥咁槻妞ゅ湱娲伴崚娑樼紦闁挎瑨顕ら敍宀冪枂鐠囥垻鐡戝鍛讲閹垹顦查惃鍕€嶉惄顔煎毉閻? *
+ * @typeParam TSnapshot - 韫囶偆鍙庣猾璇茬€烽敍宀勬付閸栧懎鎯?projects 閺佹壆绮? * @param input - 閸栧懎鎯堥柨娆掝嚖濞戝牊浼呴妴浣镐紣娴ｆ粌灏弽纭呯熅瀵板嫨鈧礁鎻╅悡褍濮炴潪钘夊毐閺佹澘寮烽崣顖炩偓澶屾畱闁插秷鐦?娣囶喖顦查柊宥囩枂
+ * @returns 閹垫儳鍩岄惃鍕€嶉惄顔煎挤閺堚偓閺傛澘鎻╅悡褝绱濋懟銉ㄧТ閺冭埖婀幍鎯у煂閸掓瑩銆嶉惄顔昏礋 null
  *
- * @remarks 鍏堣繘琛屾湁闄愭閲嶈瘯杞锛岃嫢浠嶅け璐ュ垯灏濊瘯璋冪敤 repairSnapshot 淇蹇収鍚庡啀娆℃煡鎵俱€? * 閫傜敤浜庨娆″彂閫佹祦绋嬩腑闇€瑕佸鐢ㄥ垰鎭㈠鐨勯」鐩満鏅€? */
+ * @remarks 閸忓牐绻樼悰灞炬箒闂勬劖顐奸柌宥堢槸鏉烆喛顕楅敍宀冨娴犲秴銇戠拹銉ュ灟鐏忔繆鐦拫鍐暏 repairSnapshot 娣囶喖顦茶箛顐ゅ弾閸氬骸鍟€濞嗏剝鐓￠幍淇扁偓? * 闁倻鏁ゆ禍搴浕濞嗏€冲絺闁焦绁︾粙瀣╄厬闂団偓鐟曚礁顦查悽銊ュ灠閹垹顦查惃鍕€嶉惄顔兼簚閺咁垬鈧? */
 export async function waitForRecoverableProjectForDuplicateCreate<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate>,
 >(input: {

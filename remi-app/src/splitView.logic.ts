@@ -1,6 +1,6 @@
 /**
  * @file splitView.logic.ts
- * @description 鍒嗗睆瑙嗗浘闈㈡澘鏍戠殑绾嚱鏁拌緟鍔╂ā鍧椼€? * 鎻愪緵闈㈡澘鏌ユ壘銆佹浛鎹€€佸垹闄ゃ€佹繁搴﹁绠椼€佸垎鍓插彲琛屾€у垽鏂瓑鍔熻兘锛? * 浠ュ強鏃х増鍒嗗睆瑙嗗浘鐨勮縼绉绘敮鎸併€備笉渚濊禆 DOM 鎴?React銆? */
+ * @description 閸掑棗鐫嗙憴鍡楁禈闂堛垺婢橀弽鎴犳畱缁绢垰鍤遍弫鎷岀窡閸斺晜膩閸фぜ鈧? * 閹绘劒绶甸棃銏℃緲閺屻儲澹橀妴浣规禌閹光偓鈧礁鍨归梽銈冣偓浣圭箒鎼达箒顓哥粻妞尖偓浣稿瀻閸撴彃褰茬悰灞锯偓褍鍨介弬顓犵搼閸旂喕鍏橀敍? * 娴犮儱寮烽弮褏澧楅崚鍡楃潌鐟欏棗娴橀惃鍕讣缁夌粯鏁幐浣碘偓鍌欑瑝娓氭繆绂?DOM 閹?React閵? */
 
 import type { ProjectId, ThreadId } from "~/contracts";
 import type {
@@ -13,9 +13,8 @@ import type {
 } from "./splitViewStore";
 
 /**
- * 娓呴櫎闈㈡澘鐨勫彸渚ч潰鏉跨姸鎬侊紙鍏抽棴闈㈡澘銆佹竻闄ゅ樊寮備俊鎭級
- *
- * @param panelState - 褰撳墠闈㈡澘鐘舵€? * @returns 閲嶇疆鍚庣殑闈㈡澘鐘舵€? */
+ * 濞撳懘娅庨棃銏℃緲閻ㄥ嫬褰告笟褔娼伴弶璺ㄥЦ閹緤绱欓崗鎶芥４闂堛垺婢橀妴浣圭闂勩倕妯婂鍌欎繆閹垽绱? *
+ * @param panelState - 瑜版挸澧犻棃銏℃緲閻樿埖鈧? * @returns 闁插秶鐤嗛崥搴ｆ畱闂堛垺婢橀悩鑸碘偓? */
 export function clearSplitViewPanePanelState(
   panelState: SplitViewPanePanelState,
 ): SplitViewPanePanelState {
@@ -30,11 +29,9 @@ export function clearSplitViewPanePanelState(
 // --- pane lookup ---
 
 /**
- * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘闈㈡澘鑺傜偣
- *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 鐩爣闈㈡澘 ID
- * @returns 鎵惧埌鐨勯潰鏉胯妭鐐癸紝鏈壘鍒版椂杩斿洖 null
+ * 閸︺劑娼伴弶鎸庣埐娑擃厽瀵?ID 閺屻儲澹橀棃銏℃緲閼哄倻鍋? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 閻╊喗鐖ｉ棃銏℃緲 ID
+ * @returns 閹垫儳鍩岄惃鍕桨閺夎儻濡悙鐧哥礉閺堫亝澹橀崚鐗堟鏉╂柨娲?null
  */
 export function findPaneById(root: Pane, paneId: PaneId): Pane | null {
   if (root.id === paneId) {
@@ -47,11 +44,9 @@ export function findPaneById(root: Pane, paneId: PaneId): Pane | null {
 }
 
 /**
- * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘鍙跺瓙闈㈡澘
- *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 鐩爣闈㈡澘 ID
- * @returns 鎵惧埌鐨勫彾瀛愰潰鏉匡紝鏈壘鍒版垨闈炲彾瀛愯妭鐐规椂杩斿洖 null
+ * 閸︺劑娼伴弶鎸庣埐娑擃厽瀵?ID 閺屻儲澹橀崣璺虹摍闂堛垺婢? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 閻╊喗鐖ｉ棃銏℃緲 ID
+ * @returns 閹垫儳鍩岄惃鍕骄鐎涙劙娼伴弶鍖＄礉閺堫亝澹橀崚鐗堝灗闂堢偛褰剧€涙劘濡悙瑙勬鏉╂柨娲?null
  */
 export function findLeafPaneById(root: Pane, paneId: PaneId): LeafPane | null {
   const found = findPaneById(root, paneId);
@@ -59,11 +54,9 @@ export function findLeafPaneById(root: Pane, paneId: PaneId): LeafPane | null {
 }
 
 /**
- * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘鍒嗗壊鑺傜偣
- *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 鐩爣闈㈡澘 ID
- * @returns 鎵惧埌鐨勫垎鍓茶妭鐐癸紝鏈壘鍒版垨闈炲垎鍓茶妭鐐规椂杩斿洖 null
+ * 閸︺劑娼伴弶鎸庣埐娑擃厽瀵?ID 閺屻儲澹橀崚鍡楀閼哄倻鍋? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 閻╊喗鐖ｉ棃銏℃緲 ID
+ * @returns 閹垫儳鍩岄惃鍕瀻閸撹尪濡悙鐧哥礉閺堫亝澹橀崚鐗堝灗闂堢偛鍨庨崜鑼跺Ν閻愯妞傛潻鏂挎礀 null
  */
 export function findSplitNodeById(root: Pane, paneId: PaneId): SplitNode | null {
   const found = findPaneById(root, paneId);
@@ -71,10 +64,9 @@ export function findSplitNodeById(root: Pane, paneId: PaneId): SplitNode | null 
 }
 
 /**
- * 鏌ユ壘鐩存帴鍖呭惈鎸囧畾闈㈡澘鐨勭埗鍒嗗壊鑺傜偣銆? * 濡傛灉闈㈡澘 ID 鏄牴鑺傜偣锛岃繑鍥?null銆? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 鐩爣闈㈡澘 ID
- * @returns 鐖跺垎鍓茶妭鐐癸紝闈㈡澘涓烘牴鑺傜偣鏃惰繑鍥?null
+ * 閺屻儲澹橀惄瀛樺复閸栧懎鎯堥幐鍥х暰闂堛垺婢橀惃鍕煑閸掑棗澹婇懞鍌滃仯閵? * 婵″倹鐏夐棃銏℃緲 ID 閺勵垱鐗撮懞鍌滃仯閿涘矁绻戦崶?null閵? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 閻╊喗鐖ｉ棃銏℃緲 ID
+ * @returns 閻栬泛鍨庨崜鑼跺Ν閻愮櫢绱濋棃銏℃緲娑撶儤鐗撮懞鍌滃仯閺冩儼绻戦崶?null
  */
 export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | null {
   if (root.kind === "leaf") {
@@ -87,10 +79,9 @@ export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | nul
 }
 
 /**
- * 璁＄畻闈㈡澘鍦ㄦ爲涓殑娣卞害锛堟牴鑺傜偣娣卞害涓?0锛? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 鐩爣闈㈡澘 ID
- * @returns 闈㈡澘娣卞害锛屾湭鎵惧埌鏃惰繑鍥?null
+ * 鐠侊紕鐣婚棃銏℃緲閸︺劍鐖叉稉顓犳畱濞ｅ崬瀹抽敍鍫熺壌閼哄倻鍋ｅǎ鍗炲娑?0閿? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 閻╊喗鐖ｉ棃銏℃緲 ID
+ * @returns 闂堛垺婢樺ǎ鍗炲閿涘本婀幍鎯у煂閺冩儼绻戦崶?null
  */
 export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
   if (root.id === paneId) {
@@ -108,10 +99,8 @@ export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
 }
 
 /**
- * 鏀堕泦闈㈡澘鏍戜腑鐨勬墍鏈夊彾瀛愰潰鏉? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @returns 鍙跺瓙闈㈡澘鏁扮粍
- */
+ * 閺€鍫曟肠闂堛垺婢橀弽鎴滆厬閻ㄥ嫭澧嶉張澶婂骄鐎涙劙娼伴弶? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @returns 閸欒泛鐡欓棃銏℃緲閺佹壆绮? */
 export function collectLeaves(root: Pane): LeafPane[] {
   if (root.kind === "leaf") {
     return [root];
@@ -122,11 +111,10 @@ export function collectLeaves(root: Pane): LeafPane[] {
 // --- pane mutation (immutable) ---
 
 /**
- * 鍦ㄩ潰鏉挎爲涓浛鎹㈡寚瀹氶潰鏉胯妭鐐癸紙涓嶅彲鍙樻搷浣滐級銆? * 濡傛灉娌℃湁瀹為檯鍙樻洿锛岃繑鍥炲師鏍戝紩鐢ㄤ互淇濇寔寮曠敤鐩哥瓑鎬с€? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 瑕佹浛鎹㈢殑闈㈡澘 ID
- * @param replacement - 鏇挎崲闈㈡澘
- * @returns 鏇挎崲鍚庣殑鏂伴潰鏉挎爲
+ * 閸︺劑娼伴弶鎸庣埐娑擃厽娴涢幑銏″瘹鐎规岸娼伴弶鑳Ν閻愮櫢绱欐稉宥呭讲閸欐ɑ鎼锋担婊愮礆閵? * 婵″倹鐏夊▽鈩冩箒鐎圭偤妾崣妯绘纯閿涘矁绻戦崶鐐插斧閺嶆垵绱╅悽銊や簰娣囨繃瀵斿鏇犳暏閻╁摜鐡戦幀褋鈧? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 鐟曚焦娴涢幑銏㈡畱闂堛垺婢?ID
+ * @param replacement - 閺囨寧宕查棃銏℃緲
+ * @returns 閺囨寧宕查崥搴ｆ畱閺備即娼伴弶鎸庣埐
  */
 export function replacePaneInTree(root: Pane, paneId: PaneId, replacement: Pane): Pane {
   if (root.id === paneId) {
@@ -144,20 +132,18 @@ export function replacePaneInTree(root: Pane, paneId: PaneId, replacement: Pane)
 }
 
 /**
- * 鍒犻櫎鍙跺瓙闈㈡澘鐨勭粨鏋滐紝鍖呭惈鏂版爲鏍瑰拰琚Щ闄ょ殑鍙跺瓙 ID 鍒楄〃
- */
+ * 閸掔娀娅庨崣璺虹摍闂堛垺婢橀惃鍕波閺嬫粣绱濋崠鍛儓閺傜増鐖查弽鐟版嫲鐞氼偆些闂勩倗娈戦崣璺虹摍 ID 閸掓銆? */
 export interface RemoveLeafResult {
-  /** 鍒犻櫎鍚庣殑鏂版爲鏍癸紝鎵€鏈夊彾瀛愯绉婚櫎鏃朵负 null */
+  /** 閸掔娀娅庨崥搴ｆ畱閺傜増鐖查弽鐧哥礉閹碘偓閺堝褰剧€涙劘顫︾粔濠氭珟閺冩湹璐?null */
   nextRoot: Pane | null;
-  /** 琚Щ闄ょ殑鍙跺瓙闈㈡澘 ID 鍒楄〃 */
+  /** 鐞氼偆些闂勩倗娈戦崣璺虹摍闂堛垺婢?ID 閸掓銆?*/
   removedLeafIds: PaneId[];
 }
 
 /**
- * 浠庨潰鏉挎爲涓Щ闄ゆ墍鏈夊尮閰嶆寚瀹氱嚎绋?ID 鐨勫彾瀛愰潰鏉裤€? * 澶卞幓鎵€鏈夊彾瀛愮殑瀛愭爲浼氭姌鍙犱负 null锛屼粎鍓╀竴渚у瓙鏍戠殑鍒嗗壊鑺傜偣浼氭姌鍙犱负璇ュ瓙鏍戙€? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param threadId - 瑕佺Щ闄ょ殑绾跨▼ ID
- * @returns 鍒犻櫎缁撴灉
+ * 娴犲酣娼伴弶鎸庣埐娑擃厾些闂勩倖澧嶉張澶婂爱闁板秵瀵氱€规氨鍤庣粙?ID 閻ㄥ嫬褰剧€涙劙娼伴弶瑁も偓? * 婢跺崬骞撻幍鈧張澶婂骄鐎涙劗娈戠€涙劖鐖叉导姘閸欑姳璐?null閿涘奔绮庨崜鈺€绔存笟褍鐡欓弽鎴犳畱閸掑棗澹婇懞鍌滃仯娴兼碍濮岄崣鐘辫礋鐠囥儱鐡欓弽鎴欌偓? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param threadId - 鐟曚胶些闂勩倗娈戠痪璺ㄢ柤 ID
+ * @returns 閸掔娀娅庣紒鎾寸亯
  */
 export function removeLeafByThreadId(root: Pane, threadId: ThreadId): RemoveLeafResult {
   if (root.kind === "leaf") {
@@ -191,11 +177,10 @@ export function removeLeafByThreadId(root: Pane, threadId: ThreadId): RemoveLeaf
 }
 
 /**
- * 浠庨潰鏉挎爲涓Щ闄ゆ寚瀹氶潰鏉?ID 鐨勫彾瀛愰潰鏉裤€? * 澶卞幓鎵€鏈夊彾瀛愮殑瀛愭爲浼氭姌鍙犱负 null锛屼粎鍓╀竴渚у瓙鏍戠殑鍒嗗壊鑺傜偣浼氭姌鍙犱负璇ュ瓙鏍戯紝
- * 浣垮墿浣欓潰鏉胯嚜鍔ㄨ皟鏁村ぇ灏忋€? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param paneId - 瑕佺Щ闄ょ殑鍙跺瓙闈㈡澘 ID
- * @returns 鍒犻櫎缁撴灉
+ * 娴犲酣娼伴弶鎸庣埐娑擃厾些闂勩倖瀵氱€规岸娼伴弶?ID 閻ㄥ嫬褰剧€涙劙娼伴弶瑁も偓? * 婢跺崬骞撻幍鈧張澶婂骄鐎涙劗娈戠€涙劖鐖叉导姘閸欑姳璐?null閿涘奔绮庨崜鈺€绔存笟褍鐡欓弽鎴犳畱閸掑棗澹婇懞鍌滃仯娴兼碍濮岄崣鐘辫礋鐠囥儱鐡欓弽鎴礉
+ * 娴ｅ灝澧挎担娆撴桨閺夎儻鍤滈崝銊ㄧ殶閺佹潙銇囩亸蹇嬧偓? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param paneId - 鐟曚胶些闂勩倗娈戦崣璺虹摍闂堛垺婢?ID
+ * @returns 閸掔娀娅庣紒鎾寸亯
  */
 export function removeLeafByPaneId(root: Pane, paneId: PaneId): RemoveLeafResult {
   if (root.kind === "leaf") {
@@ -231,10 +216,9 @@ export function removeLeafByPaneId(root: Pane, paneId: PaneId): RemoveLeafResult
 // --- structural rules ---
 
 /**
- * 鍒ゆ柇鍙跺瓙闈㈡澘鏄惁鍙互鍦ㄦ寚瀹氭柟鍚戜笂鍒嗗壊锛屼笉瓒呰繃娣卞害涓婇檺 2銆? * 褰撶埗鑺傜偣鏂瑰悜涓?null锛堟牴绾у彾瀛愶級鏃讹紝浠讳綍鏂瑰悜閮藉厑璁搞€? * 娣卞害涓婇檺纭繚鏈€澶氬舰鎴?2脳2 鐨勭綉鏍煎竷灞€銆? *
- * @param parentDirection - 鐖跺垎鍓茶妭鐐圭殑鏂瑰悜锛屾牴绾т负 null
- * @param requestedDirection - 璇锋眰鐨勫垎鍓叉柟鍚? * @returns 鏄惁鍙互鍒嗗壊
- */
+ * 閸掋倖鏌囬崣璺虹摍闂堛垺婢橀弰顖氭儊閸欘垯浜掗崷銊﹀瘹鐎规碍鏌熼崥鎴滅瑐閸掑棗澹婇敍灞肩瑝鐡掑懓绻冨ǎ鍗炲娑撳﹪妾?2閵? * 瑜版挾鍩楅懞鍌滃仯閺傜懓鎮滄稉?null閿涘牊鐗寸痪褍褰剧€涙劧绱氶弮璁圭礉娴犺缍嶉弬鐟版倻闁棄鍘戠拋鎼炩偓? * 濞ｅ崬瀹虫稉濠囨绾喕绻氶張鈧径姘埌閹?2鑴? 閻ㄥ嫮缍夐弽鐓庣鐏炩偓閵? *
+ * @param parentDirection - 閻栬泛鍨庨崜鑼跺Ν閻愬湱娈戦弬鐟版倻閿涘本鐗寸痪褌璐?null
+ * @param requestedDirection - 鐠囬攱鐪伴惃鍕瀻閸撳弶鏌熼崥? * @returns 閺勵垰鎯侀崣顖欎簰閸掑棗澹? */
 export function canSubdivide(
   parentDirection: SplitDirection | null,
   requestedDirection: SplitDirection,
@@ -246,11 +230,9 @@ export function canSubdivide(
 }
 
 /**
- * 鍒ゆ柇闈㈡澘鏍戜腑鎸囧畾鍙跺瓙闈㈡澘鏄惁鍙互鍦ㄦ寚瀹氭柟鍚戜笂鍒嗗壊銆? * 缁煎悎妫€鏌ラ潰鏉垮瓨鍦ㄦ€с€佹繁搴﹂檺鍒跺拰鏂瑰悜闄愬埗銆? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @param targetPaneId - 鐩爣鍙跺瓙闈㈡澘 ID
- * @param requestedDirection - 璇锋眰鐨勫垎鍓叉柟鍚? * @returns 鏄惁鍙互鍒嗗壊
- */
+ * 閸掋倖鏌囬棃銏℃緲閺嶆垳鑵戦幐鍥х暰閸欒泛鐡欓棃銏℃緲閺勵垰鎯侀崣顖欎簰閸︺劍瀵氱€规碍鏌熼崥鎴滅瑐閸掑棗澹婇妴? * 缂佺厧鎮庡Λ鈧弻銉╂桨閺夊灝鐡ㄩ崷銊︹偓褋鈧焦绻佹惔锕傛閸掕泛鎷伴弬鐟版倻闂勬劕鍩楅妴? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @param targetPaneId - 閻╊喗鐖ｉ崣璺虹摍闂堛垺婢?ID
+ * @param requestedDirection - 鐠囬攱鐪伴惃鍕瀻閸撳弶鏌熼崥? * @returns 閺勵垰鎯侀崣顖欎簰閸掑棗澹? */
 export function canSubdividePane(
   root: Pane,
   targetPaneId: PaneId,
@@ -268,9 +250,8 @@ export function canSubdividePane(
 }
 
 /**
- * 瑙ｆ瀽榛樿鑱氱劍鐨勫彾瀛愰潰鏉?ID锛圖FS 搴忓垪涓殑绗竴涓彾瀛愶級銆? * 濡傛灉娌℃湁鍙跺瓙锛屽洖閫€鍒版牴鑺傜偣 ID銆? *
- * @param root - 闈㈡澘鏍戞牴鑺傜偣
- * @returns 榛樿鑱氱劍鐨勫彾瀛愰潰鏉?ID
+ * 鐟欙絾鐎芥妯款吇閼辨氨鍔嶉惃鍕骄鐎涙劙娼伴弶?ID閿涘湒FS 鎼村繐鍨稉顓犳畱缁楊兛绔存稉顏勫骄鐎涙劧绱氶妴? * 婵″倹鐏夊▽鈩冩箒閸欒泛鐡欓敍灞芥礀闁偓閸掔増鐗撮懞鍌滃仯 ID閵? *
+ * @param root - 闂堛垺婢橀弽鎴炵壌閼哄倻鍋? * @returns 姒涙顓婚懕姘卞妽閻ㄥ嫬褰剧€涙劙娼伴弶?ID
  */
 export function resolveDefaultFocusLeafId(root: Pane): PaneId {
   const leaves = collectLeaves(root);
@@ -280,8 +261,7 @@ export function resolveDefaultFocusLeafId(root: Pane): PaneId {
 // --- legacy split-view migration ---
 
 /**
- * 鏃х増鍒嗗睆瑙嗗浘缁撴瀯锛堝乏鍙充袱闈㈡澘鐨勬墎骞崇粨鏋勶級锛岀敤浜庤縼绉诲埌鏂扮殑鏍戝舰缁撴瀯
- */
+ * 閺冄呭閸掑棗鐫嗙憴鍡楁禈缂佹挻鐎敍鍫濅箯閸欏厖琚遍棃銏℃緲閻ㄥ嫭澧庨獮宕囩波閺嬪嫸绱氶敍宀€鏁ゆ禍搴ょ讣缁夎鍩岄弬鎵畱閺嶆垵鑸扮紒鎾寸€? */
 export interface LegacySplitViewLike {
   id: string;
   sourceThreadId: ThreadId;
@@ -297,9 +277,8 @@ export interface LegacySplitViewLike {
 }
 
 /**
- * 鍒ゆ柇缁欏畾鍊兼槸鍚︿负鏃х増鍒嗗睆瑙嗗浘缁撴瀯
- *
- * @param value - 寰呭垽鏂殑鍊? * @returns 鏄惁涓烘棫鐗堝垎灞忚鍥剧粨鏋勶紙绫诲瀷瀹堝崼锛? */
+ * 閸掋倖鏌囩紒娆忕暰閸婂吋妲搁崥锔胯礋閺冄呭閸掑棗鐫嗙憴鍡楁禈缂佹挻鐎? *
+ * @param value - 瀵板懎鍨介弬顓犳畱閸? * @returns 閺勵垰鎯佹稉鐑樻＋閻楀牆鍨庣仦蹇氼潒閸ュ墽绮ㄩ弸鍕剁礄缁鐎风€瑰牆宕奸敍? */
 export function isLegacySplitViewLike(value: unknown): value is LegacySplitViewLike {
   if (!value || typeof value !== "object") {
     return false;

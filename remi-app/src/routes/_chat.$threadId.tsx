@@ -1,6 +1,6 @@
 /**
- * @file 鑱婂ぉ绾跨▼璺敱瀹瑰櫒妯″潡
- * @description 灏嗘椿璺冪殑绾跨▼璺敱瑙ｆ瀽涓哄崟鑱婂ぉ鐣岄潰鎴栨寔涔呭寲鐨勫垎鍓茶鍥? * @layer 璺敱瀹瑰櫒灞? * @depends ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, 浠ュ強闈㈡澘浣滅敤鍩熺殑娴忚鍣?宸紓瀵规瘮闈㈡澘
+ * @file 閼卞﹤銇夌痪璺ㄢ柤鐠侯垳鏁辩€圭懓娅掑Ο鈥虫健
+ * @description 鐏忓棙妞跨捄鍐畱缁捐法鈻肩捄顖滄暠鐟欙絾鐎芥稉鍝勫礋閼卞﹤銇夐悾宀勬桨閹存牗瀵旀稊鍛閻ㄥ嫬鍨庨崜鑼额潒閸? * @layer 鐠侯垳鏁辩€圭懓娅掔仦? * @depends ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, 娴犮儱寮烽棃銏℃緲娴ｆ粎鏁ら崺鐔烘畱濞村繗顫嶉崳?瀹割喖绱撶€佃鐦棃銏℃緲
  */
 
 import {
@@ -94,31 +94,31 @@ import { cn } from "~/lib/utils";
 import { Sidebar, SidebarInset, SidebarProvider, SidebarRail } from "~/components/ui/sidebar";
 
 const DiffPanel = lazy(() => import("../components/DiffPanel"));
-/** 宸紓瀵规瘮鍐呰仈甯冨眬鐨勫獟浣撴煡璇㈡柇鐐癸細褰撹鍙ｅ搴?鈮?1180px 鏃讹紝宸紓闈㈡澘浠?Sheet 褰㈠紡灞曠ず */
+/** 瀹割喖绱撶€佃鐦崘鍛颁粓鐢啫鐪惃鍕崯娴ｆ挻鐓＄拠銏℃焽閻愮櫢绱拌ぐ鎾诡潒閸欙絽顔旀惔?閳?1180px 閺冭绱濆顔肩磽闂堛垺婢樻禒?Sheet 瑜般垹绱＄仦鏇犮仛 */
 const DIFF_INLINE_LAYOUT_MEDIA_QUERY = "(max-width: 1180px)";
-/** 宸紓闈㈡澘鍐呰仈瀹藉害锛氬浐瀹氬乏渚ц竟鏍忓悗锛屽彇瑙嗗彛 50% 骞堕檺鍒跺湪 28rem ~ 44rem 涔嬮棿 */
+/** 瀹割喖绱撻棃銏℃緲閸愬懓浠堢€硅棄瀹抽敍姘祼鐎规艾涔忔笟褑绔熼弽蹇撴倵閿涘苯褰囩憴鍡楀經 50% 楠炲爼妾洪崚璺烘躬 28rem ~ 44rem 娑斿妫?*/
 const DIFF_INLINE_DEFAULT_WIDTH = "clamp(28rem, calc(50vw - 8rem), 44rem)";
-/** 娴忚鍣ㄩ潰鏉垮唴鑱旈粯璁ゅ搴︼細鍗犵埗瀹瑰櫒 50% */
+/** 濞村繗顫嶉崳銊╂桨閺夊灝鍞撮懕鏃堢帛鐠併倕顔旀惔锔肩窗閸楃姷鍩楃€圭懓娅?50% */
 const BROWSER_INLINE_DEFAULT_WIDTH = "50%";
-/** 鍒嗗壊瑙嗗浘涓潰鏉块粯璁ゅ搴︼紙22rem锛屼互 px 璁★級 */
+/** 閸掑棗澹婄憴鍡楁禈娑擃參娼伴弶鍧楃帛鐠併倕顔旀惔锔肩礄22rem閿涘奔浜?px 鐠佲槄绱?*/
 const SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 22 * 16;
-/** 鍒嗗壊瑙嗗浘涓祻瑙堝櫒闈㈡澘榛樿瀹藉害锛?0rem锛屼互 px 璁★級 */
+/** 閸掑棗澹婄憴鍡楁禈娑擃厽绁荤憴鍫濇珤闂堛垺婢樻妯款吇鐎硅棄瀹抽敍?0rem閿涘奔浜?px 鐠佲槄绱?*/
 const BROWSER_SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 30 * 16;
-/** 鍒嗗壊瑙嗗浘涓亰澶╁尯鍩熸渶灏忓搴︼紙20rem锛夛紝闈㈡澘鎵╁睍鏃朵笉寰椾镜鍗犳绌洪棿 */
+/** 閸掑棗澹婄憴鍡楁禈娑擃叀浜版径鈺佸隘閸╃喐娓剁亸蹇擃啍鎼达讣绱?0rem閿涘绱濋棃銏℃緲閹碘晛鐫嶉弮鏈电瑝瀵版ぞ闀滈崡鐘愁劃缁屾椽妫?*/
 const SPLIT_PANE_CHAT_MIN_WIDTH = 20 * 16;
-/** 鍗曡亰妯″紡涓嬪彸渚ч潰鏉挎渶灏忓搴︼紙26rem锛?*/
+/** 閸楁洝浜板Ο鈥崇础娑撳褰告笟褔娼伴弶鎸庢付鐏忓繐顔旀惔锔肩礄26rem閿?*/
 const SINGLE_PANEL_MIN_WIDTH = 26 * 16;
-/** 娴忚鍣ㄩ潰鏉挎渶灏忓搴︼紙21rem锛?*/
+/** 濞村繗顫嶉崳銊╂桨閺夋寧娓剁亸蹇擃啍鎼达讣绱?1rem閿?*/
 const BROWSER_PANEL_MIN_WIDTH = 21 * 16;
-/** 杈撳叆妗嗙揣鍑戞ā寮忎笅宸︿晶鎺т欢鏈€灏忓搴︼紝鐢ㄤ簬鍒ゆ柇闈㈡澘鏄惁瀵艰嚧婧㈠嚭 */
+/** 鏉堟挸鍙嗗鍡欐彛閸戞垶膩瀵繋绗呭锔挎櫠閹貉傛閺堚偓鐏忓繐顔旀惔锔肩礉閻劋绨崚銈嗘焽闂堛垺婢橀弰顖氭儊鐎佃壈鍤у┃銏犲毉 */
 const COMPOSER_COMPACT_MIN_LEFT_CONTROLS_WIDTH_PX = 208;
-/** 鍙充晶闈㈡澘瀹藉害鎸佷箙鍖栧埌 localStorage 鐨勯敭鍚嶅墠缂€ */
+/** 閸欏厖鏅堕棃銏℃緲鐎硅棄瀹抽幐浣风畽閸栨牕鍩?localStorage 閻ㄥ嫰鏁崥宥呭缂傗偓 */
 const RIGHT_PANEL_SIDEBAR_WIDTH_STORAGE_KEY = "chat_right_panel_width";
-/** 闈㈡澘鎷栨嫿璋冩暣澶у皬鏃剁敤浜庤法 iframe/WebView 鍚屾鐨勮嚜瀹氫箟浜嬩欢鍚?*/
+/** 闂堛垺婢橀幏鏍ㄥ鐠嬪啯鏆ｆ径褍鐨弮鍓佹暏娴滃氦娉?iframe/WebView 閸氬本顒為惃鍕殰鐎规矮绠熸禍瀣╂閸?*/
 const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "remicode:panel-resize-overlay-sync";
-/** 鍒嗗壊姣斾緥涓嬮檺锛?5%锛夛紝闃叉鏌愪晶琚帇缂╁埌涓嶅彲瑙?*/
+/** 閸掑棗澹婂В鏂剧伐娑撳妾洪敍?5%閿涘绱濋梼鍙夘剾閺屾劒鏅剁悮顐㈠竾缂傗晛鍩屾稉宥呭讲鐟?*/
 const SPLIT_RATIO_MIN = 0.25;
-/** 鍒嗗壊姣斾緥涓婇檺锛?5%锛夛紝闃叉鏌愪晶琚帇缂╁埌涓嶅彲瑙?*/
+/** 閸掑棗澹婂В鏂剧伐娑撳﹪妾洪敍?5%閿涘绱濋梼鍙夘剾閺屾劒鏅剁悮顐㈠竾缂傗晛鍩屾稉宥呭讲鐟?*/
 const SPLIT_RATIO_MAX = 0.75;
 
 const allowAnySplitDirection = (_direction: SplitDirection) => true;
@@ -156,8 +156,7 @@ const RightPanelSheet = (props: {
 };
 
 /**
- * 宸紓闈㈡澘鎳掑姞杞界殑鍔犺浇鍗犱綅缁勪欢
- * @description 鍦?DiffPanel 浠ｇ爜鍧楀姞杞藉畬鎴愬墠灞曠ず楠ㄦ灦灞? * @param props.mode - 闈㈡澘妯″紡锛坰idebar / sheet锛? */
+ * 瀹割喖绱撻棃銏℃緲閹虫帒濮炴潪鐣屾畱閸旂姾娴囬崡鐘辩秴缂佸嫪娆? * @description 閸?DiffPanel 娴狅絿鐖滈崸妤€濮炴潪钘夌暚閹存劕澧犵仦鏇犮仛妤犮劍鐏︾仦? * @param props.mode - 闂堛垺婢樺Ο鈥崇础閿涘澃idebar / sheet閿? */
 const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
   return (
     <DiffPanelShell mode={props.mode} header={<DiffPanelHeaderSkeleton />}>
@@ -167,12 +166,9 @@ const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
 };
 
 /**
- * 鎳掑姞杞界殑宸紓闈㈡澘缁勪欢
- * @description 鍖呰９ DiffWorkerPoolProvider 鍜?Suspense锛屽疄鐜板樊寮傞潰鏉跨殑鎸夐渶鍔犺浇
- * @param props.mode - 闈㈡澘灞曠ず妯″紡锛坰idebar / sheet锛? * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.panelState - 闈㈡澘鐘舵€侊紙闈㈡澘绫诲瀷銆佸樊寮傝疆娆°€佹枃浠惰矾寰勶級
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.liveRefreshEnabled - 鏄惁鍚敤瀹炴椂鍒锋柊
+ * 閹虫帒濮炴潪鐣屾畱瀹割喖绱撻棃銏℃緲缂佸嫪娆? * @description 閸栧懓锛?DiffWorkerPoolProvider 閸?Suspense閿涘苯鐤勯悳鏉挎▕瀵倿娼伴弶璺ㄦ畱閹稿娓堕崝鐘烘祰
+ * @param props.mode - 闂堛垺婢樼仦鏇犮仛濡€崇础閿涘澃idebar / sheet閿? * @param props.threadId - 瑜版挸澧犵痪璺ㄢ柤 ID
+ * @param props.panelState - 闂堛垺婢橀悩鑸碘偓渚婄礄闂堛垺婢樼猾璇茬€烽妴浣告▕瀵倽鐤嗗▎掳鈧焦鏋冩禒鎯扮熅瀵板嫸绱? * @param props.onUpdatePanelState - 闂堛垺婢橀悩鑸碘偓浣规纯閺傛澘娲栫拫? * @param props.onClosePanel - 閸忔娊妫撮棃銏℃緲閸ョ偠鐨? * @param props.liveRefreshEnabled - 閺勵垰鎯侀崥顖滄暏鐎圭偞妞傞崚閿嬫煀
  */
 const LazyDiffPanel = (props: {
   mode: DiffPanelMode;
@@ -203,10 +199,7 @@ const LazyDiffPanel = (props: {
 };
 
 /**
- * 妫€鏌ヨ緭鍏ユ鏄惁鑳藉鐞嗘寚瀹氱殑闈㈡澘瀹藉害
- * @description 閫氳繃涓存椂璋冩暣瀹藉害骞舵娴嬫槸鍚︽孩鍑猴紝鍒ゆ柇闈㈡澘瀹藉害鏄惁鍙
- * @param input.nextWidth - 鐩爣瀹藉害锛堝儚绱狅級
- * @param input.paneScopeId - 闈㈡澘浣滅敤鍩?ID锛堢敤浜庡畾浣嶇壒瀹氳緭鍏ユ锛? * @param input.applyWidth - 搴旂敤瀹藉害鐨勫洖璋? * @param input.resetWidth - 閲嶇疆瀹藉害鐨勫洖璋? * @returns 濡傛灉杈撳叆妗嗗彲浠ュ鐞嗚瀹藉害鍒欒繑鍥?true锛屽惁鍒欒繑鍥?false
+ * 濡偓閺屻儴绶崗銉︻攱閺勵垰鎯侀懗钘夘槱閻炲棙瀵氱€规氨娈戦棃銏℃緲鐎硅棄瀹? * @description 闁俺绻冩稉瀛樻鐠嬪啯鏆ｇ€硅棄瀹抽獮鑸殿梾濞村妲搁崥锔藉閸戠尨绱濋崚銈嗘焽闂堛垺婢樼€硅棄瀹抽弰顖氭儊閸欘垵顢? * @param input.nextWidth - 閻╊喗鐖ｇ€硅棄瀹抽敍鍫濆剼缁辩媴绱? * @param input.paneScopeId - 闂堛垺婢樻担婊呮暏閸?ID閿涘牏鏁ゆ禍搴＄暰娴ｅ秶澹掔€规俺绶崗銉︻攱閿? * @param input.applyWidth - 鎼存梻鏁ょ€硅棄瀹抽惃鍕礀鐠? * @param input.resetWidth - 闁插秶鐤嗙€硅棄瀹抽惃鍕礀鐠? * @returns 婵″倹鐏夋潏鎾冲弳濡楀棗褰叉禒銉ヮ槱閻炲棜顕氱€硅棄瀹抽崚娆掔箲閸?true閿涘苯鎯侀崚娆掔箲閸?false
  */
 function canComposerHandlePanelWidth(input: {
   nextWidth: number;
@@ -257,10 +250,9 @@ function canComposerHandlePanelWidth(input: {
 }
 
 /**
- * 鍒涘缓闈㈡澘璋冩暣澶у皬鐨勫叏灞忚鐩栧眰
- * @description Tauri <webview> 鍦ㄦ嫋鎷芥椂鍙兘浼氬悶鎺?pointermove 浜嬩欢锛涙瑕嗙洊灞傜‘淇?React 灞傝兘鎸佺画鎺ユ敹浜嬩欢
- * @returns 鍒涘缓鐨勮鐩栧眰 DOM 鍏冪礌
- */
+ * 閸掓稑缂撻棃銏℃緲鐠嬪啯鏆ｆ径褍鐨惃鍕弿鐏炲繗顩惄鏍х湴
+ * @description Tauri <webview> 閸︺劍瀚嬮幏鑺ユ閸欘垵鍏樻导姘偠閹?pointermove 娴滃娆㈤敍娑欘劃鐟曞棛娲婄仦鍌溾€樻穱?React 鐏炲倽鍏橀幐浣虹敾閹恒儲鏁规禍瀣╂
+ * @returns 閸掓稑缂撻惃鍕洬閻╂牕鐪?DOM 閸忓啰绀? */
 function createPanelResizeOverlay(): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.setAttribute("data-panel-resize-overlay", "true");
@@ -275,21 +267,17 @@ function createPanelResizeOverlay(): HTMLDivElement {
 }
 
 /**
- * 绉婚櫎闈㈡澘璋冩暣澶у皬鐨勮鐩栧眰
- * @param overlay - 瑕佺Щ闄ょ殑瑕嗙洊灞傚厓绱? */
+ * 缁夊娅庨棃銏℃緲鐠嬪啯鏆ｆ径褍鐨惃鍕洬閻╂牕鐪? * @param overlay - 鐟曚胶些闂勩倗娈戠憰鍡欐磰鐏炲倸鍘撶槐? */
 function removePanelResizeOverlay(overlay: HTMLDivElement): void {
   overlay.remove();
   window.dispatchEvent(new Event(PANEL_RESIZE_OVERLAY_SYNC_EVENT));
 }
 
 /**
- * 闈㈡澘鍐呰仈渚ц竟鏍忕粍浠? * @description 鍦ㄥ崟鑱婃ā寮忎笅灞曠ず宸紓瀵规瘮鎴栨祻瑙堝櫒闈㈡澘鐨勫唴鑱斾晶杈规爮锛屾敮鎸佹嫋鎷借皟鏁村搴? * @param props.panelOpen - 闈㈡澘鏄惁鎵撳紑
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.onOpenPanel - 鎵撳紑闈㈡澘鍥炶皟
- * @param props.renderPanelContent - 鏄惁娓叉煋闈㈡澘鍐呭
- * @param props.panel - 闈㈡澘绫诲瀷锛坆rowser / diff / null锛? * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.paneScopeId - 闈㈡澘浣滅敤鍩?ID
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? */
+ * 闂堛垺婢橀崘鍛颁粓娓氀嗙珶閺嶅繒绮嶆禒? * @description 閸︺劌宕熼懕濠兡佸蹇庣瑓鐏炴洜銇氬顔肩磽鐎佃鐦幋鏍ㄧセ鐟欏牆娅掗棃銏℃緲閻ㄥ嫬鍞撮懕鏂炬櫠鏉堣鐖敍灞炬暜閹镐焦瀚嬮幏鍊熺殶閺佹潙顔旀惔? * @param props.panelOpen - 闂堛垺婢橀弰顖氭儊閹垫挸绱? * @param props.onClosePanel - 閸忔娊妫撮棃銏℃緲閸ョ偠鐨? * @param props.onOpenPanel - 閹垫挸绱戦棃銏℃緲閸ョ偠鐨? * @param props.renderPanelContent - 閺勵垰鎯佸〒鍙夌厠闂堛垺婢橀崘鍛啇
+ * @param props.panel - 闂堛垺婢樼猾璇茬€烽敍鍧唕owser / diff / null閿? * @param props.threadId - 瑜版挸澧犵痪璺ㄢ柤 ID
+ * @param props.paneScopeId - 闂堛垺婢樻担婊呮暏閸?ID
+ * @param props.panelState - 闂堛垺婢橀悩鑸碘偓? * @param props.onUpdatePanelState - 闂堛垺婢橀悩鑸碘偓浣规纯閺傛澘娲栫拫? */
 const PanePanelInlineSidebar = (props: {
   panelOpen: boolean;
   onClosePanel: () => void;
@@ -473,16 +461,13 @@ const PanePanelInlineSidebar = (props: {
 };
 
 /**
- * 鍒嗗壊瑙嗗浘涓祵鍏ョ殑闈㈡澘缁勪欢
- * @description 鍒嗗壊闈㈡澘鏃犳硶澶嶇敤妗岄潰鐗?Sidebar 鍘熻锛堝洜涓哄畠鐩稿浜庤鍙ｅ畾浣嶏級锛屾缁勪欢灏嗘祻瑙堝櫒/宸紓鍐呭閿氬畾鍒板叿浣撶獥鏍? * @param props.splitViewId - 鍒嗗壊瑙嗗浘 ID
- * @param props.paneId - 绐楁牸 ID
- * @param props.paneScopeId - 绐楁牸浣滅敤鍩?ID
- * @param props.panelOpen - 闈㈡澘鏄惁鎵撳紑
- * @param props.panel - 闈㈡澘绫诲瀷
- * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? */
+ * 閸掑棗澹婄憴鍡楁禈娑擃厼绁甸崗銉ф畱闂堛垺婢樼紒鍕
+ * @description 閸掑棗澹婇棃銏℃緲閺冪姵纭舵径宥囨暏濡楀矂娼伴悧?Sidebar 閸樼喕顕㈤敍鍫濇礈娑撳搫鐣犻惄绋款嚠娴滃氦顫嬮崣锝呯暰娴ｅ稄绱氶敍灞绢劃缂佸嫪娆㈢亸鍡樼セ鐟欏牆娅?瀹割喖绱撻崘鍛啇闁挎艾鐣鹃崚鏉垮徔娴ｆ挾鐛ラ弽? * @param props.splitViewId - 閸掑棗澹婄憴鍡楁禈 ID
+ * @param props.paneId - 缁愭鐗?ID
+ * @param props.paneScopeId - 缁愭鐗告担婊呮暏閸?ID
+ * @param props.panelOpen - 闂堛垺婢橀弰顖氭儊閹垫挸绱? * @param props.panel - 闂堛垺婢樼猾璇茬€? * @param props.threadId - 瑜版挸澧犵痪璺ㄢ柤 ID
+ * @param props.onClosePanel - 閸忔娊妫撮棃銏℃緲閸ョ偠鐨? * @param props.panelState - 闂堛垺婢橀悩鑸碘偓? * @param props.isFocused - 閺勵垰鎯侀懕姘卞妽
+ * @param props.onUpdatePanelState - 闂堛垺婢橀悩鑸碘偓浣规纯閺傛澘娲栫拫? */
 function SplitPaneEmbeddedPanel(props: {
   splitViewId: SplitViewId;
   paneId: PaneId;
@@ -612,11 +597,11 @@ function SplitPaneEmbeddedPanel(props: {
 }
 
 /**
- * 瑙ｆ瀽鍗曚竴椤圭洰 ID
- * @description 浼樺厛杩斿洖绾跨▼鍏宠仈鐨勯」鐩?ID锛屽叾娆¤繑鍥炶崏绋块」鐩?ID
- * @param input.threadProjectId - 绾跨▼鍏宠仈鐨勯」鐩?ID
- * @param input.draftProjectId - 鑽夌ǹ椤圭洰 ID
- * @returns 瑙ｆ瀽鍚庣殑椤圭洰 ID锛岃嫢鏃犲垯杩斿洖 null
+ * 鐟欙絾鐎介崡鏇氱妞ゅ湱娲?ID
+ * @description 娴兼ê鍘涙潻鏂挎礀缁捐法鈻奸崗瀹犱粓閻ㄥ嫰銆嶉惄?ID閿涘苯鍙惧▎陇绻戦崶鐐跺磸缁嬪潡銆嶉惄?ID
+ * @param input.threadProjectId - 缁捐法鈻奸崗瀹犱粓閻ㄥ嫰銆嶉惄?ID
+ * @param input.draftProjectId - 閼藉枪妞ゅ湱娲?ID
+ * @returns 鐟欙絾鐎介崥搴ｆ畱妞ゅ湱娲?ID閿涘矁瀚㈤弮鐘插灟鏉╂柨娲?null
  */
 function resolveSingleProjectId(input: {
   threadProjectId: ProjectId | null;
@@ -626,9 +611,7 @@ function resolveSingleProjectId(input: {
 }
 
 /**
- * 灏嗛潰鏉跨姸鎬佹爣鍑嗗寲涓鸿矾鐢辨悳绱㈠弬鏁? * @description 灏嗛潰鏉跨姸鎬佽浆鎹负 URL 鏌ヨ鍙傛暟鏍煎紡
- * @param panelState - 闈㈡澘鐘舵€? * @returns 璺敱鎼滅储鍙傛暟瀵硅薄
- */
+ * 鐏忓棝娼伴弶璺ㄥЦ閹焦鐖ｉ崙鍡楀娑撻缚鐭鹃悽杈ㄦ偝缁便垹寮弫? * @description 鐏忓棝娼伴弶璺ㄥЦ閹浇娴嗛幑顫礋 URL 閺屻儴顕楅崣鍌涙殶閺嶇厧绱? * @param panelState - 闂堛垺婢橀悩鑸碘偓? * @returns 鐠侯垳鏁遍幖婊呭偍閸欏倹鏆熺€电钖? */
 function normalizeSingleSearchFromPane(
   panelState: Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">,
 ): DiffRouteSearch {
@@ -649,12 +632,9 @@ function normalizeSingleSearchFromPane(
 }
 
 /**
- * 鍒嗗壊瑙嗗浘绌虹姸鎬佺粍浠? * @description 褰撳垎鍓茬獥鏍间腑娌℃湁绾跨▼鏃跺睍绀虹殑閫夋嫨鍣ㄧ晫闈? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.onFocus - 鑱氱劍鍥炶皟
- * @param props.threads - 鍙€夌嚎绋嬪垪琛? * @param props.projects - 椤圭洰鍒楄〃
- * @param props.excludedThreadIds - 宸叉帓闄ょ殑绾跨▼ ID 闆嗗悎
- * @param props.onSelectThread - 閫夋嫨绾跨▼鍥炶皟
- */
+ * 閸掑棗澹婄憴鍡楁禈缁岃櫣濮搁幀浣虹矋娴? * @description 瑜版挸鍨庨崜鑼崶閺嶉棿鑵戝▽鈩冩箒缁捐法鈻奸弮璺虹潔缁€铏规畱闁瀚ㄩ崳銊ф櫕闂? * @param props.isFocused - 閺勵垰鎯侀懕姘卞妽
+ * @param props.onFocus - 閼辨氨鍔嶉崶鐐剁殶
+ * @param props.threads - 閸欘垶鈧鍤庣粙瀣灙鐞? * @param props.projects - 妞ゅ湱娲伴崚妤勩€? * @param props.excludedThreadIds - 瀹稿弶甯撻梽銈囨畱缁捐法鈻?ID 闂嗗棗鎮? * @param props.onSelectThread - 闁瀚ㄧ痪璺ㄢ柤閸ョ偠鐨? */
 function SplitPaneEmptyState(props: {
   isFocused: boolean;
   onFocus: () => void;
@@ -718,9 +698,8 @@ function SplitPaneEmptyState(props: {
 }
 
 /**
- * 鍒嗗壊绾跨粍浠? * @description 鍙嫋鎷界殑鍒嗗壊绾匡紝鏀寔姘村钩鍜屽瀭鐩存柟鍚戯紝鎷栨嫿鏃舵樉绀鸿瑙夊紩瀵肩嚎
- * @param props.splitNodeId - 鍒嗗壊鑺傜偣 ID
- * @param props.direction - 鍒嗗壊鏂瑰悜锛坔orizontal / vertical锛? * @param props.onSetRatio - 璁剧疆鍒嗗壊姣斾緥鐨勫洖璋? */
+ * 閸掑棗澹婄痪璺ㄧ矋娴? * @description 閸欘垱瀚嬮幏鐣屾畱閸掑棗澹婄痪鍖＄礉閺€顖涘瘮濮樻潙閽╅崪灞界€惄瀛樻煙閸氭埊绱濋幏鏍ㄥ閺冭埖妯夌粈楦款潒鐟欏绱╃€佃偐鍤? * @param props.splitNodeId - 閸掑棗澹婇懞鍌滃仯 ID
+ * @param props.direction - 閸掑棗澹婇弬鐟版倻閿涘潝orizontal / vertical閿? * @param props.onSetRatio - 鐠佸墽鐤嗛崚鍡楀濮ｆ柧绶ラ惃鍕礀鐠? */
 function SplitDivider(props: {
   splitNodeId: PaneId;
   direction: SplitDirection;
@@ -837,10 +816,8 @@ function SplitDivider(props: {
 }
 
 /**
- * 绐楁牸娓叉煋鍣ㄧ粍浠? * @description 閫掑綊娓叉煋鍒嗗壊瑙嗗浘鐨勬爲褰㈢粨鏋勶紝澶勭悊鍙跺瓙鑺傜偣鍜屽垎鍓茶妭鐐? * @param props.pane - 褰撳墠绐楁牸鑺傜偣
- * @param props.splitView - 鍒嗗壊瑙嗗浘瀵硅薄
- * @param props.renderLeaf - 鍙跺瓙鑺傜偣娓叉煋鍑芥暟
- * @param props.onSetRatio - 璁剧疆鍒嗗壊姣斾緥鐨勫洖璋? */
+ * 缁愭鐗稿〒鍙夌厠閸ｃ劎绮嶆禒? * @description 闁帒缍婂〒鍙夌厠閸掑棗澹婄憴鍡楁禈閻ㄥ嫭鐖茶ぐ銏㈢波閺嬪嫸绱濇径鍕倞閸欒泛鐡欓懞鍌滃仯閸滃苯鍨庨崜鑼跺Ν閻? * @param props.pane - 瑜版挸澧犵粣妤佺壐閼哄倻鍋? * @param props.splitView - 閸掑棗澹婄憴鍡楁禈鐎电钖? * @param props.renderLeaf - 閸欒泛鐡欓懞鍌滃仯濞撳弶鐓嬮崙鑺ユ殶
+ * @param props.onSetRatio - 鐠佸墽鐤嗛崚鍡楀濮ｆ柧绶ラ惃鍕礀鐠? */
 function PaneRenderer(props: {
   pane: Pane;
   splitView: SplitView;
@@ -888,8 +865,7 @@ function PaneRenderer(props: {
 }
 
 /**
- * 鑱婂ぉ鐣岄潰鎸傝浇楠ㄦ灦灞忕粍浠? * @description 鍦?ChatView 缁勪欢鎸傝浇鏈熼棿灞曠ず鍗犱綅 UI锛屾ā鎷熺湡瀹炶亰澶╃晫闈㈢殑甯冨眬缁撴瀯
- */
+ * 閼卞﹤銇夐悾宀勬桨閹稿倽娴囨銊︾仸鐏炲繒绮嶆禒? * @description 閸?ChatView 缂佸嫪娆㈤幐鍌濇祰閺堢喖妫跨仦鏇犮仛閸楃姳缍?UI閿涘本膩閹风喓婀＄€圭偠浜版径鈺冩櫕闂堛垻娈戠敮鍐ㄧ湰缂佹挻鐎? */
 function ChatMountSkeleton() {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground contain-[layout_style_paint]">
@@ -935,17 +911,12 @@ function ChatMountSkeleton() {
 }
 
 /**
- * 寤惰繜鎸傝浇鐨勮亰澶╄鍥剧粍浠? * @description 閫氳繃鍙?requestAnimationFrame 寤惰繜鎸傝浇锛岄伩鍏嶈矾鐢卞垏鎹㈡椂鐨勫崱椤? * @param props.threadId - 绾跨▼ ID
- * @param props.paneScopeId - 绐楁牸浣滅敤鍩?ID
- * @param props.deferMount - 鏄惁寤惰繜鎸傝浇
- * @param props.surfaceMode - 琛ㄩ潰妯″紡锛坰ingle / split锛? * @param props.isFocusedPane - 鏄惁鑱氱劍绐楁牸
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.onToggleDiff - 鍒囨崲宸紓闈㈡澘鍥炶皟
- * @param props.onToggleBrowser - 鍒囨崲娴忚鍣ㄩ潰鏉垮洖璋? * @param props.onOpenTurnDiff - 鎵撳紑杞宸紓鍥炶皟
- * @param props.onSplitSurface - 鍒嗗壊琛ㄩ潰鍥炶皟
- * @param props.onMaximize - 鏈€澶у寲鍥炶皟
- * @param props.onChangeThread - 鍒囨崲绾跨▼鍥炶皟
- * @param props.onCloseThreadPane - 鍏抽棴绾跨▼闈㈡澘鍥炶皟
- * @param props.onMounted - 鎸傝浇瀹屾垚鍥炶皟
+ * 瀵ゆ儼绻滈幐鍌濇祰閻ㄥ嫯浜版径鈺勵潒閸ュ墽绮嶆禒? * @description 闁俺绻冮崣?requestAnimationFrame 瀵ゆ儼绻滈幐鍌濇祰閿涘矂浼╅崗宥堢熅閻㈠崬鍨忛幑銏℃閻ㄥ嫬宕辨い? * @param props.threadId - 缁捐法鈻?ID
+ * @param props.paneScopeId - 缁愭鐗告担婊呮暏閸?ID
+ * @param props.deferMount - 閺勵垰鎯佸鎯扮箿閹稿倽娴? * @param props.surfaceMode - 鐞涖劑娼板Ο鈥崇础閿涘澃ingle / split閿? * @param props.isFocusedPane - 閺勵垰鎯侀懕姘卞妽缁愭鐗? * @param props.panelState - 闂堛垺婢橀悩鑸碘偓? * @param props.onToggleDiff - 閸掑洦宕插顔肩磽闂堛垺婢橀崶鐐剁殶
+ * @param props.onToggleBrowser - 閸掑洦宕插ù蹇氼潔閸ｃ劑娼伴弶鍨礀鐠? * @param props.onOpenTurnDiff - 閹垫挸绱戞潪顔筋偧瀹割喖绱撻崶鐐剁殶
+ * @param props.onSplitSurface - 閸掑棗澹婄悰銊╂桨閸ョ偠鐨? * @param props.onMaximize - 閺堚偓婢堆冨閸ョ偠鐨? * @param props.onChangeThread - 閸掑洦宕茬痪璺ㄢ柤閸ョ偠鐨? * @param props.onCloseThreadPane - 閸忔娊妫寸痪璺ㄢ柤闂堛垺婢橀崶鐐剁殶
+ * @param props.onMounted - 閹稿倽娴囩€瑰本鍨氶崶鐐剁殶
  */
 function DeferredChatView(props: {
   threadId: ThreadIdType;
@@ -1016,26 +987,16 @@ function DeferredChatView(props: {
 }
 
 /**
- * 鍒嗗壊瑙嗗浘绐楁牸琛ㄩ潰缁勪欢
- * @description 鍗曚釜鍒嗗壊绐楁牸鐨勫畬鏁村鍣紝鍖呭惈鑱婂ぉ瑙嗗浘銆侀潰鏉裤€佹嫋鏀捐鐩栧眰绛? * @param props.splitView - 鍒嗗壊瑙嗗浘瀵硅薄
- * @param props.paneId - 绐楁牸 ID
- * @param props.threadId - 绾跨▼ ID
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.deferChatMount - 鏄惁寤惰繜鎸傝浇鑱婂ぉ瑙嗗浘
- * @param props.canDropInDirection - 鍒ゆ柇鏄惁鍙湪鎸囧畾鏂瑰悜鎷栨斁
- * @param props.excludedThreadIds - 宸叉帓闄ょ殑绾跨▼ ID 闆嗗悎
- * @param props.threads - 鍙€夌嚎绋嬪垪琛? * @param props.projects - 椤圭洰鍒楄〃
- * @param props.onFocus - 鑱氱劍鍥炶皟
- * @param props.onToggleDiff - 鍒囨崲宸紓闈㈡澘鍥炶皟
- * @param props.onToggleBrowser - 鍒囨崲娴忚鍣ㄩ潰鏉垮洖璋? * @param props.onOpenTurnDiff - 鎵撳紑杞宸紓鍥炶皟
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? * @param props.onMaximize - 鏈€澶у寲鍥炶皟
- * @param props.onCloseThreadPane - 鍏抽棴绾跨▼闈㈡澘鍥炶皟
- * @param props.onChooseThread - 閫夋嫨绾跨▼鍥炶皟
- * @param props.onSelectThread - 閫夋嫨绾跨▼鍥炶皟
- * @param props.onChatMounted - 鑱婂ぉ鎸傝浇瀹屾垚鍥炶皟
- * @param props.onDropThread - 鎷栨斁绾跨▼鍥炶皟
- */
+ * 閸掑棗澹婄憴鍡楁禈缁愭鐗哥悰銊╂桨缂佸嫪娆? * @description 閸楁洑閲滈崚鍡楀缁愭鐗搁惃鍕暚閺佹潙顔愰崳顭掔礉閸栧懎鎯堥懕濠傘亯鐟欏棗娴橀妴渚€娼伴弶瑁も偓浣瑰珛閺€鎹愵洬閻╂牕鐪扮粵? * @param props.splitView - 閸掑棗澹婄憴鍡楁禈鐎电钖? * @param props.paneId - 缁愭鐗?ID
+ * @param props.threadId - 缁捐法鈻?ID
+ * @param props.panelState - 闂堛垺婢橀悩鑸碘偓? * @param props.isFocused - 閺勵垰鎯侀懕姘卞妽
+ * @param props.deferChatMount - 閺勵垰鎯佸鎯扮箿閹稿倽娴囬懕濠傘亯鐟欏棗娴? * @param props.canDropInDirection - 閸掋倖鏌囬弰顖氭儊閸欘垰婀幐鍥х暰閺傜懓鎮滈幏鏍ㄦ杹
+ * @param props.excludedThreadIds - 瀹稿弶甯撻梽銈囨畱缁捐法鈻?ID 闂嗗棗鎮? * @param props.threads - 閸欘垶鈧鍤庣粙瀣灙鐞? * @param props.projects - 妞ゅ湱娲伴崚妤勩€? * @param props.onFocus - 閼辨氨鍔嶉崶鐐剁殶
+ * @param props.onToggleDiff - 閸掑洦宕插顔肩磽闂堛垺婢橀崶鐐剁殶
+ * @param props.onToggleBrowser - 閸掑洦宕插ù蹇氼潔閸ｃ劑娼伴弶鍨礀鐠? * @param props.onOpenTurnDiff - 閹垫挸绱戞潪顔筋偧瀹割喖绱撻崶鐐剁殶
+ * @param props.onClosePanel - 閸忔娊妫撮棃銏℃緲閸ョ偠鐨? * @param props.onUpdatePanelState - 闂堛垺婢橀悩鑸碘偓浣规纯閺傛澘娲栫拫? * @param props.onMaximize - 閺堚偓婢堆冨閸ョ偠鐨? * @param props.onCloseThreadPane - 閸忔娊妫寸痪璺ㄢ柤闂堛垺婢橀崶鐐剁殶
+ * @param props.onChooseThread - 闁瀚ㄧ痪璺ㄢ柤閸ョ偠鐨? * @param props.onSelectThread - 闁瀚ㄧ痪璺ㄢ柤閸ョ偠鐨? * @param props.onChatMounted - 閼卞﹤銇夐幐鍌濇祰鐎瑰本鍨氶崶鐐剁殶
+ * @param props.onDropThread - 閹锋牗鏂佺痪璺ㄢ柤閸ョ偠鐨? */
 function SplitPaneSurface(props: {
   splitView: SplitView;
   paneId: PaneId;
@@ -1164,10 +1125,9 @@ function SplitPaneSurface(props: {
 }
 
 /**
- * 鍒嗗壊鑱婂ぉ琛ㄩ潰缁勪欢
- * @description 绠＄悊鏁翠釜鍒嗗壊瑙嗗浘鐨勭敓鍛藉懆鏈熷拰浜や簰锛屽寘鎷獥鏍艰仛鐒︺€佺嚎绋嬪垏鎹€€侀潰鏉挎帶鍒剁瓑
- * @param props.splitViewId - 鍒嗗壊瑙嗗浘 ID
- * @param props.routeThreadId - 璺敱涓殑绾跨▼ ID
+ * 閸掑棗澹婇懕濠傘亯鐞涖劑娼扮紒鍕
+ * @description 缁狅紕鎮婇弫缈犻嚋閸掑棗澹婄憴鍡楁禈閻ㄥ嫮鏁撻崨钘夋噯閺堢喎鎷版禍銈勭鞍閿涘苯瀵橀幏顒傜崶閺嶈壈浠涢悞锔衡偓浣哄殠缁嬪鍨忛幑鈧偓渚€娼伴弶鎸庡付閸掑墎鐡? * @param props.splitViewId - 閸掑棗澹婄憴鍡楁禈 ID
+ * @param props.routeThreadId - 鐠侯垳鏁辨稉顓犳畱缁捐法鈻?ID
  */
 function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: ThreadIdType }) {
   const navigate = useNavigate();
@@ -1662,11 +1622,9 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
 }
 
 /**
- * 鍗曡亰琛ㄩ潰缁勪欢
- * @description 绠＄悊鍗曡亰妯″紡涓嬬殑鑱婂ぉ瑙嗗浘銆佸彸渚ч潰鏉裤€佸垎鍓茶鍥惧垱寤虹瓑
- * @param props.threadId - 绾跨▼ ID
- * @param props.search - 璺敱鎼滅储鍙傛暟
- * @param props.projectId - 椤圭洰 ID
+ * 閸楁洝浜扮悰銊╂桨缂佸嫪娆? * @description 缁狅紕鎮婇崡鏇′喊濡€崇础娑撳娈戦懕濠傘亯鐟欏棗娴橀妴浣稿礁娓氀囨桨閺夎￥鈧礁鍨庨崜鑼额潒閸ユ儳鍨卞铏圭搼
+ * @param props.threadId - 缁捐法鈻?ID
+ * @param props.search - 鐠侯垳鏁遍幖婊呭偍閸欏倹鏆? * @param props.projectId - 妞ゅ湱娲?ID
  */
 function SingleChatSurface(props: {
   threadId: ThreadIdType;
@@ -1924,8 +1882,7 @@ function SingleChatSurface(props: {
 }
 
 /**
- * 鑱婂ぉ绾跨▼璺敱瑙嗗浘缁勪欢
- * @description 璺敱瀹瑰櫒鐨勪富缁勪欢锛屾牴鎹矾鐢卞弬鏁板喅瀹氭覆鏌撳崟鑱婅繕鏄垎鍓茶鍥? */
+ * 閼卞﹤銇夌痪璺ㄢ柤鐠侯垳鏁辩憴鍡楁禈缂佸嫪娆? * @description 鐠侯垳鏁辩€圭懓娅掗惃鍕瘜缂佸嫪娆㈤敍灞剧壌閹诡喛鐭鹃悽鍗炲棘閺佹澘鍠呯€规碍瑕嗛弻鎾冲礋閼卞﹨绻曢弰顖氬瀻閸撹尪顫嬮崶? */
 function ChatThreadRouteView() {
   const threadsHydrated = useStore((store) => store.threadsHydrated);
   const threadId = Route.useParams({
@@ -1998,9 +1955,7 @@ function ChatThreadRouteView() {
 }
 
 /**
- * 鑱婂ぉ绾跨▼璺敱瀹氫箟
- * @description 瀹氫箟 /_chat/$threadId 璺敱锛屾敮鎸佸樊寮傞潰鏉跨浉鍏崇殑鎼滅储鍙傛暟楠岃瘉
- */
+ * 閼卞﹤銇夌痪璺ㄢ柤鐠侯垳鏁辩€规矮绠? * @description 鐎规矮绠?/_chat/$threadId 鐠侯垳鏁遍敍灞炬暜閹镐礁妯婂鍌炴桨閺夎法娴夐崗宕囨畱閹兼粎鍌ㄩ崣鍌涙殶妤犲矁鐦? */
 export const Route = createFileRoute("/_chat/$threadId")({
   validateSearch: (search) => parseDiffRouteSearch(search),
   component: ChatThreadRouteView,

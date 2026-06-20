@@ -1,6 +1,6 @@
 /**
- * @file Git React Query 闆嗘垚妯″潡
- * @description 鎻愪緵 Git 鎿嶄綔鐨?React Query 鏌ヨ鍜屽彉鏇撮厤缃€? *              鍖呭惈鐘舵€佹煡璇€€佸垎鏀垪琛ㄣ€佸伐浣滄爲宸紓銆佹彁浜ゆ搷浣滅瓑銆? */
+ * @file Git React Query 闂嗗棙鍨氬Ο鈥虫健
+ * @description 閹绘劒绶?Git 閹垮秳缍旈惃?React Query 閺屻儴顕楅崪灞藉綁閺囨挳鍘ょ純顔衡偓? *              閸栧懎鎯堥悩鑸碘偓浣圭叀鐠団偓鈧礁鍨庨弨顖氬灙鐞涖劊鈧礁浼愭担婊勭埐瀹割喖绱撻妴浣瑰絹娴溿倖鎼锋担婊呯搼閵? */
 
 import type {
   GitReadWorkingTreeDiffInput,
@@ -11,37 +11,37 @@ import { mutationOptions, queryOptions, type QueryClient } from "@tanstack/react
 import { ensureNativeApi } from "../nativeApi";
 import { buildPatchCacheKey } from "./diffRendering";
 
-/** Git 鐘舵€佹煡璇㈣繃鏈熸椂闂达紙姣锛?*/
+/** Git 閻樿埖鈧焦鐓＄拠銏ｇ箖閺堢喐妞傞梻杈剧礄濮ｎ偆顫楅敍?*/
 const GIT_STATUS_STALE_TIME_MS = 30_000;
-/** Git 鐘舵€佹煡璇㈠埛鏂伴棿闅旓紙姣锛?*/
+/** Git 閻樿埖鈧焦鐓＄拠銏犲煕閺備即妫块梾鏃撶礄濮ｎ偆顫楅敍?*/
 const GIT_STATUS_REFETCH_INTERVAL_MS = 60_000;
-/** Git 鍒嗘敮鍒楄〃鏌ヨ杩囨湡鏃堕棿锛堟绉掞級 */
+/** Git 閸掑棙鏁崚妤勩€冮弻銉嚄鏉╁洦婀￠弮鍫曟？閿涘牊顕犵粔鎺炵礆 */
 const GIT_BRANCHES_STALE_TIME_MS = 15_000;
-/** Git 鍒嗘敮鍒楄〃鏌ヨ鍒锋柊闂撮殧锛堟绉掞級 */
+/** Git 閸掑棙鏁崚妤勩€冮弻銉嚄閸掗攱鏌婇梻鎾閿涘牊顕犵粔鎺炵礆 */
 const GIT_BRANCHES_REFETCH_INTERVAL_MS = 60_000;
-/** Git 宸紓鎽樿缂撳瓨淇濈暀鏃堕棿锛堟绉掞紝30鍒嗛挓锛?*/
+/** Git 瀹割喖绱撻幗妯款洣缂傛挸鐡ㄦ穱婵堟殌閺冨爼妫块敍鍫燁嚑缁夋帪绱?0閸掑棝鎸撻敍?*/
 const GIT_DIFF_SUMMARY_GC_TIME_MS = 30 * 60_000;
-/** Git 宸ヤ綔鏍戝樊寮傛煡璇㈣繃鏈熸椂闂达紙姣锛?*/
+/** Git 瀹搞儰缍旈弽鎴濇▕瀵倹鐓＄拠銏ｇ箖閺堢喐妞傞梻杈剧礄濮ｎ偆顫楅敍?*/
 const GIT_WORKING_TREE_DIFF_STALE_TIME_MS = 5_000;
-/** Git 宸ヤ綔鏍戝樊寮傚疄鏃跺埛鏂伴棿闅旓紙姣锛?*/
+/** Git 瀹搞儰缍旈弽鎴濇▕瀵倸鐤勯弮璺哄煕閺備即妫块梾鏃撶礄濮ｎ偆顫楅敍?*/
 export const GIT_WORKING_TREE_DIFF_LIVE_REFETCH_INTERVAL_MS = 4_000;
 
 /**
- * Git 鏌ヨ閿伐鍘? * 鐢ㄤ簬鐢熸垚 React Query 鐨勬煡璇㈤敭
+ * Git 閺屻儴顕楅柨顔间紣閸? * 閻劋绨悽鐔稿灇 React Query 閻ㄥ嫭鐓＄拠銏ゆ暛
  */
 export const gitQueryKeys = {
-  /** 鎵€鏈?Git 鏌ヨ鐨勬牴閿?*/
+  /** 閹碘偓閺?Git 閺屻儴顕楅惃鍕壌闁?*/
   all: ["git"] as const,
-  /** Git 鐘舵€佹煡璇㈤敭 */
+  /** Git 閻樿埖鈧焦鐓＄拠銏ゆ暛 */
   status: (cwd: string | null) => ["git", "status", cwd] as const,
-  /** Git 鍒嗘敮鍒楄〃鏌ヨ閿?*/
+  /** Git 閸掑棙鏁崚妤勩€冮弻銉嚄闁?*/
   branches: (cwd: string | null) => ["git", "branches", cwd] as const,
-  /** Git 宸ヤ綔鏍戝樊寮傛煡璇㈤敭 */
+  /** Git 瀹搞儰缍旈弽鎴濇▕瀵倹鐓＄拠銏ゆ暛 */
   workingTreeDiff: (
     cwd: string | null,
     scope: GitReadWorkingTreeDiffInput["scope"] = "workingTree",
   ) => ["git", "working-tree-diff", cwd, scope] as const,
-  /** Git 宸紓鎽樿鏌ヨ閿?*/
+  /** Git 瀹割喖绱撻幗妯款洣閺屻儴顕楅柨?*/
   diffSummary: (
     cacheScope: string | null,
     model: string | null,
@@ -61,27 +61,27 @@ export const gitQueryKeys = {
 };
 
 /**
- * Git 鍙樻洿閿伐鍘? * 鐢ㄤ簬鐢熸垚 React Query 鐨勫彉鏇撮敭
+ * Git 閸欐ɑ娲块柨顔间紣閸? * 閻劋绨悽鐔稿灇 React Query 閻ㄥ嫬褰夐弴鎾暛
  */
 export const gitMutationKeys = {
-  /** Git 鍒濆鍖栧彉鏇撮敭 */
+  /** Git 閸掓繂顫愰崠鏍у綁閺囨挳鏁?*/
   init: (cwd: string | null) => ["git", "mutation", "init", cwd] as const,
-  /** Git 妫€鍑哄彉鏇撮敭 */
+  /** Git 濡偓閸戝搫褰夐弴鎾暛 */
   checkout: (cwd: string | null) => ["git", "mutation", "checkout", cwd] as const,
-  /** Git 鍫嗗彔鎿嶄綔鍙樻洿閿?*/
+  /** Git 閸棗褰旈幙宥勭稊閸欐ɑ娲块柨?*/
   runStackedAction: (cwd: string | null) => ["git", "mutation", "run-stacked-action", cwd] as const,
-  /** Git 鎷夊彇鍙樻洿閿?*/
+  /** Git 閹峰褰囬崣妯绘纯闁?*/
   pull: (cwd: string | null) => ["git", "mutation", "pull", cwd] as const,
-  /** Git 鍑嗗鎷夊彇璇锋眰绾跨▼鍙樻洿閿?*/
+  /** Git 閸戝棗顦幏澶婂絿鐠囬攱鐪扮痪璺ㄢ柤閸欐ɑ娲块柨?*/
   preparePullRequestThread: (cwd: string | null) =>
     ["git", "mutation", "prepare-pull-request-thread", cwd] as const,
-  /** Git 绾跨▼浜ゆ帴鍙樻洿閿?*/
+  /** Git 缁捐法鈻兼禍銈嗗复閸欐ɑ娲块柨?*/
   handoffThread: (cwd: string | null) => ["git", "mutation", "handoff-thread", cwd] as const,
 };
 
 /**
- * 浣挎墍鏈?Git 鏌ヨ澶辨晥
- * @param queryClient - React Query 瀹㈡埛绔? * @returns 澶辨晥鎿嶄綔鐨?Promise
+ * 娴ｆ寧澧嶉張?Git 閺屻儴顕楁径杈ㄦ櫏
+ * @param queryClient - React Query 鐎广垺鍩涚粩? * @returns 婢惰鲸鏅ラ幙宥勭稊閻?Promise
  */
 export function invalidateGitQueries(queryClient: QueryClient) {
   return Promise.all([
@@ -93,10 +93,8 @@ export function invalidateGitQueries(queryClient: QueryClient) {
 }
 
 /**
- * 浣挎寚瀹氬伐浣滅洰褰曠殑 Git 鏌ヨ澶辨晥
- * 闄愬畾瀹炴椂鏂囦欢鍙樻洿鐨勫け鏁堣寖鍥达紝閬垮厤褰卞搷涓嶇浉鍏崇殑椤圭洰/宸ヤ綔鏍?Git 缂撳瓨
- * @param queryClient - React Query 瀹㈡埛绔? * @param cwds - 宸ヤ綔鐩綍鍒楄〃
- * @returns 澶辨晥鎿嶄綔鐨?Promise
+ * 娴ｆ寧瀵氱€规艾浼愭担婊呮窗瑜版洜娈?Git 閺屻儴顕楁径杈ㄦ櫏
+ * 闂勬劕鐣剧€圭偞妞傞弬鍥︽閸欐ɑ娲块惃鍕亼閺佸牐瀵栭崶杈剧礉闁灝鍘よぐ鍗炴惙娑撳秶娴夐崗宕囨畱妞ゅ湱娲?瀹搞儰缍旈弽?Git 缂傛挸鐡? * @param queryClient - React Query 鐎广垺鍩涚粩? * @param cwds - 瀹搞儰缍旈惄顔肩秿閸掓銆? * @returns 婢惰鲸鏅ラ幙宥勭稊閻?Promise
  */
 export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iterable<string>) {
   const uniqueCwds = [...new Set([...cwds].filter((cwd) => cwd.length > 0))];
@@ -111,10 +109,8 @@ export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iter
 }
 
 /**
- * Git 鐘舵€佹煡璇㈤€夐」
- * @param cwd - 宸ヤ綔鐩綍
- * @returns React Query 鏌ヨ閫夐」
- */
+ * Git 閻樿埖鈧焦鐓＄拠銏も偓澶愩€? * @param cwd - 瀹搞儰缍旈惄顔肩秿
+ * @returns React Query 閺屻儴顕楅柅澶愩€? */
 export function gitStatusQueryOptions(cwd: string | null) {
   return queryOptions({
     queryKey: gitQueryKeys.status(cwd),
@@ -132,10 +128,8 @@ export function gitStatusQueryOptions(cwd: string | null) {
 }
 
 /**
- * Git 鍒嗘敮鍒楄〃鏌ヨ閫夐」
- * @param cwd - 宸ヤ綔鐩綍
- * @returns React Query 鏌ヨ閫夐」
- */
+ * Git 閸掑棙鏁崚妤勩€冮弻銉嚄闁銆? * @param cwd - 瀹搞儰缍旈惄顔肩秿
+ * @returns React Query 閺屻儴顕楅柅澶愩€? */
 export function gitBranchesQueryOptions(cwd: string | null) {
   return queryOptions({
     queryKey: gitQueryKeys.branches(cwd),
@@ -153,11 +147,9 @@ export function gitBranchesQueryOptions(cwd: string | null) {
 }
 
 /**
- * Git 瑙ｆ瀽鎷夊彇璇锋眰鏌ヨ閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.reference - Git 寮曠敤锛堝垎鏀悕銆佹彁浜ゅ搱甯岀瓑锛? * @returns React Query 鏌ヨ閫夐」
- */
+ * Git 鐟欙絾鐎介幏澶婂絿鐠囬攱鐪伴弻銉嚄闁銆? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.reference - Git 瀵洜鏁ら敍鍫濆瀻閺€顖氭倳閵嗕焦褰佹禍銈呮惐鐢瞼鐡戦敍? * @returns React Query 閺屻儴顕楅柅澶愩€? */
 export function gitResolvePullRequestQueryOptions(input: {
   cwd: string | null;
   reference: string | null;
@@ -179,14 +171,11 @@ export function gitResolvePullRequestQueryOptions(input: {
 }
 
 /**
- * Git 宸ヤ綔鏍戝樊寮傛煡璇㈤€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.scope - 宸紓鑼冨洿锛岄粯璁や负 "workingTree"
- * @param input.enabled - 鏄惁鍚敤鏌ヨ
- * @param input.refetchInterval - 鍒锋柊闂撮殧
- * @returns React Query 鏌ヨ閫夐」
- */
+ * Git 瀹搞儰缍旈弽鎴濇▕瀵倹鐓＄拠銏も偓澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.scope - 瀹割喖绱撻懠鍐ㄦ纯閿涘矂绮拋銈勮礋 "workingTree"
+ * @param input.enabled - 閺勵垰鎯侀崥顖滄暏閺屻儴顕? * @param input.refetchInterval - 閸掗攱鏌婇梻鎾
+ * @returns React Query 閺屻儴顕楅柅澶愩€? */
 export function gitWorkingTreeDiffQueryOptions(input: {
   cwd: string | null;
   scope?: GitReadWorkingTreeDiffInput["scope"];
@@ -213,15 +202,10 @@ export function gitWorkingTreeDiffQueryOptions(input: {
 }
 
 /**
- * Git 宸紓鎽樿鏌ヨ閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.cacheScope - 缂撳瓨浣滅敤鍩? * @param input.patch - 琛ヤ竵鏂囨湰
- * @param input.model - 鏂囨湰鐢熸垚妯″瀷
- * @param input.codexHomePath - Codex 涓荤洰褰曡矾寰? * @param input.providerOptions - 鎻愪緵鍟嗛€夐」
- * @param input.enabled - 鏄惁鍚敤鏌ヨ
- * @returns React Query 鏌ヨ閫夐」
- */
+ * Git 瀹割喖绱撻幗妯款洣閺屻儴顕楅柅澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.cacheScope - 缂傛挸鐡ㄦ担婊呮暏閸? * @param input.patch - 鐞涖儰绔甸弬鍥ㄦ拱
+ * @param input.model - 閺傚洦婀伴悽鐔稿灇濡€崇€? * @param input.codexHomePath - Codex 娑撹崵娲拌ぐ鏇＄熅瀵? * @param input.providerOptions - 閹绘劒绶甸崯鍡涒偓澶愩€? * @param input.enabled - 閺勵垰鎯侀崥顖滄暏閺屻儴顕? * @returns React Query 閺屻儴顕楅柅澶愩€? */
 export function gitSummarizeDiffQueryOptions(input: {
   cwd: string | null;
   cacheScope?: string | null;
@@ -231,7 +215,7 @@ export function gitSummarizeDiffQueryOptions(input: {
   providerOptions?: ProviderStartOptions | null;
   enabled?: boolean;
 }) {
-  // 鎸夎ˉ涓佸搱甯岀紦瀛樻憳瑕侊紝閬垮厤閲嶆柊鎵撳紑鐩稿悓宸紓鏃堕噸鏂扮敓鎴?  const normalizedPatch = input.patch?.trim() ?? null;
+  // 閹稿藟娑撲礁鎼辩敮宀€绱︾€涙ɑ鎲崇憰渚婄礉闁灝鍘ら柌宥嗘煀閹垫挸绱戦惄绋挎倱瀹割喖绱撻弮鍫曞櫢閺傛壆鏁撻幋?  const normalizedPatch = input.patch?.trim() ?? null;
   const patchKey =
     normalizedPatch && normalizedPatch.length > 0
       ? buildPatchCacheKey(normalizedPatch, "git-diff-summary")
@@ -274,11 +258,9 @@ export function gitSummarizeDiffQueryOptions(input: {
 }
 
 /**
- * Git 鍒濆鍖栧彉鏇撮€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 閸掓繂顫愰崠鏍у綁閺囨挳鈧銆? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitInitMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
     mutationKey: gitMutationKeys.init(input.cwd),
@@ -294,11 +276,9 @@ export function gitInitMutationOptions(input: { cwd: string | null; queryClient:
 }
 
 /**
- * Git 妫€鍑哄彉鏇撮€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 濡偓閸戝搫褰夐弴鎾偓澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitCheckoutMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -317,13 +297,9 @@ export function gitCheckoutMutationOptions(input: {
 }
 
 /**
- * Git 杩愯鍫嗗彔鎿嶄綔鍙樻洿閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @param input.model - 鏂囨湰鐢熸垚妯″瀷
- * @param input.codexHomePath - Codex 涓荤洰褰曡矾寰? * @param input.providerOptions - 鎻愪緵鍟嗛€夐」
- * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 鏉╂劘顢戦崼鍡楀綌閹垮秳缍旈崣妯绘纯闁銆? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @param input.model - 閺傚洦婀伴悽鐔稿灇濡€崇€? * @param input.codexHomePath - Codex 娑撹崵娲拌ぐ鏇＄熅瀵? * @param input.providerOptions - 閹绘劒绶甸崯鍡涒偓澶愩€? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitRunStackedActionMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -367,11 +343,9 @@ export function gitRunStackedActionMutationOptions(input: {
 }
 
 /**
- * Git 鎷夊彇鍙樻洿閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 閹峰褰囬崣妯绘纯闁銆? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitPullMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
     mutationKey: gitMutationKeys.pull(input.cwd),
@@ -387,10 +361,8 @@ export function gitPullMutationOptions(input: { cwd: string | null; queryClient:
 }
 
 /**
- * Git 鍒涘缓宸ヤ綔鏍戝彉鏇撮€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 閸掓稑缂撳銉ょ稊閺嶆垵褰夐弴鎾偓澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({
@@ -416,10 +388,8 @@ export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClie
 }
 
 /**
- * Git 鍒涘缓鍒嗙宸ヤ綔鏍戝彉鏇撮€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 閸掓稑缂撻崚鍡欘瀲瀹搞儰缍旈弽鎴濆綁閺囨挳鈧銆? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({ cwd, ref, path }: { cwd: string; ref: string; path?: string | null }) => {
@@ -435,10 +405,8 @@ export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: Q
 }
 
 /**
- * Git 绉婚櫎宸ヤ綔鏍戝彉鏇撮€夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 缁夊娅庡銉ょ稊閺嶆垵褰夐弴鎾偓澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
     mutationFn: async ({ cwd, path, force }: { cwd: string; path: string; force?: boolean }) => {
@@ -454,11 +422,9 @@ export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClie
 }
 
 /**
- * Git 鍑嗗鎷夊彇璇锋眰绾跨▼鍙樻洿閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 閸戝棗顦幏澶婂絿鐠囬攱鐪扮痪璺ㄢ柤閸欐ɑ娲块柅澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitPreparePullRequestThreadMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;
@@ -481,11 +447,9 @@ export function gitPreparePullRequestThreadMutationOptions(input: {
 }
 
 /**
- * Git 绾跨▼浜ゆ帴鍙樻洿閫夐」
- * @param input - 杈撳叆鍙傛暟
- * @param input.cwd - 宸ヤ綔鐩綍
- * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
- */
+ * Git 缁捐法鈻兼禍銈嗗复閸欐ɑ娲块柅澶愩€? * @param input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param input.cwd - 瀹搞儰缍旈惄顔肩秿
+ * @param input.queryClient - React Query 鐎广垺鍩涚粩? * @returns React Query 閸欐ɑ娲块柅澶愩€? */
 export function gitHandoffThreadMutationOptions(input: {
   cwd: string | null;
   queryClient: QueryClient;

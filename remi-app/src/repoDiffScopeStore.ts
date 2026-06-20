@@ -1,33 +1,33 @@
 /**
- * @file 浠撳簱 Diff 鑼冨洿鐘舵€佺鐞? *
- * 绠＄悊 Diff 闈㈡澘鍜屽ご閮ㄥ窘绔犲叡浜殑褰撳墠浠撳簱 Diff 鑼冨洿銆? * 鏀寔 workingTree锛堝伐浣滄爲锛夈€乽nstaged锛堟湭鏆傚瓨锛夈€乻taged锛堝凡鏆傚瓨锛夈€乥ranch锛堝垎鏀級
- * 鍥涚鑼冨洿锛屼娇鐢?Zustand + persist 涓棿浠舵寔涔呭寲鍒?localStorage銆? */
+ * @file 娴犳挸绨?Diff 閼煎啫娲块悩鑸碘偓浣侯吀閻? *
+ * 缁狅紕鎮?Diff 闂堛垺婢橀崪灞姐仈闁劌绐樼粩鐘插彙娴滎偆娈戣ぐ鎾冲娴犳挸绨?Diff 閼煎啫娲块妴? * 閺€顖涘瘮 workingTree閿涘牆浼愭担婊勭埐閿涘鈧菇nstaged閿涘牊婀弳鍌氱摠閿涘鈧够taged閿涘牆鍑￠弳鍌氱摠閿涘鈧攻ranch閿涘牆鍨庨弨顖ょ礆
+ * 閸ユ稓顫掗懠鍐ㄦ纯閿涘奔濞囬悽?Zustand + persist 娑擃參妫挎禒鑸靛瘮娑斿懎瀵查崚?localStorage閵? */
 
 import type { GitReadWorkingTreeDiffInput } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** 浠撳簱 Diff 鑼冨洿绫诲瀷 */
+/** 娴犳挸绨?Diff 閼煎啫娲跨猾璇茬€?*/
 export type RepoDiffScope = NonNullable<GitReadWorkingTreeDiffInput["scope"]>;
 
-/** 榛樿鐨?Diff 鑼冨洿锛氬伐浣滄爲 */
+/** 姒涙顓婚惃?Diff 閼煎啫娲块敍姘紣娴ｆ粍鐖?*/
 export const DEFAULT_REPO_DIFF_SCOPE: RepoDiffScope = "workingTree";
 
-/** Diff 鑼冨洿鐨勬樉绀烘爣绛炬槧灏?*/
+/** Diff 閼煎啫娲块惃鍕▔缁€鐑樼垼缁涚偓妲х亸?*/
 export const REPO_DIFF_SCOPE_LABELS: Record<RepoDiffScope, string> = {
-  /** 宸ヤ綔鏍戯細鍖呭惈鎵€鏈夋湭鎻愪氦鐨勬洿鏀?*/
+  /** 瀹搞儰缍旈弽鎴窗閸栧懎鎯堥幍鈧張澶嬫弓閹绘劒姘﹂惃鍕纯閺€?*/
   workingTree: "Working tree",
-  /** 鏈殏瀛橈細浠呮湭鏆傚瓨鐨勬洿鏀?*/
+  /** 閺堫亝娈忕€涙﹫绱版禒鍛弓閺嗗倸鐡ㄩ惃鍕纯閺€?*/
   unstaged: "Unstaged",
-  /** 宸叉殏瀛橈細浠呭凡鏆傚瓨鐨勬洿鏀?*/
+  /** 瀹稿弶娈忕€涙﹫绱版禒鍛嚒閺嗗倸鐡ㄩ惃鍕纯閺€?*/
   staged: "Staged",
-  /** 鍒嗘敮锛氫笌鐩爣鍒嗘敮鐨勫樊寮?*/
+  /** 閸掑棙鏁敍姘瑢閻╊喗鐖ｉ崚鍡樻暜閻ㄥ嫬妯婂?*/
   branch: "Branch",
 };
 
 /**
- * 鍒ゆ柇缁欏畾瀛楃涓叉槸鍚︿负鏈夋晥鐨?Diff 鑼冨洿鍊笺€? *
- * @param value - 寰呭垽鏂殑瀛楃涓? * @returns 鏄惁涓烘湁鏁堢殑 RepoDiffScope
+ * 閸掋倖鏌囩紒娆忕暰鐎涙顑佹稉鍙夋Ц閸氾缚璐熼張澶嬫櫏閻?Diff 閼煎啫娲块崐绗衡偓? *
+ * @param value - 瀵板懎鍨介弬顓犳畱鐎涙顑佹稉? * @returns 閺勵垰鎯佹稉鐑樻箒閺佸牏娈?RepoDiffScope
  */
 export function isRepoDiffScope(value: string): value is RepoDiffScope {
   return (
@@ -35,19 +35,19 @@ export function isRepoDiffScope(value: string): value is RepoDiffScope {
   );
 }
 
-/** Diff 鑼冨洿 Store 鐨勭姸鎬佹帴鍙?*/
+/** Diff 閼煎啫娲?Store 閻ㄥ嫮濮搁幀浣瑰复閸?*/
 interface RepoDiffScopeStore {
-  /** 褰撳墠 Diff 鑼冨洿 */
+  /** 瑜版挸澧?Diff 閼煎啫娲?*/
   scope: RepoDiffScope;
-  /** 璁剧疆 Diff 鑼冨洿 */
+  /** 鐠佸墽鐤?Diff 閼煎啫娲?*/
   setScope: (scope: RepoDiffScope) => void;
 }
 
-/** localStorage 涓殑瀛樺偍閿?*/
+/** localStorage 娑擃厾娈戠€涙ê鍋嶉柨?*/
 const REPO_DIFF_SCOPE_STORAGE_KEY = "remicode:repo-diff-scope:v1";
 
 /**
- * Diff 鑼冨洿 Zustand Store銆? * 鎸佷箙鍖栧埌 localStorage锛岃褰曠敤鎴烽€夋嫨鐨?Diff 鑼冨洿銆? */
+ * Diff 閼煎啫娲?Zustand Store閵? * 閹镐椒绠欓崠鏍у煂 localStorage閿涘矁顔囪ぐ鏇犳暏閹寸兘鈧瀚ㄩ惃?Diff 閼煎啫娲块妴? */
 export const useRepoDiffScopeStore = create<RepoDiffScopeStore>()(
   persist(
     (set) => ({

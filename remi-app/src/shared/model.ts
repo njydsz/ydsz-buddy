@@ -1,15 +1,12 @@
 /**
- * @file 妯″瀷閰嶇疆涓庨€夋嫨绠＄悊妯″潡
+ * @file 濡€崇€烽柊宥囩枂娑撳酣鈧瀚ㄧ粻锛勬倞濡€虫健
  *
  * @description
- * 鎻愪緵 AI 妯″瀷閫夐」鏌ヨ銆佽兘鍔涜В鏋愩€佹ā鍨嬪弬鏁板綊涓€鍖栥€佹樉绀哄悕绉版牸寮忓寲绛夋牳蹇冨姛鑳姐€? * 鏀寔澶氱 AI 鏈嶅姟鎻愪緵鍟嗭紙Claude銆丆odex銆丆ursor銆丟emini銆丟rok銆丳i銆丱penCode銆並ilo锛夛紝
- * 骞朵负姣忕鎻愪緵鍟嗘彁渚涚粺涓€鐨勬ā鍨嬮€夋嫨涓庤兘鍔涙弿杩版帴鍙ｃ€? *
- * 鏍稿績鍔熻兘锛? * - 妯″瀷閫夐」涓庨粯璁ゆā鍨嬫煡璇? * - 妯″瀷鑳藉姏锛圕apabilities锛夎В鏋愪笌鏌ヨ
- * - Gemini 鎬濈淮閰嶇疆锛坆udget/level锛夎В鏋? * - 妯″瀷 Slug 褰掍竴鍖栦笌瑙ｆ瀽
- * - 鍚勬彁渚涘晢妯″瀷閫夐」褰掍竴鍖? * - 鎻愪緵鍟嗛€夐」鎻忚堪绗︽瀯寤? * - Claude Ultrathink 鎻愮ず璇嶅墠缂€澶勭悊
- *
+ * 閹绘劒绶?AI 濡€崇€烽柅澶愩€嶉弻銉嚄閵嗕浇鍏橀崝娑溞掗弸鎰┾偓浣鼓侀崹瀣棘閺佹澘缍婃稉鈧崠鏍モ偓浣规▔缁€鍝勬倳缁夌増鐗稿蹇撳缁涘鐗宠箛鍐ㄥ閼冲鈧? * 閺€顖涘瘮婢舵氨顫?AI 閺堝秴濮熼幓鎰返閸熷棴绱機laude閵嗕竼odex閵嗕竼ursor閵嗕笩emini閵嗕笩rok閵嗕赋i閵嗕副penCode閵嗕甫ilo閿涘绱? * 楠炴湹璐熷В蹇曨潚閹绘劒绶甸崯鍡樺絹娓氭稓绮烘稉鈧惃鍕侀崹瀣偓澶嬪娑撳氦鍏橀崝娑欏伎鏉╃増甯撮崣锝冣偓? *
+ * 閺嶇绺鹃崝鐔诲厴閿? * - 濡€崇€烽柅澶愩€嶆稉搴ㄧ帛鐠併倖膩閸ㄥ鐓＄拠? * - 濡€崇€烽懗钘夊閿涘湑apabilities閿涘袙閺嬫劒绗岄弻銉嚄
+ * - Gemini 閹繄娣柊宥囩枂閿涘潌udget/level閿涘袙閺? * - 濡€崇€?Slug 瑜版帊绔撮崠鏍︾瑢鐟欙絾鐎? * - 閸氬嫭褰佹笟娑樻櫌濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸? * - 閹绘劒绶甸崯鍡涒偓澶愩€嶉幓蹇氬牚缁楋附鐎? * - Claude Ultrathink 閹绘劗銇氱拠宥呭缂傗偓婢跺嫮鎮? *
  * @module model
- * @layer 鍏变韩宸ュ叿灞? */
+ * @layer 閸忓彉闊╁銉ュ徔鐏? */
 import {
   DEFAULT_MODEL_BY_PROVIDER,
   MODEL_CAPABILITIES_INDEX,
@@ -38,11 +35,9 @@ import {
 } from "~/contracts";
 
 /**
- * 鎸夋湇鍔℃彁渚涘晢绱㈠紩鐨勬ā鍨?Slug 闆嗗悎
- *
+ * 閹稿婀囬崝鈩冨絹娓氭稑鏅㈢槐銏犵穿閻ㄥ嫭膩閸?Slug 闂嗗棗鎮? *
  * @description
- * 浠?`MODEL_OPTIONS_BY_PROVIDER` 鏋勫缓鐨勬寜鎻愪緵鍟嗗垎缁勭殑 Slug Set 闆嗗悎锛? * 鐢ㄤ簬 O(1) 鏃堕棿澶嶆潅搴﹀垽鏂煇涓ā鍨?Slug 鏄惁灞炰簬鎸囧畾鎻愪緵鍟嗭紝
- * 閬垮厤閬嶅巻鏁扮粍杩涜鏌ユ壘銆? *
+ * 娴?`MODEL_OPTIONS_BY_PROVIDER` 閺嬪嫬缂撻惃鍕瘻閹绘劒绶甸崯鍡楀瀻缂佸嫮娈?Slug Set 闂嗗棗鎮庨敍? * 閻劋绨?O(1) 閺冨爼妫挎径宥嗘絽鎼达箑鍨介弬顓熺厙娑擃亝膩閸?Slug 閺勵垰鎯佺仦鐐扮艾閹稿洤鐣鹃幓鎰返閸熷棴绱? * 闁灝鍘ら柆宥呭坊閺佹壆绮嶆潻娑滎攽閺屻儲澹橀妴? *
  * @constant {Record<ProviderKind, ReadonlySet<ModelSlug>>}
  *
  * @example
@@ -63,31 +58,28 @@ const MODEL_SLUG_SET_BY_PROVIDER: Record<ProviderKind, ReadonlySet<ModelSlug>> =
 };
 
 /**
- * 鍙€夋嫨鐨勬ā鍨嬮€夐」
- *
+ * 閸欘垶鈧瀚ㄩ惃鍕侀崹瀣偓澶愩€? *
  * @description
- * 鐢ㄤ簬 UI 涓嬫媺鍒楄〃涓睍绀虹殑妯″瀷閫夐」锛屽寘鍚爣璇嗙鍜屾樉绀哄悕绉般€? * 鐢?`getModelOptions` 杩斿洖鐨勯€夐」鍒楄〃涓殑姣忎釜鍏冪礌绫诲瀷銆? *
+ * 閻劋绨?UI 娑撳濯洪崚妤勩€冩稉顓炵潔缁€铏规畱濡€崇€烽柅澶愩€嶉敍灞藉瘶閸氼偅鐖ｇ拠鍡欘儊閸滃本妯夌粈鍝勬倳缁夎埇鈧? * 閻?`getModelOptions` 鏉╂柨娲栭惃鍕偓澶愩€嶉崚妤勩€冩稉顓犳畱濮ｅ繋閲滈崗鍐缁鐎烽妴? *
  * @interface SelectableModelOption
  *
- * @property {string} slug - 妯″瀷鍞竴鏍囪瘑绗︼紙Slug锛夛紝鐢ㄤ簬 API 璋冪敤鍜屽唴閮ㄥ紩鐢? * @property {string} name - 妯″瀷鏄剧ず鍚嶇О锛岀敤浜?UI 灞曠ず
- *
+ * @property {string} slug - 濡€崇€烽崬顖欑閺嶅洩鐦戠粭锔肩礄Slug閿涘绱濋悽銊ょ艾 API 鐠嬪啰鏁ら崪灞藉敶闁劌绱╅悽? * @property {string} name - 濡€崇€烽弰鍓с仛閸氬秶袨閿涘瞼鏁ゆ禍?UI 鐏炴洜銇? *
  * @example
  * ```ts
  * const option: SelectableModelOption = { slug: 'gpt-4', name: 'GPT-4' };
  * ```
  */
 export interface SelectableModelOption {
-  /** 妯″瀷鍞竴鏍囪瘑绗︼紙Slug锛?*/
+  /** 濡€崇€烽崬顖欑閺嶅洩鐦戠粭锔肩礄Slug閿?*/
   slug: string;
-  /** 妯″瀷鏄剧ず鍚嶇О锛岀敤浜?UI 灞曠ず */
+  /** 濡€崇€烽弰鍓с仛閸氬秶袨閿涘瞼鏁ゆ禍?UI 鐏炴洜銇?*/
   name: string;
 }
 
 /**
- * Gemini 鎬濈淮閰嶇疆绫诲瀷
- *
+ * Gemini 閹繄娣柊宥囩枂缁鐎? *
  * @description
- * 鏍囪瘑 Gemini 妯″瀷浣跨敤鐨勬€濈淮閰嶇疆鏂瑰紡锛? * - `"budget"` 琛ㄧず鍩轰簬 Token 棰勭畻閰嶇疆锛堥€傜敤浜?Gemini 2.5 绯诲垪锛? * - `"level"` 琛ㄧず鍩轰簬绾у埆閰嶇疆锛堥€傜敤浜?Gemini 3 绯诲垪锛? *
+ * 閺嶅洩鐦?Gemini 濡€崇€锋担璺ㄦ暏閻ㄥ嫭鈧繄娣柊宥囩枂閺傜懓绱￠敍? * - `"budget"` 鐞涖劎銇氶崺杞扮艾 Token 妫板嫮鐣婚柊宥囩枂閿涘牓鈧倻鏁ゆ禍?Gemini 2.5 缁鍨敍? * - `"level"` 鐞涖劎銇氶崺杞扮艾缁狙冨焼闁板秶鐤嗛敍鍫モ偓鍌滄暏娴?Gemini 3 缁鍨敍? *
  * @type {GeminiThinkingConfigKind}
  *
  * @example
@@ -98,13 +90,13 @@ export interface SelectableModelOption {
  */
 export type GeminiThinkingConfigKind = "budget" | "level";
 
-/** 鍖归厤 Gemini 3 绯诲垪妯″瀷 ID 鐨勬鍒欒〃杈惧紡锛堝 gemini-3.0銆乤uto-gemini-3 绛夛級 */
+/** 閸栧綊鍘?Gemini 3 缁鍨Ο鈥崇€?ID 閻ㄥ嫭顒滈崚娆掋€冩潏鎯х础閿涘牆顩?gemini-3.0閵嗕工uto-gemini-3 缁涘绱?*/
 const GEMINI_3_MODEL_PATTERN = /^(?:auto-)?gemini-3(?:[.-]|$)/i;
-/** 鍖归厤 Gemini 2.5 绯诲垪妯″瀷 ID 鐨勬鍒欒〃杈惧紡锛堝 gemini-2.5-pro銆乤uto-gemini-2.5 绛夛級 */
+/** 閸栧綊鍘?Gemini 2.5 缁鍨Ο鈥崇€?ID 閻ㄥ嫭顒滈崚娆掋€冩潏鎯х础閿涘牆顩?gemini-2.5-pro閵嗕工uto-gemini-2.5 缁涘绱?*/
 const GEMINI_2_5_MODEL_PATTERN = /^(?:auto-)?gemini-2\.5(?:[.-]|$)/i;
-/** Gemini 鎬濈淮绾у埆鍚堟硶鍊奸泦鍚?*/
+/** Gemini 閹繄娣痪褍鍩嗛崥鍫熺《閸婂ジ娉﹂崥?*/
 const GEMINI_THINKING_LEVEL_SET = new Set<GeminiThinkingLevel>(["LOW", "HIGH"]);
-/** Pi 鎬濈淮绾у埆鍚堟硶鍊奸泦鍚?*/
+/** Pi 閹繄娣痪褍鍩嗛崥鍫熺《閸婂ジ娉﹂崥?*/
 const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "off",
   "minimal",
@@ -113,7 +105,7 @@ const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "high",
   "xhigh",
 ]);
-/** Gemini 鎬濈淮棰勭畻瀛楃涓插埌鏁板€肩殑鏄犲皠琛?*/
+/** Gemini 閹繄娣０鍕暬鐎涙顑佹稉鎻掑煂閺佹澘鈧偐娈戦弰鐘茬殸鐞?*/
 const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
   ["-1", -1],
   ["0", 0],
@@ -121,10 +113,9 @@ const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
 ]);
 
 /**
- * 绌虹殑妯″瀷鑳藉姏瀵硅薄
- *
+ * 缁岃櫣娈戝Ο鈥崇€烽懗钘夊鐎电钖? *
  * @description
- * 鎵€鏈夎兘鍔涘瓧娈靛潎涓洪粯璁ゅ€?绌哄€硷紝鐢ㄤ綔鏈煡妯″瀷鎴栨棤鐗规畩鑳藉姏妯″瀷鐨勫洖閫€鍊笺€? * 褰撴棤娉曡瘑鍒ā鍨嬫垨妯″瀷鏃犵壒娈婅兘鍔涢厤缃椂锛屼娇鐢ㄦ瀵硅薄浣滀负榛樿鍊笺€? *
+ * 閹碘偓閺堝鍏橀崝娑樼摟濞堥潧娼庢稉娲帛鐠併倕鈧?缁屽搫鈧》绱濋悽銊ょ稊閺堫亞鐓″Ο鈥崇€烽幋鏍ㄦ￥閻楄鐣╅懗钘夊濡€崇€烽惃鍕礀闁偓閸婄鈧? * 瑜版挻妫ゅ▔鏇＄槕閸掝偅膩閸ㄥ鍨ㄥΟ鈥崇€烽弮鐘靛濞堝﹨鍏橀崝娑㈠帳缂冾喗妞傞敍灞煎▏閻劍顒濈€电钖勬担婊€璐熸妯款吇閸婄鈧? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -141,17 +132,17 @@ export const EMPTY_MODEL_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 /**
- * Gemini 妯″瀷鐨勯粯璁よ兘鍔涘璞? *
+ * Gemini 濡€崇€烽惃鍕帛鐠併倛鍏橀崝娑橆嚠鐠? *
  * @description
- * 褰撳墠涓?`EMPTY_MODEL_CAPABILITIES` 鐩稿悓锛岀敤浜?Gemini 妯″瀷鏃犳硶璇嗗埆绯诲垪鏃剁殑鍥為€€銆? *
+ * 瑜版挸澧犳稉?`EMPTY_MODEL_CAPABILITIES` 閻╃鎮撻敍宀€鏁ゆ禍?Gemini 濡€崇€烽弮鐘崇《鐠囧棗鍩嗙化璇插灙閺冨墎娈戦崶鐐衡偓鈧妴? *
  * @constant {ModelCapabilities}
  */
 export const DEFAULT_GEMINI_MODEL_CAPABILITIES = EMPTY_MODEL_CAPABILITIES;
 
 /**
- * Gemini 3 绯诲垪妯″瀷鐨勮兘鍔涙弿杩? *
+ * Gemini 3 缁鍨Ο鈥崇€烽惃鍕厴閸旀稒寮挎潻? *
  * @description
- * 鏀寔鍩轰簬绾у埆锛圚IGH/LOW锛夌殑鎬濈淮閰嶇疆锛屼笉鏀寔蹇€熸ā寮忓拰鎬濈淮鍒囨崲銆? * 閫傜敤浜?Gemini 3.0 鍙婁互涓婄増鏈殑妯″瀷銆? *
+ * 閺€顖涘瘮閸╄桨绨痪褍鍩嗛敍鍦欼GH/LOW閿涘娈戦幀婵堟樊闁板秶鐤嗛敍灞肩瑝閺€顖涘瘮韫囶偊鈧喐膩瀵繐鎷伴幀婵堟樊閸掑洦宕查妴? * 闁倻鏁ゆ禍?Gemini 3.0 閸欏﹣浜掓稉濠勫閺堫剛娈戝Ο鈥崇€烽妴? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -172,9 +163,9 @@ export const GEMINI_3_MODEL_CAPABILITIES: ModelCapabilities = {
 };
 
 /**
- * Gemini 2.5 绯诲垪妯″瀷鐨勮兘鍔涙弿杩? *
+ * Gemini 2.5 缁鍨Ο鈥崇€烽惃鍕厴閸旀稒寮挎潻? *
  * @description
- * 鏀寔鍩轰簬 Token 棰勭畻锛圖ynamic/-1銆?12锛夌殑鎬濈淮閰嶇疆锛屼笉鏀寔蹇€熸ā寮忓拰鎬濈淮鍒囨崲銆? * 閫傜敤浜?Gemini 2.5 绯诲垪妯″瀷銆? *
+ * 閺€顖涘瘮閸╄桨绨?Token 妫板嫮鐣婚敍鍦杫namic/-1閵?12閿涘娈戦幀婵堟樊闁板秶鐤嗛敍灞肩瑝閺€顖涘瘮韫囶偊鈧喐膩瀵繐鎷伴幀婵堟樊閸掑洦宕查妴? * 闁倻鏁ゆ禍?Gemini 2.5 缁鍨Ο鈥崇€烽妴? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -195,33 +186,32 @@ export const GEMINI_2_5_MODEL_CAPABILITIES: ModelCapabilities = {
 };
 
 /**
- * 绫诲瀷瀹堝崼锛氬垽鏂€兼槸鍚︿负 Gemini 鎬濈淮绾у埆
+ * 缁鐎风€瑰牆宕奸敍姘灲閺傤厼鈧吋妲搁崥锔胯礋 Gemini 閹繄娣痪褍鍩? *
+ * @param value - 瀵板懏顥呴弻銉ф畱閸? * @returns 婵″倹鐏夐崐鍏兼Ц閸氬牊纭堕惃?GeminiThinkingLevel 鏉╂柨娲?true
  *
- * @param value - 寰呮鏌ョ殑鍊? * @returns 濡傛灉鍊兼槸鍚堟硶鐨?GeminiThinkingLevel 杩斿洖 true
- *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function isGeminiThinkingLevel(value: string): value is GeminiThinkingLevel {
   return GEMINI_THINKING_LEVEL_SET.has(value as GeminiThinkingLevel);
 }
 
 /**
- * 绫诲瀷瀹堝崼锛氬垽鏂€兼槸鍚︿负 Gemini 鎬濈淮棰勭畻
+ * 缁鐎风€瑰牆宕奸敍姘灲閺傤厼鈧吋妲搁崥锔胯礋 Gemini 閹繄娣０鍕暬
  *
- * @param value - 寰呮鏌ョ殑鍊? * @returns 濡傛灉鍊兼槸鍚堟硶鐨?GeminiThinkingBudget 瀛楃涓茶繑鍥?true
+ * @param value - 瀵板懏顥呴弻銉ф畱閸? * @returns 婵″倹鐏夐崐鍏兼Ц閸氬牊纭堕惃?GeminiThinkingBudget 鐎涙顑佹稉鑼剁箲閸?true
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function isGeminiThinkingBudget(value: string): value is `${GeminiThinkingBudget}` {
   return GEMINI_THINKING_BUDGET_MAP.has(value);
 }
 
 /**
- * 娓呮礂 Gemini 妯″瀷鍒悕鐨勭墖娈碉紝鐢熸垚鍙敤浜?API 璋冪敤鏍囪瘑绗︾殑瀛楃涓? *
+ * 濞撳懏绀?Gemini 濡€崇€烽崚顐㈡倳閻ㄥ嫮澧栧▓纰夌礉閻㈢喐鍨氶崣顖滄暏娴?API 鐠嬪啰鏁ら弽鍥槕缁楋妇娈戠€涙顑佹稉? *
  * @description
- * 灏嗘ā鍨嬪悕绉拌浆鎹负灏忓啓銆佺Щ闄ら潪娉曞瓧绗︺€佹浛鎹负杩炲瓧绗︼紝
- * 鐢熸垚閫傚悎浣滀负 API 鍒悕鏍囪瘑绗︾殑鐗囨銆? *
- * @param value - 鍘熷妯″瀷鍚嶇О瀛楃涓? * @returns 娓呮礂鍚庣殑鍒悕鐗囨锛屽鏋滅粨鏋滀负绌哄垯杩斿洖 "model"
+ * 鐏忓棙膩閸ㄥ鎮曠粔鎷屾祮閹诡澀璐熺亸蹇撳晸閵嗕胶些闂勩倝娼▔鏇炵摟缁楋负鈧焦娴涢幑顫礋鏉╃偛鐡х粭锔肩礉
+ * 閻㈢喐鍨氶柅鍌氭値娴ｆ粈璐?API 閸掝偄鎮曢弽鍥槕缁楋妇娈戦悧鍥唽閵? *
+ * @param value - 閸樼喎顫愬Ο鈥崇€烽崥宥囆炵€涙顑佹稉? * @returns 濞撳懏绀傞崥搴ｆ畱閸掝偄鎮曢悧鍥唽閿涘苯顩ч弸婊呯波閺嬫粈璐熺粚鍝勫灟鏉╂柨娲?"model"
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function sanitizeGeminiAliasSegment(value: string): string {
   const sanitized = value
     .trim()
@@ -232,12 +222,11 @@ function sanitizeGeminiAliasSegment(value: string): string {
 }
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鍟嗙殑妯″瀷閫夐」鍒楄〃
- *
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸崯鍡欐畱濡€崇€烽柅澶愩€嶉崚妤勩€? *
  * @description
- * 杩斿洖鎸囧畾鎻愪緵鍟嗘敮鎸佺殑鎵€鏈夋ā鍨嬮€夐」锛屽寘鍚?slug 鍜?name 绛変俊鎭€? * 榛樿鎻愪緵鍟嗕负 "codex"銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
- * @returns 璇ユ彁渚涘晢鏀寔鐨勬ā鍨嬮€夐」鏁扮粍
+ * 鏉╂柨娲栭幐鍥х暰閹绘劒绶甸崯鍡樻暜閹镐胶娈戦幍鈧張澶嬆侀崹瀣偓澶愩€嶉敍灞藉瘶閸?slug 閸?name 缁涘淇婇幁顖樷偓? * 姒涙顓婚幓鎰返閸熷棔璐?"codex"閵? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸ㄥ绱濇妯款吇娑?"codex"
+ * @returns 鐠囥儲褰佹笟娑樻櫌閺€顖涘瘮閻ㄥ嫭膩閸ㄥ鈧銆嶉弫鎵矋
  *
  * @example
  * ```ts
@@ -250,24 +239,23 @@ export function getModelOptions(provider: ProviderKind = "codex") {
 }
 
 /**
- * 鍒ゆ柇鎸囧畾鎻愪緵鍟嗘槸鍚︽湁榛樿妯″瀷
- *
+ * 閸掋倖鏌囬幐鍥х暰閹绘劒绶甸崯鍡樻Ц閸氾附婀佹妯款吇濡€崇€? *
  * @description
- * 闄?"pi" 涔嬪鐨勬墍鏈夋彁渚涘晢閮芥湁榛樿妯″瀷銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @returns 濡傛灉鎻愪緵鍟嗘湁榛樿妯″瀷杩斿洖 true
+ * 闂?"pi" 娑斿顦婚惃鍕閺堝褰佹笟娑樻櫌闁姤婀佹妯款吇濡€崇€烽妴? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @returns 婵″倹鐏夐幓鎰返閸熷棙婀佹妯款吇濡€崇€锋潻鏂挎礀 true
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function hasDefaultModel(provider: ProviderKind): provider is ProviderWithDefaultModel {
   return provider !== "pi";
 }
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鍟嗙殑榛樿妯″瀷 Slug
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸崯鍡欐畱姒涙顓诲Ο鈥崇€?Slug
  *
  * @description
- * 杩斿洖鎸囧畾鎻愪緵鍟嗙殑榛樿妯″瀷鏍囪瘑绗︺€?pi" 鎻愪緵鍟嗘病鏈夐粯璁ゆā鍨嬶紝杩斿洖 null銆? * 鍏朵粬鎻愪緵鍟嗚繑鍥?`DEFAULT_MODEL_BY_PROVIDER` 涓厤缃殑榛樿妯″瀷銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
- * @returns 榛樿妯″瀷鐨?Slug锛?pi" 鎻愪緵鍟嗚繑鍥?null
+ * 鏉╂柨娲栭幐鍥х暰閹绘劒绶甸崯鍡欐畱姒涙顓诲Ο鈥崇€烽弽鍥槕缁楋负鈧?pi" 閹绘劒绶甸崯鍡樼梾閺堝绮拋銈喣侀崹瀣剁礉鏉╂柨娲?null閵? * 閸忔湹绮幓鎰返閸熷棜绻戦崶?`DEFAULT_MODEL_BY_PROVIDER` 娑擃參鍘ょ純顔炬畱姒涙顓诲Ο鈥崇€烽妴? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸ㄥ绱濇妯款吇娑?"codex"
+ * @returns 姒涙顓诲Ο鈥崇€烽惃?Slug閿?pi" 閹绘劒绶甸崯鍡氱箲閸?null
  *
  * @example
  * ```ts
@@ -284,13 +272,12 @@ export function getDefaultModel(provider: ProviderKind = "codex"): ModelSlug | n
 }
 
 /**
- * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮閰嶇疆绫诲瀷
- *
+ * 閼惧嘲褰?Gemini 濡€崇€烽惃鍕偓婵堟樊闁板秶鐤嗙猾璇茬€? *
  * @description
- * 鏍规嵁妯″瀷 ID 鍒ゆ柇鍏朵娇鐢ㄧ殑鎬濈淮閰嶇疆鏂瑰紡锛? * - Gemini 3 绯诲垪杩斿洖 `"level"`锛堝熀浜庣骇鍒級
- * - Gemini 2.5 绯诲垪杩斿洖 `"budget"`锛堝熀浜?Token 棰勭畻锛? * - 鍏朵粬妯″瀷杩斿洖 null
+ * 閺嶈宓佸Ο鈥崇€?ID 閸掋倖鏌囬崗鏈靛▏閻劎娈戦幀婵堟樊闁板秶鐤嗛弬鐟扮础閿? * - Gemini 3 缁鍨潻鏂挎礀 `"level"`閿涘牆鐔€娴滃海楠囬崚顐礆
+ * - Gemini 2.5 缁鍨潻鏂挎礀 `"budget"`閿涘牆鐔€娴?Token 妫板嫮鐣婚敍? * - 閸忔湹绮Ο鈥崇€锋潻鏂挎礀 null
  *
- * @param model - 妯″瀷 ID 瀛楃涓? * @returns 鎬濈淮閰嶇疆绫诲瀷锛屾棤娉曡瘑鍒椂杩斿洖 null
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @returns 閹繄娣柊宥囩枂缁鐎烽敍灞炬￥濞夋洝鐦戦崚顐ｆ鏉╂柨娲?null
  *
  * @example
  * ```ts
@@ -316,23 +303,22 @@ export function getGeminiThinkingConfigKind(
 }
 
 /**
- * 鑾峰彇 Gemini 妯″瀷鐨勮兘鍔涙弿杩? *
+ * 閼惧嘲褰?Gemini 濡€崇€烽惃鍕厴閸旀稒寮挎潻? *
  * @description
- * 鏍规嵁妯″瀷 ID 杩斿洖瀵瑰簲鐨?Gemini 鑳藉姏鎻忚堪瀵硅薄銆? * 鑷姩璇嗗埆 Gemini 3锛坙evel 妯″紡锛夊拰 Gemini 2.5锛坆udget 妯″紡锛夌郴鍒楋紝
- * 鏃犳硶璇嗗埆鏃惰繑鍥炴彁渚涚殑鍥為€€鑳藉姏瀵硅薄銆? *
- * @param modelId - 妯″瀷 ID 瀛楃涓? * @param fallbackCapabilities - 鏃犳硶璇嗗埆鏃剁殑鍥為€€鑳藉姏瀵硅薄锛岄粯璁や负 `EMPTY_MODEL_CAPABILITIES`
- * @returns 鍖归厤鐨?Gemini 妯″瀷鑳藉姏鎻忚堪
- *
+ * 閺嶈宓佸Ο鈥崇€?ID 鏉╂柨娲栫€电懓绨查惃?Gemini 閼宠棄濮忛幓蹇氬牚鐎电钖勯妴? * 閼奉亜濮╃拠鍡楀焼 Gemini 3閿涘潤evel 濡€崇础閿涘鎷?Gemini 2.5閿涘潌udget 濡€崇础閿涘閮撮崚妤嬬礉
+ * 閺冪姵纭剁拠鍡楀焼閺冩儼绻戦崶鐐村絹娓氭稓娈戦崶鐐衡偓鈧懗钘夊鐎电钖勯妴? *
+ * @param modelId - 濡€崇€?ID 鐎涙顑佹稉? * @param fallbackCapabilities - 閺冪姵纭剁拠鍡楀焼閺冨墎娈戦崶鐐衡偓鈧懗钘夊鐎电钖勯敍宀勭帛鐠併倓璐?`EMPTY_MODEL_CAPABILITIES`
+ * @returns 閸栧綊鍘ら惃?Gemini 濡€崇€烽懗钘夊閹诲繗鍫? *
  * @example
  * ```ts
  * geminiCapabilitiesForModel('gemini-3.0-pro');
- * // 杩斿洖 GEMINI_3_MODEL_CAPABILITIES
+ * // 鏉╂柨娲?GEMINI_3_MODEL_CAPABILITIES
  *
  * geminiCapabilitiesForModel('gemini-2.5-flash');
- * // 杩斿洖 GEMINI_2_5_MODEL_CAPABILITIES
+ * // 鏉╂柨娲?GEMINI_2_5_MODEL_CAPABILITIES
  *
  * geminiCapabilitiesForModel('unknown-model');
- * // 杩斿洖 EMPTY_MODEL_CAPABILITIES
+ * // 鏉╂柨娲?EMPTY_MODEL_CAPABILITIES
  * ```
  */
 export function geminiCapabilitiesForModel(
@@ -354,11 +340,10 @@ export function geminiCapabilitiesForModel(
 }
 
 /**
- * 妯″瀷 Slug 鍒版樉绀哄悕绉扮殑鏄犲皠琛? *
+ * 濡€崇€?Slug 閸掔増妯夌粈鍝勬倳缁夋壆娈戦弰鐘茬殸鐞? *
  * @description
- * 浠庢墍鏈夋彁渚涘晢鐨勬ā鍨嬮€夐」涓瀯寤虹殑鍏ㄥ眬鏄犲皠琛紝
- * 鐢ㄤ簬灏嗘ā鍨?Slug 杞崲涓轰汉绫诲彲璇荤殑鏄剧ず鍚嶇О銆? * 閿负灏忓啓鐨?Slug锛屽€间负瀵瑰簲鐨?name銆? *
- * @private 姝ゅ父閲忎负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヤ娇鐢? */
+ * 娴犲孩澧嶉張澶嬪絹娓氭稑鏅㈤惃鍕侀崹瀣偓澶愩€嶆稉顓熺€铏规畱閸忋劌鐪弰鐘茬殸鐞涱煉绱? * 閻劋绨亸鍡樐侀崹?Slug 鏉烆剚宕叉稉杞版眽缁褰茬拠鑽ゆ畱閺勫墽銇氶崥宥囆為妴? * 闁款喕璐熺亸蹇撳晸閻?Slug閿涘苯鈧棿璐熺€电懓绨查惃?name閵? *
+ * @private 濮濄倕鐖堕柌蹇庤礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儰濞囬悽? */
 const MODEL_NAME_BY_SLUG = new Map(
   Object.values(MODEL_OPTIONS_BY_PROVIDER)
     .flat()
@@ -366,12 +351,12 @@ const MODEL_NAME_BY_SLUG = new Map(
 );
 
 /**
- * 灏嗘湭鐭ョ殑 GPT 妯″瀷 Slug 杞崲涓轰汉绫诲彲璇荤殑鍚嶇О
+ * 鐏忓棙婀惌銉ф畱 GPT 濡€崇€?Slug 鏉烆剚宕叉稉杞版眽缁褰茬拠鑽ゆ畱閸氬秶袨
  *
  * @description
- * 涓撻棬澶勭悊浠?"gpt-" 寮€澶寸殑妯″瀷 Slug锛屽皢鍏舵牸寮忓寲涓?"GPT-{version} {rest}" 鐨勫舰寮忋€? * 闈?"gpt-" 寮€澶寸殑 Slug 鍘熸牱杩斿洖銆? *
- * @param slug - 妯″瀷 Slug 瀛楃涓? * @returns 鏍煎紡鍖栧悗鐨勬樉绀哄悕绉? *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? *
+ * 娑撴捇妫径鍕倞娴?"gpt-" 瀵偓婢跺娈戝Ο鈥崇€?Slug閿涘苯鐨㈤崗鑸电壐瀵繐瀵叉稉?"GPT-{version} {rest}" 閻ㄥ嫬鑸板蹇嬧偓? * 闂?"gpt-" 瀵偓婢跺娈?Slug 閸樼喐鐗辨潻鏂挎礀閵? *
+ * @param slug - 濡€崇€?Slug 鐎涙顑佹稉? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭妯夌粈鍝勬倳缁? *
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? *
  * @example
  * ```ts
  * humanizeUnknownModelSlug('gpt-4-turbo'); // 'GPT-4 Turbo'
@@ -387,11 +372,10 @@ function humanizeUnknownModelSlug(slug: string): string {
 }
 
 /**
- * 鏍煎紡鍖栨ā鍨嬫樉绀哄悕绉? *
+ * 閺嶇厧绱￠崠鏍侀崹瀣▔缁€鍝勬倳缁? *
  * @description
- * 灏嗘ā鍨?Slug 杞崲涓轰汉绫诲彲璇荤殑鏄剧ず鍚嶇О銆? * 浼樺厛浠庡叏灞€鏄犲皠琛ㄤ腑鏌ユ壘宸茬煡妯″瀷鐨勫悕绉帮紝
- * 鏈壘鍒版椂浣跨敤 `humanizeUnknownModelSlug` 杩涜鏍煎紡鍖栥€? *
- * @param model - 妯″瀷 Slug 鎴?ID 瀛楃涓? * @returns 鏍煎紡鍖栧悗鐨勬樉绀哄悕绉帮紝杈撳叆涓虹┖鏃惰繑鍥?undefined
+ * 鐏忓棙膩閸?Slug 鏉烆剚宕叉稉杞版眽缁褰茬拠鑽ゆ畱閺勫墽銇氶崥宥囆為妴? * 娴兼ê鍘涙禒搴″弿鐏炩偓閺勭姴鐨犵悰銊よ厬閺屻儲澹樺鑼叀濡€崇€烽惃鍕倳缁夊府绱? * 閺堫亝澹橀崚鐗堟娴ｈ法鏁?`humanizeUnknownModelSlug` 鏉╂稖顢戦弽鐓庣础閸栨牓鈧? *
+ * @param model - 濡€崇€?Slug 閹?ID 鐎涙顑佹稉? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭妯夌粈鍝勬倳缁夊府绱濇潏鎾冲弳娑撹櫣鈹栭弮鎯扮箲閸?undefined
  *
  * @example
  * ```ts
@@ -410,12 +394,11 @@ export function formatModelDisplayName(model: string | null | undefined): string
 }
 
 /**
- * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮閰嶇疆閫変腑鍊? *
+ * 閼惧嘲褰?Gemini 濡€崇€烽惃鍕偓婵堟樊闁板秶鐤嗛柅澶夎厬閸? *
  * @description
- * 浠庢ā鍨嬮€夐」涓彁鍙栧綋鍓嶉€変腑鐨勬€濈淮閰嶇疆鍊笺€? * 浼樺厛杩斿洖鍖归厤鑳藉姏鍒楄〃涓湁鏁堢骇鍒殑鍊硷紝鍏舵杩斿洖浠绘剰闈炵┖鍊笺€? *
- * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @param modelOptions - Gemini 妯″瀷閫夐」锛屽彲鑳藉寘鍚?thinkingLevel 鎴?thinkingBudget
- * @returns 鍖归厤鐨勬€濈淮閰嶇疆鍊硷紝鏈壘鍒拌繑鍥?null
+ * 娴犲孩膩閸ㄥ鈧銆嶆稉顓熷絹閸欐牕缍嬮崜宥夆偓澶夎厬閻ㄥ嫭鈧繄娣柊宥囩枂閸婄鈧? * 娴兼ê鍘涙潻鏂挎礀閸栧綊鍘ら懗钘夊閸掓銆冩稉顓熸箒閺佸牏楠囬崚顐ゆ畱閸婄》绱濋崗鑸殿偧鏉╂柨娲栨禒缁樺壈闂堢偟鈹栭崐绗衡偓? *
+ * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @param modelOptions - Gemini 濡€崇€烽柅澶愩€嶉敍灞藉讲閼宠棄瀵橀崥?thinkingLevel 閹?thinkingBudget
+ * @returns 閸栧綊鍘ら惃鍕偓婵堟樊闁板秶鐤嗛崐纭风礉閺堫亝澹橀崚鎷岀箲閸?null
  *
  * @example
  * ```ts
@@ -442,12 +425,11 @@ export function getGeminiThinkingSelectionValue(
 }
 
 /**
- * 浠庢€濈淮閰嶇疆鍊艰В鏋?Gemini 妯″瀷閫夐」
- *
+ * 娴犲孩鈧繄娣柊宥囩枂閸婅壈袙閺?Gemini 濡€崇€烽柅澶愩€? *
  * @description
- * 灏嗗瓧绗︿覆褰㈠紡鐨勬€濈淮閰嶇疆鍊艰浆鎹负缁撴瀯鍖栫殑 GeminiModelOptions 瀵硅薄銆? * 鏀寔璇嗗埆 level 鏍煎紡锛堝 "HIGH"銆?LOW"锛夊拰 budget 鏍煎紡锛堝 "-1"銆?512"锛夈€? *
- * @param value - 鎬濈淮閰嶇疆鍊煎瓧绗︿覆
- * @returns 瑙ｆ瀽鍚庣殑 GeminiModelOptions锛屾棤娉曡瘑鍒繑鍥?undefined
+ * 鐏忓棗鐡х粭锔胯瑜般垹绱￠惃鍕偓婵堟樊闁板秶鐤嗛崐鑹版祮閹诡澀璐熺紒鎾寸€崠鏍畱 GeminiModelOptions 鐎电钖勯妴? * 閺€顖涘瘮鐠囧棗鍩?level 閺嶇厧绱￠敍鍫濐洤 "HIGH"閵?LOW"閿涘鎷?budget 閺嶇厧绱￠敍鍫濐洤 "-1"閵?512"閿涘鈧? *
+ * @param value - 閹繄娣柊宥囩枂閸婄厧鐡х粭锔胯
+ * @returns 鐟欙絾鐎介崥搴ｆ畱 GeminiModelOptions閿涘本妫ゅ▔鏇＄槕閸掝偉绻戦崶?undefined
  *
  * @example
  * ```ts
@@ -475,12 +457,10 @@ export function geminiModelOptionsFromEffortValue(
 }
 
 /**
- * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮鍒悕
- *
+ * 閼惧嘲褰?Gemini 濡€崇€烽惃鍕偓婵堟樊閸掝偄鎮? *
  * @description
- * 鏍规嵁 Gemini 妯″瀷 ID 鍜屾ā鍨嬮€夐」锛岀敓鎴愮敤浜?API 璋冪敤鐨勬€濈淮閰嶇疆鍒悕銆? * 鍒悕鏍煎紡涓?`remicode-gemini-{base}-thinking-{level|budget}-{value}`銆? *
- * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - Gemini 妯″瀷閫夐」
- * @returns 鐢熸垚鐨勬€濈淮鍒悕锛屾棤娉曠敓鎴愯繑鍥?null
+ * 閺嶈宓?Gemini 濡€崇€?ID 閸滃本膩閸ㄥ鈧銆嶉敍宀€鏁撻幋鎰暏娴?API 鐠嬪啰鏁ら惃鍕偓婵堟樊闁板秶鐤嗛崚顐㈡倳閵? * 閸掝偄鎮曢弽鐓庣础娑?`remicode-gemini-{base}-thinking-{level|budget}-{value}`閵? *
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @param modelOptions - Gemini 濡€崇€烽柅澶愩€? * @returns 閻㈢喐鍨氶惃鍕偓婵堟樊閸掝偄鎮曢敍灞炬￥濞夋洜鏁撻幋鎰箲閸?null
  *
  * @example
  * ```ts
@@ -523,12 +503,11 @@ export function getGeminiThinkingModelAlias(
 }
 
 /**
- * 瑙ｆ瀽 Gemini API 鐨勬ā鍨?ID
+ * 鐟欙絾鐎?Gemini API 閻ㄥ嫭膩閸?ID
  *
  * @description
- * 濡傛灉妯″瀷鏈夋€濈淮閰嶇疆鍒悕锛屽垯杩斿洖鍒悕锛涘惁鍒欒繑鍥炲師濮嬫ā鍨?ID銆? * 鍒悕浼樺厛绾ч珮浜庡師濮?ID锛岀‘淇?API 璋冪敤浣跨敤姝ｇ‘鐨勬€濈淮閰嶇疆銆? *
- * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param modelOptions - Gemini 妯″瀷閫夐」
- * @returns 鏈€缁堢敤浜?API 璋冪敤鐨勬ā鍨?ID
+ * 婵″倹鐏夊Ο鈥崇€烽張澶嬧偓婵堟樊闁板秶鐤嗛崚顐㈡倳閿涘苯鍨潻鏂挎礀閸掝偄鎮曢敍娑樻儊閸掓瑨绻戦崶鐐插斧婵膩閸?ID閵? * 閸掝偄鎮曟导妯哄帥缁狙囩彯娴滃骸甯慨?ID閿涘瞼鈥樻穱?API 鐠嬪啰鏁ゆ担璺ㄦ暏濮濓絿鈥橀惃鍕偓婵堟樊闁板秶鐤嗛妴? *
+ * @param model - 閸樼喎顫愬Ο鈥崇€?ID 鐎涙顑佹稉? * @param modelOptions - Gemini 濡€崇€烽柅澶愩€? * @returns 閺堚偓缂佸牏鏁ゆ禍?API 鐠嬪啰鏁ら惃鍕侀崹?ID
  *
  * @example
  * ```ts
@@ -546,16 +525,15 @@ export function resolveGeminiApiModelId(
   return getGeminiThinkingModelAlias(model, modelOptions) ?? model;
 }
 
-// 鈹€鈹€ Effort 杈呭姪鍑芥暟 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 Effort 鏉堝懎濮崙鑺ユ殶 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 /**
- * 妫€鏌ヨ兘鍔涘璞′腑鏄惁鍖呭惈鎸囧畾鐨勬帹鐞嗗姫鍔涚骇鍒? *
- * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @param value - 寰呮鏌ョ殑鎺ㄧ悊鍔姏绾у埆鍊? * @returns 濡傛灉鑳藉姏瀵硅薄涓寘鍚绾у埆杩斿洖 true锛屽惁鍒欒繑鍥?false
+ * 濡偓閺屻儴鍏橀崝娑橆嚠鐠炩€茶厬閺勵垰鎯侀崠鍛儓閹稿洤鐣鹃惃鍕腹閻炲棗濮崝娑氶獓閸? *
+ * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @param value - 瀵板懏顥呴弻銉ф畱閹恒劎鎮婇崝顏勫缁狙冨焼閸? * @returns 婵″倹鐏夐懗钘夊鐎电钖勬稉顓炲瘶閸氼偉顕氱痪褍鍩嗘潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
  *
  * @example
  * ```ts
- * hasEffortLevel(caps, 'high'); // true 鎴?false
+ * hasEffortLevel(caps, 'high'); // true 閹?false
  * ```
  */
 export function hasEffortLevel(caps: ModelCapabilities, value: string): boolean {
@@ -563,40 +541,35 @@ export function hasEffortLevel(caps: ModelCapabilities, value: string): boolean 
 }
 
 /**
- * 鑾峰彇鑳藉姏瀵硅薄涓殑榛樿鎺ㄧ悊鍔姏绾у埆鍊? *
- * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @returns 榛樿鐨勬帹鐞嗗姫鍔涚骇鍒€硷紝鏃犻粯璁ゅ€兼椂杩斿洖 null
+ * 閼惧嘲褰囬懗钘夊鐎电钖勬稉顓犳畱姒涙顓婚幒銊ф倞閸旑亜濮忕痪褍鍩嗛崐? *
+ * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @returns 姒涙顓婚惃鍕腹閻炲棗濮崝娑氶獓閸掝偄鈧》绱濋弮鐘荤帛鐠併倕鈧吋妞傛潻鏂挎礀 null
  */
 export function getDefaultEffort(caps: ModelCapabilities): string | null {
   return caps.reasoningEffortLevels.find((l) => l.isDefault)?.value ?? null;
 }
 
 /**
- * 妫€鏌ヨ兘鍔涘璞′腑鏄惁鍖呭惈鎸囧畾鐨勪笂涓嬫枃绐楀彛閫夐」
- *
- * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @param value - 寰呮鏌ョ殑涓婁笅鏂囩獥鍙ｉ€夐」鍊? * @returns 濡傛灉鑳藉姏瀵硅薄涓寘鍚閫夐」杩斿洖 true锛屽惁鍒欒繑鍥?false
+ * 濡偓閺屻儴鍏橀崝娑橆嚠鐠炩€茶厬閺勵垰鎯侀崠鍛儓閹稿洤鐣鹃惃鍕瑐娑撳鏋冪粣妤€褰涢柅澶愩€? *
+ * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @param value - 瀵板懏顥呴弻銉ф畱娑撳﹣绗呴弬鍥╃崶閸欙綁鈧銆嶉崐? * @returns 婵″倹鐏夐懗钘夊鐎电钖勬稉顓炲瘶閸氼偉顕氶柅澶愩€嶆潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
  */
 export function hasContextWindowOption(caps: ModelCapabilities, value: string): boolean {
   return caps.contextWindowOptions.some((option) => option.value === value);
 }
 
 /**
- * 鑾峰彇鑳藉姏瀵硅薄涓殑榛樿涓婁笅鏂囩獥鍙ｉ€夐」鍊? *
- * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @returns 榛樿鐨勪笂涓嬫枃绐楀彛閫夐」鍊硷紝鏃犻粯璁ゅ€兼椂杩斿洖 null
+ * 閼惧嘲褰囬懗钘夊鐎电钖勬稉顓犳畱姒涙顓绘稉濠佺瑓閺傚洨鐛ラ崣锝夆偓澶愩€嶉崐? *
+ * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @returns 姒涙顓婚惃鍕瑐娑撳鏋冪粣妤€褰涢柅澶愩€嶉崐纭风礉閺冪娀绮拋銈呪偓鍏兼鏉╂柨娲?null
  */
 export function getDefaultContextWindow(caps: ModelCapabilities): string | null {
   return caps.contextWindowOptions.find((option) => option.isDefault)?.value ?? null;
 }
 
 /**
- * 瑙ｆ瀽甯︽爣绛鹃€夐」鐨勫€? *
+ * 鐟欙絾鐎界敮锔界垼缁涢箖鈧銆嶉惃鍕偓? *
  * @description
- * 浠庨€夐」鍒楄〃涓В鏋愮粰瀹氬師濮嬪€肩殑鏈夋晥鎬с€傚鏋滃師濮嬪€煎湪閫夐」鍒楄〃涓瓨鍦ㄥ垯鐩存帴杩斿洖锛? * 鍚﹀垯杩斿洖閫夐」鍒楄〃涓殑榛樿鍊兼垨绗竴涓€夐」鍊笺€? *
- * @param options - 甯︽爣绛剧殑閫夐」鏁扮粍锛屾瘡椤瑰寘鍚?value 鍜屽彲閫夌殑 isDefault
- * @param rawValue - 鍘熷杈撳叆鍊? * @returns 瑙ｆ瀽鍚庣殑鏈夋晥鍊硷紝閫夐」鍒楄〃涓虹┖鏃惰繑鍥炲師濮嬪€硷紙淇壀鍚庯級
- *
+ * 娴犲酣鈧銆嶉崚妤勩€冩稉顓⌒掗弸鎰舶鐎规艾甯慨瀣偓鑲╂畱閺堝鏅ラ幀褋鈧倸顩ч弸婊冨斧婵鈧厧婀柅澶愩€嶉崚妤勩€冩稉顓炵摠閸︺劌鍨惄瀛樺复鏉╂柨娲栭敍? * 閸氾箑鍨潻鏂挎礀闁銆嶉崚妤勩€冩稉顓犳畱姒涙顓婚崐鍏煎灗缁楊兛绔存稉顏堚偓澶愩€嶉崐绗衡偓? *
+ * @param options - 鐢附鐖ｇ粵鍓ф畱闁銆嶉弫鎵矋閿涘本鐦℃い鐟板瘶閸?value 閸滃苯褰查柅澶屾畱 isDefault
+ * @param rawValue - 閸樼喎顫愭潏鎾冲弳閸? * @returns 鐟欙絾鐎介崥搴ｆ畱閺堝鏅ラ崐纭风礉闁銆嶉崚妤勩€冩稉铏光敄閺冩儼绻戦崶鐐插斧婵鈧》绱欐穱顔煎閸氬函绱? *
  * @example
  * ```ts
  * resolveLabeledOptionValue(
@@ -607,8 +580,7 @@ export function getDefaultContextWindow(caps: ModelCapabilities): string | null 
  * resolveLabeledOptionValue(
  *   [{ value: 'high', isDefault: true }, { value: 'low' }],
  *   'invalid'
- * ); // 'high'锛堝洖閫€鍒伴粯璁ゅ€硷級
- * ```
+ * ); // 'high'閿涘牆娲栭柅鈧崚浼寸帛鐠併倕鈧》绱? * ```
  */
 export function resolveLabeledOptionValue(
   options: ReadonlyArray<{ value: string; isDefault?: boolean | undefined }> | undefined,
@@ -625,11 +597,10 @@ export function resolveLabeledOptionValue(
 }
 
 /**
- * 鎻愪緵鍟嗛€夐」閫夋嫨鍊肩殑杈撳叆绫诲瀷
- *
+ * 閹绘劒绶甸崯鍡涒偓澶愩€嶉柅澶嬪閸婅偐娈戞潏鎾冲弳缁鐎? *
  * @description
- * 鏀寔涓夌杈撳叆鏍煎紡锛? * - ProviderOptionSelection 鏁扮粍锛堢粨鏋勫寲閫夋嫨鍒楄〃锛? * - Record<string, unknown> 瀵硅薄锛堥敭鍊煎鏄犲皠锛? * - null/undefined锛堟棤閫夋嫨锛? *
- * @private 姝ょ被鍨嬩负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヤ娇鐢? */
+ * 閺€顖涘瘮娑撳顫掓潏鎾冲弳閺嶇厧绱￠敍? * - ProviderOptionSelection 閺佹壆绮嶉敍鍫㈢波閺嬪嫬瀵查柅澶嬪閸掓銆冮敍? * - Record<string, unknown> 鐎电钖勯敍鍫ユ暛閸婄厧顕弰鐘茬殸閿? * - null/undefined閿涘牊妫ら柅澶嬪閿? *
+ * @private 濮濄倗琚崹瀣╄礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儰濞囬悽? */
 type ProviderOptionSelectionsInput =
   | ReadonlyArray<ProviderOptionSelection>
   | Record<string, unknown>
@@ -637,12 +608,12 @@ type ProviderOptionSelectionsInput =
   | undefined;
 
 /**
- * 娣辨嫹璐濇彁渚涘晢閫夐」鎻忚堪绗? *
+ * 濞ｈ鲸瀚圭拹婵囧絹娓氭稑鏅㈤柅澶愩€嶉幓蹇氬牚缁? *
  * @description
- * 瀵规弿杩扮杩涜娣辨嫹璐濓紝纭繚淇敼涓嶄細褰卞搷鍘熷鏁版嵁銆? * 瀵逛簬 "select" 绫诲瀷鐨勬弿杩扮锛岄澶栨嫹璐?options 鏁扮粍鍜?promptInjectedValues 鏁扮粍銆? *
- * @param descriptor - 鍘熷鎻忚堪绗? * @returns 娣辨嫹璐濆悗鐨勬弿杩扮
+ * 鐎佃寮挎潻鎵儊鏉╂稖顢戝ǎ杈ㄥ鐠愭繐绱濈涵顔荤箽娣囶喗鏁兼稉宥勭窗瑜板崬鎼烽崢鐔奉潗閺佺増宓侀妴? * 鐎甸€涚艾 "select" 缁鐎烽惃鍕伎鏉╂壆顑侀敍宀勵杺婢舵牗瀚圭拹?options 閺佹壆绮嶉崪?promptInjectedValues 閺佹壆绮嶉妴? *
+ * @param descriptor - 閸樼喎顫愰幓蹇氬牚缁? * @returns 濞ｈ鲸瀚圭拹婵嗘倵閻ㄥ嫭寮挎潻鎵儊
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function cloneProviderOptionDescriptor(
   descriptor: ProviderOptionDescriptor,
 ): ProviderOptionDescriptor {
@@ -659,13 +630,13 @@ function cloneProviderOptionDescriptor(
 }
 
 /**
- * 浠庨€夐」閫夋嫨鍊间腑鎻愬彇鎸囧畾 ID 鐨勫€? *
+ * 娴犲酣鈧銆嶉柅澶嬪閸婇棿鑵戦幓鎰絿閹稿洤鐣?ID 閻ㄥ嫬鈧? *
  * @description
- * 鏀寔鏁扮粍鍜屽璞′袱绉嶈緭鍏ユ牸寮忥紝鎻愬彇鎸囧畾 ID 瀵瑰簲鐨勯€夋嫨鍊笺€? * 鏁板€肩被鍨嬩細鑷姩杞崲涓哄瓧绗︿覆銆? *
- * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
- * @returns 鎻愬彇鍒扮殑鍊硷紙string 鎴?boolean锛夛紝鏈壘鍒拌繑鍥?undefined
+ * 閺€顖涘瘮閺佹壆绮嶉崪灞筋嚠鐠炩€茶⒈缁夊秷绶崗銉︾壐瀵骏绱濋幓鎰絿閹稿洤鐣?ID 鐎电懓绨查惃鍕偓澶嬪閸婄鈧? * 閺佹澘鈧偐琚崹瀣╃窗閼奉亜濮╂潪顒佸床娑撳搫鐡х粭锔胯閵? *
+ * @param selections - 闁銆嶉柅澶嬪閸婅壈绶崗? * @param id - 闁銆?ID
+ * @returns 閹绘劕褰囬崚鎵畱閸婄》绱檚tring 閹?boolean閿涘绱濋張顏呭閸掓媽绻戦崶?undefined
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function providerOptionSelectionValue(
   selections: ProviderOptionSelectionsInput,
   id: string,
@@ -685,9 +656,9 @@ function providerOptionSelectionValue(
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勯€夋嫨鍊硷紙string 鎴?boolean锛? *
- * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
- * @returns 鎻愬彇鍒扮殑鍊硷紝鏈壘鍒拌繑鍥?undefined
+ * 閼惧嘲褰囬幓鎰返閸熷棝鈧銆嶉惃鍕偓澶嬪閸婄》绱檚tring 閹?boolean閿? *
+ * @param selections - 闁銆嶉柅澶嬪閸婅壈绶崗? * @param id - 闁銆?ID
+ * @returns 閹绘劕褰囬崚鎵畱閸婄》绱濋張顏呭閸掓媽绻戦崶?undefined
  */
 export function getProviderOptionSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -697,9 +668,9 @@ export function getProviderOptionSelectionValue(
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勫瓧绗︿覆绫诲瀷閫夋嫨鍊? *
- * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
- * @returns 瀛楃涓茬被鍨嬬殑閫夋嫨鍊硷紝闈炲瓧绗︿覆鎴栨湭鎵惧埌杩斿洖 undefined
+ * 閼惧嘲褰囬幓鎰返閸熷棝鈧銆嶉惃鍕摟缁楋缚瑕嗙猾璇茬€烽柅澶嬪閸? *
+ * @param selections - 闁銆嶉柅澶嬪閸婅壈绶崗? * @param id - 闁銆?ID
+ * @returns 鐎涙顑佹稉鑼閸ㄥ娈戦柅澶嬪閸婄》绱濋棃鐐茬摟缁楋缚瑕嗛幋鏍ㄦ弓閹垫儳鍩屾潻鏂挎礀 undefined
  */
 export function getProviderOptionStringSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -710,9 +681,9 @@ export function getProviderOptionStringSelectionValue(
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勫竷灏旂被鍨嬮€夋嫨鍊? *
- * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
- * @returns 甯冨皵绫诲瀷鐨勯€夋嫨鍊硷紝闈炲竷灏旀垨鏈壘鍒拌繑鍥?undefined
+ * 閼惧嘲褰囬幓鎰返閸熷棝鈧銆嶉惃鍕鐏忔梻琚崹瀣偓澶嬪閸? *
+ * @param selections - 闁銆嶉柅澶嬪閸婅壈绶崗? * @param id - 闁銆?ID
+ * @returns 鐢啫鐨电猾璇茬€烽惃鍕偓澶嬪閸婄》绱濋棃鐐茬鐏忔梹鍨ㄩ張顏呭閸掓媽绻戦崶?undefined
  */
 export function getProviderOptionBooleanSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -723,12 +694,11 @@ export function getProviderOptionBooleanSelectionValue(
 }
 
 /**
- * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勯€夐」鍊? *
+ * 閼惧嘲褰囧Ο鈥崇€烽柅澶嬪娑擃厽瀵氱€?ID 閻ㄥ嫰鈧銆嶉崐? *
  * @description
- * 浠?ModelSelection 瀵硅薄鐨?options 瀛楁涓彁鍙栨寚瀹?ID 鐨勫€笺€? * 鏄?`getProviderOptionSelectionValue` 鐨勪究鎹峰皝瑁呫€? *
- * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
- * @param id - 閫夐」 ID
- * @returns 鎻愬彇鍒扮殑鍊硷紝鏈壘鍒拌繑鍥?undefined
+ * 娴?ModelSelection 鐎电钖勯惃?options 鐎涙顔屾稉顓熷絹閸欐牗瀵氱€?ID 閻ㄥ嫬鈧鈧? * 閺?`getProviderOptionSelectionValue` 閻ㄥ嫪绌堕幑宄扮殱鐟佸懌鈧? *
+ * @param modelSelection - 濡€崇€烽柅澶嬪鐎电钖? * @param id - 闁銆?ID
+ * @returns 閹绘劕褰囬崚鎵畱閸婄》绱濋張顏呭閸掓媽绻戦崶?undefined
  */
 export function getModelSelectionOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -741,10 +711,9 @@ export function getModelSelectionOptionValue(
 }
 
 /**
- * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勫瓧绗︿覆绫诲瀷閫夐」鍊? *
- * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
- * @param id - 閫夐」 ID
- * @returns 瀛楃涓茬被鍨嬬殑閫夐」鍊硷紝鏈壘鍒拌繑鍥?undefined
+ * 閼惧嘲褰囧Ο鈥崇€烽柅澶嬪娑擃厽瀵氱€?ID 閻ㄥ嫬鐡х粭锔胯缁鐎烽柅澶愩€嶉崐? *
+ * @param modelSelection - 濡€崇€烽柅澶嬪鐎电钖? * @param id - 闁銆?ID
+ * @returns 鐎涙顑佹稉鑼閸ㄥ娈戦柅澶愩€嶉崐纭风礉閺堫亝澹橀崚鎷岀箲閸?undefined
  */
 export function getModelSelectionStringOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -757,10 +726,9 @@ export function getModelSelectionStringOptionValue(
 }
 
 /**
- * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勫竷灏旂被鍨嬮€夐」鍊? *
- * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
- * @param id - 閫夐」 ID
- * @returns 甯冨皵绫诲瀷鐨勯€夐」鍊硷紝鏈壘鍒拌繑鍥?undefined
+ * 閼惧嘲褰囧Ο鈥崇€烽柅澶嬪娑擃厽瀵氱€?ID 閻ㄥ嫬绔风亸鏃傝閸ㄥ鈧銆嶉崐? *
+ * @param modelSelection - 濡€崇€烽柅澶嬪鐎电钖? * @param id - 闁銆?ID
+ * @returns 鐢啫鐨电猾璇茬€烽惃鍕偓澶愩€嶉崐纭风礉閺堫亝澹橀崚鎷岀箲閸?undefined
  */
 export function getModelSelectionBooleanOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -773,13 +741,12 @@ export function getModelSelectionBooleanOptionValue(
 }
 
 /**
- * 瑙ｆ瀽閫夋嫨绫诲瀷鎻忚堪绗︾殑褰撳墠鍊? *
+ * 鐟欙絾鐎介柅澶嬪缁鐎烽幓蹇氬牚缁楋妇娈戣ぐ鎾冲閸? *
  * @description
- * 濡傛灉鍘熷鍊煎湪閫夐」鍒楄〃涓瓨鍦ㄥ垯鐩存帴杩斿洖锛? * 鍚﹀垯浣跨敤鎻忚堪绗︾殑 currentValue 鎴栭€夐」鍒楄〃涓殑榛樿鍊笺€? *
- * @param descriptor - 閫夋嫨绫诲瀷鐨勬弿杩扮
- * @param rawValue - 鍘熷杈撳叆鍊? * @returns 瑙ｆ瀽鍚庣殑閫夐」 ID锛屾棤娉曠‘瀹氳繑鍥?undefined
+ * 婵″倹鐏夐崢鐔奉潗閸婄厧婀柅澶愩€嶉崚妤勩€冩稉顓炵摠閸︺劌鍨惄瀛樺复鏉╂柨娲栭敍? * 閸氾箑鍨担璺ㄦ暏閹诲繗鍫粭锔炬畱 currentValue 閹存牠鈧銆嶉崚妤勩€冩稉顓犳畱姒涙顓婚崐绗衡偓? *
+ * @param descriptor - 闁瀚ㄧ猾璇茬€烽惃鍕伎鏉╂壆顑? * @param rawValue - 閸樼喎顫愭潏鎾冲弳閸? * @returns 鐟欙絾鐎介崥搴ｆ畱闁銆?ID閿涘本妫ゅ▔鏇犫€樼€规俺绻戦崶?undefined
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function resolveDescriptorChoiceValue(
   descriptor: Extract<ProviderOptionDescriptor, { type: "select" }>,
   rawValue: string | null | undefined,
@@ -792,13 +759,12 @@ function resolveDescriptorChoiceValue(
 }
 
 /**
- * 涓烘弿杩扮璁剧疆褰撳墠鍊? *
+ * 娑撶儤寮挎潻鎵儊鐠佸墽鐤嗚ぐ鎾冲閸? *
  * @description
- * 鏍规嵁鎻忚堪绗︾被鍨嬪拰鍘熷鍊硷紝璁剧疆鎻忚堪绗︾殑 currentValue 瀛楁锛? * - 甯冨皵绫诲瀷锛氱洿鎺ヨ缃竷灏斿€? * - 閫夋嫨绫诲瀷锛氫娇鐢?`resolveDescriptorChoiceValue` 瑙ｆ瀽鏈夋晥鍊? * - 鏃犳硶纭畾鍊兼椂绉婚櫎 currentValue 瀛楁
+ * 閺嶈宓侀幓蹇氬牚缁楋妇琚崹瀣嫲閸樼喎顫愰崐纭风礉鐠佸墽鐤嗛幓蹇氬牚缁楋妇娈?currentValue 鐎涙顔岄敍? * - 鐢啫鐨电猾璇茬€烽敍姘辨纯閹恒儴顔曠純顔肩鐏忔柨鈧? * - 闁瀚ㄧ猾璇茬€烽敍姘▏閻?`resolveDescriptorChoiceValue` 鐟欙絾鐎介張澶嬫櫏閸? * - 閺冪姵纭剁涵顔肩暰閸婂吋妞傜粔濠氭珟 currentValue 鐎涙顔? *
+ * @param descriptor - 閸樼喎顫愰幓蹇氬牚缁? * @param rawValue - 閸樼喎顫愭潏鎾冲弳閸? * @returns 閺囧瓨鏌婃禍?currentValue 閻ㄥ嫭寮挎潻鎵儊
  *
- * @param descriptor - 鍘熷鎻忚堪绗? * @param rawValue - 鍘熷杈撳叆鍊? * @returns 鏇存柊浜?currentValue 鐨勬弿杩扮
- *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function withProviderOptionCurrentValue(
   descriptor: ProviderOptionDescriptor,
   rawValue: string | boolean | undefined,
@@ -818,19 +784,18 @@ function withProviderOptionCurrentValue(
 }
 
 /**
- * 鑾峰彇鎺ㄧ悊鍔姏绾у埆鎻忚堪绗︾殑閫夐」 ID
+ * 閼惧嘲褰囬幒銊ф倞閸旑亜濮忕痪褍鍩嗛幓蹇氬牚缁楋妇娈戦柅澶愩€?ID
  *
  * @description
- * 鏍规嵁鎻愪緵鍟嗙被鍨嬪拰鑳藉姏瀵硅薄锛岀‘瀹氭帹鐞嗗姫鍔涚骇鍒€夐」鐨?ID 鍚嶇О锛? * - claudeAgent: "effort"
+ * 閺嶈宓侀幓鎰返閸熷棛琚崹瀣嫲閼宠棄濮忕€电钖勯敍宀€鈥樼€规碍甯归悶鍡楀Й閸旀稓楠囬崚顐︹偓澶愩€嶉惃?ID 閸氬秶袨閿? * - claudeAgent: "effort"
  * - kilo/opencode: "variant"
- * - gemini: 鏍规嵁 effort 鍊兼牸寮忓垽鏂负 "thinkingBudget" 鎴?"thinkingLevel"
+ * - gemini: 閺嶈宓?effort 閸婂吋鐗稿蹇撳灲閺傤厺璐?"thinkingBudget" 閹?"thinkingLevel"
  * - pi: "thinkingLevel"
- * - 鍏朵粬: "reasoningEffort"
+ * - 閸忔湹绮? "reasoningEffort"
  *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @returns 鎺ㄧ悊鍔姏绾у埆閫夐」鐨?ID
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @returns 閹恒劎鎮婇崝顏勫缁狙冨焼闁銆嶉惃?ID
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function reasoningDescriptorId(provider: ProviderKind, caps: ModelCapabilities): string {
   if (provider === "claudeAgent") {
     return "effort";
@@ -851,13 +816,11 @@ function reasoningDescriptorId(provider: ProviderKind, caps: ModelCapabilities):
 }
 
 /**
- * 浠庤兘鍔涘璞℃瀯寤烘棫鐗堥€夐」鎻忚堪绗﹀垪琛? *
+ * 娴犲氦鍏橀崝娑橆嚠鐠炩剝鐎鐑樻＋閻楀牓鈧銆嶉幓蹇氬牚缁楋箑鍨悰? *
  * @description
- * 褰撴ā鍨嬭兘鍔涘璞℃湭鎻愪緵 `optionDescriptors` 鏃讹紝浣跨敤姝ゅ嚱鏁颁粠鑳藉姏瀛楁
- * 鏋勫缓鍏煎鐨勬棫鐗堟弿杩扮鍒楄〃銆傚寘鎷帹鐞嗗姫鍔涚骇鍒€佷笂涓嬫枃绐楀彛銆? * 蹇€熸ā寮忓拰鎬濈淮鍒囨崲绛夐€夐」銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @returns 鏃х増鏍煎紡鐨勯€夐」鎻忚堪绗︽暟缁? *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * 瑜版挻膩閸ㄥ鍏橀崝娑橆嚠鐠炩剝婀幓鎰返 `optionDescriptors` 閺冭绱濇担璺ㄦ暏濮濄倕鍤遍弫棰佺矤閼宠棄濮忕€涙顔? * 閺嬪嫬缂撻崗鐓庮啇閻ㄥ嫭妫悧鍫熷伎鏉╂壆顑侀崚妤勩€冮妴鍌氬瘶閹奉剚甯归悶鍡楀Й閸旀稓楠囬崚顐犫偓浣风瑐娑撳鏋冪粣妤€褰涢妴? * 韫囶偊鈧喐膩瀵繐鎷伴幀婵堟樊閸掑洦宕茬粵澶愨偓澶愩€嶉妴? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @param caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @returns 閺冄呭閺嶇厧绱￠惃鍕偓澶愩€嶉幓蹇氬牚缁楋附鏆熺紒? *
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function legacyCapabilityDescriptors(
   provider: ProviderKind,
   caps: ModelCapabilities,
@@ -909,11 +872,10 @@ function legacyCapabilityDescriptors(
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗙殑閫夐」鎻忚堪绗﹀垪琛? *
+ * 閼惧嘲褰囬幓鎰返閸熷棛娈戦柅澶愩€嶉幓蹇氬牚缁楋箑鍨悰? *
  * @description
- * 杩斿洖鎸囧畾鎻愪緵鍟嗗拰妯″瀷鑳藉姏鐨勯€夐」鎻忚堪绗﹀垪琛ㄣ€? * 浼樺厛浣跨敤鑳藉姏瀵硅薄涓殑 `optionDescriptors`锛堟柊鐗堟牸寮忥級锛? * 鍚﹀垯浣跨敤 `legacyCapabilityDescriptors`锛堟棫鐗堟牸寮忥級鏋勫缓銆? * 姣忎釜鎻忚堪绗︿細鏍规嵁浼犲叆鐨勯€夋嫨鍊兼洿鏂?currentValue銆? *
- * @param input.provider - 鎻愪緵鍟嗙被鍨? * @param input.caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- * @param input.selections - 鍙€夌殑閫夐」閫夋嫨鍊硷紝鐢ㄤ簬璁剧疆鎻忚堪绗︾殑褰撳墠鍊? * @returns 閫夐」鎻忚堪绗︽暟缁? *
+ * 鏉╂柨娲栭幐鍥х暰閹绘劒绶甸崯鍡楁嫲濡€崇€烽懗钘夊閻ㄥ嫰鈧銆嶉幓蹇氬牚缁楋箑鍨悰銊ｂ偓? * 娴兼ê鍘涙担璺ㄦ暏閼宠棄濮忕€电钖勬稉顓犳畱 `optionDescriptors`閿涘牊鏌婇悧鍫熺壐瀵骏绱氶敍? * 閸氾箑鍨担璺ㄦ暏 `legacyCapabilityDescriptors`閿涘牊妫悧鍫熺壐瀵骏绱氶弸鍕紦閵? * 濮ｅ繋閲滈幓蹇氬牚缁楋缚绱伴弽瑙勫祦娴肩姴鍙嗛惃鍕偓澶嬪閸婂吋娲块弬?currentValue閵? *
+ * @param input.provider - 閹绘劒绶甸崯鍡欒閸? * @param input.caps - 濡€崇€烽懗钘夊閹诲繗鍫€电钖? * @param input.selections - 閸欘垶鈧娈戦柅澶愩€嶉柅澶嬪閸婄》绱濋悽銊ょ艾鐠佸墽鐤嗛幓蹇氬牚缁楋妇娈戣ぐ鎾冲閸? * @returns 闁銆嶉幓蹇氬牚缁楋附鏆熺紒? *
  * @example
  * ```ts
  * const descriptors = getProviderOptionDescriptors({
@@ -940,13 +902,13 @@ export function getProviderOptionDescriptors(input: {
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗛€夐」鎻忚堪绗︾殑褰撳墠鍊? *
+ * 閼惧嘲褰囬幓鎰返閸熷棝鈧銆嶉幓蹇氬牚缁楋妇娈戣ぐ鎾冲閸? *
  * @description
- * 浠庢弿杩扮涓彁鍙栧綋鍓嶉€変腑鐨勫€硷細
- * - 甯冨皵绫诲瀷锛氱洿鎺ヨ繑鍥?currentValue
- * - 閫夋嫨绫诲瀷锛氳繑鍥?currentValue 鎴栭粯璁ら€夐」鐨?ID
+ * 娴犲孩寮挎潻鎵儊娑擃厽褰侀崣鏍х秼閸撳秹鈧鑵戦惃鍕偓纭风窗
+ * - 鐢啫鐨电猾璇茬€烽敍姘辨纯閹恒儴绻戦崶?currentValue
+ * - 闁瀚ㄧ猾璇茬€烽敍姘崇箲閸?currentValue 閹存牠绮拋銈夆偓澶愩€嶉惃?ID
  *
- * @param descriptor - 閫夐」鎻忚堪绗? * @returns 褰撳墠鍊硷紝鎻忚堪绗︿负绌烘椂杩斿洖 undefined
+ * @param descriptor - 闁銆嶉幓蹇氬牚缁? * @returns 瑜版挸澧犻崐纭风礉閹诲繗鍫粭锔胯礋缁岀儤妞傛潻鏂挎礀 undefined
  */
 export function getProviderOptionCurrentValue(
   descriptor: ProviderOptionDescriptor | null | undefined,
@@ -961,13 +923,13 @@ export function getProviderOptionCurrentValue(
 }
 
 /**
- * 鑾峰彇鎻愪緵鍟嗛€夐」鎻忚堪绗︾殑褰撳墠鏄剧ず鏍囩
+ * 閼惧嘲褰囬幓鎰返閸熷棝鈧銆嶉幓蹇氬牚缁楋妇娈戣ぐ鎾冲閺勫墽銇氶弽鍥╊劮
  *
  * @description
- * 浠庢弿杩扮涓彁鍙栧綋鍓嶉€変腑鍊肩殑鏄剧ず鏍囩锛? * - 甯冨皵绫诲瀷锛氳繑鍥?"On" 鎴?"Off"
- * - 閫夋嫨绫诲瀷锛氳繑鍥炲綋鍓嶉€夐」鐨?label
+ * 娴犲孩寮挎潻鎵儊娑擃厽褰侀崣鏍х秼閸撳秹鈧鑵戦崐鑲╂畱閺勫墽銇氶弽鍥╊劮閿? * - 鐢啫鐨电猾璇茬€烽敍姘崇箲閸?"On" 閹?"Off"
+ * - 闁瀚ㄧ猾璇茬€烽敍姘崇箲閸ョ偛缍嬮崜宥夆偓澶愩€嶉惃?label
  *
- * @param descriptor - 閫夐」鎻忚堪绗? * @returns 褰撳墠鍊肩殑鏄剧ず鏍囩锛屾棤娉曠‘瀹氳繑鍥?undefined
+ * @param descriptor - 闁銆嶉幓蹇氬牚缁? * @returns 瑜版挸澧犻崐鑲╂畱閺勫墽銇氶弽鍥╊劮閿涘本妫ゅ▔鏇犫€樼€规俺绻戦崶?undefined
  */
 export function getProviderOptionCurrentLabel(
   descriptor: ProviderOptionDescriptor | null | undefined,
@@ -985,10 +947,10 @@ export function getProviderOptionCurrentLabel(
 }
 
 /**
- * 浠庨€夐」鎻忚堪绗﹀垪琛ㄦ瀯寤洪€夋嫨鍊兼暟缁? *
+ * 娴犲酣鈧銆嶉幓蹇氬牚缁楋箑鍨悰銊︾€娲偓澶嬪閸婂吋鏆熺紒? *
  * @description
- * 閬嶅巻鎻忚堪绗﹀垪琛紝鎻愬彇姣忎釜鎻忚堪绗︾殑褰撳墠鍊硷紝鏋勫缓 ProviderOptionSelection 鏁扮粍銆? * 浠呭寘鍚?string 鎴?boolean 绫诲瀷鐨勫€笺€? *
- * @param descriptors - 閫夐」鎻忚堪绗︽暟缁? * @returns 閫夋嫨鍊兼暟缁勶紝鎻忚堪绗﹀垪琛ㄤ负绌烘椂杩斿洖 undefined
+ * 闁秴宸婚幓蹇氬牚缁楋箑鍨悰顭掔礉閹绘劕褰囧В蹇庨嚋閹诲繗鍫粭锔炬畱瑜版挸澧犻崐纭风礉閺嬪嫬缂?ProviderOptionSelection 閺佹壆绮嶉妴? * 娴犲懎瀵橀崥?string 閹?boolean 缁鐎烽惃鍕偓绗衡偓? *
+ * @param descriptors - 闁銆嶉幓蹇氬牚缁楋附鏆熺紒? * @returns 闁瀚ㄩ崐鍏兼殶缂佸嫸绱濋幓蹇氬牚缁楋箑鍨悰銊よ礋缁岀儤妞傛潻鏂挎礀 undefined
  */
 export function buildProviderOptionSelectionsFromDescriptors(
   descriptors: ReadonlyArray<ProviderOptionDescriptor> | null | undefined,
@@ -1005,23 +967,22 @@ export function buildProviderOptionSelectionsFromDescriptors(
   return selections.length > 0 ? selections : undefined;
 }
 
-// 鈹€鈹€ 鏁版嵁椹卞姩鐨勬ā鍨嬭兘鍔涜В鏋?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 閺佺増宓佹す鍗炲З閻ㄥ嫭膩閸ㄥ鍏橀崝娑溞掗弸?閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 /**
- * 鑾峰彇鎸囧畾鎻愪緵鍟嗗拰妯″瀷鐨勮兘鍔涙弿杩? *
+ * 閼惧嘲褰囬幐鍥х暰閹绘劒绶甸崯鍡楁嫲濡€崇€烽惃鍕厴閸旀稒寮挎潻? *
  * @description
- * 浠庡叏灞€鑳藉姏绱㈠紩涓煡鎵炬ā鍨嬬殑鑳藉姏鎻忚堪銆傚浜?Gemini 鎻愪緵鍟嗭紝
- * 棰濆鏀寔鍩轰簬妯″瀷 ID 鐨勭郴鍒楄瘑鍒€傛湭鎵惧埌鏃惰繑鍥炵┖鑳藉姏瀵硅薄銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @param model - 妯″瀷 ID 鎴?Slug
- * @returns 妯″瀷鑳藉姏鎻忚堪瀵硅薄
- *
+ * 娴犲骸鍙忕仦鈧懗钘夊缁便垹绱╂稉顓熺叀閹电偓膩閸ㄥ娈戦懗钘夊閹诲繗鍫妴鍌氼嚠娴?Gemini 閹绘劒绶甸崯鍡礉
+ * 妫版繂顦婚弨顖涘瘮閸╄桨绨Ο鈥崇€?ID 閻ㄥ嫮閮撮崚妤勭槕閸掝偁鈧倹婀幍鎯у煂閺冩儼绻戦崶鐐碘敄閼宠棄濮忕€电钖勯妴? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @param model - 濡€崇€?ID 閹?Slug
+ * @returns 濡€崇€烽懗钘夊閹诲繗鍫€电钖? *
  * @example
  * ```ts
  * getModelCapabilities('claudeAgent', 'claude-sonnet-4-20250514');
- * // 杩斿洖璇ユā鍨嬬殑鑳藉姏鎻忚堪
+ * // 鏉╂柨娲栫拠銉δ侀崹瀣畱閼宠棄濮忛幓蹇氬牚
  *
  * getModelCapabilities('codex', 'unknown-model');
- * // 杩斿洖 EMPTY_MODEL_CAPABILITIES
+ * // 鏉╂柨娲?EMPTY_MODEL_CAPABILITIES
  * ```
  */
 export function getModelCapabilities(
@@ -1039,12 +1000,10 @@ export function getModelCapabilities(
 }
 
 /**
- * 鍒ゆ柇鏂囨湰涓槸鍚﹀寘鍚?Claude Ultrathink 鎻愮ず璇? *
+ * 閸掋倖鏌囬弬鍥ㄦ拱娑擃厽妲搁崥锕€瀵橀崥?Claude Ultrathink 閹绘劗銇氱拠? *
  * @description
- * 妫€鏌ユ枃鏈腑鏄惁鍖呭惈 "ultrathink" 鍏抽敭瀛楋紙涓嶅尯鍒嗗ぇ灏忓啓锛夛紝
- * 鐢ㄤ簬鍒ゆ柇鏄惁闇€瑕佷负 Claude 妯″瀷娣诲姞 Ultrathink 鍓嶇紑銆? *
- * @param text - 寰呮鏌ョ殑鏂囨湰
- * @returns 濡傛灉鍖呭惈 ultrathink 鍏抽敭瀛楄繑鍥?true锛屽惁鍒欒繑鍥?false
+ * 濡偓閺屻儲鏋冮張顑胯厬閺勵垰鎯侀崠鍛儓 "ultrathink" 閸忔娊鏁€涙绱欐稉宥呭隘閸掑棗銇囩亸蹇撳晸閿涘绱? * 閻劋绨崚銈嗘焽閺勵垰鎯侀棁鈧憰浣疯礋 Claude 濡€崇€峰ǎ璇插 Ultrathink 閸撳秶绱戦妴? *
+ * @param text - 瀵板懏顥呴弻銉ф畱閺傚洦婀? * @returns 婵″倹鐏夐崠鍛儓 ultrathink 閸忔娊鏁€涙绻戦崶?true閿涘苯鎯侀崚娆掔箲閸?false
  *
  * @example
  * ```ts
@@ -1057,15 +1016,14 @@ export function isClaudeUltrathinkPrompt(text: string | null | undefined): boole
 }
 
 /**
- * 褰掍竴鍖栨ā鍨?Slug
+ * 瑜版帊绔撮崠鏍侀崹?Slug
  *
  * @description
- * 灏嗘ā鍨?ID 杞崲涓烘爣鍑嗗寲鐨?Slug 鏍煎紡锛? * 1. 鍘婚櫎棣栧熬绌虹櫧
- * 2. 瀵逛簬 claudeAgent 鎻愪緵鍟嗭紝绉婚櫎鏈熬鐨勬柟鎷彿鏍囪锛堝 `[1m]`锛? * 3. 鏌ユ壘鍒悕鏄犲皠琛紝灏嗗埆鍚嶈浆鎹负鏍囧噯 Slug
- * 4. 鏃犲埆鍚嶆椂鐩存帴浣跨敤澶勭悊鍚庣殑瀛楃涓蹭綔涓?Slug
+ * 鐏忓棙膩閸?ID 鏉烆剚宕叉稉鐑樼垼閸戝棗瀵查惃?Slug 閺嶇厧绱￠敍? * 1. 閸樺娅庢＃鏍х啲缁岃櫣娅? * 2. 鐎甸€涚艾 claudeAgent 閹绘劒绶甸崯鍡礉缁夊娅庨張顐㈢啲閻ㄥ嫭鏌熼幏顒€褰块弽鍥唶閿涘牆顩?`[1m]`閿? * 3. 閺屻儲澹橀崚顐㈡倳閺勭姴鐨犵悰顭掔礉鐏忓棗鍩嗛崥宥堟祮閹诡澀璐熼弽鍥у櫙 Slug
+ * 4. 閺冪姴鍩嗛崥宥嗘閻╁瓨甯存担璺ㄦ暏婢跺嫮鎮婇崥搴ｆ畱鐎涙顑佹稉韫稊娑?Slug
  *
- * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨?Slug锛岃緭鍏ヤ负绌烘椂杩斿洖 null
+ * @param model - 閸樼喎顫愬Ο鈥崇€?ID 鐎涙顑佹稉? * @param provider - 閹绘劒绶甸崯鍡欒閸ㄥ绱濇妯款吇娑?"codex"
+ * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸?Slug閿涘矁绶崗銉よ礋缁岀儤妞傛潻鏂挎礀 null
  *
  * @example
  * ```ts
@@ -1097,21 +1055,20 @@ export function normalizeModelSlug(
 }
 
 /**
- * 浠庨€夐」鍒楄〃涓В鏋愬彲閫夋嫨鐨勬ā鍨?Slug
+ * 娴犲酣鈧銆嶉崚妤勩€冩稉顓⌒掗弸鎰讲闁瀚ㄩ惃鍕侀崹?Slug
  *
  * @description
- * 鎸変互涓嬩紭鍏堢骇瑙ｆ瀽妯″瀷 Slug锛? * 1. 绮剧‘鍖归厤閫夐」鐨?slug
- * 2. 涓嶅尯鍒嗗ぇ灏忓啓鍖归厤閫夐」鐨?name
- * 3. 褰掍竴鍖栧悗鍖归厤閫夐」鐨?slug
+ * 閹稿浜掓稉瀣╃喘閸忓牏楠囩憴锝嗙€藉Ο鈥崇€?Slug閿? * 1. 缁墽鈥橀崠褰掑帳闁銆嶉惃?slug
+ * 2. 娑撳秴灏崚鍡椼亣鐏忓繐鍟撻崠褰掑帳闁銆嶉惃?name
+ * 3. 瑜版帊绔撮崠鏍ф倵閸栧綊鍘ら柅澶愩€嶉惃?slug
  *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @param value - 鐢ㄦ埛杈撳叆鐨勬ā鍨嬫爣璇嗭紙Slug 鎴栧悕绉帮級
- * @param options - 鍙€夋嫨鐨勬ā鍨嬮€夐」鍒楄〃
- * @returns 鍖归厤鍒扮殑妯″瀷 Slug锛屾湭鍖归厤杩斿洖 null
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @param value - 閻劍鍩涙潏鎾冲弳閻ㄥ嫭膩閸ㄥ鐖ｇ拠鍡礄Slug 閹存牕鎮曠粔甯礆
+ * @param options - 閸欘垶鈧瀚ㄩ惃鍕侀崹瀣偓澶愩€嶉崚妤勩€? * @returns 閸栧綊鍘ら崚鎵畱濡€崇€?Slug閿涘本婀崠褰掑帳鏉╂柨娲?null
  *
  * @example
  * ```ts
  * resolveSelectableModel('codex', 'gpt-4', options);     // 'gpt-4'
- * resolveSelectableModel('codex', 'GPT-4', options);     // 'gpt-4'锛堟寜鍚嶇О鍖归厤锛? * resolveSelectableModel('codex', 'invalid', options);   // null
+ * resolveSelectableModel('codex', 'GPT-4', options);     // 'gpt-4'閿涘牊瀵滈崥宥囆為崠褰掑帳閿? * resolveSelectableModel('codex', 'invalid', options);   // null
  * ```
  */
 export function resolveSelectableModel(
@@ -1148,18 +1105,16 @@ export function resolveSelectableModel(
 }
 
 /**
- * 瑙ｆ瀽妯″瀷 Slug锛岀‘淇濊繑鍥炴湁鏁堢殑妯″瀷鏍囪瘑
+ * 鐟欙絾鐎藉Ο鈥崇€?Slug閿涘瞼鈥樻穱婵婄箲閸ョ偞婀侀弫鍫㈡畱濡€崇€烽弽鍥槕
  *
  * @description
- * 褰掍竴鍖栨ā鍨?ID 骞堕獙璇佸叾鏄惁灞炰簬鎸囧畾鎻愪緵鍟嗙殑宸茬煡妯″瀷銆? * 濡傛灉褰掍竴鍖栧悗鐨?Slug 涓嶅湪鎻愪緵鍟嗙殑妯″瀷闆嗗悎涓紝鍒欏洖閫€鍒拌鎻愪緵鍟嗙殑榛樿妯″瀷銆? * "pi" 鎻愪緵鍟嗘病鏈夐粯璁ゆā鍨嬶紝鏈煡 Slug 鏃惰繑鍥炲綊涓€鍖栧悗鐨勫€笺€? *
- * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
- * @returns 鏈夋晥鐨勬ā鍨?Slug锛岃緭鍏ヤ负绌烘椂杩斿洖鎻愪緵鍟嗙殑榛樿妯″瀷
- *
+ * 瑜版帊绔撮崠鏍侀崹?ID 楠炲爼鐛欑拠浣稿従閺勵垰鎯佺仦鐐扮艾閹稿洤鐣鹃幓鎰返閸熷棛娈戝鑼叀濡€崇€烽妴? * 婵″倹鐏夎ぐ鎺嶇閸栨牕鎮楅惃?Slug 娑撳秴婀幓鎰返閸熷棛娈戝Ο鈥崇€烽梿鍡楁値娑擃叏绱濋崚娆忔礀闁偓閸掓媽顕氶幓鎰返閸熷棛娈戞妯款吇濡€崇€烽妴? * "pi" 閹绘劒绶甸崯鍡樼梾閺堝绮拋銈喣侀崹瀣剁礉閺堫亞鐓?Slug 閺冩儼绻戦崶鐐茬秺娑撯偓閸栨牕鎮楅惃鍕偓绗衡偓? *
+ * @param model - 閸樼喎顫愬Ο鈥崇€?ID 鐎涙顑佹稉? * @param provider - 閹绘劒绶甸崯鍡欒閸ㄥ绱濇妯款吇娑?"codex"
+ * @returns 閺堝鏅ラ惃鍕侀崹?Slug閿涘矁绶崗銉よ礋缁岀儤妞傛潻鏂挎礀閹绘劒绶甸崯鍡欐畱姒涙顓诲Ο鈥崇€? *
  * @example
  * ```ts
  * resolveModelSlug('gpt-4', 'codex');     // 'gpt-4'
- * resolveModelSlug('invalid', 'codex');    // 'o3'锛堝洖閫€鍒伴粯璁ゆā鍨嬶級
- * resolveModelSlug(null, 'codex');         // 'o3'锛堥粯璁ゆā鍨嬶級
+ * resolveModelSlug('invalid', 'codex');    // 'o3'閿涘牆娲栭柅鈧崚浼寸帛鐠併倖膩閸ㄥ绱? * resolveModelSlug(null, 'codex');         // 'o3'閿涘牓绮拋銈喣侀崹瀣剁礆
  * ```
  */
 export function resolveModelSlug(
@@ -1180,13 +1135,13 @@ export function resolveModelSlug(
 }
 
 /**
- * 瑙ｆ瀽鎸囧畾鎻愪緵鍟嗙殑妯″瀷 Slug
+ * 鐟欙絾鐎介幐鍥х暰閹绘劒绶甸崯鍡欐畱濡€崇€?Slug
  *
  * @description
- * 鏄?`resolveModelSlug` 鐨勫弬鏁伴『搴忚皟鏁寸増鏈紝渚夸簬浠ユ彁渚涘晢涓虹涓€鍙傛暟璋冪敤銆? *
- * @param provider - 鎻愪緵鍟嗙被鍨? * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @returns 鏈夋晥鐨勬ā鍨?Slug
+ * 閺?`resolveModelSlug` 閻ㄥ嫬寮弫浼淬€庢惔蹇氱殶閺佸澧楅張顒婄礉娓氬じ绨禒銉﹀絹娓氭稑鏅㈡稉铏诡儑娑撯偓閸欏倹鏆熺拫鍐暏閵? *
+ * @param provider - 閹绘劒绶甸崯鍡欒閸? * @param model - 閸樼喎顫愬Ο鈥崇€?ID 鐎涙顑佹稉? * @returns 閺堝鏅ラ惃鍕侀崹?Slug
  *
- * @see {@link resolveModelSlug} - 鏍稿績瑙ｆ瀽閫昏緫
+ * @see {@link resolveModelSlug} - 閺嶇绺剧憴锝嗙€介柅鏄忕帆
  */
 export function resolveModelSlugForProvider(
   provider: ProviderKind,
@@ -1196,12 +1151,11 @@ export function resolveModelSlugForProvider(
 }
 
 /**
- * 淇壀瀛楃涓诧紝绌哄€艰繑鍥?null
+ * 娣囶喖澹€鐎涙顑佹稉璇х礉缁屽搫鈧壈绻戦崶?null
  *
  * @description
- * 灏嗗瓧绗︿覆鍘婚櫎棣栧熬绌虹櫧锛屽鏋滅粨鏋滀负绌哄瓧绗︿覆鍒欒繑鍥?null銆? * 闈?string 绫诲瀷鐨勮緭鍏ョ洿鎺ヨ繑鍥?null銆? *
- * @template T - 瀛楃涓插瓧闈㈤噺绫诲瀷
- * @param value - 寰呬慨鍓殑鍊? * @returns 淇壀鍚庣殑闈炵┖瀛楃涓诧紝鎴?null
+ * 鐏忓棗鐡х粭锔胯閸樺娅庢＃鏍х啲缁岃櫣娅ч敍灞筋洤閺嬫粎绮ㄩ弸婊€璐熺粚鍝勭摟缁楋缚瑕嗛崚娆掔箲閸?null閵? * 闂?string 缁鐎烽惃鍕翻閸忋儳娲块幒銉ㄧ箲閸?null閵? *
+ * @template T - 鐎涙顑佹稉鎻掔摟闂堛垽鍣虹猾璇茬€? * @param value - 瀵板懍鎱ㄩ崜顏嗘畱閸? * @returns 娣囶喖澹€閸氬海娈戦棃鐐碘敄鐎涙顑佹稉璇х礉閹?null
  *
  * @example
  * ```ts
@@ -1218,13 +1172,11 @@ export function trimOrNull<T extends string>(value: T | null | undefined): T | n
 }
 
 /**
- * 褰掍竴鍖?Codex 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Codex 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Codex 妯″瀷閫夐」褰掍竴鍖栦负浠呭寘鍚笌榛樿鍊间笉鍚岀殑瀛楁锛? * - reasoningEffort锛氫粎褰撲笌榛樿鍊间笉鍚屾椂淇濈暀
- * - fastMode锛氫粎褰撲负 true 鏃朵繚鐣? *
- * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Codex 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾墍鏈夊瓧娈典笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
+ * 鐏?Codex 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牔璐熸禒鍛瘶閸氼偂绗屾妯款吇閸婇棿绗夐崥宀€娈戠€涙顔岄敍? * - reasoningEffort閿涙矮绮庤ぐ鎾茬瑢姒涙顓婚崐闂寸瑝閸氬本妞傛穱婵堟殌
+ * - fastMode閿涙矮绮庤ぐ鎾茶礋 true 閺冩湹绻氶悾? *
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @param modelOptions - 閸樼喎顫?Codex 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞惧閺堝鐡у▓鍏哥瑢姒涙顓婚崐鑲╂祲閸氬本妞傛潻鏂挎礀 undefined
  */
 export function normalizeCodexModelOptions(
   model: string | null | undefined,
@@ -1242,12 +1194,10 @@ export function normalizeCodexModelOptions(
 }
 
 /**
- * 褰掍竴鍖?Claude 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Claude 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Claude 妯″瀷閫夐」褰掍竴鍖栦负浠呭寘鍚笌榛樿鍊间笉鍚岀殑瀛楁锛? * - effort锛氭帓闄ゆ彁绀烘敞鍏ョ殑绾у埆鍜岄粯璁ょ骇鍒? * - contextWindow锛氫粎褰撲笌榛樿鍊间笉鍚屼笖鏈夋晥鏃朵繚鐣? * - thinking锛氫粎褰撲负 false 鏃朵繚鐣欙紙鍏抽棴鎬濈淮锛? * - fastMode锛氫粎褰撲负 true 鏃朵繚鐣? *
- * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Claude 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾墍鏈夊瓧娈典笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
+ * 鐏?Claude 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牔璐熸禒鍛瘶閸氼偂绗屾妯款吇閸婇棿绗夐崥宀€娈戠€涙顔岄敍? * - effort閿涙碍甯撻梽銈嗗絹缁€鐑樻暈閸忋儳娈戠痪褍鍩嗛崪宀勭帛鐠併倗楠囬崚? * - contextWindow閿涙矮绮庤ぐ鎾茬瑢姒涙顓婚崐闂寸瑝閸氬奔绗栭張澶嬫櫏閺冩湹绻氶悾? * - thinking閿涙矮绮庤ぐ鎾茶礋 false 閺冩湹绻氶悾娆欑礄閸忔娊妫撮幀婵堟樊閿? * - fastMode閿涙矮绮庤ぐ鎾茶礋 true 閺冩湹绻氶悾? *
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @param modelOptions - 閸樼喎顫?Claude 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞惧閺堝鐡у▓鍏哥瑢姒涙顓婚崐鑲╂祲閸氬本妞傛潻鏂挎礀 undefined
  */
 export function normalizeClaudeModelOptions(
   model: string | null | undefined,
@@ -1285,12 +1235,11 @@ export function normalizeClaudeModelOptions(
 }
 
 /**
- * 瑙ｆ瀽 API 璋冪敤浣跨敤鐨勬ā鍨?ID
+ * 鐟欙絾鐎?API 鐠嬪啰鏁ゆ担璺ㄦ暏閻ㄥ嫭膩閸?ID
  *
  * @description
- * 鏍规嵁妯″瀷閫夋嫨淇℃伅鐢熸垚鏈€缁堢敤浜?API 璋冪敤鐨勬ā鍨?ID銆? * 瀵逛簬 Claude 鎻愪緵鍟嗭紝濡傛灉閫夋嫨浜?1M 涓婁笅鏂囩獥鍙ｏ紝浼氬湪妯″瀷 ID 鍚庤拷鍔?`[1m]` 鏍囪銆? * 鍏朵粬鎻愪緵鍟嗙洿鎺ヨ繑鍥炲師濮嬫ā鍨?ID銆? *
- * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
- * @returns 鐢ㄤ簬 API 璋冪敤鐨勬ā鍨?ID 瀛楃涓? *
+ * 閺嶈宓佸Ο鈥崇€烽柅澶嬪娣団剝浼呴悽鐔稿灇閺堚偓缂佸牏鏁ゆ禍?API 鐠嬪啰鏁ら惃鍕侀崹?ID閵? * 鐎甸€涚艾 Claude 閹绘劒绶甸崯鍡礉婵″倹鐏夐柅澶嬪娴?1M 娑撳﹣绗呴弬鍥╃崶閸欙綇绱濇导姘躬濡€崇€?ID 閸氬氦鎷烽崝?`[1m]` 閺嶅洩顔囬妴? * 閸忔湹绮幓鎰返閸熷棛娲块幒銉ㄧ箲閸ョ偛甯慨瀣侀崹?ID閵? *
+ * @param modelSelection - 濡€崇€烽柅澶嬪鐎电钖? * @returns 閻劋绨?API 鐠嬪啰鏁ら惃鍕侀崹?ID 鐎涙顑佹稉? *
  * @example
  * ```ts
  * resolveApiModelId({ provider: 'claudeAgent', model: 'claude-sonnet-4', options: { contextWindow: '1m' } });
@@ -1314,12 +1263,10 @@ export function resolveApiModelId(modelSelection: ModelSelection): string {
 }
 
 /**
- * 褰掍竴鍖?Gemini 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Gemini 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Gemini 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欎笌榛樿鍊间笉鍚岀殑鎬濈淮閰嶇疆銆? * 濡傛灉鎬濈淮閰嶇疆鍊间笌榛樿鍊肩浉鍚岋紝杩斿洖 undefined銆? *
- * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Gemini 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屼笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
+ * 鐏?Gemini 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牭绱濇禒鍛箽閻ｆ瑤绗屾妯款吇閸婇棿绗夐崥宀€娈戦幀婵堟樊闁板秶鐤嗛妴? * 婵″倹鐏夐幀婵堟樊闁板秶鐤嗛崐闂寸瑢姒涙顓婚崐鑲╂祲閸氬矉绱濇潻鏂挎礀 undefined閵? *
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @param modelOptions - 閸樼喎顫?Gemini 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞肩瑢姒涙顓婚崐鑲╂祲閸氬本妞傛潻鏂挎礀 undefined
  */
 export function normalizeGeminiModelOptions(
   model: string | null | undefined,
@@ -1348,12 +1295,10 @@ export function normalizeGeminiModelOptions(
 }
 
 /**
- * 褰掍竴鍖?Grok 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Grok 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Grok 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欎笌榛樿鍊间笉鍚岀殑鎺ㄧ悊鍔姏绾у埆銆? *
- * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Grok 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屼笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
+ * 鐏?Grok 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牭绱濇禒鍛箽閻ｆ瑤绗屾妯款吇閸婇棿绗夐崥宀€娈戦幒銊ф倞閸旑亜濮忕痪褍鍩嗛妴? *
+ * @param model - 濡€崇€?ID 鐎涙顑佹稉? * @param modelOptions - 閸樼喎顫?Grok 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞肩瑢姒涙顓婚崐鑲╂祲閸氬本妞傛潻鏂挎礀 undefined
  */
 export function normalizeGrokModelOptions(
   model: string | null | undefined,
@@ -1371,12 +1316,10 @@ export function normalizeGrokModelOptions(
 }
 
 /**
- * 褰掍竴鍖?Pi 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Pi 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Pi 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欐湁鏁堢殑鎬濈淮绾у埆銆? *
- * @param modelOptions - 鍘熷 Pi 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏁堝€兼椂杩斿洖 undefined
+ * 鐏?Pi 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牭绱濇禒鍛箽閻ｆ瑦婀侀弫鍫㈡畱閹繄娣痪褍鍩嗛妴? *
+ * @param modelOptions - 閸樼喎顫?Pi 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞炬￥閺佸牆鈧吋妞傛潻鏂挎礀 undefined
  */
 export function normalizePiModelOptions(
   modelOptions: PiModelOptions | null | undefined,
@@ -1388,12 +1331,10 @@ export function normalizePiModelOptions(
 }
 
 /**
- * 褰掍竴鍖?OpenCode 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?OpenCode 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?OpenCode 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欓潪绌虹殑 variant 鍜?agent 瀛楁銆? *
- * @param modelOptions - 鍘熷 OpenCode 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏈夋晥瀛楁鏃惰繑鍥?undefined
+ * 鐏?OpenCode 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牭绱濇禒鍛箽閻ｆ瑩娼粚铏规畱 variant 閸?agent 鐎涙顔岄妴? *
+ * @param modelOptions - 閸樼喎顫?OpenCode 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞炬￥閺堝鏅ョ€涙顔岄弮鎯扮箲閸?undefined
  */
 export function normalizeOpenCodeModelOptions(
   modelOptions: OpenCodeModelOptions | null | undefined,
@@ -1408,12 +1349,10 @@ export function normalizeOpenCodeModelOptions(
 }
 
 /**
- * 褰掍竴鍖?Cursor 妯″瀷閫夐」
- *
+ * 瑜版帊绔撮崠?Cursor 濡€崇€烽柅澶愩€? *
  * @description
- * 灏?Cursor 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欓潪绌虹殑瀛楁銆? *
- * @param modelOptions - 鍘熷 Cursor 妯″瀷閫夐」
- * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏈夋晥瀛楁鏃惰繑鍥?undefined
+ * 鐏?Cursor 濡€崇€烽柅澶愩€嶈ぐ鎺嶇閸栨牭绱濇禒鍛箽閻ｆ瑩娼粚铏规畱鐎涙顔岄妴? *
+ * @param modelOptions - 閸樼喎顫?Cursor 濡€崇€烽柅澶愩€? * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫭膩閸ㄥ鈧銆嶉敍灞炬￥閺堝鏅ョ€涙顔岄弮鎯扮箲閸?undefined
  */
 export function normalizeCursorModelOptions(
   modelOptions: CursorModelOptions | null | undefined,
@@ -1428,23 +1367,21 @@ export function normalizeCursorModelOptions(
 }
 
 /**
- * 涓?Claude 鎻愮ず璇嶆坊鍔?Ultrathink 鍓嶇紑
- *
+ * 娑?Claude 閹绘劗銇氱拠宥嗗潑閸?Ultrathink 閸撳秶绱? *
  * @description
- * 褰撴帹鐞嗗姫鍔涚骇鍒负 "ultrathink" 鏃讹紝鍦ㄦ彁绀鸿瘝鍓嶆坊鍔?"Ultrathink:" 鍓嶇紑銆? * 濡傛灉鎻愮ず璇嶅凡浠?"Ultrathink:" 寮€澶达紝鍒欎笉閲嶅娣诲姞銆? * 闈?ultrathink 绾у埆鎴栫┖鎻愮ず璇嶄笉鍋氫换浣曞鐞嗐€? *
- * @param text - 鍘熷鎻愮ず璇嶆枃鏈? * @param effort - Claude 鎺ㄧ悊鍔姏绾у埆
- * @returns 澶勭悊鍚庣殑鎻愮ず璇嶆枃鏈? *
+ * 瑜版挻甯归悶鍡楀Й閸旀稓楠囬崚顐¤礋 "ultrathink" 閺冭绱濋崷銊﹀絹缁€楦跨槤閸撳秵鍧婇崝?"Ultrathink:" 閸撳秶绱戦妴? * 婵″倹鐏夐幓鎰仛鐠囧秴鍑℃禒?"Ultrathink:" 瀵偓婢惰揪绱濋崚娆庣瑝闁插秴顦插ǎ璇插閵? * 闂?ultrathink 缁狙冨焼閹存牜鈹栭幓鎰仛鐠囧秳绗夐崑姘崲娴ｆ洖顦╅悶鍡愨偓? *
+ * @param text - 閸樼喎顫愰幓鎰仛鐠囧秵鏋冮張? * @param effort - Claude 閹恒劎鎮婇崝顏勫缁狙冨焼
+ * @returns 婢跺嫮鎮婇崥搴ｆ畱閹绘劗銇氱拠宥嗘瀮閺? *
  * @example
  * ```ts
- * applyClaudePromptEffortPrefix('璇峰垎鏋愯繖娈典唬鐮?, 'ultrathink');
- * // 'Ultrathink:\n璇峰垎鏋愯繖娈典唬鐮?
+ * applyClaudePromptEffortPrefix('鐠囧嘲鍨庨弸鎰箹濞堝吀鍞惍?, 'ultrathink');
+ * // 'Ultrathink:\n鐠囧嘲鍨庨弸鎰箹濞堝吀鍞惍?
  *
- * applyClaudePromptEffortPrefix('璇峰垎鏋愯繖娈典唬鐮?, 'high');
- * // '璇峰垎鏋愯繖娈典唬鐮?锛堥潪 ultrathink 绾у埆涓嶅鐞嗭級
+ * applyClaudePromptEffortPrefix('鐠囧嘲鍨庨弸鎰箹濞堝吀鍞惍?, 'high');
+ * // '鐠囧嘲鍨庨弸鎰箹濞堝吀鍞惍?閿涘牓娼?ultrathink 缁狙冨焼娑撳秴顦╅悶鍡礆
  *
- * applyClaudePromptEffortPrefix('Ultrathink:\n璇峰垎鏋?, 'ultrathink');
- * // 'Ultrathink:\n璇峰垎鏋?锛堝凡鏈夊墠缂€涓嶉噸澶嶆坊鍔狅級
- * ```
+ * applyClaudePromptEffortPrefix('Ultrathink:\n鐠囧嘲鍨庨弸?, 'ultrathink');
+ * // 'Ultrathink:\n鐠囧嘲鍨庨弸?閿涘牆鍑￠張澶婂缂傗偓娑撳秹鍣告径宥嗗潑閸旂媴绱? * ```
  */
 export function applyClaudePromptEffortPrefix(
   text: string,

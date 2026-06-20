@@ -332,7 +332,7 @@ export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
         );
       }}
     >
-      <div className="chat-composer-surface relative overflow-hidden rounded-xl border border-[color:var(--color-border-light)] bg-[var(--color-background-surface-under)] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]">
+      <div className="chat-composer-surface relative overflow-hidden rounded-xl border border-(--color-border-light) bg-(--color-background-surface-under) shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]">
         <CommandList className="max-h-72 py-0.5">
           {groups.map((group, groupIndex) => (
             <div key={group.id}>
@@ -416,9 +416,9 @@ const ComposerCommandMenuItem = memo(function ComposerCommandMenuItem(props: {
       ref={props.itemRef}
       value={props.item.id}
       className={cn(
-        "cursor-pointer select-none gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-[var(--color-background-elevated-secondary)] data-highlighted:bg-[var(--color-background-elevated-secondary)]",
+        "cursor-pointer select-none gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-(--color-background-elevated-secondary) data-highlighted:bg-(--color-background-elevated-secondary)",
         props.isActive &&
-          "bg-[var(--color-background-elevated-secondary)] text-[var(--color-text-foreground)]",
+          "bg-(--color-background-elevated-secondary) text-(--color-text-foreground)",
       )}
       onMouseMove={() => {
         if (!props.isActive) props.onHighlight(props.item.id);

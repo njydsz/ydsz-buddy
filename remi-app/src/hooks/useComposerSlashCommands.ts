@@ -1,6 +1,6 @@
 /**
  * @file useComposerSlashCommands.ts
- * @description 缂栬緫鍣ㄦ枩鏉犲懡浠?Hook - 澶勭悊鍚勭鏂滄潬鍛戒护鐨勬墽琛岄€昏緫
+ * @description 缂傛牞绶崳銊︽灘閺夌姴鎳℃禒?Hook - 婢跺嫮鎮婇崥鍕潚閺傛粍娼崨鎴掓姢閻ㄥ嫭澧界悰宀勨偓鏄忕帆
  * @module hooks/useComposerSlashCommands
  */
 
@@ -39,53 +39,41 @@ import { buildNextProviderOptions } from "../providerModelOptions";
 import { resolveForkThreadEnvironment } from "../lib/threadEnvironment";
 import { type SplitViewId, useSplitViewStore } from "../splitViewStore";
 
-/** 缂栬緫鍣ㄥ揩鐓х被鍨?*/
+/** 缂傛牞绶崳銊ユ彥閻撗呰閸?*/
 type ComposerSnapshot = {
   value: string;
   cursor: number;
   expandedCursor: number;
 };
 
-/** 鏂滄潬鍛戒护椤圭被鍨?*/
+/** 閺傛粍娼崨鎴掓姢妞ゅ湱琚崹?*/
 type SlashCommandItem = Extract<ComposerCommandItem, { type: "slash-command" }>;
 
 /**
- * 鍒ゆ柇鎻愮ず鏇挎崲鏄惁鎴愬姛搴旂敤
+ * 閸掋倖鏌囬幓鎰仛閺囨寧宕查弰顖氭儊閹存劕濮涙惔鏃傛暏
  */
 function wasPromptReplacementApplied(result: number | false): boolean {
   return result !== false;
 }
 
 /**
- * 缂栬緫鍣ㄦ枩鏉犲懡浠?Hook
+ * 缂傛牞绶崳銊︽灘閺夌姴鎳℃禒?Hook
  *
  * @description
- * 澶勭悊缂栬緫鍣ㄤ腑鍚勭鏂滄潬鍛戒护鐨勬墽琛岄€昏緫锛屽寘鎷細
- * - /clear: 娓呯┖瀵硅瘽
- * - /compact: 鍘嬬缉绾跨▼涓婁笅鏂? * - /plan /default: 鍒囨崲浜や簰妯″紡
- * - /status: 鏄剧ず鐘舵€佸璇濇
- * - /subagents: 瀛愪唬鐞嗙鐞? * - /review: 浠ｇ爜瀹℃煡
- * - /fast: 蹇€熸ā寮忓垏鎹? * - /fork: 绾跨▼鍒嗗弶
- * - /side: 渚ц竟鑱婂ぉ
- *
- * @param input - 杈撳叆鍙傛暟瀵硅薄
- * @param input.activeProject - 褰撳墠娲诲姩椤圭洰
- * @param input.activeThread - 褰撳墠娲诲姩绾跨▼
- * @param input.activeRootBranch - 褰撳墠鏍瑰垎鏀? * @param input.isServerThread - 鏄惁涓烘湇鍔″櫒绾跨▼
- * @param input.supportsFastSlashCommand - 鏄惁鏀寔蹇€熷懡浠? * @param input.canOfferCompactCommand - 鏄惁鍙彁渚涘帇缂╁懡浠? * @param input.canOfferSideCommand - 鏄惁鍙彁渚涗晶杈瑰懡浠? * @param input.supportsTextNativeReviewCommand - 鏄惁鏀寔鏂囨湰鍘熺敓瀹℃煡鍛戒护
- * @param input.fastModeEnabled - 蹇€熸ā寮忔槸鍚﹀凡鍚敤
- * @param input.providerNativeCommands - 鎻愪緵鍟嗗師鐢熷懡浠ゅ垪琛? * @param input.providerCommandDiscoveryCwd - 鍛戒护鍙戠幇宸ヤ綔鐩綍
- * @param input.selectedProvider - 褰撳墠閫変腑鐨勬彁渚涘晢
- * @param input.currentProviderModelOptions - 褰撳墠鎻愪緵鍟嗘ā鍨嬮€夐」
- * @param input.selectedModelSelection - 褰撳墠閫変腑鐨勬ā鍨? * @param input.runtimeMode - 杩愯鏃舵ā寮? * @param input.interactionMode - 浜や簰妯″紡
- * @param input.threadId - 绾跨▼ ID
- * @param input.syncServerShellSnapshot - 鍚屾鏈嶅姟鍣?Shell 蹇収
- * @param input.navigateToThread - 瀵艰埅鍒扮嚎绋? * @param input.handleClearConversation - 娓呯┖瀵硅瘽澶勭悊
- * @param input.handleInteractionModeChange - 浜や簰妯″紡鍒囨崲澶勭悊
- * @param input.openForkTargetPicker - 鎵撳紑鍒嗗弶鐩爣閫夋嫨鍣? * @param input.openReviewTargetPicker - 鎵撳紑瀹℃煡鐩爣閫夋嫨鍣? * @param input.setComposerDraftProviderModelOptions - 璁剧疆缂栬緫鍣ㄨ崏绋挎彁渚涘晢妯″瀷閫夐」
- * @param input.editorActions - 缂栬緫鍣ㄦ搷浣滈泦鍚? *
- * @returns 鏂滄潬鍛戒护澶勭悊鐩稿叧鐨勭姸鎬佸拰鏂规硶
- *
+ * 婢跺嫮鎮婄紓鏍帆閸ｃ劋鑵戦崥鍕潚閺傛粍娼崨鎴掓姢閻ㄥ嫭澧界悰宀勨偓鏄忕帆閿涘苯瀵橀幏顒婄窗
+ * - /clear: 濞撳懐鈹栫€电鐦? * - /compact: 閸樺缂夌痪璺ㄢ柤娑撳﹣绗呴弬? * - /plan /default: 閸掑洦宕叉禍銈勭鞍濡€崇础
+ * - /status: 閺勫墽銇氶悩鑸碘偓浣割嚠鐠囨繃顢? * - /subagents: 鐎涙劒鍞悶鍡欘吀閻? * - /review: 娴狅絿鐖滅€光剝鐓? * - /fast: 韫囶偊鈧喐膩瀵繐鍨忛幑? * - /fork: 缁捐法鈻奸崚鍡楀级
+ * - /side: 娓氀嗙珶閼卞﹤銇? *
+ * @param input - 鏉堟挸鍙嗛崣鍌涙殶鐎电钖? * @param input.activeProject - 瑜版挸澧犲ú璇插З妞ゅ湱娲? * @param input.activeThread - 瑜版挸澧犲ú璇插З缁捐法鈻? * @param input.activeRootBranch - 瑜版挸澧犻弽鐟板瀻閺€? * @param input.isServerThread - 閺勵垰鎯佹稉鐑樻箛閸斺€虫珤缁捐法鈻? * @param input.supportsFastSlashCommand - 閺勵垰鎯侀弨顖涘瘮韫囶偊鈧喎鎳℃禒? * @param input.canOfferCompactCommand - 閺勵垰鎯侀崣顖涘絹娓氭稑甯囩紓鈺佹嚒娴? * @param input.canOfferSideCommand - 閺勵垰鎯侀崣顖涘絹娓氭稐鏅舵潏鐟版嚒娴? * @param input.supportsTextNativeReviewCommand - 閺勵垰鎯侀弨顖涘瘮閺傚洦婀伴崢鐔烘晸鐎光剝鐓￠崨鎴掓姢
+ * @param input.fastModeEnabled - 韫囶偊鈧喐膩瀵繑妲搁崥锕€鍑￠崥顖滄暏
+ * @param input.providerNativeCommands - 閹绘劒绶甸崯鍡楀斧閻㈢喎鎳℃禒銈呭灙鐞? * @param input.providerCommandDiscoveryCwd - 閸涙垝鎶ら崣鎴犲箛瀹搞儰缍旈惄顔肩秿
+ * @param input.selectedProvider - 瑜版挸澧犻柅澶夎厬閻ㄥ嫭褰佹笟娑樻櫌
+ * @param input.currentProviderModelOptions - 瑜版挸澧犻幓鎰返閸熷棙膩閸ㄥ鈧銆? * @param input.selectedModelSelection - 瑜版挸澧犻柅澶夎厬閻ㄥ嫭膩閸? * @param input.runtimeMode - 鏉╂劘顢戦弮鑸的佸? * @param input.interactionMode - 娴溿倓绨板Ο鈥崇础
+ * @param input.threadId - 缁捐法鈻?ID
+ * @param input.syncServerShellSnapshot - 閸氬本顒為張宥呭閸?Shell 韫囶偆鍙? * @param input.navigateToThread - 鐎佃壈鍩呴崚鎵殠缁? * @param input.handleClearConversation - 濞撳懐鈹栫€电鐦芥径鍕倞
+ * @param input.handleInteractionModeChange - 娴溿倓绨板Ο鈥崇础閸掑洦宕叉径鍕倞
+ * @param input.openForkTargetPicker - 閹垫挸绱戦崚鍡楀级閻╊喗鐖ｉ柅澶嬪閸? * @param input.openReviewTargetPicker - 閹垫挸绱戠€光剝鐓￠惄顔界垼闁瀚ㄩ崳? * @param input.setComposerDraftProviderModelOptions - 鐠佸墽鐤嗙紓鏍帆閸ｃ劏宕忕粙鎸庡絹娓氭稑鏅㈠Ο鈥崇€烽柅澶愩€? * @param input.editorActions - 缂傛牞绶崳銊︽惙娴ｆ粓娉﹂崥? *
+ * @returns 閺傛粍娼崨鎴掓姢婢跺嫮鎮婇惄绋垮彠閻ㄥ嫮濮搁幀浣告嫲閺傝纭? *
  * @example
  * ```tsx
  * const {
@@ -172,8 +160,7 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 获取当前可用的内置斜杠命令列表
-  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  // 鑾峰彇褰撳墠鍙敤鐨勫唴缃枩鏉犲懡浠ゅ垪琛?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -184,7 +171,7 @@ export function useComposerSlashCommands(input: {
   });
 
   /**
-   * 鍘嬬缉褰撳墠鎻愪緵鍟嗙嚎绋嬬殑涓婁笅鏂?   * 浠呭湪鏈嶅姟鍣ㄧ嚎绋嬩笖浼氳瘽鏈叧闂椂鍙敤
+   * 閸樺缂夎ぐ鎾冲閹绘劒绶甸崯鍡欏殠缁嬪娈戞稉濠佺瑓閺?   * 娴犲懎婀張宥呭閸ｃ劎鍤庣粙瀣╃瑬娴兼俺鐦介張顏勫彠闂傤厽妞傞崣顖滄暏
    */
   const compactProviderThread = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
@@ -231,8 +218,7 @@ export function useComposerSlashCommands(input: {
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
   /**
-   * 获取斜杠命令的过滤结果，根据查询字符串进行匹配
-   */
+   * 鑾峰彇鏂滄潬鍛戒护鐨勮繃婊ょ粨鏋滐紝鏍规嵁鏌ヨ瀛楃涓茶繘琛屽尮閰?   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -250,9 +236,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 鎵ц /fast 鏂滄潬鍛戒护
-   * 匹配 /fast, /fast on, /fast off, /fast status 等命令
-   */
+   * 閹笛嗩攽 /fast 閺傛粍娼崨鎴掓姢
+   * 鍖归厤 /fast, /fast on, /fast off, /fast status 绛夊懡浠?   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -294,8 +279,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 获取斜杠命令的描述文本，包含命令名称和简短说明
-   */
+   * 鑾峰彇鏂滄潬鍛戒护鐨勬弿杩版枃鏈紝鍖呭惈鍛戒护鍚嶇О鍜岀畝鐭鏄?   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -357,7 +341,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 获取斜杠命令的排序依据，按命令名称和来源排序
+   * 鑾峰彇鏂滄潬鍛戒护鐨勬帓搴忎緷鎹紝鎸夊懡浠ゅ悕绉板拰鏉ユ簮鎺掑簭
    */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
@@ -444,9 +428,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 鍚姩 Codex 瀹℃煡娴佺▼
-   * @param target - 目标对象，包含 changes 和 base-branch 等属性
-   */
+   * 閸氼垰濮?Codex 鐎光剝鐓″ù浣衡柤
+   * @param target - 鐩爣瀵硅薄锛屽寘鍚?changes 鍜?base-branch 绛夊睘鎬?   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();

@@ -1,6 +1,6 @@
 /**
  * @file useIsDisposableThread.ts
- * @description 涓€娆℃€х嚎绋嬫娴?Hook - 鍒ゆ柇绾跨▼鏄惁搴旇琚攢姣? * @module hooks/useIsDisposableThread
+ * @description 娑撯偓濞嗏剝鈧呭殠缁嬪顥呭ù?Hook - 閸掋倖鏌囩痪璺ㄢ柤閺勵垰鎯佹惔鏃囶嚉鐞氼偊鏀㈠В? * @module hooks/useIsDisposableThread
  */
 
 import { type ThreadId } from "~/contracts";
@@ -9,45 +9,42 @@ import { useComposerDraftStore } from "../composerDraftStore";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";
 
 /**
- * 涓€娆℃€х嚎绋嬫娴?Hook
+ * 娑撯偓濞嗏剝鈧呭殠缁嬪顥呭ù?Hook
  *
  * @description
- * 鍒ゆ柇鎸囧畾绾跨▼鏄惁涓轰竴娆℃€х嚎绋嬶紙涓存椂绾跨▼锛夈€? * 涓€娆℃€х嚎绋嬪湪鐢ㄦ埛绂诲紑鏃跺簲璇ヨ鑷姩閿€姣併€? *
- * 璇?Hook 浣跨敤"閿佸瓨"鏈哄埗锛氫竴鏃︽娴嬪埌绾跨▼鏄复鏃剁殑锛屽嵆浣垮悗缁姸鎬佸彉鍖栵紝
- * 涔熶細淇濇寔杩斿洖 true锛岄伩鍏?UI 鍦ㄨ崏绋?鏈嶅姟鍣ㄦ彁鍗囪繃绋嬩腑闂儊銆? *
- * @param threadId - 瑕佹鏌ョ殑绾跨▼ ID锛屽彲浠ヤ负 null 鎴?undefined
+ * 閸掋倖鏌囬幐鍥х暰缁捐法鈻奸弰顖氭儊娑撹桨绔村▎鈩冣偓褏鍤庣粙瀣剁礄娑撳瓨妞傜痪璺ㄢ柤閿涘鈧? * 娑撯偓濞嗏剝鈧呭殠缁嬪婀悽銊﹀煕缁傝绱戦弮璺虹安鐠囥儴顫﹂懛顏勫З闁库偓濮ｄ降鈧? *
+ * 鐠?Hook 娴ｈ法鏁?闁夸礁鐡?閺堝搫鍩楅敍姘閺冿附顥呭ù瀣煂缁捐法鈻奸弰顖欏閺冨墎娈戦敍灞藉祮娴ｅ灝鎮楃紒顓犲Ц閹礁褰夐崠鏍电礉
+ * 娑旂喍绱版穱婵囧瘮鏉╂柨娲?true閿涘矂浼╅崗?UI 閸︺劏宕忕粙?閺堝秴濮熼崳銊﹀絹閸楀洩绻冪粙瀣╄厬闂傤亞鍎婇妴? *
+ * @param threadId - 鐟曚焦顥呴弻銉ф畱缁捐法鈻?ID閿涘苯褰叉禒銉よ礋 null 閹?undefined
  *
- * @returns 鏄惁涓轰竴娆℃€х嚎绋? *
+ * @returns 閺勵垰鎯佹稉杞扮濞嗏剝鈧呭殠缁? *
  * @example
  * ```tsx
  * const isDisposable = useIsDisposableThread(currentThreadId);
  *
  * if (isDisposable) {
- *   console.log('杩欐槸涓€涓复鏃剁嚎绋嬶紝绂诲紑鏃朵細琚攢姣?);
+ *   console.log('鏉╂瑦妲告稉鈧稉顏冨閺冨墎鍤庣粙瀣剁礉缁傝绱戦弮鏈电窗鐞氼偊鏀㈠В?);
  * }
  * ```
  *
  * @remarks
- * - 妫€鏌ヤ袱涓潵婧愶細涓存椂绾跨▼瀛樺偍鍜岃崏绋跨嚎绋嬪厓鏁版嵁
- * - 浣跨敤 ref 璁板綍宸茶杩囩殑涓存椂绾跨▼锛岄槻姝㈢姸鎬佺灛鍙樺鑷?UI 闂儊
- */
+ * - 濡偓閺屻儰琚辨稉顏呮降濠ф劧绱版稉瀛樻缁捐法鈻肩€涙ê鍋嶉崪宀冨磸缁嬭法鍤庣粙瀣帗閺佺増宓? * - 娴ｈ法鏁?ref 鐠佹澘缍嶅鑼额潌鏉╁洨娈戞稉瀛樻缁捐法鈻奸敍宀勬Щ濮濄垻濮搁幀浣虹仜閸欐ê顕遍懛?UI 闂傤亞鍎? */
 export function useIsDisposableThread(threadId: ThreadId | null | undefined): boolean {
-  // 浠庝复鏃剁嚎绋嬪瓨鍌ㄤ腑妫€鏌ユ爣璁?  const hasTemporaryThreadMarker = useTemporaryThreadStore((store) =>
+  // 娴犲簼澶嶉弮鍓佸殠缁嬪鐡ㄩ崒銊よ厬濡偓閺屻儲鐖ｇ拋?  const hasTemporaryThreadMarker = useTemporaryThreadStore((store) =>
     threadId ? store.temporaryThreadIds[threadId] === true : false,
   );
   
-  // 浠庤崏绋跨嚎绋嬪厓鏁版嵁涓鏌ヤ复鏃舵爣璁?  const hasTemporaryDraftMetadata = useComposerDraftStore((store) =>
+  // 娴犲氦宕忕粙璺ㄥ殠缁嬪鍘撻弫鐗堝祦娑擃厽顥呴弻銉ゅ閺冭埖鐖ｇ拋?  const hasTemporaryDraftMetadata = useComposerDraftStore((store) =>
     threadId ? store.draftThreadsByThreadId[threadId]?.isTemporary === true : false,
   );
   
-  // 璁板綍宸茶杩囩殑涓存椂绾跨▼ ID锛岀敤浜庨攣瀛樻満鍒?  const seenDisposableThreadIdsRef = useRef<Set<ThreadId>>(new Set());
+  // 鐠佹澘缍嶅鑼额潌鏉╁洨娈戞稉瀛樻缁捐法鈻?ID閿涘瞼鏁ゆ禍搴ㄦ敚鐎涙ɑ婧€閸?  const seenDisposableThreadIdsRef = useRef<Set<ThreadId>>(new Set());
 
   useEffect(() => {
     if (!threadId) {
       return;
     }
-    // 閿佸瓨鏈哄埗锛氫竴鏃︽爣璁颁负涓存椂锛屽氨姘镐箙璁板綍锛岄伩鍏?UI 闂儊
-    if (hasTemporaryThreadMarker || hasTemporaryDraftMetadata) {
+    // 闁夸礁鐡ㄩ張鍝勫煑閿涙矮绔撮弮锔界垼鐠侀璐熸稉瀛樻閿涘苯姘ㄥ闀愮畽鐠佹澘缍嶉敍宀勪缉閸?UI 闂傤亞鍎?    if (hasTemporaryThreadMarker || hasTemporaryDraftMetadata) {
       seenDisposableThreadIdsRef.current.add(threadId);
     }
   }, [threadId, hasTemporaryDraftMetadata, hasTemporaryThreadMarker]);
@@ -56,7 +53,7 @@ export function useIsDisposableThread(threadId: ThreadId | null | undefined): bo
     return false;
   }
   
-  // 杩斿洖 true 鐨勬潯浠讹細褰撳墠鏈変复鏃舵爣璁帮紝鎴栬€呮浘缁忚鏍囪涓轰复鏃?  return (
+  // 鏉╂柨娲?true 閻ㄥ嫭娼禒璁圭窗瑜版挸澧犻張澶夊閺冭埖鐖ｇ拋甯礉閹存牞鈧懏娴樼紒蹇氼潶閺嶅洩顔囨稉杞板閺?  return (
     hasTemporaryThreadMarker ||
     hasTemporaryDraftMetadata ||
     seenDisposableThreadIdsRef.current.has(threadId)

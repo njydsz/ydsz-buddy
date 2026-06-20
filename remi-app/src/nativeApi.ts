@@ -1,21 +1,19 @@
 /**
- * @file NativeApi 鍏ュ彛妯″潡
- * @description 鎻愪緵鑾峰彇鍘熺敓 API 瀹炰緥鐨勭粺涓€鍏ュ彛銆? *              鎸変紭鍏堢骇渚濇灏濊瘯锛歸indow.nativeApi锛堟闈㈢娉ㄥ叆锛夆啋 Tauri 妗ユ帴 鈫?WebSocket 瀹炵幇銆? *              纭繚鍦ㄤ笉鍚岃繍琛岀幆澧冧笅閮借兘鑾峰彇鍒板悎閫傜殑 NativeApi 瀹炰緥銆? */
+ * @file NativeApi 閸忋儱褰涘Ο鈥虫健
+ * @description 閹绘劒绶甸懢宄板絿閸樼喓鏁?API 鐎圭偘绶ラ惃鍕埠娑撯偓閸忋儱褰涢妴? *              閹稿绱崗鍫㈤獓娓氭繃顐肩亸婵婄槸閿涙indow.nativeApi閿涘牊顢戦棃銏㈩伂濞夈劌鍙嗛敍澶嗗晪 Tauri 濡椼儲甯?閳?WebSocket 鐎圭偟骞囬妴? *              绾喕绻氶崷銊ょ瑝閸氬矁绻嶇悰宀€骞嗘晶鍐х瑓闁€熷厴閼惧嘲褰囬崚鏉挎値闁倻娈?NativeApi 鐎圭偘绶ラ妴? */
 
 import type { NativeApi } from "~/contracts";
 
 import { createWsNativeApi } from "./wsNativeApi";
 import { tauriBridge } from "./lib/tauri-bridge";
 
-/** 缂撳瓨鐨勬闈㈢ NativeApi 瀹炰緥 */
+/** 缂傛挸鐡ㄩ惃鍕攽闂堛垻顏?NativeApi 鐎圭偘绶?*/
 let cachedDesktopApi: NativeApi | undefined;
 
 /**
- * 璇诲彇 NativeApi 瀹炰緥锛屾寜浼樺厛绾т緷娆″皾璇曪細
- * 1. SSR 鐜杩斿洖 undefined
- * 2. window.nativeApi锛堟闈㈢娉ㄥ叆鐨勫疄渚嬶級
- * 3. Tauri 鐜涓嬬殑 tauriBridge
- * 4. 鍩轰簬 WebSocket 鐨勫疄鐜? * @returns NativeApi 瀹炰緥锛孲SR 鐜涓嬭繑鍥?undefined
+ * 鐠囪褰?NativeApi 鐎圭偘绶ラ敍灞惧瘻娴兼ê鍘涚痪褌绶峰▎鈥崇毦鐠囨洩绱? * 1. SSR 閻滎垰顣ㄦ潻鏂挎礀 undefined
+ * 2. window.nativeApi閿涘牊顢戦棃銏㈩伂濞夈劌鍙嗛惃鍕杽娓氬绱? * 3. Tauri 閻滎垰顣ㄦ稉瀣畱 tauriBridge
+ * 4. 閸╄桨绨?WebSocket 閻ㄥ嫬鐤勯悳? * @returns NativeApi 鐎圭偘绶ラ敍瀛睸R 閻滎垰顣ㄦ稉瀣箲閸?undefined
  */
 export function readNativeApi(): NativeApi | undefined {
   if (typeof window === "undefined") return undefined;
@@ -36,8 +34,7 @@ export function readNativeApi(): NativeApi | undefined {
 }
 
 /**
- * 纭繚 NativeApi 瀹炰緥鍙敤锛屼笉鍙敤鏃舵姏鍑洪敊璇? * @returns NativeApi 瀹炰緥
- * @throws 褰撴棤娉曡幏鍙?NativeApi 瀹炰緥鏃舵姏鍑洪敊璇? */
+ * 绾喕绻?NativeApi 鐎圭偘绶ラ崣顖滄暏閿涘奔绗夐崣顖滄暏閺冭埖濮忛崙娲晩鐠? * @returns NativeApi 鐎圭偘绶? * @throws 瑜版挻妫ゅ▔鏇″箯閸?NativeApi 鐎圭偘绶ラ弮鑸靛閸戞椽鏁婄拠? */
 export function ensureNativeApi(): NativeApi {
   const api = readNativeApi();
   if (!api) {

@@ -24,7 +24,7 @@ export function PickerTriggerButton(
       size="sm"
       variant="chrome"
       className={cn(
-        "min-w-0 justify-start overflow-hidden whitespace-nowrap px-1.5 text-[var(--color-text-foreground)] [&_svg]:mx-0",
+        "min-w-0 justify-start overflow-hidden whitespace-nowrap px-1.5 text-(--color-text-foreground) [&_svg]:mx-0",
         COMPOSER_PICKER_TRIGGER_TEXT_CLASS_NAME,
         compact ? "max-w-52 shrink-0" : "max-w-56 shrink sm:max-w-64 sm:px-1.5",
         className,

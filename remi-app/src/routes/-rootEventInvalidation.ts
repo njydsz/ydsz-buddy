@@ -1,8 +1,6 @@
 /**
- * @file 鏍硅矾鐢变簨浠跺け鏁堝寲妯″潡
- * @description 鍒嗙被娴佸紡缂栨帓浜嬩欢锛屽垽鏂摢浜涗簨浠跺簲璇ヤ娇鍏变韩鏌ヨ缂撳瓨澶辨晥
- * @layer 鏍硅矾鐢卞伐鍏峰嚱鏁? * @exports 鎻愪緵鑰呭拰 Git 鏌ヨ缂撳瓨鐨勪簨浠跺け鏁堝寲鍒ゆ柇鍑芥暟
- */
+ * @file 閺嶇鐭鹃悽鍙樼皑娴犺泛銇戦弫鍫濆濡€虫健
+ * @description 閸掑棛琚ù浣哥础缂傛牗甯撴禍瀣╂閿涘苯鍨介弬顓炴憿娴滄稐绨ㄦ禒璺虹安鐠囥儰濞囬崗鍙橀煩閺屻儴顕楃紓鎾崇摠婢惰鲸鏅? * @layer 閺嶇鐭鹃悽鍗炰紣閸忓嘲鍤遍弫? * @exports 閹绘劒绶甸懓鍛嫲 Git 閺屻儴顕楃紓鎾崇摠閻ㄥ嫪绨ㄦ禒璺恒亼閺佸牆瀵查崚銈嗘焽閸戣姤鏆? */
 
 import type { OrchestrationEvent, ThreadId } from "~/contracts";
 import { resolveThreadWorkspaceCwd } from "~/shared/threadEnvironment";
@@ -11,36 +9,31 @@ import type { AppState } from "../store";
 import { getThreadFromState } from "../threadDerivation";
 
 /**
- * 鏂囦欢鍙樻洿浜嬩欢绫诲瀷闆嗗悎
- * @description 杩欎簺浜嬩欢浼氬鑷存枃浠剁郴缁熷彂鐢熷彉鍖栵紝闇€瑕佷娇鐩稿叧缂撳瓨澶辨晥
+ * 閺傚洣娆㈤崣妯绘纯娴滃娆㈢猾璇茬€烽梿鍡楁値
+ * @description 鏉╂瑤绨烘禍瀣╂娴兼艾顕遍懛瀛樻瀮娴犲墎閮寸紒鐔峰絺閻㈢喎褰夐崠鏍电礉闂団偓鐟曚椒濞囬惄绋垮彠缂傛挸鐡ㄦ径杈ㄦ櫏
  */
 const FILE_CHANGE_EVENT_TYPES = new Set<OrchestrationEvent["type"]>([
-  "thread.turn-diff-completed", // 杞宸紓瀵规瘮瀹屾垚
-  "thread.reverted", // 绾跨▼宸插洖婊?  "thread.conversation-rolled-back", // 瀵硅瘽宸插洖婊?]);
+  "thread.turn-diff-completed", // 鏉烆喗顐煎顔肩磽鐎佃鐦€瑰本鍨?  "thread.reverted", // 缁捐法鈻煎鎻掓礀濠?  "thread.conversation-rolled-back", // 鐎电鐦藉鎻掓礀濠?]);
 
 /**
- * 鍒ゆ柇鏄惁搴旇浣挎彁渚涜€呮煡璇㈢紦瀛樺け鏁? * @param event - 缂栨帓浜嬩欢瀵硅薄
- * @returns 濡傛灉浜嬩欢绫诲瀷灞炰簬鏂囦欢鍙樻洿浜嬩欢锛屽垯杩斿洖 true锛岃〃绀洪渶瑕佸埛鏂版彁渚涜€呯浉鍏崇紦瀛? */
+ * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氭担鎸庡絹娓氭稖鈧懏鐓＄拠銏㈢处鐎涙ê銇戦弫? * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @returns 婵″倹鐏夋禍瀣╂缁鐎风仦鐐扮艾閺傚洣娆㈤崣妯绘纯娴滃娆㈤敍灞藉灟鏉╂柨娲?true閿涘矁銆冪粈娲付鐟曚礁鍩涢弬鐗堝絹娓氭稖鈧懐娴夐崗宕囩处鐎? */
 export function shouldInvalidateProviderQueriesForEvent(event: OrchestrationEvent): boolean {
   return FILE_CHANGE_EVENT_TYPES.has(event.type);
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旇浣?Git 鏌ヨ缂撳瓨澶辨晥
- * @param event - 缂栨帓浜嬩欢瀵硅薄
- * @returns 濡傛灉浜嬩欢鏄枃浠跺彉鏇翠簨浠讹紝鎴栬€呮槸鍖呭惈鍒嗘敮/鐜/worktree 绛夊厓鏁版嵁鍙樻洿鐨?meta-updated 浜嬩欢锛屽垯杩斿洖 true
- * @description Git 缂撳瓨澶辨晥鑼冨洿姣旀彁渚涜€呯紦瀛樻洿骞匡紝杩樺寘鎷嚎绋嬪厓鏁版嵁涓笌 Git 鐩稿叧鐨勫瓧娈靛彉鏇? */
+ * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氭担?Git 閺屻儴顕楃紓鎾崇摠婢惰鲸鏅? * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @returns 婵″倹鐏夋禍瀣╂閺勵垱鏋冩禒璺哄綁閺囩繝绨ㄦ禒璁圭礉閹存牞鈧懏妲搁崠鍛儓閸掑棙鏁?閻滎垰顣?worktree 缁涘鍘撻弫鐗堝祦閸欐ɑ娲块惃?meta-updated 娴滃娆㈤敍灞藉灟鏉╂柨娲?true
+ * @description Git 缂傛挸鐡ㄦ径杈ㄦ櫏閼煎啫娲垮В鏃€褰佹笟娑溾偓鍛处鐎涙ɑ娲块獮鍖＄礉鏉╂ê瀵橀幏顒傚殠缁嬪鍘撻弫鐗堝祦娑擃厺绗?Git 閻╃鍙ч惃鍕摟濞堥潧褰夐弴? */
 export function shouldInvalidateGitQueriesForEvent(event: OrchestrationEvent): boolean {
-  // 鏂囦欢鍙樻洿浜嬩欢蹇呯劧闇€瑕佸埛鏂?Git 缂撳瓨
-  if (FILE_CHANGE_EVENT_TYPES.has(event.type)) {
+  // 閺傚洣娆㈤崣妯绘纯娴滃娆㈣箛鍛姧闂団偓鐟曚礁鍩涢弬?Git 缂傛挸鐡?  if (FILE_CHANGE_EVENT_TYPES.has(event.type)) {
     return true;
   }
 
-  // 闈?meta-updated 浜嬩欢涓嶉渶瑕佸鐞?  if (event.type !== "thread.meta-updated") {
+  // 闂?meta-updated 娴滃娆㈡稉宥夋付鐟曚礁顦╅悶?  if (event.type !== "thread.meta-updated") {
     return false;
   }
 
-  // 妫€鏌?meta-updated 浜嬩欢涓槸鍚﹀寘鍚?Git 鐩稿叧鐨勫厓鏁版嵁鍙樻洿
+  // 濡偓閺?meta-updated 娴滃娆㈡稉顓熸Ц閸氾箑瀵橀崥?Git 閻╃鍙ч惃鍕帗閺佺増宓侀崣妯绘纯
   return (
     event.payload.branch !== undefined ||
     event.payload.envMode !== undefined ||
@@ -52,11 +45,9 @@ export function shouldInvalidateGitQueriesForEvent(event: OrchestrationEvent): b
 }
 
 /**
- * 鑾峰彇闇€瑕佸埛鏂?Git 缂撳瓨鐨勭嚎绋?ID
- * @param event - 缂栨帓浜嬩欢瀵硅薄
- * @returns 濡傛灉浜嬩欢闇€瑕佸埛鏂?Git 缂撳瓨涓斿寘鍚嚎绋?ID锛屽垯杩斿洖璇ョ嚎绋?ID锛屽惁鍒欒繑鍥?null
- * @description 鐢ㄤ簬瀹氫綅闇€瑕佸埛鏂扮紦瀛樼殑鍏蜂綋绾跨▼
- */
+ * 閼惧嘲褰囬棁鈧憰浣稿煕閺?Git 缂傛挸鐡ㄩ惃鍕殠缁?ID
+ * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @returns 婵″倹鐏夋禍瀣╂闂団偓鐟曚礁鍩涢弬?Git 缂傛挸鐡ㄦ稉鏂垮瘶閸氼偆鍤庣粙?ID閿涘苯鍨潻鏂挎礀鐠囥儳鍤庣粙?ID閿涘苯鎯侀崚娆掔箲閸?null
+ * @description 閻劋绨€规矮缍呴棁鈧憰浣稿煕閺傛壆绱︾€涙娈戦崗铚傜秼缁捐法鈻? */
 export function getGitInvalidationThreadIdForEvent(event: OrchestrationEvent): ThreadId | null {
   if (!shouldInvalidateGitQueriesForEvent(event)) {
     return null;
@@ -65,21 +56,21 @@ export function getGitInvalidationThreadIdForEvent(event: OrchestrationEvent): T
 }
 
 /**
- * 瑙ｆ瀽闇€瑕佸埛鏂?Git 缂撳瓨鐨勭嚎绋嬪伐浣滅洰褰? * @param state - 搴旂敤鐘舵€佸璞? * @param threadId - 绾跨▼ ID
- * @returns 绾跨▼瀵瑰簲鐨勫伐浣滅洰褰曡矾寰勶紝濡傛灉鏃犳硶瑙ｆ瀽鍒欒繑鍥?null
- * @description 鍦ㄩ鍩熶簨浠跺簲鐢ㄥ悗瑙ｆ瀽锛岀‘淇?worktree 鍏冩暟鎹彉鏇存寚鍚戞柊鐨勫伐浣滅洰褰? */
+ * 鐟欙絾鐎介棁鈧憰浣稿煕閺?Git 缂傛挸鐡ㄩ惃鍕殠缁嬪浼愭担婊呮窗瑜? * @param state - 鎼存梻鏁ら悩鑸碘偓浣割嚠鐠? * @param threadId - 缁捐法鈻?ID
+ * @returns 缁捐法鈻肩€电懓绨查惃鍕紣娴ｆ粎娲拌ぐ鏇＄熅瀵板嫸绱濇俊鍌涚亯閺冪姵纭剁憴锝嗙€介崚娆掔箲閸?null
+ * @description 閸︺劑顣崺鐔剁皑娴犺泛绨查悽銊ユ倵鐟欙絾鐎介敍宀€鈥樻穱?worktree 閸忓啯鏆熼幑顔煎綁閺囧瓨瀵氶崥鎴炴煀閻ㄥ嫬浼愭担婊呮窗瑜? */
 export function resolveGitInvalidationCwdForThreadId(
   state: AppState,
   threadId: ThreadId,
 ): string | null {
-  // 浼樺厛浠庣姸鎬佷腑鑾峰彇绾跨▼锛屽鏋滀笉瀛樺湪鍒欎粠绾跨▼鍒楄〃涓煡鎵?  const thread =
+  // 娴兼ê鍘涙禒搴ｅЦ閹椒鑵戦懢宄板絿缁捐法鈻奸敍灞筋洤閺嬫粈绗夌€涙ê婀崚娆庣矤缁捐法鈻奸崚妤勩€冩稉顓熺叀閹?  const thread =
     getThreadFromState(state, threadId) ??
     state.threads.find((candidate) => candidate.id === threadId);
   if (!thread) {
     return null;
   }
-  // 鑾峰彇绾跨▼鎵€灞為」鐩殑鏍瑰伐浣滅洰褰?  const projectCwd = state.projects.find((project) => project.id === thread.projectId)?.cwd ?? null;
-  // 鏍规嵁椤圭洰鐩綍銆佺幆澧冩ā寮忓拰 worktree 璺緞瑙ｆ瀽鏈€缁堢殑宸ヤ綔鐩綍
+  // 閼惧嘲褰囩痪璺ㄢ柤閹碘偓鐏炵偤銆嶉惄顔炬畱閺嶇懓浼愭担婊呮窗瑜?  const projectCwd = state.projects.find((project) => project.id === thread.projectId)?.cwd ?? null;
+  // 閺嶈宓佹い鍦窗閻╊喖缍嶉妴浣哄箚婢у啯膩瀵繐鎷?worktree 鐠侯垰绶炵憴锝嗙€介張鈧紒鍫㈡畱瀹搞儰缍旈惄顔肩秿
   return resolveThreadWorkspaceCwd({
     projectCwd,
     envMode: thread.envMode,

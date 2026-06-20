@@ -1286,7 +1286,7 @@ export default function GitActionsControl({
             <MenuPopup
               align="end"
               side="bottom"
-              className="w-50 rounded-lg border-[color:var(--color-border)] bg-[var(--composer-surface)] shadow-lg"
+              className="w-50 rounded-lg border-(--color-border) bg-(--composer-surface) shadow-lg"
             >
               <MenuGroup>
                 <MenuGroupLabel>Git actions</MenuGroupLabel>
@@ -1363,7 +1363,7 @@ export default function GitActionsControl({
             <DialogDescription>{COMMIT_DIALOG_DESCRIPTION}</DialogDescription>
           </DialogHeader>
           <DialogPanel className="space-y-4">
-            <div className="space-y-3 rounded-lg border border-[color:var(--color-border)] bg-[var(--color-background-elevated-secondary)] p-3 text-xs">
+            <div className="space-y-3 rounded-lg border border-(--color-border) bg-(--color-background-elevated-secondary) p-3 text-xs">
               <div className="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1">
                 <span className="text-muted-foreground">Branch</span>
                 <span className="flex items-center justify-between gap-2">
@@ -1410,7 +1410,7 @@ export default function GitActionsControl({
                   <p className="font-medium">none</p>
                 ) : (
                   <div className="space-y-2">
-                    <ScrollArea className="h-44 rounded-md border border-[color:var(--color-border)] bg-[var(--color-background-elevated-primary-opaque)]">
+                    <ScrollArea className="h-44 rounded-md border border-(--color-border) bg-(--color-background-elevated-primary-opaque)">
                       <div className="space-y-1 p-1">
                         {allFiles.map((file) => {
                           const isExcluded = excludedFiles.has(file.path);

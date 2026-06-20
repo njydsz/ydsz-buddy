@@ -1,5 +1,5 @@
 /**
- * @file 鑱氱劍鑱婂ぉ涓婁笅鏂囨ā鍧? * @description 瑙ｆ瀽褰撳墠鑱氱劍鐨勮亰澶╀笂涓嬫枃锛屾敮鎸佸崟瑙嗗浘鍜屽垎灞忚鍥俱€? *              涓哄揩鎹烽敭銆佸彂鐜板姛鑳姐€佺嚎绋嬪垱寤虹瓑娴佺▼鎻愪緵褰撳墠娲昏穬绾跨▼鍜岄」鐩俊鎭€? */
+ * @file 閼辨氨鍔嶉懕濠傘亯娑撳﹣绗呴弬鍥侀崸? * @description 鐟欙絾鐎借ぐ鎾冲閼辨氨鍔嶉惃鍕喊婢垛晙绗傛稉瀣瀮閿涘本鏁幐浣稿礋鐟欏棗娴橀崪灞藉瀻鐏炲繗顫嬮崶淇扁偓? *              娑撳搫鎻╅幑鐑芥暛閵嗕礁褰傞悳鏉垮閼冲鈧胶鍤庣粙瀣灡瀵よ櫣鐡戝ù浣衡柤閹绘劒绶佃ぐ鎾冲濞叉槒绌痪璺ㄢ柤閸滃矂銆嶉惄顔讳繆閹垬鈧? */
 
 import { ThreadId, type ThreadId as ThreadIdType } from "~/contracts";
 import { useParams, useSearch } from "@tanstack/react-router";
@@ -17,11 +17,10 @@ import { createProjectSelector, createThreadSelector } from "./storeSelectors";
 import type { Project, Thread } from "./types";
 
 /**
- * 鑱氱劍鑱婂ぉ涓婁笅鏂囷紝鍖呭惈褰撳墠娲昏穬鐨勭嚎绋嬨€佽崏绋垮拰椤圭洰淇℃伅
- * @property routeThreadId - 璺敱鍙傛暟涓殑绾跨▼ ID
- * @property splitView - 褰撳墠鍒嗗睆瑙嗗浘鐘舵€侊紝鏃犲垎灞忔椂涓?null
- * @property focusedThreadId - 瀹為檯鑱氱劍鐨勭嚎绋?ID锛堣€冭檻鍒嗗睆鍚庣殑缁撴灉锛? * @property activeThread - 鑱氱劍绾跨▼鐨勫畬鏁存暟鎹? * @property activeDraftThread - 鑱氱劍绾跨▼鐨勮崏绋跨姸鎬? * @property activeProject - 娲昏穬椤圭洰鏁版嵁
- * @property activeProjectId - 娲昏穬椤圭洰 ID
+ * 閼辨氨鍔嶉懕濠傘亯娑撳﹣绗呴弬鍥风礉閸栧懎鎯堣ぐ鎾冲濞叉槒绌惃鍕殠缁嬪鈧浇宕忕粙鍨嫲妞ゅ湱娲版穱鈩冧紖
+ * @property routeThreadId - 鐠侯垳鏁遍崣鍌涙殶娑擃厾娈戠痪璺ㄢ柤 ID
+ * @property splitView - 瑜版挸澧犻崚鍡楃潌鐟欏棗娴橀悩鑸碘偓渚婄礉閺冪姴鍨庣仦蹇旀娑?null
+ * @property focusedThreadId - 鐎圭偤妾懕姘卞妽閻ㄥ嫮鍤庣粙?ID閿涘牐鈧啳妾婚崚鍡楃潌閸氬海娈戠紒鎾寸亯閿? * @property activeThread - 閼辨氨鍔嶇痪璺ㄢ柤閻ㄥ嫬鐣弫瀛樻殶閹? * @property activeDraftThread - 閼辨氨鍔嶇痪璺ㄢ柤閻ㄥ嫯宕忕粙璺ㄥЦ閹? * @property activeProject - 濞叉槒绌い鍦窗閺佺増宓? * @property activeProjectId - 濞叉槒绌い鍦窗 ID
  */
 export interface FocusedChatContext {
   routeThreadId: ThreadIdType | null;
@@ -34,9 +33,9 @@ export interface FocusedChatContext {
 }
 
 /**
- * 绾嚱鏁帮細瑙ｆ瀽鑱氱劍鐨勮亰澶╀笂涓嬫枃
- * 鍒嗗睆瑙嗗浘鏃跺彇鍒嗗睆鑱氱劍闈㈡澘鐨勭嚎绋?ID锛屽惁鍒欎娇鐢ㄨ矾鐢变腑鐨勭嚎绋?ID
- * @param input - 鍖呭惈璺敱绾跨▼ ID銆佸垎灞忚鍥俱€佺嚎绋嬪垪琛ㄣ€侀」鐩垪琛ㄥ拰鑽夌ǹ鐨勮緭鍏ュ璞? * @returns 鑱氱劍鑱婂ぉ涓婁笅鏂? */
+ * 缁绢垰鍤遍弫甯窗鐟欙絾鐎介懕姘卞妽閻ㄥ嫯浜版径鈺€绗傛稉瀣瀮
+ * 閸掑棗鐫嗙憴鍡楁禈閺冭泛褰囬崚鍡楃潌閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID閿涘苯鎯侀崚娆庡▏閻劏鐭鹃悽鍙樿厬閻ㄥ嫮鍤庣粙?ID
+ * @param input - 閸栧懎鎯堢捄顖滄暠缁捐法鈻?ID閵嗕礁鍨庣仦蹇氼潒閸ヤ勘鈧胶鍤庣粙瀣灙鐞涖劊鈧線銆嶉惄顔煎灙鐞涖劌鎷伴懡澶屒归惃鍕翻閸忋儱顕挒? * @returns 閼辨氨鍔嶉懕濠傘亯娑撳﹣绗呴弬? */
 export function resolveFocusedChatContext(input: {
   routeThreadId: ThreadIdType | null;
   splitView: SplitView | null;
@@ -75,8 +74,7 @@ export function resolveFocusedChatContext(input: {
 }
 
 /**
- * React Hook锛氳幏鍙栧綋鍓嶈仛鐒︾殑鑱婂ぉ涓婁笅鏂? * 鑷姩浠庤矾鐢卞弬鏁般€佸垎灞忚鍥剧姸鎬併€佸叏灞€ store 涓彁鍙栧苟璁＄畻鑱氱劍淇℃伅
- * @returns 鑱氱劍鑱婂ぉ涓婁笅鏂? */
+ * React Hook閿涙俺骞忛崣鏍х秼閸撳秷浠涢悞锔炬畱閼卞﹤銇夋稉濠佺瑓閺? * 閼奉亜濮╂禒搴ょ熅閻㈠崬寮弫鑸偓浣稿瀻鐏炲繗顫嬮崶鍓уЦ閹降鈧礁鍙忕仦鈧?store 娑擃厽褰侀崣鏍ц嫙鐠侊紕鐣婚懕姘卞妽娣団剝浼? * @returns 閼辨氨鍔嶉懕濠傘亯娑撳﹣绗呴弬? */
 export function useFocusedChatContext(): FocusedChatContext {
   const draftThreadsByThreadId = useComposerDraftStore((store) => store.draftThreadsByThreadId);
   const routeThreadId = useParams({

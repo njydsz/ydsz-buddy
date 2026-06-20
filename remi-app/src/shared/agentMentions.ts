@@ -1,29 +1,29 @@
 /**
- * @file 浠ｇ悊鎻愬強锛園mention锛夎В鏋愬伐鍏锋ā鍧? *
+ * @file 娴狅絿鎮婇幓鎰挤閿涘湌mention閿涘袙閺嬫劕浼愰崗閿嬆侀崸? *
  * @description
- * 鎻愪緵鐢ㄦ埛杈撳叆涓?`@alias(task)` 鏍煎紡鐨勫唴鑱斾唬鐞嗘寚浠よВ鏋愬姛鑳姐€? * 鏀寔浠庢枃鏈腑鎻愬彇浠ｇ悊鎻愬強锛屽苟灏嗚繖浜涙彁鍙婅浆鎹负缁撴瀯鍖栫殑浠ｇ悊璋冪敤鎸囦护锛? * 鐢ㄤ簬鏋勫缓 Claude 瀛愪唬鐞嗙殑鎻愮ず璇嶃€? *
- * 鏍稿績鍔熻兘锛? * - 瑙ｆ瀽鏂囨湰涓殑 `@alias(task)` 鏍煎紡鎻愬強锛坄parseAgentMentionInvocations`锛? * - 鏋勫缓 Claude 瀛愪唬鐞嗙殑缁撴瀯鍖栨彁绀鸿瘝锛坄buildClaudeSubagentPrompt`锛? * - 鏀寔鎷彿骞宠　鐨勪换鍔℃弿杩拌В鏋? * - 鏀寔澶氱浠ｇ悊鍒悕鏍煎紡
+ * 閹绘劒绶甸悽銊﹀煕鏉堟挸鍙嗘稉?`@alias(task)` 閺嶇厧绱￠惃鍕敶閼辨柧鍞悶鍡樺瘹娴犮倛袙閺嬫劕濮涢懗濮愨偓? * 閺€顖涘瘮娴犲孩鏋冮張顑胯厬閹绘劕褰囨禒锝囨倞閹绘劕寮烽敍灞借嫙鐏忓棜绻栨禍娑欏絹閸欏﹨娴嗛幑顫礋缂佹挻鐎崠鏍畱娴狅絿鎮婄拫鍐暏閹稿洣鎶ら敍? * 閻劋绨弸鍕紦 Claude 鐎涙劒鍞悶鍡欐畱閹绘劗銇氱拠宥冣偓? *
+ * 閺嶇绺鹃崝鐔诲厴閿? * - 鐟欙絾鐎介弬鍥ㄦ拱娑擃厾娈?`@alias(task)` 閺嶇厧绱￠幓鎰挤閿涘潉parseAgentMentionInvocations`閿? * - 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡欐畱缂佹挻鐎崠鏍ㄥ絹缁€楦跨槤閿涘潉buildClaudeSubagentPrompt`閿? * - 閺€顖涘瘮閹奉剙褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉╂媽袙閺? * - 閺€顖涘瘮婢舵氨顫掓禒锝囨倞閸掝偄鎮曢弽鐓庣础
  *
- * 浣跨敤鍦烘櫙锛? * - 鐢ㄦ埛鍦ㄨ亰澶╀腑浣跨敤 `@agent-name(鎵ц鏌愪釜浠诲姟)` 鏍煎紡璋冪敤瀛愪唬鐞? * - 灏嗙敤鎴风殑鑷劧璇█鎸囦护杞崲涓虹粨鏋勫寲鐨勪唬鐞嗚皟鐢? * - 涓?Claude 浠ｇ悊鐢熸垚鍖呭惈瀛愪唬鐞嗘寚浠ょ殑瀹屾暣鎻愮ず璇? *
+ * 娴ｈ法鏁ら崷鐑樻珯閿? * - 閻劍鍩涢崷銊ㄤ喊婢垛晙鑵戞担璺ㄦ暏 `@agent-name(閹笛嗩攽閺屾劒閲滄禒璇插)` 閺嶇厧绱＄拫鍐暏鐎涙劒鍞悶? * - 鐏忓棛鏁ら幋椋庢畱閼奉亞鍔х拠顓♀枅閹稿洣鎶ゆ潪顒佸床娑撹櫣绮ㄩ弸鍕閻ㄥ嫪鍞悶鍡氱殶閻? * - 娑?Claude 娴狅絿鎮婇悽鐔稿灇閸栧懎鎯堢€涙劒鍞悶鍡樺瘹娴犮倗娈戠€瑰本鏆ｉ幓鎰仛鐠? *
  * @module agentMentions
- * @layer 鍏变韩宸ュ叿灞? *
+ * @layer 閸忓彉闊╁銉ュ徔鐏? *
  * @example
  * ```ts
  * import { parseAgentMentionInvocations, buildClaudeSubagentPrompt } from './agentMentions';
  *
- * const text = '璇峰府鎴?@reviewer(瀹℃煡杩欐浠ｇ爜) 鍜?@tester(缂栧啓鍗曞厓娴嬭瘯)';
+ * const text = '鐠囧嘲搴滈幋?@reviewer(鐎光剝鐓℃潻娆愵唽娴狅絿鐖? 閸?@tester(缂傛牕鍟撻崡鏇炲帗濞村鐦?';
  *
- * // 瑙ｆ瀽鎵€鏈変唬鐞嗘彁鍙? * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
+ * // 鐟欙絾鐎介幍鈧張澶夊敩閻炲棙褰侀崣? * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
  * console.log(invocations);
  * // [
- * //   { alias: 'reviewer', task: '瀹℃煡杩欐浠ｇ爜', ... },
- * //   { alias: 'tester', task: '缂栧啓鍗曞厓娴嬭瘯', ... }
+ * //   { alias: 'reviewer', task: '鐎光剝鐓℃潻娆愵唽娴狅絿鐖?, ... },
+ * //   { alias: 'tester', task: '缂傛牕鍟撻崡鏇炲帗濞村鐦?, ... }
  * // ]
  *
- * // 鏋勫缓 Claude 瀛愪唬鐞嗘彁绀鸿瘝
+ * // 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡樺絹缁€楦跨槤
  * const result = buildClaudeSubagentPrompt(text);
  * console.log(result.prompt);
- * // 鐢熸垚鍖呭惈瀛愪唬鐞嗘寚浠ょ殑瀹屾暣鎻愮ず璇? * ```
+ * // 閻㈢喐鍨氶崠鍛儓鐎涙劒鍞悶鍡樺瘹娴犮倗娈戠€瑰本鏆ｉ幓鎰仛鐠? * ```
  */
 import {
   resolveAgentAlias,
@@ -33,22 +33,19 @@ import {
 } from "~/contracts";
 
 /**
- * 瑙ｆ瀽鍚庣殑浠ｇ悊鎻愬強璋冪敤淇℃伅鎺ュ彛
- *
- * 鍖呭惈浠庢枃鏈腑鎻愬彇鐨勫崟涓?`@alias(task)` 璋冪敤鐨勬墍鏈変俊鎭紝
- * 鐢ㄤ簬鍚庣画鐨勪唬鐞嗚皟搴﹀拰浠诲姟鎵ц銆? *
+ * 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁ゆ穱鈩冧紖閹恒儱褰? *
+ * 閸栧懎鎯堟禒搴㈡瀮閺堫兛鑵戦幓鎰絿閻ㄥ嫬宕熸稉?`@alias(task)` 鐠嬪啰鏁ら惃鍕閺堝淇婇幁顖ょ礉
+ * 閻劋绨崥搴ｇ敾閻ㄥ嫪鍞悶鍡氱殶鎼达箑鎷版禒璇插閹笛嗩攽閵? *
  * @interface ParsedAgentMentionInvocation
  *
- * @property {string} alias - 浠ｇ悊鍒悕锛堝 "reviewer"銆?tester"锛? * @property {string} task - 浠诲姟鎻忚堪锛堟嫭鍙峰唴鐨勫唴瀹癸級
- * @property {string} raw - 鍘熷鎻愬強鏂囨湰锛堝寘鎷?`@alias(task)` 瀹屾暣鍐呭锛? * @property {number} start - 鎻愬強鍦ㄥ師鏂囨湰涓殑璧峰浣嶇疆绱㈠紩
- * @property {number} end - 鎻愬強鍦ㄥ師鏂囨湰涓殑缁撴潫浣嶇疆绱㈠紩锛堜笉鍖呭惈锛? * @property {ResolvedAgentAlias} definition - 瑙ｆ瀽鍚庣殑浠ｇ悊瀹氫箟淇℃伅
+ * @property {string} alias - 娴狅絿鎮婇崚顐㈡倳閿涘牆顩?"reviewer"閵?tester"閿? * @property {string} task - 娴犺濮熼幓蹇氬牚閿涘牊瀚崣宄板敶閻ㄥ嫬鍞寸€圭櫢绱? * @property {string} raw - 閸樼喎顫愰幓鎰挤閺傚洦婀伴敍鍫濆瘶閹?`@alias(task)` 鐎瑰本鏆ｉ崘鍛啇閿? * @property {number} start - 閹绘劕寮烽崷銊ュ斧閺傚洦婀版稉顓犳畱鐠у嘲顫愭担宥囩枂缁便垹绱? * @property {number} end - 閹绘劕寮烽崷銊ュ斧閺傚洦婀版稉顓犳畱缂佹挻娼担宥囩枂缁便垹绱╅敍鍫滅瑝閸栧懎鎯堥敍? * @property {ResolvedAgentAlias} definition - 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婄€规矮绠熸穱鈩冧紖
  *
  * @example
  * ```ts
  * const invocation: ParsedAgentMentionInvocation = {
  *   alias: 'reviewer',
- *   task: '瀹℃煡杩欐浠ｇ爜',
- *   raw: '@reviewer(瀹℃煡杩欐浠ｇ爜)',
+ *   task: '鐎光剝鐓℃潻娆愵唽娴狅絿鐖?,
+ *   raw: '@reviewer(鐎光剝鐓℃潻娆愵唽娴狅絿鐖?',
  *   start: 10,
  *   end: 28,
  *   definition: { alias: 'reviewer', kind: 'claude-subagent', ... }
@@ -65,49 +62,45 @@ export interface ParsedAgentMentionInvocation {
 }
 
 /**
- * 鍒ゆ柇瀛楃鏄惁涓哄悎娉曠殑浠ｇ悊鍒悕瀛楃
+ * 閸掋倖鏌囩€涙顑侀弰顖氭儊娑撳搫鎮庡▔鏇犳畱娴狅絿鎮婇崚顐㈡倳鐎涙顑? *
+ * 閸氬牊纭堕惃鍕焼閸氬秴鐡х粭锕€瀵橀幏顒婄窗鐎涙鐦濋敍鍧?z, A-Z閿涘鈧焦鏆熺€涙绱?-9閿涘鈧胶鍋ｉ崣鍑ょ礄.閿涘鈧椒绗呴崚鎺斿殠閿涘潈閿涘鈧浇绻涚€涙顑侀敍?閿涘鈧? *
+ * @param char - 瀵板懏顥呴弻銉ф畱鐎涙顑? * @returns 婵″倹鐏夐弰顖氭値濞夋洜娈戦崚顐㈡倳鐎涙顑佹潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
  *
- * 鍚堟硶鐨勫埆鍚嶅瓧绗﹀寘鎷細瀛楁瘝锛坅-z, A-Z锛夈€佹暟瀛楋紙0-9锛夈€佺偣鍙凤紙.锛夈€佷笅鍒掔嚎锛坃锛夈€佽繛瀛楃锛?锛夈€? *
- * @param char - 寰呮鏌ョ殑瀛楃
- * @returns 濡傛灉鏄悎娉曠殑鍒悕瀛楃杩斿洖 true锛屽惁鍒欒繑鍥?false
- *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function isAliasChar(char: string | undefined): boolean {
   return typeof char === "string" && /[a-zA-Z0-9._-]/.test(char);
 }
 
 /**
- * 鍒ゆ柇瀛楃鏄惁涓烘彁鍙婅竟鐣岋紙绌虹櫧瀛楃鎴栧瓧绗︿覆缁撴潫锛? *
- * 鎻愬強杈圭晫瀹氫箟涓猴細瀛楃涓?undefined锛堝瓧绗︿覆缁撴潫锛夋垨绌虹櫧瀛楃锛堢┖鏍笺€佸埗琛ㄧ銆佹崲琛岀瓑锛夈€? * 鐢ㄤ簬纭繚 `@` 绗﹀彿鍓嶉潰鏄崟璇嶈竟鐣岋紝閬垮厤鍖归厤閭鍦板潃绛夊満鏅€? *
- * @param char - 寰呮鏌ョ殑瀛楃
- * @returns 濡傛灉鏄竟鐣屽瓧绗﹁繑鍥?true锛屽惁鍒欒繑鍥?false
+ * 閸掋倖鏌囩€涙顑侀弰顖氭儊娑撶儤褰侀崣濠呯珶閻ｅ矉绱欑粚铏规鐎涙顑侀幋鏍х摟缁楋缚瑕嗙紒鎾存将閿? *
+ * 閹绘劕寮锋潏鍦櫕鐎规矮绠熸稉鐚寸窗鐎涙顑佹稉?undefined閿涘牆鐡х粭锔胯缂佹挻娼敍澶嬪灗缁岃櫣娅х€涙顑侀敍鍫⑩敄閺嶇鈧礁鍩楃悰銊ь儊閵嗕焦宕茬悰宀€鐡戦敍澶堚偓? * 閻劋绨涵顔荤箽 `@` 缁楋箑褰块崜宥夋桨閺勵垰宕熺拠宥堢珶閻ｅ矉绱濋柆鍨帳閸栧綊鍘ら柇顔绢唸閸︽澘娼冪粵澶婃簚閺咁垬鈧? *
+ * @param char - 瀵板懏顥呴弻銉ф畱鐎涙顑? * @returns 婵″倹鐏夐弰顖濈珶閻ｅ苯鐡х粭锕佺箲閸?true閿涘苯鎯侀崚娆掔箲閸?false
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
 function isMentionBoundary(char: string | undefined): boolean {
   return char === undefined || /\s/.test(char);
 }
 
 /**
- * 璇诲彇鎷彿骞宠　鐨勪换鍔℃弿杩? *
- * 浠庢寚瀹氱殑宸︽嫭鍙蜂綅缃紑濮嬶紝璇诲彇鎷彿鍐呯殑浠诲姟鎻忚堪锛屾敮鎸佸祵濂楁嫭鍙枫€? * 浣跨敤娣卞害璁℃暟鍣ㄨ拷韪嫭鍙峰祵濂楀眰绾э紝纭繚姝ｇ‘鍖归厤闂悎鎷彿銆? *
- * 绠楁硶璇存槑锛? * 1. 浠庡乏鎷彿鐨勪笅涓€涓瓧绗﹀紑濮嬮亶鍘? * 2. 閬囧埌 `(` 鏃舵繁搴﹀姞 1
- * 3. 閬囧埌 `)` 鏃舵繁搴﹀噺 1
- * 4. 褰撴繁搴﹀綊闆舵椂锛屾壘鍒板尮閰嶇殑闂悎鎷彿
- * 5. 濡傛灉閬嶅巻缁撴潫娣卞害浠嶆湭褰掗浂锛岃繑鍥?null锛堟嫭鍙蜂笉鍖归厤锛? *
- * @param text - 婧愭枃鏈? * @param openParenIndex - 宸︽嫭鍙峰湪鏂囨湰涓殑绱㈠紩浣嶇疆
- * @returns 鍖呭惈浠诲姟鎻忚堪鍜岀粨鏉熶綅缃殑瀵硅薄锛屽鏋滄嫭鍙蜂笉鍖归厤杩斿洖 null
+ * 鐠囪褰囬幏顒€褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉? *
+ * 娴犲孩瀵氱€规氨娈戝锔藉閸欒渹缍呯純顔肩磻婵绱濈拠璇插絿閹奉剙褰块崘鍛畱娴犺濮熼幓蹇氬牚閿涘本鏁幐浣哥サ婵傛瀚崣鏋偓? * 娴ｈ法鏁ゅǎ鍗炲鐠佲剝鏆熼崳銊ㄦ嫹闊亝瀚崣宄扮サ婵傛鐪扮痪褝绱濈涵顔荤箽濮濓絿鈥橀崠褰掑帳闂傤厼鎮庨幏顒€褰块妴? *
+ * 缁犳纭剁拠瀛樻閿? * 1. 娴犲骸涔忛幏顒€褰块惃鍕瑓娑撯偓娑擃亜鐡х粭锕€绱戞慨瀣憾閸? * 2. 闁洤鍩?`(` 閺冭埖绻佹惔锕€濮?1
+ * 3. 闁洤鍩?`)` 閺冭埖绻佹惔锕€鍣?1
+ * 4. 瑜版挻绻佹惔锕€缍婇梿鑸垫閿涘本澹橀崚鏉垮爱闁板秶娈戦梻顓炴値閹奉剙褰? * 5. 婵″倹鐏夐柆宥呭坊缂佹挻娼ǎ鍗炲娴犲秵婀ぐ鎺楁祩閿涘矁绻戦崶?null閿涘牊瀚崣铚傜瑝閸栧綊鍘ら敍? *
+ * @param text - 濠ф劖鏋冮張? * @param openParenIndex - 瀹革附瀚崣宄版躬閺傚洦婀版稉顓犳畱缁便垹绱╂担宥囩枂
+ * @returns 閸栧懎鎯堟禒璇插閹诲繗鍫崪宀€绮ㄩ弶鐔剁秴缂冾喚娈戠€电钖勯敍灞筋洤閺嬫粍瀚崣铚傜瑝閸栧綊鍘ゆ潻鏂挎礀 null
  *
- * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? *
+ * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? *
  * @example
  * ```ts
- * readBalancedTask('@reviewer(瀹℃煡浠ｇ爜)', 10);
- * // 杩斿洖: { task: '瀹℃煡浠ｇ爜', end: 19 }
+ * readBalancedTask('@reviewer(鐎光剝鐓℃禒锝囩垳)', 10);
+ * // 鏉╂柨娲? { task: '鐎光剝鐓℃禒锝囩垳', end: 19 }
  *
- * readBalancedTask('@agent(浠诲姟(宓屽))', 8);
- * // 杩斿洖: { task: '浠诲姟(宓屽)', end: 19 }
+ * readBalancedTask('@agent(娴犺濮?瀹撳苯顨?)', 8);
+ * // 鏉╂柨娲? { task: '娴犺濮?瀹撳苯顨?', end: 19 }
  *
- * readBalancedTask('@agent(鏈棴鍚?, 7);
- * // 杩斿洖: null
+ * readBalancedTask('@agent(閺堫亪妫撮崥?, 7);
+ * // 鏉╂柨娲? null
  * ```
  */
 function readBalancedTask(
@@ -137,40 +130,31 @@ function readBalancedTask(
 }
 
 /**
- * 瑙ｆ瀽鏂囨湰涓墍鏈夌殑浠ｇ悊鎻愬強璋冪敤
+ * 鐟欙絾鐎介弬鍥ㄦ拱娑擃厽澧嶉張澶屾畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁? *
+ * 閹殿偅寮挎潏鎾冲弳閺傚洦婀伴敍灞惧絹閸欐牗澧嶉張澶岊儊閸?`@alias(task)` 閺嶇厧绱￠惃鍕敩閻炲棙褰侀崣濠忕礉
+ * 楠炴儼袙閺嬫劖鐦℃稉顏呭絹閸欏﹦娈戞禒锝囨倞鐎规矮绠熸穱鈩冧紖閵嗗倽袙閺嬫劘绻冪粙瀣紥瀵邦亙浜掓稉瀣潐閸掓瑱绱? *
+ * 1. `@` 缁楋箑褰胯箛鍛淬€忛崷銊ュ礋鐠囧秷绔熼悾宀嬬礄閸撳秹娼伴弰顖溾敄閻ц姤鍨ㄧ€涙顑佹稉鎻掔磻婢惰揪绱? * 2. 閸掝偄鎮曢崣顏囧厴閸栧懎鎯堢€涙鐦濋妴浣规殶鐎涙ぜ鈧胶鍋ｉ崣鏋偓浣风瑓閸掓帞鍤庨妴浣界箾鐎涙顑? * 3. 閸掝偄鎮曢崥搴＄箑妞よ崵鎻ｇ捄鐔蜂箯閹奉剙褰?`(`
+ * 4. 閹奉剙褰块崘鍛畱娴犺濮熼幓蹇氬牚閺€顖涘瘮瀹撳苯顨滈幏顒€褰? * 5. 娴狅絿鎮婇崚顐㈡倳韫囧懘銆忛懗浠嬧偓姘崇箖 `resolveAgentAlias` 鐟欙絾鐎芥稉鐑樻箒閺佸牏娈戞禒锝囨倞鐎规矮绠? *
+ * 缁犳纭舵径宥嗘絽鎼达讣绱? * - 閺冨爼妫挎径宥嗘絽鎼? O(n)閿涘苯鍙炬稉?n 娑撶儤鏋冮張顒勬毐鎼? * - 缁屾椽妫挎径宥嗘絽鎼? O(k)閿涘苯鍙炬稉?k 娑撻缚袙閺嬫劕鍩岄惃鍕絹閸欏﹥鏆熼柌? *
+ * @param text - 瀵板懓袙閺嬫劗娈戞潏鎾冲弳閺傚洦婀? * @param provider - 娴狅絿鎮婇幓鎰返閸熷棛琚崹瀣剁礄婵?"claudeAgent"閿? * @returns 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁ら弫鎵矋閿涘本瀵滈崙铏瑰箛妞ゅ搫绨幒鎺戝灙
  *
- * 鎵弿杈撳叆鏂囨湰锛屾彁鍙栨墍鏈夌鍚?`@alias(task)` 鏍煎紡鐨勪唬鐞嗘彁鍙婏紝
- * 骞惰В鏋愭瘡涓彁鍙婄殑浠ｇ悊瀹氫箟淇℃伅銆傝В鏋愯繃绋嬮伒寰互涓嬭鍒欙細
- *
- * 1. `@` 绗﹀彿蹇呴』鍦ㄥ崟璇嶈竟鐣岋紙鍓嶉潰鏄┖鐧芥垨瀛楃涓插紑澶达級
- * 2. 鍒悕鍙兘鍖呭惈瀛楁瘝銆佹暟瀛椼€佺偣鍙枫€佷笅鍒掔嚎銆佽繛瀛楃
- * 3. 鍒悕鍚庡繀椤荤揣璺熷乏鎷彿 `(`
- * 4. 鎷彿鍐呯殑浠诲姟鎻忚堪鏀寔宓屽鎷彿
- * 5. 浠ｇ悊鍒悕蹇呴』鑳介€氳繃 `resolveAgentAlias` 瑙ｆ瀽涓烘湁鏁堢殑浠ｇ悊瀹氫箟
- *
- * 绠楁硶澶嶆潅搴︼細
- * - 鏃堕棿澶嶆潅搴? O(n)锛屽叾涓?n 涓烘枃鏈暱搴? * - 绌洪棿澶嶆潅搴? O(k)锛屽叾涓?k 涓鸿В鏋愬埌鐨勬彁鍙婃暟閲? *
- * @param text - 寰呰В鏋愮殑杈撳叆鏂囨湰
- * @param provider - 浠ｇ悊鎻愪緵鍟嗙被鍨嬶紙濡?"claudeAgent"锛? * @returns 瑙ｆ瀽鍚庣殑浠ｇ悊鎻愬強璋冪敤鏁扮粍锛屾寜鍑虹幇椤哄簭鎺掑垪
- *
- * @throws 姝ゅ嚱鏁颁笉浼氭姏鍑哄紓甯? *
+ * @throws 濮濄倕鍤遍弫棰佺瑝娴兼碍濮忛崙鍝勭磽鐢? *
  * @example
  * ```ts
- * const text = '璇?@reviewer(瀹℃煡浠ｇ爜) 鍜?@tester(鍐欐祴璇?';
+ * const text = '鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?';
  * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
  *
  * console.log(invocations.length); // 2
  * console.log(invocations[0].alias); // 'reviewer'
- * console.log(invocations[0].task);  // '瀹℃煡浠ｇ爜'
+ * console.log(invocations[0].task);  // '鐎光剝鐓℃禒锝囩垳'
  * console.log(invocations[1].alias); // 'tester'
- * console.log(invocations[1].task);  // '鍐欐祴璇?
+ * console.log(invocations[1].task);  // '閸愭瑦绁寸拠?
  * ```
  *
- * @example 涓嶅尮閰嶇殑鎻愬強浼氳蹇界暐
- * ```ts
- * const text = '閭 user@example.com 鍜?@invalid(鏈棴鍚?;
+ * @example 娑撳秴灏柊宥囨畱閹绘劕寮锋导姘愁潶韫囩晫鏆? * ```ts
+ * const text = '闁喚顔?user@example.com 閸?@invalid(閺堫亪妫撮崥?;
  * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
- * console.log(invocations.length); // 0锛堜袱涓兘涓嶅尮閰嶏級
+ * console.log(invocations.length); // 0閿涘牅琚辨稉顏堝厴娑撳秴灏柊宥忕礆
  * ```
  */
 export function parseAgentMentionInvocations(
@@ -183,29 +167,27 @@ export function parseAgentMentionInvocations(
     if (text[index] !== "@") {
       continue;
     }
-    // 妫€鏌?@ 绗﹀彿鍓嶆槸鍚︿负鍗曡瘝杈圭晫
-    if (!isMentionBoundary(text[index - 1])) {
+    // 濡偓閺?@ 缁楋箑褰块崜宥嗘Ц閸氾缚璐熼崡鏇＄槤鏉堝湱鏅?    if (!isMentionBoundary(text[index - 1])) {
       continue;
     }
 
-    // 璇诲彇鍒悕
+    // 鐠囪褰囬崚顐㈡倳
     let aliasEnd = index + 1;
     while (isAliasChar(text[aliasEnd])) {
       aliasEnd += 1;
     }
 
     const alias = text.slice(index + 1, aliasEnd);
-    // 鍒悕涓嶈兘涓虹┖锛屼笖鍚庨潰蹇呴』绱ц窡宸︽嫭鍙?    if (alias.length === 0 || text[aliasEnd] !== "(") {
+    // 閸掝偄鎮曟稉宥堝厴娑撹櫣鈹栭敍灞肩瑬閸氬酣娼拌箛鍛淬€忕槐褑绐″锔藉閸?    if (alias.length === 0 || text[aliasEnd] !== "(") {
       continue;
     }
 
-    // 瑙ｆ瀽浠ｇ悊瀹氫箟
-    const resolved = resolveAgentAlias(alias, provider);
+    // 鐟欙絾鐎芥禒锝囨倞鐎规矮绠?    const resolved = resolveAgentAlias(alias, provider);
     if (!resolved) {
       continue;
     }
 
-    // 璇诲彇鎷彿骞宠　鐨勪换鍔℃弿杩?    const taskMatch = readBalancedTask(text, aliasEnd);
+    // 鐠囪褰囬幏顒€褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉?    const taskMatch = readBalancedTask(text, aliasEnd);
     if (!taskMatch) {
       continue;
     }
@@ -222,55 +204,49 @@ export function parseAgentMentionInvocations(
       },
     });
 
-    // 璺宠繃宸茶В鏋愮殑閮ㄥ垎
-    index = taskMatch.end - 1;
+    // 鐠哄疇绻冨鑼缎掗弸鎰畱闁劌鍨?    index = taskMatch.end - 1;
   }
 
   return invocations;
 }
 
 /**
- * 鏋勫缓 Claude 瀛愪唬鐞嗙殑缁撴瀯鍖栨彁绀鸿瘝
+ * 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡欐畱缂佹挻鐎崠鏍ㄥ絹缁€楦跨槤
  *
- * 浠庤緭鍏ユ枃鏈腑瑙ｆ瀽鎵€鏈?Claude 瀛愪唬鐞嗘彁鍙婏紙`kind === "claude-subagent"`锛夛紝
- * 骞跺皢瀹冧滑杞崲涓虹粨鏋勫寲鐨勬寚浠ゆ牸寮忥紝宓屽叆鍒板畬鏁寸殑鎻愮ず璇嶄腑銆? *
- * 鐢熸垚鐨勬彁绀鸿瘝鍖呭惈浠ヤ笅閮ㄥ垎锛? * 1. 鎸囦护璇存槑锛氬憡鐭?Claude 鐢ㄦ埛浣跨敤浜嗗唴鑱斿瓙浠ｇ悊鎸囦护
- * 2. 鎵ц瑕佹眰锛氭槑纭姹備娇鐢?Agent 宸ュ叿璋冪敤鎸囧畾鐨勫瓙浠ｇ悊
- * 3. 鍚庣画澶勭悊锛氳姹傚畬鎴愬瓙浠ｇ悊浠诲姟鍚庣户缁鐞嗘暣浣撹姹? * 4. 鍏蜂綋鎸囦护鍒楄〃锛氭瘡涓瓙浠ｇ悊璋冪敤鐨勭紪鍙峰垪琛? * 5. 鍘熷鎻愮ず璇嶏細鐢ㄦ埛鐨勫師濮嬭緭鍏ユ枃鏈? *
- * 濡傛灉娌℃湁瑙ｆ瀽鍒板瓙浠ｇ悊鎻愬強锛岀洿鎺ヨ繑鍥炲師濮嬫枃鏈€? *
- * @param text - 鐢ㄦ埛杈撳叆鐨勫師濮嬫枃鏈? * @returns 鍖呭惈缁撴瀯鍖栨彁绀鸿瘝鍜岃В鏋愬埌鐨勮皟鐢ㄤ俊鎭殑瀵硅薄
- *   - `prompt`: 鏋勫缓瀹屾垚鐨勫畬鏁存彁绀鸿瘝瀛楃涓? *   - `invocations`: 瑙ｆ瀽鍒扮殑 Claude 瀛愪唬鐞嗚皟鐢ㄦ暟缁? *
- * @throws 姝ゅ嚱鏁颁笉浼氭姏鍑哄紓甯? *
+ * 娴犲氦绶崗銉︽瀮閺堫兛鑵戠憴锝嗙€介幍鈧張?Claude 鐎涙劒鍞悶鍡樺絹閸欏绱檂kind === "claude-subagent"`閿涘绱? * 楠炶泛鐨㈢€瑰啩婊戞潪顒佸床娑撹櫣绮ㄩ弸鍕閻ㄥ嫭瀵氭禒銈嗙壐瀵骏绱濆畵灞藉弳閸掓澘鐣弫瀵告畱閹绘劗銇氱拠宥勮厬閵? *
+ * 閻㈢喐鍨氶惃鍕絹缁€楦跨槤閸栧懎鎯堟禒銉ょ瑓闁劌鍨庨敍? * 1. 閹稿洣鎶ょ拠瀛樻閿涙艾鎲￠惌?Claude 閻劍鍩涙担璺ㄦ暏娴滃棗鍞撮懕鏂跨摍娴狅絿鎮婇幐鍥︽姢
+ * 2. 閹笛嗩攽鐟曚焦鐪伴敍姘绾喛顩﹀Ч鍌欏▏閻?Agent 瀹搞儱鍙跨拫鍐暏閹稿洤鐣鹃惃鍕摍娴狅絿鎮? * 3. 閸氬海鐢绘径鍕倞閿涙俺顩﹀Ч鍌氱暚閹存劕鐡欐禒锝囨倞娴犺濮熼崥搴ｆ埛缂侇厼顦╅悶鍡樻殻娴ｆ捁顕Ч? * 4. 閸忚渹缍嬮幐鍥︽姢閸掓銆冮敍姘槨娑擃亜鐡欐禒锝囨倞鐠嬪啰鏁ら惃鍕椽閸欏嘲鍨悰? * 5. 閸樼喎顫愰幓鎰仛鐠囧稄绱伴悽銊﹀煕閻ㄥ嫬甯慨瀣翻閸忋儲鏋冮張? *
+ * 婵″倹鐏夊▽鈩冩箒鐟欙絾鐎介崚鏉跨摍娴狅絿鎮婇幓鎰挤閿涘瞼娲块幒銉ㄧ箲閸ョ偛甯慨瀣瀮閺堫兙鈧? *
+ * @param text - 閻劍鍩涙潏鎾冲弳閻ㄥ嫬甯慨瀣瀮閺? * @returns 閸栧懎鎯堢紒鎾寸€崠鏍ㄥ絹缁€楦跨槤閸滃矁袙閺嬫劕鍩岄惃鍕殶閻劋淇婇幁顖滄畱鐎电钖? *   - `prompt`: 閺嬪嫬缂撶€瑰本鍨氶惃鍕暚閺佸瓨褰佺粈楦跨槤鐎涙顑佹稉? *   - `invocations`: 鐟欙絾鐎介崚鎵畱 Claude 鐎涙劒鍞悶鍡氱殶閻劍鏆熺紒? *
+ * @throws 濮濄倕鍤遍弫棰佺瑝娴兼碍濮忛崙鍝勭磽鐢? *
  * @example
  * ```ts
- * const text = '璇?@reviewer(瀹℃煡浠ｇ爜) 鍜?@tester(鍐欐祴璇?';
+ * const text = '鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?';
  * const result = buildClaudeSubagentPrompt(text);
  *
  * console.log(result.prompt);
- * // 杈撳嚭锛? * // The user included inline subagent directives in the form @alias(task).
+ * // 鏉堟挸鍤敍? * // The user included inline subagent directives in the form @alias(task).
  * // Execute each directive explicitly via the Agent tool using the named subagent below.
  * // After the delegated work completes, continue with the overall request and synthesize the results.
  * // Do not echo the literal @alias(task) syntax back to the user unless it is directly relevant.
  * //
  * // Inline directives:
  * // 1. Use the "Code Reviewer" agent for this task:
- * // 瀹℃煡浠ｇ爜
+ * // 鐎光剝鐓℃禒锝囩垳
  * //
  * // 2. Use the "Test Engineer" agent for this task:
- * // 鍐欐祴璇? * //
+ * // 閸愭瑦绁寸拠? * //
  * // Original user prompt:
- * // 璇?@reviewer(瀹℃煡浠ｇ爜) 鍜?@tester(鍐欐祴璇?
+ * // 鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?
  *
  * console.log(result.invocations.length); // 2
  * ```
  *
- * @example 娌℃湁瀛愪唬鐞嗘彁鍙婃椂
- * ```ts
- * const text = '鏅€氭枃鏈紝娌℃湁浠ｇ悊鎻愬強';
+ * @example 濞屸剝婀佺€涙劒鍞悶鍡樺絹閸欏﹥妞? * ```ts
+ * const text = '閺咁噣鈧碍鏋冮張顒婄礉濞屸剝婀佹禒锝囨倞閹绘劕寮?;
  * const result = buildClaudeSubagentPrompt(text);
  *
- * console.log(result.prompt); // '鏅€氭枃鏈紝娌℃湁浠ｇ悊鎻愬強'锛堝師鏍疯繑鍥烇級
- * console.log(result.invocations.length); // 0
+ * console.log(result.prompt); // '閺咁噣鈧碍鏋冮張顒婄礉濞屸剝婀佹禒锝囨倞閹绘劕寮?閿涘牆甯弽鐤箲閸ョ儑绱? * console.log(result.invocations.length); // 0
  * ```
  */
 export function buildClaudeSubagentPrompt(text: string): {

@@ -1,7 +1,5 @@
 /**
- * @file 鍏变韩瑙嗗浘妯″瀷绫诲瀷瀹氫箟
- * @description 瀹氫箟 Web 搴旂敤灞傜殑杩愯鏃?UI 绫诲瀷锛屽寘鎷嚎绋嬨€侀」鐩€佺粓绔竷灞€銆佷晶杈规爮鎽樿绛夛紝
- * 琚?store銆佽矾鐢卞拰缁勪欢骞挎硾娑堣垂銆? */
+ * @file 閸忓彉闊╃憴鍡楁禈濡€崇€风猾璇茬€风€规矮绠? * @description 鐎规矮绠?Web 鎼存梻鏁ょ仦鍌滄畱鏉╂劘顢戦弮?UI 缁鐎烽敍灞藉瘶閹奉剛鍤庣粙瀣ㄢ偓渚€銆嶉惄顔衡偓浣虹矒缁旑垰绔风仦鈧妴浣锋櫠鏉堣鐖幗妯款洣缁涘绱? * 鐞?store閵嗕浇鐭鹃悽鍗炴嫲缂佸嫪娆㈤獮鎸庣【濞戝牐鍨傞妴? */
 
 import type {
   ModelSelection,
@@ -26,224 +24,224 @@ import type {
   ThreadEnvironmentMode,
 } from "~/contracts";
 
-/** 浼氳瘽闃舵锛歞isconnected 鈫?connecting 鈫?ready 鈫?running */
+/** 娴兼俺鐦介梼鑸殿唽閿涙瓰isconnected 閳?connecting 閳?ready 閳?running */
 export type SessionPhase = "disconnected" | "connecting" | "ready" | "running";
-/** 榛樿杩愯鏃舵ā寮忥細瀹屽叏璁块棶鏉冮檺 */
+/** 姒涙顓绘潻鎰攽閺冭埖膩瀵骏绱扮€瑰苯鍙忕拋鍧楁６閺夊啴妾?*/
 export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";
 
-/** 榛樿浜や簰妯″紡 */
+/** 姒涙顓绘禍銈勭鞍濡€崇础 */
 export const DEFAULT_INTERACTION_MODE: ProviderInteractionMode = "default";
-/** 榛樿绾跨▼缁堢闈㈡澘楂樺害锛堝儚绱狅級 */
+/** 姒涙顓荤痪璺ㄢ柤缂佸牏顏棃銏℃緲妤傛ê瀹抽敍鍫濆剼缁辩媴绱?*/
 export const DEFAULT_THREAD_TERMINAL_HEIGHT = 280;
-/** 榛樿缁堢闈㈡澘 ID */
+/** 姒涙顓荤紒鍫㈩伂闂堛垺婢?ID */
 export const DEFAULT_THREAD_TERMINAL_ID = "default";
-/** 姣忎釜缁堢鍒嗙粍鍏佽鐨勬渶澶х粓绔暟閲?*/
+/** 濮ｅ繋閲滅紒鍫㈩伂閸掑棛绮嶉崗浣筋啅閻ㄥ嫭娓舵径褏绮撶粩顖涙殶闁?*/
 export const MAX_TERMINALS_PER_GROUP = 6;
-/** 缁堢闈㈡澘鐨勫睍绀烘ā寮忥細drawer锛堟娊灞夊紡锛夋垨 workspace锛堝伐浣滃尯寮忥級 */
+/** 缂佸牏顏棃銏℃緲閻ㄥ嫬鐫嶇粈鐑樐佸蹇ョ窗drawer閿涘牊濞婄仦澶婄础閿涘鍨?workspace閿涘牆浼愭担婊冨隘瀵骏绱?*/
 export type ThreadTerminalPresentationMode = "drawer" | "workspace";
-/** 缁堢宸ヤ綔鍖烘爣绛鹃〉绫诲瀷锛歵erminal锛堢粓绔級鎴?chat锛堣亰澶╋級 */
+/** 缂佸牏顏銉ょ稊閸栫儤鐖ｇ粵楣冦€夌猾璇茬€烽敍姝礶rminal閿涘牏绮撶粩顖ょ礆閹?chat閿涘牐浜版径鈺嬬礆 */
 export type ThreadTerminalWorkspaceTab = "terminal" | "chat";
-/** 缁堢宸ヤ綔鍖哄竷灞€妯″紡锛歜oth锛堝弻闈㈡澘锛夋垨 terminal-only锛堜粎缁堢锛?*/
+/** 缂佸牏顏銉ょ稊閸栧搫绔风仦鈧Ο鈥崇础閿涙瓬oth閿涘牆寮婚棃銏℃緲閿涘鍨?terminal-only閿涘牅绮庣紒鍫㈩伂閿?*/
 export type ThreadTerminalWorkspaceLayout = "both" | "terminal-only";
-/** 绾跨▼涓荤晫闈細chat锛堣亰澶╋級鎴?terminal锛堢粓绔級 */
+/** 缁捐法鈻兼稉鑽ゆ櫕闂堫澁绱癱hat閿涘牐浜版径鈺嬬礆閹?terminal閿涘牏绮撶粩顖ょ礆 */
 export type ThreadPrimarySurface = "chat" | "terminal";
-/** 椤圭洰鑴氭湰閰嶇疆锛岀洿鎺ュ鐢?contracts 涓殑瀹氫箟 */
+/** 妞ゅ湱娲伴懘姘拱闁板秶鐤嗛敍宀€娲块幒銉ヮ槻閻?contracts 娑擃厾娈戠€规矮绠?*/
 export type ProjectScript = ContractProjectScript;
 
-/** 缁堢鍒嗗睆鏂瑰悜锛歨orizontal锛堟按骞筹級鎴?vertical锛堝瀭鐩达級 */
+/** 缂佸牏顏崚鍡楃潌閺傜懓鎮滈敍姝╫rizontal閿涘牊鎸夐獮绛圭礆閹?vertical閿涘牆鐎惄杈剧礆 */
 export type ThreadTerminalSplitDirection = "horizontal" | "vertical";
-/** 缁堢鍒嗗睆浣嶇疆锛歵op / right / bottom / left */
+/** 缂佸牏顏崚鍡楃潌娴ｅ秶鐤嗛敍姝祇p / right / bottom / left */
 export type ThreadTerminalSplitPosition = "top" | "right" | "bottom" | "left";
 
-/** 缁堢甯冨眬鍙跺瓙鑺傜偣锛岃〃绀轰竴涓寘鍚粓绔疄渚嬬殑闈㈡澘 */
+/** 缂佸牏顏敮鍐ㄧ湰閸欒泛鐡欓懞鍌滃仯閿涘矁銆冪粈杞扮娑擃亜瀵橀崥顐ょ矒缁旑垰鐤勬笟瀣畱闂堛垺婢?*/
 export interface ThreadTerminalLeafNode {
-  /** 鑺傜偣绫诲瀷鏍囪瘑锛氱粓绔彾瀛?*/
+  /** 閼哄倻鍋ｇ猾璇茬€烽弽鍥槕閿涙氨绮撶粩顖氬骄鐎?*/
   type: "terminal";
-  /** 闈㈡澘鍞竴 ID */
+  /** 闂堛垺婢橀崬顖欑 ID */
   paneId: string;
-  /** 闈㈡澘涓寘鍚殑缁堢 ID 鍒楄〃 */
+  /** 闂堛垺婢樻稉顓炲瘶閸氼偆娈戠紒鍫㈩伂 ID 閸掓銆?*/
   terminalIds: string[];
-  /** 褰撳墠婵€娲荤殑缁堢 ID */
+  /** 瑜版挸澧犲┑鈧ú鑽ゆ畱缂佸牏顏?ID */
   activeTerminalId: string;
 }
 
-/** 缁堢甯冨眬鍒嗗睆鑺傜偣锛岃〃绀轰竴涓彲閫掑綊宓屽鐨勫垎灞忓鍣?*/
+/** 缂佸牏顏敮鍐ㄧ湰閸掑棗鐫嗛懞鍌滃仯閿涘矁銆冪粈杞扮娑擃亜褰查柅鎺戠秺瀹撳苯顨滈惃鍕瀻鐏炲繐顔愰崳?*/
 export interface ThreadTerminalSplitNode {
-  /** 鑺傜偣绫诲瀷鏍囪瘑锛氬垎灞?*/
+  /** 閼哄倻鍋ｇ猾璇茬€烽弽鍥槕閿涙艾鍨庣仦?*/
   type: "split";
-  /** 鍒嗗睆鑺傜偣鍞竴 ID */
+  /** 閸掑棗鐫嗛懞鍌滃仯閸烆垯绔?ID */
   id: string;
-  /** 鍒嗗睆鏂瑰悜 */
+  /** 閸掑棗鐫嗛弬鐟版倻 */
   direction: ThreadTerminalSplitDirection;
-  /** 瀛愯妭鐐瑰垪琛紝鍙祵濂楀彾瀛愯妭鐐规垨鍒嗗睆鑺傜偣 */
+  /** 鐎涙劘濡悙鐟板灙鐞涱煉绱濋崣顖氱サ婵傛褰剧€涙劘濡悙瑙勫灗閸掑棗鐫嗛懞鍌滃仯 */
   children: ThreadTerminalLayoutNode[];
-  /** 鍚勫瓙鑺傜偣鐨勬潈閲嶆瘮渚?*/
+  /** 閸氬嫬鐡欓懞鍌滃仯閻ㄥ嫭娼堥柌宥嗙槷娓?*/
   weights: number[];
 }
 
-/** 缁堢甯冨眬鑺傜偣锛氬彾瀛愯妭鐐规垨鍒嗗睆鑺傜偣鐨勮仈鍚堢被鍨?*/
+/** 缂佸牏顏敮鍐ㄧ湰閼哄倻鍋ｉ敍姘骄鐎涙劘濡悙瑙勫灗閸掑棗鐫嗛懞鍌滃仯閻ㄥ嫯浠堥崥鍫㈣閸?*/
 export type ThreadTerminalLayoutNode = ThreadTerminalLeafNode | ThreadTerminalSplitNode;
 
-/** 缁堢鍒嗙粍锛屽寘鍚竷灞€淇℃伅鍜屽綋鍓嶆縺娲荤殑缁堢 */
+/** 缂佸牏顏崚鍡欑矋閿涘苯瀵橀崥顐㈢鐏炩偓娣団剝浼呴崪灞界秼閸撳秵绺哄ú鑽ゆ畱缂佸牏顏?*/
 export interface ThreadTerminalGroup {
-  /** 鍒嗙粍鍞竴 ID */
+  /** 閸掑棛绮嶉崬顖欑 ID */
   id: string;
-  /** 褰撳墠婵€娲荤殑缁堢 ID */
+  /** 瑜版挸澧犲┑鈧ú鑽ゆ畱缂佸牏顏?ID */
   activeTerminalId: string;
-  /** 鍒嗙粍鐨勫竷灞€鏍?*/
+  /** 閸掑棛绮嶉惃鍕鐏炩偓閺?*/
   layout: ThreadTerminalLayoutNode;
 }
 
-/** 鑱婂ぉ鍥剧墖闄勪欢 */
+/** 閼卞﹤銇夐崶鍓у闂勫嫪娆?*/
 export interface ChatImageAttachment {
-  /** 闄勪欢绫诲瀷锛氬浘鐗?*/
+  /** 闂勫嫪娆㈢猾璇茬€烽敍姘禈閻?*/
   type: "image";
-  /** 闄勪欢鍞竴 ID */
+  /** 闂勫嫪娆㈤崬顖欑 ID */
   id: string;
-  /** 鏂囦欢鍚?*/
+  /** 閺傚洣娆㈤崥?*/
   name: string;
-  /** MIME 绫诲瀷 */
+  /** MIME 缁鐎?*/
   mimeType: string;
-  /** 鏂囦欢澶у皬锛堝瓧鑺傦級 */
+  /** 閺傚洣娆㈡径褍鐨敍鍫濈摟閼哄偊绱?*/
   sizeBytes: number;
-  /** 鍥剧墖棰勮 URL锛屽彲閫?*/
+  /** 閸ュ墽澧栨０鍕潔 URL閿涘苯褰查柅?*/
   previewUrl?: string;
 }
 
-/** 鑱婂ぉ鍔╂墜閫夋嫨闄勪欢锛屽紩鐢ㄥ姪鎵嬫秷鎭腑鐨勬枃鏈墖娈?*/
+/** 閼卞﹤銇夐崝鈺傚闁瀚ㄩ梽鍕閿涘苯绱╅悽銊ュИ閹靛绉烽幁顖欒厬閻ㄥ嫭鏋冮張顒傚濞?*/
 export interface ChatAssistantSelectionAttachment {
-  /** 闄勪欢绫诲瀷锛氬姪鎵嬮€夋嫨 */
+  /** 闂勫嫪娆㈢猾璇茬€烽敍姘И閹靛鈧瀚?*/
   type: "assistant-selection";
-  /** 闄勪欢鍞竴 ID */
+  /** 闂勫嫪娆㈤崬顖欑 ID */
   id: string;
-  /** 琚紩鐢ㄧ殑鍔╂墜娑堟伅 ID */
+  /** 鐞氼偄绱╅悽銊ф畱閸斺晜澧滃☉鍫熶紖 ID */
   assistantMessageId: string;
-  /** 閫変腑鐨勬枃鏈唴瀹?*/
+  /** 闁鑵戦惃鍕瀮閺堫剙鍞寸€?*/
   text: string;
 }
 
-/** 鑱婂ぉ闄勪欢锛氬浘鐗囨垨鍔╂墜鏂囨湰閫夋嫨鐨勮仈鍚堢被鍨?*/
+/** 閼卞﹤銇夐梽鍕閿涙艾娴橀悧鍥ㄥ灗閸斺晜澧滈弬鍥ㄦ拱闁瀚ㄩ惃鍕粓閸氬牏琚崹?*/
 export type ChatAttachment = ChatImageAttachment | ChatAssistantSelectionAttachment;
 
-/** 鑱婂ぉ娑堟伅 */
+/** 閼卞﹤銇夊☉鍫熶紖 */
 export interface ChatMessage {
-  /** 娑堟伅鍞竴 ID */
+  /** 濞戝牊浼呴崬顖欑 ID */
   id: MessageId;
-  /** 娑堟伅瑙掕壊锛歶ser锛堢敤鎴凤級銆乤ssistant锛堝姪鎵嬶級銆乻ystem锛堢郴缁燂級 */
+  /** 濞戝牊浼呯憴鎺曞閿涙ser閿涘牏鏁ら幋鍑ょ礆閵嗕工ssistant閿涘牆濮幍瀣剁礆閵嗕够ystem閿涘牏閮寸紒鐕傜礆 */
   role: "user" | "assistant" | "system";
-  /** 娑堟伅鏂囨湰鍐呭 */
+  /** 濞戝牊浼呴弬鍥ㄦ拱閸愬懎顔?*/
   text: string;
-  /** 闄勪欢鍒楄〃 */
+  /** 闂勫嫪娆㈤崚妤勩€?*/
   attachments?: ChatAttachment[];
-  /** 娑堟伅璋冨害妯″紡 */
+  /** 濞戝牊浼呯拫鍐ㄥ濡€崇础 */
   dispatchMode?: TurnDispatchMode;
-  /** 鎵€灞炲洖鍚?ID */
+  /** 閹碘偓鐏炵偛娲栭崥?ID */
   turnId?: TurnId | null;
-  /** 娑堟伅鍒涘缓鏃堕棿锛圛SO 瀛楃涓诧級 */
+  /** 濞戝牊浼呴崚娑樼紦閺冨爼妫块敍鍦汼O 鐎涙顑佹稉璇х礆 */
   createdAt: string;
-  /** 娑堟伅瀹屾垚鏃堕棿锛圛SO 瀛楃涓诧級锛屾祦寮忔秷鎭畬鎴愬悗鎵嶆湁鍊?*/
+  /** 濞戝牊浼呯€瑰本鍨氶弮鍫曟？閿涘湜SO 鐎涙顑佹稉璇х礆閿涘本绁﹀蹇旂Х閹垰鐣幋鎰倵閹靛秵婀侀崐?*/
   completedAt?: string | undefined;
-  /** 鏄惁姝ｅ湪娴佸紡杈撳嚭涓?*/
+  /** 閺勵垰鎯佸锝呮躬濞翠礁绱℃潏鎾冲毉娑?*/
   streaming: boolean;
-  /** 娑堟伅鏉ユ簮 */
+  /** 濞戝牊浼呴弶銉︾爱 */
   source?: OrchestrationMessageSource;
 }
 
-/** 鎻愯鐨勮鍒?*/
+/** 閹绘劘顔呴惃鍕吀閸?*/
 export interface ProposedPlan {
-  /** 璁″垝鍞竴 ID */
+  /** 鐠佲€冲灊閸烆垯绔?ID */
   id: OrchestrationProposedPlanId;
-  /** 鍏宠仈鐨勫洖鍚?ID锛屽彲涓?null */
+  /** 閸忓疇浠堥惃鍕礀閸?ID閿涘苯褰叉稉?null */
   turnId: TurnId | null;
-  /** 璁″垝鐨?Markdown 鍐呭 */
+  /** 鐠佲€冲灊閻?Markdown 閸愬懎顔?*/
   planMarkdown: string;
-  /** 瀹炴柦鏃堕棿锛屾湭瀹炴柦鏃朵负 null */
+  /** 鐎圭偞鏌﹂弮鍫曟？閿涘本婀€圭偞鏌﹂弮鏈佃礋 null */
   implementedAt: string | null;
-  /** 瀹炴柦璇ヨ鍒掔殑绾跨▼ ID锛屾湭瀹炴柦鏃朵负 null */
+  /** 鐎圭偞鏌︾拠銉吀閸掓帞娈戠痪璺ㄢ柤 ID閿涘本婀€圭偞鏌﹂弮鏈佃礋 null */
   implementationThreadId: ThreadId | null;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt: string;
 }
 
-/** 鍥炲悎宸紓涓殑鏂囦欢鍙樻洿璁板綍 */
+/** 閸ョ偛鎮庡顔肩磽娑擃厾娈戦弬鍥︽閸欐ɑ娲跨拋鏉跨秿 */
 export interface TurnDiffFileChange {
-  /** 鏂囦欢璺緞 */
+  /** 閺傚洣娆㈢捄顖氱窞 */
   path: string;
-  /** 鍙樻洿绫诲瀷锛堝 added/modified/deleted锛?*/
+  /** 閸欐ɑ娲跨猾璇茬€烽敍鍫濐洤 added/modified/deleted閿?*/
   kind?: string | undefined;
-  /** 鏂板琛屾暟 */
+  /** 閺傛澘顤冪悰灞炬殶 */
   additions?: number | undefined;
-  /** 鍒犻櫎琛屾暟 */
+  /** 閸掔娀娅庣悰灞炬殶 */
   deletions?: number | undefined;
 }
 
-/** 鍥炲悎宸紓鎽樿锛岃褰曚竴涓洖鍚堢殑鏂囦欢鍙樻洿姹囨€?*/
+/** 閸ョ偛鎮庡顔肩磽閹芥顩﹂敍宀冾唶瑜版洑绔存稉顏勬礀閸氬牏娈戦弬鍥︽閸欐ɑ娲垮Ч鍥ㄢ偓?*/
 export interface TurnDiffSummary {
-  /** 鍥炲悎 ID */
+  /** 閸ョ偛鎮?ID */
   turnId: TurnId;
-  /** 瀹屾垚鏃堕棿 */
+  /** 鐎瑰本鍨氶弮鍫曟？ */
   completedAt: string;
-  /** 鍥炲悎鐘舵€?*/
+  /** 閸ョ偛鎮庨悩鑸碘偓?*/
   status?: string | undefined;
-  /** 鍙樻洿鐨勬枃浠跺垪琛?*/
+  /** 閸欐ɑ娲块惃鍕瀮娴犺泛鍨悰?*/
   files: TurnDiffFileChange[];
-  /** 妫€鏌ョ偣寮曠敤锛岀敤浜庡洖閫€鎿嶄綔 */
+  /** 濡偓閺屻儳鍋ｅ鏇犳暏閿涘瞼鏁ゆ禍搴℃礀闁偓閹垮秳缍?*/
   checkpointRef?: CheckpointRef | undefined;
-  /** 鍏宠仈鐨勫姪鎵嬫秷鎭?ID */
+  /** 閸忓疇浠堥惃鍕И閹靛绉烽幁?ID */
   assistantMessageId?: MessageId | undefined;
-  /** 妫€鏌ョ偣瀵瑰簲鐨勫洖鍚堝簭鍙?*/
+  /** 濡偓閺屻儳鍋ｇ€电懓绨查惃鍕礀閸氬牆绨崣?*/
   checkpointTurnCount?: number | undefined;
 }
 
-/** 椤圭洰瑙嗗浘妯″瀷 */
+/** 妞ゅ湱娲扮憴鍡楁禈濡€崇€?*/
 export interface Project {
-  /** 椤圭洰鍞竴 ID */
+  /** 妞ゅ湱娲伴崬顖欑 ID */
   id: ProjectId;
-  /** 椤圭洰绫诲瀷 */
+  /** 妞ゅ湱娲扮猾璇茬€?*/
   kind: ProjectKind;
-  /** 鏈湴灞曠ず鍚嶇О锛堝彲鑳借鐢ㄦ埛閲嶅懡鍚嶏級 */
+  /** 閺堫剙婀寸仦鏇犮仛閸氬秶袨閿涘牆褰查懗鍊燁潶閻劍鍩涢柌宥呮嚒閸氬稄绱?*/
   name: string;
-  /** 杩滅▼浠撳簱鍚嶇О */
+  /** 鏉╂粎鈻兼禒鎾崇氨閸氬秶袨 */
   remoteName: string;
-  /** 宸ヤ綔鍖烘枃浠跺す鍚?*/
+  /** 瀹搞儰缍旈崠鐑樻瀮娴犺泛銇欓崥?*/
   folderName: string;
-  /** 鐢ㄦ埛鑷畾涔夌殑鏈湴鍚嶇О锛宯ull 琛ㄧず浣跨敤杩滅▼鍚嶇О */
+  /** 閻劍鍩涢懛顏勭暰娑斿娈戦張顒€婀撮崥宥囆為敍瀹痷ll 鐞涖劎銇氭担璺ㄦ暏鏉╂粎鈻奸崥宥囆?*/
   localName: string | null;
-  /** 椤圭洰宸ヤ綔鐩綍缁濆璺緞 */
+  /** 妞ゅ湱娲板銉ょ稊閻╊喖缍嶇紒婵嗩嚠鐠侯垰绶?*/
   cwd: string;
-  /** 榛樿妯″瀷閫夋嫨閰嶇疆 */
+  /** 姒涙顓诲Ο鈥崇€烽柅澶嬪闁板秶鐤?*/
   defaultModelSelection: ModelSelection | null;
-  /** 渚ц竟鏍忎腑鏄惁灞曞紑 */
+  /** 娓氀嗙珶閺嶅繋鑵戦弰顖氭儊鐏炴洖绱?*/
   expanded: boolean;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt?: string | undefined;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt?: string | undefined;
-  /** 椤圭洰鑴氭湰鍒楄〃 */
+  /** 妞ゅ湱娲伴懘姘拱閸掓銆?*/
   scripts: ProjectScript[];
 }
 
-/** 绾跨▼宸ヤ綔鍖虹姸鎬?*/
+/** 缁捐法鈻煎銉ょ稊閸栬櫣濮搁幀?*/
 export interface ThreadWorkspaceState {
-  /** 鐜妯″紡锛歭ocal锛堟湰鍦帮級鎴?worktree锛堝伐浣滄爲锛?*/
+  /** 閻滎垰顣ㄥΟ鈥崇础閿涙ocal閿涘牊婀伴崷甯礆閹?worktree閿涘牆浼愭担婊勭埐閿?*/
   envMode?: ThreadEnvironmentMode | undefined;
-  /** 褰撳墠 Git 鍒嗘敮鍚?*/
+  /** 瑜版挸澧?Git 閸掑棙鏁崥?*/
   branch: string | null;
-  /** 宸ヤ綔鏍戣矾寰?*/
+  /** 瀹搞儰缍旈弽鎴ｇ熅瀵?*/
   worktreePath: string | null;
-  /** 鍏宠仈鐨勫伐浣滄爲璺緞 */
+  /** 閸忓疇浠堥惃鍕紣娴ｆ粍鐖茬捄顖氱窞 */
   associatedWorktreePath?: string | null;
-  /** 鍏宠仈鐨勫伐浣滄爲鍒嗘敮 */
+  /** 閸忓疇浠堥惃鍕紣娴ｆ粍鐖查崚鍡樻暜 */
   associatedWorktreeBranch?: string | null;
-  /** 鍏宠仈鐨勫伐浣滄爲寮曠敤 */
+  /** 閸忓疇浠堥惃鍕紣娴ｆ粍鐖插鏇犳暏 */
   associatedWorktreeRef?: string | null;
-  /** 鍒涘缓鍒嗘敮娴佺▼鏄惁宸插畬鎴?*/
+  /** 閸掓稑缂撻崚鍡樻暜濞翠胶鈻奸弰顖氭儊瀹告彃鐣幋?*/
   createBranchFlowCompleted?: boolean;
 }
 
-/** 绾跨▼宸ヤ綔鍖鸿ˉ涓侊紝鐢ㄤ簬閮ㄥ垎鏇存柊宸ヤ綔鍖虹姸鎬?*/
+/** 缁捐法鈻煎銉ょ稊閸栭缚藟娑撲緤绱濋悽銊ょ艾闁劌鍨庨弴瀛樻煀瀹搞儰缍旈崠铏瑰Ц閹?*/
 export interface ThreadWorkspacePatch {
   envMode?: ThreadEnvironmentMode | undefined;
   branch?: string | null;
@@ -254,210 +252,210 @@ export interface ThreadWorkspacePatch {
   createBranchFlowCompleted?: boolean;
 }
 
-/** 绾跨▼瑙嗗浘妯″瀷锛屽寘鍚畬鏁寸殑绾跨▼璇︽儏 */
+/** 缁捐法鈻肩憴鍡楁禈濡€崇€烽敍灞藉瘶閸氼偄鐣弫瀵告畱缁捐法鈻肩拠锔藉剰 */
 export interface Thread extends ThreadWorkspaceState {
-  /** 绾跨▼鍞竴 ID */
+  /** 缁捐法鈻奸崬顖欑 ID */
   id: ThreadId;
-  /** Codex 绾跨▼ ID锛岀敤浜庡吋瀹规棫鐗?*/
+  /** Codex 缁捐法鈻?ID閿涘瞼鏁ゆ禍搴″悑鐎硅妫悧?*/
   codexThreadId: string | null;
-  /** 鎵€灞為」鐩?ID */
+  /** 閹碘偓鐏炵偤銆嶉惄?ID */
   projectId: ProjectId;
-  /** 绾跨▼鏍囬 */
+  /** 缁捐法鈻奸弽鍥暯 */
   title: string;
-  /** 妯″瀷閫夋嫨閰嶇疆 */
+  /** 濡€崇€烽柅澶嬪闁板秶鐤?*/
   modelSelection: ModelSelection;
-  /** 杩愯鏃舵ā寮?*/
+  /** 鏉╂劘顢戦弮鑸的佸?*/
   runtimeMode: RuntimeMode;
-  /** 浜や簰妯″紡 */
+  /** 娴溿倓绨板Ο鈥崇础 */
   interactionMode: ProviderInteractionMode;
-  /** 褰撳墠浼氳瘽淇℃伅 */
+  /** 瑜版挸澧犳导姘崇樈娣団剝浼?*/
   session: ThreadSession | null;
-  /** 鑱婂ぉ娑堟伅鍒楄〃 */
+  /** 閼卞﹤銇夊☉鍫熶紖閸掓銆?*/
   messages: ChatMessage[];
-  /** 鎻愯鐨勮鍒掑垪琛?*/
+  /** 閹绘劘顔呴惃鍕吀閸掓帒鍨悰?*/
   proposedPlans: ProposedPlan[];
-  /** 閿欒淇℃伅 */
+  /** 闁挎瑨顕ゆ穱鈩冧紖 */
   error: string | null;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 褰掓。鏃堕棿锛宯ull 琛ㄧず鏈綊妗?*/
+  /** 瑜版帗銆傞弮鍫曟？閿涘ull 鐞涖劎銇氶張顏勭秺濡?*/
   archivedAt?: string | null;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt?: string | undefined;
-  /** 鏄惁缃《 */
+  /** 閺勵垰鎯佺純顕€銆?*/
   isPinned?: boolean;
-  /** 鏈€鏂板洖鍚堜俊鎭?*/
+  /** 閺堚偓閺傛澘娲栭崥鍫滀繆閹?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 寰呭鐞嗙殑鏉ユ簮鎻愯璁″垝 */
+  /** 瀵板懎顦╅悶鍡欐畱閺夈儲绨幓鎰唴鐠佲€冲灊 */
   pendingSourceProposedPlan?: OrchestrationLatestTurn["sourceProposedPlan"];
-  /** 鏈€鍚庤闂椂闂?*/
+  /** 閺堚偓閸氬氦顔栭梻顔芥闂?*/
   lastVisitedAt?: string | undefined;
-  /** 鐖剁嚎绋?ID锛堝瓙浠ｇ悊鍦烘櫙锛?*/
+  /** 閻栧墎鍤庣粙?ID閿涘牆鐡欐禒锝囨倞閸︾儤娅欓敍?*/
   parentThreadId?: ThreadId | null;
-  /** 瀛愪唬鐞?ID */
+  /** 鐎涙劒鍞悶?ID */
   subagentAgentId?: string | null;
-  /** 瀛愪唬鐞嗘樀绉?*/
+  /** 鐎涙劒鍞悶鍡樻█缁?*/
   subagentNickname?: string | null;
-  /** 瀛愪唬鐞嗚鑹?*/
+  /** 鐎涙劒鍞悶鍡氼潡閼?*/
   subagentRole?: string | null;
-  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
+  /** 閸掑棗寮堕弶銉︾爱缁捐法鈻?ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 渚ц亰鏉ユ簮绾跨▼ ID */
+  /** 娓氀嗕喊閺夈儲绨痪璺ㄢ柤 ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 浜ゆ帴淇℃伅 */
+  /** 娴溿倖甯存穱鈩冧紖 */
   handoff?: ThreadHandoff | null;
-  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
+  /** 閺堚偓鏉╂垵鍑￠惌銉ф畱 Pull Request 娣団剝浼?*/
   lastKnownPr?: OrchestrationThreadPullRequest | null;
-  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
+  /** 閺堚偓閺傛壆鏁ら幋閿嬬Х閹垱妞傞梻?*/
   latestUserMessageAt?: string | null;
-  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕吀閹?*/
   hasPendingApprovals?: boolean;
-  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕暏閹寸柉绶崗?*/
   hasPendingUserInput?: boolean;
-  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
+  /** 閺勵垰鎯侀張澶婂讲閹垮秳缍旈惃鍕絹鐠侇喛顓搁崚?*/
   hasActionableProposedPlan?: boolean;
-  /** 鍥炲悎宸紓鎽樿鍒楄〃 */
+  /** 閸ョ偛鎮庡顔肩磽閹芥顩﹂崚妤勩€?*/
   turnDiffSummaries: TurnDiffSummary[];
-  /** 娲诲姩鍒楄〃 */
+  /** 濞茶濮╅崚妤勩€?*/
   activities: OrchestrationThreadActivity[];
 }
 
-/** 绾跨▼澶栧３淇℃伅锛屼笉鍖呭惈娑堟伅绛夐噸鍨嬫暟鎹紝鐢ㄤ簬渚ц竟鏍忕瓑杞婚噺鍦烘櫙 */
+/** 缁捐法鈻兼径鏍э紦娣団剝浼呴敍灞肩瑝閸栧懎鎯堝☉鍫熶紖缁涘鍣搁崹瀣殶閹诡噯绱濋悽銊ょ艾娓氀嗙珶閺嶅繒鐡戞潪濠氬櫤閸︾儤娅?*/
 export interface ThreadShell extends ThreadWorkspaceState {
-  /** 绾跨▼鍞竴 ID */
+  /** 缁捐法鈻奸崬顖欑 ID */
   id: ThreadId;
-  /** Codex 绾跨▼ ID */
+  /** Codex 缁捐法鈻?ID */
   codexThreadId: string | null;
-  /** 鎵€灞為」鐩?ID */
+  /** 閹碘偓鐏炵偤銆嶉惄?ID */
   projectId: ProjectId;
-  /** 绾跨▼鏍囬 */
+  /** 缁捐法鈻奸弽鍥暯 */
   title: string;
-  /** 妯″瀷閫夋嫨閰嶇疆 */
+  /** 濡€崇€烽柅澶嬪闁板秶鐤?*/
   modelSelection: ModelSelection;
-  /** 杩愯鏃舵ā寮?*/
+  /** 鏉╂劘顢戦弮鑸的佸?*/
   runtimeMode: RuntimeMode;
-  /** 浜や簰妯″紡 */
+  /** 娴溿倓绨板Ο鈥崇础 */
   interactionMode: ProviderInteractionMode;
-  /** 閿欒淇℃伅 */
+  /** 闁挎瑨顕ゆ穱鈩冧紖 */
   error: string | null;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 褰掓。鏃堕棿 */
+  /** 瑜版帗銆傞弮鍫曟？ */
   archivedAt?: string | null;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt?: string | undefined;
-  /** 鏄惁缃《 */
+  /** 閺勵垰鎯佺純顕€銆?*/
   isPinned?: boolean;
-  /** 鐖剁嚎绋?ID */
+  /** 閻栧墎鍤庣粙?ID */
   parentThreadId?: ThreadId | null;
-  /** 瀛愪唬鐞?ID */
+  /** 鐎涙劒鍞悶?ID */
   subagentAgentId?: string | null;
-  /** 瀛愪唬鐞嗘樀绉?*/
+  /** 鐎涙劒鍞悶鍡樻█缁?*/
   subagentNickname?: string | null;
-  /** 瀛愪唬鐞嗚鑹?*/
+  /** 鐎涙劒鍞悶鍡氼潡閼?*/
   subagentRole?: string | null;
-  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
+  /** 閸掑棗寮堕弶銉︾爱缁捐法鈻?ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 渚ц亰鏉ユ簮绾跨▼ ID */
+  /** 娓氀嗕喊閺夈儲绨痪璺ㄢ柤 ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 浜ゆ帴淇℃伅 */
+  /** 娴溿倖甯存穱鈩冧紖 */
   handoff?: ThreadHandoff | null;
-  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
+  /** 閺堚偓鏉╂垵鍑￠惌銉ф畱 Pull Request 娣団剝浼?*/
   lastKnownPr?: OrchestrationThreadPullRequest | null;
-  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
+  /** 閺堚偓閺傛壆鏁ら幋閿嬬Х閹垱妞傞梻?*/
   latestUserMessageAt?: string | null;
-  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕吀閹?*/
   hasPendingApprovals?: boolean;
-  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕暏閹寸柉绶崗?*/
   hasPendingUserInput?: boolean;
-  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
+  /** 閺勵垰鎯侀張澶婂讲閹垮秳缍旈惃鍕絹鐠侇喛顓搁崚?*/
   hasActionableProposedPlan?: boolean;
-  /** 鏈€鍚庤闂椂闂?*/
+  /** 閺堚偓閸氬氦顔栭梻顔芥闂?*/
   lastVisitedAt?: string | undefined;
 }
 
-/** 绾跨▼鍥炲悎鐘舵€侊紝浠呭寘鍚渶鏂板洖鍚堝拰寰呭鐞嗙殑鎻愯璁″垝 */
+/** 缁捐法鈻奸崶鐐叉値閻樿埖鈧緤绱濇禒鍛瘶閸氼偅娓堕弬鏉挎礀閸氬牆鎷板鍛槱閻炲棛娈戦幓鎰唴鐠佲€冲灊 */
 export interface ThreadTurnState {
-  /** 鏈€鏂板洖鍚堜俊鎭?*/
+  /** 閺堚偓閺傛澘娲栭崥鍫滀繆閹?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 寰呭鐞嗙殑鏉ユ簮鎻愯璁″垝 */
+  /** 瀵板懎顦╅悶鍡欐畱閺夈儲绨幓鎰唴鐠佲€冲灊 */
   pendingSourceProposedPlan?: OrchestrationLatestTurn["sourceProposedPlan"];
 }
 
-/** 渚ц竟鏍忕嚎绋嬫憳瑕侊紝鐢ㄤ簬渚ц竟鏍忓垪琛ㄨ鐨勮交閲忔覆鏌?*/
+/** 娓氀嗙珶閺嶅繒鍤庣粙瀣喅鐟曚緤绱濋悽銊ょ艾娓氀嗙珶閺嶅繐鍨悰銊攽閻ㄥ嫯浜ら柌蹇旇閺?*/
 export interface SidebarThreadSummary {
-  /** 绾跨▼鍞竴 ID */
+  /** 缁捐法鈻奸崬顖欑 ID */
   id: ThreadId;
-  /** 鎵€灞為」鐩?ID */
+  /** 閹碘偓鐏炵偤銆嶉惄?ID */
   projectId: ProjectId;
-  /** 绾跨▼鏍囬 */
+  /** 缁捐法鈻奸弽鍥暯 */
   title: string;
-  /** 妯″瀷閫夋嫨閰嶇疆 */
+  /** 濡€崇€烽柅澶嬪闁板秶鐤?*/
   modelSelection: ModelSelection;
-  /** 浜や簰妯″紡 */
+  /** 娴溿倓绨板Ο鈥崇础 */
   interactionMode: ProviderInteractionMode;
-  /** 鐜妯″紡 */
+  /** 閻滎垰顣ㄥΟ鈥崇础 */
   envMode?: ThreadEnvironmentMode | undefined;
-  /** 褰撳墠 Git 鍒嗘敮鍚?*/
+  /** 瑜版挸澧?Git 閸掑棙鏁崥?*/
   branch: string | null;
-  /** 宸ヤ綔鏍戣矾寰?*/
+  /** 瀹搞儰缍旈弽鎴ｇ熅瀵?*/
   worktreePath: string | null;
-  /** 褰撳墠浼氳瘽淇℃伅 */
+  /** 瑜版挸澧犳导姘崇樈娣団剝浼?*/
   session: ThreadSession | null;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 褰掓。鏃堕棿 */
+  /** 瑜版帗銆傞弮鍫曟？ */
   archivedAt?: string | null;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt?: string | undefined;
-  /** 鏄惁缃《 */
+  /** 閺勵垰鎯佺純顕€銆?*/
   isPinned?: boolean;
-  /** 鏈€鏂板洖鍚堜俊鎭?*/
+  /** 閺堚偓閺傛澘娲栭崥鍫滀繆閹?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 鏈€鍚庤闂椂闂?*/
+  /** 閺堚偓閸氬氦顔栭梻顔芥闂?*/
   lastVisitedAt?: string | undefined;
-  /** 鐖剁嚎绋?ID */
+  /** 閻栧墎鍤庣粙?ID */
   parentThreadId?: ThreadId | null;
-  /** 瀛愪唬鐞?ID */
+  /** 鐎涙劒鍞悶?ID */
   subagentAgentId?: string | null;
-  /** 瀛愪唬鐞嗘樀绉?*/
+  /** 鐎涙劒鍞悶鍡樻█缁?*/
   subagentNickname?: string | null;
-  /** 瀛愪唬鐞嗚鑹?*/
+  /** 鐎涙劒鍞悶鍡氼潡閼?*/
   subagentRole?: string | null;
-  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
+  /** 閺堚偓閺傛壆鏁ら幋閿嬬Х閹垱妞傞梻?*/
   latestUserMessageAt: string | null;
-  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕吀閹?*/
   hasPendingApprovals: boolean;
-  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
+  /** 閺勵垰鎯侀張澶婄窡婢跺嫮鎮婇惃鍕暏閹寸柉绶崗?*/
   hasPendingUserInput: boolean;
-  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
+  /** 閺勵垰鎯侀張澶婂讲閹垮秳缍旈惃鍕絹鐠侇喛顓搁崚?*/
   hasActionableProposedPlan: boolean;
-  /** 鏄惁鏈夋鍦ㄨ繘琛岀殑灏鹃儴宸ヤ綔锛堝鏂囦欢鍐欏叆锛?*/
+  /** 閺勵垰鎯侀張澶嬵劀閸︺劏绻樼悰宀€娈戠亸楣冨劥瀹搞儰缍旈敍鍫濐洤閺傚洣娆㈤崘娆忓弳閿?*/
   hasLiveTailWork: boolean;
-  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
+  /** 閸掑棗寮堕弶銉︾爱缁捐法鈻?ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 渚ц亰鏉ユ簮绾跨▼ ID */
+  /** 娓氀嗕喊閺夈儲绨痪璺ㄢ柤 ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 浜ゆ帴淇℃伅 */
+  /** 娴溿倖甯存穱鈩冧紖 */
   handoff?: ThreadHandoff | null;
-  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
+  /** 閺堚偓鏉╂垵鍑￠惌銉ф畱 Pull Request 娣団剝浼?*/
   lastKnownPr?: OrchestrationThreadPullRequest | null;
 }
 
-/** 绾跨▼浼氳瘽淇℃伅 */
+/** 缁捐法鈻兼导姘崇樈娣団剝浼?*/
 export interface ThreadSession {
-  /** 鎻愪緵鑰呯被鍨?*/
+  /** 閹绘劒绶甸懓鍛閸?*/
   provider: ProviderKind;
-  /** 浼氳瘽鐘舵€侊紙鍚?legacy 鐘舵€佹槧灏勶級 */
+  /** 娴兼俺鐦介悩鑸碘偓渚婄礄閸?legacy 閻樿埖鈧焦妲х亸鍕剁礆 */
   status: SessionPhase | "error" | "closed";
-  /** 褰撳墠娲昏穬鐨勫洖鍚?ID */
+  /** 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬娲栭崥?ID */
   activeTurnId?: TurnId | undefined;
-  /** 鍒涘缓鏃堕棿 */
+  /** 閸掓稑缂撻弮鍫曟？ */
   createdAt: string;
-  /** 鏇存柊鏃堕棿 */
+  /** 閺囧瓨鏌婇弮鍫曟？ */
   updatedAt: string;
-  /** 鏈€杩戜竴娆￠敊璇俊鎭?*/
+  /** 閺堚偓鏉╂垳绔村▎锟犳晩鐠囶垯淇婇幁?*/
   lastError?: string;
-  /** 缂栨帓灞備細璇濈姸鎬?*/
+  /** 缂傛牗甯撶仦鍌欑窗鐠囨繄濮搁幀?*/
   orchestrationStatus: OrchestrationSessionStatus;
 }

@@ -1,17 +1,15 @@
 /**
- * @file 缂栬緫鍣ㄥ亸濂借缃ā鍧? * @description 绠＄悊鐢ㄦ埛涓婃浣跨敤鐨勭紪杈戝櫒鍋忓ソ锛屾敮鎸?localStorage 鎸佷箙鍖栥€? *              鎻愪緵缂栬緫鍣ㄥ亸濂界殑璇诲彇銆佹寔涔呭寲鍜岃嚜鍔ㄦ墦寮€鍔熻兘銆? */
+ * @file 缂傛牞绶崳銊ヤ焊婵傚€燁啎缂冾喗膩閸? * @description 缁狅紕鎮婇悽銊﹀煕娑撳﹥顐兼担璺ㄦ暏閻ㄥ嫮绱潏鎴濇珤閸嬪繐銈介敍灞炬暜閹?localStorage 閹镐椒绠欓崠鏍モ偓? *              閹绘劒绶电紓鏍帆閸ｃ劌浜告總鐣屾畱鐠囪褰囬妴浣瑰瘮娑斿懎瀵查崪宀冨殰閸斻劍澧﹀鈧崝鐔诲厴閵? */
 
 import { EDITORS, EditorId, NativeApi } from "~/contracts";
 import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from "./hooks/useLocalStorage";
 import { useMemo } from "react";
 
-/** localStorage 涓瓨鍌ㄤ笂娆′娇鐢ㄧ紪杈戝櫒鐨?key */
+/** localStorage 娑擃厼鐡ㄩ崒銊ょ瑐濞嗏€插▏閻劎绱潏鎴濇珤閻?key */
 const LAST_EDITOR_KEY = "remicode:last-editor";
 
 /**
- * React Hook锛氳幏鍙栧拰璁剧疆鐢ㄦ埛鍋忓ソ鐨勭紪杈戝櫒
- * 浼樺厛浣跨敤涓婃閫夋嫨鐨勭紪杈戝櫒锛岃嫢涓嶅彲鐢ㄥ垯鍥為€€鍒板彲鐢ㄧ紪杈戝櫒鍒楄〃涓殑绗竴涓? * @param availableEditors - 褰撳墠鍙敤鐨勭紪杈戝櫒 ID 鍒楄〃
- * @returns 鍏冪粍 [褰撳墠鐢熸晥鐨勭紪杈戝櫒 ID, 璁剧疆缂栬緫鍣ㄧ殑鍑芥暟]
+ * React Hook閿涙俺骞忛崣鏍ф嫲鐠佸墽鐤嗛悽銊﹀煕閸嬪繐銈介惃鍕椽鏉堟垵娅? * 娴兼ê鍘涙担璺ㄦ暏娑撳﹥顐奸柅澶嬪閻ㄥ嫮绱潏鎴濇珤閿涘矁瀚㈡稉宥呭讲閻劌鍨崶鐐衡偓鈧崚鏉垮讲閻劎绱潏鎴濇珤閸掓銆冩稉顓犳畱缁楊兛绔存稉? * @param availableEditors - 瑜版挸澧犻崣顖滄暏閻ㄥ嫮绱潏鎴濇珤 ID 閸掓銆? * @returns 閸忓啰绮?[瑜版挸澧犻悽鐔告櫏閻ㄥ嫮绱潏鎴濇珤 ID, 鐠佸墽鐤嗙紓鏍帆閸ｃ劎娈戦崙鑺ユ殶]
  */
 export function usePreferredEditor(availableEditors: ReadonlyArray<EditorId>) {
   const [lastEditor, setLastEditor] = useLocalStorage<EditorId | null>(LAST_EDITOR_KEY, null);
@@ -25,9 +23,7 @@ export function usePreferredEditor(availableEditors: ReadonlyArray<EditorId>) {
 }
 
 /**
- * 瑙ｆ瀽骞舵寔涔呭寲鐢ㄦ埛鍋忓ソ鐨勭紪杈戝櫒
- * 浼樺厛浣跨敤 localStorage 涓瓨鍌ㄧ殑鍋忓ソ锛岃嫢涓嶅彲鐢ㄥ垯閫夋嫨鍙敤缂栬緫鍣ㄥ垪琛ㄤ腑鐨勭涓€涓苟鎸佷箙鍖? * @param availableEditors - 褰撳墠鍙敤鐨勭紪杈戝櫒 ID 鍒楄〃
- * @returns 鍋忓ソ鐨勭紪杈戝櫒 ID锛屾棤鍙敤缂栬緫鍣ㄦ椂杩斿洖 null
+ * 鐟欙絾鐎介獮鑸靛瘮娑斿懎瀵查悽銊﹀煕閸嬪繐銈介惃鍕椽鏉堟垵娅? * 娴兼ê鍘涙担璺ㄦ暏 localStorage 娑擃厼鐡ㄩ崒銊ф畱閸嬪繐銈介敍宀冨娑撳秴褰查悽銊ュ灟闁瀚ㄩ崣顖滄暏缂傛牞绶崳銊ュ灙鐞涖劋鑵戦惃鍕儑娑撯偓娑擃亜鑻熼幐浣风畽閸? * @param availableEditors - 瑜版挸澧犻崣顖滄暏閻ㄥ嫮绱潏鎴濇珤 ID 閸掓銆? * @returns 閸嬪繐銈介惃鍕椽鏉堟垵娅?ID閿涘本妫ら崣顖滄暏缂傛牞绶崳銊︽鏉╂柨娲?null
  */
 export function resolveAndPersistPreferredEditor(
   availableEditors: readonly EditorId[],
@@ -41,12 +37,9 @@ export function resolveAndPersistPreferredEditor(
 }
 
 /**
- * 鍦ㄥ亸濂界紪杈戝櫒涓墦寮€鎸囧畾璺緞
- * 鑷姩鑾峰彇鍙敤缂栬緫鍣ㄥ垪琛紝瑙ｆ瀽鍋忓ソ缂栬緫鍣紝鐒跺悗璋冪敤鍘熺敓 API 鎵撳紑
- * @param api - NativeApi 瀹炰緥
- * @param targetPath - 瑕佹墦寮€鐨勬枃浠舵垨鐩綍璺緞
- * @returns 浣跨敤鐨勭紪杈戝櫒 ID
- * @throws 褰撴病鏈夊彲鐢ㄧ紪杈戝櫒鏃舵姏鍑洪敊璇? */
+ * 閸︺劌浜告總鐣岀椽鏉堟垵娅掓稉顓熷ⅵ瀵偓閹稿洤鐣剧捄顖氱窞
+ * 閼奉亜濮╅懢宄板絿閸欘垳鏁ょ紓鏍帆閸ｃ劌鍨悰顭掔礉鐟欙絾鐎介崑蹇撱偨缂傛牞绶崳顭掔礉閻掕泛鎮楃拫鍐暏閸樼喓鏁?API 閹垫挸绱? * @param api - NativeApi 鐎圭偘绶? * @param targetPath - 鐟曚焦澧﹀鈧惃鍕瀮娴犺埖鍨ㄩ惄顔肩秿鐠侯垰绶? * @returns 娴ｈ法鏁ら惃鍕椽鏉堟垵娅?ID
+ * @throws 瑜版挻鐥呴張澶婂讲閻劎绱潏鎴濇珤閺冭埖濮忛崙娲晩鐠? */
 export async function openInPreferredEditor(api: NativeApi, targetPath: string): Promise<EditorId> {
   const { availableEditors } = await api.server.getConfig();
   const editor = resolveAndPersistPreferredEditor(availableEditors);

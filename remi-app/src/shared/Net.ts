@@ -1,7 +1,6 @@
 /**
- * Net 妯″潡 - 缃戠粶宸ュ叿鏈嶅姟
- *
- * 鎻愪緵鍚姩闃舵甯哥敤鐨勭綉缁滆緟鍔╁姛鑳斤紝鍖呮嫭绔彛鍙敤鎬ф娴嬨€佺幆鍥炲湴鍧€妫€鏌ャ€? * 涓存椂绔彛棰勭暀绛夎兘鍔涖€傚熀浜?Effect 妗嗘灦瀹炵幇锛屼繚璇佺被鍨嬪畨鍏ㄥ拰鍙粍鍚堟€с€? *
+ * Net 濡€虫健 - 缂冩垹绮跺銉ュ徔閺堝秴濮? *
+ * 閹绘劒绶甸崥顖氬З闂冭埖顔岀敮鍝ユ暏閻ㄥ嫮缍夌紒婊嗙窡閸斺晛濮涢懗鏂ょ礉閸栧懏瀚粩顖氬經閸欘垳鏁ら幀褎顥呭ù瀣ㄢ偓浣哄箚閸ョ偛婀撮崸鈧Λ鈧弻銉ｂ偓? * 娑撳瓨妞傜粩顖氬經妫板嫮鏆€缁涘鍏橀崝娑栤偓鍌氱唨娴?Effect 濡楀棙鐏︾€圭偟骞囬敍灞肩箽鐠囦胶琚崹瀣暔閸忋劌鎷伴崣顖滅矋閸氬牊鈧佲偓? *
  * @module Net
  */
 import * as Net from "node:net";
@@ -9,23 +8,19 @@ import * as Net from "node:net";
 import { Data, Effect, Layer, ServiceMap } from "effect";
 
 /**
- * 缃戠粶鎿嶄綔閿欒绫诲瀷
- *
- * 鐢ㄤ簬灏佽缃戠粶鎿嶄綔涓彲鑳藉嚭鐜扮殑閿欒锛屽寘鍚敊璇秷鎭拰鍙€夌殑鍘熷閿欒鍘熷洜銆? * 缁ф壙鑷?Effect 鐨?TaggedError锛屾敮鎸佹ā寮忓尮閰嶅拰閿欒澶勭悊銆? *
- * @property message - 閿欒鎻忚堪淇℃伅
- * @property cause - 鍙€夌殑鍘熷閿欒瀵硅薄锛岀敤浜庝繚鐣欓敊璇爢鏍堝拰璇︾粏淇℃伅
- */
+ * 缂冩垹绮堕幙宥勭稊闁挎瑨顕ょ猾璇茬€? *
+ * 閻劋绨亸浣筋棅缂冩垹绮堕幙宥勭稊娑擃厼褰查懗钘夊毉閻滄壆娈戦柨娆掝嚖閿涘苯瀵橀崥顐︽晩鐠囶垱绉烽幁顖氭嫲閸欘垶鈧娈戦崢鐔奉潗闁挎瑨顕ら崢鐔锋礈閵? * 缂佈勫閼?Effect 閻?TaggedError閿涘本鏁幐浣鼓佸蹇撳爱闁板秴鎷伴柨娆掝嚖婢跺嫮鎮婇妴? *
+ * @property message - 闁挎瑨顕ら幓蹇氬牚娣団剝浼? * @property cause - 閸欘垶鈧娈戦崢鐔奉潗闁挎瑨顕ょ€电钖勯敍宀€鏁ゆ禍搴濈箽閻ｆ瑩鏁婄拠顖氱垻閺嶅牆鎷扮拠锔剧矎娣団剝浼? */
 export class NetError extends Data.TaggedError("NetError")<{
   readonly message: string;
   readonly cause?: unknown;
 }> {}
 
 /**
- * 绫诲瀷瀹堝崼鍑芥暟锛氬垽鏂竴涓€兼槸鍚︿负甯︽湁 code 灞炴€х殑 ErrnoException
+ * 缁鐎风€瑰牆宕奸崙鑺ユ殶閿涙艾鍨介弬顓濈娑擃亜鈧吋妲搁崥锔胯礋鐢附婀?code 鐏炵偞鈧呮畱 ErrnoException
  *
- * Node.js 鐨勭郴缁熼敊璇€氬父鍖呭惈涓€涓?code 灞炴€э紙濡?'EADDRINUSE'銆?ECONNREFUSED' 绛夛級锛? * 璇ュ嚱鏁扮敤浜庡畨鍏ㄥ湴妫€鏌ュ苟鏀剁獎閿欒绫诲瀷銆? *
- * @param cause - 寰呮鏌ョ殑閿欒瀵硅薄
- * @returns 濡傛灉 cause 鏄甫鏈?string 绫诲瀷 code 灞炴€х殑瀵硅薄鍒欒繑鍥?true
+ * Node.js 閻ㄥ嫮閮寸紒鐔兼晩鐠囶垶鈧艾鐖堕崠鍛儓娑撯偓娑?code 鐏炵偞鈧嶇礄婵?'EADDRINUSE'閵?ECONNREFUSED' 缁涘绱氶敍? * 鐠囥儱鍤遍弫鎵暏娴滃骸鐣ㄩ崗銊ユ勾濡偓閺屻儱鑻熼弨鍓佺崕闁挎瑨顕ょ猾璇茬€烽妴? *
+ * @param cause - 瀵板懏顥呴弻銉ф畱闁挎瑨顕ょ€电钖? * @returns 婵″倹鐏?cause 閺勵垰鐢張?string 缁鐎?code 鐏炵偞鈧呮畱鐎电钖勯崚娆掔箲閸?true
  */
 function isErrnoExceptionWithCode(cause: unknown): cause is {
   readonly code: string;
@@ -39,24 +34,23 @@ function isErrnoExceptionWithCode(cause: unknown): cause is {
 }
 
 /**
- * 瀹夊叏鍏抽棴 TCP 鏈嶅姟鍣? *
- * 鍦ㄦ竻鐞嗛樁娈佃皟鐢紝蹇界暐鍏抽棴杩囩▼涓彲鑳藉嚭鐜扮殑閿欒锛? * 閬垮厤鍥犱负鍏抽棴澶辫触鑰屽奖鍝嶅悗缁殑娓呯悊閫昏緫銆? *
- * @param server - 瑕佸叧闂殑 Net.Server 瀹炰緥
- */
+ * 鐎瑰鍙忛崗鎶芥４ TCP 閺堝秴濮熼崳? *
+ * 閸︺劍绔婚悶鍡涙▉濞堜絻鐨熼悽顭掔礉韫囩晫鏆愰崗鎶芥４鏉╁洨鈻兼稉顓炲讲閼宠棄鍤悳鎵畱闁挎瑨顕ら敍? * 闁灝鍘ら崶鐘辫礋閸忔娊妫存径杈Е閼板苯濂栭崫宥呮倵缂侇厾娈戝〒鍛倞闁槒绶妴? *
+ * @param server - 鐟曚礁鍙ч梻顓犳畱 Net.Server 鐎圭偘绶? */
 const closeServer = (server: Net.Server) => {
   try {
     server.close();
   } catch {
-    // 蹇界暐娓呯悊闃舵鐨勫叧闂け璐?  }
+    // 韫囩晫鏆愬〒鍛倞闂冭埖顔岄惃鍕彠闂傤厼銇戠拹?  }
 };
 
 /**
- * 灏濊瘯棰勭暀涓€涓复鏃剁鍙? *
- * 閫氳繃鍒涘缓涓€涓复鏃剁殑 TCP 鏈嶅姟鍣ㄦ潵鎺㈡祴鎸囧畾绔彛鏄惁鍙敤銆? * 濡傛灉浼犲叆鐨勭鍙ｄ负 0锛屾搷浣滅郴缁熶細鑷姩鍒嗛厤涓€涓彲鐢ㄧ殑涓存椂绔彛銆? * 棰勭暀鎴愬姛鍚庣珛鍗冲叧闂湇鍔″櫒锛岄噴鏀剧鍙ｄ緵鍚庣画浣跨敤銆? *
- * 宸ヤ綔娴佺▼锛? * 1. 鍒涘缓 TCP 鏈嶅姟鍣ㄥ苟璋冪敤 unref()锛岄伩鍏嶉樆姝㈣繘绋嬮€€鍑? * 2. 鐩戝惉鎸囧畾绔彛锛坧ort 涓?0 鏃剁敱 OS 鍒嗛厤锛? * 3. 鑾峰彇瀹為檯鍒嗛厤鐨勭鍙ｅ彿
- * 4. 鍏抽棴鏈嶅姟鍣ㄥ苟杩斿洖绔彛鍙? * 5. 濡傛灉杩囩▼涓嚭鐜伴敊璇紝杩斿洖 NetError
+ * 鐏忔繆鐦０鍕殌娑撯偓娑擃亙澶嶉弮鍓侇伂閸? *
+ * 闁俺绻冮崚娑樼紦娑撯偓娑擃亙澶嶉弮鍓佹畱 TCP 閺堝秴濮熼崳銊︽降閹恒垺绁撮幐鍥х暰缁旑垰褰涢弰顖氭儊閸欘垳鏁ら妴? * 婵″倹鐏夋导鐘插弳閻ㄥ嫮顏崣锝勮礋 0閿涘本鎼锋担婊呴兇缂佺喍绱伴懛顏勫З閸掑棝鍘ゆ稉鈧稉顏勫讲閻劎娈戞稉瀛樻缁旑垰褰涢妴? * 妫板嫮鏆€閹存劕濮涢崥搴ｇ彌閸楀啿鍙ч梻顓熸箛閸斺€虫珤閿涘矂鍣撮弨鍓ь伂閸欙絼绶甸崥搴ｇ敾娴ｈ法鏁ら妴? *
+ * 瀹搞儰缍斿ù浣衡柤閿? * 1. 閸掓稑缂?TCP 閺堝秴濮熼崳銊ヨ嫙鐠嬪啰鏁?unref()閿涘矂浼╅崗宥夋▎濮濄垼绻樼粙瀣偓鈧崙? * 2. 閻╂垵鎯夐幐鍥х暰缁旑垰褰涢敍鍧rt 娑?0 閺冨墎鏁?OS 閸掑棝鍘ら敍? * 3. 閼惧嘲褰囩€圭偤妾崚鍡涘帳閻ㄥ嫮顏崣锝呭娇
+ * 4. 閸忔娊妫撮張宥呭閸ｃ劌鑻熸潻鏂挎礀缁旑垰褰涢崣? * 5. 婵″倹鐏夋潻鍥┾柤娑擃厼鍤悳浼存晩鐠囶垽绱濇潻鏂挎礀 NetError
  *
- * @param port - 瑕侀鐣欑殑绔彛鍙凤紝0 琛ㄧず鐢辨搷浣滅郴缁熻嚜鍔ㄥ垎閰? * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
+ * @param port - 鐟曚線顣╅悾娆戞畱缁旑垰褰涢崣鍑ょ礉0 鐞涖劎銇氶悽杈ㄦ惙娴ｆ粎閮寸紒鐔诲殰閸斻劌鍨庨柊? * @returns Effect閿涘本鍨氶崝鐔告鏉╂柨娲栨０鍕殌閻ㄥ嫮顏崣锝呭娇閿涘苯銇戠拹銉︽鏉╂柨娲?NetError
  */
 const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
   Effect.callback<number, NetError>((resume) => {
@@ -64,24 +58,23 @@ const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
     let settled = false;
 
     /**
-     * 纭繚鍥炶皟鍙璋冪敤涓€娆?     * Effect.callback 瑕佹眰 resume 鍙兘琚皟鐢ㄤ竴娆★紝璇ュ嚱鏁伴€氳繃 settled 鏍囧織浣嶄繚璇佽繖涓€鐐?     */
+     * 绾喕绻氶崶鐐剁殶閸欘亣顫︾拫鍐暏娑撯偓濞?     * Effect.callback 鐟曚焦鐪?resume 閸欘亣鍏樼悮顐ョ殶閻劋绔村▎鈽呯礉鐠囥儱鍤遍弫浼粹偓姘崇箖 settled 閺嶅洤绻旀担宥勭箽鐠囦浇绻栨稉鈧悙?     */
     const settle = (effect: Effect.Effect<number, NetError>) => {
       if (settled) return;
       settled = true;
       resume(effect);
     };
 
-    // 璋冪敤 unref() 浣挎湇鍔″櫒涓嶄細闃绘 Node.js 杩涚▼閫€鍑?    server.unref();
+    // 鐠嬪啰鏁?unref() 娴ｆ寧婀囬崝鈥虫珤娑撳秳绱伴梼缁橆剾 Node.js 鏉╂稓鈻奸柅鈧崙?    server.unref();
 
-    // 鐩戝惉閿欒浜嬩欢锛堝绔彛琚崰鐢ㄣ€佹潈闄愪笉瓒崇瓑锛?    server.once("error", (cause) => {
+    // 閻╂垵鎯夐柨娆掝嚖娴滃娆㈤敍鍫濐洤缁旑垰褰涚悮顐㈠窗閻劊鈧焦娼堥梽鎰瑝鐡掑磭鐡戦敍?    server.once("error", (cause) => {
       settle(Effect.fail(new NetError({ message: "Could not find an available port.", cause })));
     });
 
-    // 鐩戝惉鎴愬姛鍚庤幏鍙栫鍙ｅ彿骞跺叧闂湇鍔″櫒
+    // 閻╂垵鎯夐幋鎰閸氬氦骞忛崣鏍伂閸欙絽褰块獮璺哄彠闂傤厽婀囬崝鈥虫珤
     server.listen(port, () => {
       const address = server.address();
-      // address 鍙兘鏄?string銆乶ull 鎴?object锛岃繖閲屽彧澶勭悊 object 鎯呭喌
-      const resolved = typeof address === "object" && address !== null ? address.port : 0;
+      // address 閸欘垵鍏橀弰?string閵嗕苟ull 閹?object閿涘矁绻栭柌灞藉涧婢跺嫮鎮?object 閹懎鍠?      const resolved = typeof address === "object" && address !== null ? address.port : 0;
       server.close(() => {
         if (resolved > 0) {
           settle(Effect.succeed(resolved));
@@ -91,73 +84,64 @@ const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
       });
     });
 
-    // 杩斿洖娓呯悊閫昏緫锛氬綋 Effect 琚腑鏂椂鍏抽棴鏈嶅姟鍣?    return Effect.sync(() => {
+    // 鏉╂柨娲栧〒鍛倞闁槒绶敍姘秼 Effect 鐞氼偂鑵戦弬顓熸閸忔娊妫撮張宥呭閸?    return Effect.sync(() => {
       closeServer(server);
     });
   });
 
 /**
- * 缃戠粶鏈嶅姟鎺ュ彛瀹氫箟
- *
- * 鎻忚堪浜?NetService 鎻愪緵鐨勬墍鏈夌綉缁滆緟鍔╁姛鑳斤紝鍖呮嫭锛? * - 妫€鏌ユ寚瀹氫富鏈哄拰绔彛鐨勫彲缁戝畾鎬? * - 妫€鏌ョ幆鍥炲湴鍧€锛圛Pv4 鍜?IPv6锛変笂鐨勭鍙ｅ彲鐢ㄦ€? * - 棰勭暀涓存椂鐜洖绔彛
- * - 鏌ユ壘鍙敤绔彛锛堟敮鎸侀閫夌鍙ｏ級
- */
+ * 缂冩垹绮堕張宥呭閹恒儱褰涚€规矮绠? *
+ * 閹诲繗鍫禍?NetService 閹绘劒绶甸惃鍕閺堝缍夌紒婊嗙窡閸斺晛濮涢懗鏂ょ礉閸栧懏瀚敍? * - 濡偓閺屻儲瀵氱€规矮瀵岄張鍝勬嫲缁旑垰褰涢惃鍕讲缂佹垵鐣鹃幀? * - 濡偓閺屻儳骞嗛崶鐐叉勾閸р偓閿涘湜Pv4 閸?IPv6閿涘绗傞惃鍕伂閸欙絽褰查悽銊︹偓? * - 妫板嫮鏆€娑撳瓨妞傞悳顖氭礀缁旑垰褰? * - 閺屻儲澹橀崣顖滄暏缁旑垰褰涢敍鍫熸暜閹镐線顩婚柅澶岊伂閸欙綇绱? */
 export interface NetServiceShape {
   /**
-   * 妫€鏌?TCP 鏈嶅姟鍣ㄦ槸鍚﹀彲浠ョ粦瀹氬埌鎸囧畾鐨勪富鏈哄拰绔彛
-   *
-   * @param port - 瑕佹鏌ョ殑绔彛鍙?   * @param host - 瑕佹鏌ョ殑涓绘満鍦板潃
-   * @returns Effect锛岃繑鍥?boolean 琛ㄧず鏄惁鍙互缁戝畾
+   * 濡偓閺?TCP 閺堝秴濮熼崳銊︽Ц閸氾箑褰叉禒銉х拨鐎规艾鍩岄幐鍥х暰閻ㄥ嫪瀵岄張鍝勬嫲缁旑垰褰?   *
+   * @param port - 鐟曚焦顥呴弻銉ф畱缁旑垰褰涢崣?   * @param host - 鐟曚焦顥呴弻銉ф畱娑撶粯婧€閸︽澘娼?   * @returns Effect閿涘矁绻戦崶?boolean 鐞涖劎銇氶弰顖氭儊閸欘垯浜掔紒鎴濈暰
    */
   readonly canListenOnHost: (port: number, host: string) => Effect.Effect<boolean>;
 
   /**
-   * 妫€鏌ョ幆鍥炲湴鍧€锛?27.0.0.1 鍜?::1锛変笂鐨勭鍙ｅ彲鐢ㄦ€?   *
-   * 鍚屾椂妫€鏌?IPv4 鍜?IPv6 鐜洖鍦板潃锛屽彧鏈変袱鑰呴兘鍙敤鏃舵墠杩斿洖 true銆?   * 杩欑‘淇濅簡鏈嶅姟鍙互鍦ㄥ弻鏍堢幆澧冧笅姝ｅ父鍚姩銆?   *
-   * @param port - 瑕佹鏌ョ殑绔彛鍙?   * @returns Effect锛岃繑鍥?boolean 琛ㄧず绔彛鍦ㄧ幆鍥炲湴鍧€涓婃槸鍚﹀彲鐢?   */
+   * 濡偓閺屻儳骞嗛崶鐐叉勾閸р偓閿?27.0.0.1 閸?::1閿涘绗傞惃鍕伂閸欙絽褰查悽銊︹偓?   *
+   * 閸氬本妞傚Λ鈧弻?IPv4 閸?IPv6 閻滎垰娲栭崷鏉挎絻閿涘苯褰ч張澶夎⒈閼板懘鍏橀崣顖滄暏閺冭埖澧犳潻鏂挎礀 true閵?   * 鏉╂瑧鈥樻穱婵呯啊閺堝秴濮熼崣顖欎簰閸︺劌寮婚弽鍫㈠箚婢у啩绗呭锝呯埗閸氼垰濮╅妴?   *
+   * @param port - 鐟曚焦顥呴弻銉ф畱缁旑垰褰涢崣?   * @returns Effect閿涘矁绻戦崶?boolean 鐞涖劎銇氱粩顖氬經閸︺劎骞嗛崶鐐叉勾閸р偓娑撳﹥妲搁崥锕€褰查悽?   */
   readonly isPortAvailableOnLoopback: (port: number) => Effect.Effect<boolean>;
 
   /**
-   * 棰勭暀涓€涓复鏃剁幆鍥炵鍙ｅ苟绔嬪嵆閲婃斁
+   * 妫板嫮鏆€娑撯偓娑擃亙澶嶉弮鍓佸箚閸ョ偟顏崣锝呰嫙缁斿宓嗛柌濠冩杹
    *
-   * 閫氳繃缁戝畾鍒扮鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶅彲鐢ㄧ鍙ｏ紝鑾峰彇绔彛鍙峰悗绔嬪嵆鍏抽棴鏈嶅姟鍣ㄣ€?   * 杩斿洖鐨勭鍙ｅ彿鍙互鐢ㄤ簬鍚庣画鐨勬湇鍔″惎鍔紝纭繚绔彛鍦ㄦ鏌ユ椂纭疄鍙敤銆?   *
-   * @param host - 鍙€夌殑涓绘満鍦板潃锛岄粯璁や负 "127.0.0.1"
-   * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
+   * 闁俺绻冪紒鎴濈暰閸掓壆顏崣?0 鐠佲晜鎼锋担婊呴兇缂佺喕鍤滈崝銊ュ瀻闁板秴褰查悽銊ь伂閸欙綇绱濋懢宄板絿缁旑垰褰涢崣宄版倵缁斿宓嗛崗鎶芥４閺堝秴濮熼崳銊ｂ偓?   * 鏉╂柨娲栭惃鍕伂閸欙絽褰块崣顖欎簰閻劋绨崥搴ｇ敾閻ㄥ嫭婀囬崝鈥虫儙閸旑煉绱濈涵顔荤箽缁旑垰褰涢崷銊︻梾閺屻儲妞傜涵顔肩杽閸欘垳鏁ら妴?   *
+   * @param host - 閸欘垶鈧娈戞稉缁樻簚閸︽澘娼冮敍宀勭帛鐠併倓璐?"127.0.0.1"
+   * @returns Effect閿涘本鍨氶崝鐔告鏉╂柨娲栨０鍕殌閻ㄥ嫮顏崣锝呭娇閿涘苯銇戠拹銉︽鏉╂柨娲?NetError
    */
   readonly reserveLoopbackPort: (host?: string) => Effect.Effect<number, NetError>;
 
   /**
-   * 鏌ユ壘涓€涓彲鐢ㄧ殑鐩戝惉绔彛
-   *
-   * 浼樺厛灏濊瘯浣跨敤棣栭€夌鍙ｏ紝濡傛灉璇ョ鍙ｄ笉鍙敤锛堣鍗犵敤鎴栨潈闄愪笉瓒筹級锛?   * 鍒欏洖閫€鍒拌鎿嶄綔绯荤粺鑷姩鍒嗛厤涓€涓复鏃剁鍙ｏ紙port = 0锛夈€?   *
-   * @param preferred - 棣栭€夌殑绔彛鍙?   * @returns Effect锛岃繑鍥炲彲鐢ㄧ殑绔彛鍙凤紝澶辫触鏃惰繑鍥?NetError
+   * 閺屻儲澹樻稉鈧稉顏勫讲閻劎娈戦惄鎴濇儔缁旑垰褰?   *
+   * 娴兼ê鍘涚亸婵婄槸娴ｈ法鏁ゆ＃鏍偓澶岊伂閸欙綇绱濇俊鍌涚亯鐠囥儳顏崣锝勭瑝閸欘垳鏁ら敍鍫ｎ潶閸楃姷鏁ら幋鏍ㄦ綀闂勬劒绗夌搾绛圭礆閿?   * 閸掓瑥娲栭柅鈧崚鎷岊唨閹垮秳缍旂化鑽ょ埠閼奉亜濮╅崚鍡涘帳娑撯偓娑擃亙澶嶉弮鍓侇伂閸欙綇绱檖ort = 0閿涘鈧?   *
+   * @param preferred - 妫ｆ牠鈧娈戠粩顖氬經閸?   * @returns Effect閿涘矁绻戦崶鐐插讲閻劎娈戠粩顖氬經閸欏嚖绱濇径杈Е閺冩儼绻戦崶?NetError
    */
   readonly findAvailablePort: (preferred: number) => Effect.Effect<number, NetError>;
 }
 
 /**
- * NetService - 鍚姩闃舵缃戠粶杈呭姪宸ュ叿鐨勬湇鍔℃爣绛? *
- * 鍩轰簬 Effect 鐨?ServiceMap 瀹炵幇锛屾彁渚涗緷璧栨敞鍏ヨ兘鍔涖€? * 閫氳繃 NetService.layer 鍙互鑾峰彇璇ユ湇鍔＄殑瀹炵幇灞傦紝渚涘叾浠栨ā鍧椾娇鐢ㄣ€? *
- * 鏈嶅姟鏍囪瘑绗︼細@remi-code/shared/Net/NetService
+ * NetService - 閸氼垰濮╅梼鑸殿唽缂冩垹绮舵潏鍛И瀹搞儱鍙块惃鍕箛閸斺剝鐖ｇ粵? *
+ * 閸╄桨绨?Effect 閻?ServiceMap 鐎圭偟骞囬敍灞惧絹娓氭稐绶风挧鏍ㄦ暈閸忋儴鍏橀崝娑栤偓? * 闁俺绻?NetService.layer 閸欘垯浜掗懢宄板絿鐠囥儲婀囬崝锛勬畱鐎圭偟骞囩仦鍌︾礉娓氭稑鍙炬禒鏍侀崸妞惧▏閻劊鈧? *
+ * 閺堝秴濮熼弽鍥槕缁楋讣绱癅remi-code/shared/Net/NetService
  */
 export class NetService extends ServiceMap.Service<NetService, NetServiceShape>()(
   "~/shared/Net/NetService",
 ) {
   /**
-   * NetService 鐨勫疄鐜板眰
+   * NetService 閻ㄥ嫬鐤勯悳鏉跨湴
    *
-   * 浣跨敤 Layer.sync 鍒涘缓鍚屾灞傦紝鎻愪緵 NetServiceShape 鎺ュ彛鐨勫畬鏁村疄鐜般€?   * 鎵€鏈夋柟娉曢兘鍩轰簬 Effect.callback 灏佽 Node.js 鐨勫紓姝ョ綉缁滄搷浣滐紝
-   * 纭繚涓?Effect 鐢熸€佺郴缁熺殑鏃犵紳闆嗘垚銆?   */
+   * 娴ｈ法鏁?Layer.sync 閸掓稑缂撻崥灞绢劄鐏炲偊绱濋幓鎰返 NetServiceShape 閹恒儱褰涢惃鍕暚閺佹潙鐤勯悳鑸偓?   * 閹碘偓閺堝鏌熷▔鏇㈠厴閸╄桨绨?Effect.callback 鐏忎浇顥?Node.js 閻ㄥ嫬绱撳銉х秹缂佹粍鎼锋担婊愮礉
+   * 绾喕绻氭稉?Effect 閻㈢喐鈧胶閮寸紒鐔烘畱閺冪姷绱抽梿鍡樺灇閵?   */
   static readonly layer = Layer.sync(NetService, () => {
     /**
-     * 妫€鏌?TCP 鏈嶅姟鍣ㄦ槸鍚﹀彲浠ョ粦瀹氬埌鎸囧畾鐨勪富鏈哄拰绔彛
+     * 濡偓閺?TCP 閺堝秴濮熼崳銊︽Ц閸氾箑褰叉禒銉х拨鐎规艾鍩岄幐鍥х暰閻ㄥ嫪瀵岄張鍝勬嫲缁旑垰褰?     *
+     * 鐎圭偟骞囩紒鍡氬Ν閿?     * - 閸掓稑缂撴稉瀛樻 TCP 閺堝秴濮熼崳銊ヨ嫙鐏忔繆鐦紒鎴濈暰
+     * - 婵″倹鐏夐崙铏瑰箛 EADDRNOTAVAIL 闁挎瑨顕ら敍鍫濇勾閸р偓娑撳秴褰查悽顭掔礆閿涘矁顫嬫稉鍝勫讲閻?     *   鏉╂瑦妲告稉杞扮啊閸忕厧顔愬▽鈩冩箒 IPv6 閺€顖涘瘮閻ㄥ嫮骞嗘晶鍐跨礉闁灝鍘ら悳顖氭礀閸欘垳鏁ら幀褎顥呴弻銉ャ亼鐠?     * - 閸忔湹绮柨娆掝嚖閿涘牆顩?EADDRINUSE閿涘顫嬫稉杞扮瑝閸欘垳鏁?     * - 缂佹垵鐣鹃幋鎰閸氬海鐝涢崡鍐插彠闂傤厽婀囬崝鈥虫珤楠炴儼绻戦崶?true
      *
-     * 瀹炵幇缁嗚妭锛?     * - 鍒涘缓涓存椂 TCP 鏈嶅姟鍣ㄥ苟灏濊瘯缁戝畾
-     * - 濡傛灉鍑虹幇 EADDRNOTAVAIL 閿欒锛堝湴鍧€涓嶅彲鐢級锛岃涓哄彲鐢?     *   杩欐槸涓轰簡鍏煎娌℃湁 IPv6 鏀寔鐨勭幆澧冿紝閬垮厤鐜洖鍙敤鎬ф鏌ュけ璐?     * - 鍏朵粬閿欒锛堝 EADDRINUSE锛夎涓轰笉鍙敤
-     * - 缁戝畾鎴愬姛鍚庣珛鍗冲叧闂湇鍔″櫒骞惰繑鍥?true
-     *
-     * @param port - 瑕佹鏌ョ殑绔彛鍙?     * @param host - 瑕佹鏌ョ殑涓绘満鍦板潃
-     * @returns Effect锛岃繑鍥?boolean 琛ㄧず鏄惁鍙互缁戝畾
+     * @param port - 鐟曚焦顥呴弻銉ф畱缁旑垰褰涢崣?     * @param host - 鐟曚焦顥呴弻銉ф畱娑撶粯婧€閸︽澘娼?     * @returns Effect閿涘矁绻戦崶?boolean 鐞涖劎銇氶弰顖氭儊閸欘垯浜掔紒鎴濈暰
      */
     const canListenOnHost = (port: number, host: string): Effect.Effect<boolean> =>
       Effect.callback<boolean>((resume) => {
@@ -173,8 +157,8 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
         server.unref();
 
         server.once("error", (cause) => {
-          // EADDRNOTAVAIL 琛ㄧず鍦板潃涓嶅彲鐢紙濡?IPv6 鏈惎鐢級
-          // 灏嗗叾瑙嗕负"鍙敤"鏄负浜嗛伩鍏嶅湪鍙湁 IPv4 鐨勭幆澧冧腑妫€鏌ュけ璐?          if (isErrnoExceptionWithCode(cause) && cause.code === "EADDRNOTAVAIL") {
+          // EADDRNOTAVAIL 鐞涖劎銇氶崷鏉挎絻娑撳秴褰查悽顭掔礄婵?IPv6 閺堫亜鎯庨悽顭掔礆
+          // 鐏忓棗鍙剧憴鍡曡礋"閸欘垳鏁?閺勵垯璐熸禍鍡涗缉閸忓秴婀崣顏呮箒 IPv4 閻ㄥ嫮骞嗘晶鍐ц厬濡偓閺屻儱銇戠拹?          if (isErrnoExceptionWithCode(cause) && cause.code === "EADDRNOTAVAIL") {
             settle(true);
             return;
           }
@@ -195,11 +179,11 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
       });
 
     /**
-     * 棰勭暀涓€涓复鏃剁幆鍥炵鍙ｅ苟绔嬪嵆閲婃斁
+     * 妫板嫮鏆€娑撯偓娑擃亙澶嶉弮鍓佸箚閸ョ偟顏崣锝呰嫙缁斿宓嗛柌濠冩杹
      *
-     * 閫氳繃缁戝畾鍒扮鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶅彲鐢ㄧ鍙ｏ紝鑾峰彇绔彛鍙峰悗绔嬪嵆鍏抽棴鏈嶅姟鍣ㄣ€?     * 杩斿洖鐨勭鍙ｅ彿鍙互鐢ㄤ簬鍚庣画鐨勬湇鍔″惎鍔紝纭繚绔彛鍦ㄦ鏌ユ椂纭疄鍙敤銆?     *
-     * @param host - 鐜洖鍦板潃锛岄粯璁や负 "127.0.0.1"
-     * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
+     * 闁俺绻冪紒鎴濈暰閸掓壆顏崣?0 鐠佲晜鎼锋担婊呴兇缂佺喕鍤滈崝銊ュ瀻闁板秴褰查悽銊ь伂閸欙綇绱濋懢宄板絿缁旑垰褰涢崣宄版倵缁斿宓嗛崗鎶芥４閺堝秴濮熼崳銊ｂ偓?     * 鏉╂柨娲栭惃鍕伂閸欙絽褰块崣顖欎簰閻劋绨崥搴ｇ敾閻ㄥ嫭婀囬崝鈥虫儙閸旑煉绱濈涵顔荤箽缁旑垰褰涢崷銊︻梾閺屻儲妞傜涵顔肩杽閸欘垳鏁ら妴?     *
+     * @param host - 閻滎垰娲栭崷鏉挎絻閿涘矂绮拋銈勮礋 "127.0.0.1"
+     * @returns Effect閿涘本鍨氶崝鐔告鏉╂柨娲栨０鍕殌閻ㄥ嫮顏崣锝呭娇閿涘苯銇戠拹銉︽鏉╂柨娲?NetError
      */
     const reserveLoopbackPort = (host = "127.0.0.1"): Effect.Effect<number, NetError> =>
       Effect.callback<number, NetError>((resume) => {
@@ -236,8 +220,8 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
     return {
       canListenOnHost,
       /**
-       * 妫€鏌ョ幆鍥炲湴鍧€涓婄殑绔彛鍙敤鎬?       *
-       * 鍚屾椂妫€鏌?IPv4锛?27.0.0.1锛夊拰 IPv6锛?:1锛夌幆鍥炲湴鍧€锛?       * 浣跨敤 Effect.zipWith 骞惰鎵ц涓や釜妫€鏌ワ紝鍙湁涓よ€呴兘鍙敤鏃舵墠杩斿洖 true銆?       */
+       * 濡偓閺屻儳骞嗛崶鐐叉勾閸р偓娑撳﹦娈戠粩顖氬經閸欘垳鏁ら幀?       *
+       * 閸氬本妞傚Λ鈧弻?IPv4閿?27.0.0.1閿涘鎷?IPv6閿?:1閿涘骞嗛崶鐐叉勾閸р偓閿?       * 娴ｈ法鏁?Effect.zipWith 楠炴儼顢戦幍褑顢戞稉銈勯嚋濡偓閺屻儻绱濋崣顏呮箒娑撱倛鈧懘鍏橀崣顖滄暏閺冭埖澧犳潻鏂挎礀 true閵?       */
       isPortAvailableOnLoopback: (port) =>
         Effect.zipWith(
           canListenOnHost(port, "127.0.0.1"),
@@ -246,9 +230,8 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
         ),
       reserveLoopbackPort,
       /**
-       * 鏌ユ壘鍙敤绔彛
-       *
-       * 浼樺厛灏濊瘯浣跨敤棣栭€夌鍙ｏ紝濡傛灉澶辫触锛堢鍙ｈ鍗犵敤绛夛級锛?       * 鍒欏洖閫€鍒颁娇鐢ㄧ鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶃€?       * 浣跨敤 Effect.catch 鎹曡幏绗竴娆″皾璇曠殑澶辫触骞舵墽琛屽洖閫€閫昏緫銆?       */
+       * 閺屻儲澹橀崣顖滄暏缁旑垰褰?       *
+       * 娴兼ê鍘涚亸婵婄槸娴ｈ法鏁ゆ＃鏍偓澶岊伂閸欙綇绱濇俊鍌涚亯婢惰精瑙﹂敍鍫㈩伂閸欙綀顫﹂崡鐘垫暏缁涘绱氶敍?       * 閸掓瑥娲栭柅鈧崚棰佸▏閻劎顏崣?0 鐠佲晜鎼锋担婊呴兇缂佺喕鍤滈崝銊ュ瀻闁板秲鈧?       * 娴ｈ法鏁?Effect.catch 閹规洝骞忕粭顑跨濞嗏€崇毦鐠囨洜娈戞径杈Е楠炶埖澧界悰灞芥礀闁偓闁槒绶妴?       */
       findAvailablePort: (preferred) =>
         Effect.catch(tryReservePort(preferred), () => tryReservePort(0)),
     } satisfies NetServiceShape;

@@ -1,6 +1,6 @@
 /**
  * @file threadSummary.ts
- * @description 绾跨▼鎽樿鐘舵€佽绠楀伐鍏锋ā鍧? * @purpose 鎻愪緵绾跨▼鍏冩暟鎹拰鐘舵€佽绠楃殑鍏变韩宸ュ叿鍑芥暟锛岀敤浜庤拷韪緟瀹℃壒銆佸緟鐢ㄦ埛杈撳叆绛夌姸鎬? * @exports 绾跨▼鎽樿鐘舵€佸拰鍏冩暟鎹绠楀嚱鏁? */
+ * @description 缁捐法鈻奸幗妯款洣閻樿埖鈧浇顓哥粻妤€浼愰崗閿嬆侀崸? * @purpose 閹绘劒绶电痪璺ㄢ柤閸忓啯鏆熼幑顔兼嫲閻樿埖鈧浇顓哥粻妤冩畱閸忓彉闊╁銉ュ徔閸戣姤鏆熼敍宀€鏁ゆ禍搴ゆ嫹闊亜绶熺€光剝澹掗妴浣哥窡閻劍鍩涙潏鎾冲弳缁涘濮搁幀? * @exports 缁捐法鈻奸幗妯款洣閻樿埖鈧礁鎷伴崗鍐╂殶閹诡喛顓哥粻妤€鍤遍弫? */
 
 import type {
   OrchestrationLatestTurn,
@@ -11,10 +11,8 @@ import type {
 
 /**
  * @interface ThreadSummaryMetadata
- * @description 绾跨▼鎽樿鍏冩暟鎹帴鍙? * @property {string | null} latestUserMessageAt - 鏈€鏂扮敤鎴锋秷鎭殑鏃堕棿鎴筹紙ISO 鏍煎紡锛? * @property {boolean} hasPendingApprovals - 鏄惁瀛樺湪寰呭鎵圭殑璇锋眰
- * @property {boolean} hasPendingUserInput - 鏄惁瀛樺湪寰呯敤鎴疯緭鍏ョ殑璇锋眰
- * @property {boolean} hasActionableProposedPlan - 鏄惁瀛樺湪鍙墽琛岀殑鎻愯璁″垝锛堝皻鏈疄鏂斤級
- */
+ * @description 缁捐法鈻奸幗妯款洣閸忓啯鏆熼幑顔藉复閸? * @property {string | null} latestUserMessageAt - 閺堚偓閺傛壆鏁ら幋閿嬬Х閹垳娈戦弮鍫曟？閹寸绱橧SO 閺嶇厧绱￠敍? * @property {boolean} hasPendingApprovals - 閺勵垰鎯佺€涙ê婀鍛吀閹靛湱娈戠拠閿嬬湴
+ * @property {boolean} hasPendingUserInput - 閺勵垰鎯佺€涙ê婀鍛暏閹寸柉绶崗銉ф畱鐠囬攱鐪? * @property {boolean} hasActionableProposedPlan - 閺勵垰鎯佺€涙ê婀崣顖涘⒔鐞涘瞼娈戦幓鎰唴鐠佲€冲灊閿涘牆鐨婚張顏勭杽閺傛枻绱? */
 export interface ThreadSummaryMetadata {
   latestUserMessageAt: string | null;
   hasPendingApprovals: boolean;
@@ -24,10 +22,9 @@ export interface ThreadSummaryMetadata {
 
 /**
  * @interface ThreadSummaryState
- * @description 绾跨▼鎽樿鐘舵€佹帴鍙ｏ紝缁ф壙鑷?ThreadSummaryMetadata
- * @property {number} pendingApprovalCount - 寰呭鎵硅姹傜殑鏁伴噺
- * @property {number} pendingUserInputCount - 寰呯敤鎴疯緭鍏ヨ姹傜殑鏁伴噺
- */
+ * @description 缁捐法鈻奸幗妯款洣閻樿埖鈧焦甯撮崣锝忕礉缂佈勫閼?ThreadSummaryMetadata
+ * @property {number} pendingApprovalCount - 瀵板懎顓搁幍纭咁嚞濮瑰倻娈戦弫浼村櫤
+ * @property {number} pendingUserInputCount - 瀵板懐鏁ら幋鐤翻閸忋儴顕Ч鍌滄畱閺佷即鍣? */
 export interface ThreadSummaryState extends ThreadSummaryMetadata {
   pendingApprovalCount: number;
   pendingUserInputCount: number;
@@ -35,8 +32,7 @@ export interface ThreadSummaryState extends ThreadSummaryMetadata {
 
 /**
  * @function maxIso
- * @description 姣旇緝涓や釜 ISO 鏃堕棿鎴冲瓧绗︿覆锛岃繑鍥炶緝澶х殑涓€涓? * @param {string | null} left - 宸︿晶鏃堕棿鎴? * @param {string} right - 鍙充晶鏃堕棿鎴? * @returns {string} 杈冨ぇ鐨勬椂闂存埑
- * @note 鐢ㄤ簬杩借釜鏈€鏂扮殑鐢ㄦ埛娑堟伅鏃堕棿
+ * @description 濮ｆ棁绶濇稉銈勯嚋 ISO 閺冨爼妫块幋鍐茬摟缁楋缚瑕嗛敍宀冪箲閸ョ偠绶濇径褏娈戞稉鈧稉? * @param {string | null} left - 瀹革缚鏅堕弮鍫曟？閹? * @param {string} right - 閸欏厖鏅堕弮鍫曟？閹? * @returns {string} 鏉堝啫銇囬惃鍕闂傚瓨鍩? * @note 閻劋绨潻鍊熼嚋閺堚偓閺傛壆娈戦悽銊﹀煕濞戝牊浼呴弮鍫曟？
  */
 function maxIso(left: string | null, right: string): string {
   if (left === null) {
@@ -47,16 +43,13 @@ function maxIso(left: string | null, right: string): string {
 
 /**
  * @function compareActivitiesByOrder
- * @description 鎸夐『搴忔瘮杈冧袱涓椿鍔ㄥ璞★紝鐢ㄤ簬鎺掑簭
- * @param {Object} left - 宸︿晶娲诲姩瀵硅薄
- * @param {Object} right - 鍙充晶娲诲姩瀵硅薄
- * @returns {number} 鎺掑簭姣旇緝缁撴灉锛堣礋鏁拌〃绀?left 鍦ㄥ墠锛屾鏁拌〃绀?right 鍦ㄥ墠锛? 琛ㄧず鐩哥瓑锛? * @note 浼樺厛鎸?sequence 鎺掑簭锛屽叾娆℃寜 createdAt 鎺掑簭锛屾渶鍚庢寜 id 鎺掑簭
- */
+ * @description 閹稿銆庢惔蹇旂槷鏉堝啩琚辨稉顏呮た閸斻劌顕挒鈽呯礉閻劋绨幒鎺戠碍
+ * @param {Object} left - 瀹革缚鏅跺ú璇插З鐎电钖? * @param {Object} right - 閸欏厖鏅跺ú璇插З鐎电钖? * @returns {number} 閹烘帒绨В鏃囩窛缂佹挻鐏夐敍鍫ｇ閺佹媽銆冪粈?left 閸︺劌澧犻敍灞绢劀閺佹媽銆冪粈?right 閸︺劌澧犻敍? 鐞涖劎銇氶惄鍝ョ搼閿? * @note 娴兼ê鍘涢幐?sequence 閹烘帒绨敍灞藉従濞嗏剝瀵?createdAt 閹烘帒绨敍灞炬付閸氬孩瀵?id 閹烘帒绨? */
 function compareActivitiesByOrder(
   left: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
   right: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
 ): number {
-  // 濡傛灉娌℃湁 sequence锛屼娇鐢ㄦ渶澶у€肩‘淇濇帓鍦ㄦ渶鍚?  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
+  // 婵″倹鐏夊▽鈩冩箒 sequence閿涘奔濞囬悽銊︽付婢堆冣偓鑲┾€樻穱婵囧笓閸︺劍娓堕崥?  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
   const rightSequence = right.sequence ?? Number.MAX_SAFE_INTEGER;
   return (
     leftSequence - rightSequence ||
@@ -67,8 +60,8 @@ function compareActivitiesByOrder(
 
 /**
  * @function toPayloadRecord
- * @description 灏嗘湭鐭ョ被鍨嬬殑 payload 杞崲涓鸿褰曞璞? * @param {unknown} payload - 寰呰浆鎹㈢殑 payload
- * @returns {Record<string, unknown> | null} 濡傛灉鏄璞″垯杩斿洖璁板綍锛屽惁鍒欒繑鍥?null
+ * @description 鐏忓棙婀惌銉ц閸ㄥ娈?payload 鏉烆剚宕叉稉楦款唶瑜版洖顕挒? * @param {unknown} payload - 瀵板懓娴嗛幑銏㈡畱 payload
+ * @returns {Record<string, unknown> | null} 婵″倹鐏夐弰顖氼嚠鐠炩€冲灟鏉╂柨娲栫拋鏉跨秿閿涘苯鎯侀崚娆掔箲閸?null
  */
 function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
   return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
@@ -76,9 +69,8 @@ function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
 
 /**
  * @function requestKindFromRequestType
- * @description 鏍规嵁璇锋眰绫诲瀷瀛楃涓叉帹瀵艰姹傜绫? * @param {unknown} requestType - 璇锋眰绫诲瀷瀛楃涓? * @returns {"command" | "file-read" | "file-change" | null} 璇锋眰绉嶇被锛屾湭璇嗗埆杩斿洖 null
- * @note 鏀寔澶氱璇锋眰绫诲瀷鍛藉悕鏍煎紡
- */
+ * @description 閺嶈宓佺拠閿嬬湴缁鐎风€涙顑佹稉鍙夊腹鐎佃壈顕Ч鍌滎潚缁? * @param {unknown} requestType - 鐠囬攱鐪扮猾璇茬€风€涙顑佹稉? * @returns {"command" | "file-read" | "file-change" | null} 鐠囬攱鐪扮粔宥囪閿涘本婀拠鍡楀焼鏉╂柨娲?null
+ * @note 閺€顖涘瘮婢舵氨顫掔拠閿嬬湴缁鐎烽崨钘夋倳閺嶇厧绱? */
 function requestKindFromRequestType(
   requestType: unknown,
 ): "command" | "file-read" | "file-change" | null {
@@ -98,9 +90,8 @@ function requestKindFromRequestType(
 
 /**
  * @function isStalePendingRequestFailureDetail
- * @description 妫€鏌ュけ璐ヨ鎯呮槸鍚﹁〃绀鸿繃鏈熺殑寰呭鐞嗚姹? * @param {string | undefined} detail - 澶辫触璇︽儏瀛楃涓? * @returns {boolean} 濡傛灉鏄繃鏈熻姹傜殑澶辫触杩斿洖 true锛屽惁鍒欒繑鍥?false
- * @note 鐢ㄤ簬娓呯悊宸茶繃鏈熶絾鏈姝ｇ‘鍏抽棴鐨勫鎵?鐢ㄦ埛杈撳叆璇锋眰
- */
+ * @description 濡偓閺屻儱銇戠拹銉嚊閹懏妲搁崥锕併€冪粈楦跨箖閺堢喓娈戝鍛槱閻炲棜顕Ч? * @param {string | undefined} detail - 婢惰精瑙︾拠锔藉剰鐎涙顑佹稉? * @returns {boolean} 婵″倹鐏夐弰顖濈箖閺堢喕顕Ч鍌滄畱婢惰精瑙︽潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
+ * @note 閻劋绨〒鍛倞瀹歌尪绻冮張鐔剁稻閺堫亣顫﹀锝団€橀崗鎶芥４閻ㄥ嫬顓搁幍?閻劍鍩涙潏鎾冲弳鐠囬攱鐪? */
 function isStalePendingRequestFailureDetail(detail: string | undefined): boolean {
   if (!detail) {
     return false;
@@ -119,9 +110,9 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 
 /**
  * @function hasStructuredUserInputQuestions
- * @description 妫€鏌?payload 涓槸鍚﹀寘鍚粨鏋勫寲鐨勭敤鎴疯緭鍏ラ棶棰? * @param {Record<string, unknown> | null} payload - 寰呮鏌ョ殑 payload
- * @returns {boolean} 濡傛灉鍖呭惈鏈夋晥鐨勭粨鏋勫寲闂杩斿洖 true锛屽惁鍒欒繑鍥?false
- * @note 缁撴瀯鍖栭棶棰樺繀椤诲寘鍚?id銆乭eader銆乹uestion 鍜岃嚦灏戜竴涓湁鏁堢殑 option锛堝惈 label 鍜?description锛? */
+ * @description 濡偓閺?payload 娑擃厽妲搁崥锕€瀵橀崥顐ょ波閺嬪嫬瀵查惃鍕暏閹寸柉绶崗銉╂６妫? * @param {Record<string, unknown> | null} payload - 瀵板懏顥呴弻銉ф畱 payload
+ * @returns {boolean} 婵″倹鐏夐崠鍛儓閺堝鏅ラ惃鍕波閺嬪嫬瀵查梻顕€顣芥潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
+ * @note 缂佹挻鐎崠鏍６妫版ê绻€妞よ瀵橀崥?id閵嗕弓eader閵嗕构uestion 閸滃矁鍤︾亸鎴滅娑擃亝婀侀弫鍫㈡畱 option閿涘牆鎯?label 閸?description閿? */
 function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null): boolean {
   const questions = payload?.questions;
   if (!Array.isArray(questions)) {
@@ -153,12 +144,10 @@ function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null
 
 /**
  * @function resolveLatestProposedPlan
- * @description 瑙ｆ瀽鏈€鏂扮殑鎻愯璁″垝
- * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂扮殑杞淇℃伅
- * @returns {Object | null} 鏈€鏂扮殑鎻愯璁″垝锛屾湭鎵惧埌杩斿洖 null
- * @note 浼樺厛杩斿洖鏈€鏂拌疆娆＄殑璁″垝锛屽惁鍒欒繑鍥炲叏灞€鏈€鏂扮殑璁″垝
+ * @description 鐟欙絾鐎介張鈧弬鎵畱閹绘劘顔呯拋鈥冲灊
+ * @param {Object} input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param {ReadonlyArray} input.proposedPlans - 閹绘劘顔呯拋鈥冲灊閸掓銆? * @param {Object | null} input.latestTurn - 閺堚偓閺傛壆娈戞潪顔筋偧娣団剝浼? * @returns {Object | null} 閺堚偓閺傛壆娈戦幓鎰唴鐠佲€冲灊閿涘本婀幍鎯у煂鏉╂柨娲?null
+ * @note 娴兼ê鍘涙潻鏂挎礀閺堚偓閺傛媽鐤嗗▎锛勬畱鐠佲€冲灊閿涘苯鎯侀崚娆掔箲閸ョ偛鍙忕仦鈧張鈧弬鎵畱鐠佲€冲灊
  */
 function resolveLatestProposedPlan(input: {
   readonly proposedPlans: ReadonlyArray<
@@ -166,7 +155,7 @@ function resolveLatestProposedPlan(input: {
   >;
   readonly latestTurn: Pick<OrchestrationLatestTurn, "turnId"> | null;
 }): Pick<OrchestrationProposedPlan, "id" | "turnId" | "updatedAt" | "implementedAt"> | null {
-  // 濡傛灉瀛樺湪鏈€鏂拌疆娆★紝浼樺厛鏌ユ壘璇ヨ疆娆＄殑璁″垝
+  // 婵″倹鐏夌€涙ê婀張鈧弬鎷岀枂濞嗏槄绱濇导妯哄帥閺屻儲澹樼拠銉ㄧ枂濞嗭紕娈戠拋鈥冲灊
   if (input.latestTurn?.turnId) {
     const matchingTurnPlan = [...input.proposedPlans]
       .filter((plan) => plan.turnId === input.latestTurn?.turnId)
@@ -180,7 +169,7 @@ function resolveLatestProposedPlan(input: {
     }
   }
 
-  // 鍚﹀垯杩斿洖鍏ㄥ眬鏈€鏂扮殑璁″垝
+  // 閸氾箑鍨潻鏂挎礀閸忋劌鐪張鈧弬鎵畱鐠佲€冲灊
   return (
     [...input.proposedPlans]
       .toSorted(
@@ -193,11 +182,8 @@ function resolveLatestProposedPlan(input: {
 
 /**
  * @function deriveThreadSummaryState
- * @description 浠庢秷鎭€佹椿鍔ㄥ拰璁″垝鍒楄〃涓帹瀵肩嚎绋嬫憳瑕佺姸鎬? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.messages - 娑堟伅鍒楄〃
- * @param {ReadonlyArray} input.activities - 娲诲姩鍒楄〃
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @returns {ThreadSummaryState} 鎺ㄥ鍑虹殑绾跨▼鎽樿鐘舵€? * @note 閫氳繃杩借釜娲诲姩浜嬩欢鏉ヨ绠楀緟瀹℃壒鍜屽緟鐢ㄦ埛杈撳叆鐨勭姸鎬? */
+ * @description 娴犲孩绉烽幁顖樷偓浣规た閸斻劌鎷扮拋鈥冲灊閸掓銆冩稉顓熷腹鐎佃偐鍤庣粙瀣喅鐟曚胶濮搁幀? * @param {Object} input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param {ReadonlyArray} input.messages - 濞戝牊浼呴崚妤勩€? * @param {ReadonlyArray} input.activities - 濞茶濮╅崚妤勩€? * @param {ReadonlyArray} input.proposedPlans - 閹绘劘顔呯拋鈥冲灊閸掓銆? * @param {Object | null} input.latestTurn - 閺堚偓閺傛媽鐤嗗▎鈥蹭繆閹? * @returns {ThreadSummaryState} 閹恒劌顕遍崙铏规畱缁捐法鈻奸幗妯款洣閻樿埖鈧? * @note 闁俺绻冩潻鍊熼嚋濞茶濮╂禍瀣╂閺夈儴顓哥粻妤€绶熺€光剝澹掗崪灞界窡閻劍鍩涙潏鎾冲弳閻ㄥ嫮濮搁幀? */
 export function deriveThreadSummaryState(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<
@@ -208,7 +194,7 @@ export function deriveThreadSummaryState(input: {
   >;
   readonly latestTurn: Pick<OrchestrationLatestTurn, "turnId"> | null;
 }): ThreadSummaryState {
-  // 1. 杩借釜鏈€鏂扮殑鐢ㄦ埛娑堟伅鏃堕棿
+  // 1. 鏉╁€熼嚋閺堚偓閺傛壆娈戦悽銊﹀煕濞戝牊浼呴弮鍫曟？
   let latestUserMessageAt: string | null = null;
   for (const message of input.messages) {
     if (message.role === "user") {
@@ -216,16 +202,16 @@ export function deriveThreadSummaryState(input: {
     }
   }
 
-  // 2. 杩借釜寰呭鎵瑰拰寰呯敤鎴疯緭鍏ョ殑璇锋眰
+  // 2. 鏉╁€熼嚋瀵板懎顓搁幍鐟版嫲瀵板懐鏁ら幋鐤翻閸忋儳娈戠拠閿嬬湴
   const openApprovals = new Map<string, true>();
   const openUserInputs = new Map<string, true>();
-  // 鎸夐『搴忔帓搴忔椿鍔紝纭繚浜嬩欢澶勭悊鐨勬纭€?  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
+  // 閹稿銆庢惔蹇斿笓鎼村繑妞块崝顭掔礉绾喕绻氭禍瀣╂婢跺嫮鎮婇惃鍕劀绾喗鈧?  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
   for (const activity of orderedActivities) {
     const payload = toPayloadRecord(activity.payload);
     const requestId = typeof payload?.requestId === "string" ? payload.requestId : null;
     const detail = typeof payload?.detail === "string" ? payload.detail : undefined;
 
-    // 澶勭悊瀹℃壒璇锋眰寮€濮?    if (activity.kind === "approval.requested" && requestId) {
+    // 婢跺嫮鎮婄€光剝澹掔拠閿嬬湴瀵偓婵?    if (activity.kind === "approval.requested" && requestId) {
       const requestKind =
         payload?.requestKind === "command" ||
         payload?.requestKind === "file-read" ||
@@ -238,14 +224,12 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 澶勭悊瀹℃壒璇锋眰瀹屾垚
-    if (activity.kind === "approval.resolved" && requestId) {
+    // 婢跺嫮鎮婄€光剝澹掔拠閿嬬湴鐎瑰本鍨?    if (activity.kind === "approval.resolved" && requestId) {
       openApprovals.delete(requestId);
       continue;
     }
 
-    // 澶勭悊瀹℃壒璇锋眰鍝嶅簲澶辫触锛堣繃鏈熻姹傦級
-    if (
+    // 婢跺嫮鎮婄€光剝澹掔拠閿嬬湴閸濆秴绨叉径杈Е閿涘牐绻冮張鐔活嚞濮瑰偊绱?    if (
       activity.kind === "provider.approval.respond.failed" &&
       requestId &&
       isStalePendingRequestFailureDetail(detail)
@@ -254,21 +238,19 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰寮€濮?    if (activity.kind === "user-input.requested" && requestId) {
+    // 婢跺嫮鎮婇悽銊﹀煕鏉堟挸鍙嗙拠閿嬬湴瀵偓婵?    if (activity.kind === "user-input.requested" && requestId) {
       if (hasStructuredUserInputQuestions(payload)) {
         openUserInputs.set(requestId, true);
       }
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰瀹屾垚
-    if (activity.kind === "user-input.resolved" && requestId) {
+    // 婢跺嫮鎮婇悽銊﹀煕鏉堟挸鍙嗙拠閿嬬湴鐎瑰本鍨?    if (activity.kind === "user-input.resolved" && requestId) {
       openUserInputs.delete(requestId);
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰鍝嶅簲澶辫触锛堣繃鏈熻姹傦級
-    if (
+    // 婢跺嫮鎮婇悽銊﹀煕鏉堟挸鍙嗙拠閿嬬湴閸濆秴绨叉径杈Е閿涘牐绻冮張鐔活嚞濮瑰偊绱?    if (
       activity.kind === "provider.user-input.respond.failed" &&
       requestId &&
       isStalePendingRequestFailureDetail(detail)
@@ -277,29 +259,26 @@ export function deriveThreadSummaryState(input: {
     }
   }
 
-  // 3. 瑙ｆ瀽鏈€鏂扮殑鎻愯璁″垝
+  // 3. 鐟欙絾鐎介張鈧弬鎵畱閹绘劘顔呯拋鈥冲灊
   const latestProposedPlan = resolveLatestProposedPlan({
     proposedPlans: input.proposedPlans,
     latestTurn: input.latestTurn,
   });
 
-  // 4. 鏋勫缓骞惰繑鍥炴憳瑕佺姸鎬?  return {
+  // 4. 閺嬪嫬缂撻獮鎯扮箲閸ョ偞鎲崇憰浣哄Ц閹?  return {
     latestUserMessageAt,
     pendingApprovalCount: openApprovals.size,
     pendingUserInputCount: openUserInputs.size,
     hasPendingApprovals: openApprovals.size > 0,
     hasPendingUserInput: openUserInputs.size > 0,
-    // 濡傛灉鏈€鏂拌鍒掑皻鏈疄鏂斤紝鍒欒涓哄瓨鍦ㄥ彲鎵ц鐨勮鍒?    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
+    // 婵″倹鐏夐張鈧弬鎷岊吀閸掓帒鐨婚張顏勭杽閺傛枻绱濋崚娆掝吇娑撳搫鐡ㄩ崷銊ュ讲閹笛嗩攽閻ㄥ嫯顓搁崚?    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
   };
 }
 
 /**
  * @function deriveThreadSummaryMetadata
- * @description 浠庢秷鎭€佹椿鍔ㄥ拰璁″垝鍒楄〃涓帹瀵肩嚎绋嬫憳瑕佸厓鏁版嵁锛堜笉鍖呭惈璁℃暟锛? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.messages - 娑堟伅鍒楄〃
- * @param {ReadonlyArray} input.activities - 娲诲姩鍒楄〃
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @returns {ThreadSummaryMetadata} 鎺ㄥ鍑虹殑绾跨▼鎽樿鍏冩暟鎹? * @note 渚挎嵎灏佽锛氳皟鐢?deriveThreadSummaryState 骞朵粎杩斿洖鍏冩暟鎹儴鍒? */
+ * @description 娴犲孩绉烽幁顖樷偓浣规た閸斻劌鎷扮拋鈥冲灊閸掓銆冩稉顓熷腹鐎佃偐鍤庣粙瀣喅鐟曚礁鍘撻弫鐗堝祦閿涘牅绗夐崠鍛儓鐠佲剝鏆熼敍? * @param {Object} input - 鏉堟挸鍙嗛崣鍌涙殶
+ * @param {ReadonlyArray} input.messages - 濞戝牊浼呴崚妤勩€? * @param {ReadonlyArray} input.activities - 濞茶濮╅崚妤勩€? * @param {ReadonlyArray} input.proposedPlans - 閹绘劘顔呯拋鈥冲灊閸掓銆? * @param {Object | null} input.latestTurn - 閺堚偓閺傛媽鐤嗗▎鈥蹭繆閹? * @returns {ThreadSummaryMetadata} 閹恒劌顕遍崙铏规畱缁捐法鈻奸幗妯款洣閸忓啯鏆熼幑? * @note 娓氭寧宓庣亸浣筋棅閿涙俺鐨熼悽?deriveThreadSummaryState 楠炴湹绮庢潻鏂挎礀閸忓啯鏆熼幑顕€鍎撮崚? */
 export function deriveThreadSummaryMetadata(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<

@@ -1,49 +1,49 @@
 /**
- * @file 寰呯敤鎴疯緭鍏ワ紙Pending User Input锛夊鐞? *
- * 澶勭悊 AI Provider 璇锋眰鐢ㄦ埛杈撳叆鏃剁殑鑽夌ǹ绛旀绠＄悊鍜岃繘搴﹁绠椼€? * 鏀寔鍗曢€夊拰澶氶€夐棶棰橈紝鎻愪緵绛旀瑙ｆ瀽銆侀€夐」鍒囨崲銆佽繘搴︽帹瀵肩瓑鍔熻兘锛? * 渚?ChatView 鍜岀紪杈戝櫒闈㈡澘浣跨敤銆? */
+ * @file 瀵板懐鏁ら幋鐤翻閸忋儻绱橮ending User Input閿涘顦╅悶? *
+ * 婢跺嫮鎮?AI Provider 鐠囬攱鐪伴悽銊﹀煕鏉堟挸鍙嗛弮鍓佹畱閼藉枪缁涙梹顢嶇粻锛勬倞閸滃矁绻樻惔锕侇吀缁犳ぜ鈧? * 閺€顖涘瘮閸楁洟鈧鎷版径姘垛偓澶愭６妫版﹫绱濋幓鎰返缁涙梹顢嶇憴锝嗙€介妴渚€鈧銆嶉崚鍥ㄥ床閵嗕浇绻樻惔锔藉腹鐎佃偐鐡戦崝鐔诲厴閿? * 娓?ChatView 閸滃瞼绱潏鎴濇珤闂堛垺婢樻担璺ㄦ暏閵? */
 
 import type { ProviderUserInputAnswers, UserInputQuestion } from "~/contracts";
 
 /**
- * 寰呯敤鎴疯緭鍏ョ殑鑽夌ǹ绛旀锛岃褰曠敤鎴峰綋鍓嶇殑閫夋嫨鐘舵€併€? */
+ * 瀵板懐鏁ら幋鐤翻閸忋儳娈戦懡澶屒圭粵鏃€顢嶉敍宀冾唶瑜版洜鏁ら幋宄扮秼閸撳秶娈戦柅澶嬪閻樿埖鈧降鈧? */
 export interface PendingUserInputDraftAnswer {
-  /** 宸查€夋嫨鐨勯€夐」鏍囩鍒楄〃 */
+  /** 瀹告煡鈧瀚ㄩ惃鍕偓澶愩€嶉弽鍥╊劮閸掓銆?*/
   selectedOptionLabels?: string[];
-  /** 鑷畾涔夎緭鍏ョ殑绛旀鏂囨湰 */
+  /** 閼奉亜鐣炬稊澶庣翻閸忋儳娈戠粵鏃€顢嶉弬鍥ㄦ拱 */
   customAnswer?: string;
 }
 
 /**
- * 寰呯敤鎴疯緭鍏ョ殑杩涘害淇℃伅锛屾弿杩板綋鍓嶉棶棰樼殑鍥炵瓟鐘舵€佸拰瀵艰埅淇℃伅銆? */
+ * 瀵板懐鏁ら幋鐤翻閸忋儳娈戞潻娑樺娣団剝浼呴敍灞惧伎鏉╂澘缍嬮崜宥夋６妫版娈戦崶鐐电摕閻樿埖鈧礁鎷扮€佃壈鍩呮穱鈩冧紖閵? */
 export interface PendingUserInputProgress {
-  /** 褰撳墠闂绱㈠紩 */
+  /** 瑜版挸澧犻梻顕€顣界槐銏犵穿 */
   questionIndex: number;
-  /** 褰撳墠娲昏穬鐨勯棶棰橈紝鏃犻棶棰樻椂涓?null */
+  /** 瑜版挸澧犲ú鏄忕┈閻ㄥ嫰妫舵０姗堢礉閺冪娀妫舵０妯绘娑?null */
   activeQuestion: UserInputQuestion | null;
-  /** 褰撳墠闂鐨勮崏绋跨瓟妗?*/
+  /** 瑜版挸澧犻梻顕€顣介惃鍕磸缁嬭法鐡熷?*/
   activeDraft: PendingUserInputDraftAnswer | undefined;
-  /** 宸查€夋嫨鐨勯€夐」鏍囩鍒楄〃锛堟爣鍑嗗寲鍚庯級 */
+  /** 瀹告煡鈧瀚ㄩ惃鍕偓澶愩€嶉弽鍥╊劮閸掓銆冮敍鍫熺垼閸戝棗瀵查崥搴礆 */
   selectedOptionLabels: string[];
-  /** 鑷畾涔夌瓟妗堟枃鏈?*/
+  /** 閼奉亜鐣炬稊澶岀摕濡楀牊鏋冮張?*/
   customAnswer: string;
-  /** 宸茶В鏋愮殑绛旀鍊硷紝鍗曢€変负瀛楃涓诧紝澶氶€変负瀛楃涓叉暟缁勶紝鏈洖绛斾负 null */
+  /** 瀹歌尪袙閺嬫劗娈戠粵鏃€顢嶉崐纭风礉閸楁洟鈧璐熺€涙顑佹稉璇х礉婢舵岸鈧璐熺€涙顑佹稉鍙夋殶缂佸嫸绱濋張顏勬礀缁涙柧璐?null */
   resolvedAnswer: string | string[] | null;
-  /** 鏄惁姝ｅ湪浣跨敤鑷畾涔夌瓟妗?*/
+  /** 閺勵垰鎯佸锝呮躬娴ｈ法鏁ら懛顏勭暰娑斿鐡熷?*/
   usingCustomAnswer: boolean;
-  /** 宸插洖绛旂殑闂鏁伴噺 */
+  /** 瀹告彃娲栫粵鏃傛畱闂傤噣顣介弫浼村櫤 */
   answeredQuestionCount: number;
-  /** 鏄惁涓烘渶鍚庝竴涓棶棰?*/
+  /** 閺勵垰鎯佹稉鐑樻付閸氬簼绔存稉顏堟６妫?*/
   isLastQuestion: boolean;
-  /** 鎵€鏈夐棶棰樻槸鍚﹀凡鍥炵瓟瀹屾瘯 */
+  /** 閹碘偓閺堝妫舵０妯绘Ц閸氾箑鍑￠崶鐐电摕鐎瑰本鐦?*/
   isComplete: boolean;
-  /** 鏄惁鍙互鍓嶈繘鍒颁笅涓€棰?*/
+  /** 閺勵垰鎯侀崣顖欎簰閸撳秷绻橀崚棰佺瑓娑撯偓妫?*/
   canAdvance: boolean;
 }
 
 /**
- * 鏍囧噯鍖栬崏绋跨瓟妗堟枃鏈紝鍘婚櫎棣栧熬绌烘牸锛岀┖瀛楃涓茶繑鍥?null銆? *
- * @param value - 鍘熷绛旀鏂囨湰
- * @returns 鏍囧噯鍖栧悗鐨勬枃鏈紝鏃犳晥鏃惰繑鍥?null
+ * 閺嶅洤鍣崠鏍磸缁嬭法鐡熷鍫熸瀮閺堫剨绱濋崢濠氭珟妫ｆ牕鐔粚鐑樼壐閿涘瞼鈹栫€涙顑佹稉鑼剁箲閸?null閵? *
+ * @param value - 閸樼喎顫愮粵鏃€顢嶉弬鍥ㄦ拱
+ * @returns 閺嶅洤鍣崠鏍ф倵閻ㄥ嫭鏋冮張顒婄礉閺冪姵鏅ラ弮鎯扮箲閸?null
  */
 function normalizeDraftAnswer(value: string | undefined): string | null {
   if (typeof value !== "string") {
@@ -55,10 +55,8 @@ function normalizeDraftAnswer(value: string | undefined): string | null {
 }
 
 /**
- * 鏍囧噯鍖栭€夐」閫夋嫨鍒楄〃锛岃繃婊ゆ棤鏁堝€笺€佸幓闄ょ┖鏍煎苟鍘婚噸銆? * 浣?UI 鍜屾彁浜ら€昏緫鍏变韩鍚屼竴鏍囧噯鍒楄〃銆? *
- * @param value - 鍘熷閫夐」鏍囩鍒楄〃
- * @returns 鏍囧噯鍖栧悗鐨勯€夐」鏍囩鏁扮粍
- */
+ * 閺嶅洤鍣崠鏍偓澶愩€嶉柅澶嬪閸掓銆冮敍宀冪箖濠娿倖妫ら弫鍫濃偓绗衡偓浣稿箵闂勩倗鈹栭弽鐓庤嫙閸樺鍣搁妴? * 娴?UI 閸滃本褰佹禍銈夆偓鏄忕帆閸忓彉闊╅崥灞肩閺嶅洤鍣崚妤勩€冮妴? *
+ * @param value - 閸樼喎顫愰柅澶愩€嶉弽鍥╊劮閸掓銆? * @returns 閺嶅洤鍣崠鏍ф倵閻ㄥ嫰鈧銆嶉弽鍥╊劮閺佹壆绮? */
 function normalizeSelectedOptionLabels(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -73,10 +71,8 @@ function normalizeSelectedOptionLabels(value: string[] | undefined): string[] {
 }
 
 /**
- * 瑙ｆ瀽鍗曚釜闂鐨勬渶缁堢瓟妗堛€備紭鍏堜娇鐢ㄨ嚜瀹氫箟绛旀锛屽叾娆′娇鐢ㄩ€夐」閫夋嫨銆? * 澶氶€夐棶棰樿繑鍥炲瓧绗︿覆鏁扮粍锛屽崟閫夐棶棰樿繑鍥炲瓧绗︿覆銆? *
- * @param question - 鐢ㄦ埛杈撳叆闂
- * @param draft - 鑽夌ǹ绛旀
- * @returns 瑙ｆ瀽鍚庣殑绛旀锛屾湭鍥炵瓟杩斿洖 null
+ * 鐟欙絾鐎介崡鏇氶嚋闂傤噣顣介惃鍕付缂佸牏鐡熷鍫涒偓鍌欑喘閸忓牅濞囬悽銊ㄥ殰鐎规矮绠熺粵鏃€顢嶉敍灞藉従濞嗏€插▏閻劑鈧銆嶉柅澶嬪閵? * 婢舵岸鈧妫舵０妯跨箲閸ョ偛鐡х粭锔胯閺佹壆绮嶉敍灞藉礋闁妫舵０妯跨箲閸ョ偛鐡х粭锔胯閵? *
+ * @param question - 閻劍鍩涙潏鎾冲弳闂傤噣顣? * @param draft - 閼藉枪缁涙梹顢? * @returns 鐟欙絾鐎介崥搴ｆ畱缁涙梹顢嶉敍灞炬弓閸ョ偟鐡熸潻鏂挎礀 null
  */
 export function resolvePendingUserInputAnswer(
   question: UserInputQuestion,
@@ -96,10 +92,8 @@ export function resolvePendingUserInputAnswer(
 }
 
 /**
- * 璁剧疆鑷畾涔夌瓟妗堛€傚綋鑷畾涔夌瓟妗堥潪绌烘椂娓呴櫎閫夐」閫夋嫨锛屽惁鍒欎繚鐣欎箣鍓嶇殑閫夐」銆? *
- * @param draft - 褰撳墠鑽夌ǹ绛旀
- * @param customAnswer - 鏂扮殑鑷畾涔夌瓟妗堟枃鏈? * @returns 鏇存柊鍚庣殑鑽夌ǹ绛旀
- */
+ * 鐠佸墽鐤嗛懛顏勭暰娑斿鐡熷鍫涒偓鍌氱秼閼奉亜鐣炬稊澶岀摕濡楀牓娼粚鐑樻濞撳懘娅庨柅澶愩€嶉柅澶嬪閿涘苯鎯侀崚娆庣箽閻ｆ瑤绠ｉ崜宥囨畱闁銆嶉妴? *
+ * @param draft - 瑜版挸澧犻懡澶屒圭粵鏃€顢? * @param customAnswer - 閺傛壆娈戦懛顏勭暰娑斿鐡熷鍫熸瀮閺? * @returns 閺囧瓨鏌婇崥搴ｆ畱閼藉枪缁涙梹顢? */
 export function setPendingUserInputCustomAnswer(
   draft: PendingUserInputDraftAnswer | undefined,
   customAnswer: string,
@@ -116,12 +110,9 @@ export function setPendingUserInputCustomAnswer(
 }
 
 /**
- * 鍒囨崲閫夐」鐨勯€夋嫨鐘舵€併€傚閫夋ā寮忎笅鍦ㄥ垪琛ㄤ腑娣诲姞鎴栫Щ闄ら€夐」锛? * 鍗曢€夋ā寮忎笅鐩存帴鏇挎崲涓哄綋鍓嶉€夐」銆傚垏鎹㈤€夐」鏃舵竻闄よ嚜瀹氫箟绛旀銆? *
- * @param question - 鐢ㄦ埛杈撳叆闂
- * @param draft - 褰撳墠鑽夌ǹ绛旀
- * @param optionLabel - 瑕佸垏鎹㈢殑閫夐」鏍囩
- * @returns 鏇存柊鍚庣殑鑽夌ǹ绛旀
- */
+ * 閸掑洦宕查柅澶愩€嶉惃鍕偓澶嬪閻樿埖鈧降鈧倸顦块柅澶嬆佸蹇庣瑓閸︺劌鍨悰銊よ厬濞ｈ濮為幋鏍╅梽銈夆偓澶愩€嶉敍? * 閸楁洟鈧膩瀵繋绗呴惄瀛樺复閺囨寧宕叉稉鍝勭秼閸撳秹鈧銆嶉妴鍌氬瀼閹广垽鈧銆嶉弮鑸电闂勩倛鍤滅€规矮绠熺粵鏃€顢嶉妴? *
+ * @param question - 閻劍鍩涙潏鎾冲弳闂傤噣顣? * @param draft - 瑜版挸澧犻懡澶屒圭粵鏃€顢? * @param optionLabel - 鐟曚礁鍨忛幑銏㈡畱闁銆嶉弽鍥╊劮
+ * @returns 閺囧瓨鏌婇崥搴ｆ畱閼藉枪缁涙梹顢? */
 export function togglePendingUserInputOptionSelection(
   question: UserInputQuestion,
   draft: PendingUserInputDraftAnswer | undefined,
@@ -148,10 +139,9 @@ export function togglePendingUserInputOptionSelection(
 }
 
 /**
- * 鏋勫缓鎵€鏈夐棶棰樼殑鏈€缁堢瓟妗堟槧灏勩€備换涓€闂鏈洖绛斿垯杩斿洖 null銆? *
- * @param questions - 闂鍒楄〃
- * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
- * @returns 绛旀鏄犲皠锛堥棶棰?ID 鈫?绛旀鍊硷級锛屽瓨鍦ㄦ湭鍥炵瓟闂鏃惰繑鍥?null
+ * 閺嬪嫬缂撻幍鈧張澶愭６妫版娈戦張鈧紒鍫㈢摕濡楀牊妲х亸鍕┾偓鍌欐崲娑撯偓闂傤噣顣介張顏勬礀缁涙柨鍨潻鏂挎礀 null閵? *
+ * @param questions - 闂傤噣顣介崚妤勩€? * @param draftAnswers - 閸氬嫰妫舵０妯兼畱閼藉枪缁涙梹顢嶉弰鐘茬殸
+ * @returns 缁涙梹顢嶉弰鐘茬殸閿涘牓妫舵０?ID 閳?缁涙梹顢嶉崐纭风礆閿涘苯鐡ㄩ崷銊︽弓閸ョ偟鐡熼梻顕€顣介弮鎯扮箲閸?null
  */
 export function buildPendingUserInputAnswers(
   questions: ReadonlyArray<UserInputQuestion>,
@@ -171,9 +161,9 @@ export function buildPendingUserInputAnswers(
 }
 
 /**
- * 鍒ゆ柇绛旀鏄犲皠鏄惁瀹屾暣锛堟墍鏈夐棶棰橀兘鏈夋湁鏁堢瓟妗堬級銆? *
- * @param answers - 绛旀鏄犲皠
- * @returns 鏄惁鎵€鏈夐棶棰橀兘宸插洖绛? */
+ * 閸掋倖鏌囩粵鏃€顢嶉弰鐘茬殸閺勵垰鎯佺€瑰本鏆ｉ敍鍫熷閺堝妫舵０姗€鍏橀張澶嬫箒閺佸牏鐡熷鍫礆閵? *
+ * @param answers - 缁涙梹顢嶉弰鐘茬殸
+ * @returns 閺勵垰鎯侀幍鈧張澶愭６妫版﹢鍏樺鎻掓礀缁? */
 export function hasCompletePendingUserInputAnswers(answers: ProviderUserInputAnswers): boolean {
   const entries = Object.entries(answers);
   if (entries.length === 0) {
@@ -194,9 +184,9 @@ export function hasCompletePendingUserInputAnswers(answers: ProviderUserInputAns
 }
 
 /**
- * 浠庣瓟妗堟槧灏勪腑绉婚櫎鍊间负 null 鎴?undefined 鐨勬潯鐩€? *
- * @param answers - 鍘熷绛旀鏄犲皠
- * @returns 杩囨护鍚庣殑绛旀鏄犲皠
+ * 娴犲海鐡熷鍫熸Ё鐏忓嫪鑵戠粔濠氭珟閸婇棿璐?null 閹?undefined 閻ㄥ嫭娼惄顔衡偓? *
+ * @param answers - 閸樼喎顫愮粵鏃€顢嶉弰鐘茬殸
+ * @returns 鏉╁洦鎶ら崥搴ｆ畱缁涙梹顢嶉弰鐘茬殸
  */
 export function omitNullPendingUserInputAnswers(
   answers: ProviderUserInputAnswers,
@@ -207,10 +197,9 @@ export function omitNullPendingUserInputAnswers(
 }
 
 /**
- * 缁熻宸插洖绛旂殑闂鏁伴噺銆? *
- * @param questions - 闂鍒楄〃
- * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
- * @returns 宸插洖绛旂殑闂鏁伴噺
+ * 缂佺喕顓稿鎻掓礀缁涙梻娈戦梻顕€顣介弫浼村櫤閵? *
+ * @param questions - 闂傤噣顣介崚妤勩€? * @param draftAnswers - 閸氬嫰妫舵０妯兼畱閼藉枪缁涙梹顢嶉弰鐘茬殸
+ * @returns 瀹告彃娲栫粵鏃傛畱闂傤噣顣介弫浼村櫤
  */
 export function countAnsweredPendingUserInputQuestions(
   questions: ReadonlyArray<UserInputQuestion>,
@@ -222,10 +211,9 @@ export function countAnsweredPendingUserInputQuestions(
 }
 
 /**
- * 鏌ユ壘绗竴涓湭鍥炵瓟闂鐨勭储寮曘€傛墍鏈夐棶棰橀兘宸插洖绛旀椂杩斿洖鏈€鍚庝竴涓棶棰樼殑绱㈠紩銆? *
- * @param questions - 闂鍒楄〃
- * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
- * @returns 绗竴涓湭鍥炵瓟闂鐨勭储寮? */
+ * 閺屻儲澹樼粭顑跨娑擃亝婀崶鐐电摕闂傤噣顣介惃鍕偍瀵洏鈧倹澧嶉張澶愭６妫版﹢鍏樺鎻掓礀缁涙梹妞傛潻鏂挎礀閺堚偓閸氬簼绔存稉顏堟６妫版娈戠槐銏犵穿閵? *
+ * @param questions - 闂傤噣顣介崚妤勩€? * @param draftAnswers - 閸氬嫰妫舵０妯兼畱閼藉枪缁涙梹顢嶉弰鐘茬殸
+ * @returns 缁楊兛绔存稉顏呮弓閸ョ偟鐡熼梻顕€顣介惃鍕偍瀵? */
 export function findFirstUnansweredPendingUserInputQuestionIndex(
   questions: ReadonlyArray<UserInputQuestion>,
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,
@@ -238,11 +226,10 @@ export function findFirstUnansweredPendingUserInputQuestionIndex(
 }
 
 /**
- * 鎺ㄥ寰呯敤鎴疯緭鍏ョ殑瀹屾暣杩涘害淇℃伅銆? * 璁＄畻褰撳墠闂銆佺瓟妗堢姸鎬併€佸畬鎴愬害绛夛紝渚?UI 娓叉煋浣跨敤銆? *
- * @param questions - 闂鍒楄〃
- * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
- * @param questionIndex - 褰撳墠闂绱㈠紩
- * @returns 瀹屾暣鐨勮繘搴︿俊鎭璞? */
+ * 閹恒劌顕卞鍛暏閹寸柉绶崗銉ф畱鐎瑰本鏆ｆ潻娑樺娣団剝浼呴妴? * 鐠侊紕鐣昏ぐ鎾冲闂傤噣顣介妴浣虹摕濡楀牏濮搁幀浣碘偓浣哥暚閹存劕瀹崇粵澶涚礉娓?UI 濞撳弶鐓嬫担璺ㄦ暏閵? *
+ * @param questions - 闂傤噣顣介崚妤勩€? * @param draftAnswers - 閸氬嫰妫舵０妯兼畱閼藉枪缁涙梹顢嶉弰鐘茬殸
+ * @param questionIndex - 瑜版挸澧犻梻顕€顣界槐銏犵穿
+ * @returns 鐎瑰本鏆ｉ惃鍕箻鎼达缚淇婇幁顖氼嚠鐠? */
 export function derivePendingUserInputProgress(
   questions: ReadonlyArray<UserInputQuestion>,
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,

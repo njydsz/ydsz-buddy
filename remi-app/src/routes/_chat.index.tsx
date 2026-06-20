@@ -1,6 +1,6 @@
 /**
- * @file 鑱婂ぉ绱㈠紩璺敱妯″潡
- * @description 搴旂敤鍚姩鏃舵仮澶嶄笂娆¤亰澶╄矾鐢憋紝鑻ユ棤鍙敤璁板綍鍒欏垱寤烘柊鐨勫搴亰澶╄崏绋? * @layer 璺敱灞? * @depends sidebar UI 鎸佷箙鍖栥€佸叡浜殑鏂板缓鑱婂ぉ澶勭悊鍣紙鐢ㄤ簬绌虹姸鎬佸洖閫€锛? */
+ * @file 閼卞﹤銇夌槐銏犵穿鐠侯垳鏁卞Ο鈥虫健
+ * @description 鎼存梻鏁ら崥顖氬З閺冭埖浠径宥勭瑐濞喡や喊婢垛晞鐭鹃悽鎲嬬礉閼汇儲妫ら崣顖滄暏鐠佹澘缍嶉崚娆忓灡瀵ょ儤鏌婇惃鍕啀鎼搭叀浜版径鈺勫磸缁? * @layer 鐠侯垳鏁辩仦? * @depends sidebar UI 閹镐椒绠欓崠鏍モ偓浣稿彙娴滎偆娈戦弬鏉跨紦閼卞﹤銇夋径鍕倞閸ｎ煉绱欓悽銊ょ艾缁岃櫣濮搁幀浣告礀闁偓閿? */
 
 import { ThreadId } from "~/contracts";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -14,33 +14,32 @@ import { useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 
 /**
- * 鑱婂ぉ绱㈠紩璺敱瑙嗗浘缁勪欢
- * @description 搴旂敤鍚姩鏃剁殑鍏ュ彛璺敱锛岃礋璐ｆ仮澶嶄笂娆＄殑鑱婂ぉ浼氳瘽鎴栧垱寤烘柊浼氳瘽
- * 宸ヤ綔娴佺▼锛? * 1. 绛夊緟绾跨▼鍜屽垎鍓茶鍥炬暟鎹按鍚堝畬鎴? * 2. 灏濊瘯浠庢湰鍦板瓨鍌ㄦ仮澶嶄笂娆＄殑绾跨▼璺敱
- * 3. 鑻ユ棤娉曟仮澶嶏紝鍒欏垱寤烘柊鐨勮亰澶╀細璇? * 4. 鑻ュ垱寤哄け璐ワ紝灞曠ず閿欒淇℃伅骞舵彁渚涢噸璇曟寜閽? */
+ * 閼卞﹤銇夌槐銏犵穿鐠侯垳鏁辩憴鍡楁禈缂佸嫪娆? * @description 鎼存梻鏁ら崥顖氬З閺冨墎娈戦崗銉ュ經鐠侯垳鏁遍敍宀冪鐠愶絾浠径宥勭瑐濞嗭紕娈戦懕濠傘亯娴兼俺鐦介幋鏍у灡瀵ょ儤鏌婃导姘崇樈
+ * 瀹搞儰缍斿ù浣衡柤閿? * 1. 缁涘绶熺痪璺ㄢ柤閸滃苯鍨庨崜鑼额潒閸ョ偓鏆熼幑顔芥寜閸氬牆鐣幋? * 2. 鐏忔繆鐦禒搴㈡拱閸︽澘鐡ㄩ崒銊︿划婢跺秳绗傚▎锛勬畱缁捐法鈻肩捄顖滄暠
+ * 3. 閼汇儲妫ゅ▔鏇熶划婢跺稄绱濋崚娆忓灡瀵ょ儤鏌婇惃鍕喊婢垛晙绱扮拠? * 4. 閼汇儱鍨卞鍝勩亼鐠愩儻绱濈仦鏇犮仛闁挎瑨顕ゆ穱鈩冧紖楠炶埖褰佹笟娑㈠櫢鐠囨洘瀵滈柦? */
 function ChatIndexRouteView() {
   const { handleNewChat } = useHandleNewChat();
   const navigate = useNavigate();
-  /** 绾跨▼鏁版嵁鏄惁宸蹭粠鎸佷箙鍖栧瓨鍌ㄥ姞杞藉畬鎴?*/
+  /** 缁捐法鈻奸弫鐗堝祦閺勵垰鎯佸韫矤閹镐椒绠欓崠鏍х摠閸屻劌濮炴潪钘夌暚閹?*/
   const threadsHydrated = useStore((store) => store.threadsHydrated);
-  /** 鎵€鏈夊彲鐢ㄧ殑绾跨▼ ID 鍒楄〃 */
+  /** 閹碘偓閺堝褰查悽銊ф畱缁捐法鈻?ID 閸掓銆?*/
   const threadIds = useStore((state) => state.threadIds ?? []);
-  /** 鍒嗗壊瑙嗗浘鏁版嵁鏄惁宸叉按鍚?*/
+  /** 閸掑棗澹婄憴鍡楁禈閺佺増宓侀弰顖氭儊瀹稿弶鎸夐崥?*/
   const splitViewsHydrated = useSplitViewStore((state) => state.hasHydrated);
-  /** 鎵€鏈夊垎鍓茶鍥剧殑鏄犲皠琛?*/
+  /** 閹碘偓閺堝鍨庨崜鑼额潒閸ュ墽娈戦弰鐘茬殸鐞?*/
   const splitViewsById = useSplitViewStore((state) => state.splitViewsById);
-  /** 杩囨护鍑烘湁鏁堢殑鍒嗗壊瑙嗗浘 ID 鍒楄〃 */
+  /** 鏉╁洦鎶ら崙鐑樻箒閺佸牏娈戦崚鍡楀鐟欏棗娴?ID 閸掓銆?*/
   const splitViewIds = useMemo(
     () => Object.keys(splitViewsById).filter((splitViewId) => splitViewsById[splitViewId]),
     [splitViewsById],
   );
-  /** 閲嶈瘯璁℃暟鍣紝姣忔閲嶈瘯鏃堕€掑浠ヨЕ鍙?useEffect 閲嶆柊鎵ц */
+  /** 闁插秷鐦拋鈩冩殶閸ｎ煉绱濆В蹇旑偧闁插秷鐦弮鍫曗偓鎺戭杻娴犮儴袝閸?useEffect 闁插秵鏌婇幍褑顢?*/
   const [attempt, setAttempt] = useState(0);
-  /** 閿欒淇℃伅锛岀敤浜庡湪鍚姩灞忓箷灞曠ず澶辫触鍘熷洜 */
+  /** 闁挎瑨顕ゆ穱鈩冧紖閿涘瞼鏁ゆ禍搴℃躬閸氼垰濮╃仦蹇撶鐏炴洜銇氭径杈Е閸樼喎娲?*/
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // 绛夊緟鏁版嵁姘村悎瀹屾垚鍚庡啀鎵ц鎭㈠閫昏緫
+    // 缁涘绶熼弫鐗堝祦濮樻潙鎮庣€瑰本鍨氶崥搴″晙閹笛嗩攽閹垹顦查柅鏄忕帆
     if (!threadsHydrated || !splitViewsHydrated) {
       return;
     }
@@ -49,7 +48,7 @@ function ChatIndexRouteView() {
     setErrorMessage(null);
 
     void (async () => {
-      // 灏濊瘯浠庢湰鍦板瓨鍌ㄦ仮澶嶄笂娆＄殑绾跨▼璺敱
+      // 鐏忔繆鐦禒搴㈡拱閸︽澘鐡ㄩ崒銊︿划婢跺秳绗傚▎锛勬畱缁捐法鈻肩捄顖滄暠
       const restorableRoute = resolveRestorableThreadRoute({
         lastThreadRoute: readSidebarUiState().lastThreadRoute,
         availableThreadIds: new Set(threadIds),
@@ -70,8 +69,7 @@ function ChatIndexRouteView() {
         return;
       }
 
-      // 鏃犳硶鎭㈠鏃讹紝鍒涘缓鏂扮殑鑱婂ぉ浼氳瘽
-      const result = await handleNewChat({ fresh: true });
+      // 閺冪姵纭堕幁銏狀槻閺冭绱濋崚娑樼紦閺傛壆娈戦懕濠傘亯娴兼俺鐦?      const result = await handleNewChat({ fresh: true });
       if (cancelled || result.ok) {
         return;
       }
@@ -100,8 +98,7 @@ function ChatIndexRouteView() {
 }
 
 /**
- * 鑱婂ぉ绱㈠紩璺敱瀹氫箟
- * @description 瀹氫箟 /_chat/ 璺敱锛屼綔涓哄簲鐢ㄥ惎鍔ㄦ椂鐨勯粯璁ゅ叆鍙? */
+ * 閼卞﹤銇夌槐銏犵穿鐠侯垳鏁辩€规矮绠? * @description 鐎规矮绠?/_chat/ 鐠侯垳鏁遍敍灞肩稊娑撳搫绨查悽銊ユ儙閸斻劍妞傞惃鍕帛鐠併倕鍙嗛崣? */
 export const Route = createFileRoute("/_chat/")({
   component: ChatIndexRouteView,
 });

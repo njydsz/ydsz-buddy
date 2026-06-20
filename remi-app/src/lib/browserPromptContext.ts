@@ -1,5 +1,5 @@
 /**
- * @file 娴忚鍣ㄦ彁绀鸿瘝涓婁笅鏂囧鐞嗘ā鍧? * @description 妫€娴嬬敤鎴锋彁绀鸿瘝鏄惁娑夊強鍐呴儴娴忚鍣ㄤ换鍔★紝骞惰嚜鍔ㄩ檮鍔犳祻瑙堝櫒鎴浘浣滀负涓婁笅鏂囥€? */
+ * @file 濞村繗顫嶉崳銊﹀絹缁€楦跨槤娑撳﹣绗呴弬鍥ь槱閻炲棙膩閸? * @description 濡偓濞村鏁ら幋閿嬪絹缁€楦跨槤閺勵垰鎯佸☉澶婂挤閸愬懘鍎村ù蹇氼潔閸ｃ劋鎹㈤崝鈽呯礉楠炴儼鍤滈崝銊╂閸旂姵绁荤憴鍫濇珤閹搭亜娴樻担婊€璐熸稉濠佺瑓閺傚洢鈧? */
 
 import {
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
@@ -10,7 +10,7 @@ import {
 
 import type { ComposerImageAttachment } from "../composerDraftStore";
 
-/** 鏄惧紡璇锋眰璁＄畻鏈轰娇鐢ㄧ殑鍏抽敭璇嶆ā寮?*/
+/** 閺勬儳绱＄拠閿嬬湴鐠侊紕鐣婚張杞板▏閻劎娈戦崗鎶芥暛鐠囧秵膩瀵?*/
 const EXPLICIT_COMPUTER_USE_PATTERNS = [
   "computer use",
   "computer-use",
@@ -19,7 +19,7 @@ const EXPLICIT_COMPUTER_USE_PATTERNS = [
   "mcp__computer_use__",
 ];
 
-/** 鍐呴儴娴忚鍣ㄨ寖鍥寸浉鍏崇殑鍏抽敭璇嶆ā寮忥紙鏀寔澶氳瑷€锛?*/
+/** 閸愬懘鍎村ù蹇氼潔閸ｃ劏瀵栭崶瀵告祲閸忓磭娈戦崗鎶芥暛鐠囧秵膩瀵骏绱欓弨顖涘瘮婢舵俺顕㈢懛鈧敍?*/
 const INTERNAL_BROWSER_SCOPE_PATTERNS = [
   "browser interno",
   "internal browser",
@@ -36,7 +36,7 @@ const INTERNAL_BROWSER_SCOPE_PATTERNS = [
   "page in the browser",
 ];
 
-/** 鍐呴儴娴忚鍣ㄥ姩浣滅浉鍏崇殑鍏抽敭璇嶆ā寮忥紙鏀寔澶氳瑷€锛?*/
+/** 閸愬懘鍎村ù蹇氼潔閸ｃ劌濮╂担婊呮祲閸忓磭娈戦崗鎶芥暛鐠囧秵膩瀵骏绱欓弨顖涘瘮婢舵俺顕㈢懛鈧敍?*/
 const INTERNAL_BROWSER_ACTION_PATTERNS = [
   "guarda",
   "vedi",
@@ -56,22 +56,21 @@ const INTERNAL_BROWSER_ACTION_PATTERNS = [
 ];
 
 /**
- * 瑙勮寖鍖栨彁绀鸿瘝鏂囨湰鐢ㄤ簬鍏抽敭璇嶅尮閰? * @param prompt - 鍘熷鎻愮ず璇? * @returns 瑙勮寖鍖栧悗鐨勬枃鏈紙灏忓啓銆佸悎骞剁┖鐧斤級
+ * 鐟欏嫯瀵栭崠鏍ㄥ絹缁€楦跨槤閺傚洦婀伴悽銊ょ艾閸忔娊鏁拠宥呭爱闁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫭鏋冮張顒婄礄鐏忓繐鍟撻妴浣告値楠炲墎鈹栭惂鏂ょ礆
  */
 function normalizePromptForMatching(prompt: string): string {
   return prompt.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 /**
- * 妫€娴嬫彁绀鸿瘝鏄惁鏄惧紡璇锋眰璁＄畻鏈轰娇鐢ㄥ姛鑳? * @param prompt - 鐢ㄦ埛鎻愮ず璇? * @returns 鏄惁鍖呭惈璁＄畻鏈轰娇鐢ㄧ浉鍏冲叧閿瘝
- */
+ * 濡偓濞村褰佺粈楦跨槤閺勵垰鎯侀弰鎯х础鐠囬攱鐪扮拋锛勭暬閺堣桨濞囬悽銊ュ閼? * @param prompt - 閻劍鍩涢幓鎰仛鐠? * @returns 閺勵垰鎯侀崠鍛儓鐠侊紕鐣婚張杞板▏閻劎娴夐崗鍐插彠闁款喛鐦? */
 export function promptRequestsExplicitComputerUse(prompt: string): boolean {
   const normalized = normalizePromptForMatching(prompt);
   return EXPLICIT_COMPUTER_USE_PATTERNS.some((pattern) => normalized.includes(pattern));
 }
 
 /**
- * 妫€娴嬫彁绀鸿瘝鏄惁鐪嬭捣鏉ユ槸鍐呴儴娴忚鍣ㄤ换鍔? * 闇€瑕佸悓鏃跺尮閰嶆祻瑙堝櫒鑼冨洿鍏抽敭璇嶅拰鍔ㄤ綔鍏抽敭璇? * @param prompt - 鐢ㄦ埛鎻愮ず璇? * @returns 鏄惁鍖归厤鍐呴儴娴忚鍣ㄤ换鍔℃ā寮? */
+ * 濡偓濞村褰佺粈楦跨槤閺勵垰鎯侀惇瀣崳閺夈儲妲搁崘鍛村劥濞村繗顫嶉崳銊ゆ崲閸? * 闂団偓鐟曚礁鎮撻弮璺哄爱闁板秵绁荤憴鍫濇珤閼煎啫娲块崗鎶芥暛鐠囧秴鎷伴崝銊ょ稊閸忔娊鏁拠? * @param prompt - 閻劍鍩涢幓鎰仛鐠? * @returns 閺勵垰鎯侀崠褰掑帳閸愬懘鍎村ù蹇氼潔閸ｃ劋鎹㈤崝鈩兡佸? */
 export function promptLooksLikeInternalBrowserTask(prompt: string): boolean {
   const normalized = normalizePromptForMatching(prompt);
   const mentionsInternalBrowser = INTERNAL_BROWSER_SCOPE_PATTERNS.some((pattern) =>
@@ -84,16 +83,14 @@ export function promptLooksLikeInternalBrowserTask(prompt: string): boolean {
 }
 
 /**
- * 涓烘祻瑙堝櫒鎴浘鐢熸垚闄勪欢鍚嶇О
- * @param input - 娴忚鍣ㄦ埅鍥剧粨鏋? * @returns 鎴浘鏂囦欢鍚嶏紝濡傛灉鍘熷悕涓虹┖鍒欎娇鐢ㄩ粯璁ゅ懡鍚? */
+ * 娑撶儤绁荤憴鍫濇珤閹搭亜娴橀悽鐔稿灇闂勫嫪娆㈤崥宥囆? * @param input - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns 閹搭亜娴橀弬鍥︽閸氬稄绱濇俊鍌涚亯閸樼喎鎮曟稉铏光敄閸掓瑤濞囬悽銊╃帛鐠併倕鎳￠崥? */
 export function screenshotAttachmentName(input: BrowserCaptureScreenshotResult): string {
   return input.name.trim().length > 0 ? input.name : `browser-${Date.now()}.png`;
 }
 
 /**
- * 浠庢祻瑙堝櫒鎴浘鍒涘缓 File 瀵硅薄锛堝唴閮ㄥ嚱鏁帮級
- * @param screenshot - 娴忚鍣ㄦ埅鍥剧粨鏋? * @returns File 瀵硅薄
- * @throws 褰撴埅鍥炬暟鎹负绌烘椂鎶涘嚭閿欒
+ * 娴犲孩绁荤憴鍫濇珤閹搭亜娴橀崚娑樼紦 File 鐎电钖勯敍鍫濆敶闁劌鍤遍弫甯礆
+ * @param screenshot - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns File 鐎电钖? * @throws 瑜版挻鍩呴崶鐐殶閹诡喕璐熺粚鐑樻閹舵稑鍤柨娆掝嚖
  */
 function fileFromBrowserScreenshot(screenshot: BrowserCaptureScreenshotResult): File {
   if (screenshot.bytes.byteLength === 0) {
@@ -106,7 +103,7 @@ function fileFromBrowserScreenshot(screenshot: BrowserCaptureScreenshotResult): 
 }
 
 /**
- * 浠庢祻瑙堝櫒鎴浘鍒涘缓缂栬緫鍣ㄥ浘鐗囬檮浠? * @param screenshot - 娴忚鍣ㄦ埅鍥剧粨鏋? * @returns 缂栬緫鍣ㄥ浘鐗囬檮浠跺璞★紝鍖呭惈棰勮URL鍜屾枃浠跺璞? */
+ * 娴犲孩绁荤憴鍫濇珤閹搭亜娴橀崚娑樼紦缂傛牞绶崳銊ユ禈閻楀洭妾禒? * @param screenshot - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns 缂傛牞绶崳銊ユ禈閻楀洭妾禒璺侯嚠鐠炩槄绱濋崠鍛儓妫板嫯顫峌RL閸滃本鏋冩禒璺侯嚠鐠? */
 export function composerImageFromBrowserScreenshot(
   screenshot: BrowserCaptureScreenshotResult,
 ): ComposerImageAttachment {
@@ -124,41 +121,39 @@ export function composerImageFromBrowserScreenshot(
 }
 
 /**
- * 娴忚鍣ㄦ彁绀鸿瘝闄勪欢瑙ｆ瀽缁撴灉鎺ュ彛
- */
+ * 濞村繗顫嶉崳銊﹀絹缁€楦跨槤闂勫嫪娆㈢憴锝嗙€界紒鎾寸亯閹恒儱褰? */
 export interface BrowserPromptAttachmentResolution {
-  /** 鏄惁璇锋眰浜嗘祻瑙堝櫒闄勪欢 */
+  /** 閺勵垰鎯佺拠閿嬬湴娴滃棙绁荤憴鍫濇珤闂勫嫪娆?*/
   requested: boolean;
-  /** 瑙ｆ瀽鍑虹殑鍥剧墖闄勪欢锛屽鏋滆В鏋愬け璐ュ垯涓?null */
+  /** 鐟欙絾鐎介崙铏规畱閸ュ墽澧栭梽鍕閿涘苯顩ч弸婊喰掗弸鎰亼鐠愩儱鍨稉?null */
   image: ComposerImageAttachment | null;
-  /** 瑙ｆ瀽澶辫触鐨勫師鍥?*/
+  /** 鐟欙絾鐎芥径杈Е閻ㄥ嫬甯崶?*/
   reason?: "no-open-browser" | "no-active-tab" | "attachment-too-large";
 }
 
 /**
- * 灏濊瘯瑙ｆ瀽娴忚鍣ㄦ彁绀鸿瘝闄勪欢
- * 褰撴彁绀鸿瘝鍖归厤鍐呴儴娴忚鍣ㄤ换鍔℃椂锛岃嚜鍔ㄦ埅鍙栧綋鍓嶆祻瑙堝櫒鏍囩椤电殑鎴浘浣滀负闄勪欢
- * @param input - 鍖呭惈 API銆佺嚎绋婭D鍜屾彁绀鸿瘝鐨勮緭鍏ュ璞? * @returns 娴忚鍣ㄩ檮浠惰В鏋愮粨鏋? */
+ * 鐏忔繆鐦憴锝嗙€藉ù蹇氼潔閸ｃ劍褰佺粈楦跨槤闂勫嫪娆? * 瑜版挻褰佺粈楦跨槤閸栧綊鍘ら崘鍛村劥濞村繗顫嶉崳銊ゆ崲閸斺剝妞傞敍宀冨殰閸斻劍鍩呴崣鏍х秼閸撳秵绁荤憴鍫濇珤閺嶅洨顒锋い鐢垫畱閹搭亜娴樻担婊€璐熼梽鍕
+ * @param input - 閸栧懎鎯?API閵嗕胶鍤庣粙濠璂閸滃本褰佺粈楦跨槤閻ㄥ嫯绶崗銉ヮ嚠鐠? * @returns 濞村繗顫嶉崳銊╂娴犳儼袙閺嬫劗绮ㄩ弸? */
 export async function maybeResolveBrowserPromptAttachment(input: {
   api: NativeApi;
   threadId: ThreadId;
   prompt: string;
 }): Promise<BrowserPromptAttachmentResolution> {
-  // 濡傛灉鏄惧紡璇锋眰璁＄畻鏈轰娇鐢ㄦ垨涓嶅尮閰嶆祻瑙堝櫒浠诲姟妯″紡锛屽垯涓嶅鐞?  if (
+  // 婵″倹鐏夐弰鎯х础鐠囬攱鐪扮拋锛勭暬閺堣桨濞囬悽銊﹀灗娑撳秴灏柊宥嗙セ鐟欏牆娅掓禒璇插濡€崇础閿涘苯鍨稉宥咁槱閻?  if (
     promptRequestsExplicitComputerUse(input.prompt) ||
     !promptLooksLikeInternalBrowserTask(input.prompt)
   ) {
     return { requested: false, image: null };
   }
 
-  // 鑾峰彇娴忚鍣ㄧ姸鎬?  const browserState = await input.api.browser.getState({
+  // 閼惧嘲褰囧ù蹇氼潔閸ｃ劎濮搁幀?  const browserState = await input.api.browser.getState({
     threadId: input.threadId,
   });
   if (!browserState.open) {
     return { requested: true, image: null, reason: "no-open-browser" };
   }
 
-  // 鏌ユ壘娲诲姩鏍囩椤?  const activeTab =
+  // 閺屻儲澹樺ú璇插З閺嶅洨顒锋い?  const activeTab =
     browserState.tabs.find((tab) => tab.id === browserState.activeTabId) ??
     browserState.tabs[0] ??
     null;
@@ -166,11 +161,11 @@ export async function maybeResolveBrowserPromptAttachment(input: {
     return { requested: true, image: null, reason: "no-active-tab" };
   }
 
-  // 鎴彇褰撳墠鏍囩椤垫埅鍥?  const screenshot = await input.api.browser.captureScreenshot({
+  // 閹搭亜褰囪ぐ鎾冲閺嶅洨顒锋い鍨焻閸?  const screenshot = await input.api.browser.captureScreenshot({
     threadId: input.threadId,
     tabId: activeTab.id,
   });
-  // 妫€鏌ユ埅鍥惧ぇ灏忔槸鍚﹁秴杩囬檺鍒?  if (screenshot.sizeBytes > PROVIDER_SEND_TURN_MAX_IMAGE_BYTES) {
+  // 濡偓閺屻儲鍩呴崶鎯с亣鐏忓繑妲搁崥锕佺Т鏉╁洭妾洪崚?  if (screenshot.sizeBytes > PROVIDER_SEND_TURN_MAX_IMAGE_BYTES) {
     return { requested: true, image: null, reason: "attachment-too-large" };
   }
 

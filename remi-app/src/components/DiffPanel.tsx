@@ -738,8 +738,8 @@ export default function DiffPanel({
               className={cn(
                 "rounded-md border px-2 py-1 text-left transition-colors",
                 selectedTurnId === null
-                  ? "border-[color:var(--color-border)] bg-[var(--color-text-foreground)] text-[var(--color-background-surface)]"
-                  : "border-[color:var(--color-border-light)] bg-transparent text-[var(--color-text-foreground-secondary)] hover:border-[color:var(--color-border)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--color-text-foreground)]",
+                  ? "border-(--color-border) bg-(--color-text-foreground) text-(--color-background-surface)"
+                  : "border-(--color-border-light) bg-transparent text-(--color-text-foreground-secondary) hover:border-(--color-border) hover:bg-(--sidebar-accent) hover:text-(--color-text-foreground)",
               )}
             >
               <div className="text-[10px] leading-tight font-medium">All turns</div>
@@ -758,8 +758,8 @@ export default function DiffPanel({
                 className={cn(
                   "rounded-md border px-2 py-1 text-left transition-colors",
                   summary.turnId === selectedTurn?.turnId
-                    ? "border-[color:var(--color-border)] bg-[var(--color-text-foreground)] text-[var(--color-background-surface)]"
-                    : "border-[color:var(--color-border-light)] bg-transparent text-[var(--color-text-foreground-secondary)] hover:border-[color:var(--color-border)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--color-text-foreground)]",
+                    ? "border-(--color-border) bg-(--color-text-foreground) text-(--color-background-surface)"
+                    : "border-(--color-border-light) bg-transparent text-(--color-text-foreground-secondary) hover:border-(--color-border) hover:bg-(--sidebar-accent) hover:text-(--color-text-foreground)",
                 )}
               >
                 <div className="flex items-center gap-1">
@@ -817,7 +817,7 @@ export default function DiffPanel({
         {onClosePanel ? (
           <button
             type="button"
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-transparent text-[var(--color-text-foreground)] transition-colors hover:bg-[var(--sidebar-accent)] [-webkit-app-region:no-drag]"
+            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-transparent text-(--color-text-foreground) transition-colors hover:bg-(--sidebar-accent) [-webkit-app-region:no-drag]"
             onClick={(event) => {
               event.stopPropagation();
               onClosePanel();

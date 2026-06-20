@@ -1,6 +1,6 @@
 /**
- * @file 椤圭洰鑴氭湰宸ュ叿妯″潡
- * @description 鎻愪緵椤圭洰鑴氭湰鐨?ID 鐢熸垚銆佸懡浠ゆ槧灏勩€佸伐浣滅洰褰曡В鏋愬拰鐜鍙橀噺鏋勫缓绛夊伐鍏峰嚱鏁般€? */
+ * @file 妞ゅ湱娲伴懘姘拱瀹搞儱鍙垮Ο鈥虫健
+ * @description 閹绘劒绶垫い鍦窗閼存碍婀伴惃?ID 閻㈢喐鍨氶妴浣告嚒娴犮倖妲х亸鍕┾偓浣镐紣娴ｆ粎娲拌ぐ鏇⌒掗弸鎰嫲閻滎垰顣ㄩ崣姗€鍣洪弸鍕紦缁涘浼愰崗宄板毐閺佽埇鈧? */
 
 import {
   MAX_SCRIPT_ID_LENGTH,
@@ -10,8 +10,8 @@ import {
 } from "~/contracts";
 
 /**
- * 褰掍竴鍖栬剼鏈?ID锛氳浆灏忓啓銆佹浛鎹㈤潪娉曞瓧绗︿负杩炲瓧绗︺€佸幓闄ら灏捐繛瀛楃銆佹埅鏂嚦鏈€澶ч暱搴? * @param value - 鍘熷鑴氭湰鍚嶇О
- * @returns 褰掍竴鍖栧悗鐨勮剼鏈?ID
+ * 瑜版帊绔撮崠鏍壖閺?ID閿涙俺娴嗙亸蹇撳晸閵嗕焦娴涢幑銏ゆ姜濞夋洖鐡х粭锔胯礋鏉╃偛鐡х粭锔衡偓浣稿箵闂勩倝顩荤亸鎹愮箾鐎涙顑侀妴浣瑰焻閺傤叀鍤﹂張鈧径褔鏆辨惔? * @param value - 閸樼喎顫愰懘姘拱閸氬秶袨
+ * @returns 瑜版帊绔撮崠鏍ф倵閻ㄥ嫯鍓奸張?ID
  */
 function normalizeScriptId(value: string): string {
   const cleaned = value
@@ -29,15 +29,15 @@ function normalizeScriptId(value: string): string {
 }
 
 /**
- * 鏍规嵁鑴氭湰 ID 鐢熸垚蹇嵎閿懡浠ゆ爣璇? * @param scriptId - 鑴氭湰 ID
- * @returns 蹇嵎閿懡浠? */
+ * 閺嶈宓侀懘姘拱 ID 閻㈢喐鍨氳箛顐ｅ祹闁款喖鎳℃禒銈嗙垼鐠? * @param scriptId - 閼存碍婀?ID
+ * @returns 韫囶偅宓庨柨顔兼嚒娴? */
 export const commandForProjectScript = (scriptId: string): KeybindingCommand =>
   SCRIPT_RUN_COMMAND_PATTERN.makeUnsafe(`script.${scriptId}.run`);
 
 /**
- * 浠庡揩鎹烽敭鍛戒护涓彁鍙栬剼鏈?ID
- * @param command - 蹇嵎閿懡浠ゅ瓧绗︿覆
- * @returns 鑴氭湰 ID锛岄潪鑴氭湰鍛戒护杩斿洖 null
+ * 娴犲骸鎻╅幑鐑芥暛閸涙垝鎶ゆ稉顓熷絹閸欐牞鍓奸張?ID
+ * @param command - 韫囶偅宓庨柨顔兼嚒娴犮倕鐡х粭锔胯
+ * @returns 閼存碍婀?ID閿涘矂娼懘姘拱閸涙垝鎶ゆ潻鏂挎礀 null
  */
 export function projectScriptIdFromCommand(command: string): string | null {
   const trimmed = command.trim();
@@ -49,11 +49,9 @@ export function projectScriptIdFromCommand(command: string): string | null {
 }
 
 /**
- * 鐢熸垚涓嬩竴涓彲鐢ㄧ殑椤圭洰鑴氭湰 ID
- * 鍩轰簬鑴氭湰鍚嶇О鐢熸垚 ID锛岃嫢宸插瓨鍦ㄥ垯娣诲姞鏁板瓧鍚庣紑锛岀洿鍒版壘鍒板彲鐢?ID
- * @param name - 鑴氭湰鍚嶇О
- * @param existingIds - 宸插瓨鍦ㄧ殑鑴氭湰 ID 闆嗗悎
- * @returns 鍞竴鐨勮剼鏈?ID
+ * 閻㈢喐鍨氭稉瀣╃娑擃亜褰查悽銊ф畱妞ゅ湱娲伴懘姘拱 ID
+ * 閸╄桨绨懘姘拱閸氬秶袨閻㈢喐鍨?ID閿涘矁瀚㈠鎻掔摠閸︺劌鍨ǎ璇插閺佹澘鐡ч崥搴ｇ磻閿涘瞼娲块崚鐗堝閸掓澘褰查悽?ID
+ * @param name - 閼存碍婀伴崥宥囆? * @param existingIds - 瀹告彃鐡ㄩ崷銊ф畱閼存碍婀?ID 闂嗗棗鎮? * @returns 閸烆垯绔撮惃鍕壖閺?ID
  */
 export function nextProjectScriptId(name: string, existingIds: Iterable<string>): string {
   const taken = new Set(Array.from(existingIds));
@@ -73,13 +71,12 @@ export function nextProjectScriptId(name: string, existingIds: Iterable<string>)
     suffix += 1;
   }
 
-  // 鍏滃簳鏂规锛氫粎鍦ㄦ暟鍗冧釜鍚庣紑閮借€楀敖鏃惰Е鍙?  return `${baseId}-${Date.now()}`.slice(0, MAX_SCRIPT_ID_LENGTH);
+  // 閸忔粌绨抽弬瑙勵攳閿涙矮绮庨崷銊︽殶閸楀啩閲滈崥搴ｇ磻闁€熲偓妤€鏁栭弮鎯靶曢崣?  return `${baseId}-${Date.now()}`.slice(0, MAX_SCRIPT_ID_LENGTH);
 }
 
 /**
- * 椤圭洰鑴氭湰杩愯鏃剁幆澧冨彉閲忚緭鍏? * @property project.cwd - 椤圭洰鏍圭洰褰? * @property worktreePath - 宸ヤ綔鏍戣矾寰勶紙鍙€夛級
- * @property extraEnv - 棰濆鐜鍙橀噺锛堝彲閫夛級
- */
+ * 妞ゅ湱娲伴懘姘拱鏉╂劘顢戦弮鍓佸箚婢у啫褰夐柌蹇氱翻閸? * @property project.cwd - 妞ゅ湱娲伴弽鍦窗瑜? * @property worktreePath - 瀹搞儰缍旈弽鎴ｇ熅瀵板嫸绱欓崣顖炩偓澶涚礆
+ * @property extraEnv - 妫版繂顦婚悳顖氼暔閸欐﹢鍣洪敍鍫濆讲闁绱? */
 interface ProjectScriptRuntimeEnvInput {
   project: {
     cwd: string;
@@ -89,7 +86,7 @@ interface ProjectScriptRuntimeEnvInput {
 }
 
 /**
- * 瑙ｆ瀽椤圭洰鑴氭湰鐨勫伐浣滅洰褰? * 浼樺厛浣跨敤宸ヤ綔鏍戣矾寰勶紝鍚﹀垯浣跨敤椤圭洰鏍圭洰褰? * @param input - 鍖呭惈椤圭洰鍜屽伐浣滄爲璺緞鐨勮緭鍏? * @returns 鑴氭湰杩愯鐨勫伐浣滅洰褰? */
+ * 鐟欙絾鐎芥い鍦窗閼存碍婀伴惃鍕紣娴ｆ粎娲拌ぐ? * 娴兼ê鍘涙担璺ㄦ暏瀹搞儰缍旈弽鎴ｇ熅瀵板嫸绱濋崥锕€鍨担璺ㄦ暏妞ゅ湱娲伴弽鍦窗瑜? * @param input - 閸栧懎鎯堟い鍦窗閸滃苯浼愭担婊勭埐鐠侯垰绶為惃鍕翻閸? * @returns 閼存碍婀版潻鎰攽閻ㄥ嫬浼愭担婊呮窗瑜? */
 export function projectScriptCwd(input: {
   project: {
     cwd: string;
@@ -100,9 +97,8 @@ export function projectScriptCwd(input: {
 }
 
 /**
- * 鏋勫缓椤圭洰鑴氭湰鐨勮繍琛屾椂鐜鍙橀噺
- * 鍖呭惈椤圭洰鏍圭洰褰曘€佸伐浣滄爲璺緞绛夋爣鍑嗗彉閲忥紝鍙笌棰濆鐜鍙橀噺鍚堝苟
- * @param input - 杩愯鏃剁幆澧冨彉閲忚緭鍏? * @returns 鐜鍙橀噺閿€煎
+ * 閺嬪嫬缂撴い鍦窗閼存碍婀伴惃鍕箥鐞涘本妞傞悳顖氼暔閸欐﹢鍣? * 閸栧懎鎯堟い鍦窗閺嶅湱娲拌ぐ鏇樷偓浣镐紣娴ｆ粍鐖茬捄顖氱窞缁涘鐖ｉ崙鍡楀綁闁插骏绱濋崣顖欑瑢妫版繂顦婚悳顖氼暔閸欐﹢鍣洪崥鍫濊嫙
+ * @param input - 鏉╂劘顢戦弮鍓佸箚婢у啫褰夐柌蹇氱翻閸? * @returns 閻滎垰顣ㄩ崣姗€鍣洪柨顔尖偓鐓庮嚠
  */
 export function projectScriptRuntimeEnv(
   input: ProjectScriptRuntimeEnvInput,
@@ -120,8 +116,7 @@ export function projectScriptRuntimeEnv(
 }
 
 /**
- * 鑾峰彇涓昏鐨勯」鐩剼鏈紙闈炲伐浣滄爲鍒涘缓鏃惰繍琛岀殑鑴氭湰锛? * 浼樺厛杩斿洖绗竴涓潪 runOnWorktreeCreate 鐨勮剼鏈? * @param scripts - 椤圭洰鑴氭湰鍒楄〃
- * @returns 涓昏鑴氭湰锛屾棤鍖归厤鏃惰繑鍥炵涓€涓剼鏈垨 null
+ * 閼惧嘲褰囨稉鏄忣洣閻ㄥ嫰銆嶉惄顔垮壖閺堫剨绱欓棃鐐蹭紣娴ｆ粍鐖查崚娑樼紦閺冩儼绻嶇悰宀€娈戦懘姘拱閿? * 娴兼ê鍘涙潻鏂挎礀缁楊兛绔存稉顏堟姜 runOnWorktreeCreate 閻ㄥ嫯鍓奸張? * @param scripts - 妞ゅ湱娲伴懘姘拱閸掓銆? * @returns 娑撴槒顩﹂懘姘拱閿涘本妫ら崠褰掑帳閺冩儼绻戦崶鐐殿儑娑撯偓娑擃亣鍓奸張顒佸灗 null
  */
 export function primaryProjectScript(scripts: ProjectScript[]): ProjectScript | null {
   const regular = scripts.find((script) => !script.runOnWorktreeCreate);
@@ -129,8 +124,7 @@ export function primaryProjectScript(scripts: ProjectScript[]): ProjectScript | 
 }
 
 /**
- * 鑾峰彇宸ヤ綔鏍戝垱寤烘椂鐨勮缃剼鏈? * @param scripts - 椤圭洰鑴氭湰鍒楄〃
- * @returns 璁剧疆鑴氭湰锛屾棤鍖归厤鏃惰繑鍥?null
+ * 閼惧嘲褰囧銉ょ稊閺嶆垵鍨卞鐑樻閻ㄥ嫯顔曠純顔垮壖閺? * @param scripts - 妞ゅ湱娲伴懘姘拱閸掓銆? * @returns 鐠佸墽鐤嗛懘姘拱閿涘本妫ら崠褰掑帳閺冩儼绻戦崶?null
  */
 export function setupProjectScript(scripts: ProjectScript[]): ProjectScript | null {
   return scripts.find((script) => script.runOnWorktreeCreate) ?? null;

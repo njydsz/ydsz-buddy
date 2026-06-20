@@ -1,6 +1,6 @@
 /**
  * @file useThreadWorkspaceHandoff.ts
- * @description 绾跨▼宸ヤ綔鍖轰氦鎺?Hook - 澶勭悊绾跨▼鍦ㄦ湰鍦板拰宸ヤ綔鏍戜箣闂寸殑鍒囨崲
+ * @description 缁捐法鈻煎銉ょ稊閸栬桨姘﹂幒?Hook - 婢跺嫮鎮婄痪璺ㄢ柤閸︺劍婀伴崷鏉挎嫲瀹搞儰缍旈弽鎴滅闂傚娈戦崚鍥ㄥ床
  * @module hooks/useThreadWorkspaceHandoff
  */
 
@@ -17,22 +17,16 @@ import { setupProjectScript } from "../projectScripts";
 import type { Project, ProjectScript, Thread, ThreadWorkspacePatch } from "../types";
 
 /**
- * 绾跨▼宸ヤ綔鍖轰氦鎺?Hook
+ * 缁捐法鈻煎銉ょ稊閸栬桨姘﹂幒?Hook
  *
  * @description
- * 澶勭悊绾跨▼鍦ㄦ湰鍦扮幆澧冿紙local锛夊拰宸ヤ綔鏍戠幆澧冿紙worktree锛変箣闂寸殑鍒囨崲銆? * 鏀寔锛? * - 鍒囨崲鍒版湰鍦版ā寮忥紙鐩存帴鍦ㄩ」鐩洰褰曞伐浣滐級
- * - 鍒囨崲鍒板伐浣滄爲妯″紡锛堝湪鐙珛鐨?git worktree 涓伐浣滐級
- * - 鑷姩妫€娴嬪彲澶嶇敤鐨勫叧鑱斿伐浣滄爲
- * - 宸ヤ綔鏍戝懡鍚嶅璇濇
- * - 浜ゆ帴鍚庤嚜鍔ㄦ墽琛岄」鐩缃剼鏈? *
- * @param input - 杈撳叆鍙傛暟瀵硅薄
- * @param input.activeProject - 褰撳墠娲诲姩椤圭洰
- * @param input.activeThread - 褰撳墠娲诲姩绾跨▼
- * @param input.activeRootBranch - 褰撳墠鏍瑰垎鏀? * @param input.activeThreadAssociatedWorktree - 绾跨▼鍏宠仈鐨勫伐浣滄爲淇℃伅
- * @param input.isServerThread - 鏄惁涓烘湇鍔″櫒绾跨▼
- * @param input.stopActiveThreadSession - 鍋滄褰撳墠绾跨▼浼氳瘽鐨勬柟娉? * @param input.runProjectScript - 杩愯椤圭洰鑴氭湰鐨勬柟娉? * @param input.setStoreThreadWorkspace - 璁剧疆绾跨▼宸ヤ綔鍖虹殑鏂规硶
- * @param input.syncServerShellSnapshot - 鍚屾 Shell 蹇収鐨勬柟娉? *
- * @returns 宸ヤ綔鍖轰氦鎺ョ浉鍏崇殑鐘舵€佸拰鏂规硶
+ * 婢跺嫮鎮婄痪璺ㄢ柤閸︺劍婀伴崷鎵箚婢у喛绱檒ocal閿涘鎷板銉ょ稊閺嶆垹骞嗘晶鍐跨礄worktree閿涘绠ｉ梻瀵告畱閸掑洦宕查妴? * 閺€顖涘瘮閿? * - 閸掑洦宕查崚鐗堟拱閸︾増膩瀵骏绱欓惄瀛樺复閸︺劑銆嶉惄顔炬窗瑜版洖浼愭担婊愮礆
+ * - 閸掑洦宕查崚鏉夸紣娴ｆ粍鐖插Ο鈥崇础閿涘牆婀悪顒傜彌閻?git worktree 娑擃厼浼愭担婊愮礆
+ * - 閼奉亜濮╁Λ鈧ù瀣讲婢跺秶鏁ら惃鍕彠閼辨柨浼愭担婊勭埐
+ * - 瀹搞儰缍旈弽鎴濇嚒閸氬秴顕拠婵囶攱
+ * - 娴溿倖甯撮崥搴ゅ殰閸斻劍澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張? *
+ * @param input - 鏉堟挸鍙嗛崣鍌涙殶鐎电钖? * @param input.activeProject - 瑜版挸澧犲ú璇插З妞ゅ湱娲? * @param input.activeThread - 瑜版挸澧犲ú璇插З缁捐法鈻? * @param input.activeRootBranch - 瑜版挸澧犻弽鐟板瀻閺€? * @param input.activeThreadAssociatedWorktree - 缁捐法鈻奸崗瀹犱粓閻ㄥ嫬浼愭担婊勭埐娣団剝浼? * @param input.isServerThread - 閺勵垰鎯佹稉鐑樻箛閸斺€虫珤缁捐法鈻? * @param input.stopActiveThreadSession - 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈閻ㄥ嫭鏌熷▔? * @param input.runProjectScript - 鏉╂劘顢戞い鍦窗閼存碍婀伴惃鍕煙濞? * @param input.setStoreThreadWorkspace - 鐠佸墽鐤嗙痪璺ㄢ柤瀹搞儰缍旈崠铏规畱閺傝纭? * @param input.syncServerShellSnapshot - 閸氬本顒?Shell 韫囶偆鍙庨惃鍕煙濞? *
+ * @returns 瀹搞儰缍旈崠杞版唉閹恒儳娴夐崗宕囨畱閻樿埖鈧礁鎷伴弬瑙勭《
  *
  * @example
  * ```tsx
@@ -75,14 +69,12 @@ export function useThreadWorkspaceHandoff(input: {
   const [worktreeHandoffName, setWorktreeHandoffName] = useState("");
 
   /**
-   * 鎵ц宸ヤ綔鍖轰氦鎺?   *
+   * 閹笛嗩攽瀹搞儰缍旈崠杞版唉閹?   *
    * @description
-   * 鏍稿績浜ゆ帴閫昏緫锛?   * 1. 鍋滄褰撳墠绾跨▼浼氳瘽
-   * 2. 鎵ц git 浜ゆ帴鎿嶄綔锛堝垏鎹㈠垎鏀?worktree锛?   * 3. 鏇存柊绾跨▼鍏冩暟鎹?   * 4. 鍚屾 Shell 蹇収
-   * 5. 鍦ㄥ伐浣滄爲妯″紡涓嬫墽琛岄」鐩缃剼鏈?   *
-   * @param targetMode - 鐩爣妯″紡锛?local" 鎴?"worktree"
-   * @param options - 鍙€夊弬鏁帮紙棣栭€夊伐浣滄爲鍚嶇О锛?   * @returns 鏄惁浜ゆ帴鎴愬姛
-   */
+   * 閺嶇绺炬禍銈嗗复闁槒绶敍?   * 1. 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈
+   * 2. 閹笛嗩攽 git 娴溿倖甯撮幙宥勭稊閿涘牆鍨忛幑銏犲瀻閺€?worktree閿?   * 3. 閺囧瓨鏌婄痪璺ㄢ柤閸忓啯鏆熼幑?   * 4. 閸氬本顒?Shell 韫囶偆鍙?   * 5. 閸︺劌浼愭担婊勭埐濡€崇础娑撳澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張?   *
+   * @param targetMode - 閻╊喗鐖ｅΟ鈥崇础閿?local" 閹?"worktree"
+   * @param options - 閸欘垶鈧寮弫甯礄妫ｆ牠鈧浼愭担婊勭埐閸氬秶袨閿?   * @returns 閺勵垰鎯佹禍銈嗗复閹存劕濮?   */
   const handoffThread = useCallback(
     async (targetMode: "local" | "worktree", options?: { preferredWorktreeName?: string }) => {
       const api = readNativeApi();
@@ -97,10 +89,10 @@ export function useThreadWorkspaceHandoff(input: {
       }
 
       try {
-        // 鍋滄褰撳墠绾跨▼浼氳瘽
+        // 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈
         await input.stopActiveThreadSession();
         
-        // 鎵ц git 浜ゆ帴鎿嶄綔
+        // 閹笛嗩攽 git 娴溿倖甯撮幙宥勭稊
         const result = await handoffThreadMutation.mutateAsync({
           targetMode,
           currentBranch: input.activeThread.branch ?? null,
@@ -117,7 +109,7 @@ export function useThreadWorkspaceHandoff(input: {
           preferredNewWorktreeName: options?.preferredWorktreeName ?? null,
         });
 
-        // 鏋勫缓宸ヤ綔鍖鸿ˉ涓?        const workspacePatch = {
+        // 閺嬪嫬缂撳銉ょ稊閸栭缚藟娑?        const workspacePatch = {
           envMode: result.targetMode,
           branch: result.branch,
           worktreePath: result.worktreePath,
@@ -127,21 +119,19 @@ export function useThreadWorkspaceHandoff(input: {
           ...(targetMode === "worktree" ? { createBranchFlowCompleted: false } : {}),
         } as const;
 
-        // 鏇存柊鏈嶅姟鍣ㄧ鐨勭嚎绋嬪厓鏁版嵁
+        // 閺囧瓨鏌婇張宥呭閸ｃ劎顏惃鍕殠缁嬪鍘撻弫鐗堝祦
         await api.orchestration.dispatchCommand({
           type: "thread.meta.update",
           commandId: newCommandId(),
           threadId: input.activeThread.id,
           ...workspacePatch,
         });
-        // 鏇存柊鏈湴瀛樺偍鐨勭嚎绋嬪伐浣滃尯淇℃伅
-        input.setStoreThreadWorkspace(input.activeThread.id, workspacePatch);
+        // 閺囧瓨鏌婇張顒€婀寸€涙ê鍋嶉惃鍕殠缁嬪浼愭担婊冨隘娣団剝浼?        input.setStoreThreadWorkspace(input.activeThread.id, workspacePatch);
 
-        // 鍚屾 Shell 蹇収
-        const snapshot = await api.orchestration.getShellSnapshot();
+        // 閸氬本顒?Shell 韫囶偆鍙?        const snapshot = await api.orchestration.getShellSnapshot();
         input.syncServerShellSnapshot(snapshot);
 
-        // 鍦ㄥ伐浣滄爲妯″紡涓嬫墽琛岄」鐩缃剼鏈?        if (targetMode === "worktree" && result.worktreePath) {
+        // 閸︺劌浼愭担婊勭埐濡€崇础娑撳澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張?        if (targetMode === "worktree" && result.worktreePath) {
           const setupScript = setupProjectScript(input.activeProject.scripts);
           if (setupScript) {
             await input.runProjectScript(setupScript, {
@@ -152,7 +142,7 @@ export function useThreadWorkspaceHandoff(input: {
           }
         }
 
-        // 鏄剧ず浜ゆ帴缁撴灉閫氱煡
+        // 閺勫墽銇氭禍銈嗗复缂佹挻鐏夐柅姘辩叀
         toastManager.add({
           type: result.conflictsDetected ? "warning" : "success",
           title:
@@ -179,17 +169,16 @@ export function useThreadWorkspaceHandoff(input: {
   );
 
   /**
-   * 澶勭悊浜ゆ帴鍒板伐浣滄爲
+   * 婢跺嫮鎮婃禍銈嗗复閸掓澘浼愭担婊勭埐
    *
    * @description
-   * 妫€鏌ユ槸鍚﹀彲浠ュ鐢ㄥ凡鏈夌殑鍏宠仈宸ヤ綔鏍戯細
-   * - 濡傛灉鍙互澶嶇敤锛岀洿鎺ユ墽琛屼氦鎺?   * - 鍚﹀垯鎵撳紑鍛藉悕瀵硅瘽妗嗚鐢ㄦ埛杈撳叆宸ヤ綔鏍戝悕绉?   */
+   * 濡偓閺屻儲妲搁崥锕€褰叉禒銉ヮ槻閻劌鍑￠張澶屾畱閸忓疇浠堝銉ょ稊閺嶆埊绱?   * - 婵″倹鐏夐崣顖欎簰婢跺秶鏁ら敍宀€娲块幒銉﹀⒔鐞涘奔姘﹂幒?   * - 閸氾箑鍨幍鎾崇磻閸涜棄鎮曠€电鐦藉鍡氼唨閻劍鍩涙潏鎾冲弳瀹搞儰缍旈弽鎴濇倳缁?   */
   const onHandoffToWorktree = useCallback(() => {
     if (!input.activeThread) {
       return;
     }
 
-    // 瑙ｆ瀽宸ヤ綔鏍戜氦鎺ユ剰鍥?    const worktreeIntent = resolveWorktreeHandoffIntent({
+    // 鐟欙絾鐎藉銉ょ稊閺嶆垳姘﹂幒銉﹀壈閸?    const worktreeIntent = resolveWorktreeHandoffIntent({
       associatedWorktreePath: input.activeThreadAssociatedWorktree.associatedWorktreePath,
       associatedWorktreeBranch: input.activeThreadAssociatedWorktree.associatedWorktreeBranch,
       associatedWorktreeRef: input.activeThreadAssociatedWorktree.associatedWorktreeRef,
@@ -197,13 +186,13 @@ export function useThreadWorkspaceHandoff(input: {
       currentBranch: input.activeThread.branch ?? null,
     });
     
-    // 濡傛灉鍙互澶嶇敤鍏宠仈宸ヤ綔鏍戯紝鐩存帴鎵ц浜ゆ帴
+    // 婵″倹鐏夐崣顖欎簰婢跺秶鏁ら崗瀹犱粓瀹搞儰缍旈弽鎴礉閻╁瓨甯撮幍褑顢戞禍銈嗗复
     if (worktreeIntent?.kind === "reuse-associated") {
       void handoffThread("worktree");
       return;
     }
 
-    // 鍚﹀垯鎵撳紑鍛藉悕瀵硅瘽妗?    setWorktreeHandoffName(
+    // 閸氾箑鍨幍鎾崇磻閸涜棄鎮曠€电鐦藉?    setWorktreeHandoffName(
       buildSuggestedWorktreeName({
         associatedWorktreeBranch:
           input.activeThreadAssociatedWorktree.associatedWorktreeBranch ??
@@ -216,9 +205,9 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, input]);
 
   /**
-   * 纭宸ヤ綔鏍戜氦鎺?   *
+   * 绾喛顓诲銉ょ稊閺嶆垳姘﹂幒?   *
    * @description
-   * 浣跨敤鐢ㄦ埛杈撳叆鐨勫伐浣滄爲鍚嶇О鎵ц浜ゆ帴
+   * 娴ｈ法鏁ら悽銊﹀煕鏉堟挸鍙嗛惃鍕紣娴ｆ粍鐖查崥宥囆為幍褑顢戞禍銈嗗复
    */
   const confirmWorktreeHandoff = useCallback(async () => {
     const normalizedWorktreeName = buildSuggestedWorktreeName({
@@ -234,27 +223,27 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, worktreeHandoffName]);
 
   /**
-   * 澶勭悊浜ゆ帴鍒版湰鍦扮幆澧?   */
+   * 婢跺嫮鎮婃禍銈嗗复閸掔増婀伴崷鎵箚婢?   */
   const onHandoffToLocal = useCallback(async () => {
     await handoffThread("local");
   }, [handoffThread]);
 
   return {
-    /** 浜ゆ帴鎿嶄綔鏄惁姝ｅ湪杩涜涓?*/
+    /** 娴溿倖甯撮幙宥勭稊閺勵垰鎯佸锝呮躬鏉╂稖顢戞稉?*/
     handoffBusy: handoffThreadMutation.isPending,
-    /** 宸ヤ綔鏍戜氦鎺ュ璇濇鏄惁鎵撳紑 */
+    /** 瀹搞儰缍旈弽鎴滄唉閹恒儱顕拠婵囶攱閺勵垰鎯侀幍鎾崇磻 */
     worktreeHandoffDialogOpen,
-    /** 璁剧疆宸ヤ綔鏍戜氦鎺ュ璇濇鐨勬墦寮€鐘舵€?*/
+    /** 鐠佸墽鐤嗗銉ょ稊閺嶆垳姘﹂幒銉ヮ嚠鐠囨繃顢嬮惃鍕ⅵ瀵偓閻樿埖鈧?*/
     setWorktreeHandoffDialogOpen,
-    /** 宸ヤ綔鏍戝悕绉?*/
+    /** 瀹搞儰缍旈弽鎴濇倳缁?*/
     worktreeHandoffName,
-    /** 璁剧疆宸ヤ綔鏍戝悕绉?*/
+    /** 鐠佸墽鐤嗗銉ょ稊閺嶆垵鎮曠粔?*/
     setWorktreeHandoffName,
-    /** 浜ゆ帴宸ヤ綔鏍戝鐞嗗嚱鏁?*/
+    /** 娴溿倖甯村銉ょ稊閺嶆垵顦╅悶鍡楀毐閺?*/
     onHandoffToWorktree,
-    /** 浜ゆ帴鏈湴澶勭悊鍑芥暟 */
+    /** 娴溿倖甯撮張顒€婀存径鍕倞閸戣姤鏆?*/
     onHandoffToLocal,
-    /** 纭宸ヤ綔鏍戜氦鎺?*/
+    /** 绾喛顓诲銉ょ稊閺嶆垳姘﹂幒?*/
     confirmWorktreeHandoff,
   };
 }

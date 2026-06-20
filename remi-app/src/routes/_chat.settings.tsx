@@ -111,9 +111,9 @@ import { formatRelativeTime } from "../components/Sidebar";
 import { formatWorktreePathForDisplay } from "../worktreeCleanup";
 import { sameProviderOrder } from "../providerOrdering";
 
-// 鈹€鈹€ Settings taxonomy 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 Settings taxonomy 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
-// 鈹€鈹€ Model Channels (Service Gateways) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 Model Channels (Service Gateways) 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 type ModelChannelId =
   | "deepseek"
@@ -135,40 +135,40 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "deepseek",
     name: "DeepSeek",
-    subtitle: "娣卞害姹傜储 路 DeepSeek",
-    balance: "楼177.52",
+    subtitle: "濞ｅ崬瀹冲Ч鍌滃偍 璺?DeepSeek",
+    balance: "妤?77.52",
     iconColor: "#4D6BFA",
   },
   {
     id: "siliconflow",
-    name: "纭呭熀娴佸姩",
-    subtitle: "纭呭熀娴佸姩 路 SiliconFlow",
-    balance: "楼110.87",
+    name: "绾懎鐔€濞翠礁濮?,
+    subtitle: "绾懎鐔€濞翠礁濮?璺?SiliconFlow",
+    balance: "妤?10.87",
     iconColor: "#6366F1",
   },
   {
     id: "volcano",
-    name: "鐏北鏂硅垷",
-    subtitle: "瀛楄妭璺冲姩 路 鐏北鏂硅垷",
+    name: "閻忣偄鍖楅弬纭呭灧",
+    subtitle: "鐎涙濡捄鍐插З 璺?閻忣偄鍖楅弬纭呭灧",
     iconColor: "#3B82F6",
   },
   {
     id: "tongyi",
-    name: "閫氫箟鍗冮棶",
-    subtitle: "闃块噷浜?路 鐧剧偧骞冲彴",
+    name: "闁矮绠熼崡鍐６",
+    subtitle: "闂冨潡鍣锋禍?璺?閻у墽鍋ч獮鍐插酱",
     iconColor: "#F97316",
   },
   {
     id: "kimi",
     name: "Kimi",
-    subtitle: "鏈堜箣鏆楅潰 路 Kimi",
-    balance: "楼13.96",
+    subtitle: "閺堝牅绠ｉ弳妤呮桨 璺?Kimi",
+    balance: "妤?3.96",
     iconColor: "#1F2937",
   },
   {
     id: "minimax",
     name: "MiniMax",
-    subtitle: "MiniMax 路 娴疯灪 AI",
+    subtitle: "MiniMax 璺?濞寸柉鐏?AI",
     iconColor: "#10B981",
   },
 ];
@@ -478,7 +478,7 @@ function buildInstallProviderSettings(
   }));
 }
 
-// 鈹€鈹€ Settings UI primitives 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 Settings UI primitives 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -655,7 +655,7 @@ function providerUpdateFailureMessage(provider: ServerProviderStatus | undefined
   return state.output?.trim() || state.message || "The provider update did not complete.";
 }
 
-// 鈹€鈹€ Route screen 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// 閳光偓閳光偓 Route screen 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 function SettingsRouteView() {
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
@@ -1902,7 +1902,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM…
+                  placeholder="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif"
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2548,11 +2548,11 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="缃戝叧浠ｇ悊">
+      <SettingsSection title="缂冩垵鍙ф禒锝囨倞">
         <div className="space-y-2">
           <SettingsRow
-            title="鏈湴 API 缃戝叧"
-            description="鍚姩鍚庡彲閫氳繃缁熶竴鏈湴绔偣璁块棶鎵€鏈夊凡鍚敤鐨勬ā鍨嬫笭閬撱€?
+            title="閺堫剙婀?API 缂冩垵鍙?
+            description="閸氼垰濮╅崥搴″讲闁俺绻冪紒鐔剁閺堫剙婀寸粩顖滃仯鐠佸潡妫堕幍鈧張澶婂嚒閸氼垳鏁ら惃鍕侀崹瀣闁挶鈧?
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2562,7 +2562,7 @@ function SettingsRouteView() {
           />
           {gatewayRunning ? (
             <div className="mt-4 space-y-5 border-t border-border pt-4">
-              {/* 鈹€鈹€ Local API 鈹€鈹€ */}
+              {/* 閳光偓閳光偓 Local API 閳光偓閳光偓 */}
               <div>
                 <h4 className="mb-2 text-sm font-semibold text-foreground">Local API</h4>
                 <p className="mb-2 text-xs text-muted-foreground">
@@ -2600,7 +2600,7 @@ function SettingsRouteView() {
                 </div>
               </div>
 
-              {/* 鈹€鈹€ Agent Setup 鈹€鈹€ */}
+              {/* 閳光偓閳光偓 Agent Setup 閳光偓閳光偓 */}
               <div>
                 <h4 className="mb-3 text-sm font-semibold text-foreground">Agent Setup</h4>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -2855,14 +2855,14 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="妯″瀷娓犻亾鎺ュ叆">
+      <SettingsSection title="濡€崇€峰〒鐘讳壕閹恒儱鍙?>
         <div className="space-y-2">
           <SettingsRow
-            title="鏈嶅姟娓犻亾"
-            description="绠＄悊绗笁鏂规ā鍨?API 娓犻亾鎺ュ叆锛屽惎鐢ㄥ悗鍙湪瀵瑰簲鎻愪緵鍟嗕腑浣跨敤杩欎簺娓犻亾銆?
+            title="閺堝秴濮熷〒鐘讳壕"
+            description="缁狅紕鎮婄粭顑跨瑏閺傝膩閸?API 濞撶娀浜鹃幒銉ュ弳閿涘苯鎯庨悽銊ユ倵閸欘垰婀€电懓绨查幓鎰返閸熷棔鑵戞担璺ㄦ暏鏉╂瑤绨哄〒鐘讳壕閵?
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 宸插惎鐢?
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 瀹告彃鎯庨悽?
               </span>
             }
           >
@@ -2899,7 +2899,7 @@ function SettingsRouteView() {
                           <span>{channel.name}</span>
                           {channel.balance ? (
                             <span className="text-xs font-normal text-emerald-500">
-                              浣欓 {channel.balance}
+                              娴ｆ瑩顤?{channel.balance}
                             </span>
                           ) : null}
                         </div>

@@ -1,52 +1,49 @@
 /**
- * @file 鍔╂墜閫夋嫨寮曠敤澶勭悊妯″潡
- * @description 瑙勮寖鍖栥€佸簭鍒楀寲鍜屽墺绂荤敤鎴锋彁绀鸿瘝涓殑鍔╂墜寮曠敤閫夋嫨鍐呭銆? *              鐢ㄤ簬鑱婂ぉ缂栬緫鍣ㄥ拰瀵硅瘽璁板綍杈呭姪鍑芥暟銆? */
+ * @file 閸斺晜澧滈柅澶嬪瀵洜鏁ゆ径鍕倞濡€虫健
+ * @description 鐟欏嫯瀵栭崠鏍モ偓浣哥碍閸掓瀵查崪灞藉⒑缁傝崵鏁ら幋閿嬪絹缁€楦跨槤娑擃厾娈戦崝鈺傚瀵洜鏁ら柅澶嬪閸愬懎顔愰妴? *              閻劋绨懕濠傘亯缂傛牞绶崳銊ユ嫲鐎电鐦界拋鏉跨秿鏉堝懎濮崙鑺ユ殶閵? */
 
 import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS } from "~/contracts";
 
 import type { ChatAssistantSelectionAttachment } from "../types";
 import { randomUUID } from "./utils";
 
-/** 灏鹃儴鍔╂墜閫夋嫨寮曠敤鐨勬鍒欏尮閰嶆ā寮?*/
+/** 鐏忛箖鍎撮崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫭顒滈崚娆忓爱闁板秵膩瀵?*/
 const TRAILING_ASSISTANT_SELECTIONS_PATTERN =
   /\n*<assistant_selection>\n([\s\S]*?)\n<\/assistant_selection>\s*$/;
-/** 宓屽叆寮忓姪鎵嬮€夋嫨寮曠敤鐨勬鍒欏尮閰嶆ā寮?*/
+/** 瀹撳苯鍙嗗蹇撳И閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫭顒滈崚娆忓爱闁板秵膩瀵?*/
 const EMBEDDED_ASSISTANT_SELECTIONS_PATTERN =
   /\n*<assistant_selection>\n[\s\S]*?\n<\/assistant_selection>(?=\n*(<terminal_context>\n[\s\S]*?\n<\/terminal_context>\s*)?$)/;
-/** 鍔╂墜閫夋嫨棰勮鐨勬渶澶у瓧绗︽暟 */
+/** 閸斺晜澧滈柅澶嬪妫板嫯顫嶉惃鍕付婢堆冪摟缁楋附鏆?*/
 const ASSISTANT_SELECTION_PREVIEW_MAX_CHARS = 44;
 
 /**
- * 鎻愬彇鐨勫姪鎵嬮€夋嫨寮曠敤缁撴灉鎺ュ彛
+ * 閹绘劕褰囬惃鍕И閹靛鈧瀚ㄥ鏇犳暏缂佹挻鐏夐幒銉ュ經
  */
 export interface ExtractedAssistantSelections {
-  /** 鍓ョ閫夋嫨寮曠敤鍚庣殑鎻愮ず璇嶆枃鏈?*/
+  /** 閸撱儳顬囬柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠宥嗘瀮閺?*/
   promptText: string;
-  /** 瑙ｆ瀽鍑虹殑閫夋嫨寮曠敤鏉＄洰鍒楄〃 */
+  /** 鐟欙絾鐎介崙铏规畱闁瀚ㄥ鏇犳暏閺夛紕娲伴崚妤勩€?*/
   selections: ParsedAssistantSelectionEntry[];
 }
 
 /**
- * 瑙ｆ瀽鍚庣殑鍔╂墜閫夋嫨寮曠敤鏉＄洰
+ * 鐟欙絾鐎介崥搴ｆ畱閸斺晜澧滈柅澶嬪瀵洜鏁ら弶锛勬窗
  */
 export interface ParsedAssistantSelectionEntry {
-  /** 鍔╂墜娑堟伅鐨勫敮涓€鏍囪瘑绗?*/
+  /** 閸斺晜澧滃☉鍫熶紖閻ㄥ嫬鏁稉鈧弽鍥槕缁?*/
   assistantMessageId: string;
-  /** 閫夋嫨鐨勬枃鏈唴瀹?*/
+  /** 闁瀚ㄩ惃鍕瀮閺堫剙鍞寸€?*/
   text: string;
 }
 
 /**
- * 鍔╂墜閫夋嫨寮曠敤楠岃瘉閿欒绫诲瀷
- * - "empty": 鍐呭涓虹┖
- * - "too-long": 鍐呭瓒呴暱
+ * 閸斺晜澧滈柅澶嬪瀵洜鏁ゆ宀冪槈闁挎瑨顕ょ猾璇茬€? * - "empty": 閸愬懎顔愭稉铏光敄
+ * - "too-long": 閸愬懎顔愮搾鍛存毐
  */
 export type AssistantSelectionValidationError = "empty" | "too-long";
 
 /**
- * 瑙勮寖鍖栧姪鎵嬮€夋嫨寮曠敤鏂囨湰
- * @param text - 鍘熷閫夋嫨鏂囨湰
- * @returns 瑙勮寖鍖栧悗鐨勬枃鏈紙缁熶竴鎹㈣绗︺€佸幓闄ら灏剧┖鐧斤級
+ * 鐟欏嫯瀵栭崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閺傚洦婀? * @param text - 閸樼喎顫愰柅澶嬪閺傚洦婀? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫭鏋冮張顒婄礄缂佺喍绔撮幑銏ｎ攽缁楋负鈧礁骞撻梽銈夘浕鐏忓墽鈹栭惂鏂ょ礆
  */
 export function normalizeAssistantSelectionText(text: string): string {
   return text
@@ -56,8 +53,7 @@ export function normalizeAssistantSelectionText(text: string): string {
 }
 
 /**
- * 鑾峰彇鍔╂墜閫夋嫨寮曠敤鐨勯獙璇侀敊璇? * @param selection - 鍖呭惈鍔╂墜娑堟伅ID鍜屾枃鏈殑閫夋嫨瀵硅薄
- * @returns 楠岃瘉閿欒绫诲瀷锛屽鏋滈獙璇侀€氳繃鍒欒繑鍥?null
+ * 閼惧嘲褰囬崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫰鐛欑拠渚€鏁婄拠? * @param selection - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱闁瀚ㄧ€电钖? * @returns 妤犲矁鐦夐柨娆掝嚖缁鐎烽敍灞筋洤閺嬫粓鐛欑拠渚€鈧俺绻冮崚娆掔箲閸?null
  */
 export function getAssistantSelectionValidationError(
   selection: Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">,
@@ -74,9 +70,7 @@ export function getAssistantSelectionValidationError(
 }
 
 /**
- * 瑙勮寖鍖栧姪鎵嬮€夋嫨寮曠敤闄勪欢
- * @param selection - 鍖呭惈鍔╂墜娑堟伅ID鍜屾枃鏈殑閫夋嫨瀵硅薄
- * @returns 瑙勮寖鍖栧悗鐨勯€夋嫨瀵硅薄锛屽鏋滈獙璇佸け璐ュ垯杩斿洖 null
+ * 鐟欏嫯瀵栭崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏闂勫嫪娆? * @param selection - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱闁瀚ㄧ€电钖? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫰鈧瀚ㄧ€电钖勯敍灞筋洤閺嬫粓鐛欑拠浣搞亼鐠愩儱鍨潻鏂挎礀 null
  */
 export function normalizeAssistantSelectionAttachment(
   selection: Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">,
@@ -94,9 +88,7 @@ export function normalizeAssistantSelectionAttachment(
 }
 
 /**
- * 鍒涘缓鍔╂墜閫夋嫨寮曠敤闄勪欢
- * @param input - 鍖呭惈鍔╂墜娑堟伅ID鍜屾枃鏈殑杈撳叆瀵硅薄
- * @returns 瀹屾暣鐨勯檮浠跺璞★紝濡傛灉楠岃瘉澶辫触鍒欒繑鍥?null
+ * 閸掓稑缂撻崝鈺傚闁瀚ㄥ鏇犳暏闂勫嫪娆? * @param input - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱鏉堟挸鍙嗙€电钖? * @returns 鐎瑰本鏆ｉ惃鍕娴犺泛顕挒鈽呯礉婵″倹鐏夋宀冪槈婢惰精瑙﹂崚娆掔箲閸?null
  */
 export function createAssistantSelectionAttachment(input: {
   assistantMessageId: string;
@@ -116,8 +108,8 @@ export function createAssistantSelectionAttachment(input: {
 }
 
 /**
- * 鏍煎紡鍖栧姪鎵嬮€夋嫨寮曠敤鐨勯瑙堟枃鏈? * @param text - 閫夋嫨鏂囨湰
- * @returns 棰勮鏂囨湰锛堥琛屽唴瀹癸紝瓒呴暱鏃舵埅鏂級
+ * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫰顣╃憴鍫熸瀮閺? * @param text - 闁瀚ㄩ弬鍥ㄦ拱
+ * @returns 妫板嫯顫嶉弬鍥ㄦ拱閿涘牓顩荤悰灞藉敶鐎圭櫢绱濈搾鍛存毐閺冭埖鍩呴弬顓ㄧ礆
  */
 export function formatAssistantSelectionPreview(text: string): string {
   const normalized = normalizeAssistantSelectionText(text);
@@ -126,22 +118,18 @@ export function formatAssistantSelectionPreview(text: string): string {
   }
   const firstLine = normalized.split("\n")[0] ?? normalized;
   return firstLine.length > ASSISTANT_SELECTION_PREVIEW_MAX_CHARS
-    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}…`
+    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}鈥
     : firstLine;
 }
 
 /**
- * 鏍煎紡鍖栧姪鎵嬮€夋嫨寮曠敤闃熷垪鐨勯瑙堟枃鏈? * @param selectionCount - 閫夋嫨寮曠敤鏁伴噺
- * @returns 闃熷垪棰勮鏂囨湰
- */
+ * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏闂冪喎鍨惃鍕暕鐟欏牊鏋冮張? * @param selectionCount - 闁瀚ㄥ鏇犳暏閺佷即鍣? * @returns 闂冪喎鍨０鍕潔閺傚洦婀? */
 export function formatAssistantSelectionQueuePreview(selectionCount: number): string {
   return selectionCount === 1 ? "1 referenced selection" : "Referenced selections";
 }
 
 /**
- * 鏍煎紡鍖栧姪鎵嬮€夋嫨寮曠敤鐨勬爣棰樼瀛愭枃鏈? * @param selectionCount - 閫夋嫨寮曠敤鏁伴噺
- * @returns 鏍囬绉嶅瓙鏂囨湰
- */
+ * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫭鐖ｆ０妯碱潚鐎涙劖鏋冮張? * @param selectionCount - 闁瀚ㄥ鏇犳暏閺佷即鍣? * @returns 閺嶅洭顣界粔宥呯摍閺傚洦婀? */
 export function formatAssistantSelectionTitleSeed(selectionCount: number): string {
   return selectionCount === 1
     ? "Referenced assistant selection"
@@ -149,12 +137,11 @@ export function formatAssistantSelectionTitleSeed(selectionCount: number): strin
 }
 
 /**
- * 鏋勫缓鍔╂墜閫夋嫨寮曠敤鐨勬彁绀鸿瘝鍧? * @param selections - 閫夋嫨寮曠敤鍒楄〃
- * @returns 鏍煎紡鍖栧悗鐨?XML 鎻愮ず璇嶅潡锛屽鏋滄病鏈夋湁鏁堥€夋嫨鍒欒繑鍥炵┖瀛楃涓? */
+ * 閺嬪嫬缂撻崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫭褰佺粈楦跨槤閸? * @param selections - 闁瀚ㄥ鏇犳暏閸掓銆? * @returns 閺嶇厧绱￠崠鏍ф倵閻?XML 閹绘劗銇氱拠宥呮健閿涘苯顩ч弸婊勭梾閺堝婀侀弫鍫モ偓澶嬪閸掓瑨绻戦崶鐐碘敄鐎涙顑佹稉? */
 export function buildAssistantSelectionsPromptBlock(
   selections: ReadonlyArray<Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">>,
 ): string {
-  // 瑙勮寖鍖栧苟杩囨护鏃犳晥鐨勯€夋嫨寮曠敤
+  // 鐟欏嫯瀵栭崠鏍ц嫙鏉╁洦鎶ら弮鐘虫櫏閻ㄥ嫰鈧瀚ㄥ鏇犳暏
   const normalizedSelections = selections
     .map((selection) => normalizeAssistantSelectionAttachment(selection))
     .filter(
@@ -167,7 +154,7 @@ export function buildAssistantSelectionsPromptBlock(
     return "";
   }
 
-  // 鏋勫缓 XML 鏍煎紡鐨勯€夋嫨寮曠敤鍧?  const lines: string[] = [];
+  // 閺嬪嫬缂?XML 閺嶇厧绱￠惃鍕偓澶嬪瀵洜鏁ら崸?  const lines: string[] = [];
   for (const selection of normalizedSelections) {
     lines.push(`- assistant message ${selection.assistantMessageId}:`);
     for (const line of selection.text.split("\n")) {
@@ -178,9 +165,7 @@ export function buildAssistantSelectionsPromptBlock(
 }
 
 /**
- * 灏嗗姪鎵嬮€夋嫨寮曠敤杩藉姞鍒版彁绀鸿瘝鏈熬
- * @param prompt - 鍘熷鎻愮ず璇? * @param selections - 閫夋嫨寮曠敤鍒楄〃
- * @returns 杩藉姞閫夋嫨寮曠敤鍚庣殑鎻愮ず璇? */
+ * 鐏忓棗濮幍瀣偓澶嬪瀵洜鏁ゆ潻钘夊閸掔増褰佺粈楦跨槤閺堫偄鐔? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @param selections - 闁瀚ㄥ鏇犳暏閸掓銆? * @returns 鏉╄棄濮為柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠? */
 export function appendAssistantSelectionsToPrompt(
   prompt: string,
   selections: ReadonlyArray<Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">>,
@@ -194,9 +179,7 @@ export function appendAssistantSelectionsToPrompt(
 }
 
 /**
- * 浠庢彁绀鸿瘝灏鹃儴鎻愬彇鍔╂墜閫夋嫨寮曠敤
- * @param prompt - 鍘熷鎻愮ず璇? * @returns 鎻愬彇缁撴灉锛屽寘鍚墺绂诲悗鐨勬彁绀鸿瘝鍜岃В鏋愬嚭鐨勯€夋嫨寮曠敤鍒楄〃
- */
+ * 娴犲孩褰佺粈楦跨槤鐏忛箖鍎撮幓鎰絿閸斺晜澧滈柅澶嬪瀵洜鏁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閹绘劕褰囩紒鎾寸亯閿涘苯瀵橀崥顐㈠⒑缁傝鎮楅惃鍕絹缁€楦跨槤閸滃矁袙閺嬫劕鍤惃鍕偓澶嬪瀵洜鏁ら崚妤勩€? */
 export function extractTrailingAssistantSelections(prompt: string): ExtractedAssistantSelections {
   const match = TRAILING_ASSISTANT_SELECTIONS_PATTERN.exec(prompt);
   if (!match) {
@@ -213,29 +196,26 @@ export function extractTrailingAssistantSelections(prompt: string): ExtractedAss
 }
 
 /**
- * 浠庢彁绀鸿瘝灏鹃儴鍓ョ鍔╂墜閫夋嫨寮曠敤
- * @param prompt - 鍘熷鎻愮ず璇? * @returns 鍓ョ閫夋嫨寮曠敤鍚庣殑鎻愮ず璇? */
+ * 娴犲孩褰佺粈楦跨槤鐏忛箖鍎撮崜銉ь瀲閸斺晜澧滈柅澶嬪瀵洜鏁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閸撱儳顬囬柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠? */
 export function stripTrailingAssistantSelections(prompt: string): string {
   return extractTrailingAssistantSelections(prompt).promptText;
 }
 
 /**
- * 浠庢彁绀鸿瘝涓墺绂诲祵鍏ョ殑鍔╂墜閫夋嫨寮曠敤
- * @param prompt - 鍘熷鎻愮ず璇? * @returns 鍓ョ宓屽叆閫夋嫨寮曠敤鍚庣殑鎻愮ず璇? */
+ * 娴犲孩褰佺粈楦跨槤娑擃厼澧虹粋璇茬サ閸忋儳娈戦崝鈺傚闁瀚ㄥ鏇犳暏
+ * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閸撱儳顬囧畵灞藉弳闁瀚ㄥ鏇犳暏閸氬海娈戦幓鎰仛鐠? */
 export function stripEmbeddedAssistantSelections(prompt: string): string {
   return prompt.replace(EMBEDDED_ASSISTANT_SELECTIONS_PATTERN, "");
 }
 
 /**
- * 瑙ｆ瀽鍔╂墜閫夋嫨寮曠敤鏉＄洰锛堝唴閮ㄥ嚱鏁帮級
- * @param block - 閫夋嫨寮曠敤鍧楃殑鏂囨湰鍐呭
- * @returns 瑙ｆ瀽鍚庣殑閫夋嫨寮曠敤鏉＄洰鍒楄〃
- */
+ * 鐟欙絾鐎介崝鈺傚闁瀚ㄥ鏇犳暏閺夛紕娲伴敍鍫濆敶闁劌鍤遍弫甯礆
+ * @param block - 闁瀚ㄥ鏇犳暏閸ф娈戦弬鍥ㄦ拱閸愬懎顔? * @returns 鐟欙絾鐎介崥搴ｆ畱闁瀚ㄥ鏇犳暏閺夛紕娲伴崚妤勩€? */
 function parseAssistantSelectionEntries(block: string): ParsedAssistantSelectionEntry[] {
   const entries: ParsedAssistantSelectionEntry[] = [];
   let current: { assistantMessageId: string; lines: string[] } | null = null;
 
-  // 鎻愪氦褰撳墠瑙ｆ瀽鏉＄洰鐨勮緟鍔╁嚱鏁?  const commitCurrent = () => {
+  // 閹绘劒姘﹁ぐ鎾冲鐟欙絾鐎介弶锛勬窗閻ㄥ嫯绶熼崝鈺佸毐閺?  const commitCurrent = () => {
     if (!current) return;
     const text = current.lines.join("\n").trimEnd();
     if (text.length > 0) {
@@ -247,7 +227,7 @@ function parseAssistantSelectionEntries(block: string): ParsedAssistantSelection
     current = null;
   };
 
-  // 閫愯瑙ｆ瀽閫夋嫨寮曠敤鍧?  for (const rawLine of block.split("\n")) {
+  // 闁劘顢戠憴锝嗙€介柅澶嬪瀵洜鏁ら崸?  for (const rawLine of block.split("\n")) {
     const headerMatch = /^- assistant message (.+):$/.exec(rawLine);
     if (headerMatch) {
       commitCurrent();
@@ -260,12 +240,11 @@ function parseAssistantSelectionEntries(block: string): ParsedAssistantSelection
     if (!current) {
       continue;
     }
-    // 澶勭悊缂╄繘鐨勫唴瀹硅
-    if (rawLine.startsWith("  ")) {
+    // 婢跺嫮鎮婄紓鈺勭箻閻ㄥ嫬鍞寸€圭顢?    if (rawLine.startsWith("  ")) {
       current.lines.push(rawLine.slice(2));
       continue;
     }
-    // 澶勭悊绌鸿
+    // 婢跺嫮鎮婄粚楦款攽
     if (rawLine.length === 0) {
       current.lines.push("");
     }

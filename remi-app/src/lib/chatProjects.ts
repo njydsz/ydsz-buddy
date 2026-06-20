@@ -1,6 +1,6 @@
 /**
- * @file 鑱婂ぉ椤圭洰绠＄悊妯″潡
- * @description 澶嶇敤闅愯棌鐨勯椤典綔鐢ㄥ煙鑱婂ぉ椤圭洰浣滀负鑱婂ぉ琛岀殑鍚庡彴瀹瑰櫒銆? *              鎻愪緵棣栭〉鑱婂ぉ椤圭洰鐨勬煡鎵俱€佸垱寤恒€佷慨澶嶇瓑鍔熻兘銆? */
+ * @file 閼卞﹤銇夋い鍦窗缁狅紕鎮婂Ο鈥虫健
+ * @description 婢跺秶鏁ら梾鎰閻ㄥ嫰顩绘い鍏哥稊閻劌鐓欓懕濠傘亯妞ゅ湱娲版担婊€璐熼懕濠傘亯鐞涘瞼娈戦崥搴″酱鐎圭懓娅掗妴? *              閹绘劒绶垫＃鏍€夐懕濠傘亯妞ゅ湱娲伴惃鍕叀閹典勘鈧礁鍨卞鎭掆偓浣锋叏婢跺秶鐡戦崝鐔诲厴閵? */
 
 import { type ProjectId } from "~/contracts";
 import type { Project } from "../types";
@@ -9,16 +9,14 @@ import { useStore } from "../store";
 import { getThreadFromState } from "../threadDerivation";
 import { newCommandId, newProjectId } from "./utils";
 
-/** 鎸夐椤电洰褰曠紦瀛樼殑寰呭垱寤洪椤佃亰澶╅」鐩?Promise */
+/** 閹稿顩绘い鐢垫窗瑜版洜绱︾€涙娈戝鍛灡瀵ゆ椽顩绘い浣冧喊婢垛晠銆嶉惄?Promise */
 const pendingHomeChatCreationByHomeDir = new Map<string, Promise<ProjectId | null>>();
-/** 鎸夐椤电洰褰曠紦瀛樼殑寰呬慨澶嶉椤佃亰澶╅」鐩?Promise */
+/** 閹稿顩绘い鐢垫窗瑜版洜绱︾€涙娈戝鍛叏婢跺秹顩绘い浣冧喊婢垛晠銆嶉惄?Promise */
 const pendingHomeChatFixupByHomeDir = new Map<string, Promise<void>>();
 
 /**
- * 鍦ㄩ」鐩腑鏌ユ壘棣栭〉鑱婂ぉ瀹瑰櫒椤圭洰
- * @param projects - 椤圭洰鍒楄〃
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鍖归厤鐨勯椤佃亰澶╁鍣ㄩ」鐩紝濡傛灉鏈壘鍒板垯杩斿洖 null
+ * 閸︺劑銆嶉惄顔昏厬閺屻儲澹樻＃鏍€夐懕濠傘亯鐎圭懓娅掓い鍦窗
+ * @param projects - 妞ゅ湱娲伴崚妤勩€? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? * @returns 閸栧綊鍘ら惃鍕浕妞や絻浜版径鈺侇啇閸ｃ劑銆嶉惄顕嗙礉婵″倹鐏夐張顏呭閸掓澘鍨潻鏂挎礀 null
  */
 export function findHomeChatContainerProject<
   T extends Pick<Project, "cwd" | "kind" | "name" | "remoteName">,
@@ -30,9 +28,7 @@ export function findHomeChatContainerProject<
 }
 
 /**
- * 鏌ユ壘瑙勮寖鐨勯椤甸」鐩紙鍐呴儴鍑芥暟锛? * 璇嗗埆瑙勮寖椤圭洰鍜岄噸澶嶉」鐩紝妫€娴嬫槸鍚﹂渶瑕佷慨澶嶉」鐩被鍨? * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鍖呭惈瑙勮寖椤圭洰ID銆侀噸澶嶉」鐩甀D鍒楄〃鍜屾槸鍚﹂渶瑕佷慨澶嶇被鍨嬬殑瀵硅薄
- */
+ * 閺屻儲澹樼憴鍕瘱閻ㄥ嫰顩绘い鐢搞€嶉惄顕嗙礄閸愬懘鍎撮崙鑺ユ殶閿? * 鐠囧棗鍩嗙憴鍕瘱妞ゅ湱娲伴崪宀勫櫢婢跺秹銆嶉惄顕嗙礉濡偓濞村妲搁崥锕傛付鐟曚椒鎱ㄦ径宥夈€嶉惄顔捐閸? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? * @returns 閸栧懎鎯堢憴鍕瘱妞ゅ湱娲癐D閵嗕線鍣告径宥夈€嶉惄鐢€D閸掓銆冮崪灞炬Ц閸氾箓娓剁憰浣锋叏婢跺秶琚崹瀣畱鐎电钖? */
 function findCanonicalHomeProject(homeDir: string): {
   canonicalProjectId: ProjectId | null;
   duplicateProjectIds: ProjectId[];
@@ -42,7 +38,7 @@ function findCanonicalHomeProject(homeDir: string): {
   const homeProjects = state.projects.filter((project) =>
     isHomeChatContainerProject(project, homeDir),
   );
-  // 浼樺厛閫夋嫨绫诲瀷涓?"chat" 鐨勯」鐩綔涓鸿鑼冮」鐩?  const canonicalProject =
+  // 娴兼ê鍘涢柅澶嬪缁鐎锋稉?"chat" 閻ㄥ嫰銆嶉惄顔荤稊娑撻缚顫夐懠鍐€嶉惄?  const canonicalProject =
     homeProjects.find((project) => project.kind === "chat") ?? homeProjects[0];
   if (!canonicalProject) {
     return {
@@ -52,7 +48,7 @@ function findCanonicalHomeProject(homeDir: string): {
     };
   }
 
-  // 鏌ユ壘閲嶅椤圭洰锛堜粎褰撴病鏈夊叧鑱旂嚎绋嬫椂鎵嶅彲鍒犻櫎锛?  const duplicateProjectIds = homeProjects
+  // 閺屻儲澹橀柌宥咁槻妞ゅ湱娲伴敍鍫滅矌瑜版挻鐥呴張澶婂彠閼辨梻鍤庣粙瀣閹靛秴褰查崚鐘绘珟閿?  const duplicateProjectIds = homeProjects
     .filter((project) => project.id !== canonicalProject.id)
     .flatMap((project) => {
       const hasThreads = (state.threadIds ?? [])
@@ -69,9 +65,8 @@ function findCanonicalHomeProject(homeDir: string): {
 }
 
 /**
- * 淇棣栭〉鑱婂ぉ椤圭洰锛堝唴閮ㄥ嚱鏁帮級
- * 淇椤圭洰绫诲瀷鍜屾竻鐞嗛噸澶嶉」鐩? * @param homeDir - 棣栭〉鐩綍璺緞
- */
+ * 娣囶喖顦叉＃鏍€夐懕濠傘亯妞ゅ湱娲伴敍鍫濆敶闁劌鍤遍弫甯礆
+ * 娣囶喖顦叉い鍦窗缁鐎烽崪灞剧閻炲棝鍣告径宥夈€嶉惄? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? */
 async function fixupHomeChatProject(homeDir: string): Promise<void> {
   const api = readNativeApi();
   if (!api) {
@@ -84,8 +79,7 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
     return;
   }
 
-  // 淇椤圭洰绫诲瀷
-  if (needsKindFixup) {
+  // 娣囶喖顦叉い鍦窗缁鐎?  if (needsKindFixup) {
     await api.orchestration.dispatchCommand({
       type: "project.meta.update",
       commandId: newCommandId(),
@@ -96,8 +90,7 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
     });
   }
 
-  // 鍒犻櫎閲嶅椤圭洰
-  for (const duplicateProjectId of duplicateProjectIds) {
+  // 閸掔娀娅庨柌宥咁槻妞ゅ湱娲?  for (const duplicateProjectId of duplicateProjectIds) {
     await api.orchestration.dispatchCommand({
       type: "project.delete",
       commandId: newCommandId(),
@@ -107,10 +100,7 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
 }
 
 /**
- * 璋冨害棣栭〉鑱婂ぉ椤圭洰淇锛堝唴閮ㄥ嚱鏁帮級
- * 浣跨敤缂撳瓨閬垮厤閲嶅淇
- * @param homeDir - 棣栭〉鐩綍璺緞
- */
+ * 鐠嬪啫瀹虫＃鏍€夐懕濠傘亯妞ゅ湱娲版穱顔碱槻閿涘牆鍞撮柈銊ュ毐閺佸府绱? * 娴ｈ法鏁ょ紓鎾崇摠闁灝鍘ら柌宥咁槻娣囶喖顦? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? */
 function scheduleHomeChatFixup(homeDir: string): void {
   if (pendingHomeChatFixupByHomeDir.has(homeDir)) {
     return;
@@ -122,10 +112,7 @@ function scheduleHomeChatFixup(homeDir: string): void {
 }
 
 /**
- * 纭繚棣栭〉鑱婂ぉ椤圭洰瀛樺湪
- * 濡傛灉涓嶅瓨鍦ㄥ垯鍒涘缓锛屽鏋滃瓨鍦ㄥ垯璋冨害淇
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 棣栭〉鑱婂ぉ椤圭洰 ID锛屽鏋?API 涓嶅彲鐢ㄥ垯杩斿洖 null
+ * 绾喕绻氭＃鏍€夐懕濠傘亯妞ゅ湱娲扮€涙ê婀? * 婵″倹鐏夋稉宥呯摠閸︺劌鍨崚娑樼紦閿涘苯顩ч弸婊冪摠閸︺劌鍨拫鍐ㄥ娣囶喖顦? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? * @returns 妫ｆ牠銆夐懕濠傘亯妞ゅ湱娲?ID閿涘苯顩ч弸?API 娑撳秴褰查悽銊ュ灟鏉╂柨娲?null
  */
 export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId | null> {
   const api = readNativeApi();
@@ -139,14 +126,13 @@ export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId 
     return canonicalProjectId;
   }
 
-  // 妫€鏌ユ槸鍚﹀凡鏈夊緟鍒涘缓鐨?Promise
+  // 濡偓閺屻儲妲搁崥锕€鍑￠張澶婄窡閸掓稑缂撻惃?Promise
   const pendingCreation = pendingHomeChatCreationByHomeDir.get(homeDir);
   if (pendingCreation) {
     return pendingCreation;
   }
 
-  // 鍒涘缓鏂扮殑棣栭〉鑱婂ぉ椤圭洰
-  const creationPromise = (async () => {
+  // 閸掓稑缂撻弬鎵畱妫ｆ牠銆夐懕濠傘亯妞ゅ湱娲?  const creationPromise = (async () => {
     const projectId = newProjectId();
     await api.orchestration.dispatchCommand({
       type: "project.create",
@@ -167,18 +153,14 @@ export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId 
 }
 
 /**
- * 棰勭儹棣栭〉鑱婂ぉ椤圭洰
- * 寮傛瑙﹀彂椤圭洰鍒涘缓锛屼笉绛夊緟缁撴灉
- * @param homeDir - 棣栭〉鐩綍璺緞
- */
+ * 妫板嫮鍎规＃鏍€夐懕濠傘亯妞ゅ湱娲? * 瀵倹顒炵憴锕€褰傛い鍦窗閸掓稑缂撻敍灞肩瑝缁涘绶熺紒鎾寸亯
+ * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? */
 export function prewarmHomeChatProject(homeDir: string): void {
   void ensureHomeChatProject(homeDir);
 }
 
 /**
- * 鍒ゆ柇椤圭洰鏄惁涓洪椤佃亰澶╁鍣ㄩ」鐩? * @param project - 椤圭洰瀵硅薄
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鏄惁涓洪椤佃亰澶╁鍣ㄩ」鐩? */
+ * 閸掋倖鏌囨い鍦窗閺勵垰鎯佹稉娲浕妞や絻浜版径鈺侇啇閸ｃ劑銆嶉惄? * @param project - 妞ゅ湱娲扮€电钖? * @param homeDir - 妫ｆ牠銆夐惄顔肩秿鐠侯垰绶? * @returns 閺勵垰鎯佹稉娲浕妞や絻浜版径鈺侇啇閸ｃ劑銆嶉惄? */
 export function isHomeChatContainerProject(
   project: Pick<Project, "cwd" | "kind" | "name" | "remoteName"> | null | undefined,
   homeDir: string | null | undefined,

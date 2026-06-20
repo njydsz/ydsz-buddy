@@ -107,7 +107,7 @@ export function ThemePackEditor({
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[color:var(--color-border)] bg-[var(--color-background-panel)] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]">
+    <div className="overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-background-panel) shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:py-3.5">
         <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export function ThemePackEditor({
             <button
               type="button"
               onClick={() => resetThemeVariant(variant)}
-              className="rounded-sm px-1.5 py-0.5 text-[11px] text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-[var(--color-text-foreground)]"
+              className="rounded-sm px-1.5 py-0.5 text-[11px] text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-(--color-text-foreground)"
             >
               {messages.themeEditor.reset}
             </button>
@@ -127,7 +127,7 @@ export function ThemePackEditor({
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="rounded-md px-2 py-1 text-xs text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-[var(--color-text-foreground)]"
+            className="rounded-md px-2 py-1 text-xs text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-(--color-text-foreground)"
           >
             {messages.themeEditor.copy}
           </button>
@@ -367,7 +367,7 @@ function ColorPill({
             setDraftHex(null);
             onReset();
           }}
-          className="rounded-sm p-1 text-[var(--color-text-foreground-tertiary)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-[var(--color-text-foreground)]"
+          className="rounded-sm p-1 text-[var(--color-text-foreground-tertiary)] transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-(--color-text-foreground)"
           aria-label={`Reset ${ariaLabel}`}
           title={messages.themeEditor.resetTitle}
         >
@@ -558,7 +558,7 @@ function ImportThemeDialog({
         render={
           <button
             type="button"
-            className="rounded-md px-2 py-1 text-xs text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-[var(--color-text-foreground)]"
+            className="rounded-md px-2 py-1 text-xs text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-(--color-text-foreground)"
           >
             {messages.themeEditor.import}
           </button>

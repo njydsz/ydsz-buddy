@@ -1,6 +1,6 @@
 /**
  * @file TerminalChrome.tsx
- * @description 缁堢澶栧３锛圕hrome锛夊彲澶嶇敤鐨?UI 鍘熻锛岀敤浜庢覆鏌撶粓绔爣绛炬爮銆佷晶杈规爮鍜屽伐鍏锋爮鎿嶄綔鎸夐挳銆? * 鍖呭惈缁堢鏍囩椤垫爮銆佷晶杈规爮鍒楄〃銆佹搷浣滄寜閽粍绛夋牳蹇?UI 缁勪欢銆? */
+ * @description 缂佸牏顏径鏍э紦閿涘湑hrome閿涘褰叉径宥囨暏閻?UI 閸樼喕顕㈤敍宀€鏁ゆ禍搴㈣閺屾挾绮撶粩顖涚垼缁涚偓鐖妴浣锋櫠鏉堣鐖崪灞戒紣閸忛攱鐖幙宥勭稊閹稿鎸抽妴? * 閸栧懎鎯堢紒鍫㈩伂閺嶅洨顒锋い鍨埉閵嗕椒鏅舵潏瑙勭埉閸掓銆冮妴浣规惙娴ｆ粍瀵滈柦顔剧矋缁涘鐗宠箛?UI 缂佸嫪娆㈤妴? */
 
 import type { ReactNode } from "react";
 
@@ -18,8 +18,8 @@ import TerminalActivityIndicator from "./TerminalActivityIndicator";
 import TerminalIdentityIcon from "./TerminalIdentityIcon";
 
 /**
- * 鏍规嵁缁堢瑙嗚鐘舵€佽繑鍥炰紭鍏堢骇鏁板€硷紝鏁板€艰秺澶т紭鍏堢骇瓒婇珮銆? * 鐢ㄤ簬鍦ㄦ爣绛炬爮涓喅瀹氭樉绀哄摢涓粓绔殑鐘舵€佹寚绀哄櫒銆? *
- * @param state - 缁堢瑙嗚鐘舵€? * @returns 浼樺厛绾ф暟鍊硷紙1-4锛? */
+ * 閺嶈宓佺紒鍫㈩伂鐟欏棜顫庨悩鑸碘偓浣界箲閸ョ偘绱崗鍫㈤獓閺佹澘鈧》绱濋弫鏉库偓鑹扮Ш婢堆傜喘閸忓牏楠囩搾濠囩彯閵? * 閻劋绨崷銊︾垼缁涚偓鐖稉顓炲枀鐎规碍妯夌粈鍝勬憿娑擃亞绮撶粩顖滄畱閻樿埖鈧焦瀵氱粈鍝勬珤閵? *
+ * @param state - 缂佸牏顏憴鍡氼潕閻樿埖鈧? * @returns 娴兼ê鍘涚痪褎鏆熼崐纭风礄1-4閿? */
 function terminalVisualStatePriority(state: TerminalVisualState): number {
   switch (state) {
     case "attention":
@@ -34,33 +34,33 @@ function terminalVisualStatePriority(state: TerminalVisualState): number {
 }
 
 /**
- * 缁堢宸ュ叿鏍忔搷浣滈」閰嶇疆锛屾弿杩颁竴涓彲鐐瑰嚮鐨勬搷浣滄寜閽€? */
+ * 缂佸牏顏銉ュ徔閺嶅繑鎼锋担婊堛€嶉柊宥囩枂閿涘本寮挎潻棰佺娑擃亜褰查悙鐟板毊閻ㄥ嫭鎼锋担婊勫瘻闁筋喓鈧? */
 export interface TerminalChromeActionItem {
-  /** 鏄惁绂佺敤璇ユ搷浣?*/
+  /** 閺勵垰鎯佺粋浣烘暏鐠囥儲鎼锋担?*/
   disabled?: boolean;
-  /** 鎿嶄綔鐨勬枃鏈爣绛撅紝鍚屾椂浣滀负 tooltip 灞曠ず */
+  /** 閹垮秳缍旈惃鍕瀮閺堫剚鐖ｇ粵鎾呯礉閸氬本妞傛担婊€璐?tooltip 鐏炴洜銇?*/
   label: string;
-  /** 鐐瑰嚮鏃剁殑鍥炶皟鍑芥暟 */
+  /** 閻愮懓鍤弮鍓佹畱閸ョ偠鐨熼崙鑺ユ殶 */
   onClick: () => void;
-  /** 鎸夐挳鍐呭锛岄€氬父涓哄浘鏍?*/
+  /** 閹稿鎸抽崘鍛啇閿涘矂鈧艾鐖舵稉鍝勬禈閺?*/
   children: ReactNode;
 }
 
 /**
- * 缁堢鎿嶄綔鎸夐挳鐨勫唴閮?props锛屽皝瑁呬簡甯?tooltip 鐨勬寜閽氦浜掋€? */
+ * 缂佸牏顏幙宥勭稊閹稿鎸抽惃鍕敶闁?props閿涘苯鐨濈憗鍛啊鐢?tooltip 閻ㄥ嫭瀵滈柦顔绘唉娴滄帇鈧? */
 interface TerminalActionButtonProps {
-  /** 鎸夐挳鐨?aria-label 鍙?tooltip 鏂囨湰 */
+  /** 閹稿鎸抽惃?aria-label 閸?tooltip 閺傚洦婀?*/
   label: string;
-  /** 鑷畾涔夋牱寮忕被鍚?*/
+  /** 閼奉亜鐣炬稊澶嬬壉瀵繒琚崥?*/
   className: string;
-  /** 鐐瑰嚮鍥炶皟 */
+  /** 閻愮懓鍤崶鐐剁殶 */
   onClick: () => void;
-  /** 鎸夐挳鍐呭锛岄€氬父涓哄浘鏍?*/
+  /** 閹稿鎸抽崘鍛啇閿涘矂鈧艾鐖舵稉鍝勬禈閺?*/
   children: ReactNode;
 }
 
 /**
- * 缁堢鎿嶄綔鎸夐挳缁勪欢锛屽湪 hover 鏃跺睍绀?tooltip 鎻愮ず銆? * 鍐呴儴浣跨敤 Popover 瀹炵幇 hover 瑙﹀彂鐨?tooltip 鏁堟灉銆? */
+ * 缂佸牏顏幙宥勭稊閹稿鎸崇紒鍕閿涘苯婀?hover 閺冭泛鐫嶇粈?tooltip 閹绘劗銇氶妴? * 閸愬懘鍎存担璺ㄦ暏 Popover 鐎圭偟骞?hover 鐟欙箑褰傞惃?tooltip 閺佸牊鐏夐妴? */
 function TerminalActionButton({ label, className, onClick, children }: TerminalActionButtonProps) {
   return (
     <Popover>
@@ -84,8 +84,8 @@ function TerminalActionButton({ label, className, onClick, children }: TerminalA
 }
 
 /**
- * 缁堢宸ュ叿鏍忔搷浣滄寜閽粍锛屾牴鎹笉鍚屽彉浣擄紙compact/workspace/sidebar锛夋覆鏌撴搷浣滄寜閽垪琛ㄣ€? * compact 妯″紡涓嬫寜閽箣闂翠娇鐢ㄧ珫绾垮垎闅旓紝workspace/sidebar 妯″紡涓嬩娇鐢ㄨ竟妗嗗垎闅斻€? *
- * @param props.actions - 鎿嶄綔椤瑰垪琛? * @param props.variant - 甯冨眬鍙樹綋锛屽奖鍝嶆寜閽殑闂磋窛鍜屽垎闅旀牱寮? */
+ * 缂佸牏顏銉ュ徔閺嶅繑鎼锋担婊勫瘻闁筋喚绮嶉敍灞剧壌閹诡喕绗夐崥灞藉綁娴ｆ搫绱檆ompact/workspace/sidebar閿涘瑕嗛弻鎾存惙娴ｆ粍瀵滈柦顔煎灙鐞涖劊鈧? * compact 濡€崇础娑撳瀵滈柦顔荤闂傜繝濞囬悽銊х彨缁惧灝鍨庨梾鏃撶礉workspace/sidebar 濡€崇础娑撳濞囬悽銊ㄧ珶濡楀棗鍨庨梾鏂烩偓? *
+ * @param props.actions - 閹垮秳缍旀い鐟板灙鐞? * @param props.variant - 鐢啫鐪崣妯圭秼閿涘苯濂栭崫宥嗗瘻闁筋喚娈戦梻纾嬬獩閸滃苯鍨庨梾鏃€鐗卞? */
 export function TerminalChromeActions(props: {
   actions: ReadonlyArray<TerminalChromeActionItem>;
   variant: "compact" | "workspace" | "sidebar";
@@ -134,12 +134,10 @@ export function TerminalChromeActions(props: {
 }
 
 /**
- * 缁堢宸ヤ綔鍖烘爣绛炬爮缁勪欢锛屼互姘村钩鏍囩椤靛舰寮忓睍绀虹粓绔垎缁勩€? * 姣忎釜鏍囩椤垫樉绀虹粓绔浘鏍囥€佹爣棰樸€佹椿鍔ㄧ姸鎬佹寚绀哄櫒鍜屽叧闂寜閽€? * 鏍囩椤典細鑷姩閫夋嫨璇ュ垎缁勪腑浼樺厛绾ф渶楂樼殑缁堢鐘舵€佷綔涓洪瑙堢姸鎬併€? *
- * @param props.terminalGroups - 宸茶В鏋愮殑缁堢鍒嗙粍甯冨眬鍒楄〃
- * @param props.activeGroupId - 褰撳墠娲昏穬鐨勫垎缁?ID
- * @param props.terminalVisualIdentityById - 缁堢 ID 鍒拌瑙夋爣璇嗙殑鏄犲皠
- * @param props.actions - 宸ュ叿鏍忔搷浣滈」鍒楄〃
- * @param props.onActiveGroupChange - 鍒囨崲娲昏穬鍒嗙粍鐨勫洖璋? * @param props.onCloseGroup - 鍏抽棴鍒嗙粍鐨勫洖璋? */
+ * 缂佸牏顏銉ょ稊閸栫儤鐖ｇ粵鐐埉缂佸嫪娆㈤敍灞间簰濮樻潙閽╅弽鍥╊劮妞ら潧鑸板蹇撶潔缁€铏圭矒缁旑垰鍨庣紒鍕┾偓? * 濮ｅ繋閲滈弽鍥╊劮妞ゅ灚妯夌粈铏圭矒缁旑垰娴橀弽鍥モ偓浣圭垼妫版ǜ鈧焦妞块崝銊уЦ閹焦瀵氱粈鍝勬珤閸滃苯鍙ч梻顓熷瘻闁筋喓鈧? * 閺嶅洨顒锋い鍏哥窗閼奉亜濮╅柅澶嬪鐠囥儱鍨庣紒鍕厬娴兼ê鍘涚痪褎娓舵妯兼畱缂佸牏顏悩鑸碘偓浣风稊娑撴椽顣╃憴鍫㈠Ц閹降鈧? *
+ * @param props.terminalGroups - 瀹歌尪袙閺嬫劗娈戠紒鍫㈩伂閸掑棛绮嶇敮鍐ㄧ湰閸掓銆? * @param props.activeGroupId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣紒?ID
+ * @param props.terminalVisualIdentityById - 缂佸牏顏?ID 閸掓媽顫嬬憴澶嬬垼鐠囧棛娈戦弰鐘茬殸
+ * @param props.actions - 瀹搞儱鍙块弽蹇旀惙娴ｆ粓銆嶉崚妤勩€? * @param props.onActiveGroupChange - 閸掑洦宕插ú鏄忕┈閸掑棛绮嶉惃鍕礀鐠? * @param props.onCloseGroup - 閸忔娊妫撮崚鍡欑矋閻ㄥ嫬娲栫拫? */
 export function TerminalWorkspaceTabBar(props: {
   terminalGroups: ResolvedTerminalGroupLayout[];
   activeGroupId: string;
@@ -228,16 +226,12 @@ export function TerminalWorkspaceTabBar(props: {
 }
 
 /**
- * 缁堢渚ц竟鏍忕粍浠讹紝浠ュ瀭鐩村垪琛ㄥ舰寮忓睍绀虹粓绔垎缁勫拰缁堢瀹炰緥銆? * 鏀寔鍒嗙粍鏍囬鎶樺彔灞曠ず銆佺粓绔浘鏍囧拰鐘舵€佹寚绀哄櫒銆佸叧闂寜閽瓑浜や簰銆? * 閫傜敤浜庣粓绔暟閲忚緝澶氶渶瑕佸垎缁勭鐞嗙殑鍦烘櫙銆? *
- * @param props.terminalIds - 鎵€鏈夌粓绔?ID 鍒楄〃
- * @param props.terminalGroups - 宸茶В鏋愮殑缁堢鍒嗙粍甯冨眬鍒楄〃
- * @param props.activeTerminalId - 褰撳墠娲昏穬鐨勭粓绔?ID
- * @param props.activeGroupId - 褰撳墠娲昏穬鐨勫垎缁?ID
- * @param props.showGroupHeaders - 鏄惁鏄剧ず鍒嗙粍鏍囬
- * @param props.closeShortcutLabel - 鍏抽棴蹇嵎閿殑鏍囩鏂囨湰
- * @param props.terminalVisualIdentityById - 缁堢 ID 鍒拌瑙夋爣璇嗙殑鏄犲皠
- * @param props.actions - 宸ュ叿鏍忔搷浣滈」鍒楄〃
- * @param props.onActiveTerminalChange - 鍒囨崲娲昏穬缁堢鐨勫洖璋? * @param props.onCloseTerminal - 鍏抽棴缁堢鐨勫洖璋? */
+ * 缂佸牏顏笟褑绔熼弽蹇曠矋娴犺绱濇禒銉ョ€惄鏉戝灙鐞涖劌鑸板蹇撶潔缁€铏圭矒缁旑垰鍨庣紒鍕嫲缂佸牏顏€圭偘绶ラ妴? * 閺€顖涘瘮閸掑棛绮嶉弽鍥暯閹舵ê褰旂仦鏇犮仛閵嗕胶绮撶粩顖氭禈閺嶅洤鎷伴悩鑸碘偓浣瑰瘹缁€鍝勬珤閵嗕礁鍙ч梻顓熷瘻闁筋喚鐡戞禍銈勭鞍閵? * 闁倻鏁ゆ禍搴ｇ矒缁旑垱鏆熼柌蹇氱窛婢舵岸娓剁憰浣稿瀻缂佸嫮顓搁悶鍡欐畱閸︾儤娅欓妴? *
+ * @param props.terminalIds - 閹碘偓閺堝绮撶粩?ID 閸掓銆? * @param props.terminalGroups - 瀹歌尪袙閺嬫劗娈戠紒鍫㈩伂閸掑棛绮嶇敮鍐ㄧ湰閸掓銆? * @param props.activeTerminalId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫮绮撶粩?ID
+ * @param props.activeGroupId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣紒?ID
+ * @param props.showGroupHeaders - 閺勵垰鎯侀弰鍓с仛閸掑棛绮嶉弽鍥暯
+ * @param props.closeShortcutLabel - 閸忔娊妫磋箛顐ｅ祹闁款喚娈戦弽鍥╊劮閺傚洦婀? * @param props.terminalVisualIdentityById - 缂佸牏顏?ID 閸掓媽顫嬬憴澶嬬垼鐠囧棛娈戦弰鐘茬殸
+ * @param props.actions - 瀹搞儱鍙块弽蹇旀惙娴ｆ粓銆嶉崚妤勩€? * @param props.onActiveTerminalChange - 閸掑洦宕插ú鏄忕┈缂佸牏顏惃鍕礀鐠? * @param props.onCloseTerminal - 閸忔娊妫寸紒鍫㈩伂閻ㄥ嫬娲栫拫? */
 export function TerminalSidebar(props: {
   terminalIds: string[];
   terminalGroups: ResolvedTerminalGroupLayout[];
@@ -302,7 +296,7 @@ export function TerminalSidebar(props: {
                       }`}
                     >
                       {props.showGroupHeaders && (
-                        <span className="text-[10px] text-muted-foreground/80">鈹?/span>
+                        <span className="text-[10px] text-muted-foreground/80">閳?/span>
                       )}
                       <button
                         type="button"
