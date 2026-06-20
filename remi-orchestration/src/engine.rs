@@ -415,7 +415,7 @@ impl OrchestrationEngine {
                 // 从 payload_json 反序列化出领域事件
                 let event: OrchestrationEvent = serde_json::from_str(&stored_event.payload_json)
                     .map_err(|e| {
-                        crate::error::OrchestrationError::Internal(format!(
+                        crate::error::OrchestrationError::InternalError(format!(
                             "Failed to deserialize event: {}",
                             e
                         ))

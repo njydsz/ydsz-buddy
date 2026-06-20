@@ -32,31 +32,49 @@ export interface NewThreadOptions {
   fresh?: boolean;
 }
 
+/** 活跃线程快照，用于纯函数辅助工具 */
 interface ActiveThreadSnapshot {
+  /** 项目 ID */
   projectId: ProjectId;
+  /** 模型选择 */
   modelSelection: ModelSelection;
+  /** 运行时模式 */
   runtimeMode: RuntimeMode;
+  /** 交互模式 */
   interactionMode: ProviderInteractionMode;
+  /** 环境模式 */
   envMode?: ThreadEnvironmentMode | undefined;
+  /** 最近已知的 PR */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
 }
 
+/** 草稿复用计划：使用已存储的草稿线程 */
 export interface DraftReusePlanStored {
+  /** 草稿线程状态 */
   draftThread: DraftThreadState;
+  /** 计划类型 */
   kind: "stored";
+  /** 线程 ID */
   threadId: ThreadId;
 }
 
+/** 草稿复用计划：使用当前路由的草稿线程 */
 export interface DraftReusePlanRoute {
+  /** 草稿线程状态 */
   draftThread: DraftThreadState;
+  /** 计划类型 */
   kind: "route";
+  /** 线程 ID */
   threadId: ThreadId;
 }
 
+/** 草稿复用计划：创建全新线程 */
 export interface DraftReusePlanFresh {
+  /** 计划类型 */
   kind: "fresh";
 }
 
+/** 线程引导计划联合类型 */
 export type ThreadBootstrapPlan = DraftReusePlanStored | DraftReusePlanRoute | DraftReusePlanFresh;
 
 interface ResolveTerminalThreadCreationStateInput {
