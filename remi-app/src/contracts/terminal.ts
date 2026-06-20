@@ -96,6 +96,7 @@ export interface TerminalSessionSnapshot {
   updatedAt: string;
 }
 
+/** 终端事件基础结构，包含线程 ID、终端 ID 和创建时间 */
 interface TerminalEventBase {
   /** 会话线程 ID */
   threadId: string;
@@ -107,42 +108,55 @@ interface TerminalEventBase {
 
 /** 终端启动事件，携带启动后的会话快照 */
 interface TerminalStartedEvent extends TerminalEventBase {
+  /** 事件类型：启动 */
   type: "started";
+  /** 启动后的终端会话快照 */
   snapshot: TerminalSessionSnapshot;
 }
 
 /** 终端输出事件，携带输出的文本数据 */
 interface TerminalOutputEvent extends TerminalEventBase {
+  /** 事件类型：输出 */
   type: "output";
+  /** 输出的文本数据 */
   data: string;
 }
 
 /** 终端退出事件，携带退出码和退出信号 */
 interface TerminalExitedEvent extends TerminalEventBase {
+  /** 事件类型：退出 */
   type: "exited";
+  /** 进程退出码，异常退出时为 null */
   exitCode: number | null;
+  /** 进程退出信号，无信号时为 null */
   exitSignal: number | null;
 }
 
 /** 终端错误事件，携带错误信息 */
 interface TerminalErrorEvent extends TerminalEventBase {
+  /** 事件类型：错误 */
   type: "error";
+  /** 错误信息 */
   message: string;
 }
 
 /** 终端清屏事件 */
 interface TerminalClearedEvent extends TerminalEventBase {
+  /** 事件类型：清屏 */
   type: "cleared";
 }
 
 /** 终端重启事件，携带重启后的会话快照 */
 interface TerminalRestartedEvent extends TerminalEventBase {
+  /** 事件类型：重启 */
   type: "restarted";
+  /** 重启后的终端会话快照 */
   snapshot: TerminalSessionSnapshot;
 }
 
 /** 终端活动状态事件，用于上报终端内子进程和 AI Agent 的运行状态 */
 interface TerminalActivityEvent extends TerminalEventBase {
+  /** 事件类型：活动状态 */
   type: "activity";
   /** 是否有正在运行的子进程 */
   hasRunningSubprocess: boolean;

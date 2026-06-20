@@ -16,6 +16,8 @@
 //! | [`checkpoint`] | [`register_checkpoint_methods`] | `checkpoint.*` | 检查点方法 |
 //! | [`server`] | [`register_server_methods`] | `server.*` | 服务器方法 |
 //! | [`telemetry`] | [`register_telemetry_methods`] | `telemetry.*` | 遥测方法 |
+//! | [`subscription`] | [`register_subscription_methods`] | `subscribe.*` | 推送通道订阅方法 |
+//! | [`shell`] | [`register_shell_methods`] | `shell.*` | Shell 操作方法 |
 
 /// 编排引擎 RPC 方法
 mod orchestration;
@@ -39,6 +41,8 @@ mod telemetry;
 mod subscription;
 /// Shell 操作 RPC 方法
 mod shell;
+/// 语音转文字 RPC 方法
+mod voice;
 
 pub use orchestration::*;
 pub use provider::*;
@@ -51,3 +55,4 @@ pub use server::*;
 pub use telemetry::*;
 pub use subscription::*;
 pub use shell::*;
+pub use voice::*;

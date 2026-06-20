@@ -28,5 +28,8 @@ pub mod models;
 /// AI Provider 相关类型定义，包括 Provider 类型、模型选择、运行时事件等
 pub mod provider;
 
+#[cfg(test)]
+mod tests;
+
 /// 重导出 error 模块中的所有公开类型，方便外部直接使用
 pub use error::*;

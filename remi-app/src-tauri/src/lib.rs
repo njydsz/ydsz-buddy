@@ -169,6 +169,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init()) // 剪贴板管理
         .plugin(tauri_plugin_notification::init())   // 系统通知
         .plugin(tauri_plugin_process::init())        // 进程管理
+        .plugin(tauri_plugin_updater::Builder::new().build()) // 应用自动更新
 
         // ========== 全局状态注入 ==========
         // 每个 State 对象在整个应用生命周期内唯一，各命令通过 `State<'_, XxxState>` 获取

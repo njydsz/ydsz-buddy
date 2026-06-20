@@ -1,7 +1,8 @@
-// FILE: ShortcutsDialog.tsx
-// Purpose: Render a context-aware keyboard shortcuts reference as a slim, app-style dialog with search.
-// Layer: Chat shell overlay
-// Depends on: shared dialog UI, shortcut label builder, and current project script metadata.
+/**
+ * @file ShortcutsDialog.tsx
+ * @description 上下文感知的键盘快捷键参考对话框，支持搜索过滤，
+ *              展示当前可用的快捷键列表和项目脚本自定义键绑定。
+ */
 
 import type { ResolvedKeybindingsConfig } from "~/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";

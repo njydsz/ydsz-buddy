@@ -70,8 +70,10 @@ export type ResolvedAgentAlias = AgentAliasDefinition & {
   readonly alias: string;
 };
 
+/** OpenCode/Kilo Provider 的 Agent 别名映射表（当前为空） */
 const OPENCODE_AGENT_MENTION_ALIASES: Record<string, AgentAliasDefinition> = {};
 
+/** Codex Provider 的 Agent 别名映射表，将简短别名映射到对应的模型定义 */
 const CODEX_AGENT_MENTION_ALIASES: Record<string, CodexAgentAliasDefinition> = {
   "5.5": {
     provider: "codex",
@@ -145,6 +147,7 @@ const CODEX_AGENT_MENTION_ALIASES: Record<string, CodexAgentAliasDefinition> = {
   },
 };
 
+/** Claude Provider 的子代理别名映射表，将简短别名映射到对应的子代理定义 */
 const CLAUDE_AGENT_MENTION_ALIASES: Record<string, ClaudeSubagentAliasDefinition> = {
   explore: {
     provider: "claudeAgent",
@@ -271,6 +274,12 @@ export const AGENT_MENTION_ALIASES: Record<string, AgentAliasDefinition> = Objec
   ...Object.values(AGENT_MENTION_ALIASES_BY_PROVIDER),
 );
 
+/**
+ * 按 Provider 分组的自动补全别名列表
+ *
+ * @description 每个 Provider 对应一组推荐用于自动补全的别名名称，
+ * 用于在用户输入 @ 时提供智能提示。仅包含最常用的别名子集。
+ */
 const AGENT_MENTION_AUTOCOMPLETE_ALIASES_BY_PROVIDER: Record<ProviderKind, readonly string[]> = {
   codex: ["5.5", "5.4", "mini", "5.3-codex", "spark", "5.2", "5.2-codex"],
   claudeAgent: ["explore", "review", "build", "plan"],
@@ -282,6 +291,12 @@ const AGENT_MENTION_AUTOCOMPLETE_ALIASES_BY_PROVIDER: Record<ProviderKind, reado
   pi: [],
 };
 
+/**
+ * 将别名映射表转换为解析后的别名数组
+ *
+ * @param input - 别名定义映射表
+ * @returns 解析后的别名数组，按别名字母顺序排序
+ */
 function mapAgentEntries(input: Record<string, AgentAliasDefinition>): ResolvedAgentAlias[] {
   return Object.entries(input)
     .map(([alias, definition]) => Object.assign({ alias }, definition))

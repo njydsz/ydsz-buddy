@@ -113,6 +113,12 @@ pub enum ProviderError {
     /// 通常表示程序逻辑错误或未处理的边界情况。
     #[error("内部错误: {0}")]
     InternalError(String),
+
+    /// 启动失败错误
+    ///
+    /// 当 Provider 子进程（如 Codex App Server）启动失败时返回此错误。
+    #[error("启动失败: {0}")]
+    StartupFailed(String),
 }
 
 /// Provider 操作结果类型别名

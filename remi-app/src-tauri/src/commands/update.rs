@@ -7,13 +7,14 @@
 //! - 管理应用更新的状态（可用版本、下载进度等）
 //! - 提供前端可调用的更新检查、下载、安装命令
 //! - 维护更新状态信息
+//! - 通过 Tauri 事件总线向前端推送下载进度
 //!
 //! ## 核心功能
 //!
 //! 1. **状态查询**：获取当前更新状态（是否有可用更新、下载进度等）
 //! 2. **版本检查**：检查是否有新版本可用
-//! 3. **下载更新**：下载更新包
-//! 4. **安装更新**：安装已下载的更新
+//! 3. **下载更新**：下载更新包，并在下载过程中向前端推送进度事件
+//! 4. **安装更新**：安装已下载的更新（重启应用）
 //!
 //! ## 使用场景
 //!
@@ -24,71 +25,54 @@
 //!
 //! ## 依赖说明
 //!
-//! 本模块依赖 `tauri_plugin_updater` 插件，该插件在 `lib.rs` 中已注册。
+//! 本模块依赖 `tauri_plugin_updater` 插件。
 //!
-//! ## 设计说明
+//! ## 事件
 //!
-//! - 当前实现为占位符，实际的更新逻辑需要集成 `tauri_plugin_updater`
-//! - 更新状态存储在内存中，应用重启后会重置
+//! - `update://available`：发现可用更新
+//! - `update://progress`：下载进度更新
+//! - `update://downloaded`：下载完成
+//! - `update://error`：更新过程出错
 
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
+use tauri_plugin_updater::UpdaterExt;
 
 /// 更新状态管理器
 ///
 /// 持有应用更新的状态信息，通过互斥锁保证线程安全。
-///
-/// # 字段说明
-///
-/// - `state`: 更新状态信息的 Arc 包装，支持多线程共享
-///
-/// # 使用场景
-///
-/// 在 `lib.rs` 中通过 `.manage(UpdateState::new())` 注入，
-/// 各命令通过 `State<'_, UpdateState>` 参数获取该状态。
 pub struct UpdateState {
+    /// 更新信息（通过互斥锁保证线程安全的内部可变性）
     state: Arc<Mutex<UpdateInfo>>,
 }
 
 /// 更新信息结构
 ///
 /// 表示应用更新的当前状态。
-///
-/// # 字段说明
-///
-/// - `available`: 是否有可用更新
-/// - `version`: 可用更新的版本号（如 "1.2.0"）
-/// - `download_progress`: 下载进度（0.0 - 100.0）
-/// - `downloaded`: 更新是否已下载完成
-///
-/// # 使用场景
-///
-/// 作为 `get_update_state`、`check_for_updates` 等命令的返回值。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateInfo {
     /// 是否有可用更新
     pub available: bool,
-    /// 可用更新的版本号
+    /// 当前应用版本
+    pub current_version: String,
+    /// 可用更新的版本号（如 "1.2.0"）
     pub version: String,
-    /// 下载进度（百分比）
+    /// 更新公告
+    pub notes: String,
+    /// 发布时间（RFC3339）
+    pub pub_date: String,
+    /// 下载进度（0.0 - 100.0）
     pub download_progress: f64,
     /// 是否已下载完成
     pub downloaded: bool,
+    /// 是否正在检查/下载中
+    pub in_progress: bool,
+    /// 错误信息（最近一次失败）
+    pub error: Option<String>,
 }
 
 /// 更新操作结果结构
-///
-/// 表示更新操作（下载、安装）的执行结果。
-///
-/// # 字段说明
-///
-/// - `success`: 操作是否成功
-/// - `message`: 操作结果消息（成功或错误信息）
-///
-/// # 使用场景
-///
-/// 作为 `download_update`、`install_update` 等命令的返回值。
 #[derive(Debug, Serialize)]
 pub struct UpdateActionResult {
     /// 操作是否成功
@@ -97,49 +81,55 @@ pub struct UpdateActionResult {
     pub message: String,
 }
 
+impl Default for UpdateInfo {
+    fn default() -> Self {
+        Self {
+            available: false,
+            current_version: env!("CARGO_PKG_VERSION").to_string(),
+            version: String::new(),
+            notes: String::new(),
+            pub_date: String::new(),
+            download_progress: 0.0,
+            downloaded: false,
+            in_progress: false,
+            error: None,
+        }
+    }
+}
+
 impl UpdateState {
     /// 创建新的更新状态管理器
-    ///
-    /// 初始化默认的更新状态（无可用更新）。
-    ///
-    /// # 返回值
-    ///
-    /// 返回初始化后的 `UpdateState` 实例
     pub fn new() -> Self {
         Self {
-            state: Arc::new(Mutex::new(UpdateInfo {
-                available: false,
-                version: String::new(),
-                download_progress: 0.0,
-                downloaded: false,
-            })),
+            state: Arc::new(Mutex::new(UpdateInfo::default())),
         }
+    }
+
+    /// 重置为初始状态
+    fn reset(&self) {
+        if let Ok(mut info) = self.state.lock() {
+            *info = UpdateInfo::default();
+        }
+    }
+
+    /// 设置错误
+    fn set_error(&self, msg: String) {
+        if let Ok(mut info) = self.state.lock() {
+            info.error = Some(msg);
+            info.in_progress = false;
+        }
+    }
+}
+
+impl Default for UpdateState {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
 /// 获取更新状态命令
 ///
 /// 获取当前的应用更新状态信息。
-///
-/// # 参数
-///
-/// - `state`: 更新状态管理器（通过 Tauri State 注入）
-///
-/// # 返回值
-///
-/// - `Ok(UpdateInfo)`: 查询成功，返回更新状态信息
-/// - `Err(String)`: 查询失败（如锁获取失败）
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const updateState = await window.__TAURI__.invoke('get_update_state');
-/// if (updateState.available) {
-///     console.log(`发现新版本: ${updateState.version}`);
-///     console.log(`下载进度: ${updateState.download_progress}%`);
-/// }
-/// ```
 #[tauri::command]
 pub async fn get_update_state(state: State<'_, UpdateState>) -> Result<UpdateInfo, String> {
     let update_info = state.state.lock().map_err(|e| e.to_string())?;
@@ -148,107 +138,200 @@ pub async fn get_update_state(state: State<'_, UpdateState>) -> Result<UpdateInf
 
 /// 检查更新命令
 ///
-/// 检查是否有新版本可用（当前为占位实现）。
-///
-/// # 参数
-///
-/// - `state`: 更新状态管理器
-///
-/// # 返回值
-///
-/// - `Ok(UpdateInfo)`: 检查成功，返回更新状态信息
-/// - `Err(String)`: 检查失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const result = await window.__TAURI__.invoke('check_for_updates');
-/// if (result.available) {
-///     console.log(`发现新版本: ${result.version}`);
-/// }
-/// ```
-///
-/// # 设计说明
-///
-/// - 当前实现为占位符，始终返回 `available: false`
-/// - 实际实现需要集成 `tauri_plugin_updater` 插件
-/// - 建议前端在应用启动时和用户手动触发时调用此命令
+/// 通过 `tauri_plugin_updater` 检查远端是否有新版本可用。
+/// 若可用，会将版本信息写入 `UpdateState` 并向前端发送 `update://available` 事件。
 #[tauri::command]
-pub async fn check_for_updates(state: State<'_, UpdateState>) -> Result<UpdateInfo, String> {
-    // Placeholder - actual update check would use tauri-plugin-updater
-    let mut update_info = state.state.lock().map_err(|e| e.to_string())?;
-    update_info.available = false;
-    Ok(update_info.clone())
+pub async fn check_for_updates(
+    app: AppHandle,
+    state: State<'_, UpdateState>,
+) -> Result<UpdateInfo, String> {
+    state.reset();
+    {
+        let mut info = state.state.lock().map_err(|e| e.to_string())?;
+        info.in_progress = true;
+        info.current_version = env!("CARGO_PKG_VERSION").to_string();
+    }
+
+    let updater = match app.updater() {
+        Ok(u) => u,
+        Err(e) => {
+            let msg = format!("Updater not available: {e}");
+            state.set_error(msg.clone());
+            return Err(msg);
+        }
+    };
+
+    match updater.check().await {
+        Ok(Some(update)) => {
+            let version = update.version.clone();
+            let notes = update.body.clone().unwrap_or_default();
+            let pub_date = update.date.map(|d| d.to_rfc3339()).unwrap_or_default();
+            let info_snapshot = {
+                let mut info = state.state.lock().map_err(|e| e.to_string())?;
+                info.available = true;
+                info.version = version.clone();
+                info.notes = notes.clone();
+                info.pub_date = pub_date.clone();
+                info.in_progress = false;
+                info.clone()
+            };
+            // 通知前端
+            let _ = app.emit("update://available", &info_snapshot);
+            Ok(info_snapshot)
+        }
+        Ok(None) => {
+            let info_snapshot = {
+                let mut info = state.state.lock().map_err(|e| e.to_string())?;
+                info.available = false;
+                info.in_progress = false;
+                info.clone()
+            };
+            Ok(info_snapshot)
+        }
+        Err(e) => {
+            let msg = format!("Check for updates failed: {e}");
+            state.set_error(msg.clone());
+            Err(msg)
+        }
+    }
 }
 
 /// 下载更新命令
 ///
-/// 下载可用的应用更新（当前为占位实现）。
-///
-/// # 参数
-///
-/// - `state`: 更新状态管理器
-///
-/// # 返回值
-///
-/// - `Ok(UpdateActionResult)`: 下载操作结果
-/// - `Err(String)`: 下载失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const result = await window.__TAURI__.invoke('download_update');
-/// if (result.success) {
-///     console.log('更新下载完成');
-/// }
-/// ```
-///
-/// # 设计说明
-///
-/// - 当前实现为占位符，直接标记为已下载
-/// - 实际实现需要集成 `tauri_plugin_updater` 插件
-/// - 下载过程中应定期调用 `get_update_state` 获取进度
+/// 下载可用的应用更新。在下载过程中会通过 `update://progress` 事件向前端推送进度。
 #[tauri::command]
-pub async fn download_update(state: State<'_, UpdateState>) -> Result<UpdateActionResult, String> {
-    let mut update_info = state.state.lock().map_err(|e| e.to_string())?;
-    update_info.downloaded = true;
-    Ok(UpdateActionResult {
-        success: true,
-        message: "Update downloaded".to_string(),
-    })
+pub async fn download_update(
+    app: AppHandle,
+    state: State<'_, UpdateState>,
+) -> Result<UpdateActionResult, String> {
+    {
+        let mut info = state.state.lock().map_err(|e| e.to_string())?;
+        if !info.available {
+            return Err("No update available".to_string());
+        }
+        info.download_progress = 0.0;
+        info.in_progress = true;
+        info.error = None;
+    }
+
+    let updater = app
+        .updater()
+        .map_err(|e| format!("Updater not available: {e}"))?;
+
+    match updater.check().await {
+        Ok(Some(update)) => {
+            // 启动下载任务，定期上报进度
+            let app_handle = app.clone();
+            let state_arc = state.state.clone();
+            let update_clone = update.clone();
+
+            let on_progress = move |received: u64, total: Option<u64>| {
+                let pct = match total {
+                    Some(t) if t > 0 => (received as f64 / t as f64) * 100.0,
+                    _ => 0.0,
+                };
+                if let Ok(mut info) = state_arc.lock() {
+                    info.download_progress = pct;
+                }
+                let _ = app_handle.emit(
+                    "update://progress",
+                    serde_json::json!({
+                        "received": received,
+                        "total": total,
+                        "progress": pct,
+                    }),
+                );
+            };
+
+            match update_clone.download(on_progress).await {
+                Ok(bytes) => {
+                    let info_snapshot = {
+                        let mut info = state.state.lock().map_err(|e| e.to_string())?;
+                        info.downloaded = true;
+                        info.download_progress = 100.0;
+                        info.in_progress = false;
+                        info.clone()
+                    };
+                    let _ = app.emit("update://downloaded", &info_snapshot);
+                    Ok(UpdateActionResult {
+                        success: true,
+                        message: format!("Update downloaded ({} bytes)", bytes),
+                    })
+                }
+                Err(e) => {
+                    let msg = format!("Download failed: {e}");
+                    state.set_error(msg.clone());
+                    let _ = app.emit("update://error", &msg);
+                    Ok(UpdateActionResult {
+                        success: false,
+                        message: msg,
+                    })
+                }
+            }
+        }
+        Ok(None) => {
+            let msg = "No update available".to_string();
+            state.set_error(msg.clone());
+            Ok(UpdateActionResult {
+                success: false,
+                message: msg,
+            })
+        }
+        Err(e) => {
+            let msg = format!("Check failed: {e}");
+            state.set_error(msg.clone());
+            Ok(UpdateActionResult {
+                success: false,
+                message: msg,
+            })
+        }
+    }
 }
 
 /// 安装更新命令
 ///
-/// 安装已下载的应用更新（当前为占位实现）。
-///
-/// # 返回值
-///
-/// - `Ok(UpdateActionResult)`: 安装操作结果
-/// - `Err(String)`: 安装失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例
-/// const result = await window.__TAURI__.invoke('install_update');
-/// if (result.success) {
-///     console.log('正在安装更新，应用将重启...');
-/// }
-/// ```
-///
-/// # 设计说明
-///
-/// - 当前实现为占位符，直接返回成功
-/// - 实际实现需要重启应用以完成安装
-/// - 建议在安装前提示用户保存工作
+/// 安装已下载的应用更新：关闭当前实例并以新版本重启。
+/// 在调用此命令前，状态必须处于 `downloaded == true`。
 #[tauri::command]
-pub async fn install_update() -> Result<UpdateActionResult, String> {
-    // Placeholder - actual install would restart the app
-    Ok(UpdateActionResult {
-        success: true,
-        message: "Installing update".to_string(),
-    })
+pub async fn install_update(
+    app: AppHandle,
+    state: State<'_, UpdateState>,
+) -> Result<UpdateActionResult, String> {
+    if !state.state.lock().map_err(|e| e.to_string())?.downloaded {
+        return Ok(UpdateActionResult {
+            success: false,
+            message: "Update has not been downloaded yet".to_string(),
+        });
+    }
+
+    let updater = app
+        .updater()
+        .map_err(|e| format!("Updater not available: {e}"))?;
+
+    match updater.check().await {
+        Ok(Some(update)) => {
+            // install 在内部会执行：关闭应用、以新版本重启
+            if let Err(e) = update.install().await {
+                let msg = format!("Install failed: {e}");
+                state.set_error(msg.clone());
+                return Ok(UpdateActionResult {
+                    success: false,
+                    message: msg,
+                });
+            }
+            // 通常执行到这里时应用已经重启或即将退出
+            Ok(UpdateActionResult {
+                success: true,
+                message: "Update installed, application is restarting".to_string(),
+            })
+        }
+        Ok(None) => Ok(UpdateActionResult {
+            success: false,
+            message: "No update available to install".to_string(),
+        }),
+        Err(e) => Ok(UpdateActionResult {
+            success: false,
+            message: format!("Check failed: {e}"),
+        }),
+    }
 }

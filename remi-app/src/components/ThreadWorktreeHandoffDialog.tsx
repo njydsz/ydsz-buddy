@@ -1,3 +1,8 @@
+/**
+ * @file ThreadWorktreeHandoffDialog.tsx
+ * @description 工作树交接对话框，用于在切换分支或环境模式时
+ *              创建新的 Git worktree 并将线程关联到该工作树。
+ */
 import { useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import {

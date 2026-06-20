@@ -1,6 +1,8 @@
-// FILE: Sidebar.tsx
-// Purpose: Renders the project/thread sidebar, including row status, sorting, and thread actions.
-// Exports: Sidebar
+/**
+ * @file Sidebar.tsx
+ * @description 项目/线程侧边栏组件，渲染项目列表、线程行状态、排序和线程操作，
+ *              支持项目折叠、线程置顶、搜索过滤、新建聊天等功能。
+ */
 
 import {
   ArrowLeftIcon,
@@ -2576,7 +2578,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms �?this is a folder-level operation, and
+      // Bulk archive always confirms �?this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [

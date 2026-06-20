@@ -1,3 +1,8 @@
+/**
+ * @file ProjectScriptsControl.tsx
+ * @description 项目脚本运行控件，展示项目自定义脚本的快捷入口，
+ *              支持脚本执行、自定义键绑定配置和脚本管理。
+ */
 import type {
   ProjectScript,
   ProjectScriptIcon,

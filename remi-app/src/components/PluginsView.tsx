@@ -1,9 +1,8 @@
-// FILE: PluginsView.tsx
-// Purpose: Plugin browser surface for the /plugins route. Reads the same provider
-//          discovery data as the SkillsView and renders the marketplace-grouped plugin
-//          grid with a hero, search, and provider toolbar.
-// Layer: Route-level screen
-// Exports: PluginsView
+/**
+ * @file PluginsView.tsx
+ * @description 插件浏览页面，读取提供者发现数据并渲染按市场分组的插件网格，
+ *              包含搜索、提供者工具栏和空状态提示。
+ */
 
 import { useDeferredValue } from "react";
 import { SearchIcon } from "~/lib/icons";
@@ -75,7 +74,7 @@ export function PluginsView() {
                 <InlineWarning>
                   {data.pluginsQuery.data?.marketplaceLoadErrors
                     .map((err) => `${sectionTitle(err.marketplacePath)}: ${err.message}`)
-                    .join(" �?")}
+                    .join(" �?")}
                 </InlineWarning>
               ) : null}
             </div>

@@ -1,10 +1,8 @@
-// FILE: WhatsNewDialog.tsx
-// Purpose: Render the one-time "What's new" release-notes dialog shown after
-// an update. Two views: a default "What's new?" card stack anchored on the
-// installed release, and a secondary "Complete changelog" accordion spanning
-// every curated release. Open/close state and the underlying data are owned
-// by `useWhatsNew`; this component is pure presentation.
-// Layer: Chat shell overlay (mounted once from the root route).
+/**
+ * @file WhatsNewDialog.tsx
+ * @description 更新后的"新功能"发布说明对话框，包含当前版本功能卡片和完整更新日志折叠面板。
+ *              开关状态由 useWhatsNew 管理，本组件仅负责展示。
+ */
 
 import { useEffect, useState } from "react";
 
@@ -30,7 +28,7 @@ export interface WhatsNewDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   /**
-   * The entry matching the installed build. `null` means "nothing to show" �?   * the hook only flips `open=true` when we have an entry, so normally this is
+   * The entry matching the installed build. `null` means "nothing to show" �?   * the hook only flips `open=true` when we have an entry, so normally this is
    * non-null while the dialog is visible. We still guard against the null
    * case to keep the UI tolerant of mid-transition re-renders.
    */
@@ -59,7 +57,7 @@ export default function WhatsNewDialog({
   }, [open]);
 
   // Guard against a race where the hook has already reset but base-ui is
-  // still transitioning �?rendering an empty card would briefly flash a
+  // still transitioning �?rendering an empty card would briefly flash a
   // confusing empty state.
   if (!currentEntry) {
     return (

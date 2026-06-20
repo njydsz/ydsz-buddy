@@ -1,3 +1,8 @@
+/**
+ * @file DiffWorkerPoolProvider.tsx
+ * @description 差异渲染 Worker 池提供者，初始化 @pierre/diffs 的 Web Worker 池
+ *              并在主题切换时同步渲染选项，确保差异面板始终使用正确的主题配置。
+ */
 import { WorkerPoolContextProvider, useWorkerPool } from "@pierre/diffs/react";
 import DiffsWorker from "@pierre/diffs/worker/worker.js?worker";
 import { useEffect, useMemo, type ReactNode } from "react";

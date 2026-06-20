@@ -30,6 +30,7 @@ function WorkspaceRouteView() {
   return <WorkspaceView workspaceId={workspace.id} />;
 }
 
+/** 工作区详情路由定义，组件为 WorkspaceRouteView */
 export const Route = createFileRoute("/_chat/workspace/$workspaceId")({
   component: WorkspaceRouteView,
 });

@@ -58,6 +58,7 @@ struct TerminalOutputPayload {
 /// 在 `lib.rs` 中通过 `.manage(TerminalState::new())` 注入，
 /// 各命令通过 `State<'_, TerminalState>` 参数获取该状态。
 pub struct TerminalState {
+    /// 终端会话集合（键为会话 ID，值为会话对象）
     terminals: Arc<Mutex<HashMap<String, TerminalSession>>>,
 }
 
@@ -75,11 +76,17 @@ pub struct TerminalState {
 /// - `cwd`: 终端工作目录，用于重启
 /// - `shell`: Shell 程序路径，用于重启
 struct TerminalSession {
+    /// PTY 主设备，用于 resize 操作
     master: Box<dyn portable_pty::MasterPty + Send>,
+    /// 向终端写入输入的写入流
     writer: Box<dyn Write + Send>,
+    /// 终端子进程句柄，用于控制进程生命周期
     process: Box<dyn portable_pty::Child + Send>,
+    /// 后台读取任务的句柄，用于在关闭终端时终止读取循环
     reader_handle: Option<JoinHandle<()>>,
+    /// 终端工作目录，用于重启时恢复
     cwd: String,
+    /// Shell 程序路径，用于重启时恢复
     shell: String,
 }
 

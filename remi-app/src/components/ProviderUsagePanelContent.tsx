@@ -1,6 +1,8 @@
-// FILE: ProviderUsagePanelContent.tsx
-// Purpose: Render a provider usage summary panel that can show both classic
-// rate-limit rows and archive-derived local usage lines in the same popover.
+/**
+ * @file ProviderUsagePanelContent.tsx
+ * @description 提供者用量摘要面板内容，同时展示经典速率限制行和
+ *              基于归档的本地用量数据，用于弹出面板中统一呈现。
+ */
 
 import type { ProviderKind } from "~/contracts";
 import { memo, useMemo } from "react";

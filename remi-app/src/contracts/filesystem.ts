@@ -5,7 +5,7 @@
  */
 import type { TrimmedNonEmptyString } from "./baseSchemas";
 
-/** 文件系统路径最大长度限制 */
+/** 文件系统路径最大长度限制（字符数） */
 const FILESYSTEM_PATH_MAX_LENGTH = 512;
 
 /** 文件系统浏览请求输入，包含部分路径和可选的工作目录 */

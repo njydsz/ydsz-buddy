@@ -1,7 +1,8 @@
-// FILE: ChatMarkdown.tsx
-// Purpose: Renders assistant and plan markdown with syntax highlighting and local file links.
-// Layer: Web chat presentation component
-// Exports: ChatMarkdown
+/**
+ * @file ChatMarkdown.tsx
+ * @description 聊天 Markdown 渲染组件，支持语法高亮、本地文件链接、
+ *              LaTeX 数学公式、GFM 扩展语法等，用于助手消息和计划内容的渲染。
+ */
 
 import { DiffsHighlighter, getSharedHighlighter, SupportedLanguages } from "@pierre/diffs";
 import { CheckIcon, CopyIcon } from "~/lib/icons";
@@ -499,10 +500,10 @@ function getHighlighterPromise(language: string): Promise<DiffsHighlighter> {
   }).catch((err) => {
     highlighterPromiseCache.delete(language);
     if (language === "text") {
-      // "text" itself failed �?Shiki cannot initialize at all, surface the error
+      // "text" itself failed �?Shiki cannot initialize at all, surface the error
       throw err;
     }
-    // Language not supported by Shiki �?fall back to "text"
+    // Language not supported by Shiki �?fall back to "text"
     return getHighlighterPromise("text");
   });
   highlighterPromiseCache.set(language, promise);

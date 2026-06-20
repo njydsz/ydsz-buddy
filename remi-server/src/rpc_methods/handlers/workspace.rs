@@ -13,6 +13,9 @@
 //! | `workspace.writeFile` | 写入文件 |
 //! | `workspace.readFile` | 读取文件内容 |
 //! | `workspace.deleteFile` | 删除文件 |
+//! | `workspace.listProjects` | 列出所有项目 |
+//! | `workspace.addProject` | 添加项目 |
+//! | `workspace.removeProject` | 移除项目 |
 
 use std::sync::Arc;
 
@@ -297,7 +300,9 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.listProjects
+    // workspace.listProjects - 列出所有项目
+    // 参数: 无
+    // 返回: Project[]
     let projection_query = services.projection_query.clone();
     router
         .register("workspace.listProjects", move |_params: Option<Value>| {
@@ -310,7 +315,7 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.addProject - 添加项目
+    // workspace.addProject - 添加项目，自动从路径提取项目名并通过编排引擎创建
     // 参数: { path: string }
     // 返回: null
     let engine = services.orchestration_engine.clone();
@@ -351,7 +356,7 @@ pub async fn register_workspace_methods(
         })
         .await;
 
-    // workspace.removeProject - 移除项目
+    // workspace.removeProject - 移除项目，通过编排引擎发送删除命令
     // 参数: { projectId: string }
     // 返回: null
     let engine = services.orchestration_engine.clone();

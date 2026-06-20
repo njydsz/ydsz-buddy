@@ -1,0 +1,27 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="404" description="Page not found.">
+  <section class="section notfound">
+    <div class="container">
+      <span class="section-eyebrow">404</span>
+      <h1>That page escaped into a worktree.</h1>
+      <p>
+        We couldn't find what you were looking for. Try the
+        <a href="/">homepage</a> or grab the latest
+        <a href="/download">download</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    text-align: center;
+    padding: 120px 0;
+  }
+  .notfound h1 {
+    margin-top: 12px;
+  }
+</style>

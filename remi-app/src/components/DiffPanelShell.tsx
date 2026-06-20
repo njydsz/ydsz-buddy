@@ -1,3 +1,8 @@
+/**
+ * @file DiffPanelShell.tsx
+ * @description 差异面板的外壳布局组件，提供统一的头部和内容区域容器。
+ *              支持内联、弹出面板和侧边栏三种显示模式，处理桌面端拖拽区域等平台差异。
+ */
 import type { ReactNode } from "react";
 
 import { isDesktop } from "~/env";

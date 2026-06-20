@@ -1,6 +1,62 @@
 //! ACP 会话运行时
 //!
-//! 本模块提供 ACP 会话的生命周期管理和进程通信能力。
+//! 本模块提供 ACP (Agent Client Protocol) 会话的生命周期管理和进程通信能力。
+//! 通过 JSON-RPC over stdio 协议与 ACP 客户端子进程进行双向通信。
+//!
+//! # 核心功能
+//!
+//! - **进程管理**：启动 ACP 客户端子进程，管理其生命周期
+//! - **请求/响应**：发送 JSON-RPC 请求并等待对应的响应
+//! - **事件广播**：通过 broadcast 通道发布 Provider 运行时事件
+//! - **优雅关闭**：支持主动关闭子进程并清理资源
+//!
+//! # 架构设计
+//!
+//! ```text
+//! ┌──────────────────────────────────────────┐
+//! │        AcpSessionRuntime                  │
+//! ├──────────────────────────────────────────┤
+//! │  child: Mutex<Child>      ← 子进程句柄   │
+//! │  stdin: Mutex<ChildStdin> ← 请求写入端   │
+//! │  state: Mutex<AcpSessionState> ← 会话状态│
+//! │  event_tx: broadcast       ← 事件广播    │
+//! │  request_id: Mutex<u64>   ← 请求ID生成器 │
+//! │  pending_responses         ← 待处理响应   │
+//! └──────────────────────────────────────────┘
+//!         ↓ stdin 写入          ↑ stdout 读取
+//! ┌──────────────────────────────────────────┐
+//! │        ACP 客户端子进程                   │
+//! └──────────────────────────────────────────┘
+//! ```
+//!
+//! # 会话生命周期
+//!
+//! ```text
+//! ┌─────────────┐
+//! │   spawn()   │ ← 启动子进程，创建运行时
+//! └──────┬──────┘
+//!        ↓
+//! ┌─────────────┐
+//! │send_request │ ← 发送 JSON-RPC 请求（可多次调用）
+//! └──────┬──────┘
+//!        ↓
+//! ┌─────────────┐
+//! │  shutdown() │ ← 关闭子进程，清理资源
+//! └─────────────┘
+//! ```
+//!
+//! # 线程安全
+//!
+//! - `child` 和 `stdin` 使用 `Mutex`，保证互斥访问
+//! - `state` 使用 `Mutex`，保证状态变更的原子性
+//! - `request_id` 使用 `Mutex`，保证 ID 递增的原子性
+//! - `pending_responses` 使用 `Mutex`，保证并发安全
+//!
+//! # 模块依赖
+//!
+//! - 依赖 [`crate::acp::model::AcpSpawnInput`] 定义进程启动参数
+//! - 依赖 [`crate::error`] 模块定义错误类型
+//! - 被 [`crate::acp::cursor`] 和 [`crate::acp::grok`] 模块依赖
 
 use crate::acp::model::AcpSpawnInput;
 use crate::error::{ProviderError, ProviderResult};
@@ -15,50 +71,90 @@ use tokio::sync::{broadcast, Mutex};
 use tracing::{debug, error, info, warn};
 
 /// ACP 会话状态
+///
+/// 描述 ACP 会话在其生命周期中所处的阶段。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AcpSessionState {
     /// 初始化中
+    ///
+    /// 子进程已启动但尚未完成初始化握手
     Initializing,
     /// 运行中
+    ///
+    /// 会话已就绪，可以正常处理请求
     Running,
     /// 已暂停
+    ///
+    /// 会话暂停，等待用户输入或其他条件恢复
     Paused,
     /// 已完成
+    ///
+    /// 会话正常结束，所有任务已完成
     Completed,
     /// 已失败
+    ///
+    /// 会话因错误而终止
     Failed,
 }
 
 /// ACP 会话信息
+///
+/// 记录 ACP 会话的基本元数据，包括标识、状态和时间信息。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AcpSession {
     /// 会话 ID
+    ///
+    /// 由运行时生成的唯一标识，格式为 "acp-{uuid}"
     pub id: String,
     /// 线程 ID
+    ///
+    /// 关联的 Remi 线程标识，用于与上层业务关联
     pub thread_id: String,
     /// 会话状态
+    ///
+    /// 当前会话所处的生命周期阶段
     pub state: AcpSessionState,
     /// 模型 ID
+    ///
+    /// 当前会话使用的 AI 模型标识
     pub model_id: String,
     /// 创建时间
+    ///
+    /// 会话创建的 UTC 时间戳
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// 最后活动时间
+    ///
+    /// 会话最后一次活动的 UTC 时间戳
     pub last_activity_at: chrono::DateTime<chrono::Utc>,
 }
 
 /// ACP 运行时选项
+///
+/// 控制 ACP 会话运行时的行为，包括日志记录和超时设置。
 #[derive(Debug, Clone)]
 pub struct AcpRuntimeOptions {
     /// 是否记录请求日志
+    ///
+    /// 启用后，每个发送的 JSON-RPC 请求都会以 debug 级别记录日志
     pub log_requests: bool,
     /// 是否记录响应日志
+    ///
+    /// 启用后，每个从子进程接收的 JSON-RPC 响应都会以 debug 级别记录日志
     pub log_responses: bool,
     /// 请求超时时间（秒）
+    ///
+    /// 发送 JSON-RPC 请求后等待响应的最大时间，超时返回错误。
+    /// 默认为 30 秒。
     pub request_timeout_secs: u64,
 }
 
 impl Default for AcpRuntimeOptions {
+    /// 默认运行时选项
+    ///
+    /// - `log_requests`: false（不记录请求日志）
+    /// - `log_responses`: false（不记录响应日志）
+    /// - `request_timeout_secs`: 30（30 秒超时）
     fn default() -> Self {
         Self {
             log_requests: false,
@@ -69,68 +165,138 @@ impl Default for AcpRuntimeOptions {
 }
 
 /// ACP JSON-RPC 请求
+///
+/// 遵循 JSON-RPC 2.0 规范的请求结构体，通过 stdin 发送给 ACP 客户端子进程。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AcpJsonRpcRequest {
-    /// JSON-RPC 版本
+    /// JSON-RPC 版本，固定为 "2.0"
     pub jsonrpc: String,
-    /// 请求 ID
+    /// 请求 ID，用于关联响应
     pub id: u64,
-    /// 方法名
+    /// 要调用的远程方法名
     pub method: String,
-    /// 参数
+    /// 方法参数
     pub params: serde_json::Value,
 }
 
 /// ACP JSON-RPC 响应
+///
+/// ACP 客户端子进程通过 stdout 返回的响应结构体。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AcpJsonRpcResponse {
     /// JSON-RPC 版本
     pub jsonrpc: String,
-    /// 请求 ID
+    /// 对应请求的 ID
     pub id: u64,
-    /// 结果
+    /// 请求成功时的返回值
     pub result: Option<serde_json::Value>,
-    /// 错误
+    /// 请求失败时的错误信息
     pub error: Option<AcpJsonRpcError>,
 }
 
 /// ACP JSON-RPC 错误
+///
+/// 当 ACP 客户端处理请求失败时返回的错误详情。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AcpJsonRpcError {
     /// 错误代码
+    ///
+    /// 负数表示系统级错误，正数保留给自定义错误
     pub code: i32,
-    /// 错误消息
+    /// 人类可读的错误描述
     pub message: String,
-    /// 附加数据
+    /// 可选的附加错误数据
     pub data: Option<serde_json::Value>,
 }
 
 /// ACP 会话运行时
 ///
-/// 管理与 ACP 客户端进程的通信和会话生命周期。
+/// 管理与 ACP 客户端子进程的完整通信生命周期，包括进程启动、
+/// JSON-RPC 请求发送、事件广播和会话关闭。
+///
+/// # 线程安全
+///
+/// 内部使用 `Arc<Mutex<...>>` 管理所有共享状态，支持多线程并发访问。
+/// stdin 写入通过 Mutex 保证原子性，避免消息交错。
+///
+/// # 生命周期
+///
+/// 1. 通过 [`spawn`](AcpSessionRuntime::spawn) 创建实例，启动子进程
+/// 2. 通过 [`send_request`](AcpSessionRuntime::send_request) 发送请求
+/// 3. 通过 [`subscribe_events`](AcpSessionRuntime::subscribe_events) 订阅事件
+/// 4. 通过 [`shutdown`](AcpSessionRuntime::shutdown) 关闭会话
 pub struct AcpSessionRuntime {
     /// 会话 ID
+    ///
+    /// 由运行时生成的唯一标识，格式为 "acp-{uuid}"
     session_id: String,
     /// 线程 ID
+    ///
+    /// 关联的 Remi 线程标识
     thread_id: String,
-    /// 子进程（stdout/stderr 已被 take）
+    /// 子进程句柄
+    ///
+    /// ACP 客户端子进程的句柄，stdout/stderr 已被 take。
+    /// 使用 `Mutex` 保证终止操作的互斥性。
     child: Arc<Mutex<Child>>,
-    /// 子进程标准输入（单独存储以便反复写入）
+    /// 子进程标准输入
+    ///
+    /// 用于向 ACP 客户端写入 JSON-RPC 请求。
+    /// 使用 `Mutex` 保证写入的原子性，避免消息交错。
     stdin: Arc<Mutex<ChildStdin>>,
     /// 会话状态
+    ///
+    /// 当前会话的生命周期状态，使用 `Mutex` 保证状态变更的原子性。
     state: Arc<Mutex<AcpSessionState>>,
-    /// 事件发送器
+    /// 事件广播发送器
+    ///
+    /// 将 ACP 客户端推送的事件转换为 `ProviderRuntimeEvent` 后广播给订阅者。
     event_tx: broadcast::Sender<ProviderRuntimeEvent>,
     /// 请求 ID 计数器
+    ///
+    /// 自增的请求 ID 生成器，保证每个请求获得唯一 ID。
     request_id: Arc<Mutex<u64>>,
     /// 运行时选项
+    ///
+    /// 控制日志记录和超时等行为
     options: AcpRuntimeOptions,
-    /// 待处理的响应
+    /// 待处理的响应映射表
+    ///
+    /// 键为请求 ID，值为 oneshot 通道的发送端。
+    /// 读取线程收到响应后，根据 ID 查找并通知对应的等待方。
     pending_responses: Arc<Mutex<HashMap<u64, tokio::sync::oneshot::Sender<AcpJsonRpcResponse>>>>,
 }
 
 impl AcpSessionRuntime {
     /// 创建新的 ACP 会话运行时
+    ///
+    /// 启动 ACP 客户端子进程，建立 stdin/stdout/stderr 通信管道，
+    /// 并启动后台读取任务处理响应和错误输出。
+    ///
+    /// # 参数
+    ///
+    /// - `spawn_input`: 进程启动参数，包含可执行文件路径、命令行参数、环境变量等
+    /// - `thread_id`: 关联的 Remi 线程 ID，用于与上层业务关联
+    /// - `options`: 运行时选项，控制日志记录和超时等行为
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(AcpSessionRuntime)`: 运行时创建成功
+    /// - `Err(ProviderError::AdapterError)`: 进程启动失败或管道建立失败
+    ///
+    /// # 错误
+    ///
+    /// - 可执行文件不存在或无执行权限
+    /// - 无法获取子进程的 stdin/stdout/stderr 管道
+    ///
+    /// # 启动流程
+    ///
+    /// 1. 根据 `spawn_input` 构建 `Command` 并配置环境变量和工作目录
+    /// 2. 启动子进程并获取 stdin/stdout/stderr 管道
+    /// 3. 创建事件广播通道和会话 ID
+    /// 4. 启动 stdout 读取任务，处理 JSON-RPC 响应
+    /// 5. 启动 stderr 读取任务，记录错误输出
+    /// 6. 将会话状态更新为 `Running`
     pub async fn spawn(
         spawn_input: AcpSpawnInput,
         thread_id: String,
@@ -246,6 +412,34 @@ impl AcpSessionRuntime {
     }
 
     /// 发送 JSON-RPC 请求
+    ///
+    /// 构造 JSON-RPC 2.0 请求，通过 stdin 发送给 ACP 客户端子进程，
+    /// 并阻塞等待对应的响应返回。
+    ///
+    /// # 参数
+    ///
+    /// - `method`: 要调用的远程方法名
+    /// - `params`: 方法参数，以 JSON Value 形式传递
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(serde_json::Value)`: 请求成功时的返回值
+    /// - `Err(ProviderError::AdapterError)`: 请求失败，可能原因包括序列化失败、
+    ///   发送失败、超时、响应通道关闭、服务端返回错误等
+    ///
+    /// # 错误
+    ///
+    /// - 请求序列化失败
+    /// - stdin 写入失败
+    /// - 等待响应超时（由 `request_timeout_secs` 控制）
+    /// - 响应通道关闭（通常因为子进程退出）
+    /// - 服务端返回 JSON-RPC 错误
+    /// - 响应中缺少 result 字段
+    ///
+    /// # 并发安全
+    ///
+    /// stdin 写入通过 Mutex 保证原子性，多个请求可并发发送，
+    /// 每个请求通过唯一的 `id` 关联其响应。
     pub async fn send_request(
         &self,
         method: &str,
@@ -325,6 +519,14 @@ impl AcpSessionRuntime {
     }
 
     /// 获取会话信息
+    ///
+    /// 返回当前会话的元数据快照，包括 ID、状态和时间信息。
+    ///
+    /// # 返回值
+    ///
+    /// 返回 [`AcpSession`] 结构体，包含会话的当前信息。
+    /// 注意：`model_id` 字段当前返回空字符串，
+    /// `created_at` 和 `last_activity_at` 返回当前时间。
     pub async fn get_session(&self) -> AcpSession {
         let state = self.state.lock().await.clone();
         AcpSession {
@@ -338,16 +540,40 @@ impl AcpSessionRuntime {
     }
 
     /// 获取会话状态
+    ///
+    /// 返回当前会话的生命周期状态。
+    ///
+    /// # 返回值
+    ///
+    /// 返回 [`AcpSessionState`] 枚举值
     pub async fn get_state(&self) -> AcpSessionState {
         self.state.lock().await.clone()
     }
 
     /// 订阅事件流
+    ///
+    /// 创建一个新的事件接收器，用于接收 Provider 运行时事件。
+    /// 多个订阅者可以同时接收相同的事件。
+    ///
+    /// # 返回值
+    ///
+    /// 返回 `broadcast::Receiver<ProviderRuntimeEvent>`，用于异步接收事件
     pub fn subscribe_events(&self) -> broadcast::Receiver<ProviderRuntimeEvent> {
         self.event_tx.subscribe()
     }
 
     /// 关闭会话
+    ///
+    /// 将会话状态更新为 `Completed`，并向子进程发送 SIGKILL 信号终止其运行。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 关闭成功
+    /// - `Err(ProviderError::AdapterError)`: 关闭失败（通常不会发生）
+    ///
+    /// # 注意
+    ///
+    /// 此方法会强制终止子进程（SIGKILL），不会等待子进程优雅退出。
     pub async fn shutdown(&self) -> ProviderResult<()> {
         info!(session_id = %self.session_id, "关闭 ACP 会话");
 

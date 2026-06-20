@@ -1,3 +1,8 @@
+/**
+ * @file SidebarCommandGrid.tsx
+ * @description 侧边栏命令网格组件，以卡片式网格展示快捷操作入口
+ *              （如新建聊天、历史记录、插件浏览等），支持导航和激活状态高亮。
+ */
 import { type FC, useCallback } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { BookIcon, ClockIcon, PlugIcon } from "../lib/icons";

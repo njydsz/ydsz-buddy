@@ -37,6 +37,7 @@ import type {
 } from "./baseSchemas";
 import type { ProviderKind } from "./orchestration";
 
+/** 任意键值对记录类型，用于表示不确定结构的对象数据 */
 type UnknownRecord = Record<string, unknown>;
 
 /** 运行时事件原始来源，标识事件来自哪个 Provider 的哪种通信渠道 */
@@ -138,7 +139,12 @@ export const TOOL_LIFECYCLE_ITEM_TYPES = [
 /** 工具生命周期项目类型 */
 export type ToolLifecycleItemType = (typeof TOOL_LIFECYCLE_ITEM_TYPES)[number];
 
-/** 判断是否为工具生命周期项目类型 */
+/**
+ * 判断是否为工具生命周期项目类型
+ *
+ * @param value - 待判断的字符串值
+ * @returns 如果值是合法的 ToolLifecycleItemType 返回 true，否则返回 false
+ */
 export function isToolLifecycleItemType(value: string): value is ToolLifecycleItemType {
   return TOOL_LIFECYCLE_ITEM_TYPES.includes(value as ToolLifecycleItemType);
 }
@@ -781,53 +787,101 @@ export interface RuntimeErrorPayload {
   detail?: unknown;
 }
 
-// 事件类型定义
+// ── 事件类型别名定义 ──────────────────────────────────────────────────
+
+/** 会话启动事件类型标识 */
 type SessionStartedType = "session.started";
+/** 会话配置事件类型标识 */
 type SessionConfiguredType = "session.configured";
+/** 会话状态变化事件类型标识 */
 type SessionStateChangedType = "session.state.changed";
+/** 会话退出事件类型标识 */
 type SessionExitedType = "session.exited";
+/** 线程启动事件类型标识 */
 type ThreadStartedType = "thread.started";
+/** 线程状态变化事件类型标识 */
 type ThreadStateChangedType = "thread.state.changed";
+/** 线程元数据更新事件类型标识 */
 type ThreadMetadataUpdatedType = "thread.metadata.updated";
+/** 线程 Token 使用量更新事件类型标识 */
 type ThreadTokenUsageUpdatedType = "thread.token-usage.updated";
+/** 线程实时会话启动事件类型标识 */
 type ThreadRealtimeStartedType = "thread.realtime.started";
+/** 线程实时会话新增项目事件类型标识 */
 type ThreadRealtimeItemAddedType = "thread.realtime.item-added";
+/** 线程实时会话音频增量事件类型标识 */
 type ThreadRealtimeAudioDeltaType = "thread.realtime.audio.delta";
+/** 线程实时会话错误事件类型标识 */
 type ThreadRealtimeErrorType = "thread.realtime.error";
+/** 线程实时会话关闭事件类型标识 */
 type ThreadRealtimeClosedType = "thread.realtime.closed";
+/** 轮次启动事件类型标识 */
 type TurnStartedType = "turn.started";
+/** 轮次完成事件类型标识 */
 type TurnCompletedType = "turn.completed";
+/** 轮次中止事件类型标识 */
 type TurnAbortedType = "turn.aborted";
+/** 轮次任务更新事件类型标识 */
 type TurnTasksUpdatedType = "turn.tasks.updated";
+/** 轮次提议增量事件类型标识 */
 type TurnProposedDeltaType = "turn.proposed.delta";
+/** 轮次提议完成事件类型标识 */
 type TurnProposedCompletedType = "turn.proposed.completed";
+/** 轮次差异更新事件类型标识 */
 type TurnDiffUpdatedType = "turn.diff.updated";
+/** 项目启动事件类型标识 */
 type ItemStartedType = "item.started";
+/** 项目更新事件类型标识 */
 type ItemUpdatedType = "item.updated";
+/** 项目完成事件类型标识 */
 type ItemCompletedType = "item.completed";
+/** 内容增量事件类型标识 */
 type ContentDeltaType = "content.delta";
+/** 请求打开事件类型标识 */
 type RequestOpenedType = "request.opened";
+/** 请求解决事件类型标识 */
 type RequestResolvedType = "request.resolved";
+/** 用户输入请求事件类型标识 */
 type UserInputRequestedType = "user-input.requested";
+/** 用户输入解决事件类型标识 */
 type UserInputResolvedType = "user-input.resolved";
+/** 任务启动事件类型标识 */
 type TaskStartedType = "task.started";
+/** 任务进度事件类型标识 */
 type TaskProgressType = "task.progress";
+/** 任务完成事件类型标识 */
 type TaskCompletedType = "task.completed";
+/** 钩子启动事件类型标识 */
 type HookStartedType = "hook.started";
+/** 钩子进度事件类型标识 */
 type HookProgressType = "hook.progress";
+/** 钩子完成事件类型标识 */
 type HookCompletedType = "hook.completed";
+/** 工具进度事件类型标识 */
 type ToolProgressType = "tool.progress";
+/** 工具摘要事件类型标识 */
 type ToolSummaryType = "tool.summary";
+/** 认证状态事件类型标识 */
 type AuthStatusType = "auth.status";
+/** 账户更新事件类型标识 */
 type AccountUpdatedType = "account.updated";
+/** 账户速率限制更新事件类型标识 */
 type AccountRateLimitsUpdatedType = "account.rate-limits.updated";
+/** MCP 状态更新事件类型标识 */
 type McpStatusUpdatedType = "mcp.status.updated";
+/** MCP OAuth 完成事件类型标识 */
 type McpOauthCompletedType = "mcp.oauth.completed";
+/** 模型重路由事件类型标识 */
 type ModelReroutedType = "model.rerouted";
+/** 配置警告事件类型标识 */
 type ConfigWarningType = "config.warning";
+/** 弃用通知事件类型标识 */
 type DeprecationNoticeType = "deprecation.notice";
+/** 文件持久化事件类型标识 */
 type FilesPersistedType = "files.persisted";
+/** 运行时警告事件类型标识 */
 type RuntimeWarningType = "runtime.warning";
+/** 运行时错误事件类型标识 */
 type RuntimeErrorType = "runtime.error";
 
 /** 会话启动事件 */

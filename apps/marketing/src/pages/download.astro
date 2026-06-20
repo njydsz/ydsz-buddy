@@ -1,0 +1,310 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+
+interface Platform {
+  id: string;
+  os: "macOS" | "Windows" | "Linux";
+  arch: "Apple Silicon" | "Intel" | "x86_64" | "ARM64" | "Universal";
+  installer: string;
+  filename: string;
+  size: string;
+  minimum: string;
+}
+
+const platforms: Platform[] = [
+  {
+    id: "macos-arm",
+    os: "macOS",
+    arch: "Apple Silicon",
+    installer: "DMG",
+    filename: "Remi-Code-0.1.0-macOS-arm64.dmg",
+    size: "12.4 MB",
+    minimum: "macOS 12 Monterey",
+  },
+  {
+    id: "macos-x64",
+    os: "macOS",
+    arch: "Intel",
+    installer: "DMG",
+    filename: "Remi-Code-0.1.0-macOS-x64.dmg",
+    size: "12.7 MB",
+    minimum: "macOS 12 Monterey",
+  },
+  {
+    id: "win-x64",
+    os: "Windows",
+    arch: "x86_64",
+    installer: "MSI",
+    filename: "Remi-Code-0.1.0-windows-x64.msi",
+    size: "14.2 MB",
+    minimum: "Windows 10 1809+",
+  },
+  {
+    id: "win-arm",
+    os: "Windows",
+    arch: "ARM64",
+    installer: "MSI",
+    filename: "Remi-Code-0.1.0-windows-arm64.msi",
+    size: "13.9 MB",
+    minimum: "Windows 11 ARM",
+  },
+  {
+    id: "linux-deb",
+    os: "Linux",
+    arch: "x86_64",
+    installer: ".deb",
+    filename: "remi-code_0.1.0_amd64.deb",
+    size: "13.1 MB",
+    minimum: "Ubuntu 22.04 / Debian 12",
+  },
+  {
+    id: "linux-rpm",
+    os: "Linux",
+    arch: "x86_64",
+    installer: ".rpm",
+    filename: "remi-code-0.1.0.x86_64.rpm",
+    size: "13.3 MB",
+    minimum: "Fedora 39 / RHEL 9",
+  },
+  {
+    id: "linux-appimage",
+    os: "Linux",
+    arch: "Universal",
+    installer: "AppImage",
+    filename: "Remi-Code-0.1.0-x86_64.AppImage",
+    size: "15.0 MB",
+    minimum: "glibc 2.31+",
+  },
+];
+
+const installCommands: Record<string, { cmd: string; note?: string }> = {
+  Homebrew: {
+    cmd: "brew install --cask remi-code",
+    note: "Tap: remi-code/homebrew-tap",
+  },
+  Winget: {
+    cmd: "winget install --id RemiCode.RemiCode",
+  },
+  "Debian / Ubuntu": {
+    cmd: "sudo dpkg -i remi-code_0.1.0_amd64.deb && sudo apt -f install",
+  },
+  "Fedora / RHEL": {
+    cmd: "sudo dnf install ./remi-code-0.1.0.x86_64.rpm",
+  },
+  AppImage: {
+    cmd: "chmod +x Remi-Code-0.1.0-x86_64.AppImage && ./Remi-Code-0.1.0-x86_64.AppImage",
+  },
+};
+---
+
+<BaseLayout
+  title="Download"
+  description="Download Remi Code for macOS, Windows, and Linux. Native installers, AppImage, and Homebrew / Winget / apt / dnf."
+>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow">Download</span>
+        <h1>Get Remi Code on your platform.</h1>
+        <p>
+          Pick a native installer, or grab Remi Code from your favourite
+          package manager. Auto-updates are on by default for everyone.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section download-section">
+    <div class="container">
+      <div class="download-grid">
+        {
+          platforms.map((p) => (
+            <article class="download-card" id={p.id}>
+              <header>
+                <span class="os-badge">{p.os}</span>
+                <h3>{p.arch}</h3>
+              </header>
+              <dl>
+                <div>
+                  <dt>Installer</dt>
+                  <dd>{p.installer}</dd>
+                </div>
+                <div>
+                  <dt>File</dt>
+                  <dd class="filename">{p.filename}</dd>
+                </div>
+                <div>
+                  <dt>Size</dt>
+                  <dd>{p.size}</dd>
+                </div>
+                <div>
+                  <dt>Minimum</dt>
+                  <dd>{p.minimum}</dd>
+                </div>
+              </dl>
+              <a
+                class="btn btn-primary"
+                href={`https://github.com/remi-code/remi-code/releases/latest/download/${p.filename}`}
+                rel="noopener"
+              >
+                Download {p.installer}
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow">Package managers</span>
+        <h2>One-line install, auto-updated.</h2>
+        <p>
+          Use the package manager you already trust. Remi Code ships official
+          packages for Homebrew, Winget, apt and dnf, and an AppImage for the
+          long tail of Linux distributions.
+        </p>
+      </div>
+      <div class="install-grid">
+        {
+          Object.entries(installCommands).map(([name, info]) => (
+            <article class="install-card">
+              <h3>{name}</h3>
+              <pre><code>{info.cmd}</code></pre>
+              {info.note && <p class="muted small">{info.note}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="verify-card">
+        <h2>Verify your download</h2>
+        <p>
+          Every release is signed and ships with a <code>SHA256SUMS</code> file
+          and a <code>SHA256SUMS.sig</code> minisign signature. Verify with:
+        </p>
+        <pre><code>sha256sum -c SHA256SUMS --ignore-missing
+minisign -V SHA256SUMS.sig -p remi-code-release.pub</code></pre>
+        <p class="muted small">
+          Public key fingerprint: <code>8C9E 1A2B 3C4D 5E6F 7A8B 9C0D 1E2F 3A4B 5C6D 7E8F</code>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 720px;
+  }
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .download-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .download-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .download-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .download-card header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .os-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .download-card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .download-card dl {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+  .download-card dl > div {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .download-card dt {
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .download-card dd {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+  .filename {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    word-break: break-all;
+  }
+  .install-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 700px) {
+    .install-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .install-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+  .install-card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+  }
+  .install-card pre {
+    margin: 0;
+    font-size: 0.82rem;
+  }
+  .verify-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+  }
+  .small {
+    font-size: 0.8rem;
+  }
+</style>

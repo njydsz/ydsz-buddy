@@ -304,20 +304,23 @@ mod tests {
     use super::*;
     use crate::migrations::run_migrations;
     use chrono::Utc;
-    use remi_core::events::{ProjectCreatedEvent, OrchestrationEvent};
+    use remi_core::events::{ProjectCreatedEvent, ThreadCreatedEvent, OrchestrationEvent};
     use remi_core::models::ProjectId;
+
+    /// 辅助函数：创建临时数据库
+    fn make_test_db(test_name: &str) -> (SqliteClient, std::path::PathBuf) {
+        let temp_dir = std::env::temp_dir().join(format!("remi-test-event-store-{}", test_name));
+        let _ = std::fs::remove_dir_all(&temp_dir);
+        let db_path = temp_dir.join("test.sqlite");
+        let client = SqliteClient::new(&db_path).unwrap();
+        run_migrations(&client).unwrap();
+        (client, temp_dir)
+    }
 
     #[test]
     fn test_event_store() {
-        let temp_dir = std::env::temp_dir().join("remi-test-event-store");
-        let db_path = temp_dir.join("test.sqlite");
+        let (client, temp_dir) = make_test_db("basic");
 
-        // 清理旧数据库
-        let _ = std::fs::remove_dir_all(&temp_dir);
-
-        let client = SqliteClient::new(&db_path).unwrap();
-        run_migrations(&client).unwrap();
-        
         let store = SqliteEventStore::new(client);
 
         // 创建测试事件
@@ -344,6 +347,127 @@ mod tests {
         assert_eq!(latest, 1);
 
         // 清理
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_event_store_empty_initial_latest_is_zero() {
+        let (client, temp_dir) = make_test_db("empty");
+        let store = SqliteEventStore::new(client);
+
+        // 空表应返回 0
+        assert_eq!(store.get_latest_sequence().unwrap(), 0);
+        assert!(store.read_events(0, 10).unwrap().is_empty());
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_event_store_sequential_appends() {
+        let (client, temp_dir) = make_test_db("sequential");
+        let store = SqliteEventStore::new(client);
+
+        for i in 0..5 {
+            let ev = OrchestrationEvent::ProjectCreated(ProjectCreatedEvent {
+                sequence: 0,
+                occurred_at: Utc::now(),
+                command_id: None,
+                project_id: ProjectId::new_v4(),
+                title: format!("Project-{}", i),
+                workspace_root: "/tmp".to_string(),
+            });
+            let seq = store.append_event(&ev).unwrap();
+            assert_eq!(seq, (i + 1) as u64);
+        }
+
+        assert_eq!(store.get_latest_sequence().unwrap(), 5);
+        let events = store.read_events(0, 100).unwrap();
+        assert_eq!(events.len(), 5);
+        // 顺序应递增
+        for (i, e) in events.iter().enumerate() {
+            assert_eq!(e.sequence, (i + 1) as u64);
+        }
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_event_store_pagination_from_sequence() {
+        let (client, temp_dir) = make_test_db("pagination");
+        let store = SqliteEventStore::new(client);
+
+        for i in 0..10 {
+            let ev = OrchestrationEvent::ProjectCreated(ProjectCreatedEvent {
+                sequence: 0,
+                occurred_at: Utc::now(),
+                command_id: None,
+                project_id: ProjectId::new_v4(),
+                title: format!("Project-{}", i),
+                workspace_root: "/tmp".to_string(),
+            });
+            store.append_event(&ev).unwrap();
+        }
+
+        // 从序列号 5 之后读取 3 条
+        let page = store.read_events(5, 3).unwrap();
+        assert_eq!(page.len(), 3);
+        assert_eq!(page[0].sequence, 6);
+        assert_eq!(page[2].sequence, 8);
+
+        // 超出范围
+        let empty = store.read_events(10, 5).unwrap();
+        assert!(empty.is_empty());
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_event_store_aggregate_info_extraction() {
+        let (client, temp_dir) = make_test_db("aggregate-info");
+        let store = SqliteEventStore::new(client);
+
+        // 线程事件应归类为 thread 聚合
+        let project_id = ProjectId::new_v4();
+        let thread_id = remi_core::models::ThreadId::new_v4();
+
+        let ev = OrchestrationEvent::ThreadCreated(ThreadCreatedEvent {
+            sequence: 0,
+            occurred_at: Utc::now(),
+            command_id: Some("cmd-x".to_string()),
+            thread_id,
+            project_id,
+            title: "T".to_string(),
+            model_selection: remi_core::provider::ModelSelection {
+                provider: remi_core::provider::ProviderKind::Codex,
+                model: "gpt-5".to_string(),
+                options: None,
+            },
+            runtime_mode: remi_core::models::RuntimeMode::Agent,
+            interaction_mode: remi_core::models::InteractionMode::Chat,
+            env_mode: remi_core::models::EnvMode::Local,
+            branch: None,
+            worktree_path: None,
+            associated_worktree: None,
+            is_pinned: false,
+            parent_thread_id: None,
+            subagent: None,
+            fork_source_thread_id: None,
+            sidechat_source_thread_id: None,
+            last_known_pr: None,
+            handoff: None,
+        });
+        let seq = store.append_event(&ev).unwrap();
+
+        let stored = store.read_events(0, 10).unwrap();
+        assert_eq!(stored.len(), 1);
+        let s = &stored[0];
+        assert_eq!(s.sequence, seq);
+        assert_eq!(s.aggregate_kind, "thread");
+        assert_eq!(s.stream_id, thread_id.to_string());
+        assert_eq!(s.event_type, "thread.created");
+        assert_eq!(s.command_id.as_deref(), Some("cmd-x"));
+        assert!(!s.payload_json.is_empty());
+
         let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }

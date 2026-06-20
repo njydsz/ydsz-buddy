@@ -53,6 +53,8 @@ pub mod server;
 pub mod websocket;
 /// 服务引导模块，提供统一的服务容器构造和启动逻辑
 pub mod bootstrap;
+/// 进程内 IPC 桥接模块，供嵌入式 Tauri 等同进程消费者使用
+pub mod ipc;
 
 pub use error::*;
 pub use push_channels::*;
@@ -61,3 +63,4 @@ pub use rpc_methods::*;
 pub use server::*;
 pub use websocket::*;
 pub use bootstrap::*;
+pub use ipc::*;

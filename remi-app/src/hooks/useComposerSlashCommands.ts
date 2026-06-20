@@ -1,6 +1,6 @@
 /**
  * @file useComposerSlashCommands.ts
- * @description 编辑器斜杠命�?Hook - 处理各种斜杠命令的执行逻辑
+ * @description 编辑器斜杠命�?Hook - 处理各种斜杠命令的执行逻辑
  * @module hooks/useComposerSlashCommands
  */
 
@@ -39,14 +39,14 @@ import { buildNextProviderOptions } from "../providerModelOptions";
 import { resolveForkThreadEnvironment } from "../lib/threadEnvironment";
 import { type SplitViewId, useSplitViewStore } from "../splitViewStore";
 
-/** 编辑器快照类�?*/
+/** 编辑器快照类�?*/
 type ComposerSnapshot = {
   value: string;
   cursor: number;
   expandedCursor: number;
 };
 
-/** 斜杠命令项类�?*/
+/** 斜杠命令项类�?*/
 type SlashCommandItem = Extract<ComposerCommandItem, { type: "slash-command" }>;
 
 /**
@@ -57,33 +57,33 @@ function wasPromptReplacementApplied(result: number | false): boolean {
 }
 
 /**
- * 编辑器斜杠命�?Hook
+ * 编辑器斜杠命�?Hook
  *
  * @description
  * 处理编辑器中各种斜杠命令的执行逻辑，包括：
  * - /clear: 清空对话
- * - /compact: 压缩线程上下�? * - /plan /default: 切换交互模式
+ * - /compact: 压缩线程上下�? * - /plan /default: 切换交互模式
  * - /status: 显示状态对话框
- * - /subagents: 子代理管�? * - /review: 代码审查
- * - /fast: 快速模式切�? * - /fork: 线程分叉
+ * - /subagents: 子代理管�? * - /review: 代码审查
+ * - /fast: 快速模式切�? * - /fork: 线程分叉
  * - /side: 侧边聊天
  *
  * @param input - 输入参数对象
  * @param input.activeProject - 当前活动项目
  * @param input.activeThread - 当前活动线程
- * @param input.activeRootBranch - 当前根分�? * @param input.isServerThread - 是否为服务器线程
- * @param input.supportsFastSlashCommand - 是否支持快速命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.supportsTextNativeReviewCommand - 是否支持文本原生审查命令
+ * @param input.activeRootBranch - 当前根分�? * @param input.isServerThread - 是否为服务器线程
+ * @param input.supportsFastSlashCommand - 是否支持快速命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.supportsTextNativeReviewCommand - 是否支持文本原生审查命令
  * @param input.fastModeEnabled - 快速模式是否已启用
- * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerCommandDiscoveryCwd - 命令发现工作目录
+ * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerCommandDiscoveryCwd - 命令发现工作目录
  * @param input.selectedProvider - 当前选中的提供商
  * @param input.currentProviderModelOptions - 当前提供商模型选项
- * @param input.selectedModelSelection - 当前选中的模�? * @param input.runtimeMode - 运行时模�? * @param input.interactionMode - 交互模式
+ * @param input.selectedModelSelection - 当前选中的模�? * @param input.runtimeMode - 运行时模�? * @param input.interactionMode - 交互模式
  * @param input.threadId - 线程 ID
- * @param input.syncServerShellSnapshot - 同步服务�?Shell 快照
- * @param input.navigateToThread - 导航到线�? * @param input.handleClearConversation - 清空对话处理
+ * @param input.syncServerShellSnapshot - 同步服务�?Shell 快照
+ * @param input.navigateToThread - 导航到线�? * @param input.handleClearConversation - 清空对话处理
  * @param input.handleInteractionModeChange - 交互模式切换处理
- * @param input.openForkTargetPicker - 打开分叉目标选择�? * @param input.openReviewTargetPicker - 打开审查目标选择�? * @param input.setComposerDraftProviderModelOptions - 设置编辑器草稿提供商模型选项
- * @param input.editorActions - 编辑器操作集�? *
+ * @param input.openForkTargetPicker - 打开分叉目标选择�? * @param input.openReviewTargetPicker - 打开审查目标选择�? * @param input.setComposerDraftProviderModelOptions - 设置编辑器草稿提供商模型选项
+ * @param input.editorActions - 编辑器操作集�? *
  * @returns 斜杠命令处理相关的状态和方法
  *
  * @example
@@ -172,7 +172,7 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 获取当前可用的内置斜杠命令列�?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  // 获取当前可用的内置斜杠命令列�?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -183,7 +183,7 @@ export function useComposerSlashCommands(input: {
   });
 
   /**
-   * 压缩当前提供商线程的上下�?   * 仅在服务器线程且会话未关闭时可用
+   * 压缩当前提供商线程的上下�?   * 仅在服务器线程且会话未关闭时可用
    */
   const compactProviderThread = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
@@ -230,7 +230,7 @@ export function useComposerSlashCommands(input: {
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
   /**
-   * 从斜杠命令设置快速模�?   * 更新提供商模型选项中的快速模式配�?   */
+   * 从斜杠命令设置快速模�?   * 更新提供商模型选项中的快速模式配�?   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -249,7 +249,7 @@ export function useComposerSlashCommands(input: {
 
   /**
    * 执行 /fast 斜杠命令
-   * 支持 /fast, /fast on, /fast off, /fast status 等语�?   */
+   * 支持 /fast, /fast on, /fast off, /fast status 等语�?   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -291,7 +291,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建分叉线�?   * 复制当前线程的消息并创建新线�?   */
+   * 从斜杠命令创建分叉线�?   * 复制当前线程的消息并创建新线�?   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -353,7 +353,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建侧边聊天线�?   * 在当前线程旁边打开一个新的聊天窗�?   */
+   * 从斜杠命令创建侧边聊天线�?   * 在当前线程旁边打开一个新的聊天窗�?   */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
       const api = readNativeApi();
@@ -440,7 +440,7 @@ export function useComposerSlashCommands(input: {
 
   /**
    * 启动 Codex 审查流程
-   * @param target - 审查目标：changes（当前更改）�?base-branch（基础分支�?   */
+   * @param target - 审查目标：changes（当前更改）�?base-branch（基础分支�?   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();
@@ -546,6 +546,16 @@ export function useComposerSlashCommands(input: {
     ],
   );
 
+  /**
+   * 处理审查目标选择
+   *
+   * @description
+   * 根据选中的审查目标和当前提供商类型，执行不同的审查流程：
+   * - Codex 提供商：直接启动原生审查
+   * - 其他提供商：将审查提示词插入编辑器
+   *
+   * @param target - 审查目标类型："changes"（当前更改）或 "base-branch"（基础分支）
+   */
   const handleReviewTargetSelection = useCallback(
     async (target: "changes" | "base-branch") => {
       if (selectedProvider === "codex") {
@@ -559,6 +569,15 @@ export function useComposerSlashCommands(input: {
     [editorActions, selectedProvider, runCodexReviewStart],
   );
 
+  /**
+   * 处理分叉目标选择
+   *
+   * @description
+   * 根据用户选择的分叉目标（本地或工作树），创建分叉线程。
+   * 失败时显示错误通知。
+   *
+   * @param target - 分叉目标类型："local"（本地）或 "worktree"（工作树）
+   */
   const handleForkTargetSelection = useCallback(
     async (target: ForkSlashCommandTarget) => {
       try {
@@ -577,6 +596,15 @@ export function useComposerSlashCommands(input: {
     [createForkThreadFromSlashCommand],
   );
 
+  /**
+   * 检查 Claude 提供商的 /fast 斜杠命令可用性
+   *
+   * @description
+   * 通过 Claude 命令发现接口查询当前账户/环境是否支持 /fast 命令。
+   * 如果不可用，清除编辑器草稿并显示提示通知。
+   *
+   * @returns 是否支持 /fast 命令
+   */
   const checkClaudeFastSlashCommandAvailability = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
     if (!api || !providerCommandDiscoveryCwd) {
@@ -624,6 +652,25 @@ export function useComposerSlashCommands(input: {
     return false;
   }, [editorActions, providerCommandDiscoveryCwd, threadId]);
 
+  /**
+   * 处理独立斜杠命令输入
+   *
+   * @description
+   * 当用户在编辑器中直接输入完整的斜杠命令（如 "/clear"、"/compact"）时触发。
+   * 解析命令文本并执行对应的操作，包括：
+   * - /clear: 清空对话
+   * - /compact: 压缩上下文
+   * - /plan /default: 切换交互模式
+   * - /status: 打开状态对话框
+   * - /subagents: 插入子代理提示词
+   * - /review: 启动代码审查
+   * - /fast: 切换快速模式
+   * - /fork: 创建分叉线程
+   * - /side: 创建侧边聊天
+   *
+   * @param trimmed - 去除首尾空格后的命令文本
+   * @returns 是否成功处理了该命令（true 表示已消费，false 表示未识别）
+   */
   const handleStandaloneSlashCommand = useCallback(
     async (trimmed: string): Promise<boolean> => {
       const fastSlashAction = parseFastSlashCommandAction(trimmed);
@@ -771,6 +818,19 @@ export function useComposerSlashCommands(input: {
     ],
   );
 
+  /**
+   * 处理斜杠命令菜单选择
+   *
+   * @description
+   * 当用户从命令菜单中选择一个斜杠命令项时触发。
+   * 根据命令类型执行不同的编辑器操作：
+   * - /model: 在编辑器中插入 "/model " 并保留菜单
+   * - /clear, /compact, /plan, /default, /status, /fast: 清除命令文本并执行对应操作
+   * - /subagents, /review: 在编辑器中插入对应的提示词
+   * - /fork, /side: 清除命令文本并打开目标选择器或执行操作
+   *
+   * @param item - 用户选中的斜杠命令菜单项
+   */
   const handleSlashCommandSelection = useCallback(
     (item: SlashCommandItem) => {
       const { snapshot, trigger } = editorActions.resolveActiveComposerTrigger();

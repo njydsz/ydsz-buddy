@@ -1,7 +1,8 @@
-// FILE: ComposerLocalDirectoryMenu.tsx
-// Purpose: Render the inline composer popup used for browsing local files and folders after `@local`.
-// Layer: Chat composer UI
-// Depends on: the same Command primitives used by ComposerCommandMenu so both pickers share chrome.
+/**
+ * @file ComposerLocalDirectoryMenu
+ * @description 编辑器中 `@local` 触发的本地文件/文件夹浏览弹出菜单，
+ *              支持目录导航、模糊搜索和键盘操作，与 ComposerCommandMenu 共享命令面板 UI 原语。
+ */
 
 import type { ProjectFileSystemEntry, ProjectLocalSearchEntry } from "~/contracts";
 import type { Ref } from "react";
@@ -31,27 +32,48 @@ import {
   CommandSeparator,
 } from "../ui/command";
 
+/** 按路径分组的文件系统条目映射 */
 type EntriesByPath = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 
-// Delay search requests until the user stops typing �?keeps chat input smooth
-// because every keystroke reshapes mentionQuery in the parent.
+/** 本地搜索的防抖延迟（毫秒），避免每次击键都发起搜索请求 */
 const LOCAL_SEARCH_DEBOUNCE_MS = 220;
+/** 触发模糊搜索的最小查询长度 */
 const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
 
+/**
+ * ComposerLocalDirectoryMenu 的命令式句柄接口，
+ * 提供键盘导航所需的高亮移动和激活方法。
+ */
 export interface ComposerLocalDirectoryMenuHandle {
+  /** 将高亮位置向上或向下移动一行 */
   moveHighlight: (direction: "up" | "down") => void;
+  /** 激活当前高亮的行，返回是否成功激活 */
   activateHighlighted: () => boolean;
 }
 
+/** 菜单中可见行的类型，区分当前目录、本地条目和搜索结果 */
 type VisibleRow =
   | { kind: "use-current"; separator: "/" | "\\" }
   | { kind: "entry"; entry: ProjectFileSystemEntry }
   | { kind: "search"; entry: ProjectLocalSearchEntry };
 
+/**
+ * 检测路径使用的分隔符类型。
+ *
+ * @param value - 待检测的路径
+ * @returns 路径分隔符 "/" 或 "\\"
+ */
 function detectPathSeparator(value: string): "/" | "\\" {
   return value.includes("\\") ? "\\" : "/";
 }
 
+/**
+ * 将目录路径和子名称拼接为完整路径。
+ *
+ * @param directoryPath - 父目录路径
+ * @param childName - 子项名称
+ * @returns 拼接后的完整路径
+ */
 function joinDirectoryPath(directoryPath: string, childName: string): string {
   if (!childName) return directoryPath;
   const separator = detectPathSeparator(directoryPath);
@@ -59,10 +81,23 @@ function joinDirectoryPath(directoryPath: string, childName: string): string {
   return `${directoryPath}${needsSeparator ? separator : ""}${childName}`;
 }
 
+/**
+ * 判断路径是否为 tilde 根目录（~/ 或 ~\）。
+ *
+ * @param directoryPath - 待判断的路径
+ * @returns 是否为 tilde 根目录
+ */
 function isTildeRoot(directoryPath: string): boolean {
   return directoryPath === "~/" || directoryPath === "~\\";
 }
 
+/**
+ * 获取目录的父目录路径。
+ * 处理 Unix 根目录、Windows 驱动器根目录和 tilde 根目录等边界情况。
+ *
+ * @param directoryPath - 目录路径
+ * @returns 父目录路径，若已是根目录则返回 null
+ */
 function parentDirectory(directoryPath: string): string | null {
   if (!directoryPath) return null;
   if (directoryPath === "/") return null;
@@ -503,14 +538,14 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
         </div>
         {isAwaitingHomeDir ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Waiting for home directory from server�?          </p>
+            Waiting for home directory from server�?          </p>
         ) : isLoading && visibleCount === 0 ? (
-          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files�?/p>
+          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files�?/p>
         ) : errorMessage ? (
           <p className="px-2 py-1.5 text-destructive/80 text-[11px]">{errorMessage}</p>
         ) : isSearchPending ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Searching nested files�?          </p>
+            Searching nested files�?          </p>
         ) : visibleCount === 0 ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
             {filter.trim().length > 0 ? "No matches." : "No files or folders here."}

@@ -1,7 +1,8 @@
-// FILE: ProjectPicker.tsx
-// Purpose: Folder selector beneath the new-chat composer that groups active folders and home
-//          folders while always creating chats as rows inside the shared Chats container.
-// Layer: Chat / empty-state entrypoint
+/**
+ * @file ProjectPicker
+ * @description 新聊天编辑器下方的项目文件夹选择器，将活跃文件夹和主目录文件夹分组展示，
+ *              始终在共享的 Chats 容器中创建聊天行。
+ */
 
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { type ProjectDirectoryEntry } from "~/contracts";
@@ -26,21 +27,38 @@ import {
 } from "../ui/combobox";
 import { useWorkspaceStore } from "../../workspaceStore";
 
+/** ProjectPicker 组件的属性接口 */
 interface ProjectPickerProps {
+  /** 弹出面板的对齐方式 */
   align?: "start" | "center" | "end";
+  /** 弹出面板的放置方向 */
   side?: "top" | "bottom";
+  /** 是否显示"重置为主目录"按钮 */
   showResetToHome?: boolean;
+  /** 当前选中的工作区根路径 */
   selectedWorkspaceRoot?: string | null;
+  /** 选择工作区根路径的回调 */
   onSelectWorkspaceRoot?: ((workspaceRoot: string) => void) | undefined;
+  /** 重置为主目录的回调 */
   onResetToHome?: (() => void) | undefined;
 }
 
+/** 活跃文件夹选项，包含路径和显示标签 */
 interface ActiveFolderOption {
+  /** 文件夹的绝对路径 */
   cwd: string;
+  /** 主显示标签（项目名称或文件夹名） */
   primaryLabel: string;
+  /** 副显示标签（文件夹名，当与主标签不同时显示） */
   secondaryLabel: string | null;
 }
 
+/**
+ * 提取路径的最后一部分作为文件名。
+ *
+ * @param value - 文件路径
+ * @returns 路径的基准名称，若路径为空则返回 null
+ */
 function basenameOfPath(value: string | null | undefined): string | null {
   if (!value) return null;
   const normalized = value.replace(/[\\/]+$/, "");
@@ -49,10 +67,23 @@ function basenameOfPath(value: string | null | undefined): string | null {
   return basename.length > 0 ? basename : null;
 }
 
+/**
+ * 构建目录条目的搜索用文本，将名称和路径拼接为小写字符串。
+ *
+ * @param entry - 项目目录条目
+ * @returns 用于搜索匹配的小写字符串
+ */
 function directorySearchHaystack(entry: ProjectDirectoryEntry): string {
   return [entry.name, entry.path].join(" ").toLowerCase();
 }
 
+/**
+ * 将根路径和相对路径拼接为完整的目录路径，自动检测路径分隔符。
+ *
+ * @param rootPath - 根路径
+ * @param relativePath - 相对路径
+ * @returns 拼接后的完整路径
+ */
 function joinDirectoryPath(rootPath: string, relativePath: string): string {
   if (!relativePath) return rootPath;
   const separator = rootPath.includes("\\") ? "\\" : "/";
@@ -61,6 +92,17 @@ function joinDirectoryPath(rootPath: string, relativePath: string): string {
   return `${normalizedRoot}${separator}${normalizedRelative}`;
 }
 
+/**
+ * 项目文件夹选择器组件。
+ * 以组合框形式展示活跃文件夹和主目录下的文件夹，支持搜索过滤和添加新项目。
+ *
+ * @param props.align - 弹出面板的对齐方式
+ * @param props.side - 弹出面板的放置方向
+ * @param props.showResetToHome - 是否显示重置为主目录按钮
+ * @param props.selectedWorkspaceRoot - 当前选中的工作区根路径
+ * @param props.onSelectWorkspaceRoot - 选择工作区根路径的回调
+ * @param props.onResetToHome - 重置为主目录的回调
+ */
 export const ProjectPicker = memo(function ProjectPicker({
   align = "start",
   side = "bottom",
@@ -299,7 +341,7 @@ export const ProjectPicker = memo(function ProjectPicker({
               >
                 <PlusIcon className="size-3.5 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">
-                  {isPicking ? "Opening folder picker�? : "Add new project"}
+                  {isPicking ? "Opening folder picker�? : "Add new project"}
                 </span>
               </button>
               {showResetToHome ? (
@@ -323,7 +365,7 @@ export const ProjectPicker = memo(function ProjectPicker({
         >
           <ComboboxEmpty>
             {isLoadingDirectories
-              ? "Loading folders�?
+              ? "Loading folders�?
               : activeFolderOptions.length === 0 && macFolderOptions.length === 0
                 ? "No folders found"
                 : "No matches"}

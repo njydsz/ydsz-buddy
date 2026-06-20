@@ -1,7 +1,8 @@
-// FILE: GitActionsControl.tsx
-// Purpose: Render the chat-header git action control, commit dialog, and action toasts.
-// Layer: Header action control
-// Depends on: git React Query hooks, native shell bridges, and shared picker/menu primitives.
+/**
+ * @file GitActionsControl.tsx
+ * @description 聊天头部 Git 操作控件，包含提交对话框、推送/PR 操作和进度提示，
+ *              整合 Git React Query 挂钩和原生 Shell 桥接。
+ */
 
 import type {
   GitActionProgressEvent,
@@ -525,14 +526,14 @@ export default function GitActionsControl({
           progress.lastOutputLine = null;
           break;
         case "action_finished":
-          // Don't clear timestamps here �?the HTTP response handler (line 496)
+          // Don't clear timestamps here �?the HTTP response handler (line 496)
           // sets activeGitActionProgressRef to null and shows the success toast.
           // Clearing timestamps early causes the "Running for Xs" description
           // to disappear before the success state renders, leaving a bare
           // "Pushing..." toast in the gap between the WS event and HTTP response.
           return;
         case "action_failed":
-          // Same reasoning as action_finished �?let the HTTP error handler
+          // Same reasoning as action_finished �?let the HTTP error handler
           // manage the final toast state to avoid a flash of bare title.
           return;
       }

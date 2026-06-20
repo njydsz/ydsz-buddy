@@ -50,6 +50,7 @@ use tracing::{debug, info, warn};
 /// 在 `lib.rs` 中通过 `.manage(BrowserState::new())` 注入，
 /// 各命令通过 `State<'_, BrowserState>` 参数获取该状态。
 pub struct BrowserState {
+    /// 浏览器标签页集合（键为标签页 ID，值为标签页对象）
     tabs: Arc<Mutex<HashMap<String, BrowserTab>>>,
 }
 

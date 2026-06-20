@@ -1,3 +1,9 @@
+/**
+ * @file ComposerPendingUserInputPanel
+ * @description 编辑器中待处理用户输入的面板组件，用于展示计划确认问题、
+ *              选项列表和快捷键选择，支持单选和多选模式及自动推进。
+ */
+
 import { type ApprovalRequestId } from "~/contracts";
 import { memo, useEffect, useEffectEvent, useRef } from "react";
 import { type PendingUserInput } from "../../session-logic";
@@ -8,16 +14,34 @@ import {
 import { CheckIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
+/** ComposerPendingUserInputPanel 组件的属性接口 */
 interface PendingUserInputPanelProps {
+  /** 待处理的用户输入列表 */
   pendingUserInputs: PendingUserInput[];
+  /** 正在响应的审批请求 ID 列表 */
   respondingRequestIds: ApprovalRequestId[];
+  /** 各问题的草稿答案映射 */
   answers: Record<string, PendingUserInputDraftAnswer>;
+  /** 当前活跃问题的索引 */
   questionIndex: number;
+  /** 切换选项选中状态的回调 */
   onToggleOption: (questionId: string, optionLabel: string) => PendingUserInputDraftAnswer | null;
+  /** 推进到下一个问题的回调 */
   onAdvance: (answerOverrides?: Record<string, PendingUserInputDraftAnswer>) => void;
 }
 
-// Keep pending-input choices neutral so they read like Codex list controls instead of accent buttons.
+/**
+ * 待处理用户输入面板组件。
+ * 展示当前待确认的计划问题，提供选项列表和快捷键操作，
+ * 单选模式下选中后自动推进，多选模式下需手动提交。
+ *
+ * @param props.pendingUserInputs - 待处理的用户输入列表
+ * @param props.respondingRequestIds - 正在响应的请求 ID
+ * @param props.answers - 草稿答案映射
+ * @param props.questionIndex - 当前问题索引
+ * @param props.onToggleOption - 切换选项回调
+ * @param props.onAdvance - 推进回调
+ */
 export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserInputPanel({
   pendingUserInputs,
   respondingRequestIds,
@@ -43,6 +67,10 @@ export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserIn
   );
 });
 
+/**
+ * 待处理用户输入卡片组件。
+ * 渲染单个待确认问题的选项列表，支持键盘快捷键和自动推进逻辑。
+ */
 const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard({
   prompt,
   isResponding,
@@ -67,7 +95,7 @@ const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard(
   }, [onAdvance]);
 
   // Cancel a pending auto-advance on unmount, and whenever the active question
-  // changes or a response goes in flight �?otherwise a manual Next/Submit landing
+  // changes or a response goes in flight �?otherwise a manual Next/Submit landing
   // inside the 200ms window leaves a stale timer that advances or submits again.
   useEffect(() => {
     return () => {

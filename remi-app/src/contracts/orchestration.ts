@@ -1943,23 +1943,37 @@ export interface ThreadActivityAppendedPayload {
 
 /** 编排事件元数据，包含 Provider 关联信息和适配器上下文 */
 export interface OrchestrationEventMetadata {
+  /** Provider 轮次 ID，用于关联 Provider 层的轮次 */
   providerTurnId?: TrimmedNonEmptyString;
+  /** Provider 项目 ID，用于关联 Provider 层的项目 */
   providerItemId?: ProviderItemId;
+  /** 适配器键名，标识处理该事件的适配器 */
   adapterKey?: TrimmedNonEmptyString;
+  /** 请求 ID，用于关联审批请求 */
   requestId?: ApprovalRequestId;
+  /** 事件摄入时间，记录事件被系统接收的时间 */
   ingestedAt?: IsoDateTime;
 }
 
 /** 事件基础字段，所有编排事件的公共属性 */
 interface EventBaseFields {
+  /** 事件序列号（单调递增） */
   sequence: NonNegativeInt;
+  /** 事件唯一标识 */
   eventId: EventId;
+  /** 聚合根类型（项目或线程） */
   aggregateKind: OrchestrationAggregateKind;
+  /** 聚合根 ID（项目 ID 或线程 ID） */
   aggregateId: ProjectId | ThreadId;
+  /** 事件发生时间 */
   occurredAt: IsoDateTime;
+  /** 触发该事件的命令 ID，非命令触发时为 null */
   commandId: CommandId | null;
+  /** 因果事件 ID，无因果关系时为 null */
   causationEventId: EventId | null;
+  /** 关联命令 ID，用于追踪请求-响应链，无关联时为 null */
   correlationId: CommandId | null;
+  /** 事件元数据 */
   metadata: OrchestrationEventMetadata;
 }
 
@@ -2071,13 +2085,21 @@ export type ProjectionThreadTurnStatus = "running" | "completed" | "interrupted"
 
 /** 投影检查点行，用于持久化存储检查点信息 */
 export interface ProjectionCheckpointRow {
+  /** 线程 ID */
   threadId: ThreadId;
+  /** 轮次 ID */
   turnId: TurnId;
+  /** 检查点轮次计数 */
   checkpointTurnCount: NonNegativeInt;
+  /** 检查点引用标识 */
   checkpointRef: CheckpointRef;
+  /** 检查点状态 */
   status: OrchestrationCheckpointStatus;
+  /** 检查点文件列表 */
   files: Array<OrchestrationCheckpointFile>;
+  /** 关联的助手消息 ID，无关联时为 null */
   assistantMessageId: MessageId | null;
+  /** 检查点完成时间 */
   completedAt: IsoDateTime;
 }
 
@@ -2088,6 +2110,7 @@ export type ProjectionPendingApprovalDecision = ProviderApprovalDecision | null;
 
 /** 命令分发结果，返回事件序列号 */
 export interface DispatchResult {
+  /** 分发后的事件序列号 */
   sequence: NonNegativeInt;
 }
 

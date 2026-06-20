@@ -235,6 +235,21 @@ impl RpcRouter {
         let methods = self.methods.read().await;
         methods.keys().cloned().collect()
     }
+
+    /// 派发一个 RPC 调用并返回结果 JSON 值（不关心 ID）
+    ///
+    /// 与 `handle_request` 不同，`dispatch` 直接调用处理器并返回 `Ok(result)` 或 `Err(message)`，
+    /// 适合进程内 IPC 桥接使用。
+    pub async fn dispatch(&self, method: &str, params: Option<Value>) -> Result<Value, String> {
+        let methods = self.methods.read().await;
+        match methods.get(method) {
+            Some(handler) => handler
+                .handle(params)
+                .await
+                .map_err(|e| format!("RPC method failed: {e}")),
+            None => Err(format!("Method not found: {method}")),
+        }
+    }
 }
 
 impl Default for RpcRouter {

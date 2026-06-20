@@ -64,6 +64,21 @@ pub mod claude;
 /// Codex Provider 适配器实现
 pub mod codex;
 
+/// Codex App Server 进程管理
+pub mod codex_app_server_manager;
+
+/// Codex 错误分类
+pub mod codex_error_classification;
+
+/// Codex 生成图片管理
+pub mod codex_generated_images;
+
+/// Codex 家目录路径解析
+pub mod codex_home_paths;
+
+/// Codex 进程环境变量管理
+pub mod codex_process_env;
+
 /// Cursor Provider 适配器实现
 pub mod cursor;
 

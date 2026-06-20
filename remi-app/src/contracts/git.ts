@@ -73,34 +73,51 @@ type GitHandoffThreadMode = "local" | "worktree";
 
 /** Git 分支信息结构 */
 export interface GitBranch {
+  /** 分支名称 */
   name: TrimmedNonEmptyString;
+  /** 是否为远程分支 */
   isRemote?: boolean;
+  /** 远程名称（如 origin） */
   remoteName?: TrimmedNonEmptyString;
+  /** 是否为当前分支 */
   current: boolean;
+  /** 是否为默认分支 */
   isDefault: boolean;
+  /** 关联的工作树路径，无关联时为 null */
   worktreePath: TrimmedNonEmptyString | null;
 }
 
 /** Git 工作树结构：包含路径和分支信息 */
 interface GitWorktree {
+  /** 工作树路径 */
   path: TrimmedNonEmptyString;
+  /** 工作树关联的分支名称 */
   branch: TrimmedNonEmptyString;
 }
 
 /** Git 分离工作树结构：包含路径、引用和可选分支 */
 interface GitDetachedWorktree {
+  /** 工作树路径 */
   path: TrimmedNonEmptyString;
+  /** 工作树检出的引用（如 commit SHA 或 tag） */
   ref: TrimmedNonEmptyString;
+  /** 关联的分支名称，无关联时为 null */
   branch: TrimmedNonEmptyString | null;
 }
 
 /** Git 已解析的 Pull Request 结构：包含 PR 的完整信息 */
 export interface GitResolvedPullRequest {
+  /** PR 编号 */
   number: PositiveInt;
+  /** PR 标题 */
   title: TrimmedNonEmptyString;
+  /** PR 页面 URL */
   url: string;
+  /** 目标基础分支 */
   baseBranch: TrimmedNonEmptyString;
+  /** 源头部分支 */
   headBranch: TrimmedNonEmptyString;
+  /** PR 状态 */
   state: GitPullRequestState;
 }
 
@@ -251,69 +268,104 @@ export interface GitInitInput {
 
 /** Git 状态中的 PR 信息结构 */
 interface GitStatusPr {
+  /** PR 编号 */
   number: PositiveInt;
+  /** PR 标题 */
   title: TrimmedNonEmptyString;
+  /** PR 页面 URL */
   url: string;
+  /** 目标基础分支 */
   baseBranch: TrimmedNonEmptyString;
+  /** 源头部分支 */
   headBranch: TrimmedNonEmptyString;
+  /** PR 状态 */
   state: GitStatusPrState;
 }
 
 /** Git 工作树文件变更信息 */
 interface GitWorkingTreeFile {
+  /** 文件路径 */
   path: TrimmedNonEmptyString;
+  /** 新增行数 */
   insertions: NonNegativeInt;
+  /** 删除行数 */
   deletions: NonNegativeInt;
 }
 
 /** Git 工作树变更信息 */
 interface GitWorkingTree {
+  /** 变更文件列表 */
   files: GitWorkingTreeFile[];
+  /** 总新增行数 */
   insertions: NonNegativeInt;
+  /** 总删除行数 */
   deletions: NonNegativeInt;
 }
 
 /** Git 状态查询结果：包含分支、工作树变更、远程同步状态和 PR 信息 */
 export interface GitStatusResult {
+  /** 当前分支名称，未初始化仓库时为 null */
   branch: TrimmedNonEmptyString | null;
+  /** 是否有工作树变更 */
   hasWorkingTreeChanges: boolean;
+  /** 工作树变更详情 */
   workingTree: GitWorkingTree;
+  /** 是否有上游分支 */
   hasUpstream: boolean;
+  /** 上游分支名称，无上游时为 null */
   upstreamBranch: TrimmedNonEmptyString | null;
+  /** 领先上游的提交数 */
   aheadCount: NonNegativeInt;
+  /** 落后上游的提交数 */
   behindCount: NonNegativeInt;
+  /** 关联的 PR 信息，无关联时为 null */
   pr: GitStatusPr | null;
 }
 
 /** Git 本地状态结果：仅包含分支和工作树变更信息 */
 export interface GitStatusLocalResult {
+  /** 当前分支名称，未初始化仓库时为 null */
   branch: TrimmedNonEmptyString | null;
+  /** 是否有工作树变更 */
   hasWorkingTreeChanges: boolean;
+  /** 工作树变更详情 */
   workingTree: GitWorkingTree;
 }
 
 /** Git 远程状态结果：包含远程同步和 PR 信息 */
 export interface GitStatusRemoteResult {
+  /** 是否有上游分支 */
   hasUpstream: boolean;
+  /** 上游分支名称，无上游时为 null */
   upstreamBranch: TrimmedNonEmptyString | null;
+  /** 领先上游的提交数 */
   aheadCount: NonNegativeInt;
+  /** 落后上游的提交数 */
   behindCount: NonNegativeInt;
+  /** 关联的 PR 信息，无关联时为 null */
   pr: GitStatusPr | null;
 }
 
 /** Git 状态流事件：用于实时推送状态更新 */
 export type GitStatusStreamEvent =
   | {
+      /** 完整状态快照 */
       _tag: "snapshot";
+      /** 本地状态 */
       local: GitStatusLocalResult;
+      /** 远程状态，未查询时为 null */
       remote: GitStatusRemoteResult | null;
     }
   | {
+      /** 本地状态更新 */
       _tag: "localUpdated";
+      /** 更新后的本地状态 */
       local: GitStatusLocalResult;
     }
   | {
+      /** 远程状态更新 */
       _tag: "remoteUpdated";
+      /** 更新后的远程状态，未查询时为 null */
       remote: GitStatusRemoteResult | null;
     };
 
@@ -419,56 +471,72 @@ export interface GitSummarizeDiffResult {
 
 /** Git 操作进度基础结构：包含操作 ID、工作目录和操作类型 */
 interface GitActionProgressBase {
+  /** 操作唯一标识 */
   actionId: TrimmedNonEmptyString;
+  /** 工作目录 */
   cwd: TrimmedNonEmptyString;
+  /** 堆叠操作类型 */
   action: GitStackedAction;
 }
 
 /** Git 操作开始事件：包含将要执行的阶段列表 */
 interface GitActionStartedEvent extends GitActionProgressBase {
   kind: "action_started";
+  /** 将要执行的阶段列表 */
   phases: GitActionProgressPhase[];
 }
 
 /** Git 操作阶段开始事件：标识某个阶段的开始 */
 interface GitActionPhaseStartedEvent extends GitActionProgressBase {
   kind: "phase_started";
+  /** 当前阶段 */
   phase: GitActionProgressPhase;
+  /** 阶段显示标签 */
   label: TrimmedNonEmptyString;
 }
 
 /** Git 操作钩子开始事件：标识 Git 钩子的开始执行 */
 interface GitActionHookStartedEvent extends GitActionProgressBase {
   kind: "hook_started";
+  /** 钩子名称 */
   hookName: TrimmedNonEmptyString;
 }
 
 /** Git 操作钩子输出事件：捕获钩子的标准输出或错误输出 */
 interface GitActionHookOutputEvent extends GitActionProgressBase {
   kind: "hook_output";
+  /** 钩子名称，无关联钩子时为 null */
   hookName: TrimmedNonEmptyString | null;
+  /** 输出流类型 */
   stream: GitActionProgressStream;
+  /** 输出文本 */
   text: TrimmedNonEmptyString;
 }
 
 /** Git 操作钩子完成事件：标识钩子执行完成及退出状态 */
 interface GitActionHookFinishedEvent extends GitActionProgressBase {
   kind: "hook_finished";
+  /** 钩子名称 */
   hookName: TrimmedNonEmptyString;
+  /** 进程退出码，未正常退出时为 null */
   exitCode: number | null;
+  /** 钩子执行耗时（毫秒），未记录时为 null */
   durationMs: NonNegativeInt | null;
 }
 
 /** Git 操作完成事件：包含操作的最终结果 */
 interface GitActionFinishedEvent extends GitActionProgressBase {
   kind: "action_finished";
+  /** 堆叠操作结果 */
   result: GitRunStackedActionResult;
 }
 
 /** Git 操作失败事件：包含失败阶段和错误信息 */
 interface GitActionFailedEvent extends GitActionProgressBase {
   kind: "action_failed";
+  /** 失败发生的阶段，无法确定时为 null */
   phase: GitActionProgressPhase | null;
+  /** 错误信息 */
   message: TrimmedNonEmptyString;
 }
 

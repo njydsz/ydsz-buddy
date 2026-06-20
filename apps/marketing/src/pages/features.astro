@@ -1,0 +1,128 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import FeatureCard from "~/components/FeatureCard.astro";
+
+const featureGroups = [
+  {
+    title: "Orchestration",
+    items: [
+      {
+        icon: "✦",
+        title: "Multi-provider routing",
+        description:
+          "Per-thread model selection with hot-swappable adapters for OpenAI, Anthropic, Google, Ollama and custom endpoints.",
+      },
+      {
+        icon: "↻",
+        title: "Command normalization",
+        description:
+          "All incoming commands flow through a normalizer that validates inputs and resolves aliases before they touch the engine.",
+      },
+      {
+        icon: "◉",
+        title: "Projection read model",
+        description:
+          "CQRS projections keep a fast, queryable view of threads, projects and checkpoints without scanning the event log.",
+      },
+    ],
+  },
+  {
+    title: "Developer experience",
+    items: [
+      {
+        icon: "⎇",
+        title: "Worktree-native workflow",
+        description:
+          "Every thread gets its own git worktree. Branch, commit, and merge without ever leaving the chat.",
+      },
+      {
+        icon: "▣",
+        title: "Checkpoint & replay",
+        description:
+          "Capture the full state of a turn — diffs, plan, approvals — and roll forward or backward at any point.",
+      },
+      {
+        icon: "↬",
+        title: "Thread import routing",
+        description:
+          "Bring threads in from Cursor, Codex, or JSON exports. We map provider metadata and normalize it to the Remi model.",
+      },
+    ],
+  },
+  {
+    title: "Platform",
+    items: [
+      {
+        icon: "▶",
+        title: "JSON-RPC control plane",
+        description:
+          "A single, versioned protocol powers the WebSocket server, the Tauri IPC bridge, and the CLI — no shadow APIs.",
+      },
+      {
+        icon: "✺",
+        title: "Tauri native shell",
+        description:
+          "System file dialogs, OS context menus, voice input, and a multi-tab workspace that respects your platform conventions.",
+      },
+      {
+        icon: "✱",
+        title: "Open event log",
+        description:
+          "Every event is JSON-serialized and append-only. Inspect, audit, or replay sessions with nothing but `sqlite3`.",
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Features"
+  description="A complete tour of Remi Code's orchestration engine, worktree-native workflow, and developer experience."
+>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow">Features</span>
+        <h1>Every layer engineered to be inspected.</h1>
+        <p>
+          From the Rust orchestration engine down to the Tauri shell, every
+          component in Remi Code is documented, testable, and open to
+          extension.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {
+    featureGroups.map((group) => (
+      <section class="section feature-group">
+        <div class="container">
+          <h2 class="group-title">{group.title}</h2>
+          <div class="grid grid-3">
+            {group.items.map((item) => (
+              <FeatureCard
+                icon={item.icon}
+                title={item.title}
+                description={item.description}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .feature-group {
+    padding-top: 0;
+  }
+  .group-title {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+    color: var(--color-text-primary);
+  }
+  .section-head {
+    max-width: 720px;
+  }
+</style>

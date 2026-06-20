@@ -1,3 +1,8 @@
+/**
+ * @file PlanSidebar.tsx
+ * @description 计划侧边栏组件，展示 AI 生成的执行计划（proposed plan），
+ *              包括步骤列表、完成状态、计划操作按钮等，支持展开/折叠和时间戳显示。
+ */
 import { memo, useState } from "react";
 import { type TimestampFormat } from "../appSettings";
 import { Badge } from "./ui/badge";

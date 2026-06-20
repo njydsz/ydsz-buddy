@@ -85,6 +85,14 @@ export function resolveThreadPickerTitle(title: string | null): string {
   return title || "New chat";
 }
 
+/**
+ * 创建路由面板搜索键
+ * @description 根据 scopeId 和搜索参数生成唯一键，用于判断面板状态是否已应用过。
+ * 当搜索参数中无面板相关信息时返回 null
+ * @param input.scopeId - 作用域 ID
+ * @param input.search - 差异路由搜索参数
+ * @returns 序列化的搜索键，或 null（无面板状态时）
+ */
 function createRoutePanelSearchKey(input: {
   scopeId: string;
   search: DiffRouteSearch;
@@ -107,6 +115,15 @@ function createRoutePanelSearchKey(input: {
   });
 }
 
+/**
+ * 解析路由面板引导状态
+ * @description 根据 URL 搜索参数解析面板状态，生成面板补丁。
+ * 通过搜索键去重，避免重复应用相同的面板状态
+ * @param input.scopeId - 作用域 ID
+ * @param input.search - 差异路由搜索参数
+ * @param input.lastAppliedSearchKey - 上次已应用的搜索键
+ * @returns 引导结果，包含下一个搜索键和面板补丁
+ */
 export function resolveRoutePanelBootstrap(input: {
   scopeId: string;
   search: DiffRouteSearch;
@@ -141,6 +158,14 @@ export function resolveRoutePanelBootstrap(input: {
   };
 }
 
+/**
+ * 解析切换聊天面板的补丁
+ * @description 切换指定面板的开关状态：如果当前面板已经是目标面板则关闭，否则打开目标面板。
+ * 差异对比的轮次 ID 和文件路径保持不变
+ * @param previousState - 之前的面板状态快照
+ * @param panel - 要切换的面板类型
+ * @returns 面板状态补丁
+ */
 export function resolveToggledChatPanelPatch(
   previousState: ChatPanelStateSnapshot,
   panel: ChatRightPanel,
@@ -152,7 +177,15 @@ export function resolveToggledChatPanelPatch(
   };
 }
 
-// Expanding a split pane exits split mode entirely; the selected chat becomes the single surface.
+/**
+ * 解析分割面板最大化决策
+ * @description 展开分割面板时退出分割模式，选中的聊天成为唯一的显示界面。
+ * 如果没有聚焦的线程 ID 则返回 null
+ * @param input.splitViewId - 分割视图 ID
+ * @param input.focusedThreadId - 当前聚焦的线程 ID
+ * @param input.focusedPanelState - 当前聚焦的面板状态
+ * @returns 最大化决策，或 null（无聚焦线程时）
+ */
 export function resolveSplitPaneMaximizeDecision(input: {
   splitViewId: string;
   focusedThreadId: ThreadId | null | undefined;
@@ -169,7 +202,18 @@ export function resolveSplitPaneMaximizeDecision(input: {
   };
 }
 
-// Closing a sidechat is a return-to-source action; generic pane closes can still fall back normally.
+/**
+ * 解析分割面板关闭决策
+ * @description 关闭侧边聊天是返回源线程的操作。根据关闭的线程和剩余面板数量，
+ * 决定是回到单线程模式、保留分割视图切换到另一线程，还是创建新聊天
+ * @param input.splitViewId - 分割视图 ID
+ * @param input.sourceThreadId - 源线程 ID
+ * @param input.closingThreadId - 正在关闭的线程 ID
+ * @param input.closingSidechatSourceThreadId - 正在关闭的侧边聊天的源线程 ID
+ * @param input.nextFocusedThreadId - 下一个聚焦的线程 ID
+ * @param input.nextLeafCount - 关闭后剩余的叶子节点数量
+ * @returns 关闭决策，包含单线程、分割线程或新聊天三种策略
+ */
 export function resolveSplitPaneCloseDecision(input: {
   splitViewId: string;
   sourceThreadId: ThreadId;

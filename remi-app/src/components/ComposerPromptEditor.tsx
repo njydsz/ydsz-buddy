@@ -1,3 +1,9 @@
+/**
+ * @file ComposerPromptEditor.tsx
+ * @description 基于 Lexical 的富文本编辑器组件，用于聊天输入框。
+ *              支持文件提及（@path）、技能引用（$skill）、Agent 提及（@alias(task)）、
+ *              终端上下文插入等行内芯片节点，以及键盘快捷键和自动补全等交互。
+ */
 import { LexicalComposer, type InitialConfigType } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";

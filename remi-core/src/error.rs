@@ -19,9 +19,9 @@
 //! ```rust
 //! use remi_core::{CoreError, CoreResult};
 //!
-//! fn find_project(id: &str) -> CoreResult<Project> {
-//!     // 查找项目...
-//!     Err(CoreError::NotFoundError(format!("项目 {} 不存在", id)))
+//! fn lookup_id(id: &str) -> CoreResult<String> {
+//!     // 查找资源...
+//!     Err(CoreError::NotFoundError(format!("资源 {} 不存在", id)))
 //! }
 //! ```
 

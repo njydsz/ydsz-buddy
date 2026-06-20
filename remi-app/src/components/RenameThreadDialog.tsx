@@ -1,3 +1,8 @@
+/**
+ * @file RenameThreadDialog.tsx
+ * @description 线程重命名对话框组件，允许用户修改聊天线程的标题，
+ *              支持异步保存和加载状态提示。
+ */
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import {

@@ -22,7 +22,7 @@ use super::handlers::{
     register_orchestration_methods, register_provider_methods, register_git_methods,
     register_terminal_methods, register_workspace_methods, register_auth_methods,
     register_checkpoint_methods, register_server_methods, register_telemetry_methods,
-    register_subscription_methods, register_shell_methods,
+    register_subscription_methods, register_shell_methods, register_voice_methods,
 };
 
 /// 服务容器
@@ -109,7 +109,10 @@ pub async fn register_all_methods(
     register_subscription_methods(router.clone(), services.clone()).await;
 
     // Shell 操作方法
-    register_shell_methods(router, services).await;
+    register_shell_methods(router.clone(), services.clone()).await;
+
+    // 语音转文字方法
+    register_voice_methods(router).await;
 
     info!("RPC 方法注册完成");
 }

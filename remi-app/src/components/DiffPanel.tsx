@@ -1,3 +1,9 @@
+/**
+ * @file DiffPanel.tsx
+ * @description 代码差异查看面板，支持按轮次（turn）查看 checkpoint diff、
+ *              仓库级 diff（分支/工作区/暂存区/未暂存）、AI 摘要等视图。
+ *              提供堆叠/分栏渲染模式、自动换行、忽略空白等配置。
+ */
 import { FileDiff, type FileDiffMetadata, Virtualizer } from "@pierre/diffs/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
@@ -75,8 +81,11 @@ import { DiffStatLabel, hasNonZeroStat } from "./chat/DiffStatLabel";
 import { type SplitViewPanePanelState } from "../splitViewStore";
 import { hasLiveTurnTailWork, isLatestTurnSettled } from "../session-logic";
 
+/** 差异渲染模式：堆叠（统一）或分栏（左右对照） */
 type DiffRenderMode = "stacked" | "split";
+/** 差异面板表面模式：审查（逐文件）、摘要（AI 生成）、总量（仓库级） */
 type DiffSurfaceMode = "review" | "summary" | "total";
+/** 差异主题类型：亮色或暗色 */
 type DiffThemeType = "light" | "dark";
 
 function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
@@ -148,7 +157,7 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
   cursor: pointer;
 }
 
-/* Hide the default change-type icon (blue circle) �?replaced by chevron + file-type icon. */
+/* Hide the default change-type icon (blue circle) �?replaced by chevron + file-type icon. */
 [data-change-icon] {
   display: none;
 }
@@ -162,6 +171,7 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
 `;
 }
 
+/** 从 FileDiffMetadata 中解析文件路径，去除 a/b 前缀 */
 function resolveFileDiffPath(fileDiff: FileDiffMetadata): string {
   const raw = fileDiff.name ?? fileDiff.prevName ?? "";
   if (raw.startsWith("a/") || raw.startsWith("b/")) {
@@ -170,23 +180,37 @@ function resolveFileDiffPath(fileDiff: FileDiffMetadata): string {
   return raw;
 }
 
+/** 构建文件差异的渲染 key，用于 React 列表渲染和缓存标识 */
 function buildFileDiffRenderKey(fileDiff: FileDiffMetadata): string {
   return fileDiff.cacheKey ?? `${fileDiff.prevName ?? "none"}:${fileDiff.name}`;
 }
 
+/** DiffPanel 组件属性 */
 interface DiffPanelProps {
+  /** 面板模式：内联侧栏、弹出面板或侧边栏 */
   mode?: DiffPanelMode;
+  /** 当前线程 ID */
   threadId?: ThreadId | null;
+  /** 分栏面板状态 */
   panelState?: Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">;
+  /** 更新面板状态的回调 */
   onUpdatePanelState?: (
     patch: Partial<Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">>,
   ) => void;
+  /** 关闭面板的回调 */
   onClosePanel?: () => void;
+  /** 是否启用实时刷新（用于运行中的线程） */
   liveRefreshEnabled?: boolean;
 }
 
+/** 重新导出 DiffWorkerPoolProvider，供使用差异面板的页面统一引入 */
 export { DiffWorkerPoolProvider } from "./DiffWorkerPoolProvider";
 
+/**
+ * 代码差异查看面板
+ * 支持按轮次查看 checkpoint diff、仓库级 diff 和 AI 摘要，
+ * 提供堆叠/分栏渲染、自动换行、忽略空白等配置
+ */
 export default function DiffPanel({
   mode = "inline",
   threadId: controlledThreadId,

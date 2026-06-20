@@ -627,6 +627,13 @@ async function sendTerminalInput(
   }
 }
 
+/**
+ * 同步运行时配置到已有的运行时条目。更新线程 ID、终端 ID、标签、CLI 类型、
+ * 工作目录、环境变量和回调等配置。
+ *
+ * @param entry - 终端运行时条目
+ * @param config - 新的运行时配置
+ */
 export function syncRuntimeConfig(
   entry: TerminalRuntimeEntry,
   config: TerminalRuntimeConfig,
@@ -645,6 +652,13 @@ export function syncRuntimeConfig(
   entry.callbacks = config.callbacks;
 }
 
+/**
+ * 创建终端运行时条目。初始化 xterm Terminal 实例及所有插件，
+ * 配置键盘事件处理、链接提供器、数据输入、主题观察和事件订阅。
+ *
+ * @param config - 终端运行时配置
+ * @returns 初始化完成的终端运行时条目
+ */
 export function createRuntimeEntry(config: TerminalRuntimeConfig): TerminalRuntimeEntry {
   const wrapper = document.createElement("div");
   wrapper.className = "h-full w-full";
@@ -970,6 +984,12 @@ export function createRuntimeEntry(config: TerminalRuntimeConfig): TerminalRunti
   return entry;
 }
 
+/**
+ * 打开终端后端 PTY 会话。首次调用时通过 API 创建 PTY 进程，
+ * 成功后回放快照历史数据，并在需要时自动聚焦终端。
+ *
+ * @param entry - 终端运行时条目
+ */
 function openTerminal(entry: TerminalRuntimeEntry): void {
   const api = readNativeApi();
   if (!api || entry.opened) return;
@@ -1035,6 +1055,14 @@ function openTerminal(entry: TerminalRuntimeEntry): void {
     });
 }
 
+/**
+ * 将运行时条目挂载到 DOM 容器。如果容器发生变化则先卸载，
+ * 然后更新视图状态、加载 WebGL、启动 ResizeObserver 和可见性恢复、打开终端。
+ *
+ * @param entry - 终端运行时条目
+ * @param viewState - 视图状态
+ * @param container - 目标 DOM 容器
+ */
 export function attachRuntimeToContainer(
   entry: TerminalRuntimeEntry,
   viewState: TerminalRuntimeViewState,
@@ -1082,6 +1110,12 @@ export function updateRuntimeViewState(
   }
 }
 
+/**
+ * 将运行时条目从 DOM 容器卸载。取消所有调度操作、释放 WebGL、
+ * 清理 ResizeObserver 和可见性恢复、移除 DOM 元素。
+ *
+ * @param entry - 终端运行时条目
+ */
 export function detachRuntimeFromContainer(entry: TerminalRuntimeEntry): void {
   cancelScheduledVisualResize(entry);
   stopVisibilityRecovery(entry);
@@ -1095,6 +1129,13 @@ export function detachRuntimeFromContainer(entry: TerminalRuntimeEntry): void {
   entry.container = null;
 }
 
+/**
+ * 完全销毁运行时条目。先从容器卸载，然后刷新待写入数据、
+ * 取消事件订阅、释放主题观察器、销毁所有可释放资源、
+ * 释放 WebGL 插件并最终销毁 xterm Terminal 实例。
+ *
+ * @param entry - 终端运行时条目
+ */
 export function disposeRuntimeEntry(entry: TerminalRuntimeEntry): void {
   detachRuntimeFromContainer(entry);
   entry.disposed = true;
