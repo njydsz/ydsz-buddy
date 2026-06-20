@@ -22,9 +22,9 @@ export type ProjectKind = "project" | "chat";
 /** 项目级文件搜索的输入参数，包含工作目录、搜索关键词和返回数量限制 */
 export interface ProjectSearchEntriesInput {
   /** 工作目录（绝对路径） */
-  cwd: typeof TrimmedNonEmptyString.Type;
+  cwd: TrimmedNonEmptyString;
   /** 搜索关键词，最大长度 256 */
-  query: typeof TrimmedNonEmptyString.Type;
+  query: TrimmedNonEmptyString;
   /** 最大返回条目数，不超过 PROJECT_SEARCH_ENTRIES_MAX_LIMIT */
   limit: number;
 }

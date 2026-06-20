@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { HiOutlineFolderOpen } from "react-icons/hi2";
+import { tauriBridge } from "../lib/tauri-bridge";
 import { FolderClosed } from "./FolderClosed";
 
 const projectFaviconPresence = new Map<string, boolean>();

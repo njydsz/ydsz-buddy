@@ -43,20 +43,39 @@ export function clampTerminalDrawerHeight(height: number): number {
   return Math.min(Math.max(Math.round(safeHeight), MIN_DRAWER_HEIGHT), maxHeight);
 }
 
+/**
+ * 终端抽屉高度管理 Hook，提供高度状态和拖拽调整交互。
+ *
+ * 核心行为：
+ * - 维护抽屉高度状态，自动约束在合法范围内
+ * - 支持指针拖拽调整高度，拖拽结束后同步到外部
+ * - 监听窗口 resize 事件，自动调整高度到合法范围
+ * - 组件卸载时自动同步最终高度
+ *
+ * @param options.height - 外部传入的初始高度
+ * @param options.onHeightChange - 高度变化时的回调
+ * @param options.resetKey - 重置键，变化时重新同步外部高度
+ * @returns 抽屉高度和指针事件处理器
+ */
 export function useTerminalDrawerHeight(options: {
   height: number;
   onHeightChange: (height: number) => void;
   resetKey: string;
 }) {
   const [drawerHeight, setDrawerHeight] = useState(() => clampTerminalDrawerHeight(options.height));
+  /** 保存最新的抽屉高度，供事件回调中读取，避免闭包过期 */
   const drawerHeightRef = useRef(drawerHeight);
+  /** 记录上次同步到外部的高度，避免重复触发回调 */
   const lastSyncedHeightRef = useRef(clampTerminalDrawerHeight(options.height));
+  /** 保存最新的 onHeightChange 回调，避免闭包过期 */
   const onHeightChangeRef = useRef(options.onHeightChange);
+  /** 拖拽调整状态，记录当前拖拽的指针 ID、起始 Y 坐标和起始高度 */
   const resizeStateRef = useRef<{
     pointerId: number;
     startY: number;
     startHeight: number;
   } | null>(null);
+  /** 标记本次拖拽是否实际改变了高度，用于判断松开时是否需要同步 */
   const didResizeDuringDragRef = useRef(false);
 
   useEffect(() => {
@@ -67,6 +86,7 @@ export function useTerminalDrawerHeight(options: {
     drawerHeightRef.current = drawerHeight;
   }, [drawerHeight]);
 
+  /** 将约束后的高度同步到外部回调，仅在高度实际变化时触发 */
   const syncHeight = useCallback((nextHeight: number) => {
     const clampedHeight = clampTerminalDrawerHeight(nextHeight);
     if (lastSyncedHeightRef.current === clampedHeight) return;
@@ -74,6 +94,7 @@ export function useTerminalDrawerHeight(options: {
     onHeightChangeRef.current(clampedHeight);
   }, []);
 
+  /** 当外部高度或重置键变化时，重新同步抽屉高度状态 */
   useEffect(() => {
     const clampedHeight = clampTerminalDrawerHeight(options.height);
     setDrawerHeight(clampedHeight);
@@ -81,6 +102,7 @@ export function useTerminalDrawerHeight(options: {
     lastSyncedHeightRef.current = clampedHeight;
   }, [options.height, options.resetKey]);
 
+  /** 指针按下时开始拖拽调整，仅响应左键 */
   const handleResizePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -93,6 +115,7 @@ export function useTerminalDrawerHeight(options: {
     };
   }, []);
 
+  /** 指针移动时根据拖拽偏移量实时更新抽屉高度 */
   const handleResizePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
     const resizeState = resizeStateRef.current;
     if (!resizeState || resizeState.pointerId !== event.pointerId) return;
@@ -108,6 +131,7 @@ export function useTerminalDrawerHeight(options: {
     setDrawerHeight(clampedHeight);
   }, []);
 
+  /** 指针松开时结束拖拽，若高度有变化则同步到外部 */
   const handleResizePointerEnd = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       const resizeState = resizeStateRef.current;
@@ -124,6 +148,7 @@ export function useTerminalDrawerHeight(options: {
     [syncHeight],
   );
 
+  /** 监听窗口 resize 事件，当视口变化时重新约束抽屉高度 */
   useEffect(() => {
     const onWindowResize = () => {
       const clampedHeight = clampTerminalDrawerHeight(drawerHeightRef.current);

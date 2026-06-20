@@ -485,7 +485,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 2. 使用 `COALESCE` 处理不存在的情况，返回 0
     fn get_projection_state(&self, projector_name: &str) -> PersistenceResult<Sequence> {
         let sequence: Sequence = self.client.query_row(
-            "SELECT COALESCE(last_applied_sequence, 0) FROM projection_state WHERE projector_name = ?1",
+            "SELECT COALESCE(last_applied_sequence, 0) FROM projection_state WHERE projector = ?1",
             &[&projector_name],
             |row| row.get(0),
         ).unwrap_or(0);
@@ -498,8 +498,8 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 使用 `INSERT OR REPLACE` 语义，如果投影器不存在则创建，存在则更新。
     fn update_projection_state(&self, projector_name: &str, sequence: Sequence) -> PersistenceResult<()> {
         self.client.execute(
-            "INSERT OR REPLACE INTO projection_state (projector_name, last_applied_sequence) VALUES (?1, ?2)",
-            &[&projector_name, &sequence],
+            "INSERT OR REPLACE INTO projection_state (projector, last_applied_sequence, updated_at) VALUES (?1, ?2, ?3)",
+            &[&projector_name, &sequence, &chrono::Utc::now().to_rfc3339()],
         )?;
         Ok(())
     }

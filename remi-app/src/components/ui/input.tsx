@@ -1,14 +1,15 @@
 "use client";
 
 import { Input as InputPrimitive } from "@base-ui/react/input";
-import { forwardRef, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from "react";
 
 import { cn } from "~/lib/utils";
 
-type InputProps = Omit<ComponentPropsWithoutRef<typeof InputPrimitive>, "size"> & {
+type InputProps = Omit<ComponentPropsWithoutRef<typeof InputPrimitive>, "size" | "style"> & {
   size?: "sm" | "default" | "lg" | number;
   unstyled?: boolean;
   nativeInput?: boolean;
+  style?: CSSProperties;
 };
 
 // Forward refs so the browser address bar can autofocus and select reliably.

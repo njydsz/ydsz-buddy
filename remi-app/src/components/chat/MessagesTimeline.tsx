@@ -1106,8 +1106,10 @@ function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
   }, [rows]);
 }
 
-// Keep the live clock scoped to tiny leaf components so active Claude turns do
-// not force the full transcript tree to re-render every second.
+/**
+ * 工作计时器组件。
+ * 将实时时钟限定在小型叶子组件内，避免活跃的助手回合每秒强制整个对话树重新渲染。
+ */
 function WorkingTimer({ createdAt }: { createdAt: string }) {
   const textRef = useRef<HTMLSpanElement>(null);
   const initialText = formatWorkingTimerNow(createdAt);
@@ -1128,6 +1130,7 @@ function WorkingTimer({ createdAt }: { createdAt: string }) {
   return <span ref={textRef}>{initialText}</span>;
 }
 
+/** 实时消息元信息组件，显示创建时间和持续时长 */
 function LiveMessageMeta({
   createdAt,
   durationStart,
@@ -1160,6 +1163,7 @@ function LiveMessageMeta({
   return <span ref={textRef}>{initialText}</span>;
 }
 
+/** 格式化工作计时器文本，返回如 "5s"、"2m 30s"、"1h 5m" 格式 */
 function formatWorkingTimer(startIso: string, endIso: string): string | null {
   const startedAtMs = Date.parse(startIso);
   const endedAtMs = Date.parse(endIso);
@@ -1183,10 +1187,12 @@ function formatWorkingTimer(startIso: string, endIso: string): string | null {
   return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
 }
 
+/** 使用当前时间格式化工作计时器 */
 function formatWorkingTimerNow(startIso: string): string {
   return formatWorkingTimer(startIso, new Date().toISOString()) ?? "0s";
 }
 
+/** 格式化实时消息元信息（创建时间 + 持续时长） */
 function formatLiveMessageMetaNow(
   createdAt: string,
   durationStart: string,
@@ -1199,6 +1205,7 @@ function formatLiveMessageMetaNow(
   );
 }
 
+/** 格式化消息元信息，拼接时间戳和持续时长 */
 function formatMessageMeta(
   createdAt: string,
   duration: string | null,
@@ -1208,10 +1215,12 @@ function formatMessageMeta(
   return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
 }
 
+/** 格式化内联工作摘要（当前未实现，返回 null） */
 function formatInlineWorkSummary(_groupedEntries: TimelineWorkEntry[]): string | null {
   return null;
 }
 
+/** 判断条目列表是否全部为工具调用类型 */
 function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   entries: ReadonlyArray<T> | undefined,
 ): entries is ReadonlyArray<T> {
@@ -1221,6 +1230,7 @@ function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   return entries.every((entry) => entry.tone === "tool");
 }
 
+/** 用户消息中的终端上下文内联标签组件 */
 const UserMessageTerminalContextInlineLabel = memo(
   function UserMessageTerminalContextInlineLabel(props: { context: ParsedTerminalContextEntry }) {
     const tooltipText =

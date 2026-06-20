@@ -12,7 +12,6 @@ members = [
     "remi-auth",
     "remi-checkpoint",
     "remi-telemetry",
-    "remi-environment",
     "remi-server",
     "remi-cli",
 ]

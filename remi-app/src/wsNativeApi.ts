@@ -9,6 +9,7 @@
 import {
   type AuthBootstrapInput,
   type AuthBootstrapResult,
+  type AuthBearerBootstrapResult,
   type AuthClientSession,
   type AuthCreatePairingCredentialInput,
   type AuthPairingCredentialResult,
@@ -29,6 +30,7 @@ import {
   type TerminalEvent,
   ORCHESTRATION_WS_CHANNELS,
   ORCHESTRATION_WS_METHODS,
+  type ClientOrchestrationCommand,
   type ContextMenuItem,
   type NativeApi,
   ServerConfigUpdatedPayload,
@@ -66,6 +68,8 @@ const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => 
  * @returns 过滤后的命令
  */
 function omitNullUserInputAnswers(
+  command: ClientOrchestrationCommand,
+): ClientOrchestrationCommand {
   if (command.type !== "thread.user-input.respond") {
     return command;
   }

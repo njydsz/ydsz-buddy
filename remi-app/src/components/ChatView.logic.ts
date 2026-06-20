@@ -46,7 +46,7 @@ export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remicode:last-invoked-script-
 export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remicode:dismissed-provider-health-banners";
 
 /** 按项目记录上次调用脚本的 Schema，用于 localStorage 数据校验 */
-export const LastInvokedScriptByProjectSchema = Schema.Record(ProjectId, Schema.String);
+export const LastInvokedScriptByProjectSchema = Schema.Record({ key: ProjectId, value: Schema.String });
 /** 已关闭的 Provider 健康告警 Schema，用于 localStorage 数据校验 */
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
 
@@ -150,6 +150,7 @@ export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   }
 }
 
+/** 收集用户消息中所有图片附件的 blob: 预览 URL，用于批量释放 */
 export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[] {
   if (message.role !== "user" || !message.attachments) {
     return [];
@@ -163,6 +164,12 @@ export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[
   return previewUrls;
 }
 
+/**
+ * 将语音转录文本追加到当前提示词末尾，用换行符分隔。
+ * @param currentPrompt - 当前输入框中的提示词
+ * @param transcript - 语音转录文本
+ * @returns 合并后的提示词；若转录为空则返回 null 表示无需追加
+ */
 export function appendVoiceTranscriptToPrompt(
   currentPrompt: string,
   transcript: string,
@@ -176,6 +183,11 @@ export function appendVoiceTranscriptToPrompt(
     : `${currentPrompt.replace(/\s+$/, "")}\n${trimmedTranscript}`;
 }
 
+/**
+ * 清洗语音输入错误信息，移除堆栈跟踪和重复的 Error 前缀，返回用户友好的错误描述。
+ * @param message - 原始错误消息
+ * @returns 清洗后的错误消息；若清洗后为空则返回默认提示
+ */
 export function sanitizeVoiceErrorMessage(message: string): string {
   const normalized = message.trim();
   if (normalized.length === 0) {
@@ -195,11 +207,17 @@ export function sanitizeVoiceErrorMessage(message: string): string {
     : "The voice note could not be transcribed.";
 }
 
+/** 判断语音错误消息是否表示认证已过期，需要用户重新登录 */
 export function isVoiceAuthExpiredMessage(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("chatgpt login has expired") || normalized.includes("sign in again");
 }
 
+/**
+ * 根据麦克风启动错误类型生成用户友好的错误描述，覆盖权限拒绝、设备未找到、设备繁忙等常见场景。
+ * @param error - 捕获到的错误对象
+ * @returns 面向用户的错误提示文本
+ */
 export function describeVoiceRecordingStartError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "The microphone could not be opened.";
@@ -227,6 +245,14 @@ export function describeVoiceRecordingStartError(error: unknown): string {
   return "The microphone could not be opened.";
 }
 
+/**
+ * 推导语音笔记功能的 UI 状态，判断是否可渲染、可启动语音笔记，以及是否显示控制按钮。
+ * @param input.authStatus - 服务端认证状态
+ * @param input.voiceTranscriptionAvailable - 语音转录是否可用
+ * @param input.isRecording - 是否正在录音
+ * @param input.isTranscribing - 是否正在转录
+ * @returns 语音笔记 UI 状态：canRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
+ */
 export function deriveComposerVoiceState(input: {
   authStatus: ServerProviderAuthStatus | null | undefined;
   voiceTranscriptionAvailable: boolean | undefined;
@@ -247,6 +273,12 @@ export function deriveComposerVoiceState(input: {
   };
 }
 
+/**
+ * 判断 Composer 模型选择器是否应显示骨架屏加载状态。
+ * 当 Provider 需要动态发现模型列表且仍在加载中，或持久化的模型选择与当前选择不一致时显示骨架屏。
+ * @param input - 包含当前选中的 Provider/模型、持久化/草稿模型选择、加载状态等
+ * @returns 是否应显示骨架屏
+ */
 export function shouldShowComposerModelBootstrapSkeleton(input: {
   selectedProvider: ProviderKind;
   selectedModel: string | null | undefined;
@@ -286,6 +318,13 @@ export function shouldShowComposerModelBootstrapSkeleton(input: {
   return normalizedSelectedModel !== normalizedPersistedModel;
 }
 
+/**
+ * 解析最终提交给 Provider 的模型标识，优先匹配运行时可用选项列表中的 slug，否则使用回退值。
+ * @param input.selectedModel - 用户选择的模型 slug
+ * @param input.availableOptions - 当前可用的模型选项列表
+ * @param input.fallback - 当无法匹配时的回退函数
+ * @returns 最终使用的模型 slug
+ */
 export function resolveCommittedProviderModel(input: {
   selectedModel: ModelSlug;
   availableOptions: ReadonlyArray<ProviderModelOption>;

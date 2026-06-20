@@ -65,9 +65,16 @@ async function getWsTransport(): Promise<WsTransport> {
 }
 
 /**
- * 将 Tauri 异步 listen 包装为同步 cleanup 函数。
+ * 将 Tauri 异步 listen 包装为同步 cleanup 函数
+ *
+ * @description
  * Tauri 的 listen 返回 Promise<UnlistenFn>，但上层契约期望 () => void，
  * 因此在卸载回调内部异步等待 unlisten 完成。
+ *
+ * @typeParam T - 事件载荷类型
+ * @param event - 事件名称
+ * @param handler - 事件处理函数
+ * @returns 同步取消监听函数
  */
 function syncListen<T>(event: string, handler: (event: { payload: T }) => void): () => void {
   let unlisten: UnlistenFn | null = null;
@@ -85,19 +92,44 @@ function syncListen<T>(event: string, handler: (event: { payload: T }) => void):
 }
 
 /**
- * Tauri 桥接层
- * 封装所有与 Tauri 后端的交互
+ * Tauri 桥接对象
+ *
+ * @description
+ * 封装所有与 Tauri 桌面端后端的交互，提供统一的 API 接口。
+ * 包含以下模块：
+ * - 基础操作：文件选择、保存、确认对话框、主题设置、上下文菜单、外部链接
+ * - Shell：在文件管理器中显示文件
+ * - 菜单：监听菜单动作事件
+ * - 更新：检查、下载、安装应用更新
+ * - 通知：桌面通知的权限请求和发送
+ * - 服务器：通过 WebSocket 调用后端服务（配置、环境、设置、提供商等）
+ * - 浏览器：浏览器自动化操作（打开、关闭、截图、导航等）
+ * - 编排引擎：线程创建/管理、命令分发、快照获取、事件监听
+ * - 提供商：AI 模型列表、API Key 管理、命令/技能/插件/代理查询
+ * - 终端：创建、写入、调整大小、关闭、重启
+ * - Git：状态查询、分支操作、提交、推送、拉取、差异查看
+ * - 工作区：项目管理、文件读写
+ * - 检查点：创建、查询、回滚
+ * - 遥测：使用统计、事件、指标
+ * - 窗口：最小化、最大化、关闭、标题设置
+ * - 对话框：打开/保存文件、消息、确认
+ * - 文件系统：读写文件、创建目录
+ * - 剪贴板：读写文本
  */
 export const tauriBridge = {
   /**
-   * 获取 WebSocket URL
+   * 获取 WebSocket 服务器 URL
+   *
+   * @returns WS URL 字符串，如果未配置则返回 null
    */
   getWsUrl: () => {
     return import.meta.env.VITE_WS_URL || null;
   },
 
   /**
-   * 选择文件夹
+   * 打开文件夹选择对话框
+   *
+   * @returns 选中的文件夹路径，用户取消时返回 null
    */
   pickFolder: async (): Promise<string | null> => {
     return await open({
@@ -108,7 +140,13 @@ export const tauriBridge = {
   },
 
   /**
-   * 保存文件
+   * 保存文件到磁盘
+   *
+   * @param input - 保存参数
+   * @param input.defaultFilename - 默认文件名
+   * @param input.contents - 文件内容
+   * @param input.filters - 文件类型过滤器
+   * @returns 保存的文件路径，用户取消时返回 null
    */
   saveFile: async (input: {
     defaultFilename: string;
@@ -132,6 +170,9 @@ export const tauriBridge = {
 
   /**
    * 显示确认对话框
+   *
+   * @param message - 确认消息内容
+   * @returns 用户是否确认
    */
   confirm: async (message: string): Promise<boolean> => {
     return await confirm(message, {
@@ -141,7 +182,9 @@ export const tauriBridge = {
   },
 
   /**
-   * 设置主题
+   * 设置桌面端主题模式
+   *
+   * @param theme - 主题模式（light/dark/system）
    */
   setTheme: async (theme: DesktopTheme): Promise<void> => {
     await invoke('set_theme', { theme });
@@ -149,6 +192,11 @@ export const tauriBridge = {
 
   /**
    * 显示上下文菜单
+   *
+   * @typeParam T - 菜单项值的类型
+   * @param items - 菜单项列表
+   * @param position - 可选的菜单位置坐标
+   * @returns 用户选择的菜单项值，取消时返回 null
    */
   showContextMenu: async <T extends string>(
     items: readonly ContextMenuItem<T>[],
@@ -158,7 +206,10 @@ export const tauriBridge = {
   },
 
   /**
-   * 打开外部链接
+   * 在系统默认浏览器中打开外部链接
+   *
+   * @param url - 要打开的 URL
+   * @returns 是否成功打开
    */
   openExternal: async (url: string): Promise<boolean> => {
     try {
