@@ -1,46 +1,68 @@
-// FILE: projectCreateRecovery.ts
-// Purpose: Centralizes duplicate `project.create` error parsing and recovery helpers.
-// Exports: duplicate-create error guards plus snapshot matching for import recovery.
+/**
+ * @file projectCreateRecovery.ts
+ * @description 集中处理 project.create 重复错误的解析与恢复逻辑。
+ * 提供重复创建错误检测、项目 ID 提取、快照匹配及重试等待等恢复工具函数。
+ */
 
 import type { OrchestrationReadModel } from "@remi-code/contracts";
 import { workspaceRootsEqual } from "@remi-code/shared/threadWorkspace";
 
+/** 重复项目创建错误消息的前缀 */
 const DUPLICATE_PROJECT_CREATE_ERROR_PREFIX =
   "Orchestration command invariant failed (project.create): Project '";
+/** 默认最大恢复重试次数 */
 const DEFAULT_RECOVERY_MAX_ATTEMPTS = 6;
+/** 默认重试间隔（毫秒） */
 const DEFAULT_RECOVERY_DELAY_MS = 50;
 
+/** 可恢复的项目候选对象，包含 ID、类型、工作区根路径及删除时间 */
 export interface DuplicateProjectCreateRecoveryCandidate {
+  /** 项目 ID */
   readonly id: string;
+  /** 项目类型，默认为 "project" */
   readonly kind?: string | undefined;
+  /** 工作区根路径 */
   readonly workspaceRoot: string;
+  /** 项目删除时间，未删除则为 null */
   readonly deletedAt?: string | null | undefined;
 }
 
+/** 包含项目列表的快照结构 */
 interface SnapshotWithProjects<T extends DuplicateProjectCreateRecoveryCandidate> {
   readonly projects: readonly T[];
 }
 
+/** 项目查找输入参数 */
 interface ProjectLookupInput {
+  /** 项目 ID */
   readonly projectId?: string | null | undefined;
+  /** 工作区根路径 */
   readonly workspaceRoot?: string | null | undefined;
 }
 
+/** 判断项目类型是否可恢复（仅 "project" 类型可恢复） */
 function isRecoverableProjectKind(kind: string | undefined): boolean {
   return (kind ?? "project") === "project";
 }
 
+/** 判断项目是否为可恢复的活跃项目（未删除且类型可恢复） */
 function isRecoverableActiveProject(project: DuplicateProjectCreateRecoveryCandidate): boolean {
   return (project.deletedAt ?? null) === null && isRecoverableProjectKind(project.kind);
 }
 
+/** 等待指定毫秒数 */
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-// Parses the invariant text so the UI can recover existing projects instead of failing imports.
+/**
+ * 判断错误消息是否为重复项目创建错误
+ *
+ * @param message - 错误消息字符串
+ * @returns 是否为重复项目创建错误
+ */
 export function isDuplicateProjectCreateError(message: string): boolean {
   if (!message.startsWith(DUPLICATE_PROJECT_CREATE_ERROR_PREFIX)) {
     return false;
@@ -50,6 +72,12 @@ export function isDuplicateProjectCreateError(message: string): boolean {
   return duplicateMarkerIndex > DUPLICATE_PROJECT_CREATE_ERROR_PREFIX.length;
 }
 
+/**
+ * 从重复项目创建错误消息中提取项目 ID
+ *
+ * @param message - 错误消息字符串
+ * @returns 提取到的项目 ID，若消息格式不匹配则返回 null
+ */
 export function extractDuplicateProjectCreateProjectId(message: string): string | null {
   if (!isDuplicateProjectCreateError(message)) {
     return null;
@@ -59,6 +87,15 @@ export function extractDuplicateProjectCreateProjectId(message: string): string 
   return message.slice(DUPLICATE_PROJECT_CREATE_ERROR_PREFIX.length, duplicateMarkerIndex) || null;
 }
 
+/**
+ * 在项目列表中查找可恢复的活跃项目
+ *
+ * @typeParam T - 项目候选类型
+ * @param input - 查找输入，包含项目列表及可选的 projectId/workspaceRoot
+ * @returns 匹配到的项目，若未找到则返回 null
+ *
+ * @remarks 优先按 projectId 精确匹配，其次按 workspaceRoot 模糊匹配
+ */
 export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryCandidate>(
   input: ProjectLookupInput & {
     readonly projects: readonly T[];
@@ -87,7 +124,15 @@ export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryC
   );
 }
 
-// Prefers the explicit duplicate id, then falls back to workspace-root matching for older clients.
+/**
+ * 从重复创建错误消息中查找可恢复的项目
+ *
+ * @typeParam T - 项目候选类型
+ * @param input - 包含错误消息、项目列表和工作区根路径的输入
+ * @returns 匹配到的可恢复项目，若未找到则返回 null
+ *
+ * @remarks 优先使用错误消息中提取的重复项目 ID，回退到工作区根路径匹配
+ */
 export function findRecoverableProjectForDuplicateCreate<
   T extends DuplicateProjectCreateRecoveryCandidate,
 >(input: {
@@ -106,6 +151,15 @@ export function findRecoverableProjectForDuplicateCreate<
   });
 }
 
+/**
+ * 在读模型中轮询等待可恢复的项目出现
+ *
+ * @typeParam TSnapshot - 快照类型，需包含 projects 数组
+ * @param input - 包含快照加载函数、查找参数及可选的重试/修复配置
+ * @returns 找到的项目及最新快照，若超时未找到则项目为 null
+ *
+ * @remarks 先进行有限次重试轮询，若仍失败则尝试调用 repairSnapshot 修复快照后再次查找
+ */
 export async function waitForRecoverableProjectInReadModel<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate> =
     OrchestrationReadModel,
@@ -167,7 +221,16 @@ export async function waitForRecoverableProjectInReadModel<
   };
 }
 
-// Retries snapshot reads briefly so freshly restored projects can be reused by the first-send flow.
+/**
+ * 针对重复项目创建错误，轮询等待可恢复的项目出现
+ *
+ * @typeParam TSnapshot - 快照类型，需包含 projects 数组
+ * @param input - 包含错误消息、工作区根路径、快照加载函数及可选的重试/修复配置
+ * @returns 找到的项目及最新快照，若超时未找到则项目为 null
+ *
+ * @remarks 先进行有限次重试轮询，若仍失败则尝试调用 repairSnapshot 修复快照后再次查找。
+ * 适用于首次发送流程中需要复用刚恢复的项目场景。
+ */
 export async function waitForRecoverableProjectForDuplicateCreate<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate>,
 >(input: {

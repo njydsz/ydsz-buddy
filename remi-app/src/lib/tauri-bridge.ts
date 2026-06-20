@@ -30,7 +30,7 @@ import type {
   BrowserNavigateInput,
   BrowserNewTabInput,
   ThreadBrowserState
-} from '@remi-code/contracts';
+} from '~/contracts';
 import { WsTransport } from '../wsTransport';
 
 /** TODO: 迁移完成后替换为 contracts 中的正式类型 */

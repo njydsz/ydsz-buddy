@@ -1,13 +1,9 @@
 /**
  * @file workspaceStore.ts
- * @description 持久化的终端工作区页面状态管理 Store。
- *
- * 管理终端专属的工作区页面，每个工作区页面拥有独立的终端布局预设。
- * 同时维护用户主目录路径，供终端路径解析使用。
- * 状态通过 localStorage 持久化。
- */
+ * @description 持久化的终端工作区页面状态管�?Store�? *
+ * 管理终端专属的工作区页面，每个工作区页面拥有独立的终端布局预设�? * 同时维护用户主目录路径，供终端路径解析使用�? * 状态通过 localStorage 持久化�? */
 
-import { type ThreadId } from "@remi-code/contracts";
+import { type ThreadId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -17,18 +13,17 @@ import {
 } from "./workspaceTerminalLayoutPresets";
 
 /**
- * 工作区页面数据，包含 ID、标题、布局预设和时间戳。
- */
+ * 工作区页面数据，包含 ID、标题、布局预设和时间戳�? */
 interface WorkspacePage {
   /** 工作区唯一标识 */
   id: string;
-  /** 工作区显示标题 */
+  /** 工作区显示标�?*/
   title: string;
   /** 终端布局预设 ID */
   layoutPresetId: WorkspaceLayoutPresetId;
-  /** 创建时间（ISO 格式） */
+  /** 创建时间（ISO 格式�?*/
   createdAt: string;
-  /** 最后更新时间（ISO 格式） */
+  /** 最后更新时间（ISO 格式�?*/
   updatedAt: string;
 }
 
@@ -44,7 +39,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-/** localStorage 持久化键名 */
+/** localStorage 持久化键�?*/
 const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
@@ -141,12 +136,9 @@ function reorderAtIndex<T>(items: readonly T[], fromIndex: number, toIndex: numb
 }
 
 /**
- * 将工作区 ID 转换为合成的线程 ID。
- * 工作区页面使用合成的线程 ID 与终端状态 Store 关联，
- * 使得工作区页面可以复用线程级别的终端状态管理。
- *
- * @param workspaceId - 工作区 ID
- * @returns 合成的线程 ID，格式为 "workspace:{workspaceId}"
+ * 将工作区 ID 转换为合成的线程 ID�? * 工作区页面使用合成的线程 ID 与终端状�?Store 关联�? * 使得工作区页面可以复用线程级别的终端状态管理�? *
+ * @param workspaceId - 工作�?ID
+ * @returns 合成的线�?ID，格式为 "workspace:{workspaceId}"
  *
  * @example
  * ```ts
@@ -158,10 +150,7 @@ export function workspaceThreadId(workspaceId: string): ThreadId {
 }
 
 /**
- * 工作区页面状态 Zustand Store。
- * 管理工作区页面的增删改查、重命名、排序和布局预设切换。
- * 通过 persist 中间件将状态持久化到 localStorage。
- *
+ * 工作区页面状�?Zustand Store�? * 管理工作区页面的增删改查、重命名、排序和布局预设切换�? * 通过 persist 中间件将状态持久化�?localStorage�? *
  * @example
  * ```tsx
  * const { workspacePages, createWorkspace, deleteWorkspace } = useWorkspaceStore();

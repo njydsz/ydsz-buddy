@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { OrchestrationThreadActivity } from "@remi-code/contracts";
+import type { OrchestrationThreadActivity } from "~/contracts";
 import { Alert, AlertAction, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";

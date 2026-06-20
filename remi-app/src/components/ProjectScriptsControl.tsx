@@ -2,7 +2,7 @@ import type {
   ProjectScript,
   ProjectScriptIcon,
   ResolvedKeybindingsConfig,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   BugIcon,
   ChevronDownIcon,

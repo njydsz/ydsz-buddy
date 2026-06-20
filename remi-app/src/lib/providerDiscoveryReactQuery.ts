@@ -7,7 +7,7 @@ import type {
   ProviderListPluginsResult,
   ProviderListSkillsResult,
   ProviderReadPluginResult,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { ensureNativeApi } from "~/nativeApi";
 

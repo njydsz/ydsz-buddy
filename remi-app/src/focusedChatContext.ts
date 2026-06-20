@@ -1,10 +1,7 @@
 /**
- * @file 聚焦聊天上下文模块
- * @description 解析当前聚焦的聊天上下文，支持单视图和分屏视图。
- *              为快捷键、发现功能、线程创建等流程提供当前活跃线程和项目信息。
- */
+ * @file 聚焦聊天上下文模�? * @description 解析当前聚焦的聊天上下文，支持单视图和分屏视图�? *              为快捷键、发现功能、线程创建等流程提供当前活跃线程和项目信息�? */
 
-import { ThreadId, type ThreadId as ThreadIdType } from "@remi-code/contracts";
+import { ThreadId, type ThreadId as ThreadIdType } from "~/contracts";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { type DraftThreadState, useComposerDraftStore } from "./composerDraftStore";
@@ -22,11 +19,8 @@ import type { Project, Thread } from "./types";
 /**
  * 聚焦聊天上下文，包含当前活跃的线程、草稿和项目信息
  * @property routeThreadId - 路由参数中的线程 ID
- * @property splitView - 当前分屏视图状态，无分屏时为 null
- * @property focusedThreadId - 实际聚焦的线程 ID（考虑分屏后的结果）
- * @property activeThread - 聚焦线程的完整数据
- * @property activeDraftThread - 聚焦线程的草稿状态
- * @property activeProject - 活跃项目数据
+ * @property splitView - 当前分屏视图状态，无分屏时�?null
+ * @property focusedThreadId - 实际聚焦的线�?ID（考虑分屏后的结果�? * @property activeThread - 聚焦线程的完整数�? * @property activeDraftThread - 聚焦线程的草稿状�? * @property activeProject - 活跃项目数据
  * @property activeProjectId - 活跃项目 ID
  */
 export interface FocusedChatContext {
@@ -41,10 +35,8 @@ export interface FocusedChatContext {
 
 /**
  * 纯函数：解析聚焦的聊天上下文
- * 分屏视图时取分屏聚焦面板的线程 ID，否则使用路由中的线程 ID
- * @param input - 包含路由线程 ID、分屏视图、线程列表、项目列表和草稿的输入对象
- * @returns 聚焦聊天上下文
- */
+ * 分屏视图时取分屏聚焦面板的线�?ID，否则使用路由中的线�?ID
+ * @param input - 包含路由线程 ID、分屏视图、线程列表、项目列表和草稿的输入对�? * @returns 聚焦聊天上下�? */
 export function resolveFocusedChatContext(input: {
   routeThreadId: ThreadIdType | null;
   splitView: SplitView | null;
@@ -83,10 +75,8 @@ export function resolveFocusedChatContext(input: {
 }
 
 /**
- * React Hook：获取当前聚焦的聊天上下文
- * 自动从路由参数、分屏视图状态、全局 store 中提取并计算聚焦信息
- * @returns 聚焦聊天上下文
- */
+ * React Hook：获取当前聚焦的聊天上下�? * 自动从路由参数、分屏视图状态、全局 store 中提取并计算聚焦信息
+ * @returns 聚焦聊天上下�? */
 export function useFocusedChatContext(): FocusedChatContext {
   const draftThreadsByThreadId = useComposerDraftStore((store) => store.draftThreadsByThreadId);
   const routeThreadId = useParams({

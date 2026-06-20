@@ -2,7 +2,7 @@
 // Purpose: Render a provider usage summary panel that can show both classic
 // rate-limit rows and archive-derived local usage lines in the same popover.
 
-import type { ProviderKind } from "@remi-code/contracts";
+import type { ProviderKind } from "~/contracts";
 import { memo, useMemo } from "react";
 
 import { ExternalLinkIcon } from "~/lib/icons";

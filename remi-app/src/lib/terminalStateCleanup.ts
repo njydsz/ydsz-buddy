@@ -1,4 +1,4 @@
-import type { ThreadId } from "@remi-code/contracts";
+import type { ThreadId } from "~/contracts";
 
 interface TerminalRetentionThread {
   id: ThreadId;

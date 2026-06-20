@@ -1,4 +1,4 @@
-import type { ProviderKind } from "@remi-code/contracts";
+import type { ProviderKind } from "~/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { ensureNativeApi } from "~/nativeApi";
 

@@ -39,6 +39,7 @@ use remi_telemetry::{AnalyticsService, MetricsCollector};
 use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 
+use crate::push_channels::PushChannelManager;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::{register_all_methods, ServiceContainer};
 use crate::server::WebSocketServer;
@@ -127,6 +128,9 @@ fn build_service_container(
         sqlite_checkpoint_store,
     ));
 
+    // ===== 推送通道层 =====
+    let push_channel_manager = Arc::new(PushChannelManager::new());
+
     // ===== 遥测层 =====
     let analytics_service = Arc::new(AnalyticsService::new());
     let metrics_collector = Arc::new(MetricsCollector::new());
@@ -147,6 +151,7 @@ fn build_service_container(
         checkpoint_store,
         analytics_service,
         metrics_collector,
+        push_channel_manager,
     })
 }
 

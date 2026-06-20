@@ -2,7 +2,7 @@
 // Purpose: Centralizes rate-limit parsing, normalization, formatting, and row derivation
 // for provider runtime events so UI components can stay presentation-only.
 
-import type { OrchestrationThread } from "@remi-code/contracts";
+import type { OrchestrationThread } from "~/contracts";
 
 export interface RateLimitWindow {
   window: string;
@@ -351,7 +351,7 @@ export function deriveVisibleRateLimitRows(
 }
 
 export function formatRateLimitRemainingPercent(remainingPercent: number | undefined): string {
-  if (remainingPercent === undefined) return "â€”";
+  if (remainingPercent === undefined) return "â€?;
   return `${Math.round(Math.min(100, Math.max(0, remainingPercent)))}%`;
 }
 

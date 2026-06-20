@@ -1,27 +1,19 @@
 /**
- * @file Zustand 稳定选择器工厂
- * @description 为实体查找和侧边栏轻量投影提供引用稳定的 Zustand 选择器，
- * 避免因 store 更新导致无关组件重新渲染。
- * 导出的选择器工厂被路由和侧边栏组件广泛使用。
- */
+ * @file Zustand 稳定选择器工�? * @description 为实体查找和侧边栏轻量投影提供引用稳定的 Zustand 选择器，
+ * 避免�?store 更新导致无关组件重新渲染�? * 导出的选择器工厂被路由和侧边栏组件广泛使用�? */
 
-import type { ProjectId, ThreadId } from "@remi-code/contracts";
+import type { ProjectId, ThreadId } from "~/contracts";
 
 import type { AppState } from "./store";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import type { Project, SidebarThreadSummary, Thread } from "./types";
 
 /**
- * 创建引用稳定的实体选择器
- *
+ * 创建引用稳定的实体选择�? *
  * @description 通过闭包缓存上一次的列表引用和匹配结果，仅当列表引用变化时重新查找，
- * 从而保证同一实体在列表未变时返回相同引用，避免不必要的重渲染。
- *
- * @typeParam T - 实体类型，必须包含 id 属性
- * @param selectItems - 从 store 中选取实体列表的函数
- * @param id - 要查找的实体 ID，为 null/undefined 时始终返回 undefined
- * @returns 一个稳定的选择器函数
- */
+ * 从而保证同一实体在列表未变时返回相同引用，避免不必要的重渲染�? *
+ * @typeParam T - 实体类型，必须包�?id 属�? * @param selectItems - �?store 中选取实体列表的函�? * @param id - 要查找的实体 ID，为 null/undefined 时始终返�?undefined
+ * @returns 一个稳定的选择器函�? */
 function createStableEntitySelector<T extends { id: string }>(
   selectItems: (state: AppState) => readonly T[],
   id: string | null | undefined,
@@ -46,11 +38,9 @@ function createStableEntitySelector<T extends { id: string }>(
 }
 
 /**
- * 创建项目选择器
- *
- * @param projectId - 项目 ID，为 null/undefined 时选择器始终返回 undefined
- * @returns 稳定的项目选择器函数
- */
+ * 创建项目选择�? *
+ * @param projectId - 项目 ID，为 null/undefined 时选择器始终返�?undefined
+ * @returns 稳定的项目选择器函�? */
 export function createProjectSelector(
   projectId: ProjectId | null | undefined,
 ): (state: AppState) => Project | undefined {
@@ -58,14 +48,10 @@ export function createProjectSelector(
 }
 
 /**
- * 创建线程选择器
- *
- * @description 优先从 threadDerivation 获取线程（基于归一化切片重建），
- * 回退到 store.threads 数组中查找。
- *
- * @param threadId - 线程 ID，为 null/undefined 时选择器始终返回 undefined
- * @returns 稳定的线程选择器函数
- */
+ * 创建线程选择�? *
+ * @description 优先�?threadDerivation 获取线程（基于归一化切片重建）�? * 回退�?store.threads 数组中查找�? *
+ * @param threadId - 线程 ID，为 null/undefined 时选择器始终返�?undefined
+ * @returns 稳定的线程选择器函�? */
 export function createThreadSelector(
   threadId: ThreadId | null | undefined,
 ): (state: AppState) => Thread | undefined {
@@ -77,13 +63,9 @@ export function createThreadSelector(
 }
 
 /**
- * 创建全量线程列表选择器
- *
- * @description 监控 store 中所有线程相关的归一化切片引用，仅当任一切片变化时
- * 才重新从 threadDerivation 重建线程列表，保证引用稳定性。
- *
- * @returns 稳定的全量线程列表选择器函数
- */
+ * 创建全量线程列表选择�? *
+ * @description 监控 store 中所有线程相关的归一化切片引用，仅当任一切片变化�? * 才重新从 threadDerivation 重建线程列表，保证引用稳定性�? *
+ * @returns 稳定的全量线程列表选择器函�? */
 export function createAllThreadsSelector(): (state: AppState) => readonly Thread[] {
   let previousThreadIds: readonly ThreadId[] | undefined;
   let previousThreadShellById = {} as AppState["threadShellById"];
@@ -135,10 +117,9 @@ export function createAllThreadsSelector(): (state: AppState) => readonly Thread
 }
 
 /**
- * 创建线程所属项目 ID 选择器
- *
+ * 创建线程所属项�?ID 选择�? *
  * @param threadId - 线程 ID
- * @returns 返回该线程所属项目 ID 的选择器，线程不存在时返回 null
+ * @returns 返回该线程所属项�?ID 的选择器，线程不存在时返回 null
  */
 export function createThreadProjectIdSelector(
   threadId: ThreadId | null | undefined,
@@ -148,11 +129,9 @@ export function createThreadProjectIdSelector(
 }
 
 /**
- * 创建线程是否存在选择器
- *
+ * 创建线程是否存在选择�? *
  * @param threadId - 线程 ID
- * @returns 返回布尔值的选择器，指示线程是否存在于 store 中
- */
+ * @returns 返回布尔值的选择器，指示线程是否存在�?store �? */
 export function createThreadExistsSelector(
   threadId: ThreadId | null | undefined,
 ): (state: AppState) => boolean {
@@ -161,8 +140,7 @@ export function createThreadExistsSelector(
 }
 
 /**
- * 创建侧边栏线程摘要选择器
- *
+ * 创建侧边栏线程摘要选择�? *
  * @param threadId - 线程 ID
  * @returns 返回侧边栏线程摘要的选择器，线程不存在时返回 undefined
  */
@@ -173,13 +151,9 @@ export function createSidebarThreadSummarySelector(
 }
 
 /**
- * 创建全量侧边栏线程摘要列表选择器
- *
- * @description 监控 threadIds 和 sidebarThreadSummaryById 引用，
- * 仅当二者之一变化时才重建摘要列表。
- *
- * @returns 稳定的侧边栏线程摘要列表选择器函数
- */
+ * 创建全量侧边栏线程摘要列表选择�? *
+ * @description 监控 threadIds �?sidebarThreadSummaryById 引用�? * 仅当二者之一变化时才重建摘要列表�? *
+ * @returns 稳定的侧边栏线程摘要列表选择器函�? */
 export function createSidebarThreadSummariesSelector(): (
   state: AppState,
 ) => readonly SidebarThreadSummary[] {
@@ -204,13 +178,9 @@ export function createSidebarThreadSummariesSelector(): (
 }
 
 /**
- * 创建侧边栏展示线程选择器
- *
- * @description 过滤掉有父线程的（子代理线程）和已归档的线程，
- * 仅返回需要在侧边栏主列表中展示的线程摘要。
- *
- * @returns 稳定的侧边栏展示线程列表选择器函数
- */
+ * 创建侧边栏展示线程选择�? *
+ * @description 过滤掉有父线程的（子代理线程）和已归档的线程�? * 仅返回需要在侧边栏主列表中展示的线程摘要�? *
+ * @returns 稳定的侧边栏展示线程列表选择器函�? */
 export function createSidebarDisplayThreadsSelector(): (
   state: AppState,
 ) => readonly SidebarThreadSummary[] {
@@ -233,13 +203,10 @@ export function createSidebarDisplayThreadsSelector(): (
 }
 
 /**
- * 创建第一个项目选择器
- *
- * @description 返回项目列表中第一个 kind 为 "project" 的项目，
- * 用于默认选中或回退场景。
- *
- * @returns 稳定的第一个项目选择器函数
- */
+ * 创建第一个项目选择�? *
+ * @description 返回项目列表中第一�?kind �?"project" 的项目，
+ * 用于默认选中或回退场景�? *
+ * @returns 稳定的第一个项目选择器函�? */
 export function createFirstProjectSelector(): (state: AppState) => Project | undefined {
   let previousProjects: readonly Project[] | undefined;
   let previousFirstProject: Project | undefined;
@@ -256,11 +223,9 @@ export function createFirstProjectSelector(): (state: AppState) => Project | und
 }
 
 /**
- * 创建按类型筛选的项目选择器
- *
- * @param kind - 项目类型（如 "project"、"folder" 等）
- * @returns 稳定的按类型筛选项目列表选择器函数
- */
+ * 创建按类型筛选的项目选择�? *
+ * @param kind - 项目类型（如 "project"�?folder" 等）
+ * @returns 稳定的按类型筛选项目列表选择器函�? */
 export function createProjectsByKindSelector(
   kind: Project["kind"],
 ): (state: AppState) => readonly Project[] {

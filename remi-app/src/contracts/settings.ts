@@ -1,5 +1,6 @@
 /**
- * 服务器设置类型定义。
+ * @file settings.ts
+ * @description 服务器设置类型定义。
  * 包含各 Provider（Codex、Claude、Gemini、Grok、Cursor、OpenCode、Kilo、Pi）的配置类型，
  * 以及服务器全局设置、设置补丁（部分更新）和设置错误类型。
  */

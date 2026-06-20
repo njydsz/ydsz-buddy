@@ -3,7 +3,7 @@
 // Layer: UI helpers
 // Exports: visible-thread resolver shared by toast containers and split-aware tests
 
-import type { ThreadId } from "@remi-code/contracts";
+import type { ThreadId } from "~/contracts";
 import { resolveSplitViewThreadIds, type SplitView } from "../../splitViewStore";
 
 export function resolveVisibleToastThreadIds(input: {

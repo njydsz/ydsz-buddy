@@ -1,4 +1,4 @@
-import { type ResolvedKeybindingsConfig } from "@remi-code/contracts";
+import { type ResolvedKeybindingsConfig } from "~/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";

@@ -3,7 +3,7 @@
 // Exports: resolveDiffPanelThread
 // Depends on: ChatView.logic draft-thread normalization.
 
-import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection, type ThreadId } from "@remi-code/contracts";
+import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection, type ThreadId } from "~/contracts";
 
 import type { DraftThreadState } from "../composerDraftStore";
 import type { Thread } from "../types";

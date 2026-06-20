@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use remi_auth::AuthService;
 use remi_checkpoint::CheckpointStore;
+use remi_config::ServerConfig;
 use remi_git::{GitCore, GitManager, GitStatusBroadcaster};
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use remi_provider::ProviderService;
@@ -15,11 +16,13 @@ use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 use tracing::info;
 
+use crate::push_channels::PushChannelManager;
 use crate::rpc::RpcRouter;
 use super::handlers::{
     register_orchestration_methods, register_provider_methods, register_git_methods,
     register_terminal_methods, register_workspace_methods, register_auth_methods,
     register_checkpoint_methods, register_server_methods, register_telemetry_methods,
+    register_subscription_methods,
 };
 
 /// 服务容器
@@ -54,6 +57,10 @@ pub struct ServiceContainer {
     pub analytics_service: Arc<AnalyticsService>,
     /// 指标收集器
     pub metrics_collector: Arc<MetricsCollector>,
+    /// 推送通道管理器
+    pub push_channel_manager: Arc<PushChannelManager>,
+    /// 服务器配置
+    pub config: Arc<ServerConfig>,
 }
 
 /// 注册所有 RPC 方法
@@ -96,7 +103,10 @@ pub async fn register_all_methods(
     register_server_methods(router.clone(), services.clone()).await;
 
     // 遥测方法
-    register_telemetry_methods(router, services).await;
+    register_telemetry_methods(router.clone(), services.clone()).await;
+
+    // 推送通道订阅方法
+    register_subscription_methods(router, services).await;
 
     info!("RPC 方法注册完成");
 }

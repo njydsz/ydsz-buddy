@@ -4,7 +4,7 @@
 // Exports: deriveReadableToolTitle, deriveReadableCommandDisplay, deriveInlineCommandCall, normalizeCompactToolLabel
 // Depends on: @remi-code/contracts tool lifecycle item types
 
-import type { ToolLifecycleItemType } from "@remi-code/contracts";
+import type { ToolLifecycleItemType } from "~/contracts";
 
 export function normalizeCompactToolLabel(value: string): string {
   return value

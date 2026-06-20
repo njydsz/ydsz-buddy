@@ -1,4 +1,4 @@
-import type { TerminalEvent } from "@remi-code/contracts";
+import type { TerminalEvent } from "~/contracts";
 
 import { readNativeApi } from "~/nativeApi";
 

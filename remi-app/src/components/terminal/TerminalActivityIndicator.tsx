@@ -2,7 +2,7 @@
 // Purpose: Compact terminal lifecycle indicator for running, attention, and review states.
 // Layer: Terminal presentation primitive
 
-import type { TerminalVisualState } from "@remi-code/shared/terminalThreads";
+import type { TerminalVisualState } from "~/shared/terminalThreads";
 
 import { cn } from "~/lib/utils";
 

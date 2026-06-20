@@ -1,14 +1,7 @@
 /**
- * @file WebSocket 传输层实现
- * @description 基于 Effect RPC 和 WebSocket 协议的双向通信传输层。
- *              封装了 RPC 客户端的创建、连接管理、自动重连、流式订阅等功能，
- *              为上层提供统一的 request/subscribe 接口，屏蔽底层 WebSocket 通信细节。
- *              Tauri 迁移期间临时跳过类型检查，后续需替换为 Tauri event/invoke 实现。
- */
+ * @file WebSocket 传输层实�? * @description 基于 Effect RPC �?WebSocket 协议的双向通信传输层�? *              封装�?RPC 客户端的创建、连接管理、自动重连、流式订阅等功能�? *              为上层提供统一�?request/subscribe 接口，屏蔽底�?WebSocket 通信细节�? *              Tauri 迁移期间临时跳过类型检查，后续需替换�?Tauri event/invoke 实现�? */
 // @ts-nocheck
-// TODO: Tauri 迁移期间临时跳过类型检查。原文件基于 Effect RPC/WebSocket，
-// 需替换为 Tauri event/invoke 实现。
-
+// TODO: Tauri 迁移期间临时跳过类型检查。原文件基于 Effect RPC/WebSocket�?// 需替换�?Tauri event/invoke 实现�?
 import {
   ORCHESTRATION_WS_CHANNELS,
   ORCHESTRATION_WS_METHODS,
@@ -28,21 +21,21 @@ import {
   type WsPush,
   type WsPushChannel,
   type WsPushMessage,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from "effect";
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";
 
-/** 推送消息监听器类型，用于订阅指定频道的推送消息 */
+/** 推送消息监听器类型，用于订阅指定频道的推送消�?*/
 type PushListener<C extends WsPushChannel> = (message: WsPushMessage<C>) => void;
 
-/** RPC 客户端工厂 Effect 类型 */
+/** RPC 客户端工�?Effect 类型 */
 type RpcClientEffect = typeof makeRpcClient;
-/** RPC 客户端实例类型，从工厂 Effect 中推断 */
+/** RPC 客户端实例类型，从工�?Effect 中推�?*/
 type RpcClientInstance =
   RpcClientEffect extends Effect.Effect<infer Client, any, any> ? Client : never;
 
-/** 传输层连接状态 */
+/** 传输层连接状�?*/
 type TransportState = "connecting" | "open" | "closed" | "disposed";
 
 /** WebSocket RPC 通信错误 */
@@ -51,13 +44,13 @@ class WsTransportRpcError extends Data.TaggedError("WsTransportRpcError")<{
   readonly cause?: unknown;
 }> {}
 
-/** 创建 RPC 客户端实例的 Effect，基于 WsRpcGroup 定义的方法集 */
+/** 创建 RPC 客户端实例的 Effect，基�?WsRpcGroup 定义的方法集 */
 const makeRpcClient = RpcClient.make(WsRpcGroup);
 
 /**
- * 将原始 URL 解析为 RPC 端点地址
+ * 将原�?URL 解析�?RPC 端点地址
  * @param rawUrl - 原始 WebSocket 连接地址
- * @returns 追加了 `/ws` 路径的完整 URL
+ * @returns 追加�?`/ws` 路径的完�?URL
  */
 function resolveRpcUrl(rawUrl: string): string {
   const url = new URL(rawUrl);
@@ -68,8 +61,7 @@ function resolveRpcUrl(rawUrl: string): string {
 /**
  * 构建 WebSocket 连接地址
  * 优先级：显式 URL > Tauri Bridge URL > 环境变量 VITE_WS_URL > 当前页面协议自动推导
- * @param explicitUrl - 显式指定的 WebSocket URL，为 null 时自动推导
- * @returns 可用于建立 WebSocket 连接的完整 URL
+ * @param explicitUrl - 显式指定�?WebSocket URL，为 null 时自动推�? * @returns 可用于建�?WebSocket 连接的完�?URL
  */
 function makeSocketUrl(explicitUrl: string | null): string {
   if (explicitUrl) return resolveRpcUrl(explicitUrl);
@@ -87,7 +79,7 @@ function makeSocketUrl(explicitUrl: string | null): string {
 /**
  * 构建 RPC 协议层，包含 WebSocket 传输层和 JSON 序列化层
  * @param url - WebSocket 连接地址
- * @returns Effect Layer，提供 RPC 协议支持
+ * @returns Effect Layer，提�?RPC 协议支持
  */
 function makeProtocolLayer(url: string) {
   const socketLayer = Socket.layerWebSocket(url).pipe(
@@ -99,8 +91,8 @@ function makeProtocolLayer(url: string) {
 }
 
 /**
- * 将 Effect Cause 转换为标准 Error 对象
- * @param cause - Effect 框架的错误 Cause
+ * �?Effect Cause 转换为标�?Error 对象
+ * @param cause - Effect 框架的错�?Cause
  * @returns 标准 Error 实例
  */
 function causeToError(cause: Cause.Cause<unknown>): Error {
@@ -109,10 +101,8 @@ function causeToError(cause: Cause.Cause<unknown>): Error {
 }
 
 /**
- * 过滤用户输入应答中的 null/undefined 值
- * 当命令类型为 thread.user-input.respond 时，移除 answers 中值为 null 或 undefined 的条目，
- * 避免后端接收到无效的空值应答
- * @param input - 原始 RPC 请求参数
+ * 过滤用户输入应答中的 null/undefined �? * 当命令类型为 thread.user-input.respond 时，移除 answers 中值为 null �?undefined 的条目，
+ * 避免后端接收到无效的空值应�? * @param input - 原始 RPC 请求参数
  * @returns 过滤后的请求参数
  */
 function omitNullUserInputAnswers(input: unknown): unknown {
@@ -139,17 +129,13 @@ function omitNullUserInputAnswers(input: unknown): unknown {
 /**
  * 判断给定频道是否为服务器生命周期相关频道
  * @param channel - 频道标识
- * @returns 是否为服务器生命周期频道（serverWelcome 或 serverMaintenanceUpdated）
- */
+ * @returns 是否为服务器生命周期频道（serverWelcome �?serverMaintenanceUpdated�? */
 export function isServerLifecyclePushChannel(channel: string): boolean {
   return channel === WS_CHANNELS.serverWelcome || channel === WS_CHANNELS.serverMaintenanceUpdated;
 }
 
 /**
- * 判断是否需要保持服务器生命周期流处于活跃状态
- * 当任一生命周期频道仍有订阅者时，流不应被关闭
- * @param activeChannels - 当前活跃的频道集合
- * @returns 是否需要保持生命周期流
+ * 判断是否需要保持服务器生命周期流处于活跃状�? * 当任一生命周期频道仍有订阅者时，流不应被关�? * @param activeChannels - 当前活跃的频道集�? * @returns 是否需要保持生命周期流
  */
 export function shouldKeepServerLifecycleStream(activeChannels: ReadonlySet<string>): boolean {
   return (
@@ -160,12 +146,9 @@ export function shouldKeepServerLifecycleStream(activeChannels: ReadonlySet<stri
 
 /**
  * WebSocket 传输层核心类
- * 负责管理 WebSocket 连接的生命周期，包括：
- * - RPC 请求的发送与响应接收
- * - 推送频道的订阅与取消
- * - 连接断开后的自动重连（指数退避）
- * - 流式数据的订阅管理
- *
+ * 负责管理 WebSocket 连接的生命周期，包括�? * - RPC 请求的发送与响应接收
+ * - 推送频道的订阅与取�? * - 连接断开后的自动重连（指数退避）
+ * - 流式数据的订阅管�? *
  * @example
  * ```typescript
  * const transport = new WsTransport("ws://localhost:8080");
@@ -178,35 +161,35 @@ export function shouldKeepServerLifecycleStream(activeChannels: ReadonlySet<stri
  * ```
  */
 export class WsTransport {
-  /** 显式指定的 WebSocket URL，优先级最高 */
+  /** 显式指定�?WebSocket URL，优先级最�?*/
   private readonly explicitUrl: string | null;
   /** 各频道的监听器集合，key 为频道名 */
   private readonly listeners = new Map<string, Set<(message: WsPush) => void>>();
   /** 各频道最近一次推送消息缓存，用于新订阅者的回放 */
   private readonly latestPushByChannel = new Map<string, WsPush>();
-  /** 消息序列号，用于推送消息排序 */
+  /** 消息序列号，用于推送消息排�?*/
   private sequence = 0;
-  /** 当前传输层状态 */
+  /** 当前传输层状�?*/
   private state: TransportState = "connecting";
-  /** 是否已销毁 */
+  /** 是否已销�?*/
   private disposed = false;
-  /** Effect ManagedRuntime，管理 RPC 客户端的生命周期 */
+  /** Effect ManagedRuntime，管�?RPC 客户端的生命周期 */
   private runtime: ManagedRuntime.ManagedRuntime<RpcClient.Protocol, never>;
   /** RPC 客户端的作用域，用于资源清理 */
   private clientScope: Scope.Closeable;
   /** RPC 客户端实例的 Promise，支持异步初始化 */
   private clientPromise: Promise<RpcClientInstance>;
-  /** 正在进行的重连 Promise，防止并发重连 */
+  /** 正在进行的重�?Promise，防止并发重�?*/
   private reconnectPromise: Promise<RpcClientInstance> | null = null;
-  /** 连续重连失败次数，用于计算退避延迟 */
+  /** 连续重连失败次数，用于计算退避延�?*/
   private reconnectFailures = 0;
   /** 活跃流的清理函数映射，key 为流标识 */
   private readonly streamCleanups = new Map<string, () => void>();
   /** 正在主动停止的流标识集合，用于区分主动停止和异常断开 */
   private readonly stoppingStreams = new Set<string>();
-  /** 是否已订阅 Shell 事件流 */
+  /** 是否已订�?Shell 事件�?*/
   private shellSubscribed = false;
-  /** 线程订阅参数映射，key 为 threadId，重连时用于恢复订阅 */
+  /** 线程订阅参数映射，key �?threadId，重连时用于恢复订阅 */
   private readonly threadSubscriptions = new Map<string, unknown>();
 
   /**
@@ -222,10 +205,7 @@ export class WsTransport {
   }
 
   /**
-   * 发送 RPC 请求并返回响应
-   * 对于流式方法（如 git 操作、Shell/Thread 订阅），会启动对应的流处理
-   * @param method - RPC 方法名
-   * @param params - 请求参数
+   * 发�?RPC 请求并返回响�?   * 对于流式方法（如 git 操作、Shell/Thread 订阅），会启动对应的流处�?   * @param method - RPC 方法�?   * @param params - 请求参数
    * @param _options - 可选配置（如超时时间），当前未使用
    * @returns RPC 响应结果
    * @throws 当传输层已销毁或方法不存在时抛出错误
@@ -281,13 +261,9 @@ export class WsTransport {
   }
 
   /**
-   * 订阅指定频道的推送消息
-   * 当首个监听器注册时自动启动对应的流，当最后一个监听器移除时自动停止流
-   * @param channel - 要订阅的推送频道
-   * @param listener - 消息回调函数
-   * @param options - 订阅选项，replayLatest 为 true 时会立即回放最近一条消息
-   * @returns 取消订阅的函数
-   * @example
+   * 订阅指定频道的推送消�?   * 当首个监听器注册时自动启动对应的流，当最后一个监听器移除时自动停止流
+   * @param channel - 要订阅的推送频�?   * @param listener - 消息回调函数
+   * @param options - 订阅选项，replayLatest �?true 时会立即回放最近一条消�?   * @returns 取消订阅的函�?   * @example
    * ```typescript
    * const unsub = transport.subscribe(WS_CHANNELS.serverConfigUpdated, (msg) => {
    *   console.log(msg.data);
@@ -324,9 +300,8 @@ export class WsTransport {
   }
 
   /**
-   * 获取指定频道最近一次推送消息
-   * @param channel - 频道标识
-   * @returns 最近一次推送消息，若无缓存则返回 null
+   * 获取指定频道最近一次推送消�?   * @param channel - 频道标识
+   * @returns 最近一次推送消息，若无缓存则返�?null
    */
   getLatestPush<C extends WsPushChannel>(channel: C): WsPushMessage<C> | null {
     const latest = this.latestPushByChannel.get(channel);
@@ -334,16 +309,13 @@ export class WsTransport {
   }
 
   /**
-   * 获取当前传输层状态
-   * @returns 传输层连接状态
-   */
+   * 获取当前传输层状�?   * @returns 传输层连接状�?   */
   getState(): TransportState {
     return this.state;
   }
 
   /**
-   * 销毁传输层，释放所有资源
-   * 停止所有活跃流、关闭 RPC 客户端连接、销毁运行时
+   * 销毁传输层，释放所有资�?   * 停止所有活跃流、关�?RPC 客户端连接、销毁运行时
    */
   dispose() {
     this.disposed = true;
@@ -355,7 +327,7 @@ export class WsTransport {
     });
   }
 
-  /** 创建新的 RPC 会话（运行时 + 客户端作用域 + 客户端 Promise） */
+  /** 创建新的 RPC 会话（运行时 + 客户端作用域 + 客户�?Promise�?*/
   private createSession() {
     const runtime = ManagedRuntime.make(makeProtocolLayer(makeSocketUrl(this.explicitUrl)));
     const clientScope = runtime.runSync(Scope.make());
@@ -373,9 +345,7 @@ export class WsTransport {
   }
 
   /**
-   * 获取 RPC 客户端实例，连接失败时自动触发重连
-   * @returns RPC 客户端实例
-   */
+   * 获取 RPC 客户端实例，连接失败时自动触发重�?   * @returns RPC 客户端实�?   */
   private async getClient(): Promise<RpcClientInstance> {
     try {
       return await this.clientPromise;
@@ -387,9 +357,7 @@ export class WsTransport {
 
   /**
    * 执行重连操作，清理旧会话并创建新会话
-   * 使用互斥锁（reconnectPromise）防止并发重连
-   * @returns 新的 RPC 客户端实例
-   */
+   * 使用互斥锁（reconnectPromise）防止并发重�?   * @returns 新的 RPC 客户端实�?   */
   private reconnect(): Promise<RpcClientInstance> {
     if (this.reconnectPromise) return this.reconnectPromise;
 
@@ -412,12 +380,9 @@ export class WsTransport {
   }
 
   /**
-   * 打开新的重连会话，使用指数退避策略延迟重试
-   * 重连成功后恢复所有频道订阅、Shell 订阅和线程订阅
-   * @returns 新的 RPC 客户端实例
-   */
+   * 打开新的重连会话，使用指数退避策略延迟重�?   * 重连成功后恢复所有频道订阅、Shell 订阅和线程订�?   * @returns 新的 RPC 客户端实�?   */
   private async openReconnectSession(): Promise<RpcClientInstance> {
-    // 指数退避：500ms * 2^failures，最大 5000ms
+    // 指数退避：500ms * 2^failures，最�?5000ms
     const delayMs = Math.min(500 * 2 ** this.reconnectFailures, 5_000);
     this.reconnectFailures += 1;
     await new Promise((resolve) => window.setTimeout(resolve, delayMs));
@@ -444,8 +409,7 @@ export class WsTransport {
   /**
    * 向指定频道发送推送消息，通知所有监听器
    * @param channel - 目标频道
-   * @param data - 推送数据
-   */
+   * @param data - 推送数�?   */
   private emit<C extends WsPushChannel>(channel: C, data: WsPushMessage<C>["data"]): void {
     const message = {
       type: "push" as const,
@@ -466,8 +430,7 @@ export class WsTransport {
   }
 
   /**
-   * 启动指定频道的流式订阅
-   * 根据频道类型路由到对应的流处理逻辑
+   * 启动指定频道的流式订�?   * 根据频道类型路由到对应的流处理逻辑
    * @param channel - 要订阅的频道
    */
   private startChannelStream(channel: WsPushChannel): void {
@@ -538,8 +501,7 @@ export class WsTransport {
   }
 
   /**
-   * 停止指定频道的流式订阅
-   * @param channel - 要停止的频道
+   * 停止指定频道的流式订�?   * @param channel - 要停止的频道
    */
   private stopChannelStream(channel: WsPushChannel): void {
     if (isServerLifecyclePushChannel(channel)) {
@@ -553,15 +515,13 @@ export class WsTransport {
       this.stopStream("orchestration.domain");
   }
 
-  /** 判断是否仍需保持生命周期流活跃 */
+  /** 判断是否仍需保持生命周期流活�?*/
   private shouldKeepLifecycleStream(): boolean {
     return shouldKeepServerLifecycleStream(new Set(this.listeners.keys()));
   }
 
   /**
-   * 启动服务器生命周期事件流（welcome + maintenance）
-   * @param client - RPC 客户端实例
-   */
+   * 启动服务器生命周期事件流（welcome + maintenance�?   * @param client - RPC 客户端实�?   */
   private startLifecycleStream(client: RpcClientInstance): void {
     const restartLifecycle = () => {
       if (!this.shouldKeepLifecycleStream()) return;
@@ -584,9 +544,7 @@ export class WsTransport {
   }
 
   /**
-   * 启动 Shell 事件流
-   * @param client - RPC 客户端实例
-   */
+   * 启动 Shell 事件�?   * @param client - RPC 客户端实�?   */
   private startShellStream(client: RpcClientInstance): void {
     const restartShell = () => {
       void this.getClient()
@@ -604,8 +562,7 @@ export class WsTransport {
 
   /**
    * 启动指定线程的事件流
-   * @param client - RPC 客户端实例
-   * @param threadId - 线程 ID
+   * @param client - RPC 客户端实�?   * @param threadId - 线程 ID
    * @param input - 订阅参数
    */
   private startThreadStream(client: RpcClientInstance, threadId: string, input: unknown): void {
@@ -627,12 +584,9 @@ export class WsTransport {
   }
 
   /**
-   * 通用的流启动方法，订阅 Effect Stream 并在流结束时自动处理重连或错误
-   * @param key - 流的唯一标识，用于管理生命周期
-   * @param stream - Effect Stream 实例
+   * 通用的流启动方法，订�?Effect Stream 并在流结束时自动处理重连或错�?   * @param key - 流的唯一标识，用于管理生命周�?   * @param stream - Effect Stream 实例
    * @param listener - 事件回调
-   * @param restart - 流异常中断后的重启回调
-   */
+   * @param restart - 流异常中断后的重启回�?   */
   private startStream<T>(
     key: string,
     stream: unknown,
@@ -688,10 +642,8 @@ export class WsTransport {
 
   /**
    * 执行 Git 堆叠操作流，将进度事件推送到 gitActionProgress 频道
-   * @param client - RPC 客户端实例
-   * @param params - Git 操作参数
-   * @returns Git 操作的最终结果
-   * @throws 当流完成但未返回最终结果时抛出错误
+   * @param client - RPC 客户端实�?   * @param params - Git 操作参数
+   * @returns Git 操作的最终结�?   * @throws 当流完成但未返回最终结果时抛出错误
    */
   private async runGitActionStream(
     client: RpcClientInstance,

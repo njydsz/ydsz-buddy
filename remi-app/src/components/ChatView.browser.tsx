@@ -14,7 +14,7 @@ import {
   WS_CHANNELS,
   WS_METHODS,
   OrchestrationSessionStatus,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { RouterProvider, createMemoryHistory } from "@tanstack/react-router";
 import { HttpResponse, http, ws } from "msw";
 import { setupWorker } from "msw/browser";
@@ -2349,7 +2349,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
       // Clear the draft now that the server thread exists (mirrors EventRouter behavior).
       useComposerDraftStore.getState().clearDraftThread(newThreadId);
 
-      // The route should still be on the new thread ï¿½?not redirected away.
+      // The route should still be on the new thread ï¿?not redirected away.
       await waitForURL(
         mounted.router,
         (path) => path === newThreadPath,

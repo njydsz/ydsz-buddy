@@ -1,7 +1,6 @@
 /**
- * Provider 发现与能力查询契约
- *
- * 定义 Provider 能力发现相关的数据结构，包括：
+ * @file providerDiscovery.ts
+ * @description Provider 发现与能力查询契约。定义 Provider 能力发现相关的数据结构，包括：
  * - 技能（Skills）的发现与描述
  * - 命令（Commands）的列表
  * - 插件（Plugins）的市场与详情

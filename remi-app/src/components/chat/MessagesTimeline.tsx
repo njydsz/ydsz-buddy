@@ -1,14 +1,11 @@
 /**
  * @file MessagesTimeline.tsx
- * @description 聊天消息时间线组件，负责渲染聊天记录行并使用 LegendList 管理滚动/跟随行为。
- * 该组件是 Web 端聊天展示层的核心组件，处理用户消息、助手回复、工具调用日志、
- * 文件变更摘要等多种时间线行的渲染逻辑。
- * @layer Web 聊天展示组件
+ * @description 聊天消息时间线组件，负责渲染聊天记录行并使用 LegendList 管理滚动/跟随行为�? * 该组件是 Web 端聊天展示层的核心组件，处理用户消息、助手回复、工具调用日志�? * 文件变更摘要等多种时间线行的渲染逻辑�? * @layer Web 聊天展示组件
  * @exports MessagesTimeline
  */
 
-import { type MessageId, ThreadId, type TurnId } from "@remi-code/contracts";
-import { resolveLatestTailUserMessageEditTarget } from "@remi-code/shared/conversationEdit";
+import { type MessageId, ThreadId, type TurnId } from "~/contracts";
+import { resolveLatestTailUserMessageEditTarget } from "~/shared/conversationEdit";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import {
   memo,
@@ -103,12 +100,12 @@ import {
 import { RiRobot3Line } from "react-icons/ri";
 import { deriveUserMessagePreviewState } from "./userMessagePreview";
 
-/** 工作日志条目最大可见数量，超出后显示"查看更多" */
+/** 工作日志条目最大可见数量，超出后显�?查看更多" */
 const MAX_VISIBLE_WORK_LOG_ENTRIES = 6;
-/** 内联工具调用条目最大可见数量 */
+/** 内联工具调用条目最大可见数�?*/
 const MAX_VISIBLE_INLINE_TOOL_ENTRIES = 4;
 
-/** 技能立方体图标，用于 MCP 工具调用条目 */
+/** 技能立方体图标，用�?MCP 工具调用条目 */
 const SkillCubeIcon: LucideIcon = (props) => (
   <svg {...props} viewBox="0 0 24 24" fill="none">
     <path
@@ -135,7 +132,7 @@ const SkillCubeIcon: LucideIcon = (props) => (
   </svg>
 );
 
-/** 代理任务图标，用于协作代理工具调用条目 */
+/** 代理任务图标，用于协作代理工具调用条�?*/
 const AgentTaskIcon: LucideIcon = (props) => (
   <RiRobot3Line className={props.className} style={props.style} />
 );
@@ -153,12 +150,8 @@ const AGENT_COLOR_STYLES: Record<string, { bg: string; text: string }> = {
 };
 
 /**
- * 用户消息调度模式标签组件。
- * 当用户消息的 dispatchMode 为 "steer" 时，显示 "Steering conversation" 标签，
- * 将引导标记视觉上附加到整条已发送消息堆栈上。
- * @param dispatchMode - 消息调度模式
- * @param hasLeadingMedia - 是否有前置媒体（图片或助手选择）
- */
+ * 用户消息调度模式标签组件�? * 当用户消息的 dispatchMode �?"steer" 时，显示 "Steering conversation" 标签�? * 将引导标记视觉上附加到整条已发送消息堆栈上�? * @param dispatchMode - 消息调度模式
+ * @param hasLeadingMedia - 是否有前置媒体（图片或助手选择�? */
 function UserDispatchModeChip({
   dispatchMode,
   hasLeadingMedia,
@@ -183,16 +176,14 @@ function UserDispatchModeChip({
   );
 }
 
-/** 从路径中提取文件名部分 */
+/** 从路径中提取文件名部�?*/
 function basename(value: string): string {
   const slash = Math.max(value.lastIndexOf("/"), value.lastIndexOf("\\"));
   return slash >= 0 ? value.slice(slash + 1) : value;
 }
 
 /**
- * MessagesTimeline 组件的 Props 类型定义。
- * 包含聊天时间线渲染所需的所有配置和回调。
- */
+ * MessagesTimeline 组件�?Props 类型定义�? * 包含聊天时间线渲染所需的所有配置和回调�? */
 interface MessagesTimelineProps {
   hasMessages: boolean;
   isWorking: boolean;
@@ -236,10 +227,8 @@ interface MessagesTimelineProps {
 }
 
 /**
- * 聊天消息时间线组件。
- * 负责渲染聊天记录中的用户消息、助手回复、工具调用日志、文件变更摘要等行，
- * 并使用 LegendList 管理虚拟化滚动和实时跟随行为。
- * @param props - MessagesTimelineProps
+ * 聊天消息时间线组件�? * 负责渲染聊天记录中的用户消息、助手回复、工具调用日志、文件变更摘要等行，
+ * 并使�?LegendList 管理虚拟化滚动和实时跟随行为�? * @param props - MessagesTimelineProps
  */
 export const MessagesTimeline = memo(function MessagesTimeline({
   hasMessages,
@@ -743,7 +732,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                 inlineWorkSummary,
               ]
                 .filter((value): value is string => Boolean(value))
-                .join(" �?")
+                .join(" �?")
             ) : (
               <>
                 <LiveMessageMeta
@@ -751,7 +740,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                   durationStart={row.durationStart}
                   timestampFormat={timestampFormat}
                 />
-                {inlineWorkSummary ? <> �?{inlineWorkSummary}</> : null}
+                {inlineWorkSummary ? <> �?{inlineWorkSummary}</> : null}
               </>
             )
           ) : (
@@ -764,7 +753,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               inlineWorkSummary,
             ]
               .filter((value): value is string => Boolean(value))
-              .join(" �?")
+              .join(" �?")
           );
           return (
             <>
@@ -1083,16 +1072,13 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   );
 });
 
-/** 时间线消息行的消息类型提取 */
+/** 时间线消息行的消息类型提�?*/
 type TimelineMessage = Extract<MessagesTimelineRow, { kind: "message" }>["message"];
-/** 时间线工作日志条目类型提取 */
+/** 时间线工作日志条目类型提�?*/
 type TimelineWorkEntry = Extract<MessagesTimelineRow, { kind: "work" }>["groupedEntries"][number];
 
 /**
- * 复用稳定行引用的 Hook。
- * 在流式更新时，仅对可见内容实际发生变化的行触发 React 重新渲染，
- * 避免不必要的整列表刷新。
- */
+ * 复用稳定行引用的 Hook�? * 在流式更新时，仅对可见内容实际发生变化的行触�?React 重新渲染�? * 避免不必要的整列表刷新�? */
 function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
   const previousStateRef = useRef<StableMessagesTimelineRowsState>({
     byId: new Map<string, MessagesTimelineRow>(),
@@ -1107,9 +1093,7 @@ function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
 }
 
 /**
- * 工作计时器组件。
- * 将实时时钟限定在小型叶子组件内，避免活跃的助手回合每秒强制整个对话树重新渲染。
- */
+ * 工作计时器组件�? * 将实时时钟限定在小型叶子组件内，避免活跃的助手回合每秒强制整个对话树重新渲染�? */
 function WorkingTimer({ createdAt }: { createdAt: string }) {
   const textRef = useRef<HTMLSpanElement>(null);
   const initialText = formatWorkingTimerNow(createdAt);
@@ -1130,7 +1114,7 @@ function WorkingTimer({ createdAt }: { createdAt: string }) {
   return <span ref={textRef}>{initialText}</span>;
 }
 
-/** 实时消息元信息组件，显示创建时间和持续时长 */
+/** 实时消息元信息组件，显示创建时间和持续时�?*/
 function LiveMessageMeta({
   createdAt,
   durationStart,
@@ -1163,7 +1147,7 @@ function LiveMessageMeta({
   return <span ref={textRef}>{initialText}</span>;
 }
 
-/** 格式化工作计时器文本，返回如 "5s"、"2m 30s"、"1h 5m" 格式 */
+/** 格式化工作计时器文本，返回如 "5s"�?2m 30s"�?1h 5m" 格式 */
 function formatWorkingTimer(startIso: string, endIso: string): string | null {
   const startedAtMs = Date.parse(startIso);
   const endedAtMs = Date.parse(endIso);
@@ -1192,7 +1176,7 @@ function formatWorkingTimerNow(startIso: string): string {
   return formatWorkingTimer(startIso, new Date().toISOString()) ?? "0s";
 }
 
-/** 格式化实时消息元信息（创建时间 + 持续时长） */
+/** 格式化实时消息元信息（创建时�?+ 持续时长�?*/
 function formatLiveMessageMetaNow(
   createdAt: string,
   durationStart: string,
@@ -1205,22 +1189,22 @@ function formatLiveMessageMetaNow(
   );
 }
 
-/** 格式化消息元信息，拼接时间戳和持续时长 */
+/** 格式化消息元信息，拼接时间戳和持续时�?*/
 function formatMessageMeta(
   createdAt: string,
   duration: string | null,
   timestampFormat: TimestampFormat,
 ): string {
   if (!duration) return formatShortTimestamp(createdAt, timestampFormat);
-  return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
+  return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
 }
 
-/** 格式化内联工作摘要（当前未实现，返回 null） */
+/** 格式化内联工作摘要（当前未实现，返回 null�?*/
 function formatInlineWorkSummary(_groupedEntries: TimelineWorkEntry[]): string | null {
   return null;
 }
 
-/** 判断条目列表是否全部为工具调用类型 */
+/** 判断条目列表是否全部为工具调用类�?*/
 function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   entries: ReadonlyArray<T> | undefined,
 ): entries is ReadonlyArray<T> {
@@ -1230,7 +1214,7 @@ function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   return entries.every((entry) => entry.tone === "tool");
 }
 
-/** 用户消息中的终端上下文内联标签组件 */
+/** 用户消息中的终端上下文内联标签组�?*/
 const UserMessageTerminalContextInlineLabel = memo(
   function UserMessageTerminalContextInlineLabel(props: { context: ParsedTerminalContextEntry }) {
     const tooltipText =
@@ -1664,7 +1648,7 @@ function extractFilePathFromDetail(detail: string): string | null {
       return filePath.trim();
     }
   } catch {
-    // Not valid JSON �?try regex fallback
+    // Not valid JSON �?try regex fallback
     const match = /"(?:file_path|filePath|path|filename)"\s*:\s*"([^"]+)"/i.exec(detail);
     if (match?.[1]) return match[1];
   }
@@ -1720,7 +1704,7 @@ function workEntryPreview(
     const filePath = extractFilePathFromDetail(workEntry.detail);
     if (filePath) return basename(filePath);
 
-    // For file-related entries, the heading alone is enough �?don't show raw JSON
+    // For file-related entries, the heading alone is enough �?don't show raw JSON
     if (isFileRelated) return null;
 
     // For other entries, if the detail looks like raw JSON, skip it
@@ -1730,7 +1714,7 @@ function workEntryPreview(
     const readLinesMatch = /^Read\s+(\d+\s+lines?)$/i.exec(trimmedDetail);
     if (readLinesMatch?.[1]) return readLinesMatch[1];
 
-    // Clean, non-JSON detail �?show it
+    // Clean, non-JSON detail �?show it
     return trimmedDetail;
   }
 
@@ -1831,7 +1815,7 @@ function subagentSecondaryLabel(
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(" �?");
+  return parts.join(" �?");
 }
 
 function subagentStatusClasses(
@@ -1867,7 +1851,7 @@ function subagentCardSummary(workEntry: TimelineWorkEntry): string {
 function subagentCardMeta(workEntry: TimelineWorkEntry): string | null {
   const modelLabel = formatSubagentModelLabel(workEntry.subagentAction?.model);
   if (modelLabel && workEntry.subagentAction?.prompt) {
-    return `${modelLabel} �?${workEntry.subagentAction.prompt}`;
+    return `${modelLabel} �?${workEntry.subagentAction.prompt}`;
   }
   return modelLabel ?? workEntry.subagentAction?.prompt ?? null;
 }

@@ -1,10 +1,6 @@
 /**
- * @file 基于 WebSocket 的 NativeApi 实现
- * @description 通过 WsTransport 实现 NativeApi 接口，将所有原生能力调用
- *              转换为 WebSocket RPC 请求。同时提供服务器推送事件的订阅机制，
- *              以及浏览器状态的后备（fallback）管理。
- *              当 Tauri 原生桥接不可用时，作为 Web 端的默认实现。
- */
+ * @file 基于 WebSocket �?NativeApi 实现
+ * @description 通过 WsTransport 实现 NativeApi 接口，将所有原生能力调�? *              转换�?WebSocket RPC 请求。同时提供服务器推送事件的订阅机制�? *              以及浏览器状态的后备（fallback）管理�? *              �?Tauri 原生桥接不可用时，作�?Web 端的默认实现�? */
 
 import {
   type AuthBootstrapInput,
@@ -37,20 +33,20 @@ import {
   WS_CHANNELS,
   WS_METHODS,
   type WsWelcomePayload,
-} from "@remi-code/contracts";
+} from "~/contracts";
 
 import { showConfirmDialogFallback } from "./confirmDialogFallback";
 import { showContextMenuFallback } from "./contextMenuFallback";
 import { WsTransport } from "./wsTransport";
 import { tauriBridge } from "./lib/tauri-bridge";
 
-/** 单例实例，缓存已创建的 NativeApi 和 WsTransport */
+/** 单例实例，缓存已创建�?NativeApi �?WsTransport */
 let instance: { api: NativeApi; transport: WsTransport } | null = null;
 /** 服务器欢迎消息监听器集合 */
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
 /** 服务器配置更新监听器集合 */
 const serverConfigUpdatedListeners = new Set<(payload: ServerConfigUpdatedPayload) => void>();
-/** 服务器 Provider 状态更新监听器集合 */
+/** 服务�?Provider 状态更新监听器集合 */
 const serverProviderStatusesUpdatedListeners = new Set<
   (payload: ServerProviderStatusesUpdatedPayload) => void
 >();
@@ -58,13 +54,11 @@ const serverProviderStatusesUpdatedListeners = new Set<
 const serverMaintenanceUpdatedListeners = new Set<(payload: ServerLifecycleStreamEvent) => void>();
 /** 服务器设置更新监听器集合 */
 const serverSettingsUpdatedListeners = new Set<(payload: ServerSettingsUpdatedPayload) => void>();
-/** Git 操作进度监听器集合 */
+/** Git 操作进度监听器集�?*/
 const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => void>();
 
 /**
- * 过滤用户输入应答中的 null/undefined 值
- * 仅对 thread.user-input.respond 类型的命令生效，移除 answers 中无效的空值条目
- * @param command - 编排调度命令
+ * 过滤用户输入应答中的 null/undefined �? * 仅对 thread.user-input.respond 类型的命令生效，移除 answers 中无效的空值条�? * @param command - 编排调度命令
  * @returns 过滤后的命令
  */
 function omitNullUserInputAnswers(
@@ -83,26 +77,24 @@ function omitNullUserInputAnswers(
     ),
   };
 }
-/** 终端事件监听器集合 */
+/** 终端事件监听器集�?*/
 const terminalEventListeners = new Set<(payload: TerminalEvent) => void>();
-/** 编排领域事件监听器集合 */
+/** 编排领域事件监听器集�?*/
 const orchestrationDomainEventListeners = new Set<(payload: OrchestrationEvent) => void>();
-/** 编排 Shell 事件监听器集合 */
+/** 编排 Shell 事件监听器集�?*/
 const orchestrationShellEventListeners = new Set<(payload: OrchestrationShellStreamItem) => void>();
-/** 编排线程事件监听器集合 */
+/** 编排线程事件监听器集�?*/
 const orchestrationThreadEventListeners = new Set<
   (payload: OrchestrationThreadStreamItem) => void
 >();
 /** 后备浏览器状态监听器集合 */
 const fallbackBrowserStateListeners = new Set<(state: ThreadBrowserState) => void>();
-/** 后备浏览器状态缓存，key 为 threadId */
+/** 后备浏览器状态缓存，key �?threadId */
 const fallbackBrowserStates = new Map<ThreadId, ThreadBrowserState>();
 
 /**
- * 创建默认的浏览器状态
- * @param threadId - 线程 ID
- * @returns 初始浏览器状态，版本为 0，未打开，无标签页
- */
+ * 创建默认的浏览器状�? * @param threadId - 线程 ID
+ * @returns 初始浏览器状态，版本�?0，未打开，无标签�? */
 function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   return {
     threadId,
@@ -115,9 +107,8 @@ function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
 }
 
 /**
- * 根据 URL 生成默认的浏览器标签页标题
- * @param url - 标签页 URL
- * @returns 标签页标题，空白页返回 "New tab"，否则返回域名或原始 URL
+ * 根据 URL 生成默认的浏览器标签页标�? * @param url - 标签�?URL
+ * @returns 标签页标题，空白页返�?"New tab"，否则返回域名或原始 URL
  */
 function defaultBrowserTitle(url: string): string {
   if (url === "about:blank") {
@@ -131,12 +122,10 @@ function defaultBrowserTitle(url: string): string {
 }
 
 /**
- * 发送带认证的 HTTP JSON 请求
+ * 发送带认证�?HTTP JSON 请求
  * @param path - 请求路径
- * @param options - 请求选项，包括方法和请求体
- * @returns 解析后的 JSON 响应
- * @throws 当响应状态码非 2xx 时抛出错误
- */
+ * @param options - 请求选项，包括方法和请求�? * @returns 解析后的 JSON 响应
+ * @throws 当响应状态码�?2xx 时抛出错�? */
 async function requestAuthJson<T>(
   path: string,
   options: {
@@ -191,9 +180,7 @@ function createFallbackTab(url = "about:blank") {
 
 /**
  * 深拷贝浏览器状态（包括标签页列表）
- * @param state - 原始浏览器状态
- * @returns 深拷贝后的浏览器状态
- */
+ * @param state - 原始浏览器状�? * @returns 深拷贝后的浏览器状�? */
 function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   return {
     ...state,
@@ -202,10 +189,8 @@ function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
 }
 
 /**
- * 获取指定线程的后备浏览器状态，不存在则创建默认状态
- * @param threadId - 线程 ID
- * @returns 浏览器状态
- */
+ * 获取指定线程的后备浏览器状态，不存在则创建默认状�? * @param threadId - 线程 ID
+ * @returns 浏览器状�? */
 function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const existing = fallbackBrowserStates.get(threadId);
   if (existing) {
@@ -219,8 +204,7 @@ function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
 /**
  * 通知所有后备浏览器状态监听器状态已更新
  * @param threadId - 线程 ID
- * @returns 更新后的浏览器状态副本
- */
+ * @returns 更新后的浏览器状态副�? */
 function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const state = cloneBrowserState(getFallbackBrowserState(threadId));
   for (const listener of fallbackBrowserStateListeners) {
@@ -229,17 +213,15 @@ function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return state;
 }
 
-/** 标记后备浏览器状态已变更，递增版本号 */
+/** 标记后备浏览器状态已变更，递增版本�?*/
 function markFallbackBrowserStateChanged(state: ThreadBrowserState): void {
   state.version += 1;
 }
 
 /**
- * 确保指定线程的后备浏览器工作区已初始化
- * 如果没有标签页则创建一个默认标签页，并标记为已打开
+ * 确保指定线程的后备浏览器工作区已初始�? * 如果没有标签页则创建一个默认标签页，并标记为已打开
  * @param threadId - 线程 ID
- * @returns 初始化后的浏览器状态
- */
+ * @returns 初始化后的浏览器状�? */
 function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState {
   const state = getFallbackBrowserState(threadId);
   if (state.tabs.length === 0) {
@@ -255,10 +237,8 @@ function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState 
  * 解析后备浏览器中的目标标签页
  * 优先匹配指定 tabId，其次匹配当前活跃标签页，最后使用第一个标签页
  * 若均不存在则创建新标签页
- * @param state - 浏览器状态
- * @param tabId - 可选的目标标签页 ID
- * @returns 匹配到的标签页
- */
+ * @param state - 浏览器状�? * @param tabId - 可选的目标标签�?ID
+ * @returns 匹配到的标签�? */
 function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
   const existing =
     (tabId ? state.tabs.find((tab) => tab.id === tabId) : undefined) ??
@@ -275,12 +255,9 @@ function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
 }
 
 /**
- * 订阅服务器欢迎消息
- * 如果在调用之前已收到欢迎消息，监听器会同步触发并传入缓存的消息，
- * 避免 WebSocket 连接与 React effect 注册之间的竞态条件
- * @param listener - 欢迎消息回调函数
- * @returns 取消订阅的函数
- */
+ * 订阅服务器欢迎消�? * 如果在调用之前已收到欢迎消息，监听器会同步触发并传入缓存的消息，
+ * 避免 WebSocket 连接�?React effect 注册之间的竞态条�? * @param listener - 欢迎消息回调函数
+ * @returns 取消订阅的函�? */
 export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): () => void {
   welcomeListeners.add(listener);
 
@@ -299,11 +276,8 @@ export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): 
 }
 
 /**
- * 订阅服务器配置更新事件
- * 对迟注册的订阅者回放最新的更新，避免错过配置校验反馈
- * @param listener - 配置更新回调函数
- * @returns 取消订阅的函数
- */
+ * 订阅服务器配置更新事�? * 对迟注册的订阅者回放最新的更新，避免错过配置校验反�? * @param listener - 配置更新回调函数
+ * @returns 取消订阅的函�? */
 export function onServerConfigUpdated(
   listener: (payload: ServerConfigUpdatedPayload) => void,
 ): () => void {
@@ -326,9 +300,7 @@ export function onServerConfigUpdated(
 
 /**
  * 订阅 Provider 状态更新事件，无需强制完整配置重载
- * @param listener - Provider 状态更新回调函数
- * @returns 取消订阅的函数
- */
+ * @param listener - Provider 状态更新回调函�? * @returns 取消订阅的函�? */
 export function onServerProviderStatusesUpdated(
   listener: (payload: ServerProviderStatusesUpdatedPayload) => void,
 ): () => void {
@@ -350,10 +322,7 @@ export function onServerProviderStatusesUpdated(
 }
 
 /**
- * 订阅服务器维护状态更新事件
- * @param listener - 维护状态更新回调函数
- * @returns 取消订阅的函数
- */
+ * 订阅服务器维护状态更新事�? * @param listener - 维护状态更新回调函�? * @returns 取消订阅的函�? */
 export function onServerMaintenanceUpdated(
   listener: (payload: ServerLifecycleStreamEvent) => void,
 ): () => void {
@@ -375,10 +344,8 @@ export function onServerMaintenanceUpdated(
 }
 
 /**
- * 订阅服务器设置更新事件
- * @param listener - 设置更新回调函数
- * @returns 取消订阅的函数
- */
+ * 订阅服务器设置更新事�? * @param listener - 设置更新回调函数
+ * @returns 取消订阅的函�? */
 export function onServerSettingsUpdated(
   listener: (payload: ServerSettingsUpdatedPayload) => void,
 ): () => void {
@@ -400,7 +367,7 @@ export function onServerSettingsUpdated(
 }
 
 /**
- * 创建基于 WebSocket 的 NativeApi 实例（单例模式）
+ * 创建基于 WebSocket �?NativeApi 实例（单例模式）
  * 如果已有未销毁的实例则直接返回，否则创建新的 WsTransport 并注册所有推送频道监听器
  * @returns NativeApi 实例
  */
@@ -789,7 +756,7 @@ export function createWsNativeApi(): NativeApi {
   return api;
 }
 
-/** Vite HMR 热更新时清理所有资源 */
+/** Vite HMR 热更新时清理所有资�?*/
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     instance?.transport.dispose();

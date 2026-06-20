@@ -5,8 +5,8 @@
 
 import { SearchAddon } from "@xterm/addon-search";
 import { Plus, SquareSplitHorizontal, SquareSplitVertical, Trash2 } from "~/lib/icons";
-import { type ThreadId } from "@remi-code/contracts";
-import { type TerminalActivityState, type TerminalCliKind } from "@remi-code/shared/terminalThreads";
+import { type ThreadId } from "~/contracts";
+import { type TerminalActivityState, type TerminalCliKind } from "~/shared/terminalThreads";
 import { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type TerminalContextSelection } from "~/lib/terminalContext";

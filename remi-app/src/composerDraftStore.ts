@@ -3,9 +3,7 @@
 // Purpose: Stores composer drafts, model selections, queued turns, and sticky provider choices.
 // Layer: Web state store
 // Depends on: contracts schemas, app model resolution helpers, and zustand persistence.
-// TODO: 迁移期间临时跳过类型检查。当前仍使用旧版 Effect Schema API，
-// 需后续改写为 zod 或新版 Effect Schema。
-
+// TODO: 迁移期间临时跳过类型检查。当前仍使用旧版 Effect Schema API�?// 需后续改写�?zod 或新�?Effect Schema�?
 import {
   type ClaudeCodeEffort,
   type CodexReasoningEffort,
@@ -27,7 +25,7 @@ import {
   ProviderStartOptions,
   RuntimeMode,
   ThreadId,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import * as Schema from "effect/Schema";
 import * as Equal from "effect/Equal";
 import { DeepMutable } from "effect/Types";
@@ -36,7 +34,7 @@ import {
   normalizeModelSlug,
   resolveSelectableModel,
   resolveModelSlugForProvider,
-} from "@remi-code/shared/model";
+} from "~/shared/model";
 import { useMemo } from "react";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { resolveAppModelSelection } from "./appSettings";
@@ -62,7 +60,7 @@ import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
-/** 草稿线程的环境模式：`"local"` 为本地环境，`"worktree"` 为 worktree 环境 */
+/** 草稿线程的环境模式：`"local"` 为本地环境，`"worktree"` �?worktree 环境 */
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
 const DraftThreadEntryPointSchema = Schema.Literals(["chat", "terminal"]);
 const COMPOSER_PROVIDER_KINDS = [
@@ -93,7 +91,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** 持久化的图片附件 Schema，用于 localStorage 序列化 */
+/** 持久化的图片附件 Schema，用�?localStorage 序列�?*/
 export const PersistedComposerImageAttachment = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -105,21 +103,17 @@ export const PersistedComposerImageAttachment = Schema.Struct({
 export type PersistedComposerImageAttachment = typeof PersistedComposerImageAttachment.Type;
 
 /**
- * Composer 图片附件，包含运行时信息（File 对象和预览 URL）。
- * 与 PersistedComposerImageAttachment 不同，此类型包含不可序列化的 File 对象。
- */
+ * Composer 图片附件，包含运行时信息（File 对象和预�?URL）�? * �?PersistedComposerImageAttachment 不同，此类型包含不可序列化的 File 对象�? */
 export interface ComposerImageAttachment extends Omit<ChatImageAttachment, "previewUrl"> {
   previewUrl: string;
   file: File;
 }
 
-/** Composer 助手选择附件类型，与 ChatAssistantSelectionAttachment 一致 */
+/** Composer 助手选择附件类型，与 ChatAssistantSelectionAttachment 一�?*/
 export type ComposerAssistantSelectionAttachment = ChatAssistantSelectionAttachment;
 
 /**
- * 排队中的 Composer 聊天轮次。
- * 当用户在当前轮次未完成时发送新消息，消息会被放入队列等待处理。
- */
+ * 排队中的 Composer 聊天轮次�? * 当用户在当前轮次未完成时发送新消息，消息会被放入队列等待处理�? */
 export interface QueuedComposerChatTurn {
   id: string;
   kind: "chat";
@@ -141,7 +135,7 @@ export interface QueuedComposerChatTurn {
   envMode: DraftThreadEnvMode;
 }
 
-/** 排队中的计划跟进轮次，用于 plan 模式下的后续操作 */
+/** 排队中的计划跟进轮次，用�?plan 模式下的后续操作 */
 export interface QueuedComposerPlanFollowUp {
   id: string;
   kind: "plan-follow-up";
@@ -157,7 +151,7 @@ export interface QueuedComposerPlanFollowUp {
   runtimeMode: RuntimeMode;
 }
 
-/** 排队中的 Composer 轮次联合类型（聊天轮次或计划跟进轮次） */
+/** 排队中的 Composer 轮次联合类型（聊天轮次或计划跟进轮次�?*/
 export type QueuedComposerTurn = QueuedComposerChatTurn | QueuedComposerPlanFollowUp;
 
 const PersistedTerminalContextDraft = Schema.Struct({
@@ -330,9 +324,7 @@ const PersistedComposerDraftStoreStorage = Schema.Struct({
 });
 
 /**
- * Composer 线程草稿状态，包含编辑器内容、附件、模型选择等运行时信息。
- * 每个线程对应一个草稿状态，用于在用户切换线程时保留未发送的内容。
- */
+ * Composer 线程草稿状态，包含编辑器内容、附件、模型选择等运行时信息�? * 每个线程对应一个草稿状态，用于在用户切换线程时保留未发送的内容�? */
 export interface ComposerThreadDraftState {
   prompt: string;
   images: ComposerImageAttachment[];
@@ -348,9 +340,7 @@ export interface ComposerThreadDraftState {
 }
 
 /**
- * 草稿线程状态，记录线程的项目归属、分支、环境模式等元信息。
- * 与 ComposerThreadDraftState 不同，此接口关注线程的上下文信息而非编辑器内容。
- */
+ * 草稿线程状态，记录线程的项目归属、分支、环境模式等元信息�? * �?ComposerThreadDraftState 不同，此接口关注线程的上下文信息而非编辑器内容�? */
 export interface DraftThreadState {
   projectId: ProjectId;
   createdAt: string;
@@ -370,9 +360,7 @@ interface ProjectDraftThread extends DraftThreadState {
 }
 
 /**
- * Composer 草稿存储的完整状态接口。
- * 管理所有线程的草稿内容、草稿线程元信息、项目映射以及粘性模型选择。
- */
+ * Composer 草稿存储的完整状态接口�? * 管理所有线程的草稿内容、草稿线程元信息、项目映射以及粘性模型选择�? */
 export interface ComposerDraftStoreState {
   draftsByThreadId: Record<ThreadId, ComposerThreadDraftState>;
   draftThreadsByThreadId: Record<ThreadId, DraftThreadState>;
@@ -478,9 +466,7 @@ export interface ComposerDraftStoreState {
 }
 
 /**
- * 有效的 Composer 模型状态，包含当前选中的模型和模型选项。
- * 由 deriveEffectiveComposerModelState 计算得出。
- */
+ * 有效�?Composer 模型状态，包含当前选中的模型和模型选项�? * �?deriveEffectiveComposerModelState 计算得出�? */
 export interface EffectiveComposerModelState {
   selectedModel: ModelSlug;
   modelOptions: ProviderModelOptions | null;
@@ -1172,19 +1158,15 @@ function legacyToModelSelectionByProvider(
 }
 
 /**
- * 推导有效的 Composer 模型状态。
- *
- * 按优先级合并多个来源的模型选择：草稿 > 线程 > 项目 > 默认值。
- * 同时考虑可用模型列表，确保最终选中的模型是可用的。
- *
+ * 推导有效�?Composer 模型状态�? *
+ * 按优先级合并多个来源的模型选择：草�?> 线程 > 项目 > 默认值�? * 同时考虑可用模型列表，确保最终选中的模型是可用的�? *
  * @param input.draft - 草稿状态中的模型选择信息
- * @param input.selectedProvider - 当前选中的 Provider
+ * @param input.selectedProvider - 当前选中�?Provider
  * @param input.threadModelSelection - 线程级别的模型选择
  * @param input.projectModelSelection - 项目级别的模型选择
- * @param input.customModelsByProvider - 各 Provider 的自定义模型列表
- * @param input.availableModelOptionsByProvider - 各 Provider 的可用模型选项
- * @returns 有效的模型状态
- */
+ * @param input.customModelsByProvider - �?Provider 的自定义模型列表
+ * @param input.availableModelOptionsByProvider - �?Provider 的可用模型选项
+ * @returns 有效的模型状�? */
 export function deriveEffectiveComposerModelState(input: {
   draft:
     | Pick<ComposerThreadDraftState, "modelSelectionByProvider" | "activeProvider">
@@ -1263,11 +1245,8 @@ export function deriveEffectiveComposerModelState(input: {
 }
 
 /**
- * 解析首选的 Composer 模型选择，用于草稿线程提升为正式线程时的模型持久化。
- * 保持终端优先的线程创建与 Composer 的优先级一致。
- *
- * @param input.draft - 草稿状态
- * @param input.threadModelSelection - 线程级别的模型选择
+ * 解析首选的 Composer 模型选择，用于草稿线程提升为正式线程时的模型持久化�? * 保持终端优先的线程创建与 Composer 的优先级一致�? *
+ * @param input.draft - 草稿状�? * @param input.threadModelSelection - 线程级别的模型选择
  * @param input.projectModelSelection - 项目级别的模型选择
  * @param input.defaultProvider - 默认 Provider
  * @returns 首选的模型选择
@@ -2258,7 +2237,7 @@ function toHydratedThreadDraft(
   };
 }
 
-/** Composer 草稿存储的 Zustand hook，基于 persist 中间件实现 localStorage 持久化 */
+/** Composer 草稿存储�?Zustand hook，基�?persist 中间件实�?localStorage 持久�?*/
 export const useComposerDraftStore = create<ComposerDraftStoreState>()(
   persist(
     (set, get) => ({
@@ -2767,10 +2746,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided �?use them
+              // Explicit options provided �?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection �?preserve existing options, update provider+model
+              // No options in selection �?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
@@ -3478,28 +3457,22 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
 );
 
 /**
- * 获取指定线程的草稿状态。
- * 如果线程没有草稿，返回空草稿状态（EMPTY_THREAD_DRAFT）。
- *
+ * 获取指定线程的草稿状态�? * 如果线程没有草稿，返回空草稿状态（EMPTY_THREAD_DRAFT）�? *
  * @param threadId - 线程 ID
- * @returns 线程草稿状态
- */
+ * @returns 线程草稿状�? */
 export function useComposerThreadDraft(threadId: ThreadId): ComposerThreadDraftState {
   return useComposerDraftStore((state) => state.draftsByThreadId[threadId] ?? EMPTY_THREAD_DRAFT);
 }
 
 /**
- * React hook：获取指定线程的有效模型状态。
- * 内部使用 useMemo 缓存计算结果，避免不必要的重渲染。
- *
+ * React hook：获取指定线程的有效模型状态�? * 内部使用 useMemo 缓存计算结果，避免不必要的重渲染�? *
  * @param input.threadId - 线程 ID
- * @param input.selectedProvider - 当前选中的 Provider
+ * @param input.selectedProvider - 当前选中�?Provider
  * @param input.threadModelSelection - 线程级别的模型选择
  * @param input.projectModelSelection - 项目级别的模型选择
- * @param input.customModelsByProvider - 各 Provider 的自定义模型列表
- * @param input.availableModelOptionsByProvider - 各 Provider 的可用模型选项
- * @returns 有效的模型状态
- */
+ * @param input.customModelsByProvider - �?Provider 的自定义模型列表
+ * @param input.availableModelOptionsByProvider - �?Provider 的可用模型选项
+ * @returns 有效的模型状�? */
 export function useEffectiveComposerModelState(input: {
   threadId: ThreadId;
   selectedProvider: ProviderKind;
@@ -3536,10 +3509,8 @@ export function useEffectiveComposerModelState(input: {
 }
 
 /**
- * 将已提升为服务端线程的草稿标记为"正在提升"状态。
- * 先标记再由路由/Composer 在服务端线程启动后执行清理。
- *
- * @param serverThreadIds - 已提升的服务端线程 ID 集合
+ * 将已提升为服务端线程的草稿标记为"正在提升"状态�? * 先标记再由路�?Composer 在服务端线程启动后执行清理�? *
+ * @param serverThreadIds - 已提升的服务端线�?ID 集合
  */
 export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
@@ -3552,9 +3523,8 @@ export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>)
 }
 
 /**
- * 完成已提升草稿线程的清理工作，删除对应的草稿数据。
- *
- * @param serverThreadIds - 已提升的服务端线程 ID 集合
+ * 完成已提升草稿线程的清理工作，删除对应的草稿数据�? *
+ * @param serverThreadIds - 已提升的服务端线�?ID 集合
  */
 export function finalizePromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();

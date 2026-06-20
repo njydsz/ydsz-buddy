@@ -1,11 +1,8 @@
 /**
  * @file splitView.logic.ts
- * @description 分屏视图面板树的纯函数辅助模块。
- * 提供面板查找、替换、删除、深度计算、分割可行性判断等功能，
- * 以及旧版分屏视图的迁移支持。不依赖 DOM 或 React。
- */
+ * @description 分屏视图面板树的纯函数辅助模块�? * 提供面板查找、替换、删除、深度计算、分割可行性判断等功能�? * 以及旧版分屏视图的迁移支持。不依赖 DOM �?React�? */
 
-import type { ProjectId, ThreadId } from "@remi-code/contracts";
+import type { ProjectId, ThreadId } from "~/contracts";
 import type {
   LeafPane,
   Pane,
@@ -18,9 +15,7 @@ import type {
 /**
  * 清除面板的右侧面板状态（关闭面板、清除差异信息）
  *
- * @param panelState - 当前面板状态
- * @returns 重置后的面板状态
- */
+ * @param panelState - 当前面板状�? * @returns 重置后的面板状�? */
 export function clearSplitViewPanePanelState(
   panelState: SplitViewPanePanelState,
 ): SplitViewPanePanelState {
@@ -76,12 +71,10 @@ export function findSplitNodeById(root: Pane, paneId: PaneId): SplitNode | null 
 }
 
 /**
- * 查找直接包含指定面板的父分割节点。
- * 如果面板 ID 是根节点，返回 null。
- *
+ * 查找直接包含指定面板的父分割节点�? * 如果面板 ID 是根节点，返�?null�? *
  * @param root - 面板树根节点
  * @param paneId - 目标面板 ID
- * @returns 父分割节点，面板为根节点时返回 null
+ * @returns 父分割节点，面板为根节点时返�?null
  */
 export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | null {
   if (root.kind === "leaf") {
@@ -94,11 +87,10 @@ export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | nul
 }
 
 /**
- * 计算面板在树中的深度（根节点深度为 0）
- *
+ * 计算面板在树中的深度（根节点深度�?0�? *
  * @param root - 面板树根节点
  * @param paneId - 目标面板 ID
- * @returns 面板深度，未找到时返回 null
+ * @returns 面板深度，未找到时返�?null
  */
 export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
   if (root.id === paneId) {
@@ -116,8 +108,7 @@ export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
 }
 
 /**
- * 收集面板树中的所有叶子面板
- *
+ * 收集面板树中的所有叶子面�? *
  * @param root - 面板树根节点
  * @returns 叶子面板数组
  */
@@ -131,9 +122,7 @@ export function collectLeaves(root: Pane): LeafPane[] {
 // --- pane mutation (immutable) ---
 
 /**
- * 在面板树中替换指定面板节点（不可变操作）。
- * 如果没有实际变更，返回原树引用以保持引用相等性。
- *
+ * 在面板树中替换指定面板节点（不可变操作）�? * 如果没有实际变更，返回原树引用以保持引用相等性�? *
  * @param root - 面板树根节点
  * @param paneId - 要替换的面板 ID
  * @param replacement - 替换面板
@@ -165,9 +154,7 @@ export interface RemoveLeafResult {
 }
 
 /**
- * 从面板树中移除所有匹配指定线程 ID 的叶子面板。
- * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树。
- *
+ * 从面板树中移除所有匹配指定线�?ID 的叶子面板�? * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树�? *
  * @param root - 面板树根节点
  * @param threadId - 要移除的线程 ID
  * @returns 删除结果
@@ -204,10 +191,8 @@ export function removeLeafByThreadId(root: Pane, threadId: ThreadId): RemoveLeaf
 }
 
 /**
- * 从面板树中移除指定面板 ID 的叶子面板。
- * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树，
- * 使剩余面板自动调整大小。
- *
+ * 从面板树中移除指定面�?ID 的叶子面板�? * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树，
+ * 使剩余面板自动调整大小�? *
  * @param root - 面板树根节点
  * @param paneId - 要移除的叶子面板 ID
  * @returns 删除结果
@@ -246,13 +231,9 @@ export function removeLeafByPaneId(root: Pane, paneId: PaneId): RemoveLeafResult
 // --- structural rules ---
 
 /**
- * 判断叶子面板是否可以在指定方向上分割，不超过深度上限 2。
- * 当父节点方向为 null（根级叶子）时，任何方向都允许。
- * 深度上限确保最多形成 2×2 的网格布局。
- *
+ * 判断叶子面板是否可以在指定方向上分割，不超过深度上限 2�? * 当父节点方向�?null（根级叶子）时，任何方向都允许�? * 深度上限确保最多形�?2×2 的网格布局�? *
  * @param parentDirection - 父分割节点的方向，根级为 null
- * @param requestedDirection - 请求的分割方向
- * @returns 是否可以分割
+ * @param requestedDirection - 请求的分割方�? * @returns 是否可以分割
  */
 export function canSubdivide(
   parentDirection: SplitDirection | null,
@@ -265,13 +246,10 @@ export function canSubdivide(
 }
 
 /**
- * 判断面板树中指定叶子面板是否可以在指定方向上分割。
- * 综合检查面板存在性、深度限制和方向限制。
- *
+ * 判断面板树中指定叶子面板是否可以在指定方向上分割�? * 综合检查面板存在性、深度限制和方向限制�? *
  * @param root - 面板树根节点
  * @param targetPaneId - 目标叶子面板 ID
- * @param requestedDirection - 请求的分割方向
- * @returns 是否可以分割
+ * @param requestedDirection - 请求的分割方�? * @returns 是否可以分割
  */
 export function canSubdividePane(
   root: Pane,
@@ -290,11 +268,9 @@ export function canSubdividePane(
 }
 
 /**
- * 解析默认聚焦的叶子面板 ID（DFS 序列中的第一个叶子）。
- * 如果没有叶子，回退到根节点 ID。
- *
+ * 解析默认聚焦的叶子面�?ID（DFS 序列中的第一个叶子）�? * 如果没有叶子，回退到根节点 ID�? *
  * @param root - 面板树根节点
- * @returns 默认聚焦的叶子面板 ID
+ * @returns 默认聚焦的叶子面�?ID
  */
 export function resolveDefaultFocusLeafId(root: Pane): PaneId {
   const leaves = collectLeaves(root);
@@ -323,9 +299,7 @@ export interface LegacySplitViewLike {
 /**
  * 判断给定值是否为旧版分屏视图结构
  *
- * @param value - 待判断的值
- * @returns 是否为旧版分屏视图结构（类型守卫）
- */
+ * @param value - 待判断的�? * @returns 是否为旧版分屏视图结构（类型守卫�? */
 export function isLegacySplitViewLike(value: unknown): value is LegacySplitViewLike {
   if (!value || typeof value !== "object") {
     return false;

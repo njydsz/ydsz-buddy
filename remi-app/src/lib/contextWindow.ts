@@ -1,15 +1,11 @@
 /**
- * @file 上下文窗口管理模块
- * @description 提供上下文窗口使用情况的快照、计算和格式化功能。
- *              用于跟踪和展示模型上下文窗口的 token 使用情况。
- */
+ * @file 上下文窗口管理模�? * @description 提供上下文窗口使用情况的快照、计算和格式化功能�? *              用于跟踪和展示模型上下文窗口�?token 使用情况�? */
 
-import type { OrchestrationThreadActivity, ThreadTokenUsageSnapshot } from "@remi-code/contracts";
+import type { OrchestrationThreadActivity, ThreadTokenUsageSnapshot } from "~/contracts";
 
 /**
  * 将未知值转换为记录对象（内部函数）
- * @param value - 未知值
- * @returns 如果是对象则返回记录，否则返回 null
+ * @param value - 未知�? * @returns 如果是对象则返回记录，否则返�?null
  */
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
@@ -17,17 +13,14 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 
 /**
  * 将未知值转换为有限数字（内部函数）
- * @param value - 未知值
- * @returns 如果是有限数字则返回，否则返回 null
+ * @param value - 未知�? * @returns 如果是有限数字则返回，否则返�?null
  */
 function asFiniteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 /**
- * 将未知值转换为布尔值（内部函数）
- * @param value - 未知值
- * @returns 如果是布尔值则返回，否则返回 null
+ * 将未知值转换为布尔值（内部函数�? * @param value - 未知�? * @returns 如果是布尔值则返回，否则返�?null
  */
 function asBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
@@ -35,8 +28,7 @@ function asBoolean(value: unknown): boolean | null {
 
 /**
  * 将未知值转换为上下文窗口百分比（内部函数）
- * @param value - 未知值
- * @returns 限制在 0-100 范围内的百分比值，如果无效则返回 null
+ * @param value - 未知�? * @returns 限制�?0-100 范围内的百分比值，如果无效则返�?null
  */
 function asContextWindowPercent(value: unknown): number | null {
   const percent = asFiniteNumber(value);
@@ -48,7 +40,7 @@ function asContextWindowPercent(value: unknown): number | null {
 
 /**
  * 可空上下文窗口使用量类型
- * 将 ThreadTokenUsageSnapshot 中可选的字段也标记为可空
+ * �?ThreadTokenUsageSnapshot 中可选的字段也标记为可空
  */
 type NullableContextWindowUsage = {
   readonly [Key in keyof ThreadTokenUsageSnapshot]: undefined extends ThreadTokenUsageSnapshot[Key]
@@ -57,23 +49,20 @@ type NullableContextWindowUsage = {
 };
 
 /**
- * 上下文窗口快照接口
- * 包含 token 使用量、剩余量、百分比等信息
- */
+ * 上下文窗口快照接�? * 包含 token 使用量、剩余量、百分比等信�? */
 export type ContextWindowSnapshot = NullableContextWindowUsage & {
   /** 剩余 token 数量 */
   readonly remainingTokens: number | null;
   /** 已使用百分比 */
   readonly usedPercentage: number | null;
-  /** 剩余百分比 */
+  /** 剩余百分�?*/
   readonly remainingPercentage: number | null;
-  /** 更新时间戳 */
+  /** 更新时间�?*/
   readonly updatedAt: string;
 };
 
 /**
- * 上下文窗口选择状态接口
- */
+ * 上下文窗口选择状态接�? */
 export interface ContextWindowSelectionStatus {
   /** 当前活动的上下文窗口标签 */
   readonly activeLabel: string | null;
@@ -84,33 +73,31 @@ export interface ContextWindowSelectionStatus {
 }
 
 /**
- * 上下文窗口仪表显示信息接口
- */
+ * 上下文窗口仪表显示信息接�? */
 export interface ContextWindowMeterDisplay {
   /** 已使用百分比标签 */
   readonly usedPercentageLabel: string | null;
-  /** token 使用量标签 */
+  /** token 使用量标�?*/
   readonly tokenUsageLabel: string;
   /** 是否有可靠的 token 比例数据 */
   readonly hasReliableTokenRatio: boolean;
-  /** 规范化后的百分比（0-100） */
+  /** 规范化后的百分比�?-100�?*/
   readonly normalizedPercentage: number;
   /** 紧凑标签 */
   readonly compactLabel: string;
-  /** 无障碍标签 */
+  /** 无障碍标�?*/
   readonly ariaLabel: string;
 }
 
-/** 已知的上下文窗口最大 token 配置 */
+/** 已知的上下文窗口最�?token 配置 */
 const KNOWN_CONTEXT_WINDOW_MAX_TOKENS = {
   "200k": 200_000,
   "1m": 1_000_000,
 } as const;
 
 /**
- * 从活动列表中提取最新的使用量快照（内部函数）
- * @param activities - 线程活动列表
- * @returns 最新的上下文窗口使用量快照，如果未找到则返回 null
+ * 从活动列表中提取最新的使用量快照（内部函数�? * @param activities - 线程活动列表
+ * @returns 最新的上下文窗口使用量快照，如果未找到则返�?null
  */
 function deriveLatestUsageContextWindowSnapshot(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -138,8 +125,7 @@ function deriveLatestUsageContextWindowSnapshot(
       payloadUsedPercent ??
       (maxTokens !== null && maxTokens > 0 ? Math.min(100, (usedTokens / maxTokens) * 100) : null);
     
-    // 判断 token 使用量是否可靠
-    const hasReliableTokenUsage =
+    // 判断 token 使用量是否可�?    const hasReliableTokenUsage =
       rawUsedTokens !== null &&
       (usedTokens > 0 || payloadUsedPercent === null || (maxTokens !== null && maxTokens > 0));
     
@@ -178,9 +164,8 @@ function deriveLatestUsageContextWindowSnapshot(
 }
 
 /**
- * 从活动列表中提取最新的配置最大 token 数（内部函数）
- * @param activities - 线程活动列表
- * @returns 配置的最大 token 数，如果未找到则返回 null
+ * 从活动列表中提取最新的配置最�?token 数（内部函数�? * @param activities - 线程活动列表
+ * @returns 配置的最�?token 数，如果未找到则返回 null
  */
 function deriveLatestConfiguredContextWindowMaxTokens(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -203,8 +188,7 @@ function deriveLatestConfiguredContextWindowMaxTokens(
 }
 
 /**
- * 从活动列表中派生最新的上下文窗口快照
- * @param activities - 线程活动列表
+ * 从活动列表中派生最新的上下文窗口快�? * @param activities - 线程活动列表
  * @returns 最新的上下文窗口快照，如果未找到则返回 null
  */
 export function deriveLatestContextWindowSnapshot(
@@ -217,8 +201,7 @@ export function deriveLatestContextWindowSnapshot(
     return null;
   }
 
-  // 优先使用配置的最大 token 数
-  const usedTokens = usageSnapshot?.usedTokens ?? 0;
+  // 优先使用配置的最�?token �?  const usedTokens = usageSnapshot?.usedTokens ?? 0;
   const maxTokens = configuredMaxTokens ?? usageSnapshot?.maxTokens ?? null;
   const usedPercentage =
     usageSnapshot?.usedPercent ??
@@ -260,8 +243,7 @@ export function deriveLatestContextWindowSnapshot(
 
 /**
  * 根据选择值派生上下文窗口快照
- * @param selectedValue - 选择的上下文窗口值（如 "200k" 或 "1m"）
- * @returns 对应的上下文窗口快照，如果值无效则返回 null
+ * @param selectedValue - 选择的上下文窗口值（�?"200k" �?"1m"�? * @returns 对应的上下文窗口快照，如果值无效则返回 null
  */
 export function deriveSelectedContextWindowSnapshot(
   selectedValue: string | null | undefined,
@@ -277,8 +259,7 @@ export function deriveSelectedContextWindowSnapshot(
     return null;
   }
 
-  // 返回一个初始状态的快照，表示尚未使用
-  return {
+  // 返回一个初始状态的快照，表示尚未使�?  return {
     usedTokens: 0,
     usedPercent: null,
     totalProcessedTokens: null,
@@ -303,9 +284,7 @@ export function deriveSelectedContextWindowSnapshot(
 }
 
 /**
- * 格式化百分比值（内部函数）
- * @param value - 百分比值
- * @returns 格式化后的百分比字符串，如果无效则返回 null
+ * 格式化百分比值（内部函数�? * @param value - 百分比�? * @returns 格式化后的百分比字符串，如果无效则返�?null
  */
 function formatPercentage(value: number | null): string | null {
   if (value === null || !Number.isFinite(value)) {
@@ -318,9 +297,7 @@ function formatPercentage(value: number | null): string | null {
 }
 
 /**
- * 派生上下文窗口仪表显示信息
- * @param usage - 上下文窗口快照
- * @returns 仪表显示信息对象
+ * 派生上下文窗口仪表显示信�? * @param usage - 上下文窗口快�? * @returns 仪表显示信息对象
  */
 export function deriveContextWindowMeterDisplay(
   usage: ContextWindowSnapshot,
@@ -347,7 +324,7 @@ export function deriveContextWindowMeterDisplay(
 /**
  * 派生累计成本（美元）
  * @param activities - 线程活动列表
- * @returns 累计成本，如果未找到则返回 null
+ * @returns 累计成本，如果未找到则返�?null
  */
 export function deriveCumulativeCostUsd(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -356,8 +333,7 @@ export function deriveCumulativeCostUsd(
   let latestCumulative: number | null = null;
   let foundTurnDelta = false;
   
-  // 遍历所有 turn.completed 活动，累计成本
-  for (const activity of activities) {
+  // 遍历所�?turn.completed 活动，累计成�?  for (const activity of activities) {
     if (activity.kind !== "turn.completed") continue;
     const payload = asRecord(activity.payload);
     const cumulativeCost = asFiniteNumber(payload?.cumulativeCostUsd);
@@ -379,8 +355,7 @@ export function deriveCumulativeCostUsd(
 
 /**
  * 格式化上下文窗口选择标签
- * @param value - 选择值
- * @returns 格式化后的标签，如果无效则返回 null
+ * @param value - 选择�? * @returns 格式化后的标签，如果无效则返�?null
  */
 export function formatContextWindowSelectionLabel(value: string | null | undefined): string | null {
   if (typeof value !== "string") {
@@ -400,9 +375,7 @@ export function formatContextWindowSelectionLabel(value: string | null | undefin
 }
 
 /**
- * 从最大 token 数推断选择值
- * @param maxTokens - 最大 token 数
- * @returns 匹配的选择值，如果无匹配则返回 null
+ * 从最�?token 数推断选择�? * @param maxTokens - 最�?token �? * @returns 匹配的选择值，如果无匹配则返回 null
  */
 export function inferContextWindowSelectionValue(
   maxTokens: number | null | undefined,
@@ -411,8 +384,7 @@ export function inferContextWindowSelectionValue(
     return null;
   }
   
-  // 找到最接近的已知配置
-  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
+  // 找到最接近的已知配�?  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
     value: string | null;
     relativeDistance: number;
   }>(
@@ -423,17 +395,12 @@ export function inferContextWindowSelectionValue(
     { value: null, relativeDistance: Number.POSITIVE_INFINITY },
   );
   
-  // 仅当相对距离在 20% 以内时才返回匹配值
-  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
+  // 仅当相对距离�?20% 以内时才返回匹配�?  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
 }
 
 /**
- * 派生上下文窗口选择状态
- * @param input - 输入参数
- * @param input.activeSnapshot - 当前活动的快照
- * @param input.selectedValue - 用户选择的值
- * @returns 选择状态对象
- */
+ * 派生上下文窗口选择状�? * @param input - 输入参数
+ * @param input.activeSnapshot - 当前活动的快�? * @param input.selectedValue - 用户选择的�? * @returns 选择状态对�? */
 export function deriveContextWindowSelectionStatus(input: {
   activeSnapshot: ContextWindowSnapshot | null;
   selectedValue: string | null | undefined;
@@ -459,9 +426,7 @@ export function deriveContextWindowSelectionStatus(input: {
 }
 
 /**
- * 格式化成本（美元）
- * @param value - 成本值
- * @returns 格式化后的成本字符串
+ * 格式化成本（美元�? * @param value - 成本�? * @returns 格式化后的成本字符串
  */
 export function formatCostUsd(value: number): string {
   if (value < 0.0001) return `$${value.toFixed(6)}`;
@@ -474,8 +439,7 @@ export function formatCostUsd(value: number): string {
 /**
  * 格式化上下文窗口 token 数量
  * @param value - token 数量
- * @returns 格式化后的字符串（如 "1.5k" 或 "2m"）
- */
+ * @returns 格式化后的字符串（如 "1.5k" �?"2m"�? */
 export function formatContextWindowTokens(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) {
     return "0";

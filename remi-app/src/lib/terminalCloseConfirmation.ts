@@ -3,7 +3,7 @@
 // Layer: UI logic helper
 // Depends on: Native dialog contract from the app shell.
 
-import type { NativeApi } from "@remi-code/contracts";
+import type { NativeApi } from "~/contracts";
 
 function formatTerminalCloseSubject(terminalTitle: string | null | undefined): string {
   const trimmedTitle = terminalTitle?.trim();

@@ -1,4 +1,4 @@
-import { type ApprovalRequestId } from "@remi-code/contracts";
+import { type ApprovalRequestId } from "~/contracts";
 import { memo, useEffect, useEffectEvent, useRef } from "react";
 import { type PendingUserInput } from "../../session-logic";
 import {

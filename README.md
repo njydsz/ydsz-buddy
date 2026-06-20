@@ -614,7 +614,7 @@ cargo test --test '*'
 pnpm test
 
 # 运行特定包测试
-pnpm test --filter=@remi-code/contracts
+pnpm --filter @remi-code/desktop test
 
 # 生成覆盖率报告
 pnpm test -- --coverage

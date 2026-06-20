@@ -1,7 +1,7 @@
 import type {
   ProjectSearchEntriesResult,
   ProjectSearchLocalEntriesResult,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { ensureNativeApi } from "~/nativeApi";
 

@@ -1,3 +1,2 @@
 packages:
   - "remi-app"
-  - "remi-app/libs/*"

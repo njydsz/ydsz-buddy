@@ -1,7 +1,6 @@
 /**
- * Provider 会话管理契约
- *
- * 定义 Provider 会话的生命周期管理数据结构，包括：
+ * @file provider.ts
+ * @description Provider 会话管理契约。定义 Provider 会话的生命周期管理数据结构，包括：
  * - 会话启动、停止、状态管理
  * - 对话轮次（Turn）的发送、引导、中断
  * - 线程（Thread）的创建与分叉

@@ -1,12 +1,12 @@
 /**
  * @file useThreadWorkspaceHandoff.ts
- * @description 线程工作区交接 Hook - 处理线程在本地和工作树之间的切换
+ * @description 线程工作区交�?Hook - 处理线程在本地和工作树之间的切换
  * @module hooks/useThreadWorkspaceHandoff
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { OrchestrationShellSnapshot, ThreadId } from "@remi-code/contracts";
-import { resolveWorktreeHandoffIntent } from "@remi-code/shared/worktreeHandoff";
+import type { OrchestrationShellSnapshot, ThreadId } from "~/contracts";
+import { resolveWorktreeHandoffIntent } from "~/shared/worktreeHandoff";
 import { useCallback, useState } from "react";
 import { gitHandoffThreadMutationOptions } from "~/lib/gitReactQuery";
 import { buildSuggestedWorktreeName } from "../components/ChatView.logic";
@@ -17,28 +17,21 @@ import { setupProjectScript } from "../projectScripts";
 import type { Project, ProjectScript, Thread, ThreadWorkspacePatch } from "../types";
 
 /**
- * 线程工作区交接 Hook
+ * 线程工作区交�?Hook
  *
  * @description
- * 处理线程在本地环境（local）和工作树环境（worktree）之间的切换。
- * 支持：
- * - 切换到本地模式（直接在项目目录工作）
- * - 切换到工作树模式（在独立的 git worktree 中工作）
+ * 处理线程在本地环境（local）和工作树环境（worktree）之间的切换�? * 支持�? * - 切换到本地模式（直接在项目目录工作）
+ * - 切换到工作树模式（在独立�?git worktree 中工作）
  * - 自动检测可复用的关联工作树
  * - 工作树命名对话框
- * - 交接后自动执行项目设置脚本
- *
+ * - 交接后自动执行项目设置脚�? *
  * @param input - 输入参数对象
  * @param input.activeProject - 当前活动项目
  * @param input.activeThread - 当前活动线程
- * @param input.activeRootBranch - 当前根分支
- * @param input.activeThreadAssociatedWorktree - 线程关联的工作树信息
+ * @param input.activeRootBranch - 当前根分�? * @param input.activeThreadAssociatedWorktree - 线程关联的工作树信息
  * @param input.isServerThread - 是否为服务器线程
- * @param input.stopActiveThreadSession - 停止当前线程会话的方法
- * @param input.runProjectScript - 运行项目脚本的方法
- * @param input.setStoreThreadWorkspace - 设置线程工作区的方法
- * @param input.syncServerShellSnapshot - 同步 Shell 快照的方法
- *
+ * @param input.stopActiveThreadSession - 停止当前线程会话的方�? * @param input.runProjectScript - 运行项目脚本的方�? * @param input.setStoreThreadWorkspace - 设置线程工作区的方法
+ * @param input.syncServerShellSnapshot - 同步 Shell 快照的方�? *
  * @returns 工作区交接相关的状态和方法
  *
  * @example
@@ -82,19 +75,13 @@ export function useThreadWorkspaceHandoff(input: {
   const [worktreeHandoffName, setWorktreeHandoffName] = useState("");
 
   /**
-   * 执行工作区交接
-   *
+   * 执行工作区交�?   *
    * @description
-   * 核心交接逻辑：
-   * 1. 停止当前线程会话
-   * 2. 执行 git 交接操作（切换分支/worktree）
-   * 3. 更新线程元数据
-   * 4. 同步 Shell 快照
-   * 5. 在工作树模式下执行项目设置脚本
-   *
-   * @param targetMode - 目标模式："local" 或 "worktree"
-   * @param options - 可选参数（首选工作树名称）
-   * @returns 是否交接成功
+   * 核心交接逻辑�?   * 1. 停止当前线程会话
+   * 2. 执行 git 交接操作（切换分�?worktree�?   * 3. 更新线程元数�?   * 4. 同步 Shell 快照
+   * 5. 在工作树模式下执行项目设置脚�?   *
+   * @param targetMode - 目标模式�?local" �?"worktree"
+   * @param options - 可选参数（首选工作树名称�?   * @returns 是否交接成功
    */
   const handoffThread = useCallback(
     async (targetMode: "local" | "worktree", options?: { preferredWorktreeName?: string }) => {
@@ -130,8 +117,7 @@ export function useThreadWorkspaceHandoff(input: {
           preferredNewWorktreeName: options?.preferredWorktreeName ?? null,
         });
 
-        // 构建工作区补丁
-        const workspacePatch = {
+        // 构建工作区补�?        const workspacePatch = {
           envMode: result.targetMode,
           branch: result.branch,
           worktreePath: result.worktreePath,
@@ -155,8 +141,7 @@ export function useThreadWorkspaceHandoff(input: {
         const snapshot = await api.orchestration.getShellSnapshot();
         input.syncServerShellSnapshot(snapshot);
 
-        // 在工作树模式下执行项目设置脚本
-        if (targetMode === "worktree" && result.worktreePath) {
+        // 在工作树模式下执行项目设置脚�?        if (targetMode === "worktree" && result.worktreePath) {
           const setupScript = setupProjectScript(input.activeProject.scripts);
           if (setupScript) {
             await input.runProjectScript(setupScript, {
@@ -198,16 +183,13 @@ export function useThreadWorkspaceHandoff(input: {
    *
    * @description
    * 检查是否可以复用已有的关联工作树：
-   * - 如果可以复用，直接执行交接
-   * - 否则打开命名对话框让用户输入工作树名称
-   */
+   * - 如果可以复用，直接执行交�?   * - 否则打开命名对话框让用户输入工作树名�?   */
   const onHandoffToWorktree = useCallback(() => {
     if (!input.activeThread) {
       return;
     }
 
-    // 解析工作树交接意图
-    const worktreeIntent = resolveWorktreeHandoffIntent({
+    // 解析工作树交接意�?    const worktreeIntent = resolveWorktreeHandoffIntent({
       associatedWorktreePath: input.activeThreadAssociatedWorktree.associatedWorktreePath,
       associatedWorktreeBranch: input.activeThreadAssociatedWorktree.associatedWorktreeBranch,
       associatedWorktreeRef: input.activeThreadAssociatedWorktree.associatedWorktreeRef,
@@ -221,8 +203,7 @@ export function useThreadWorkspaceHandoff(input: {
       return;
     }
 
-    // 否则打开命名对话框
-    setWorktreeHandoffName(
+    // 否则打开命名对话�?    setWorktreeHandoffName(
       buildSuggestedWorktreeName({
         associatedWorktreeBranch:
           input.activeThreadAssociatedWorktree.associatedWorktreeBranch ??
@@ -235,8 +216,7 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, input]);
 
   /**
-   * 确认工作树交接
-   *
+   * 确认工作树交�?   *
    * @description
    * 使用用户输入的工作树名称执行交接
    */
@@ -254,28 +234,27 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, worktreeHandoffName]);
 
   /**
-   * 处理交接到本地环境
-   */
+   * 处理交接到本地环�?   */
   const onHandoffToLocal = useCallback(async () => {
     await handoffThread("local");
   }, [handoffThread]);
 
   return {
-    /** 交接操作是否正在进行中 */
+    /** 交接操作是否正在进行�?*/
     handoffBusy: handoffThreadMutation.isPending,
     /** 工作树交接对话框是否打开 */
     worktreeHandoffDialogOpen,
-    /** 设置工作树交接对话框的打开状态 */
+    /** 设置工作树交接对话框的打开状�?*/
     setWorktreeHandoffDialogOpen,
-    /** 工作树名称 */
+    /** 工作树名�?*/
     worktreeHandoffName,
-    /** 设置工作树名称 */
+    /** 设置工作树名�?*/
     setWorktreeHandoffName,
-    /** 交接工作树处理函数 */
+    /** 交接工作树处理函�?*/
     onHandoffToWorktree,
     /** 交接本地处理函数 */
     onHandoffToLocal,
-    /** 确认工作树交接 */
+    /** 确认工作树交�?*/
     confirmWorktreeHandoff,
   };
 }

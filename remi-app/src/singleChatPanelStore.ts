@@ -1,50 +1,44 @@
 /**
- * @file 单聊面板状态管理
- *
- * 管理单线程聊天界面右侧面板的状态持久化。
- * 每个线程独立维护面板类型（浏览器/Diff）、Diff 轮次 ID、Diff 文件路径等状态，
- * 使用 Zustand + persist 中间件持久化到 localStorage。
- */
+ * @file 单聊面板状态管�? *
+ * 管理单线程聊天界面右侧面板的状态持久化�? * 每个线程独立维护面板类型（浏览器/Diff）、Diff 轮次 ID、Diff 文件路径等状态，
+ * 使用 Zustand + persist 中间件持久化�?localStorage�? */
 
-import type { ThreadId, TurnId } from "@remi-code/contracts";
+import type { ThreadId, TurnId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ChatRightPanel } from "./diffRouteSearch";
 
 /**
- * 单聊面板的状态，记录每个线程的右侧面板配置。
- */
+ * 单聊面板的状态，记录每个线程的右侧面板配置�? */
 export interface SingleChatPanelState {
   /** 当前打开的面板类型，null 表示面板关闭 */
   panel: ChatRightPanel | null;
-  /** 当前查看的 Diff 轮次 ID */
+  /** 当前查看�?Diff 轮次 ID */
   diffTurnId: TurnId | null;
-  /** 当前查看的 Diff 文件路径 */
+  /** 当前查看�?Diff 文件路径 */
   diffFilePath: string | null;
-  /** 用户是否曾经打开过面板（用于首次打开提示） */
+  /** 用户是否曾经打开过面板（用于首次打开提示�?*/
   hasOpenedPanel: boolean;
   /** 上次打开的面板类型（用于面板切换时恢复） */
   lastOpenPanel: ChatRightPanel;
 }
 
-/** 单聊面板 Store 的状态接口 */
+/** 单聊面板 Store 的状态接�?*/
 interface SingleChatPanelStore {
-  /** 按线程 ID 索引的面板状态映射 */
+  /** 按线�?ID 索引的面板状态映�?*/
   panelStateByThreadId: Record<string, SingleChatPanelState | undefined>;
-  /** 更新指定线程的面板状态（部分更新） */
+  /** 更新指定线程的面板状态（部分更新�?*/
   setThreadPanelState: (threadId: ThreadId, patch: Partial<SingleChatPanelState>) => void;
-  /** 清除指定线程的面板状态 */
+  /** 清除指定线程的面板状�?*/
   clearThreadPanelState: (threadId: ThreadId) => void;
 }
 
-/** localStorage 中的存储键 */
+/** localStorage 中的存储�?*/
 const SINGLE_CHAT_PANEL_STORAGE_KEY = "remicode:single-chat-panel-state:v1";
 
 /**
- * 创建默认的单聊面板状态。
- *
- * @returns 默认面板状态对象
- */
+ * 创建默认的单聊面板状态�? *
+ * @returns 默认面板状态对�? */
 export function createDefaultSingleChatPanelState(): SingleChatPanelState {
   return {
     panel: null,
@@ -64,10 +58,7 @@ function getDefaultSingleChatPanelState(): SingleChatPanelState {
 }
 
 /**
- * 单聊面板 Zustand Store。
- * 持久化到 localStorage，按线程 ID 独立管理面板状态。
- * 状态未变化时跳过更新以避免不必要的重渲染。
- */
+ * 单聊面板 Zustand Store�? * 持久化到 localStorage，按线程 ID 独立管理面板状态�? * 状态未变化时跳过更新以避免不必要的重渲染�? */
 export const useSingleChatPanelStore = create<SingleChatPanelStore>()(
   persist(
     (set) => ({
@@ -115,12 +106,9 @@ export const useSingleChatPanelStore = create<SingleChatPanelStore>()(
 );
 
 /**
- * 创建选择器函数，获取指定线程的面板状态。
- * 未持久化状态的线程返回默认状态的稳定引用，避免 React 检测到幻影变更。
- *
+ * 创建选择器函数，获取指定线程的面板状态�? * 未持久化状态的线程返回默认状态的稳定引用，避�?React 检测到幻影变更�? *
  * @param threadId - 线程 ID
- * @returns Zustand 选择器函数
- */
+ * @returns Zustand 选择器函�? */
 export function selectSingleChatPanelState(threadId: ThreadId) {
   return (store: SingleChatPanelStore) =>
     // Keep the fallback snapshot stable so React does not observe a phantom store change

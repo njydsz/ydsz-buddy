@@ -7,13 +7,13 @@ import {
   type ProviderOptionDescriptor,
   type ProviderKind,
   type ProviderModelDescriptor,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   getProviderOptionCurrentValue,
   getProviderOptionDescriptors,
   isClaudeUltrathinkPrompt,
   trimOrNull,
-} from "@remi-code/shared/model";
+} from "~/shared/model";
 
 import type { ProviderOptions } from "../../providerModelOptions";
 import { getRuntimeAwareModelCapabilities } from "./runtimeModelCapabilities";

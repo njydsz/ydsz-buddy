@@ -1,14 +1,13 @@
 /**
  * @file useThreadHandoff.ts
- * @description 线程交接 Hook - 创建从一个提供商到另一个提供商的交接线程
- * @module hooks/useThreadHandoff
+ * @description 线程交接 Hook - 创建从一个提供商到另一个提供商的交接线�? * @module hooks/useThreadHandoff
  * @layer Web Hook
  */
 
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { type ProviderKind } from "@remi-code/contracts";
+import { type ProviderKind } from "~/contracts";
 import { getCustomBinaryPathForProvider, useAppSettings } from "../appSettings";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { serverConfigQueryOptions } from "../lib/serverReactQuery";
@@ -33,19 +32,14 @@ import { type Thread } from "../types";
  * 线程交接 Hook
  *
  * @description
- * 从当前活动的 Web 状态创建提供商到提供商的交接线程。
- * 交接操作会将当前线程的消息、活动和配置复制到新线程中，
- * 并切换到目标提供商。
- *
- * @returns 包含交接方法的对象
- * @returns.createThreadHandoff - 创建交接线程的方法
- *
+ * 从当前活动的 Web 状态创建提供商到提供商的交接线程�? * 交接操作会将当前线程的消息、活动和配置复制到新线程中，
+ * 并切换到目标提供商�? *
+ * @returns 包含交接方法的对�? * @returns.createThreadHandoff - 创建交接线程的方�? *
  * @example
  * ```tsx
  * const { createThreadHandoff } = useThreadHandoff();
  *
- * // 将当前线程交接到 claude 提供商
- * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
+ * // 将当前线程交接到 claude 提供�? * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
  * ```
  */
 export function useThreadHandoff() {
@@ -60,16 +54,11 @@ export function useThreadHandoff() {
    *
    * @description
    * 执行完整的线程交接流程：
-   * 1. 验证源线程和目标提供商的可用性
-   * 2. 构建导入的消息和活动
-   * 3. 创建交接线程并复制状态
-   * 4. 导航到新线程
+   * 1. 验证源线程和目标提供商的可用�?   * 2. 构建导入的消息和活动
+   * 3. 创建交接线程并复制状�?   * 4. 导航到新线程
    *
-   * @param thread - 源线程
-   * @param targetProvider - 目标提供商
-   * @returns 新创建的线程 ID
-   * @throws 当条件不满足时抛出错误
-   */
+   * @param thread - 源线�?   * @param targetProvider - 目标提供�?   * @returns 新创建的线程 ID
+   * @throws 当条件不满足时抛出错�?   */
   const createThreadHandoff = useCallback(
     async (thread: Thread, targetProvider: ProviderKind): Promise<Thread["id"]> => {
       const api = readNativeApi();
@@ -83,20 +72,17 @@ export function useThreadHandoff() {
         throw new Error("Project not found for handoff thread.");
       }
 
-      // 验证源线程是否可以进行交接
-      if (!canCreateThreadHandoff({ thread })) {
+      // 验证源线程是否可以进行交�?      if (!canCreateThreadHandoff({ thread })) {
         throw new Error("This thread cannot be handed off yet.");
       }
-      // 验证目标提供商是否可用
-      if (
+      // 验证目标提供商是否可�?      if (
         !resolveAvailableHandoffTargetProviders(thread.modelSelection.provider).includes(
           targetProvider,
         )
       ) {
         throw new Error("This handoff target is not available for the current thread.");
       }
-      // 检查目标提供商的可用性状态
-      const targetStatus = normalizeProviderStatusForLocalConfig({
+      // 检查目标提供商的可用性状�?      const targetStatus = normalizeProviderStatusForLocalConfig({
         provider: targetProvider,
         status:
           serverConfigQuery.data?.providers.find((entry) => entry.provider === targetProvider) ??
@@ -109,8 +95,7 @@ export function useThreadHandoff() {
 
       const nextThreadId = newThreadId();
       const createdAt = new Date().toISOString();
-      // 构建要导入的消息和活动
-      const importedMessages = buildThreadHandoffImportedMessages(thread);
+      // 构建要导入的消息和活�?      const importedMessages = buildThreadHandoffImportedMessages(thread);
       const importedActivities = buildThreadHandoffImportedActivities(thread);
       const { copyTransferableComposerState, stickyModelSelectionByProvider } =
         useComposerDraftStore.getState();
@@ -143,8 +128,7 @@ export function useThreadHandoff() {
         createdAt,
       });
 
-      // 逐个追加导入的活动
-      for (const activity of importedActivities) {
+      // 逐个追加导入的活�?      for (const activity of importedActivities) {
         await api.orchestration.dispatchCommand({
           type: "thread.activity.append",
           commandId: newCommandId(),
@@ -154,11 +138,9 @@ export function useThreadHandoff() {
         });
       }
 
-      // 复制可转移的编辑器状态到新线程
-      copyTransferableComposerState(thread.id, nextThreadId);
+      // 复制可转移的编辑器状态到新线�?      copyTransferableComposerState(thread.id, nextThreadId);
 
-      // 同步 Shell 快照并导航到新线程
-      const snapshot = await api.orchestration.getShellSnapshot();
+      // 同步 Shell 快照并导航到新线�?      const snapshot = await api.orchestration.getShellSnapshot();
       syncServerShellSnapshot(snapshot);
       await navigate({
         to: "/$threadId",

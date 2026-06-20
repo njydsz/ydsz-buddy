@@ -5,7 +5,7 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { SearchAddon } from "@xterm/addon-search";
 import { WebglAddon } from "@xterm/addon-webgl";
-import { type TerminalActivityState, type TerminalCliKind } from "@remi-code/shared/terminalThreads";
+import { type TerminalActivityState, type TerminalCliKind } from "~/shared/terminalThreads";
 import { Terminal, type IDisposable } from "@xterm/xterm";
 
 export interface TerminalRuntimeCallbacks {

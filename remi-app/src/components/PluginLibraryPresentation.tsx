@@ -12,7 +12,7 @@ import {
   type ProviderKind,
   type ProviderPluginDescriptor,
   type ProviderSkillDescriptor,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   SiCanva,
   SiFigma,

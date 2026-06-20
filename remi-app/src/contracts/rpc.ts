@@ -1,5 +1,6 @@
 /**
- * WebSocket RPC 方法定义。
+ * @file rpc.ts
+ * @description WebSocket RPC 方法定义。
  * 定义所有通过 WebSocket 暴露的远程过程调用方法的类型，
  * 包括编排、项目、文件系统、Git、终端、服务器管理、Provider 发现等功能。
  */

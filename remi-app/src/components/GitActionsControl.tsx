@@ -8,7 +8,7 @@ import type {
   GitStackedAction,
   GitStatusResult,
   ThreadId,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";

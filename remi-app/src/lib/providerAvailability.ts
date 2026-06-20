@@ -2,7 +2,7 @@ import {
   PROVIDER_DISPLAY_NAMES,
   type ProviderKind,
   type ServerProviderStatus,
-} from "@remi-code/contracts";
+} from "~/contracts";
 
 export function normalizeCustomBinaryPath(value: string | null | undefined): string | null {
   if (typeof value !== "string") {

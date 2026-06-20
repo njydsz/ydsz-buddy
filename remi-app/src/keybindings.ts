@@ -1,11 +1,8 @@
 /**
- * @file 快捷键绑定系统
- *
+ * @file 快捷键绑定系�? *
  * 负责管理应用内所有快捷键的解析、匹配和格式化。包括：
- * - 默认快捷键配置（侧边栏、聊天、终端、线程跳转等）
- * - 键盘事件与快捷键规则的匹配逻辑
- * - 快捷键标签的格式化与拆分（支持 macOS 和 Windows/Linux 平台差异）
- * - 各类快捷键判定的便捷函数
+ * - 默认快捷键配置（侧边栏、聊天、终端、线程跳转等�? * - 键盘事件与快捷键规则的匹配逻辑
+ * - 快捷键标签的格式化与拆分（支�?macOS �?Windows/Linux 平台差异�? * - 各类快捷键判定的便捷函数
  */
 
 import {
@@ -16,34 +13,30 @@ import {
   type ResolvedKeybindingsConfig,
   THREAD_JUMP_KEYBINDING_COMMANDS,
   type ThreadJumpKeybindingCommand,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { isMacPlatform } from "./lib/utils";
 
 /**
- * 快捷键事件的轻量表示，兼容原生 KeyboardEvent 和自定义事件对象。
- * 用于在快捷键匹配时统一处理键盘输入。
- */
+ * 快捷键事件的轻量表示，兼容原�?KeyboardEvent 和自定义事件对象�? * 用于在快捷键匹配时统一处理键盘输入�? */
 export interface ShortcutEventLike {
   /** 事件类型，如 "keydown" */
   type?: string;
-  /** 物理按键代码，如 "KeyA"、"Digit1" */
+  /** 物理按键代码，如 "KeyA"�?Digit1" */
   code?: string;
-  /** 按键值，如 "a"、"1"、"Escape" */
+  /** 按键值，�?"a"�?1"�?Escape" */
   key: string;
-  /** 是否按下 Meta 键（macOS 为 Command 键） */
+  /** 是否按下 Meta 键（macOS �?Command 键） */
   metaKey: boolean;
-  /** 是否按下 Ctrl 键 */
+  /** 是否按下 Ctrl �?*/
   ctrlKey: boolean;
-  /** 是否按下 Shift 键 */
+  /** 是否按下 Shift �?*/
   shiftKey: boolean;
-  /** 是否按下 Alt 键（macOS 为 Option 键） */
+  /** 是否按下 Alt 键（macOS �?Option 键） */
   altKey: boolean;
 }
 
 /**
- * 快捷键匹配的上下文环境，用于判断 when 子句的条件。
- * 描述当前 UI 状态以决定哪些快捷键生效。
- */
+ * 快捷键匹配的上下文环境，用于判断 when 子句的条件�? * 描述当前 UI 状态以决定哪些快捷键生效�? */
 export interface ShortcutMatchContext {
   /** 终端是否获得焦点 */
   terminalFocus: boolean;
@@ -53,26 +46,23 @@ export interface ShortcutMatchContext {
   [key: string]: boolean;
 }
 
-/** 快捷键匹配时的可选配置 */
+/** 快捷键匹配时的可选配�?*/
 interface ShortcutMatchOptions {
-  /** 运行平台，默认使用 navigator.platform */
+  /** 运行平台，默认使�?navigator.platform */
   platform?: string;
-  /** 匹配上下文，用于 when 子句求值 */
+  /** 匹配上下文，用于 when 子句求�?*/
   context?: Partial<ShortcutMatchContext>;
 }
 
 /** 快捷键标签解析的配置选项 */
 interface ResolvedShortcutLabelOptions extends ShortcutMatchOptions {
-  /** 运行平台，默认使用 navigator.platform */
+  /** 运行平台，默认使�?navigator.platform */
   platform?: string;
 }
 
 /**
- * 创建一个快捷键对象，默认启用 modKey（macOS 为 Command，其他为 Ctrl）。
- *
- * @param key - 按键值
- * @param overrides - 可选的修饰键覆盖
- * @returns 完整的快捷键对象
+ * 创建一个快捷键对象，默认启�?modKey（macOS �?Command，其他为 Ctrl）�? *
+ * @param key - 按键�? * @param overrides - 可选的修饰键覆�? * @returns 完整的快捷键对象
  *
  * @example
  * ```ts
@@ -95,8 +85,7 @@ function commandShortcut(
 }
 
 /**
- * 创建 when 子句的标识符节点，表示一个上下文条件变量。
- *
+ * 创建 when 子句的标识符节点，表示一个上下文条件变量�? *
  * @param name - 条件变量名称
  * @returns 标识符类型的 when 子句节点
  */
@@ -105,18 +94,15 @@ function whenIdentifier(name: string): KeybindingWhenNode {
 }
 
 /**
- * 创建 when 子句的取反节点，表示对子条件的逻辑非。
- *
- * @param node - 需要取反的子节点
- * @returns 取反类型的 when 子句节点
+ * 创建 when 子句的取反节点，表示对子条件的逻辑非�? *
+ * @param node - 需要取反的子节�? * @returns 取反类型�?when 子句节点
  */
 function whenNot(node: KeybindingWhenNode): KeybindingWhenNode {
   return { type: "not", node };
 }
 
 /**
- * 创建 when 子句的逻辑与节点，表示两个子条件同时满足。
- *
+ * 创建 when 子句的逻辑与节点，表示两个子条件同时满足�? *
  * @param left - 左子节点
  * @param right - 右子节点
  * @returns 逻辑与类型的 when 子句节点
@@ -127,16 +113,14 @@ function whenAnd(left: KeybindingWhenNode, right: KeybindingWhenNode): Keybindin
 
 /** when 子句：终端未获得焦点 */
 const whenNotTerminalFocus = whenNot(whenIdentifier("terminalFocus"));
-/** when 子句：终端未获得焦点且终端工作区未打开（用于线程跳转快捷键） */
+/** when 子句：终端未获得焦点且终端工作区未打开（用于线程跳转快捷键�?*/
 const whenThreadJumpAvailable = whenAnd(
   whenNotTerminalFocus,
   whenNot(whenIdentifier("terminalWorkspaceOpen")),
 );
 
 /**
- * 默认快捷键回退配置。当用户未自定义某命令的快捷键时，使用此列表中的绑定。
- * 配置项按优先级从低到高排列，后出现的规则优先级更高。
- */
+ * 默认快捷键回退配置。当用户未自定义某命令的快捷键时，使用此列表中的绑定�? * 配置项按优先级从低到高排列，后出现的规则优先级更高�? */
 export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
   {
     command: "sidebar.addProject",
@@ -253,16 +237,14 @@ export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
 const TERMINAL_WORD_BACKWARD = "\u001bb";
 /** 终端中按 Alt+F 向前跳一个单词的转义序列 */
 const TERMINAL_WORD_FORWARD = "\u001bf";
-/** 终端中按 Ctrl+A 跳到行首的转义序列 */
+/** 终端中按 Ctrl+A 跳到行首的转义序�?*/
 const TERMINAL_LINE_START = "\u0001";
-/** 终端中按 Ctrl+E 跳到行尾的转义序列 */
+/** 终端中按 Ctrl+E 跳到行尾的转义序�?*/
 const TERMINAL_LINE_END = "\u0005";
 
 /**
- * 键盘事件 code 到 key 的别名映射表。
- * 用于将物理按键代码（如 "KeyA"）映射为逻辑按键值（如 "a"），
- * 以便在快捷键匹配时兼容不同键盘布局。
- */
+ * 键盘事件 code �?key 的别名映射表�? * 用于将物理按键代码（�?"KeyA"）映射为逻辑按键值（�?"a"），
+ * 以便在快捷键匹配时兼容不同键盘布局�? */
 const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
   BracketLeft: ["["],
   BracketRight: ["]"],
@@ -305,11 +287,8 @@ const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
 };
 
 /**
- * 将键盘事件的 key 值标准化为小写，并处理特殊键的别名。
- *
- * @param key - 原始 key 值
- * @returns 标准化后的 key 值
- */
+ * 将键盘事件的 key 值标准化为小写，并处理特殊键的别名�? *
+ * @param key - 原始 key �? * @returns 标准化后�?key �? */
 function normalizeEventKey(key: string): string {
   const normalized = key.toLowerCase();
   if (normalized === "esc") return "escape";
@@ -319,12 +298,9 @@ function normalizeEventKey(key: string): string {
 }
 
 /**
- * 解析键盘事件中所有可能的按键值集合。
- * 包括事件本身的 key 值和通过 code 映射出的别名。
- *
+ * 解析键盘事件中所有可能的按键值集合�? * 包括事件本身�?key 值和通过 code 映射出的别名�? *
  * @param event - 键盘事件
- * @returns 所有可能的按键值集合
- */
+ * @returns 所有可能的按键值集�? */
 function resolveEventKeys(event: ShortcutEventLike): Set<string> {
   const keys = new Set([normalizeEventKey(event.key)]);
   const aliases = event.code ? EVENT_CODE_KEY_ALIASES[event.code] : undefined;
@@ -337,14 +313,10 @@ function resolveEventKeys(event: ShortcutEventLike): Set<string> {
 }
 
 /**
- * 判断键盘事件的修饰键是否与快捷键规则匹配。
- * modKey 在 macOS 上映射为 Meta（Command），在其他平台映射为 Ctrl。
- *
+ * 判断键盘事件的修饰键是否与快捷键规则匹配�? * modKey �?macOS 上映射为 Meta（Command），在其他平台映射为 Ctrl�? *
  * @param event - 键盘事件
- * @param shortcut - 快捷键规则
- * @param platform - 运行平台，默认使用 navigator.platform
- * @returns 修饰键是否匹配
- */
+ * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
+ * @returns 修饰键是否匹�? */
 function matchesShortcutModifiers(
   event: ShortcutEventLike,
   shortcut: KeybindingShortcut,
@@ -362,11 +334,9 @@ function matchesShortcutModifiers(
 }
 
 /**
- * 判断键盘事件是否完全匹配某个快捷键规则（修饰键 + 按键值）。
- *
+ * 判断键盘事件是否完全匹配某个快捷键规则（修饰�?+ 按键值）�? *
  * @param event - 键盘事件
- * @param shortcut - 快捷键规则
- * @param platform - 运行平台，默认使用 navigator.platform
+ * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
  * @returns 是否匹配
  */
 function matchesShortcut(
@@ -384,8 +354,7 @@ function resolvePlatform(options: ShortcutMatchOptions | undefined): string {
 }
 
 /**
- * 从选项中解析快捷键匹配上下文，未指定的条件默认为 false。
- *
+ * 从选项中解析快捷键匹配上下文，未指定的条件默认�?false�? *
  * @param options - 匹配选项
  * @returns 完整的匹配上下文
  */
@@ -398,13 +367,9 @@ function resolveContext(options: ShortcutMatchOptions | undefined): ShortcutMatc
 }
 
 /**
- * 递归求值 when 子句的 AST 节点。
- * 支持标识符（identifier）、取反（not）、逻辑与（and）、逻辑或（or）四种节点类型。
- *
+ * 递归求�?when 子句�?AST 节点�? * 支持标识符（identifier）、取反（not）、逻辑与（and）、逻辑或（or）四种节点类型�? *
  * @param node - when 子句 AST 节点
- * @param context - 上下文条件变量
- * @returns 子句求值结果
- */
+ * @param context - 上下文条件变�? * @returns 子句求值结�? */
 function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContext): boolean {
   switch (node.type) {
     case "identifier":
@@ -421,11 +386,8 @@ function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContex
 }
 
 /**
- * 判断 when 子句是否在给定上下文中成立。无 when 子句时默认返回 true。
- *
- * @param whenAst - when 子句 AST 根节点
- * @param context - 上下文条件变量
- * @returns 子句是否成立
+ * 判断 when 子句是否在给定上下文中成立。无 when 子句时默认返�?true�? *
+ * @param whenAst - when 子句 AST 根节�? * @param context - 上下文条件变�? * @returns 子句是否成立
  */
 function matchesWhenClause(
   whenAst: KeybindingWhenNode | undefined,
@@ -436,13 +398,9 @@ function matchesWhenClause(
 }
 
 /**
- * 生成快捷键的冲突检测键，用于判断两个快捷键是否会产生冲突。
- * 将按键值和修饰键组合为唯一标识字符串。
- *
- * @param shortcut - 快捷键规则
- * @param platform - 运行平台
- * @returns 冲突检测键字符串
- */
+ * 生成快捷键的冲突检测键，用于判断两个快捷键是否会产生冲突�? * 将按键值和修饰键组合为唯一标识字符串�? *
+ * @param shortcut - 快捷键规�? * @param platform - 运行平台
+ * @returns 冲突检测键字符�? */
 function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.platform): string {
   const useMetaForMod = isMacPlatform(platform);
   const metaKey = shortcut.metaKey || (shortcut.modKey && useMetaForMod);
@@ -458,13 +416,10 @@ function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.
 }
 
 /**
- * 在快捷键配置列表中查找指定命令的有效快捷键。
- * 从列表末尾向前遍历（后出现的规则优先级更高），跳过已被更高优先级规则占用的快捷键。
- *
- * @param keybindings - 快捷键配置列表
- * @param command - 目标命令
+ * 在快捷键配置列表中查找指定命令的有效快捷键�? * 从列表末尾向前遍历（后出现的规则优先级更高），跳过已被更高优先级规则占用的快捷键�? *
+ * @param keybindings - 快捷键配置列�? * @param command - 目标命令
  * @param options - 匹配选项
- * @returns 匹配到的快捷键，未找到返回 null
+ * @returns 匹配到的快捷键，未找到返�?null
  */
 function findEffectiveShortcutForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -495,11 +450,9 @@ function findEffectiveShortcutForCommand(
 }
 
 /**
- * 判断键盘事件是否匹配指定命令的快捷键。
- *
+ * 判断键盘事件是否匹配指定命令的快捷键�? *
  * @param event - 键盘事件
- * @param keybindings - 快捷键配置列表
- * @param command - 目标命令
+ * @param keybindings - 快捷键配置列�? * @param command - 目标命令
  * @param options - 匹配选项
  * @returns 是否匹配
  */
@@ -513,12 +466,9 @@ function matchesCommandShortcut(
 }
 
 /**
- * 从快捷键配置列表中解析键盘事件对应的命令。
- * 从列表末尾向前遍历，返回第一个匹配的命令。
- *
+ * 从快捷键配置列表中解析键盘事件对应的命令�? * 从列表末尾向前遍历，返回第一个匹配的命令�? *
  * @param event - 键盘事件
- * @param keybindings - 快捷键配置列表
- * @param options - 匹配选项
+ * @param keybindings - 快捷键配置列�? * @param options - 匹配选项
  * @returns 匹配到的命令，未找到返回 null
  */
 function resolveShortcutCommandFromBindings(
@@ -541,10 +491,8 @@ function resolveShortcutCommandFromBindings(
 }
 
 /**
- * 从用户自定义配置中提取未被覆盖的默认快捷键回退项。
- *
- * @param keybindings - 用户自定义的快捷键配置
- * @returns 未被用户覆盖的默认快捷键列表
+ * 从用户自定义配置中提取未被覆盖的默认快捷键回退项�? *
+ * @param keybindings - 用户自定义的快捷键配�? * @returns 未被用户覆盖的默认快捷键列表
  */
 function getFallbackBindings(
   keybindings: ResolvedKeybindingsConfig,
@@ -554,13 +502,10 @@ function getFallbackBindings(
 }
 
 /**
- * 解析键盘事件对应的命令。优先在用户自定义配置中查找，
- * 未找到时回退到默认快捷键配置。
- *
+ * 解析键盘事件对应的命令。优先在用户自定义配置中查找�? * 未找到时回退到默认快捷键配置�? *
  * @param event - 键盘事件
- * @param keybindings - 用户自定义的快捷键配置
- * @param options - 匹配选项
- * @returns 匹配到的命令标识符，未找到返回 null
+ * @param keybindings - 用户自定义的快捷键配�? * @param options - 匹配选项
+ * @returns 匹配到的命令标识符，未找到返�?null
  *
  * @example
  * ```ts
@@ -587,12 +532,8 @@ export function resolveShortcutCommand(
 }
 
 /**
- * 将按键值格式化为可读的标签文本。
- * 处理特殊键如空格、方向键、Escape 等。
- *
- * @param key - 按键值
- * @returns 格式化后的标签
- */
+ * 将按键值格式化为可读的标签文本�? * 处理特殊键如空格、方向键、Escape 等�? *
+ * @param key - 按键�? * @returns 格式化后的标�? */
 function formatShortcutKeyLabel(key: string): string {
   if (key === " ") return "Space";
   if (key.length === 1) return key.toUpperCase();
@@ -605,11 +546,8 @@ function formatShortcutKeyLabel(key: string): string {
 }
 
 /**
- * 将快捷键规则格式化为可读的标签字符串。
- * macOS 使用符号（⌘⌥⇧⌃），其他平台使用文字（Ctrl+Alt+Shift+Meta）。
- *
- * @param shortcut - 快捷键规则
- * @param platform - 运行平台，默认使用 navigator.platform
+ * 将快捷键规则格式化为可读的标签字符串�? * macOS 使用符号（⌘⌥⇧⌃），其他平台使用文字（Ctrl+Alt+Shift+Meta）�? *
+ * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
  * @returns 格式化后的快捷键标签
  *
  * @example
@@ -642,20 +580,17 @@ export function formatShortcutLabel(
   return parts.join("+");
 }
 
-/** macOS 修饰键符号集合，用于拆分快捷键标签 */
-const MODIFIER_SYMBOLS = new Set(["⌘", "⌥", "⌃", "⇧"]);
+/** macOS 修饰键符号集合，用于拆分快捷键标�?*/
+const MODIFIER_SYMBOLS = new Set(["�?, "�?, "�?, "�?]);
 
 /**
- * 将快捷键标签字符串拆分为独立的修饰键和按键部分。
- * 支持两种格式：Windows 风格的 "+" 分隔和 macOS 风格的符号拼接。
- *
+ * 将快捷键标签字符串拆分为独立的修饰键和按键部分�? * 支持两种格式：Windows 风格�?"+" 分隔�?macOS 风格的符号拼接�? *
  * @param shortcutLabel - 快捷键标签字符串
- * @returns 拆分后的各部分数组
- *
+ * @returns 拆分后的各部分数�? *
  * @example
  * ```ts
  * splitShortcutLabel("Ctrl+Shift+N") // ["Ctrl", "Shift", "N"]
- * splitShortcutLabel("⌘⇧N")          // ["⌘", "⇧", "N"]
+ * splitShortcutLabel("⌘⇧N")          // ["�?, "�?, "N"]
  * ```
  */
 export function splitShortcutLabel(shortcutLabel: string): string[] {
@@ -680,14 +615,9 @@ export function splitShortcutLabel(shortcutLabel: string): string[] {
 }
 
 /**
- * 获取指定命令的快捷键标签字符串。
- * 优先在用户自定义配置中查找，未找到时回退到默认配置。
- * 当未提供上下文时，直接按命令匹配（不评估 when 子句）以提高性能。
- *
- * @param keybindings - 快捷键配置列表
- * @param command - 目标命令
- * @param options - 平台和上下文选项，也可以直接传入平台字符串
- * @returns 快捷键标签字符串，未找到返回 null
+ * 获取指定命令的快捷键标签字符串�? * 优先在用户自定义配置中查找，未找到时回退到默认配置�? * 当未提供上下文时，直接按命令匹配（不评估 when 子句）以提高性能�? *
+ * @param keybindings - 快捷键配置列�? * @param command - 目标命令
+ * @param options - 平台和上下文选项，也可以直接传入平台字符�? * @returns 快捷键标签字符串，未找到返回 null
  */
 export function shortcutLabelForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -728,20 +658,16 @@ export function shortcutLabelForCommand(
 }
 
 /**
- * 根据索引获取线程跳转命令。索引范围 0-8 对应 thread.jump.1 到 thread.jump.9。
- *
- * @param index - 线程索引（0 起始）
- * @returns 线程跳转命令，索引越界返回 null
+ * 根据索引获取线程跳转命令。索引范�?0-8 对应 thread.jump.1 �?thread.jump.9�? *
+ * @param index - 线程索引�? 起始�? * @returns 线程跳转命令，索引越界返�?null
  */
 export function threadJumpCommandForIndex(index: number): ThreadJumpKeybindingCommand | null {
   return THREAD_JUMP_KEYBINDING_COMMANDS[index] ?? null;
 }
 
 /**
- * 根据线程跳转命令获取其索引位置。
- *
- * @param command - 线程跳转命令字符串
- * @returns 索引位置（0 起始），未找到返回 null
+ * 根据线程跳转命令获取其索引位置�? *
+ * @param command - 线程跳转命令字符�? * @returns 索引位置�? 起始），未找到返�?null
  */
 export function threadJumpIndexFromCommand(command: string): number | null {
   const index = THREAD_JUMP_KEYBINDING_COMMANDS.indexOf(command as ThreadJumpKeybindingCommand);
@@ -749,14 +675,10 @@ export function threadJumpIndexFromCommand(command: string): number | null {
 }
 
 /**
- * 判断当前键盘事件是否应显示线程跳转提示。
- * 当按下了线程跳转快捷键的修饰键组合时返回 true。
- *
+ * 判断当前键盘事件是否应显示线程跳转提示�? * 当按下了线程跳转快捷键的修饰键组合时返回 true�? *
  * @param event - 键盘事件
- * @param keybindings - 快捷键配置列表
- * @param options - 匹配选项
- * @returns 是否应显示线程跳转提示
- */
+ * @param keybindings - 快捷键配置列�? * @param options - 匹配选项
+ * @returns 是否应显示线程跳转提�? */
 export function shouldShowThreadJumpHints(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -778,7 +700,7 @@ export function shouldShowThreadJumpHints(
   return false;
 }
 
-/** 判断键盘事件是否匹配终端切换快捷键 */
+/** 判断键盘事件是否匹配终端切换快捷�?*/
 export function isTerminalToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -787,7 +709,7 @@ export function isTerminalToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.toggle", options);
 }
 
-/** 判断键盘事件是否匹配终端分屏快捷键 */
+/** 判断键盘事件是否匹配终端分屏快捷�?*/
 export function isTerminalSplitShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -796,7 +718,7 @@ export function isTerminalSplitShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.split", options);
 }
 
-/** 判断键盘事件是否匹配新建终端快捷键 */
+/** 判断键盘事件是否匹配新建终端快捷�?*/
 export function isTerminalNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -805,7 +727,7 @@ export function isTerminalNewShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.new", options);
 }
 
-/** 判断键盘事件是否匹配关闭终端快捷键 */
+/** 判断键盘事件是否匹配关闭终端快捷�?*/
 export function isTerminalCloseShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -823,7 +745,7 @@ export function isSidebarToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "sidebar.toggle", options);
 }
 
-/** 判断键盘事件是否匹配 Diff 面板切换快捷键 */
+/** 判断键盘事件是否匹配 Diff 面板切换快捷�?*/
 export function isDiffToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -841,7 +763,7 @@ export function isBrowserToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "browser.toggle", options);
 }
 
-/** 判断键盘事件是否匹配新建线程快捷键 */
+/** 判断键盘事件是否匹配新建线程快捷�?*/
 export function isChatNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -850,7 +772,7 @@ export function isChatNewShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.new", options);
 }
 
-/** 判断键盘事件是否匹配在最新项目中新建线程快捷键 */
+/** 判断键盘事件是否匹配在最新项目中新建线程快捷�?*/
 export function isChatNewLatestProjectShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -860,9 +782,7 @@ export function isChatNewLatestProjectShortcut(
 }
 
 /**
- * 判断键盘事件是否匹配新建聊天快捷键。
- * 同时匹配 chat.newChat 和 chat.newLocal 两个命令。
- */
+ * 判断键盘事件是否匹配新建聊天快捷键�? * 同时匹配 chat.newChat �?chat.newLocal 两个命令�? */
 export function isChatNewChatShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -874,10 +794,10 @@ export function isChatNewChatShortcut(
   );
 }
 
-/** isChatNewLocalShortcut 的别名，与 isChatNewChatShortcut 行为一致 */
+/** isChatNewLocalShortcut 的别名，�?isChatNewChatShortcut 行为一�?*/
 export const isChatNewLocalShortcut = isChatNewChatShortcut;
 
-/** 判断键盘事件是否匹配新建 Claude 线程快捷键 */
+/** 判断键盘事件是否匹配新建 Claude 线程快捷�?*/
 export function isChatNewClaudeShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -886,7 +806,7 @@ export function isChatNewClaudeShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newClaude", options);
 }
 
-/** 判断键盘事件是否匹配新建 Codex 线程快捷键 */
+/** 判断键盘事件是否匹配新建 Codex 线程快捷�?*/
 export function isChatNewCodexShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -895,7 +815,7 @@ export function isChatNewCodexShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCodex", options);
 }
 
-/** 判断键盘事件是否匹配新建 Cursor 线程快捷键 */
+/** 判断键盘事件是否匹配新建 Cursor 线程快捷�?*/
 export function isChatNewCursorShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -904,7 +824,7 @@ export function isChatNewCursorShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCursor", options);
 }
 
-/** 判断键盘事件是否匹配新建 Gemini 线程快捷键 */
+/** 判断键盘事件是否匹配新建 Gemini 线程快捷�?*/
 export function isChatNewGeminiShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -923,13 +843,10 @@ export function isOpenFavoriteEditorShortcut(
 }
 
 /**
- * 判断键盘事件是否匹配终端清屏快捷键（Ctrl+L）。
- * 此快捷键不通过快捷键配置系统，而是硬编码判定。
- *
+ * 判断键盘事件是否匹配终端清屏快捷键（Ctrl+L）�? * 此快捷键不通过快捷键配置系统，而是硬编码判定�? *
  * @param event - 键盘事件
- * @param platform - 运行平台，默认使用 navigator.platform
- * @returns 是否匹配终端清屏快捷键
- */
+ * @param platform - 运行平台，默认使�?navigator.platform
+ * @returns 是否匹配终端清屏快捷�? */
 export function isTerminalClearShortcut(
   event: ShortcutEventLike,
   platform = navigator.platform,
@@ -944,15 +861,12 @@ export function isTerminalClearShortcut(
 }
 
 /**
- * 解析终端中的导航快捷键（按单词/行首/行尾跳转）。
- * 返回对应的终端转义序列，供终端模拟器直接发送。
- *
+ * 解析终端中的导航快捷键（按单�?行首/行尾跳转）�? * 返回对应的终端转义序列，供终端模拟器直接发送�? *
  * - macOS: Alt+Arrow 按单词跳转，Cmd+Arrow 跳到行首/行尾
- * - Windows/Linux: Ctrl+Arrow 或 Alt+Arrow 按单词跳转
- *
+ * - Windows/Linux: Ctrl+Arrow �?Alt+Arrow 按单词跳�? *
  * @param event - 键盘事件
- * @param platform - 运行平台，默认使用 navigator.platform
- * @returns 终端转义序列字符串，不匹配返回 null
+ * @param platform - 运行平台，默认使�?navigator.platform
+ * @returns 终端转义序列字符串，不匹配返�?null
  */
 export function terminalNavigationShortcutData(
   event: ShortcutEventLike,

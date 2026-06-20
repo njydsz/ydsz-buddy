@@ -2,8 +2,8 @@ import type {
   GitRunStackedActionResult,
   GitStackedAction,
   GitStatusResult,
-} from "@remi-code/contracts";
-import { isTemporaryWorktreeBranch, resolveUniqueRemicodeBranchName } from "@remi-code/shared/git";
+} from "~/contracts";
+import { isTemporaryWorktreeBranch, resolveUniqueRemicodeBranchName } from "~/shared/git";
 
 export type GitActionIconName = "commit" | "push" | "pr";
 
@@ -537,4 +537,4 @@ export function resolveLiveThreadBranchUpdate(input: {
 }
 
 // Re-export from shared for backwards compatibility in this module's exports
-export { resolveAutoFeatureBranchName } from "@remi-code/shared/git";
+export { resolveAutoFeatureBranchName } from "~/shared/git";

@@ -1,9 +1,6 @@
 /**
  * @file session-logic.ts
- * @description 会话逻辑模块，负责从编排活动流中推导 UI 状态。
- * 包括工作日志条目推导、待审批请求管理、待处理用户输入、
- * 活跃任务列表、提议计划状态、时间线条目组装以及会话阶段判断。
- */
+ * @description 会话逻辑模块，负责从编排活动流中推导 UI 状态�? * 包括工作日志条目推导、待审批请求管理、待处理用户输入�? * 活跃任务列表、提议计划状态、时间线条目组装以及会话阶段判断�? */
 
 import {
   ApprovalRequestId,
@@ -16,14 +13,14 @@ import {
   type UserInputQuestion,
   type ThreadId,
   type TurnId,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   decodeSubagentAgentStates,
   extractSubagentIdentityHints,
   decodeSubagentReceiverAgents,
   decodeSubagentReceiverThreadIds,
-} from "@remi-code/shared/subagents";
-import { summarizeToolRawOutput } from "@remi-code/shared/toolOutputSummary";
+} from "~/shared/subagents";
+import { summarizeToolRawOutput } from "~/shared/toolOutputSummary";
 import { deriveReadableToolTitle, normalizeCompactToolLabel } from "./lib/toolCallLabel";
 import { stripProposedPlanBlocksFromText } from "./proposedPlan";
 
@@ -36,12 +33,11 @@ import type {
   TurnDiffSummary,
 } from "./types";
 
-/** Provider 选择器类型别名 */
+/** Provider 选择器类型别�?*/
 export type ProviderPickerKind = ProviderKind;
 
 /**
- * 可选的 Provider 列表，用于 Composer 的 Provider 选择器
- */
+ * 可选的 Provider 列表，用�?Composer �?Provider 选择�? */
 export const PROVIDER_OPTIONS: Array<{
   value: ProviderPickerKind;
   label: string;
@@ -63,19 +59,19 @@ export const PROVIDER_OPTIONS: Array<{
 export interface WorkLogEntry {
   /** 条目唯一 ID */
   id: string;
-  /** 创建时间（ISO 格式） */
+  /** 创建时间（ISO 格式�?*/
   createdAt: string;
   /** 显示标签 */
   label: string;
   /** 详细信息 */
   detail?: string;
-  /** 执行的命令（可读格式） */
+  /** 执行的命令（可读格式�?*/
   command?: string;
   /** 原始命令文本 */
   rawCommand?: string;
   /** 命令预览文本 */
   preview?: string;
-  /** 变更的文件列表 */
+  /** 变更的文件列�?*/
   changedFiles?: ReadonlyArray<string>;
   /** 条目语气：`"thinking"` 思考中、`"tool"` 工具调用、`"info"` 信息、`"error"` 错误 */
   tone: "thinking" | "tool" | "info" | "error";
@@ -85,13 +81,13 @@ export interface WorkLogEntry {
   toolName?: string;
   /** 工具调用 ID */
   toolCallId?: string;
-  /** 工具生命周期项类型 */
+  /** 工具生命周期项类�?*/
   itemType?: ToolLifecycleItemType;
-  /** 待审批请求类型 */
+  /** 待审批请求类�?*/
   requestKind?: PendingApproval["requestKind"];
-  /** 子代理列表 */
+  /** 子代理列�?*/
   subagents?: ReadonlyArray<WorkLogSubagent>;
-  /** 子代理操作信息 */
+  /** 子代理操作信�?*/
   subagentAction?: WorkLogSubagentAction;
 }
 
@@ -99,8 +95,7 @@ export interface WorkLogEntry {
 export const WORK_LOG_PRESENTATION_VERSION = 5;
 
 /**
- * 工作日志中的子代理信息
- */
+ * 工作日志中的子代理信�? */
 export interface WorkLogSubagent {
   threadId: string;
   providerThreadId?: string | undefined;
@@ -117,7 +112,7 @@ export interface WorkLogSubagent {
   isActive?: boolean | undefined;
 }
 
-/** 子代理操作信息，描述子代理的工具调用状态 */
+/** 子代理操作信息，描述子代理的工具调用状�?*/
 export interface WorkLogSubagentAction {
   tool: string;
   status: string;
@@ -148,7 +143,7 @@ export interface PendingUserInput {
   questions: ReadonlyArray<UserInputQuestion>;
 }
 
-/** 活跃任务列表状态，表示当前轮次的任务进度 */
+/** 活跃任务列表状态，表示当前轮次的任务进�?*/
 export interface ActiveTaskListState {
   createdAt: string;
   turnId: TurnId | null;
@@ -159,12 +154,12 @@ export interface ActiveTaskListState {
   }>;
 }
 
-/** 活跃后台任务状态，统计当前正在运行的后台任务数量 */
+/** 活跃后台任务状态，统计当前正在运行的后台任务数�?*/
 export interface ActiveBackgroundTasksState {
   activeCount: number;
 }
 
-/** 最新的提议计划状态 */
+/** 最新的提议计划状�?*/
 export interface LatestProposedPlanState {
   id: OrchestrationProposedPlanId;
   createdAt: string;
@@ -176,9 +171,7 @@ export interface LatestProposedPlanState {
 }
 
 /**
- * 时间线条目类型，用于聊天界面的时间线渲染。
- * 包含消息、提议计划和工作日志三种类型。
- */
+ * 时间线条目类型，用于聊天界面的时间线渲染�? * 包含消息、提议计划和工作日志三种类型�? */
 export type TimelineEntry =
   | {
       id: string;
@@ -200,11 +193,9 @@ export type TimelineEntry =
     };
 
 /**
- * 格式化持续时间为人可读的字符串
- *
+ * 格式化持续时间为人可读的字符�? *
  * @param durationMs - 持续时间（毫秒）
- * @returns 格式化后的字符串（如 "1.5s"、"2m 30s"）
- *
+ * @returns 格式化后的字符串（如 "1.5s"�?2m 30s"�? *
  * @example
  * formatDuration(500)   // => "500ms"
  * formatDuration(1500)  // => "1.5s"
@@ -223,11 +214,9 @@ export function formatDuration(durationMs: number): string {
 }
 
 /**
- * 格式化两个时间点之间的经过时间
- *
- * @param startIso - 开始时间（ISO 格式）
- * @param endIso - 结束时间（ISO 格式），未提供时返回 null
- * @returns 格式化后的经过时间，时间无效时返回 null
+ * 格式化两个时间点之间的经过时�? *
+ * @param startIso - 开始时间（ISO 格式�? * @param endIso - 结束时间（ISO 格式），未提供时返回 null
+ * @returns 格式化后的经过时间，时间无效时返�?null
  */
 export function formatElapsed(startIso: string, endIso: string | undefined): string | null {
   if (!endIso) return null;
@@ -246,11 +235,9 @@ type LatestTurnTiming = Pick<
 type SessionActivityState = Pick<ThreadSession, "orchestrationStatus" | "activeTurnId">;
 
 /**
- * 判断最新轮次是否已结束（完成、中断或出错）
- *
+ * 判断最新轮次是否已结束（完成、中断或出错�? *
  * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状态
- * @returns 最新轮次是否已结束
+ * @param session - 会话活动状�? * @returns 最新轮次是否已结束
  */
 export function isLatestTurnSettled(
   latestTurn: LatestTurnTiming | null,
@@ -267,12 +254,10 @@ export function isLatestTurnSettled(
 }
 
 /**
- * 判断最新轮次是否仍在活跃（与 isLatestTurnSettled 互为反函数）
+ * 判断最新轮次是否仍在活跃（�?isLatestTurnSettled 互为反函数）
  *
  * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状态
- * @returns 最新轮次是否仍在活跃
- */
+ * @param session - 会话活动状�? * @returns 最新轮次是否仍在活�? */
 export function hasLiveLatestTurn(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -284,14 +269,9 @@ export function hasLiveLatestTurn(
 }
 
 /**
- * 推导活跃工作的开始时间。
- * 优先使用正在运行的轮次开始时间，其次使用消息发送时间。
- *
+ * 推导活跃工作的开始时间�? * 优先使用正在运行的轮次开始时间，其次使用消息发送时间�? *
  * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状态
- * @param sendStartedAt - 消息发送的开始时间
- * @returns 活跃工作的开始时间
- */
+ * @param session - 会话活动状�? * @param sendStartedAt - 消息发送的开始时�? * @returns 活跃工作的开始时�? */
 export function deriveActiveWorkStartedAt(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -341,12 +321,8 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 }
 
 /**
- * 从活动流中推导当前待审批的请求列表。
- * 跟踪审批请求的开启和解决事件，自动清理过期的待审批项。
- *
- * @param activities - 编排活动流
- * @returns 按创建时间排序的待审批请求列表
- */
+ * 从活动流中推导当前待审批的请求列表�? * 跟踪审批请求的开启和解决事件，自动清理过期的待审批项�? *
+ * @param activities - 编排活动�? * @returns 按创建时间排序的待审批请求列�? */
 export function derivePendingApprovals(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingApproval[] {
@@ -454,12 +430,8 @@ function parseUserInputQuestions(
 }
 
 /**
- * 从活动流中推导当前待处理的用户输入请求列表。
- * 跟踪用户输入请求的开启和解决事件，自动清理过期的请求。
- *
- * @param activities - 编排活动流
- * @returns 按创建时间排序的待处理用户输入列表
- */
+ * 从活动流中推导当前待处理的用户输入请求列表�? * 跟踪用户输入请求的开启和解决事件，自动清理过期的请求�? *
+ * @param activities - 编排活动�? * @returns 按创建时间排序的待处理用户输入列�? */
 export function derivePendingUserInputs(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingUserInput[] {
@@ -554,11 +526,8 @@ function toActiveTaskListState(activity: OrchestrationThreadActivity): ActiveTas
 }
 
 /**
- * 从活动流中推导当前活跃的任务列表状态。
- * 优先显示当前轮次的任务，若无则回退到最近未完成的先前轮次任务。
- *
- * @param activities - 编排活动流
- * @param latestTurnId - 最新轮次 ID
+ * 从活动流中推导当前活跃的任务列表状态�? * 优先显示当前轮次的任务，若无则回退到最近未完成的先前轮次任务�? *
+ * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID
  * @returns 活跃任务列表状态，无活跃任务时返回 null
  */
 export function deriveActiveTaskListState(
@@ -610,11 +579,8 @@ export function deriveActiveTaskListState(
 }
 
 /**
- * 统计当前活跃的后台任务数量（排除 plan 类型任务）。
- * 用于紧凑 UI 中展示代理活动状态。
- *
- * @param activities - 编排活动流
- * @param latestTurnId - 最新轮次 ID
+ * 统计当前活跃的后台任务数量（排除 plan 类型任务）�? * 用于紧凑 UI 中展示代理活动状态�? *
+ * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID
  * @returns 活跃后台任务状态，无活跃任务时返回 null
  */
 export function deriveActiveBackgroundTasksState(
@@ -668,14 +634,9 @@ export function deriveActiveBackgroundTasksState(
 }
 
 /**
- * 判断最新轮次是否仍有"尾部工作"正在进行。
- * 当 Provider 仍有可见的助手文本在流式输出或后台任务更新时，UI 应保持"工作中"状态。
- *
- * @param input.latestTurn - 最新轮次信息
- * @param input.messages - 消息列表
- * @param input.activities - 活动流
- * @param input.session - 会话状态
- * @returns 是否仍有尾部工作
+ * 判断最新轮次是否仍�?尾部工作"正在进行�? * �?Provider 仍有可见的助手文本在流式输出或后台任务更新时，UI 应保�?工作�?状态�? *
+ * @param input.latestTurn - 最新轮次信�? * @param input.messages - 消息列表
+ * @param input.activities - 活动�? * @param input.session - 会话状�? * @returns 是否仍有尾部工作
  */
 export function hasLiveTurnTailWork(input: {
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "completedAt"> | null;
@@ -718,11 +679,9 @@ function isCollabAgentToolActivity(activity: OrchestrationThreadActivity): boole
 }
 
 /**
- * 查找最新的提议计划状态。
- * 优先查找当前轮次的计划，若无则回退到全局最新计划。
- *
+ * 查找最新的提议计划状态�? * 优先查找当前轮次的计划，若无则回退到全局最新计划�? *
  * @param proposedPlans - 提议计划列表
- * @param latestTurnId - 最新轮次 ID
+ * @param latestTurnId - 最新轮�?ID
  * @returns 最新的提议计划状态，无计划时返回 null
  */
 export function findLatestProposedPlan(
@@ -756,15 +715,11 @@ export function findLatestProposedPlan(
 }
 
 /**
- * 查找侧边栏应显示的提议计划。
- * 当最新轮次未结束时，优先显示其关联的源计划。
- *
+ * 查找侧边栏应显示的提议计划�? * 当最新轮次未结束时，优先显示其关联的源计划�? *
  * @param input.threads - 线程列表
- * @param input.latestTurn - 最新轮次信息
- * @param input.latestTurnSettled - 最新轮次是否已结束
+ * @param input.latestTurn - 最新轮次信�? * @param input.latestTurnSettled - 最新轮次是否已结束
  * @param input.threadId - 当前线程 ID
- * @returns 侧边栏应显示的提议计划状态
- */
+ * @returns 侧边栏应显示的提议计划状�? */
 export function findSidebarProposedPlan(input: {
   threads: ReadonlyArray<Pick<Thread, "id" | "proposedPlans">>;
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "sourceProposedPlan"> | null;
@@ -790,11 +745,8 @@ export function findSidebarProposedPlan(input: {
 }
 
 /**
- * 判断提议计划是否可操作（尚未实施）
- *
- * @param proposedPlan - 提议计划状态
- * @returns 是否可操作
- */
+ * 判断提议计划是否可操作（尚未实施�? *
+ * @param proposedPlan - 提议计划状�? * @returns 是否可操�? */
 export function hasActionableProposedPlan(
   proposedPlan: LatestProposedPlanState | Pick<ProposedPlan, "implementedAt"> | null,
 ): boolean {
@@ -802,13 +754,8 @@ export function hasActionableProposedPlan(
 }
 
 /**
- * 从活动流中推导工作日志条目列表。
- * 过滤掉不需要展示的活动类型（如任务生命周期、速率限制更新等），
- * 并将同一工具调用的多个生命周期事件合并为单条目。
- *
- * @param activities - 编排活动流
- * @param latestTurnId - 最新轮次 ID，为 undefined 时显示所有轮次
- * @returns 工作日志条目列表
+ * 从活动流中推导工作日志条目列表�? * 过滤掉不需要展示的活动类型（如任务生命周期、速率限制更新等）�? * 并将同一工具调用的多个生命周期事件合并为单条目�? *
+ * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID，为 undefined 时显示所有轮�? * @returns 工作日志条目列表
  */
 export function deriveWorkLogEntries(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -1816,12 +1763,9 @@ function compareActivityLifecycleRank(kind: string): number {
 }
 
 /**
- * 判断指定轮次是否有工具活动
- *
- * @param activities - 编排活动流
- * @param turnId - 轮次 ID
- * @returns 是否有工具活动
- */
+ * 判断指定轮次是否有工具活�? *
+ * @param activities - 编排活动�? * @param turnId - 轮次 ID
+ * @returns 是否有工具活�? */
 export function hasToolActivityForTurn(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
   turnId: TurnId | null | undefined,
@@ -1831,14 +1775,11 @@ export function hasToolActivityForTurn(
 }
 
 /**
- * 将消息、提议计划和工作日志合并为统一的时间线条目列表，按创建时间排序。
- * 如果助手消息关联了提议计划，会从消息文本中移除计划块。
- *
+ * 将消息、提议计划和工作日志合并为统一的时间线条目列表，按创建时间排序�? * 如果助手消息关联了提议计划，会从消息文本中移除计划块�? *
  * @param messages - 聊天消息列表
  * @param proposedPlans - 提议计划列表
  * @param workEntries - 工作日志条目列表
- * @returns 按时间排序的时间线条目列表
- */
+ * @returns 按时间排序的时间线条目列�? */
 export function deriveTimelineEntries(
   messages: ChatMessage[],
   proposedPlans: ProposedPlan[],
@@ -1890,8 +1831,7 @@ export function deriveTimelineEntries(
  * 根据轮次差异摘要推断每个轮次的检查点序号
  *
  * @param summaries - 轮次差异摘要列表
- * @returns 轮次 ID 到检查点序号的映射
- */
+ * @returns 轮次 ID 到检查点序号的映�? */
 export function inferCheckpointTurnCountByTurnId(
   summaries: TurnDiffSummary[],
 ): Record<TurnId, number> {
@@ -1906,10 +1846,8 @@ export function inferCheckpointTurnCountByTurnId(
 }
 
 /**
- * 从会话状态推导会话阶段
- *
- * @param session - 线程会话状态
- * @returns 会话阶段：`"disconnected"` 已断开、`"connecting"` 连接中、`"running"` 运行中、`"ready"` 就绪
+ * 从会话状态推导会话阶�? *
+ * @param session - 线程会话状�? * @returns 会话阶段：`"disconnected"` 已断开、`"connecting"` 连接中、`"running"` 运行中、`"ready"` 就绪
  */
 export function derivePhase(session: ThreadSession | null): SessionPhase {
   if (!session || session.status === "closed") return "disconnected";

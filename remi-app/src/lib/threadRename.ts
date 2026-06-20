@@ -11,7 +11,7 @@ import {
   type ProviderInteractionMode,
   type RuntimeMode,
   type ThreadId,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { type DraftThreadEnvMode } from "../composerDraftStore";
 import { readNativeApi } from "../nativeApi";
 import { promoteThreadCreate } from "./threadCreatePromotion";

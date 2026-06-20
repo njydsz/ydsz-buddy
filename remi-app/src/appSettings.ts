@@ -1,29 +1,25 @@
 /**
  * @file 应用设置管理
- * @description 管理应用的本地设置与服务器设置，包括 Schema 定义、归一化、
- * 服务器同步、自定义模型管理、提供者配置等。
- * 设置分为两类：
- * - 本地设置：仅存储在 localStorage 中（如侧边栏位置、字体大小等 UI 偏好）
- * - 服务器设置：同步到服务器端（如二进制路径、自定义模型列表等）
+ * @description 管理应用的本地设置与服务器设置，包括 Schema 定义、归一化�? * 服务器同步、自定义模型管理、提供者配置等�? * 设置分为两类�? * - 本地设置：仅存储�?localStorage 中（如侧边栏位置、字体大小等 UI 偏好�? * - 服务器设置：同步到服务器端（如二进制路径、自定义模型列表等）
  */
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Option, Schema } from "effect";
+import { Schema } from "effect";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
   DEFAULT_SERVER_SETTINGS,
-  TrimmedNonEmptyString,
-  ProviderKind,
+  type ProviderKind,
   type ProviderStartOptions,
   type ServerSettings,
   type ServerSettingsPatch,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   getDefaultModel,
   getModelOptions,
   normalizeModelSlug,
   resolveSelectableModel,
-} from "@remi-code/shared/model";
+} from "~/shared/model";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { EnvMode } from "./components/BranchToolbar.logic";
 import { formatProviderModelOptionName, type ProviderModelOption } from "./providerModelOptions";
@@ -36,44 +32,44 @@ import { ensureNativeApi } from "./nativeApi";
 import { serverQueryKeys, serverSettingsQueryOptions } from "./lib/serverReactQuery";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "./i18n";
 
-/** 本地设置的 localStorage key */
+/** 本地设置�?localStorage key */
 const APP_SETTINGS_STORAGE_KEY = "remicode:app-settings:v1";
 /** 服务器设置迁移完成的 localStorage 标记 key */
 const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "remicode:server-settings-migrated:v1";
 /** 每个提供者允许的最大自定义模型数量 */
 const MAX_CUSTOM_MODEL_COUNT = 32;
-/** 自定义模型 slug 的最大长度 */
+/** 自定义模�?slug 的最大长�?*/
 export const MAX_CUSTOM_MODEL_LENGTH = 256;
-/** 聊天字体最小像素值 */
+/** 聊天字体最小像素�?*/
 export const MIN_CHAT_FONT_SIZE_PX = 11;
-/** 聊天字体最大像素值 */
+/** 聊天字体最大像素�?*/
 export const MAX_CHAT_FONT_SIZE_PX = 18;
-/** 聊天字体默认像素值 */
+/** 聊天字体默认像素�?*/
 export const DEFAULT_CHAT_FONT_SIZE_PX = 12;
 
-/** 时间戳格式 Schema：locale（本地化）、12-hour（12小时制）、24-hour（24小时制） */
+/** 时间戳格�?Schema：locale（本地化）�?2-hour�?2小时制）�?4-hour�?4小时制） */
 export const TimestampFormat = Schema.Literal("locale", "12-hour", "24-hour");
-/** 时间戳格式类型 */
+/** 时间戳格式类�?*/
 export type TimestampFormat = typeof TimestampFormat.Type;
-/** 默认时间戳格式 */
+/** 默认时间戳格�?*/
 export const DEFAULT_TIMESTAMP_FORMAT: TimestampFormat = "locale";
-/** 侧边栏位置 Schema：left（左侧）、right（右侧） */
+/** 侧边栏位�?Schema：left（左侧）、right（右侧） */
 export const SidebarSide = Schema.Literal("left", "right");
-/** 侧边栏位置类型 */
+/** 侧边栏位置类�?*/
 export type SidebarSide = typeof SidebarSide.Type;
-/** 默认侧边栏位置 */
+/** 默认侧边栏位�?*/
 export const DEFAULT_SIDEBAR_SIDE: SidebarSide = "left";
-/** 侧边栏项目排序 Schema：updated_at（按更新时间）、created_at（按创建时间）、manual（手动排序） */
+/** 侧边栏项目排�?Schema：updated_at（按更新时间）、created_at（按创建时间）、manual（手动排序） */
 export const SidebarProjectSortOrder = Schema.Literal("updated_at", "created_at", "manual");
-/** 侧边栏项目排序类型 */
+/** 侧边栏项目排序类�?*/
 export type SidebarProjectSortOrder = typeof SidebarProjectSortOrder.Type;
-/** 默认侧边栏项目排序方式 */
+/** 默认侧边栏项目排序方�?*/
 export const DEFAULT_SIDEBAR_PROJECT_SORT_ORDER: SidebarProjectSortOrder = "manual";
-/** 侧边栏线程排序 Schema：updated_at（按更新时间）、created_at（按创建时间） */
+/** 侧边栏线程排�?Schema：updated_at（按更新时间）、created_at（按创建时间�?*/
 export const SidebarThreadSortOrder = Schema.Literal("updated_at", "created_at");
-/** 侧边栏线程排序类型 */
+/** 侧边栏线程排序类�?*/
 export type SidebarThreadSortOrder = typeof SidebarThreadSortOrder.Type;
-/** 默认侧边栏线程排序方式 */
+/** 默认侧边栏线程排序方�?*/
 export const DEFAULT_SIDEBAR_THREAD_SORT_ORDER: SidebarThreadSortOrder = "updated_at";
 /** 语言设置 Schema */
 export const LanguageSchema = Schema.Literal("en", "zh");
@@ -83,11 +79,9 @@ export type LanguageSetting = typeof LanguageSchema.Type;
 export const DEFAULT_LANGUAGE_SETTING: LanguageSetting = DEFAULT_LANGUAGE;
 
 /**
- * 获取默认的原生字体平滑设置
- *
- * @description macOS/iOS 默认启用字体平滑，其他平台默认关闭。
- *
- * @param platform - 平台标识字符串，默认取 navigator.platform
+ * 获取默认的原生字体平滑设�? *
+ * @description macOS/iOS 默认启用字体平滑，其他平台默认关闭�? *
+ * @param platform - 平台标识字符串，默认�?navigator.platform
  * @returns 是否启用原生字体平滑
  */
 export function getDefaultNativeFontSmoothing(platform = globalThis.navigator?.platform ?? "") {
@@ -107,7 +101,7 @@ type CustomModelSettingsKey =
 
 /** 提供者自定义模型配置 */
 export type ProviderCustomModelConfig = {
-  /** 提供者类型 */
+  /** 提供者类�?*/
   provider: ProviderKind;
   /** 对应的设置字段名 */
   settingsKey: CustomModelSettingsKey;
@@ -117,7 +111,7 @@ export type ProviderCustomModelConfig = {
   title: string;
   /** 配置描述 */
   description: string;
-  /** 输入框占位文本 */
+  /** 输入框占位文�?*/
   placeholder: string;
   /** 输入示例 */
   example: string;
@@ -135,38 +129,45 @@ const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>
   pi: new Set(getModelOptions("pi").map((option) => option.slug)),
 };
 
+/** Provider 类型 Schema */
+const ProviderKindSchema = Schema.Literal(
+  "codex",
+  "claudeAgent",
+  "cursor",
+  "gemini",
+  "grok",
+  "kilo",
+  "opencode",
+  "pi",
+);
+
 const withDefaults =
-  <
-    S extends Schema.Schema.Any,
-    D extends S["~type.make.in"] & S["Encoded"],
-  >(
-    fallback: () => D,
-  ) =>
-  (schema: S) =>
-    schema.pipe(
-      Schema.withConstructorDefault(() => Option.some(fallback())),
-      Schema.withDecodingDefault(() => fallback()),
+  <A>(fallback: () => A) =>
+  <S extends Schema.Schema.Any>(schema: S) =>
+    Schema.optional(schema).pipe(
+      Schema.withDecodingDefault(() => fallback() as never),
+      Schema.withConstructorDefault(() => fallback() as never),
     );
 
-/** 应用设置 Schema，使用 Effect Schema 定义所有字段及默认值 */
+/** 应用设置 Schema，使�?Effect Schema 定义所有字段及默认�?*/
 export const AppSettingsSchema = Schema.Struct({
-  claudeBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
+  claudeBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
   chatFontSizePx: Schema.Number.pipe(withDefaults(() => DEFAULT_CHAT_FONT_SIZE_PX)),
-  chatCodeFontFamily: Schema.String.check(Schema.isMaxLength(256)).pipe(withDefaults(() => "")),
-  codexBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  codexHomePath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  cursorBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  cursorApiEndpoint: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  geminiBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  grokBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  kiloBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  kiloServerUrl: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  kiloServerPassword: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  openCodeBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  piBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  piAgentDir: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  openCodeServerUrl: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
-  openCodeServerPassword: Schema.String.check(Schema.isMaxLength(4096)).pipe(
+  chatCodeFontFamily: Schema.String.pipe(Schema.maxLength(256)).pipe(withDefaults(() => "")),
+  codexBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  codexHomePath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  cursorBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  cursorApiEndpoint: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  geminiBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  grokBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  kiloBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  kiloServerUrl: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  kiloServerPassword: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  openCodeBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  piBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  piAgentDir: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  openCodeServerUrl: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
+  openCodeServerPassword: Schema.String.pipe(Schema.maxLength(4096)).pipe(
     withDefaults(() => ""),
   ),
   defaultThreadEnvMode: EnvMode.pipe(withDefaults(() => "local" as const satisfies EnvMode)),
@@ -194,22 +195,22 @@ export const AppSettingsSchema = Schema.Struct({
   customKiloModels: Schema.Array(Schema.String).pipe(withDefaults(() => [])),
   customOpenCodeModels: Schema.Array(Schema.String).pipe(withDefaults(() => [])),
   customPiModels: Schema.Array(Schema.String).pipe(withDefaults(() => [])),
-  textGenerationProvider: ProviderKind.pipe(withDefaults(() => "codex" as const)),
-  textGenerationModel: Schema.optional(TrimmedNonEmptyString),
-  uiFontFamily: Schema.String.check(Schema.isMaxLength(256)).pipe(withDefaults(() => "")),
-  defaultProvider: ProviderKind.pipe(withDefaults(() => "codex" as const)),
+  textGenerationProvider: ProviderKindSchema.pipe(withDefaults(() => "codex" as const)),
+  textGenerationModel: Schema.optional(Schema.String),
+  uiFontFamily: Schema.String.pipe(Schema.maxLength(256)).pipe(withDefaults(() => "")),
+  defaultProvider: ProviderKindSchema.pipe(withDefaults(() => "codex" as const)),
   language: LanguageSchema.pipe(withDefaults(() => DEFAULT_LANGUAGE_SETTING)),
   // Local-only UI preference: providers explicitly hidden from the composer picker.
   // The active/locked provider for a thread is always shown regardless, so users
   // never get stuck on a thread whose provider they later chose to hide.
-  hiddenProviders: Schema.Array(ProviderKind).pipe(withDefaults(() => [])),
+  hiddenProviders: Schema.Array(ProviderKindSchema).pipe(withDefaults(() => [])),
   // Local-only UI preference: top-level provider order in Settings and the composer picker.
-  providerOrder: Schema.Array(ProviderKind).pipe(withDefaults(() => [...DEFAULT_PROVIDER_ORDER])),
+  providerOrder: Schema.Array(ProviderKindSchema).pipe(withDefaults(() => [...DEFAULT_PROVIDER_ORDER])),
   // Deprecated local-only preference kept for backward-compatible decoding.
   // Model-level hiding caused too many edge cases, so the app now normalizes it away.
   hiddenModels: Schema.Array(
     Schema.Struct({
-      provider: ProviderKind,
+      provider: ProviderKindSchema,
       slug: Schema.String,
     }),
   ).pipe(withDefaults(() => [])),
@@ -220,15 +221,15 @@ type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
 type MutableServerSettingsPatch = Mutable<ServerSettingsPatch>;
 type MutableServerSettingsProvidersPatch = Mutable<NonNullable<ServerSettingsPatch["providers"]>>;
 
-/** 应用模型选项，扩展 ProviderModelOption 增加提供者和自定义标识 */
+/** 应用模型选项，扩�?ProviderModelOption 增加提供者和自定义标�?*/
 export interface AppModelOption extends ProviderModelOption {
-  /** 提供者类型 */
+  /** 提供者类�?*/
   provider: ProviderKind;
   /** 是否为用户自定义模型 */
   isCustom: boolean;
 }
 
-const DEFAULT_APP_SETTINGS = AppSettingsSchema.makeUnsafe({});
+const DEFAULT_APP_SETTINGS = AppSettingsSchema.make({});
 let serverSettingsMigrationInFlight = false;
 
 const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConfig> = {
@@ -306,17 +307,15 @@ const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConf
   },
 };
 
-/** 所有提供者的自定义模型配置列表 */
+/** 所有提供者的自定义模型配置列�?*/
 export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFIG);
 
 /**
  * 归一化自定义模型 slug 列表
  *
- * @description 对输入的模型 slug 列表进行去重、长度限制、内置模型过滤等归一化处理。
- *
- * @param models - 待归一化的模型 slug 可迭代对象
- * @param provider - 提供者类型，默认为 "codex"
- * @returns 归一化后的模型 slug 数组
+ * @description 对输入的模型 slug 列表进行去重、长度限制、内置模型过滤等归一化处理�? *
+ * @param models - 待归一化的模型 slug 可迭代对�? * @param provider - 提供者类型，默认�?"codex"
+ * @returns 归一化后的模�?slug 数组
  */
 export function normalizeCustomModelSlugs(
   models: Iterable<string | null | undefined>,
@@ -348,14 +347,10 @@ export function normalizeCustomModelSlugs(
 }
 
 /**
- * 归一化聊天字体大小
- *
+ * 归一化聊天字体大�? *
  * @description 将字体大小限制在 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 范围内，
- * 无效值回退为默认值。
- *
- * @param value - 输入的字体大小值
- * @returns 归一化后的字体大小
- */
+ * 无效值回退为默认值�? *
+ * @param value - 输入的字体大小�? * @returns 归一化后的字体大�? */
 export function normalizeChatFontSizePx(value: number | null | undefined): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return DEFAULT_CHAT_FONT_SIZE_PX;
@@ -609,21 +604,17 @@ function buildInitialServerSettingsMigrationPatch(settings: AppSettings): Server
  * 归一化存储的应用设置
  *
  * @description 对从 localStorage 读取的设置进行归一化处理，
- * 确保自定义模型、字体大小、提供者顺序等字段符合约束。
- *
+ * 确保自定义模型、字体大小、提供者顺序等字段符合约束�? *
  * @param settings - 待归一化的应用设置
- * @returns 归一化后的应用设置
- */
+ * @returns 归一化后的应用设�? */
 export function normalizeStoredAppSettings(settings: AppSettings): AppSettings {
   return normalizeAppSettings(settings);
 }
 
 /**
- * 获取指定提供者的自定义模型列表
- *
+ * 获取指定提供者的自定义模型列�? *
  * @param settings - 应用设置（仅需自定义模型相关字段）
- * @param provider - 提供者类型
- * @returns 自定义模型 slug 列表
+ * @param provider - 提供者类�? * @returns 自定义模�?slug 列表
  */
 export function getCustomModelsForProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
@@ -633,11 +624,9 @@ export function getCustomModelsForProvider(
 }
 
 /**
- * 获取指定提供者的默认自定义模型列表
- *
+ * 获取指定提供者的默认自定义模型列�? *
  * @param defaults - 默认设置（仅需自定义模型相关字段）
- * @param provider - 提供者类型
- * @returns 默认自定义模型 slug 列表
+ * @param provider - 提供者类�? * @returns 默认自定义模�?slug 列表
  */
 export function getDefaultCustomModelsForProvider(
   defaults: Pick<AppSettings, CustomModelSettingsKey>,
@@ -647,12 +636,8 @@ export function getDefaultCustomModelsForProvider(
 }
 
 /**
- * 构造指定提供者的自定义模型补丁
- *
- * @param provider - 提供者类型
- * @param models - 新的自定义模型列表
- * @returns 仅包含该提供者自定义模型字段的设置补丁
- */
+ * 构造指定提供者的自定义模型补�? *
+ * @param provider - 提供者类�? * @param models - 新的自定义模型列�? * @returns 仅包含该提供者自定义模型字段的设置补�? */
 export function patchCustomModels(
   provider: ProviderKind,
   models: string[],
@@ -663,11 +648,9 @@ export function patchCustomModels(
 }
 
 /**
- * 获取所有提供者的自定义模型映射
- *
+ * 获取所有提供者的自定义模型映�? *
  * @param settings - 应用设置（仅需自定义模型相关字段）
- * @returns 按提供者类型索引的自定义模型列表映射
- */
+ * @returns 按提供者类型索引的自定义模型列表映�? */
 export function getCustomModelsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
 ): Record<ProviderKind, readonly string[]> {
@@ -686,13 +669,9 @@ export function getCustomModelsByProvider(
 /**
  * 获取应用模型选项列表
  *
- * @description 合并内置模型和自定义模型，去重后返回完整的模型选项列表。
- * 若当前选中的模型不在列表中，会自动追加。
- *
- * @param provider - 提供者类型
- * @param customModels - 自定义模型 slug 列表
- * @param selectedModel - 当前选中的模型 slug，可选
- * @returns 模型选项列表
+ * @description 合并内置模型和自定义模型，去重后返回完整的模型选项列表�? * 若当前选中的模型不在列表中，会自动追加�? *
+ * @param provider - 提供者类�? * @param customModels - 自定义模�?slug 列表
+ * @param selectedModel - 当前选中的模�?slug，可�? * @returns 模型选项列表
  */
 export function getAppModelOptions(
   provider: ProviderKind,
@@ -745,11 +724,8 @@ export function getAppModelOptions(
 /**
  * 获取 Git 文本生成模型选项列表
  *
- * @description 合并 Codex、Kilo、OpenCode 三个提供者的模型选项，
- * 去重后返回完整的文本生成模型列表。
- *
- * @param settings - 应用设置（仅需相关字段）
- * @returns 去重后的文本生成模型选项列表
+ * @description 合并 Codex、Kilo、OpenCode 三个提供者的模型选项�? * 去重后返回完整的文本生成模型列表�? *
+ * @param settings - 应用设置（仅需相关字段�? * @returns 去重后的文本生成模型选项列表
  */
 export function getGitTextGenerationModelOptions(
   settings: Pick<
@@ -797,14 +773,9 @@ export function getGitTextGenerationModelOptions(
 /**
  * 解析应用模型选择
  *
- * @description 根据提供者、自定义模型列表和当前选中模型，
- * 解析出最终可用的模型 slug。
- *
- * @param provider - 提供者类型
- * @param customModels - 各提供者的自定义模型映射
- * @param selectedModel - 当前选中的模型 slug
- * @returns 解析后的模型 slug 字符串
- */
+ * @description 根据提供者、自定义模型列表和当前选中模型�? * 解析出最终可用的模型 slug�? *
+ * @param provider - 提供者类�? * @param customModels - 各提供者的自定义模型映�? * @param selectedModel - 当前选中的模�?slug
+ * @returns 解析后的模型 slug 字符�? */
 export function resolveAppModelSelection(
   provider: ProviderKind,
   customModels: Record<ProviderKind, readonly string[]>,
@@ -843,10 +814,9 @@ export function getCustomModelOptionsByProvider(
  * 获取提供者启动选项
  *
  * @description 从应用设置中提取各提供者的二进制路径、服务器 URL 等配置，
- * 构造 ProviderStartOptions 对象用于启动提供者进程。
- *
+ * 构�?ProviderStartOptions 对象用于启动提供者进程�? *
  * @param settings - 应用设置（仅需二进制路径相关字段）
- * @returns 提供者启动选项，无配置时返回 undefined
+ * @returns 提供者启动选项，无配置时返�?undefined
  */
 export function getProviderStartOptions(
   settings: Pick<
@@ -943,9 +913,7 @@ export function getProviderStartOptions(
  * 获取指定提供者的自定义二进制路径
  *
  * @param settings - 应用设置（仅需二进制路径相关字段）
- * @param provider - 提供者类型
- * @returns 自定义二进制路径字符串
- */
+ * @param provider - 提供者类�? * @returns 自定义二进制路径字符�? */
 export function getCustomBinaryPathForProvider(
   settings: Pick<
     AppSettings,
@@ -983,13 +951,9 @@ export function getCustomBinaryPathForProvider(
 /**
  * React Hook：获取和更新应用设置
  *
- * @description 合并本地 localStorage 设置和服务器设置，
- * 提供更新和重置方法。首次加载时自动将本地设置迁移到服务器。
- *
- * @returns 设置对象及操作方法
- * @returns settings - 合并后的应用设置
- * @returns updateSettings - 更新设置的函数（同时更新本地和服务器）
- * @returns resetSettings - 重置为默认设置的函数
+ * @description 合并本地 localStorage 设置和服务器设置�? * 提供更新和重置方法。首次加载时自动将本地设置迁移到服务器�? *
+ * @returns 设置对象及操作方�? * @returns settings - 合并后的应用设置
+ * @returns updateSettings - 更新设置的函数（同时更新本地和服务器�? * @returns resetSettings - 重置为默认设置的函数
  * @returns defaults - 合并了服务器默认值的默认设置
  */
 export function useAppSettings() {

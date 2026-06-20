@@ -1,10 +1,8 @@
 /**
- * @file 聊天首次发送目标解析模块
- * @description 解析首次消息发送时的目标项目，支持当前项目、已有项目或创建新项目三种场景。
- */
+ * @file 聊天首次发送目标解析模�? * @description 解析首次消息发送时的目标项目，支持当前项目、已有项目或创建新项目三种场景�? */
 
-import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "@remi-code/contracts";
-import { workspaceRootsEqual } from "@remi-code/shared/threadWorkspace";
+import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "~/contracts";
+import { workspaceRootsEqual } from "~/shared/threadWorkspace";
 
 import type { Project } from "../types";
 
@@ -37,19 +35,16 @@ export interface FirstSendProjectCreation {
 }
 
 /**
- * 首次发送目标解析结果类型
- * - "current": 使用当前活跃项目
+ * 首次发送目标解析结果类�? * - "current": 使用当前活跃项目
  * - "existing-project": 使用已有项目
- * - "create-project": 创建新项目
- */
+ * - "create-project": 创建新项�? */
 export type FirstSendTargetResolution =
   | { kind: "current"; target: FirstSendProjectTarget }
   | { kind: "existing-project"; target: FirstSendProjectTarget }
   | { kind: "create-project"; creation: FirstSendProjectCreation };
 
 /**
- * 从项目对象构建项目目标（内部函数）
- * @param project - 项目对象
+ * 从项目对象构建项目目标（内部函数�? * @param project - 项目对象
  * @returns 项目目标对象
  */
 function buildProjectTarget(project: Project): FirstSendProjectTarget {
@@ -63,8 +58,7 @@ function buildProjectTarget(project: Project): FirstSendProjectTarget {
 }
 
 /**
- * 从工作区根目录构建项目标题（内部函数）
- * @param workspaceRoot - 工作区根目录路径
+ * 从工作区根目录构建项目标题（内部函数�? * @param workspaceRoot - 工作区根目录路径
  * @returns 项目标题（取路径最后一段）
  */
 function buildProjectTitleFromWorkspaceRoot(workspaceRoot: string): string {
@@ -75,12 +69,7 @@ function buildProjectTitleFromWorkspaceRoot(workspaceRoot: string): string {
  * 解析首次发送的目标项目
  * @param input - 输入参数
  * @param input.activeProject - 当前活跃项目
- * @param input.isFirstMessage - 是否为首次消息
- * @param input.isHomeChatContainer - 是否在主页聊天容器
- * @param input.projects - 所有项目列表
- * @param input.selectedWorkspaceRoot - 选中的工作区根目录
- * @returns 首次发送目标解析结果
- */
+ * @param input.isFirstMessage - 是否为首次消�? * @param input.isHomeChatContainer - 是否在主页聊天容�? * @param input.projects - 所有项目列�? * @param input.selectedWorkspaceRoot - 选中的工作区根目�? * @returns 首次发送目标解析结�? */
 export function resolveFirstSendTarget(input: {
   activeProject: Project;
   isFirstMessage: boolean;

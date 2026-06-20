@@ -1,5 +1,6 @@
 /**
- * WebSocket 通信协议定义。
+ * @file ws.ts
+ * @description WebSocket 通信协议定义。
  * 包含 RPC 方法名常量、推送通道常量、请求/响应格式、推送消息类型，
  * 以及所有 WebSocket 消息的联合类型定义。
  */

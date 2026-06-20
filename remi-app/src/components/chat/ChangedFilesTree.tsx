@@ -3,7 +3,7 @@
 // Layer: Chat timeline UI
 // Exports: ChangedFilesTree
 
-import { type TurnId } from "@remi-code/contracts";
+import { type TurnId } from "~/contracts";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { type TurnDiffFileChange } from "../../types";
 import { buildTurnDiffTree, type TurnDiffTreeNode } from "../../lib/turnDiffTree";

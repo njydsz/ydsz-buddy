@@ -55,7 +55,7 @@ import {
   INLINE_TERMINAL_CONTEXT_PLACEHOLDER,
   type TerminalContextDraft,
 } from "~/lib/terminalContext";
-import type { ProviderMentionReference } from "@remi-code/contracts";
+import type { ProviderMentionReference } from "~/contracts";
 import { cn } from "~/lib/utils";
 import {
   ComposerMentionNode,

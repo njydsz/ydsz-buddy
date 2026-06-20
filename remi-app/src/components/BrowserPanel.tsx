@@ -9,7 +9,7 @@ import {
   PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
   type ThreadId,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,

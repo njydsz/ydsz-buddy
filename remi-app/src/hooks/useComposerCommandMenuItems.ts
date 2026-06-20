@@ -11,8 +11,8 @@ import type {
   ProviderMentionReference,
   ProviderPluginDescriptor,
   ProviderSkillDescriptor,
-} from "@remi-code/contracts";
-import { getAgentMentionAutocompleteAliases } from "@remi-code/contracts";
+} from "~/contracts";
+import { getAgentMentionAutocompleteAliases } from "~/contracts";
 import { useMemo } from "react";
 import {
   buildCommandSearchBlob,
@@ -35,7 +35,7 @@ import {
 } from "../composerSlashCommands";
 import type { ComposerCommandItem } from "../components/chat/ComposerCommandMenu";
 
-/** 插件建议项类型 */
+/** 插件建议项类�?*/
 type ComposerPluginSuggestion = {
   plugin: ProviderPluginDescriptor;
   mention: ProviderMentionReference;
@@ -57,24 +57,10 @@ type SearchableModelOption = {
  * 编辑器命令菜单项 Hook
  *
  * @description
- * 根据编辑器触发器类型（mention、slash-command、skill、model）生成对应的命令菜单项。
- * 支持插件、代理、路径、技能、模型等多种类型的命令建议。
- *
+ * 根据编辑器触发器类型（mention、slash-command、skill、model）生成对应的命令菜单项�? * 支持插件、代理、路径、技能、模型等多种类型的命令建议�? *
  * @param input - 输入参数对象
- * @param input.composerTrigger - 编辑器触发器，决定菜单类型
- * @param input.provider - 当前提供商类型
- * @param input.providerPlugins - 提供商插件列表
- * @param input.providerNativeCommands - 提供商原生命令列表
- * @param input.providerSkills - 提供商技能列表
- * @param input.workspaceEntries - 工作区条目列表
- * @param input.searchableModelOptions - 可搜索的模型选项
- * @param input.supportsFastSlashCommand - 是否支持快速斜杠命令
- * @param input.canOfferCompactCommand - 是否可提供压缩命令
- * @param input.canOfferReviewCommand - 是否可提供审查命令
- * @param input.canOfferForkCommand - 是否可提供分叉命令
- * @param input.canOfferSideCommand - 是否可提供侧边命令
- * @param input.dynamicAgents - 动态代理列表
- *
+ * @param input.composerTrigger - 编辑器触发器，决定菜单类�? * @param input.provider - 当前提供商类�? * @param input.providerPlugins - 提供商插件列�? * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerSkills - 提供商技能列�? * @param input.workspaceEntries - 工作区条目列�? * @param input.searchableModelOptions - 可搜索的模型选项
+ * @param input.supportsFastSlashCommand - 是否支持快速斜杠命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferReviewCommand - 是否可提供审查命�? * @param input.canOfferForkCommand - 是否可提供分叉命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.dynamicAgents - 动态代理列�? *
  * @returns 过滤和映射后的命令菜单项数组
  *
  * @example
@@ -122,14 +108,11 @@ export function useComposerCommandMenuItems(input: {
     // 无触发器时返回空数组
     if (!composerTrigger) return [];
 
-    // 处理 @ 提及触发器：显示插件、本地文件夹、路径、代理
-    if (composerTrigger.kind === "mention") {
+    // 处理 @ 提及触发器：显示插件、本地文件夹、路径、代�?    if (composerTrigger.kind === "mention") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
 
-      // 构建代理项：优先使用动态代理，否则使用静态别名
-      const agentItems: ComposerCommandItem[] = (() => {
-        // 有动态代理时使用动态代理
-        if (dynamicAgents.length > 0) {
+      // 构建代理项：优先使用动态代理，否则使用静态别�?      const agentItems: ComposerCommandItem[] = (() => {
+        // 有动态代理时使用动态代�?        if (dynamicAgents.length > 0) {
           return dynamicAgents
             .filter(({ name, displayName }) => {
               if (!query) return true;
@@ -146,8 +129,7 @@ export function useComposerCommandMenuItems(input: {
               description: displayName,
             }));
         }
-        // 静态回退：使用预定义的代理别名
-        return getAgentMentionAutocompleteAliases(provider)
+        // 静态回退：使用预定义的代理别�?        return getAgentMentionAutocompleteAliases(provider)
           .filter(({ alias, displayName }) => {
             if (!query) return true;
             const searchBlob = `${alias} ${displayName}`.toLowerCase();
@@ -164,8 +146,7 @@ export function useComposerCommandMenuItems(input: {
           }));
       })();
 
-      // 构建插件项：仅显示已安装的插件
-      const pluginItems = providerPlugins
+      // 构建插件项：仅显示已安装的插�?      const pluginItems = providerPlugins
         .filter(({ plugin }) => isInstalledProviderPlugin(plugin))
         .filter(({ plugin }) => {
           if (!query) return true;
@@ -193,8 +174,7 @@ export function useComposerCommandMenuItems(input: {
             ]
           : [];
       
-      // 路径项：工作区条目
-      const pathItems = workspaceEntries.map((entry) => ({
+      // 路径项：工作区条�?      const pathItems = workspaceEntries.map((entry) => ({
         id: `path:${entry.kind}:${entry.path}`,
         type: "path" as const,
         path: entry.path,
@@ -207,8 +187,7 @@ export function useComposerCommandMenuItems(input: {
       return [...pluginItems, ...localRootItems, ...pathItems, ...agentItems];
     }
 
-    // 处理斜杠命令触发器：显示内置命令、提供商原生命令、技能
-    if (composerTrigger.kind === "slash-command") {
+    // 处理斜杠命令触发器：显示内置命令、提供商原生命令、技�?    if (composerTrigger.kind === "slash-command") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       const availableCommands = getAvailableComposerSlashCommands({
         provider,
@@ -220,8 +199,7 @@ export function useComposerCommandMenuItems(input: {
         providerNativeCommandNames: providerNativeCommands.map((command) => command.name),
       });
       
-      // 内置斜杠命令项
-      const builtInItems = filterComposerSlashCommands(
+      // 内置斜杠命令�?      const builtInItems = filterComposerSlashCommands(
         composerTrigger.query,
         availableCommands,
       ).map((definition) => ({
@@ -276,8 +254,7 @@ export function useComposerCommandMenuItems(input: {
       return [...builtInItems, ...providerCommandItems, ...skillItems];
     }
 
-    // 处理技能触发器：仅显示技能
-    if (composerTrigger.kind === "skill") {
+    // 处理技能触发器：仅显示技�?    if (composerTrigger.kind === "skill") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       return providerSkills
         .filter((skill) => {

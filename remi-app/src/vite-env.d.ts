@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { NativeApi, DesktopBridge } from "@remi-code/contracts";
+import type { NativeApi, DesktopBridge } from "~/contracts";
 
 interface ImportMetaEnv {
   readonly APP_VERSION: string;

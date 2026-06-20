@@ -6,7 +6,7 @@ import {
   type ProviderKind,
   type ProviderPluginDescriptor,
   type ProviderSkillDescriptor,
-} from "@remi-code/contracts";
+} from "~/contracts";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { RiRobot3Line } from "react-icons/ri";
 import { type ComposerTriggerKind } from "../../composer-logic";

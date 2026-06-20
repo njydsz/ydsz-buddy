@@ -1,20 +1,14 @@
 /**
  * @file terminalStateStore.ts
- * @description 按 threadId 索引的终端 UI 状态的 Zustand Store。
- *
- * 管理每个线程的终端面板状态，包括：
- * - 终端的打开/关闭、展示模式（抽屉/工作区）
- * - 终端标签页的创建、关闭、分割、切换
- * - 终端元数据（标签、CLI 类型、标题覆盖）
+ * @description �?threadId 索引的终�?UI 状态的 Zustand Store�? *
+ * 管理每个线程的终端面板状态，包括�? * - 终端的打开/关闭、展示模式（抽屉/工作区）
+ * - 终端标签页的创建、关闭、分割、切�? * - 终端元数据（标签、CLI 类型、标题覆盖）
  * - 终端活动状态（运行中子进程、Agent 注意力状态）
- * - 工作区布局（双栏/仅终端等）
- *
- * 状态通过 localStorage 持久化，启动时自动恢复。
- * 终端过渡辅助函数保持私有，以约束公共 API 仅暴露 store actions/selectors。
- */
+ * - 工作区布局（双�?仅终端等�? *
+ * 状态通过 localStorage 持久化，启动时自动恢复�? * 终端过渡辅助函数保持私有，以约束公共 API 仅暴�?store actions/selectors�? */
 
-import { type TerminalActivityState, type TerminalCliKind } from "@remi-code/shared/terminalThreads";
-import type { ThreadId } from "@remi-code/contracts";
+import { type TerminalActivityState, type TerminalCliKind } from "~/shared/terminalThreads";
+import type { ThreadId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -44,43 +38,41 @@ import {
 } from "./workspaceTerminalLayoutPresets";
 
 /**
- * 单个线程的终端 UI 状态。
- * 包含终端面板的展示方式、布局、标签页列表和运行时活动信息。
- */
+ * 单个线程的终�?UI 状态�? * 包含终端面板的展示方式、布局、标签页列表和运行时活动信息�? */
 export interface ThreadTerminalState {
-  /** 终端入口面：从聊天页进入还是终端页进入 */
+  /** 终端入口面：从聊天页进入还是终端页进�?*/
   entryPoint: ThreadPrimarySurface;
   /** 终端面板是否打开 */
   terminalOpen: boolean;
-  /** 展示模式：抽屉模式或工作区模式 */
+  /** 展示模式：抽屉模式或工作区模�?*/
   presentationMode: ThreadTerminalPresentationMode;
-  /** 工作区布局：双栏（聊天+终端）或仅终端 */
+  /** 工作区布局：双栏（聊天+终端）或仅终�?*/
   workspaceLayout: ThreadTerminalWorkspaceLayout;
-  /** 工作区当前激活的标签页 */
+  /** 工作区当前激活的标签�?*/
   workspaceActiveTab: ThreadTerminalWorkspaceTab;
-  /** 终端面板高度（抽屉模式下使用） */
+  /** 终端面板高度（抽屉模式下使用�?*/
   terminalHeight: number;
-  /** 当前线程拥有的所有终端 ID 列表 */
+  /** 当前线程拥有的所有终�?ID 列表 */
   terminalIds: string[];
   /** 终端 ID 到显示标签的映射 */
   terminalLabelsById: Record<string, string>;
-  /** 终端 ID 到用户自定义标题覆盖的映射 */
+  /** 终端 ID 到用户自定义标题覆盖的映�?*/
   terminalTitleOverridesById: Record<string, string>;
-  /** 终端 ID 到 CLI 类型（codex/claude）的映射 */
+  /** 终端 ID �?CLI 类型（codex/claude）的映射 */
   terminalCliKindsById: Record<string, TerminalCliKind>;
   /** 终端 ID 到注意力状态（attention/review）的映射 */
   terminalAttentionStatesById: Record<string, "attention" | "review">;
-  /** 当前有子进程正在运行的终端 ID 列表 */
+  /** 当前有子进程正在运行的终�?ID 列表 */
   runningTerminalIds: string[];
   /** 当前激活的终端 ID */
   activeTerminalId: string;
   /** 终端面板组列表（每个组包含一个布局树） */
   terminalGroups: ThreadTerminalGroup[];
-  /** 当前激活的面板组 ID */
+  /** 当前激活的面板�?ID */
   activeTerminalGroupId: string;
 }
 
-/** localStorage 持久化键名 */
+/** localStorage 持久化键�?*/
 const TERMINAL_STATE_STORAGE_KEY = "remicode:terminal-state:v1";
 
 function normalizeTerminalIds(terminalIds: string[]): string[] {
@@ -500,13 +492,10 @@ function stripVolatileTerminalRuntimeState(state: ThreadTerminalState): ThreadTe
 }
 
 /**
- * 清理并归一化持久化的终端状态映射表。
- * 移除运行时临时状态（注意力状态、运行中终端列表），
- * 并删除与默认状态相同的条目以减少存储体积。
- *
+ * 清理并归一化持久化的终端状态映射表�? * 移除运行时临时状态（注意力状态、运行中终端列表），
+ * 并删除与默认状态相同的条目以减少存储体积�? *
  * @param terminalStateByThreadId - 持久化的线程终端状态映射表
- * @returns 清理后的映射表
- */
+ * @returns 清理后的映射�? */
 export function sanitizePersistedTerminalStateByThreadId(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState> | null | undefined,
 ): Record<ThreadId, ThreadTerminalState> {
@@ -1229,13 +1218,10 @@ function applyThreadWorkspaceLayoutPreset(
 }
 
 /**
- * 从终端状态映射表中选取指定线程的终端状态。
- * 若线程 ID 为空或不存在对应状态，返回默认终端状态。
- *
+ * 从终端状态映射表中选取指定线程的终端状态�? * 若线�?ID 为空或不存在对应状态，返回默认终端状态�? *
  * @param terminalStateByThreadId - 线程终端状态映射表
  * @param threadId - 目标线程 ID
- * @returns 该线程的终端状态（保证不为 null）
- */
+ * @returns 该线程的终端状态（保证不为 null�? */
 export function selectThreadTerminalState(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>,
   threadId: ThreadId,
@@ -1276,8 +1262,7 @@ function updateTerminalStateByThreadId(
 }
 
 /**
- * 终端状态 Store 的完整接口，包含状态和所有操作方法。
- */
+ * 终端状�?Store 的完整接口，包含状态和所有操作方法�? */
 interface TerminalStateStoreState {
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>;
   openChatThreadPage: (threadId: ThreadId) => void;
@@ -1335,9 +1320,7 @@ interface TerminalStateStoreState {
 }
 
 /**
- * 终端状态 Zustand Store，按 threadId 管理终端 UI 状态。
- * 通过 persist 中间件将状态持久化到 localStorage。
- *
+ * 终端状�?Zustand Store，按 threadId 管理终端 UI 状态�? * 通过 persist 中间件将状态持久化�?localStorage�? *
  * @example
  * ```tsx
  * const { activeTerminalId, splitTerminal, closeTerminal } = useTerminalStateStore();

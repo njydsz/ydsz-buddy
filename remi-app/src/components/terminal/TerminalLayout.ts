@@ -8,7 +8,7 @@ import {
   resolveTerminalVisualIdentity,
   type ResolvedTerminalVisualIdentity,
   type TerminalCliKind,
-} from "@remi-code/shared/terminalThreads";
+} from "~/shared/terminalThreads";
 
 import {
   collectTerminalIdsFromLayout,

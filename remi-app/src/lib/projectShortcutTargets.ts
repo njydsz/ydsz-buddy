@@ -1,4 +1,4 @@
-import type { ProjectId } from "@remi-code/contracts";
+import type { ProjectId } from "~/contracts";
 
 import type { Project } from "../types";
 

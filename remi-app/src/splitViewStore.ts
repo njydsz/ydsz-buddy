@@ -1,11 +1,9 @@
 /**
  * @file splitViewStore.ts
- * @description 分屏视图的 Zustand 持久化状态存储。
- * 以递归面板树（深度上限 2，最多 2×2 网格）管理分屏聊天界面，
- * 提供面板/分割类型、树感知选择器和基于 ID 的变更操作。
- */
+ * @description 分屏视图�?Zustand 持久化状态存储�? * 以递归面板树（深度上限 2，最�?2×2 网格）管理分屏聊天界面，
+ * 提供面板/分割类型、树感知选择器和基于 ID 的变更操作�? */
 
-import { type ProjectId, type ThreadId, type TurnId } from "@remi-code/contracts";
+import { type ProjectId, type ThreadId, type TurnId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -31,21 +29,21 @@ export type PaneId = string;
 /** 分割方向：`"horizontal"` 水平分割（左右），`"vertical"` 垂直分割（上下） */
 export type SplitDirection = "horizontal" | "vertical";
 /**
- * 分割放置侧：`"first"` 对应分割的上/左侧，`"second"` 对应下/右侧
+ * 分割放置侧：`"first"` 对应分割的上/左侧，`"second"` 对应�?右侧
  */
 export type SplitDropSide = "first" | "second";
 
-/** 面板右侧面板状态（浏览器/差异视图等） */
+/** 面板右侧面板状态（浏览�?差异视图等） */
 export interface SplitViewPanePanelState {
-  /** 当前打开的面板类型 */
+  /** 当前打开的面板类�?*/
   panel: ChatRightPanel | null;
-  /** 差异视图的轮次 ID */
+  /** 差异视图的轮�?ID */
   diffTurnId: TurnId | null;
-  /** 差异视图的文件路径 */
+  /** 差异视图的文件路�?*/
   diffFilePath: string | null;
-  /** 是否曾打开过面板 */
+  /** 是否曾打开过面�?*/
   hasOpenedPanel: boolean;
-  /** 最近打开的面板类型 */
+  /** 最近打开的面板类�?*/
   lastOpenPanel: ChatRightPanel;
 }
 
@@ -54,40 +52,40 @@ export interface LeafPane {
   kind: "leaf";
   /** 面板唯一 ID */
   id: PaneId;
-  /** 关联的线程 ID，为 null 时表示空面板 */
+  /** 关联的线�?ID，为 null 时表示空面板 */
   threadId: ThreadId | null;
-  /** 面板右侧面板状态 */
+  /** 面板右侧面板状�?*/
   panel: SplitViewPanePanelState;
 }
 
-/** 分割节点，代表一个水平或垂直的分割 */
+/** 分割节点，代表一个水平或垂直的分�?*/
 export interface SplitNode {
   kind: "split";
   /** 节点唯一 ID */
   id: PaneId;
   /** 分割方向 */
   direction: SplitDirection;
-  /** first = 左（水平）/ 上（垂直）；second = 右 / 下 */
+  /** first = 左（水平�? 上（垂直）；second = �?/ �?*/
   first: Pane;
   second: Pane;
-  /** 分割比例（0.25 ~ 0.75） */
+  /** 分割比例�?.25 ~ 0.75�?*/
   ratio: number;
 }
 
-/** 面板节点联合类型（叶子或分割） */
+/** 面板节点联合类型（叶子或分割�?*/
 export type Pane = LeafPane | SplitNode;
 
-/** 分屏视图，包含面板树和聚焦状态 */
+/** 分屏视图，包含面板树和聚焦状�?*/
 export interface SplitView {
   /** 分屏视图唯一 ID */
   id: SplitViewId;
-  /** 源线程 ID */
+  /** 源线�?ID */
   sourceThreadId: ThreadId;
-  /** 所属项目 ID */
+  /** 所属项�?ID */
   ownerProjectId: ProjectId;
   /** 面板树根节点 */
   root: Pane;
-  /** 当前聚焦的面板 ID */
+  /** 当前聚焦的面�?ID */
   focusedPaneId: PaneId;
   /** 创建时间 */
   createdAt: string;
@@ -340,11 +338,9 @@ function resolveNextSourceThreadId(input: {
 // --- selectors ---
 
 /**
- * 解析分屏视图中聚焦的线程 ID。
- * 优先返回聚焦面板的线程 ID，若聚焦面板为空则回退到第一个非空叶子面板。
- *
+ * 解析分屏视图中聚焦的线程 ID�? * 优先返回聚焦面板的线�?ID，若聚焦面板为空则回退到第一个非空叶子面板�? *
  * @param splitView - 分屏视图
- * @returns 聚焦的线程 ID，所有面板为空时返回 null
+ * @returns 聚焦的线�?ID，所有面板为空时返回 null
  */
 export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId | null {
   const focused = findLeafPaneById(splitView.root, splitView.focusedPaneId);
@@ -358,17 +354,17 @@ export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId 
 }
 
 /**
- * 严格获取聚焦面板的线程 ID（无回退），用于路由交接
+ * 严格获取聚焦面板的线�?ID（无回退），用于路由交接
  *
  * @param splitView - 分屏视图
- * @returns 聚焦面板的线程 ID
+ * @returns 聚焦面板的线�?ID
  */
 export function resolveSplitViewFocusedPaneThreadId(splitView: SplitView): ThreadId | null {
   return findLeafPaneById(splitView.root, splitView.focusedPaneId)?.threadId ?? null;
 }
 
 /**
- * 获取指定面板 ID 关联的线程 ID
+ * 获取指定面板 ID 关联的线�?ID
  *
  * @param splitView - 分屏视图
  * @param paneId - 面板 ID
@@ -395,11 +391,11 @@ export function resolveSplitViewThreadIds(splitView: SplitView): ThreadId[] {
 }
 
 /**
- * 根据线程 ID 查找对应的面板 ID
+ * 根据线程 ID 查找对应的面�?ID
  *
  * @param splitView - 分屏视图
  * @param threadId - 线程 ID
- * @returns 面板 ID，未找到时返回 null
+ * @returns 面板 ID，未找到时返�?null
  */
 export function resolveSplitViewPaneIdForThread(
   splitView: SplitView,
@@ -413,22 +409,18 @@ export function resolveSplitViewPaneIdForThread(
 }
 
 /**
- * 收集分屏视图中所有叶子面板。
- *
- * 遍历分屏视图的根节点，递归收集所有叶子面板（LeafPane）。
- *
+ * 收集分屏视图中所有叶子面板�? *
+ * 遍历分屏视图的根节点，递归收集所有叶子面板（LeafPane）�? *
  * @param splitView - 要收集叶子面板的分屏视图
- * @returns 叶子面板数组，按树遍历顺序排列
- */
+ * @returns 叶子面板数组，按树遍历顺序排�? */
 export function resolveSplitViewLeaves(splitView: SplitView): LeafPane[] {
   return collectLeaves(splitView.root);
 }
 
 /**
- * 创建一个 Zustand 选择器，根据分屏视图 ID 选取对应的分屏视图。
- *
- * @param splitViewId - 要选取的分屏视图 ID，为 null 时返回 null
- * @returns Zustand 选择器函数，接收 store 返回对应的 SplitView 或 null
+ * 创建一�?Zustand 选择器，根据分屏视图 ID 选取对应的分屏视图�? *
+ * @param splitViewId - 要选取的分屏视�?ID，为 null 时返�?null
+ * @returns Zustand 选择器函数，接收 store 返回对应�?SplitView �?null
  */
 export function selectSplitView(splitViewId: SplitViewId | null) {
   return (store: SplitViewStore) =>
@@ -436,12 +428,10 @@ export function selectSplitView(splitViewId: SplitViewId | null) {
 }
 
 /**
- * 创建一个 Zustand 选择器，根据源线程 ID 查找其所属的分屏视图 ID。
- *
- * 通过 splitViewIdBySourceThreadId 映射表查找源线程对应的分屏视图。
- *
- * @param threadId - 源线程 ID，为 null 时返回 null
- * @returns Zustand 选择器函数，接收 store 返回对应的 SplitViewId 或 null
+ * 创建一�?Zustand 选择器，根据源线�?ID 查找其所属的分屏视图 ID�? *
+ * 通过 splitViewIdBySourceThreadId 映射表查找源线程对应的分屏视图�? *
+ * @param threadId - 源线�?ID，为 null 时返�?null
+ * @returns Zustand 选择器函数，接收 store 返回对应�?SplitViewId �?null
  */
 export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
   return (store: SplitViewStore) =>
@@ -449,16 +439,12 @@ export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
 }
 
 /**
- * 确定性成员查找：仅当线程有唯一明确的分屏视图归属，或作为某个分屏的源线程时才恢复。
- * 模糊的非源线程成员关系回退到单聊模式，而非按最近使用猜测。
- *
+ * 确定性成员查找：仅当线程有唯一明确的分屏视图归属，或作为某个分屏的源线程时才恢复�? * 模糊的非源线程成员关系回退到单聊模式，而非按最近使用猜测�? *
  * 查找线程首选归属的分屏视图 ID。优先使用源线程映射表查找；
- * 若线程同时出现在多个分屏视图中且不是任何分屏的源线程，则仅当唯一匹配时返回。
- *
+ * 若线程同时出现在多个分屏视图中且不是任何分屏的源线程，则仅当唯一匹配时返回�? *
  * @param input - 查找参数
- * @param input.splitViewsById - 所有分屏视图的映射表
- * @param input.splitViewIdBySourceThreadId - 源线程到分屏视图 ID 的映射表
- * @param input.threadId - 要查找归属的线程 ID，为 null 时返回 null
+ * @param input.splitViewsById - 所有分屏视图的映射�? * @param input.splitViewIdBySourceThreadId - 源线程到分屏视图 ID 的映射表
+ * @param input.threadId - 要查找归属的线程 ID，为 null 时返�?null
  * @returns 线程首选归属的分屏视图 ID，无法确定时返回 null
  */
 export function resolvePreferredSplitViewIdForThread(input: {
@@ -491,21 +477,11 @@ export function resolvePreferredSplitViewIdForThread(input: {
 // --- store ---
 
 /**
- * 分屏视图 Zustand 状态管理 store。
- *
- * 使用 persist 中间件将分屏视图数据持久化到 localStorage，
- * 支持从旧版扁平左右面板结构迁移到树形结构。
- *
- * 主要功能：
- * - createFromThread：从源线程创建分屏视图
- * - createFromDrop：从拖放操作创建分屏视图
- * - removeSplitView：删除分屏视图
- * - replacePaneThread：替换面板中的线程
- * - dropThreadOnPane：将线程拖放到面板上以创建分屏
- * - removePaneFromSplitView：从分屏视图中移除面板
- * - setFocusedPane：设置聚焦面板
- * - setRatioForNode：设置分屏节点的分割比例
- * - setPanePanelState：设置面板的 UI 状态（如 diff 视图、面板展开等）
+ * 分屏视图 Zustand 状态管�?store�? *
+ * 使用 persist 中间件将分屏视图数据持久化到 localStorage�? * 支持从旧版扁平左右面板结构迁移到树形结构�? *
+ * 主要功能�? * - createFromThread：从源线程创建分屏视�? * - createFromDrop：从拖放操作创建分屏视图
+ * - removeSplitView：删除分屏视�? * - replacePaneThread：替换面板中的线�? * - dropThreadOnPane：将线程拖放到面板上以创建分�? * - removePaneFromSplitView：从分屏视图中移除面�? * - setFocusedPane：设置聚焦面�? * - setRatioForNode：设置分屏节点的分割比例
+ * - setPanePanelState：设置面板的 UI 状态（�?diff 视图、面板展开等）
  * - removeThreadFromSplitViews：从所有分屏视图中移除指定线程
  */
 export const useSplitViewStore = create<SplitViewStore>()(
@@ -879,9 +855,7 @@ export const useSplitViewStore = create<SplitViewStore>()(
           state?.setHasHydrated(true);
         };
       },
-      // v2 之前的存储使用扁平的左右面板结构。此处将持久化状态迁移到树形结构；
-      // 如果迁移无法恢复任何有效数据，则静默丢弃而非崩溃。
-      migrate: (persistedState, version) => {
+      // v2 之前的存储使用扁平的左右面板结构。此处将持久化状态迁移到树形结构�?      // 如果迁移无法恢复任何有效数据，则静默丢弃而非崩溃�?      migrate: (persistedState, version) => {
         if (version >= SPLIT_VIEW_STORAGE_VERSION) {
           return persistedState as SplitViewStoreState;
         }

@@ -1,9 +1,6 @@
 /**
- * @file 根路由模块
- * @description 应用根路由，负责初始化全局状态、事件订阅、主题管理、国际化等核心功能
- * @layer 根路由层
- * @exports Route - 根路由配置
- */
+ * @file 根路由模�? * @description 应用根路由，负责初始化全局状态、事件订阅、主题管理、国际化等核心功�? * @layer 根路由层
+ * @exports Route - 根路由配�? */
 
 import {
   PROVIDER_DISPLAY_NAMES,
@@ -14,8 +11,8 @@ import {
   type OrchestrationThread,
   type ServerConfig,
   type ServerProviderStatus,
-} from "@remi-code/contracts";
-import { defaultTerminalTitleForCliKind } from "@remi-code/shared/terminalThreads";
+} from "~/contracts";
+import { defaultTerminalTitleForCliKind } from "~/shared/terminalThreads";
 import {
   Outlet,
   createRootRouteWithContext,
@@ -100,17 +97,15 @@ const THREAD_DETAIL_CATCHUP_INTERVAL_MS = 1_500;
 const seenProviderUpdateNotificationKeys = new Set<string>();
 
 /**
- * 判断 Shell 线程是否已启动
- * @param thread - Shell 快照中的线程对象
- * @returns 如果线程有最新的轮次或会话，则返回 true
+ * 判断 Shell 线程是否已启�? * @param thread - Shell 快照中的线程对象
+ * @returns 如果线程有最新的轮次或会话，则返�?true
  */
 function shellThreadHasStarted(thread: OrchestrationShellSnapshot["threads"][number]): boolean {
   return thread.latestTurn !== null || thread.session !== null;
 }
 
 /**
- * 判断详情线程是否已启动
- * @param thread - 编排线程对象
+ * 判断详情线程是否已启�? * @param thread - 编排线程对象
  * @returns 如果线程已启动或包含消息，则返回 true
  */
 function detailThreadHasStarted(thread: OrchestrationThread): boolean {
@@ -118,8 +113,7 @@ function detailThreadHasStarted(thread: OrchestrationThread): boolean {
 }
 
 /**
- * 从 Shell 线程列表中协调已提升的草稿线程
- * @param threads - Shell 快照中的线程列表
+ * �?Shell 线程列表中协调已提升的草稿线�? * @param threads - Shell 快照中的线程列表
  * @description 标记所有线程为已提升，并将已启动的线程标记为已最终化
  */
 function reconcilePromotedDraftsFromShellThreads(
@@ -132,8 +126,7 @@ function reconcilePromotedDraftsFromShellThreads(
 }
 
 /**
- * 从线程详情协调已提升的草稿线程
- * @param thread - 编排线程对象
+ * 从线程详情协调已提升的草稿线�? * @param thread - 编排线程对象
  * @description 标记线程为已提升，如果已启动则标记为已最终化
  */
 function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): void {
@@ -144,8 +137,7 @@ function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): vo
 }
 
 /**
- * 根路由配置
- * @description 创建带有 QueryClient 上下文的根路由，定义根视图和错误视图
+ * 根路由配�? * @description 创建带有 QueryClient 上下文的根路由，定义根视图和错误视图
  */
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -158,8 +150,7 @@ export const Route = createRootRouteWithContext<{
 });
 
 /**
- * 根路由视图组件
- * @description 初始化全局样式、主题、字体、国际化等，并渲染全局组件
+ * 根路由视图组�? * @description 初始化全局样式、主题、字体、国际化等，并渲染全局组件
  */
 function RootRouteView() {
   useAppTypography();
@@ -209,8 +200,7 @@ function ProviderUpdateNotifications() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const updateToastIdRef = useRef<ReturnType<typeof toastManager.add> | null>(null);
-  // 过滤出有可用更新的提供者
-  const outdatedProviders = useMemo(
+  // 过滤出有可用更新的提供�?  const outdatedProviders = useMemo(
     () =>
       (serverConfigQuery.data?.providers ?? []).filter(
         (provider) =>
@@ -221,9 +211,7 @@ function ProviderUpdateNotifications() {
   );
 
   /**
-   * 批量更新所有过时的提供者
-   * @param providers - 需要更新的提供者列表
-   * @description 依次更新每个提供者，收集失败信息，并显示相应的通知
+   * 批量更新所有过时的提供�?   * @param providers - 需要更新的提供者列�?   * @description 依次更新每个提供者，收集失败信息，并显示相应的通知
    */
   const updateAll = useCallback(
     async (providers: ReadonlyArray<ServerProviderStatus>) => {
@@ -397,8 +385,7 @@ function ProviderUpdateNotifications() {
 
 /**
  * 全局快捷键对话框组件
- * @description 管理全局快捷键对话框的显示，响应菜单动作和键盘事件
- */
+ * @description 管理全局快捷键对话框的显示，响应菜单动作和键盘事�? */
 function GlobalShortcutsDialog() {
   const [open, setOpen] = useState(false);
   const { focusedThreadId, activeProject } = useFocusedChatContext();
@@ -452,13 +439,10 @@ function GlobalShortcutsDialog() {
 }
 
 /**
- * 全局"新功能"展示面组件
- * @description 应用会话级别的单一挂载点，负责渲染"新功能"弹窗和弹出卡片
- */
+ * 全局"新功�?展示面组�? * @description 应用会话级别的单一挂载点，负责渲染"新功�?弹窗和弹出卡�? */
 function GlobalWhatsNewSurface() {
-  // 单一挂载点，Hook 负责"弹出卡片可见"和"对话框打开"的布尔状态以及已查看标记的持久化
-  // 该组件仅负责将它们组合渲染，共享一个入口
-  const {
+  // 单一挂载点，Hook 负责"弹出卡片可见"�?对话框打开"的布尔状态以及已查看标记的持久化
+  // 该组件仅负责将它们组合渲染，共享一个入�?  const {
     currentEntry,
     allEntries,
     currentVersion,
@@ -496,11 +480,9 @@ function GlobalWhatsNewSurface() {
 }
 
 /**
- * 根路由错误视图组件
- * @description 当路由发生错误时显示的错误页面，提供重试和重载应用的选项
+ * 根路由错误视图组�? * @description 当路由发生错误时显示的错误页面，提供重试和重载应用的选项
  * @param error - 错误对象
- * @param reset - 重置函数，用于重试
- */
+ * @param reset - 重置函数，用于重�? */
 function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
   const message = errorMessage(error);
   const details = errorDetails(error);
@@ -545,8 +527,7 @@ function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
 /**
  * 提取错误消息
  * @param error - 错误对象
- * @returns 格式化的错误消息字符串
- */
+ * @returns 格式化的错误消息字符�? */
 function errorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
@@ -562,8 +543,7 @@ function errorMessage(error: unknown): string {
 /**
  * 提取错误详情
  * @param error - 错误对象
- * @returns 格式化的错误详情字符串，包含堆栈信息或 JSON 序列化结果
- */
+ * @returns 格式化的错误详情字符串，包含堆栈信息�?JSON 序列化结�? */
 function errorDetails(error: unknown): string {
   if (error instanceof Error) {
     return error.stack ?? error.message;
@@ -625,10 +605,10 @@ function coalesceOrchestrationUiEvents(
 
 /**
  * 判断是否应该立即刷新领域事件
- * @description 对于助手消息的首个流式事件，立即刷新以确保 UI 及时响应
+ * @description 对于助手消息的首个流式事件，立即刷新以确�?UI 及时响应
  * @param event - 编排事件对象
  * @param immediatelyFlushedAssistantMessageIds - 已立即刷新的助手消息 ID 集合
- * @returns 如果应该立即刷新则返回 true
+ * @returns 如果应该立即刷新则返�?true
  */
 function shouldFlushDomainEventImmediately(
   event: OrchestrationEvent,
@@ -689,12 +669,8 @@ function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
 
 /**
  * 事件路由组件
- * @description 核心事件订阅和分发组件，负责：
- * - 订阅 Shell 和线程详情事件流
- * - 管理线程订阅的生命周期
- * - 协调缓存失效和查询刷新
- * - 处理终端事件和欢迎消息
- * - 维护线程快照序列号和事件缓冲
+ * @description 核心事件订阅和分发组件，负责�? * - 订阅 Shell 和线程详情事件流
+ * - 管理线程订阅的生命周�? * - 协调缓存失效和查询刷�? * - 处理终端事件和欢迎消�? * - 维护线程快照序列号和事件缓冲
  */
 function EventRouter() {
   const messages = useMessages();
@@ -1292,8 +1268,7 @@ function EventRouter() {
 
 /**
  * 桌面项目引导组件
- * @description 处理桌面应用的项目初始化逻辑，确保项目数据正确加载
- */
+ * @description 处理桌面应用的项目初始化逻辑，确保项目数据正确加�? */
 function DesktopProjectBootstrap() {
   const syncServerReadModel = useStore((store) => store.syncServerReadModel);
   const projects = useStore((store) => store.projects);
@@ -1337,6 +1312,5 @@ function DesktopProjectBootstrap() {
       });
   }, [projects, syncServerReadModel, threads, threadsHydrated]);
 
-  // 桌面端的数据初始化通常通过 EventRouter 的项目和编排同步来完成
-  return null;
+  // 桌面端的数据初始化通常通过 EventRouter 的项目和编排同步来完�?  return null;
 }

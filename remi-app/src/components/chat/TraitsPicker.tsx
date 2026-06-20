@@ -9,8 +9,8 @@ import {
   type ProviderKind,
   type ProviderModelDescriptor,
   type ThreadId,
-} from "@remi-code/contracts";
-import { applyClaudePromptEffortPrefix } from "@remi-code/shared/model";
+} from "~/contracts";
+import { applyClaudePromptEffortPrefix } from "~/shared/model";
 import { memo, useCallback, useState } from "react";
 import { IoFlash } from "react-icons/io5";
 import { ChevronDownIcon } from "~/lib/icons";

@@ -6,8 +6,8 @@ import {
   buildSubagentIdentityDirectory,
   extractSubagentIdentityHints as extractParsedSubagentIdentityHints,
   resolveSubagentIdentityFromDirectory,
-} from "@remi-code/shared/subagents";
-import { formatModelDisplayName } from "@remi-code/shared/model";
+} from "~/shared/subagents";
+import { formatModelDisplayName } from "~/shared/model";
 
 const SUBAGENT_ACCENT_PALETTE = [
   "#b84e44",

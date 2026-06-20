@@ -1,46 +1,41 @@
 /**
  * @file 聊天线程路由逻辑辅助模块
  * @description 提供路由级别的聊天面板状态转换和降级处理的确定性逻辑
- * @layer 路由 UI 逻辑辅助层
- * @exports 线程标题降级、深度链接引导重放处理、面板切换辅助函数
- */
+ * @layer 路由 UI 逻辑辅助�? * @exports 线程标题降级、深度链接引导重放处理、面板切换辅助函�? */
 
-import type { ThreadId, TurnId } from "@remi-code/contracts";
+import type { ThreadId, TurnId } from "~/contracts";
 
 import type { ChatRightPanel, DiffRouteSearch } from "../diffRouteSearch";
 
 /**
- * 聊天面板状态快照
- * @description 表示当前聊天面板的完整状态，包括面板类型和差异对比信息
- */
+ * 聊天面板状态快�? * @description 表示当前聊天面板的完整状态，包括面板类型和差异对比信�? */
 export interface ChatPanelStateSnapshot {
   /** 当前激活的面板类型，null 表示无面板打开 */
   panel: ChatRightPanel | null;
-  /** 差异对比的轮次 ID，用于定位具体的代码变更 */
+  /** 差异对比的轮�?ID，用于定位具体的代码变更 */
   diffTurnId: TurnId | null;
-  /** 差异对比的文件路径 */
+  /** 差异对比的文件路�?*/
   diffFilePath: string | null;
 }
 
 /**
- * 聊天面板状态补丁
- * @description 用于部分更新面板状态，所有字段都是可选的
+ * 聊天面板状态补�? * @description 用于部分更新面板状态，所有字段都是可选的
  */
 export interface ChatPanelStatePatch {
   /** 面板类型 */
   panel?: ChatRightPanel | null;
-  /** 差异对比的轮次 ID */
+  /** 差异对比的轮�?ID */
   diffTurnId?: TurnId | null;
-  /** 差异对比的文件路径 */
+  /** 差异对比的文件路�?*/
   diffFilePath?: string | null;
 }
 
 /**
  * 路由面板引导结果
- * @description 表示从 URL 搜索参数中解析面板状态的引导结果
+ * @description 表示�?URL 搜索参数中解析面板状态的引导结果
  */
 export interface RoutePanelBootstrapResult {
-  /** 下一个应用的搜索键，用于避免重复应用相同的状态 */
+  /** 下一个应用的搜索键，用于避免重复应用相同的状�?*/
   nextAppliedSearchKey: string | null;
   /** 面板状态补丁，null 表示无需更新 */
   panelPatch: ChatPanelStatePatch | null;
@@ -53,25 +48,24 @@ export interface RoutePanelBootstrapResult {
 export interface SplitPaneMaximizeDecision {
   /** 要移除的分割视图 ID */
   splitViewIdToRemove: string;
-  /** 保留的线程 ID */
+  /** 保留的线�?ID */
   threadId: ThreadId;
-  /** 保留的面板状态 */
+  /** 保留的面板状�?*/
   panelState: ChatPanelStateSnapshot | null;
 }
 
 /**
  * 分割面板关闭决策
- * @description 联合类型，表示关闭分割面板时的不同处理策略
- */
+ * @description 联合类型，表示关闭分割面板时的不同处理策�? */
 export type SplitPaneCloseDecision =
   | {
-      /** 单线程模式：关闭分割视图，保留单个线程 */
+      /** 单线程模式：关闭分割视图，保留单个线�?*/
       kind: "single-thread";
       threadId: ThreadId;
       splitViewIdToRemove: string;
     }
   | {
-      /** 分割线程模式：保留分割视图，但切换到另一个线程 */
+      /** 分割线程模式：保留分割视图，但切换到另一个线�?*/
       kind: "split-thread";
       threadId: ThreadId;
       splitViewId: string;
