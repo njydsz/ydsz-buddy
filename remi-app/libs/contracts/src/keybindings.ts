@@ -160,4 +160,4 @@ export interface ResolvedKeybindingRule {
 }
 
 /** 解析后的快捷键配置类型，为解析后的快捷键规则数组，数量有上限限制 */
-export type ResolvedKeybindingsConfig = ResolvedKeybindingRule[];
+export type ResolvedKeybindingsConfig = ReadonlyArray<ResolvedKeybindingRule>;

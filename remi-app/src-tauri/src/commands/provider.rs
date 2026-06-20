@@ -26,7 +26,6 @@
 //! - 当前支持的提供商：OpenAI、Anthropic
 //! - 模型列表硬编码在代码中，后续可改为动态获取
 
-use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tauri::State;
@@ -50,29 +49,6 @@ use remi_provider::ProviderService;
 pub struct ProviderState {
     api_keys: Arc<Mutex<HashMap<String, String>>>,
     service: Arc<ProviderService>,
-}
-
-/// AI 模型信息结构
-///
-/// 表示单个 AI 模型的基本信息。
-///
-/// # 字段说明
-///
-/// - `id`: 模型唯一标识符（如 "gpt-4"、"claude-3-opus"）
-/// - `name`: 模型显示名称（如 "GPT-4"、"Claude 3 Opus"）
-/// - `provider`: 提供商名称（如 "openai"、"anthropic"）
-///
-/// # 使用场景
-///
-/// 作为 `list_models` 命令的返回值元素，用于前端渲染模型选择列表。
-#[derive(Debug, Serialize)]
-pub struct Model {
-    /// 模型 ID
-    pub id: String,
-    /// 模型显示名称
-    pub name: String,
-    /// 提供商名称
-    pub provider: String,
 }
 
 impl ProviderState {
@@ -102,70 +78,55 @@ impl ProviderState {
 /// 列出可用模型命令
 ///
 /// 获取支持的 AI 模型列表，可按提供商过滤。
+/// 通过 `ProviderService::list_models()` 查询，返回静态模型目录。
 ///
 /// # 参数
 ///
-/// - `provider`: 可选的提供商名称过滤条件
+/// - `state`: 提供商状态管理器（通过 Tauri State 注入）
+/// - `provider`: 可选的提供商名称过滤条件（如 "codex"、"claudeAgent"）
 ///   - 如果提供，仅返回该提供商的模型
-///   - 如果不提供，返回所有模型
+///   - 如果不提供，返回所有已注册提供商的模型
 ///
 /// # 返回值
 ///
-/// - `Ok(Vec<Model>)`: 查询成功，返回模型信息列表
+/// - `Ok(Vec<serde_json::Value>)`: 查询成功，返回模型信息列表
 /// - `Err(String)`: 查询失败
-///
-/// # 使用示例
-///
-/// ```javascript
-/// // 前端调用示例 - 获取所有模型
-/// const allModels = await window.__TAURI__.invoke('list_models');
-///
-/// // 前端调用示例 - 仅获取 OpenAI 模型
-/// const openaiModels = await window.__TAURI__.invoke('list_models', {
-///     provider: 'openai'
-/// });
-/// ```
-///
-/// # 当前支持的模型
-///
-/// - OpenAI: GPT-4, GPT-3.5 Turbo
-/// - Anthropic: Claude 3 Opus, Claude 3 Sonnet
-///
-/// # 设计说明
-///
-/// - 模型列表当前硬编码在代码中
-/// - 后续可改为从配置文件或远程 API 动态获取
 #[tauri::command]
-pub async fn list_models(provider: Option<String>) -> Result<Vec<Model>, String> {
-    // 硬编码的默认模型列表
-    let models = vec![
-        Model {
-            id: "gpt-4".to_string(),
-            name: "GPT-4".to_string(),
-            provider: "openai".to_string(),
-        },
-        Model {
-            id: "gpt-3.5-turbo".to_string(),
-            name: "GPT-3.5 Turbo".to_string(),
-            provider: "openai".to_string(),
-        },
-        Model {
-            id: "claude-3-opus".to_string(),
-            name: "Claude 3 Opus".to_string(),
-            provider: "anthropic".to_string(),
-        },
-        Model {
-            id: "claude-3-sonnet".to_string(),
-            name: "Claude 3 Sonnet".to_string(),
-            provider: "anthropic".to_string(),
-        },
-    ];
-    
-    // 按提供商过滤（如果提供）
-    if let Some(p) = provider {
-        Ok(models.into_iter().filter(|m| m.provider == p).collect())
+pub async fn list_models(
+    state: State<'_, ProviderState>,
+    provider: Option<String>,
+) -> Result<Vec<serde_json::Value>, String> {
+    let service = state.service();
+
+    if let Some(provider_str) = provider {
+        // 按指定提供商过滤
+        let kind = parse_provider_kind(&provider_str)
+            .ok_or_else(|| format!("未知的 Provider: {}", provider_str))?;
+        service
+            .list_models(kind)
+            .await
+            .map_err(|e| e.to_string())
     } else {
-        Ok(models)
+        // 返回所有 Provider 的模型
+        let all_kinds = [
+            ProviderKind::Codex,
+            ProviderKind::ClaudeAgent,
+            ProviderKind::Cursor,
+            ProviderKind::Gemini,
+            ProviderKind::Grok,
+            ProviderKind::Kilo,
+            ProviderKind::OpenCode,
+            ProviderKind::Pi,
+        ];
+        let mut all_models = Vec::new();
+        for kind in all_kinds {
+            let models = service
+                .list_models(kind)
+                .await
+                .map_err(|e| e.to_string())?;
+            all_models.extend(models);
+        }
+        Ok(all_models)
     }
 }
 
@@ -267,40 +228,80 @@ pub async fn get_provider_status(
 
 #[tauri::command]
 pub async fn provider_get_composer_capabilities(
+    state: State<'_, ProviderState>,
     input: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
+    // 尝试从 input 中解析 provider 字段
+    let provider_str = input
+        .get("provider")
+        .and_then(|v| v.as_str())
+        .unwrap_or("claudeAgent");
+
+    let kind = parse_provider_kind(provider_str)
+        .ok_or_else(|| format!("未知的 Provider: {}", provider_str))?;
+    let service = state.service();
+    let adapter = service.get_adapter(kind).await.map_err(|e| e.to_string())?;
+    let caps = adapter.capabilities();
+
     Ok(serde_json::json!({
         "tools": [],
         "skills": [],
-        "plugins": []
+        "plugins": [],
+        "capabilities": {
+            "session_model_switch": caps.session_model_switch,
+            "supports_skill_mentions": caps.supports_skill_mentions,
+            "supports_skill_discovery": caps.supports_skill_discovery,
+            "supports_native_slash_command_discovery": caps.supports_native_slash_command_discovery,
+            "supports_runtime_model_list": caps.supports_runtime_model_list,
+            "supports_turn_steering": caps.supports_turn_steering
+        }
     }))
 }
 
 #[tauri::command]
 pub async fn provider_compact_thread(
+    state: State<'_, ProviderState>,
     input: serde_json::Value,
 ) -> Result<(), String> {
-    Ok(())
+    let thread_id = input
+        .get("threadId")
+        .and_then(|v| v.as_str())
+        .ok_or("缺少 threadId 参数")?;
+    let provider_str = input
+        .get("provider")
+        .and_then(|v| v.as_str())
+        .ok_or("缺少 provider 参数")?;
+
+    let kind = parse_provider_kind(provider_str)
+        .ok_or_else(|| format!("未知的 Provider: {}", provider_str))?;
+    let service = state.service();
+    service
+        .compact_thread(thread_id, kind)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub async fn provider_list_commands(
-    input: serde_json::Value,
+    _input: serde_json::Value,
 ) -> Result<Vec<serde_json::Value>, String> {
+    // 命令列表依赖于活跃的 Provider 会话，当前无会话时返回空列表
     Ok(vec![])
 }
 
 #[tauri::command]
 pub async fn provider_list_skills(
-    input: serde_json::Value,
+    _input: serde_json::Value,
 ) -> Result<Vec<serde_json::Value>, String> {
+    // 技能列表依赖于活跃的 Provider 会话，当前无会话时返回空列表
     Ok(vec![])
 }
 
 #[tauri::command]
 pub async fn provider_list_plugins(
-    input: serde_json::Value,
+    _input: serde_json::Value,
 ) -> Result<Vec<serde_json::Value>, String> {
+    // 插件列表依赖于活跃的 Provider 会话，当前无会话时返回空列表
     Ok(vec![])
 }
 
@@ -308,17 +309,60 @@ pub async fn provider_list_plugins(
 pub async fn provider_read_plugin(
     input: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
-    Ok(serde_json::json!({}))
+    let plugin_id = input
+        .get("pluginId")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    Err(format!("未找到插件: {}", plugin_id))
 }
 
 #[tauri::command]
 pub async fn provider_list_agents(
+    state: State<'_, ProviderState>,
     input: serde_json::Value,
 ) -> Result<Vec<serde_json::Value>, String> {
-    Ok(vec![])
+    let provider_str = input
+        .get("provider")
+        .and_then(|v| v.as_str())
+        .unwrap_or("claudeAgent");
+
+    let kind = parse_provider_kind(provider_str)
+        .ok_or_else(|| format!("未知的 Provider: {}", provider_str))?;
+    let service = state.service();
+    service
+        .list_agents(kind)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub async fn skills_list_local() -> Result<Vec<serde_json::Value>, String> {
+    // 本地技能列表，当前返回空（后续可从文件系统扫描）
     Ok(vec![])
+}
+
+/// 解析 ProviderKind 字符串
+///
+/// 支持以下格式（大小写不敏感）：
+/// - "codex" → ProviderKind::Codex
+/// - "claudeAgent" / "claudeagent" / "claude" → ProviderKind::ClaudeAgent
+/// - "cursor" → ProviderKind::Cursor
+/// - "gemini" → ProviderKind::Gemini
+/// - "grok" → ProviderKind::Grok
+/// - "kilo" → ProviderKind::Kilo
+/// - "opencode" → ProviderKind::OpenCode
+/// - "pi" → ProviderKind::Pi
+fn parse_provider_kind(s: &str) -> Option<ProviderKind> {
+    let lower = s.to_lowercase();
+    match lower.as_str() {
+        "codex" | "openai" => Some(ProviderKind::Codex),
+        "claudeagent" | "claude" | "anthropic" => Some(ProviderKind::ClaudeAgent),
+        "cursor" => Some(ProviderKind::Cursor),
+        "gemini" | "google" => Some(ProviderKind::Gemini),
+        "grok" | "xai" => Some(ProviderKind::Grok),
+        "kilo" => Some(ProviderKind::Kilo),
+        "opencode" => Some(ProviderKind::OpenCode),
+        "pi" | "inflection" => Some(ProviderKind::Pi),
+        _ => None,
+    }
 }

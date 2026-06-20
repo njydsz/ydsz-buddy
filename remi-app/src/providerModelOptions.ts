@@ -198,7 +198,7 @@ export function buildProviderOptionPatch(
     typeof value === "string" &&
     (optionId === "thinkingLevel" || optionId === "thinkingBudget")
   ) {
-    return geminiModelOptionsFromEffortValue(value) ?? {};
+    return (geminiModelOptionsFromEffortValue(value) ?? {}) as Record<string, unknown>;
   }
   return { [optionId]: value };
 }

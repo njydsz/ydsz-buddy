@@ -381,3 +381,477 @@ pub struct ProviderTurnStartResult {
     /// 关联的线程 ID
     pub thread_id: String,
 }
+
+/// # Provider 审查目标
+///
+/// 代码审查的目标类型，支持审查分支、提交或差异。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub enum ProviderReviewTarget {
+    /// 审查指定分支
+    Branch {
+        /// 分支名称
+        branch: String,
+    },
+    /// 审查指定提交
+    Commit {
+        /// 提交 SHA
+        commit_sha: String,
+    },
+    /// 审查差异范围
+    Diff {
+        /// 基础引用（如分支名、提交 SHA）
+        base_ref: String,
+        /// 头部引用（如分支名、提交 SHA）
+        head_ref: String,
+    },
+}
+
+/// # Provider 启动审查输入
+///
+/// 启动代码审查流程时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderStartReviewInput {
+    /// 关联的线程 ID
+    pub thread_id: String,
+    /// 审查目标
+    pub target: ProviderReviewTarget,
+}
+
+/// # Provider 审批决策
+///
+/// 用户对 Provider 审批请求的决策。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum ProviderApprovalDecision {
+    /// 批准请求
+    Approve,
+    /// 拒绝请求
+    Deny,
+    /// 批准并记住此决策（后续类似请求自动批准）
+    ApproveAndRemember,
+    /// 拒绝并记住此决策（后续类似请求自动拒绝）
+    DenyAndRemember,
+}
+
+/// # Provider 用户输入答案
+///
+/// 用户对 Provider 结构化输入请求的回答。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProviderUserInputAnswers {
+    /// 答案键值对，键为问题 ID，答案为用户输入的文本
+    pub answers: std::collections::HashMap<String, String>,
+}
+
+/// # Provider 线程快照
+///
+/// Provider 线程的当前状态快照，包含所有 Turn 的信息。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderThreadSnapshot {
+    /// 线程 ID
+    pub thread_id: String,
+    /// Turn 列表
+    pub turns: Vec<ProviderTurnSnapshot>,
+    /// 恢复游标，用于会话恢复
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resume_cursor: Option<serde_json::Value>,
+}
+
+/// # Provider Turn 快照
+///
+/// 单个 Turn 的状态快照。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderTurnSnapshot {
+    /// Turn ID
+    pub turn_id: String,
+    /// Turn 状态
+    pub status: String,
+    /// 用户消息内容
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_message: Option<String>,
+    /// 助手响应内容
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assistant_message: Option<String>,
+    /// 创建时间
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+/// # Provider 分叉线程输入
+///
+/// 从现有线程创建新线程时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderForkThreadInput {
+    /// 源线程 ID
+    pub source_thread_id: String,
+    /// 新线程 ID
+    pub thread_id: String,
+    /// 源线程的恢复游标
+    pub source_resume_cursor: Option<serde_json::Value>,
+    /// 新线程的工作目录
+    pub cwd: Option<String>,
+    /// 新线程的模型选择
+    pub model: Option<String>,
+}
+
+/// # Provider 分叉线程结果
+///
+/// 分叉线程操作的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderForkThreadResult {
+    /// 新创建的线程 ID
+    pub thread_id: String,
+    /// 新线程的恢复游标
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resume_cursor: Option<serde_json::Value>,
+}
+
+/// # Provider Composer 能力
+///
+/// 描述 Provider 在编辑器中支持的功能特性。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderComposerCapabilities {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 是否支持技能提及
+    pub supports_skill_mentions: bool,
+    /// 是否支持技能发现
+    pub supports_skill_discovery: bool,
+    /// 是否支持原生命令发现
+    pub supports_native_slash_command_discovery: bool,
+    /// 是否支持插件提及
+    pub supports_plugin_mentions: bool,
+    /// 是否支持插件发现
+    pub supports_plugin_discovery: bool,
+    /// 是否支持运行时模型列表
+    pub supports_runtime_model_list: bool,
+    /// 是否支持线程压缩
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supports_thread_compaction: Option<bool>,
+    /// 是否支持线程导入
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supports_thread_import: Option<bool>,
+}
+
+/// # Provider 技能描述符
+///
+/// 描述一个可用的技能。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderSkillDescriptor {
+    /// 技能名称
+    pub name: String,
+    /// 技能描述
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// 技能路径
+    pub path: String,
+    /// 是否启用
+    pub enabled: bool,
+    /// 作用域
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scope: Option<String>,
+}
+
+/// # Provider 列出技能输入
+///
+/// 列出可用技能时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderListSkillsInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 工作目录
+    pub cwd: String,
+    /// 线程 ID（可选）
+    pub thread_id: Option<String>,
+    /// 是否强制重新加载
+    pub force_reload: Option<bool>,
+}
+
+/// # Provider 列出技能结果
+///
+/// 技能列表的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderListSkillsResult {
+    /// 技能列表
+    pub skills: Vec<ProviderSkillDescriptor>,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # Provider 原生命令描述符
+///
+/// 描述 Provider 原生的斜杠命令。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderNativeCommandDescriptor {
+    /// 命令名称
+    pub name: String,
+    /// 命令描述
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+/// # Provider 列出命令输入
+///
+/// 列出可用命令时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderListCommandsInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 工作目录
+    pub cwd: String,
+    /// 线程 ID（可选）
+    pub thread_id: Option<String>,
+    /// 是否强制重新加载
+    pub force_reload: Option<bool>,
+}
+
+/// # Provider 列出命令结果
+///
+/// 命令列表的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderListCommandsResult {
+    /// 命令列表
+    pub commands: Vec<ProviderNativeCommandDescriptor>,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # Provider 插件描述符
+///
+/// 描述一个可用的插件。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderPluginDescriptor {
+    /// 插件 ID
+    pub id: String,
+    /// 插件名称
+    pub name: String,
+    /// 是否已安装
+    pub installed: bool,
+    /// 是否已启用
+    pub enabled: bool,
+}
+
+/// # Provider 插件市场描述符
+///
+/// 描述一个插件市场。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderPluginMarketplaceDescriptor {
+    /// 市场名称
+    pub name: String,
+    /// 市场路径
+    pub path: String,
+    /// 插件列表
+    pub plugins: Vec<ProviderPluginDescriptor>,
+}
+
+/// # Provider 列出插件输入
+///
+/// 列出可用插件时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderListPluginsInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 工作目录（可选）
+    pub cwd: Option<String>,
+    /// 是否强制远程同步
+    pub force_remote_sync: Option<bool>,
+    /// 是否强制重新加载
+    pub force_reload: Option<bool>,
+}
+
+/// # Provider 列出插件结果
+///
+/// 插件列表的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderListPluginsResult {
+    /// 市场列表
+    pub marketplaces: Vec<ProviderPluginMarketplaceDescriptor>,
+    /// 推荐插件 ID 列表
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub featured_plugin_ids: Vec<String>,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # Provider 读取插件输入
+///
+/// 读取插件详情时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderReadPluginInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 市场路径
+    pub marketplace_path: String,
+    /// 插件名称
+    pub plugin_name: String,
+}
+
+/// # Provider 插件详情
+///
+/// 插件的详细信息。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderPluginDetail {
+    /// 市场名称
+    pub marketplace_name: String,
+    /// 市场路径
+    pub marketplace_path: String,
+    /// 插件摘要
+    pub summary: ProviderPluginDescriptor,
+    /// 技能列表
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub skills: Vec<ProviderSkillDescriptor>,
+}
+
+/// # Provider 读取插件结果
+///
+/// 插件详情的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderReadPluginResult {
+    /// 插件详情
+    pub plugin: ProviderPluginDetail,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # Provider 模型描述符
+///
+/// 描述一个可用的 AI 模型。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderModelDescriptor {
+    /// 模型标识
+    pub slug: String,
+    /// 模型名称
+    pub name: String,
+    /// 上游提供者 ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upstream_provider_id: Option<String>,
+    /// 上游提供者名称
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upstream_provider_name: Option<String>,
+    /// 默认上下文窗口
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_context_window: Option<String>,
+}
+
+/// # Provider 列出模型输入
+///
+/// 列出可用模型时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderListModelsInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 二进制文件路径（可选）
+    pub binary_path: Option<String>,
+    /// API 端点（可选）
+    pub api_endpoint: Option<String>,
+}
+
+/// # Provider 列出模型结果
+///
+/// 模型列表的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderListModelsResult {
+    /// 模型列表
+    pub models: Vec<ProviderModelDescriptor>,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # Provider 代理描述符
+///
+/// 描述一个可用的代理。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderAgentDescriptor {
+    /// 代理名称
+    pub name: String,
+    /// 显示名称
+    pub display_name: String,
+    /// 代理描述
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// 使用的模型
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+}
+
+/// # Provider 列出代理结果
+///
+/// 代理列表的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderListAgentsResult {
+    /// 代理列表
+    pub agents: Vec<ProviderAgentDescriptor>,
+    /// 数据来源
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    /// 是否来自缓存
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<bool>,
+}
+
+/// # 语音转录输入
+///
+/// 语音转录请求的输入参数。
+#[derive(Debug, Clone)]
+pub struct ServerVoiceTranscriptionInput {
+    /// Provider 类型
+    pub provider: ProviderKind,
+    /// 工作目录
+    pub cwd: String,
+    /// 线程 ID（可选）
+    pub thread_id: Option<String>,
+    /// 音频 MIME 类型
+    pub mime_type: String,
+    /// 采样率（Hz）
+    pub sample_rate_hz: u32,
+    /// 音频时长（ms）
+    pub duration_ms: u64,
+    /// 音频数据（Base64 编码）
+    pub audio_base64: String,
+}
+
+/// # 语音转录结果
+///
+/// 语音转录的返回结果。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServerVoiceTranscriptionResult {
+    /// 转录后的文本
+    pub text: String,
+}

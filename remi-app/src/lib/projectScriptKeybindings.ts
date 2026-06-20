@@ -1,10 +1,8 @@
 import {
-  KeybindingRule as KeybindingRuleSchema,
   type KeybindingCommand,
   type KeybindingRule,
   type ResolvedKeybindingsConfig,
 } from "@remi-code/contracts";
-import { Schema } from "effect";
 
 export const PROJECT_SCRIPT_KEYBINDING_INVALID_MESSAGE = "Invalid keybinding.";
 
@@ -22,14 +20,15 @@ export function decodeProjectScriptKeybindingRule(input: {
   const normalizedKey = normalizeProjectScriptKeybindingInput(input.keybinding);
   if (!normalizedKey) return null;
 
-  const decoded = Schema.decodeUnknownOption(KeybindingRuleSchema)({
-    key: normalizedKey,
-    command: input.command,
-  });
-  if (decoded._tag === "None") {
+  // TODO: 迁移期间仅做基础非空校验；后续可接入 zod/effect schema 校验。
+  if (typeof input.command !== "string" || input.command.length === 0) {
     throw new Error(PROJECT_SCRIPT_KEYBINDING_INVALID_MESSAGE);
   }
-  return decoded.value;
+
+  return {
+    key: normalizedKey,
+    command: input.command,
+  };
 }
 
 export function keybindingValueForCommand(

@@ -122,5 +122,234 @@ pub async fn register_provider_methods(
         })
         .await;
 
+    // provider.listSkills
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.listSkills", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let input = remi_core::provider::ProviderListSkillsInput {
+                    provider,
+                    cwd: cwd.to_string(),
+                    thread_id: params.get("threadId").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
+                };
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                let result = adapter.list_skills(input).await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // provider.listCommands
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.listCommands", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let input = remi_core::provider::ProviderListCommandsInput {
+                    provider,
+                    cwd: cwd.to_string(),
+                    thread_id: params.get("threadId").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
+                };
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                let result = adapter.list_commands(input).await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // provider.listPlugins
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.listPlugins", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let input = remi_core::provider::ProviderListPluginsInput {
+                    provider,
+                    cwd: params.get("cwd").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    force_remote_sync: params.get("forceRemoteSync").and_then(|v| v.as_bool()),
+                    force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
+                };
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                let result = adapter.list_plugins(input).await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // provider.readPlugin
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.readPlugin", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let marketplace_path = params
+                    .get("marketplacePath")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing marketplacePath".to_string())
+                    })?;
+
+                let plugin_name = params
+                    .get("pluginName")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing pluginName".to_string())
+                    })?;
+
+                let input = remi_core::provider::ProviderReadPluginInput {
+                    provider,
+                    marketplace_path: marketplace_path.to_string(),
+                    plugin_name: plugin_name.to_string(),
+                };
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                let result = adapter.read_plugin(input).await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // provider.getComposerCapabilities
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.getComposerCapabilities", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                let result = adapter.get_composer_capabilities().await?;
+                serde_json::to_value(result)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // provider.compactThread
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.compactThread", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let thread_id = params
+                    .get("threadId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing threadId".to_string())
+                    })?;
+
+                let adapter = provider_service.get_adapter(provider).await?;
+                adapter.compact_thread(thread_id).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
     info!("Provider RPC 方法注册完成");
 }

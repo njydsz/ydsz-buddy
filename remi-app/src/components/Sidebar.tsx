@@ -5181,7 +5181,7 @@ export default function Sidebar() {
     if (desktopUpdateButtonAction === "download") {
       void bridge
         .downloadUpdate()
-        .then((result: { completed: boolean; state: DesktopUpdateState }) => {
+        .then((result) => {
           setInstallingDesktopUpdate(false);
           setDesktopUpdateState(result.state);
           if (result.completed) {
@@ -5215,7 +5215,7 @@ export default function Sidebar() {
       persistAppStateNow();
       void bridge
         .installUpdate()
-        .then((result: { state: DesktopUpdateState }) => {
+        .then((result) => {
           setDesktopUpdateState(result.state);
           setInstallingDesktopUpdate(false);
           if (!shouldToastDesktopUpdateActionResult(result)) return;

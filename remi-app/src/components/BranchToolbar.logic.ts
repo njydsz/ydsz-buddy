@@ -5,7 +5,7 @@ import {
 } from "@remi-code/shared/threadWorkspace";
 import { Schema } from "effect";
 
-export const EnvMode = Schema.Literals(["local", "worktree"]);
+export const EnvMode = Schema.Literal("local", "worktree");
 export type EnvMode = typeof EnvMode.Type;
 
 export function resolveEffectiveEnvMode(input: {
