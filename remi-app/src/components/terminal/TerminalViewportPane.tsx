@@ -1,9 +1,7 @@
-/**
- * @file TerminalViewportPane.tsx
- * @description 终端视口面板组件，渲染活跃终端面板树，支持嵌套分屏和面板内标签栏。
- * 属于终端展示组件层，通过外部传入的 renderViewport 回调渲染 xterm 视口，
- * 使 xterm 生命周期管理保持在外部。
- */
+// FILE: TerminalViewportPane.tsx
+// Purpose: Renders the active terminal pane tree with nested splits and pane-local tab strips.
+// Layer: Terminal presentation components
+// Depends on: caller-provided viewport renderer so xterm lifecycle can stay external.
 
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
@@ -29,76 +27,38 @@ import type {
 import TerminalActivityIndicator from "./TerminalActivityIndicator";
 import TerminalIdentityIcon from "./TerminalIdentityIcon";
 
-/** 终端面板最小尺寸（像素），防止面板被拖拽到过小 */
 const MIN_TERMINAL_PANE_SIZE_PX = 180;
 
-/**
- * 终端视口面板组件的 Props 接口。
- */
 interface TerminalViewportPaneProps {
-  /** 所属分组 ID */
   groupId: string;
-  /** 面板布局节点树 */
   layout: ThreadTerminalLayoutNode;
-  /** 当前活跃的终端 ID */
   resolvedActiveTerminalId: string;
-  /** 终端 ID 到视觉标识的映射 */
   terminalVisualIdentityById: ReadonlyMap<string, ResolvedTerminalVisualIdentity>;
-  /** 切换活跃终端的回调 */
   onActiveTerminalChange: (terminalId: string) => void;
-  /** 分屏权重调整回调 */
   onResizeSplit: (groupId: string, splitId: string, weights: number[]) => void;
-  /** 终端视口渲染回调，由外部提供以解耦 xterm 生命周期 */
   renderViewport: (
     terminalId: string,
     options: { autoFocus: boolean; isVisible: boolean },
   ) => ReactNode;
-  /** 向右分屏回调 */
   onSplitTerminalRight?: ((terminalId: string) => void) | undefined;
-  /** 向下分屏回调 */
   onSplitTerminalDown?: ((terminalId: string) => void) | undefined;
-  /** 新建终端标签页回调 */
   onNewTerminalTab?: ((terminalId: string) => void) | undefined;
-  /** 将终端移至独立分组回调 */
   onMoveTerminalToGroup?: ((terminalId: string) => void) | undefined;
-  /** 关闭终端回调 */
   onCloseTerminal?: ((terminalId: string) => void) | undefined;
-  /** 终端展示模式 */
   presentationMode: ThreadTerminalPresentationMode;
-  /** 切换展示模式回调 */
   onTogglePresentationMode?: (() => void) | undefined;
 }
 
-/**
- * 归一化分屏权重数组，将无效值（非有限数或非正数）替换为 1。
- *
- * @param weights - 原始权重数组
- * @returns 归一化后的权重数组
- */
 function normalizeWeights(weights: number[]): number[] {
   return weights.map((weight) => (Number.isFinite(weight) && weight > 0 ? weight : 1));
 }
 
-/**
- * 根据分屏方向返回分割手柄的样式类名。
- *
- * @param direction - 分屏方向（horizontal/vertical）
- * @returns 对应方向的 CSS 类名字符串
- */
 function splitHandleClassName(direction: ThreadTerminalSplitNode["direction"]): string {
   return direction === "horizontal"
     ? "shrink-0 w-px cursor-col-resize bg-border/70 hover:bg-[var(--sidebar-accent)]"
     : "shrink-0 h-px cursor-row-resize bg-border/70 hover:bg-[var(--sidebar-accent)]";
 }
 
-/**
- * 判断指定终端是否可以移至独立分组。
- * 当终端所在面板包含多个终端标签时，该终端可移出。
- *
- * @param node - 布局节点树
- * @param terminalId - 待判断的终端 ID
- * @returns 是否可以移至独立分组
- */
 function canMoveTerminalToOwnGroup(node: ThreadTerminalLayoutNode, terminalId: string): boolean {
   if (node.type === "terminal") {
     return node.activeTerminalId === terminalId && node.terminalIds.length > 1;
@@ -112,14 +72,6 @@ function canMoveTerminalToOwnGroup(node: ThreadTerminalLayoutNode, terminalId: s
   });
 }
 
-/**
- * 面板操作按钮组件，用于渲染标签栏和工具栏中的小型图标按钮。
- *
- * @param props.label - 按钮的 aria-label 和 title 文本
- * @param props.onClick - 点击回调
- * @param props.children - 按钮内容，通常为图标
- * @param props.className - 自定义样式类名
- */
 function PaneActionButton(props: {
   label: string;
   onClick: () => void;
@@ -145,13 +97,6 @@ function PaneActionButton(props: {
   );
 }
 
-/**
- * 终端视口面板组件。递归渲染终端布局节点树，支持嵌套分屏和面板内标签栏。
- * 每个终端面板包含标签栏（图标、标题、关闭按钮）和终端视口区域，
- * 分屏节点通过可拖拽的分割手柄支持实时调整权重。
- *
- * @param props - 终端视口面板组件的属性
- */
 export default function TerminalViewportPane({
   groupId,
   layout,

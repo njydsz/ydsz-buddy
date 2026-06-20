@@ -1,8 +1,7 @@
-/**
- * @file DiffPanel.logic.ts
- * @description 差异面板的线程上下文解析逻辑，在服务端线程和本地草稿线程之间
- *              统一推导差异面板应使用的线程上下文。
- */
+// FILE: DiffPanel.logic.ts
+// Purpose: Resolve the thread context the diff panel should use across server-backed and local draft chats.
+// Exports: resolveDiffPanelThread
+// Depends on: ChatView.logic draft-thread normalization.
 
 import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection, type ThreadId } from "~/contracts";
 

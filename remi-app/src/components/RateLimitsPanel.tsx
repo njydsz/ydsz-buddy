@@ -1,8 +1,6 @@
-/**
- * @file RateLimitsPanel.tsx
- * @description 速率限制折叠面板，基于编排线程活动数据展示账户级速率限制摘要，
- *              支持展开/折叠和"了解更多"外部链接。
- */
+// FILE: RateLimitsPanel.tsx
+// Purpose: Wraps the shared rate-limit summary UI in a collapsible panel fed by
+// orchestration thread activities.
 
 import { useMemo, useState } from "react";
 import type { OrchestrationThread } from "~/contracts";

@@ -1,8 +1,3 @@
-/**
- * @file DiffPanelShell.tsx
- * @description 差异面板的外壳布局组件，提供统一的头部和内容区域容器。
- *              支持内联、弹出面板和侧边栏三种显示模式，处理桌面端拖拽区域等平台差异。
- */
 import type { ReactNode } from "react";
 
 import { isDesktop } from "~/env";
@@ -10,7 +5,6 @@ import { cn } from "~/lib/utils";
 
 import { Skeleton } from "./ui/skeleton";
 
-/** 差异面板显示模式：内联侧栏、弹出面板或侧边栏 */
 export type DiffPanelMode = "inline" | "sheet" | "sidebar";
 
 function getDiffPanelHeaderRowClassName(mode: DiffPanelMode) {
@@ -21,7 +15,6 @@ function getDiffPanelHeaderRowClassName(mode: DiffPanelMode) {
   );
 }
 
-/** 差异面板外壳组件，提供统一的头部和内容区域布局 */
 export function DiffPanelShell(props: {
   mode: DiffPanelMode;
   header: ReactNode;
@@ -50,7 +43,6 @@ export function DiffPanelShell(props: {
   );
 }
 
-/** 差异面板头部骨架屏，在加载期间显示占位动画 */
 export function DiffPanelHeaderSkeleton() {
   return (
     <>
@@ -71,7 +63,6 @@ export function DiffPanelHeaderSkeleton() {
   );
 }
 
-/** 差异面板加载状态组件，显示居中加载指示器和标签文本 */
 export function DiffPanelLoadingState(props: { label: string }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col p-2">

@@ -1,6 +1,6 @@
 /**
- * @file 鑱婂ぉ椤圭洰绠＄悊妯″潡
- * @description 澶嶇敤闅愯棌鐨勯椤典綔鐢ㄥ煙鑱婂ぉ椤圭洰浣滀负鑱婂ぉ琛岀殑鍚庡彴瀹瑰櫒銆? *              鎻愪緵棣栭〉鑱婂ぉ椤圭洰鐨勬煡鎵俱€佸垱寤恒€佷慨澶嶇瓑鍔熻兘銆? */
+ * @file 聊天项目管理模块
+ * @description 复用隐藏的首页作用域聊天项目作为聊天行的后台容器�? *              提供首页聊天项目的查找、创建、修复等功能�? */
 
 import { type ProjectId } from "~/contracts";
 import type { Project } from "../types";
@@ -9,16 +9,16 @@ import { useStore } from "../store";
 import { getThreadFromState } from "../threadDerivation";
 import { newCommandId, newProjectId } from "./utils";
 
-/** 鎸夐椤电洰褰曠紦瀛樼殑寰呭垱寤洪椤佃亰澶╅」鐩?Promise */
+/** 按首页目录缓存的待创建首页聊天项�?Promise */
 const pendingHomeChatCreationByHomeDir = new Map<string, Promise<ProjectId | null>>();
-/** 鎸夐椤电洰褰曠紦瀛樼殑寰呬慨澶嶉椤佃亰澶╅」鐩?Promise */
+/** 按首页目录缓存的待修复首页聊天项�?Promise */
 const pendingHomeChatFixupByHomeDir = new Map<string, Promise<void>>();
 
 /**
- * 鍦ㄩ」鐩腑鏌ユ壘棣栭〉鑱婂ぉ瀹瑰櫒椤圭洰
- * @param projects - 椤圭洰鍒楄〃
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鍖归厤鐨勯椤佃亰澶╁鍣ㄩ」鐩紝濡傛灉鏈壘鍒板垯杩斿洖 null
+ * 在项目中查找首页聊天容器项目
+ * @param projects - 项目列表
+ * @param homeDir - 首页目录路径
+ * @returns 匹配的首页聊天容器项目，如果未找到则返回 null
  */
 export function findHomeChatContainerProject<
   T extends Pick<Project, "cwd" | "kind" | "name" | "remoteName">,
@@ -30,8 +30,8 @@ export function findHomeChatContainerProject<
 }
 
 /**
- * 鏌ユ壘瑙勮寖鐨勯椤甸」鐩紙鍐呴儴鍑芥暟锛? * 璇嗗埆瑙勮寖椤圭洰鍜岄噸澶嶉」鐩紝妫€娴嬫槸鍚﹂渶瑕佷慨澶嶉」鐩被鍨? * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鍖呭惈瑙勮寖椤圭洰ID銆侀噸澶嶉」鐩甀D鍒楄〃鍜屾槸鍚﹂渶瑕佷慨澶嶇被鍨嬬殑瀵硅薄
+ * 查找规范的首页项目（内部函数�? * 识别规范项目和重复项目，检测是否需要修复项目类�? * @param homeDir - 首页目录路径
+ * @returns 包含规范项目ID、重复项目ID列表和是否需要修复类型的对象
  */
 function findCanonicalHomeProject(homeDir: string): {
   canonicalProjectId: ProjectId | null;
@@ -42,7 +42,7 @@ function findCanonicalHomeProject(homeDir: string): {
   const homeProjects = state.projects.filter((project) =>
     isHomeChatContainerProject(project, homeDir),
   );
-  // 浼樺厛閫夋嫨绫诲瀷涓?"chat" 鐨勯」鐩綔涓鸿鑼冮」鐩?  const canonicalProject =
+  // 优先选择类型�?"chat" 的项目作为规范项�?  const canonicalProject =
     homeProjects.find((project) => project.kind === "chat") ?? homeProjects[0];
   if (!canonicalProject) {
     return {
@@ -52,7 +52,7 @@ function findCanonicalHomeProject(homeDir: string): {
     };
   }
 
-  // 鏌ユ壘閲嶅椤圭洰锛堜粎褰撴病鏈夊叧鑱旂嚎绋嬫椂鎵嶅彲鍒犻櫎锛?  const duplicateProjectIds = homeProjects
+  // 查找重复项目（仅当没有关联线程时才可删除�?  const duplicateProjectIds = homeProjects
     .filter((project) => project.id !== canonicalProject.id)
     .flatMap((project) => {
       const hasThreads = (state.threadIds ?? [])
@@ -69,8 +69,8 @@ function findCanonicalHomeProject(homeDir: string): {
 }
 
 /**
- * 淇棣栭〉鑱婂ぉ椤圭洰锛堝唴閮ㄥ嚱鏁帮級
- * 淇椤圭洰绫诲瀷鍜屾竻鐞嗛噸澶嶉」鐩? * @param homeDir - 棣栭〉鐩綍璺緞
+ * 修复首页聊天项目（内部函数）
+ * 修复项目类型和清理重复项�? * @param homeDir - 首页目录路径
  */
 async function fixupHomeChatProject(homeDir: string): Promise<void> {
   const api = readNativeApi();
@@ -84,7 +84,7 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
     return;
   }
 
-  // 淇椤圭洰绫诲瀷
+  // 修复项目类型
   if (needsKindFixup) {
     await api.orchestration.dispatchCommand({
       type: "project.meta.update",
@@ -96,7 +96,7 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
     });
   }
 
-  // 鍒犻櫎閲嶅椤圭洰
+  // 删除重复项目
   for (const duplicateProjectId of duplicateProjectIds) {
     await api.orchestration.dispatchCommand({
       type: "project.delete",
@@ -107,9 +107,9 @@ async function fixupHomeChatProject(homeDir: string): Promise<void> {
 }
 
 /**
- * 璋冨害棣栭〉鑱婂ぉ椤圭洰淇锛堝唴閮ㄥ嚱鏁帮級
- * 浣跨敤缂撳瓨閬垮厤閲嶅淇
- * @param homeDir - 棣栭〉鐩綍璺緞
+ * 调度首页聊天项目修复（内部函数）
+ * 使用缓存避免重复修复
+ * @param homeDir - 首页目录路径
  */
 function scheduleHomeChatFixup(homeDir: string): void {
   if (pendingHomeChatFixupByHomeDir.has(homeDir)) {
@@ -122,10 +122,10 @@ function scheduleHomeChatFixup(homeDir: string): void {
 }
 
 /**
- * 纭繚棣栭〉鑱婂ぉ椤圭洰瀛樺湪
- * 濡傛灉涓嶅瓨鍦ㄥ垯鍒涘缓锛屽鏋滃瓨鍦ㄥ垯璋冨害淇
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 棣栭〉鑱婂ぉ椤圭洰 ID锛屽鏋?API 涓嶅彲鐢ㄥ垯杩斿洖 null
+ * 确保首页聊天项目存在
+ * 如果不存在则创建，如果存在则调度修复
+ * @param homeDir - 首页目录路径
+ * @returns 首页聊天项目 ID，如�?API 不可用则返回 null
  */
 export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId | null> {
   const api = readNativeApi();
@@ -139,13 +139,13 @@ export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId 
     return canonicalProjectId;
   }
 
-  // 妫€鏌ユ槸鍚﹀凡鏈夊緟鍒涘缓鐨?Promise
+  // 检查是否已有待创建�?Promise
   const pendingCreation = pendingHomeChatCreationByHomeDir.get(homeDir);
   if (pendingCreation) {
     return pendingCreation;
   }
 
-  // 鍒涘缓鏂扮殑棣栭〉鑱婂ぉ椤圭洰
+  // 创建新的首页聊天项目
   const creationPromise = (async () => {
     const projectId = newProjectId();
     await api.orchestration.dispatchCommand({
@@ -167,18 +167,18 @@ export async function ensureHomeChatProject(homeDir: string): Promise<ProjectId 
 }
 
 /**
- * 棰勭儹棣栭〉鑱婂ぉ椤圭洰
- * 寮傛瑙﹀彂椤圭洰鍒涘缓锛屼笉绛夊緟缁撴灉
- * @param homeDir - 棣栭〉鐩綍璺緞
+ * 预热首页聊天项目
+ * 异步触发项目创建，不等待结果
+ * @param homeDir - 首页目录路径
  */
 export function prewarmHomeChatProject(homeDir: string): void {
   void ensureHomeChatProject(homeDir);
 }
 
 /**
- * 鍒ゆ柇椤圭洰鏄惁涓洪椤佃亰澶╁鍣ㄩ」鐩? * @param project - 椤圭洰瀵硅薄
- * @param homeDir - 棣栭〉鐩綍璺緞
- * @returns 鏄惁涓洪椤佃亰澶╁鍣ㄩ」鐩? */
+ * 判断项目是否为首页聊天容器项�? * @param project - 项目对象
+ * @param homeDir - 首页目录路径
+ * @returns 是否为首页聊天容器项�? */
 export function isHomeChatContainerProject(
   project: Pick<Project, "cwd" | "kind" | "name" | "remoteName"> | null | undefined,
   homeDir: string | null | undefined,

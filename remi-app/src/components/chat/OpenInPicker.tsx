@@ -1,8 +1,7 @@
-/**
- * @file OpenInPicker
- * @description 聊天头部的"打开方式"控件，用于在首选编辑器中打开当前活跃项目。
- *              支持编辑器偏好设置、快捷键打开和编辑器选择菜单。
- */
+// FILE: OpenInPicker.tsx
+// Purpose: Render the chat header "Open In" controls for the currently active project.
+// Layer: Chat header action
+// Depends on: shared editor metadata, native shell bridge, and preferred editor state.
 
 import { type EditorId, type ResolvedKeybindingsConfig } from "~/contracts";
 import { memo, useCallback, useEffect, useMemo } from "react";
@@ -15,14 +14,6 @@ import { Group, GroupSeparator } from "../ui/group";
 import { Menu, MenuItem, MenuPopup, MenuShortcut, MenuTrigger } from "../ui/menu";
 import { readNativeApi } from "~/nativeApi";
 
-/**
- * "打开方式"选择器组件。
- * 渲染打开按钮和编辑器选择菜单，支持快捷键打开首选编辑器。
- *
- * @param props.keybindings - 已解析的快捷键配置
- * @param props.availableEditors - 可用的编辑器 ID 列表
- * @param props.openInCwd - 要打开的工作目录路径
- */
 export const OpenInPicker = memo(function OpenInPicker({
   keybindings,
   availableEditors,

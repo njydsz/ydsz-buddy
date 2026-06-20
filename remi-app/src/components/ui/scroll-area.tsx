@@ -1,19 +1,9 @@
-/** @file scroll-area
- * @description 滚动区域组件，基于 Base UI ScrollArea 原语封装，支持自定义滚动条、滚动淡出效果和滚动条间距。
- */
-
 "use client";
 
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 
 import { cn } from "~/lib/utils";
 
-/**
- * 滚动区域组件
- * @param props.scrollFade - 是否启用滚动边缘淡出效果
- * @param props.scrollbarGutter - 是否为滚动条预留间距
- * @param props.hideScrollbars - 是否隐藏滚动条
- */
 function ScrollArea({
   className,
   children,
@@ -52,10 +42,6 @@ function ScrollArea({
   );
 }
 
-/**
- * 滚动条组件
- * @param props.orientation - 滚动条方向，默认 vertical
- */
 function ScrollBar({
   className,
   orientation = "vertical",

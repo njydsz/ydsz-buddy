@@ -1,8 +1,10 @@
-/**
- * @file WhatsNewDialog.tsx
- * @description æ›´æ–°åŽçš„"æ–°åŠŸèƒ½"å‘å¸ƒè¯´æ˜Žå¯¹è¯æ¡†ï¼ŒåŒ…å«å½“å‰ç‰ˆæœ¬åŠŸèƒ½å¡ç‰‡å’Œå®Œæ•´æ›´æ–°æ—¥å¿—æŠ˜å é¢æ¿ã€‚
- *              å¼€å…³çŠ¶æ€ç”± useWhatsNew ç®¡ç†ï¼Œæœ¬ç»„ä»¶ä»…è´Ÿè´£å±•ç¤ºã€‚
- */
+// FILE: WhatsNewDialog.tsx
+// Purpose: Render the one-time "What's new" release-notes dialog shown after
+// an update. Two views: a default "What's new?" card stack anchored on the
+// installed release, and a secondary "Complete changelog" accordion spanning
+// every curated release. Open/close state and the underlying data are owned
+// by `useWhatsNew`; this component is pure presentation.
+// Layer: Chat shell overlay (mounted once from the root route).
 
 import { useEffect, useState } from "react";
 
@@ -28,7 +30,7 @@ export interface WhatsNewDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   /**
-   * The entry matching the installed build. `null` means "nothing to show" ï¿½?   * the hook only flips `open=true` when we have an entry, so normally this is
+   * The entry matching the installed build. `null` means "nothing to show" �?   * the hook only flips `open=true` when we have an entry, so normally this is
    * non-null while the dialog is visible. We still guard against the null
    * case to keep the UI tolerant of mid-transition re-renders.
    */
@@ -57,7 +59,7 @@ export default function WhatsNewDialog({
   }, [open]);
 
   // Guard against a race where the hook has already reset but base-ui is
-  // still transitioning ï¿½?rendering an empty card would briefly flash a
+  // still transitioning �?rendering an empty card would briefly flash a
   // confusing empty state.
   if (!currentEntry) {
     return (
@@ -135,7 +137,7 @@ function CurrentHeader({
         <DialogTitle className="text-base">What&rsquo;s new?</DialogTitle>
         <DialogDescription className="text-xs">
           v{currentVersion}
-          <span aria-hidden="true"> Â· </span>
+          <span aria-hidden="true"> · </span>
           {entry.date}
         </DialogDescription>
       </div>

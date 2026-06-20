@@ -1,7 +1,3 @@
-/** @file label
- * @description 标签组件，基于 Base UI useRender 封装，用于表单字段的文本标签。
- */
-
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -9,7 +5,6 @@ import { useRender } from "@base-ui/react/use-render";
 
 import { cn } from "~/lib/utils";
 
-/** 标签组件 */
 function Label({ className, render, ...props }: useRender.ComponentProps<"label">) {
   const defaultProps = {
     className: cn(

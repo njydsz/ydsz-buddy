@@ -1,8 +1,7 @@
-/**
- * @file TerminalIdentityIcon.tsx
- * @description 终端身份图标组件，根据图标键渲染对应的终端或 AI 提供商图标。
- * 属于终端展示原语层，可在所有终端界面中复用。
- */
+// FILE: TerminalIdentityIcon.tsx
+// Purpose: Renders a terminal/provider icon without extra activity chrome.
+// Layer: Terminal presentation primitive
+// Depends on: shared terminal icon keys plus local provider/icon components.
 
 import type { TerminalIconKey } from "~/shared/terminalThreads";
 
@@ -11,23 +10,12 @@ import { cn } from "~/lib/utils";
 
 import { ClaudeAI, OpenAI } from "../Icons";
 
-/**
- * 终端身份图标组件的 Props 接口。
- */
 interface TerminalIdentityIconProps {
-  /** 图标键，决定渲染哪种图标（terminal/openai/claude 等） */
   iconKey: TerminalIconKey;
-  /** 自定义样式类名 */
   className?: string;
 }
 
-/**
- * 终端身份图标组件。根据图标键渲染对应的终端图标或 AI 提供商品牌图标，
- * 可在标签栏、侧边栏等所有终端界面中复用。
- *
- * @param props.iconKey - 图标键，决定渲染哪种图标
- * @param props.className - 自定义样式类名
- */
+// Keep provider branding reusable across every terminal surface.
 export default function TerminalIdentityIcon({ iconKey, className }: TerminalIdentityIconProps) {
   const IconComponent =
     iconKey === "openai" ? OpenAI : iconKey === "claude" ? ClaudeAI : TerminalSquare;

@@ -1,8 +1,3 @@
-/**
- * @file ProposedPlanCard.tsx
- * @description 提议计划卡片组件，展示 AI 生成的计划内容，支持折叠/展开和操作按钮。
- */
-
 import { memo, useState, type CSSProperties } from "react";
 import {
   buildCollapsedProposedPlanPreviewMarkdown,
@@ -15,14 +10,6 @@ import { cn } from "~/lib/utils";
 import { Badge } from "../ui/badge";
 import { ProposedPlanActions } from "./ProposedPlanActions";
 
-/**
- * ProposedPlanCard 组件
- * @description 提议计划卡片，展示 AI 生成的计划内容，支持折叠/展开和操作按钮
- * @param props.planMarkdown - 计划的 Markdown 文本
- * @param props.cwd - 当前工作目录
- * @param props.workspaceRoot - 工作区根路径
- * @param props.chatTypographyStyle - 聊天排版样式（可选）
- */
 export const ProposedPlanCard = memo(function ProposedPlanCard({
   planMarkdown,
   cwd,

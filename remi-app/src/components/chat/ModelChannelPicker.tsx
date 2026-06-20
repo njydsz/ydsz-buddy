@@ -1,7 +1,7 @@
-/**
- * @file ModelChannelPicker.tsx
- * @description 模型服务渠道选择器，允许用户在提供者选择器中切换第三方 API 渠道（如 DeepSeek、硅基流动等）的启用状态。
- */
+// FILE: ModelChannelPicker.tsx
+// Purpose: Renders a service-channel (model-gateway) list inside the provider
+//          picker so users can toggle third-party API channels on/off.
+// Layer: Chat composer presentation
 
 import { memo, useCallback, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
@@ -22,7 +22,6 @@ import { ChevronRightIcon } from "~/lib/icons";
 // Data model
 // ------------------------------------------------------------------
 
-/** 模型服务渠道 ID 类型 */
 export type ModelChannelId =
   | "deepseek"
   | "siliconflow"
@@ -31,7 +30,6 @@ export type ModelChannelId =
   | "kimi"
   | "minimax";
 
-/** 模型服务渠道配置，包含 ID、名称、副标题、图标和余额信息 */
 export type ModelChannel = {
   readonly id: ModelChannelId;
   readonly name: string;
@@ -42,10 +40,8 @@ export type ModelChannel = {
   readonly balance?: string;
 };
 
-/** 渠道 ID 的 Schema，用于本地存储的编解码 */
 const ChannelSlugs = Schema.Array(Schema.String);
 
-/** 预定义的服务渠道列表 */
 const CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "deepseek",
@@ -92,7 +88,7 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "tongyi",
     name: "通义千问",
     nameEn: "Tongyi Qianwen",
-    subtitle: "阿里云·百炼平台",
+    subtitle: "阿里�?· 百炼平台",
     subtitleEn: "Alibaba Cloud BaiLian",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -134,7 +130,6 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
 // Sub-components
 // ------------------------------------------------------------------
 
-/** 渠道开关切换组件 */
 function ChannelToggle({
   enabled,
   onChange,
@@ -168,7 +163,6 @@ function ChannelToggle({
   );
 }
 
-/** 渠道列表项组件，显示渠道名称、副标题、余额和开关 */
 function ChannelListItem({
   channel,
   enabled,
@@ -206,10 +200,6 @@ function ChannelListItem({
 // Main exported component (inline section for the model-picker popup)
 // ------------------------------------------------------------------
 
-/**
- * ModelChannelSection 组件
- * @description 渠道选择区域，嵌入模型选择器弹窗中，显示所有可用渠道及其启用状态
- */
 export const ModelChannelSection = memo(function ModelChannelSection() {
   const [enabledIds, setEnabledIds] = useLocalStorage(
     "remicode:enabled-model-channels:v1",
@@ -243,7 +233,7 @@ export const ModelChannelSection = memo(function ModelChannelSection() {
             服务渠道
           </span>
           <span className="text-[11px] text-muted-foreground/70">
-            ({enabledCount}/{totalCount} 已启用)
+            ({enabledCount}/{totalCount} 已启�?
           </span>
         </MenuGroupLabel>
         <div className="space-y-0.5 px-1 py-1">
@@ -265,12 +255,6 @@ export const ModelChannelSection = memo(function ModelChannelSection() {
 // Stand-alone picker (if we ever want a separate trigger/button)
 // ------------------------------------------------------------------
 
-/**
- * ModelChannelPicker 组件
- * @description 独立的渠道选择器，作为子菜单嵌入其他菜单中
- * @param props.open - 是否打开（受控模式）
- * @param props.onOpenChange - 打开状态变更回调
- */
 export const ModelChannelPicker = memo(function ModelChannelPicker({
   open,
   onOpenChange,
@@ -309,7 +293,7 @@ export const ModelChannelPicker = memo(function ModelChannelPicker({
         />
         <span className="flex-1">服务渠道</span>
         <span className="text-[11px] text-muted-foreground/70">
-          ({enabledIds.length}/{CHANNELS.length} 已启用)
+          ({enabledIds.length}/{CHANNELS.length} 已启�?
         </span>
       </MenuSubTrigger>
       <MenuSubPopup className="[--available-height:min(24rem,70vh)] w-72">

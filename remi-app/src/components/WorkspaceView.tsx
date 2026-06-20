@@ -1,8 +1,6 @@
-/**
- * @file WorkspaceView.tsx
- * @description 独立终端工作区页面，基于合成终端作用域提供纯终端工作空间，
- *              支持多终端标签页、布局预设切换和工作区设置。
- */
+// FILE: WorkspaceView.tsx
+// Purpose: Render a dedicated terminal-only workspace page backed by a synthetic terminal scope.
+// Layer: Workspace route surface
 
 import { Plus, SettingsIcon } from "~/lib/icons";
 import { type TerminalCliKind } from "~/shared/terminalThreads";

@@ -1,22 +1,9 @@
-/**
- * @file FileEntryIcon.tsx
- * @description 文件条目图标组件，根据路径类型渲染文件夹图标或 Seti 文件类型图标，加载失败时回退到通用文件图标。
- */
-
 import { memo, useMemo, useState } from "react";
 import { getFileIconUrlForEntry } from "../../file-icons";
 import { FileIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { FolderClosed } from "../FolderClosed";
 
-/**
- * FileEntryIcon 组件
- * @description 文件条目图标，根据路径类型渲染文件夹图标或 Seti 文件类型图标
- * @param props.pathValue - 文件/目录路径
- * @param props.kind - 条目类型（文件或目录）
- * @param props.theme - 当前主题（亮色/暗色）
- * @param props.className - 额外类名
- */
 export const FileEntryIcon = memo(function FileEntryIcon(props: {
   pathValue: string;
   kind: "file" | "directory";
@@ -40,7 +27,6 @@ export const FileEntryIcon = memo(function FileEntryIcon(props: {
   );
 });
 
-/** 文件图标图片子组件，加载 Seti 图标，失败时回退到通用文件图标 */
 const FileIconImage = memo(function FileIconImage(props: {
   pathValue: string;
   theme: "light" | "dark";

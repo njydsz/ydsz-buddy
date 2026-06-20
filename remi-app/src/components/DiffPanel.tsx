@@ -1,9 +1,3 @@
-/**
- * @file DiffPanel.tsx
- * @description ä»£ç å·®å¼‚æŸ¥çœ‹é¢æ¿ï¼Œæ”¯æŒæŒ‰è½®æ¬¡ï¼ˆturnï¼‰æŸ¥çœ‹ checkpoint diffã€
- *              ä»“åº“çº§ diffï¼ˆåˆ†æ”¯/å·¥ä½œåŒº/æš‚å­˜åŒº/æœªæš‚å­˜ï¼‰ã€AI æ‘˜è¦ç­‰è§†å›¾ã€‚
- *              æä¾›å †å /åˆ†æ æ¸²æŸ“æ¨¡å¼ã€è‡ªåŠ¨æ¢è¡Œã€å¿½ç•¥ç©ºç™½ç­‰é…ç½®ã€‚
- */
 import { FileDiff, type FileDiffMetadata, Virtualizer } from "@pierre/diffs/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
@@ -81,11 +75,8 @@ import { DiffStatLabel, hasNonZeroStat } from "./chat/DiffStatLabel";
 import { type SplitViewPanePanelState } from "../splitViewStore";
 import { hasLiveTurnTailWork, isLatestTurnSettled } from "../session-logic";
 
-/** å·®å¼‚æ¸²æŸ“æ¨¡å¼ï¼šå †å ï¼ˆç»Ÿä¸€ï¼‰æˆ–åˆ†æ ï¼ˆå·¦å³å¯¹ç…§ï¼‰ */
 type DiffRenderMode = "stacked" | "split";
-/** å·®å¼‚é¢æ¿è¡¨é¢æ¨¡å¼ï¼šå®¡æŸ¥ï¼ˆé€æ–‡ä»¶ï¼‰ã€æ‘˜è¦ï¼ˆAI ç”Ÿæˆï¼‰ã€æ€»é‡ï¼ˆä»“åº“çº§ï¼‰ */
 type DiffSurfaceMode = "review" | "summary" | "total";
-/** å·®å¼‚ä¸»é¢˜ç±»åž‹ï¼šäº®è‰²æˆ–æš—è‰² */
 type DiffThemeType = "light" | "dark";
 
 function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
@@ -157,7 +148,7 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
   cursor: pointer;
 }
 
-/* Hide the default change-type icon (blue circle) ï¿½?replaced by chevron + file-type icon. */
+/* Hide the default change-type icon (blue circle) �?replaced by chevron + file-type icon. */
 [data-change-icon] {
   display: none;
 }
@@ -171,7 +162,6 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
 `;
 }
 
-/** ä»Ž FileDiffMetadata ä¸­è§£æžæ–‡ä»¶è·¯å¾„ï¼ŒåŽ»é™¤ a/b å‰ç¼€ */
 function resolveFileDiffPath(fileDiff: FileDiffMetadata): string {
   const raw = fileDiff.name ?? fileDiff.prevName ?? "";
   if (raw.startsWith("a/") || raw.startsWith("b/")) {
@@ -180,37 +170,23 @@ function resolveFileDiffPath(fileDiff: FileDiffMetadata): string {
   return raw;
 }
 
-/** æž„å»ºæ–‡ä»¶å·®å¼‚çš„æ¸²æŸ“ keyï¼Œç”¨äºŽ React åˆ—è¡¨æ¸²æŸ“å’Œç¼“å­˜æ ‡è¯† */
 function buildFileDiffRenderKey(fileDiff: FileDiffMetadata): string {
   return fileDiff.cacheKey ?? `${fileDiff.prevName ?? "none"}:${fileDiff.name}`;
 }
 
-/** DiffPanel ç»„ä»¶å±žæ€§ */
 interface DiffPanelProps {
-  /** é¢æ¿æ¨¡å¼ï¼šå†…è”ä¾§æ ã€å¼¹å‡ºé¢æ¿æˆ–ä¾§è¾¹æ  */
   mode?: DiffPanelMode;
-  /** å½“å‰çº¿ç¨‹ ID */
   threadId?: ThreadId | null;
-  /** åˆ†æ é¢æ¿çŠ¶æ€ */
   panelState?: Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">;
-  /** æ›´æ–°é¢æ¿çŠ¶æ€çš„å›žè°ƒ */
   onUpdatePanelState?: (
     patch: Partial<Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">>,
   ) => void;
-  /** å…³é—­é¢æ¿çš„å›žè°ƒ */
   onClosePanel?: () => void;
-  /** æ˜¯å¦å¯ç”¨å®žæ—¶åˆ·æ–°ï¼ˆç”¨äºŽè¿è¡Œä¸­çš„çº¿ç¨‹ï¼‰ */
   liveRefreshEnabled?: boolean;
 }
 
-/** é‡æ–°å¯¼å‡º DiffWorkerPoolProviderï¼Œä¾›ä½¿ç”¨å·®å¼‚é¢æ¿çš„é¡µé¢ç»Ÿä¸€å¼•å…¥ */
 export { DiffWorkerPoolProvider } from "./DiffWorkerPoolProvider";
 
-/**
- * ä»£ç å·®å¼‚æŸ¥çœ‹é¢æ¿
- * æ”¯æŒæŒ‰è½®æ¬¡æŸ¥çœ‹ checkpoint diffã€ä»“åº“çº§ diff å’Œ AI æ‘˜è¦ï¼Œ
- * æä¾›å †å /åˆ†æ æ¸²æŸ“ã€è‡ªåŠ¨æ¢è¡Œã€å¿½ç•¥ç©ºç™½ç­‰é…ç½®
- */
 export default function DiffPanel({
   mode = "inline",
   threadId: controlledThreadId,

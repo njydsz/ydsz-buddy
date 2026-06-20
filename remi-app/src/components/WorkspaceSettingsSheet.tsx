@@ -1,8 +1,6 @@
-/**
- * @file WorkspaceSettingsSheet.tsx
- * @description 工作区设置面板，提供终端布局预设选择和可视化预览，
- *              支持单终端、双分栏、垂直分栏等布局模式。
- */
+// FILE: WorkspaceSettingsSheet.tsx
+// Purpose: Render per-workspace terminal layout settings with visual preset previews.
+// Layer: Workspace UI controls
 
 import { CheckIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

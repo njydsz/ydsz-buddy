@@ -1,12 +1,7 @@
-/** @file kbd
- * @description 键盘按键展示组件，用于显示键盘快捷键或按键标识。
- */
-
 import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
-/** 单个键盘按键展示组件 */
 function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
   return (
     <kbd
@@ -20,7 +15,6 @@ function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
   );
 }
 
-/** 键盘按键组合展示组件，用于组合多个按键 */
 function KbdGroup({ className, ...props }: React.ComponentProps<"kbd">) {
   return (
     <kbd

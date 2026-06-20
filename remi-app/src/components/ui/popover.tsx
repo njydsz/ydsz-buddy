@@ -1,21 +1,13 @@
-/**
- * @file popover
- * @description 气泡弹出层组件，基于 Base UI Popover 原语封装，
- * 支持多方向定位、工具提示样式和内容切换动画。
- */
 "use client";
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 
 import { cn } from "~/lib/utils";
 
-/** 创建 Popover 句柄，用于命令式控制弹出层的打开/关闭 */
 const PopoverCreateHandle = PopoverPrimitive.createHandle;
 
-/** 气泡弹出层根组件 */
 const Popover = PopoverPrimitive.Root;
 
-/** 气泡弹出层触发器 */
 function PopoverTrigger({ className, children, ...props }: PopoverPrimitive.Trigger.Props) {
   return (
     <PopoverPrimitive.Trigger className={className} data-slot="popover-trigger" {...props}>
@@ -24,7 +16,6 @@ function PopoverTrigger({ className, children, ...props }: PopoverPrimitive.Trig
   );
 }
 
-/** 气泡弹出层面板，支持方向、偏移、工具提示样式和锚点定位 */
 function PopoverPopup({
   children,
   className,
@@ -81,12 +72,10 @@ function PopoverPopup({
   );
 }
 
-/** 气泡弹出层关闭按钮 */
 function PopoverClose({ ...props }: PopoverPrimitive.Close.Props) {
   return <PopoverPrimitive.Close data-slot="popover-close" {...props} />;
 }
 
-/** 气泡弹出层标题 */
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   return (
     <PopoverPrimitive.Title
@@ -97,7 +86,6 @@ function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   );
 }
 
-/** 气泡弹出层描述 */
 function PopoverDescription({ className, ...props }: PopoverPrimitive.Description.Props) {
   return (
     <PopoverPrimitive.Description

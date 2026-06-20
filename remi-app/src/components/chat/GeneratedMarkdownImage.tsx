@@ -1,8 +1,10 @@
-/**
- * @file GeneratedMarkdownImage.tsx
- * @description 渲染 Markdown 中嵌入的 AI 生成图片，支持加载骨架屏、悬停覆盖层（展开/下载）和内联错误卡片。
- * 纯 UI 组件，图片 URL 构建逻辑在 `~/lib/localImageUrls` 中。
- */
+// FILE: GeneratedMarkdownImage.tsx
+// Purpose: Renders Codex-generated images embedded in assistant markdown with
+//          loading skeleton, hover overlay (expand/download), and inline error card.
+// Layer: Web chat presentation component
+// Exports: GeneratedMarkdownImage
+// Notes: Pure UI; image URL building lives in `~/lib/localImageUrls`. No data
+//        fetching here so the component stays trivially testable.
 
 import { type MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -11,31 +13,15 @@ import { DownloadIcon, Loader2Icon, Maximize2, TriangleAlertIcon } from "~/lib/i
 import { buildLocalImageUrl, localImageFileName } from "../../lib/localImageUrls";
 import type { ExpandedImagePreview } from "./ExpandedImagePreview";
 
-/** 生成图片的状态：加载中、就绪或错误 */
 type GeneratedImageStatus = "loading" | "ready" | "error";
 
-/**
- * GeneratedMarkdownImage 组件的属性接口
- */
 export interface GeneratedMarkdownImageProps {
-  /** 图片源路径 */
   src: string;
-  /** 图片替代文本 */
   alt: string;
-  /** 当前工作目录 */
   cwd: string | undefined;
-  /** 展开图片预览的回调 */
   onImageExpand?: ((preview: ExpandedImagePreview) => void) | undefined;
 }
 
-/**
- * GeneratedMarkdownImage 组件
- * @description 渲染 Markdown 中嵌入的 AI 生成图片，支持加载骨架屏、悬停覆盖层和错误卡片
- * @param props.src - 图片源路径
- * @param props.alt - 图片替代文本
- * @param props.cwd - 当前工作目录
- * @param props.onImageExpand - 展开图片预览的回调
- */
 export function GeneratedMarkdownImage(props: GeneratedMarkdownImageProps) {
   const { src, alt, cwd, onImageExpand } = props;
   const previewUrl = useMemo(() => buildLocalImageUrl({ src, cwd }), [src, cwd]);

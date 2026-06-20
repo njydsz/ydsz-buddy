@@ -1,29 +1,19 @@
-/**
- * @module alert-dialog
- * @description 警告对话框组件，用于需要用户明确确认的紧急操作场景，
- * 如删除确认等。基于 Base UI AlertDialog 原语封装。
- */
 "use client";
 
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog";
 
 import { cn } from "~/lib/utils";
 
-/** 创建 AlertDialog 句柄，用于命令式控制对话框的打开/关闭 */
 const AlertDialogCreateHandle = AlertDialogPrimitive.createHandle;
 
-/** 警告对话框根组件 */
 const AlertDialog = AlertDialogPrimitive.Root;
 
-/** 警告对话框传送门 */
 const AlertDialogPortal = AlertDialogPrimitive.Portal;
 
-/** 警告对话框触发器 */
 function AlertDialogTrigger(props: AlertDialogPrimitive.Trigger.Props) {
   return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 }
 
-/** 警告对话框遮罩层 */
 function AlertDialogBackdrop({ className, ...props }: AlertDialogPrimitive.Backdrop.Props) {
   return (
     <AlertDialogPrimitive.Backdrop
@@ -37,7 +27,6 @@ function AlertDialogBackdrop({ className, ...props }: AlertDialogPrimitive.Backd
   );
 }
 
-/** 警告对话框视口容器 */
 function AlertDialogViewport({ className, ...props }: AlertDialogPrimitive.Viewport.Props) {
   return (
     <AlertDialogPrimitive.Viewport
@@ -51,7 +40,6 @@ function AlertDialogViewport({ className, ...props }: AlertDialogPrimitive.Viewp
   );
 }
 
-/** 警告对话框弹出面板，支持移动端底部吸附布局 */
 function AlertDialogPopup({
   className,
   bottomStickOnMobile = true,
@@ -80,7 +68,6 @@ function AlertDialogPopup({
   );
 }
 
-/** 警告对话框头部区域 */
 function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -91,7 +78,6 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">)
   );
 }
 
-/** 警告对话框底部操作区域，支持 default（带边框背景）和 bare（无装饰）两种变体 */
 function AlertDialogFooter({
   className,
   variant = "default",
@@ -114,7 +100,6 @@ function AlertDialogFooter({
   );
 }
 
-/** 警告对话框标题 */
 function AlertDialogTitle({ className, ...props }: AlertDialogPrimitive.Title.Props) {
   return (
     <AlertDialogPrimitive.Title
@@ -135,7 +120,6 @@ function AlertDialogDescription({ className, ...props }: AlertDialogPrimitive.De
   );
 }
 
-/** 警告对话框关闭按钮 */
 function AlertDialogClose(props: AlertDialogPrimitive.Close.Props) {
   return <AlertDialogPrimitive.Close data-slot="alert-dialog-close" {...props} />;
 }

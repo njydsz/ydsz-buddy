@@ -1,63 +1,63 @@
 /**
  * @file threadEnvironment.ts
- * @description 绾跨▼鐜閰嶇疆瑙ｆ瀽宸ュ叿妯″潡
- * @purpose 鎻愪緵绾跨▼宸ヤ綔鍖虹姸鎬併€佺幆澧冩ā寮忓拰宸ヤ綔鐩綍瑙ｆ瀽鐨勫叡浜伐鍏峰嚱鏁? * @exports 鐜妯″紡瑙ｆ瀽銆佸伐浣滃尯鐘舵€佸垽鏂€佸伐浣滅洰褰曡В鏋愮瓑宸ュ叿鍑芥暟
+ * @description 线程环境配置解析工具模块
+ * @purpose 提供线程工作区状态、环境模式和工作目录解析的共享工具函�? * @exports 环境模式解析、工作区状态判断、工作目录解析等工具函数
  */
 
 import type { ThreadEnvironmentMode } from "~/contracts";
 
 /**
  * @type ResolvedThreadWorkspaceState
- * @description 瑙ｆ瀽鍚庣殑绾跨▼宸ヤ綔鍖虹姸鎬佺被鍨? * @property {"local"} local - 鏈湴妯″紡锛岀洿鎺ヤ娇鐢ㄩ」鐩牴鐩綍
- * @property {"worktree-pending"} worktree-pending - Worktree 妯″紡浣嗗皻鏈氨缁紙璺緞鏈彁渚涳級
- * @property {"worktree-ready"} worktree-ready - Worktree 妯″紡涓斿凡灏辩华锛堣矾寰勫凡鎻愪緵锛? */
+ * @description 解析后的线程工作区状态类�? * @property {"local"} local - 本地模式，直接使用项目根目录
+ * @property {"worktree-pending"} worktree-pending - Worktree 模式但尚未就绪（路径未提供）
+ * @property {"worktree-ready"} worktree-ready - Worktree 模式且已就绪（路径已提供�? */
 export type ResolvedThreadWorkspaceState = "local" | "worktree-pending" | "worktree-ready";
 
 /**
  * @function resolveThreadEnvironmentMode
- * @description 瑙ｆ瀽绾跨▼鐜妯″紡
- * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 鐜妯″紡閰嶇疆
- * @param {string | null | undefined} input.worktreePath - Worktree 璺緞
- * @returns {ThreadEnvironmentMode} 瑙ｆ瀽鍚庣殑鐜妯″紡
- * @note 濡傛灉鎻愪緵浜?worktreePath锛屽垯寮哄埗杩斿洖 "worktree" 妯″紡锛涘惁鍒欎娇鐢ㄩ厤缃殑妯″紡鎴栭粯璁?"local"
+ * @description 解析线程环境模式
+ * @param {Object} input - 输入参数
+ * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 环境模式配置
+ * @param {string | null | undefined} input.worktreePath - Worktree 路径
+ * @returns {ThreadEnvironmentMode} 解析后的环境模式
+ * @note 如果提供�?worktreePath，则强制返回 "worktree" 模式；否则使用配置的模式或默�?"local"
  */
 export function resolveThreadEnvironmentMode(input: {
   envMode?: ThreadEnvironmentMode | null | undefined;
   worktreePath?: string | null | undefined;
 }): ThreadEnvironmentMode {
-  // 濡傛灉瀛樺湪 worktree 璺緞锛岃鏄庢槸 worktree 妯″紡
+  // 如果存在 worktree 路径，说明是 worktree 模式
   if (input.worktreePath) {
     return "worktree";
   }
-  // 鍚﹀垯浣跨敤閰嶇疆鐨勬ā寮忥紝鏈厤缃垯榛樿涓?local
+  // 否则使用配置的模式，未配置则默认�?local
   return input.envMode ?? "local";
 }
 
 /**
  * @function resolveThreadWorkspaceState
- * @description 瑙ｆ瀽绾跨▼宸ヤ綔鍖虹姸鎬? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 鐜妯″紡閰嶇疆
- * @param {string | null | undefined} input.worktreePath - Worktree 璺緞
- * @returns {ResolvedThreadWorkspaceState} 瑙ｆ瀽鍚庣殑宸ヤ綔鍖虹姸鎬? * @note 鏍规嵁鐜妯″紡鍜?worktree 璺緞鍒ゆ柇宸ヤ綔鍖烘槸鍚﹀氨缁? */
+ * @description 解析线程工作区状�? * @param {Object} input - 输入参数
+ * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 环境模式配置
+ * @param {string | null | undefined} input.worktreePath - Worktree 路径
+ * @returns {ResolvedThreadWorkspaceState} 解析后的工作区状�? * @note 根据环境模式�?worktree 路径判断工作区是否就�? */
 export function resolveThreadWorkspaceState(input: {
   envMode?: ThreadEnvironmentMode | null | undefined;
   worktreePath?: string | null | undefined;
 }): ResolvedThreadWorkspaceState {
   const mode = resolveThreadEnvironmentMode(input);
-  // 鏈湴妯″紡鐩存帴杩斿洖 local
+  // 本地模式直接返回 local
   if (mode === "local") {
     return "local";
   }
-  // worktree 妯″紡涓嬶紝鏍规嵁璺緞鏄惁瀛樺湪鍒ゆ柇灏辩华鐘舵€?  return input.worktreePath ? "worktree-ready" : "worktree-pending";
+  // worktree 模式下，根据路径是否存在判断就绪状�?  return input.worktreePath ? "worktree-ready" : "worktree-pending";
 }
 
 /**
  * @function isPendingThreadWorktree
- * @description 鍒ゆ柇绾跨▼鐨?worktree 鏄惁澶勪簬寰呭氨缁姸鎬? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 鐜妯″紡閰嶇疆
- * @param {string | null | undefined} input.worktreePath - Worktree 璺緞
- * @returns {boolean} 濡傛灉 worktree 寰呭氨缁繑鍥?true锛屽惁鍒欒繑鍥?false
+ * @description 判断线程�?worktree 是否处于待就绪状�? * @param {Object} input - 输入参数
+ * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 环境模式配置
+ * @param {string | null | undefined} input.worktreePath - Worktree 路径
+ * @returns {boolean} 如果 worktree 待就绪返�?true，否则返�?false
  */
 export function isPendingThreadWorktree(input: {
   envMode?: ThreadEnvironmentMode | null | undefined;
@@ -68,11 +68,11 @@ export function isPendingThreadWorktree(input: {
 
 /**
  * @function resolveThreadWorkspaceCwd
- * @description 瑙ｆ瀽绾跨▼宸ヤ綔鍖虹殑褰撳墠宸ヤ綔鐩綍锛圕WD锛? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {string | null | undefined} input.projectCwd - 椤圭洰鏍圭洰褰? * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 鐜妯″紡閰嶇疆
- * @param {string | null | undefined} input.worktreePath - Worktree 璺緞
- * @returns {string | null} 瑙ｆ瀽鍚庣殑宸ヤ綔鐩綍锛屾湭鎵惧埌杩斿洖 null
- * @note 杩愯鏃舵搷浣滃簲浠呴拡瀵瑰凡鐗╁寲鐨?worktree 璺緞锛岀‘淇濇枃浠舵搷浣滃湪姝ｇ‘鐨勯殧绂荤幆澧冧腑鎵ц
+ * @description 解析线程工作区的当前工作目录（CWD�? * @param {Object} input - 输入参数
+ * @param {string | null | undefined} input.projectCwd - 项目根目�? * @param {ThreadEnvironmentMode | null | undefined} input.envMode - 环境模式配置
+ * @param {string | null | undefined} input.worktreePath - Worktree 路径
+ * @returns {string | null} 解析后的工作目录，未找到返回 null
+ * @note 运行时操作应仅针对已物化�?worktree 路径，确保文件操作在正确的隔离环境中执行
  */
 export function resolveThreadWorkspaceCwd(input: {
   projectCwd?: string | null | undefined;
@@ -80,26 +80,26 @@ export function resolveThreadWorkspaceCwd(input: {
   worktreePath?: string | null | undefined;
 }): string | null {
   const mode = resolveThreadEnvironmentMode(input);
-  // worktree 妯″紡涓嬩娇鐢?worktree 璺緞
+  // worktree 模式下使�?worktree 路径
   if (mode === "worktree") {
     return input.worktreePath ?? null;
   }
-  // 鏈湴妯″紡涓嬩娇鐢ㄩ」鐩牴鐩綍
+  // 本地模式下使用项目根目录
   return input.projectCwd ?? null;
 }
 
 /**
  * @function resolveThreadBranchSourceCwd
- * @description 瑙ｆ瀽绾跨▼鍒嗘敮鍙戠幇婧愮殑褰撳墠宸ヤ綔鐩綍
- * @param {Object} input - 杈撳叆鍙傛暟
- * @param {string | null | undefined} input.projectCwd - 椤圭洰鏍圭洰褰? * @param {string | null | undefined} input.worktreePath - Worktree 璺緞
- * @returns {string | null} 瑙ｆ瀽鍚庣殑宸ヤ綔鐩綍锛屾湭鎵惧埌杩斿洖 null
- * @note 鍒嗘敮鍙戠幇鎿嶄綔鍦?worktree 瀛樺湪鍓嶄粛鍙娇鐢ㄩ」鐩牴鐩綍锛屽洜涓?Git 浠撳簱淇℃伅鏄叡浜殑
+ * @description 解析线程分支发现源的当前工作目录
+ * @param {Object} input - 输入参数
+ * @param {string | null | undefined} input.projectCwd - 项目根目�? * @param {string | null | undefined} input.worktreePath - Worktree 路径
+ * @returns {string | null} 解析后的工作目录，未找到返回 null
+ * @note 分支发现操作�?worktree 存在前仍可使用项目根目录，因�?Git 仓库信息是共享的
  */
 export function resolveThreadBranchSourceCwd(input: {
   projectCwd?: string | null | undefined;
   worktreePath?: string | null | undefined;
 }): string | null {
-  // 浼樺厛浣跨敤 worktree 璺緞锛屽叾娆′娇鐢ㄩ」鐩牴鐩綍
+  // 优先使用 worktree 路径，其次使用项目根目录
   return input.worktreePath ?? input.projectCwd ?? null;
 }

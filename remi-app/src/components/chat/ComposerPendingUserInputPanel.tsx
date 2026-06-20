@@ -1,9 +1,3 @@
-/**
- * @file ComposerPendingUserInputPanel
- * @description ç¼–è¾‘å™¨ä¸­å¾…å¤„ç†ç”¨æˆ·è¾“å…¥çš„é¢æ¿ç»„ä»¶ï¼Œç”¨äºŽå±•ç¤ºè®¡åˆ’ç¡®è®¤é—®é¢˜ã€
- *              é€‰é¡¹åˆ—è¡¨å’Œå¿«æ·é”®é€‰æ‹©ï¼Œæ”¯æŒå•é€‰å’Œå¤šé€‰æ¨¡å¼åŠè‡ªåŠ¨æŽ¨è¿›ã€‚
- */
-
 import { type ApprovalRequestId } from "~/contracts";
 import { memo, useEffect, useEffectEvent, useRef } from "react";
 import { type PendingUserInput } from "../../session-logic";
@@ -14,34 +8,16 @@ import {
 import { CheckIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-/** ComposerPendingUserInputPanel ç»„ä»¶çš„å±žæ€§æŽ¥å£ */
 interface PendingUserInputPanelProps {
-  /** å¾…å¤„ç†çš„ç”¨æˆ·è¾“å…¥åˆ—è¡¨ */
   pendingUserInputs: PendingUserInput[];
-  /** æ­£åœ¨å“åº”çš„å®¡æ‰¹è¯·æ±‚ ID åˆ—è¡¨ */
   respondingRequestIds: ApprovalRequestId[];
-  /** å„é—®é¢˜çš„è‰ç¨¿ç­”æ¡ˆæ˜ å°„ */
   answers: Record<string, PendingUserInputDraftAnswer>;
-  /** å½“å‰æ´»è·ƒé—®é¢˜çš„ç´¢å¼• */
   questionIndex: number;
-  /** åˆ‡æ¢é€‰é¡¹é€‰ä¸­çŠ¶æ€çš„å›žè°ƒ */
   onToggleOption: (questionId: string, optionLabel: string) => PendingUserInputDraftAnswer | null;
-  /** æŽ¨è¿›åˆ°ä¸‹ä¸€ä¸ªé—®é¢˜çš„å›žè°ƒ */
   onAdvance: (answerOverrides?: Record<string, PendingUserInputDraftAnswer>) => void;
 }
 
-/**
- * å¾…å¤„ç†ç”¨æˆ·è¾“å…¥é¢æ¿ç»„ä»¶ã€‚
- * å±•ç¤ºå½“å‰å¾…ç¡®è®¤çš„è®¡åˆ’é—®é¢˜ï¼Œæä¾›é€‰é¡¹åˆ—è¡¨å’Œå¿«æ·é”®æ“ä½œï¼Œ
- * å•é€‰æ¨¡å¼ä¸‹é€‰ä¸­åŽè‡ªåŠ¨æŽ¨è¿›ï¼Œå¤šé€‰æ¨¡å¼ä¸‹éœ€æ‰‹åŠ¨æäº¤ã€‚
- *
- * @param props.pendingUserInputs - å¾…å¤„ç†çš„ç”¨æˆ·è¾“å…¥åˆ—è¡¨
- * @param props.respondingRequestIds - æ­£åœ¨å“åº”çš„è¯·æ±‚ ID
- * @param props.answers - è‰ç¨¿ç­”æ¡ˆæ˜ å°„
- * @param props.questionIndex - å½“å‰é—®é¢˜ç´¢å¼•
- * @param props.onToggleOption - åˆ‡æ¢é€‰é¡¹å›žè°ƒ
- * @param props.onAdvance - æŽ¨è¿›å›žè°ƒ
- */
+// Keep pending-input choices neutral so they read like Codex list controls instead of accent buttons.
 export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserInputPanel({
   pendingUserInputs,
   respondingRequestIds,
@@ -67,10 +43,6 @@ export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserIn
   );
 });
 
-/**
- * å¾…å¤„ç†ç”¨æˆ·è¾“å…¥å¡ç‰‡ç»„ä»¶ã€‚
- * æ¸²æŸ“å•ä¸ªå¾…ç¡®è®¤é—®é¢˜çš„é€‰é¡¹åˆ—è¡¨ï¼Œæ”¯æŒé”®ç›˜å¿«æ·é”®å’Œè‡ªåŠ¨æŽ¨è¿›é€»è¾‘ã€‚
- */
 const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard({
   prompt,
   isResponding,
@@ -95,7 +67,7 @@ const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard(
   }, [onAdvance]);
 
   // Cancel a pending auto-advance on unmount, and whenever the active question
-  // changes or a response goes in flight ï¿½?otherwise a manual Next/Submit landing
+  // changes or a response goes in flight �?otherwise a manual Next/Submit landing
   // inside the 200ms window leaves a stale timer that advances or submits again.
   useEffect(() => {
     return () => {

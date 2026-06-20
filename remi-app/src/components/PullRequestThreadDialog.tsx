@@ -1,8 +1,3 @@
-/**
- * @file PullRequestThreadDialog.tsx
- * @description Pull Request 线程导入对话框，允许用户通过 PR 引用（URL 或编号）
- *              创建本地线程并从远程 PR 上下文恢复对话。
- */
 import type { GitResolvePullRequestResult } from "~/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebouncedValue } from "@tanstack/react-pacer";
@@ -27,7 +22,6 @@ import {
 import { Input } from "./ui/input";
 import { Spinner } from "./ui/spinner";
 
-/** Pull Request 线程对话框属性 */
 interface PullRequestThreadDialogProps {
   open: boolean;
   cwd: string | null;

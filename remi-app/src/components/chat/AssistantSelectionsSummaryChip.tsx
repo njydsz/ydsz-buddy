@@ -1,7 +1,6 @@
-/**
- * @file AssistantSelectionsSummaryChip.tsx
- * @description 助手选择摘要标签组件，在编辑器和用户消息气泡中显示选择数量的紧凑标签。
- */
+// FILE: AssistantSelectionsSummaryChip.tsx
+// Purpose: Renders the compact assistant-selection count chip used in composer and user bubbles.
+// Layer: Chat attachment presentation
 
 import { MessageCircleIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
@@ -9,31 +8,15 @@ import { type ChatAssistantSelectionAttachment } from "../../types";
 import { COMPOSER_ATTACHMENT_CHIP_CLASS_NAME } from "../composerInlineChip";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 
-/**
- * AssistantSelectionsSummaryChip 组件的属性接口
- */
 interface AssistantSelectionsSummaryChipProps {
-  /** 助手选择附件列表 */
   selections: ReadonlyArray<ChatAssistantSelectionAttachment>;
-  /** 移除选择的回调（可选） */
   onRemove?: (() => void) | undefined;
 }
 
-/**
- * 生成选择数量标签文本
- * @param count - 选择数量
- * @returns 标签文本
- */
 function selectionCountLabel(count: number): string {
   return `${count} selection${count === 1 ? "" : "s"}`;
 }
 
-/**
- * AssistantSelectionsSummaryChip 组件
- * @description 助手选择摘要标签，显示选择数量和工具提示详情
- * @param props.selections - 助手选择附件列表
- * @param props.onRemove - 移除选择的回调
- */
 export function AssistantSelectionsSummaryChip(props: AssistantSelectionsSummaryChipProps) {
   if (props.selections.length === 0) {
     return null;

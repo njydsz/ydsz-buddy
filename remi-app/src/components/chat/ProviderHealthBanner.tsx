@@ -1,22 +1,9 @@
-/**
- * @file ProviderHealthBanner
- * @description 显示服务提供者健康状态横幅，当提供者处于错误或警告状态时展示提示信息，
- *              支持关闭操作。
- */
-
 import { PROVIDER_DISPLAY_NAMES, type ServerProviderStatus } from "~/contracts";
 import { memo } from "react";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "../ui/alert";
 import { Button } from "../ui/button";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";
 
-/**
- * 服务提供者健康状态横幅组件。
- * 当服务提供者处于错误或警告状态时显示提示信息，包含状态标题、描述和关闭按钮。
- *
- * @param props.onDismiss - 关闭横幅的回调函数
- * @param props.status - 服务提供者状态信息，为 null 或 ready 时不渲染
- */
 export const ProviderHealthBanner = memo(function ProviderHealthBanner({
   onDismiss,
   status,

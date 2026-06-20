@@ -1,8 +1,3 @@
-/**
- * @module alert
- * @description 提示信息组件，用于向用户展示重要的状态信息或反馈，
- * 支持默认、错误、信息、成功、警告等多种语义变体。
- */
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 
@@ -26,7 +21,6 @@ const alertVariants = cva(
   },
 );
 
-/** 提示信息容器，支持多种语义变体 */
 function Alert({
   className,
   variant,
@@ -53,7 +47,6 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** 提示信息描述内容 */
 function AlertDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -64,7 +57,6 @@ function AlertDescription({ className, ...props }: React.ComponentProps<"div">) 
   );
 }
 
-/** 提示信息操作区域 */
 function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

@@ -1,27 +1,17 @@
-/**
- * @file tooltip
- * @description 工具提示组件，基于 Base UI Tooltip 原语封装，
- * 支持多方向定位、动画过渡和内容切换效果。
- */
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 
 import { cn } from "~/lib/utils";
 
-/** 创建 Tooltip 句柄，用于命令式控制工具提示的打开/关闭 */
 const TooltipCreateHandle = TooltipPrimitive.createHandle;
 
-/** 工具提示提供者 */
 const TooltipProvider = TooltipPrimitive.Provider;
 
-/** 工具提示根组件 */
 const Tooltip = TooltipPrimitive.Root;
 
-/** 工具提示触发器 */
 function TooltipTrigger(props: TooltipPrimitive.Trigger.Props) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
-/** 工具提示弹出面板，支持方向、偏移和锚点定位 */
 function TooltipPopup({
   className,
   align = "center",

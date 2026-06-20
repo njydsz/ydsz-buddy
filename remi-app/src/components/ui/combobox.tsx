@@ -1,8 +1,3 @@
-/**
- * @file combobox
- * @description 组合框组件，基于 Base UI Combobox 原语封装，
- * 支持单选/多选模式、标签（Chips）输入、分组筛选等功能。
- */
 "use client";
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react/combobox";
@@ -13,7 +8,6 @@ import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 
-/** 组合框上下文，用于在多选模式下共享 Chips 引用 */
 const ComboboxContext = React.createContext<{
   chipsRef: React.RefObject<Element | null> | null;
   multiple: boolean;
@@ -22,7 +16,6 @@ const ComboboxContext = React.createContext<{
   multiple: false,
 });
 
-/** 组合框根组件，支持泛型值类型和多选模式 */
 function Combobox<Value, Multiple extends boolean | undefined = false>(
   props: ComboboxPrimitive.Root.Props<Value, Multiple>,
 ) {
@@ -35,7 +28,6 @@ function Combobox<Value, Multiple extends boolean | undefined = false>(
   );
 }
 
-/** 组合框标签输入框，用于多选模式下的内联输入 */
 function ComboboxChipsInput({
   className,
   size,
@@ -61,7 +53,6 @@ function ComboboxChipsInput({
   );
 }
 
-/** 组合框输入框，支持前缀装饰、触发按钮和清除按钮 */
 function ComboboxInput({
   className,
   inputClassName,
@@ -136,7 +127,6 @@ function ComboboxInput({
   );
 }
 
-/** 组合框触发按钮 */
 function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Trigger.Props) {
   return (
     <ComboboxPrimitive.Trigger className={className} data-slot="combobox-trigger" {...props}>
@@ -145,7 +135,6 @@ function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Tr
   );
 }
 
-/** 组合框弹出面板，默认锚定到 Chips 容器 */
 function ComboboxPopup({
   className,
   children,
@@ -195,7 +184,6 @@ function ComboboxPopup({
   );
 }
 
-/** 组合框选项，支持隐藏选中指示器 */
 function ComboboxItem({
   className,
   children,
@@ -221,7 +209,6 @@ function ComboboxItem({
   );
 }
 
-/** 组合框分隔线 */
 function ComboboxSeparator({ className, ...props }: ComboboxPrimitive.Separator.Props) {
   return (
     <ComboboxPrimitive.Separator
@@ -232,7 +219,6 @@ function ComboboxSeparator({ className, ...props }: ComboboxPrimitive.Separator.
   );
 }
 
-/** 组合框分组 */
 function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
   return (
     <ComboboxPrimitive.Group
@@ -243,7 +229,6 @@ function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
   );
 }
 
-/** 组合框分组标签 */
 function ComboboxGroupLabel({ className, ...props }: ComboboxPrimitive.GroupLabel.Props) {
   return (
     <ComboboxPrimitive.GroupLabel
@@ -254,7 +239,6 @@ function ComboboxGroupLabel({ className, ...props }: ComboboxPrimitive.GroupLabe
   );
 }
 
-/** 组合框空状态提示 */
 function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
   return (
     <ComboboxPrimitive.Empty
@@ -268,17 +252,14 @@ function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
   );
 }
 
-/** 组合框行容器 */
 function ComboboxRow({ className, ...props }: ComboboxPrimitive.Row.Props) {
   return <ComboboxPrimitive.Row className={className} data-slot="combobox-row" {...props} />;
 }
 
-/** 组合框值显示 */
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />;
 }
 
-/** 组合框选项列表，带滚动区域 */
 function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   return (
     <ScrollArea className="min-h-0 flex-1" scrollFade>
@@ -291,12 +272,10 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   );
 }
 
-/** 组合框清除按钮 */
 function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   return <ComboboxPrimitive.Clear className={className} data-slot="combobox-clear" {...props} />;
 }
 
-/** 组合框状态提示 */
 function ComboboxStatus({ className, ...props }: ComboboxPrimitive.Status.Props) {
   return (
     <ComboboxPrimitive.Status
@@ -310,12 +289,10 @@ function ComboboxStatus({ className, ...props }: ComboboxPrimitive.Status.Props)
   );
 }
 
-/** 组合框集合容器 */
 function ComboboxCollection(props: ComboboxPrimitive.Collection.Props) {
   return <ComboboxPrimitive.Collection data-slot="combobox-collection" {...props} />;
 }
 
-/** 组合框标签容器，用于多选模式下的标签展示 */
 function ComboboxChips({
   className,
   children,
@@ -350,7 +327,6 @@ function ComboboxChips({
   );
 }
 
-/** 组合框单个标签项 */
 function ComboboxChip({ children, ...props }: ComboboxPrimitive.Chip.Props) {
   return (
     <ComboboxPrimitive.Chip
@@ -364,7 +340,6 @@ function ComboboxChip({ children, ...props }: ComboboxPrimitive.Chip.Props) {
   );
 }
 
-/** 组合框标签移除按钮 */
 function ComboboxChipRemove(props: ComboboxPrimitive.ChipRemove.Props) {
   return (
     <ComboboxPrimitive.ChipRemove
@@ -378,7 +353,6 @@ function ComboboxChipRemove(props: ComboboxPrimitive.ChipRemove.Props) {
   );
 }
 
-/** 组合框筛选钩子 */
 const useComboboxFilter = ComboboxPrimitive.useFilter;
 
 export {

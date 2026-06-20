@@ -1,8 +1,3 @@
-/**
- * @file GitActionsControl.logic.ts
- * @description Git 操作控件的纯逻辑层，包含菜单项构建、快捷操作推导、
- *              默认分支确认逻辑、PR 可用性判断等与 UI 渲染无关的业务逻辑。
- */
 import type {
   GitRunStackedActionResult,
   GitStackedAction,
@@ -10,13 +5,10 @@ import type {
 } from "~/contracts";
 import { isTemporaryWorktreeBranch, resolveUniqueRemicodeBranchName } from "~/shared/git";
 
-/** Git 操作图标名称 */
 export type GitActionIconName = "commit" | "push" | "pr";
 
-/** Git 对话框操作类型 */
 export type GitDialogAction = "commit" | "push" | "commit_push" | "create_pr";
 
-/** Git 操作菜单项 */
 export interface GitActionMenuItem {
   id: "commit" | "commit_push" | "push" | "pr";
   label: string;
@@ -26,7 +18,6 @@ export interface GitActionMenuItem {
   dialogAction?: GitDialogAction;
 }
 
-/** Git 快捷操作项 */
 export interface GitQuickAction {
   label: string;
   disabled: boolean;

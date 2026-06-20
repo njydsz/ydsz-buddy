@@ -1,6 +1,6 @@
 /**
  * @file threadSummary.ts
- * @description 绾跨▼鎽樿鐘舵€佽绠楀伐鍏锋ā鍧? * @purpose 鎻愪緵绾跨▼鍏冩暟鎹拰鐘舵€佽绠楃殑鍏变韩宸ュ叿鍑芥暟锛岀敤浜庤拷韪緟瀹℃壒銆佸緟鐢ㄦ埛杈撳叆绛夌姸鎬? * @exports 绾跨▼鎽樿鐘舵€佸拰鍏冩暟鎹绠楀嚱鏁? */
+ * @description 线程摘要状态计算工具模�? * @purpose 提供线程元数据和状态计算的共享工具函数，用于追踪待审批、待用户输入等状�? * @exports 线程摘要状态和元数据计算函�? */
 
 import type {
   OrchestrationLatestTurn,
@@ -11,9 +11,9 @@ import type {
 
 /**
  * @interface ThreadSummaryMetadata
- * @description 绾跨▼鎽樿鍏冩暟鎹帴鍙? * @property {string | null} latestUserMessageAt - 鏈€鏂扮敤鎴锋秷鎭殑鏃堕棿鎴筹紙ISO 鏍煎紡锛? * @property {boolean} hasPendingApprovals - 鏄惁瀛樺湪寰呭鎵圭殑璇锋眰
- * @property {boolean} hasPendingUserInput - 鏄惁瀛樺湪寰呯敤鎴疯緭鍏ョ殑璇锋眰
- * @property {boolean} hasActionableProposedPlan - 鏄惁瀛樺湪鍙墽琛岀殑鎻愯璁″垝锛堝皻鏈疄鏂斤級
+ * @description 线程摘要元数据接�? * @property {string | null} latestUserMessageAt - 最新用户消息的时间戳（ISO 格式�? * @property {boolean} hasPendingApprovals - 是否存在待审批的请求
+ * @property {boolean} hasPendingUserInput - 是否存在待用户输入的请求
+ * @property {boolean} hasActionableProposedPlan - 是否存在可执行的提议计划（尚未实施）
  */
 export interface ThreadSummaryMetadata {
   latestUserMessageAt: string | null;
@@ -24,9 +24,9 @@ export interface ThreadSummaryMetadata {
 
 /**
  * @interface ThreadSummaryState
- * @description 绾跨▼鎽樿鐘舵€佹帴鍙ｏ紝缁ф壙鑷?ThreadSummaryMetadata
- * @property {number} pendingApprovalCount - 寰呭鎵硅姹傜殑鏁伴噺
- * @property {number} pendingUserInputCount - 寰呯敤鎴疯緭鍏ヨ姹傜殑鏁伴噺
+ * @description 线程摘要状态接口，继承�?ThreadSummaryMetadata
+ * @property {number} pendingApprovalCount - 待审批请求的数量
+ * @property {number} pendingUserInputCount - 待用户输入请求的数量
  */
 export interface ThreadSummaryState extends ThreadSummaryMetadata {
   pendingApprovalCount: number;
@@ -35,8 +35,8 @@ export interface ThreadSummaryState extends ThreadSummaryMetadata {
 
 /**
  * @function maxIso
- * @description 姣旇緝涓や釜 ISO 鏃堕棿鎴冲瓧绗︿覆锛岃繑鍥炶緝澶х殑涓€涓? * @param {string | null} left - 宸︿晶鏃堕棿鎴? * @param {string} right - 鍙充晶鏃堕棿鎴? * @returns {string} 杈冨ぇ鐨勬椂闂存埑
- * @note 鐢ㄤ簬杩借釜鏈€鏂扮殑鐢ㄦ埛娑堟伅鏃堕棿
+ * @description 比较两个 ISO 时间戳字符串，返回较大的一�? * @param {string | null} left - 左侧时间�? * @param {string} right - 右侧时间�? * @returns {string} 较大的时间戳
+ * @note 用于追踪最新的用户消息时间
  */
 function maxIso(left: string | null, right: string): string {
   if (left === null) {
@@ -47,16 +47,16 @@ function maxIso(left: string | null, right: string): string {
 
 /**
  * @function compareActivitiesByOrder
- * @description 鎸夐『搴忔瘮杈冧袱涓椿鍔ㄥ璞★紝鐢ㄤ簬鎺掑簭
- * @param {Object} left - 宸︿晶娲诲姩瀵硅薄
- * @param {Object} right - 鍙充晶娲诲姩瀵硅薄
- * @returns {number} 鎺掑簭姣旇緝缁撴灉锛堣礋鏁拌〃绀?left 鍦ㄥ墠锛屾鏁拌〃绀?right 鍦ㄥ墠锛? 琛ㄧず鐩哥瓑锛? * @note 浼樺厛鎸?sequence 鎺掑簭锛屽叾娆℃寜 createdAt 鎺掑簭锛屾渶鍚庢寜 id 鎺掑簭
+ * @description 按顺序比较两个活动对象，用于排序
+ * @param {Object} left - 左侧活动对象
+ * @param {Object} right - 右侧活动对象
+ * @returns {number} 排序比较结果（负数表�?left 在前，正数表�?right 在前�? 表示相等�? * @note 优先�?sequence 排序，其次按 createdAt 排序，最后按 id 排序
  */
 function compareActivitiesByOrder(
   left: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
   right: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
 ): number {
-  // 濡傛灉娌℃湁 sequence锛屼娇鐢ㄦ渶澶у€肩‘淇濇帓鍦ㄦ渶鍚?  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
+  // 如果没有 sequence，使用最大值确保排在最�?  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
   const rightSequence = right.sequence ?? Number.MAX_SAFE_INTEGER;
   return (
     leftSequence - rightSequence ||
@@ -67,8 +67,8 @@ function compareActivitiesByOrder(
 
 /**
  * @function toPayloadRecord
- * @description 灏嗘湭鐭ョ被鍨嬬殑 payload 杞崲涓鸿褰曞璞? * @param {unknown} payload - 寰呰浆鎹㈢殑 payload
- * @returns {Record<string, unknown> | null} 濡傛灉鏄璞″垯杩斿洖璁板綍锛屽惁鍒欒繑鍥?null
+ * @description 将未知类型的 payload 转换为记录对�? * @param {unknown} payload - 待转换的 payload
+ * @returns {Record<string, unknown> | null} 如果是对象则返回记录，否则返�?null
  */
 function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
   return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
@@ -76,8 +76,8 @@ function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
 
 /**
  * @function requestKindFromRequestType
- * @description 鏍规嵁璇锋眰绫诲瀷瀛楃涓叉帹瀵艰姹傜绫? * @param {unknown} requestType - 璇锋眰绫诲瀷瀛楃涓? * @returns {"command" | "file-read" | "file-change" | null} 璇锋眰绉嶇被锛屾湭璇嗗埆杩斿洖 null
- * @note 鏀寔澶氱璇锋眰绫诲瀷鍛藉悕鏍煎紡
+ * @description 根据请求类型字符串推导请求种�? * @param {unknown} requestType - 请求类型字符�? * @returns {"command" | "file-read" | "file-change" | null} 请求种类，未识别返回 null
+ * @note 支持多种请求类型命名格式
  */
 function requestKindFromRequestType(
   requestType: unknown,
@@ -98,8 +98,8 @@ function requestKindFromRequestType(
 
 /**
  * @function isStalePendingRequestFailureDetail
- * @description 妫€鏌ュけ璐ヨ鎯呮槸鍚﹁〃绀鸿繃鏈熺殑寰呭鐞嗚姹? * @param {string | undefined} detail - 澶辫触璇︽儏瀛楃涓? * @returns {boolean} 濡傛灉鏄繃鏈熻姹傜殑澶辫触杩斿洖 true锛屽惁鍒欒繑鍥?false
- * @note 鐢ㄤ簬娓呯悊宸茶繃鏈熶絾鏈姝ｇ‘鍏抽棴鐨勫鎵?鐢ㄦ埛杈撳叆璇锋眰
+ * @description 检查失败详情是否表示过期的待处理请�? * @param {string | undefined} detail - 失败详情字符�? * @returns {boolean} 如果是过期请求的失败返回 true，否则返�?false
+ * @note 用于清理已过期但未被正确关闭的审�?用户输入请求
  */
 function isStalePendingRequestFailureDetail(detail: string | undefined): boolean {
   if (!detail) {
@@ -119,9 +119,9 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 
 /**
  * @function hasStructuredUserInputQuestions
- * @description 妫€鏌?payload 涓槸鍚﹀寘鍚粨鏋勫寲鐨勭敤鎴疯緭鍏ラ棶棰? * @param {Record<string, unknown> | null} payload - 寰呮鏌ョ殑 payload
- * @returns {boolean} 濡傛灉鍖呭惈鏈夋晥鐨勭粨鏋勫寲闂杩斿洖 true锛屽惁鍒欒繑鍥?false
- * @note 缁撴瀯鍖栭棶棰樺繀椤诲寘鍚?id銆乭eader銆乹uestion 鍜岃嚦灏戜竴涓湁鏁堢殑 option锛堝惈 label 鍜?description锛? */
+ * @description 检�?payload 中是否包含结构化的用户输入问�? * @param {Record<string, unknown> | null} payload - 待检查的 payload
+ * @returns {boolean} 如果包含有效的结构化问题返回 true，否则返�?false
+ * @note 结构化问题必须包�?id、header、question 和至少一个有效的 option（含 label �?description�? */
 function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null): boolean {
   const questions = payload?.questions;
   if (!Array.isArray(questions)) {
@@ -153,12 +153,12 @@ function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null
 
 /**
  * @function resolveLatestProposedPlan
- * @description 瑙ｆ瀽鏈€鏂扮殑鎻愯璁″垝
- * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂扮殑杞淇℃伅
- * @returns {Object | null} 鏈€鏂扮殑鎻愯璁″垝锛屾湭鎵惧埌杩斿洖 null
- * @note 浼樺厛杩斿洖鏈€鏂拌疆娆＄殑璁″垝锛屽惁鍒欒繑鍥炲叏灞€鏈€鏂扮殑璁″垝
+ * @description 解析最新的提议计划
+ * @param {Object} input - 输入参数
+ * @param {ReadonlyArray} input.proposedPlans - 提议计划列表
+ * @param {Object | null} input.latestTurn - 最新的轮次信息
+ * @returns {Object | null} 最新的提议计划，未找到返回 null
+ * @note 优先返回最新轮次的计划，否则返回全局最新的计划
  */
 function resolveLatestProposedPlan(input: {
   readonly proposedPlans: ReadonlyArray<
@@ -166,7 +166,7 @@ function resolveLatestProposedPlan(input: {
   >;
   readonly latestTurn: Pick<OrchestrationLatestTurn, "turnId"> | null;
 }): Pick<OrchestrationProposedPlan, "id" | "turnId" | "updatedAt" | "implementedAt"> | null {
-  // 濡傛灉瀛樺湪鏈€鏂拌疆娆★紝浼樺厛鏌ユ壘璇ヨ疆娆＄殑璁″垝
+  // 如果存在最新轮次，优先查找该轮次的计划
   if (input.latestTurn?.turnId) {
     const matchingTurnPlan = [...input.proposedPlans]
       .filter((plan) => plan.turnId === input.latestTurn?.turnId)
@@ -180,7 +180,7 @@ function resolveLatestProposedPlan(input: {
     }
   }
 
-  // 鍚﹀垯杩斿洖鍏ㄥ眬鏈€鏂扮殑璁″垝
+  // 否则返回全局最新的计划
   return (
     [...input.proposedPlans]
       .toSorted(
@@ -193,11 +193,11 @@ function resolveLatestProposedPlan(input: {
 
 /**
  * @function deriveThreadSummaryState
- * @description 浠庢秷鎭€佹椿鍔ㄥ拰璁″垝鍒楄〃涓帹瀵肩嚎绋嬫憳瑕佺姸鎬? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.messages - 娑堟伅鍒楄〃
- * @param {ReadonlyArray} input.activities - 娲诲姩鍒楄〃
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @returns {ThreadSummaryState} 鎺ㄥ鍑虹殑绾跨▼鎽樿鐘舵€? * @note 閫氳繃杩借釜娲诲姩浜嬩欢鏉ヨ绠楀緟瀹℃壒鍜屽緟鐢ㄦ埛杈撳叆鐨勭姸鎬? */
+ * @description 从消息、活动和计划列表中推导线程摘要状�? * @param {Object} input - 输入参数
+ * @param {ReadonlyArray} input.messages - 消息列表
+ * @param {ReadonlyArray} input.activities - 活动列表
+ * @param {ReadonlyArray} input.proposedPlans - 提议计划列表
+ * @param {Object | null} input.latestTurn - 最新轮次信�? * @returns {ThreadSummaryState} 推导出的线程摘要状�? * @note 通过追踪活动事件来计算待审批和待用户输入的状�? */
 export function deriveThreadSummaryState(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<
@@ -208,7 +208,7 @@ export function deriveThreadSummaryState(input: {
   >;
   readonly latestTurn: Pick<OrchestrationLatestTurn, "turnId"> | null;
 }): ThreadSummaryState {
-  // 1. 杩借釜鏈€鏂扮殑鐢ㄦ埛娑堟伅鏃堕棿
+  // 1. 追踪最新的用户消息时间
   let latestUserMessageAt: string | null = null;
   for (const message of input.messages) {
     if (message.role === "user") {
@@ -216,16 +216,16 @@ export function deriveThreadSummaryState(input: {
     }
   }
 
-  // 2. 杩借釜寰呭鎵瑰拰寰呯敤鎴疯緭鍏ョ殑璇锋眰
+  // 2. 追踪待审批和待用户输入的请求
   const openApprovals = new Map<string, true>();
   const openUserInputs = new Map<string, true>();
-  // 鎸夐『搴忔帓搴忔椿鍔紝纭繚浜嬩欢澶勭悊鐨勬纭€?  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
+  // 按顺序排序活动，确保事件处理的正确�?  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
   for (const activity of orderedActivities) {
     const payload = toPayloadRecord(activity.payload);
     const requestId = typeof payload?.requestId === "string" ? payload.requestId : null;
     const detail = typeof payload?.detail === "string" ? payload.detail : undefined;
 
-    // 澶勭悊瀹℃壒璇锋眰寮€濮?    if (activity.kind === "approval.requested" && requestId) {
+    // 处理审批请求开�?    if (activity.kind === "approval.requested" && requestId) {
       const requestKind =
         payload?.requestKind === "command" ||
         payload?.requestKind === "file-read" ||
@@ -238,13 +238,13 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 澶勭悊瀹℃壒璇锋眰瀹屾垚
+    // 处理审批请求完成
     if (activity.kind === "approval.resolved" && requestId) {
       openApprovals.delete(requestId);
       continue;
     }
 
-    // 澶勭悊瀹℃壒璇锋眰鍝嶅簲澶辫触锛堣繃鏈熻姹傦級
+    // 处理审批请求响应失败（过期请求）
     if (
       activity.kind === "provider.approval.respond.failed" &&
       requestId &&
@@ -254,20 +254,20 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰寮€濮?    if (activity.kind === "user-input.requested" && requestId) {
+    // 处理用户输入请求开�?    if (activity.kind === "user-input.requested" && requestId) {
       if (hasStructuredUserInputQuestions(payload)) {
         openUserInputs.set(requestId, true);
       }
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰瀹屾垚
+    // 处理用户输入请求完成
     if (activity.kind === "user-input.resolved" && requestId) {
       openUserInputs.delete(requestId);
       continue;
     }
 
-    // 澶勭悊鐢ㄦ埛杈撳叆璇锋眰鍝嶅簲澶辫触锛堣繃鏈熻姹傦級
+    // 处理用户输入请求响应失败（过期请求）
     if (
       activity.kind === "provider.user-input.respond.failed" &&
       requestId &&
@@ -277,29 +277,29 @@ export function deriveThreadSummaryState(input: {
     }
   }
 
-  // 3. 瑙ｆ瀽鏈€鏂扮殑鎻愯璁″垝
+  // 3. 解析最新的提议计划
   const latestProposedPlan = resolveLatestProposedPlan({
     proposedPlans: input.proposedPlans,
     latestTurn: input.latestTurn,
   });
 
-  // 4. 鏋勫缓骞惰繑鍥炴憳瑕佺姸鎬?  return {
+  // 4. 构建并返回摘要状�?  return {
     latestUserMessageAt,
     pendingApprovalCount: openApprovals.size,
     pendingUserInputCount: openUserInputs.size,
     hasPendingApprovals: openApprovals.size > 0,
     hasPendingUserInput: openUserInputs.size > 0,
-    // 濡傛灉鏈€鏂拌鍒掑皻鏈疄鏂斤紝鍒欒涓哄瓨鍦ㄥ彲鎵ц鐨勮鍒?    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
+    // 如果最新计划尚未实施，则认为存在可执行的计�?    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
   };
 }
 
 /**
  * @function deriveThreadSummaryMetadata
- * @description 浠庢秷鎭€佹椿鍔ㄥ拰璁″垝鍒楄〃涓帹瀵肩嚎绋嬫憳瑕佸厓鏁版嵁锛堜笉鍖呭惈璁℃暟锛? * @param {Object} input - 杈撳叆鍙傛暟
- * @param {ReadonlyArray} input.messages - 娑堟伅鍒楄〃
- * @param {ReadonlyArray} input.activities - 娲诲姩鍒楄〃
- * @param {ReadonlyArray} input.proposedPlans - 鎻愯璁″垝鍒楄〃
- * @param {Object | null} input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @returns {ThreadSummaryMetadata} 鎺ㄥ鍑虹殑绾跨▼鎽樿鍏冩暟鎹? * @note 渚挎嵎灏佽锛氳皟鐢?deriveThreadSummaryState 骞朵粎杩斿洖鍏冩暟鎹儴鍒? */
+ * @description 从消息、活动和计划列表中推导线程摘要元数据（不包含计数�? * @param {Object} input - 输入参数
+ * @param {ReadonlyArray} input.messages - 消息列表
+ * @param {ReadonlyArray} input.activities - 活动列表
+ * @param {ReadonlyArray} input.proposedPlans - 提议计划列表
+ * @param {Object | null} input.latestTurn - 最新轮次信�? * @returns {ThreadSummaryMetadata} 推导出的线程摘要元数�? * @note 便捷封装：调�?deriveThreadSummaryState 并仅返回元数据部�? */
 export function deriveThreadSummaryMetadata(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<

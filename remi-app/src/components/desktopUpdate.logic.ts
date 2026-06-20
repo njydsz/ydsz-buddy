@@ -1,14 +1,14 @@
 /**
- * @file 妗岄潰绔洿鏂伴€昏緫妯″潡
- * @description 灏佽妗岄潰绔簲鐢ㄦ洿鏂扮殑鐘舵€佸垽鏂拰 UI 灞曠ず閫昏緫锛? *              鍖呮嫭鎸夐挳琛屼负瑙ｆ瀽銆佹爣绛?鎻愮ず鏂囨湰鐢熸垚銆丄RM64/Intel 鏋舵瀯璀﹀憡绛夈€? */
+ * @file 桌面端更新逻辑模块
+ * @description 封装桌面端应用更新的状态判断和 UI 展示逻辑�? *              包括按钮行为解析、标�?提示文本生成、ARM64/Intel 架构警告等�? */
 
 import type { DesktopUpdateActionResult, DesktopUpdateState } from "~/contracts";
 
-/** 妗岄潰绔洿鏂版寜閽彲鎵ц鐨勬搷浣滅被鍨?*/
+/** 桌面端更新按钮可执行的操作类�?*/
 export type DesktopUpdateButtonAction = "check" | "download" | "install" | "none";
 
 /**
- * 鏍规嵁鏇存柊鐘舵€佽В鏋愭寜閽簲鎵ц鐨勬搷浣? * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鎸夐挳鎿嶄綔绫诲瀷
+ * 根据更新状态解析按钮应执行的操�? * @param state - 桌面端更新状�? * @returns 按钮操作类型
  */
 export function resolveDesktopUpdateButtonAction(
   state: DesktopUpdateState,
@@ -39,9 +39,9 @@ export function resolveDesktopUpdateButtonAction(
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旀樉绀烘闈㈢鏇存柊鎸夐挳
- * 浠呭湪鏈夊彲鎵ц鎿嶄綔鏃舵樉绀猴細鏈夋柊鐗堟湰鍙笅杞姐€佸凡涓嬭浇寰呭畨瑁呫€佹垨鍙噸璇曠殑閿欒
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鏄惁鏄剧ず鏇存柊鎸夐挳
+ * 判断是否应显示桌面端更新按钮
+ * 仅在有可执行操作时显示：有新版本可下载、已下载待安装、或可重试的错误
+ * @param state - 桌面端更新状�? * @returns 是否显示更新按钮
  */
 export function shouldShowDesktopUpdateButton(state: DesktopUpdateState | null): boolean {
   if (!state?.enabled) return false;
@@ -57,23 +57,23 @@ export function shouldShowDesktopUpdateButton(state: DesktopUpdateState | null):
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旀樉绀?ARM64/Intel 鏋舵瀯涓嶅尮閰嶈鍛? * 褰撲富鏈烘灦鏋勪负 ARM64 浣嗗簲鐢ㄤ负 x64 鏋勫缓鏃讹紙Rosetta 妯″紡锛? * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鏄惁鏄剧ず鏋舵瀯璀﹀憡
+ * 判断是否应显�?ARM64/Intel 架构不匹配警�? * 当主机架构为 ARM64 但应用为 x64 构建时（Rosetta 模式�? * @param state - 桌面端更新状�? * @returns 是否显示架构警告
  */
 export function shouldShowArm64IntelBuildWarning(state: DesktopUpdateState | null): boolean {
   return state?.hostArch === "arm64" && state.appArch === "x64";
 }
 
 /**
- * 鍒ゆ柇鏇存柊鎸夐挳鏄惁搴旂鐢紙姝ｅ湪妫€鏌ユ垨涓嬭浇涓級
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鏄惁绂佺敤鎸夐挳
+ * 判断更新按钮是否应禁用（正在检查或下载中）
+ * @param state - 桌面端更新状�? * @returns 是否禁用按钮
  */
 export function isDesktopUpdateButtonDisabled(state: DesktopUpdateState | null): boolean {
   return state?.status === "downloading" || state?.status === "checking";
 }
 
 /**
- * 鏍煎紡鍖栦笅杞借繘搴︾櫨鍒嗘瘮
- * @param percent - 涓嬭浇杩涘害锛?-100锛? * @returns 鏍煎紡鍖栧悗鐨勭櫨鍒嗘瘮瀛楃涓诧紝鏃犳晥鍊艰繑鍥?null
+ * 格式化下载进度百分比
+ * @param percent - 下载进度�?-100�? * @returns 格式化后的百分比字符串，无效值返�?null
  */
 function formatDesktopUpdateDownloadPercent(percent: number | null): string | null {
   if (typeof percent !== "number" || !Number.isFinite(percent)) {
@@ -84,9 +84,9 @@ function formatDesktopUpdateDownloadPercent(percent: number | null): string | nu
 }
 
 /**
- * 鏇存柊鎸夐挳灞曠ず淇℃伅
- * @property label - 鎸夐挳涓绘爣绛? * @property secondaryLabel - 娆¤鏍囩锛堝鐗堟湰鍙凤級
- * @property progressPercent - 涓嬭浇杩涘害鐧惧垎姣? */
+ * 更新按钮展示信息
+ * @property label - 按钮主标�? * @property secondaryLabel - 次要标签（如版本号）
+ * @property progressPercent - 下载进度百分�? */
 export interface DesktopUpdateButtonPresentation {
   label: string;
   secondaryLabel: string | null;
@@ -94,8 +94,8 @@ export interface DesktopUpdateButtonPresentation {
 }
 
 /**
- * 鑾峰彇鏇存柊鎸夐挳鐨勫睍绀轰俊鎭紙鏍囩銆佺増鏈彿銆佽繘搴︼級
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @param options - 鍙€夊弬鏁帮紝installing 琛ㄧず姝ｅ湪瀹夎涓? * @returns 鎸夐挳灞曠ず淇℃伅
+ * 获取更新按钮的展示信息（标签、版本号、进度）
+ * @param state - 桌面端更新状�? * @param options - 可选参数，installing 表示正在安装�? * @returns 按钮展示信息
  */
 export function getDesktopUpdateButtonPresentation(
   state: DesktopUpdateState | null,
@@ -178,17 +178,17 @@ export function getDesktopUpdateButtonPresentation(
 }
 
 /**
- * 鑾峰彇鏇存柊鎸夐挳鐨勪富鏍囩鏂囨湰
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鎸夐挳鏍囩
+ * 获取更新按钮的主标签文本
+ * @param state - 桌面端更新状�? * @returns 按钮标签
  */
 export function getDesktopUpdateButtonLabel(state: DesktopUpdateState | null): string {
   return getDesktopUpdateButtonPresentation(state).label;
 }
 
 /**
- * 鑾峰彇 ARM64/Intel 鏋舵瀯涓嶅尮閰嶈鍛婄殑鎻忚堪鏂囨湰
- * 鏍规嵁褰撳墠鏇存柊鐘舵€佺粰鍑轰笉鍚岀殑鎿嶄綔寤鸿
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 璀﹀憡鎻忚堪鏂囨湰
+ * 获取 ARM64/Intel 架构不匹配警告的描述文本
+ * 根据当前更新状态给出不同的操作建议
+ * @param state - 桌面端更新状�? * @returns 警告描述文本
  */
 export function getArm64IntelBuildWarningDescription(state: DesktopUpdateState): string {
   if (!shouldShowArm64IntelBuildWarning(state)) {
@@ -206,8 +206,8 @@ export function getArm64IntelBuildWarningDescription(state: DesktopUpdateState):
 }
 
 /**
- * 鑾峰彇鏇存柊鎸夐挳鐨?Tooltip 鎻愮ず鏂囨湰
- * @param state - 妗岄潰绔洿鏂扮姸鎬? * @param options - 鍙€夊弬鏁帮紝installing 琛ㄧず姝ｅ湪瀹夎涓? * @returns Tooltip 鏂囨湰
+ * 获取更新按钮�?Tooltip 提示文本
+ * @param state - 桌面端更新状�? * @param options - 可选参数，installing 表示正在安装�? * @returns Tooltip 文本
  */
 export function getDesktopUpdateButtonTooltip(
   state: DesktopUpdateState,
@@ -254,9 +254,9 @@ export function getDesktopUpdateButtonTooltip(
 }
 
 /**
- * 浠庢洿鏂版搷浣滅粨鏋滀腑鎻愬彇閿欒娑堟伅
- * @param result - 鏇存柊鎿嶄綔缁撴灉
- * @returns 閿欒娑堟伅鏂囨湰锛屾棤閿欒鏃惰繑鍥?null
+ * 从更新操作结果中提取错误消息
+ * @param result - 更新操作结果
+ * @returns 错误消息文本，无错误时返�?null
  */
 export function getDesktopUpdateActionError(result: DesktopUpdateActionResult): string | null {
   if (!result.accepted || result.completed) return null;
@@ -266,16 +266,16 @@ export function getDesktopUpdateActionError(result: DesktopUpdateActionResult): 
 }
 
 /**
- * 鍒ゆ柇鏄惁搴斾互 Toast 鎻愮ず鏇存柊鎿嶄綔缁撴灉
- * 褰撴搷浣滃凡鎺ュ彈浣嗘湭瀹屾垚鏃讹紙鍗冲嚭閿欐椂锛夐渶瑕佹彁绀? * @param result - 鏇存柊鎿嶄綔缁撴灉
- * @returns 鏄惁闇€瑕?Toast 鎻愮ず
+ * 判断是否应以 Toast 提示更新操作结果
+ * 当操作已接受但未完成时（即出错时）需要提�? * @param result - 更新操作结果
+ * @returns 是否需�?Toast 提示
  */
 export function shouldToastDesktopUpdateActionResult(result: DesktopUpdateActionResult): boolean {
   return result.accepted && !result.completed;
 }
 
 /**
- * 鍒ゆ柇鏄惁搴旈珮浜樉绀烘洿鏂伴敊璇紙涓嬭浇鎴栧畨瑁呭け璐ユ椂锛? * @param state - 妗岄潰绔洿鏂扮姸鎬? * @returns 鏄惁楂樹寒閿欒
+ * 判断是否应高亮显示更新错误（下载或安装失败时�? * @param state - 桌面端更新状�? * @returns 是否高亮错误
  */
 export function shouldHighlightDesktopUpdateError(state: DesktopUpdateState | null): boolean {
   if (!state || state.status !== "error") return false;

@@ -1,6 +1,6 @@
 /**
- * @file 鑱婂ぉ绾跨▼璺敱瀹瑰櫒妯″潡
- * @description 灏嗘椿璺冪殑绾跨▼璺敱瑙ｆ瀽涓哄崟鑱婂ぉ鐣岄潰鎴栨寔涔呭寲鐨勫垎鍓茶鍥? * @layer 璺敱瀹瑰櫒灞? * @depends ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, 浠ュ強闈㈡澘浣滅敤鍩熺殑娴忚鍣?宸紓瀵规瘮闈㈡澘
+ * @file 聊天线程路由容器模块
+ * @description 将活跃的线程路由解析为单聊天界面或持久化的分割视�? * @layer 路由容器�? * @depends ChatView, splitViewStore, splitView.logic, ChatPaneDropOverlay, 以及面板作用域的浏览�?差异对比面板
  */
 
 import {
@@ -94,31 +94,31 @@ import { cn } from "~/lib/utils";
 import { Sidebar, SidebarInset, SidebarProvider, SidebarRail } from "~/components/ui/sidebar";
 
 const DiffPanel = lazy(() => import("../components/DiffPanel"));
-/** 宸紓瀵规瘮鍐呰仈甯冨眬鐨勫獟浣撴煡璇㈡柇鐐癸細褰撹鍙ｅ搴?鈮?1180px 鏃讹紝宸紓闈㈡澘浠?Sheet 褰㈠紡灞曠ず */
+/** 差异对比内联布局的媒体查询断点：当视口宽�?�?1180px 时，差异面板�?Sheet 形式展示 */
 const DIFF_INLINE_LAYOUT_MEDIA_QUERY = "(max-width: 1180px)";
-/** 宸紓闈㈡澘鍐呰仈瀹藉害锛氬浐瀹氬乏渚ц竟鏍忓悗锛屽彇瑙嗗彛 50% 骞堕檺鍒跺湪 28rem ~ 44rem 涔嬮棿 */
+/** 差异面板内联宽度：固定左侧边栏后，取视口 50% 并限制在 28rem ~ 44rem 之间 */
 const DIFF_INLINE_DEFAULT_WIDTH = "clamp(28rem, calc(50vw - 8rem), 44rem)";
-/** 娴忚鍣ㄩ潰鏉垮唴鑱旈粯璁ゅ搴︼細鍗犵埗瀹瑰櫒 50% */
+/** 浏览器面板内联默认宽度：占父容器 50% */
 const BROWSER_INLINE_DEFAULT_WIDTH = "50%";
-/** 鍒嗗壊瑙嗗浘涓潰鏉块粯璁ゅ搴︼紙22rem锛屼互 px 璁★級 */
+/** 分割视图中面板默认宽度（22rem，以 px 计） */
 const SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 22 * 16;
-/** 鍒嗗壊瑙嗗浘涓祻瑙堝櫒闈㈡澘榛樿瀹藉害锛?0rem锛屼互 px 璁★級 */
+/** 分割视图中浏览器面板默认宽度�?0rem，以 px 计） */
 const BROWSER_SPLIT_PANE_PANEL_DEFAULT_WIDTH_PX = 30 * 16;
-/** 鍒嗗壊瑙嗗浘涓亰澶╁尯鍩熸渶灏忓搴︼紙20rem锛夛紝闈㈡澘鎵╁睍鏃朵笉寰椾镜鍗犳绌洪棿 */
+/** 分割视图中聊天区域最小宽度（20rem），面板扩展时不得侵占此空间 */
 const SPLIT_PANE_CHAT_MIN_WIDTH = 20 * 16;
-/** 鍗曡亰妯″紡涓嬪彸渚ч潰鏉挎渶灏忓搴︼紙26rem锛?*/
+/** 单聊模式下右侧面板最小宽度（26rem�?*/
 const SINGLE_PANEL_MIN_WIDTH = 26 * 16;
-/** 娴忚鍣ㄩ潰鏉挎渶灏忓搴︼紙21rem锛?*/
+/** 浏览器面板最小宽度（21rem�?*/
 const BROWSER_PANEL_MIN_WIDTH = 21 * 16;
-/** 杈撳叆妗嗙揣鍑戞ā寮忎笅宸︿晶鎺т欢鏈€灏忓搴︼紝鐢ㄤ簬鍒ゆ柇闈㈡澘鏄惁瀵艰嚧婧㈠嚭 */
+/** 输入框紧凑模式下左侧控件最小宽度，用于判断面板是否导致溢出 */
 const COMPOSER_COMPACT_MIN_LEFT_CONTROLS_WIDTH_PX = 208;
-/** 鍙充晶闈㈡澘瀹藉害鎸佷箙鍖栧埌 localStorage 鐨勯敭鍚嶅墠缂€ */
+/** 右侧面板宽度持久化到 localStorage 的键名前缀 */
 const RIGHT_PANEL_SIDEBAR_WIDTH_STORAGE_KEY = "chat_right_panel_width";
-/** 闈㈡澘鎷栨嫿璋冩暣澶у皬鏃剁敤浜庤法 iframe/WebView 鍚屾鐨勮嚜瀹氫箟浜嬩欢鍚?*/
+/** 面板拖拽调整大小时用于跨 iframe/WebView 同步的自定义事件�?*/
 const PANEL_RESIZE_OVERLAY_SYNC_EVENT = "remicode:panel-resize-overlay-sync";
-/** 鍒嗗壊姣斾緥涓嬮檺锛?5%锛夛紝闃叉鏌愪晶琚帇缂╁埌涓嶅彲瑙?*/
+/** 分割比例下限�?5%），防止某侧被压缩到不可�?*/
 const SPLIT_RATIO_MIN = 0.25;
-/** 鍒嗗壊姣斾緥涓婇檺锛?5%锛夛紝闃叉鏌愪晶琚帇缂╁埌涓嶅彲瑙?*/
+/** 分割比例上限�?5%），防止某侧被压缩到不可�?*/
 const SPLIT_RATIO_MAX = 0.75;
 
 const allowAnySplitDirection = (_direction: SplitDirection) => true;
@@ -156,8 +156,8 @@ const RightPanelSheet = (props: {
 };
 
 /**
- * 宸紓闈㈡澘鎳掑姞杞界殑鍔犺浇鍗犱綅缁勪欢
- * @description 鍦?DiffPanel 浠ｇ爜鍧楀姞杞藉畬鎴愬墠灞曠ず楠ㄦ灦灞? * @param props.mode - 闈㈡澘妯″紡锛坰idebar / sheet锛? */
+ * 差异面板懒加载的加载占位组件
+ * @description �?DiffPanel 代码块加载完成前展示骨架�? * @param props.mode - 面板模式（sidebar / sheet�? */
 const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
   return (
     <DiffPanelShell mode={props.mode} header={<DiffPanelHeaderSkeleton />}>
@@ -167,12 +167,12 @@ const DiffLoadingFallback = (props: { mode: DiffPanelMode }) => {
 };
 
 /**
- * 鎳掑姞杞界殑宸紓闈㈡澘缁勪欢
- * @description 鍖呰９ DiffWorkerPoolProvider 鍜?Suspense锛屽疄鐜板樊寮傞潰鏉跨殑鎸夐渶鍔犺浇
- * @param props.mode - 闈㈡澘灞曠ず妯″紡锛坰idebar / sheet锛? * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.panelState - 闈㈡澘鐘舵€侊紙闈㈡澘绫诲瀷銆佸樊寮傝疆娆°€佹枃浠惰矾寰勶級
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.liveRefreshEnabled - 鏄惁鍚敤瀹炴椂鍒锋柊
+ * 懒加载的差异面板组件
+ * @description 包裹 DiffWorkerPoolProvider �?Suspense，实现差异面板的按需加载
+ * @param props.mode - 面板展示模式（sidebar / sheet�? * @param props.threadId - 当前线程 ID
+ * @param props.panelState - 面板状态（面板类型、差异轮次、文件路径）
+ * @param props.onUpdatePanelState - 面板状态更新回�? * @param props.onClosePanel - 关闭面板回调
+ * @param props.liveRefreshEnabled - 是否启用实时刷新
  */
 const LazyDiffPanel = (props: {
   mode: DiffPanelMode;
@@ -203,10 +203,10 @@ const LazyDiffPanel = (props: {
 };
 
 /**
- * 妫€鏌ヨ緭鍏ユ鏄惁鑳藉鐞嗘寚瀹氱殑闈㈡澘瀹藉害
- * @description 閫氳繃涓存椂璋冩暣瀹藉害骞舵娴嬫槸鍚︽孩鍑猴紝鍒ゆ柇闈㈡澘瀹藉害鏄惁鍙
- * @param input.nextWidth - 鐩爣瀹藉害锛堝儚绱狅級
- * @param input.paneScopeId - 闈㈡澘浣滅敤鍩?ID锛堢敤浜庡畾浣嶇壒瀹氳緭鍏ユ锛? * @param input.applyWidth - 搴旂敤瀹藉害鐨勫洖璋? * @param input.resetWidth - 閲嶇疆瀹藉害鐨勫洖璋? * @returns 濡傛灉杈撳叆妗嗗彲浠ュ鐞嗚瀹藉害鍒欒繑鍥?true锛屽惁鍒欒繑鍥?false
+ * 检查输入框是否能处理指定的面板宽度
+ * @description 通过临时调整宽度并检测是否溢出，判断面板宽度是否可行
+ * @param input.nextWidth - 目标宽度（像素）
+ * @param input.paneScopeId - 面板作用�?ID（用于定位特定输入框�? * @param input.applyWidth - 应用宽度的回�? * @param input.resetWidth - 重置宽度的回�? * @returns 如果输入框可以处理该宽度则返�?true，否则返�?false
  */
 function canComposerHandlePanelWidth(input: {
   nextWidth: number;
@@ -257,9 +257,9 @@ function canComposerHandlePanelWidth(input: {
 }
 
 /**
- * 鍒涘缓闈㈡澘璋冩暣澶у皬鐨勫叏灞忚鐩栧眰
- * @description Tauri <webview> 鍦ㄦ嫋鎷芥椂鍙兘浼氬悶鎺?pointermove 浜嬩欢锛涙瑕嗙洊灞傜‘淇?React 灞傝兘鎸佺画鎺ユ敹浜嬩欢
- * @returns 鍒涘缓鐨勮鐩栧眰 DOM 鍏冪礌
+ * 创建面板调整大小的全屏覆盖层
+ * @description Tauri <webview> 在拖拽时可能会吞�?pointermove 事件；此覆盖层确�?React 层能持续接收事件
+ * @returns 创建的覆盖层 DOM 元素
  */
 function createPanelResizeOverlay(): HTMLDivElement {
   const overlay = document.createElement("div");
@@ -275,21 +275,21 @@ function createPanelResizeOverlay(): HTMLDivElement {
 }
 
 /**
- * 绉婚櫎闈㈡澘璋冩暣澶у皬鐨勮鐩栧眰
- * @param overlay - 瑕佺Щ闄ょ殑瑕嗙洊灞傚厓绱? */
+ * 移除面板调整大小的覆盖层
+ * @param overlay - 要移除的覆盖层元�? */
 function removePanelResizeOverlay(overlay: HTMLDivElement): void {
   overlay.remove();
   window.dispatchEvent(new Event(PANEL_RESIZE_OVERLAY_SYNC_EVENT));
 }
 
 /**
- * 闈㈡澘鍐呰仈渚ц竟鏍忕粍浠? * @description 鍦ㄥ崟鑱婃ā寮忎笅灞曠ず宸紓瀵规瘮鎴栨祻瑙堝櫒闈㈡澘鐨勫唴鑱斾晶杈规爮锛屾敮鎸佹嫋鎷借皟鏁村搴? * @param props.panelOpen - 闈㈡澘鏄惁鎵撳紑
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.onOpenPanel - 鎵撳紑闈㈡澘鍥炶皟
- * @param props.renderPanelContent - 鏄惁娓叉煋闈㈡澘鍐呭
- * @param props.panel - 闈㈡澘绫诲瀷锛坆rowser / diff / null锛? * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.paneScopeId - 闈㈡澘浣滅敤鍩?ID
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? */
+ * 面板内联侧边栏组�? * @description 在单聊模式下展示差异对比或浏览器面板的内联侧边栏，支持拖拽调整宽�? * @param props.panelOpen - 面板是否打开
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.onOpenPanel - 打开面板回调
+ * @param props.renderPanelContent - 是否渲染面板内容
+ * @param props.panel - 面板类型（browser / diff / null�? * @param props.threadId - 当前线程 ID
+ * @param props.paneScopeId - 面板作用�?ID
+ * @param props.panelState - 面板状�? * @param props.onUpdatePanelState - 面板状态更新回�? */
 const PanePanelInlineSidebar = (props: {
   panelOpen: boolean;
   onClosePanel: () => void;
@@ -473,16 +473,16 @@ const PanePanelInlineSidebar = (props: {
 };
 
 /**
- * 鍒嗗壊瑙嗗浘涓祵鍏ョ殑闈㈡澘缁勪欢
- * @description 鍒嗗壊闈㈡澘鏃犳硶澶嶇敤妗岄潰鐗?Sidebar 鍘熻锛堝洜涓哄畠鐩稿浜庤鍙ｅ畾浣嶏級锛屾缁勪欢灏嗘祻瑙堝櫒/宸紓鍐呭閿氬畾鍒板叿浣撶獥鏍? * @param props.splitViewId - 鍒嗗壊瑙嗗浘 ID
- * @param props.paneId - 绐楁牸 ID
- * @param props.paneScopeId - 绐楁牸浣滅敤鍩?ID
- * @param props.panelOpen - 闈㈡澘鏄惁鎵撳紑
- * @param props.panel - 闈㈡澘绫诲瀷
- * @param props.threadId - 褰撳墠绾跨▼ ID
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? */
+ * 分割视图中嵌入的面板组件
+ * @description 分割面板无法复用桌面�?Sidebar 原语（因为它相对于视口定位），此组件将浏览器/差异内容锚定到具体窗�? * @param props.splitViewId - 分割视图 ID
+ * @param props.paneId - 窗格 ID
+ * @param props.paneScopeId - 窗格作用�?ID
+ * @param props.panelOpen - 面板是否打开
+ * @param props.panel - 面板类型
+ * @param props.threadId - 当前线程 ID
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.panelState - 面板状�? * @param props.isFocused - 是否聚焦
+ * @param props.onUpdatePanelState - 面板状态更新回�? */
 function SplitPaneEmbeddedPanel(props: {
   splitViewId: SplitViewId;
   paneId: PaneId;
@@ -612,11 +612,11 @@ function SplitPaneEmbeddedPanel(props: {
 }
 
 /**
- * 瑙ｆ瀽鍗曚竴椤圭洰 ID
- * @description 浼樺厛杩斿洖绾跨▼鍏宠仈鐨勯」鐩?ID锛屽叾娆¤繑鍥炶崏绋块」鐩?ID
- * @param input.threadProjectId - 绾跨▼鍏宠仈鐨勯」鐩?ID
- * @param input.draftProjectId - 鑽夌ǹ椤圭洰 ID
- * @returns 瑙ｆ瀽鍚庣殑椤圭洰 ID锛岃嫢鏃犲垯杩斿洖 null
+ * 解析单一项目 ID
+ * @description 优先返回线程关联的项�?ID，其次返回草稿项�?ID
+ * @param input.threadProjectId - 线程关联的项�?ID
+ * @param input.draftProjectId - 草稿项目 ID
+ * @returns 解析后的项目 ID，若无则返回 null
  */
 function resolveSingleProjectId(input: {
   threadProjectId: ProjectId | null;
@@ -626,8 +626,8 @@ function resolveSingleProjectId(input: {
 }
 
 /**
- * 灏嗛潰鏉跨姸鎬佹爣鍑嗗寲涓鸿矾鐢辨悳绱㈠弬鏁? * @description 灏嗛潰鏉跨姸鎬佽浆鎹负 URL 鏌ヨ鍙傛暟鏍煎紡
- * @param panelState - 闈㈡澘鐘舵€? * @returns 璺敱鎼滅储鍙傛暟瀵硅薄
+ * 将面板状态标准化为路由搜索参�? * @description 将面板状态转换为 URL 查询参数格式
+ * @param panelState - 面板状�? * @returns 路由搜索参数对象
  */
 function normalizeSingleSearchFromPane(
   panelState: Pick<SplitViewPanePanelState, "panel" | "diffTurnId" | "diffFilePath">,
@@ -649,11 +649,11 @@ function normalizeSingleSearchFromPane(
 }
 
 /**
- * 鍒嗗壊瑙嗗浘绌虹姸鎬佺粍浠? * @description 褰撳垎鍓茬獥鏍间腑娌℃湁绾跨▼鏃跺睍绀虹殑閫夋嫨鍣ㄧ晫闈? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.onFocus - 鑱氱劍鍥炶皟
- * @param props.threads - 鍙€夌嚎绋嬪垪琛? * @param props.projects - 椤圭洰鍒楄〃
- * @param props.excludedThreadIds - 宸叉帓闄ょ殑绾跨▼ ID 闆嗗悎
- * @param props.onSelectThread - 閫夋嫨绾跨▼鍥炶皟
+ * 分割视图空状态组�? * @description 当分割窗格中没有线程时展示的选择器界�? * @param props.isFocused - 是否聚焦
+ * @param props.onFocus - 聚焦回调
+ * @param props.threads - 可选线程列�? * @param props.projects - 项目列表
+ * @param props.excludedThreadIds - 已排除的线程 ID 集合
+ * @param props.onSelectThread - 选择线程回调
  */
 function SplitPaneEmptyState(props: {
   isFocused: boolean;
@@ -718,9 +718,9 @@ function SplitPaneEmptyState(props: {
 }
 
 /**
- * 鍒嗗壊绾跨粍浠? * @description 鍙嫋鎷界殑鍒嗗壊绾匡紝鏀寔姘村钩鍜屽瀭鐩存柟鍚戯紝鎷栨嫿鏃舵樉绀鸿瑙夊紩瀵肩嚎
- * @param props.splitNodeId - 鍒嗗壊鑺傜偣 ID
- * @param props.direction - 鍒嗗壊鏂瑰悜锛坔orizontal / vertical锛? * @param props.onSetRatio - 璁剧疆鍒嗗壊姣斾緥鐨勫洖璋? */
+ * 分割线组�? * @description 可拖拽的分割线，支持水平和垂直方向，拖拽时显示视觉引导线
+ * @param props.splitNodeId - 分割节点 ID
+ * @param props.direction - 分割方向（horizontal / vertical�? * @param props.onSetRatio - 设置分割比例的回�? */
 function SplitDivider(props: {
   splitNodeId: PaneId;
   direction: SplitDirection;
@@ -837,10 +837,10 @@ function SplitDivider(props: {
 }
 
 /**
- * 绐楁牸娓叉煋鍣ㄧ粍浠? * @description 閫掑綊娓叉煋鍒嗗壊瑙嗗浘鐨勬爲褰㈢粨鏋勶紝澶勭悊鍙跺瓙鑺傜偣鍜屽垎鍓茶妭鐐? * @param props.pane - 褰撳墠绐楁牸鑺傜偣
- * @param props.splitView - 鍒嗗壊瑙嗗浘瀵硅薄
- * @param props.renderLeaf - 鍙跺瓙鑺傜偣娓叉煋鍑芥暟
- * @param props.onSetRatio - 璁剧疆鍒嗗壊姣斾緥鐨勫洖璋? */
+ * 窗格渲染器组�? * @description 递归渲染分割视图的树形结构，处理叶子节点和分割节�? * @param props.pane - 当前窗格节点
+ * @param props.splitView - 分割视图对象
+ * @param props.renderLeaf - 叶子节点渲染函数
+ * @param props.onSetRatio - 设置分割比例的回�? */
 function PaneRenderer(props: {
   pane: Pane;
   splitView: SplitView;
@@ -888,7 +888,7 @@ function PaneRenderer(props: {
 }
 
 /**
- * 鑱婂ぉ鐣岄潰鎸傝浇楠ㄦ灦灞忕粍浠? * @description 鍦?ChatView 缁勪欢鎸傝浇鏈熼棿灞曠ず鍗犱綅 UI锛屾ā鎷熺湡瀹炶亰澶╃晫闈㈢殑甯冨眬缁撴瀯
+ * 聊天界面挂载骨架屏组�? * @description �?ChatView 组件挂载期间展示占位 UI，模拟真实聊天界面的布局结构
  */
 function ChatMountSkeleton() {
   return (
@@ -935,17 +935,17 @@ function ChatMountSkeleton() {
 }
 
 /**
- * 寤惰繜鎸傝浇鐨勮亰澶╄鍥剧粍浠? * @description 閫氳繃鍙?requestAnimationFrame 寤惰繜鎸傝浇锛岄伩鍏嶈矾鐢卞垏鎹㈡椂鐨勫崱椤? * @param props.threadId - 绾跨▼ ID
- * @param props.paneScopeId - 绐楁牸浣滅敤鍩?ID
- * @param props.deferMount - 鏄惁寤惰繜鎸傝浇
- * @param props.surfaceMode - 琛ㄩ潰妯″紡锛坰ingle / split锛? * @param props.isFocusedPane - 鏄惁鑱氱劍绐楁牸
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.onToggleDiff - 鍒囨崲宸紓闈㈡澘鍥炶皟
- * @param props.onToggleBrowser - 鍒囨崲娴忚鍣ㄩ潰鏉垮洖璋? * @param props.onOpenTurnDiff - 鎵撳紑杞宸紓鍥炶皟
- * @param props.onSplitSurface - 鍒嗗壊琛ㄩ潰鍥炶皟
- * @param props.onMaximize - 鏈€澶у寲鍥炶皟
- * @param props.onChangeThread - 鍒囨崲绾跨▼鍥炶皟
- * @param props.onCloseThreadPane - 鍏抽棴绾跨▼闈㈡澘鍥炶皟
- * @param props.onMounted - 鎸傝浇瀹屾垚鍥炶皟
+ * 延迟挂载的聊天视图组�? * @description 通过�?requestAnimationFrame 延迟挂载，避免路由切换时的卡�? * @param props.threadId - 线程 ID
+ * @param props.paneScopeId - 窗格作用�?ID
+ * @param props.deferMount - 是否延迟挂载
+ * @param props.surfaceMode - 表面模式（single / split�? * @param props.isFocusedPane - 是否聚焦窗格
+ * @param props.panelState - 面板状�? * @param props.onToggleDiff - 切换差异面板回调
+ * @param props.onToggleBrowser - 切换浏览器面板回�? * @param props.onOpenTurnDiff - 打开轮次差异回调
+ * @param props.onSplitSurface - 分割表面回调
+ * @param props.onMaximize - 最大化回调
+ * @param props.onChangeThread - 切换线程回调
+ * @param props.onCloseThreadPane - 关闭线程面板回调
+ * @param props.onMounted - 挂载完成回调
  */
 function DeferredChatView(props: {
   threadId: ThreadIdType;
@@ -1016,25 +1016,25 @@ function DeferredChatView(props: {
 }
 
 /**
- * 鍒嗗壊瑙嗗浘绐楁牸琛ㄩ潰缁勪欢
- * @description 鍗曚釜鍒嗗壊绐楁牸鐨勫畬鏁村鍣紝鍖呭惈鑱婂ぉ瑙嗗浘銆侀潰鏉裤€佹嫋鏀捐鐩栧眰绛? * @param props.splitView - 鍒嗗壊瑙嗗浘瀵硅薄
- * @param props.paneId - 绐楁牸 ID
- * @param props.threadId - 绾跨▼ ID
- * @param props.panelState - 闈㈡澘鐘舵€? * @param props.isFocused - 鏄惁鑱氱劍
- * @param props.deferChatMount - 鏄惁寤惰繜鎸傝浇鑱婂ぉ瑙嗗浘
- * @param props.canDropInDirection - 鍒ゆ柇鏄惁鍙湪鎸囧畾鏂瑰悜鎷栨斁
- * @param props.excludedThreadIds - 宸叉帓闄ょ殑绾跨▼ ID 闆嗗悎
- * @param props.threads - 鍙€夌嚎绋嬪垪琛? * @param props.projects - 椤圭洰鍒楄〃
- * @param props.onFocus - 鑱氱劍鍥炶皟
- * @param props.onToggleDiff - 鍒囨崲宸紓闈㈡澘鍥炶皟
- * @param props.onToggleBrowser - 鍒囨崲娴忚鍣ㄩ潰鏉垮洖璋? * @param props.onOpenTurnDiff - 鎵撳紑杞宸紓鍥炶皟
- * @param props.onClosePanel - 鍏抽棴闈㈡澘鍥炶皟
- * @param props.onUpdatePanelState - 闈㈡澘鐘舵€佹洿鏂板洖璋? * @param props.onMaximize - 鏈€澶у寲鍥炶皟
- * @param props.onCloseThreadPane - 鍏抽棴绾跨▼闈㈡澘鍥炶皟
- * @param props.onChooseThread - 閫夋嫨绾跨▼鍥炶皟
- * @param props.onSelectThread - 閫夋嫨绾跨▼鍥炶皟
- * @param props.onChatMounted - 鑱婂ぉ鎸傝浇瀹屾垚鍥炶皟
- * @param props.onDropThread - 鎷栨斁绾跨▼鍥炶皟
+ * 分割视图窗格表面组件
+ * @description 单个分割窗格的完整容器，包含聊天视图、面板、拖放覆盖层�? * @param props.splitView - 分割视图对象
+ * @param props.paneId - 窗格 ID
+ * @param props.threadId - 线程 ID
+ * @param props.panelState - 面板状�? * @param props.isFocused - 是否聚焦
+ * @param props.deferChatMount - 是否延迟挂载聊天视图
+ * @param props.canDropInDirection - 判断是否可在指定方向拖放
+ * @param props.excludedThreadIds - 已排除的线程 ID 集合
+ * @param props.threads - 可选线程列�? * @param props.projects - 项目列表
+ * @param props.onFocus - 聚焦回调
+ * @param props.onToggleDiff - 切换差异面板回调
+ * @param props.onToggleBrowser - 切换浏览器面板回�? * @param props.onOpenTurnDiff - 打开轮次差异回调
+ * @param props.onClosePanel - 关闭面板回调
+ * @param props.onUpdatePanelState - 面板状态更新回�? * @param props.onMaximize - 最大化回调
+ * @param props.onCloseThreadPane - 关闭线程面板回调
+ * @param props.onChooseThread - 选择线程回调
+ * @param props.onSelectThread - 选择线程回调
+ * @param props.onChatMounted - 聊天挂载完成回调
+ * @param props.onDropThread - 拖放线程回调
  */
 function SplitPaneSurface(props: {
   splitView: SplitView;
@@ -1164,10 +1164,10 @@ function SplitPaneSurface(props: {
 }
 
 /**
- * 鍒嗗壊鑱婂ぉ琛ㄩ潰缁勪欢
- * @description 绠＄悊鏁翠釜鍒嗗壊瑙嗗浘鐨勭敓鍛藉懆鏈熷拰浜や簰锛屽寘鎷獥鏍艰仛鐒︺€佺嚎绋嬪垏鎹€€侀潰鏉挎帶鍒剁瓑
- * @param props.splitViewId - 鍒嗗壊瑙嗗浘 ID
- * @param props.routeThreadId - 璺敱涓殑绾跨▼ ID
+ * 分割聊天表面组件
+ * @description 管理整个分割视图的生命周期和交互，包括窗格聚焦、线程切换、面板控制等
+ * @param props.splitViewId - 分割视图 ID
+ * @param props.routeThreadId - 路由中的线程 ID
  */
 function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: ThreadIdType }) {
   const navigate = useNavigate();
@@ -1662,11 +1662,11 @@ function SplitChatSurface(props: { splitViewId: SplitViewId; routeThreadId: Thre
 }
 
 /**
- * 鍗曡亰琛ㄩ潰缁勪欢
- * @description 绠＄悊鍗曡亰妯″紡涓嬬殑鑱婂ぉ瑙嗗浘銆佸彸渚ч潰鏉裤€佸垎鍓茶鍥惧垱寤虹瓑
- * @param props.threadId - 绾跨▼ ID
- * @param props.search - 璺敱鎼滅储鍙傛暟
- * @param props.projectId - 椤圭洰 ID
+ * 单聊表面组件
+ * @description 管理单聊模式下的聊天视图、右侧面板、分割视图创建等
+ * @param props.threadId - 线程 ID
+ * @param props.search - 路由搜索参数
+ * @param props.projectId - 项目 ID
  */
 function SingleChatSurface(props: {
   threadId: ThreadIdType;
@@ -1924,8 +1924,8 @@ function SingleChatSurface(props: {
 }
 
 /**
- * 鑱婂ぉ绾跨▼璺敱瑙嗗浘缁勪欢
- * @description 璺敱瀹瑰櫒鐨勪富缁勪欢锛屾牴鎹矾鐢卞弬鏁板喅瀹氭覆鏌撳崟鑱婅繕鏄垎鍓茶鍥? */
+ * 聊天线程路由视图组件
+ * @description 路由容器的主组件，根据路由参数决定渲染单聊还是分割视�? */
 function ChatThreadRouteView() {
   const threadsHydrated = useStore((store) => store.threadsHydrated);
   const threadId = Route.useParams({
@@ -1998,8 +1998,8 @@ function ChatThreadRouteView() {
 }
 
 /**
- * 鑱婂ぉ绾跨▼璺敱瀹氫箟
- * @description 瀹氫箟 /_chat/$threadId 璺敱锛屾敮鎸佸樊寮傞潰鏉跨浉鍏崇殑鎼滅储鍙傛暟楠岃瘉
+ * 聊天线程路由定义
+ * @description 定义 /_chat/$threadId 路由，支持差异面板相关的搜索参数验证
  */
 export const Route = createFileRoute("/_chat/$threadId")({
   validateSearch: (search) => parseDiffRouteSearch(search),

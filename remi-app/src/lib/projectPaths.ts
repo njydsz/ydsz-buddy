@@ -1,6 +1,6 @@
 /**
  * @file projectPaths.ts
- * @description 椤圭洰璺緞澶勭悊宸ュ叿闆嗭紝鎻愪緵璺ㄥ钩鍙帮紙Unix/Windows锛夌殑璺緞瑙勮寖鍖栥€? * 娴忚瀵艰埅銆佺洰褰曟帹鏂瓑鍔熻兘锛屾敮鎸佹枃浠剁郴缁熸祻瑙堝櫒鐨勮矾寰勬搷浣滃満鏅€? */
+ * @description 项目路径处理工具集，提供跨平台（Unix/Windows）的路径规范化�? * 浏览导航、目录推断等功能，支持文件系统浏览器的路径操作场景�? */
 
 import {
   isExplicitRelativePath,
@@ -10,12 +10,12 @@ import {
 } from "~/shared/path";
 import { isWindowsPlatform } from "./utils";
 
-/** 鍒ゆ柇璺緞鏄惁涓烘枃浠剁郴缁熸牴璺緞锛?/"銆?\"鎴?Windows 鐩樼鏍圭洰褰曪級 */
+/** 判断路径是否为文件系统根路径�?/"�?\"�?Windows 盘符根目录） */
 function isRootPath(value: string): boolean {
   return value === "/" || value === "\\" || /^[a-zA-Z]:[/\\]?$/.test(value);
 }
 
-/** 鑾峰彇缁濆璺緞鐨勫钩鍙扮被鍨?*/
+/** 获取绝对路径的平台类�?*/
 function getAbsolutePathKind(value: string): "unix" | "windows" | null {
   if (isWindowsDrivePath(value) || isUncPath(value)) {
     return "windows";
@@ -28,7 +28,7 @@ function getAbsolutePathKind(value: string): "unix" | "windows" | null {
   return null;
 }
 
-/** 鍘婚櫎璺緞鏈熬鐨勫垎闅旂锛屼繚鐣欐牴璺緞鐨勬湯灏惧垎闅旂 */
+/** 去除路径末尾的分隔符，保留根路径的末尾分隔符 */
 function trimTrailingPathSeparators(value: string): string {
   if (value.length === 0 || isRootPath(value)) {
     return value;
@@ -45,7 +45,7 @@ function trimTrailingPathSeparators(value: string): string {
   return /^[a-zA-Z]:$/.test(trimmed) ? `${trimmed}\\` : trimmed;
 }
 
-/** 鏍规嵁璺緞鏍煎紡鎺ㄦ柇棣栭€夎矾寰勫垎闅旂 */
+/** 根据路径格式推断首选路径分隔符 */
 function preferredPathSeparator(value: string): "/" | "\\" {
   const absolutePathKind = getAbsolutePathKind(value);
   if (absolutePathKind === "windows") {
@@ -59,23 +59,23 @@ function preferredPathSeparator(value: string): "/" | "\\" {
 }
 
 /**
- * 鍒ゆ柇璺緞鏄惁浠ヨ矾寰勫垎闅旂缁撳熬
+ * 判断路径是否以路径分隔符结尾
  *
- * @param value - 寰呮娴嬬殑璺緞瀛楃涓? * @returns 鏄惁浠ヨ矾寰勫垎闅旂缁撳熬
+ * @param value - 待检测的路径字符�? * @returns 是否以路径分隔符结尾
  */
 export function hasTrailingPathSeparator(value: string): boolean {
   return (getAbsolutePathKind(value) === "unix" ? /\/$/ : /[\\/]$/).test(value);
 }
 
-/** 鍒ゆ柇璺緞鏄惁涓烘樉寮忕浉瀵硅矾寰勶紙浠?"./" 鎴?"../" 寮€澶达級 */
+/** 判断路径是否为显式相对路径（�?"./" �?"../" 开头） */
 export { isExplicitRelativePath as isExplicitRelativeProjectPath };
 
-/** 鎸夊垎闅旂鎷嗗垎璺緞娈?*/
+/** 按分隔符拆分路径�?*/
 function splitPathSegments(value: string, separator: "/" | "\\"): string[] {
   return value.split(separator === "/" ? /\/+/ : /[\\/]+/).filter(Boolean);
 }
 
-/** 鑾峰彇璺緞涓渶鍚庝竴涓矾寰勫垎闅旂鐨勭储寮?*/
+/** 获取路径中最后一个路径分隔符的索�?*/
 function getLastPathSeparatorIndex(value: string): number {
   if (getAbsolutePathKind(value) === "unix") {
     return value.lastIndexOf("/");
@@ -84,7 +84,7 @@ function getLastPathSeparatorIndex(value: string): number {
   return Math.max(value.lastIndexOf("/"), value.lastIndexOf("\\"));
 }
 
-/** 灏嗙粷瀵硅矾寰勬媶鍒嗕负鏍硅矾寰勩€佸垎闅旂鍜岃矾寰勬 */
+/** 将绝对路径拆分为根路径、分隔符和路径段 */
 function splitAbsolutePath(value: string): {
   root: string;
   separator: "/" | "\\";
@@ -118,10 +118,10 @@ function splitAbsolutePath(value: string): {
 }
 
 /**
- * 鍒ゆ柇杈撳叆鍊兼槸鍚︿负鏂囦欢绯荤粺娴忚鏌ヨ璺緞
+ * 判断输入值是否为文件系统浏览查询路径
  *
- * @param value - 寰呮娴嬬殑瀛楃涓? * @param platform - 杩愯骞冲彴鏍囪瘑锛岄粯璁ゅ彇 navigator.platform
- * @returns 鏄惁涓烘枃浠剁郴缁熸祻瑙堟煡璇紙鐩稿璺緞銆佺粷瀵硅矾寰勬垨鐢ㄦ埛涓荤洰褰曡矾寰勶級
+ * @param value - 待检测的字符�? * @param platform - 运行平台标识，默认取 navigator.platform
+ * @returns 是否为文件系统浏览查询（相对路径、绝对路径或用户主目录路径）
  */
 export function isFilesystemBrowseQuery(
   value: string,
@@ -140,25 +140,25 @@ export function isFilesystemBrowseQuery(
 }
 
 /**
- * 鍒ゆ柇鏄惁涓哄綋鍓嶅钩鍙颁笉鏀寔鐨?Windows 椤圭洰璺緞
+ * 判断是否为当前平台不支持�?Windows 项目路径
  *
- * @param value - 璺緞瀛楃涓? * @param platform - 杩愯骞冲彴鏍囪瘑
- * @returns 鏄惁涓轰笉鏀寔鐨?Windows 缁濆璺緞锛堝嵆 Windows 璺緞浣嗚繍琛屽湪闈?Windows 骞冲彴锛? */
+ * @param value - 路径字符�? * @param platform - 运行平台标识
+ * @returns 是否为不支持�?Windows 绝对路径（即 Windows 路径但运行在�?Windows 平台�? */
 export function isUnsupportedWindowsProjectPath(value: string, platform: string): boolean {
   return isWindowsAbsolutePath(value) && !isWindowsPlatform(platform);
 }
 
 /**
- * 瑙勮寖鍖栭」鐩矾寰勭敤浜庡垎鍙戯紙鍘婚櫎棣栧熬绌虹櫧鍙婃湯灏惧垎闅旂锛? *
- * @param value - 鍘熷璺緞瀛楃涓? * @returns 瑙勮寖鍖栧悗鐨勮矾寰? */
+ * 规范化项目路径用于分发（去除首尾空白及末尾分隔符�? *
+ * @param value - 原始路径字符�? * @returns 规范化后的路�? */
 export function normalizeProjectPathForDispatch(value: string): string {
   return trimTrailingPathSeparators(value.trim());
 }
 
 /**
- * 浠庨」鐩矾寰勬帹鏂」鐩爣棰橈紙鍙栬矾寰勬渶鍚庝竴娈电洰褰曞悕锛? *
- * @param value - 椤圭洰璺緞
- * @returns 鎺ㄦ柇鍑虹殑椤圭洰鏍囬
+ * 从项目路径推断项目标题（取路径最后一段目录名�? *
+ * @param value - 项目路径
+ * @returns 推断出的项目标题
  */
 export function inferProjectTitleFromPath(value: string): string {
   const normalized = normalizeProjectPathForDispatch(value);
@@ -172,10 +172,10 @@ export function inferProjectTitleFromPath(value: string): string {
 }
 
 /**
- * 鍦ㄥ綋鍓嶆祻瑙堣矾寰勫悗杩藉姞涓€涓矾寰勬
+ * 在当前浏览路径后追加一个路径段
  *
- * @param currentPath - 褰撳墠娴忚璺緞
- * @param segment - 瑕佽拷鍔犵殑璺緞娈? * @returns 杩藉姞鍚庣殑瀹屾暣璺緞锛堜互鍒嗛殧绗︾粨灏撅級
+ * @param currentPath - 当前浏览路径
+ * @param segment - 要追加的路径�? * @returns 追加后的完整路径（以分隔符结尾）
  */
 export function appendBrowsePathSegment(currentPath: string, segment: string): string {
   const separator = preferredPathSeparator(currentPath);
@@ -183,10 +183,10 @@ export function appendBrowsePathSegment(currentPath: string, segment: string): s
 }
 
 /**
- * 鑾峰彇褰撳墠娴忚璺緞鐨勬湯娈靛悕绉帮紙鍗虫渶鍚庝竴涓矾寰勫垎闅旂涔嬪悗鐨勯儴鍒嗭級
+ * 获取当前浏览路径的末段名称（即最后一个路径分隔符之后的部分）
  *
- * @param currentPath - 褰撳墠娴忚璺緞
- * @returns 鏈璺緞鍚嶇О
+ * @param currentPath - 当前浏览路径
+ * @returns 末段路径名称
  */
 export function getBrowseLeafPathSegment(currentPath: string): string {
   const lastSeparatorIndex = getLastPathSeparatorIndex(currentPath);
@@ -194,9 +194,9 @@ export function getBrowseLeafPathSegment(currentPath: string): string {
 }
 
 /**
- * 鑾峰彇褰撳墠娴忚璺緞鐨勭洰褰曢儴鍒嗭紙鑻ヨ矾寰勪互鍒嗛殧绗︾粨灏惧垯鐩存帴杩斿洖锛屽惁鍒欐埅鍙栧埌鏈€鍚庝竴涓垎闅旂锛? *
- * @param currentPath - 褰撳墠娴忚璺緞
- * @returns 鐩綍璺緞锛堜互鍒嗛殧绗︾粨灏撅級
+ * 获取当前浏览路径的目录部分（若路径以分隔符结尾则直接返回，否则截取到最后一个分隔符�? *
+ * @param currentPath - 当前浏览路径
+ * @returns 目录路径（以分隔符结尾）
  */
 export function getBrowseDirectoryPath(currentPath: string): string {
   if (hasTrailingPathSeparator(currentPath)) {
@@ -212,9 +212,9 @@ export function getBrowseDirectoryPath(currentPath: string): string {
 }
 
 /**
- * 鑾峰彇褰撳墠娴忚璺緞鐨勭埗绾ц矾寰? *
- * @param currentPath - 褰撳墠娴忚璺緞
- * @returns 鐖剁骇璺緞锛岃嫢宸插浜庢牴鐩綍鍒欒繑鍥?null
+ * 获取当前浏览路径的父级路�? *
+ * @param currentPath - 当前浏览路径
+ * @returns 父级路径，若已处于根目录则返�?null
  */
 export function getBrowseParentPath(currentPath: string): string | null {
   const trimmed = trimTrailingPathSeparators(currentPath);
@@ -247,18 +247,18 @@ export function getBrowseParentPath(currentPath: string): string | null {
 }
 
 /**
- * 鍒ゆ柇褰撳墠璺緞鏄惁鍙互鍚戜笂瀵艰埅
+ * 判断当前路径是否可以向上导航
  *
- * @param currentPath - 褰撳墠娴忚璺緞
- * @returns 鏄惁瀛樺湪鐖剁骇璺緞鍙鑸? */
+ * @param currentPath - 当前浏览路径
+ * @returns 是否存在父级路径可导�? */
 export function canNavigateUp(currentPath: string): boolean {
   return hasTrailingPathSeparator(currentPath) && getBrowseParentPath(currentPath) !== null;
 }
 
 /**
- * 鑾峰彇鍒濆娴忚鏌ヨ璺緞锛堝熀浜庣敤鎴蜂富鐩綍锛? *
- * @param homeDir - 鐢ㄦ埛涓荤洰褰曡矾寰勶紝鑻ヤ负 null 鍒欓粯璁や娇鐢?"~/"
- * @returns 鍒濆娴忚璺緞锛堜互鍒嗛殧绗︾粨灏撅級
+ * 获取初始浏览查询路径（基于用户主目录�? *
+ * @param homeDir - 用户主目录路径，若为 null 则默认使�?"~/"
+ * @returns 初始浏览路径（以分隔符结尾）
  */
 export function getInitialBrowseQuery(homeDir: string | null): string {
   if (!homeDir) return "~/";

@@ -1,8 +1,6 @@
-/**
- * @file DebugFeatureFlagsMenu.tsx
- * @description 调试功能标志菜单，提供本地功能开关的可复用控件，
- *              不在产品侧边栏中显示，仅供开发调试使用。
- */
+// FILE: DebugFeatureFlagsMenu.tsx
+// Purpose: Keeps local-only feature flag controls reusable without showing them in the product sidebar.
+// Exports: DebugFeatureFlagsMenu
 
 import { FlagIcon } from "~/lib/icons";
 import {

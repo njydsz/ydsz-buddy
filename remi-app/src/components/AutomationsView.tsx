@@ -1,8 +1,3 @@
-/**
- * @file AutomationsView.tsx
- * @description 自动化模板浏览页面，展示预置的自动化模板（如每日简报、每周回顾等），
- *              用户可选择模板快速创建自动化任务。
- */
 import { BookIcon, CalendarIcon, ClockIcon, RocketIcon, SparklesIcon } from "../lib/icons";
 import { SidebarInset } from "./ui/sidebar";
 import { useMessages } from "../i18n/I18nContext";

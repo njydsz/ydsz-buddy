@@ -1,8 +1,7 @@
-/**
- * @file ProviderModelPicker
- * @description 编辑器服务提供者/模型选择菜单，支持受控打开和快捷键触发。
- *              展示可用和不可用的服务提供者，支持模型搜索、收藏和分组显示。
- */
+// FILE: ProviderModelPicker.tsx
+// Purpose: Renders the composer provider/model menu and supports controlled opening for shortcuts.
+// Layer: Chat composer presentation
+// Depends on: provider availability metadata, shared menu primitives, and picker trigger styling.
 
 import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "~/contracts";
 import { resolveSelectableModel } from "~/shared/model";
@@ -49,12 +48,6 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { StarFilledIcon, StarIcon } from "../../lib/icons";
 import { Skeleton } from "../ui/skeleton";
 
-/**
- * 类型守卫：判断服务提供者选项是否可用。
- *
- * @param option - 服务提供者选项
- * @returns 是否为可用的服务提供者选项
- */
 function isAvailableProviderOption(option: (typeof PROVIDER_OPTIONS)[number]): option is {
   value: ProviderKind;
   label: string;
@@ -63,13 +56,6 @@ function isAvailableProviderOption(option: (typeof PROVIDER_OPTIONS)[number]): o
   return option.available;
 }
 
-/**
- * 解析服务提供者的实时可用性状态。
- * 根据服务提供者状态和认证信息判断是否可用及显示标签。
- *
- * @param provider - 服务提供者状态信息
- * @returns 包含禁用状态和显示标签的对象
- */
 function resolveLiveProviderAvailability(provider: ServerProviderStatus | undefined): {
   disabled: boolean;
   label: string | null;
@@ -101,20 +87,14 @@ function resolveLiveProviderAvailability(provider: ServerProviderStatus | undefi
   };
 }
 
-/** 可用的服务提供者选项列表 */
 export const AVAILABLE_PROVIDER_OPTIONS = PROVIDER_OPTIONS.filter(isAvailableProviderOption);
-/** 不可用的服务提供者选项列表 */
 const UNAVAILABLE_PROVIDER_OPTIONS = PROVIDER_OPTIONS.filter((option) => !option.available);
 
-/**
- * 根据可见性过滤服务提供者选项列表。
- * 移除用户隐藏的提供者，但始终保留受保护的提供者（如当前活跃和锁定的提供者）。
- *
- * @param options - 待过滤的选项列表
- * @param hiddenProviders - 用户隐藏的提供者集合
- * @param protectedProviders - 受保护的提供者集合
- * @returns 过滤后的选项列表
- */
+// Removes user-hidden providers from a provider option list while always
+// preserving any providers the caller marks as protected (the active and
+// locked provider for the current thread). Without that carve-out, hiding the
+// provider you're already using would erase the entry that lets you switch
+// away from it.
 function filterProviderOptionsByVisibility<T extends { value: ProviderKind }>(
   options: ReadonlyArray<T>,
   hiddenProviders: ReadonlySet<ProviderKind>,
@@ -128,14 +108,6 @@ function filterProviderOptionsByVisibility<T extends { value: ProviderKind }>(
   );
 }
 
-/**
- * 获取服务提供者图标的 CSS 类名。
- * 部分提供者需要使用前景色而非默认的弱化色。
- *
- * @param provider - 服务提供者类型
- * @param fallbackClassName - 默认的 CSS 类名
- * @returns 适用的 CSS 类名
- */
 function providerIconClassName(
   provider: ProviderKind | ProviderPickerKind,
   fallbackClassName: string,
@@ -145,39 +117,23 @@ function providerIconClassName(
     : fallbackClassName;
 }
 
-/** 触发模型搜索功能的最小模型数量阈值 */
 const SEARCHABLE_MODEL_PICKER_THRESHOLD = 15;
-/** 各提供者的收藏模型本地存储键 */
 const FAVORITE_MODEL_STORAGE_KEYS = {
   cursor: "remicode:cursor-favourite-models:v1",
   kilo: "remicode:kilo-favourite-models:v1",
   opencode: "remicode:opencode-favourite-models:v1",
   pi: "remicode:pi-favourite-models:v1",
 } as const;
-/** 收藏模型 slug 数组的 Schema 定义 */
 const FavoriteModelSlugs = Schema.Array(Schema.String);
-/** 支持收藏功能的提供者类型 */
 type FavoriteModelProvider = keyof typeof FAVORITE_MODEL_STORAGE_KEYS;
 
-/**
- * 判断服务提供者是否支持模型收藏功能。
- *
- * @param provider - 服务提供者类型
- * @returns 是否支持收藏功能
- */
 function supportsModelFavorites(provider: ProviderKind): provider is FavoriteModelProvider {
   return (
     provider === "cursor" || provider === "kilo" || provider === "opencode" || provider === "pi"
   );
 }
 
-/**
- * 切换收藏模型 slug，保持列表紧凑且保留用户顺序。
- *
- * @param current - 当前收藏列表
- * @param slug - 待切换的模型 slug
- * @returns 更新后的收藏列表
- */
+// Keeps persisted favorite slugs compact and stable while preserving the user's order.
 function toggleFavoriteModelSlug(current: ReadonlyArray<string>, slug: string): string[] {
   const normalizedCurrent = Array.from(new Set(current.filter((entry) => entry.trim().length > 0)));
   return normalizedCurrent.includes(slug)
@@ -185,25 +141,10 @@ function toggleFavoriteModelSlug(current: ReadonlyArray<string>, slug: string): 
     : [...normalizedCurrent, slug];
 }
 
-/**
- * 移除模型名称中的参数化后缀（如 `[fast=false]`）。
- *
- * @param model - 模型标识
- * @returns 去除参数化后缀的模型标识
- */
 function stripParameterizedModelSuffix(model: string): string {
   return model.trim().replace(/\[[^\]]*\]$/u, "");
 }
 
-/**
- * 解析当前选中模型的显示标签。
- * 优先精确匹配，对 Cursor 提供者还会尝试去除参数化后缀后匹配。
- *
- * @param input.provider - 服务提供者类型
- * @param input.model - 当前模型标识
- * @param input.options - 可用模型选项列表
- * @returns 模型的显示标签
- */
 function resolveSelectedModelLabel(input: {
   provider: ProviderKind;
   model: string;
@@ -228,12 +169,6 @@ function resolveSelectedModelLabel(input: {
   });
 }
 
-/**
- * 构建模型选项的搜索文本，将名称、slug、上游提供者信息拼接为小写字符串。
- *
- * @param option - 模型选项
- * @returns 用于搜索匹配的小写字符串
- */
 function buildModelSearchText(option: ProviderModelOption): string {
   return [option.name, option.slug, option.upstreamProviderName, option.upstreamProviderId]
     .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
@@ -241,28 +176,6 @@ function buildModelSearchText(option: ProviderModelOption): string {
     .toLowerCase();
 }
 
-/**
- * 服务提供者/模型选择器组件。
- * 以菜单形式展示可用和不可用的服务提供者，支持模型搜索、收藏和分组显示。
- * 当提供者被锁定时直接展示模型列表，否则展示提供者子菜单。
- *
- * @param props.provider - 当前服务提供者
- * @param props.model - 当前模型标识
- * @param props.lockedProvider - 锁定的服务提供者（线程中途不可切换时）
- * @param props.providers - 服务提供者状态列表
- * @param props.modelOptionsByProvider - 各提供者的模型选项映射
- * @param props.loadingModelProviders - 正在加载模型的提供者映射
- * @param props.hiddenProviders - 用户隐藏的提供者集合
- * @param props.providerOrder - 提供者排序顺序
- * @param props.activeProviderIconClassName - 活跃提供者图标的 CSS 类名
- * @param props.compact - 是否使用紧凑模式
- * @param props.disabled - 是否禁用选择器
- * @param props.open - 受控的菜单打开状态
- * @param props.onOpenChange - 菜单打开状态变更回调
- * @param props.onSelectionCommitted - 选择提交后的回调
- * @param props.shortcutLabel - 快捷键标签
- * @param props.onProviderModelChange - 提供者/模型变更回调
- */
 export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   provider: ProviderKind;
   model: ModelSlug;

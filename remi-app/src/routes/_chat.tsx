@@ -1,12 +1,3 @@
-/**
- * @file 聊天路由布局模块
- * @description 定义 `/_chat` 路由的布局组件，包含侧边栏、全局快捷键、线程保留维护提示等。
- * 作为所有聊天子路由的父级布局，管理侧边栏的渲染位置和尺寸、键盘快捷键绑定、
- * 桌面端菜单事件监听，以及线程保留清理的后台 Toast 通知。
- * @layer 路由布局
- * @exports Route - TanStack Router 路由定义
- */
-
 import { type ResolvedKeybindingsConfig } from "~/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
@@ -55,12 +46,6 @@ const MAINTENANCE_EVENT_STALE_MS = 5 * 60 * 1000;
 
 type MaintenanceToastId = ReturnType<typeof toastManager.add>;
 
-/**
- * 线程保留维护 Toast 组件
- * @description 监听服务端线程保留清理事件，在后台清理旧线程时显示进度 Toast 通知。
- * 清理开始时显示加载状态，进行中时更新进度，完成后显示成功或失败提示。
- * 忽略超过 5 分钟的过期事件，避免重复通知。
- */
 function ThreadRetentionMaintenanceToast() {
   const toastIdRef = useRef<MaintenanceToastId | null>(null);
 
@@ -502,11 +487,6 @@ const SIDEBAR_INNER_CLASS = {
   right: "app-sidebar-surface border-l border-[color:var(--color-border-light)]",
 } as const;
 
-/**
- * 聊天路由布局组件
- * @description 聊天路由的顶层布局，根据侧边栏位置设置渲染线程侧边栏和主内容区域。
- * 包含线程保留维护 Toast 和全局快捷键组件，使用 SidebarProvider 管理侧边栏状态。
- */
 function ChatRouteLayout() {
   const { settings } = useAppSettings();
   const side = settings.sidebarSide;

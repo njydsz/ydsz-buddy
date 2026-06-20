@@ -1,48 +1,25 @@
-/**
- * @file ComposerPendingApprovalPanel.tsx
- * @description 编辑器中待审批请求的面板组件，解析审批详情并展示文件名、命令或原始文本，支持多种审批类型。
- */
-
 import { memo, useMemo } from "react";
 import { type PendingApproval } from "../../session-logic";
 
-/**
- * ComposerPendingApprovalPanel 组件的属性接口
- */
 interface ComposerPendingApprovalPanelProps {
-  /** 待审批请求 */
   approval: PendingApproval;
-  /** 待审批请求总数 */
   pendingCount: number;
 }
 
-/** 解析后的审批详情 */
 type ParsedApproval = {
-  /** 工具名称 */
   tool: string | null;
-  /** 文件名 */
   fileName: string | null;
-  /** 文件所在目录 */
   fileDir: string | null;
-  /** 命令文本 */
   command: string | null;
-  /** 回退文本 */
   fallback: string | null;
 };
 
-/** 审批请求类型的显示标签映射 */
 const KIND_LABEL: Record<PendingApproval["requestKind"], string> = {
   command: "COMMAND",
   "file-read": "FILE READ",
   "file-change": "FILE CHANGE",
 };
 
-/**
- * ComposerPendingApprovalPanel 组件
- * @description 待审批请求面板，解析并展示审批详情（文件名、命令或原始文本）
- * @param props.approval - 待审批请求
- * @param props.pendingCount - 待审批请求总数
- */
 export const ComposerPendingApprovalPanel = memo(function ComposerPendingApprovalPanel({
   approval,
   pendingCount,
@@ -74,7 +51,6 @@ export const ComposerPendingApprovalPanel = memo(function ComposerPendingApprova
   );
 });
 
-/** 审批详情展示子组件，根据解析结果渲染文件名、命令或回退文本 */
 function ApprovalBody({ parsed }: { parsed: ParsedApproval }) {
   if (parsed.fileName) {
     return (
@@ -199,13 +175,6 @@ function parseApprovalDetail(detail: string | undefined): ParsedApproval {
  * object. Prefers a real JSON.parse when it succeeds, otherwise falls back to
  * a permissive regex that tolerates truncation mid-value.
  */
-/**
- * 从可能被截断的 JSON 对象中提取第一个匹配的字符串字段。
- * 优先使用 JSON.parse，失败时回退到正则表达式提取。
- * @param payload - JSON 字符串（可能被截断）
- * @param keys - 待提取的字段名列表
- * @returns 提取到的字符串值，未找到返回 null
- */
 function extractJsonString(payload: string, keys: ReadonlyArray<string>): string | null {
   const parsed = tryParseJson(payload);
   if (parsed && typeof parsed === "object") {
@@ -227,7 +196,6 @@ function extractJsonString(payload: string, keys: ReadonlyArray<string>): string
   return null;
 }
 
-/** 尝试解析 JSON 字符串，失败返回 null */
 function tryParseJson(value: string): unknown {
   try {
     return JSON.parse(value);
@@ -271,12 +239,10 @@ function regexExtractString(payload: string, key: string): string | null {
   return out.length > 0 ? out : null;
 }
 
-/** 去除字符串末尾的省略号 */
 function stripTrailingEllipsis(value: string): string {
   return value.replace(/\.{3}$/u, "").replace(/…$/u, "");
 }
 
-/** 将路径拆分为文件名和父目录 */
 function splitPath(path: string): { name: string; parent: string | null } {
   const normalized = path.replace(/\\/g, "/");
   const trimmed = normalized.replace(/\/+$/, "");
@@ -290,7 +256,6 @@ function splitPath(path: string): { name: string; parent: string | null } {
   };
 }
 
-/** 缩短路径显示，将中间段替换为省略号 */
 function shortenPath(path: string): string {
   const normalized = path.replace(/\\/g, "/");
   const homeMatch = normalized.match(/^\/(?:Users|home)\/[^/]+(?=\/|$)/);
@@ -304,7 +269,6 @@ function shortenPath(path: string): string {
   return `${leading}/…/${tail}`.replace(/^\/…/, "…");
 }
 
-/** 折叠连续空白为单个空格并去除首尾空白 */
 function collapseWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }

@@ -1,8 +1,6 @@
-/**
- * @file BranchToolbarBranchSelector.tsx
- * @description 分支/工作树选择器组件，用于聊天工具栏中的分支切换。
- *              协调分支检出/创建操作，并以 Git 元数据装饰行项。
- */
+// Purpose: Branch/worktree picker for the chat toolbar.
+// Coordinates branch checkout/create actions and decorates rows with git metadata.
+// Depends on: git React Query helpers, native API mutations, and toolbar selection rules.
 import type {
   GitBranch,
   GitStashInfoResult,

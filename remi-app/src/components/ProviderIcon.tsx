@@ -1,7 +1,8 @@
 /**
- * @file ProviderIcon.tsx
- * @description 提供者图标映射组件，集中管理提供者到图标的对应关系，
- *              避免在每个 UI 表面重复分支判断。
+ * ProviderIcon - shared provider glyphs for chat, sidebar, and picker surfaces.
+ *
+ * Centralizes provider-to-icon mapping so new providers do not need repeated
+ * branching across every UI surface.
  */
 import { type ProviderKind } from "~/contracts";
 import type { ReactNode, SVGProps } from "react";
@@ -19,10 +20,8 @@ import {
   PiIcon,
 } from "./Icons";
 
-/** 提供者图标色调类型：默认或头部强调 */
 export type ProviderIconTone = "default" | "header";
 
-/** 按提供者类型映射的图标组件注册表 */
 export const PROVIDER_ICON_COMPONENT_BY_PROVIDER: Record<ProviderKind, Icon> = {
   codex: OpenAI,
   claudeAgent: ClaudeAI,

@@ -1,8 +1,7 @@
-﻿/**
- * @file ComposerLocalDirectoryMenu
- * @description 编辑器中 `@local` 触发的本地文件/文件夹浏览弹出菜单，
- *              支持目录导航、模糊搜索和键盘操作，与 ComposerCommandMenu 共享命令面板 UI 原语。
- */
+// FILE: ComposerLocalDirectoryMenu.tsx
+// Purpose: Render the inline composer popup used for browsing local files and folders after `@local`.
+// Layer: Chat composer UI
+// Depends on: the same Command primitives used by ComposerCommandMenu so both pickers share chrome.
 
 import type { ProjectFileSystemEntry, ProjectLocalSearchEntry } from "~/contracts";
 import type { Ref } from "react";
@@ -32,48 +31,27 @@ import {
   CommandSeparator,
 } from "../ui/command";
 
-/** 按路径分组的文件系统条目映射 */
 type EntriesByPath = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 
-/** 本地搜索的防抖延迟（毫秒），避免每次击键都发起搜索请求 */
+// Delay search requests until the user stops typing �?keeps chat input smooth
+// because every keystroke reshapes mentionQuery in the parent.
 const LOCAL_SEARCH_DEBOUNCE_MS = 220;
-/** 触发模糊搜索的最小查询长度 */
 const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
 
-/**
- * ComposerLocalDirectoryMenu 的命令式句柄接口，
- * 提供键盘导航所需的高亮移动和激活方法。
- */
 export interface ComposerLocalDirectoryMenuHandle {
-  /** 将高亮位置向上或向下移动一行 */
   moveHighlight: (direction: "up" | "down") => void;
-  /** 激活当前高亮的行，返回是否成功激活 */
   activateHighlighted: () => boolean;
 }
 
-/** 菜单中可见行的类型，区分当前目录、本地条目和搜索结果 */
 type VisibleRow =
   | { kind: "use-current"; separator: "/" | "\\" }
   | { kind: "entry"; entry: ProjectFileSystemEntry }
   | { kind: "search"; entry: ProjectLocalSearchEntry };
 
-/**
- * 检测路径使用的分隔符类型。
- *
- * @param value - 待检测的路径
- * @returns 路径分隔符 "/" 或 "\\"
- */
 function detectPathSeparator(value: string): "/" | "\\" {
   return value.includes("\\") ? "\\" : "/";
 }
 
-/**
- * 将目录路径和子名称拼接为完整路径。
- *
- * @param directoryPath - 父目录路径
- * @param childName - 子项名称
- * @returns 拼接后的完整路径
- */
 function joinDirectoryPath(directoryPath: string, childName: string): string {
   if (!childName) return directoryPath;
   const separator = detectPathSeparator(directoryPath);
@@ -81,23 +59,10 @@ function joinDirectoryPath(directoryPath: string, childName: string): string {
   return `${directoryPath}${needsSeparator ? separator : ""}${childName}`;
 }
 
-/**
- * 判断路径是否为 tilde 根目录（~/ 或 ~\）。
- *
- * @param directoryPath - 待判断的路径
- * @returns 是否为 tilde 根目录
- */
 function isTildeRoot(directoryPath: string): boolean {
   return directoryPath === "~/" || directoryPath === "~\\";
 }
 
-/**
- * 获取目录的父目录路径。
- * 处理 Unix 根目录、Windows 驱动器根目录和 tilde 根目录等边界情况。
- *
- * @param directoryPath - 目录路径
- * @returns 父目录路径，若已是根目录则返回 null
- */
 function parentDirectory(directoryPath: string): string | null {
   if (!directoryPath) return null;
   if (directoryPath === "/") return null;
@@ -117,13 +82,6 @@ function parentDirectory(directoryPath: string): string | null {
   return parentSlice;
 }
 
-/**
- * 从 mention 查询字符串中推导出当前目录和过滤词。
- * 以最后一个路径分隔符为界，分隔符之前为目录，之后为过滤词。
- *
- * @param mentionQuery - 编辑器中的 @local 查询文本
- * @returns 包含目录路径和过滤词的对象
- */
 function deriveDirectoryAndFilter(mentionQuery: string): { directory: string; filter: string } {
   const slashIndex = Math.max(mentionQuery.lastIndexOf("/"), mentionQuery.lastIndexOf("\\"));
   if (slashIndex === -1) {
@@ -139,23 +97,11 @@ function deriveDirectoryAndFilter(mentionQuery: string): { directory: string; fi
   return { directory: before, filter: after };
 }
 
-/**
- * 提取路径的最后一部分作为文件名。
- *
- * @param value - 文件路径
- * @returns 路径的基准名称
- */
 function basename(value: string): string {
   const parts = value.split(/[\\/]+/).filter(Boolean);
   return parts[parts.length - 1] ?? value;
 }
 
-/**
- * 判断路径是否为根目录（Unix 根、Windows 驱动器根或 tilde 根）。
- *
- * @param directoryPath - 待判断的路径
- * @returns 是否为根目录
- */
 function isRootDirectory(directoryPath: string): boolean {
   if (directoryPath === "/") return true;
   if (/^[A-Za-z]:[\\/]$/.test(directoryPath)) return true;
@@ -163,13 +109,8 @@ function isRootDirectory(directoryPath: string): boolean {
   return false;
 }
 
-/**
- * 将文件系统错误转换为用户友好的简短描述。
- * 处理常见的 ENOENT、EACCES、ENOTDIR 等错误码。
- *
- * @param error - 原始错误对象
- * @returns 用户可读的错误描述文本
- */
+// Effect/fs errors come through with deep stack traces and absolute internal paths.
+// Surface a short, user-friendly reason so the popover stays tidy on missing/denied paths.
 function summarizeDirectoryLoadError(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error ?? "");
   if (/ENOENT|no such file or directory/i.test(raw)) {
@@ -184,18 +125,6 @@ function summarizeDirectoryLoadError(error: unknown): string {
   return "Unable to load folders.";
 }
 
-/**
- * 本地目录浏览菜单组件。
- * 在编辑器中输入 @local 后弹出，支持目录导航、文件/文件夹浏览、
- * 模糊搜索和键盘高亮操作。
- *
- * @param props.mentionQuery - 当前编辑器中的 @local 查询文本
- * @param props.rootLabel - 根目录的显示标签
- * @param props.homeDir - 用户主目录路径
- * @param props.onSelectEntry - 选中条目的回调
- * @param props.onNavigateFolder - 导航到子文件夹的回调
- * @param props.handleRef - 命令式句柄的引用
- */
 export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMenu(props: {
   mentionQuery: string;
   rootLabel: string;
@@ -574,14 +503,14 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
         </div>
         {isAwaitingHomeDir ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Waiting for home directory from server\u2026          </p>
+            Waiting for home directory from server�?          </p>
         ) : isLoading && visibleCount === 0 ? (
-          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files\u2026</p>
+          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files�?/p>
         ) : errorMessage ? (
           <p className="px-2 py-1.5 text-destructive/80 text-[11px]">{errorMessage}</p>
         ) : isSearchPending ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Searching nested files�?          </p>
+            Searching nested files�?          </p>
         ) : visibleCount === 0 ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
             {filter.trim().length > 0 ? "No matches." : "No files or folders here."}
@@ -596,9 +525,6 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
   );
 });
 
-/**
- * "使用当前文件夹"行组件，在非根目录时显示，允许用户直接选择当前浏览的目录。
- */
 const UseCurrentFolderRow = memo(function UseCurrentFolderRow(props: {
   directoryLabel: string;
   index: number;
@@ -635,13 +561,6 @@ const UseCurrentFolderRow = memo(function UseCurrentFolderRow(props: {
   );
 });
 
-/**
- * 构建搜索结果行的副标题，显示相对于根路径的父目录路径。
- *
- * @param entry - 本地搜索结果条目
- * @param rootPath - 根路径
- * @returns 格式化后的相对路径副标题
- */
 function buildSearchRowSubtitle(entry: ProjectLocalSearchEntry, rootPath: string): string {
   const parent = entry.parentPath ?? "";
   if (!parent) return "";
@@ -656,7 +575,6 @@ function buildSearchRowSubtitle(entry: ProjectLocalSearchEntry, rootPath: string
   return parent;
 }
 
-/** 模糊搜索结果行组件，显示深层匹配的文件/文件夹条目 */
 const LocalSearchRow = memo(function LocalSearchRow(props: {
   entry: ProjectLocalSearchEntry;
   rootPath: string;
@@ -705,7 +623,6 @@ const LocalSearchRow = memo(function LocalSearchRow(props: {
   );
 });
 
-/** 本地文件系统条目行组件，显示当前目录下的文件/文件夹 */
 const LocalEntryRow = memo(function LocalEntryRow(props: {
   entry: ProjectFileSystemEntry;
   index: number;

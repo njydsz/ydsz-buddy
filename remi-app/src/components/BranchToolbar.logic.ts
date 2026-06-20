@@ -1,8 +1,3 @@
-/**
- * @file BranchToolbar.logic.ts
- * @description 分支工具栏的纯逻辑层，包含环境模式推导（local/worktree）、
- *              分支切换后的环境模式更新、工作树元数据解析等与 UI 无关的业务逻辑。
- */
 import type { GitBranch } from "~/contracts";
 import {
   deriveAssociatedWorktreeMetadata,

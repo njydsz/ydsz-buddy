@@ -1,8 +1,3 @@
-/**
- * @file TerminalScrollToBottom.tsx
- * @description 终端"滚动到底部"浮动按钮组件，当终端视口不在最底部时显示，
- *              点击后自动滚动到终端输出末尾。
- */
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";

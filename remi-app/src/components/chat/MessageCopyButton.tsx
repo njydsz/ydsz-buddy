@@ -1,8 +1,3 @@
-/**
- * @file MessageCopyButton.tsx
- * @description 消息复制按钮组件，点击后将消息文本复制到剪贴板，并显示锚定提示。
- */
-
 import { memo, useRef, type RefObject } from "react";
 import { CheckIcon, CopyIcon } from "~/lib/icons";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
@@ -10,15 +5,8 @@ import { cn } from "~/lib/utils";
 import { anchoredToastManager } from "../ui/toast";
 import { MessageActionButton } from "./MessageActionButton";
 
-/** 锚定提示的显示时长（毫秒） */
 const ANCHORED_TOAST_TIMEOUT_MS = 1000;
 
-/**
- * 在按钮旁显示锚定提示
- * @param ref - 按钮元素的引用
- * @param title - 提示标题
- * @param description - 提示描述（可选）
- */
 function showCopyToast(
   ref: RefObject<HTMLButtonElement | null>,
   title: string,
@@ -39,14 +27,6 @@ function showCopyToast(
   });
 }
 
-/**
- * MessageCopyButton 组件
- * @description 消息复制按钮，点击后将消息文本复制到剪贴板，并显示锚定提示
- * @param props.text - 待复制的文本
- * @param props.size - 按钮大小
- * @param props.variant - 按钮变体样式
- * @param props.className - 额外类名
- */
 export const MessageCopyButton = memo(function MessageCopyButton({
   text,
   size = "icon-xs",

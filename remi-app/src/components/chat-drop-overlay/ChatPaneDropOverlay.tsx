@@ -1,8 +1,7 @@
-/**
- * @file ChatPaneDropOverlay.tsx
- * @description 聊天面板拖放覆盖层，渲染四象限拖放区域，支持通过拖拽侧边栏线程
- *              来分屏显示聊天界面。提供拖放区域计算、MIME 类型过滤和放置规则校验。
- */
+// FILE: ChatPaneDropOverlay.tsx
+// Purpose: Renders the 4-quadrant drop-zone overlay used to split a chat surface by dragging a sidebar thread.
+// Layer: UI component (route surfaces wrap it around <ChatView /> or empty-state placeholders)
+// Exports: ChatPaneDropOverlay component, drag MIME constant, drop-zone helpers used by tests
 
 import {
   useCallback,
@@ -16,18 +15,15 @@ import { type ThreadId } from "~/contracts";
 import { type SplitDirection, type SplitDropSide } from "../../splitViewStore";
 import { cn } from "../../lib/utils";
 
-/** 自定义拖拽 MIME 类型，避免外部文件拖拽触发分屏 */
+// Custom MIME so external file drops on the composer (which listen for `Files`) cannot trigger us.
 export const THREAD_DRAG_MIME = "application/x-t3-thread";
 
-/** 线程拖拽负载数据结构 */
 export interface ThreadDragPayload {
   threadId: ThreadId;
 }
 
-/** 拖放区域方向类型 */
 export type DropZone = "top" | "bottom" | "left" | "right";
 
-/** 线程拖放规则配置 */
 export interface ThreadDropRules {
   excludedThreadIds?: ReadonlySet<ThreadId> | undefined;
 }
@@ -64,14 +60,6 @@ interface ChatPaneDropOverlayProps {
   paneScopeId?: string;
 }
 
-/**
- * 根据指针位置计算拖放目标区域
- * @param rect - 容器矩形区域
- * @param clientX - 指针 X 坐标
- * @param clientY - 指针 Y 坐标
- * @param isZoneAllowed - 判断某区域是否允许放置的回调
- * @returns 拖放目标区域，若不在有效范围内返回 null
- */
 export function getDropZoneFromPointer(
   rect: { left: number; top: number; width: number; height: number },
   clientX: number,
@@ -120,11 +108,6 @@ export function getDropZoneFromPointer(
   return chooseHorizontal();
 }
 
-/**
- * 将拖放区域转换为分屏方向和侧边
- * @param zone - 拖放区域
- * @returns 包含分屏方向和侧边的对象
- */
 export function dropZoneToDirectionSide(zone: DropZone): {
   direction: SplitDirection;
   side: SplitDropSide;
@@ -159,12 +142,7 @@ function parseThreadDragPayload(event: ReactDragEvent): ThreadDragPayload | null
   return null;
 }
 
-/**
- * 判断线程拖拽负载是否满足放置规则
- * @param payload - 线程拖拽负载
- * @param rules - 拖放规则配置
- * @returns 是否允许放置
- */
+// Applies the same thread constraints for hover feedback and the final drop.
 export function isThreadDragPayloadAllowed(
   payload: ThreadDragPayload,
   rules: ThreadDropRules,
@@ -173,10 +151,6 @@ export function isThreadDragPayloadAllowed(
   return true;
 }
 
-/**
- * 聊天面板拖放覆盖层组件，包裹聊天界面并提供四象限拖放分屏功能。
- * 当用户从侧边栏拖拽线程到聊天面板时，显示目标区域预览并执行分屏操作。
- */
 export function ChatPaneDropOverlay(props: ChatPaneDropOverlayProps) {
   const { onDrop, canDropInDirection, excludedThreadIds, paneScopeId, className, children } = props;
   const wrapperRef = useRef<HTMLDivElement>(null);

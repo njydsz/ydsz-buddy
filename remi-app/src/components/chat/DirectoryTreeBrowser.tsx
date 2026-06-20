@@ -1,8 +1,7 @@
-﻿/**
- * @file DirectoryTreeBrowser
- * @description 渲染一个懒加载、可递归展开的本地目录浏览器。
- *              支持按层级延迟加载目录内容，提供搜索过滤和文件/文件夹选择功能。
- */
+// FILE: DirectoryTreeBrowser.tsx
+// Purpose: Render a lazy, recursive local browser rooted at a caller-provided path.
+// Layer: Chat/home filesystem UI helper
+// Exports: DirectoryTreeBrowser for inline and popover-based local file/folder navigation.
 
 import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "~/contracts";
 import type { ReactNode } from "react";
@@ -11,36 +10,19 @@ import { ChevronDownIcon, ChevronRightIcon, FileIcon, FolderIcon } from "~/lib/i
 import { readNativeApi } from "~/nativeApi";
 import { cn } from "~/lib/utils";
 
-/** DirectoryTreeBrowser 组件的属性接口 */
 interface DirectoryTreeBrowserProps {
-  /** 目录树的根路径，为 null 时显示不可用提示 */
   rootPath: string | null;
-  /** 无条目时的空状态提示文本 */
   emptyLabel?: string;
-  /** 根路径不可用时的提示文本 */
   unavailableLabel?: string;
-  /** 加载中的提示文本 */
   loadingLabel?: string;
-  /** 自定义 CSS 类名 */
   className?: string;
-  /** 是否在浏览中包含文件（默认仅显示文件夹） */
   includeFiles?: boolean;
-  /** 搜索过滤关键词 */
   query?: string;
-  /** 选中条目的回调，接收绝对路径和文件系统条目信息 */
   onSelectEntry: (absolutePath: string, entry: ProjectFileSystemEntry) => Promise<void> | void;
 }
 
-/** 按父路径分组的目录条目映射 */
 type DirectoryEntriesByParent = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 
-/**
- * 将根路径和相对路径拼接为完整路径，自动检测路径分隔符。
- *
- * @param rootPath - 根路径
- * @param relativePath - 相对路径
- * @returns 拼接后的完整路径
- */
 function joinDirectoryPath(rootPath: string, relativePath: string): string {
   if (!relativePath) return rootPath;
   const separator = rootPath.includes("\\") ? "\\" : "/";
@@ -49,24 +31,11 @@ function joinDirectoryPath(rootPath: string, relativePath: string): string {
   return `${normalizedRoot}${separator}${normalizedRelative}`;
 }
 
-/**
- * 目录树浏览器组件。
- * 提供懒加载、可递归展开的本地文件系统浏览功能，支持搜索过滤。
- *
- * @param props.rootPath - 目录树的根路径
- * @param props.emptyLabel - 空状态提示
- * @param props.unavailableLabel - 不可用提示
- * @param props.loadingLabel - 加载中提示
- * @param props.className - 自定义类名
- * @param props.includeFiles - 是否包含文件
- * @param props.query - 搜索关键词
- * @param props.onSelectEntry - 选中条目的回调
- */
 export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
   rootPath,
   emptyLabel = "No folders found",
   unavailableLabel = "Home directory unavailable.",
-  loadingLabel = "Loading folders\u2026",
+  loadingLabel = "Loading folders�?,
   className,
   includeFiles = false,
   query = "",
@@ -207,7 +176,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
               <span className="truncate text-foreground/95">{entry.name}</span>
             </button>
             {isDirectory && isLoadingChildren ? (
-              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loading�?/span>
+              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loading�?/span>
             ) : null}
           </div>,
           ...renderedChildren,

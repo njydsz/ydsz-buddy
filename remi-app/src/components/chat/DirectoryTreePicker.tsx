@@ -1,8 +1,7 @@
-/**
- * @file DirectoryTreePicker
- * @description 将共享的目录浏览器包装为按钮触发的弹出式选择器，
- *              用于在聊天输入区域选择本地文件夹。
- */
+// FILE: DirectoryTreePicker.tsx
+// Purpose: Wrap the shared directory browser in a button-triggered popover picker.
+// Layer: Chat/home input helper
+// Depends on: DirectoryTreeBrowser and shared popover/button primitives.
 
 import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "~/contracts";
 import { memo, useState } from "react";
@@ -11,30 +10,14 @@ import { Button } from "../ui/button";
 import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
 import { DirectoryTreeBrowser } from "./DirectoryTreeBrowser";
 
-/** DirectoryTreePicker 组件的属性接口 */
 interface DirectoryTreePickerProps {
-  /** 目录树的根路径，为 null 时显示不可用提示 */
   rootPath: string | null;
-  /** 触发按钮的显示文本 */
   triggerLabel: string;
-  /** 无文件夹时的空状态提示文本 */
   emptyLabel?: string;
-  /** 是否在浏览中包含文件（默认仅显示文件夹） */
   includeFiles?: boolean;
-  /** 选中目录的回调，接收绝对路径和目录条目信息 */
   onSelectDirectory: (absolutePath: string, entry: ProjectDirectoryEntry) => Promise<void> | void;
 }
 
-/**
- * 目录树弹出选择器组件。
- * 以弹出面板形式展示目录浏览器，用户可浏览并选择本地文件夹。
- *
- * @param props.rootPath - 目录树的根路径
- * @param props.triggerLabel - 触发按钮的文本
- * @param props.emptyLabel - 空状态提示
- * @param props.includeFiles - 是否包含文件
- * @param props.onSelectDirectory - 选中目录的回调
- */
 export const DirectoryTreePicker = memo(function DirectoryTreePicker({
   rootPath,
   triggerLabel,
@@ -61,7 +44,7 @@ export const DirectoryTreePicker = memo(function DirectoryTreePicker({
           rootPath={rootPath}
           emptyLabel={emptyLabel}
           unavailableLabel="Home directory unavailable."
-          loadingLabel={includeFiles ? "Loading entries\u2026" : "Loading folders\u2026"}
+          loadingLabel={includeFiles ? "Loading entries�? : "Loading folders�?}
           className="max-h-96 overflow-auto px-2 py-2"
           includeFiles={includeFiles}
           onSelectEntry={async (absolutePath, entry: ProjectFileSystemEntry) => {

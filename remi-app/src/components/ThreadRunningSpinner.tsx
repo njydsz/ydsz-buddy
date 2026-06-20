@@ -1,7 +1,7 @@
-/**
- * @file ThreadRunningSpinner.tsx
- * @description 侧边栏线程行的运行中旋转指示器，支持覆盖层和内联两种展示模式。
- */
+// FILE: ThreadRunningSpinner.tsx
+// Purpose: Shared running/pulse spinner for sidebar thread rows.
+// Layer: Sidebar UI primitive
+// Exports: ThreadRunningSpinner
 
 import { cn } from "~/lib/utils";
 

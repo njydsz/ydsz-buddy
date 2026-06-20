@@ -1,8 +1,7 @@
-/**
- * @file BrowserPanel.tsx
- * @description 应用内浏览器面板，渲染浏览器 Chrome 和原生桌面视图的镜像，
- *              支持标签页管理、地址栏同步、截图捕获和原生 WebContentsView 绑定。
- */
+// FILE: BrowserPanel.tsx
+// Purpose: Renders the in-app browser chrome and mirrors the native desktop view.
+// Layer: Desktop-only React component
+// Depends on: browserStateStore, nativeApi browser bridge, DiffPanelShell
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
@@ -292,10 +291,6 @@ function isBrowserPerfLoggingEnabled(): boolean {
   }
 }
 
-/**
- * 应用内浏览器面板组件，提供标签页管理、地址栏导航、截图捕获等功能，
- * 并与原生桌面端 WebContentsView 进行绑定和边界同步。
- */
 export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps) {
   const api = readNativeApi();
   const threadBrowserState = useStore(useBrowserStateStore, selectThreadBrowserState(threadId));

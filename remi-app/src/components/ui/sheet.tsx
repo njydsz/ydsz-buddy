@@ -1,8 +1,3 @@
-/**
- * @file sheet
- * @description 抽屉面板组件，基于 Base UI Dialog 原语封装，
- * 支持从四个方向滑出、内嵌变体和可滚动面板。
- */
 "use client";
 
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
@@ -11,23 +6,18 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 
-/** 抽屉面板根组件 */
 const Sheet = SheetPrimitive.Root;
 
-/** 抽屉面板传送门 */
 const SheetPortal = SheetPrimitive.Portal;
 
-/** 抽屉面板触发器 */
 function SheetTrigger(props: SheetPrimitive.Trigger.Props) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
-/** 抽屉面板关闭按钮 */
 function SheetClose(props: SheetPrimitive.Close.Props) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
-/** 抽屉面板遮罩层 */
 function SheetBackdrop({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   return (
     <SheetPrimitive.Backdrop
@@ -41,7 +31,6 @@ function SheetBackdrop({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   );
 }
 
-/** 抽屉面板视口容器，支持方向和内嵌变体 */
 function SheetViewport({
   className,
   side,
@@ -68,7 +57,6 @@ function SheetViewport({
   );
 }
 
-/** 抽屉面板弹出层，支持方向、关闭按钮和内嵌变体 */
 function SheetPopup({
   className,
   children,
@@ -121,7 +109,6 @@ function SheetPopup({
   );
 }
 
-/** 抽屉面板头部区域 */
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -135,7 +122,6 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** 抽屉面板底部操作区域，支持 default（带边框背景）和 bare（无装饰）两种变体 */
 function SheetFooter({
   className,
   variant = "default",
@@ -158,7 +144,6 @@ function SheetFooter({
   );
 }
 
-/** 抽屉面板标题 */
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   return (
     <SheetPrimitive.Title
@@ -169,7 +154,6 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   );
 }
 
-/** 抽屉面板描述内容 */
 function SheetDescription({ className, ...props }: SheetPrimitive.Description.Props) {
   return (
     <SheetPrimitive.Description
@@ -180,7 +164,6 @@ function SheetDescription({ className, ...props }: SheetPrimitive.Description.Pr
   );
 }
 
-/** 抽屉面板可滚动内容区域 */
 function SheetPanel({
   className,
   scrollFade = true,

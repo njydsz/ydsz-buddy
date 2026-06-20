@@ -1,8 +1,9 @@
-/**
- * @file PluginsView.tsx
- * @description æ’ä»¶æµè§ˆé¡µé¢ï¼Œè¯»å–æä¾›è€…å‘çŽ°æ•°æ®å¹¶æ¸²æŸ“æŒ‰å¸‚åœºåˆ†ç»„çš„æ’ä»¶ç½‘æ ¼ï¼Œ
- *              åŒ…å«æœç´¢ã€æä¾›è€…å·¥å…·æ å’Œç©ºçŠ¶æ€æç¤ºã€‚
- */
+// FILE: PluginsView.tsx
+// Purpose: Plugin browser surface for the /plugins route. Reads the same provider
+//          discovery data as the SkillsView and renders the marketplace-grouped plugin
+//          grid with a hero, search, and provider toolbar.
+// Layer: Route-level screen
+// Exports: PluginsView
 
 import { useDeferredValue } from "react";
 import { SearchIcon } from "~/lib/icons";
@@ -74,7 +75,7 @@ export function PluginsView() {
                 <InlineWarning>
                   {data.pluginsQuery.data?.marketplaceLoadErrors
                     .map((err) => `${sectionTitle(err.marketplacePath)}: ${err.message}`)
-                    .join(" ï¿½?")}
+                    .join(" �?")}
                 </InlineWarning>
               ) : null}
             </div>

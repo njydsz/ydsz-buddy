@@ -1,8 +1,3 @@
-/**
- * @file input
- * @description 输入框组件，基于 Base UI Input 原语封装，
- * 支持多种尺寸、无样式模式和原生 input 模式。
- */
 "use client";
 
 import { Input as InputPrimitive } from "@base-ui/react/input";
@@ -10,7 +5,6 @@ import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from "r
 
 import { cn } from "~/lib/utils";
 
-/** 输入框属性类型 */
 type InputProps = Omit<ComponentPropsWithoutRef<typeof InputPrimitive>, "size" | "style"> & {
   size?: "sm" | "default" | "lg" | number;
   unstyled?: boolean;
@@ -18,7 +12,7 @@ type InputProps = Omit<ComponentPropsWithoutRef<typeof InputPrimitive>, "size" |
   style?: CSSProperties;
 };
 
-/** 输入框组件，支持转发 ref 以便浏览器地址栏自动聚焦和选中 */
+// Forward refs so the browser address bar can autofocus and select reliably.
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { className, size = "default", unstyled = false, nativeInput = false, ...props },
   ref,

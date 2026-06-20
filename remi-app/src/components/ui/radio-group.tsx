@@ -1,8 +1,3 @@
-/**
- * @file radio-group
- * @description 单选按钮组组件，基于 Base UI Radio/RadioGroup 原语封装，
- * 支持单选互斥选择，包含单选组和单个单选按钮。
- */
 "use client";
 
 import { Radio as RadioPrimitive } from "@base-ui/react/radio";
@@ -10,7 +5,6 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 
 import { cn } from "~/lib/utils";
 
-/** 单选按钮组容器 */
 function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
   return (
     <RadioGroupPrimitive
@@ -21,7 +15,6 @@ function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
   );
 }
 
-/** 单选按钮组件 */
 function Radio({ className, ...props }: RadioPrimitive.Root.Props) {
   return (
     <RadioPrimitive.Root

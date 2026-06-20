@@ -1,39 +1,22 @@
-/**
- * @file chatSelectionActions.ts
- * @description 对话文本选择的辅助函数，用于读取助手消息选区并计算浮动操作按钮的布局位置。
- * 避免因选区变化导致不必要的重渲染。
- */
+// FILE: chatSelectionActions.ts
+// Purpose: Helpers for reading assistant text selections from the transcript without re-render churn.
+// Layer: Chat transcript interaction helpers
 
-/** 助手消息选区数据 */
 export interface TranscriptAssistantSelection {
-  /** 助手消息 ID */
   assistantMessageId: string;
-  /** 选中的文本 */
   text: string;
 }
 
-/** 选区操作按钮的布局位置 */
 export interface TranscriptSelectionActionLayout {
-  /** 左偏移量 */
   left: number;
-  /** 上偏移量 */
   top: number;
-  /** 放置方向（上方/下方） */
   placement: "top" | "bottom";
 }
 
-/** 操作按钮宽度（像素） */
 const TRANSCRIPT_SELECTION_ACTION_WIDTH_PX = 108;
-/** 操作按钮高度（像素） */
 const TRANSCRIPT_SELECTION_ACTION_HEIGHT_PX = 32;
-/** 操作按钮与选区的间距（像素） */
 const TRANSCRIPT_SELECTION_ACTION_GAP_PX = 8;
 
-/**
- * 获取选区的客户端矩形
- * @param selection - 浏览器选区对象
- * @returns 选区矩形，无有效选区时返回 null
- */
 function getSelectionRect(selection: Selection): DOMRect | null {
   if (selection.rangeCount === 0 || selection.isCollapsed) {
     return null;
@@ -49,11 +32,6 @@ function getSelectionRect(selection: Selection): DOMRect | null {
   return boundingRect.width > 0 || boundingRect.height > 0 ? boundingRect : null;
 }
 
-/**
- * 查找节点所属的助手消息容器元素
- * @param node - DOM 节点
- * @returns 最近的包含 data-assistant-message-id 属性的元素，未找到返回 null
- */
 function selectionContainerForNode(node: Node | null): HTMLElement | null {
   if (!node) {
     return null;
@@ -62,11 +40,6 @@ function selectionContainerForNode(node: Node | null): HTMLElement | null {
   return element?.closest<HTMLElement>("[data-assistant-message-id]") ?? null;
 }
 
-/**
- * 读取对话中助手消息的文本选区
- * @param input.container - 选区搜索范围的容器元素
- * @returns 选区数据和选区矩形，无有效选区时返回 null
- */
 export function readTranscriptAssistantSelection(input: {
   container: HTMLElement | null;
 }): { selection: TranscriptAssistantSelection; selectionRect: DOMRect | null } | null {
@@ -104,13 +77,6 @@ export function readTranscriptAssistantSelection(input: {
   };
 }
 
-/**
- * 计算选区操作按钮的布局位置
- * @param input.selectionRect - 选区矩形
- * @param input.pointer - 指针位置
- * @param input.viewport - 视口尺寸（可选）
- * @returns 操作按钮的布局位置
- */
 export function resolveTranscriptSelectionActionLayout(input: {
   selectionRect: DOMRect | null;
   pointer: { x: number; y: number };

@@ -1,8 +1,7 @@
-/**
- * @file ChatMarkdown.tsx
- * @description èŠå¤© Markdown æ¸²æŸ“ç»„ä»¶ï¼Œæ”¯æŒè¯­æ³•é«˜äº®ã€æœ¬åœ°æ–‡ä»¶é“¾æŽ¥ã€
- *              LaTeX æ•°å­¦å…¬å¼ã€GFM æ‰©å±•è¯­æ³•ç­‰ï¼Œç”¨äºŽåŠ©æ‰‹æ¶ˆæ¯å’Œè®¡åˆ’å†…å®¹çš„æ¸²æŸ“ã€‚
- */
+// FILE: ChatMarkdown.tsx
+// Purpose: Renders assistant and plan markdown with syntax highlighting and local file links.
+// Layer: Web chat presentation component
+// Exports: ChatMarkdown
 
 import { DiffsHighlighter, getSharedHighlighter, SupportedLanguages } from "@pierre/diffs";
 import { CheckIcon, CopyIcon } from "~/lib/icons";
@@ -500,10 +499,10 @@ function getHighlighterPromise(language: string): Promise<DiffsHighlighter> {
   }).catch((err) => {
     highlighterPromiseCache.delete(language);
     if (language === "text") {
-      // "text" itself failed ï¿½?Shiki cannot initialize at all, surface the error
+      // "text" itself failed �?Shiki cannot initialize at all, surface the error
       throw err;
     }
-    // Language not supported by Shiki ï¿½?fall back to "text"
+    // Language not supported by Shiki �?fall back to "text"
     return getHighlighterPromise("text");
   });
   highlighterPromiseCache.set(language, promise);

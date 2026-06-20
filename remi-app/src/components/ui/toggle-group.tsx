@@ -1,8 +1,3 @@
-/**
- * @file toggle-group
- * @description 切换按钮组组件，基于 Base UI ToggleGroup 原语封装，
- * 支持水平/垂直方向、分组分隔线，子项自动继承组的尺寸和变体。
- */
 "use client";
 
 import type { Toggle as TogglePrimitive } from "@base-ui/react/toggle";
@@ -14,13 +9,11 @@ import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 import { Toggle as ToggleComponent, type toggleVariants } from "~/components/ui/toggle";
 
-/** 切换按钮组上下文，用于向子项传递尺寸和变体 */
 const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
   size: "default",
   variant: "default",
 });
 
-/** 切换按钮组容器 */
 function ToggleGroup({
   className,
   variant = "default",
@@ -55,7 +48,6 @@ function ToggleGroup({
   );
 }
 
-/** 切换按钮组内的切换按钮，自动继承组的尺寸和变体 */
 function Toggle({
   className,
   children,
@@ -82,7 +74,6 @@ function Toggle({
   );
 }
 
-/** 切换按钮组分隔线 */
 function ToggleGroupSeparator({
   className,
   orientation = "vertical",

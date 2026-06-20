@@ -1,6 +1,6 @@
 /**
  * @file useIsDisposableThread.ts
- * @description 涓€娆℃€х嚎绋嬫娴?Hook - 鍒ゆ柇绾跨▼鏄惁搴旇琚攢姣? * @module hooks/useIsDisposableThread
+ * @description 一次性线程检�?Hook - 判断线程是否应该被销�? * @module hooks/useIsDisposableThread
  */
 
 import { type ThreadId } from "~/contracts";
@@ -9,44 +9,44 @@ import { useComposerDraftStore } from "../composerDraftStore";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";
 
 /**
- * 涓€娆℃€х嚎绋嬫娴?Hook
+ * 一次性线程检�?Hook
  *
  * @description
- * 鍒ゆ柇鎸囧畾绾跨▼鏄惁涓轰竴娆℃€х嚎绋嬶紙涓存椂绾跨▼锛夈€? * 涓€娆℃€х嚎绋嬪湪鐢ㄦ埛绂诲紑鏃跺簲璇ヨ鑷姩閿€姣併€? *
- * 璇?Hook 浣跨敤"閿佸瓨"鏈哄埗锛氫竴鏃︽娴嬪埌绾跨▼鏄复鏃剁殑锛屽嵆浣垮悗缁姸鎬佸彉鍖栵紝
- * 涔熶細淇濇寔杩斿洖 true锛岄伩鍏?UI 鍦ㄨ崏绋?鏈嶅姟鍣ㄦ彁鍗囪繃绋嬩腑闂儊銆? *
- * @param threadId - 瑕佹鏌ョ殑绾跨▼ ID锛屽彲浠ヤ负 null 鎴?undefined
+ * 判断指定线程是否为一次性线程（临时线程）�? * 一次性线程在用户离开时应该被自动销毁�? *
+ * �?Hook 使用"锁存"机制：一旦检测到线程是临时的，即使后续状态变化，
+ * 也会保持返回 true，避�?UI 在草�?服务器提升过程中闪烁�? *
+ * @param threadId - 要检查的线程 ID，可以为 null �?undefined
  *
- * @returns 鏄惁涓轰竴娆℃€х嚎绋? *
+ * @returns 是否为一次性线�? *
  * @example
  * ```tsx
  * const isDisposable = useIsDisposableThread(currentThreadId);
  *
  * if (isDisposable) {
- *   console.log('杩欐槸涓€涓复鏃剁嚎绋嬶紝绂诲紑鏃朵細琚攢姣?);
+ *   console.log('这是一个临时线程，离开时会被销�?);
  * }
  * ```
  *
  * @remarks
- * - 妫€鏌ヤ袱涓潵婧愶細涓存椂绾跨▼瀛樺偍鍜岃崏绋跨嚎绋嬪厓鏁版嵁
- * - 浣跨敤 ref 璁板綍宸茶杩囩殑涓存椂绾跨▼锛岄槻姝㈢姸鎬佺灛鍙樺鑷?UI 闂儊
+ * - 检查两个来源：临时线程存储和草稿线程元数据
+ * - 使用 ref 记录已见过的临时线程，防止状态瞬变导�?UI 闪烁
  */
 export function useIsDisposableThread(threadId: ThreadId | null | undefined): boolean {
-  // 浠庝复鏃剁嚎绋嬪瓨鍌ㄤ腑妫€鏌ユ爣璁?  const hasTemporaryThreadMarker = useTemporaryThreadStore((store) =>
+  // 从临时线程存储中检查标�?  const hasTemporaryThreadMarker = useTemporaryThreadStore((store) =>
     threadId ? store.temporaryThreadIds[threadId] === true : false,
   );
   
-  // 浠庤崏绋跨嚎绋嬪厓鏁版嵁涓鏌ヤ复鏃舵爣璁?  const hasTemporaryDraftMetadata = useComposerDraftStore((store) =>
+  // 从草稿线程元数据中检查临时标�?  const hasTemporaryDraftMetadata = useComposerDraftStore((store) =>
     threadId ? store.draftThreadsByThreadId[threadId]?.isTemporary === true : false,
   );
   
-  // 璁板綍宸茶杩囩殑涓存椂绾跨▼ ID锛岀敤浜庨攣瀛樻満鍒?  const seenDisposableThreadIdsRef = useRef<Set<ThreadId>>(new Set());
+  // 记录已见过的临时线程 ID，用于锁存机�?  const seenDisposableThreadIdsRef = useRef<Set<ThreadId>>(new Set());
 
   useEffect(() => {
     if (!threadId) {
       return;
     }
-    // 閿佸瓨鏈哄埗锛氫竴鏃︽爣璁颁负涓存椂锛屽氨姘镐箙璁板綍锛岄伩鍏?UI 闂儊
+    // 锁存机制：一旦标记为临时，就永久记录，避�?UI 闪烁
     if (hasTemporaryThreadMarker || hasTemporaryDraftMetadata) {
       seenDisposableThreadIdsRef.current.add(threadId);
     }
@@ -56,7 +56,7 @@ export function useIsDisposableThread(threadId: ThreadId | null | undefined): bo
     return false;
   }
   
-  // 杩斿洖 true 鐨勬潯浠讹細褰撳墠鏈変复鏃舵爣璁帮紝鎴栬€呮浘缁忚鏍囪涓轰复鏃?  return (
+  // 返回 true 的条件：当前有临时标记，或者曾经被标记为临�?  return (
     hasTemporaryThreadMarker ||
     hasTemporaryDraftMetadata ||
     seenDisposableThreadIdsRef.current.has(threadId)

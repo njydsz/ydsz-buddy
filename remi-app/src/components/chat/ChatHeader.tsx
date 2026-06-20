@@ -1,8 +1,7 @@
-/**
- * @file ChatHeader.tsx
- * @description 聊天界面顶部栏组件，包含项目操作、面板切换、Git 操作、线程导航和 Handoff 等控制项。
- * 支持紧凑模式（宽度不足时自动折叠部分控件到菜单中）。
- */
+// FILE: ChatHeader.tsx
+// Purpose: Renders the chat top bar with project actions and panel toggles.
+// Layer: Chat shell header
+// Depends on: project action controls, git actions, and panel toggle callbacks
 
 import {
   type EditorId,
@@ -41,127 +40,70 @@ import { gitWorkingTreeDiffQueryOptions } from "~/lib/gitReactQuery";
 import { summarizePatchStats } from "~/lib/diffRendering";
 import { useRepoDiffScopeStore } from "~/repoDiffScopeStore";
 
-/** 宽度阈值（像素），低于此值时头部控件折叠到省略号菜单中 */
+/** Width (px) below which collapsible header controls fold into the ellipsis menu. */
 const HEADER_COMPACT_BREAKPOINT = 480;
 
-/**
- * ChatHeader 组件的属性接口
- */
 interface ChatHeaderProps {
-  /** 当前活跃的线程 ID */
   activeThreadId: ThreadId;
-  /** 当前活跃的线程标题 */
   activeThreadTitle: string;
-  /** 当前线程的入口界面类型 */
   activeThreadEntryPoint: ThreadPrimarySurface;
-  /** 当前活跃的提供者类型 */
   activeProvider: ProviderKind;
-  /** 当前活跃的项目名称 */
   activeProjectName: string | undefined;
-  /** 线程面包屑导航 */
   threadBreadcrumbs: ReadonlyArray<{
     threadId: ThreadId;
     title: string;
   }>;
-  /** 是否隐藏 Handoff 控件 */
   hideHandoffControls?: boolean;
-  /** 当前项目是否为 Git 仓库 */
   isGitRepo: boolean;
-  /** 在当前工作目录中打开的路径 */
   openInCwd: string | null;
-  /** 当前项目的脚本列表 */
   activeProjectScripts: ProjectScript[] | undefined;
-  /** 首选脚本 ID */
   preferredScriptId: string | null;
-  /** 快捷键配置 */
   keybindings: ResolvedKeybindingsConfig;
-  /** 可用的编辑器 ID 列表 */
   availableEditors: ReadonlyArray<EditorId>;
-  /** 终端是否可用 */
   terminalAvailable: boolean;
-  /** 终端是否已打开 */
   terminalOpen: boolean;
-  /** 终端切换快捷键标签 */
   terminalToggleShortcutLabel: string | null;
-  /** 浏览器切换快捷键标签 */
   browserToggleShortcutLabel: string | null;
-  /** Diff 面板切换快捷键标签 */
   diffToggleShortcutLabel: string | null;
-  /** Handoff 徽章标签 */
   handoffBadgeLabel: string | null;
-  /** Handoff 操作标签 */
   handoffActionLabel: string;
-  /** Handoff 是否被禁用 */
   handoffDisabled: boolean;
-  /** Handoff 目标提供者列表 */
   handoffActionTargetProviders: ReadonlyArray<ProviderKind>;
-  /** Handoff 徽章来源提供者 */
   handoffBadgeSourceProvider: ProviderKind | null;
-  /** Handoff 徽章目标提供者 */
   handoffBadgeTargetProvider: ProviderKind | null;
-  /** 浏览器是否已打开 */
   browserOpen: boolean;
-  /** Git 工作目录 */
   gitCwd: string | null;
-  /** Diff 徽章刷新间隔（毫秒），false 表示不刷新 */
   diffBadgeRefreshIntervalMs?: number | false;
-  /** 是否显示 Git 操作控件 */
   showGitActions?: boolean;
-  /** Diff 面板是否已打开 */
   diffOpen: boolean;
-  /** Diff 面板禁用原因 */
   diffDisabledReason?: string | null;
-  /** 界面模式（单面板/分屏） */
   surfaceMode?: "single" | "split";
-  /** 是否为侧边聊天 */
   isSidechat?: boolean;
-  /** 聊天布局操作（分屏/最大化） */
   chatLayoutAction?: {
     kind: "split" | "maximize";
     label: string;
     shortcutLabel: string | null;
     onClick: () => void;
   } | null;
-  /** 切换线程操作 */
   changeThreadAction?: {
     label: string;
     onClick: () => void;
   } | null;
-  /** 运行项目脚本回调 */
   onRunProjectScript: (script: ProjectScript) => void;
-  /** 添加项目脚本回调 */
   onAddProjectScript: (input: NewProjectScriptInput) => Promise<void>;
-  /** 更新项目脚本回调 */
   onUpdateProjectScript: (scriptId: string, input: NewProjectScriptInput) => Promise<void>;
-  /** 删除项目脚本回调 */
   onDeleteProjectScript: (scriptId: string) => Promise<void>;
-  /** 切换终端回调 */
   onToggleTerminal: () => void;
-  /** 切换 Diff 面板回调 */
   onToggleDiff: () => void;
-  /** 切换浏览器回调 */
   onToggleBrowser: () => void;
-  /** 创建 Handoff 回调 */
   onCreateHandoff: (targetProvider: ProviderKind) => void;
-  /** 导航到指定线程回调 */
   onNavigateToThread: (threadId: ThreadId) => void;
-  /** 重命名线程回调 */
   onRenameThread: () => void;
-  /** 关闭线程面板回调 */
   onCloseThreadPane?: () => void;
 }
 
-/**
- * 聊天头部线程图标类型：无图标、提供者图标或终端图标
- */
 export type ChatHeaderThreadIconKind = "none" | "provider" | "terminal";
 
-/**
- * 根据线程入口类型和标题解析头部图标类型
- * @param entryPoint - 线程入口界面类型
- * @param title - 线程标题（可选）
- * @returns 图标类型
- */
 export function resolveChatHeaderThreadIconKind(
   entryPoint: ThreadPrimarySurface,
   title?: string,
@@ -172,11 +114,6 @@ export function resolveChatHeaderThreadIconKind(
   return entryPoint === "terminal" ? "terminal" : "provider";
 }
 
-/**
- * ChatHeader 组件
- * @description 聊天界面顶部栏，包含项目操作、面板切换、Git 操作、线程导航和 Handoff 等控制项。
- * 支持紧凑模式（宽度不足时自动折叠部分控件到菜单中）。
- */
 export const ChatHeader = memo(function ChatHeader({
   activeThreadId,
   activeThreadTitle,
@@ -452,7 +389,7 @@ export const ChatHeader = memo(function ChatHeader({
           </Tooltip>
         ) : null}
 
-        {/* Panel toggles menu — editor, terminal, browser, split chat. */}
+        {/* Panel toggles menu �?editor, terminal, browser, split chat. */}
         {!isDisposableThread &&
         (terminalAvailable ||
           activeProjectName ||

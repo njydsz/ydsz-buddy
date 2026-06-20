@@ -1,8 +1,6 @@
-/**
- * @file ChatView.selectors.ts
- * @description ChatView 的线程作用域选择器工厂，将选择器逻辑从组件热路径
- *              和渲染文件中分离，提供消息时间线和工作日志的选择器创建函数。
- */
+// FILE: ChatView.selectors.ts
+// Purpose: Keep ChatView's thread-scoped selectors off the component hot path and out of the render file.
+// Exports: lineage/work-log selector factories used by ChatView.
 
 import {
   type MessageId,

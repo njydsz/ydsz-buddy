@@ -9,24 +9,16 @@ import { type TimelineEntry, type WorkLogEntry } from "../../session-logic";
 import { normalizeCompactToolLabel as normalizeCompactToolLabelValue } from "../../lib/toolCallLabel";
 import { type ChatMessage, type ProposedPlan, type TurnDiffSummary } from "../../types";
 
-/** 工作日志条目的最大可见数量 */
 export const MAX_VISIBLE_WORK_LOG_ENTRIES = 6;
 
-/** 用于计算消息持续时间的时间线消息结构 */
 export interface TimelineDurationMessage {
-  /** 消息 ID */
   id: string;
-  /** 消息角色 */
   role: "user" | "assistant" | "system";
-  /** 消息创建时间 */
   createdAt: string;
-  /** 所属回合 ID */
   turnId?: string | null;
-  /** 消息完成时间 */
   completedAt?: string | undefined;
 }
 
-/** 消息时间线的行类型，包含工作日志、消息、提议计划和加载指示器 */
 export type MessagesTimelineRow =
   | {
       kind: "work";
@@ -57,19 +49,11 @@ export type MessagesTimelineRow =
     }
   | { kind: "working"; id: string; createdAt: string | null };
 
-/** 稳定化的消息时间线行状态，用于结构化共享优化 */
 export interface StableMessagesTimelineRowsState {
   byId: Map<string, MessagesTimelineRow>;
   result: MessagesTimelineRow[];
 }
 
-/**
- * 计算每条消息的持续时间起始点。
- * 用户消息的起始点为自身创建时间，助手消息的起始点为前一条用户消息的创建时间。
- *
- * @param messages - 时间线消息列表
- * @returns 消息 ID 到持续时间起始时间的映射
- */
 export function computeMessageDurationStart(
   messages: ReadonlyArray<TimelineDurationMessage>,
 ): Map<string, string> {
@@ -89,20 +73,10 @@ export function computeMessageDurationStart(
   return result;
 }
 
-/** 标准化工具调用的紧凑标签文本 */
 export function normalizeCompactToolLabel(value: string): string {
   return normalizeCompactToolLabelValue(value);
 }
 
-/**
- * 解析助手消息的复制按钮状态。
- * 仅在消息有内容、显示复制按钮且非流式传输时可见。
- *
- * @param text - 消息文本内容
- * @param showCopyButton - 是否应显示复制按钮
- * @param streaming - 是否正在流式传输
- * @returns 复制按钮的可见状态和标准化文本
- */
 export function resolveAssistantMessageCopyState({
   text,
   showCopyButton,
@@ -119,15 +93,10 @@ export function resolveAssistantMessageCopyState({
   };
 }
 
-/**
- * 构建"文件变更"查找表，以每个回合的最终助手消息 ID 为键。
- * 按 turnId 而非 summary.assistantMessageId 作用域化，防止在 ID 缺失、
- * 合成或重连时临时过期的情况下，turn-diff 占位符附加到错误的行。
- *
- * @param input.turnDiffSummaries - 回合差异摘要列表
- * @param input.assistantMessages - 助手消息列表
- * @returns 助手消息 ID 到回合差异摘要的映射
- */
+// Builds the "Files changed" lookup keyed by the terminal assistant message id
+// of each turn. Scoping by turnId (not by summary.assistantMessageId) prevents
+// turn-diff placeholders from attaching a card to the wrong row when ids are
+// missing, synthetic, or temporarily stale across reconnects.
 export function buildTurnDiffSummaryByAssistantMessageId(input: {
   turnDiffSummaries: ReadonlyArray<TurnDiffSummary>;
   assistantMessages: ReadonlyArray<{ id: MessageId; turnId: TurnId | null }>;
@@ -155,14 +124,6 @@ export function buildTurnDiffSummaryByAssistantMessageId(input: {
   return byMessageId;
 }
 
-/**
- * 推导每个回合中最终的助手消息 ID 集合。
- * 对于有 turnId 的回合，取该回合中最后一条助手消息；
- * 对于无 turnId 的回合，按序号分组取最后一条。
- *
- * @param messages - 时间线消息列表
- * @returns 最终助手消息 ID 的集合
- */
 export function deriveTerminalAssistantMessageIds(
   messages: ReadonlyArray<TimelineDurationMessage>,
 ): Set<string> {

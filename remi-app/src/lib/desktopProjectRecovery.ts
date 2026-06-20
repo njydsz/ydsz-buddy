@@ -1,24 +1,24 @@
 /**
- * @file 妗岄潰椤圭洰鎭㈠妫€娴嬫ā鍧? * @description 妫€娴嬫闈㈠惎鍔ㄥ揩鐓т腑鏄惁瀛樺湪闅愯棌椤圭洰浣嗙嚎绋嬭浠嶅瓨鍦ㄧ殑鎯呭喌銆? *              鐢ㄤ簬妗岄潰鍚姩淇璺緞鐨勫揩鐓у舰鐘跺畧鍗€? */
+ * @file 桌面项目恢复检测模�? * @description 检测桌面启动快照中是否存在隐藏项目但线程行仍存在的情况�? *              用于桌面启动修复路径的快照形状守卫�? */
 
 import type { OrchestrationReadModel, OrchestrationShellSnapshot } from "~/contracts";
 
-/** 椤圭洰鎭㈠蹇収绫诲瀷 */
+/** 项目恢复快照类型 */
 type ProjectRecoverySnapshot = OrchestrationReadModel | OrchestrationShellSnapshot;
 
 /**
- * 妫€娴嬫槸鍚﹀瓨鍦ㄦ椿璺冪嚎绋嬩絾缂哄皯瀵瑰簲椤圭洰鐨勬儏鍐? * @param snapshot - 椤圭洰鎭㈠蹇収
- * @returns 鏄惁瀛樺湪闇€瑕佹仮澶嶇殑椤圭洰
+ * 检测是否存在活跃线程但缺少对应项目的情�? * @param snapshot - 项目恢复快照
+ * @returns 是否存在需要恢复的项目
  */
 export function hasLiveThreadsWithMissingProjects(snapshot: ProjectRecoverySnapshot): boolean {
-  // 鏀堕泦鎵€鏈夋湭鍒犻櫎鐨勯」鐩?ID
+  // 收集所有未删除的项�?ID
   const liveProjectIds = new Set(
     snapshot.projects
       .filter((project) => !("deletedAt" in project) || project.deletedAt === null)
       .map((project) => project.id),
   );
 
-  // 妫€鏌ユ槸鍚︽湁娲昏穬绾跨▼寮曠敤浜嗕笉瀛樺湪鐨勯」鐩?  return snapshot.threads.some((thread) => {
+  // 检查是否有活跃线程引用了不存在的项�?  return snapshot.threads.some((thread) => {
     const isLiveThread = !("deletedAt" in thread) || thread.deletedAt === null;
     return isLiveThread && !liveProjectIds.has(thread.projectId);
   });

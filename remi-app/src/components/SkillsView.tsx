@@ -1,8 +1,9 @@
-/**
- * @file SkillsView.tsx
- * @description 技能浏览页面，默认展示用户本地技能（从 ~/.claude/skills 等目录扫描），
- *              并提供"浏览 skill.sh"入口以发现和安装新技能。
- */
+// FILE: SkillsView.tsx
+// Purpose: Skills browser. Defaults to the user's local skills (scanned from well-known
+//          home dirs like ~/.claude/skills, ~/.codex/skills, ~/.agents/skills) and surfaces
+//          a "Browse skill.sh" CTA so users can discover and install new skills.
+// Layer: Route-level screen
+// Exports: SkillsView
 
 import { useDeferredValue, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";

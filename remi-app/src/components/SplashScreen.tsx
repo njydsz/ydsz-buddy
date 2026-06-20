@@ -1,8 +1,6 @@
-/**
- * @file SplashScreen.tsx
- * @description 品牌启动画面组件，在应用路由或会话加载期间显示，
- *              支持错误消息展示和重试按钮。
- */
+// FILE: SplashScreen.tsx
+// Purpose: Render the branded startup face while the app is still booting a route or session.
+// Layer: Shared app loading presentation
 
 export function SplashScreen({
   errorMessage,

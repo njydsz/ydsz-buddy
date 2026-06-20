@@ -1,24 +1,14 @@
-/**
- * @file TerminalSearch.tsx
- * @description ç»ˆç«¯æœç´¢æ ç»„ä»¶ï¼ŒåŸºäºŽ xterm SearchAddon æä¾›æŸ¥æ‰¾ã€å¤§å°å†™åˆ‡æ¢ã€
- *              ä¸Š/ä¸‹ä¸€ä¸ªåŒ¹é…é¡¹å¯¼èˆªç­‰æœç´¢åŠŸèƒ½ã€‚ä½œä¸ºæµ®åŠ¨æœç´¢æ¡è¦†ç›–åœ¨ç»ˆç«¯è§†å£ä¸Šæ–¹ã€‚
- */
 import type { SearchAddon, ISearchOptions } from "@xterm/addon-search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-/** ç»ˆç«¯æœç´¢æ ç»„ä»¶å±žæ€§ */
 interface TerminalSearchProps {
-  /** xterm æœç´¢æ’ä»¶å®žä¾‹ï¼Œnull è¡¨ç¤ºæœç´¢åŠŸèƒ½ä¸å¯ç”¨ */
   searchAddon: SearchAddon | null;
-  /** æœç´¢æ æ˜¯å¦å¯è§ */
   isOpen: boolean;
-  /** å…³é—­æœç´¢æ çš„å›žè°ƒ */
   onClose: () => void;
 }
 
-/** æœç´¢ç»“æžœé«˜äº®è£…é¥°æ ·å¼é…ç½® */
 const SEARCH_DECORATIONS = {
   matchBackground: "#515c6a",
   matchBorder: "#74879f",
@@ -28,10 +18,6 @@ const SEARCH_DECORATIONS = {
   activeMatchColorOverviewRuler: "#ffd33d",
 } satisfies NonNullable<ISearchOptions["decorations"]>;
 
-/**
- * ç»ˆç«¯æœç´¢æ ç»„ä»¶
- * æä¾›æŸ¥æ‰¾è¾“å…¥ã€å¤§å°å†™åˆ‡æ¢ã€ä¸Š/ä¸‹ä¸€ä¸ªåŒ¹é…é¡¹å¯¼èˆªå’Œå…³é—­åŠŸèƒ½
- */
 export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -85,7 +71,7 @@ export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchP
   };
 
   // Re-run search when case sensitivity or search addon changes
-  // (but not on query change ï¿½?handleInputChange handles that).
+  // (but not on query change �?handleInputChange handles that).
   const prevCaseSensitiveRef = useRef(caseSensitive);
   const prevSearchAddonRef = useRef<SearchAddon | null>(searchAddon);
   useEffect(() => {

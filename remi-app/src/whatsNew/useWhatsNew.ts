@@ -1,11 +1,11 @@
-/**
- * @file "新增内容" React Hook
- * @description 驱动"新增内容"两阶段展示界面的 React Hook：
- *   1. 左下角的小浮窗卡片，宣传新版本。
- *   2. 包含发布说明的弹窗，仅在用户点击卡片时打开。
- * 将"已查看此版本"标记持久化到 localStorage，使浮窗关闭后不再出现。
- * @layer Hook 层——连接 `logic.ts`（纯规则）、更新日志数据和浮窗 + 弹窗组件
- */
+// FILE: whatsNew/useWhatsNew.ts
+// Purpose: React hook that drives the two-stage "What's new" surface:
+//   1. A small popout card (bottom-left) advertising the new release.
+//   2. A dialog with the release notes, opened only when the user taps the card.
+// Persists the "already seen this version" marker in localStorage so the popout
+// doesn't reappear after dismissal.
+// Layer: hook �?glue between `logic.ts` (pure rules), the changelog data, and
+// the popout + dialog components.
 
 import { Schema } from "effect";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -22,8 +22,9 @@ import {
 
 const WHATS_NEW_STORAGE_KEY = "remicode:whats-new:v1";
 
-// 使用 Schema.NullOr 的 Option<string> 保持磁盘上"从未查看"标记的显式性。
-// 省略该字段（undefined）在 JSON 往返中会丢失；`null` 在重载后保持不变。
+// Using an Option<string> via Schema.NullOr keeps the "never seen" sentinel
+// explicit on disk. Omitting the field (undefined) would round-trip poorly
+// through JSON; `null` stays faithful across reloads.
 const WhatsNewStorageSchema = Schema.Struct({
   lastSeenVersion: Schema.NullOr(Schema.String),
 });
@@ -31,48 +32,51 @@ type WhatsNewStorage = typeof WhatsNewStorageSchema.Type;
 
 const INITIAL_STORAGE: WhatsNewStorage = { lastSeenVersion: null };
 
-/** useWhatsNew Hook 返回结果 */
 export interface UseWhatsNewResult {
   /**
-   * 匹配当前安装版本的发布条目。`null` 表示"无需展示"——
-   * 静默引导或无操作。为 null 时，浮窗和弹窗均不应渲染。
+   * The release entry matching the installed build. `null` means "nothing
+   * to advertise" �?silent-bootstrap or noop. When null, neither popout nor
+   * dialog should render.
    */
   readonly currentEntry: WhatsNewEntry | null;
-  /** 完整的精选历史，按最新优先排序，用于更新日志视图 */
+  /** Full curated history, sorted newest-first, for the changelog view. */
   readonly allEntries: readonly WhatsNewEntry[];
-  /** 浮窗/弹窗正在宣传的版本号（当前安装版本） */
+  /** Version the popout / dialog is announcing (the installed build). */
   readonly currentVersion: string;
-  /** 是否应渲染左下角的"新增: ..."卡片 */
+  /** Whether the bottom-left "New: ..." card should be rendered. */
   readonly isPopoutVisible: boolean;
-  /** 是否应渲染更新后发布说明弹窗为打开状态 */
+  /** Whether the post-update release-notes dialog should be rendered open. */
   readonly isDialogOpen: boolean;
   /**
-   * 响应用户点击浮窗卡片而打开弹窗。此处不标记更新为已读——
-   * 确认卡片不等于确认说明。`onDialogOpenChange(false)` 处理标记已读。
+   * Open the dialog in response to the user tapping the popout card. We don't
+   * mark the update as seen here �?acknowledging the card is not the same as
+   * acknowledging the notes. `onDialogOpenChange(false)` handles that.
    */
   readonly openDialog: () => void;
   /**
-   * 通过 ✕ 按钮关闭浮窗。此操作标记版本为已读，且不再重新提示——
-   * 即使用户从未打开弹窗。与 IndieDevs 行为一致：点击 ✕ 表示"我不关心"。
+   * Dismiss the popout via its �?button. This marks the release as seen and
+   * never re-prompts �?even if the user never opens the dialog. Matches
+   * IndieDevs behaviour: hitting the X is a deliberate "I don't care".
    */
   readonly dismissPopout: () => void;
   /**
-   * 弹窗的关闭处理器（base-ui `onOpenChange(open)` 形式）。
-   * 弹窗关闭时，持久化已读标记并隐藏浮窗，避免用户刚操作过的卡片继续显示。
+   * Close handler for the dialog (base-ui `onOpenChange(open)` shape). When
+   * the dialog closes, persist the seen marker and hide the popout so the
+   * user isn't nagged by the card they just acted on.
    */
   readonly onDialogOpenChange: (open: boolean) => void;
 }
 
 /**
- * "新增内容"更新后展示界面的驱动 Hook
+ * Drives the "What's new" post-update surface.
  *
- * @description 行为摘要（参见 `resolveWhatsNewState` 了解规则）：
- *   - 首次启动——静默记录当前版本，不显示浮窗。
- *   - 用户已是最新（或版本超前）——不显示浮窗。
- *   - 用户升级且有精选说明——显示浮窗卡片。
- *   - 用户升级但无精选说明——静默推进标记。
+ * Behaviour summary (see `resolveWhatsNewState` for the rules):
+ *   - First launch �?silently record the current version, no popout.
+ *   - User already on the latest (or somehow ahead) �?no popout.
+ *   - User upgraded and there are curated notes �?show the popout card.
+ *   - User upgraded but no curated notes exist �?silently advance the marker.
  *
- * 弹窗从不自动打开——仅通过点击浮窗卡片触发。
+ * The dialog is never opened automatically �?only via the popout card click.
  */
 export function useWhatsNew(options?: {
   readonly entries?: readonly WhatsNewEntry[];
@@ -87,8 +91,9 @@ export function useWhatsNew(options?: {
     WhatsNewStorageSchema,
   );
 
-  // 在每次挂载时使用初始存储值快照决策，使更新 localStorage
-  // （如确认弹窗）不会在动画仍在运行时翻转 UI。
+  // Snapshot the decision once per mount using the initial storage value so
+  // that updating localStorage (e.g. acknowledging the dialog) doesn't flip
+  // the UI back and forth while animations are still running.
   const initialStorageRef = useRef(storage);
   const initialState = useMemo<WhatsNewState>(
     () =>
@@ -100,12 +105,13 @@ export function useWhatsNew(options?: {
     [entries, currentVersion],
   );
 
-  // 浮窗仅在有内容展示时开始可见
+  // The popout starts visible only when we actually have something to show.
   const [isPopoutVisible, setIsPopoutVisible] = useState(initialState.kind === "show");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // 静默引导（首次启动或本次升级无精选说明）：
-  // 在后台推进标记，使下次升级能正确检测。在 effect 中执行，确保每次挂载仅触及存储一次。
+  // Silent bootstrap (first launch or no curated notes for this upgrade):
+  // advance the marker in the background so the next upgrade is correctly
+  // detected. Done in an effect so we only touch storage once per mount.
   useEffect(() => {
     if (initialState.kind === "silent-bootstrap") {
       setStorage({ lastSeenVersion: initialState.nextLastSeenVersion });
@@ -129,13 +135,14 @@ export function useWhatsNew(options?: {
   }, [initialState, setStorage]);
 
   const openDialog = useCallback(() => {
-    // 仅打开弹窗。用户即将阅读说明——暂不标记已读；
-    // 标记在弹窗关闭时执行。
+    // Just open the dialog. The user is about to read the notes �?don't mark
+    // as seen yet; that happens on dialog close.
     setIsDialogOpen(true);
   }, []);
 
   const dismissPopout = useCallback(() => {
-    // 卡片上的 ✕：视为"我已确认此更新"。标记已读并永久隐藏浮窗（此版本内）。
+    // X on the card: treat as "I've acknowledged this update". Mark as seen
+    // and hide the popout forever (for this version).
     setIsPopoutVisible(false);
     markSeen();
   }, [markSeen]);
@@ -144,8 +151,9 @@ export function useWhatsNew(options?: {
     (open: boolean) => {
       setIsDialogOpen(open);
       if (!open) {
-        // 关闭弹窗 = 已读完说明。同时隐藏浮窗，
-        // 避免用户已明确操作后"点击查看"提示继续残留。
+        // Dismissing the dialog = finished reading the notes. Hide the
+        // popout too so we don't leave the "click me" affordance lingering
+        // after the user clearly engaged.
         setIsPopoutVisible(false);
         markSeen();
       }

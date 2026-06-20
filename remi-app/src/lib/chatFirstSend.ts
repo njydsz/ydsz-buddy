@@ -1,5 +1,5 @@
 /**
- * @file 鑱婂ぉ棣栨鍙戦€佺洰鏍囪В鏋愭ā鍧? * @description 瑙ｆ瀽棣栨娑堟伅鍙戦€佹椂鐨勭洰鏍囬」鐩紝鏀寔褰撳墠椤圭洰銆佸凡鏈夐」鐩垨鍒涘缓鏂伴」鐩笁绉嶅満鏅€? */
+ * @file 聊天首次发送目标解析模�? * @description 解析首次消息发送时的目标项目，支持当前项目、已有项目或创建新项目三种场景�? */
 
 import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "~/contracts";
 import { workspaceRootsEqual } from "~/shared/threadWorkspace";
@@ -7,45 +7,45 @@ import { workspaceRootsEqual } from "~/shared/threadWorkspace";
 import type { Project } from "../types";
 
 /**
- * 棣栨鍙戦€佺殑椤圭洰鐩爣鎺ュ彛
+ * 首次发送的项目目标接口
  */
 export interface FirstSendProjectTarget {
-  /** 鐩爣椤圭洰 ID */
+  /** 目标项目 ID */
   targetProjectId: Project["id"];
-  /** 鐩爣椤圭洰绫诲瀷 */
+  /** 目标项目类型 */
   targetProjectKind: Project["kind"];
-  /** 鐩爣椤圭洰宸ヤ綔鐩綍 */
+  /** 目标项目工作目录 */
   targetProjectCwd: string;
-  /** 鐩爣椤圭洰鑴氭湰鍒楄〃 */
+  /** 目标项目脚本列表 */
   targetProjectScripts: Project["scripts"];
-  /** 鐩爣椤圭洰榛樿妯″瀷閫夋嫨 */
+  /** 目标项目默认模型选择 */
   targetProjectDefaultModelSelection: ModelSelection | null;
 }
 
 /**
- * 棣栨鍙戦€佹椂鍒涘缓鏂伴」鐩殑鍙傛暟鎺ュ彛
+ * 首次发送时创建新项目的参数接口
  */
 export interface FirstSendProjectCreation {
-  /** 宸ヤ綔鍖烘牴鐩綍 */
+  /** 工作区根目录 */
   workspaceRoot: string;
-  /** 椤圭洰鏍囬 */
+  /** 项目标题 */
   title: string;
-  /** 榛樿妯″瀷閫夋嫨 */
+  /** 默认模型选择 */
   defaultModelSelection: ModelSelection;
 }
 
 /**
- * 棣栨鍙戦€佺洰鏍囪В鏋愮粨鏋滅被鍨? * - "current": 浣跨敤褰撳墠娲昏穬椤圭洰
- * - "existing-project": 浣跨敤宸叉湁椤圭洰
- * - "create-project": 鍒涘缓鏂伴」鐩? */
+ * 首次发送目标解析结果类�? * - "current": 使用当前活跃项目
+ * - "existing-project": 使用已有项目
+ * - "create-project": 创建新项�? */
 export type FirstSendTargetResolution =
   | { kind: "current"; target: FirstSendProjectTarget }
   | { kind: "existing-project"; target: FirstSendProjectTarget }
   | { kind: "create-project"; creation: FirstSendProjectCreation };
 
 /**
- * 浠庨」鐩璞℃瀯寤洪」鐩洰鏍囷紙鍐呴儴鍑芥暟锛? * @param project - 椤圭洰瀵硅薄
- * @returns 椤圭洰鐩爣瀵硅薄
+ * 从项目对象构建项目目标（内部函数�? * @param project - 项目对象
+ * @returns 项目目标对象
  */
 function buildProjectTarget(project: Project): FirstSendProjectTarget {
   return {
@@ -58,18 +58,18 @@ function buildProjectTarget(project: Project): FirstSendProjectTarget {
 }
 
 /**
- * 浠庡伐浣滃尯鏍圭洰褰曟瀯寤洪」鐩爣棰橈紙鍐呴儴鍑芥暟锛? * @param workspaceRoot - 宸ヤ綔鍖烘牴鐩綍璺緞
- * @returns 椤圭洰鏍囬锛堝彇璺緞鏈€鍚庝竴娈碉級
+ * 从工作区根目录构建项目标题（内部函数�? * @param workspaceRoot - 工作区根目录路径
+ * @returns 项目标题（取路径最后一段）
  */
 function buildProjectTitleFromWorkspaceRoot(workspaceRoot: string): string {
   return workspaceRoot.split(/[/\\]/).findLast((segment) => segment.length > 0) ?? workspaceRoot;
 }
 
 /**
- * 瑙ｆ瀽棣栨鍙戦€佺殑鐩爣椤圭洰
- * @param input - 杈撳叆鍙傛暟
- * @param input.activeProject - 褰撳墠娲昏穬椤圭洰
- * @param input.isFirstMessage - 鏄惁涓洪娆℃秷鎭? * @param input.isHomeChatContainer - 鏄惁鍦ㄤ富椤佃亰澶╁鍣? * @param input.projects - 鎵€鏈夐」鐩垪琛? * @param input.selectedWorkspaceRoot - 閫変腑鐨勫伐浣滃尯鏍圭洰褰? * @returns 棣栨鍙戦€佺洰鏍囪В鏋愮粨鏋? */
+ * 解析首次发送的目标项目
+ * @param input - 输入参数
+ * @param input.activeProject - 当前活跃项目
+ * @param input.isFirstMessage - 是否为首次消�? * @param input.isHomeChatContainer - 是否在主页聊天容�? * @param input.projects - 所有项目列�? * @param input.selectedWorkspaceRoot - 选中的工作区根目�? * @returns 首次发送目标解析结�? */
 export function resolveFirstSendTarget(input: {
   activeProject: Project;
   isFirstMessage: boolean;
@@ -80,7 +80,7 @@ export function resolveFirstSendTarget(input: {
   const { activeProject, isFirstMessage, isHomeChatContainer, projects, selectedWorkspaceRoot } =
     input;
 
-  // 濡傛灉涓嶆槸棣栨娑堟伅鎴栦笉鍦ㄤ富椤佃亰澶╁鍣紝鐩存帴浣跨敤褰撳墠椤圭洰
+  // 如果不是首次消息或不在主页聊天容器，直接使用当前项目
   if (!isFirstMessage || !isHomeChatContainer || !selectedWorkspaceRoot) {
     return {
       kind: "current",
@@ -88,7 +88,7 @@ export function resolveFirstSendTarget(input: {
     };
   }
 
-  // 鏌ユ壘鏄惁宸插瓨鍦ㄥ尮閰嶇殑椤圭洰
+  // 查找是否已存在匹配的项目
   const existingProject = projects.find(
     (project) =>
       project.kind === "project" && workspaceRootsEqual(project.cwd, selectedWorkspaceRoot),
@@ -100,7 +100,7 @@ export function resolveFirstSendTarget(input: {
     };
   }
 
-  // 闇€瑕佸垱寤烘柊椤圭洰
+  // 需要创建新项目
   return {
     kind: "create-project",
     creation: {

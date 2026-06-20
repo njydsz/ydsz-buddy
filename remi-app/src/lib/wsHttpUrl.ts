@@ -7,7 +7,7 @@
 // Build a fully-qualified HTTP URL for `rawPath` against the same server the WS connection uses.
 // On desktop the page is served from a custom protocol scheme, so <img>/<a download> with a
 // relative path never reaches the server. We mirror the WS host and forward the legacy token
-// query param so authenticated GET routes (attachments, local-image, ï¿½? can authorize the
+// query param so authenticated GET routes (attachments, local-image, �? can authorize the
 // request without touching cookies.
 import { tauriBridge } from "./tauri-bridge";
 

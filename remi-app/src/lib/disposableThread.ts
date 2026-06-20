@@ -1,16 +1,16 @@
 /**
- * @file 鍙缃嚎绋嬬鐞嗘ā鍧? * @description 闅旂涓存椂绾跨▼鐨勮嚜鍔ㄥ缃喅绛栦笌璺敱鐢熷懡鍛ㄦ湡鏁堟灉銆? *              鎻愪緵鍩轰簬鍒囨崲鎰熺煡鐨勫彲澶勭疆绾跨▼娓呯悊瑙ｆ瀽鍣ㄣ€? */
+ * @file 可处置线程管理模�? * @description 隔离临时线程的自动处置决策与路由生命周期效果�? *              提供基于切换感知的可处置线程清理解析器�? */
 
 import type { ThreadId } from "~/contracts";
 import type { DraftThreadState } from "../composerDraftStore";
 
 /**
- * 瑙ｆ瀽闇€瑕佸缃殑涓存椂绾跨▼ ID
- * @param input - 杈撳叆鍙傛暟
- * @param input.previousThreadId - 涓婁竴涓嚎绋?ID
- * @param input.nextThreadId - 涓嬩竴涓嚎绋?ID
- * @param input.previousThreadWasTemporary - 涓婁竴涓嚎绋嬫槸鍚︿负涓存椂绾跨▼
- * @param input.draftThreadsByThreadId - 鎸夌嚎绋?ID 绱㈠紩鐨勮崏绋跨嚎绋嬬姸鎬? * @returns 闇€瑕佸缃殑绾跨▼ ID锛屽鏋滄棤闇€澶勭疆鍒欒繑鍥?null
+ * 解析需要处置的临时线程 ID
+ * @param input - 输入参数
+ * @param input.previousThreadId - 上一个线�?ID
+ * @param input.nextThreadId - 下一个线�?ID
+ * @param input.previousThreadWasTemporary - 上一个线程是否为临时线程
+ * @param input.draftThreadsByThreadId - 按线�?ID 索引的草稿线程状�? * @returns 需要处置的线程 ID，如果无需处置则返�?null
  */
 export function resolveDisposableThreadIdToDispose(input: {
   previousThreadId: ThreadId | null;
@@ -19,12 +19,12 @@ export function resolveDisposableThreadIdToDispose(input: {
   draftThreadsByThreadId: Record<string, DraftThreadState | undefined>;
 }): ThreadId | null {
   const previousThreadId = input.previousThreadId;
-  // 濡傛灉娌℃湁涓婁竴涓嚎绋嬫垨绾跨▼鏈敼鍙橈紝鍒欐棤闇€澶勭疆
+  // 如果没有上一个线程或线程未改变，则无需处置
   if (!previousThreadId || previousThreadId === input.nextThreadId) {
     return null;
   }
   const previousDraftThread = input.draftThreadsByThreadId[previousThreadId];
-  // 浠呭綋涓婁竴涓嚎绋嬫槸涓存椂绾跨▼鏃舵墠杩斿洖澶勭疆
+  // 仅当上一个线程是临时线程时才返回处置
   if (input.previousThreadWasTemporary !== true && previousDraftThread?.isTemporary !== true) {
     return null;
   }

@@ -1,13 +1,12 @@
-/**
- * @file PickerPanelShell.tsx
- * @description 选择器面板外壳，为聊天界面中的组合框式选择器提供统一的搜索栏和内容区域布局。
- */
+// FILE: PickerPanelShell.tsx
+// Purpose: Share the visual shell used by combobox-style pickers in chat surfaces.
+// Layer: Chat picker UI
+// Depends on: shared input styling plus caller-provided content slots.
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
 
-/** 菜单导航按键集合，搜索框中这些按键不会被阻止传播 */
 const MENU_NAVIGATION_KEYS = new Set([
   "ArrowDown",
   "ArrowUp",
@@ -19,19 +18,6 @@ const MENU_NAVIGATION_KEYS = new Set([
   "Escape",
 ]);
 
-/**
- * PickerPanelShell 组件
- * @description 选择器面板外壳，提供搜索栏、内容区域和可选的底部区域
- * @param props.searchPlaceholder - 搜索框占位文本
- * @param props.query - 当前搜索关键词
- * @param props.onQueryChange - 搜索关键词变更回调
- * @param props.stopSearchKeyPropagation - 是否阻止搜索框中非导航按键的传播
- * @param props.autoFocusSearch - 是否自动聚焦搜索框
- * @param props.children - 面板内容
- * @param props.footer - 面板底部内容
- * @param props.widthClassName - 面板宽度类名
- * @param props.bleedParentPadding - 是否消除父级内边距
- */
 export function PickerPanelShell(props: {
   searchPlaceholder?: string;
   query?: string;

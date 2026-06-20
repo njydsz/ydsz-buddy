@@ -1,9 +1,3 @@
-/**
- * @file ComposerSlashStatusDialog
- * @description 编辑器会话状态对话框，展示当前会话的运行时控件和线程状态，
- *              包括模型、快速模式、推理力度、环境、分支、上下文窗口和速率限制等信息。
- */
-
 import type { ResolvedThreadWorkspaceState } from "~/shared/threadEnvironment";
 import type { ProviderInteractionMode } from "~/contracts";
 import type { DraftThreadEnvMode } from "../../composerDraftStore";
@@ -25,12 +19,6 @@ import {
 } from "../ui/dialog";
 import { ContextWindowMeter } from "./ContextWindowMeter";
 
-/**
- * 格式化速率限制状态为可读消息。
- *
- * @param rateLimitStatus - 速率限制状态
- * @returns 格式化后的消息文本
- */
 function formatRateLimitMessage(rateLimitStatus: RateLimitStatus): string {
   const resetSuffix = rateLimitStatus.resetsAt
     ? ` Resets at ${new Date(rateLimitStatus.resetsAt).toLocaleTimeString()}.`
@@ -45,13 +33,6 @@ function formatRateLimitMessage(rateLimitStatus: RateLimitStatus): string {
   return `Approaching rate limit${utilizationSuffix}.${resetSuffix}`;
 }
 
-/**
- * 格式化环境模式标签。
- *
- * @param envMode - 环境模式（本地或工作树）
- * @param envState - 已解析的线程工作区状态
- * @returns 环境标签文本
- */
 function formatEnvironmentLabel(
   envMode: DraftThreadEnvMode,
   envState: ResolvedThreadWorkspaceState,
@@ -62,25 +43,6 @@ function formatEnvironmentLabel(
   return envState === "worktree-pending" ? "New worktree (pending)" : "Worktree";
 }
 
-/**
- * 编辑器会话状态对话框组件。
- * 展示当前会话的模型配置、环境状态、上下文窗口使用量和速率限制等信息。
- *
- * @param props.open - 对话框打开状态
- * @param props.onOpenChange - 对话框打开状态变更回调
- * @param props.selectedModel - 当前选中的模型
- * @param props.fastModeEnabled - 是否启用快速模式
- * @param props.selectedPromptEffort - 当前推理力度
- * @param props.interactionMode - 交互模式
- * @param props.envMode - 环境模式
- * @param props.envState - 环境状态
- * @param props.branch - 当前分支
- * @param props.contextWindow - 上下文窗口快照
- * @param props.cumulativeCostUsd - 累计费用（美元）
- * @param props.rateLimitStatus - 速率限制状态
- * @param props.activeContextWindowLabel - 活跃上下文窗口标签
- * @param props.pendingContextWindowLabel - 待定上下文窗口标签
- */
 export function ComposerSlashStatusDialog(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;

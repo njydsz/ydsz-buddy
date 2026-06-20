@@ -1,8 +1,3 @@
-/**
- * @file autocomplete
- * @description 自动补全组件，基于 Base UI Autocomplete 原语封装，
- * 提供输入框、弹出面板、选项列表等子组件，支持分组、筛选和清除等功能。
- */
 "use client";
 
 import { Autocomplete as AutocompletePrimitive } from "@base-ui/react/autocomplete";
@@ -12,10 +7,8 @@ import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 
-/** 自动补全根组件 */
 const Autocomplete = AutocompletePrimitive.Root;
 
-/** 自动补全输入框，支持前缀装饰、触发按钮和清除按钮 */
 function AutocompleteInput({
   className,
   showTrigger = false,
@@ -82,7 +75,6 @@ function AutocompleteInput({
   );
 }
 
-/** 自动补全弹出面板 */
 function AutocompletePopup({
   className,
   children,
@@ -129,7 +121,6 @@ function AutocompletePopup({
   );
 }
 
-/** 自动补全选项条目 */
 function AutocompleteItem({ className, children, ...props }: AutocompletePrimitive.Item.Props) {
   return (
     <AutocompletePrimitive.Item
@@ -145,7 +136,6 @@ function AutocompleteItem({ className, children, ...props }: AutocompletePrimiti
   );
 }
 
-/** 自动补全分隔线 */
 function AutocompleteSeparator({ className, ...props }: AutocompletePrimitive.Separator.Props) {
   return (
     <AutocompletePrimitive.Separator
@@ -156,7 +146,6 @@ function AutocompleteSeparator({ className, ...props }: AutocompletePrimitive.Se
   );
 }
 
-/** 自动补全分组 */
 function AutocompleteGroup({ className, ...props }: AutocompletePrimitive.Group.Props) {
   return (
     <AutocompletePrimitive.Group
@@ -167,7 +156,6 @@ function AutocompleteGroup({ className, ...props }: AutocompletePrimitive.Group.
   );
 }
 
-/** 自动补全分组标签 */
 function AutocompleteGroupLabel({ className, ...props }: AutocompletePrimitive.GroupLabel.Props) {
   return (
     <AutocompletePrimitive.GroupLabel
@@ -178,7 +166,6 @@ function AutocompleteGroupLabel({ className, ...props }: AutocompletePrimitive.G
   );
 }
 
-/** 自动补全空状态提示 */
 function AutocompleteEmpty({ className, ...props }: AutocompletePrimitive.Empty.Props) {
   return (
     <AutocompletePrimitive.Empty
@@ -192,19 +179,16 @@ function AutocompleteEmpty({ className, ...props }: AutocompletePrimitive.Empty.
   );
 }
 
-/** 自动补全行容器 */
 function AutocompleteRow({ className, ...props }: AutocompletePrimitive.Row.Props) {
   return (
     <AutocompletePrimitive.Row className={className} data-slot="autocomplete-row" {...props} />
   );
 }
 
-/** 自动补全值显示 */
 function AutocompleteValue({ ...props }: AutocompletePrimitive.Value.Props) {
   return <AutocompletePrimitive.Value data-slot="autocomplete-value" {...props} />;
 }
 
-/** 自动补全选项列表，带滚动区域 */
 function AutocompleteList({ className, ...props }: AutocompletePrimitive.List.Props) {
   return (
     <ScrollArea scrollbarGutter scrollFade>
@@ -217,7 +201,6 @@ function AutocompleteList({ className, ...props }: AutocompletePrimitive.List.Pr
   );
 }
 
-/** 自动补全清除按钮 */
 function AutocompleteClear({ className, ...props }: AutocompletePrimitive.Clear.Props) {
   return (
     <AutocompletePrimitive.Clear
@@ -233,7 +216,6 @@ function AutocompleteClear({ className, ...props }: AutocompletePrimitive.Clear.
   );
 }
 
-/** 自动补全状态提示 */
 function AutocompleteStatus({ className, ...props }: AutocompletePrimitive.Status.Props) {
   return (
     <AutocompletePrimitive.Status
@@ -247,12 +229,10 @@ function AutocompleteStatus({ className, ...props }: AutocompletePrimitive.Statu
   );
 }
 
-/** 自动补全集合容器 */
 function AutocompleteCollection({ ...props }: AutocompletePrimitive.Collection.Props) {
   return <AutocompletePrimitive.Collection data-slot="autocomplete-collection" {...props} />;
 }
 
-/** 自动补全触发按钮 */
 function AutocompleteTrigger({
   className,
   children,
@@ -269,7 +249,6 @@ function AutocompleteTrigger({
   );
 }
 
-/** 自动补全筛选钩子 */
 const useAutocompleteFilter = AutocompletePrimitive.useFilter;
 
 export {

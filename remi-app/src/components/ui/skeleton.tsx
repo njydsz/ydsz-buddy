@@ -1,10 +1,5 @@
-/** @file skeleton
- * @description 骨架屏组件，用于内容加载时展示占位动画效果。
- */
-
 import { cn } from "~/lib/utils";
 
-/** 骨架屏组件 */
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

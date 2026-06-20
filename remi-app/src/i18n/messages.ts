@@ -3178,18 +3178,7 @@ const zh: Messages = {
   },
 };
 
-/**
- * 按语言索引的翻译消息映射表。
- * 键为语言标识（`Language`），值为对应语言的完整翻译消息对象。
- * 由 `I18nProvider` 根据当前语言设置从中选取对应的翻译内容。
- */
 export const MESSAGES: Record<Language, Messages> = { en, zh };
-
-/**
- * 各语言的母语名称标签映射。
- * 用于语言选择器中展示语言的本地化名称（如 "English"、"中文"），
- * 确保用户能以该语言本身的写法识别语言选项。
- */
 export const NATIVE_LANGUAGE_LABELS: Record<Language, string> = {
   en: "English",
   zh: "中文",

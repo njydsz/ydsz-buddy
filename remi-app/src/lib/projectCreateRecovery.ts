@@ -1,54 +1,54 @@
 /**
  * @file projectCreateRecovery.ts
- * @description 闆嗕腑澶勭悊 project.create 閲嶅閿欒鐨勮В鏋愪笌鎭㈠閫昏緫銆? * 鎻愪緵閲嶅鍒涘缓閿欒妫€娴嬨€侀」鐩?ID 鎻愬彇銆佸揩鐓у尮閰嶅強閲嶈瘯绛夊緟绛夋仮澶嶅伐鍏峰嚱鏁般€? */
+ * @description 集中处理 project.create 重复错误的解析与恢复逻辑�? * 提供重复创建错误检测、项�?ID 提取、快照匹配及重试等待等恢复工具函数�? */
 
 import type { OrchestrationReadModel } from "~/contracts";
 import { workspaceRootsEqual } from "~/shared/threadWorkspace";
 
-/** 閲嶅椤圭洰鍒涘缓閿欒娑堟伅鐨勫墠缂€ */
+/** 重复项目创建错误消息的前缀 */
 const DUPLICATE_PROJECT_CREATE_ERROR_PREFIX =
   "Orchestration command invariant failed (project.create): Project '";
-/** 榛樿鏈€澶ф仮澶嶉噸璇曟鏁?*/
+/** 默认最大恢复重试次�?*/
 const DEFAULT_RECOVERY_MAX_ATTEMPTS = 6;
-/** 榛樿閲嶈瘯闂撮殧锛堟绉掞級 */
+/** 默认重试间隔（毫秒） */
 const DEFAULT_RECOVERY_DELAY_MS = 50;
 
-/** 鍙仮澶嶇殑椤圭洰鍊欓€夊璞★紝鍖呭惈 ID銆佺被鍨嬨€佸伐浣滃尯鏍硅矾寰勫強鍒犻櫎鏃堕棿 */
+/** 可恢复的项目候选对象，包含 ID、类型、工作区根路径及删除时间 */
 export interface DuplicateProjectCreateRecoveryCandidate {
-  /** 椤圭洰 ID */
+  /** 项目 ID */
   readonly id: string;
-  /** 椤圭洰绫诲瀷锛岄粯璁や负 "project" */
+  /** 项目类型，默认为 "project" */
   readonly kind?: string | undefined;
-  /** 宸ヤ綔鍖烘牴璺緞 */
+  /** 工作区根路径 */
   readonly workspaceRoot: string;
-  /** 椤圭洰鍒犻櫎鏃堕棿锛屾湭鍒犻櫎鍒欎负 null */
+  /** 项目删除时间，未删除则为 null */
   readonly deletedAt?: string | null | undefined;
 }
 
-/** 鍖呭惈椤圭洰鍒楄〃鐨勫揩鐓х粨鏋?*/
+/** 包含项目列表的快照结�?*/
 interface SnapshotWithProjects<T extends DuplicateProjectCreateRecoveryCandidate> {
   readonly projects: readonly T[];
 }
 
-/** 椤圭洰鏌ユ壘杈撳叆鍙傛暟 */
+/** 项目查找输入参数 */
 interface ProjectLookupInput {
-  /** 椤圭洰 ID */
+  /** 项目 ID */
   readonly projectId?: string | null | undefined;
-  /** 宸ヤ綔鍖烘牴璺緞 */
+  /** 工作区根路径 */
   readonly workspaceRoot?: string | null | undefined;
 }
 
-/** 鍒ゆ柇椤圭洰绫诲瀷鏄惁鍙仮澶嶏紙浠?"project" 绫诲瀷鍙仮澶嶏級 */
+/** 判断项目类型是否可恢复（�?"project" 类型可恢复） */
 function isRecoverableProjectKind(kind: string | undefined): boolean {
   return (kind ?? "project") === "project";
 }
 
-/** 鍒ゆ柇椤圭洰鏄惁涓哄彲鎭㈠鐨勬椿璺冮」鐩紙鏈垹闄や笖绫诲瀷鍙仮澶嶏級 */
+/** 判断项目是否为可恢复的活跃项目（未删除且类型可恢复） */
 function isRecoverableActiveProject(project: DuplicateProjectCreateRecoveryCandidate): boolean {
   return (project.deletedAt ?? null) === null && isRecoverableProjectKind(project.kind);
 }
 
-/** 绛夊緟鎸囧畾姣鏁?*/
+/** 等待指定毫秒�?*/
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -56,8 +56,8 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * 鍒ゆ柇閿欒娑堟伅鏄惁涓洪噸澶嶉」鐩垱寤洪敊璇? *
- * @param message - 閿欒娑堟伅瀛楃涓? * @returns 鏄惁涓洪噸澶嶉」鐩垱寤洪敊璇? */
+ * 判断错误消息是否为重复项目创建错�? *
+ * @param message - 错误消息字符�? * @returns 是否为重复项目创建错�? */
 export function isDuplicateProjectCreateError(message: string): boolean {
   if (!message.startsWith(DUPLICATE_PROJECT_CREATE_ERROR_PREFIX)) {
     return false;
@@ -68,9 +68,9 @@ export function isDuplicateProjectCreateError(message: string): boolean {
 }
 
 /**
- * 浠庨噸澶嶉」鐩垱寤洪敊璇秷鎭腑鎻愬彇椤圭洰 ID
+ * 从重复项目创建错误消息中提取项目 ID
  *
- * @param message - 閿欒娑堟伅瀛楃涓? * @returns 鎻愬彇鍒扮殑椤圭洰 ID锛岃嫢娑堟伅鏍煎紡涓嶅尮閰嶅垯杩斿洖 null
+ * @param message - 错误消息字符�? * @returns 提取到的项目 ID，若消息格式不匹配则返回 null
  */
 export function extractDuplicateProjectCreateProjectId(message: string): string | null {
   if (!isDuplicateProjectCreateError(message)) {
@@ -82,12 +82,12 @@ export function extractDuplicateProjectCreateProjectId(message: string): string 
 }
 
 /**
- * 鍦ㄩ」鐩垪琛ㄤ腑鏌ユ壘鍙仮澶嶇殑娲昏穬椤圭洰
+ * 在项目列表中查找可恢复的活跃项目
  *
- * @typeParam T - 椤圭洰鍊欓€夌被鍨? * @param input - 鏌ユ壘杈撳叆锛屽寘鍚」鐩垪琛ㄥ強鍙€夌殑 projectId/workspaceRoot
- * @returns 鍖归厤鍒扮殑椤圭洰锛岃嫢鏈壘鍒板垯杩斿洖 null
+ * @typeParam T - 项目候选类�? * @param input - 查找输入，包含项目列表及可选的 projectId/workspaceRoot
+ * @returns 匹配到的项目，若未找到则返回 null
  *
- * @remarks 浼樺厛鎸?projectId 绮剧‘鍖归厤锛屽叾娆℃寜 workspaceRoot 妯＄硦鍖归厤
+ * @remarks 优先�?projectId 精确匹配，其次按 workspaceRoot 模糊匹配
  */
 export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryCandidate>(
   input: ProjectLookupInput & {
@@ -118,11 +118,11 @@ export function findRecoverableProject<T extends DuplicateProjectCreateRecoveryC
 }
 
 /**
- * 浠庨噸澶嶅垱寤洪敊璇秷鎭腑鏌ユ壘鍙仮澶嶇殑椤圭洰
+ * 从重复创建错误消息中查找可恢复的项目
  *
- * @typeParam T - 椤圭洰鍊欓€夌被鍨? * @param input - 鍖呭惈閿欒娑堟伅銆侀」鐩垪琛ㄥ拰宸ヤ綔鍖烘牴璺緞鐨勮緭鍏? * @returns 鍖归厤鍒扮殑鍙仮澶嶉」鐩紝鑻ユ湭鎵惧埌鍒欒繑鍥?null
+ * @typeParam T - 项目候选类�? * @param input - 包含错误消息、项目列表和工作区根路径的输�? * @returns 匹配到的可恢复项目，若未找到则返�?null
  *
- * @remarks 浼樺厛浣跨敤閿欒娑堟伅涓彁鍙栫殑閲嶅椤圭洰 ID锛屽洖閫€鍒板伐浣滃尯鏍硅矾寰勫尮閰? */
+ * @remarks 优先使用错误消息中提取的重复项目 ID，回退到工作区根路径匹�? */
 export function findRecoverableProjectForDuplicateCreate<
   T extends DuplicateProjectCreateRecoveryCandidate,
 >(input: {
@@ -142,12 +142,12 @@ export function findRecoverableProjectForDuplicateCreate<
 }
 
 /**
- * 鍦ㄨ妯″瀷涓疆璇㈢瓑寰呭彲鎭㈠鐨勯」鐩嚭鐜? *
- * @typeParam TSnapshot - 蹇収绫诲瀷锛岄渶鍖呭惈 projects 鏁扮粍
- * @param input - 鍖呭惈蹇収鍔犺浇鍑芥暟銆佹煡鎵惧弬鏁板強鍙€夌殑閲嶈瘯/淇閰嶇疆
- * @returns 鎵惧埌鐨勯」鐩強鏈€鏂板揩鐓э紝鑻ヨ秴鏃舵湭鎵惧埌鍒欓」鐩负 null
+ * 在读模型中轮询等待可恢复的项目出�? *
+ * @typeParam TSnapshot - 快照类型，需包含 projects 数组
+ * @param input - 包含快照加载函数、查找参数及可选的重试/修复配置
+ * @returns 找到的项目及最新快照，若超时未找到则项目为 null
  *
- * @remarks 鍏堣繘琛屾湁闄愭閲嶈瘯杞锛岃嫢浠嶅け璐ュ垯灏濊瘯璋冪敤 repairSnapshot 淇蹇収鍚庡啀娆℃煡鎵? */
+ * @remarks 先进行有限次重试轮询，若仍失败则尝试调用 repairSnapshot 修复快照后再次查�? */
 export async function waitForRecoverableProjectInReadModel<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate> =
     OrchestrationReadModel,
@@ -210,12 +210,12 @@ export async function waitForRecoverableProjectInReadModel<
 }
 
 /**
- * 閽堝閲嶅椤圭洰鍒涘缓閿欒锛岃疆璇㈢瓑寰呭彲鎭㈠鐨勯」鐩嚭鐜? *
- * @typeParam TSnapshot - 蹇収绫诲瀷锛岄渶鍖呭惈 projects 鏁扮粍
- * @param input - 鍖呭惈閿欒娑堟伅銆佸伐浣滃尯鏍硅矾寰勩€佸揩鐓у姞杞藉嚱鏁板強鍙€夌殑閲嶈瘯/淇閰嶇疆
- * @returns 鎵惧埌鐨勯」鐩強鏈€鏂板揩鐓э紝鑻ヨ秴鏃舵湭鎵惧埌鍒欓」鐩负 null
+ * 针对重复项目创建错误，轮询等待可恢复的项目出�? *
+ * @typeParam TSnapshot - 快照类型，需包含 projects 数组
+ * @param input - 包含错误消息、工作区根路径、快照加载函数及可选的重试/修复配置
+ * @returns 找到的项目及最新快照，若超时未找到则项目为 null
  *
- * @remarks 鍏堣繘琛屾湁闄愭閲嶈瘯杞锛岃嫢浠嶅け璐ュ垯灏濊瘯璋冪敤 repairSnapshot 淇蹇収鍚庡啀娆℃煡鎵俱€? * 閫傜敤浜庨娆″彂閫佹祦绋嬩腑闇€瑕佸鐢ㄥ垰鎭㈠鐨勯」鐩満鏅€? */
+ * @remarks 先进行有限次重试轮询，若仍失败则尝试调用 repairSnapshot 修复快照后再次查找�? * 适用于首次发送流程中需要复用刚恢复的项目场景�? */
 export async function waitForRecoverableProjectForDuplicateCreate<
   TSnapshot extends SnapshotWithProjects<DuplicateProjectCreateRecoveryCandidate>,
 >(input: {

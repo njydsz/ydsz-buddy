@@ -1,7 +1,3 @@
-/**
- * @file card
- * @description 卡片组件，基于 Base UI useRender 封装，提供卡片容器、卡片帧、头部、标题、描述、操作区、内容面板和底部等子组件。
- */
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -9,7 +5,6 @@ import { useRender } from "@base-ui/react/use-render";
 
 import { cn } from "~/lib/utils";
 
-/** 卡片容器组件，提供圆角边框和阴影等基础样式 */
 function Card({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -26,7 +21,6 @@ function Card({ className, render, ...props }: useRender.ComponentProps<"div">) 
   });
 }
 
-/** 卡片帧组件，用于将多张卡片组合成连续视觉单元 */
 function CardFrame({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -43,7 +37,6 @@ function CardFrame({ className, render, ...props }: useRender.ComponentProps<"di
   });
 }
 
-/** 卡片帧头部，包含帧级别的标题和描述 */
 function CardFrameHeader({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("relative flex flex-col px-6 py-4", className),
@@ -57,7 +50,6 @@ function CardFrameHeader({ className, render, ...props }: useRender.ComponentPro
   });
 }
 
-/** 卡片帧标题 */
 function CardFrameTitle({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("font-semibold text-sm", className),
@@ -71,7 +63,6 @@ function CardFrameTitle({ className, render, ...props }: useRender.ComponentProp
   });
 }
 
-/** 卡片帧描述 */
 function CardFrameDescription({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("text-muted-foreground text-sm", className),
@@ -85,7 +76,6 @@ function CardFrameDescription({ className, render, ...props }: useRender.Compone
   });
 }
 
-/** 卡片帧底部 */
 function CardFrameFooter({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("px-6 py-4", className),
@@ -99,7 +89,6 @@ function CardFrameFooter({ className, render, ...props }: useRender.ComponentPro
   });
 }
 
-/** 卡片头部，包含标题、描述和操作区 */
 function CardHeader({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -116,7 +105,6 @@ function CardHeader({ className, render, ...props }: useRender.ComponentProps<"d
   });
 }
 
-/** 卡片标题 */
 function CardTitle({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("font-semibold text-lg leading-none", className),
@@ -130,7 +118,6 @@ function CardTitle({ className, render, ...props }: useRender.ComponentProps<"di
   });
 }
 
-/** 卡片描述 */
 function CardDescription({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn("text-muted-foreground text-sm", className),
@@ -144,7 +131,6 @@ function CardDescription({ className, render, ...props }: useRender.ComponentPro
   });
 }
 
-/** 卡片操作区，位于卡片头部右侧 */
 function CardAction({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -161,7 +147,6 @@ function CardAction({ className, render, ...props }: useRender.ComponentProps<"d
   });
 }
 
-/** 卡片内容面板 */
 function CardPanel({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -178,7 +163,6 @@ function CardPanel({ className, render, ...props }: useRender.ComponentProps<"di
   });
 }
 
-/** 卡片底部 */
 function CardFooter({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
