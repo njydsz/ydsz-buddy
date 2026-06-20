@@ -1,9 +1,4 @@
-/**
- * @file useDisposableThreadLifecycle.ts
- * @description 一次性线程生命周期管�?Hook - 处理临时线程的清理和销�? * @module hooks/useDisposableThreadLifecycle
- */
-
-import type { ThreadId } from "~/contracts";
+import type { ThreadId } from "@peakcode/contracts";
 import { useEffect, useRef } from "react";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { resolveDisposableThreadIdToDispose } from "../lib/disposableThread";
@@ -15,26 +10,6 @@ import { useTemporaryThreadStore } from "../temporaryThreadStore";
 import { useTerminalStateStore } from "../terminalStateStore";
 import { getThreadFromState } from "../threadDerivation";
 
-/**
- * 一次性线程生命周期管�?Hook
- *
- * @description
- * 监控活动线程的变化，当检测到临时线程需要被销毁时，执行完整的清理流程�? * 1. 停止线程会话（如果正在运行）
- * 2. 关闭终端并删除历史记�? * 3. 从服务器删除线程
- * 4. 清理所有相关的本地状态（草稿、终端状态、分屏视图、临时标记）
- *
- * @param activeThreadId - 当前活动的线�?ID，为 null 表示无活动线�? *
- * @example
- * ```tsx
- * function App() {
- *   useDisposableThreadLifecycle(currentThreadId);
- *   return <div>...</div>;
- * }
- * ```
- *
- * @remarks
- * - 仅在活动线程变化时触发检�? * - 使用 ref 防止重复销毁同一个线�? * - 所有清理操作都是异步的，失败时静默处理
- */
 export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): void {
   const syncServerShellSnapshot = useStore((store) => store.syncServerShellSnapshot);
   const clearDraftThread = useComposerDraftStore((store) => store.clearDraftThread);
@@ -42,13 +17,11 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
   const removeThreadFromSplitViews = useSplitViewStore((store) => store.removeThreadFromSplitViews);
   const temporaryThreadIds = useTemporaryThreadStore((store) => store.temporaryThreadIds);
   const clearTemporaryThread = useTemporaryThreadStore((store) => store.clearTemporaryThread);
-  
-  // 获取初始草稿线程状态（仅用于初始化 ref�?  const initialDraftThread =
+  const initialDraftThread =
     activeThreadId !== null
       ? useComposerDraftStore.getState().draftThreadsByThreadId[activeThreadId]
       : undefined;
-  
-  // 跟踪上一个线程的状态，用于检测线程切�?  const previousThreadStateRef = useRef<{
+  const previousThreadStateRef = useRef<{
     threadId: ThreadId | null;
     wasTemporary: boolean;
   }>({
@@ -57,14 +30,11 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
       (activeThreadId ? temporaryThreadIds[activeThreadId] === true : false) ||
       initialDraftThread?.isTemporary === true,
   });
-  
-  // 正在销毁中的线�?ID 集合，防止重复销�?  const disposingThreadIdsRef = useRef<Set<ThreadId>>(new Set());
+  const disposingThreadIdsRef = useRef<Set<ThreadId>>(new Set());
 
   useEffect(() => {
     const previousThreadState = previousThreadStateRef.current;
     const draftThreadsByThreadId = useComposerDraftStore.getState().draftThreadsByThreadId;
-    
-    // 更新上一个线程状态为当前线程
     previousThreadStateRef.current = {
       threadId: activeThreadId,
       wasTemporary: activeThreadId
@@ -73,20 +43,17 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
         : false,
     };
 
-    // 判断是否需要销毁上一个线�?    const disposableThreadId = resolveDisposableThreadIdToDispose({
+    const disposableThreadId = resolveDisposableThreadIdToDispose({
       previousThreadId: previousThreadState.threadId,
       nextThreadId: activeThreadId,
       previousThreadWasTemporary: previousThreadState.wasTemporary,
       draftThreadsByThreadId,
     });
-    
-    // 无需销毁或正在销毁中，直接返�?    if (!disposableThreadId || disposingThreadIdsRef.current.has(disposableThreadId)) {
+    if (!disposableThreadId || disposingThreadIdsRef.current.has(disposableThreadId)) {
       return;
     }
 
-    // 标记为正在销�?    disposingThreadIdsRef.current.add(disposableThreadId);
-    
-    // 执行异步清理流程
+    disposingThreadIdsRef.current.add(disposableThreadId);
     void (async () => {
       try {
         const api = readNativeApi();
@@ -94,7 +61,6 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
         const serverThread = getThreadFromState(storeState, disposableThreadId) ?? null;
 
         if (api) {
-          // 1. 停止线程会话（如果正在运行）
           if (serverThread?.session && serverThread.session.status !== "closed") {
             await api.orchestration
               .dispatchCommand({
@@ -106,11 +72,10 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
               .catch(() => undefined);
           }
 
-          // 2. 关闭终端并删除历史记�?          await api.terminal
+          await api.terminal
             .close({ threadId: disposableThreadId, deleteHistory: true })
             .catch(() => undefined);
 
-          // 3. 从服务器删除线程
           if (serverThread) {
             await api.orchestration
               .dispatchCommand({
@@ -119,8 +84,6 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
                 threadId: disposableThreadId,
               })
               .catch(() => undefined);
-            
-            // 同步最新的 Shell 快照
             const snapshot = await api.orchestration.getShellSnapshot().catch(() => null);
             if (snapshot) {
               syncServerShellSnapshot(snapshot);
@@ -128,12 +91,11 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
           }
         }
 
-        // 4. 清理所有本地状�?        clearDraftThread(disposableThreadId);
+        clearDraftThread(disposableThreadId);
         clearTerminalState(disposableThreadId);
         removeThreadFromSplitViews(disposableThreadId);
         clearTemporaryThread(disposableThreadId);
       } finally {
-        // 从正在销毁集合中移除
         disposingThreadIdsRef.current.delete(disposableThreadId);
       }
     })();

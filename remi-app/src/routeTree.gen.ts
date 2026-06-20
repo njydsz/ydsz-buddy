@@ -1,8 +1,3 @@
-/**
- * @file 路由树自动生成文件
- * @description 由 TanStack Router 自动生成，定义应用的路由树结构。
- *              请勿手动修改此文件，任何更改将在下次生成时被覆盖。
- */
 /* eslint-disable */
 
 // @ts-nocheck

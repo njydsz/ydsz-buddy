@@ -1,9 +1,3 @@
-/**
- * @file useComposerSlashCommands.ts
- * @description 编辑器斜杠命�?Hook - 处理各种斜杠命令的执行逻辑
- * @module hooks/useComposerSlashCommands
- */
-
 import {
   type ModelSelection,
   type OrchestrationShellSnapshot,
@@ -13,9 +7,9 @@ import {
   type ProviderModelOptions,
   type RuntimeMode,
   type ThreadId,
-} from "~/contracts";
-import { buildPromptThreadTitleFallback } from "~/shared/chatThreads";
-import { deriveAssociatedWorktreeMetadata } from "~/shared/threadWorkspace";
+} from "@peakcode/contracts";
+import { buildPromptThreadTitleFallback } from "@peakcode/shared/chatThreads";
+import { deriveAssociatedWorktreeMetadata } from "@peakcode/shared/threadWorkspace";
 import { useCallback, useState } from "react";
 import { newCommandId, newMessageId, newThreadId } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";
@@ -39,62 +33,18 @@ import { buildNextProviderOptions } from "../providerModelOptions";
 import { resolveForkThreadEnvironment } from "../lib/threadEnvironment";
 import { type SplitViewId, useSplitViewStore } from "../splitViewStore";
 
-/** 编辑器快照类�?*/
 type ComposerSnapshot = {
   value: string;
   cursor: number;
   expandedCursor: number;
 };
 
-/** 斜杠命令项类�?*/
 type SlashCommandItem = Extract<ComposerCommandItem, { type: "slash-command" }>;
 
-/**
- * 判断提示替换是否成功应用
- */
 function wasPromptReplacementApplied(result: number | false): boolean {
   return result !== false;
 }
 
-/**
- * 编辑器斜杠命�?Hook
- *
- * @description
- * 处理编辑器中各种斜杠命令的执行逻辑，包括：
- * - /clear: 清空对话
- * - /compact: 压缩线程上下�? * - /plan /default: 切换交互模式
- * - /status: 显示状态对话框
- * - /subagents: 子代理管�? * - /review: 代码审查
- * - /fast: 快速模式切�? * - /fork: 线程分叉
- * - /side: 侧边聊天
- *
- * @param input - 输入参数对象
- * @param input.activeProject - 当前活动项目
- * @param input.activeThread - 当前活动线程
- * @param input.activeRootBranch - 当前根分�? * @param input.isServerThread - 是否为服务器线程
- * @param input.supportsFastSlashCommand - 是否支持快速命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.supportsTextNativeReviewCommand - 是否支持文本原生审查命令
- * @param input.fastModeEnabled - 快速模式是否已启用
- * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerCommandDiscoveryCwd - 命令发现工作目录
- * @param input.selectedProvider - 当前选中的提供商
- * @param input.currentProviderModelOptions - 当前提供商模型选项
- * @param input.selectedModelSelection - 当前选中的模�? * @param input.runtimeMode - 运行时模�? * @param input.interactionMode - 交互模式
- * @param input.threadId - 线程 ID
- * @param input.syncServerShellSnapshot - 同步服务�?Shell 快照
- * @param input.navigateToThread - 导航到线�? * @param input.handleClearConversation - 清空对话处理
- * @param input.handleInteractionModeChange - 交互模式切换处理
- * @param input.openForkTargetPicker - 打开分叉目标选择�? * @param input.openReviewTargetPicker - 打开审查目标选择�? * @param input.setComposerDraftProviderModelOptions - 设置编辑器草稿提供商模型选项
- * @param input.editorActions - 编辑器操作集�? *
- * @returns 斜杠命令处理相关的状态和方法
- *
- * @example
- * ```tsx
- * const {
- *   handleStandaloneSlashCommand,
- *   handleSlashCommandSelection,
- *   isSlashStatusDialogOpen,
- * } = useComposerSlashCommands({ ... });
- * ```
- */
 export function useComposerSlashCommands(input: {
   activeProject: Project | undefined;
   activeThread: Thread | undefined;
@@ -172,7 +122,7 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 获取当前可用的内置斜杠命令列�?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -182,9 +132,6 @@ export function useComposerSlashCommands(input: {
     providerNativeCommandNames,
   });
 
-  /**
-   * 压缩当前提供商线程的上下�?   * 仅在服务器线程且会话未关闭时可用
-   */
   const compactProviderThread = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
     if (
@@ -229,8 +176,6 @@ export function useComposerSlashCommands(input: {
     }
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
-  /**
-   * 从斜杠命令设置快速模�?   * 更新提供商模型选项中的快速模式配�?   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -247,9 +192,6 @@ export function useComposerSlashCommands(input: {
     [currentProviderModelOptions, selectedProvider, setComposerDraftProviderModelOptions, threadId],
   );
 
-  /**
-   * 执行 /fast 斜杠命令
-   * 支持 /fast, /fast on, /fast off, /fast status 等语�?   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -290,8 +232,6 @@ export function useComposerSlashCommands(input: {
     [fastModeEnabled, supportsFastSlashCommand, setFastModeFromSlashCommand],
   );
 
-  /**
-   * 从斜杠命令创建分叉线�?   * 复制当前线程的消息并创建新线�?   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -352,8 +292,6 @@ export function useComposerSlashCommands(input: {
     ],
   );
 
-  /**
-   * 从斜杠命令创建侧边聊天线�?   * 在当前线程旁边打开一个新的聊天窗�?   */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
       const api = readNativeApi();
@@ -438,9 +376,6 @@ export function useComposerSlashCommands(input: {
     ],
   );
 
-  /**
-   * 启动 Codex 审查流程
-   * @param target - 审查目标：changes（当前更改）�?base-branch（基础分支�?   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();

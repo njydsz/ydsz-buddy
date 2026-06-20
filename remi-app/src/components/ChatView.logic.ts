@@ -1,19 +1,16 @@
-/**
- * @file ChatView.logic.ts
- * @description ChatView 组件的纯逻辑层，包含对话线程构建、语音输入处理、消息附件管理�? *              发送状态推导、终端上下文过滤等与 UI 渲染无关的业务逻辑函数�? *              所有函数均为纯函数或无副作用的工具函数，便于单元测试�? */
-
 import {
+  ProjectId,
   ThreadId,
   type ModelSelection,
   type ModelSlug,
   type ProviderKind,
   type ServerProviderAuthStatus,
   type ThreadId as ThreadIdType,
-} from "~/contracts";
-import { normalizeModelSlug } from "~/shared/model";
-import { buildRemicodeBranchName } from "~/shared/git";
-import { isGenericChatThreadTitle } from "~/shared/chatThreads";
-import { isGenericTerminalThreadTitle } from "~/shared/terminalThreads";
+} from "@peakcode/contracts";
+import { normalizeModelSlug } from "@peakcode/shared/model";
+import { buildPeakcodeBranchName } from "@peakcode/shared/git";
+import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
+import { isGenericTerminalThreadTitle } from "@peakcode/shared/terminalThreads";
 import {
   type ChatAssistantSelectionAttachment,
   type ChatMessage,
@@ -36,21 +33,12 @@ import { hasLiveTurnTailWork, type WorkLogEntry } from "../session-logic";
 import { localSubagentThreadId } from "./ChatView.selectors";
 import type { ProviderModelOption } from "../providerModelOptions";
 
-/** localStorage 键：按项目记录上次调用的脚本 */
-export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remicode:last-invoked-script-by-project";
-/** localStorage 键：已关闭的 Provider 健康告警标识列表 */
-export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remicode:dismissed-provider-health-banners";
+export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "peakcode:last-invoked-script-by-project";
+export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "peakcode:dismissed-provider-health-banners";
 
-/** 按项目记录上次调用脚本的 Schema，用�?localStorage 数据校验 */
-export const LastInvokedScriptByProjectSchema = Schema.Record({ key: Schema.String, value: Schema.String });
-/** 已关闭的 Provider 健康告警 Schema，用�?localStorage 数据校验 */
+export const LastInvokedScriptByProjectSchema = Schema.Record(ProjectId, Schema.String);
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
 
-/**
- * 根据本地草稿状态构建一个本�?Thread 对象，用于在服务端线程尚未创建时提供 UI 渲染所需的数据结构�? * @param threadId - 本地生成的线�?ID
- * @param draftThread - 本地草稿线程状�? * @param fallbackModelSelection - 当草稿未指定模型时的回退模型选择
- * @param error - 可选的错误信息，用于展示创建失败状�? * @returns 构建完成�?Thread 对象，包含空的消息列表和会话
- */
 export function buildLocalDraftThread(
   threadId: ThreadId,
   draftThread: DraftThreadState,
@@ -82,10 +70,6 @@ export function buildLocalDraftThread(
   };
 }
 
-/**
- * 解析当前活跃线程的显示标题，优先使用子代理标题，对空白的 Home Chat 使用 "New Chat"�? * @param input.title - 线程原始标题
- * @param input.subagentTitle - 子代理标题（如有�? * @param input.isHomeChat - 是否�?Home Chat 容器
- * @param input.isEmpty - 线程是否为空（无消息�? * @returns 最终展示给用户的标题文�? */
 export function resolveActiveThreadTitle(input: {
   title: string;
   subagentTitle: string | null;
@@ -101,11 +85,8 @@ export function resolveActiveThreadTitle(input: {
   return input.title;
 }
 
-// 旁聊（sidechat）携带了�?fork 导入的历史消息用�?Provider 上下文，但其对话面板应只展示
-// 新的旁聊消息，因此需要过滤掉 fork-import 来源的消息�?/**
- * 过滤旁聊消息列表，移除从 fork 导入的历史消息，仅保留旁聊自身产生的新消息�? * @param messages - 原始消息列表
- * @param isSidechat - 是否为旁聊线�? * @returns 过滤后的消息列表
- */
+// Sidechats carry imported fork history for provider context, but their transcript should start
+// visually clean so only new sidechat turns appear in the pane.
 export function filterSidechatTranscriptMessages(
   messages: readonly ChatMessage[],
   isSidechat: boolean,
@@ -115,7 +96,6 @@ export function filterSidechatTranscriptMessages(
     : [...messages];
 }
 
-/** 释放 blob: 预览 URL，防止内存泄漏。仅�?blob: 协议�?URL 执行 revokeObjectURL�?*/
 export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   if (!previewUrl || typeof URL === "undefined" || !previewUrl.startsWith("blob:")) {
     return;
@@ -123,7 +103,6 @@ export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   URL.revokeObjectURL(previewUrl);
 }
 
-/** 释放用户消息中所有图片附件的 blob: 预览 URL，防止内存泄�?*/
 export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   if (message.role !== "user" || !message.attachments) {
     return;
@@ -136,7 +115,6 @@ export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   }
 }
 
-/** 收集用户消息中所有图片附件的 blob: 预览 URL，用于批量释�?*/
 export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[] {
   if (message.role !== "user" || !message.attachments) {
     return [];
@@ -150,11 +128,6 @@ export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[
   return previewUrls;
 }
 
-/**
- * 将语音转录文本追加到当前提示词末尾，用换行符分隔�? * @param currentPrompt - 当前输入框中的提示词
- * @param transcript - 语音转录文本
- * @returns 合并后的提示词；若转录为空则返回 null 表示无需追加
- */
 export function appendVoiceTranscriptToPrompt(
   currentPrompt: string,
   transcript: string,
@@ -168,10 +141,6 @@ export function appendVoiceTranscriptToPrompt(
     : `${currentPrompt.replace(/\s+$/, "")}\n${trimmedTranscript}`;
 }
 
-/**
- * 清洗语音输入错误信息，移除堆栈跟踪和重复�?Error 前缀，返回用户友好的错误描述�? * @param message - 原始错误消息
- * @returns 清洗后的错误消息；若清洗后为空则返回默认提示
- */
 export function sanitizeVoiceErrorMessage(message: string): string {
   const normalized = message.trim();
   if (normalized.length === 0) {
@@ -191,15 +160,11 @@ export function sanitizeVoiceErrorMessage(message: string): string {
     : "The voice note could not be transcribed.";
 }
 
-/** 判断语音错误消息是否表示认证已过期，需要用户重新登�?*/
 export function isVoiceAuthExpiredMessage(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("chatgpt login has expired") || normalized.includes("sign in again");
 }
 
-/**
- * 根据麦克风启动错误类型生成用户友好的错误描述，覆盖权限拒绝、设备未找到、设备繁忙等常见场景�? * @param error - 捕获到的错误对象
- * @returns 面向用户的错误提示文�? */
 export function describeVoiceRecordingStartError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "The microphone could not be opened.";
@@ -209,7 +174,7 @@ export function describeVoiceRecordingStartError(error: unknown): string {
   const errorName = typeof error.name === "string" ? error.name : "";
 
   if (errorName === "NotAllowedError" || errorName === "PermissionDeniedError") {
-    return "Microphone access was denied. Enable it in macOS Privacy & Security > Microphone for Remi Code, then try again.";
+    return "Microphone access was denied. Enable it in macOS Privacy & Security > Microphone for Peak Code, then try again.";
   }
   if (errorName === "NotFoundError" || errorName === "DevicesNotFoundError") {
     return "No microphone was found. Connect one and try again.";
@@ -227,12 +192,6 @@ export function describeVoiceRecordingStartError(error: unknown): string {
   return "The microphone could not be opened.";
 }
 
-/**
- * 推导语音笔记功能�?UI 状态，判断是否可渲染、可启动语音笔记，以及是否显示控制按钮�? * @param input.authStatus - 服务端认证状�? * @param input.voiceTranscriptionAvailable - 语音转录是否可用
- * @param input.isRecording - 是否正在录音
- * @param input.isTranscribing - 是否正在转录
- * @returns 语音笔记 UI 状态：canRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
- */
 export function deriveComposerVoiceState(input: {
   authStatus: ServerProviderAuthStatus | null | undefined;
   voiceTranscriptionAvailable: boolean | undefined;
@@ -253,10 +212,6 @@ export function deriveComposerVoiceState(input: {
   };
 }
 
-/**
- * 判断 Composer 模型选择器是否应显示骨架屏加载状态�? * �?Provider 需要动态发现模型列表且仍在加载中，或持久化的模型选择与当前选择不一致时显示骨架屏�? * @param input - 包含当前选中�?Provider/模型、持久化/草稿模型选择、加载状态等
- * @returns 是否应显示骨架屏
- */
 export function shouldShowComposerModelBootstrapSkeleton(input: {
   selectedProvider: ProviderKind;
   selectedModel: string | null | undefined;
@@ -296,12 +251,6 @@ export function shouldShowComposerModelBootstrapSkeleton(input: {
   return normalizedSelectedModel !== normalizedPersistedModel;
 }
 
-/**
- * 解析最终提交给 Provider 的模型标识，优先匹配运行时可用选项列表中的 slug，否则使用回退值�? * @param input.selectedModel - 用户选择的模�?slug
- * @param input.availableOptions - 当前可用的模型选项列表
- * @param input.fallback - 当无法匹配时的回退函数
- * @returns 最终使用的模型 slug
- */
 export function resolveCommittedProviderModel(input: {
   selectedModel: ModelSlug;
   availableOptions: ReadonlyArray<ProviderModelOption>;
@@ -445,7 +394,7 @@ export function buildSuggestedWorktreeName(input: {
   associatedWorktreeBranch?: string | null;
   title?: string | null;
 }): string {
-  return buildRemicodeBranchName(input.associatedWorktreeBranch ?? input.title);
+  return buildPeakcodeBranchName(input.associatedWorktreeBranch ?? input.title);
 }
 
 export function cloneComposerImageForRetry(

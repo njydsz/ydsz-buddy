@@ -79,7 +79,7 @@ pub struct BootstrapResult {
 /// 6. 工作空间层（WorkspaceEntries、WorkspaceFileSystem）
 /// 7. 认证层（SecretStore、SessionCredentialService、AuthService）
 /// 8. 检查点层（CheckpointStore）
-fn build_service_container(
+async fn build_service_container(
     sqlite_client: SqliteClient,
     config: &ServerConfig,
 ) -> Result<ServiceContainer> {
@@ -129,7 +129,7 @@ fn build_service_container(
     ));
 
     // ===== 推送通道层 =====
-    let push_channel_manager = Arc::new(PushChannelManager::new());
+    let push_channel_manager = Arc::new(PushChannelManager::new().await);
 
     // ===== 遥测层 =====
     let analytics_service = Arc::new(AnalyticsService::new());
@@ -246,7 +246,7 @@ pub async fn bootstrap(config: &ServerConfig) -> Result<BootstrapResult> {
     info!("数据库初始化完成: {}", config.db_path.display());
 
     // 2. 构建服务容器
-    let services = Arc::new(build_service_container(sqlite_client, config)?);
+    let services = Arc::new(build_service_container(sqlite_client, config).await?);
 
     // 3. 启动 Reactor
     let (shutdown_tx, _) = broadcast::channel::<()>(1);
@@ -298,7 +298,7 @@ pub async fn bootstrap_embedded(config: &ServerConfig) -> Result<BootstrapResult
     info!("数据库初始化完成: {}", config.db_path.display());
 
     // 2. 构建服务容器
-    let services = Arc::new(build_service_container(sqlite_client, config)?);
+    let services = Arc::new(build_service_container(sqlite_client, config).await?);
 
     // 3. 启动 Reactor
     let (shutdown_tx, _) = broadcast::channel::<()>(1);

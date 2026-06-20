@@ -1,9 +1,6 @@
-/**
- * @file 应用核心状态管�? * @description 将编排层快照归一化为稳定的客户端状态，驱动 Web 应用渲染�? * 导出 Zustand store 及纯状态转换辅助函数，供运行时引导流程共享使用�? *
- * 核心设计原则�? * - 引用稳定性：通过浅比较和深比较保持未变化对象的引用不变，减少重渲�? * - 归一化切片：将线程数据拆分为 shell/session/turnState/message 等独立切片，
- *   使高频流式更新仅影响活跃线程的切片，不触发侧边栏全局重建
- * - 热路径优化：提供 HotPath 变体函数，跳过线程数组和侧边栏摘要更新，
- *   将流式消息的写入开销降到最�? */
+// FILE: store.ts
+// Purpose: Normalizes orchestration snapshots into stable client state for the web app.
+// Exports: Zustand store plus pure state transition helpers shared by runtime bootstrap flows.
 
 import { Fragment, type ReactNode, createElement, useEffect } from "react";
 import {
@@ -17,10 +14,10 @@ import {
   type OrchestrationShellStreamEvent,
   type OrchestrationSessionStatus,
   type TurnId,
-} from "~/contracts";
-import { resolveThreadBranchRegressionGuard } from "~/shared/git";
-import { normalizeModelSlug } from "~/shared/model";
-import { normalizeWorkspaceRootForComparison } from "~/shared/threadWorkspace";
+} from "@peakcode/contracts";
+import { resolveThreadBranchRegressionGuard } from "@peakcode/shared/git";
+import { normalizeModelSlug } from "@peakcode/shared/model";
+import { normalizeWorkspaceRootForComparison } from "@peakcode/shared/threadWorkspace";
 import { create } from "zustand";
 import {
   type ChatAttachment,
@@ -35,48 +32,28 @@ import {
 } from "./types";
 import { Debouncer } from "@tanstack/react-pacer";
 import { hasLiveTurnTailWork } from "./session-logic";
-import { deriveThreadSummaryMetadata } from "~/shared/threadSummary";
+import { deriveThreadSummaryMetadata } from "@peakcode/shared/threadSummary";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import { toAttachmentPreviewUrl } from "./lib/wsHttpUrl";
 
-// ── 状态定�?────────────────────────────────────────────────────────────
+// ── State ────────────────────────────────────────────────────────────
 
-/**
- * 应用全局状�? *
- * @description 采用归一化切片设计，将线程数据拆分为多个按线�?ID 索引的独立映射，
- * 使高频流式更新仅影响活跃线程的切片，不触发侧边栏全局重建�? */
 export interface AppState {
-  /** 项目列表 */
   projects: Project[];
-  /** 线程完整视图模型列表（由切片重建�?*/
   threads: Thread[];
-  /** 侧边栏线程摘要映射，用于侧边栏行的轻量渲�?*/
   sidebarThreadSummaryById: Record<string, SidebarThreadSummary>;
-  /** 线程数据是否已完成首次水�?*/
   threadsHydrated: boolean;
-  /** 线程 ID 有序列表 */
   threadIds?: ThreadId[];
-  /** 线程外壳映射（不含消息等重型数据�?*/
   threadShellById?: Record<ThreadId, ThreadShell>;
-  /** 线程会话映射 */
   threadSessionById?: Record<ThreadId, ThreadSession | null>;
-  /** 线程回合状态映�?*/
   threadTurnStateById?: Record<ThreadId, ThreadTurnState>;
-  /** 按线程索引的消息 ID 列表 */
   messageIdsByThreadId?: Record<ThreadId, MessageId[]>;
-  /** 按线程索引的消息映射 */
   messageByThreadId?: Record<ThreadId, Record<MessageId, ChatMessage>>;
-  /** 按线程索引的活动 ID 列表 */
   activityIdsByThreadId?: Record<ThreadId, string[]>;
-  /** 按线程索引的活动映射 */
   activityByThreadId?: Record<ThreadId, Record<string, Thread["activities"][number]>>;
-  /** 按线程索引的提议计划 ID 列表 */
   proposedPlanIdsByThreadId?: Record<ThreadId, string[]>;
-  /** 按线程索引的提议计划映射 */
   proposedPlanByThreadId?: Record<ThreadId, Record<string, Thread["proposedPlans"][number]>>;
-  /** 按线程索引的回合差异 ID 列表 */
   turnDiffIdsByThreadId?: Record<ThreadId, TurnId[]>;
-  /** 按线程索引的回合差异摘要映射 */
   turnDiffSummaryByThreadId?: Record<ThreadId, Record<TurnId, Thread["turnDiffSummaries"][number]>>;
 }
 
@@ -99,18 +76,14 @@ type ThreadUserInputResponseRequestedEvent = Extract<
   { type: "thread.user-input-response-requested" }
 >;
 
-/** 持久化状态的 localStorage key */
-const PERSISTED_STATE_KEY = "remicode:renderer-state:v8";
-/** 旧版持久�?key 列表，首次加载后自动清理 */
+const PERSISTED_STATE_KEY = "peakcode:renderer-state:v8";
 const LEGACY_PERSISTED_STATE_KEYS = [
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",
   "codething:renderer-state:v2",
   "codething:renderer-state:v1",
 ] as const;
-/** 每个线程保留的最大消息数 */
 const MAX_THREAD_MESSAGES = 2_000;
-/** 每个线程保留的最大活动数 */
 const MAX_THREAD_ACTIVITIES = 500;
 const EMPTY_THREAD_IDS: ThreadId[] = [];
 const EMPTY_THREAD_SHELL_BY_ID: Record<ThreadId, ThreadShell> = {};
@@ -130,7 +103,6 @@ const EMPTY_TURN_DIFF_BY_THREAD: Record<
   ThreadId,
   Record<TurnId, Thread["turnDiffSummaries"][number]>
 > = {};
-/** 影响侧边栏摘要的活动类型集合 */
 const THREAD_SUMMARY_ACTIVITY_KINDS = new Set([
   "approval.requested",
   "approval.resolved",
@@ -139,7 +111,6 @@ const THREAD_SUMMARY_ACTIVITY_KINDS = new Set([
   "user-input.resolved",
   "provider.user-input.respond.failed",
 ]);
-/** 待处理的交互请求类型集合 */
 const PENDING_INTERACTION_REQUEST_KINDS = new Set(["approval.requested", "user-input.requested"]);
 
 const initialState: AppState = {
@@ -201,9 +172,8 @@ function rememberProjectLocalNames(
   }
 }
 
-// ── 持久化辅�?──────────────────────────────────────────────────────
+// ── Persist helpers ──────────────────────────────────────────────────
 
-/** �?localStorage 读取持久化状态（项目展开/排序/本地名称�?*/
 function readPersistedState(): AppState {
   if (typeof window === "undefined") return initialState;
   try {
@@ -243,7 +213,6 @@ function readPersistedState(): AppState {
 
 let legacyKeysCleanedUp = false;
 
-/** 将项�?UI 状态（展开/排序/本地名称）写�?localStorage，同时清理旧�?key */
 function persistState(state: AppState): void {
   if (typeof window === "undefined") return;
   try {
@@ -269,19 +238,14 @@ function persistState(state: AppState): void {
     // Ignore quota/storage errors to avoid breaking chat UX.
   }
 }
-/** 防抖持久化，避免 localStorage 频繁写入 */
 const debouncedPersistState = new Debouncer(persistState, { wait: 500 });
 
-/**
- * 立即同步持久化当前应用状�? *
- * @param state - 应用状态，默认取当�?store 状�? */
 export function persistAppStateNow(state: AppState = useStore.getState()): void {
   persistState(state);
 }
 
-// ── 纯函数辅�?──────────────────────────────────────────────────────
+// ── Pure helpers ──────────────────────────────────────────────────────
 
-/** 更新线程列表中指�?ID 的线程，若未变化则返回原数组引用 */
 function updateThread(
   threads: Thread[],
   threadId: ThreadId,
@@ -337,7 +301,9 @@ function threadSessionsEqual(
   );
 }
 
-// 保持乐观的分支流程完成标记在同一分支/工作树标识下持续有效�?// 但当线程切换到新的分支上下文时让服务器重新初始化�?function resolveCreateBranchFlowCompletedMerge(input: {
+// Keep optimistic branch-flow completion sticky for the same branch/worktree identity,
+// but let the server reinitialize it whenever the thread moves to a new branch context.
+function resolveCreateBranchFlowCompletedMerge(input: {
   currentBranch: string | null;
   nextBranch: string | null;
   currentWorktreePath: string | null;
@@ -523,7 +489,8 @@ function buildTurnDiffSlice(thread: Thread): {
   };
 }
 
-// 复用读模型中未变化的分支，使每线程选择器在流式传输期间保持引用稳定�?function arraysShallowEqual<T>(
+// Reuse unchanged branches from the read model so per-thread selectors stay stable during streaming.
+function arraysShallowEqual<T>(
   left: ReadonlyArray<T> | undefined,
   right: ReadonlyArray<T>,
 ): left is ReadonlyArray<T> {
@@ -864,7 +831,7 @@ function readModelAttachmentsFromChatMessage(
         ? {
             id: attachment.id,
             type: "assistant-selection" as const,
-            assistantMessageId: attachment.assistantMessageId as MessageId,
+            assistantMessageId: MessageId.makeUnsafe(attachment.assistantMessageId),
             text: attachment.text,
           }
         : {
@@ -1032,7 +999,7 @@ function readModelSessionFromThreadSession(
   incomingSession: ReadModelThread["session"],
 ): NonNullable<ReadModelThread["session"]> {
   return {
-    threadId: previousThread?.id ?? incomingSession?.threadId ?? "unknown" as ThreadId,
+    threadId: previousThread?.id ?? incomingSession?.threadId ?? ThreadId.makeUnsafe("unknown"),
     status: previousSession.orchestrationStatus,
     providerName: previousSession.provider,
     runtimeMode: previousThread?.runtimeMode ?? incomingSession?.runtimeMode ?? "full-access",
@@ -1341,7 +1308,8 @@ function isStalePendingRequestFailureDetail(detail: unknown): boolean {
   );
 }
 
-// 保留旧的可操作提示，即使其时间轴行已超出上限�?function pendingInteractionRequestIds(
+// Keep old actionable prompts even when their timeline rows fall outside the cap.
+function pendingInteractionRequestIds(
   activities: readonly Thread["activities"][number][],
 ): Set<string> {
   const pendingRequestIds = new Set<string>();
@@ -1386,7 +1354,9 @@ function dedupeActivitiesById<TActivity extends Thread["activities"][number]>(
   return arraysShallowEqual(activities, result) ? (activities as TActivity[]) : result;
 }
 
-// 快照与实时事件竞争可能导致重复的活动 ID。保留具有最多工具细节的负载�?// 防止归一化状态回退到通用行�?function preferRicherActivity<TActivity extends Thread["activities"][number]>(
+// Duplicate activity ids can arrive from snapshot + live event races. Keep the
+// payload with the most tool detail so normalized state cannot regress to a generic row.
+function preferRicherActivity<TActivity extends Thread["activities"][number]>(
   previous: TActivity,
   incoming: TActivity,
 ): TActivity {
@@ -1970,7 +1940,8 @@ function threadActivityUpdatesSummary(event: ThreadActivityAppendedEvent): boole
   return THREAD_SUMMARY_ACTIVITY_KINDS.has(event.payload.activity.kind);
 }
 
-// 侧边栏摘要可跟随回合边界更新，但不响应每个流式助手增量�?function threadMessageUpdatesSidebarSummary(event: ThreadMessageSentEvent): boolean {
+// Sidebar summaries can follow turn boundaries, but not every streaming assistant delta.
+function threadMessageUpdatesSidebarSummary(event: ThreadMessageSentEvent): boolean {
   return event.payload.role === "user" || !event.payload.streaming;
 }
 
@@ -1983,7 +1954,9 @@ function resolveThreadSummaryAfterUserInputResponseRequested(
     activities: [
       ...thread.activities,
       {
-        id: `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
+        id: EventId.makeUnsafe(
+          `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}`,
+        ),
         kind: "user-input.resolved",
         payload: {
           requestId: event.payload.requestId,
@@ -2005,7 +1978,9 @@ function resolveThreadSummaryAfterApprovalResponseRequested(
     activities: [
       ...thread.activities,
       {
-        id: `synthetic-approval-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
+        id: EventId.makeUnsafe(
+          `synthetic-approval-resolved:${event.payload.requestId}:${event.sequence}`,
+        ),
         kind: "approval.resolved",
         payload: {
           requestId: event.payload.requestId,
@@ -2057,8 +2032,9 @@ function sidebarThreadSummariesEqual(
   );
 }
 
-// 保持侧边栏行状态轻量，使实时线程更新不会强制行组件
-// 在每次渲染时重新扫描每个线程的消�?活动集合�?function buildSidebarThreadSummary(
+// Keep sidebar row state lightweight so live thread updates do not force row code
+// to rescan every thread message/activity collection on each render.
+function buildSidebarThreadSummary(
   thread: Thread,
   previous?: SidebarThreadSummary,
 ): SidebarThreadSummary {
@@ -2183,7 +2159,9 @@ function writeThreadShellProjection(
   return nextState;
 }
 
-// 详情写入保持活跃线程切片最新，但侧边栏摘要�?shell 管理�?// 避免活跃聊天转录的高频变动扩散到导航树�?function writeThreadState(state: AppState, nextThread: Thread, previousThread?: Thread): AppState {
+// Detail writes keep the active thread slices current, but sidebar summaries stay
+// shell-owned so active transcript churn does not fan out into the navigation tree.
+function writeThreadState(state: AppState, nextThread: Thread, previousThread?: Thread): AppState {
   const nextShell = toThreadShell(nextThread);
   const nextTurnState = toThreadTurnState(nextThread);
   const previousShell = state.threadShellById?.[nextThread.id];
@@ -2384,7 +2362,9 @@ function commitThreadProjection(
     return state;
   }
 
-// 让热路径详情同步跳过数组变动，不强制侧边栏所有权回到线程详情路径�?const shouldUpdateThreadArray = options?.updateThreadArray ?? true;
+  // Let hot-path detail syncs skip array churn without forcing sidebar ownership
+  // back onto the thread-detail path.
+  const shouldUpdateThreadArray = options?.updateThreadArray ?? true;
   const shouldUpdateSidebarSummary = options?.updateSidebarSummary ?? true;
   const threadExists = previousThread !== undefined;
   const threads = shouldUpdateThreadArray
@@ -2469,7 +2449,8 @@ function isProviderDiffPlaceholderRef(checkpointRef: string | null | undefined):
   return checkpointRef?.startsWith("provider-diff:") === true;
 }
 
-// 在提议计划关联的实时回合更新中保留关联，直到快照追上�?function buildLatestTurn(params: {
+// Preserve proposed-plan linkage across live turn updates until the snapshot catches up.
+function buildLatestTurn(params: {
   previous: Thread["latestTurn"];
   turnId: NonNullable<Thread["latestTurn"]>["turnId"];
   state: NonNullable<Thread["latestTurn"]>["state"];
@@ -2702,7 +2683,11 @@ function applyTurnDiffSummaryToThread(
             requestedAt: thread.latestTurn?.requestedAt ?? nextSummary.completedAt,
             startedAt: thread.latestTurn?.startedAt ?? nextSummary.completedAt,
             completedAt: nextSummary.completedAt,
-            // 优先使用传入�?assistantMessageId；否则保留同一回合的旧值�?            // 回合差异事件可能在消息最终确定前到达并携�?null id—�?            // 它们不能抹除已被 thread.message-sent 记录的真�?id�?            assistantMessageId:
+            // Prefer the incoming assistantMessageId when present; otherwise keep
+            // the previous one from the same turn. Turn-diff events may arrive
+            // before the message has been finalized and carry a null id — they
+            // must not erase a real id already recorded by thread.message-sent.
+            assistantMessageId:
               nextSummary.assistantMessageId ??
               (thread.latestTurn?.turnId === nextSummary.turnId
                 ? thread.latestTurn.assistantMessageId
@@ -3173,8 +3158,9 @@ function applyOrchestrationEvent(
       );
 
     case "thread.turn-interrupt-requested": {
-      // 中断请求是尽力而为的，可能失败或超时。保持最新回合时�?状态活跃，
-      // 直到提供者确认终端事件�?      return state;
+      // Interrupt requests are best-effort and can fail or time out. Keep the
+      // latest-turn clock/state live until the provider confirms a terminal event.
+      return state;
     }
 
     case "thread.session-stop-requested":
@@ -3262,9 +3248,12 @@ function applyOrchestrationEvent(
         state,
         event.payload.threadId,
         (thread) => {
-          // 响应命令被接受后立即隐藏编辑器提示；
-          // 提供者可能稍后追加自己的已解决活动�?          const syntheticResolvedActivity = {
-            id: `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
+          // Hide the composer prompt as soon as the response command is accepted;
+          // the provider may append its own resolved activity shortly after.
+          const syntheticResolvedActivity = {
+            id: EventId.makeUnsafe(
+              `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}`,
+            ),
             tone: "info",
             kind: "user-input.resolved",
             summary: "User input submitted",
@@ -3573,11 +3562,6 @@ function applyOrchestrationEvent(
   }
 }
 
-/**
- * 应用编排事件到状�? *
- * @description 处理编排层事件列表，更新线程数组和侧边栏摘要�? * 适用于非流式场景（如初始加载、快照同步）�? *
- * @param state - 当前应用状�? * @param events - 编排事件列表
- * @returns 更新后的应用状�? */
 export function applyOrchestrationEvents(
   state: AppState,
   events: ReadonlyArray<OrchestrationEvent>,
@@ -3588,15 +3572,6 @@ export function applyOrchestrationEvents(
   });
 }
 
-/**
- * 应用编排事件到状态（热路径）
- *
- * @description 高性能变体，默认跳过线程数组和侧边栏摘要更新，
- * 适用于流式消息等高频场景。调用方可通过 options 覆盖默认行为�? *
- * @param state - 当前应用状�? * @param events - 编排事件列表
- * @param options - 可选配�? * @param options.updateThreadArray - 是否更新线程数组，默�?false
- * @param options.updateSidebarSummary - 是否更新侧边栏摘要，默认 false
- * @returns 更新后的应用状�? */
 export function applyOrchestrationEventsHotPath(
   state: AppState,
   events: ReadonlyArray<OrchestrationEvent>,
@@ -3616,13 +3591,8 @@ export function applyOrchestrationEventsHotPath(
   return nextState;
 }
 
-// ── 纯状态转换函�?────────────────────────────────────────────────────
+// ── Pure state transition functions ────────────────────────────────────
 
-/**
- * 同步服务�?Shell 快照到状�? *
- * @description 处理编排层的 Shell 快照，更新项目列表和线程外壳信息�? * 并重建侧边栏摘要。标�?threadsHydrated �?true�? *
- * @param state - 当前应用状�? * @param snapshot - 服务�?Shell 快照
- * @returns 更新后的应用状�? */
 export function syncServerShellSnapshot(
   state: AppState,
   snapshot: OrchestrationShellSnapshot,
@@ -3715,30 +3685,14 @@ function syncServerThreadDetailWithOptions(
   );
 }
 
-/**
- * 同步服务器线程详情到状�? *
- * @description 合并服务器读模型中的线程详情到当前状态，
- * 更新线程数组和侧边栏摘要�? *
- * @param state - 当前应用状�? * @param thread - 服务器读模型中的线程数据
- * @returns 更新后的应用状�? */
 export function syncServerThreadDetail(state: AppState, thread: ReadModelThread): AppState {
   return syncServerThreadDetailWithOptions(state, thread, { updateThreadArray: true });
 }
 
-/**
- * 同步服务器线程详情到状态（热路径）
- *
- * @description 高性能变体，跳过线程数组更新，将实时流式数据合并到现有状态中�? * 避免活跃聊天转录的高频变动扩散到导航树�? *
- * @param state - 当前应用状�? * @param thread - 服务器读模型中的线程数据
- * @returns 更新后的应用状�? */
 export function syncServerThreadDetailHotPath(state: AppState, thread: ReadModelThread): AppState {
   return syncServerThreadDetailWithOptions(state, thread, { updateThreadArray: false });
 }
 
-/**
- * 应用 Shell 流事件到状�? *
- * @description 处理 Shell 流事件（项目增删、线程增删）�? * 更新对应的状态切片和侧边栏摘要�? *
- * @param state - 当前应用状�? * @param event - Shell 流事�? * @returns 更新后的应用状�? */
 export function applyShellEvent(state: AppState, event: OrchestrationShellStreamEvent): AppState {
   switch (event.kind) {
     case "project-upserted":
@@ -3757,12 +3711,6 @@ export function applyShellEvent(state: AppState, event: OrchestrationShellStream
   }
 }
 
-/**
- * 同步服务器读模型到状�? *
- * @description 全量同步编排层读模型，重建所有项目、线程和侧边栏摘要，
- * 清理不存在的线程切片数据。标�?threadsHydrated �?true�? *
- * @param state - 当前应用状�? * @param readModel - 服务器读模型
- * @returns 更新后的应用状�? */
 export function syncServerReadModel(state: AppState, readModel: OrchestrationReadModel): AppState {
   rememberProjectUiState(state.projects);
   rememberProjectLocalNames(state.projects);
@@ -3847,12 +3795,6 @@ export function syncServerReadModel(state: AppState, readModel: OrchestrationRea
   };
 }
 
-/**
- * 标记线程为已访问
- *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param visitedAt - 访问时间（ISO 字符串），默认为当前时间
- * @returns 更新后的应用状�? */
 export function markThreadVisited(
   state: AppState,
   threadId: ThreadId,
@@ -3873,11 +3815,6 @@ export function markThreadVisited(
   });
 }
 
-/**
- * 标记线程为未�? *
- * @description �?lastVisitedAt 设置为最新回合完成时间之�?1ms�? * 使线程在侧边栏中显示为未读状态�? *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @returns 更新后的应用状�? */
 export function markThreadUnread(state: AppState, threadId: ThreadId): AppState {
   return applyThreadUpdate(state, threadId, (thread) => {
     if (!thread.latestTurn?.completedAt) return thread;
@@ -3889,10 +3826,6 @@ export function markThreadUnread(state: AppState, threadId: ThreadId): AppState 
   });
 }
 
-/**
- * 切换项目展开/折叠状�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @returns 更新后的应用状�? */
 export function toggleProject(state: AppState, projectId: Project["id"]): AppState {
   return {
     ...state,
@@ -3900,11 +3833,6 @@ export function toggleProject(state: AppState, projectId: Project["id"]): AppSta
   };
 }
 
-/**
- * 设置项目展开状�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @param expanded - 是否展开
- * @returns 更新后的应用状�? */
 export function setProjectExpanded(
   state: AppState,
   projectId: Project["id"],
@@ -3919,10 +3847,6 @@ export function setProjectExpanded(
   return changed ? { ...state, projects } : state;
 }
 
-/**
- * 设置所有项目的展开状�? *
- * @param state - 当前应用状�? * @param expanded - 是否展开
- * @returns 更新后的应用状�? */
 export function setAllProjectsExpanded(state: AppState, expanded: boolean): AppState {
   let changed = false;
   const projects = state.projects.map((project) => {
@@ -3933,9 +3857,7 @@ export function setAllProjectsExpanded(state: AppState, expanded: boolean): AppS
   return changed ? { ...state, projects } : state;
 }
 
-// 仅保留一个项目展开，使批量折叠保留活跃聊天的上下文�?/**
- * 折叠除指定项目外的所有项�? *
- * @param state - 当前应用状�? * @param activeProjectId - 保持展开的项�?ID，为 null 时折叠全�? * @returns 更新后的应用状�? */
+// Keep just one project expanded so bulk collapse preserves the active chat context.
 export function collapseProjectsExcept(
   state: AppState,
   activeProjectId: Project["id"] | null,
@@ -3950,12 +3872,6 @@ export function collapseProjectsExcept(
   return changed ? { ...state, projects } : state;
 }
 
-/**
- * 重排项目顺序
- *
- * @param state - 当前应用状�? * @param draggedProjectId - 被拖拽的项目 ID
- * @param targetProjectId - 目标位置的项�?ID
- * @returns 更新后的应用状�? */
 export function reorderProjects(
   state: AppState,
   draggedProjectId: Project["id"],
@@ -3972,12 +3888,6 @@ export function reorderProjects(
   return { ...state, projects };
 }
 
-/**
- * 本地重命名项�? *
- * @description 仅修改本地展示名称，不影响远程仓库名称�? * 重命名后立即持久化到 localStorage�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @param name - 新名称，�?null 时恢复为远程名称
- * @returns 更新后的应用状�? */
 export function renameProjectLocally(
   state: AppState,
   projectId: Project["id"],
@@ -4004,11 +3914,6 @@ export function renameProjectLocally(
   return changed ? { ...state, projects } : state;
 }
 
-/**
- * 设置线程错误信息
- *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param error - 错误信息，为 null 时清�? * @returns 更新后的应用状�? */
 export function setError(state: AppState, threadId: ThreadId, error: string | null): AppState {
   return applyThreadUpdate(state, threadId, (thread) => {
     if (thread.error === error) return thread;
@@ -4016,11 +3921,6 @@ export function setError(state: AppState, threadId: ThreadId, error: string | nu
   });
 }
 
-/**
- * 设置线程工作区状�? *
- * @description 部分更新线程的工作区信息（环境模式、分支、工作树路径等）�? * 当工作目录变化时清除会话状态�? *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param patch - 工作区状态补�? * @returns 更新后的应用状�? */
 export function setThreadWorkspace(
   state: AppState,
   threadId: ThreadId,
@@ -4085,9 +3985,8 @@ export function setThreadWorkspace(
   });
 }
 
-// ── Zustand Store ────────────────────────────────────────────────────
+// ── Zustand store ────────────────────────────────────────────────────
 
-/** 应用 Store 接口，扩�?AppState 增加操作方法 */
 interface AppStore extends AppState {
   syncServerShellSnapshot: (snapshot: OrchestrationShellSnapshot) => void;
   syncServerThreadDetail: (thread: ReadModelThread) => void;
@@ -4108,7 +4007,6 @@ interface AppStore extends AppState {
   setThreadWorkspace: (threadId: ThreadId, patch: ThreadWorkspacePatch) => void;
 }
 
-/** Zustand 应用 Store 实例 */
 export const useStore = create<AppStore>((set) => ({
   ...readPersistedState(),
   syncServerShellSnapshot: (snapshot) => set((state) => syncServerShellSnapshot(state, snapshot)),
@@ -4145,24 +4043,20 @@ export const useStore = create<AppStore>((set) => ({
     set((state) => setThreadWorkspace(state, threadId, patch)),
 }));
 
-// 通过防抖订阅持久化状态变更，避免 localStorage 频繁写入
+// Persist state changes with debouncing to avoid localStorage thrashing
 useStore.subscribe((state) => {
   rememberProjectUiState(state.projects);
   rememberProjectLocalNames(state.projects);
   debouncedPersistState.maybeExecute(state);
 });
 
-// 页面卸载前同步刷新待写入的持久化数据，防止数据丢�?if (typeof window !== "undefined") {
+// Flush pending writes synchronously before page unload to prevent data loss.
+if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", () => {
     persistAppStateNow();
   });
 }
 
-/**
- * Store Provider 组件
- *
- * @description 在组件挂载时立即持久化当前状态，确保初始状态被正确保存�? * 仅作�?Zustand Store 的入口包装，不提�?Context�? *
- * @param props.children - 子组�? */
 export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     persistAppStateNow();

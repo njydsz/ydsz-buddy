@@ -52,8 +52,9 @@ use commands::{
 use std::net::SocketAddr;
 use std::sync::Arc;
 use remi_config::ServerConfig;
-use remi_server::{bootstrap_embedded, start_server, BootstrapResult, shutdown_reactors};
+use remi_server::{bootstrap_embedded, start_server, BootstrapResult};
 use tracing::{info, error};
+use tauri::Emitter;
 
 /// 嵌入式服务器状态
 ///
@@ -140,7 +141,6 @@ pub fn run() {
 
     // 创建 Tokio 运行时
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-    let _guard = runtime.enter();
 
     // 启动嵌入式 remi-server
     info!("启动嵌入式 remi-server...");
@@ -170,6 +170,11 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())   // 系统通知
         .plugin(tauri_plugin_process::init())        // 进程管理
         .plugin(tauri_plugin_updater::Builder::new().build()) // 应用自动更新
+
+        // ========== 菜单事件处理 ==========
+        .on_menu_event(|app_handle, event| {
+            let _ = app_handle.emit("context_menu://selected", event.id.0.clone());
+        })
 
         // ========== 全局状态注入 ==========
         // 每个 State 对象在整个应用生命周期内唯一，各命令通过 `State<'_, XxxState>` 获取

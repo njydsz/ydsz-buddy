@@ -27,7 +27,7 @@
 
 use serde::Deserialize;
 use tauri::menu::{Menu, MenuBuilder, MenuItem, MenuItemBuilder};
-use tauri::{AppHandle, Emitter, Manager, Runtime};
+use tauri::{AppHandle, Manager, Runtime};
 
 /// 上下文菜单项结构
 ///
@@ -92,13 +92,6 @@ pub async fn show_context_menu<R: Runtime>(
     let menu: Menu<R> = menu_builder
         .build()
         .map_err(|e| format!("构建菜单失败: {e}"))?;
-
-    // 监听菜单项点击事件
-    let app_handle_for_event = app.clone();
-    menu.set_app_event_handler(move |_app, menu_id| {
-        let id = menu_id.0.clone();
-        let _ = app_handle_for_event.emit("context_menu://selected", id);
-    });
 
     // 弹出菜单
     if let Some(win) = app.get_webview_window("main") {

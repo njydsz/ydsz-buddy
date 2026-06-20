@@ -200,7 +200,7 @@ impl PushChannelManager {
     ///
     /// 初始化所有预定义的推送通道，每个通道的广播容量为 1000 条消息。
     /// 当消息堆积超过容量时，旧的未消费消息会被丢弃。
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
         let channels = Arc::new(RwLock::new(HashMap::new()));
 
         // 初始化所有通道
@@ -218,7 +218,7 @@ impl PushChannelManager {
         let channel_count = channel_names.len();
         for name in channel_names {
             let (tx, _) = broadcast::channel(1000);
-            channels.blocking_write().insert(name.to_string(), tx);
+            channels.write().await.insert(name.to_string(), tx);
         }
 
         info!("推送通道管理器初始化完成，共 {} 个通道", channel_count);
@@ -386,11 +386,5 @@ impl PushChannelManager {
                 }
             })
             .collect()
-    }
-}
-
-impl Default for PushChannelManager {
-    fn default() -> Self {
-        Self::new()
     }
 }

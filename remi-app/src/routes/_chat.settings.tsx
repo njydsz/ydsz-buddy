@@ -9,10 +9,10 @@ import {
   type ServerProviderStatus,
   type ThreadId,
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
-} from "~/contracts";
+} from "@peakcode/contracts";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getModelOptions, normalizeModelSlug } from "~/shared/model";
+import { getModelOptions, normalizeModelSlug } from "@peakcode/shared/model";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,
@@ -77,7 +77,6 @@ import { resolveAndPersistPreferredEditor } from "../editorPreferences";
 import { isElectron } from "../env";
 import { useTheme } from "../hooks/useTheme";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
-import { tauriBridge } from "../lib/tauri-bridge";
 import {
   ArchiveIcon,
   ChevronDownIcon,
@@ -155,7 +154,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "tongyi",
     name: "通义千问",
-    subtitle: "阿里�?· 百炼平台",
+    subtitle: "阿里云 · 百炼平台",
     iconColor: "#F97316",
   },
   {
@@ -280,7 +279,7 @@ function SortableProviderVisibilityRow(props: {
         transition,
       }}
       className={cn(
-        "flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-(--color-background-elevated-secondary)/40 px-3 py-2.5",
+        "flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-[var(--color-background-elevated-secondary)]/40 px-3 py-2.5",
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
@@ -288,7 +287,7 @@ function SortableProviderVisibilityRow(props: {
         <button
           type="button"
           ref={setActivatorNodeRef}
-          className="inline-flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-foreground active:cursor-grabbing"
+          className="inline-flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-foreground active:cursor-grabbing"
           aria-label={`Reorder ${props.option.title}`}
           {...attributes}
           {...listeners}
@@ -510,7 +509,7 @@ function SettingsRow({
 }) {
   return (
     <div
-      className="rounded-xl border border-(--color-border-light) bg-(--color-background-panel) px-4 py-3.5 transition-colors hover:bg-(--sidebar-accent)"
+      className="rounded-xl border border-[color:var(--color-border-light)] bg-[var(--color-background-panel)] px-4 py-3.5 transition-colors hover:bg-[var(--sidebar-accent)]"
       data-slot="settings-row"
     >
       <div
@@ -585,7 +584,7 @@ function ProviderDocsLinks({
   label: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/60 bg-(--color-background-elevated-secondary)/35 px-3 py-2.5">
+    <div className="rounded-lg border border-border/60 bg-[var(--color-background-elevated-secondary)]/35 px-3 py-2.5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-xs font-medium text-foreground">{label}</span>
         <div className="flex flex-wrap gap-2">
@@ -595,7 +594,7 @@ function ProviderDocsLinks({
               href={doc.href}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-(--color-background-panel) hover:text-foreground"
+              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-[var(--color-background-panel)] hover:text-foreground"
             >
               <span>{doc.label}</span>
               <ExternalLinkIcon className="size-3" />
@@ -747,7 +746,7 @@ function SettingsRouteView() {
   );
   const orderedProviderVisibilityOptions = useMemo(
     () =>
-      settings.providerOrder.flatMap((provider: ProviderKind) => {
+      settings.providerOrder.flatMap((provider) => {
         const option = providerVisibilityOptionsByProvider.get(provider);
         return option ? [option] : [];
       }),
@@ -1021,7 +1020,7 @@ function SettingsRouteView() {
         }));
         return;
       }
-      if (getModelOptions(provider).some((option: { slug: string }) => option.slug === normalized)) {
+      if (getModelOptions(provider).some((option) => option.slug === normalized)) {
         setCustomModelErrorByProvider((existing) => ({
           ...existing,
           [provider]: "That model is already built in.",
@@ -1206,8 +1205,8 @@ function SettingsRouteView() {
     const title = "Activity notification";
     const body = "Notification test for chats and terminal agents.";
 
-    if (tauriBridge) {
-      const shown = await tauriBridge.notifications.show({ title, body, silent: false });
+    if (window.desktopBridge) {
+      const shown = await window.desktopBridge.notifications.show({ title, body, silent: false });
       toastManager.add({
         type: shown ? "success" : "warning",
         title: shown ? "Test notification sent" : "Notifications unavailable",
@@ -1468,7 +1467,7 @@ function SettingsRouteView() {
                   className="w-full sm:w-44"
                   aria-label={messages.settings.general.language.title}
                 >
-                  <SelectValue>{NATIVE_LANGUAGE_LABELS[settings.language as keyof typeof NATIVE_LANGUAGE_LABELS]}</SelectValue>
+                  <SelectValue>{NATIVE_LANGUAGE_LABELS[settings.language]}</SelectValue>
                 </SelectTrigger>
                 <SelectPopup align="end" alignItemWithTrigger={false}>
                   {SUPPORTED_LANGUAGES.map((language) => (
@@ -1534,7 +1533,7 @@ function SettingsRouteView() {
                       ) : (
                         <OpenAI className="size-3.5" />
                       )}
-                      {PROVIDER_DISPLAY_NAMES[settings.defaultProvider as ProviderKind]}
+                      {PROVIDER_DISPLAY_NAMES[settings.defaultProvider]}
                     </span>
                   </SelectValue>
                 </SelectTrigger>
@@ -1902,7 +1901,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM�?
+                  placeholder="-apple-system, BlinkM…"
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2552,7 +2551,7 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
+            description="启动后可通过统一本地端点访问所有已启用的模型渠道。"
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2578,7 +2577,7 @@ function SettingsRouteView() {
                   ].map((ep) => (
                     <div
                       key={ep.label}
-                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm hover:bg-(--sidebar-accent)"
+                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm hover:bg-[var(--sidebar-accent)]"
                     >
                       <div className="flex items-center gap-4">
                         <span className="w-20 text-xs text-muted-foreground">{ep.label}</span>
@@ -2586,7 +2585,7 @@ function SettingsRouteView() {
                       </div>
                       <button
                         type="button"
-                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-foreground"
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-foreground"
                         onClick={() => {
                           void navigator.clipboard.writeText(ep.url);
                           toastManager.add({ title: "Copied to clipboard", type: "success" });
@@ -2650,7 +2649,7 @@ function SettingsRouteView() {
                   ].map((agent) => (
                     <div
                       key={agent.name}
-                      className="flex items-center justify-between rounded-lg border border-border/40 bg-(--color-background-panel) px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-border/40 bg-[var(--color-background-panel)] px-3 py-2.5"
                     >
                       <div className="flex items-center gap-2.5">
                         <div
@@ -2859,10 +2858,10 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="服务渠道"
-            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
+            description="管理第三方模型 API 渠道接入，启用后可在对应提供商中使用这些渠道。"
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启用)
               </span>
             }
           >
@@ -2873,7 +2872,7 @@ function SettingsRouteView() {
                   return (
                     <div
                       key={channel.id}
-                      className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 px-3 py-2.5 transition-colors hover:bg-(--sidebar-accent)"
+                      className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 px-3 py-2.5 transition-colors hover:bg-[var(--sidebar-accent)]"
                     >
                       <div
                         className="flex size-8 shrink-0 items-center justify-center rounded-md"
@@ -2964,20 +2963,20 @@ function SettingsRouteView() {
               onDragEnd={handleProviderOrderDragEnd}
             >
               <SortableContext
-                items={orderedProviderVisibilityOptions.map((option: { provider: string }) => option.provider)}
+                items={orderedProviderVisibilityOptions.map((option) => option.provider)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="mt-4 space-y-2">
-                  {orderedProviderVisibilityOptions.map((option: { provider: ProviderKind; title: string }) => (
+                  {orderedProviderVisibilityOptions.map((option) => (
                     <SortableProviderVisibilityRow
                       key={option.provider}
                       option={option}
-                      isHidden={hiddenProviderSet.has(option.provider as ProviderKind)}
+                      isHidden={hiddenProviderSet.has(option.provider)}
                       onHiddenChange={(hidden) =>
                         updateSettings({
                           hiddenProviders: setProviderHidden(
                             settings.hiddenProviders,
-                            option.provider as ProviderKind,
+                            option.provider,
                             hidden,
                           ),
                         })

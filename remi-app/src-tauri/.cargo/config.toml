@@ -1,1 +1,6 @@
 # Cargo configuration for Tauri build
+
+# Use a short target path to avoid Windows path length issues
+# (default target path is too long for some systems)
+[build]
+target-dir = "C:/rust-target/remi-app"
