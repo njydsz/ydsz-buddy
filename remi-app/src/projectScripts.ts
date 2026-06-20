@@ -4,7 +4,6 @@ import {
   type KeybindingCommand,
   type ProjectScript,
 } from "@remi-code/contracts";
-import { Schema } from "effect";
 
 function normalizeScriptId(value: string): string {
   const cleaned = value
@@ -26,7 +25,7 @@ export const commandForProjectScript = (scriptId: string): KeybindingCommand =>
 
 export function projectScriptIdFromCommand(command: string): string | null {
   const trimmed = command.trim();
-  if (!Schema.is(SCRIPT_RUN_COMMAND_PATTERN)(trimmed)) {
+  if (!SCRIPT_RUN_COMMAND_PATTERN.is(trimmed)) {
     return null;
   }
   const [prefix, , suffix] = SCRIPT_RUN_COMMAND_PATTERN.parts;

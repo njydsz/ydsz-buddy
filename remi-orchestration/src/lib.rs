@@ -108,9 +108,11 @@ pub mod error;
 pub mod projector;
 pub mod query;
 pub mod reactor;
+pub mod runtime_receipt_bus;
 
 pub use engine::*;
 pub use error::*;
 pub use projector::*;
 pub use query::*;
 pub use reactor::*;
+pub use runtime_receipt_bus::*;

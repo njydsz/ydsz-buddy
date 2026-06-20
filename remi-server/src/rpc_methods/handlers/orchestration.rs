@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use remi_core::commands::OrchestrationCommand;
 use remi_core::models::ThreadId;
-use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use serde_json::Value;
 use tracing::info;
 

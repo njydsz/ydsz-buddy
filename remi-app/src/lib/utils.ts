@@ -1,8 +1,6 @@
 import { CommandId, MessageId, ProjectId, ThreadId } from "@remi-code/contracts";
 import { type CxOptions, cx } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
-import * as Random from "effect/Random";
-import * as Effect from "effect/Effect";
 
 export function cn(...inputs: CxOptions) {
   return twMerge(cx(inputs));
@@ -24,7 +22,12 @@ export function randomUUID(): string {
   if (typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return Effect.runSync(Random.nextUUIDv4);
+  // Fallback UUID v4 implementation for environments without crypto.randomUUID
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 export const newCommandId = (): CommandId => CommandId.makeUnsafe(randomUUID());

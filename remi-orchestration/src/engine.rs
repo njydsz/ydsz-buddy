@@ -467,14 +467,51 @@ impl OrchestrationEngine {
         match command {
             // ==================== 项目命令 ====================
             OrchestrationCommand::ProjectCreate(c) => {
-                Ok(vec![OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
+                let mut events = Vec::new();
+
+                // 查询所有项目，找出相同 workspace_root 的 stale 项目
+                let all_projects = self.projection_repo.list_projects()?;
+                let stale_projects: Vec<_> = all_projects
+                    .into_iter()
+                    .filter(|p| p.workspace_root == c.workspace_root && p.id != c.project_id)
+                    .collect();
+
+                // 检查 stale 项目是否还有活跃线程
+                for stale_project in &stale_projects {
+                    let threads = self.projection_repo.list_threads()?;
+                    let active_threads: Vec<_> = threads
+                        .into_iter()
+                        .filter(|t| t.project_id == stale_project.id && t.deleted_at.is_none())
+                        .collect();
+
+                    if !active_threads.is_empty() {
+                        // 如果有活跃线程，返回错误
+                        return Err(OrchestrationError::CommandError(format!(
+                            "Project '{}' already uses workspace root '{}'.",
+                            stale_project.id, stale_project.workspace_root
+                        )));
+                    }
+
+                    // 如果没有活跃线程，生成 ProjectDeleted 事件
+                    events.push(OrchestrationEvent::ProjectDeleted(remi_core::events::ProjectDeletedEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        project_id: stale_project.id,
+                    }));
+                }
+
+                // 生成 ProjectCreated 事件
+                events.push(OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
                     project_id: c.project_id,
                     title: c.title,
                     workspace_root: c.workspace_root,
-                })])
+                }));
+
+                Ok(events)
             }
             OrchestrationCommand::ProjectMetaUpdate(c) => {
                 Ok(vec![OrchestrationEvent::ProjectMetaUpdated(remi_core::events::ProjectMetaUpdatedEvent {
@@ -692,13 +729,20 @@ impl OrchestrationEngine {
             OrchestrationCommand::ThreadTurnStart(c) => {
                 // 1. 查询线程状态，判断是否需要排队
                 let thread = self.projection_repo.get_thread(c.thread_id)?;
-                let should_queue = if let Some(ref t) = thread {
-                    // 如果当前有正在运行的 Turn，则需要排队
-                    t.latest_turn.as_ref().map_or(false, |turn| {
+                let (should_queue, active_turn_id) = if let Some(ref t) = thread {
+                    let is_running = t.latest_turn.as_ref().map_or(false, |turn| {
                         turn.status == remi_core::models::TurnStatus::Running
-                    })
+                    });
+                    let active_id = t.latest_turn.as_ref().and_then(|turn| {
+                        if turn.status == remi_core::models::TurnStatus::Running {
+                            Some(turn.id.clone())
+                        } else {
+                            None
+                        }
+                    });
+                    (is_running, active_id)
                 } else {
-                    false
+                    (false, None)
                 };
 
                 // 2. 生成用户消息事件
@@ -725,25 +769,47 @@ impl OrchestrationEngine {
                 });
 
                 // 3. 根据排队状态生成 Turn 事件
-                let turn_event = if should_queue {
-                    OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
-                        sequence: 0,
-                        occurred_at: now,
-                        command_id: command_id.clone(),
-                        thread_id: c.thread_id,
-                        turn_id: c.turn_id.clone(),
-                    })
-                } else {
-                    OrchestrationEvent::ThreadTurnStartRequested(remi_core::events::ThreadTurnStartRequestedEvent {
-                        sequence: 0,
-                        occurred_at: now,
-                        command_id: command_id.clone(),
-                        thread_id: c.thread_id,
-                        turn_id: c.turn_id.clone(),
-                    })
-                };
+                let mut events = vec![user_event];
 
-                Ok(vec![user_event, turn_event])
+                if should_queue {
+                    // 生成排队事件
+                    let queued_event = OrchestrationEvent::ThreadTurnQueued(remi_core::events::ThreadTurnQueuedEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        turn_id: c.turn_id.clone(),
+                    });
+                    events.push(queued_event);
+
+                    // 如果是 steer 模式且有活动的 Turn，生成中断事件
+                    if c.dispatch_mode == remi_core::models::DispatchMode::Steer {
+                        if let Some(active_id) = active_turn_id {
+                            let interrupt_event = OrchestrationEvent::ThreadTurnInterruptRequested(
+                                remi_core::events::ThreadTurnInterruptRequestedEvent {
+                                    sequence: 0,
+                                    occurred_at: now,
+                                    command_id: command_id.clone(),
+                                    thread_id: c.thread_id,
+                                    turn_id: active_id,
+                                },
+                            );
+                            events.push(interrupt_event);
+                        }
+                    }
+                } else {
+                    // 不需要排队，直接启动 Turn
+                    let start_event = OrchestrationEvent::ThreadTurnStartRequested(remi_core::events::ThreadTurnStartRequestedEvent {
+                        sequence: 0,
+                        occurred_at: now,
+                        command_id: command_id.clone(),
+                        thread_id: c.thread_id,
+                        turn_id: c.turn_id.clone(),
+                    });
+                    events.push(start_event);
+                }
+
+                Ok(events)
             }
             OrchestrationCommand::ThreadTurnInterrupt(c) => {
                 Ok(vec![OrchestrationEvent::ThreadTurnInterruptRequested(remi_core::events::ThreadTurnInterruptRequestedEvent {

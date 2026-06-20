@@ -3,8 +3,7 @@
 use std::sync::Arc;
 
 use remi_workspace::{
-    BrowseInput, ListDirectoriesInput, SearchEntriesInput, WorkspaceEntries, WorkspaceFileSystem,
-    WriteFileInput,
+    BrowseInput, ListDirectoriesInput, SearchEntriesInput, WriteFileInput,
 };
 use serde_json::Value;
 use tracing::info;

@@ -822,7 +822,7 @@ export interface OrchestrationThreadShell {
   /** 侧聊源线程 ID（可选） */
   sidechatSourceThreadId?: ThreadId | null;
   /** 最后已知的 PR 信息（可选） */
-  lastKnownPR?: OrchestrationThreadPullRequest | null;
+  lastKnownPr?: OrchestrationThreadPullRequest | null;
   /** 最新轮次信息 */
   latestTurn: OrchestrationLatestTurn | null;
   /** 最后用户消息时间（可选） */

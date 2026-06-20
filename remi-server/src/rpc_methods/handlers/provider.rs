@@ -3,7 +3,6 @@
 use std::sync::Arc;
 
 use remi_core::provider::ProviderKind;
-use remi_provider::ProviderService;
 use serde_json::Value;
 use tracing::info;
 

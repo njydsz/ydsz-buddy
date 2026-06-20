@@ -162,6 +162,62 @@ pub struct PullRequestInfo {
     pub url: String,
 }
 
+/// 详细 Git 状态信息
+///
+/// 包含比 `GitStatusResult` 更详细的仓库状态，包括分支计数和上游跟踪状态。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitStatusDetails {
+    /// 当前分支名称（detached HEAD 状态下为 None）
+    pub branch: Option<String>,
+    /// 上游跟踪分支引用
+    pub upstream_ref: Option<String>,
+    /// 是否有上游跟踪分支
+    pub has_upstream: bool,
+    /// 领先上游的提交数
+    pub ahead_count: u32,
+    /// 落后上游的提交数
+    pub behind_count: u32,
+    /// 工作区是否"脏"（有未提交的更改）
+    pub is_dirty: bool,
+    /// 已暂存的文件列表
+    pub staged_files: Vec<String>,
+    /// 已修改但未暂存的文件列表
+    pub modified_files: Vec<String>,
+    /// 未跟踪的文件列表
+    pub untracked_files: Vec<String>,
+}
+
+/// 工作区补丁
+///
+/// 封装工作区与 HEAD 之间的统一补丁格式差异。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitWorkingTreePatch {
+    /// 统一补丁格式的差异内容
+    pub patch: String,
+}
+
+/// 准备提交上下文
+///
+/// 包含提交所需的暂存摘要和补丁信息。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitPreparedCommitContext {
+    /// 暂存文件的状态摘要（name-status 格式）
+    pub staged_summary: String,
+    /// 暂存文件的补丁内容
+    pub staged_patch: String,
+}
+
+/// 范围上下文
+///
+/// 包含基础分支与当前 HEAD 之间的提交列表和差异补丁。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitRangeContext {
+    /// 提交列表（oneline 格式）
+    pub commits: Vec<String>,
+    /// 差异补丁内容
+    pub patch: String,
+}
+
 /// Git 核心服务
 ///
 /// 提供所有底层 Git 操作的封装。本结构体是无状态的，所有方法都通过 `&self` 调用。
@@ -1307,6 +1363,666 @@ impl GitCore {
             .collect();
 
         Ok(branches)
+    }
+
+    /// 获取详细的 Git 状态信息
+    ///
+    /// 获取比 `status` 更详细的仓库状态信息，包括分支计数、上游跟踪状态等。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitStatusDetails)`: 详细状态信息
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn status_details(&self, cwd: &str) -> GitResult<GitStatusDetails> {
+        // 获取当前分支
+        let branch_result = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --abbrev-ref HEAD".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["rev-parse".to_string(), "--abbrev-ref".to_string(), "HEAD".to_string()],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let branch = if branch_result.code == 0 {
+            let b = branch_result.stdout.trim();
+            if b == "HEAD" { None } else { Some(b.to_string()) }
+        } else {
+            None
+        };
+
+        // 获取上游引用
+        let upstream_result = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --abbrev-ref --symbolic-full-name @{u}".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "rev-parse".to_string(),
+                    "--abbrev-ref".to_string(),
+                    "--symbolic-full-name".to_string(),
+                    "@{u}".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let upstream_ref = if upstream_result.code == 0 {
+            Some(upstream_result.stdout.trim().to_string())
+        } else {
+            None
+        };
+
+        // 获取 ahead/behind 计数
+        let (ahead_count, behind_count) = if upstream_ref.is_some() {
+            let count_result = self
+                .execute(ExecuteGitInput {
+                    operation: "rev-list --left-right --count HEAD...@{u}".to_string(),
+                    cwd: cwd.to_string(),
+                    args: vec![
+                        "rev-list".to_string(),
+                        "--left-right".to_string(),
+                        "--count".to_string(),
+                        "HEAD...@{u}".to_string(),
+                    ],
+                    env: vec![],
+                    allow_non_zero_exit: true,
+                    timeout_ms: None,
+                })
+                .await?;
+
+            if count_result.code == 0 {
+                let parts: Vec<&str> = count_result.stdout.trim().split_whitespace().collect();
+                if parts.len() == 2 {
+                    let ahead = parts[0].parse::<u32>().unwrap_or(0);
+                    let behind = parts[1].parse::<u32>().unwrap_or(0);
+                    (ahead, behind)
+                } else {
+                    (0, 0)
+                }
+            } else {
+                (0, 0)
+            }
+        } else {
+            (0, 0)
+        };
+
+        // 获取文件状态
+        let status_result = self
+            .execute(ExecuteGitInput {
+                operation: "status --porcelain".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["status".to_string(), "--porcelain".to_string()],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let mut staged_files = Vec::new();
+        let mut modified_files = Vec::new();
+        let mut untracked_files = Vec::new();
+
+        for line in status_result.stdout.lines() {
+            if line.len() < 3 {
+                continue;
+            }
+            let status = &line[0..2];
+            let file = line[3..].to_string();
+            match status {
+                "??" => untracked_files.push(file),
+                "M " | "A " | "D " => staged_files.push(file),
+                " M" | " A" | " D" => modified_files.push(file),
+                "MM" | "AM" | "DM" => {
+                    staged_files.push(file.clone());
+                    modified_files.push(file);
+                }
+                _ => {}
+            }
+        }
+
+        let is_dirty = !staged_files.is_empty() || !modified_files.is_empty() || !untracked_files.is_empty();
+        let has_upstream = upstream_ref.is_some();
+
+        Ok(GitStatusDetails {
+            branch,
+            upstream_ref,
+            has_upstream,
+            ahead_count,
+            behind_count,
+            is_dirty,
+            staged_files,
+            modified_files,
+            untracked_files,
+        })
+    }
+
+    /// 读取工作区统一补丁
+    ///
+    /// 获取工作区（包括未跟踪文件）与 HEAD 之间的统一补丁。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitWorkingTreePatch)`: 工作区补丁
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn read_working_tree_patch(&self, cwd: &str) -> GitResult<GitWorkingTreePatch> {
+        // 检查 HEAD 是否存在
+        let head_exists = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --verify HEAD".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["rev-parse".to_string(), "--verify".to_string(), "HEAD".to_string()],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let tracked_patch = if head_exists.code == 0 {
+            self.diff(cwd, false).await?
+        } else {
+            // 空仓库，使用空树对象
+            let result = self
+                .execute(ExecuteGitInput {
+                    operation: "diff HEAD".to_string(),
+                    cwd: cwd.to_string(),
+                    args: vec![
+                        "diff".to_string(),
+                        "--patch".to_string(),
+                        "--no-color".to_string(),
+                        "--no-ext-diff".to_string(),
+                        "HEAD".to_string(),
+                    ],
+                    env: vec![],
+                    allow_non_zero_exit: true,
+                    timeout_ms: Some(60000),
+                })
+                .await?;
+            result.stdout
+        };
+
+        // 获取未跟踪文件的补丁
+        let untracked_patches = self.read_untracked_patches(cwd).await?;
+
+        let mut full_patch = tracked_patch;
+        for patch in untracked_patches {
+            if !full_patch.is_empty() && !full_patch.ends_with('\n') {
+                full_patch.push('\n');
+            }
+            full_patch.push_str(&patch);
+        }
+
+        Ok(GitWorkingTreePatch { patch: full_patch })
+    }
+
+    /// 读取未暂存更改补丁
+    ///
+    /// 获取未暂存的已跟踪更改加上未跟踪文件的补丁。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitWorkingTreePatch)`: 未暂存补丁
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn read_unstaged_patch(&self, cwd: &str) -> GitResult<GitWorkingTreePatch> {
+        let tracked_patch = self.diff(cwd, false).await?;
+        let untracked_patches = self.read_untracked_patches(cwd).await?;
+
+        let mut full_patch = tracked_patch;
+        for patch in untracked_patches {
+            if !full_patch.is_empty() && !full_patch.ends_with('\n') {
+                full_patch.push('\n');
+            }
+            full_patch.push_str(&patch);
+        }
+
+        Ok(GitWorkingTreePatch { patch: full_patch })
+    }
+
+    /// 读取已暂存更改补丁
+    ///
+    /// 获取暂存区与 HEAD 之间的补丁。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitWorkingTreePatch)`: 已暂存补丁
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn read_staged_patch(&self, cwd: &str) -> GitResult<GitWorkingTreePatch> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "diff --cached".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    "--cached".to_string(),
+                    "--patch".to_string(),
+                    "--no-color".to_string(),
+                    "--no-ext-diff".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: Some(60000),
+            })
+            .await?;
+
+        Ok(GitWorkingTreePatch { patch: result.stdout })
+    }
+
+    /// 读取分支差异补丁
+    ///
+    /// 获取当前分支与上游/基础分支之间的差异补丁。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitWorkingTreePatch)`: 分支差异补丁
+    /// - `Err(GitError::CommandError)`: 无法解析基础分支或命令执行失败
+    pub async fn read_branch_patch(&self, cwd: &str) -> GitResult<GitWorkingTreePatch> {
+        let details = self.status_details(cwd).await?;
+
+        let base_branch = if let Some(ref upstream) = details.upstream_ref {
+            Some(upstream.clone())
+        } else if let Some(ref branch) = details.branch {
+            // 尝试解析基础分支
+            self.resolve_base_branch(cwd, branch).await.ok()
+        } else {
+            None
+        };
+
+        let base = base_branch.ok_or_else(|| {
+            GitError::CommandError("无法解析当前分支的基础分支".to_string())
+        })?;
+
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "diff base...HEAD".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    "--patch".to_string(),
+                    "--minimal".to_string(),
+                    "--no-color".to_string(),
+                    "--no-ext-diff".to_string(),
+                    format!("{}...HEAD", base),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: Some(60000),
+            })
+            .await?;
+
+        Ok(GitWorkingTreePatch { patch: result.stdout })
+    }
+
+    /// 准备提交上下文
+    ///
+    /// 暂存指定文件（或所有文件）并生成提交所需的摘要和补丁。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `file_paths`: 要暂存的文件路径列表，None 表示暂存所有更改
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Some(GitPreparedCommitContext))`: 提交上下文
+    /// - `Ok(None)`: 没有可提交的更改
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn prepare_commit_context(
+        &self,
+        cwd: &str,
+        file_paths: Option<&[String]>,
+    ) -> GitResult<Option<GitPreparedCommitContext>> {
+        // 暂存文件
+        if let Some(paths) = file_paths {
+            if !paths.is_empty() {
+                // 先重置暂存区
+                let _ = self
+                    .execute(ExecuteGitInput {
+                        operation: "reset".to_string(),
+                        cwd: cwd.to_string(),
+                        args: vec!["reset".to_string()],
+                        env: vec![],
+                        allow_non_zero_exit: true,
+                        timeout_ms: None,
+                    })
+                    .await;
+
+                // 添加指定文件
+                let mut args = vec!["add".to_string(), "-A".to_string(), "--".to_string()];
+                args.extend(paths.iter().cloned());
+                self.execute(ExecuteGitInput {
+                    operation: "add".to_string(),
+                    cwd: cwd.to_string(),
+                    args,
+                    env: vec![],
+                    allow_non_zero_exit: false,
+                    timeout_ms: None,
+                })
+                .await?;
+            }
+        } else {
+            self.execute(ExecuteGitInput {
+                operation: "add -A".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["add".to_string(), "-A".to_string()],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+        }
+
+        // 获取暂存摘要
+        let summary_result = self
+            .execute(ExecuteGitInput {
+                operation: "diff --cached --name-status".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    "--cached".to_string(),
+                    "--name-status".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let staged_summary = summary_result.stdout.trim().to_string();
+        if staged_summary.is_empty() {
+            return Ok(None);
+        }
+
+        // 获取暂存补丁
+        let patch_result = self
+            .execute(ExecuteGitInput {
+                operation: "diff --cached --patch".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    "--cached".to_string(),
+                    "--patch".to_string(),
+                    "--minimal".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        Ok(Some(GitPreparedCommitContext {
+            staged_summary,
+            staged_patch: patch_result.stdout,
+        }))
+    }
+
+    /// 读取范围上下文
+    ///
+    /// 获取基础分支与当前 HEAD 之间的提交和差异上下文。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `base_branch`: 基础分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitRangeContext)`: 范围上下文
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn read_range_context(
+        &self,
+        cwd: &str,
+        base_branch: &str,
+    ) -> GitResult<GitRangeContext> {
+        // 获取提交列表
+        let log_result = self
+            .execute(ExecuteGitInput {
+                operation: "log".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "log".to_string(),
+                    "--oneline".to_string(),
+                    "--no-color".to_string(),
+                    format!("{}...HEAD", base_branch),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let commits: Vec<String> = log_result
+            .stdout
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect();
+
+        // 获取差异补丁
+        let patch_result = self
+            .execute(ExecuteGitInput {
+                operation: "diff base...HEAD".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "diff".to_string(),
+                    "--patch".to_string(),
+                    "--no-color".to_string(),
+                    "--no-ext-diff".to_string(),
+                    format!("{}...HEAD", base_branch),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: Some(60000),
+            })
+            .await?;
+
+        Ok(GitRangeContext {
+            commits,
+            patch: patch_result.stdout,
+        })
+    }
+
+    /// 读取 Git 配置值
+    ///
+    /// 从本地仓库读取指定的 Git 配置值。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `key`: 配置键（如 "user.name"、"remote.origin.url"）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Some(String))`: 配置值
+    /// - `Ok(None)`: 配置不存在
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn read_config_value(&self, cwd: &str, key: &str) -> GitResult<Option<String>> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "config".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["config".to_string(), "--get".to_string(), key.to_string()],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        if result.code == 0 {
+            Ok(Some(result.stdout.trim().to_string()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// 创建分离 worktree
+    ///
+    /// 从指定的分支或引用创建分离的 worktree（不创建新分支）。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 主仓库工作目录
+    /// - `worktree_path`: 新 worktree 的绝对路径
+    /// - `ref_spec`: 要检出的分支或引用
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: worktree 创建成功
+    /// - `Err(GitError::CommandError)`: 创建失败
+    pub async fn create_detached_worktree(
+        &self,
+        cwd: &str,
+        worktree_path: &str,
+        ref_spec: &str,
+    ) -> GitResult<()> {
+        self.execute(ExecuteGitInput {
+            operation: "worktree add --detach".to_string(),
+            cwd: cwd.to_string(),
+            args: vec![
+                "worktree".to_string(),
+                "add".to_string(),
+                "--detach".to_string(),
+                worktree_path.to_string(),
+                ref_spec.to_string(),
+            ],
+            env: vec![],
+            allow_non_zero_exit: false,
+            timeout_ms: None,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// 暂存并切换分支
+    ///
+    /// 暂存当前更改，切换到目标分支，然后恢复暂存。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `branch_name`: 目标分支名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 操作成功
+    /// - `Err(GitError::CommandError)`: 操作失败
+    pub async fn stash_and_checkout(&self, cwd: &str, branch_name: &str) -> GitResult<()> {
+        // 暂存当前更改
+        self.stash(cwd).await?;
+
+        // 切换分支
+        let checkout_result = self.checkout_branch(cwd, branch_name).await;
+
+        // 恢复暂存
+        let _ = self.stash_pop(cwd).await;
+
+        checkout_result
+    }
+
+    /// 读取未跟踪文件的补丁（内部辅助方法）
+    async fn read_untracked_patches(&self, cwd: &str) -> GitResult<Vec<String>> {
+        // 获取未跟踪文件列表
+        let status_result = self
+            .execute(ExecuteGitInput {
+                operation: "status --porcelain".to_string(),
+                cwd: cwd.to_string(),
+                args: vec!["status".to_string(), "--porcelain".to_string()],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        let untracked_files: Vec<String> = status_result
+            .stdout
+            .lines()
+            .filter(|line| line.starts_with("??"))
+            .map(|line| line[3..].to_string())
+            .collect();
+
+        let mut patches = Vec::new();
+        for file in untracked_files {
+            // 为每个未跟踪文件生成补丁
+            let result = self
+                .execute(ExecuteGitInput {
+                    operation: "diff /dev/null file".to_string(),
+                    cwd: cwd.to_string(),
+                    args: vec![
+                        "diff".to_string(),
+                        "--no-index".to_string(),
+                        "--patch".to_string(),
+                        "--no-color".to_string(),
+                        "--src-prefix=a/".to_string(),
+                        "--dst-prefix=b/".to_string(),
+                        "--".to_string(),
+                        "/dev/null".to_string(),
+                        file.clone(),
+                    ],
+                    env: vec![],
+                    allow_non_zero_exit: true,
+                    timeout_ms: Some(30000),
+                })
+                .await?;
+
+            if !result.stdout.is_empty() {
+                patches.push(result.stdout);
+            }
+        }
+
+        Ok(patches)
+    }
+
+    /// 解析基础分支（内部辅助方法）
+    async fn resolve_base_branch(&self, cwd: &str, branch: &str) -> GitResult<String> {
+        // 尝试常见的 base 分支
+        for base in &["main", "master", "develop"] {
+            let result = self
+                .execute(ExecuteGitInput {
+                    operation: "merge-base".to_string(),
+                    cwd: cwd.to_string(),
+                    args: vec![
+                        "merge-base".to_string(),
+                        base.to_string(),
+                        branch.to_string(),
+                    ],
+                    env: vec![],
+                    allow_non_zero_exit: true,
+                    timeout_ms: None,
+                })
+                .await?;
+
+            if result.code == 0 {
+                return Ok(base.to_string());
+            }
+        }
+
+        Err(GitError::CommandError(format!(
+            "无法为分支 '{}' 解析基础分支",
+            branch
+        )))
     }
 }
 

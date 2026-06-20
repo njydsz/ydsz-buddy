@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use remi_git::{GitAction, GitCore, GitManager, GitRunStackedActionInput, GitStatusBroadcaster};
+use remi_git::{GitAction, GitRunStackedActionInput};
 use serde_json::Value;
 use tracing::info;
 

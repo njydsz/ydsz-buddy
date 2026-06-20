@@ -235,6 +235,7 @@ mod tests {
     use crate::migrations::run_migrations;
     use chrono::Utc;
     use remi_core::models::ThreadId;
+    use uuid::Uuid;
 
     #[test]
     fn test_checkpoint_store() {

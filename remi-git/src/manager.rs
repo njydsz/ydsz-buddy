@@ -673,4 +673,238 @@ impl GitManager {
 
         Ok(())
     }
+
+    /// 生成差异摘要
+    ///
+    /// 将 diff 补丁转换为 Markdown 格式的可读摘要，用于代码审查和文档生成。
+    ///
+    /// # 参数
+    ///
+    /// - `diff`: 统一格式的 diff 补丁内容
+    /// - `max_length`: 摘要最大长度（可选，默认为 4000 字符）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: Markdown 格式的差异摘要
+    /// - `Err(GitError)`: 生成失败
+    ///
+    /// # 使用场景
+    ///
+    /// - 为 PR 描述生成变更摘要
+    /// - 为 AI Agent 提供代码变更的结构化描述
+    /// - 生成提交消息建议
+    ///
+    /// # 实现细节
+    ///
+    /// 解析 diff 输出，提取：
+    /// - 修改的文件列表
+    /// - 每个文件的增删行数统计
+    /// - 关键变更的简要描述
+    pub async fn summarize_diff(&self, diff: &str, max_length: Option<usize>) -> GitResult<String> {
+        let max_len = max_length.unwrap_or(4000);
+        info!("生成差异摘要，最大长度: {}", max_len);
+
+        let mut summary = String::new();
+        let mut files_changed = Vec::new();
+        let mut total_additions = 0;
+        let mut total_deletions = 0;
+
+        // 解析 diff 输出
+        let mut current_file = None;
+        let mut file_additions = 0;
+        let mut file_deletions = 0;
+
+        for line in diff.lines() {
+            if line.starts_with("diff --git") {
+                // 保存上一个文件的统计
+                if let Some(file) = current_file.take() {
+                    files_changed.push((file, file_additions, file_deletions));
+                    file_additions = 0;
+                    file_deletions = 0;
+                }
+
+                // 提取文件名
+                if let Some(parts) = line.split(" b/").nth(1) {
+                    current_file = Some(parts.to_string());
+                }
+            } else if line.starts_with('+') && !line.starts_with("+++") {
+                file_additions += 1;
+                total_additions += 1;
+            } else if line.starts_with('-') && !line.starts_with("---") {
+                file_deletions += 1;
+                total_deletions += 1;
+            }
+        }
+
+        // 保存最后一个文件
+        if let Some(file) = current_file {
+            files_changed.push((file, file_additions, file_deletions));
+        }
+
+        // 生成 Markdown 摘要
+        summary.push_str(&format!(
+            "## 变更摘要\n\n共修改 {} 个文件，增加 {} 行，删除 {} 行。\n\n",
+            files_changed.len(),
+            total_additions,
+            total_deletions
+        ));
+
+        if !files_changed.is_empty() {
+            summary.push_str("### 文件列表\n\n");
+            for (file, additions, deletions) in &files_changed {
+                summary.push_str(&format!(
+                    "- `{}` (+{} -{})\n",
+                    file, additions, deletions
+                ));
+
+                // 检查是否超过最大长度
+                if summary.len() > max_len {
+                    summary.push_str("\n... (摘要已截断)\n");
+                    break;
+                }
+            }
+        }
+
+        Ok(summary)
+    }
+
+    /// 解析 Pull Request
+    ///
+    /// 根据 PR URL 或编号解析出 PR 的详细信息，包括仓库、分支、提交等。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `pr_ref`: PR 引用，可以是：
+    ///   - PR 编号（如 "123"）
+    ///   - PR URL（如 "https://github.com/owner/repo/pull/123"）
+    ///   - 分支引用（如 "owner:branch"）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitPullRequestInfo)`: PR 详细信息
+    /// - `Err(GitError)`: 解析失败
+    ///
+    /// # 使用场景
+    ///
+    /// - 从用户输入解析 PR 引用
+    /// - 验证 PR 是否存在
+    /// - 获取 PR 的目标分支和源分支信息
+    pub async fn resolve_pull_request(
+        &self,
+        cwd: &str,
+        pr_ref: &str,
+    ) -> GitResult<GitPullRequestInfo> {
+        info!("解析 PR 引用: {}", pr_ref);
+
+        // 尝试解析 PR 编号
+        let pr_number = if let Ok(num) = pr_ref.parse::<u64>() {
+            num
+        } else if pr_ref.contains("/pull/") {
+            // 从 URL 中提取 PR 编号
+            pr_ref
+                .split("/pull/")
+                .nth(1)
+                .and_then(|s| s.split('/').next())
+                .and_then(|s| s.parse::<u64>().ok())
+                .ok_or_else(|| {
+                    GitError::CommandError(format!("无法从 URL 解析 PR 编号: {}", pr_ref))
+                })?
+        } else {
+            return Err(GitError::CommandError(format!(
+                "无法解析 PR 引用: {}，请提供 PR 编号或 URL",
+                pr_ref
+            )));
+        };
+
+        // 使用 gh CLI 获取 PR 信息
+        let mut cmd = Command::new("gh");
+        cmd.current_dir(cwd)
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .args([
+                "pr",
+                "view",
+                &pr_number.to_string(),
+                "--json",
+                "number,title,headRefName,baseRefName,state,url,author",
+            ]);
+
+        let output = cmd.output().await.map_err(|e| {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                GitError::CommandError(
+                    "未找到 gh CLI，请安装 GitHub CLI (https://cli.github.com)".to_string(),
+                )
+            } else {
+                GitError::CommandError(format!("执行 gh 命令失败: {}", e))
+            }
+        })?;
+
+        let code = output.status.code().unwrap_or(-1);
+        if code != 0 {
+            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+            return Err(GitError::CommandError(format!(
+                "gh pr view 失败 (exit {}): {}",
+                code, stderr
+            )));
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+        // 解析 JSON 输出
+        let pr_info: serde_json::Value = serde_json::from_str(&stdout).map_err(|e| {
+            GitError::InternalError(format!("解析 PR 信息失败: {}", e))
+        })?;
+
+        Ok(GitPullRequestInfo {
+            number: pr_info["number"]
+                .as_u64()
+                .ok_or_else(|| GitError::InternalError("缺少 PR 编号".to_string()))?,
+            title: pr_info["title"]
+                .as_str()
+                .unwrap_or("")
+                .to_string(),
+            head_ref: pr_info["headRefName"]
+                .as_str()
+                .unwrap_or("")
+                .to_string(),
+            base_ref: pr_info["baseRefName"]
+                .as_str()
+                .unwrap_or("")
+                .to_string(),
+            state: pr_info["state"]
+                .as_str()
+                .unwrap_or("unknown")
+                .to_string(),
+            url: pr_info["url"]
+                .as_str()
+                .unwrap_or("")
+                .to_string(),
+            author: pr_info["author"]["login"]
+                .as_str()
+                .map(|s| s.to_string()),
+        })
+    }
+}
+
+/// Pull Request 信息
+///
+/// 封装从 GitHub CLI 获取的 PR 元数据。
+#[derive(Debug, Clone)]
+pub struct GitPullRequestInfo {
+    /// PR 编号
+    pub number: u64,
+    /// PR 标题
+    pub title: String,
+    /// 源分支名称
+    pub head_ref: String,
+    /// 目标分支名称
+    pub base_ref: String,
+    /// PR 状态（open, closed, merged）
+    pub state: String,
+    /// PR URL
+    pub url: String,
+    /// PR 作者（GitHub 用户名）
+    pub author: Option<String>,
 }

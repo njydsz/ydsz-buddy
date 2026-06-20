@@ -6,6 +6,7 @@
  */
 
 import { ThreadId } from "@remi-code/contracts";
+import { tauriBridge } from "../lib/tauri-bridge";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import { toastManager } from "../components/ui/toast";

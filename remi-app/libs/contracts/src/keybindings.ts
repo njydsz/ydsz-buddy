@@ -83,6 +83,22 @@ export type ThreadJumpKeybindingCommand = (typeof THREAD_JUMP_KEYBINDING_COMMAND
 /** 脚本运行命令的类型，格式为 script.{scriptId}.run，scriptId 需符合小写字母数字和连字符的命名规则 */
 type ScriptRunCommand = `script.${string}.run`;
 
+/** 脚本运行命令模式校验器（兼容 Effect Schema 的轻量替代） */
+export const SCRIPT_RUN_COMMAND_PATTERN = {
+  pattern: /^script\.([a-z0-9-]+)\.run$/,
+  parts: [
+    { literal: "script." },
+    { type: "scriptId" as const },
+    { literal: ".run" },
+  ] as const,
+  makeUnsafe(value: string): ScriptRunCommand {
+    return value as ScriptRunCommand;
+  },
+  is(value: unknown): value is ScriptRunCommand {
+    return typeof value === "string" && this.pattern.test(value);
+  },
+};
+
 /** 快捷键命令类型，可以是静态命令或动态脚本运行命令 */
 export type KeybindingCommand =
   | (typeof STATIC_KEYBINDING_COMMANDS)[number]

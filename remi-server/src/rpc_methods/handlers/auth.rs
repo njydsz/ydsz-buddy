@@ -2,11 +2,10 @@
 
 use std::sync::Arc;
 
-use remi_auth::{AuthService, ClientMetadata};
+use remi_auth::ClientMetadata;
 use serde_json::Value;
 use tracing::info;
 
-use crate::error::ServerResult;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 

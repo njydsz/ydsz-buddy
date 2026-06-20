@@ -1677,11 +1677,11 @@ function normalizeThreadShellSnapshot(
       ? previous.handoff
       : (incoming.handoff ?? null);
   const lastKnownPr =
-    previous?.lastKnownPR &&
-    incoming.lastKnownPR &&
-    deepEqualJson(previous.lastKnownPR, incoming.lastKnownPR)
-      ? previous.lastKnownPR
-      : (incoming.lastKnownPR ?? null);
+    previous?.lastKnownPr &&
+    incoming.lastKnownPr &&
+    deepEqualJson(previous.lastKnownPr, incoming.lastKnownPr)
+      ? previous.lastKnownPr
+      : (incoming.lastKnownPr ?? null);
   const error = normalizeThreadErrorMessage(incoming.session?.lastError);
   const lastVisitedAt = previous?.lastVisitedAt ?? incoming.updatedAt;
   const nextWorktreePath = incoming.worktreePath;

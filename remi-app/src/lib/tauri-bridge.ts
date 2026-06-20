@@ -1,17 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
-import { listen, emit } from '@tauri-apps/api/event';
-import { appWindow } from '@tauri-apps/api/window';
-import { open, save, message, confirm } from '@tauri-apps/api/dialog';
-import { writeTextFile, readTextFile, createDir, readDir } from '@tauri-apps/api/fs';
-import { writeText, readText } from '@tauri-apps/api/clipboard';
-import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/api/notification';
+import { listen, emit, type UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open, save, message as showMessage, confirm } from '@tauri-apps/plugin-dialog';
+import { writeTextFile, readTextFile, mkdir, readDir } from '@tauri-apps/plugin-fs';
+import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 import type { 
-  Thread, 
-  Message, 
-  Model, 
-  CreateThreadParams,
-  SendMessageParams,
-  DesktopBridge,
   DesktopTheme,
   DesktopUpdateState,
   DesktopUpdateActionResult,
@@ -31,11 +25,38 @@ import type {
   ThreadBrowserState
 } from '@remi-code/contracts';
 
+// TODO: 迁移完成后替换为 contracts 中的正式类型
+type Thread = unknown;
+type Message = unknown;
+type Model = unknown;
+type CreateThreadParams = unknown;
+type SendMessageParams = unknown;
+
+/**
+ * 将 Tauri 异步 listen 包装为同步 cleanup 函数。
+ * Tauri 的 listen 返回 Promise<UnlistenFn>，但上层契约期望 () => void，
+ * 因此在卸载回调内部异步等待 unlisten 完成。
+ */
+function syncListen<T>(event: string, handler: (event: { payload: T }) => void): () => void {
+  let unlisten: UnlistenFn | null = null;
+  const unlistenPromise = listen<T>(event, handler).then((fn) => {
+    unlisten = fn;
+    return fn;
+  });
+  return () => {
+    if (unlisten) {
+      unlisten();
+    } else {
+      void unlistenPromise.then((fn) => fn());
+    }
+  };
+}
+
 /**
  * Tauri 桥接层
  * 封装所有与 Tauri 后端的交互
  */
-export const tauriBridge: DesktopBridge = {
+export const tauriBridge = {
   /**
    * 获取 WebSocket URL
    */
@@ -83,7 +104,7 @@ export const tauriBridge: DesktopBridge = {
   confirm: async (message: string): Promise<boolean> => {
     return await confirm(message, {
       title: '确认',
-      type: 'info'
+      kind: 'info'
     });
   },
 
@@ -136,7 +157,7 @@ export const tauriBridge: DesktopBridge = {
    * 监听菜单动作
    */
   onMenuAction: (listener: (action: string) => void) => {
-    return listen<string>('menu-action', (event) => {
+    return syncListen<string>('menu-action', (event) => {
       listener(event.payload);
     });
   },
@@ -173,7 +194,7 @@ export const tauriBridge: DesktopBridge = {
    * 监听更新状态
    */
   onUpdateState: (listener: (state: DesktopUpdateState) => void) => {
-    return listen<DesktopUpdateState>('update-state', (event) => {
+    return syncListen<DesktopUpdateState>('update-state', (event) => {
       listener(event.payload);
     });
   },
@@ -210,7 +231,7 @@ export const tauriBridge: DesktopBridge = {
     transcribeVoice: async (
       input: ServerVoiceTranscriptionInput
     ): Promise<ServerVoiceTranscriptionResult> => {
-      return await invoke<ServerVoiceTranscriptionResult>('transcribe_voice', input);
+      return await invoke<ServerVoiceTranscriptionResult>('transcribe_voice', { ...input });
     },
 
     getConfig: async (): Promise<any> => {
@@ -259,81 +280,81 @@ export const tauriBridge: DesktopBridge = {
    */
   browser: {
     open: async (input: BrowserOpenInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_open', input);
+      return await invoke<ThreadBrowserState>('browser_open', { ...input });
     },
 
     close: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_close', input);
+      return await invoke<ThreadBrowserState>('browser_close', { ...input });
     },
 
     hide: async (input: BrowserThreadInput): Promise<void> => {
-      await invoke('browser_hide', input);
+      await invoke('browser_hide', { ...input });
     },
 
     getState: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_get_state', input);
+      return await invoke<ThreadBrowserState>('browser_get_state', { ...input });
     },
 
     setPanelBounds: async (input: BrowserSetPanelBoundsInput): Promise<void> => {
-      await invoke('browser_set_panel_bounds', input);
+      await invoke('browser_set_panel_bounds', { ...input });
     },
 
     attachWebview: async (input: BrowserAttachWebviewInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_attach_webview', input);
+      return await invoke<ThreadBrowserState>('browser_attach_webview', { ...input });
     },
 
     copyScreenshotToClipboard: async (input: BrowserTabInput): Promise<void> => {
-      await invoke('browser_copy_screenshot_to_clipboard', input);
+      await invoke('browser_copy_screenshot_to_clipboard', { ...input });
     },
 
     captureScreenshot: async (input: BrowserTabInput): Promise<BrowserCaptureScreenshotResult> => {
-      return await invoke<BrowserCaptureScreenshotResult>('browser_capture_screenshot', input);
+      return await invoke<BrowserCaptureScreenshotResult>('browser_capture_screenshot', { ...input });
     },
 
     executeCdp: async (input: BrowserExecuteCdpInput): Promise<unknown> => {
-      return await invoke('browser_execute_cdp', input);
+      return await invoke('browser_execute_cdp', { ...input });
     },
 
     navigate: async (input: BrowserNavigateInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_navigate', input);
+      return await invoke<ThreadBrowserState>('browser_navigate', { ...input });
     },
 
     reload: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_reload', input);
+      return await invoke<ThreadBrowserState>('browser_reload', { ...input });
     },
 
     goBack: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_go_back', input);
+      return await invoke<ThreadBrowserState>('browser_go_back', { ...input });
     },
 
     goForward: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_go_forward', input);
+      return await invoke<ThreadBrowserState>('browser_go_forward', { ...input });
     },
 
     newTab: async (input: BrowserNewTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_new_tab', input);
+      return await invoke<ThreadBrowserState>('browser_new_tab', { ...input });
     },
 
     closeTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_close_tab', input);
+      return await invoke<ThreadBrowserState>('browser_close_tab', { ...input });
     },
 
     selectTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
-      return await invoke<ThreadBrowserState>('browser_select_tab', input);
+      return await invoke<ThreadBrowserState>('browser_select_tab', { ...input });
     },
 
     openDevTools: async (input: BrowserTabInput): Promise<void> => {
-      await invoke('browser_open_dev_tools', input);
+      await invoke('browser_open_dev_tools', { ...input });
     },
 
     onState: (listener: (state: ThreadBrowserState) => void) => {
-      return listen<ThreadBrowserState>('browser-state', (event) => {
+      return syncListen<ThreadBrowserState>('browser-state', (event) => {
         listener(event.payload);
       });
     },
 
     onBrowserUseOpenPanelRequest: (listener: () => void) => {
-      return listen('browser-use-open-panel-request', () => {
+      return syncListen('browser-use-open-panel-request', () => {
         listener();
       });
     },
@@ -348,7 +369,7 @@ export const tauriBridge: DesktopBridge = {
     },
 
     sendMessage: async (params: SendMessageParams): Promise<void> => {
-      return await invoke<void>('send_message', params);
+      return await invoke<void>('send_message', params as Record<string, unknown>);
     },
 
     listThreads: async (projectId: string): Promise<Thread[]> => {
@@ -412,19 +433,19 @@ export const tauriBridge: DesktopBridge = {
     },
 
     onDomainEvent: (listener: (event: any) => void) => {
-      return listen('orchestration-domain-event', (event) => {
+      return syncListen('orchestration-domain-event', (event) => {
         listener(event.payload);
       });
     },
 
     onShellEvent: (listener: (event: any) => void) => {
-      return listen('orchestration-shell-event', (event) => {
+      return syncListen('orchestration-shell-event', (event) => {
         listener(event.payload);
       });
     },
 
     onThreadEvent: (listener: (event: any) => void) => {
-      return listen('orchestration-thread-event', (event) => {
+      return syncListen('orchestration-thread-event', (event) => {
         listener(event.payload);
       });
     },
@@ -609,25 +630,25 @@ export const tauriBridge: DesktopBridge = {
    */
   events: {
     onThreadUpdated: (callback: (thread: Thread) => void) => {
-      return listen<Thread>('thread-updated', (event) => {
+      return syncListen<Thread>('thread-updated', (event) => {
         callback(event.payload);
       });
     },
 
     onTerminalOutput: (callback: (data: { sessionId: string; output: string }) => void) => {
-      return listen('terminal-output', (event) => {
+      return syncListen('terminal-output', (event) => {
         callback(event.payload as { sessionId: string; output: string });
       });
     },
 
     onMessage: (callback: (message: Message) => void) => {
-      return listen<Message>('message-received', (event) => {
+      return syncListen<Message>('message-received', (event) => {
         callback(event.payload);
       });
     },
 
     onGitStatusChanged: (callback: (status: any) => void) => {
-      return listen('git-status-changed', (event) => {
+      return syncListen('git-status-changed', (event) => {
         callback(event.payload);
       });
     },
@@ -642,19 +663,19 @@ export const tauriBridge: DesktopBridge = {
    */
   window: {
     minimize: async () => {
-      await appWindow.minimize();
+      await getCurrentWindow().minimize();
     },
 
     maximize: async () => {
-      await appWindow.toggleMaximize();
+      await getCurrentWindow().toggleMaximize();
     },
 
     close: async () => {
-      await appWindow.close();
+      await getCurrentWindow().close();
     },
 
     setTitle: async (title: string) => {
-      await appWindow.setTitle(title);
+      await getCurrentWindow().setTitle(title);
     },
   },
 
@@ -663,15 +684,16 @@ export const tauriBridge: DesktopBridge = {
    */
   dialog: {
     open: async (options?: any): Promise<string | null> => {
-      return await open(options);
+      const result = await open(options);
+      return Array.isArray(result) ? (result[0] ?? null) : result;
     },
 
     save: async (options?: any): Promise<string | null> => {
       return await save(options);
     },
 
-    message: async (message: string, options?: any) => {
-      return await message(message, options);
+    message: async (text: string, options?: any) => {
+      return await showMessage(text, options);
     },
 
     confirm: async (message: string, options?: any): Promise<boolean> => {
@@ -692,7 +714,7 @@ export const tauriBridge: DesktopBridge = {
     },
 
     createDir: async (path: string, options?: any): Promise<void> => {
-      return await createDir(path, options);
+      return await mkdir(path, options);
     },
 
     readDir: async (path: string): Promise<any[]> => {

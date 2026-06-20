@@ -12,6 +12,7 @@ import {
   type ThreadId as ThreadIdType,
   type TurnId,
 } from "@remi-code/contracts";
+import { tauriBridge } from "../lib/tauri-bridge";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Suspense,

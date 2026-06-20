@@ -464,6 +464,7 @@ pub enum MentionKind {
 /// - [`Normal`](DispatchMode::Normal) - 普通对话模式
 /// - [`Review`](DispatchMode::Review) - 代码审查模式
 /// - [`Plan`](DispatchMode::Plan) - 规划模式（AI 生成执行计划）
+/// - [`Steer`](DispatchMode::Steer) - 引导模式（中断当前 Turn 并优先处理）
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum DispatchMode {
@@ -473,6 +474,8 @@ pub enum DispatchMode {
     Review,
     /// 规划模式，AI 生成执行计划而非直接执行
     Plan,
+    /// 引导模式，中断当前 Turn 并优先处理新消息
+    Steer,
 }
 
 /// # 消息来源
@@ -746,6 +749,9 @@ pub type Sequence = u64;
 
 /// 检查点唯一标识类型
 pub type CheckpointId = String;
+
+/// Turn 唯一标识类型
+pub type TurnId = String;
 
 /// # 配对链接
 ///

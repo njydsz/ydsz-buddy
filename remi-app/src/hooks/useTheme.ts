@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { isDesktop } from "../env";
+import { tauriBridge } from "../lib/tauri-bridge";
 import {
   DEFAULT_THEME_STATE,
   type ChromeTheme,

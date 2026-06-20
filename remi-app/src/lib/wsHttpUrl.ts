@@ -9,6 +9,8 @@
 // relative path never reaches the server. We mirror the WS host and forward the legacy token
 // query param so authenticated GET routes (attachments, local-image, �? can authorize the
 // request without touching cookies.
+import { tauriBridge } from "./tauri-bridge";
+
 export function resolveWsHttpUrl(rawPath: string): string {
   if (typeof window === "undefined") return rawPath;
   const bridgeWsUrl = tauriBridge.getWsUrl?.();

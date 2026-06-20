@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use remi_terminal::TerminalManager;
 use remi_terminal::{
     TerminalCloseInput, TerminalOpenInput, TerminalResizeInput, TerminalRestartInput,
     TerminalWriteInput,
