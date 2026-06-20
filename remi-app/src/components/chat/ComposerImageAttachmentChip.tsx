@@ -1,7 +1,7 @@
-// FILE: ComposerImageAttachmentChip.tsx
-// Purpose: Renders filename-first composer image attachments as compact pills with preview/remove actions.
-// Layer: Chat composer presentation
-// Depends on: composer draft image metadata, shared chip styles, and expanded image preview helpers.
+/**
+ * @file ComposerImageAttachmentChip.tsx
+ * @description 编辑器图片附件标签组件，以紧凑药丸形式显示图片缩略图、文件名和移除按钮，支持预览和未持久化警告。
+ */
 
 import { memo } from "react";
 import { type ComposerImageAttachment } from "../../composerDraftStore";
@@ -14,14 +14,31 @@ import {
 } from "../composerInlineChip";
 import { buildExpandedImagePreview, type ExpandedImagePreview } from "./ExpandedImagePreview";
 
+/**
+ * ComposerImageAttachmentChip 组件的属性接口
+ */
 interface ComposerImageAttachmentChipProps {
+  /** 图片附件数据 */
   image: ComposerImageAttachment;
+  /** 所有图片附件列表（用于构建预览） */
   images: readonly ComposerImageAttachment[];
+  /** 图片是否未持久化 */
   nonPersisted: boolean;
+  /** 展开图片预览的回调 */
   onExpandImage: (preview: ExpandedImagePreview) => void;
+  /** 移除图片的回调 */
   onRemoveImage: (imageId: string) => void;
 }
 
+/**
+ * ComposerImageAttachmentChip 组件
+ * @description 图片附件标签，显示缩略图、文件名、未持久化警告和移除按钮
+ * @param props.image - 图片附件数据
+ * @param props.images - 所有图片附件列表
+ * @param props.nonPersisted - 图片是否未持久化
+ * @param props.onExpandImage - 展开图片预览的回调
+ * @param props.onRemoveImage - 移除图片的回调
+ */
 export const ComposerImageAttachmentChip = memo(function ComposerImageAttachmentChip({
   image,
   images,

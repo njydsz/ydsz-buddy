@@ -1,3 +1,8 @@
+/**
+ * @file dialog
+ * @description 对话框组件，基于 Base UI Dialog 原语封装，
+ * 支持嵌套对话框、移动端底部吸附、关闭按钮和可滚动面板。
+ */
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
@@ -6,20 +11,26 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 
+/** 创建 Dialog 句柄，用于命令式控制对话框的打开/关闭 */
 const DialogCreateHandle = DialogPrimitive.createHandle;
 
+/** 对话框根组件 */
 const Dialog = DialogPrimitive.Root;
 
+/** 对话框传送门 */
 const DialogPortal = DialogPrimitive.Portal;
 
+/** 对话框触发器 */
 function DialogTrigger(props: DialogPrimitive.Trigger.Props) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
+/** 对话框关闭按钮 */
 function DialogClose(props: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/** 对话框遮罩层 */
 function DialogBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props) {
   return (
     <DialogPrimitive.Backdrop
@@ -33,6 +44,7 @@ function DialogBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props)
   );
 }
 
+/** 对话框视口容器 */
 function DialogViewport({ className, ...props }: DialogPrimitive.Viewport.Props) {
   return (
     <DialogPrimitive.Viewport
@@ -46,6 +58,7 @@ function DialogViewport({ className, ...props }: DialogPrimitive.Viewport.Props)
   );
 }
 
+/** 对话框弹出面板，支持移动端底部吸附布局和关闭按钮 */
 function DialogPopup({
   className,
   children,
@@ -88,6 +101,7 @@ function DialogPopup({
   );
 }
 
+/** 对话框头部区域 */
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -101,6 +115,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/** 对话框底部操作区域，支持 default（带边框背景）和 bare（无装饰）两种变体 */
 function DialogFooter({
   className,
   variant = "default",
@@ -124,6 +139,7 @@ function DialogFooter({
   );
 }
 
+/** 对话框标题 */
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
@@ -134,6 +150,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   );
 }
 
+/** 对话框描述内容 */
 function DialogDescription({ className, ...props }: DialogPrimitive.Description.Props) {
   return (
     <DialogPrimitive.Description
@@ -144,6 +161,7 @@ function DialogDescription({ className, ...props }: DialogPrimitive.Description.
   );
 }
 
+/** 对话框可滚动面板区域 */
 function DialogPanel({
   className,
   scrollFade = true,

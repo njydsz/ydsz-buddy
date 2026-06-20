@@ -36,15 +36,17 @@ use thiserror::Error;
 /// ## 示例
 ///
 /// ```rust,no_run
+/// #[tokio::main]
+/// async fn main() {
 /// use remi_workspace::error::WorkspaceError;
-///
+/// 
 /// fn check_path(path: &str) -> Result<(), WorkspaceError> {
 ///     if path.contains("..") {
 ///         return Err(WorkspaceError::PathOutsideRoot(path.to_string()));
 ///     }
 ///     Ok(())
 /// }
-/// ```
+/// }
 #[derive(Error, Debug)]
 pub enum WorkspaceError {
     /// 路径穿越错误：请求的路径超出了工作空间根目录范围
@@ -123,10 +125,12 @@ pub enum WorkspaceError {
 /// ## 示例
 ///
 /// ```rust,no_run
+/// #[tokio::main]
+/// async fn main() {
 /// use remi_workspace::error::WorkspaceResult;
-///
+/// 
 /// fn do_something() -> WorkspaceResult<String> {
 ///     Ok("success".to_string())
 /// }
-/// ```
+/// }
 pub type WorkspaceResult<T> = Result<T, WorkspaceError>;

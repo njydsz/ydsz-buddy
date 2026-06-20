@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file DirectoryTreeBrowser
  * @description 渲染一个懒加载、可递归展开的本地目录浏览器。
  *              支持按层级延迟加载目录内容，提供搜索过滤和文件/文件夹选择功能。
@@ -66,7 +66,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
   rootPath,
   emptyLabel = "No folders found",
   unavailableLabel = "Home directory unavailable.",
-  loadingLabel = "Loading folders�?,
+  loadingLabel = "Loading folders\u2026",
   className,
   includeFiles = false,
   query = "",
@@ -207,7 +207,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
               <span className="truncate text-foreground/95">{entry.name}</span>
             </button>
             {isDirectory && isLoadingChildren ? (
-              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loading�?/span>
+              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loading\u2026</span>
             ) : null}
           </div>,
           ...renderedChildren,

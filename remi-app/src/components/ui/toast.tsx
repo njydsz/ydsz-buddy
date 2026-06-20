@@ -1,3 +1,9 @@
+/**
+ * @file toast
+ * @description Toast 消息提示组件，基于 Base UI Toast 原语封装，
+ * 支持多位置布局、线程感知可见性、自动消失、滑动关闭等特性。
+ * 提供标准 ToastProvider 和锚定定位的 AnchoredToastProvider 两种模式。
+ */
 "use client";
 
 import { Toast, type ToastObject } from "@base-ui/react/toast";
@@ -26,6 +32,7 @@ import {
   shouldRenderToastForVisibleThreads,
 } from "./toastRouteVisibility";
 
+/** Toast 线程附加数据类型 */
 type ThreadToastData = {
   allowCrossThreadVisibility?: boolean;
   copyText?: string;
@@ -35,11 +42,14 @@ type ThreadToastData = {
   dismissAfterVisibleMs?: number;
 };
 
+/** 全局 Toast 管理器 */
 const toastManager = Toast.createToastManager<ThreadToastData>();
+/** 锚定定位 Toast 管理器 */
 const anchoredToastManager = Toast.createToastManager<ThreadToastData>();
 type ToastId = ReturnType<typeof toastManager.add>;
 const threadToastVisibleTimeoutRemainingMs = new Map<ToastId, number>();
 
+/** Toast 类型与图标映射 */
 const TOAST_ICONS = {
   error: CircleAlertIcon,
   info: InfoIcon,
@@ -48,6 +58,7 @@ const TOAST_ICONS = {
   warning: TriangleAlertIcon,
 } as const;
 
+/** Toast 弹出位置类型 */
 type ToastPosition =
   | "top-left"
   | "top-center"
@@ -56,10 +67,12 @@ type ToastPosition =
   | "bottom-center"
   | "bottom-right";
 
+/** Toast 提供者属性类型 */
 interface ToastProviderProps extends Toast.Provider.Props {
   position?: ToastPosition;
 }
 
+/** 判断 Toast 是否应该在当前活动线程中渲染 */
 function shouldRenderForActiveThread(
   data: ThreadToastData | undefined,
   visibleThreadIds: ReadonlySet<ThreadId>,
@@ -71,6 +84,7 @@ function shouldRenderForActiveThread(
   });
 }
 
+/** 从路由状态中获取当前可见的线程 ID 集合 */
 function useVisibleThreadIdsFromRoute(): ReadonlySet<ThreadId> {
   const activeThreadId = useParams({
     strict: false,
@@ -88,6 +102,7 @@ function useVisibleThreadIdsFromRoute(): ReadonlySet<ThreadId> {
   }, [activeThreadId, splitView]);
 }
 
+/** 线程 Toast 可见时自动消失计时器，支持页面失焦暂停 */
 function ThreadToastVisibleAutoDismiss({
   toastId,
   dismissAfterVisibleMs,
@@ -166,6 +181,7 @@ function ThreadToastVisibleAutoDismiss({
   return null;
 }
 
+/** Toast 操作按钮区域，支持复制、主操作和次要操作 */
 function ToastActions({
   actionProps,
   copyText,
@@ -217,6 +233,7 @@ function ToastActions({
   );
 }
 
+/** Toast 关闭按钮 */
 function ToastCloseButton() {
   return (
     <Toast.Close
@@ -230,6 +247,7 @@ function ToastCloseButton() {
   );
 }
 
+/** Toast 提供者组件，管理 Toast 的创建和渲染 */
 function ToastProvider({ children, position = "top-right", ...props }: ToastProviderProps) {
   return (
     <Toast.Provider toastManager={toastManager} {...props}>
@@ -239,6 +257,7 @@ function ToastProvider({ children, position = "top-right", ...props }: ToastProv
   );
 }
 
+/** Toast 列表渲染组件，负责可见性过滤和堆叠布局 */
 function Toasts({ position = "top-right" }: { position: ToastPosition }) {
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const visibleThreadIds = useVisibleThreadIdsFromRoute();
@@ -395,6 +414,7 @@ function Toasts({ position = "top-right" }: { position: ToastPosition }) {
   );
 }
 
+/** 锚定定位 Toast 提供者，Toast 弹出位置相对于锚点元素 */
 function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
   return (
     <Toast.Provider toastManager={anchoredToastManager} {...props}>
@@ -404,6 +424,7 @@ function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
   );
 }
 
+/** 锚定定位 Toast 列表渲染组件 */
 function AnchoredToasts() {
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const visibleThreadIds = useVisibleThreadIdsFromRoute();

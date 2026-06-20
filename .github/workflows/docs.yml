@@ -1,0 +1,75 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".docs/**"
+      - "remi-*/src/**"
+      - "remi-app/src/contracts/**"
+      - "apps/marketing/src/pages/docs.astro"
+  pull_request:
+    paths:
+      - ".docs/**"
+      - "remi-*/src/**"
+      - "remi-app/src/contracts/**"
+      - "apps/marketing/src/pages/docs.astro"
+
+env:
+  PNPM_VERSION: "9.12.0"
+  NODE_VERSION: "22"
+
+jobs:
+  links:
+    name: Link & spell check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install lychee (broken link checker)
+        run: |
+          cargo install --locked lychee
+
+      - name: Check internal links
+        working-directory: .docs
+        run: lychee --offline --no-progress --exclude-path '(^|/)(node_modules|dist|target)/' .
+
+  contract-sync:
+    name: JSON-RPC contract sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "remi-core"
+
+      - name: Verify RPC contract snapshot
+        run: |
+          cargo run -p remi-core --bin rpc-schema --quiet > .docs/api/schema/rpc.schema.json
+          if [[ -n "$(git status --porcelain .docs/api/schema/rpc.schema.json)" ]]; then
+            echo "::error::RPC schema drifted. Re-run scripts/sync-rpc-schema.sh and commit."
+            exit 1
+          fi
+
+      - name: Verify Tauri command doc completeness
+        run: |
+          bash .github/scripts/check-tauri-docs.sh

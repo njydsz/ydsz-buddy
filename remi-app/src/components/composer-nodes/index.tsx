@@ -1,11 +1,10 @@
 /**
- * Composer Lexical Nodes
- *
- * Custom nodes for the composer editor:
- * - ComposerMentionNode: File/path mentions (@path)
- * - ComposerSkillNode: Skill mentions ($skill or /skill)
- * - ComposerAgentMentionNode: Agent mentions (@alias(task))
- * - ComposerTerminalContextNode: Terminal context blocks
+ * @file composer-nodes/index.tsx
+ * @description 编辑器自定义 Lexical 节点集合，包括：
+ *              - ComposerMentionNode：文件/路径提及（@path）
+ *              - ComposerSkillNode：技能引用（$skill 或 /skill）
+ *              - ComposerAgentMentionNode：Agent 提及（@alias(task)）
+ *              - ComposerTerminalContextNode：终端上下文块
  */
 
 import {
@@ -43,6 +42,7 @@ import { createMentionChipIconElement, type MentionChipKind } from "../chat/Ment
 
 // ── Serialized Types ──────────────────────────────────────────────────
 
+/** 文件/路径提及节点序列化类型 */
 export type SerializedComposerMentionNode = Spread<
   {
     kind?: MentionChipKind;
@@ -53,6 +53,7 @@ export type SerializedComposerMentionNode = Spread<
   SerializedTextNode
 >;
 
+/** 技能引用节点序列化类型 */
 export type SerializedComposerSkillNode = Spread<
   {
     skillName: string;
@@ -62,6 +63,7 @@ export type SerializedComposerSkillNode = Spread<
   SerializedTextNode
 >;
 
+/** Agent 提及节点序列化类型 */
 export type SerializedComposerAgentMentionNode = Spread<
   {
     alias: string;
@@ -72,6 +74,7 @@ export type SerializedComposerAgentMentionNode = Spread<
   SerializedTextNode
 >;
 
+/** 终端上下文节点序列化类型 */
 export type SerializedComposerTerminalContextNode = Spread<
   {
     context: TerminalContextDraft;
@@ -161,6 +164,7 @@ function renderAgentMentionChipDom(container: HTMLElement, alias: string, color:
 
 // ── ComposerMentionNode ───────────────────────────────────────────────
 
+/** 文件/路径提及节点，渲染为行内芯片，不可编辑文本 */
 export class ComposerMentionNode extends TextNode {
   __kind: MentionChipKind;
   __path: string;
@@ -236,6 +240,7 @@ export class ComposerMentionNode extends TextNode {
   }
 }
 
+/** 创建文件/路径提及节点 */
 export function $createComposerMentionNode(
   path: string,
   kind: MentionChipKind = "path",
@@ -245,6 +250,7 @@ export function $createComposerMentionNode(
 
 // ── ComposerSkillNode ─────────────────────────────────────────────────
 
+/** 技能引用节点，渲染为行内技能芯片，不可编辑文本 */
 export class ComposerSkillNode extends TextNode {
   __skillName: string;
 
@@ -314,12 +320,14 @@ export class ComposerSkillNode extends TextNode {
   }
 }
 
+/** 创建技能引用节点 */
 export function $createComposerSkillNode(name: string): ComposerSkillNode {
   return $applyNodeReplacement(new ComposerSkillNode(name));
 }
 
 // ── ComposerAgentMentionNode ──────────────────────────────────────────
 
+/** Agent 提及节点，渲染为带颜色标识的行内芯片，不可编辑文本 */
 export class ComposerAgentMentionNode extends TextNode {
   __alias: string;
   __color: string;
@@ -393,6 +401,7 @@ export class ComposerAgentMentionNode extends TextNode {
   }
 }
 
+/** 创建 Agent 提及节点 */
 export function $createComposerAgentMentionNode(
   alias: string,
   color: string,
@@ -402,10 +411,12 @@ export function $createComposerAgentMentionNode(
 
 // ── ComposerTerminalContextNode ───────────────────────────────────────
 
+/** 终端上下文装饰器组件，渲染待确认的终端上下文芯片 */
 function ComposerTerminalContextDecorator(props: { context: TerminalContextDraft }) {
   return <ComposerPendingTerminalContextChip context={props.context} />;
 }
 
+/** 终端上下文节点，以装饰器模式渲染终端选择上下文芯片 */
 export class ComposerTerminalContextNode extends DecoratorNode<ReactElement> {
   __context: TerminalContextDraft;
 
@@ -460,20 +471,21 @@ export class ComposerTerminalContextNode extends DecoratorNode<ReactElement> {
   }
 }
 
+/** 创建终端上下文节点 */
 export function $createComposerTerminalContextNode(
   context: TerminalContextDraft,
 ): ComposerTerminalContextNode {
   return $applyNodeReplacement(new ComposerTerminalContextNode(context));
 }
 
-// ── Type Guards & Utilities ───────────────────────────────────────────
-
+/** 编辑器行内令牌节点的联合类型 */
 export type ComposerInlineTokenNode =
   | ComposerMentionNode
   | ComposerSkillNode
   | ComposerTerminalContextNode
   | ComposerAgentMentionNode;
 
+/** 判断给定值是否为编辑器行内令牌节点 */
 export function isComposerInlineTokenNode(
   candidate: unknown,
 ): candidate is ComposerInlineTokenNode {
@@ -485,7 +497,7 @@ export function isComposerInlineTokenNode(
   );
 }
 
-/** All node classes for Lexical registration */
+/** 所有节点类列表，用于 Lexical 编辑器注册 */
 export const COMPOSER_NODE_CLASSES = [
   ComposerMentionNode,
   ComposerSkillNode,

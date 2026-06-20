@@ -1,7 +1,8 @@
-// FILE: Sidebar.uiState.ts
-// Purpose: Persists sidebar-only UI preferences plus the last chat route for restore flows.
-// Layer: Browser storage helper
-// Exports: sidebar UI state read/write helpers.
+/**
+ * @file Sidebar.uiState.ts
+ * @description 侧边栏 UI 状态持久化模块，保存侧边栏展开/折叠状态、
+ *              项目线程列表展开状态和最后聊天路由等偏好设置到浏览器存储。
+ */
 
 import { normalizeWorkspaceRootForComparison } from "~/shared/threadWorkspace";
 import type { LastThreadRoute } from "../chatRouteRestore";

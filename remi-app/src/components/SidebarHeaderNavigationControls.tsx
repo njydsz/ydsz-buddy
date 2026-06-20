@@ -1,7 +1,7 @@
-// FILE: SidebarHeaderNavigationControls.tsx
-// Purpose: Keeps the collapsed-sidebar trigger and desktop route arrows in one header cluster.
-// Layer: Shared web shell chrome
-// Depends on: Sidebar state plus AppNavigationButtons
+/**
+ * @file SidebarHeaderNavigationControls.tsx
+ * @description 侧边栏头部导航控件集群，整合折叠侧边栏触发器和桌面端路由箭头按钮。
+ */
 
 import { AppNavigationButtons } from "./AppNavigationButtons";
 import { SidebarHeaderTrigger, useSidebar } from "./ui/sidebar";

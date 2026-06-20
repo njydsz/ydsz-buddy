@@ -18,19 +18,21 @@
 //! # 使用示例
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_persistence::{SqliteClient, run_migrations, SqliteEventStore, SqliteProjectionRepository};
 //! use std::path::Path;
-//!
+//! 
 //! // 初始化数据库客户端
 //! let client = SqliteClient::new(Path::new("/path/to/db.sqlite")).unwrap();
-//!
+//! 
 //! // 执行数据库迁移
 //! run_migrations(&client).unwrap();
-//!
+//! 
 //! // 创建事件存储和投影仓库
 //! let event_store = SqliteEventStore::new(client.clone());
 //! let projection_repo = SqliteProjectionRepository::new(client);
-//! ```
+//! }
 
 // 错误类型定义模块
 pub mod error;

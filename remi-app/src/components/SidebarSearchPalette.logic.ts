@@ -1,6 +1,8 @@
-// Purpose: Scores sidebar palette results for actions, themes, projects, and chat threads.
-// Keeps search local and deterministic so the palette can rank title hits above
-// message-content hits while still surfacing a useful snippet for chat matches.
+/**
+ * @file SidebarSearchPalette.logic.ts
+ * @description 侧边栏搜索面板的结果评分逻辑，对操作、主题、项目和聊天线程
+ *              进行本地确定性排序，优先匹配标题再匹配消息内容。
+ */
 import type { ProviderKind } from "~/contracts";
 import { basenameOfPath } from "../file-icons";
 import type { ThemeMode, ThemeVariant } from "../theme/theme.logic";

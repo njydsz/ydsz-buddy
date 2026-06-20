@@ -417,7 +417,9 @@ pub async fn register_git_methods(
                     .and_then(|v| v.as_str())
                     .map(|s| s.to_string());
 
-                git_core.create_worktree(cwd, worktree_path, branch).await?;
+                git_core
+                    .create_worktree(cwd, worktree_path, branch, base)
+                    .await?;
                 Ok(Value::Null)
             }
         })

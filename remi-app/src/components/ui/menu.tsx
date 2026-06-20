@@ -1,3 +1,9 @@
+/**
+ * @file menu
+ * @description 菜单组件，基于 Base UI Menu 原语封装，
+ * 提供菜单项、复选菜单项、单选菜单项、子菜单等子组件，
+ * 同时导出 DropdownMenu 别名以兼容旧版 API。
+ */
 "use client";
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
@@ -6,12 +12,16 @@ import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
+/** 创建 Menu 句柄，用于命令式控制菜单的打开/关闭 */
 const MenuCreateHandle = MenuPrimitive.createHandle;
 
+/** 菜单根组件 */
 const Menu = MenuPrimitive.Root;
 
+/** 菜单传送门 */
 const MenuPortal = MenuPrimitive.Portal;
 
+/** 菜单触发器 */
 function MenuTrigger({ className, children, ...props }: MenuPrimitive.Trigger.Props) {
   return (
     <MenuPrimitive.Trigger className={className} data-slot="menu-trigger" {...props}>
@@ -20,6 +30,7 @@ function MenuTrigger({ className, children, ...props }: MenuPrimitive.Trigger.Pr
   );
 }
 
+/** 菜单弹出面板 */
 function MenuPopup({
   children,
   className,
@@ -62,10 +73,12 @@ function MenuPopup({
   );
 }
 
+/** 菜单分组 */
 function MenuGroup(props: MenuPrimitive.Group.Props) {
   return <MenuPrimitive.Group data-slot="menu-group" {...props} />;
 }
 
+/** 菜单项，支持默认和破坏性变体 */
 function MenuItem({
   className,
   inset,
@@ -89,6 +102,7 @@ function MenuItem({
   );
 }
 
+/** 菜单复选项，支持默认复选框和开关两种变体 */
 function MenuCheckboxItem({
   className,
   children,
@@ -143,10 +157,12 @@ function MenuCheckboxItem({
   );
 }
 
+/** 菜单单选组，用于包裹一组互斥的单选项 */
 function MenuRadioGroup(props: MenuPrimitive.RadioGroup.Props) {
   return <MenuPrimitive.RadioGroup data-slot="menu-radio-group" {...props} />;
 }
 
+/** 菜单单选项，带选中指示器，需配合 MenuRadioGroup 使用 */
 function MenuRadioItem({ className, children, ...props }: MenuPrimitive.RadioItem.Props) {
   return (
     <MenuPrimitive.RadioItem
@@ -177,6 +193,7 @@ function MenuRadioItem({ className, children, ...props }: MenuPrimitive.RadioIte
   );
 }
 
+/** 菜单分组标签，用于为 MenuGroup 添加标题 */
 function MenuGroupLabel({
   className,
   inset,
@@ -197,6 +214,7 @@ function MenuGroupLabel({
   );
 }
 
+/** 菜单分隔线，用于在菜单项之间添加视觉分隔 */
 function MenuSeparator({ className, ...props }: MenuPrimitive.Separator.Props) {
   return (
     <MenuPrimitive.Separator
@@ -207,6 +225,7 @@ function MenuSeparator({ className, ...props }: MenuPrimitive.Separator.Props) {
   );
 }
 
+/** 菜单快捷键提示，用于在菜单项右侧显示键盘快捷键 */
 function MenuShortcut({ className, ...props }: React.ComponentProps<"kbd">) {
   return (
     <kbd
@@ -220,10 +239,12 @@ function MenuShortcut({ className, ...props }: React.ComponentProps<"kbd">) {
   );
 }
 
+/** 菜单子菜单根组件，用于创建嵌套子菜单 */
 function MenuSub(props: MenuPrimitive.SubmenuRoot.Props) {
   return <MenuPrimitive.SubmenuRoot data-slot="menu-sub" {...props} />;
 }
 
+/** 子菜单触发器，点击后展开对应的子菜单 */
 function MenuSubTrigger({
   className,
   inset,
@@ -248,6 +269,7 @@ function MenuSubTrigger({
   );
 }
 
+/** 子菜单弹出面板，展示子菜单内容 */
 function MenuSubPopup({
   className,
   sideOffset = 0,

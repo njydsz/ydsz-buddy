@@ -1,3 +1,8 @@
+/**
+ * @file ContextWindowMeter.tsx
+ * @description 上下文窗口用量仪表盘组件，以圆形进度条和弹出面板展示上下文使用率、令牌数和会话费用。
+ */
+
 import {
   type ContextWindowSnapshot,
   deriveContextWindowMeterDisplay,
@@ -6,6 +11,14 @@ import {
 } from "~/lib/contextWindow";
 import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
 
+/**
+ * ContextWindowMeter 组件
+ * @description 上下文窗口用量仪表盘，以圆形进度条展示使用率，悬停显示详细信息
+ * @param props.usage - 上下文窗口快照数据
+ * @param props.cumulativeCostUsd - 累计费用（美元）
+ * @param props.activeWindowLabel - 活跃窗口标签
+ * @param props.pendingWindowLabel - 待处理窗口标签
+ */
 export function ContextWindowMeter(props: {
   usage: ContextWindowSnapshot;
   cumulativeCostUsd?: number | null | undefined;

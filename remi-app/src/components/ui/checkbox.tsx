@@ -1,9 +1,15 @@
+/**
+ * @file checkbox
+ * @description 复选框组件，基于 Base UI Checkbox 原语封装，
+ * 支持选中、未选中和半选（indeterminate）三种状态。
+ */
 "use client";
 
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 
 import { cn } from "~/lib/utils";
 
+/** 复选框组件 */
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root

@@ -25,8 +25,10 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
-//!
+//! 
 //! let entries = WorkspaceEntries::new();
 //! let result = entries.browse(BrowseInput {
 //!     cwd: "/path/to/workspace".to_string(),
@@ -34,11 +36,11 @@
 //!     include_hidden: false,
 //!     max_depth: Some(2),
 //! }).await.unwrap();
-//!
+//! 
 //! for entry in result.entries {
 //!     println!("{}: {}", entry.name, entry.path);
 //! }
-//! ```
+//! }
 
 use std::path::Path;
 
@@ -286,8 +288,10 @@ pub struct ListDirectoriesResult {
 /// ## 典型用法
 ///
 /// ```rust,no_run
+/// #[tokio::main]
+/// async fn main() {
 /// use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
-///
+/// 
 /// let service = WorkspaceEntries::new();
 /// let result = service.browse(BrowseInput {
 ///     cwd: "/project".to_string(),
@@ -295,7 +299,7 @@ pub struct ListDirectoriesResult {
 ///     include_hidden: false,
 ///     max_depth: Some(2),
 /// }).await?;
-/// ```
+/// }
 pub struct WorkspaceEntries;
 
 impl WorkspaceEntries {
@@ -339,8 +343,10 @@ impl WorkspaceEntries {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
-    ///
+    /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.browse(BrowseInput {
     ///     cwd: "/project".to_string(),
@@ -348,7 +354,7 @@ impl WorkspaceEntries {
     ///     include_hidden: false,
     ///     max_depth: Some(2),
     /// }).await?;
-    /// ```
+    /// }
     pub async fn browse(&self, input: BrowseInput) -> WorkspaceResult<BrowseResult> {
         // 拼接基础路径：如果指定了相对路径则拼接，否则直接使用 cwd
         let base_path = if let Some(ref rel) = input.relative_path {
@@ -452,8 +458,10 @@ impl WorkspaceEntries {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, SearchEntriesInput};
-    ///
+    /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.search(SearchEntriesInput {
     ///     cwd: "/project".to_string(),
@@ -461,7 +469,7 @@ impl WorkspaceEntries {
     ///     max_results: Some(50),
     ///     file_pattern: Some("*.rs".to_string()),
     /// }).await?;
-    /// ```
+    /// }
     pub async fn search(&self, input: SearchEntriesInput) -> WorkspaceResult<SearchEntriesResult> {
         info!("搜索条目: cwd={}, query={}", input.cwd, input.query);
 
@@ -567,14 +575,16 @@ impl WorkspaceEntries {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, ListDirectoriesInput};
-    ///
+    /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.list_directories(ListDirectoriesInput {
     ///     cwd: "/project".to_string(),
     ///     max_depth: Some(5),
     /// }).await?;
-    /// ```
+    /// }
     pub async fn list_directories(
         &self,
         input: ListDirectoriesInput,
@@ -646,11 +656,13 @@ impl WorkspaceEntries {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::entries::WorkspaceEntries;
-    ///
+    /// 
     /// let service = WorkspaceEntries::new();
     /// service.invalidate("/project").await;
-    /// ```
+    /// }
     pub async fn invalidate(&self, _cwd: &str) {
         // TODO: 实现缓存失效逻辑
         debug!("缓存失效: {}", _cwd);

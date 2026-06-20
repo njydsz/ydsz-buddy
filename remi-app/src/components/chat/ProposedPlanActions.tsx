@@ -1,3 +1,8 @@
+/**
+ * @file ProposedPlanActions.tsx
+ * @description 提议计划的操作按钮组，提供下载到 .plan 目录、导出为 Markdown 文件和复制到剪贴板三种操作。
+ */
+
 import { memo, useMemo, useState, type ReactNode } from "react";
 import {
   buildProposedPlanMarkdownFilename,
@@ -11,17 +16,37 @@ import { Button } from "../ui/button";
 import { toastManager } from "../ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 
+/** 计划操作按钮的视觉变体 */
 type PlanActionVariant = "outline" | "ghost";
 
+/**
+ * ProposedPlanActions 组件的属性接口
+ */
 interface ProposedPlanActionsProps {
+  /** 计划的 Markdown 文本 */
   planMarkdown: string;
+  /** 工作区根路径 */
   workspaceRoot: string | undefined;
+  /** 按钮变体样式 */
   variant?: PlanActionVariant;
+  /** 容器类名 */
   className?: string;
+  /** 按钮类名 */
   buttonClassName?: string;
+  /** 图标类名 */
   iconClassName?: string;
 }
 
+/**
+ * ProposedPlanActions 组件
+ * @description 提议计划的操作按钮组，提供下载、导出和复制三种操作
+ * @param props.planMarkdown - 计划的 Markdown 文本
+ * @param props.workspaceRoot - 工作区根路径
+ * @param props.variant - 按钮变体样式
+ * @param props.className - 容器类名
+ * @param props.buttonClassName - 按钮类名
+ * @param props.iconClassName - 图标类名
+ */
 export const ProposedPlanActions = memo(function ProposedPlanActions({
   planMarkdown,
   workspaceRoot,
@@ -156,6 +181,7 @@ export const ProposedPlanActions = memo(function ProposedPlanActions({
   );
 });
 
+/** 计划操作按钮子组件，封装工具提示和加载状态 */
 function PlanActionButton({
   label,
   onClick,

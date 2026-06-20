@@ -1,9 +1,8 @@
-// FILE: PluginLibrary.tsx
-// Purpose: Dispatches the /plugins route to either the PluginsView or the SkillsView
-//          based on the `?tab=` URL search parameter. Each view owns its own layout;
-//          they share the provider discovery data via useProviderDiscoveryData.
-// Layer: Route dispatcher
-// Exports: PluginLibrary
+/**
+ * @file PluginLibrary.tsx
+ * @description 插件/技能库路由分发器，根据 URL `?tab=` 参数
+ *              在 PluginsView 和 SkillsView 之间切换渲染。
+ */
 
 import { useSearch } from "@tanstack/react-router";
 import { PluginsView } from "./PluginsView";

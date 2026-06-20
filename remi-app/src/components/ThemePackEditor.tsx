@@ -1,7 +1,8 @@
-// FILE: ThemePackEditor.tsx
-// Purpose: Per-variant theme card matching the Codex appearance settings layout.
-// Layer: Web settings UI
-// Exports: ThemePackEditor
+/**
+ * @file ThemePackEditor.tsx
+ * @description 主题包编辑器，按亮/暗变体提供主题卡片配置，
+ *              支持颜色选择器、代码主题切换、CSS 导入/导出等外观设置。
+ */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";

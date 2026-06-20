@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file DirectoryTreePicker
  * @description 将共享的目录浏览器包装为按钮触发的弹出式选择器，
  *              用于在聊天输入区域选择本地文件夹。
@@ -61,7 +61,7 @@ export const DirectoryTreePicker = memo(function DirectoryTreePicker({
           rootPath={rootPath}
           emptyLabel={emptyLabel}
           unavailableLabel="Home directory unavailable."
-          loadingLabel={includeFiles ? "Loading entries�? : "Loading folders�?}
+          loadingLabel={includeFiles ? "Loading entries\u2026" : "Loading folders\u2026"}
           className="max-h-96 overflow-auto px-2 py-2"
           includeFiles={includeFiles}
           onSelectEntry={async (absolutePath, entry: ProjectFileSystemEntry) => {

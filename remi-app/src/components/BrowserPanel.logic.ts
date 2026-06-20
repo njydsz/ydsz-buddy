@@ -1,8 +1,8 @@
-// FILE: BrowserPanel.logic.ts
-// Purpose: Holds the address-bar sync rules and suggestions for the in-app browser panel.
-// Layer: Component logic helper
-// Exports: browserAddressDisplayValue, normalizeBrowserAddressInput, buildBrowserAddressSuggestions
-// Depends on: browser tab metadata and thread-local browser history
+/**
+ * @file BrowserPanel.logic.ts
+ * @description 浏览器面板的地址栏同步规则和建议列表逻辑，
+ *              包含地址显示值解析、输入规范化、标签页/历史建议构建等函数。
+ */
 
 import type { BrowserTabState } from "~/contracts";
 import type { BrowserHistoryEntry } from "../browserStateStore";

@@ -1,3 +1,9 @@
+/**
+ * @file ComposerCommandMenu.tsx
+ * @description 聊天编辑器的命令菜单组件，支持斜杠命令、@提及、插件、技能、子代理等多种命令类型的搜索和选择。
+ * 提供命令分组、高亮追踪和自动滚动等交互功能。
+ */
+
 import {
   type ProjectEntry,
   type ModelSlug,
@@ -38,6 +44,7 @@ import {
 } from "../ui/command";
 import { FileEntryIcon } from "./FileEntryIcon";
 
+/** 技能立方体图标组件 */
 function SkillCubeIcon(props: { className?: string }) {
   return (
     <svg className={props.className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -66,6 +73,11 @@ function SkillCubeIcon(props: { className?: string }) {
   );
 }
 
+/**
+ * 将提供者命令名称转换为人类可读的标题格式
+ * @param command - 原始命令名称（可能包含连字符或下划线）
+ * @returns 格式化后的标题字符串
+ */
 function humanizeProviderCommandName(command: string): string {
   return command
     .split(/[-_]/g)
@@ -74,6 +86,11 @@ function humanizeProviderCommandName(command: string): string {
     .join(" ");
 }
 
+/**
+ * 获取斜杠命令或提供者原生命令的菜单显示标题
+ * @param item - 命令项（斜杠命令或提供者原生命令）
+ * @returns 命令的显示标题
+ */
 function commandMenuTitle(
   item: Extract<ComposerCommandItem, { type: "slash-command" | "provider-native-command" }>,
 ): string {
@@ -105,6 +122,11 @@ function commandMenuTitle(
   }
 }
 
+/**
+ * 获取命令项的尾部元数据文本（右对齐显示）
+ * @param item - 命令项
+ * @returns 尾部元数据文本，无则返回 null
+ */
 function commandMenuTrailingMeta(item: ComposerCommandItem): string | null {
   if (item.type === "agent") {
     return "delegate task to subagent";
@@ -135,6 +157,11 @@ function commandMenuTrailingMeta(item: ComposerCommandItem): string | null {
   return null;
 }
 
+/**
+ * 获取命令项的次要描述文本
+ * @param item - 命令项
+ * @returns 次要描述文本，无则返回 null
+ */
 function commandMenuSecondaryText(item: ComposerCommandItem): string | null {
   if (item.type === "slash-command" || item.type === "provider-native-command") {
     return item.description;
@@ -151,6 +178,10 @@ function commandMenuSecondaryText(item: ComposerCommandItem): string | null {
   return null;
 }
 
+/**
+ * 编辑器命令项联合类型，涵盖路径、本地根目录、斜杠命令、提供者原生命令、
+ * 分叉目标、审查目标、模型、插件、技能和子代理等命令类型
+ */
 export type ComposerCommandItem =
   | {
       id: string;
@@ -229,6 +260,7 @@ export type ComposerCommandItem =
       description: string;
     };
 
+/** 命令分组模型，包含分组 ID、标签和命令项列表 */
 type ComposerCommandGroupModel = {
   id: string;
   label: string | null;
@@ -238,6 +270,13 @@ type ComposerCommandGroupModel = {
 const COMPOSER_COMMAND_GROUP_LABEL_CLASSNAME =
   "px-2 pt-1.5 pb-1 text-[11px] font-normal text-muted-foreground/60";
 
+/**
+ * 将命令项按触发类型分组
+ * @param items - 待分组的命令项列表
+ * @param triggerKind - 触发类型（提及、斜杠命令等）
+ * @param groupSlashCommandSections - 是否将斜杠命令按内置/提供者分组
+ * @returns 分组后的命令组模型数组
+ */
 export function groupCommandItems(
   items: ComposerCommandItem[],
   triggerKind: ComposerTriggerKind | null,
@@ -294,6 +333,19 @@ export function groupCommandItems(
   return groups;
 }
 
+/**
+ * ComposerCommandMenu 组件
+ * @description 编辑器命令菜单，支持斜杠命令、@提及、插件、技能等多种命令类型的搜索和选择
+ * @param props.items - 可选的命令项列表
+ * @param props.resolvedTheme - 当前主题（亮色/暗色）
+ * @param props.isLoading - 是否正在加载命令
+ * @param props.triggerKind - 触发类型
+ * @param props.groupSlashCommandSections - 是否将斜杠命令分组显示
+ * @param props.emptyStateText - 空状态提示文本
+ * @param props.activeItemId - 当前高亮的命令项 ID
+ * @param props.onHighlightedItemChange - 高亮项变更回调
+ * @param props.onSelect - 命令项选中回调
+ */
 export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
   items: ComposerCommandItem[];
   resolvedTheme: "light" | "dark";
@@ -400,6 +452,7 @@ export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
   );
 });
 
+/** 命令菜单项子组件，渲染单个命令项的图标、标题和描述 */
 const ComposerCommandMenuItem = memo(function ComposerCommandMenuItem(props: {
   item: ComposerCommandItem;
   resolvedTheme: "light" | "dark";

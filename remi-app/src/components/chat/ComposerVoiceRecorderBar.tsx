@@ -1,7 +1,7 @@
-// FILE: ComposerVoiceRecorderBar.tsx
-// Purpose: Renders the expanded WhatsApp-style voice recorder UI inside the chat composer.
-// Layer: Chat composer presentation
-// Depends on: live waveform samples and caller-owned record/cancel/send actions.
+/**
+ * @file ComposerVoiceRecorderBar.tsx
+ * @description 聊天编辑器中的语音录制条，展示 WhatsApp 风格的实时波形、录制时长和取消/发送按钮。
+ */
 
 import { memo, useEffect, useRef, useState } from "react";
 import { FiArrowUp } from "react-icons/fi";
@@ -10,21 +10,46 @@ import { IoStopSharp } from "react-icons/io5";
 import { Loader2Icon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
+/**
+ * ComposerVoiceRecorderBar 组件的属性接口
+ */
 interface ComposerVoiceRecorderBarProps {
+  /** 是否禁用操作按钮 */
   disabled?: boolean;
+  /** 录制时长标签 */
   durationLabel: string;
+  /** 是否正在录制 */
   isRecording: boolean;
+  /** 是否正在转录 */
   isTranscribing: boolean;
+  /** 实时波形电平数组 */
   waveformLevels: readonly number[];
+  /** 取消录制的回调 */
   onCancel: () => void;
+  /** 发送语音的回调 */
   onSubmit: () => void;
 }
 
+/** 波形条宽度（像素） */
 const BAR_WIDTH_PX = 2;
+/** 波形条间距（像素） */
 const BAR_GAP_PX = 2;
+/** 波形条最小高度（像素） */
 const BAR_MIN_HEIGHT_PX = 3;
+/** 波形条最大高度（像素） */
 const BAR_MAX_HEIGHT_PX = 22;
 
+/**
+ * ComposerVoiceRecorderBar 组件
+ * @description 语音录制条，展示实时波形、录制时长和取消/发送按钮
+ * @param props.disabled - 是否禁用操作按钮
+ * @param props.durationLabel - 录制时长标签
+ * @param props.isRecording - 是否正在录制
+ * @param props.isTranscribing - 是否正在转录
+ * @param props.waveformLevels - 实时波形电平数组
+ * @param props.onCancel - 取消录制的回调
+ * @param props.onSubmit - 发送语音的回调
+ */
 export const ComposerVoiceRecorderBar = memo(function ComposerVoiceRecorderBar(
   props: ComposerVoiceRecorderBarProps,
 ) {

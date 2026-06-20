@@ -1,0 +1,273 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.1.0)"
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+  PNPM_VERSION: "9.12.0"
+  NODE_VERSION: "22"
+
+jobs:
+  resolve:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      is_prerelease: ${{ steps.bump.outputs.is_prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: bump
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION=${GITHUB_REF_NAME#v}
+          else
+            VERSION=${{ inputs.version }}
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if [[ "${VERSION}" == *-* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Resolved version: ${VERSION}"
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: resolve
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+            artifact: linux-x86_64
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04-arm
+            artifact: linux-aarch64
+          - target: x86_64-apple-darwin
+            os: macos-14
+            artifact: macos-x86_64
+          - target: aarch64-apple-darwin
+            os: macos-14
+            artifact: macos-aarch64
+          - target: x86_64-pc-windows-msvc
+            os: windows-2022
+            artifact: windows-x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry & build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+          shared-key: ${{ matrix.target }}
+
+      - name: Install Linux cross toolchain (aarch64)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build (Linux)
+        if: startsWith(matrix.target, 'x86_64-unknown-linux-gnu') || startsWith(matrix.target, 'aarch64-unknown-linux-gnu')
+        run: |
+          cargo build --release --target ${{ matrix.target }} \
+            --config target.${{ matrix.target }}.linker=\"aarch64-linux-gnu-gcc\"
+          mkdir -p release
+          cp target/${{ matrix.target }}/release/remi-cli release/remi-cli || true
+
+      - name: Build (Apple)
+        if: startsWith(matrix.target, 'apple')
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+          mkdir -p release
+          cp target/${{ matrix.target }}/release/remi-cli release/remi-cli || true
+
+      - name: Build (Windows)
+        if: endsWith(matrix.target, 'pc-windows-msvc')
+        shell: pwsh
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item target/${{ matrix.target }}/release/remi-cli.exe release/remi-cli.exe
+
+      - name: Upload raw binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.artifact }}
+          path: release/
+
+  package:
+    name: Package installers
+    needs: [resolve, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            artifact: macos-aarch64
+            target: aarch64-apple-darwin
+            outputs: dmg
+          - os: macos-14
+            artifact: macos-x86_64
+            target: x86_64-apple-darwin
+            outputs: dmg
+          - os: windows-2022
+            artifact: windows-x86_64
+            target: x86_64-pc-windows-msvc
+            outputs: msi
+          - os: ubuntu-22.04
+            artifact: linux-x86_64
+            target: x86_64-unknown-linux-gnu
+            outputs: deb,rpm,appimage
+          - os: ubuntu-22.04-arm
+            artifact: linux-aarch64
+            target: aarch64-unknown-linux-gnu
+            outputs: deb,rpm,appimage
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download binary
+        uses: actions/download-artifact@v4
+        with:
+          name: binary-${{ matrix.artifact }}
+          path: release/
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry & build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+          shared-key: ${{ matrix.target }}-pack
+
+      - name: Build Tauri bundles
+        env:
+          REMI_RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          cargo tauri build \
+            --target ${{ matrix.target }} \
+            --bundles ${{ matrix.outputs }}
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.artifact }}
+          path: |
+            remi-app/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+            remi-app/src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+            remi-app/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
+            remi-app/src-tauri/target/${{ matrix.target }}/release/bundle/rpm/*.rpm
+            remi-app/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
+
+  checksum:
+    name: Checksums
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Generate SHA256SUMS
+        working-directory: dist
+        run: |
+          find . -type f -name "*.dmg" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" \
+            | xargs sha256sum > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Sign SHA256SUMS (minisign)
+        env:
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        run: |
+          minisign -S -s <(echo "$MINISIGN_SECRET_KEY") \
+            -m dist/SHA256SUMS \
+            -c "Remi Code release signing key"
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: dist/SHA256SUMS*
+
+  release:
+    name: Publish GitHub release
+    needs: [resolve, package, checksum]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.resolve.outputs.version }}
+          name: "Remi Code v${{ needs.resolve.outputs.version }}"
+          draft: true
+          prerelease: ${{ needs.resolve.outputs.is_prerelease == 'true' }}
+          generate_release_notes: true
+          files: |
+            artifacts/installers-*/*
+            artifacts/checksums/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-updater:
+    name: Update latest.json
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update Tauri updater manifest
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          echo "Generating latest.json for ${TAG}"
+          # See .github/scripts/update-manifest.py for full logic.
+          python3 .github/scripts/update-manifest.py \
+            --repo remi-code/remi-code \
+            --tag "${TAG}" \
+            --output remi-app/src-tauri/latest.json
+
+      - name: Commit manifest
+        run: |
+          git config user.name "remi-bot"
+          git config user.email "bot@remi-code.dev"
+          git add remi-app/src-tauri/latest.json
+          git commit -m "chore(release): update updater manifest for ${TAG}" \
+            || echo "no changes"
+          git push

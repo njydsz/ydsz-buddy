@@ -1,7 +1,9 @@
-// FILE: TraitsPicker.tsx
-// Purpose: Renders composer trait controls for effort, thinking, and fast mode across menu surfaces.
-// Layer: Chat composer presentation
-// Depends on: shared trait resolution helpers, provider model option updates, and shared menu primitives.
+/**
+ * @file TraitsPicker
+ * @description 编辑器特征控件菜单，包括推理力度（Effort）、思考模式（Thinking）、
+ *              快速模式（Fast Mode）、上下文窗口和智能体选择等功能。
+ *              依赖共享的特征解析辅助函数、服务提供者模型选项更新和菜单 UI 原语。
+ */
 
 import {
   type OpenCodeModelOptions,
@@ -35,14 +37,29 @@ import { getComposerTraitSelection, hasVisibleComposerTraitControls } from "./co
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { ShortcutKbd } from "../ui/shortcut-kbd";
 
+/** Ultrathink 提示词前缀，用于通过 prompt 控制推理力度 */
 const ULTRATHINK_PROMPT_PREFIX = "Ultrathink:\n";
 
+/**
+ * 获取指定服务提供者的默认智能体名称。
+ *
+ * @param provider - 服务提供者类型
+ * @returns 默认智能体名称，若无则返回 null
+ */
 function defaultAgentForProvider(provider: ProviderKind): string | null {
   if (provider === "kilo") return "code";
   if (provider === "opencode") return "build";
   return null;
 }
 
+/**
+ * 获取指定服务提供者的智能体选项列表。
+ * 仅 kilo 和 opencode 提供者支持智能体选择。
+ *
+ * @param provider - 服务提供者类型
+ * @param runtimeAgents - 运行时发现的智能体描述符列表
+ * @returns 智能体选项列表
+ */
 function getAgentOptions(
   provider: ProviderKind,
   runtimeAgents: ReadonlyArray<ProviderAgentDescriptor> | null | undefined,
@@ -51,6 +68,14 @@ function getAgentOptions(
   return runtimeAgents ?? [];
 }
 
+/**
+ * 获取当前选中的智能体值。
+ * 优先使用模型选项中配置的智能体，否则使用提供者默认智能体。
+ *
+ * @param provider - 服务提供者类型
+ * @param modelOptions - 当前模型选项
+ * @returns 选中的智能体名称，若无则返回 null
+ */
 function getSelectedAgentValue(
   provider: ProviderKind,
   modelOptions: ProviderOptions | null | undefined,
@@ -61,6 +86,13 @@ function getSelectedAgentValue(
   return selectedAgent && selectedAgent.length > 0 ? selectedAgent : defaultAgent;
 }
 
+/**
+ * 在智能体列表中查找指定值的显示标签。
+ *
+ * @param agents - 智能体描述符列表
+ * @param value - 待查找的智能体名称
+ * @returns 显示标签，未找到则返回原始值或 null
+ */
 function findAgentLabel(
   agents: ReadonlyArray<ProviderAgentDescriptor>,
   value: string | null,
@@ -70,20 +102,37 @@ function findAgentLabel(
   return agent?.displayName ?? value;
 }
 
+/** 特征菜单内容组件的属性接口 */
 export interface TraitsMenuContentProps {
+  /** 当前服务提供者类型 */
   provider: ProviderKind;
+  /** 当前线程 ID */
   threadId: ThreadId;
+  /** 当前选中的模型标识 */
   model: string | null | undefined;
+  /** 运行时发现的模型描述符 */
   runtimeModel?: ProviderModelDescriptor | undefined;
+  /** 运行时发现的模型描述符列表 */
   runtimeModels?: ReadonlyArray<ProviderModelDescriptor> | null | undefined;
+  /** 运行时发现的智能体描述符列表 */
   runtimeAgents?: ReadonlyArray<ProviderAgentDescriptor> | null | undefined;
+  /** 当前编辑器提示词文本 */
   prompt: string;
+  /** 提示词变更回调 */
   onPromptChange: (prompt: string) => void;
+  /** 是否包含快速模式控件 */
   includeFastMode?: boolean;
+  /** 当前模型选项 */
   modelOptions?: ProviderOptions | null | undefined;
+  /** 选择完成后的回调 */
   onSelectionComplete?: () => void;
 }
 
+/**
+ * 特征菜单内容组件。
+ * 渲染推理力度、思考模式、快速模式、上下文窗口和智能体选择的菜单项，
+ * 根据模型能力动态显示可用控件。
+ */
 export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
   provider,
   threadId,
@@ -355,6 +404,24 @@ export const TraitsMenuContent = memo(function TraitsMenuContentImpl({
   );
 });
 
+/**
+ * 特征选择器组件。
+ * 以菜单按钮形式展示当前特征状态，点击后展开特征菜单进行配置。
+ * 支持受控和非受控两种打开模式，并可选显示快捷键提示。
+ *
+ * @param props.provider - 服务提供者类型
+ * @param props.threadId - 线程 ID
+ * @param props.model - 当前模型标识
+ * @param props.runtimeModel - 运行时模型描述符
+ * @param props.runtimeAgents - 运行时智能体列表
+ * @param props.prompt - 当前提示词
+ * @param props.onPromptChange - 提示词变更回调
+ * @param props.includeFastMode - 是否包含快速模式
+ * @param props.modelOptions - 模型选项
+ * @param props.open - 受控的菜单打开状态
+ * @param props.onOpenChange - 菜单打开状态变更回调
+ * @param props.shortcutLabel - 快捷键标签
+ */
 export const TraitsPicker = memo(function TraitsPicker({
   provider,
   threadId,

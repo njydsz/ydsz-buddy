@@ -1,3 +1,7 @@
+/** @file group
+ * @description 按钮组组件，基于 cva 样式变体封装，将多个按钮组合为视觉连续的组，支持水平和垂直方向。
+ */
+
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -8,6 +12,7 @@ import type * as React from "react";
 import { cn } from "~/lib/utils";
 import { Separator } from "./separator";
 
+/** 按钮组样式变体定义，支持 orientation 方向变体 */
 const groupVariants = cva(
   "flex w-fit *:focus-visible:z-1 has-[>[data-slot=group]]:gap-2 *:has-focus-visible:z-1 dark:*:[[data-slot=button]:hover~[data-slot=separator]:not([data-slot]:hover~[data-slot=separator]~[data-slot=separator]),[data-slot][data-pressed]~[data-slot=separator]:not([data-slot][data-pressed]~[data-slot=separator]~[data-slot=separator])]:before:bg-input/64 dark:*:[[data-slot=separator]:has(~[data-slot=button]:hover):not(:has(~[data-slot=separator]~[data-slot]:hover)),[data-slot=separator]:has(~[data-slot][data-pressed]):not(:has(~[data-slot=separator]~[data-slot][data-pressed]))]:before:bg-input/64",
   {
@@ -25,6 +30,10 @@ const groupVariants = cva(
   },
 );
 
+/**
+ * 按钮组容器组件
+ * @param props.orientation - 组的方向，horizontal 或 vertical
+ */
 function Group({
   className,
   orientation,
@@ -48,6 +57,7 @@ function Group({
   );
 }
 
+/** 按钮组文本组件，用于在按钮组中插入不可交互的文本元素 */
 function GroupText({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -63,6 +73,7 @@ function GroupText({ className, render, ...props }: useRender.ComponentProps<"di
   });
 }
 
+/** 按钮组分隔线组件，用于在按钮组中插入视觉分隔 */
 function GroupSeparator({
   className,
   orientation = "vertical",

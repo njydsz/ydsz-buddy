@@ -1,0 +1,34 @@
+# Default reviewers for Remi Code.
+# Each line is a file pattern followed by one or more owners.
+
+# Core maintainers
+*                                   @remi-code/maintainers
+
+# Rust crates
+/remi-core/                         @remi-code/core-maintainers
+/remi-orchestration/                @remi-code/orchestration-maintainers
+/remi-persistence/                  @remi-code/persistence-maintainers
+/remi-provider/                     @remi-code/provider-maintainers
+/remi-git/                          @remi-code/git-maintainers
+/remi-server/                       @remi-code/server-maintainers
+/remi-cli/                          @remi-code/server-maintainers
+
+# Frontend
+/remi-app/src/contracts/            @remi-code/frontend-maintainers
+/remi-app/src/routes/               @remi-code/frontend-maintainers
+/remi-app/src/i18n/                 @remi-code/i18n-maintainers
+/remi-app/src/lib/                  @remi-code/frontend-maintainers
+
+# Tauri shell
+/remi-app/src-tauri/                @remi-code/desktop-maintainers
+
+# Marketing
+/apps/marketing/                    @remi-code/marketing-maintainers
+
+# Documentation
+/.docs/                             @remi-code/docs-maintainers
+/apps/marketing/src/pages/docs.astro  @remi-code/docs-maintainers
+
+# CI / release
+/.github/                           @remi-code/release-engineers
+/scripts/bump-version.sh           @remi-code/release-engineers

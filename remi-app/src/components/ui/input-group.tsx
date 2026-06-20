@@ -1,3 +1,7 @@
+/** @file input-group
+ * @description 输入框组合组件，将输入框与附加元素（前缀、后缀、按钮等）组合为统一的视觉单元。
+ */
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -7,6 +11,7 @@ import { cn } from "~/lib/utils";
 import { Input, type InputProps } from "~/components/ui/input";
 import { Textarea, type TextareaProps } from "~/components/ui/textarea";
 
+/** 输入框组合容器组件 */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -21,6 +26,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/** 输入框附加元素样式变体定义，支持 align 定位变体 */
 const inputGroupAddonVariants = cva(
   "[&_svg]:-mx-0.5 flex h-auto cursor-text select-none items-center justify-center gap-2 leading-none [&>kbd]:rounded-[calc(var(--radius)-5px)] in-[[data-slot=input-group]:has([data-slot=input-control],[data-slot=textarea-control])]:[&_svg:not([class*='size-'])]:size-4.5 sm:in-[[data-slot=input-group]:has([data-slot=input-control],[data-slot=textarea-control])]:[&_svg:not([class*='size-'])]:size-4 not-has-[button]:**:[svg:not([class*='opacity-'])]:opacity-80",
   {
@@ -42,6 +48,10 @@ const inputGroupAddonVariants = cva(
   },
 );
 
+/**
+ * 输入框附加元素组件
+ * @param props.align - 附加元素的对齐位置，默认 inline-start
+ */
 function InputGroupAddon({
   className,
   align = "inline-start",
@@ -72,6 +82,7 @@ function InputGroupAddon({
   );
 }
 
+/** 输入框附加文本组件 */
 function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -84,10 +95,12 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
+/** 输入框组合内的输入控件 */
 function InputGroupInput({ className, ...props }: InputProps) {
   return <Input className={className} unstyled {...props} />;
 }
 
+/** 输入框组合内的文本域控件 */
 function InputGroupTextarea({ className, ...props }: TextareaProps) {
   return <Textarea className={className} unstyled {...props} />;
 }

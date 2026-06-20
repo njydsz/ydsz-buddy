@@ -19,14 +19,16 @@
 //! ## 使用示例
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_config::{CliArgs, ServerConfig};
 //! use clap::Parser;
-//!
+//! 
 //! // 从命令行参数和环境变量构建配置
 //! let args = CliArgs::parse();
 //! let config = ServerConfig::from_args_and_env(args).expect("配置初始化失败");
 //! config.validate().expect("配置校验失败");
-//! ```
+//! }
 
 /// 服务器配置模块，包含配置结构体、CLI 参数、运行时模式及路径派生逻辑
 pub mod config;

@@ -97,6 +97,8 @@ impl SecretStore {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// # use remi_auth::SecretStore;
     /// # async fn example() {
     /// let store = SecretStore::new(None);
@@ -104,7 +106,7 @@ impl SecretStore {
     ///     println!("密钥长度: {}", key.len());
     /// }
     /// # }
-    /// ```
+    /// }
     pub async fn get(&self, name: &str) -> AuthResult<Option<Vec<u8>>> {
         let secrets = self.secrets.read().await;
         Ok(secrets.get(name).cloned())
@@ -154,13 +156,15 @@ impl SecretStore {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// # use remi_auth::SecretStore;
     /// # async fn example() {
     /// let store = SecretStore::new(None);
     /// let key = store.get_or_create_random("signing_key", 32).await.unwrap();
     /// assert_eq!(key.len(), 32);
     /// # }
-    /// ```
+    /// }
     pub async fn get_or_create_random(&self, name: &str, bytes: usize) -> AuthResult<Vec<u8>> {
         if let Some(existing) = self.get(name).await? {
             debug!("密钥已存在: {}", name);

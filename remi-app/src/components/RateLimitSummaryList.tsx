@@ -1,6 +1,8 @@
-// FILE: RateLimitSummaryList.tsx
-// Purpose: Renders the compact rate-limit rows shared by the local popover and
-// the dedicated rate-limit panel.
+/**
+ * @file RateLimitSummaryList.tsx
+ * @description 速率限制摘要列表组件，渲染紧凑的速率限制行，
+ *              被本地弹出面板和专用速率限制面板共享使用。
+ */
 
 import { useMemo } from "react";
 

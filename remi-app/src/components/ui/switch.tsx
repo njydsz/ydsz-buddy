@@ -1,9 +1,15 @@
+/**
+ * @file switch
+ * @description 开关组件，基于 Base UI Switch 原语封装，
+ * 支持选中/未选中状态切换，带滑块动画效果。
+ */
 "use client";
 
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 
 import { cn } from "~/lib/utils";
 
+/** 开关组件 */
 function Switch({ className, ...props }: SwitchPrimitive.Root.Props) {
   return (
     <SwitchPrimitive.Root

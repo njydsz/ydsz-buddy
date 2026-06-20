@@ -1,6 +1,8 @@
-// FILE: BranchToolbar.tsx
-// Purpose: Renders the chat thread's compact workspace controls, including the
-// local usage popover, inline workspace handoff actions, and runtime access toggle.
+/**
+ * @file BranchToolbar.tsx
+ * @description 聊天线程的紧凑工作区控件栏，包含本地用量弹出面板、
+ *              内联工作区交接操作、运行时访问开关和分支选择器。
+ */
 import type { ThreadId, RuntimeMode } from "~/contracts";
 import { LuSplit } from "react-icons/lu";
 import { ChevronDownIcon, ChevronRightIcon, HandoffIcon } from "~/lib/icons";
@@ -92,7 +94,7 @@ export function RuntimeUsageControls({
           }
           title={
             runtimeMode === "full-access"
-              ? "Full access �?click to require approvals"
+              ? "Full access �?click to require approvals"
               : "Ask every action"
           }
         >

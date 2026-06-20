@@ -1,3 +1,9 @@
+/**
+ * @file ChatView.tsx
+ * @description 聊天主视图组件，承载消息时间线、编辑器、差异面板和终端工作区，
+ *              是应用核心交互界面。整合消息收发、附件管理、自动滚动、
+ *              语音输入、模型选择等完整聊天交互流程。
+ */
 import {
   type ApprovalRequestId,
   DEFAULT_MODEL_BY_PROVIDER,
@@ -4170,7 +4176,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers �?skills are provider-specific.
+  // Clear selected skills when switching providers �?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -7731,7 +7737,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode �?click to return to normal build mode"
+                            title="Plan mode �?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8475,7 +8481,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode �?click to return to normal build mode"
+                                        title="Plan mode �?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

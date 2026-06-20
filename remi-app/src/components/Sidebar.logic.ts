@@ -1,6 +1,8 @@
-// FILE: Sidebar.logic.ts
-// Purpose: Shared sidebar sorting and status helpers used by the thread list UI.
-// Exports: Sidebar row state derivation, add-project error helpers, sort utilities, and visibility helpers.
+/**
+ * @file Sidebar.logic.ts
+ * @description 侧边栏共享排序和状态辅助逻辑，包含线程行状态推导、
+ *              项目创建错误处理、排序工具和可见性判断等函数。
+ */
 
 import type { KeybindingCommand, ProjectId, ThreadId } from "~/contracts";
 import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "../appSettings";

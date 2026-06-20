@@ -1,7 +1,8 @@
-// FILE: TerminalWorkspaceTabs.tsx
-// Purpose: Renders the top-level workspace switcher between terminal and chat surfaces.
-// Layer: Chat workspace chrome
-// Depends on: terminal workspace store layout state and shared className helpers.
+/**
+ * @file TerminalWorkspaceTabs.tsx
+ * @description 工作区顶层标签页切换器，在终端和聊天界面之间切换，
+ *              当工作区为纯终端模式或仅有一个终端时自动隐藏。
+ */
 
 import { cn } from "~/lib/utils";
 

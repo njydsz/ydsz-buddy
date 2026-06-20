@@ -128,7 +128,7 @@ pub async fn register_server_methods(
             let config = config.clone();
             let push_channel_manager = push_channel_manager.clone();
             async move {
-                let mut errors: Vec<String> = Vec::new();
+                let errors: Vec<String> = Vec::new();
                 let mut warnings: Vec<String> = Vec::new();
 
                 // 检查数据库文件

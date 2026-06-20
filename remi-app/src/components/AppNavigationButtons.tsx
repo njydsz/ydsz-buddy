@@ -1,7 +1,8 @@
-// FILE: AppNavigationButtons.tsx
-// Purpose: Renders desktop-only browser-style route back/forward controls.
-// Layer: Shared web shell chrome
-// Depends on: appNavigation history helpers, header Button/Tooltip primitives
+/**
+ * @file AppNavigationButtons.tsx
+ * @description 桌面端浏览器风格的路由前进/后退导航按钮，
+ *              仅在桌面端显示，移动端不渲染。
+ */
 
 import { goBackInAppHistory, goForwardInAppHistory, useAppNavigationState } from "~/appNavigation";
 import { isDesktop } from "~/env";

@@ -1,3 +1,8 @@
+/**
+ * @file select
+ * @description 下拉选择组件，基于 Base UI Select 原语封装，
+ * 提供触发器、弹出面板、选项、分组等子组件，支持多种尺寸和变体。
+ */
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -9,9 +14,10 @@ import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
+/** 下拉选择根组件 */
 const Select = SelectPrimitive.Root;
 
-// Keep neutral select chrome on the same token families Codex uses for menus and list hover.
+/** 下拉选择触发器样式变体 */
 const selectTriggerVariants = cva(
   "relative inline-flex cursor-pointer select-none items-center justify-between gap-2 border rounded-md text-left text-[length:var(--app-font-size-ui,12px)] outline-none transition-[color,box-shadow,background-color] data-disabled:pointer-events-none data-disabled:opacity-64 sm:text-[length:var(--app-font-size-ui,12px)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4",
   {
@@ -38,11 +44,13 @@ const selectTriggerVariants = cva(
 
 const selectTriggerIconClassName = "-me-1 size-4.5 opacity-80 sm:size-4";
 
+/** 下拉选择按钮属性类型 */
 interface SelectButtonProps extends useRender.ComponentProps<"button"> {
   size?: VariantProps<typeof selectTriggerVariants>["size"];
   variant?: VariantProps<typeof selectTriggerVariants>["variant"];
 }
 
+/** 下拉选择按钮，自带箭头图标和占位符样式 */
 function SelectButton({ className, size, variant, render, children, ...props }: SelectButtonProps) {
   const typeValue: React.ButtonHTMLAttributes<HTMLButtonElement>["type"] = render
     ? undefined
@@ -73,6 +81,7 @@ function SelectButton({ className, size, variant, render, children, ...props }: 
   });
 }
 
+/** 下拉选择触发器 */
 function SelectTrigger({
   className,
   size = "default",
@@ -94,6 +103,7 @@ function SelectTrigger({
   );
 }
 
+/** 下拉选择值显示 */
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
@@ -104,6 +114,7 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   );
 }
 
+/** 下拉选择弹出面板，支持方向、偏移和对齐 */
 function SelectPopup({
   className,
   children,
@@ -170,6 +181,7 @@ function SelectPopup({
   );
 }
 
+/** 下拉选择选项，支持隐藏选中指示器 */
 function SelectItem({
   className,
   children,
@@ -215,6 +227,7 @@ function SelectItem({
   );
 }
 
+/** 下拉选择分隔线 */
 function SelectSeparator({ className, ...props }: SelectPrimitive.Separator.Props) {
   return (
     <SelectPrimitive.Separator
@@ -225,10 +238,12 @@ function SelectSeparator({ className, ...props }: SelectPrimitive.Separator.Prop
   );
 }
 
+/** 下拉选择分组 */
 function SelectGroup(props: SelectPrimitive.Group.Props) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
+/** 下拉选择分组标签 */
 function SelectGroupLabel(props: SelectPrimitive.GroupLabel.Props) {
   return (
     <SelectPrimitive.GroupLabel

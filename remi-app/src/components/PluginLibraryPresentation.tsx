@@ -1,9 +1,8 @@
-// FILE: PluginLibraryPresentation.tsx
-// Purpose: Shared presentational building blocks used by both PluginsView and SkillsView.
-//          Provider toggle, grid items, and the small UI bits that don't carry route state.
-// Layer: Presentation
-// Exports: ProviderDiscoveryToolbar, PluginGridItem, SkillGridItem, ProviderToggleButton,
-//          PluginGlyph, SkillGlyph, InstalledStatus, ProviderIconByKind
+/**
+ * @file PluginLibraryPresentation.tsx
+ * @description 插件/技能库的共享展示组件，包括提供者切换工具栏、
+ *              网格项卡片、安装状态标识和图标等纯展示 UI 模块。
+ */
 
 import { useState, type ReactNode, type SVGProps } from "react";
 import { HammerIcon, CheckIcon, type LucideIcon } from "~/lib/icons";

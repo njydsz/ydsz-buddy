@@ -1,7 +1,7 @@
-// FILE: ComposerExtrasMenu.tsx
-// Purpose: Hosts the composer `+` menu for attachments and quick composer mode toggles.
-// Layer: Chat composer presentation
-// Depends on: shared menu primitives, icon buttons, and caller-owned composer state callbacks.
+/**
+ * @file ComposerExtrasMenu.tsx
+ * @description 聊天编辑器的附加功能菜单（"+"按钮），提供图片附件添加、计划模式切换和快速模式切换等功能。
+ */
 
 import { type ProviderInteractionMode } from "~/contracts";
 import { memo, useId, useRef, type ChangeEvent } from "react";
@@ -23,6 +23,16 @@ import {
   MenuTrigger,
 } from "../ui/menu";
 
+/**
+ * ComposerExtrasMenu 组件
+ * @description 编辑器附加功能菜单，包含添加图片、计划模式开关和快速模式子菜单
+ * @param props.interactionMode - 当前交互模式（默认/计划）
+ * @param props.supportsFastMode - 当前模型是否支持快速模式
+ * @param props.fastModeEnabled - 快速模式是否已启用
+ * @param props.onAddPhotos - 添加图片回调
+ * @param props.onToggleFastMode - 切换快速模式回调
+ * @param props.onSetPlanMode - 设置计划模式回调
+ */
 export const ComposerExtrasMenu = memo(function ComposerExtrasMenu(props: {
   interactionMode: ProviderInteractionMode;
   supportsFastMode: boolean;

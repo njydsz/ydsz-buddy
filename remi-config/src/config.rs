@@ -244,12 +244,14 @@ impl ServerConfig {
     /// # 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_config::{CliArgs, ServerConfig};
     /// use clap::Parser;
-    ///
+    /// 
     /// let args = CliArgs::parse();
     /// let config = ServerConfig::from_args_and_env(args).unwrap();
-    /// ```
+    /// }
     pub fn from_args_and_env(args: CliArgs) -> ConfigResult<Self> {
         // 当前仅支持桌面端模式
         let mode = RuntimeMode::Desktop;

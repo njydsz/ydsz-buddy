@@ -1,9 +1,10 @@
-// FILE: whatsNew/WhatsNewPopoutCard.tsx
-// Purpose: Post-update "popout" card that lives in the bottom-left corner of
-// the app after an upgrade. Clicking the card body opens the release-notes
-// dialog; clicking the ✕ dismisses the update silently. Matches the
-// IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
-// Layer: overlay — rendered once from the root route next to the dialog.
+/**
+ * @file "新增内容"浮窗卡片组件
+ * @description 更新后显示在应用左下角的浮窗卡片。点击卡片主体打开发布说明弹窗；
+ * 点击 ✕ 静默关闭更新提示。参照 IndieDevs `UpdateCard` 模式，
+ * 但针对深色优先界面进行了主题适配。
+ * @layer 浮层——从根路由渲染一次，与弹窗并列
+ */
 
 import { type KeyboardEvent } from "react";
 
@@ -12,6 +13,7 @@ import { cn } from "~/lib/utils";
 
 import type { WhatsNewEntry } from "./logic";
 
+/** WhatsNewPopoutCard 组件属性 */
 export interface WhatsNewPopoutCardProps {
   readonly entry: WhatsNewEntry;
   readonly currentVersion: string;
@@ -21,14 +23,13 @@ export interface WhatsNewPopoutCardProps {
 }
 
 /**
- * A small attention-grabber card. Clicking the body acts as a "open release
- * notes" affordance; the ✕ in the corner is a deliberate "not interested" —
- * both paths mark the release as seen, so the card never nags twice.
+ * "新增内容"浮窗卡片组件
+ * @description 小型注意力引导卡片。点击主体作为"打开发布说明"的操作入口；
+ * 角落的 ✕ 是明确的"不感兴趣"——两条路径均标记版本为已读，卡片不会重复提示。
  *
- * The card is keyboard-reachable (tab-stop with Enter/Space activating) to
- * match the mouse affordance, since base-ui's Dialog otherwise owns the only
- * trigger in the IndieDevs implementation (their `<DialogTrigger>` wraps the
- * whole card).
+ * 卡片支持键盘访问（Tab 停靠，Enter/Space 激活），与鼠标操作保持一致，
+ * 因为 base-ui 的 Dialog 在 IndieDevs 实现中通常拥有唯一的触发器
+ * （他们的 `<DialogTrigger>` 包裹整个卡片）。
  */
 export function WhatsNewPopoutCard({
   entry,
@@ -55,8 +56,8 @@ export function WhatsNewPopoutCard({
         className,
       )}
       style={{
-        // Inline @keyframes so the popout doesn't need a tailwind plugin or
-        // global stylesheet just for one 200ms fade-in.
+        // 内联 @keyframes，使浮窗无需 tailwind 插件或全局样式表
+        // 即可实现 200ms 的淡入效果
         animationName: "whats-new-popout-in",
       }}
     >
@@ -78,8 +79,7 @@ export function WhatsNewPopoutCard({
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         )}
       >
-        {/* Close button. `stopPropagation` so dismissing doesn't also fire
-            the card's onOpen handler. */}
+        {/* 关闭按钮。`stopPropagation` 使关闭操作不触发卡片的 onOpen 处理器 */}
         <button
           type="button"
           aria-label="Dismiss What's new"
@@ -97,9 +97,8 @@ export function WhatsNewPopoutCard({
           <XIcon className="size-3.5" />
         </button>
 
-        {/* Hero band: screenshot when the entry supplies one, otherwise a
-            branded gradient + icon so every release still gets a polished
-            visual. */}
+        {/* 宣传图区域：条目提供截图时使用截图，否则使用品牌渐变 + 图标，
+            确保每个版本仍能获得精致的视觉效果 */}
         <div className="relative h-24 w-full overflow-hidden">
           {entry.heroImage !== undefined ? (
             <img
@@ -124,7 +123,7 @@ export function WhatsNewPopoutCard({
               />
             </div>
           )}
-          {/* Subtle bottom gradient so text below the band always reads. */}
+          {/* 底部渐变，确保下方文字始终可读 */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-b from-transparent to-popover/90"

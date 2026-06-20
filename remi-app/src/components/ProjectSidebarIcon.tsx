@@ -1,7 +1,8 @@
-// FILE: ProjectSidebarIcon.tsx
-// Purpose: Render the standard project folder icon with an optional favicon badge overlay.
-// Layer: Sidebar UI component
-// Exports: ProjectSidebarIcon
+/**
+ * @file ProjectSidebarIcon.tsx
+ * @description 项目侧边栏图标组件，渲染标准文件夹图标并可选地叠加 favicon 徽标，
+ *              自动检测项目是否存在 favicon 以决定是否显示。
+ */
 
 import { useEffect, useState } from "react";
 import { HiOutlineFolderOpen } from "react-icons/hi2";

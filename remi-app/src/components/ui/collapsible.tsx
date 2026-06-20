@@ -1,13 +1,19 @@
+/**
+ * @file collapsible
+ * @description 折叠面板组件，基于 Base UI Collapsible 原语封装，提供可折叠/展开的内容区域。
+ */
 "use client";
 
 import { Collapsible as CollapsiblePrimitive } from "@base-ui/react/collapsible";
 
 import { cn } from "~/lib/utils";
 
+/** 折叠面板根组件，控制展开/折叠状态 */
 function Collapsible({ ...props }: CollapsiblePrimitive.Root.Props) {
   return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />;
 }
 
+/** 折叠面板触发器，点击切换展开/折叠状态 */
 function CollapsibleTrigger({ className, ...props }: CollapsiblePrimitive.Trigger.Props) {
   return (
     <CollapsiblePrimitive.Trigger
@@ -18,6 +24,7 @@ function CollapsibleTrigger({ className, ...props }: CollapsiblePrimitive.Trigge
   );
 }
 
+/** 折叠面板内容面板，展开时显示、折叠时隐藏 */
 function CollapsiblePanel({ className, ...props }: CollapsiblePrimitive.Panel.Props) {
   return (
     <CollapsiblePrimitive.Panel

@@ -1,5 +1,15 @@
+/**
+ * @file ComposerPlanFollowUpBanner.tsx
+ * @description 计划就绪横幅组件，在编辑器中显示计划已就绪的提示和计划标题。
+ */
+
 import { memo } from "react";
 
+/**
+ * ComposerPlanFollowUpBanner 组件
+ * @description 计划就绪横幅，显示"Plan ready"标签和计划标题
+ * @param props.planTitle - 计划标题（可选）
+ */
 export const ComposerPlanFollowUpBanner = memo(function ComposerPlanFollowUpBanner({
   planTitle,
 }: {

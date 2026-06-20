@@ -1,7 +1,8 @@
-// FILE: composerProviderRegistry.tsx
-// Purpose: Centralizes provider-specific composer state and trait picker rendering.
-// Layer: Chat composer orchestration
-// Depends on: shared model helpers, trait picker components, and runtime model discovery metadata.
+/**
+ * @file composerProviderRegistry
+ * @description 集中管理各服务提供者的编辑器状态和特征选择器渲染逻辑。
+ *              通过注册表模式为每个提供者提供统一的状态获取和 UI 渲染接口。
+ */
 
 import {
   type ModelSlug,
@@ -31,23 +32,37 @@ import { TraitsMenuContent, TraitsPicker } from "./TraitsPicker";
 import { getComposerTraitSelection, hasVisibleComposerTraitControls } from "./composerTraits";
 import { getRuntimeAwareModelCapabilities } from "./runtimeModelCapabilities";
 
+/** 编辑器提供者状态输入参数 */
 export type ComposerProviderStateInput = {
+  /** 服务提供者类型 */
   provider: ProviderKind;
+  /** 当前模型标识 */
   model: ModelSlug;
+  /** 运行时模型描述符 */
   runtimeModel?: ProviderModelDescriptor | undefined;
+  /** 当前提示词文本 */
   prompt: string;
+  /** 模型选项配置 */
   modelOptions: ProviderModelOptions | null | undefined;
 };
 
+/** 编辑器提供者状态输出 */
 export type ComposerProviderState = {
+  /** 服务提供者类型 */
   provider: ProviderKind;
+  /** 当前推理力度 */
   promptEffort: string | null;
+  /** 用于分发的模型选项 */
   modelOptionsForDispatch: ProviderModelOptions[ProviderKind] | undefined;
+  /** 编辑器框架的自定义 CSS 类名 */
   composerFrameClassName?: string;
+  /** 编辑器表面的自定义 CSS 类名 */
   composerSurfaceClassName?: string;
+  /** 模型选择器图标的自定义 CSS 类名 */
   modelPickerIconClassName?: string;
 };
 
+/** 提供者特征渲染输入参数 */
 type ProviderTraitRenderInput = {
   threadId: ThreadId;
   model: ModelSlug;
@@ -60,12 +75,14 @@ type ProviderTraitRenderInput = {
   onPromptChange: (prompt: string) => void;
 };
 
+/** 提供者特征选择器渲染输入参数（含受控打开状态） */
 type ProviderTraitPickerRenderInput = ProviderTraitRenderInput & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   shortcutLabel?: string | null;
 };
 
+/** 提供者注册表条目，包含状态获取和 UI 渲染方法 */
 type ProviderRegistryEntry = {
   getState: (input: ComposerProviderStateInput) => ComposerProviderState;
   renderTraitsMenuContent: (input: ProviderTraitRenderInput) => ReactNode;
@@ -290,10 +307,24 @@ const composerProviderRegistry: Record<ProviderKind, ProviderRegistryEntry> = {
   },
 };
 
+/**
+ * 获取编辑器提供者状态。
+ * 根据服务提供者类型解析模型能力、推理力度和模型选项等状态。
+ *
+ * @param input - 提供者状态输入参数
+ * @returns 提供者状态
+ */
 export function getComposerProviderState(input: ComposerProviderStateInput): ComposerProviderState {
   return composerProviderRegistry[input.provider].getState(input);
 }
 
+/**
+ * 渲染提供者特征菜单内容。
+ * 当模型无可见特征控件时返回 null。
+ *
+ * @param input - 渲染输入参数
+ * @returns 菜单内容 React 节点
+ */
 export function renderProviderTraitsMenuContent(input: {
   provider: ProviderKind;
   threadId: ThreadId;
@@ -326,6 +357,13 @@ export function renderProviderTraitsMenuContent(input: {
   return composerProviderRegistry[input.provider].renderTraitsMenuContent(input);
 }
 
+/**
+ * 渲染提供者特征选择器。
+ * 当模型无可见特征控件时返回 null。
+ *
+ * @param input - 渲染输入参数（含受控打开状态）
+ * @returns 选择器 React 节点
+ */
 export function renderProviderTraitsPicker(input: {
   provider: ProviderKind;
   threadId: ThreadId;

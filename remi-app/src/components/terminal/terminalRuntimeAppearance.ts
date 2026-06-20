@@ -1,12 +1,21 @@
-// FILE: terminalRuntimeAppearance.ts
-// Purpose: Resolve terminal theme, font, and system-message styling from app chrome tokens.
-// Layer: Terminal runtime infrastructure
+/**
+ * @file terminalRuntimeAppearance.ts
+ * @description 终端外观配置，从应用主题令牌解析终端主题、字体和系统消息样式。
+ * 属于终端运行时基础设施层。
+ */
 
 import { Terminal, type ITheme } from "@xterm/xterm";
 
+/** 回退等宽字体族，当 CSS 变量未配置时使用 */
 const FALLBACK_MONO_FONT_FAMILY =
   '"JetBrainsMono NFM", "JetBrainsMono NF", "JetBrains Mono", monospace';
 
+/**
+ * 获取终端字体族。优先从 CSS 变量 `--terminal-font-family` 读取，
+ * 未配置时使用回退等宽字体族。
+ *
+ * @returns 终端字体族字符串
+ */
 export function getTerminalFontFamily(): string {
   if (typeof window === "undefined") {
     return FALLBACK_MONO_FONT_FAMILY;
@@ -18,6 +27,12 @@ export function getTerminalFontFamily(): string {
   return configuredFontFamily || FALLBACK_MONO_FONT_FAMILY;
 }
 
+/**
+ * 解析终端表面颜色（背景色和前景色）。通过临时 DOM 探针元素读取 CSS 变量值，
+ * 读取失败时根据暗色/亮色模式返回默认值。
+ *
+ * @returns 包含 background 和 foreground 颜色值的对象
+ */
 function resolveTerminalSurfaceColors(): { background: string; foreground: string } {
   const isDark = document.documentElement.classList.contains("dark");
   const probe = document.createElement("div");
@@ -39,6 +54,12 @@ function resolveTerminalSurfaceColors(): { background: string; foreground: strin
   };
 }
 
+/**
+ * 从应用主题令牌生成 xterm 终端主题配置。根据暗色/亮色模式返回不同的配色方案，
+ * 包含背景、前景、光标、选区、滚动条和 ANSI 16 色等配置。
+ *
+ * @returns xterm ITheme 主题对象
+ */
 export function terminalThemeFromApp(): ITheme {
   const isDark = document.documentElement.classList.contains("dark");
   const { background, foreground } = resolveTerminalSurfaceColors();
@@ -98,6 +119,12 @@ export function terminalThemeFromApp(): ITheme {
   };
 }
 
+/**
+ * 向终端写入系统消息，以 `[terminal]` 前缀标记，用于显示错误或状态提示。
+ *
+ * @param terminal - xterm Terminal 实例
+ * @param message - 系统消息文本
+ */
 export function writeSystemMessage(terminal: Terminal, message: string): void {
   terminal.write(`\r\n[terminal] ${message}\r\n`);
 }

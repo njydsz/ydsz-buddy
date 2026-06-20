@@ -28,13 +28,15 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use std::sync::Arc;
 //! use remi_git::{GitCore, GitManager, GitStatusBroadcaster};
-//!
+//! 
 //! let core = Arc::new(GitCore::new());
 //! let manager = GitManager::new(core.clone());
 //! let broadcaster = GitStatusBroadcaster::new(core, Duration::from_secs(5));
-//! ```
+//! }
 
 pub mod broadcaster;
 pub mod core;

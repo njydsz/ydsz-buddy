@@ -37,7 +37,9 @@ import { useTerminalStateStore } from "../terminalStateStore";
  * @description
  * 处理创建新线程的复杂逻辑，包括：
  * - 复用已存储的草稿线程
- * - 复用当前活动的草稿线�? * - 创建全新的线�? * - 处理终端入口�?vs 聊天入口�? * - 应用提供商和模型覆盖
+ * - 复用当前活动的草稿线程
+ * - 创建全新的线程
+ * - 处理终端入口点 vs 聊天入口点 * - 应用提供商和模型覆盖
  * - 导航到新线程
  *
  * @returns 包含线程创建方法和相关状态的对象
@@ -283,7 +285,7 @@ export function useHandleNewThread() {
 
       clearProjectDraftThreadId(projectId, entryPoint);
 
-      // 情况 2：使用路由中的线�?      if (bootstrapPlan.kind === "route") {
+      // 情况 2：使用路由中的线程      if (bootstrapPlan.kind === "route") {
         if (wantsTemporaryThread) {
           markTemporaryThread(bootstrapPlan.threadId);
         }

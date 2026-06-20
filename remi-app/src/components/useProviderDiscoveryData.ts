@@ -1,9 +1,8 @@
-// FILE: useProviderDiscoveryData.ts
-// Purpose: Shared React hook for provider plugin/skill discovery data, used by both the
-//          PluginsView and SkillsView surfaces. Returns the queries, capabilities, and
-//          search state in a single bundle so view components stay presentational.
-// Layer: Logic hook
-// Exports: useProviderDiscoveryData, type ProviderDiscoveryData
+/**
+ * @file useProviderDiscoveryData.ts
+ * @description 提供者插件/技能发现数据的共享 React Hook，
+ *              将查询、能力检测和搜索状态打包返回，使视图组件保持纯展示职责。
+ */
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";

@@ -1,6 +1,7 @@
-// FILE: FolderClosed.tsx
-// Purpose: Shared closed-folder glyph used by the sidebar and sidebar command palette.
-// Exports: FolderClosed
+/**
+ * @file FolderClosed.tsx
+ * @description 关闭状态文件夹图标，被侧边栏和搜索面板复用。
+ */
 
 import type { SVGProps } from "react";
 

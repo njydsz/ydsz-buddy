@@ -1,3 +1,7 @@
+/**
+ * @file badge
+ * @description 徽标组件，基于 Base UI useRender 和 cva 样式变体封装，支持多种尺寸和语义变体。
+ */
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -6,6 +10,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "~/lib/utils";
 
+/**
+ * 徽标样式变体定义，包含 size 和 variant 两个维度
+ * @param size - 徽标尺寸：default | lg | sm
+ * @param variant - 徽标变体：default | destructive | error | info | outline | secondary | success | warning
+ */
 const badgeVariants = cva(
   "relative inline-flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-sm border border-transparent font-medium outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-3.5 sm:[&_svg:not([class*='size-'])]:size-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [button&,a&]:cursor-pointer [button&,a&]:pointer-coarse:after:absolute [button&,a&]:pointer-coarse:after:size-full [button&,a&]:pointer-coarse:after:min-h-11 [button&,a&]:pointer-coarse:after:min-w-11",
   {
@@ -35,11 +44,20 @@ const badgeVariants = cva(
   },
 );
 
+/** 徽标属性接口，扩展自 useRender.ComponentProps<"span"> */
 interface BadgeProps extends useRender.ComponentProps<"span"> {
   variant?: VariantProps<typeof badgeVariants>["variant"];
   size?: VariantProps<typeof badgeVariants>["size"];
 }
 
+/**
+ * 徽标组件
+ * @param className - 自定义类名
+ * @param variant - 徽标视觉变体
+ * @param size - 徽标尺寸
+ * @param render - 自定义渲染元素
+ * @returns 渲染后的徽标元素
+ */
 function Badge({ className, variant, size, render, ...props }: BadgeProps) {
   const defaultProps = {
     className: cn(badgeVariants({ className, size, variant })),

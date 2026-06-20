@@ -1,8 +1,7 @@
 /**
- * SidebarSearchPalette - Command-style palette for sidebar actions, threads, and projects.
- *
- * Keeps the sidebar search UX aligned with the shared command primitives so
- * keyboard navigation and shortcut labels behave like the rest of the app.
+ * @file SidebarSearchPalette.tsx
+ * @description 侧边栏命令式搜索面板，支持操作、线程和项目的快速搜索，
+ *              键盘导航和快捷键标签与全局命令原语保持一致。
  */
 import {
   CheckIcon,
@@ -532,7 +531,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
   };
 
   const isMac = isMacPlatform(platform);
-  const submitModifierLabel = isMac ? "�? : "Ctrl";
+  const submitModifierLabel = isMac ? "⌘" : "Ctrl";
 
   const handleBrowseInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isBrowsing) return;

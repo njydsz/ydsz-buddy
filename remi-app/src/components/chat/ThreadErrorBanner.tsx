@@ -1,7 +1,18 @@
+/**
+ * @file ThreadErrorBanner.tsx
+ * @description 线程错误横幅组件，在线程出错时显示错误信息和关闭按钮。
+ */
+
 import { memo } from "react";
 import { Alert, AlertAction, AlertDescription } from "../ui/alert";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";
 
+/**
+ * ThreadErrorBanner 组件
+ * @description 线程错误横幅，显示错误信息和可选的关闭按钮
+ * @param props.error - 错误信息（为 null 时不渲染）
+ * @param props.onDismiss - 关闭错误横幅的回调（可选）
+ */
 export const ThreadErrorBanner = memo(function ThreadErrorBanner({
   error,
   onDismiss,

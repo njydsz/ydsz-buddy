@@ -1,3 +1,8 @@
+/**
+ * @file textarea
+ * @description 多行文本输入框组件，基于 Base UI Field 原语封装，
+ * 支持多种尺寸和无样式模式，自动根据内容调整高度。
+ */
 "use client";
 
 import { Field as FieldPrimitive } from "@base-ui/react/field";
@@ -6,11 +11,13 @@ import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
+/** 多行文本输入框属性类型 */
 type TextareaProps = React.ComponentProps<"textarea"> & {
   size?: "sm" | "default" | "lg" | number;
   unstyled?: boolean;
 };
 
+/** 多行文本输入框组件 */
 function Textarea({ className, size = "default", unstyled = false, ...props }: TextareaProps) {
   return (
     <span

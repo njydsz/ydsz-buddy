@@ -1,3 +1,7 @@
+/**
+ * @file button
+ * @description 按钮组件，基于 Base UI useRender 和 cva 样式变体封装，支持多种尺寸和视觉变体。
+ */
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -7,6 +11,11 @@ import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
+/**
+ * 按钮样式变体定义，包含 size 和 variant 两个维度
+ * @param size - 按钮尺寸：default | icon | icon-lg | icon-sm | icon-xl | icon-xs | lg | sm | xl | xs
+ * @param variant - 按钮变体：chrome | default | destructive | destructive-outline | ghost | link | outline | secondary
+ */
 const buttonVariants = cva(
   "[&_svg]:-mx-0.5 relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border font-medium text-[length:var(--app-font-size-ui,12px)] outline-none transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] pointer-coarse:after:absolute pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 focus-visible:ring-1 focus-visible:ring-ring/60 focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-64 sm:text-[length:var(--app-font-size-ui,12px)] [&_svg:not([class*='opacity-'])]:opacity-80 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
@@ -50,11 +59,20 @@ const buttonVariants = cva(
   },
 );
 
+/** 按钮属性接口，扩展自 useRender.ComponentProps<"button"> */
 interface ButtonProps extends useRender.ComponentProps<"button"> {
   variant?: VariantProps<typeof buttonVariants>["variant"];
   size?: VariantProps<typeof buttonVariants>["size"];
 }
 
+/**
+ * 按钮组件
+ * @param className - 自定义类名
+ * @param variant - 按钮视觉变体
+ * @param size - 按钮尺寸
+ * @param render - 自定义渲染元素
+ * @returns 渲染后的按钮元素
+ */
 function Button({ className, variant, size, render, ...props }: ButtonProps) {
   const typeValue: React.ButtonHTMLAttributes<HTMLButtonElement>["type"] = render
     ? undefined

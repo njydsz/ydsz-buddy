@@ -36,12 +36,14 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use std::sync::Arc;
 //! use remi_git::{GitCore, GitManager, GitRunStackedActionInput, GitAction};
-//!
+//! 
 //! let core = Arc::new(GitCore::new());
 //! let manager = GitManager::new(core);
-//!
+//! 
 //! // 执行提交并推送操作
 //! let result = manager.run_stacked_action(GitRunStackedActionInput {
 //!     cwd: "/path/to/repo".to_string(),
@@ -49,11 +51,12 @@
 //!     commit_message: Some("feat: add new feature".to_string()),
 //!     feature_branch: None,
 //! }).await?;
-//!
+//! 
 //! println!("操作结果: {}", result.message);
-//! ```
+//! }
 
 use std::sync::Arc;
+use serde::{Deserialize, Serialize};
 
 use tokio::process::Command;
 use tracing::{info, warn};
@@ -935,7 +938,7 @@ impl GitManager {
 /// - 获取 PR 的源分支和目标分支，用于创建 worktree 或切换分支
 /// - 判断 PR 状态是否为 open，决定是否可以进行审查
 /// - 展示 PR 的基本信息（标题、作者、URL）
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitPullRequestInfo {
     /// PR 编号
     pub number: u64,

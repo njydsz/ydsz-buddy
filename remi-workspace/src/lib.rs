@@ -42,8 +42,10 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem, BrowseInput};
-//!
+//! 
 //! // 浏览工作空间根目录
 //! let entries = WorkspaceEntries::new();
 //! let result = entries.browse(BrowseInput {
@@ -52,11 +54,11 @@
 //!     include_hidden: false,
 //!     max_depth: Some(2),
 //! }).await.unwrap();
-//!
+//! 
 //! // 安全地读取文件
 //! let fs = WorkspaceFileSystem::new();
 //! let content = fs.read_file("/path/to/workspace", "src/main.rs").await.unwrap();
-//! ```
+//! }
 
 /// 工作空间目录浏览与搜索模块，提供目录结构遍历、文件搜索和目录列举功能
 pub mod entries;

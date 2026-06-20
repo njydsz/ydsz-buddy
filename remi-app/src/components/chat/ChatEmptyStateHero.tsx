@@ -1,10 +1,15 @@
-// FILE: ChatEmptyStateHero.tsx
-// Purpose: Render the centered empty-state hero for blank transcripts.
-// Layer: Chat presentation
-// Depends on: the caller-supplied project display name.
+/**
+ * @file ChatEmptyStateHero.tsx
+ * @description 聊天空状态居中展示组件，在无消息时显示品牌 Logo 和欢迎文案。
+ */
 
 import { memo } from "react";
 
+/**
+ * ChatEmptyStateHero 组件
+ * @description 聊天空状态居中展示，显示品牌 Logo 和欢迎文案
+ * @param props.projectName - 项目名称（可选，显示在欢迎文案下方）
+ */
 export const ChatEmptyStateHero = memo(function ChatEmptyStateHero({
   projectName,
 }: {

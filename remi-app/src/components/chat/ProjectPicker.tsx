@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file ProjectPicker
  * @description 新聊天编辑器下方的项目文件夹选择器，将活跃文件夹和主目录文件夹分组展示，
  *              始终在共享的 Chats 容器中创建聊天行。
@@ -341,7 +341,7 @@ export const ProjectPicker = memo(function ProjectPicker({
               >
                 <PlusIcon className="size-3.5 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">
-                  {isPicking ? "Opening folder picker�? : "Add new project"}
+                  {isPicking ? "Opening folder picker\u2026" : "Add new project"}
                 </span>
               </button>
               {showResetToHome ? (
@@ -365,7 +365,7 @@ export const ProjectPicker = memo(function ProjectPicker({
         >
           <ComboboxEmpty>
             {isLoadingDirectories
-              ? "Loading folders�?
+              ? "Loading folders…"
               : activeFolderOptions.length === 0 && macFolderOptions.length === 0
                 ? "No folders found"
                 : "No matches"}

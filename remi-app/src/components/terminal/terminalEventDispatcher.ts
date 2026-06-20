@@ -63,6 +63,7 @@ class TerminalEventDispatcher {
     };
   }
 
+  /** 确保后端共享事件监听器已启动，仅在有监听器时才建立连接 */
   private ensureSharedListener(): void {
     if (this.unsubscribeSharedListener) return;
     const api = readNativeApi();
@@ -78,4 +79,5 @@ class TerminalEventDispatcher {
   }
 }
 
+/** 全局终端事件分发器单例 */
 export const terminalEventDispatcher = new TerminalEventDispatcher();

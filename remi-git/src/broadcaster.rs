@@ -34,17 +34,19 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use std::sync::Arc;
 //! use std::time::Duration;
 //! use remi_git::{GitCore, GitStatusBroadcaster};
-//!
+//! 
 //! let core = Arc::new(GitCore::new());
 //! let broadcaster = GitStatusBroadcaster::new(core, Duration::from_secs(5));
-//!
+//! 
 //! // 启动后台刷新循环
 //! let shutdown_tx = broadcaster.shutdown_channel();
 //! tokio::spawn(broadcaster.run_refresh_loop("/path/to/repo".to_string(), shutdown_tx.subscribe()));
-//!
+//! 
 //! // 订阅状态变更
 //! let mut receiver = broadcaster.stream_status();
 //! tokio::spawn(async move {
@@ -52,7 +54,7 @@
 //!         println!("仓库 {} 状态更新: {:?}", event.cwd, event.status.current_branch);
 //!     }
 //! });
-//! ```
+//! }
 
 use std::collections::HashMap;
 use std::sync::Arc;

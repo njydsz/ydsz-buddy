@@ -1,7 +1,8 @@
-// FILE: ThreadPinToggleButton.tsx
-// Purpose: Shared pin/unpin icon button reused by sidebar thread rows.
-// Layer: Sidebar UI primitive
-// Exports: ThreadPinToggleButton
+/**
+ * @file ThreadPinToggleButton.tsx
+ * @description 线程置顶/取消置顶图标按钮，被侧边栏线程行复用，
+ *              支持覆盖层和内联两种展示模式。
+ */
 
 import type React from "react";
 import { PinIcon } from "~/lib/icons";

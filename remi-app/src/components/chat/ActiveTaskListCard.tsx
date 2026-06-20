@@ -1,3 +1,8 @@
+/**
+ * @file ActiveTaskListCard.tsx
+ * @description 活跃任务列表卡片组件，显示当前任务进度、任务列表和后台代理数量，支持折叠/展开和侧边栏打开。
+ */
+
 import { memo } from "react";
 import {
   PiArrowsInSimple,
@@ -11,14 +16,27 @@ import { BotIcon, CheckIcon, LoaderIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 
+/**
+ * ActiveTaskListCard 组件的属性接口
+ */
 interface ActiveTaskListCardProps {
+  /** 活跃任务列表状态 */
   activeTaskList: ActiveTaskListState;
+  /** 后台代理任务数量 */
   backgroundTaskCount?: number;
+  /** 是否紧凑模式 */
   compact?: boolean;
+  /** 紧凑模式变更回调 */
   onCompactChange: (compact: boolean) => void;
+  /** 打开侧边栏回调 */
   onOpenSidebar: () => void;
 }
 
+/**
+ * 根据任务状态渲染对应图标
+ * @param status - 任务状态
+ * @returns 图标元素
+ */
 function taskStatusIcon(status: ActiveTaskListState["tasks"][number]["status"]) {
   if (status === "completed") {
     return <CheckIcon className="size-3" />;
@@ -29,6 +47,15 @@ function taskStatusIcon(status: ActiveTaskListState["tasks"][number]["status"]) 
   return <span className="block size-[7px] rounded-full border border-current" />;
 }
 
+/**
+ * ActiveTaskListCard 组件
+ * @description 活跃任务列表卡片，显示任务进度、任务列表和后台代理数量
+ * @param props.activeTaskList - 活跃任务列表状态
+ * @param props.backgroundTaskCount - 后台代理任务数量
+ * @param props.compact - 是否紧凑模式
+ * @param props.onCompactChange - 紧凑模式变更回调
+ * @param props.onOpenSidebar - 打开侧边栏回调
+ */
 export const ActiveTaskListCard = memo(function ActiveTaskListCard({
   activeTaskList,
   backgroundTaskCount = 0,

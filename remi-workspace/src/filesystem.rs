@@ -33,10 +33,12 @@
 //! ## 典型用法
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
-//!
+//! 
 //! let fs = WorkspaceFileSystem::new();
-//!
+//! 
 //! // 安全地写入文件
 //! let result = fs.write_file(WriteFileInput {
 //!     cwd: "/project".to_string(),
@@ -44,13 +46,13 @@
 //!     content: "fn main() {}".to_string(),
 //!     create_directories: true,
 //! }).await?;
-//!
+//! 
 //! // 读取文件
 //! let content = fs.read_file("/project", "src/main.rs").await?;
-//!
+//! 
 //! // 检查文件是否存在
 //! let exists = fs.file_exists("/project", "src/main.rs").await?;
-//! ```
+//! }
 
 use std::path::{Path, PathBuf};
 
@@ -153,10 +155,12 @@ pub struct WriteFileResult {
 /// ## 典型用法
 ///
 /// ```rust,no_run
+/// #[tokio::main]
+/// async fn main() {
 /// use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
-///
+/// 
 /// let fs = WorkspaceFileSystem::new();
-///
+/// 
 /// // 写入文件
 /// let result = fs.write_file(WriteFileInput {
 ///     cwd: "/project".to_string(),
@@ -164,10 +168,10 @@ pub struct WriteFileResult {
 ///     content: "fn main() {}".to_string(),
 ///     create_directories: true,
 /// }).await?;
-///
+/// 
 /// // 读取文件
 /// let content = fs.read_file("/project", "src/main.rs").await?;
-/// ```
+/// }
 pub struct WorkspaceFileSystem;
 
 impl WorkspaceFileSystem {
@@ -212,15 +216,17 @@ impl WorkspaceFileSystem {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
-    ///
+    /// 
     /// let path = WorkspaceFileSystem::validate_path("/project", "src/main.rs")?;
     /// // path = "/project/src/main.rs"
-    ///
+    /// 
     /// // 以下会返回错误
     /// let path = WorkspaceFileSystem::validate_path("/project", "../other/file.txt")?;
     /// // Err(WorkspaceError::PathOutsideRoot)
-    /// ```
+    /// }
     pub fn validate_path(cwd: &str, relative_path: &str) -> WorkspaceResult<PathBuf> {
         // 将 cwd 规范化为绝对路径，如果 cwd 不存在则说明工作空间根目录无效
         let root = Path::new(cwd).canonicalize().map_err(|e| {
@@ -267,8 +273,10 @@ impl WorkspaceFileSystem {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
-    ///
+    /// 
     /// let fs = WorkspaceFileSystem::new();
     /// let result = fs.write_file(WriteFileInput {
     ///     cwd: "/project".to_string(),
@@ -276,11 +284,11 @@ impl WorkspaceFileSystem {
     ///     content: "fn main() {}".to_string(),
     ///     create_directories: true,
     /// }).await?;
-    ///
+    /// 
     /// println!("写入到: {}", result.absolute_path);
     /// println!("字节数: {}", result.bytes_written);
     /// println!("是否新建: {}", result.created);
-    /// ```
+    /// }
     pub async fn write_file(&self, input: WriteFileInput) -> WorkspaceResult<WriteFileResult> {
         let absolute_path = Self::validate_path(&input.cwd, &input.relative_path)?;
 
@@ -337,12 +345,14 @@ impl WorkspaceFileSystem {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
-    ///
+    /// 
     /// let fs = WorkspaceFileSystem::new();
     /// let content = fs.read_file("/project", "src/main.rs").await?;
     /// println!("文件内容: {}", content);
-    /// ```
+    /// }
     pub async fn read_file(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<String> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
 
@@ -386,11 +396,13 @@ impl WorkspaceFileSystem {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
-    ///
+    /// 
     /// let fs = WorkspaceFileSystem::new();
     /// fs.delete_file("/project", "src/old_file.txt").await?;
-    /// ```
+    /// }
     pub async fn delete_file(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<()> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
 
@@ -432,8 +444,10 @@ impl WorkspaceFileSystem {
     /// ## 示例
     ///
     /// ```rust,no_run
+    /// #[tokio::main]
+    /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
-    ///
+    /// 
     /// let fs = WorkspaceFileSystem::new();
     /// let exists = fs.file_exists("/project", "src/main.rs").await?;
     /// if exists {
@@ -441,7 +455,7 @@ impl WorkspaceFileSystem {
     /// } else {
     ///     println!("文件不存在");
     /// }
-    /// ```
+    /// }
     pub async fn file_exists(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<bool> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
         // 使用同步的 exists() 检查文件是否存在，避免额外的异步 I/O 开销

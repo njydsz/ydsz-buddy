@@ -1,7 +1,7 @@
-// FILE: ChangedFilesTree.tsx
-// Purpose: Render the collapsible changed-files tree shown inside assistant turn summaries.
-// Layer: Chat timeline UI
-// Exports: ChangedFilesTree
+/**
+ * @file ChangedFilesTree.tsx
+ * @description 渲染助手轮次摘要中的可折叠变更文件树，支持目录展开/折叠和差异统计显示。
+ */
 
 import { type TurnId } from "~/contracts";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -13,9 +13,19 @@ import { DiffStatLabel, hasNonZeroStat } from "./DiffStatLabel";
 import { FileEntryIcon } from "./FileEntryIcon";
 import { DisclosureChevron } from "../ui/DisclosureChevron";
 
+/** 变更文件行分隔线样式类名 */
 const CHANGED_FILE_ROW_SEPARATOR_CLASS =
   "border-t border-[color:var(--color-border-light)]/60 first:border-t-0";
 
+/**
+ * ChangedFilesTree 组件
+ * @description 渲染可折叠的变更文件树，支持目录展开/折叠和差异统计显示
+ * @param props.turnId - 轮次 ID
+ * @param props.files - 变更文件列表
+ * @param props.allDirectoriesExpanded - 是否全部展开目录
+ * @param props.resolvedTheme - 当前主题（亮色/暗色）
+ * @param props.onOpenTurnDiff - 打开轮次差异对比的回调
+ */
 export const ChangedFilesTree = memo(function ChangedFilesTree(props: {
   turnId: TurnId;
   files: ReadonlyArray<TurnDiffFileChange>;
@@ -131,6 +141,11 @@ export const ChangedFilesTree = memo(function ChangedFilesTree(props: {
   return <div>{treeNodes.map((node) => renderTreeNode(node, 0))}</div>;
 });
 
+/**
+ * 递归收集树节点中所有目录路径
+ * @param nodes - 差异树节点数组
+ * @returns 目录路径数组
+ */
 function collectDirectoryPaths(nodes: ReadonlyArray<TurnDiffTreeNode>): string[] {
   const paths: string[] = [];
   for (const node of nodes) {
@@ -141,6 +156,12 @@ function collectDirectoryPaths(nodes: ReadonlyArray<TurnDiffTreeNode>): string[]
   return paths;
 }
 
+/**
+ * 构建目录展开状态映射
+ * @param directoryPaths - 目录路径数组
+ * @param expanded - 是否展开
+ * @returns 目录路径到展开状态的映射
+ */
 function buildDirectoryExpansionState(
   directoryPaths: ReadonlyArray<string>,
   expanded: boolean,

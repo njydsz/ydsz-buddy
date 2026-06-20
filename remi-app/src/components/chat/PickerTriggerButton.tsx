@@ -1,7 +1,7 @@
-// FILE: PickerTriggerButton.tsx
-// Purpose: Shares the trigger shell used by chat picker-style menus in the header and composer.
-// Layer: Chat shell controls
-// Depends on: button primitives, shared picker text styles, and icon slots supplied by callers.
+/**
+ * @file PickerTriggerButton.tsx
+ * @description 选择器触发按钮，为头部和编辑器中的下拉式选择器提供统一的触发按钮外壳。
+ */
 
 import { type ComponentProps, type ReactNode } from "react";
 import { ChevronDownIcon } from "~/lib/icons";
@@ -9,6 +9,13 @@ import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { COMPOSER_PICKER_TRIGGER_TEXT_CLASS_NAME } from "./composerPickerStyles";
 
+/**
+ * PickerTriggerButton 组件
+ * @description 选择器触发按钮，为下拉式选择器提供统一的触发按钮外壳
+ * @param props.icon - 按钮左侧图标
+ * @param props.label - 按钮标签
+ * @param props.compact - 是否使用紧凑模式
+ */
 export function PickerTriggerButton(
   props: {
     icon: ReactNode;

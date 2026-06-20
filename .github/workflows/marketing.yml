@@ -1,0 +1,55 @@
+name: Marketing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/marketing/**"
+      - ".github/workflows/marketing.yml"
+  workflow_dispatch:
+
+env:
+  PNPM_VERSION: "9.12.0"
+  NODE_VERSION: "22"
+
+jobs:
+  build:
+    name: Build & deploy marketing site
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Astro
+        run: pnpm --filter @remi-code/marketing build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/marketing/dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

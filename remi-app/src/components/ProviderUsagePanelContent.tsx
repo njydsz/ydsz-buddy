@@ -19,6 +19,11 @@ import { cn } from "~/lib/utils";
 
 import { RateLimitSummaryList } from "./RateLimitSummaryList";
 
+/**
+ * 获取提供者用量的显示标签
+ * @param provider - 提供者类型
+ * @returns 用量标签文本
+ */
 export function providerUsageLabel(provider: ProviderKind | null | undefined): string {
   if (provider === "codex") return "Codex usage";
   if (provider === "claudeAgent") return "Claude usage";
@@ -26,6 +31,7 @@ export function providerUsageLabel(provider: ProviderKind | null | undefined): s
   return "Usage";
 }
 
+/** 提供者用量摘要面板内容组件，展示速率限制和本地用量数据 */
 export const ProviderUsagePanelContent = memo(function ProviderUsagePanelContent(props: {
   provider: ProviderKind | null | undefined;
   rateLimits: ReadonlyArray<ProviderRateLimit>;

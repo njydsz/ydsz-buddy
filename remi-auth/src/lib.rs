@@ -28,18 +28,20 @@
 //! ## 使用示例
 //!
 //! ```rust,no_run
+//! #[tokio::main]
+//! async fn main() {
 //! use remi_auth::{AuthService, SecretStore, SessionCredentialService};
 //! use std::sync::Arc;
-//!
+//! 
 //! // 初始化密钥存储
 //! let secret_store = Arc::new(SecretStore::new(None));
-//!
+//! 
 //! // 初始化会话凭证服务
 //! let credential_service = Arc::new(SessionCredentialService::new(secret_store));
-//!
+//! 
 //! // 初始化认证服务
 //! let auth_service = AuthService::new(credential_service);
-//! ```
+//! }
 
 /// 认证错误类型模块
 pub mod error;
