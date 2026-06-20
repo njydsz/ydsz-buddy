@@ -1,7 +1,7 @@
 /**
  * @file splitViewStore.ts
- * @description 閸掑棗鐫嗙憴鍡楁禈閻?Zustand 閹镐椒绠欓崠鏍Ц閹礁鐡ㄩ崒銊ｂ偓? * 娴犮儵鈧帒缍婇棃銏℃緲閺嶆埊绱欏ǎ鍗炲娑撳﹪妾?2閿涘本娓舵径?2鑴? 缂冩垶鐗搁敍澶岊吀閻炲棗鍨庣仦蹇氫喊婢垛晝鏅棃顫礉
- * 閹绘劒绶甸棃銏℃緲/閸掑棗澹婄猾璇茬€烽妴浣圭埐閹扮喓鐓￠柅澶嬪閸ｃ劌鎷伴崺杞扮艾 ID 閻ㄥ嫬褰夐弴瀛樻惙娴ｆ嚎鈧? */
+ * @description 分屏视图�?Zustand 持久化状态存储�? * 以递归面板树（深度上限 2，最�?2×2 网格）管理分屏聊天界面，
+ * 提供面板/分割类型、树感知选择器和基于 ID 的变更操作�? */
 
 import { type ProjectId, type ThreadId, type TurnId } from "~/contracts";
 import { create } from "zustand";
@@ -22,73 +22,74 @@ import {
   type LegacySplitViewLike,
 } from "./splitView.logic";
 
-/** 閸掑棗鐫嗙憴鍡楁禈閸烆垯绔撮弽鍥槕 */
+/** 分屏视图唯一标识 */
 export type SplitViewId = string;
-/** 闂堛垺婢橀崬顖欑閺嶅洩鐦?*/
+/** 面板唯一标识 */
 export type PaneId = string;
-/** 閸掑棗澹婇弬鐟版倻閿涙瓪"horizontal"` 濮樻潙閽╅崚鍡楀閿涘牆涔忛崣绛圭礆閿涘畭"vertical"` 閸ㄥ倻娲块崚鍡楀閿涘牅绗傛稉瀣剁礆 */
+/** 分割方向：`"horizontal"` 水平分割（左右），`"vertical"` 垂直分割（上下） */
 export type SplitDirection = "horizontal" | "vertical";
 /**
- * 閸掑棗澹婇弨鍓х枂娓氀嶇窗`"first"` 鐎电懓绨查崚鍡楀閻ㄥ嫪绗?瀹革缚鏅堕敍瀹?second"` 鐎电懓绨叉稉?閸欏厖鏅? */
+ * 分割放置侧：`"first"` 对应分割的上/左侧，`"second"` 对应�?右侧
+ */
 export type SplitDropSide = "first" | "second";
 
-/** 闂堛垺婢橀崣鍏呮櫠闂堛垺婢橀悩鑸碘偓渚婄礄濞村繗顫嶉崳?瀹割喖绱撶憴鍡楁禈缁涘绱?*/
+/** 面板右侧面板状态（浏览�?差异视图等） */
 export interface SplitViewPanePanelState {
-  /** 瑜版挸澧犻幍鎾崇磻閻ㄥ嫰娼伴弶璺ㄨ閸?*/
+  /** 当前打开的面板类�?*/
   panel: ChatRightPanel | null;
-  /** 瀹割喖绱撶憴鍡楁禈閻ㄥ嫯鐤嗗▎?ID */
+  /** 差异视图的轮�?ID */
   diffTurnId: TurnId | null;
-  /** 瀹割喖绱撶憴鍡楁禈閻ㄥ嫭鏋冩禒鎯扮熅瀵?*/
+  /** 差异视图的文件路�?*/
   diffFilePath: string | null;
-  /** 閺勵垰鎯侀弴鐐ⅵ瀵偓鏉╁洭娼伴弶?*/
+  /** 是否曾打开过面�?*/
   hasOpenedPanel: boolean;
-  /** 閺堚偓鏉╂垶澧﹀鈧惃鍕桨閺夎法琚崹?*/
+  /** 最近打开的面板类�?*/
   lastOpenPanel: ChatRightPanel;
 }
 
-/** 閸欒泛鐡欓棃銏℃緲閿涘奔鍞悰銊ょ娑擃亞鍤庣粙瀣畱閺勫墽銇氶崠鍝勭厵 */
+/** 叶子面板，代表一个线程的显示区域 */
 export interface LeafPane {
   kind: "leaf";
-  /** 闂堛垺婢橀崬顖欑 ID */
+  /** 面板唯一 ID */
   id: PaneId;
-  /** 閸忓疇浠堥惃鍕殠缁?ID閿涘奔璐?null 閺冩儼銆冪粈铏光敄闂堛垺婢?*/
+  /** 关联的线�?ID，为 null 时表示空面板 */
   threadId: ThreadId | null;
-  /** 闂堛垺婢橀崣鍏呮櫠闂堛垺婢橀悩鑸碘偓?*/
+  /** 面板右侧面板状�?*/
   panel: SplitViewPanePanelState;
 }
 
-/** 閸掑棗澹婇懞鍌滃仯閿涘奔鍞悰銊ょ娑擃亝鎸夐獮铏灗閸ㄥ倻娲块惃鍕瀻閸?*/
+/** 分割节点，代表一个水平或垂直的分�?*/
 export interface SplitNode {
   kind: "split";
-  /** 閼哄倻鍋ｉ崬顖欑 ID */
+  /** 节点唯一 ID */
   id: PaneId;
-  /** 閸掑棗澹婇弬鐟版倻 */
+  /** 分割方向 */
   direction: SplitDirection;
-  /** first = 瀹革讣绱欏鏉戦挬閿? 娑撳绱欓崹鍌滄纯閿涘绱眘econd = 閸?/ 娑?*/
+  /** first = 左（水平�? 上（垂直）；second = �?/ �?*/
   first: Pane;
   second: Pane;
-  /** 閸掑棗澹婂В鏂剧伐閿?.25 ~ 0.75閿?*/
+  /** 分割比例�?.25 ~ 0.75�?*/
   ratio: number;
 }
 
-/** 闂堛垺婢橀懞鍌滃仯閼辨柨鎮庣猾璇茬€烽敍鍫濆骄鐎涙劖鍨ㄩ崚鍡楀閿?*/
+/** 面板节点联合类型（叶子或分割�?*/
 export type Pane = LeafPane | SplitNode;
 
-/** 閸掑棗鐫嗙憴鍡楁禈閿涘苯瀵橀崥顐︽桨閺夋寧鐖查崪宀冧粵閻掞妇濮搁幀?*/
+/** 分屏视图，包含面板树和聚焦状�?*/
 export interface SplitView {
-  /** 閸掑棗鐫嗙憴鍡楁禈閸烆垯绔?ID */
+  /** 分屏视图唯一 ID */
   id: SplitViewId;
-  /** 濠ф劗鍤庣粙?ID */
+  /** 源线�?ID */
   sourceThreadId: ThreadId;
-  /** 閹碘偓鐏炵偤銆嶉惄?ID */
+  /** 所属项�?ID */
   ownerProjectId: ProjectId;
-  /** 闂堛垺婢橀弽鎴炵壌閼哄倻鍋?*/
+  /** 面板树根节点 */
   root: Pane;
-  /** 瑜版挸澧犻懕姘卞妽閻ㄥ嫰娼伴弶?ID */
+  /** 当前聚焦的面�?ID */
   focusedPaneId: PaneId;
-  /** 閸掓稑缂撻弮鍫曟？ */
+  /** 创建时间 */
   createdAt: string;
-  /** 閺囧瓨鏌婇弮鍫曟？ */
+  /** 更新时间 */
   updatedAt: string;
 }
 
@@ -337,9 +338,9 @@ function resolveNextSourceThreadId(input: {
 // --- selectors ---
 
 /**
- * 鐟欙絾鐎介崚鍡楃潌鐟欏棗娴樻稉顓′粵閻掞妇娈戠痪璺ㄢ柤 ID閵? * 娴兼ê鍘涙潻鏂挎礀閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID閿涘矁瀚㈤懕姘卞妽闂堛垺婢樻稉铏光敄閸掓瑥娲栭柅鈧崚鎵儑娑撯偓娑擃亪娼粚鍝勫骄鐎涙劙娼伴弶瑁も偓? *
- * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
- * @returns 閼辨氨鍔嶉惃鍕殠缁?ID閿涘本澧嶉張澶愭桨閺夊じ璐熺粚鐑樻鏉╂柨娲?null
+ * 解析分屏视图中聚焦的线程 ID�? * 优先返回聚焦面板的线�?ID，若聚焦面板为空则回退到第一个非空叶子面板�? *
+ * @param splitView - 分屏视图
+ * @returns 聚焦的线�?ID，所有面板为空时返回 null
  */
 export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId | null {
   const focused = findLeafPaneById(splitView.root, splitView.focusedPaneId);
@@ -353,20 +354,21 @@ export function resolveSplitViewFocusedThreadId(splitView: SplitView): ThreadId 
 }
 
 /**
- * 娑撱儲鐗搁懢宄板絿閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID閿涘牊妫ら崶鐐衡偓鈧敍澶涚礉閻劋绨捄顖滄暠娴溿倖甯? *
- * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
- * @returns 閼辨氨鍔嶉棃銏℃緲閻ㄥ嫮鍤庣粙?ID
+ * 严格获取聚焦面板的线�?ID（无回退），用于路由交接
+ *
+ * @param splitView - 分屏视图
+ * @returns 聚焦面板的线�?ID
  */
 export function resolveSplitViewFocusedPaneThreadId(splitView: SplitView): ThreadId | null {
   return findLeafPaneById(splitView.root, splitView.focusedPaneId)?.threadId ?? null;
 }
 
 /**
- * 閼惧嘲褰囬幐鍥х暰闂堛垺婢?ID 閸忓疇浠堥惃鍕殠缁?ID
+ * 获取指定面板 ID 关联的线�?ID
  *
- * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
- * @param paneId - 闂堛垺婢?ID
- * @returns 缁捐法鈻?ID
+ * @param splitView - 分屏视图
+ * @param paneId - 面板 ID
+ * @returns 线程 ID
  */
 export function resolveSplitViewPaneThreadId(
   splitView: SplitView,
@@ -376,10 +378,11 @@ export function resolveSplitViewPaneThreadId(
 }
 
 /**
- * 閼惧嘲褰囬崚鍡楃潌鐟欏棗娴樻稉顓熷閺堝娼粚铏规畱缁捐法鈻?ID閿涘牆骞撻柌宥忕礆
+ * 获取分屏视图中所有非空的线程 ID（去重）
  *
- * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
- * @returns 缁捐法鈻?ID 閺佹壆绮? */
+ * @param splitView - 分屏视图
+ * @returns 线程 ID 数组
+ */
 export function resolveSplitViewThreadIds(splitView: SplitView): ThreadId[] {
   const ids = collectLeaves(splitView.root)
     .map((leaf) => leaf.threadId)
@@ -388,11 +391,11 @@ export function resolveSplitViewThreadIds(splitView: SplitView): ThreadId[] {
 }
 
 /**
- * 閺嶈宓佺痪璺ㄢ柤 ID 閺屻儲澹樼€电懓绨查惃鍕桨閺?ID
+ * 根据线程 ID 查找对应的面�?ID
  *
- * @param splitView - 閸掑棗鐫嗙憴鍡楁禈
- * @param threadId - 缁捐法鈻?ID
- * @returns 闂堛垺婢?ID閿涘本婀幍鎯у煂閺冩儼绻戦崶?null
+ * @param splitView - 分屏视图
+ * @param threadId - 线程 ID
+ * @returns 面板 ID，未找到时返�?null
  */
 export function resolveSplitViewPaneIdForThread(
   splitView: SplitView,
@@ -406,18 +409,18 @@ export function resolveSplitViewPaneIdForThread(
 }
 
 /**
- * 閺€鍫曟肠閸掑棗鐫嗙憴鍡楁禈娑擃厽澧嶉張澶婂骄鐎涙劙娼伴弶瑁も偓? *
- * 闁秴宸婚崚鍡楃潌鐟欏棗娴橀惃鍕壌閼哄倻鍋ｉ敍宀勨偓鎺戠秺閺€鍫曟肠閹碘偓閺堝褰剧€涙劙娼伴弶鍖＄礄LeafPane閿涘鈧? *
- * @param splitView - 鐟曚焦鏁归梿鍡楀骄鐎涙劙娼伴弶璺ㄦ畱閸掑棗鐫嗙憴鍡楁禈
- * @returns 閸欒泛鐡欓棃銏℃緲閺佹壆绮嶉敍灞惧瘻閺嶆垿浜堕崢鍡涖€庢惔蹇斿笓閸? */
+ * 收集分屏视图中所有叶子面板�? *
+ * 遍历分屏视图的根节点，递归收集所有叶子面板（LeafPane）�? *
+ * @param splitView - 要收集叶子面板的分屏视图
+ * @returns 叶子面板数组，按树遍历顺序排�? */
 export function resolveSplitViewLeaves(splitView: SplitView): LeafPane[] {
   return collectLeaves(splitView.root);
 }
 
 /**
- * 閸掓稑缂撴稉鈧稉?Zustand 闁瀚ㄩ崳顭掔礉閺嶈宓侀崚鍡楃潌鐟欏棗娴?ID 闁褰囩€电懓绨查惃鍕瀻鐏炲繗顫嬮崶淇扁偓? *
- * @param splitViewId - 鐟曚線鈧褰囬惃鍕瀻鐏炲繗顫嬮崶?ID閿涘奔璐?null 閺冩儼绻戦崶?null
- * @returns Zustand 闁瀚ㄩ崳銊ュ毐閺佸府绱濋幒銉︽暪 store 鏉╂柨娲栫€电懓绨查惃?SplitView 閹?null
+ * 创建一�?Zustand 选择器，根据分屏视图 ID 选取对应的分屏视图�? *
+ * @param splitViewId - 要选取的分屏视�?ID，为 null 时返�?null
+ * @returns Zustand 选择器函数，接收 store 返回对应�?SplitView �?null
  */
 export function selectSplitView(splitViewId: SplitViewId | null) {
   return (store: SplitViewStore) =>
@@ -425,10 +428,10 @@ export function selectSplitView(splitViewId: SplitViewId | null) {
 }
 
 /**
- * 閸掓稑缂撴稉鈧稉?Zustand 闁瀚ㄩ崳顭掔礉閺嶈宓佸┃鎰殠缁?ID 閺屻儲澹橀崗鑸靛鐏炵偟娈戦崚鍡楃潌鐟欏棗娴?ID閵? *
- * 闁俺绻?splitViewIdBySourceThreadId 閺勭姴鐨犵悰銊︾叀閹电偓绨痪璺ㄢ柤鐎电懓绨查惃鍕瀻鐏炲繗顫嬮崶淇扁偓? *
- * @param threadId - 濠ф劗鍤庣粙?ID閿涘奔璐?null 閺冩儼绻戦崶?null
- * @returns Zustand 闁瀚ㄩ崳銊ュ毐閺佸府绱濋幒銉︽暪 store 鏉╂柨娲栫€电懓绨查惃?SplitViewId 閹?null
+ * 创建一�?Zustand 选择器，根据源线�?ID 查找其所属的分屏视图 ID�? *
+ * 通过 splitViewIdBySourceThreadId 映射表查找源线程对应的分屏视图�? *
+ * @param threadId - 源线�?ID，为 null 时返�?null
+ * @returns Zustand 选择器函数，接收 store 返回对应�?SplitViewId �?null
  */
 export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
   return (store: SplitViewStore) =>
@@ -436,11 +439,13 @@ export function selectSplitViewIdForSourceThread(threadId: ThreadId | null) {
 }
 
 /**
- * 绾喖鐣鹃幀褎鍨氶崨妯荤叀閹垫拝绱版禒鍛秼缁捐法鈻奸張澶婃暜娑撯偓閺勫海鈥橀惃鍕瀻鐏炲繗顫嬮崶鎯х秺鐏炵儑绱濋幋鏍︾稊娑撶儤鐓囨稉顏勫瀻鐏炲繒娈戝┃鎰殠缁嬪妞傞幍宥嗕划婢跺秲鈧? * 濡紕纭﹂惃鍕姜濠ф劗鍤庣粙瀣灇閸涙ê鍙х化璇叉礀闁偓閸掓澘宕熼懕濠兡佸蹇ョ礉閼板矂娼幐澶嬫付鏉╂垳濞囬悽銊у濞村鈧? *
- * 閺屻儲澹樼痪璺ㄢ柤妫ｆ牠鈧缍婄仦鐐垫畱閸掑棗鐫嗙憴鍡楁禈 ID閵嗗倷绱崗鍫滃▏閻劍绨痪璺ㄢ柤閺勭姴鐨犵悰銊︾叀閹垫拝绱? * 閼汇儳鍤庣粙瀣倱閺冭泛鍤悳鏉挎躬婢舵矮閲滈崚鍡楃潌鐟欏棗娴樻稉顓濈瑬娑撳秵妲告禒璁崇秿閸掑棗鐫嗛惃鍕爱缁捐法鈻奸敍灞藉灟娴犲懎缍嬮崬顖欑閸栧綊鍘ら弮鎯扮箲閸ョ偑鈧? *
- * @param input - 閺屻儲澹橀崣鍌涙殶
- * @param input.splitViewsById - 閹碘偓閺堝鍨庣仦蹇氼潒閸ュ墽娈戦弰鐘茬殸鐞? * @param input.splitViewIdBySourceThreadId - 濠ф劗鍤庣粙瀣煂閸掑棗鐫嗙憴鍡楁禈 ID 閻ㄥ嫭妲х亸鍕€? * @param input.threadId - 鐟曚焦鐓￠幍鎯х秺鐏炵偟娈戠痪璺ㄢ柤 ID閿涘奔璐?null 閺冩儼绻戦崶?null
- * @returns 缁捐法鈻兼＃鏍偓澶婄秺鐏炵偟娈戦崚鍡楃潌鐟欏棗娴?ID閿涘本妫ゅ▔鏇犫€樼€规碍妞傛潻鏂挎礀 null
+ * 确定性成员查找：仅当线程有唯一明确的分屏视图归属，或作为某个分屏的源线程时才恢复�? * 模糊的非源线程成员关系回退到单聊模式，而非按最近使用猜测�? *
+ * 查找线程首选归属的分屏视图 ID。优先使用源线程映射表查找；
+ * 若线程同时出现在多个分屏视图中且不是任何分屏的源线程，则仅当唯一匹配时返回�? *
+ * @param input - 查找参数
+ * @param input.splitViewsById - 所有分屏视图的映射�? * @param input.splitViewIdBySourceThreadId - 源线程到分屏视图 ID 的映射表
+ * @param input.threadId - 要查找归属的线程 ID，为 null 时返�?null
+ * @returns 线程首选归属的分屏视图 ID，无法确定时返回 null
  */
 export function resolvePreferredSplitViewIdForThread(input: {
   splitViewsById: Record<SplitViewId, SplitView | undefined>;
@@ -472,11 +477,13 @@ export function resolvePreferredSplitViewIdForThread(input: {
 // --- store ---
 
 /**
- * 閸掑棗鐫嗙憴鍡楁禈 Zustand 閻樿埖鈧胶顓搁悶?store閵? *
- * 娴ｈ法鏁?persist 娑擃參妫挎禒璺虹殺閸掑棗鐫嗙憴鍡楁禈閺佺増宓侀幐浣风畽閸栨牕鍩?localStorage閿? * 閺€顖涘瘮娴犲孩妫悧鍫熷楠炲啿涔忛崣鎶芥桨閺夎法绮ㄩ弸鍕讣缁夎鍩岄弽鎴濊埌缂佹挻鐎妴? *
- * 娑撴槒顩﹂崝鐔诲厴閿? * - createFromThread閿涙矮绮犲┃鎰殠缁嬪鍨卞鍝勫瀻鐏炲繗顫嬮崶? * - createFromDrop閿涙矮绮犻幏鏍ㄦ杹閹垮秳缍旈崚娑樼紦閸掑棗鐫嗙憴鍡楁禈
- * - removeSplitView閿涙艾鍨归梽銈呭瀻鐏炲繗顫嬮崶? * - replacePaneThread閿涙碍娴涢幑銏ゆ桨閺夊じ鑵戦惃鍕殠缁? * - dropThreadOnPane閿涙艾鐨㈢痪璺ㄢ柤閹锋牗鏂侀崚浼存桨閺夊じ绗傛禒銉ュ灡瀵ゅ搫鍨庣仦? * - removePaneFromSplitView閿涙矮绮犻崚鍡楃潌鐟欏棗娴樻稉顓犘╅梽銈夋桨閺? * - setFocusedPane閿涙俺顔曠純顔夸粵閻掞箓娼伴弶? * - setRatioForNode閿涙俺顔曠純顔煎瀻鐏炲繗濡悙鍦畱閸掑棗澹婂В鏂剧伐
- * - setPanePanelState閿涙俺顔曠純顕€娼伴弶璺ㄦ畱 UI 閻樿埖鈧緤绱欐俊?diff 鐟欏棗娴橀妴渚€娼伴弶鍨潔瀵偓缁涘绱? * - removeThreadFromSplitViews閿涙矮绮犻幍鈧張澶婂瀻鐏炲繗顫嬮崶鍙ヨ厬缁夊娅庨幐鍥х暰缁捐法鈻? */
+ * 分屏视图 Zustand 状态管�?store�? *
+ * 使用 persist 中间件将分屏视图数据持久化到 localStorage�? * 支持从旧版扁平左右面板结构迁移到树形结构�? *
+ * 主要功能�? * - createFromThread：从源线程创建分屏视�? * - createFromDrop：从拖放操作创建分屏视图
+ * - removeSplitView：删除分屏视�? * - replacePaneThread：替换面板中的线�? * - dropThreadOnPane：将线程拖放到面板上以创建分�? * - removePaneFromSplitView：从分屏视图中移除面�? * - setFocusedPane：设置聚焦面�? * - setRatioForNode：设置分屏节点的分割比例
+ * - setPanePanelState：设置面板的 UI 状态（�?diff 视图、面板展开等）
+ * - removeThreadFromSplitViews：从所有分屏视图中移除指定线程
+ */
 export const useSplitViewStore = create<SplitViewStore>()(
   persist(
     (set, get) => ({
@@ -848,7 +855,7 @@ export const useSplitViewStore = create<SplitViewStore>()(
           state?.setHasHydrated(true);
         };
       },
-      // v2 娑斿澧犻惃鍕摠閸屻劋濞囬悽銊﹀楠炲磭娈戝锕€褰搁棃銏℃緲缂佹挻鐎妴鍌涱劃婢跺嫬鐨㈤幐浣风畽閸栨牜濮搁幀浣界讣缁夎鍩岄弽鎴濊埌缂佹挻鐎敍?      // 婵″倹鐏夋潻浣盒╅弮鐘崇《閹垹顦叉禒璁崇秿閺堝鏅ラ弫鐗堝祦閿涘苯鍨棃娆撶帛娑撱垹绱旈懓宀勬姜瀹曗晜绨濋妴?      migrate: (persistedState, version) => {
+      // v2 之前的存储使用扁平的左右面板结构。此处将持久化状态迁移到树形结构�?      // 如果迁移无法恢复任何有效数据，则静默丢弃而非崩溃�?      migrate: (persistedState, version) => {
         if (version >= SPLIT_VIEW_STORAGE_VERSION) {
           return persistedState as SplitViewStoreState;
         }

@@ -1,6 +1,7 @@
 /**
  * @file useThreadActivationController.ts
- * @description 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅?Hook - 闂嗗棔鑵戠粻锛勬倞娓氀嗙珶閺嶅繒鍤庣粙瀣负濞茶崵娈戦崜顖欑稊閻劑鎽? * @module hooks/useThreadActivationController
+ * @description 线程激活控制器 Hook - 集中管理侧边栏线程激活的副作用链
+ * @module hooks/useThreadActivationController
  */
 
 import { useCallback } from "react";
@@ -23,53 +24,55 @@ type SidebarThreadActivationSummary = Pick<
 >;
 
 /**
- * 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅掓潏鎾冲弳閸欏倹鏆熺猾璇茬€? */
+ * 线程激活控制器输入参数类型
+ */
 export type ThreadActivationControllerInput = {
-  /** 瑜版挸澧犲ú璇插З閻ㄥ嫬鍨庣仦蹇氼潒閸?*/
+  /** 当前活动的分屏视�?*/
   activeSplitView: SplitView | null;
-  /** 濞撳懘娅庤ぐ鎾冲闁瀚?*/
+  /** 清除当前选择 */
   clearSelection: () => void;
-  /** 鐠侯垳鏁辩€佃壈鍩呴崙鑺ユ殶 */
+  /** 路由导航函数 */
   navigate: Navigate;
-  /** 閹垫挸绱戦懕濠傘亯缁捐法鈻兼い鐢告桨 */
+  /** 打开聊天线程页面 */
   openChatThreadPage: (threadId: ThreadId) => void;
-  /** 閹垫挸绱戞笟褑绔熼懕濠傘亯閸掑棗鐫?*/
+  /** 打开侧边聊天分屏 */
   openSidechatSplit: (input: {
     sidechatThreadId: ThreadId;
     sourceThreadId: ThreadId;
     ownerProjectId: ProjectId;
   }) => SplitViewId;
-  /** 閹垫挸绱戠紒鍫㈩伂缁捐法鈻兼い鐢告桨 */
+  /** 打开终端线程页面 */
   openTerminalThreadPage: (threadId: ThreadId) => void;
-  /** 妫板嫮鍎圭痪璺ㄢ柤鐠囷附鍎忛敍鍫熷絹閸撳秴濮炴潪鑺ユ殶閹诡噯绱?*/
+  /** 预热线程详情（提前加载数据） */
   prewarmThreadDetailForIntent: (threadId: ThreadId) => void;
-  /** 鐠侀缍囨稉濠佺濞嗭紕娈戠捄顖滄暠娣団剝浼?*/
+  /** 记住上一次的路由信息 */
   rememberLastThreadRouteNow: (nextLastThreadRoute: LastThreadRoute) => void;
-  /** 鐠侯垳鏁辨稉顓犳畱閸掑棗鐫嗙憴鍡楁禈 ID */
+  /** 路由中的分屏视图 ID */
   routeSplitViewId: string | null | undefined;
-  /** 鐠侯垳鏁辨稉顓犳畱缁捐法鈻?ID */
+  /** 路由中的线程 ID */
   routeThreadId: ThreadId | null | undefined;
-  /** 瑜版挸澧犻柅澶夎厬閻ㄥ嫮鍤庣粙瀣殶闁?*/
+  /** 当前选中的线程数�?*/
   selectedThreadCount: number;
-  /** 娑旀劘顫囩拋鍓х枂濞茶濮╃痪璺ㄢ柤 ID */
+  /** 乐观设置活动线程 ID */
   setOptimisticActiveThreadId: (threadId: ThreadId) => void;
-  /** 鐠佸墽鐤嗛柅澶嬪闁挎氨鍋?*/
+  /** 设置选择锚点 */
   setSelectionAnchor: (threadId: ThreadId) => void;
-  /** 鐠佸墽鐤嗛崚鍡楃潌閼辨氨鍔嶉棃銏℃緲 */
+  /** 设置分屏聚焦面板 */
   setSplitFocusedPane: (splitViewId: SplitViewId, paneId: PaneId) => void;
-  /** 娓氀嗙珶閺嶅繒鍤庣粙瀣喅鐟曚焦妲х亸?*/
+  /** 侧边栏线程摘要映�?*/
   sidebarThreadSummaryById: Readonly<Partial<Record<ThreadId, SidebarThreadActivationSummary>>>;
-  /** 閸掑棗鐫嗙憴鍡楁禈閺勭姴鐨?*/
+  /** 分屏视图映射 */
   splitViewsById: Record<SplitViewId, SplitView | undefined>;
-  /** 缂佸牏顏悩鑸碘偓浣规Ё鐏?*/
+  /** 终端状态映�?*/
   terminalStateByThreadId: ThreadTerminalStateById;
 };
 
 /**
- * 娴犲簼鏅舵潏瑙勭埉閹板繐娴樺┑鈧ú鑽ゅ殠缁? *
+ * 从侧边栏意图激活线�? *
  * @description
- * 閹笛嗩攽鐎瑰本鏆ｉ惃鍕櫠鏉堣鐖痪璺ㄢ柤濠碘偓濞茶澹囨担婊呮暏闁句勘鈧倸顦╅悶鍡涒偓鏄忕帆閿? * 1. 绾喖鐣炬＃鏍偓澶婂瀻鐏炲繗顫嬮崶鎾呯礄濞茶濮╅崚鍡楃潌娴兼ê鍘涢敍? * 2. 鐟欙絾鐎藉┑鈧ú鑽よ閸ㄥ绱欒箛鐣屾殣/閸楁洟銆?閸掑棗鐫嗛敍? * 3. 婢跺嫮鎮婃笟褑绔熼懕濠傘亯閻ㄥ嫮澹掑▓濠傚瀻鐏炲繘鈧槒绶? * 4. 閹笛嗩攽鐎佃壈鍩呴崪宀€濮搁幀浣规纯閺? *
- * @param input - 閹貉冨煑閸ｃ劏绶崗銉ュ棘閺? * @param threadId - 鐟曚焦绺哄ú鑽ゆ畱缁捐法鈻?ID
+ * 执行完整的侧边栏线程激活副作用链。处理逻辑�? * 1. 确定首选分屏视图（活动分屏优先�? * 2. 解析激活类型（忽略/单页/分屏�? * 3. 处理侧边聊天的特殊分屏逻辑
+ * 4. 执行导航和状态更�? *
+ * @param input - 控制器输入参�? * @param threadId - 要激活的线程 ID
  */
 export function activateThreadFromSidebarIntent(
   input: ThreadActivationControllerInput,
@@ -94,7 +97,8 @@ export function activateThreadFromSidebarIntent(
     terminalStateByThreadId,
   } = input;
 
-  // 濞茶濮╅崚鍡楃潌娴兼ê鍘涢敍娑樻儊閸掓瑦鐦℃稉顏呭瘮娑斿懎瀵查惃鍕瀻鐏炲繐娼￠柈钘夊讲娴犮儳鈥樼€规碍鈧冩勾閹垹顦?  const preferredSplit = resolvePreferredSplitForCommand({
+  // 活动分屏优先；否则每个持久化的分屏块都可以确定性地恢复
+  const preferredSplit = resolvePreferredSplitForCommand({
     activeSplitView,
     splitViewsById,
     threadId,
@@ -108,7 +112,7 @@ export function activateThreadFromSidebarIntent(
     splitPaneId: preferredSplit?.paneId ?? null,
   });
 
-  // 濡偓閺屻儲妲搁崥锔胯礋娓氀嗙珶閼卞﹤銇夐崚鍡楃潌濠碘偓濞?  const sidechatSplitActivation = resolveSidechatSplitActivation(input, {
+  // 检查是否为侧边聊天分屏激�?  const sidechatSplitActivation = resolveSidechatSplitActivation(input, {
     threadId,
     targetThread,
   });
@@ -117,20 +121,21 @@ export function activateThreadFromSidebarIntent(
     return;
   }
 
-  // 韫囩晫鏆愮拠銉︾负濞叉槒顕Ч?  if (activation.kind === "ignore") {
+  // 忽略该激活请�?  if (activation.kind === "ignore") {
     return;
   }
 
-  // 閸楁洟銆夊┑鈧ú缁樐佸?  if (activation.kind === "single") {
+  // 单页激活模�?  if (activation.kind === "single") {
     activateThreadSingle(input, activation.threadId);
     return;
   }
 
-  // 婵″倹鐏夊鑼病閸︺劎娲伴弽鍥︾秴缂冾噯绱濋弮鐘绘付鐎佃壈鍩?  if (routeThreadId === activation.threadId && routeSplitViewId === activation.splitViewId) {
+  // 如果已经在目标位置，无需导航
+  if (routeThreadId === activation.threadId && routeSplitViewId === activation.splitViewId) {
     return;
   }
 
-  // 閹笛嗩攽鐎瑰本鏆ｉ惃鍕负濞茬粯绁︾粙?  prewarmThreadDetailForIntent(activation.threadId);
+  // 执行完整的激活流�?  prewarmThreadDetailForIntent(activation.threadId);
   setOptimisticActiveThreadId(activation.threadId);
   if (selectedThreadCount > 0) {
     clearSelection();
@@ -152,9 +157,9 @@ export function activateThreadFromSidebarIntent(
 }
 
 /**
- * 鐟欙絾鐎芥笟褑绔熼懕濠傘亯閸掑棗鐫嗗┑鈧ú缁樻蒋娴? *
+ * 解析侧边聊天分屏激活条�? *
  * @description
- * 瑜版挾娲伴弽鍥╁殠缁嬪妲告笟褑绔熼懕濠傘亯娑撴梹婀佸┃鎰殠缁嬪绱濇稉鏂跨秼閸撳秵鐥呴張澶婂瀻鐏炲繗鐭鹃悽杈ㄦ閿涘矁绻戦崶鐐寸负濞茶淇婇幁? */
+ * 当目标线程是侧边聊天且有源线程，且当前没有分屏路由时，返回激活信�? */
 function resolveSidechatSplitActivation(
   input: ThreadActivationControllerInput,
   options: {
@@ -177,9 +182,10 @@ function resolveSidechatSplitActivation(
 }
 
 /**
- * 濠碘偓濞茶鏅舵潏纭呬喊婢垛晛鍨庣仦? *
+ * 激活侧边聊天分�? *
  * @description
- * 瑜版挻鐥呴張澶婂瀻鐏炲繗鐭鹃悽杈ㄧ负濞茬粯妞傞敍灞兼櫠鏉堢浜版径鈺勵攽闁插秵鏌婇幍鎾崇磻娑?濠ф劗鍤庣粙瀣躬瀹?+ 娓氀嗙珶閼卞﹤銇夐崷銊ュ礁"閻ㄥ嫬绔风仦鈧? */
+ * 当没有分屏路由激活时，侧边聊天行重新打开�?源线程在�?+ 侧边聊天在右"的布局
+ */
 function activateSidechatSplit(
   input: ThreadActivationControllerInput,
   activation: {
@@ -188,7 +194,7 @@ function activateSidechatSplit(
     ownerProjectId: ProjectId;
   },
 ): void {
-  // 妫板嫮鍎规稉銈勯嚋缁捐法鈻奸惃鍕嚊閹?  input.prewarmThreadDetailForIntent(activation.sourceThreadId);
+  // 预热两个线程的详�?  input.prewarmThreadDetailForIntent(activation.sourceThreadId);
   input.prewarmThreadDetailForIntent(activation.threadId);
   input.setOptimisticActiveThreadId(activation.threadId);
   if (input.selectedThreadCount > 0) {
@@ -196,7 +202,8 @@ function activateSidechatSplit(
   }
   input.setSelectionAnchor(activation.threadId);
 
-  // 閹垫挸绱戞笟褑绔熼懕濠傘亯閸掑棗鐫?  const splitViewId = input.openSidechatSplit({
+  // 打开侧边聊天分屏
+  const splitViewId = input.openSidechatSplit({
     sourceThreadId: activation.sourceThreadId,
     ownerProjectId: activation.ownerProjectId,
     sidechatThreadId: activation.threadId,
@@ -216,9 +223,9 @@ function activateSidechatSplit(
 }
 
 /**
- * 娴犮儱宕熸い鍨佸蹇旂负濞茶崵鍤庣粙? *
+ * 以单页模式激活线�? *
  * @description
- * 鐏忓棛娲伴弽鍥︾稊娑撳搫宕熸稉顏囦喊婢垛晜澧﹀鈧敍灞芥倱閺冩湹绻氶悾娆掍喊婢?vs 缂佸牏顏惃鍕弳閸欙絿鍋ｉ柅澶嬪
+ * 将目标作为单个聊天打开，同时保留聊�?vs 终端的入口点选择
  */
 function activateThreadSingle(input: ThreadActivationControllerInput, threadId: ThreadId): void {
   if (!input.sidebarThreadSummaryById[threadId]) return;
@@ -230,7 +237,7 @@ function activateThreadSingle(input: ThreadActivationControllerInput, threadId: 
   }
   input.setSelectionAnchor(threadId);
 
-  // 閺嶈宓侀崗銉ュ經閻愬湱琚崹瀣ⅵ瀵偓鐎电懓绨叉い鐢告桨
+  // 根据入口点类型打开对应页面
   const threadEntryPoint = selectThreadTerminalState(
     input.terminalStateByThreadId,
     threadId,
@@ -252,20 +259,21 @@ function activateThreadSingle(input: ThreadActivationControllerInput, threadId: 
 }
 
 /**
- * 缁捐法鈻煎┑鈧ú缁樺付閸掕泛娅?Hook
+ * 线程激活控制器 Hook
  *
  * @description
- * 闂嗗棔鑵戠粻锛勬倞娓氀嗙珶閺嶅繒鍤庣粙瀣负濞茶崵娈戦崜顖欑稊閻劑鎽奸妴? * 鐏忓棛鍑藉┑鈧ú鑽ょ摜閻ｃ儰绗?React 閸擃垯缍旈悽銊х拨鐎规艾婀稉鈧挧鏋偓? *
- * @param input - 閹貉冨煑閸ｃ劏绶崗銉ュ棘閺? * @returns 閸栧懎鎯堝┑鈧ú缁樻煙濞夋洜娈戠€电钖? *
+ * 集中管理侧边栏线程激活的副作用链�? * 将纯激活策略与 React 副作用绑定在一起�? *
+ * @param input - 控制器输入参�? * @returns 包含激活方法的对象
+ *
  * @example
  * ```tsx
  * const { activateThreadFromSidebarIntent } = useThreadActivationController({
  *   activeSplitView,
  *   navigate,
- *   // ... 閸忔湹绮崣鍌涙殶
+ *   // ... 其他参数
  * });
  *
- * // 濠碘偓濞茬粯鐓囨稉顏嗗殠缁? * activateThreadFromSidebarIntent(threadId);
+ * // 激活某个线�? * activateThreadFromSidebarIntent(threadId);
  * ```
  */
 export function useThreadActivationController(input: ThreadActivationControllerInput): {

@@ -1,6 +1,6 @@
 /**
  * @file TerminalChrome.tsx
- * @description 缂佸牏顏径鏍э紦閿涘湑hrome閿涘褰叉径宥囨暏閻?UI 閸樼喕顕㈤敍宀€鏁ゆ禍搴㈣閺屾挾绮撶粩顖涚垼缁涚偓鐖妴浣锋櫠鏉堣鐖崪灞戒紣閸忛攱鐖幙宥勭稊閹稿鎸抽妴? * 閸栧懎鎯堢紒鍫㈩伂閺嶅洨顒锋い鍨埉閵嗕椒鏅舵潏瑙勭埉閸掓銆冮妴浣规惙娴ｆ粍瀵滈柦顔剧矋缁涘鐗宠箛?UI 缂佸嫪娆㈤妴? */
+ * @description 终端外壳（Chrome）可复用�?UI 原语，用于渲染终端标签栏、侧边栏和工具栏操作按钮�? * 包含终端标签页栏、侧边栏列表、操作按钮组等核�?UI 组件�? */
 
 import type { ReactNode } from "react";
 
@@ -18,8 +18,8 @@ import TerminalActivityIndicator from "./TerminalActivityIndicator";
 import TerminalIdentityIcon from "./TerminalIdentityIcon";
 
 /**
- * 閺嶈宓佺紒鍫㈩伂鐟欏棜顫庨悩鑸碘偓浣界箲閸ョ偘绱崗鍫㈤獓閺佹澘鈧》绱濋弫鏉库偓鑹扮Ш婢堆傜喘閸忓牏楠囩搾濠囩彯閵? * 閻劋绨崷銊︾垼缁涚偓鐖稉顓炲枀鐎规碍妯夌粈鍝勬憿娑擃亞绮撶粩顖滄畱閻樿埖鈧焦瀵氱粈鍝勬珤閵? *
- * @param state - 缂佸牏顏憴鍡氼潕閻樿埖鈧? * @returns 娴兼ê鍘涚痪褎鏆熼崐纭风礄1-4閿? */
+ * 根据终端视觉状态返回优先级数值，数值越大优先级越高�? * 用于在标签栏中决定显示哪个终端的状态指示器�? *
+ * @param state - 终端视觉状�? * @returns 优先级数值（1-4�? */
 function terminalVisualStatePriority(state: TerminalVisualState): number {
   switch (state) {
     case "attention":
@@ -34,33 +34,33 @@ function terminalVisualStatePriority(state: TerminalVisualState): number {
 }
 
 /**
- * 缂佸牏顏銉ュ徔閺嶅繑鎼锋担婊堛€嶉柊宥囩枂閿涘本寮挎潻棰佺娑擃亜褰查悙鐟板毊閻ㄥ嫭鎼锋担婊勫瘻闁筋喓鈧? */
+ * 终端工具栏操作项配置，描述一个可点击的操作按钮�? */
 export interface TerminalChromeActionItem {
-  /** 閺勵垰鎯佺粋浣烘暏鐠囥儲鎼锋担?*/
+  /** 是否禁用该操�?*/
   disabled?: boolean;
-  /** 閹垮秳缍旈惃鍕瀮閺堫剚鐖ｇ粵鎾呯礉閸氬本妞傛担婊€璐?tooltip 鐏炴洜銇?*/
+  /** 操作的文本标签，同时作为 tooltip 展示 */
   label: string;
-  /** 閻愮懓鍤弮鍓佹畱閸ョ偠鐨熼崙鑺ユ殶 */
+  /** 点击时的回调函数 */
   onClick: () => void;
-  /** 閹稿鎸抽崘鍛啇閿涘矂鈧艾鐖舵稉鍝勬禈閺?*/
+  /** 按钮内容，通常为图�?*/
   children: ReactNode;
 }
 
 /**
- * 缂佸牏顏幙宥勭稊閹稿鎸抽惃鍕敶闁?props閿涘苯鐨濈憗鍛啊鐢?tooltip 閻ㄥ嫭瀵滈柦顔绘唉娴滄帇鈧? */
+ * 终端操作按钮的内�?props，封装了�?tooltip 的按钮交互�? */
 interface TerminalActionButtonProps {
-  /** 閹稿鎸抽惃?aria-label 閸?tooltip 閺傚洦婀?*/
+  /** 按钮�?aria-label �?tooltip 文本 */
   label: string;
-  /** 閼奉亜鐣炬稊澶嬬壉瀵繒琚崥?*/
+  /** 自定义样式类�?*/
   className: string;
-  /** 閻愮懓鍤崶鐐剁殶 */
+  /** 点击回调 */
   onClick: () => void;
-  /** 閹稿鎸抽崘鍛啇閿涘矂鈧艾鐖舵稉鍝勬禈閺?*/
+  /** 按钮内容，通常为图�?*/
   children: ReactNode;
 }
 
 /**
- * 缂佸牏顏幙宥勭稊閹稿鎸崇紒鍕閿涘苯婀?hover 閺冭泛鐫嶇粈?tooltip 閹绘劗銇氶妴? * 閸愬懘鍎存担璺ㄦ暏 Popover 鐎圭偟骞?hover 鐟欙箑褰傞惃?tooltip 閺佸牊鐏夐妴? */
+ * 终端操作按钮组件，在 hover 时展�?tooltip 提示�? * 内部使用 Popover 实现 hover 触发�?tooltip 效果�? */
 function TerminalActionButton({ label, className, onClick, children }: TerminalActionButtonProps) {
   return (
     <Popover>
@@ -84,8 +84,8 @@ function TerminalActionButton({ label, className, onClick, children }: TerminalA
 }
 
 /**
- * 缂佸牏顏銉ュ徔閺嶅繑鎼锋担婊勫瘻闁筋喚绮嶉敍灞剧壌閹诡喕绗夐崥灞藉綁娴ｆ搫绱檆ompact/workspace/sidebar閿涘瑕嗛弻鎾存惙娴ｆ粍瀵滈柦顔煎灙鐞涖劊鈧? * compact 濡€崇础娑撳瀵滈柦顔荤闂傜繝濞囬悽銊х彨缁惧灝鍨庨梾鏃撶礉workspace/sidebar 濡€崇础娑撳濞囬悽銊ㄧ珶濡楀棗鍨庨梾鏂烩偓? *
- * @param props.actions - 閹垮秳缍旀い鐟板灙鐞? * @param props.variant - 鐢啫鐪崣妯圭秼閿涘苯濂栭崫宥嗗瘻闁筋喚娈戦梻纾嬬獩閸滃苯鍨庨梾鏃€鐗卞? */
+ * 终端工具栏操作按钮组，根据不同变体（compact/workspace/sidebar）渲染操作按钮列表�? * compact 模式下按钮之间使用竖线分隔，workspace/sidebar 模式下使用边框分隔�? *
+ * @param props.actions - 操作项列�? * @param props.variant - 布局变体，影响按钮的间距和分隔样�? */
 export function TerminalChromeActions(props: {
   actions: ReadonlyArray<TerminalChromeActionItem>;
   variant: "compact" | "workspace" | "sidebar";
@@ -134,10 +134,12 @@ export function TerminalChromeActions(props: {
 }
 
 /**
- * 缂佸牏顏銉ょ稊閸栫儤鐖ｇ粵鐐埉缂佸嫪娆㈤敍灞间簰濮樻潙閽╅弽鍥╊劮妞ら潧鑸板蹇撶潔缁€铏圭矒缁旑垰鍨庣紒鍕┾偓? * 濮ｅ繋閲滈弽鍥╊劮妞ゅ灚妯夌粈铏圭矒缁旑垰娴橀弽鍥モ偓浣圭垼妫版ǜ鈧焦妞块崝銊уЦ閹焦瀵氱粈鍝勬珤閸滃苯鍙ч梻顓熷瘻闁筋喓鈧? * 閺嶅洨顒锋い鍏哥窗閼奉亜濮╅柅澶嬪鐠囥儱鍨庣紒鍕厬娴兼ê鍘涚痪褎娓舵妯兼畱缂佸牏顏悩鑸碘偓浣风稊娑撴椽顣╃憴鍫㈠Ц閹降鈧? *
- * @param props.terminalGroups - 瀹歌尪袙閺嬫劗娈戠紒鍫㈩伂閸掑棛绮嶇敮鍐ㄧ湰閸掓銆? * @param props.activeGroupId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣紒?ID
- * @param props.terminalVisualIdentityById - 缂佸牏顏?ID 閸掓媽顫嬬憴澶嬬垼鐠囧棛娈戦弰鐘茬殸
- * @param props.actions - 瀹搞儱鍙块弽蹇旀惙娴ｆ粓銆嶉崚妤勩€? * @param props.onActiveGroupChange - 閸掑洦宕插ú鏄忕┈閸掑棛绮嶉惃鍕礀鐠? * @param props.onCloseGroup - 閸忔娊妫撮崚鍡欑矋閻ㄥ嫬娲栫拫? */
+ * 终端工作区标签栏组件，以水平标签页形式展示终端分组�? * 每个标签页显示终端图标、标题、活动状态指示器和关闭按钮�? * 标签页会自动选择该分组中优先级最高的终端状态作为预览状态�? *
+ * @param props.terminalGroups - 已解析的终端分组布局列表
+ * @param props.activeGroupId - 当前活跃的分�?ID
+ * @param props.terminalVisualIdentityById - 终端 ID 到视觉标识的映射
+ * @param props.actions - 工具栏操作项列表
+ * @param props.onActiveGroupChange - 切换活跃分组的回�? * @param props.onCloseGroup - 关闭分组的回�? */
 export function TerminalWorkspaceTabBar(props: {
   terminalGroups: ResolvedTerminalGroupLayout[];
   activeGroupId: string;
@@ -226,12 +228,16 @@ export function TerminalWorkspaceTabBar(props: {
 }
 
 /**
- * 缂佸牏顏笟褑绔熼弽蹇曠矋娴犺绱濇禒銉ョ€惄鏉戝灙鐞涖劌鑸板蹇撶潔缁€铏圭矒缁旑垰鍨庣紒鍕嫲缂佸牏顏€圭偘绶ラ妴? * 閺€顖涘瘮閸掑棛绮嶉弽鍥暯閹舵ê褰旂仦鏇犮仛閵嗕胶绮撶粩顖氭禈閺嶅洤鎷伴悩鑸碘偓浣瑰瘹缁€鍝勬珤閵嗕礁鍙ч梻顓熷瘻闁筋喚鐡戞禍銈勭鞍閵? * 闁倻鏁ゆ禍搴ｇ矒缁旑垱鏆熼柌蹇氱窛婢舵岸娓剁憰浣稿瀻缂佸嫮顓搁悶鍡欐畱閸︾儤娅欓妴? *
- * @param props.terminalIds - 閹碘偓閺堝绮撶粩?ID 閸掓銆? * @param props.terminalGroups - 瀹歌尪袙閺嬫劗娈戠紒鍫㈩伂閸掑棛绮嶇敮鍐ㄧ湰閸掓銆? * @param props.activeTerminalId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫮绮撶粩?ID
- * @param props.activeGroupId - 瑜版挸澧犲ú鏄忕┈閻ㄥ嫬鍨庣紒?ID
- * @param props.showGroupHeaders - 閺勵垰鎯侀弰鍓с仛閸掑棛绮嶉弽鍥暯
- * @param props.closeShortcutLabel - 閸忔娊妫磋箛顐ｅ祹闁款喚娈戦弽鍥╊劮閺傚洦婀? * @param props.terminalVisualIdentityById - 缂佸牏顏?ID 閸掓媽顫嬬憴澶嬬垼鐠囧棛娈戦弰鐘茬殸
- * @param props.actions - 瀹搞儱鍙块弽蹇旀惙娴ｆ粓銆嶉崚妤勩€? * @param props.onActiveTerminalChange - 閸掑洦宕插ú鏄忕┈缂佸牏顏惃鍕礀鐠? * @param props.onCloseTerminal - 閸忔娊妫寸紒鍫㈩伂閻ㄥ嫬娲栫拫? */
+ * 终端侧边栏组件，以垂直列表形式展示终端分组和终端实例�? * 支持分组标题折叠展示、终端图标和状态指示器、关闭按钮等交互�? * 适用于终端数量较多需要分组管理的场景�? *
+ * @param props.terminalIds - 所有终�?ID 列表
+ * @param props.terminalGroups - 已解析的终端分组布局列表
+ * @param props.activeTerminalId - 当前活跃的终�?ID
+ * @param props.activeGroupId - 当前活跃的分�?ID
+ * @param props.showGroupHeaders - 是否显示分组标题
+ * @param props.closeShortcutLabel - 关闭快捷键的标签文本
+ * @param props.terminalVisualIdentityById - 终端 ID 到视觉标识的映射
+ * @param props.actions - 工具栏操作项列表
+ * @param props.onActiveTerminalChange - 切换活跃终端的回�? * @param props.onCloseTerminal - 关闭终端的回�? */
 export function TerminalSidebar(props: {
   terminalIds: string[];
   terminalGroups: ResolvedTerminalGroupLayout[];
@@ -296,7 +302,7 @@ export function TerminalSidebar(props: {
                       }`}
                     >
                       {props.showGroupHeaders && (
-                        <span className="text-[10px] text-muted-foreground/80">閳?/span>
+                        <span className="text-[10px] text-muted-foreground/80">�?/span>
                       )}
                       <button
                         type="button"

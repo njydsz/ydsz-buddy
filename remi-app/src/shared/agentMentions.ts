@@ -1,29 +1,29 @@
 /**
- * @file 娴狅絿鎮婇幓鎰挤閿涘湌mention閿涘袙閺嬫劕浼愰崗閿嬆侀崸? *
+ * @file 代理提及（@mention）解析工具模�? *
  * @description
- * 閹绘劒绶甸悽銊﹀煕鏉堟挸鍙嗘稉?`@alias(task)` 閺嶇厧绱￠惃鍕敶閼辨柧鍞悶鍡樺瘹娴犮倛袙閺嬫劕濮涢懗濮愨偓? * 閺€顖涘瘮娴犲孩鏋冮張顑胯厬閹绘劕褰囨禒锝囨倞閹绘劕寮烽敍灞借嫙鐏忓棜绻栨禍娑欏絹閸欏﹨娴嗛幑顫礋缂佹挻鐎崠鏍畱娴狅絿鎮婄拫鍐暏閹稿洣鎶ら敍? * 閻劋绨弸鍕紦 Claude 鐎涙劒鍞悶鍡欐畱閹绘劗銇氱拠宥冣偓? *
- * 閺嶇绺鹃崝鐔诲厴閿? * - 鐟欙絾鐎介弬鍥ㄦ拱娑擃厾娈?`@alias(task)` 閺嶇厧绱￠幓鎰挤閿涘潉parseAgentMentionInvocations`閿? * - 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡欐畱缂佹挻鐎崠鏍ㄥ絹缁€楦跨槤閿涘潉buildClaudeSubagentPrompt`閿? * - 閺€顖涘瘮閹奉剙褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉╂媽袙閺? * - 閺€顖涘瘮婢舵氨顫掓禒锝囨倞閸掝偄鎮曢弽鐓庣础
+ * 提供用户输入�?`@alias(task)` 格式的内联代理指令解析功能�? * 支持从文本中提取代理提及，并将这些提及转换为结构化的代理调用指令�? * 用于构建 Claude 子代理的提示词�? *
+ * 核心功能�? * - 解析文本中的 `@alias(task)` 格式提及（`parseAgentMentionInvocations`�? * - 构建 Claude 子代理的结构化提示词（`buildClaudeSubagentPrompt`�? * - 支持括号平衡的任务描述解�? * - 支持多种代理别名格式
  *
- * 娴ｈ法鏁ら崷鐑樻珯閿? * - 閻劍鍩涢崷銊ㄤ喊婢垛晙鑵戞担璺ㄦ暏 `@agent-name(閹笛嗩攽閺屾劒閲滄禒璇插)` 閺嶇厧绱＄拫鍐暏鐎涙劒鍞悶? * - 鐏忓棛鏁ら幋椋庢畱閼奉亞鍔х拠顓♀枅閹稿洣鎶ゆ潪顒佸床娑撹櫣绮ㄩ弸鍕閻ㄥ嫪鍞悶鍡氱殶閻? * - 娑?Claude 娴狅絿鎮婇悽鐔稿灇閸栧懎鎯堢€涙劒鍞悶鍡樺瘹娴犮倗娈戠€瑰本鏆ｉ幓鎰仛鐠? *
+ * 使用场景�? * - 用户在聊天中使用 `@agent-name(执行某个任务)` 格式调用子代�? * - 将用户的自然语言指令转换为结构化的代理调�? * - �?Claude 代理生成包含子代理指令的完整提示�? *
  * @module agentMentions
- * @layer 閸忓彉闊╁銉ュ徔鐏? *
+ * @layer 共享工具�? *
  * @example
  * ```ts
  * import { parseAgentMentionInvocations, buildClaudeSubagentPrompt } from './agentMentions';
  *
- * const text = '鐠囧嘲搴滈幋?@reviewer(鐎光剝鐓℃潻娆愵唽娴狅絿鐖? 閸?@tester(缂傛牕鍟撻崡鏇炲帗濞村鐦?';
+ * const text = '请帮�?@reviewer(审查这段代码) �?@tester(编写单元测试)';
  *
- * // 鐟欙絾鐎介幍鈧張澶夊敩閻炲棙褰侀崣? * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
+ * // 解析所有代理提�? * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
  * console.log(invocations);
  * // [
- * //   { alias: 'reviewer', task: '鐎光剝鐓℃潻娆愵唽娴狅絿鐖?, ... },
- * //   { alias: 'tester', task: '缂傛牕鍟撻崡鏇炲帗濞村鐦?, ... }
+ * //   { alias: 'reviewer', task: '审查这段代码', ... },
+ * //   { alias: 'tester', task: '编写单元测试', ... }
  * // ]
  *
- * // 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡樺絹缁€楦跨槤
+ * // 构建 Claude 子代理提示词
  * const result = buildClaudeSubagentPrompt(text);
  * console.log(result.prompt);
- * // 閻㈢喐鍨氶崠鍛儓鐎涙劒鍞悶鍡樺瘹娴犮倗娈戠€瑰本鏆ｉ幓鎰仛鐠? * ```
+ * // 生成包含子代理指令的完整提示�? * ```
  */
 import {
   resolveAgentAlias,
@@ -33,19 +33,22 @@ import {
 } from "~/contracts";
 
 /**
- * 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁ゆ穱鈩冧紖閹恒儱褰? *
- * 閸栧懎鎯堟禒搴㈡瀮閺堫兛鑵戦幓鎰絿閻ㄥ嫬宕熸稉?`@alias(task)` 鐠嬪啰鏁ら惃鍕閺堝淇婇幁顖ょ礉
- * 閻劋绨崥搴ｇ敾閻ㄥ嫪鍞悶鍡氱殶鎼达箑鎷版禒璇插閹笛嗩攽閵? *
+ * 解析后的代理提及调用信息接口
+ *
+ * 包含从文本中提取的单�?`@alias(task)` 调用的所有信息，
+ * 用于后续的代理调度和任务执行�? *
  * @interface ParsedAgentMentionInvocation
  *
- * @property {string} alias - 娴狅絿鎮婇崚顐㈡倳閿涘牆顩?"reviewer"閵?tester"閿? * @property {string} task - 娴犺濮熼幓蹇氬牚閿涘牊瀚崣宄板敶閻ㄥ嫬鍞寸€圭櫢绱? * @property {string} raw - 閸樼喎顫愰幓鎰挤閺傚洦婀伴敍鍫濆瘶閹?`@alias(task)` 鐎瑰本鏆ｉ崘鍛啇閿? * @property {number} start - 閹绘劕寮烽崷銊ュ斧閺傚洦婀版稉顓犳畱鐠у嘲顫愭担宥囩枂缁便垹绱? * @property {number} end - 閹绘劕寮烽崷銊ュ斧閺傚洦婀版稉顓犳畱缂佹挻娼担宥囩枂缁便垹绱╅敍鍫滅瑝閸栧懎鎯堥敍? * @property {ResolvedAgentAlias} definition - 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婄€规矮绠熸穱鈩冧紖
+ * @property {string} alias - 代理别名（如 "reviewer"�?tester"�? * @property {string} task - 任务描述（括号内的内容）
+ * @property {string} raw - 原始提及文本（包�?`@alias(task)` 完整内容�? * @property {number} start - 提及在原文本中的起始位置索引
+ * @property {number} end - 提及在原文本中的结束位置索引（不包含�? * @property {ResolvedAgentAlias} definition - 解析后的代理定义信息
  *
  * @example
  * ```ts
  * const invocation: ParsedAgentMentionInvocation = {
  *   alias: 'reviewer',
- *   task: '鐎光剝鐓℃潻娆愵唽娴狅絿鐖?,
- *   raw: '@reviewer(鐎光剝鐓℃潻娆愵唽娴狅絿鐖?',
+ *   task: '审查这段代码',
+ *   raw: '@reviewer(审查这段代码)',
  *   start: 10,
  *   end: 28,
  *   definition: { alias: 'reviewer', kind: 'claude-subagent', ... }
@@ -62,45 +65,49 @@ export interface ParsedAgentMentionInvocation {
 }
 
 /**
- * 閸掋倖鏌囩€涙顑侀弰顖氭儊娑撳搫鎮庡▔鏇犳畱娴狅絿鎮婇崚顐㈡倳鐎涙顑? *
- * 閸氬牊纭堕惃鍕焼閸氬秴鐡х粭锕€瀵橀幏顒婄窗鐎涙鐦濋敍鍧?z, A-Z閿涘鈧焦鏆熺€涙绱?-9閿涘鈧胶鍋ｉ崣鍑ょ礄.閿涘鈧椒绗呴崚鎺斿殠閿涘潈閿涘鈧浇绻涚€涙顑侀敍?閿涘鈧? *
- * @param char - 瀵板懏顥呴弻銉ф畱鐎涙顑? * @returns 婵″倹鐏夐弰顖氭値濞夋洜娈戦崚顐㈡倳鐎涙顑佹潻鏂挎礀 true閿涘苯鎯侀崚娆掔箲閸?false
+ * 判断字符是否为合法的代理别名字符
  *
- * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
+ * 合法的别名字符包括：字母（a-z, A-Z）、数字（0-9）、点号（.）、下划线（_）、连字符�?）�? *
+ * @param char - 待检查的字符
+ * @returns 如果是合法的别名字符返回 true，否则返�?false
+ *
+ * @private 此函数为内部实现细节，不应直接调�? */
 function isAliasChar(char: string | undefined): boolean {
   return typeof char === "string" && /[a-zA-Z0-9._-]/.test(char);
 }
 
 /**
- * 閸掋倖鏌囩€涙顑侀弰顖氭儊娑撶儤褰侀崣濠呯珶閻ｅ矉绱欑粚铏规鐎涙顑侀幋鏍х摟缁楋缚瑕嗙紒鎾存将閿? *
- * 閹绘劕寮锋潏鍦櫕鐎规矮绠熸稉鐚寸窗鐎涙顑佹稉?undefined閿涘牆鐡х粭锔胯缂佹挻娼敍澶嬪灗缁岃櫣娅х€涙顑侀敍鍫⑩敄閺嶇鈧礁鍩楃悰銊ь儊閵嗕焦宕茬悰宀€鐡戦敍澶堚偓? * 閻劋绨涵顔荤箽 `@` 缁楋箑褰块崜宥夋桨閺勵垰宕熺拠宥堢珶閻ｅ矉绱濋柆鍨帳閸栧綊鍘ら柇顔绢唸閸︽澘娼冪粵澶婃簚閺咁垬鈧? *
- * @param char - 瀵板懏顥呴弻銉ф畱鐎涙顑? * @returns 婵″倹鐏夐弰顖濈珶閻ｅ苯鐡х粭锕佺箲閸?true閿涘苯鎯侀崚娆掔箲閸?false
+ * 判断字符是否为提及边界（空白字符或字符串结束�? *
+ * 提及边界定义为：字符�?undefined（字符串结束）或空白字符（空格、制表符、换行等）�? * 用于确保 `@` 符号前面是单词边界，避免匹配邮箱地址等场景�? *
+ * @param char - 待检查的字符
+ * @returns 如果是边界字符返�?true，否则返�?false
  *
- * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? */
+ * @private 此函数为内部实现细节，不应直接调�? */
 function isMentionBoundary(char: string | undefined): boolean {
   return char === undefined || /\s/.test(char);
 }
 
 /**
- * 鐠囪褰囬幏顒€褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉? *
- * 娴犲孩瀵氱€规氨娈戝锔藉閸欒渹缍呯純顔肩磻婵绱濈拠璇插絿閹奉剙褰块崘鍛畱娴犺濮熼幓蹇氬牚閿涘本鏁幐浣哥サ婵傛瀚崣鏋偓? * 娴ｈ法鏁ゅǎ鍗炲鐠佲剝鏆熼崳銊ㄦ嫹闊亝瀚崣宄扮サ婵傛鐪扮痪褝绱濈涵顔荤箽濮濓絿鈥橀崠褰掑帳闂傤厼鎮庨幏顒€褰块妴? *
- * 缁犳纭剁拠瀛樻閿? * 1. 娴犲骸涔忛幏顒€褰块惃鍕瑓娑撯偓娑擃亜鐡х粭锕€绱戞慨瀣憾閸? * 2. 闁洤鍩?`(` 閺冭埖绻佹惔锕€濮?1
- * 3. 闁洤鍩?`)` 閺冭埖绻佹惔锕€鍣?1
- * 4. 瑜版挻绻佹惔锕€缍婇梿鑸垫閿涘本澹橀崚鏉垮爱闁板秶娈戦梻顓炴値閹奉剙褰? * 5. 婵″倹鐏夐柆宥呭坊缂佹挻娼ǎ鍗炲娴犲秵婀ぐ鎺楁祩閿涘矁绻戦崶?null閿涘牊瀚崣铚傜瑝閸栧綊鍘ら敍? *
- * @param text - 濠ф劖鏋冮張? * @param openParenIndex - 瀹革附瀚崣宄版躬閺傚洦婀版稉顓犳畱缁便垹绱╂担宥囩枂
- * @returns 閸栧懎鎯堟禒璇插閹诲繗鍫崪宀€绮ㄩ弶鐔剁秴缂冾喚娈戠€电钖勯敍灞筋洤閺嬫粍瀚崣铚傜瑝閸栧綊鍘ゆ潻鏂挎礀 null
+ * 读取括号平衡的任务描�? *
+ * 从指定的左括号位置开始，读取括号内的任务描述，支持嵌套括号�? * 使用深度计数器追踪括号嵌套层级，确保正确匹配闭合括号�? *
+ * 算法说明�? * 1. 从左括号的下一个字符开始遍�? * 2. 遇到 `(` 时深度加 1
+ * 3. 遇到 `)` 时深度减 1
+ * 4. 当深度归零时，找到匹配的闭合括号
+ * 5. 如果遍历结束深度仍未归零，返�?null（括号不匹配�? *
+ * @param text - 源文�? * @param openParenIndex - 左括号在文本中的索引位置
+ * @returns 包含任务描述和结束位置的对象，如果括号不匹配返回 null
  *
- * @private 濮濄倕鍤遍弫棰佽礋閸愬懘鍎寸€圭偟骞囩紒鍡氬Ν閿涘奔绗夋惔鏃傛纯閹恒儴鐨熼悽? *
+ * @private 此函数为内部实现细节，不应直接调�? *
  * @example
  * ```ts
- * readBalancedTask('@reviewer(鐎光剝鐓℃禒锝囩垳)', 10);
- * // 鏉╂柨娲? { task: '鐎光剝鐓℃禒锝囩垳', end: 19 }
+ * readBalancedTask('@reviewer(审查代码)', 10);
+ * // 返回: { task: '审查代码', end: 19 }
  *
- * readBalancedTask('@agent(娴犺濮?瀹撳苯顨?)', 8);
- * // 鏉╂柨娲? { task: '娴犺濮?瀹撳苯顨?', end: 19 }
+ * readBalancedTask('@agent(任务(嵌套))', 8);
+ * // 返回: { task: '任务(嵌套)', end: 19 }
  *
- * readBalancedTask('@agent(閺堫亪妫撮崥?, 7);
- * // 鏉╂柨娲? null
+ * readBalancedTask('@agent(未闭�?, 7);
+ * // 返回: null
  * ```
  */
 function readBalancedTask(
@@ -130,31 +137,40 @@ function readBalancedTask(
 }
 
 /**
- * 鐟欙絾鐎介弬鍥ㄦ拱娑擃厽澧嶉張澶屾畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁? *
- * 閹殿偅寮挎潏鎾冲弳閺傚洦婀伴敍灞惧絹閸欐牗澧嶉張澶岊儊閸?`@alias(task)` 閺嶇厧绱￠惃鍕敩閻炲棙褰侀崣濠忕礉
- * 楠炴儼袙閺嬫劖鐦℃稉顏呭絹閸欏﹦娈戞禒锝囨倞鐎规矮绠熸穱鈩冧紖閵嗗倽袙閺嬫劘绻冪粙瀣紥瀵邦亙浜掓稉瀣潐閸掓瑱绱? *
- * 1. `@` 缁楋箑褰胯箛鍛淬€忛崷銊ュ礋鐠囧秷绔熼悾宀嬬礄閸撳秹娼伴弰顖溾敄閻ц姤鍨ㄧ€涙顑佹稉鎻掔磻婢惰揪绱? * 2. 閸掝偄鎮曢崣顏囧厴閸栧懎鎯堢€涙鐦濋妴浣规殶鐎涙ぜ鈧胶鍋ｉ崣鏋偓浣风瑓閸掓帞鍤庨妴浣界箾鐎涙顑? * 3. 閸掝偄鎮曢崥搴＄箑妞よ崵鎻ｇ捄鐔蜂箯閹奉剙褰?`(`
- * 4. 閹奉剙褰块崘鍛畱娴犺濮熼幓蹇氬牚閺€顖涘瘮瀹撳苯顨滈幏顒€褰? * 5. 娴狅絿鎮婇崚顐㈡倳韫囧懘銆忛懗浠嬧偓姘崇箖 `resolveAgentAlias` 鐟欙絾鐎芥稉鐑樻箒閺佸牏娈戞禒锝囨倞鐎规矮绠? *
- * 缁犳纭舵径宥嗘絽鎼达讣绱? * - 閺冨爼妫挎径宥嗘絽鎼? O(n)閿涘苯鍙炬稉?n 娑撶儤鏋冮張顒勬毐鎼? * - 缁屾椽妫挎径宥嗘絽鎼? O(k)閿涘苯鍙炬稉?k 娑撻缚袙閺嬫劕鍩岄惃鍕絹閸欏﹥鏆熼柌? *
- * @param text - 瀵板懓袙閺嬫劗娈戞潏鎾冲弳閺傚洦婀? * @param provider - 娴狅絿鎮婇幓鎰返閸熷棛琚崹瀣剁礄婵?"claudeAgent"閿? * @returns 鐟欙絾鐎介崥搴ｆ畱娴狅絿鎮婇幓鎰挤鐠嬪啰鏁ら弫鎵矋閿涘本瀵滈崙铏瑰箛妞ゅ搫绨幒鎺戝灙
+ * 解析文本中所有的代理提及调用
  *
- * @throws 濮濄倕鍤遍弫棰佺瑝娴兼碍濮忛崙鍝勭磽鐢? *
+ * 扫描输入文本，提取所有符�?`@alias(task)` 格式的代理提及，
+ * 并解析每个提及的代理定义信息。解析过程遵循以下规则：
+ *
+ * 1. `@` 符号必须在单词边界（前面是空白或字符串开头）
+ * 2. 别名只能包含字母、数字、点号、下划线、连字符
+ * 3. 别名后必须紧跟左括号 `(`
+ * 4. 括号内的任务描述支持嵌套括号
+ * 5. 代理别名必须能通过 `resolveAgentAlias` 解析为有效的代理定义
+ *
+ * 算法复杂度：
+ * - 时间复杂�? O(n)，其�?n 为文本长�? * - 空间复杂�? O(k)，其�?k 为解析到的提及数�? *
+ * @param text - 待解析的输入文本
+ * @param provider - 代理提供商类型（�?"claudeAgent"�? * @returns 解析后的代理提及调用数组，按出现顺序排列
+ *
+ * @throws 此函数不会抛出异�? *
  * @example
  * ```ts
- * const text = '鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?';
+ * const text = '�?@reviewer(审查代码) �?@tester(写测�?';
  * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
  *
  * console.log(invocations.length); // 2
  * console.log(invocations[0].alias); // 'reviewer'
- * console.log(invocations[0].task);  // '鐎光剝鐓℃禒锝囩垳'
+ * console.log(invocations[0].task);  // '审查代码'
  * console.log(invocations[1].alias); // 'tester'
- * console.log(invocations[1].task);  // '閸愭瑦绁寸拠?
+ * console.log(invocations[1].task);  // '写测�?
  * ```
  *
- * @example 娑撳秴灏柊宥囨畱閹绘劕寮锋导姘愁潶韫囩晫鏆? * ```ts
- * const text = '闁喚顔?user@example.com 閸?@invalid(閺堫亪妫撮崥?;
+ * @example 不匹配的提及会被忽略
+ * ```ts
+ * const text = '邮箱 user@example.com �?@invalid(未闭�?;
  * const invocations = parseAgentMentionInvocations(text, 'claudeAgent');
- * console.log(invocations.length); // 0閿涘牅琚辨稉顏堝厴娑撳秴灏柊宥忕礆
+ * console.log(invocations.length); // 0（两个都不匹配）
  * ```
  */
 export function parseAgentMentionInvocations(
@@ -167,27 +183,29 @@ export function parseAgentMentionInvocations(
     if (text[index] !== "@") {
       continue;
     }
-    // 濡偓閺?@ 缁楋箑褰块崜宥嗘Ц閸氾缚璐熼崡鏇＄槤鏉堝湱鏅?    if (!isMentionBoundary(text[index - 1])) {
+    // 检�?@ 符号前是否为单词边界
+    if (!isMentionBoundary(text[index - 1])) {
       continue;
     }
 
-    // 鐠囪褰囬崚顐㈡倳
+    // 读取别名
     let aliasEnd = index + 1;
     while (isAliasChar(text[aliasEnd])) {
       aliasEnd += 1;
     }
 
     const alias = text.slice(index + 1, aliasEnd);
-    // 閸掝偄鎮曟稉宥堝厴娑撹櫣鈹栭敍灞肩瑬閸氬酣娼拌箛鍛淬€忕槐褑绐″锔藉閸?    if (alias.length === 0 || text[aliasEnd] !== "(") {
+    // 别名不能为空，且后面必须紧跟左括�?    if (alias.length === 0 || text[aliasEnd] !== "(") {
       continue;
     }
 
-    // 鐟欙絾鐎芥禒锝囨倞鐎规矮绠?    const resolved = resolveAgentAlias(alias, provider);
+    // 解析代理定义
+    const resolved = resolveAgentAlias(alias, provider);
     if (!resolved) {
       continue;
     }
 
-    // 鐠囪褰囬幏顒€褰块獮瀹犮€€閻ㄥ嫪鎹㈤崝鈩冨伎鏉?    const taskMatch = readBalancedTask(text, aliasEnd);
+    // 读取括号平衡的任务描�?    const taskMatch = readBalancedTask(text, aliasEnd);
     if (!taskMatch) {
       continue;
     }
@@ -204,49 +222,55 @@ export function parseAgentMentionInvocations(
       },
     });
 
-    // 鐠哄疇绻冨鑼缎掗弸鎰畱闁劌鍨?    index = taskMatch.end - 1;
+    // 跳过已解析的部分
+    index = taskMatch.end - 1;
   }
 
   return invocations;
 }
 
 /**
- * 閺嬪嫬缂?Claude 鐎涙劒鍞悶鍡欐畱缂佹挻鐎崠鏍ㄥ絹缁€楦跨槤
+ * 构建 Claude 子代理的结构化提示词
  *
- * 娴犲氦绶崗銉︽瀮閺堫兛鑵戠憴锝嗙€介幍鈧張?Claude 鐎涙劒鍞悶鍡樺絹閸欏绱檂kind === "claude-subagent"`閿涘绱? * 楠炶泛鐨㈢€瑰啩婊戞潪顒佸床娑撹櫣绮ㄩ弸鍕閻ㄥ嫭瀵氭禒銈嗙壐瀵骏绱濆畵灞藉弳閸掓澘鐣弫瀵告畱閹绘劗銇氱拠宥勮厬閵? *
- * 閻㈢喐鍨氶惃鍕絹缁€楦跨槤閸栧懎鎯堟禒銉ょ瑓闁劌鍨庨敍? * 1. 閹稿洣鎶ょ拠瀛樻閿涙艾鎲￠惌?Claude 閻劍鍩涙担璺ㄦ暏娴滃棗鍞撮懕鏂跨摍娴狅絿鎮婇幐鍥︽姢
- * 2. 閹笛嗩攽鐟曚焦鐪伴敍姘绾喛顩﹀Ч鍌欏▏閻?Agent 瀹搞儱鍙跨拫鍐暏閹稿洤鐣鹃惃鍕摍娴狅絿鎮? * 3. 閸氬海鐢绘径鍕倞閿涙俺顩﹀Ч鍌氱暚閹存劕鐡欐禒锝囨倞娴犺濮熼崥搴ｆ埛缂侇厼顦╅悶鍡樻殻娴ｆ捁顕Ч? * 4. 閸忚渹缍嬮幐鍥︽姢閸掓銆冮敍姘槨娑擃亜鐡欐禒锝囨倞鐠嬪啰鏁ら惃鍕椽閸欏嘲鍨悰? * 5. 閸樼喎顫愰幓鎰仛鐠囧稄绱伴悽銊﹀煕閻ㄥ嫬甯慨瀣翻閸忋儲鏋冮張? *
- * 婵″倹鐏夊▽鈩冩箒鐟欙絾鐎介崚鏉跨摍娴狅絿鎮婇幓鎰挤閿涘瞼娲块幒銉ㄧ箲閸ョ偛甯慨瀣瀮閺堫兙鈧? *
- * @param text - 閻劍鍩涙潏鎾冲弳閻ㄥ嫬甯慨瀣瀮閺? * @returns 閸栧懎鎯堢紒鎾寸€崠鏍ㄥ絹缁€楦跨槤閸滃矁袙閺嬫劕鍩岄惃鍕殶閻劋淇婇幁顖滄畱鐎电钖? *   - `prompt`: 閺嬪嫬缂撶€瑰本鍨氶惃鍕暚閺佸瓨褰佺粈楦跨槤鐎涙顑佹稉? *   - `invocations`: 鐟欙絾鐎介崚鎵畱 Claude 鐎涙劒鍞悶鍡氱殶閻劍鏆熺紒? *
- * @throws 濮濄倕鍤遍弫棰佺瑝娴兼碍濮忛崙鍝勭磽鐢? *
+ * 从输入文本中解析所�?Claude 子代理提及（`kind === "claude-subagent"`），
+ * 并将它们转换为结构化的指令格式，嵌入到完整的提示词中�? *
+ * 生成的提示词包含以下部分�? * 1. 指令说明：告�?Claude 用户使用了内联子代理指令
+ * 2. 执行要求：明确要求使�?Agent 工具调用指定的子代理
+ * 3. 后续处理：要求完成子代理任务后继续处理整体请�? * 4. 具体指令列表：每个子代理调用的编号列�? * 5. 原始提示词：用户的原始输入文�? *
+ * 如果没有解析到子代理提及，直接返回原始文本�? *
+ * @param text - 用户输入的原始文�? * @returns 包含结构化提示词和解析到的调用信息的对象
+ *   - `prompt`: 构建完成的完整提示词字符�? *   - `invocations`: 解析到的 Claude 子代理调用数�? *
+ * @throws 此函数不会抛出异�? *
  * @example
  * ```ts
- * const text = '鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?';
+ * const text = '�?@reviewer(审查代码) �?@tester(写测�?';
  * const result = buildClaudeSubagentPrompt(text);
  *
  * console.log(result.prompt);
- * // 鏉堟挸鍤敍? * // The user included inline subagent directives in the form @alias(task).
+ * // 输出�? * // The user included inline subagent directives in the form @alias(task).
  * // Execute each directive explicitly via the Agent tool using the named subagent below.
  * // After the delegated work completes, continue with the overall request and synthesize the results.
  * // Do not echo the literal @alias(task) syntax back to the user unless it is directly relevant.
  * //
  * // Inline directives:
  * // 1. Use the "Code Reviewer" agent for this task:
- * // 鐎光剝鐓℃禒锝囩垳
+ * // 审查代码
  * //
  * // 2. Use the "Test Engineer" agent for this task:
- * // 閸愭瑦绁寸拠? * //
+ * // 写测�? * //
  * // Original user prompt:
- * // 鐠?@reviewer(鐎光剝鐓℃禒锝囩垳) 閸?@tester(閸愭瑦绁寸拠?
+ * // �?@reviewer(审查代码) �?@tester(写测�?
  *
  * console.log(result.invocations.length); // 2
  * ```
  *
- * @example 濞屸剝婀佺€涙劒鍞悶鍡樺絹閸欏﹥妞? * ```ts
- * const text = '閺咁噣鈧碍鏋冮張顒婄礉濞屸剝婀佹禒锝囨倞閹绘劕寮?;
+ * @example 没有子代理提及时
+ * ```ts
+ * const text = '普通文本，没有代理提及';
  * const result = buildClaudeSubagentPrompt(text);
  *
- * console.log(result.prompt); // '閺咁噣鈧碍鏋冮張顒婄礉濞屸剝婀佹禒锝囨倞閹绘劕寮?閿涘牆甯弽鐤箲閸ョ儑绱? * console.log(result.invocations.length); // 0
+ * console.log(result.prompt); // '普通文本，没有代理提及'（原样返回）
+ * console.log(result.invocations.length); // 0
  * ```
  */
 export function buildClaudeSubagentPrompt(text: string): {

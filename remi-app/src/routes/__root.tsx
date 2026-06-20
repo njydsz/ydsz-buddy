@@ -1,6 +1,6 @@
 /**
- * @file 閺嶇鐭鹃悽杈侀崸? * @description 鎼存梻鏁ら弽纭呯熅閻㈡唻绱濈拹鐔荤煑閸掓繂顫愰崠鏍у弿鐏炩偓閻樿埖鈧降鈧椒绨ㄦ禒鎯邦吂闂冨懌鈧椒瀵屾０妯碱吀閻炲棎鈧礁娴楅梽鍛缁涘鐗宠箛鍐ㄥ閼? * @layer 閺嶇鐭鹃悽鍗炵湴
- * @exports Route - 閺嶇鐭鹃悽閬嶅帳缂? */
+ * @file 根路由模�? * @description 应用根路由，负责初始化全局状态、事件订阅、主题管理、国际化等核心功�? * @layer 根路由层
+ * @exports Route - 根路由配�? */
 
 import {
   PROVIDER_DISPLAY_NAMES,
@@ -89,29 +89,32 @@ import {
   shouldInvalidateProviderQueriesForEvent,
 } from "./-rootEventInvalidation";
 
-/** Shell 韫囶偆鍙庡鏇烆嚤闂勫秶楠囧鎯扮箿閺冨爼妫块敍鍫燁嚑缁夋帪绱?*/
+/** Shell 快照引导降级延迟时间（毫秒） */
 const SHELL_SNAPSHOT_BOOTSTRAP_FALLBACK_DELAY_MS = 1_500;
-/** 缁捐法鈻肩拠锔藉剰鏉╁€熷垁鏉烆喛顕楅梻鎾閿涘牊顕犵粔鎺炵礆 */
+/** 线程详情追赶轮询间隔（毫秒） */
 const THREAD_DETAIL_CATCHUP_INTERVAL_MS = 1_500;
-/** 瀹歌尪顫嗘潻鍥╂畱閹绘劒绶甸懓鍛纯閺備即鈧氨鐓￠柨顕€娉﹂崥鍫礉閻劋绨柆鍨帳闁插秴顦查柅姘辩叀 */
+/** 已见过的提供者更新通知键集合，用于避免重复通知 */
 const seenProviderUpdateNotificationKeys = new Set<string>();
 
 /**
- * 閸掋倖鏌?Shell 缁捐法鈻奸弰顖氭儊瀹告彃鎯庨崝? * @param thread - Shell 韫囶偆鍙庢稉顓犳畱缁捐法鈻肩€电钖? * @returns 婵″倹鐏夌痪璺ㄢ柤閺堝娓堕弬鎵畱鏉烆喗顐奸幋鏍︾窗鐠囨繐绱濋崚娆掔箲閸?true
+ * 判断 Shell 线程是否已启�? * @param thread - Shell 快照中的线程对象
+ * @returns 如果线程有最新的轮次或会话，则返�?true
  */
 function shellThreadHasStarted(thread: OrchestrationShellSnapshot["threads"][number]): boolean {
   return thread.latestTurn !== null || thread.session !== null;
 }
 
 /**
- * 閸掋倖鏌囩拠锔藉剰缁捐法鈻奸弰顖氭儊瀹告彃鎯庨崝? * @param thread - 缂傛牗甯撶痪璺ㄢ柤鐎电钖? * @returns 婵″倹鐏夌痪璺ㄢ柤瀹告彃鎯庨崝銊﹀灗閸栧懎鎯堝☉鍫熶紖閿涘苯鍨潻鏂挎礀 true
+ * 判断详情线程是否已启�? * @param thread - 编排线程对象
+ * @returns 如果线程已启动或包含消息，则返回 true
  */
 function detailThreadHasStarted(thread: OrchestrationThread): boolean {
   return shellThreadHasStarted(thread) || thread.messages.length > 0;
 }
 
 /**
- * 娴?Shell 缁捐法鈻奸崚妤勩€冩稉顓炲礂鐠嬪啫鍑￠幓鎰磳閻ㄥ嫯宕忕粙璺ㄥ殠缁? * @param threads - Shell 韫囶偆鍙庢稉顓犳畱缁捐法鈻奸崚妤勩€? * @description 閺嶅洩顔囬幍鈧張澶屽殠缁嬪璐熷鍙夊絹閸楀浄绱濋獮璺虹殺瀹告彃鎯庨崝銊ф畱缁捐法鈻奸弽鍥唶娑撳搫鍑￠張鈧紒鍫濆
+ * �?Shell 线程列表中协调已提升的草稿线�? * @param threads - Shell 快照中的线程列表
+ * @description 标记所有线程为已提升，并将已启动的线程标记为已最终化
  */
 function reconcilePromotedDraftsFromShellThreads(
   threads: ReadonlyArray<OrchestrationShellSnapshot["threads"][number]>,
@@ -123,7 +126,9 @@ function reconcilePromotedDraftsFromShellThreads(
 }
 
 /**
- * 娴犲海鍤庣粙瀣嚊閹懎宕楃拫鍐ㄥ嚒閹绘劕宕岄惃鍕磸缁嬭法鍤庣粙? * @param thread - 缂傛牗甯撶痪璺ㄢ柤鐎电钖? * @description 閺嶅洩顔囩痪璺ㄢ柤娑撳搫鍑￠幓鎰磳閿涘苯顩ч弸婊冨嚒閸氼垰濮╅崚娆愮垼鐠侀璐熷鍙夋付缂佸牆瀵? */
+ * 从线程详情协调已提升的草稿线�? * @param thread - 编排线程对象
+ * @description 标记线程为已提升，如果已启动则标记为已最终化
+ */
 function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): void {
   markPromotedDraftThreads(new Set([thread.id]));
   if (detailThreadHasStarted(thread)) {
@@ -132,7 +137,8 @@ function reconcilePromotedDraftFromThreadDetail(thread: OrchestrationThread): vo
 }
 
 /**
- * 閺嶇鐭鹃悽閬嶅帳缂? * @description 閸掓稑缂撶敮锔芥箒 QueryClient 娑撳﹣绗呴弬鍥╂畱閺嶇鐭鹃悽鎲嬬礉鐎规矮绠熼弽纭咁潒閸ユ儳鎷伴柨娆掝嚖鐟欏棗娴? */
+ * 根路由配�? * @description 创建带有 QueryClient 上下文的根路由，定义根视图和错误视图
+ */
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
@@ -144,7 +150,8 @@ export const Route = createRootRouteWithContext<{
 });
 
 /**
- * 閺嶇鐭鹃悽杈潒閸ュ墽绮嶆禒? * @description 閸掓繂顫愰崠鏍у弿鐏炩偓閺嶅嘲绱￠妴浣峰瘜妫版ǜ鈧礁鐡ф担鎾扁偓浣告禇闂勫懎瀵茬粵澶涚礉楠炶埖瑕嗛弻鎾冲弿鐏炩偓缂佸嫪娆? */
+ * 根路由视图组�? * @description 初始化全局样式、主题、字体、国际化等，并渲染全局组件
+ */
 function RootRouteView() {
   useAppTypography();
   useChatCodeFont();
@@ -183,8 +190,9 @@ function RootRouteView() {
 }
 
 /**
- * 閹绘劒绶甸懓鍛纯閺備即鈧氨鐓＄紒鍕
- * @description 閻╂垶甯堕幓鎰返閼板懐澧楅張顒傚Ц閹緤绱濊ぐ鎾存箒閸欘垳鏁ら弴瀛樻煀閺冭埖妯夌粈娲偓姘辩叀閿涘本鏁幐浣稿礋娑擃亝鍨ㄩ幍褰掑櫤閺囧瓨鏌? */
+ * 提供者更新通知组件
+ * @description 监控提供者版本状态，当有可用更新时显示通知，支持单个或批量更新
+ */
 function ProviderUpdateNotifications() {
   const messages = useMessages();
   const navigate = useNavigate();
@@ -192,7 +200,7 @@ function ProviderUpdateNotifications() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const updateToastIdRef = useRef<ReturnType<typeof toastManager.add> | null>(null);
-  // 鏉╁洦鎶ら崙鐑樻箒閸欘垳鏁ら弴瀛樻煀閻ㄥ嫭褰佹笟娑溾偓?  const outdatedProviders = useMemo(
+  // 过滤出有可用更新的提供�?  const outdatedProviders = useMemo(
     () =>
       (serverConfigQuery.data?.providers ?? []).filter(
         (provider) =>
@@ -203,7 +211,7 @@ function ProviderUpdateNotifications() {
   );
 
   /**
-   * 閹靛綊鍣洪弴瀛樻煀閹碘偓閺堝绻冮弮鍓佹畱閹绘劒绶甸懓?   * @param providers - 闂団偓鐟曚焦娲块弬鎵畱閹绘劒绶甸懓鍛灙鐞?   * @description 娓氭繃顐奸弴瀛樻煀濮ｅ繋閲滈幓鎰返閼板拑绱濋弨鍫曟肠婢惰精瑙︽穱鈩冧紖閿涘苯鑻熼弰鍓с仛閻╃绨查惃鍕偓姘辩叀
+   * 批量更新所有过时的提供�?   * @param providers - 需要更新的提供者列�?   * @description 依次更新每个提供者，收集失败信息，并显示相应的通知
    */
   const updateAll = useCallback(
     async (providers: ReadonlyArray<ServerProviderStatus>) => {
@@ -376,7 +384,8 @@ function ProviderUpdateNotifications() {
 }
 
 /**
- * 閸忋劌鐪箛顐ｅ祹闁款喖顕拠婵囶攱缂佸嫪娆? * @description 缁狅紕鎮婇崗銊ョ湰韫囶偅宓庨柨顔碱嚠鐠囨繃顢嬮惃鍕▔缁€鐚寸礉閸濆秴绨查懣婊冨礋閸斻劋缍旈崪宀勬暛閻╂ü绨ㄦ禒? */
+ * 全局快捷键对话框组件
+ * @description 管理全局快捷键对话框的显示，响应菜单动作和键盘事�? */
 function GlobalShortcutsDialog() {
   const [open, setOpen] = useState(false);
   const { focusedThreadId, activeProject } = useFocusedChatContext();
@@ -430,10 +439,10 @@ function GlobalShortcutsDialog() {
 }
 
 /**
- * 閸忋劌鐪?閺傛澘濮涢懗?鐏炴洜銇氶棃銏㈢矋娴? * @description 鎼存梻鏁ゆ导姘崇樈缁狙冨焼閻ㄥ嫬宕熸稉鈧幐鍌濇祰閻愮櫢绱濈拹鐔荤煑濞撳弶鐓?閺傛澘濮涢懗?瀵湱鐛ラ崪灞借剨閸戝搫宕遍悧? */
+ * 全局"新功�?展示面组�? * @description 应用会话级别的单一挂载点，负责渲染"新功�?弹窗和弹出卡�? */
 function GlobalWhatsNewSurface() {
-  // 閸楁洑绔撮幐鍌濇祰閻愮櫢绱滺ook 鐠愮喕鐭?瀵懓鍤崡锛勫閸欘垵顫?閸?鐎电鐦藉鍡樺ⅵ瀵偓"閻ㄥ嫬绔风亸鏃傚Ц閹椒浜掗崣濠傚嚒閺屻儳婀呴弽鍥唶閻ㄥ嫭瀵旀稊鍛
-  // 鐠囥儳绮嶆禒鏈电矌鐠愮喕鐭楃亸鍡楃暊娴狀剛绮嶉崥鍫熻閺屾搫绱濋崗鍙橀煩娑撯偓娑擃亜鍙嗛崣?  const {
+  // 单一挂载点，Hook 负责"弹出卡片可见"�?对话框打开"的布尔状态以及已查看标记的持久化
+  // 该组件仅负责将它们组合渲染，共享一个入�?  const {
     currentEntry,
     allEntries,
     currentVersion,
@@ -445,7 +454,8 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // 闂堟瑩绮崥顖氬З閹存牗妫ら幙宥勭稊 - 娑撱倓閲滅仦鏇犮仛闂堛垽鍏橀弮鐘绘付濞撳弶鐓?    return null;
+    // 静默启动或无操作 - 两个展示面都无需渲染
+    return null;
   }
 
   return (
@@ -470,7 +480,9 @@ function GlobalWhatsNewSurface() {
 }
 
 /**
- * 閺嶇鐭鹃悽閬嶆晩鐠囶垵顫嬮崶鍓х矋娴? * @description 瑜版捁鐭鹃悽鍗炲絺閻㈢喖鏁婄拠顖涙閺勫墽銇氶惃鍕晩鐠囶垶銆夐棃顫礉閹绘劒绶甸柌宥堢槸閸滃矂鍣告潪钘夌安閻劎娈戦柅澶愩€? * @param error - 闁挎瑨顕ょ€电钖? * @param reset - 闁插秶鐤嗛崙鑺ユ殶閿涘瞼鏁ゆ禍搴ㄥ櫢鐠? */
+ * 根路由错误视图组�? * @description 当路由发生错误时显示的错误页面，提供重试和重载应用的选项
+ * @param error - 错误对象
+ * @param reset - 重置函数，用于重�? */
 function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
   const message = errorMessage(error);
   const details = errorDetails(error);
@@ -513,7 +525,9 @@ function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
 }
 
 /**
- * 閹绘劕褰囬柨娆掝嚖濞戝牊浼? * @param error - 闁挎瑨顕ょ€电钖? * @returns 閺嶇厧绱￠崠鏍畱闁挎瑨顕ゅ☉鍫熶紖鐎涙顑佹稉? */
+ * 提取错误消息
+ * @param error - 错误对象
+ * @returns 格式化的错误消息字符�? */
 function errorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
@@ -527,7 +541,9 @@ function errorMessage(error: unknown): string {
 }
 
 /**
- * 閹绘劕褰囬柨娆掝嚖鐠囷附鍎? * @param error - 闁挎瑨顕ょ€电钖? * @returns 閺嶇厧绱￠崠鏍畱闁挎瑨顕ょ拠锔藉剰鐎涙顑佹稉璇х礉閸栧懎鎯堥崼鍡樼垽娣団剝浼呴幋?JSON 鎼村繐鍨崠鏍波閺? */
+ * 提取错误详情
+ * @param error - 错误对象
+ * @returns 格式化的错误详情字符串，包含堆栈信息�?JSON 序列化结�? */
 function errorDetails(error: unknown): string {
   if (error instanceof Error) {
     return error.stack ?? error.message;
@@ -545,8 +561,10 @@ function errorDetails(error: unknown): string {
 }
 
 /**
- * 閸氬牆鑻熺紓鏍ㄥ笓 UI 娴滃娆? * @description 鐏忓棜绻涚紒顓犳畱閻╃鎮撳☉鍫熶紖閸欐垿鈧椒绨ㄦ禒璺烘値楠炴湹璐熸稉鈧稉顏庣礉闁灝鍘?UI 闁插秴顦插〒鍙夌厠
- * @param events - 缂傛牗甯撴禍瀣╂閺佹壆绮? * @returns 閸氬牆鑻熼崥搴ｆ畱娴滃娆㈤弫鎵矋
+ * 合并编排 UI 事件
+ * @description 将连续的相同消息发送事件合并为一个，避免 UI 重复渲染
+ * @param events - 编排事件数组
+ * @returns 合并后的事件数组
  */
 function coalesceOrchestrationUiEvents(
   events: ReadonlyArray<OrchestrationEvent>,
@@ -586,8 +604,11 @@ function coalesceOrchestrationUiEvents(
 }
 
 /**
- * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氱粩瀣祮閸掗攱鏌婃０鍡楃厵娴滃娆? * @description 鐎甸€涚艾閸斺晜澧滃☉鍫熶紖閻ㄥ嫰顩绘稉顏呯ウ瀵繋绨ㄦ禒璁圭礉缁斿宓嗛崚閿嬫煀娴犮儳鈥樻穱?UI 閸欏﹥妞傞崫宥呯安
- * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @param immediatelyFlushedAssistantMessageIds - 瀹歌尙鐝涢崡鍐插煕閺傛壆娈戦崝鈺傚濞戝牊浼?ID 闂嗗棗鎮? * @returns 婵″倹鐏夋惔鏃囶嚉缁斿宓嗛崚閿嬫煀閸掓瑨绻戦崶?true
+ * 判断是否应该立即刷新领域事件
+ * @description 对于助手消息的首个流式事件，立即刷新以确�?UI 及时响应
+ * @param event - 编排事件对象
+ * @param immediatelyFlushedAssistantMessageIds - 已立即刷新的助手消息 ID 集合
+ * @returns 如果应该立即刷新则返�?true
  */
 function shouldFlushDomainEventImmediately(
   event: OrchestrationEvent,
@@ -611,9 +632,10 @@ function shouldFlushDomainEventImmediately(
 }
 
 /**
- * 閸掋倖鏌囨禍瀣╂閺勵垰鎯佹稉鐑樺瘹鐎规氨鍤庣粙瀣畱鐠囷附鍎忔禍瀣╂
- * @param event - 缂傛牗甯撴禍瀣╂鐎电钖? * @param threadId - 缁捐法鈻?ID
- * @returns 婵″倹鐏夋禍瀣╂鐏炵偘绨幐鍥х暰缁捐法鈻奸惃鍕嚊閹懍绨ㄦ禒璺哄灟鏉╂柨娲?true
+ * 判断事件是否为指定线程的详情事件
+ * @param event - 编排事件对象
+ * @param threadId - 线程 ID
+ * @returns 如果事件属于指定线程的详情事件则返回 true
  */
 function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: ThreadId): boolean {
   if (event.aggregateKind !== "thread" || event.aggregateId !== threadId) {
@@ -634,9 +656,9 @@ function isThreadDetailEventForThread(event: OrchestrationEvent, threadId: Threa
 }
 
 /**
- * 閸掋倖鏌囬弰顖氭儊鎼存棁顕氭潪顔款嚄缁捐法鈻肩拠锔藉剰鏉╁€熷垁
- * @param threadId - 缁捐法鈻?ID
- * @returns 婵″倹鐏夌痪璺ㄢ柤濮濓絽婀潻鎰攽閿涘牅绱扮拠婵囧灗閺堚偓閺傛媽鐤嗗▎鈽呯礆閿涘苯鍨潻鏂挎礀 true
+ * 判断是否应该轮询线程详情追赶
+ * @param threadId - 线程 ID
+ * @returns 如果线程正在运行（会话或最新轮次），则返回 true
  */
 function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
   const thread = getThreadFromState(useStore.getState(), threadId);
@@ -646,8 +668,10 @@ function shouldPollThreadDetailCatchup(threadId: ThreadId): boolean {
 }
 
 /**
- * 娴滃娆㈢捄顖滄暠缂佸嫪娆? * @description 閺嶇绺炬禍瀣╂鐠併垽妲勯崪灞藉瀻閸欐垹绮嶆禒璁圭礉鐠愮喕鐭楅敍? * - 鐠併垽妲?Shell 閸滃瞼鍤庣粙瀣嚊閹懍绨ㄦ禒鑸电ウ
- * - 缁狅紕鎮婄痪璺ㄢ柤鐠併垽妲勯惃鍕晸閸涜棄鎳嗛張? * - 閸楀繗鐨熺紓鎾崇摠婢惰鲸鏅ラ崪灞剧叀鐠囥垹鍩涢弬? * - 婢跺嫮鎮婄紒鍫㈩伂娴滃娆㈤崪灞绢偨鏉╁孩绉烽幁? * - 缂佸瓨濮㈢痪璺ㄢ柤韫囶偆鍙庢惔蹇撳灙閸欏嘲鎷版禍瀣╂缂傛挸鍟? */
+ * 事件路由组件
+ * @description 核心事件订阅和分发组件，负责�? * - 订阅 Shell 和线程详情事件流
+ * - 管理线程订阅的生命周�? * - 协调缓存失效和查询刷�? * - 处理终端事件和欢迎消�? * - 维护线程快照序列号和事件缓冲
+ */
 function EventRouter() {
   const messages = useMessages();
   const syncServerShellSnapshot = useStore((store) => store.syncServerShellSnapshot);
@@ -1243,8 +1267,8 @@ function EventRouter() {
 }
 
 /**
- * 濡楀矂娼版い鍦窗瀵洖顕辩紒鍕
- * @description 婢跺嫮鎮婂宀勬桨鎼存梻鏁ら惃鍕€嶉惄顔煎灥婵瀵查柅鏄忕帆閿涘瞼鈥樻穱婵嬨€嶉惄顔芥殶閹诡喗顒滅涵顔煎鏉? */
+ * 桌面项目引导组件
+ * @description 处理桌面应用的项目初始化逻辑，确保项目数据正确加�? */
 function DesktopProjectBootstrap() {
   const syncServerReadModel = useStore((store) => store.syncServerReadModel);
   const projects = useStore((store) => store.projects);
@@ -1266,7 +1290,8 @@ function DesktopProjectBootstrap() {
 
     attemptedRecoveryRef.current = true;
 
-    // Shell 鐠併垽妲勯柅姘埗娴兼艾鍨垫慨瀣娓氀嗙珶閺嶅繑鏆熼幑顔衡偓鍌氼洤閺嬫粓銆嶉惄顔款攽缂傚搫銇戞担鍡楃摠閸︺劍妞跨捄鍐殠缁嬪绱?    // 閸︺劍甯撮崣妤€鎻╅悡褌绠ｉ崜宥呭帥鏉╂稖顢戞穱顔碱槻
+    // Shell 订阅通常会初始化侧边栏数据。如果项目行缺失但存在活跃线程，
+    // 在接受快照之前先进行修复
     void api.orchestration
       .getShellSnapshot()
       .then((snapshot) => {
@@ -1287,5 +1312,5 @@ function DesktopProjectBootstrap() {
       });
   }, [projects, syncServerReadModel, threads, threadsHydrated]);
 
-  // 濡楀矂娼扮粩顖滄畱閺佺増宓侀崚婵嗩潗閸栨牠鈧艾鐖堕柅姘崇箖 EventRouter 閻ㄥ嫰銆嶉惄顔兼嫲缂傛牗甯撻崥灞绢劄閺夈儱鐣幋?  return null;
+  // 桌面端的数据初始化通常通过 EventRouter 的项目和编排同步来完�?  return null;
 }

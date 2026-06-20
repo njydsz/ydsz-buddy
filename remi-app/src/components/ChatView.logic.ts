@@ -1,6 +1,6 @@
 /**
  * @file ChatView.logic.ts
- * @description ChatView 缂佸嫪娆㈤惃鍕嚱闁槒绶仦鍌︾礉閸栧懎鎯堢€电鐦界痪璺ㄢ柤閺嬪嫬缂撻妴浣筋嚔闂婂疇绶崗銉ヮ槱閻炲棎鈧焦绉烽幁顖炴娴犲墎顓搁悶鍡愨偓? *              閸欐垿鈧胶濮搁幀浣瑰腹鐎电鈧胶绮撶粩顖欑瑐娑撳鏋冩潻鍥ㄦ姢缁涘绗?UI 濞撳弶鐓嬮弮鐘插彠閻ㄥ嫪绗熼崝锟犫偓鏄忕帆閸戣姤鏆熼妴? *              閹碘偓閺堝鍤遍弫鏉挎綆娑撹櫣鍑介崙鑺ユ殶閹存牗妫ら崜顖欑稊閻劎娈戝銉ュ徔閸戣姤鏆熼敍灞肩┒娴滃骸宕熼崗鍐╃ゴ鐠囨洏鈧? */
+ * @description ChatView 组件的纯逻辑层，包含对话线程构建、语音输入处理、消息附件管理�? *              发送状态推导、终端上下文过滤等与 UI 渲染无关的业务逻辑函数�? *              所有函数均为纯函数或无副作用的工具函数，便于单元测试�? */
 
 import {
   ThreadId,
@@ -36,20 +36,21 @@ import { hasLiveTurnTailWork, type WorkLogEntry } from "../session-logic";
 import { localSubagentThreadId } from "./ChatView.selectors";
 import type { ProviderModelOption } from "../providerModelOptions";
 
-/** localStorage 闁款噯绱伴幐澶愩€嶉惄顔款唶瑜版洑绗傚▎陇鐨熼悽銊ф畱閼存碍婀?*/
+/** localStorage 键：按项目记录上次调用的脚本 */
 export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remicode:last-invoked-script-by-project";
-/** localStorage 闁款噯绱板鎻掑彠闂傤厾娈?Provider 閸嬨儱鎮嶉崨濠咁劅閺嶅洩鐦戦崚妤勩€?*/
+/** localStorage 键：已关闭的 Provider 健康告警标识列表 */
 export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remicode:dismissed-provider-health-banners";
 
-/** 閹稿銆嶉惄顔款唶瑜版洑绗傚▎陇鐨熼悽銊ㄥ壖閺堫剛娈?Schema閿涘瞼鏁ゆ禍?localStorage 閺佺増宓侀弽锟犵崣 */
+/** 按项目记录上次调用脚本的 Schema，用�?localStorage 数据校验 */
 export const LastInvokedScriptByProjectSchema = Schema.Record({ key: Schema.String, value: Schema.String });
-/** 瀹告彃鍙ч梻顓犳畱 Provider 閸嬨儱鎮嶉崨濠咁劅 Schema閿涘瞼鏁ゆ禍?localStorage 閺佺増宓侀弽锟犵崣 */
+/** 已关闭的 Provider 健康告警 Schema，用�?localStorage 数据校验 */
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
 
 /**
- * 閺嶈宓侀張顒€婀撮懡澶屒归悩鑸碘偓浣圭€杞扮娑擃亝婀伴崷?Thread 鐎电钖勯敍宀€鏁ゆ禍搴℃躬閺堝秴濮熺粩顖滃殠缁嬪鐨婚張顏勫灡瀵ょ儤妞傞幓鎰返 UI 濞撳弶鐓嬮幍鈧棁鈧惃鍕殶閹诡喚绮ㄩ弸鍕┾偓? * @param threadId - 閺堫剙婀撮悽鐔稿灇閻ㄥ嫮鍤庣粙?ID
- * @param draftThread - 閺堫剙婀撮懡澶屒圭痪璺ㄢ柤閻樿埖鈧? * @param fallbackModelSelection - 瑜版捁宕忕粙鎸庢弓閹稿洤鐣惧Ο鈥崇€烽弮鍓佹畱閸ョ偤鈧偓濡€崇€烽柅澶嬪
- * @param error - 閸欘垶鈧娈戦柨娆掝嚖娣団剝浼呴敍宀€鏁ゆ禍搴＄潔缁€鍝勫灡瀵ゅ搫銇戠拹銉уЦ閹? * @returns 閺嬪嫬缂撶€瑰本鍨氶惃?Thread 鐎电钖勯敍灞藉瘶閸氼偆鈹栭惃鍕Х閹垰鍨悰銊ユ嫲娴兼俺鐦? */
+ * 根据本地草稿状态构建一个本�?Thread 对象，用于在服务端线程尚未创建时提供 UI 渲染所需的数据结构�? * @param threadId - 本地生成的线�?ID
+ * @param draftThread - 本地草稿线程状�? * @param fallbackModelSelection - 当草稿未指定模型时的回退模型选择
+ * @param error - 可选的错误信息，用于展示创建失败状�? * @returns 构建完成�?Thread 对象，包含空的消息列表和会话
+ */
 export function buildLocalDraftThread(
   threadId: ThreadId,
   draftThread: DraftThreadState,
@@ -82,7 +83,9 @@ export function buildLocalDraftThread(
 }
 
 /**
- * 鐟欙絾鐎借ぐ鎾冲濞叉槒绌痪璺ㄢ柤閻ㄥ嫭妯夌粈鐑樼垼妫版﹫绱濇导妯哄帥娴ｈ法鏁ょ€涙劒鍞悶鍡樼垼妫版﹫绱濈€靛湱鈹栭惂鐣屾畱 Home Chat 娴ｈ法鏁?"New Chat"閵? * @param input.title - 缁捐法鈻奸崢鐔奉潗閺嶅洭顣? * @param input.subagentTitle - 鐎涙劒鍞悶鍡樼垼妫版﹫绱欐俊鍌涙箒閿? * @param input.isHomeChat - 閺勵垰鎯佹稉?Home Chat 鐎圭懓娅? * @param input.isEmpty - 缁捐法鈻奸弰顖氭儊娑撹櫣鈹栭敍鍫熸￥濞戝牊浼呴敍? * @returns 閺堚偓缂佸牆鐫嶇粈铏圭舶閻劍鍩涢惃鍕垼妫版ɑ鏋冮張? */
+ * 解析当前活跃线程的显示标题，优先使用子代理标题，对空白的 Home Chat 使用 "New Chat"�? * @param input.title - 线程原始标题
+ * @param input.subagentTitle - 子代理标题（如有�? * @param input.isHomeChat - 是否�?Home Chat 容器
+ * @param input.isEmpty - 线程是否为空（无消息�? * @returns 最终展示给用户的标题文�? */
 export function resolveActiveThreadTitle(input: {
   title: string;
   subagentTitle: string | null;
@@ -98,9 +101,11 @@ export function resolveActiveThreadTitle(input: {
   return input.title;
 }
 
-// 閺冧浇浜伴敍鍧癷dechat閿涘鎯＄敮锔跨啊娴?fork 鐎电厧鍙嗛惃鍕坊閸欏弶绉烽幁顖滄暏娴?Provider 娑撳﹣绗呴弬鍥风礉娴ｅ棗鍙剧€电鐦介棃銏℃緲鎼存柨褰х仦鏇犮仛
-// 閺傛壆娈戦弮浣戒喊濞戝牊浼呴敍灞芥礈濮濄倝娓剁憰浣界箖濠娿倖甯€ fork-import 閺夈儲绨惃鍕Х閹垬鈧?/**
- * 鏉╁洦鎶ら弮浣戒喊濞戝牊浼呴崚妤勩€冮敍宀€些闂勩倓绮?fork 鐎电厧鍙嗛惃鍕坊閸欏弶绉烽幁顖ょ礉娴犲懍绻氶悾娆愭⒑閼卞﹨鍤滈煬顐￠獓閻㈢喓娈戦弬鐗堢Х閹垬鈧? * @param messages - 閸樼喎顫愬☉鍫熶紖閸掓銆? * @param isSidechat - 閺勵垰鎯佹稉鐑樻⒑閼卞﹦鍤庣粙? * @returns 鏉╁洦鎶ら崥搴ｆ畱濞戝牊浼呴崚妤勩€? */
+// 旁聊（sidechat）携带了�?fork 导入的历史消息用�?Provider 上下文，但其对话面板应只展示
+// 新的旁聊消息，因此需要过滤掉 fork-import 来源的消息�?/**
+ * 过滤旁聊消息列表，移除从 fork 导入的历史消息，仅保留旁聊自身产生的新消息�? * @param messages - 原始消息列表
+ * @param isSidechat - 是否为旁聊线�? * @returns 过滤后的消息列表
+ */
 export function filterSidechatTranscriptMessages(
   messages: readonly ChatMessage[],
   isSidechat: boolean,
@@ -110,7 +115,7 @@ export function filterSidechatTranscriptMessages(
     : [...messages];
 }
 
-/** 闁插﹥鏂?blob: 妫板嫯顫?URL閿涘矂妲诲銏犲敶鐎涙ɑ纭犲蹇嬧偓鍌欑矌鐎?blob: 閸楀繗顔呴惃?URL 閹笛嗩攽 revokeObjectURL閵?*/
+/** 释放 blob: 预览 URL，防止内存泄漏。仅�?blob: 协议�?URL 执行 revokeObjectURL�?*/
 export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   if (!previewUrl || typeof URL === "undefined" || !previewUrl.startsWith("blob:")) {
     return;
@@ -118,7 +123,7 @@ export function revokeBlobPreviewUrl(previewUrl: string | undefined): void {
   URL.revokeObjectURL(previewUrl);
 }
 
-/** 闁插﹥鏂侀悽銊﹀煕濞戝牊浼呮稉顓熷閺堝娴橀悧鍥娴犲墎娈?blob: 妫板嫯顫?URL閿涘矂妲诲銏犲敶鐎涙ɑ纭犲?*/
+/** 释放用户消息中所有图片附件的 blob: 预览 URL，防止内存泄�?*/
 export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   if (message.role !== "user" || !message.attachments) {
     return;
@@ -131,7 +136,7 @@ export function revokeUserMessagePreviewUrls(message: ChatMessage): void {
   }
 }
 
-/** 閺€鍫曟肠閻劍鍩涘☉鍫熶紖娑擃厽澧嶉張澶婃禈閻楀洭妾禒鍓佹畱 blob: 妫板嫯顫?URL閿涘瞼鏁ゆ禍搴㈠闁插繘鍣撮弨?*/
+/** 收集用户消息中所有图片附件的 blob: 预览 URL，用于批量释�?*/
 export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[] {
   if (message.role !== "user" || !message.attachments) {
     return [];
@@ -146,9 +151,10 @@ export function collectUserMessageBlobPreviewUrls(message: ChatMessage): string[
 }
 
 /**
- * 鐏忓棜顕㈤棅瀹犳祮瑜版洘鏋冮張顒冩嫹閸旂姴鍩岃ぐ鎾冲閹绘劗銇氱拠宥嗘汞鐏忔拝绱濋悽銊﹀床鐞涘瞼顑侀崚鍡涙閵? * @param currentPrompt - 瑜版挸澧犳潏鎾冲弳濡楀棔鑵戦惃鍕絹缁€楦跨槤
- * @param transcript - 鐠囶參鐓舵潪顒€缍嶉弬鍥ㄦ拱
- * @returns 閸氬牆鑻熼崥搴ｆ畱閹绘劗銇氱拠宥忕幢閼汇儴娴嗚ぐ鏇氳礋缁屽搫鍨潻鏂挎礀 null 鐞涖劎銇氶弮鐘绘付鏉╄棄濮? */
+ * 将语音转录文本追加到当前提示词末尾，用换行符分隔�? * @param currentPrompt - 当前输入框中的提示词
+ * @param transcript - 语音转录文本
+ * @returns 合并后的提示词；若转录为空则返回 null 表示无需追加
+ */
 export function appendVoiceTranscriptToPrompt(
   currentPrompt: string,
   transcript: string,
@@ -163,7 +169,9 @@ export function appendVoiceTranscriptToPrompt(
 }
 
 /**
- * 濞撳懏绀傜拠顓㈢叾鏉堟挸鍙嗛柨娆掝嚖娣団剝浼呴敍宀€些闂勩倕鐖㈤弽鍫ｇ闊亜鎷伴柌宥咁槻閻?Error 閸撳秶绱戦敍宀冪箲閸ョ偟鏁ら幋宄板几婵傜晫娈戦柨娆掝嚖閹诲繗鍫妴? * @param message - 閸樼喎顫愰柨娆掝嚖濞戝牊浼? * @returns 濞撳懏绀傞崥搴ｆ畱闁挎瑨顕ゅ☉鍫熶紖閿涙稖瀚㈠〒鍛閸氬簼璐熺粚鍝勫灟鏉╂柨娲栨妯款吇閹绘劗銇? */
+ * 清洗语音输入错误信息，移除堆栈跟踪和重复�?Error 前缀，返回用户友好的错误描述�? * @param message - 原始错误消息
+ * @returns 清洗后的错误消息；若清洗后为空则返回默认提示
+ */
 export function sanitizeVoiceErrorMessage(message: string): string {
   const normalized = message.trim();
   if (normalized.length === 0) {
@@ -183,14 +191,15 @@ export function sanitizeVoiceErrorMessage(message: string): string {
     : "The voice note could not be transcribed.";
 }
 
-/** 閸掋倖鏌囩拠顓㈢叾闁挎瑨顕ゅ☉鍫熶紖閺勵垰鎯佺悰銊с仛鐠併倛鐦夊鑼剁箖閺堢噦绱濋棁鈧憰浣烘暏閹寸兘鍣搁弬鎵瑜?*/
+/** 判断语音错误消息是否表示认证已过期，需要用户重新登�?*/
 export function isVoiceAuthExpiredMessage(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("chatgpt login has expired") || normalized.includes("sign in again");
 }
 
 /**
- * 閺嶈宓佹ス锕€鍘犳搴℃儙閸斻劑鏁婄拠顖滆閸ㄥ鏁撻幋鎰暏閹村嘲寮告總鐣屾畱闁挎瑨顕ら幓蹇氬牚閿涘矁顩惄鏍ㄦ綀闂勬劖瀚嗙紒婵勨偓浣筋啎婢跺洦婀幍鎯у煂閵嗕浇顔曟径鍥╃畳韫囨瑧鐡戠敮姝岊潌閸︾儤娅欓妴? * @param error - 閹规洝骞忛崚鎵畱闁挎瑨顕ょ€电钖? * @returns 闂堛垹鎮滈悽銊﹀煕閻ㄥ嫰鏁婄拠顖涘絹缁€鐑樻瀮閺? */
+ * 根据麦克风启动错误类型生成用户友好的错误描述，覆盖权限拒绝、设备未找到、设备繁忙等常见场景�? * @param error - 捕获到的错误对象
+ * @returns 面向用户的错误提示文�? */
 export function describeVoiceRecordingStartError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "The microphone could not be opened.";
@@ -219,7 +228,10 @@ export function describeVoiceRecordingStartError(error: unknown): string {
 }
 
 /**
- * 閹恒劌顕辩拠顓㈢叾缁楁棁顔囬崝鐔诲厴閻?UI 閻樿埖鈧緤绱濋崚銈嗘焽閺勵垰鎯侀崣顖涜閺屾挶鈧礁褰查崥顖氬З鐠囶參鐓剁粭鏃囶唶閿涘奔浜掗崣濠冩Ц閸氾附妯夌粈鐑樺付閸掕埖瀵滈柦顔衡偓? * @param input.authStatus - 閺堝秴濮熺粩顖濐吇鐠囦胶濮搁幀? * @param input.voiceTranscriptionAvailable - 鐠囶參鐓舵潪顒€缍嶉弰顖氭儊閸欘垳鏁? * @param input.isRecording - 閺勵垰鎯佸锝呮躬瑜版洟鐓? * @param input.isTranscribing - 閺勵垰鎯佸锝呮躬鏉烆剙缍? * @returns 鐠囶參鐓剁粭鏃囶唶 UI 閻樿埖鈧緤绱癱anRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
+ * 推导语音笔记功能�?UI 状态，判断是否可渲染、可启动语音笔记，以及是否显示控制按钮�? * @param input.authStatus - 服务端认证状�? * @param input.voiceTranscriptionAvailable - 语音转录是否可用
+ * @param input.isRecording - 是否正在录音
+ * @param input.isTranscribing - 是否正在转录
+ * @returns 语音笔记 UI 状态：canRenderVoiceNotes / canStartVoiceNotes / showVoiceNotesControl
  */
 export function deriveComposerVoiceState(input: {
   authStatus: ServerProviderAuthStatus | null | undefined;
@@ -242,7 +254,8 @@ export function deriveComposerVoiceState(input: {
 }
 
 /**
- * 閸掋倖鏌?Composer 濡€崇€烽柅澶嬪閸ｃ劍妲搁崥锕€绨查弰鍓с仛妤犮劍鐏︾仦蹇撳鏉炵晫濮搁幀浣碘偓? * 瑜?Provider 闂団偓鐟曚礁濮╅幀浣稿絺閻滅増膩閸ㄥ鍨悰銊ょ瑬娴犲秴婀崝鐘烘祰娑擃叏绱濋幋鏍ㄥ瘮娑斿懎瀵查惃鍕侀崹瀣偓澶嬪娑撳骸缍嬮崜宥夆偓澶嬪娑撳秳绔撮懛瀛樻閺勫墽銇氭銊︾仸鐏炲繈鈧? * @param input - 閸栧懎鎯堣ぐ鎾冲闁鑵戦惃?Provider/濡€崇€烽妴浣瑰瘮娑斿懎瀵?閼藉枪濡€崇€烽柅澶嬪閵嗕礁濮炴潪鐣屽Ц閹胶鐡? * @returns 閺勵垰鎯佹惔鏃€妯夌粈娲€囬弸璺虹潌
+ * 判断 Composer 模型选择器是否应显示骨架屏加载状态�? * �?Provider 需要动态发现模型列表且仍在加载中，或持久化的模型选择与当前选择不一致时显示骨架屏�? * @param input - 包含当前选中�?Provider/模型、持久化/草稿模型选择、加载状态等
+ * @returns 是否应显示骨架屏
  */
 export function shouldShowComposerModelBootstrapSkeleton(input: {
   selectedProvider: ProviderKind;
@@ -284,8 +297,10 @@ export function shouldShowComposerModelBootstrapSkeleton(input: {
 }
 
 /**
- * 鐟欙絾鐎介張鈧紒鍫熷絹娴溿倗绮?Provider 閻ㄥ嫭膩閸ㄥ鐖ｇ拠鍡礉娴兼ê鍘涢崠褰掑帳鏉╂劘顢戦弮璺哄讲閻劑鈧銆嶉崚妤勩€冩稉顓犳畱 slug閿涘苯鎯侀崚娆庡▏閻劌娲栭柅鈧崐绗衡偓? * @param input.selectedModel - 閻劍鍩涢柅澶嬪閻ㄥ嫭膩閸?slug
- * @param input.availableOptions - 瑜版挸澧犻崣顖滄暏閻ㄥ嫭膩閸ㄥ鈧銆嶉崚妤勩€? * @param input.fallback - 瑜版挻妫ゅ▔鏇炲爱闁板秵妞傞惃鍕礀闁偓閸戣姤鏆? * @returns 閺堚偓缂佸牅濞囬悽銊ф畱濡€崇€?slug
+ * 解析最终提交给 Provider 的模型标识，优先匹配运行时可用选项列表中的 slug，否则使用回退值�? * @param input.selectedModel - 用户选择的模�?slug
+ * @param input.availableOptions - 当前可用的模型选项列表
+ * @param input.fallback - 当无法匹配时的回退函数
+ * @returns 最终使用的模型 slug
  */
 export function resolveCommittedProviderModel(input: {
   selectedModel: ModelSlug;

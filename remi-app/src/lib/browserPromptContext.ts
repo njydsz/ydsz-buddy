@@ -1,5 +1,5 @@
 /**
- * @file 濞村繗顫嶉崳銊﹀絹缁€楦跨槤娑撳﹣绗呴弬鍥ь槱閻炲棙膩閸? * @description 濡偓濞村鏁ら幋閿嬪絹缁€楦跨槤閺勵垰鎯佸☉澶婂挤閸愬懘鍎村ù蹇氼潔閸ｃ劋鎹㈤崝鈽呯礉楠炴儼鍤滈崝銊╂閸旂姵绁荤憴鍫濇珤閹搭亜娴樻担婊€璐熸稉濠佺瑓閺傚洢鈧? */
+ * @file 浏览器提示词上下文处理模�? * @description 检测用户提示词是否涉及内部浏览器任务，并自动附加浏览器截图作为上下文�? */
 
 import {
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
@@ -10,7 +10,7 @@ import {
 
 import type { ComposerImageAttachment } from "../composerDraftStore";
 
-/** 閺勬儳绱＄拠閿嬬湴鐠侊紕鐣婚張杞板▏閻劎娈戦崗鎶芥暛鐠囧秵膩瀵?*/
+/** 显式请求计算机使用的关键词模�?*/
 const EXPLICIT_COMPUTER_USE_PATTERNS = [
   "computer use",
   "computer-use",
@@ -19,7 +19,7 @@ const EXPLICIT_COMPUTER_USE_PATTERNS = [
   "mcp__computer_use__",
 ];
 
-/** 閸愬懘鍎村ù蹇氼潔閸ｃ劏瀵栭崶瀵告祲閸忓磭娈戦崗鎶芥暛鐠囧秵膩瀵骏绱欓弨顖涘瘮婢舵俺顕㈢懛鈧敍?*/
+/** 内部浏览器范围相关的关键词模式（支持多语言�?*/
 const INTERNAL_BROWSER_SCOPE_PATTERNS = [
   "browser interno",
   "internal browser",
@@ -36,7 +36,7 @@ const INTERNAL_BROWSER_SCOPE_PATTERNS = [
   "page in the browser",
 ];
 
-/** 閸愬懘鍎村ù蹇氼潔閸ｃ劌濮╂担婊呮祲閸忓磭娈戦崗鎶芥暛鐠囧秵膩瀵骏绱欓弨顖涘瘮婢舵俺顕㈢懛鈧敍?*/
+/** 内部浏览器动作相关的关键词模式（支持多语言�?*/
 const INTERNAL_BROWSER_ACTION_PATTERNS = [
   "guarda",
   "vedi",
@@ -56,21 +56,22 @@ const INTERNAL_BROWSER_ACTION_PATTERNS = [
 ];
 
 /**
- * 鐟欏嫯瀵栭崠鏍ㄥ絹缁€楦跨槤閺傚洦婀伴悽銊ょ艾閸忔娊鏁拠宥呭爱闁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫭鏋冮張顒婄礄鐏忓繐鍟撻妴浣告値楠炲墎鈹栭惂鏂ょ礆
+ * 规范化提示词文本用于关键词匹�? * @param prompt - 原始提示�? * @returns 规范化后的文本（小写、合并空白）
  */
 function normalizePromptForMatching(prompt: string): string {
   return prompt.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 /**
- * 濡偓濞村褰佺粈楦跨槤閺勵垰鎯侀弰鎯х础鐠囬攱鐪扮拋锛勭暬閺堣桨濞囬悽銊ュ閼? * @param prompt - 閻劍鍩涢幓鎰仛鐠? * @returns 閺勵垰鎯侀崠鍛儓鐠侊紕鐣婚張杞板▏閻劎娴夐崗鍐插彠闁款喛鐦? */
+ * 检测提示词是否显式请求计算机使用功�? * @param prompt - 用户提示�? * @returns 是否包含计算机使用相关关键词
+ */
 export function promptRequestsExplicitComputerUse(prompt: string): boolean {
   const normalized = normalizePromptForMatching(prompt);
   return EXPLICIT_COMPUTER_USE_PATTERNS.some((pattern) => normalized.includes(pattern));
 }
 
 /**
- * 濡偓濞村褰佺粈楦跨槤閺勵垰鎯侀惇瀣崳閺夈儲妲搁崘鍛村劥濞村繗顫嶉崳銊ゆ崲閸? * 闂団偓鐟曚礁鎮撻弮璺哄爱闁板秵绁荤憴鍫濇珤閼煎啫娲块崗鎶芥暛鐠囧秴鎷伴崝銊ょ稊閸忔娊鏁拠? * @param prompt - 閻劍鍩涢幓鎰仛鐠? * @returns 閺勵垰鎯侀崠褰掑帳閸愬懘鍎村ù蹇氼潔閸ｃ劋鎹㈤崝鈩兡佸? */
+ * 检测提示词是否看起来是内部浏览器任�? * 需要同时匹配浏览器范围关键词和动作关键�? * @param prompt - 用户提示�? * @returns 是否匹配内部浏览器任务模�? */
 export function promptLooksLikeInternalBrowserTask(prompt: string): boolean {
   const normalized = normalizePromptForMatching(prompt);
   const mentionsInternalBrowser = INTERNAL_BROWSER_SCOPE_PATTERNS.some((pattern) =>
@@ -83,14 +84,16 @@ export function promptLooksLikeInternalBrowserTask(prompt: string): boolean {
 }
 
 /**
- * 娑撶儤绁荤憴鍫濇珤閹搭亜娴橀悽鐔稿灇闂勫嫪娆㈤崥宥囆? * @param input - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns 閹搭亜娴橀弬鍥︽閸氬稄绱濇俊鍌涚亯閸樼喎鎮曟稉铏光敄閸掓瑤濞囬悽銊╃帛鐠併倕鎳￠崥? */
+ * 为浏览器截图生成附件名称
+ * @param input - 浏览器截图结�? * @returns 截图文件名，如果原名为空则使用默认命�? */
 export function screenshotAttachmentName(input: BrowserCaptureScreenshotResult): string {
   return input.name.trim().length > 0 ? input.name : `browser-${Date.now()}.png`;
 }
 
 /**
- * 娴犲孩绁荤憴鍫濇珤閹搭亜娴橀崚娑樼紦 File 鐎电钖勯敍鍫濆敶闁劌鍤遍弫甯礆
- * @param screenshot - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns File 鐎电钖? * @throws 瑜版挻鍩呴崶鐐殶閹诡喕璐熺粚鐑樻閹舵稑鍤柨娆掝嚖
+ * 从浏览器截图创建 File 对象（内部函数）
+ * @param screenshot - 浏览器截图结�? * @returns File 对象
+ * @throws 当截图数据为空时抛出错误
  */
 function fileFromBrowserScreenshot(screenshot: BrowserCaptureScreenshotResult): File {
   if (screenshot.bytes.byteLength === 0) {
@@ -103,7 +106,7 @@ function fileFromBrowserScreenshot(screenshot: BrowserCaptureScreenshotResult): 
 }
 
 /**
- * 娴犲孩绁荤憴鍫濇珤閹搭亜娴橀崚娑樼紦缂傛牞绶崳銊ユ禈閻楀洭妾禒? * @param screenshot - 濞村繗顫嶉崳銊﹀焻閸ュ墽绮ㄩ弸? * @returns 缂傛牞绶崳銊ユ禈閻楀洭妾禒璺侯嚠鐠炩槄绱濋崠鍛儓妫板嫯顫峌RL閸滃本鏋冩禒璺侯嚠鐠? */
+ * 从浏览器截图创建编辑器图片附�? * @param screenshot - 浏览器截图结�? * @returns 编辑器图片附件对象，包含预览URL和文件对�? */
 export function composerImageFromBrowserScreenshot(
   screenshot: BrowserCaptureScreenshotResult,
 ): ComposerImageAttachment {
@@ -121,39 +124,41 @@ export function composerImageFromBrowserScreenshot(
 }
 
 /**
- * 濞村繗顫嶉崳銊﹀絹缁€楦跨槤闂勫嫪娆㈢憴锝嗙€界紒鎾寸亯閹恒儱褰? */
+ * 浏览器提示词附件解析结果接口
+ */
 export interface BrowserPromptAttachmentResolution {
-  /** 閺勵垰鎯佺拠閿嬬湴娴滃棙绁荤憴鍫濇珤闂勫嫪娆?*/
+  /** 是否请求了浏览器附件 */
   requested: boolean;
-  /** 鐟欙絾鐎介崙铏规畱閸ュ墽澧栭梽鍕閿涘苯顩ч弸婊喰掗弸鎰亼鐠愩儱鍨稉?null */
+  /** 解析出的图片附件，如果解析失败则�?null */
   image: ComposerImageAttachment | null;
-  /** 鐟欙絾鐎芥径杈Е閻ㄥ嫬甯崶?*/
+  /** 解析失败的原�?*/
   reason?: "no-open-browser" | "no-active-tab" | "attachment-too-large";
 }
 
 /**
- * 鐏忔繆鐦憴锝嗙€藉ù蹇氼潔閸ｃ劍褰佺粈楦跨槤闂勫嫪娆? * 瑜版挻褰佺粈楦跨槤閸栧綊鍘ら崘鍛村劥濞村繗顫嶉崳銊ゆ崲閸斺剝妞傞敍宀冨殰閸斻劍鍩呴崣鏍х秼閸撳秵绁荤憴鍫濇珤閺嶅洨顒锋い鐢垫畱閹搭亜娴樻担婊€璐熼梽鍕
- * @param input - 閸栧懎鎯?API閵嗕胶鍤庣粙濠璂閸滃本褰佺粈楦跨槤閻ㄥ嫯绶崗銉ヮ嚠鐠? * @returns 濞村繗顫嶉崳銊╂娴犳儼袙閺嬫劗绮ㄩ弸? */
+ * 尝试解析浏览器提示词附件
+ * 当提示词匹配内部浏览器任务时，自动截取当前浏览器标签页的截图作为附件
+ * @param input - 包含 API、线程ID和提示词的输入对�? * @returns 浏览器附件解析结�? */
 export async function maybeResolveBrowserPromptAttachment(input: {
   api: NativeApi;
   threadId: ThreadId;
   prompt: string;
 }): Promise<BrowserPromptAttachmentResolution> {
-  // 婵″倹鐏夐弰鎯х础鐠囬攱鐪扮拋锛勭暬閺堣桨濞囬悽銊﹀灗娑撳秴灏柊宥嗙セ鐟欏牆娅掓禒璇插濡€崇础閿涘苯鍨稉宥咁槱閻?  if (
+  // 如果显式请求计算机使用或不匹配浏览器任务模式，则不处�?  if (
     promptRequestsExplicitComputerUse(input.prompt) ||
     !promptLooksLikeInternalBrowserTask(input.prompt)
   ) {
     return { requested: false, image: null };
   }
 
-  // 閼惧嘲褰囧ù蹇氼潔閸ｃ劎濮搁幀?  const browserState = await input.api.browser.getState({
+  // 获取浏览器状�?  const browserState = await input.api.browser.getState({
     threadId: input.threadId,
   });
   if (!browserState.open) {
     return { requested: true, image: null, reason: "no-open-browser" };
   }
 
-  // 閺屻儲澹樺ú璇插З閺嶅洨顒锋い?  const activeTab =
+  // 查找活动标签�?  const activeTab =
     browserState.tabs.find((tab) => tab.id === browserState.activeTabId) ??
     browserState.tabs[0] ??
     null;
@@ -161,11 +166,11 @@ export async function maybeResolveBrowserPromptAttachment(input: {
     return { requested: true, image: null, reason: "no-active-tab" };
   }
 
-  // 閹搭亜褰囪ぐ鎾冲閺嶅洨顒锋い鍨焻閸?  const screenshot = await input.api.browser.captureScreenshot({
+  // 截取当前标签页截�?  const screenshot = await input.api.browser.captureScreenshot({
     threadId: input.threadId,
     tabId: activeTab.id,
   });
-  // 濡偓閺屻儲鍩呴崶鎯с亣鐏忓繑妲搁崥锕佺Т鏉╁洭妾洪崚?  if (screenshot.sizeBytes > PROVIDER_SEND_TURN_MAX_IMAGE_BYTES) {
+  // 检查截图大小是否超过限�?  if (screenshot.sizeBytes > PROVIDER_SEND_TURN_MAX_IMAGE_BYTES) {
     return { requested: true, image: null, reason: "attachment-too-large" };
   }
 

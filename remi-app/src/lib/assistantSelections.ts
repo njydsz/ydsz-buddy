@@ -1,49 +1,52 @@
 /**
- * @file 閸斺晜澧滈柅澶嬪瀵洜鏁ゆ径鍕倞濡€虫健
- * @description 鐟欏嫯瀵栭崠鏍モ偓浣哥碍閸掓瀵查崪灞藉⒑缁傝崵鏁ら幋閿嬪絹缁€楦跨槤娑擃厾娈戦崝鈺傚瀵洜鏁ら柅澶嬪閸愬懎顔愰妴? *              閻劋绨懕濠傘亯缂傛牞绶崳銊ユ嫲鐎电鐦界拋鏉跨秿鏉堝懎濮崙鑺ユ殶閵? */
+ * @file 助手选择引用处理模块
+ * @description 规范化、序列化和剥离用户提示词中的助手引用选择内容�? *              用于聊天编辑器和对话记录辅助函数�? */
 
 import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS } from "~/contracts";
 
 import type { ChatAssistantSelectionAttachment } from "../types";
 import { randomUUID } from "./utils";
 
-/** 鐏忛箖鍎撮崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫭顒滈崚娆忓爱闁板秵膩瀵?*/
+/** 尾部助手选择引用的正则匹配模�?*/
 const TRAILING_ASSISTANT_SELECTIONS_PATTERN =
   /\n*<assistant_selection>\n([\s\S]*?)\n<\/assistant_selection>\s*$/;
-/** 瀹撳苯鍙嗗蹇撳И閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫭顒滈崚娆忓爱闁板秵膩瀵?*/
+/** 嵌入式助手选择引用的正则匹配模�?*/
 const EMBEDDED_ASSISTANT_SELECTIONS_PATTERN =
   /\n*<assistant_selection>\n[\s\S]*?\n<\/assistant_selection>(?=\n*(<terminal_context>\n[\s\S]*?\n<\/terminal_context>\s*)?$)/;
-/** 閸斺晜澧滈柅澶嬪妫板嫯顫嶉惃鍕付婢堆冪摟缁楋附鏆?*/
+/** 助手选择预览的最大字符数 */
 const ASSISTANT_SELECTION_PREVIEW_MAX_CHARS = 44;
 
 /**
- * 閹绘劕褰囬惃鍕И閹靛鈧瀚ㄥ鏇犳暏缂佹挻鐏夐幒銉ュ經
+ * 提取的助手选择引用结果接口
  */
 export interface ExtractedAssistantSelections {
-  /** 閸撱儳顬囬柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠宥嗘瀮閺?*/
+  /** 剥离选择引用后的提示词文�?*/
   promptText: string;
-  /** 鐟欙絾鐎介崙铏规畱闁瀚ㄥ鏇犳暏閺夛紕娲伴崚妤勩€?*/
+  /** 解析出的选择引用条目列表 */
   selections: ParsedAssistantSelectionEntry[];
 }
 
 /**
- * 鐟欙絾鐎介崥搴ｆ畱閸斺晜澧滈柅澶嬪瀵洜鏁ら弶锛勬窗
+ * 解析后的助手选择引用条目
  */
 export interface ParsedAssistantSelectionEntry {
-  /** 閸斺晜澧滃☉鍫熶紖閻ㄥ嫬鏁稉鈧弽鍥槕缁?*/
+  /** 助手消息的唯一标识�?*/
   assistantMessageId: string;
-  /** 闁瀚ㄩ惃鍕瀮閺堫剙鍞寸€?*/
+  /** 选择的文本内�?*/
   text: string;
 }
 
 /**
- * 閸斺晜澧滈柅澶嬪瀵洜鏁ゆ宀冪槈闁挎瑨顕ょ猾璇茬€? * - "empty": 閸愬懎顔愭稉铏光敄
- * - "too-long": 閸愬懎顔愮搾鍛存毐
+ * 助手选择引用验证错误类型
+ * - "empty": 内容为空
+ * - "too-long": 内容超长
  */
 export type AssistantSelectionValidationError = "empty" | "too-long";
 
 /**
- * 鐟欏嫯瀵栭崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閺傚洦婀? * @param text - 閸樼喎顫愰柅澶嬪閺傚洦婀? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫭鏋冮張顒婄礄缂佺喍绔撮幑銏ｎ攽缁楋负鈧礁骞撻梽銈夘浕鐏忓墽鈹栭惂鏂ょ礆
+ * 规范化助手选择引用文本
+ * @param text - 原始选择文本
+ * @returns 规范化后的文本（统一换行符、去除首尾空白）
  */
 export function normalizeAssistantSelectionText(text: string): string {
   return text
@@ -53,7 +56,8 @@ export function normalizeAssistantSelectionText(text: string): string {
 }
 
 /**
- * 閼惧嘲褰囬崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫰鐛欑拠渚€鏁婄拠? * @param selection - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱闁瀚ㄧ€电钖? * @returns 妤犲矁鐦夐柨娆掝嚖缁鐎烽敍灞筋洤閺嬫粓鐛欑拠渚€鈧俺绻冮崚娆掔箲閸?null
+ * 获取助手选择引用的验证错�? * @param selection - 包含助手消息ID和文本的选择对象
+ * @returns 验证错误类型，如果验证通过则返�?null
  */
 export function getAssistantSelectionValidationError(
   selection: Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">,
@@ -70,7 +74,9 @@ export function getAssistantSelectionValidationError(
 }
 
 /**
- * 鐟欏嫯瀵栭崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏闂勫嫪娆? * @param selection - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱闁瀚ㄧ€电钖? * @returns 鐟欏嫯瀵栭崠鏍ф倵閻ㄥ嫰鈧瀚ㄧ€电钖勯敍灞筋洤閺嬫粓鐛欑拠浣搞亼鐠愩儱鍨潻鏂挎礀 null
+ * 规范化助手选择引用附件
+ * @param selection - 包含助手消息ID和文本的选择对象
+ * @returns 规范化后的选择对象，如果验证失败则返回 null
  */
 export function normalizeAssistantSelectionAttachment(
   selection: Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">,
@@ -88,7 +94,9 @@ export function normalizeAssistantSelectionAttachment(
 }
 
 /**
- * 閸掓稑缂撻崝鈺傚闁瀚ㄥ鏇犳暏闂勫嫪娆? * @param input - 閸栧懎鎯堥崝鈺傚濞戝牊浼匢D閸滃本鏋冮張顒傛畱鏉堟挸鍙嗙€电钖? * @returns 鐎瑰本鏆ｉ惃鍕娴犺泛顕挒鈽呯礉婵″倹鐏夋宀冪槈婢惰精瑙﹂崚娆掔箲閸?null
+ * 创建助手选择引用附件
+ * @param input - 包含助手消息ID和文本的输入对象
+ * @returns 完整的附件对象，如果验证失败则返�?null
  */
 export function createAssistantSelectionAttachment(input: {
   assistantMessageId: string;
@@ -108,8 +116,8 @@ export function createAssistantSelectionAttachment(input: {
 }
 
 /**
- * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫰顣╃憴鍫熸瀮閺? * @param text - 闁瀚ㄩ弬鍥ㄦ拱
- * @returns 妫板嫯顫嶉弬鍥ㄦ拱閿涘牓顩荤悰灞藉敶鐎圭櫢绱濈搾鍛存毐閺冭埖鍩呴弬顓ㄧ礆
+ * 格式化助手选择引用的预览文�? * @param text - 选择文本
+ * @returns 预览文本（首行内容，超长时截断）
  */
 export function formatAssistantSelectionPreview(text: string): string {
   const normalized = normalizeAssistantSelectionText(text);
@@ -118,18 +126,22 @@ export function formatAssistantSelectionPreview(text: string): string {
   }
   const firstLine = normalized.split("\n")[0] ?? normalized;
   return firstLine.length > ASSISTANT_SELECTION_PREVIEW_MAX_CHARS
-    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}鈥
+    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}…`
     : firstLine;
 }
 
 /**
- * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏闂冪喎鍨惃鍕暕鐟欏牊鏋冮張? * @param selectionCount - 闁瀚ㄥ鏇犳暏閺佷即鍣? * @returns 闂冪喎鍨０鍕潔閺傚洦婀? */
+ * 格式化助手选择引用队列的预览文�? * @param selectionCount - 选择引用数量
+ * @returns 队列预览文本
+ */
 export function formatAssistantSelectionQueuePreview(selectionCount: number): string {
   return selectionCount === 1 ? "1 referenced selection" : "Referenced selections";
 }
 
 /**
- * 閺嶇厧绱￠崠鏍уИ閹靛鈧瀚ㄥ鏇犳暏閻ㄥ嫭鐖ｆ０妯碱潚鐎涙劖鏋冮張? * @param selectionCount - 闁瀚ㄥ鏇犳暏閺佷即鍣? * @returns 閺嶅洭顣界粔宥呯摍閺傚洦婀? */
+ * 格式化助手选择引用的标题种子文�? * @param selectionCount - 选择引用数量
+ * @returns 标题种子文本
+ */
 export function formatAssistantSelectionTitleSeed(selectionCount: number): string {
   return selectionCount === 1
     ? "Referenced assistant selection"
@@ -137,11 +149,12 @@ export function formatAssistantSelectionTitleSeed(selectionCount: number): strin
 }
 
 /**
- * 閺嬪嫬缂撻崝鈺傚闁瀚ㄥ鏇犳暏閻ㄥ嫭褰佺粈楦跨槤閸? * @param selections - 闁瀚ㄥ鏇犳暏閸掓銆? * @returns 閺嶇厧绱￠崠鏍ф倵閻?XML 閹绘劗銇氱拠宥呮健閿涘苯顩ч弸婊勭梾閺堝婀侀弫鍫モ偓澶嬪閸掓瑨绻戦崶鐐碘敄鐎涙顑佹稉? */
+ * 构建助手选择引用的提示词�? * @param selections - 选择引用列表
+ * @returns 格式化后�?XML 提示词块，如果没有有效选择则返回空字符�? */
 export function buildAssistantSelectionsPromptBlock(
   selections: ReadonlyArray<Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">>,
 ): string {
-  // 鐟欏嫯瀵栭崠鏍ц嫙鏉╁洦鎶ら弮鐘虫櫏閻ㄥ嫰鈧瀚ㄥ鏇犳暏
+  // 规范化并过滤无效的选择引用
   const normalizedSelections = selections
     .map((selection) => normalizeAssistantSelectionAttachment(selection))
     .filter(
@@ -154,7 +167,7 @@ export function buildAssistantSelectionsPromptBlock(
     return "";
   }
 
-  // 閺嬪嫬缂?XML 閺嶇厧绱￠惃鍕偓澶嬪瀵洜鏁ら崸?  const lines: string[] = [];
+  // 构建 XML 格式的选择引用�?  const lines: string[] = [];
   for (const selection of normalizedSelections) {
     lines.push(`- assistant message ${selection.assistantMessageId}:`);
     for (const line of selection.text.split("\n")) {
@@ -165,7 +178,9 @@ export function buildAssistantSelectionsPromptBlock(
 }
 
 /**
- * 鐏忓棗濮幍瀣偓澶嬪瀵洜鏁ゆ潻钘夊閸掔増褰佺粈楦跨槤閺堫偄鐔? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @param selections - 闁瀚ㄥ鏇犳暏閸掓銆? * @returns 鏉╄棄濮為柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠? */
+ * 将助手选择引用追加到提示词末尾
+ * @param prompt - 原始提示�? * @param selections - 选择引用列表
+ * @returns 追加选择引用后的提示�? */
 export function appendAssistantSelectionsToPrompt(
   prompt: string,
   selections: ReadonlyArray<Pick<ChatAssistantSelectionAttachment, "assistantMessageId" | "text">>,
@@ -179,7 +194,9 @@ export function appendAssistantSelectionsToPrompt(
 }
 
 /**
- * 娴犲孩褰佺粈楦跨槤鐏忛箖鍎撮幓鎰絿閸斺晜澧滈柅澶嬪瀵洜鏁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閹绘劕褰囩紒鎾寸亯閿涘苯瀵橀崥顐㈠⒑缁傝鎮楅惃鍕絹缁€楦跨槤閸滃矁袙閺嬫劕鍤惃鍕偓澶嬪瀵洜鏁ら崚妤勩€? */
+ * 从提示词尾部提取助手选择引用
+ * @param prompt - 原始提示�? * @returns 提取结果，包含剥离后的提示词和解析出的选择引用列表
+ */
 export function extractTrailingAssistantSelections(prompt: string): ExtractedAssistantSelections {
   const match = TRAILING_ASSISTANT_SELECTIONS_PATTERN.exec(prompt);
   if (!match) {
@@ -196,26 +213,29 @@ export function extractTrailingAssistantSelections(prompt: string): ExtractedAss
 }
 
 /**
- * 娴犲孩褰佺粈楦跨槤鐏忛箖鍎撮崜銉ь瀲閸斺晜澧滈柅澶嬪瀵洜鏁? * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閸撱儳顬囬柅澶嬪瀵洜鏁ら崥搴ｆ畱閹绘劗銇氱拠? */
+ * 从提示词尾部剥离助手选择引用
+ * @param prompt - 原始提示�? * @returns 剥离选择引用后的提示�? */
 export function stripTrailingAssistantSelections(prompt: string): string {
   return extractTrailingAssistantSelections(prompt).promptText;
 }
 
 /**
- * 娴犲孩褰佺粈楦跨槤娑擃厼澧虹粋璇茬サ閸忋儳娈戦崝鈺傚闁瀚ㄥ鏇犳暏
- * @param prompt - 閸樼喎顫愰幓鎰仛鐠? * @returns 閸撱儳顬囧畵灞藉弳闁瀚ㄥ鏇犳暏閸氬海娈戦幓鎰仛鐠? */
+ * 从提示词中剥离嵌入的助手选择引用
+ * @param prompt - 原始提示�? * @returns 剥离嵌入选择引用后的提示�? */
 export function stripEmbeddedAssistantSelections(prompt: string): string {
   return prompt.replace(EMBEDDED_ASSISTANT_SELECTIONS_PATTERN, "");
 }
 
 /**
- * 鐟欙絾鐎介崝鈺傚闁瀚ㄥ鏇犳暏閺夛紕娲伴敍鍫濆敶闁劌鍤遍弫甯礆
- * @param block - 闁瀚ㄥ鏇犳暏閸ф娈戦弬鍥ㄦ拱閸愬懎顔? * @returns 鐟欙絾鐎介崥搴ｆ畱闁瀚ㄥ鏇犳暏閺夛紕娲伴崚妤勩€? */
+ * 解析助手选择引用条目（内部函数）
+ * @param block - 选择引用块的文本内容
+ * @returns 解析后的选择引用条目列表
+ */
 function parseAssistantSelectionEntries(block: string): ParsedAssistantSelectionEntry[] {
   const entries: ParsedAssistantSelectionEntry[] = [];
   let current: { assistantMessageId: string; lines: string[] } | null = null;
 
-  // 閹绘劒姘﹁ぐ鎾冲鐟欙絾鐎介弶锛勬窗閻ㄥ嫯绶熼崝鈺佸毐閺?  const commitCurrent = () => {
+  // 提交当前解析条目的辅助函�?  const commitCurrent = () => {
     if (!current) return;
     const text = current.lines.join("\n").trimEnd();
     if (text.length > 0) {
@@ -227,7 +247,7 @@ function parseAssistantSelectionEntries(block: string): ParsedAssistantSelection
     current = null;
   };
 
-  // 闁劘顢戠憴锝嗙€介柅澶嬪瀵洜鏁ら崸?  for (const rawLine of block.split("\n")) {
+  // 逐行解析选择引用�?  for (const rawLine of block.split("\n")) {
     const headerMatch = /^- assistant message (.+):$/.exec(rawLine);
     if (headerMatch) {
       commitCurrent();
@@ -240,11 +260,12 @@ function parseAssistantSelectionEntries(block: string): ParsedAssistantSelection
     if (!current) {
       continue;
     }
-    // 婢跺嫮鎮婄紓鈺勭箻閻ㄥ嫬鍞寸€圭顢?    if (rawLine.startsWith("  ")) {
+    // 处理缩进的内容行
+    if (rawLine.startsWith("  ")) {
       current.lines.push(rawLine.slice(2));
       continue;
     }
-    // 婢跺嫮鎮婄粚楦款攽
+    // 处理空行
     if (rawLine.length === 0) {
       current.lines.push("");
     }

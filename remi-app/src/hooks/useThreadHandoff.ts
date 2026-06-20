@@ -1,6 +1,6 @@
 /**
  * @file useThreadHandoff.ts
- * @description 缁捐法鈻兼禍銈嗗复 Hook - 閸掓稑缂撴禒搴濈娑擃亝褰佹笟娑樻櫌閸掓澘褰熸稉鈧稉顏呭絹娓氭稑鏅㈤惃鍕唉閹恒儳鍤庣粙? * @module hooks/useThreadHandoff
+ * @description 线程交接 Hook - 创建从一个提供商到另一个提供商的交接线�? * @module hooks/useThreadHandoff
  * @layer Web Hook
  */
 
@@ -29,16 +29,17 @@ import { useStore } from "../store";
 import { type Thread } from "../types";
 
 /**
- * 缁捐法鈻兼禍銈嗗复 Hook
+ * 线程交接 Hook
  *
  * @description
- * 娴犲骸缍嬮崜宥嗘た閸斻劎娈?Web 閻樿埖鈧礁鍨卞鐑樺絹娓氭稑鏅㈤崚鐗堝絹娓氭稑鏅㈤惃鍕唉閹恒儳鍤庣粙瀣ㄢ偓? * 娴溿倖甯撮幙宥勭稊娴兼艾鐨㈣ぐ鎾冲缁捐法鈻奸惃鍕Х閹垬鈧焦妞块崝銊ユ嫲闁板秶鐤嗘径宥呭煑閸掔増鏌婄痪璺ㄢ柤娑擃叏绱? * 楠炶泛鍨忛幑銏犲煂閻╊喗鐖ｉ幓鎰返閸熷棎鈧? *
- * @returns 閸栧懎鎯堟禍銈嗗复閺傝纭堕惃鍕嚠鐠? * @returns.createThreadHandoff - 閸掓稑缂撴禍銈嗗复缁捐法鈻奸惃鍕煙濞? *
+ * 从当前活动的 Web 状态创建提供商到提供商的交接线程�? * 交接操作会将当前线程的消息、活动和配置复制到新线程中，
+ * 并切换到目标提供商�? *
+ * @returns 包含交接方法的对�? * @returns.createThreadHandoff - 创建交接线程的方�? *
  * @example
  * ```tsx
  * const { createThreadHandoff } = useThreadHandoff();
  *
- * // 鐏忓棗缍嬮崜宥囧殠缁嬪姘﹂幒銉ュ煂 claude 閹绘劒绶甸崯? * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
+ * // 将当前线程交接到 claude 提供�? * const newThreadId = await createThreadHandoff(currentThread, "claudeAgent");
  * ```
  */
 export function useThreadHandoff() {
@@ -49,12 +50,15 @@ export function useThreadHandoff() {
   const serverConfigQuery = useQuery(serverConfigQueryOptions());
 
   /**
-   * 閸掓稑缂撶痪璺ㄢ柤娴溿倖甯?   *
+   * 创建线程交接
+   *
    * @description
-   * 閹笛嗩攽鐎瑰本鏆ｉ惃鍕殠缁嬪姘﹂幒銉︾ウ缁嬪绱?   * 1. 妤犲矁鐦夊┃鎰殠缁嬪鎷伴惄顔界垼閹绘劒绶甸崯鍡欐畱閸欘垳鏁ら幀?   * 2. 閺嬪嫬缂撶€电厧鍙嗛惃鍕Х閹垰鎷板ú璇插З
-   * 3. 閸掓稑缂撴禍銈嗗复缁捐法鈻奸獮璺侯槻閸掑墎濮搁幀?   * 4. 鐎佃壈鍩呴崚鐗堟煀缁捐法鈻?   *
-   * @param thread - 濠ф劗鍤庣粙?   * @param targetProvider - 閻╊喗鐖ｉ幓鎰返閸?   * @returns 閺傛澘鍨卞铏规畱缁捐法鈻?ID
-   * @throws 瑜版挻娼禒鏈电瑝濠娐ゅ喕閺冭埖濮忛崙娲晩鐠?   */
+   * 执行完整的线程交接流程：
+   * 1. 验证源线程和目标提供商的可用�?   * 2. 构建导入的消息和活动
+   * 3. 创建交接线程并复制状�?   * 4. 导航到新线程
+   *
+   * @param thread - 源线�?   * @param targetProvider - 目标提供�?   * @returns 新创建的线程 ID
+   * @throws 当条件不满足时抛出错�?   */
   const createThreadHandoff = useCallback(
     async (thread: Thread, targetProvider: ProviderKind): Promise<Thread["id"]> => {
       const api = readNativeApi();
@@ -62,22 +66,23 @@ export function useThreadHandoff() {
         throw new Error("Native API not found");
       }
 
-      // 閺屻儲澹樺┃鎰殠缁嬪澧嶇仦鐐垫畱妞ゅ湱娲?      const project = projects.find((entry) => entry.id === thread.projectId);
+      // 查找源线程所属的项目
+      const project = projects.find((entry) => entry.id === thread.projectId);
       if (!project) {
         throw new Error("Project not found for handoff thread.");
       }
 
-      // 妤犲矁鐦夊┃鎰殠缁嬪妲搁崥锕€褰叉禒銉ㄧ箻鐞涘奔姘﹂幒?      if (!canCreateThreadHandoff({ thread })) {
+      // 验证源线程是否可以进行交�?      if (!canCreateThreadHandoff({ thread })) {
         throw new Error("This thread cannot be handed off yet.");
       }
-      // 妤犲矁鐦夐惄顔界垼閹绘劒绶甸崯鍡樻Ц閸氾箑褰查悽?      if (
+      // 验证目标提供商是否可�?      if (
         !resolveAvailableHandoffTargetProviders(thread.modelSelection.provider).includes(
           targetProvider,
         )
       ) {
         throw new Error("This handoff target is not available for the current thread.");
       }
-      // 濡偓閺屻儳娲伴弽鍥ㄥ絹娓氭稑鏅㈤惃鍕讲閻劍鈧呭Ц閹?      const targetStatus = normalizeProviderStatusForLocalConfig({
+      // 检查目标提供商的可用性状�?      const targetStatus = normalizeProviderStatusForLocalConfig({
         provider: targetProvider,
         status:
           serverConfigQuery.data?.providers.find((entry) => entry.provider === targetProvider) ??
@@ -90,12 +95,13 @@ export function useThreadHandoff() {
 
       const nextThreadId = newThreadId();
       const createdAt = new Date().toISOString();
-      // 閺嬪嫬缂撶憰浣割嚤閸忋儳娈戝☉鍫熶紖閸滃本妞块崝?      const importedMessages = buildThreadHandoffImportedMessages(thread);
+      // 构建要导入的消息和活�?      const importedMessages = buildThreadHandoffImportedMessages(thread);
       const importedActivities = buildThreadHandoffImportedActivities(thread);
       const { copyTransferableComposerState, stickyModelSelectionByProvider } =
         useComposerDraftStore.getState();
 
-      // 閸掓稑缂撴禍銈嗗复缁捐法鈻?      await api.orchestration.dispatchCommand({
+      // 创建交接线程
+      await api.orchestration.dispatchCommand({
         type: "thread.handoff.create",
         commandId: newCommandId(),
         threadId: nextThreadId,
@@ -122,7 +128,7 @@ export function useThreadHandoff() {
         createdAt,
       });
 
-      // 闁劒閲滄潻钘夊鐎电厧鍙嗛惃鍕た閸?      for (const activity of importedActivities) {
+      // 逐个追加导入的活�?      for (const activity of importedActivities) {
         await api.orchestration.dispatchCommand({
           type: "thread.activity.append",
           commandId: newCommandId(),
@@ -132,9 +138,9 @@ export function useThreadHandoff() {
         });
       }
 
-      // 婢跺秴鍩楅崣顖濇祮缁夎崵娈戠紓鏍帆閸ｃ劎濮搁幀浣稿煂閺傛壆鍤庣粙?      copyTransferableComposerState(thread.id, nextThreadId);
+      // 复制可转移的编辑器状态到新线�?      copyTransferableComposerState(thread.id, nextThreadId);
 
-      // 閸氬本顒?Shell 韫囶偆鍙庨獮璺侯嚤閼割亜鍩岄弬鎵殠缁?      const snapshot = await api.orchestration.getShellSnapshot();
+      // 同步 Shell 快照并导航到新线�?      const snapshot = await api.orchestration.getShellSnapshot();
       syncServerShellSnapshot(snapshot);
       await navigate({
         to: "/$threadId",

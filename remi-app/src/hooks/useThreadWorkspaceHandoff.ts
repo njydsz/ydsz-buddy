@@ -1,6 +1,6 @@
 /**
  * @file useThreadWorkspaceHandoff.ts
- * @description 缁捐法鈻煎銉ょ稊閸栬桨姘﹂幒?Hook - 婢跺嫮鎮婄痪璺ㄢ柤閸︺劍婀伴崷鏉挎嫲瀹搞儰缍旈弽鎴滅闂傚娈戦崚鍥ㄥ床
+ * @description 线程工作区交�?Hook - 处理线程在本地和工作树之间的切换
  * @module hooks/useThreadWorkspaceHandoff
  */
 
@@ -17,16 +17,22 @@ import { setupProjectScript } from "../projectScripts";
 import type { Project, ProjectScript, Thread, ThreadWorkspacePatch } from "../types";
 
 /**
- * 缁捐法鈻煎銉ょ稊閸栬桨姘﹂幒?Hook
+ * 线程工作区交�?Hook
  *
  * @description
- * 婢跺嫮鎮婄痪璺ㄢ柤閸︺劍婀伴崷鎵箚婢у喛绱檒ocal閿涘鎷板銉ょ稊閺嶆垹骞嗘晶鍐跨礄worktree閿涘绠ｉ梻瀵告畱閸掑洦宕查妴? * 閺€顖涘瘮閿? * - 閸掑洦宕查崚鐗堟拱閸︾増膩瀵骏绱欓惄瀛樺复閸︺劑銆嶉惄顔炬窗瑜版洖浼愭担婊愮礆
- * - 閸掑洦宕查崚鏉夸紣娴ｆ粍鐖插Ο鈥崇础閿涘牆婀悪顒傜彌閻?git worktree 娑擃厼浼愭担婊愮礆
- * - 閼奉亜濮╁Λ鈧ù瀣讲婢跺秶鏁ら惃鍕彠閼辨柨浼愭担婊勭埐
- * - 瀹搞儰缍旈弽鎴濇嚒閸氬秴顕拠婵囶攱
- * - 娴溿倖甯撮崥搴ゅ殰閸斻劍澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張? *
- * @param input - 鏉堟挸鍙嗛崣鍌涙殶鐎电钖? * @param input.activeProject - 瑜版挸澧犲ú璇插З妞ゅ湱娲? * @param input.activeThread - 瑜版挸澧犲ú璇插З缁捐法鈻? * @param input.activeRootBranch - 瑜版挸澧犻弽鐟板瀻閺€? * @param input.activeThreadAssociatedWorktree - 缁捐法鈻奸崗瀹犱粓閻ㄥ嫬浼愭担婊勭埐娣団剝浼? * @param input.isServerThread - 閺勵垰鎯佹稉鐑樻箛閸斺€虫珤缁捐法鈻? * @param input.stopActiveThreadSession - 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈閻ㄥ嫭鏌熷▔? * @param input.runProjectScript - 鏉╂劘顢戞い鍦窗閼存碍婀伴惃鍕煙濞? * @param input.setStoreThreadWorkspace - 鐠佸墽鐤嗙痪璺ㄢ柤瀹搞儰缍旈崠铏规畱閺傝纭? * @param input.syncServerShellSnapshot - 閸氬本顒?Shell 韫囶偆鍙庨惃鍕煙濞? *
- * @returns 瀹搞儰缍旈崠杞版唉閹恒儳娴夐崗宕囨畱閻樿埖鈧礁鎷伴弬瑙勭《
+ * 处理线程在本地环境（local）和工作树环境（worktree）之间的切换�? * 支持�? * - 切换到本地模式（直接在项目目录工作）
+ * - 切换到工作树模式（在独立�?git worktree 中工作）
+ * - 自动检测可复用的关联工作树
+ * - 工作树命名对话框
+ * - 交接后自动执行项目设置脚�? *
+ * @param input - 输入参数对象
+ * @param input.activeProject - 当前活动项目
+ * @param input.activeThread - 当前活动线程
+ * @param input.activeRootBranch - 当前根分�? * @param input.activeThreadAssociatedWorktree - 线程关联的工作树信息
+ * @param input.isServerThread - 是否为服务器线程
+ * @param input.stopActiveThreadSession - 停止当前线程会话的方�? * @param input.runProjectScript - 运行项目脚本的方�? * @param input.setStoreThreadWorkspace - 设置线程工作区的方法
+ * @param input.syncServerShellSnapshot - 同步 Shell 快照的方�? *
+ * @returns 工作区交接相关的状态和方法
  *
  * @example
  * ```tsx
@@ -69,12 +75,14 @@ export function useThreadWorkspaceHandoff(input: {
   const [worktreeHandoffName, setWorktreeHandoffName] = useState("");
 
   /**
-   * 閹笛嗩攽瀹搞儰缍旈崠杞版唉閹?   *
+   * 执行工作区交�?   *
    * @description
-   * 閺嶇绺炬禍銈嗗复闁槒绶敍?   * 1. 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈
-   * 2. 閹笛嗩攽 git 娴溿倖甯撮幙宥勭稊閿涘牆鍨忛幑銏犲瀻閺€?worktree閿?   * 3. 閺囧瓨鏌婄痪璺ㄢ柤閸忓啯鏆熼幑?   * 4. 閸氬本顒?Shell 韫囶偆鍙?   * 5. 閸︺劌浼愭担婊勭埐濡€崇础娑撳澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張?   *
-   * @param targetMode - 閻╊喗鐖ｅΟ鈥崇础閿?local" 閹?"worktree"
-   * @param options - 閸欘垶鈧寮弫甯礄妫ｆ牠鈧浼愭担婊勭埐閸氬秶袨閿?   * @returns 閺勵垰鎯佹禍銈嗗复閹存劕濮?   */
+   * 核心交接逻辑�?   * 1. 停止当前线程会话
+   * 2. 执行 git 交接操作（切换分�?worktree�?   * 3. 更新线程元数�?   * 4. 同步 Shell 快照
+   * 5. 在工作树模式下执行项目设置脚�?   *
+   * @param targetMode - 目标模式�?local" �?"worktree"
+   * @param options - 可选参数（首选工作树名称�?   * @returns 是否交接成功
+   */
   const handoffThread = useCallback(
     async (targetMode: "local" | "worktree", options?: { preferredWorktreeName?: string }) => {
       const api = readNativeApi();
@@ -89,10 +97,10 @@ export function useThreadWorkspaceHandoff(input: {
       }
 
       try {
-        // 閸嬫粍顒涜ぐ鎾冲缁捐法鈻兼导姘崇樈
+        // 停止当前线程会话
         await input.stopActiveThreadSession();
         
-        // 閹笛嗩攽 git 娴溿倖甯撮幙宥勭稊
+        // 执行 git 交接操作
         const result = await handoffThreadMutation.mutateAsync({
           targetMode,
           currentBranch: input.activeThread.branch ?? null,
@@ -109,7 +117,7 @@ export function useThreadWorkspaceHandoff(input: {
           preferredNewWorktreeName: options?.preferredWorktreeName ?? null,
         });
 
-        // 閺嬪嫬缂撳銉ょ稊閸栭缚藟娑?        const workspacePatch = {
+        // 构建工作区补�?        const workspacePatch = {
           envMode: result.targetMode,
           branch: result.branch,
           worktreePath: result.worktreePath,
@@ -119,19 +127,21 @@ export function useThreadWorkspaceHandoff(input: {
           ...(targetMode === "worktree" ? { createBranchFlowCompleted: false } : {}),
         } as const;
 
-        // 閺囧瓨鏌婇張宥呭閸ｃ劎顏惃鍕殠缁嬪鍘撻弫鐗堝祦
+        // 更新服务器端的线程元数据
         await api.orchestration.dispatchCommand({
           type: "thread.meta.update",
           commandId: newCommandId(),
           threadId: input.activeThread.id,
           ...workspacePatch,
         });
-        // 閺囧瓨鏌婇張顒€婀寸€涙ê鍋嶉惃鍕殠缁嬪浼愭担婊冨隘娣団剝浼?        input.setStoreThreadWorkspace(input.activeThread.id, workspacePatch);
+        // 更新本地存储的线程工作区信息
+        input.setStoreThreadWorkspace(input.activeThread.id, workspacePatch);
 
-        // 閸氬本顒?Shell 韫囶偆鍙?        const snapshot = await api.orchestration.getShellSnapshot();
+        // 同步 Shell 快照
+        const snapshot = await api.orchestration.getShellSnapshot();
         input.syncServerShellSnapshot(snapshot);
 
-        // 閸︺劌浼愭担婊勭埐濡€崇础娑撳澧界悰宀勩€嶉惄顔款啎缂冾喛鍓奸張?        if (targetMode === "worktree" && result.worktreePath) {
+        // 在工作树模式下执行项目设置脚�?        if (targetMode === "worktree" && result.worktreePath) {
           const setupScript = setupProjectScript(input.activeProject.scripts);
           if (setupScript) {
             await input.runProjectScript(setupScript, {
@@ -142,7 +152,7 @@ export function useThreadWorkspaceHandoff(input: {
           }
         }
 
-        // 閺勫墽銇氭禍銈嗗复缂佹挻鐏夐柅姘辩叀
+        // 显示交接结果通知
         toastManager.add({
           type: result.conflictsDetected ? "warning" : "success",
           title:
@@ -169,16 +179,17 @@ export function useThreadWorkspaceHandoff(input: {
   );
 
   /**
-   * 婢跺嫮鎮婃禍銈嗗复閸掓澘浼愭担婊勭埐
+   * 处理交接到工作树
    *
    * @description
-   * 濡偓閺屻儲妲搁崥锕€褰叉禒銉ヮ槻閻劌鍑￠張澶屾畱閸忓疇浠堝銉ょ稊閺嶆埊绱?   * - 婵″倹鐏夐崣顖欎簰婢跺秶鏁ら敍宀€娲块幒銉﹀⒔鐞涘奔姘﹂幒?   * - 閸氾箑鍨幍鎾崇磻閸涜棄鎮曠€电鐦藉鍡氼唨閻劍鍩涙潏鎾冲弳瀹搞儰缍旈弽鎴濇倳缁?   */
+   * 检查是否可以复用已有的关联工作树：
+   * - 如果可以复用，直接执行交�?   * - 否则打开命名对话框让用户输入工作树名�?   */
   const onHandoffToWorktree = useCallback(() => {
     if (!input.activeThread) {
       return;
     }
 
-    // 鐟欙絾鐎藉銉ょ稊閺嶆垳姘﹂幒銉﹀壈閸?    const worktreeIntent = resolveWorktreeHandoffIntent({
+    // 解析工作树交接意�?    const worktreeIntent = resolveWorktreeHandoffIntent({
       associatedWorktreePath: input.activeThreadAssociatedWorktree.associatedWorktreePath,
       associatedWorktreeBranch: input.activeThreadAssociatedWorktree.associatedWorktreeBranch,
       associatedWorktreeRef: input.activeThreadAssociatedWorktree.associatedWorktreeRef,
@@ -186,13 +197,13 @@ export function useThreadWorkspaceHandoff(input: {
       currentBranch: input.activeThread.branch ?? null,
     });
     
-    // 婵″倹鐏夐崣顖欎簰婢跺秶鏁ら崗瀹犱粓瀹搞儰缍旈弽鎴礉閻╁瓨甯撮幍褑顢戞禍銈嗗复
+    // 如果可以复用关联工作树，直接执行交接
     if (worktreeIntent?.kind === "reuse-associated") {
       void handoffThread("worktree");
       return;
     }
 
-    // 閸氾箑鍨幍鎾崇磻閸涜棄鎮曠€电鐦藉?    setWorktreeHandoffName(
+    // 否则打开命名对话�?    setWorktreeHandoffName(
       buildSuggestedWorktreeName({
         associatedWorktreeBranch:
           input.activeThreadAssociatedWorktree.associatedWorktreeBranch ??
@@ -205,9 +216,9 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, input]);
 
   /**
-   * 绾喛顓诲銉ょ稊閺嶆垳姘﹂幒?   *
+   * 确认工作树交�?   *
    * @description
-   * 娴ｈ法鏁ら悽銊﹀煕鏉堟挸鍙嗛惃鍕紣娴ｆ粍鐖查崥宥囆為幍褑顢戞禍銈嗗复
+   * 使用用户输入的工作树名称执行交接
    */
   const confirmWorktreeHandoff = useCallback(async () => {
     const normalizedWorktreeName = buildSuggestedWorktreeName({
@@ -223,27 +234,27 @@ export function useThreadWorkspaceHandoff(input: {
   }, [handoffThread, worktreeHandoffName]);
 
   /**
-   * 婢跺嫮鎮婃禍銈嗗复閸掔増婀伴崷鎵箚婢?   */
+   * 处理交接到本地环�?   */
   const onHandoffToLocal = useCallback(async () => {
     await handoffThread("local");
   }, [handoffThread]);
 
   return {
-    /** 娴溿倖甯撮幙宥勭稊閺勵垰鎯佸锝呮躬鏉╂稖顢戞稉?*/
+    /** 交接操作是否正在进行�?*/
     handoffBusy: handoffThreadMutation.isPending,
-    /** 瀹搞儰缍旈弽鎴滄唉閹恒儱顕拠婵囶攱閺勵垰鎯侀幍鎾崇磻 */
+    /** 工作树交接对话框是否打开 */
     worktreeHandoffDialogOpen,
-    /** 鐠佸墽鐤嗗銉ょ稊閺嶆垳姘﹂幒銉ヮ嚠鐠囨繃顢嬮惃鍕ⅵ瀵偓閻樿埖鈧?*/
+    /** 设置工作树交接对话框的打开状�?*/
     setWorktreeHandoffDialogOpen,
-    /** 瀹搞儰缍旈弽鎴濇倳缁?*/
+    /** 工作树名�?*/
     worktreeHandoffName,
-    /** 鐠佸墽鐤嗗銉ょ稊閺嶆垵鎮曠粔?*/
+    /** 设置工作树名�?*/
     setWorktreeHandoffName,
-    /** 娴溿倖甯村銉ょ稊閺嶆垵顦╅悶鍡楀毐閺?*/
+    /** 交接工作树处理函�?*/
     onHandoffToWorktree,
-    /** 娴溿倖甯撮張顒€婀存径鍕倞閸戣姤鏆?*/
+    /** 交接本地处理函数 */
     onHandoffToLocal,
-    /** 绾喛顓诲銉ょ稊閺嶆垳姘﹂幒?*/
+    /** 确认工作树交�?*/
     confirmWorktreeHandoff,
   };
 }

@@ -1,6 +1,9 @@
 /**
- * @file 韫囶偅宓庨柨顔剧拨鐎规氨閮寸紒? *
- * 鐠愮喕鐭楃粻锛勬倞鎼存梻鏁ら崘鍛閺堝鎻╅幑鐑芥暛閻ㄥ嫯袙閺嬫劑鈧礁灏柊宥呮嫲閺嶇厧绱￠崠鏍モ偓鍌氬瘶閹奉剨绱? * - 姒涙顓昏箛顐ｅ祹闁款噣鍘ょ純顕嗙礄娓氀嗙珶閺嶅繈鈧浇浜版径鈹库偓浣虹矒缁旑垬鈧胶鍤庣粙瀣儲鏉烆剛鐡戦敍? * - 闁款喚娲忔禍瀣╂娑撳骸鎻╅幑鐑芥暛鐟欏嫬鍨惃鍕爱闁板秹鈧槒绶? * - 韫囶偅宓庨柨顔界垼缁涘墽娈戦弽鐓庣础閸栨牔绗岄幏鍡楀瀻閿涘牊鏁幐?macOS 閸?Windows/Linux 楠炲啿褰村顔肩磽閿? * - 閸氬嫮琚箛顐ｅ祹闁款喖鍨界€规氨娈戞笟鎸庡祹閸戣姤鏆? */
+ * @file 蹇嵎閿粦瀹氱郴缁? *
+ * 璐熻矗绠＄悊搴旂敤鍐呮墍鏈夊揩鎹烽敭鐨勮В鏋愩€佸尮閰嶅拰鏍煎紡鍖栥€傚寘鎷細
+ * - 榛樿蹇嵎閿厤缃紙渚ц竟鏍忋€佽亰澶┿€佺粓绔€佺嚎绋嬭烦杞瓑锛? * - 閿洏浜嬩欢涓庡揩鎹烽敭瑙勫垯鐨勫尮閰嶉€昏緫
+ * - 蹇嵎閿爣绛剧殑鏍煎紡鍖栦笌鎷嗗垎锛堟敮鎸?macOS 鍜?Windows/Linux 骞冲彴宸紓锛? * - 鍚勭被蹇嵎閿垽瀹氱殑渚挎嵎鍑芥暟
+ */
 
 import {
   type KeybindingCommand,
@@ -14,52 +17,53 @@ import {
 import { isMacPlatform } from "./lib/utils";
 
 /**
- * 韫囶偅宓庨柨顔荤皑娴犲墎娈戞潪濠氬櫤鐞涖劎銇氶敍灞藉悑鐎圭懓甯悽?KeyboardEvent 閸滃矁鍤滅€规矮绠熸禍瀣╂鐎电钖勯妴? * 閻劋绨崷銊ユ彥閹圭兘鏁崠褰掑帳閺冨墎绮烘稉鈧径鍕倞闁款喚娲忔潏鎾冲弳閵? */
+ * 蹇嵎閿簨浠剁殑杞婚噺琛ㄧず锛屽吋瀹瑰師鐢?KeyboardEvent 鍜岃嚜瀹氫箟浜嬩欢瀵硅薄銆? * 鐢ㄤ簬鍦ㄥ揩鎹烽敭鍖归厤鏃剁粺涓€澶勭悊閿洏杈撳叆銆? */
 export interface ShortcutEventLike {
-  /** 娴滃娆㈢猾璇茬€烽敍灞筋洤 "keydown" */
+  /** 浜嬩欢绫诲瀷锛屽 "keydown" */
   type?: string;
-  /** 閻椻晝鎮婇幐澶愭暛娴狅絿鐖滈敍灞筋洤 "KeyA"閵?Digit1" */
+  /** 鐗╃悊鎸夐敭浠ｇ爜锛屽 "KeyA"銆?Digit1" */
   code?: string;
-  /** 閹稿鏁崐纭风礉婵?"a"閵?1"閵?Escape" */
+  /** 鎸夐敭鍊硷紝濡?"a"銆?1"銆?Escape" */
   key: string;
-  /** 閺勵垰鎯侀幐澶夌瑓 Meta 闁款噯绱檓acOS 娑?Command 闁款噯绱?*/
+  /** 鏄惁鎸変笅 Meta 閿紙macOS 涓?Command 閿級 */
   metaKey: boolean;
-  /** 閺勵垰鎯侀幐澶夌瑓 Ctrl 闁?*/
+  /** 鏄惁鎸変笅 Ctrl 閿?*/
   ctrlKey: boolean;
-  /** 閺勵垰鎯侀幐澶夌瑓 Shift 闁?*/
+  /** 鏄惁鎸変笅 Shift 閿?*/
   shiftKey: boolean;
-  /** 閺勵垰鎯侀幐澶夌瑓 Alt 闁款噯绱檓acOS 娑?Option 闁款噯绱?*/
+  /** 鏄惁鎸変笅 Alt 閿紙macOS 涓?Option 閿級 */
   altKey: boolean;
 }
 
 /**
- * 韫囶偅宓庨柨顔煎爱闁板秶娈戞稉濠佺瑓閺傚洨骞嗘晶鍐跨礉閻劋绨崚銈嗘焽 when 鐎涙劕褰為惃鍕蒋娴犺翰鈧? * 閹诲繗鍫ぐ鎾冲 UI 閻樿埖鈧椒浜掗崘鍐茬暰閸濐亙绨鸿箛顐ｅ祹闁款喚鏁撻弫鍫涒偓? */
+ * 蹇嵎閿尮閰嶇殑涓婁笅鏂囩幆澧冿紝鐢ㄤ簬鍒ゆ柇 when 瀛愬彞鐨勬潯浠躲€? * 鎻忚堪褰撳墠 UI 鐘舵€佷互鍐冲畾鍝簺蹇嵎閿敓鏁堛€? */
 export interface ShortcutMatchContext {
-  /** 缂佸牏顏弰顖氭儊閼惧嘲绶遍悞锔惧仯 */
+  /** 缁堢鏄惁鑾峰緱鐒︾偣 */
   terminalFocus: boolean;
-  /** 缂佸牏顏弰顖氭儊閹垫挸绱?*/
+  /** 缁堢鏄惁鎵撳紑 */
   terminalOpen: boolean;
-  /** 閸忔湹绮懛顏勭暰娑斿绗傛稉瀣瀮閺夆€叉 */
+  /** 鍏朵粬鑷畾涔変笂涓嬫枃鏉′欢 */
   [key: string]: boolean;
 }
 
-/** 韫囶偅宓庨柨顔煎爱闁板秵妞傞惃鍕讲闁鍘ょ純?*/
+/** 蹇嵎閿尮閰嶆椂鐨勫彲閫夐厤缃?*/
 interface ShortcutMatchOptions {
-  /** 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform */
+  /** 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform */
   platform?: string;
-  /** 閸栧綊鍘ゆ稉濠佺瑓閺傚浄绱濋悽銊ょ艾 when 鐎涙劕褰炲Ч鍌氣偓?*/
+  /** 鍖归厤涓婁笅鏂囷紝鐢ㄤ簬 when 瀛愬彞姹傚€?*/
   context?: Partial<ShortcutMatchContext>;
 }
 
-/** 韫囶偅宓庨柨顔界垼缁涙崘袙閺嬫劗娈戦柊宥囩枂闁銆?*/
+/** 蹇嵎閿爣绛捐В鏋愮殑閰嶇疆閫夐」 */
 interface ResolvedShortcutLabelOptions extends ShortcutMatchOptions {
-  /** 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform */
+  /** 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform */
   platform?: string;
 }
 
 /**
- * 閸掓稑缂撴稉鈧稉顏勬彥閹圭兘鏁€电钖勯敍宀勭帛鐠併倕鎯庨悽?modKey閿涘潰acOS 娑?Command閿涘苯鍙炬禒鏍﹁礋 Ctrl閿涘鈧? *
- * @param key - 閹稿鏁崐? * @param overrides - 閸欘垶鈧娈戞穱顕€銈伴柨顔款洬閻? * @returns 鐎瑰本鏆ｉ惃鍕彥閹圭兘鏁€电钖? *
+ * 鍒涘缓涓€涓揩鎹烽敭瀵硅薄锛岄粯璁ゅ惎鐢?modKey锛坢acOS 涓?Command锛屽叾浠栦负 Ctrl锛夈€? *
+ * @param key - 鎸夐敭鍊? * @param overrides - 鍙€夌殑淇グ閿鐩? * @returns 瀹屾暣鐨勫揩鎹烽敭瀵硅薄
+ *
  * @example
  * ```ts
  * commandShortcut("n", { shiftKey: true }) // Mod+Shift+N
@@ -81,41 +85,42 @@ function commandShortcut(
 }
 
 /**
- * 閸掓稑缂?when 鐎涙劕褰為惃鍕垼鐠囧棛顑侀懞鍌滃仯閿涘矁銆冪粈杞扮娑擃亙绗傛稉瀣瀮閺夆€叉閸欐﹢鍣洪妴? *
- * @param name - 閺夆€叉閸欐﹢鍣洪崥宥囆? * @returns 閺嶅洩鐦戠粭锔捐閸ㄥ娈?when 鐎涙劕褰為懞鍌滃仯
+ * 鍒涘缓 when 瀛愬彞鐨勬爣璇嗙鑺傜偣锛岃〃绀轰竴涓笂涓嬫枃鏉′欢鍙橀噺銆? *
+ * @param name - 鏉′欢鍙橀噺鍚嶇О
+ * @returns 鏍囪瘑绗︾被鍨嬬殑 when 瀛愬彞鑺傜偣
  */
 function whenIdentifier(name: string): KeybindingWhenNode {
   return { type: "identifier", name };
 }
 
 /**
- * 閸掓稑缂?when 鐎涙劕褰為惃鍕絿閸欏秷濡悙鐧哥礉鐞涖劎銇氱€电懓鐡欓弶鈥叉閻ㄥ嫰鈧槒绶棃鐐偓? *
- * @param node - 闂団偓鐟曚礁褰囬崣宥囨畱鐎涙劘濡悙? * @returns 閸欐牕寮界猾璇茬€烽惃?when 鐎涙劕褰為懞鍌滃仯
+ * 鍒涘缓 when 瀛愬彞鐨勫彇鍙嶈妭鐐癸紝琛ㄧず瀵瑰瓙鏉′欢鐨勯€昏緫闈炪€? *
+ * @param node - 闇€瑕佸彇鍙嶇殑瀛愯妭鐐? * @returns 鍙栧弽绫诲瀷鐨?when 瀛愬彞鑺傜偣
  */
 function whenNot(node: KeybindingWhenNode): KeybindingWhenNode {
   return { type: "not", node };
 }
 
 /**
- * 閸掓稑缂?when 鐎涙劕褰為惃鍕偓鏄忕帆娑撳氦濡悙鐧哥礉鐞涖劎銇氭稉銈勯嚋鐎涙劖娼禒璺烘倱閺冭埖寮х搾鐐解偓? *
- * @param left - 瀹革箑鐡欓懞鍌滃仯
- * @param right - 閸欏啿鐡欓懞鍌滃仯
- * @returns 闁槒绶稉搴ｈ閸ㄥ娈?when 鐎涙劕褰為懞鍌滃仯
+ * 鍒涘缓 when 瀛愬彞鐨勯€昏緫涓庤妭鐐癸紝琛ㄧず涓や釜瀛愭潯浠跺悓鏃舵弧瓒炽€? *
+ * @param left - 宸﹀瓙鑺傜偣
+ * @param right - 鍙冲瓙鑺傜偣
+ * @returns 閫昏緫涓庣被鍨嬬殑 when 瀛愬彞鑺傜偣
  */
 function whenAnd(left: KeybindingWhenNode, right: KeybindingWhenNode): KeybindingWhenNode {
   return { type: "and", left, right };
 }
 
-/** when 鐎涙劕褰為敍姘辩矒缁旑垱婀懢宄扮繁閻掞妇鍋?*/
+/** when 瀛愬彞锛氱粓绔湭鑾峰緱鐒︾偣 */
 const whenNotTerminalFocus = whenNot(whenIdentifier("terminalFocus"));
-/** when 鐎涙劕褰為敍姘辩矒缁旑垱婀懢宄扮繁閻掞妇鍋ｆ稉鏃傜矒缁旑垰浼愭担婊冨隘閺堫亝澧﹀鈧敍鍫㈡暏娴滃海鍤庣粙瀣儲鏉烆剙鎻╅幑鐑芥暛閿?*/
+/** when 瀛愬彞锛氱粓绔湭鑾峰緱鐒︾偣涓旂粓绔伐浣滃尯鏈墦寮€锛堢敤浜庣嚎绋嬭烦杞揩鎹烽敭锛?*/
 const whenThreadJumpAvailable = whenAnd(
   whenNotTerminalFocus,
   whenNot(whenIdentifier("terminalWorkspaceOpen")),
 );
 
 /**
- * 姒涙顓昏箛顐ｅ祹闁款喖娲栭柅鈧柊宥囩枂閵嗗倸缍嬮悽銊﹀煕閺堫亣鍤滅€规矮绠熼弻鎰嚒娴犮倗娈戣箛顐ｅ祹闁款喗妞傞敍灞煎▏閻劍顒濋崚妤勩€冩稉顓犳畱缂佹垵鐣鹃妴? * 闁板秶鐤嗘い瑙勫瘻娴兼ê鍘涚痪褌绮犳担搴″煂妤傛ɑ甯撻崚妤嬬礉閸氬骸鍤悳鎵畱鐟欏嫬鍨导妯哄帥缁狙勬纯妤傛ǜ鈧? */
+ * 榛樿蹇嵎閿洖閫€閰嶇疆銆傚綋鐢ㄦ埛鏈嚜瀹氫箟鏌愬懡浠ょ殑蹇嵎閿椂锛屼娇鐢ㄦ鍒楄〃涓殑缁戝畾銆? * 閰嶇疆椤规寜浼樺厛绾т粠浣庡埌楂樻帓鍒楋紝鍚庡嚭鐜扮殑瑙勫垯浼樺厛绾ф洿楂樸€? */
 export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
   {
     command: "sidebar.addProject",
@@ -228,17 +233,18 @@ export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
   },
 ];
 
-/** 缂佸牏顏稉顓熷瘻 Alt+B 閸氭垵鎮楃捄鍏呯娑擃亜宕熺拠宥囨畱鏉烆兛绠熸惔蹇撳灙 */
+/** 缁堢涓寜 Alt+B 鍚戝悗璺充竴涓崟璇嶇殑杞箟搴忓垪 */
 const TERMINAL_WORD_BACKWARD = "\u001bb";
-/** 缂佸牏顏稉顓熷瘻 Alt+F 閸氭垵澧犵捄鍏呯娑擃亜宕熺拠宥囨畱鏉烆兛绠熸惔蹇撳灙 */
+/** 缁堢涓寜 Alt+F 鍚戝墠璺充竴涓崟璇嶇殑杞箟搴忓垪 */
 const TERMINAL_WORD_FORWARD = "\u001bf";
-/** 缂佸牏顏稉顓熷瘻 Ctrl+A 鐠哄啿鍩岀悰宀勵浕閻ㄥ嫯娴嗘稊澶婄碍閸?*/
+/** 缁堢涓寜 Ctrl+A 璺冲埌琛岄鐨勮浆涔夊簭鍒?*/
 const TERMINAL_LINE_START = "\u0001";
-/** 缂佸牏顏稉顓熷瘻 Ctrl+E 鐠哄啿鍩岀悰灞界啲閻ㄥ嫯娴嗘稊澶婄碍閸?*/
+/** 缁堢涓寜 Ctrl+E 璺冲埌琛屽熬鐨勮浆涔夊簭鍒?*/
 const TERMINAL_LINE_END = "\u0005";
 
 /**
- * 闁款喚娲忔禍瀣╂ code 閸?key 閻ㄥ嫬鍩嗛崥宥嗘Ё鐏忓嫯銆冮妴? * 閻劋绨亸鍡欏⒖閻炲棙瀵滈柨顔诲敩閻緤绱欐俊?"KeyA"閿涘妲х亸鍕礋闁槒绶幐澶愭暛閸婄》绱欐俊?"a"閿涘绱? * 娴犮儰绌堕崷銊ユ彥閹圭兘鏁崠褰掑帳閺冭泛鍚嬬€归€涚瑝閸氬矂鏁惄妯虹鐏炩偓閵? */
+ * 閿洏浜嬩欢 code 鍒?key 鐨勫埆鍚嶆槧灏勮〃銆? * 鐢ㄤ簬灏嗙墿鐞嗘寜閿唬鐮侊紙濡?"KeyA"锛夋槧灏勪负閫昏緫鎸夐敭鍊硷紙濡?"a"锛夛紝
+ * 浠ヤ究鍦ㄥ揩鎹烽敭鍖归厤鏃跺吋瀹逛笉鍚岄敭鐩樺竷灞€銆? */
 const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
   BracketLeft: ["["],
   BracketRight: ["]"],
@@ -281,8 +287,8 @@ const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
 };
 
 /**
- * 鐏忓棝鏁惄妯圭皑娴犲墎娈?key 閸婂吋鐖ｉ崙鍡楀娑撳搫鐨崘娆欑礉楠炶泛顦╅悶鍡欏濞堝﹪鏁惃鍕焼閸氬秲鈧? *
- * @param key - 閸樼喎顫?key 閸? * @returns 閺嶅洤鍣崠鏍ф倵閻?key 閸? */
+ * 灏嗛敭鐩樹簨浠剁殑 key 鍊兼爣鍑嗗寲涓哄皬鍐欙紝骞跺鐞嗙壒娈婇敭鐨勫埆鍚嶃€? *
+ * @param key - 鍘熷 key 鍊? * @returns 鏍囧噯鍖栧悗鐨?key 鍊? */
 function normalizeEventKey(key: string): string {
   const normalized = key.toLowerCase();
   if (normalized === "esc") return "escape";
@@ -292,9 +298,9 @@ function normalizeEventKey(key: string): string {
 }
 
 /**
- * 鐟欙絾鐎介柨顔炬磸娴滃娆㈡稉顓熷閺堝褰查懗鐣屾畱閹稿鏁崐濂告肠閸氬牄鈧? * 閸栧懏瀚禍瀣╂閺堫剝闊╅惃?key 閸婄厧鎷伴柅姘崇箖 code 閺勭姴鐨犻崙铏规畱閸掝偄鎮曢妴? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @returns 閹碘偓閺堝褰查懗鐣屾畱閹稿鏁崐濂告肠閸? */
+ * 瑙ｆ瀽閿洏浜嬩欢涓墍鏈夊彲鑳界殑鎸夐敭鍊奸泦鍚堛€? * 鍖呮嫭浜嬩欢鏈韩鐨?key 鍊煎拰閫氳繃 code 鏄犲皠鍑虹殑鍒悕銆? *
+ * @param event - 閿洏浜嬩欢
+ * @returns 鎵€鏈夊彲鑳界殑鎸夐敭鍊奸泦鍚? */
 function resolveEventKeys(event: ShortcutEventLike): Set<string> {
   const keys = new Set([normalizeEventKey(event.key)]);
   const aliases = event.code ? EVENT_CODE_KEY_ALIASES[event.code] : undefined;
@@ -307,10 +313,10 @@ function resolveEventKeys(event: ShortcutEventLike): Set<string> {
 }
 
 /**
- * 閸掋倖鏌囬柨顔炬磸娴滃娆㈤惃鍕叏妤椾即鏁弰顖氭儊娑撳骸鎻╅幑鐑芥暛鐟欏嫬鍨崠褰掑帳閵? * modKey 閸?macOS 娑撳﹥妲х亸鍕礋 Meta閿涘湑ommand閿涘绱濋崷銊ュ従娴犳牕閽╅崣鐗堟Ё鐏忓嫪璐?Ctrl閵? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param shortcut - 韫囶偅宓庨柨顔款潐閸? * @param platform - 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform
- * @returns 娣囶噣銈伴柨顔芥Ц閸氾箑灏柊? */
+ * 鍒ゆ柇閿洏浜嬩欢鐨勪慨楗伴敭鏄惁涓庡揩鎹烽敭瑙勫垯鍖归厤銆? * modKey 鍦?macOS 涓婃槧灏勪负 Meta锛圕ommand锛夛紝鍦ㄥ叾浠栧钩鍙版槧灏勪负 Ctrl銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 淇グ閿槸鍚﹀尮閰? */
 function matchesShortcutModifiers(
   event: ShortcutEventLike,
   shortcut: KeybindingShortcut,
@@ -328,10 +334,10 @@ function matchesShortcutModifiers(
 }
 
 /**
- * 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊鐎瑰苯鍙忛崠褰掑帳閺屾劒閲滆箛顐ｅ祹闁款喛顫夐崚娆欑礄娣囶噣銈伴柨?+ 閹稿鏁崐纭风礆閵? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param shortcut - 韫囶偅宓庨柨顔款潐閸? * @param platform - 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform
- * @returns 閺勵垰鎯侀崠褰掑帳
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁瀹屽叏鍖归厤鏌愪釜蹇嵎閿鍒欙紙淇グ閿?+ 鎸夐敭鍊硷級銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏄惁鍖归厤
  */
 function matchesShortcut(
   event: ShortcutEventLike,
@@ -342,14 +348,15 @@ function matchesShortcut(
   return resolveEventKeys(event).has(shortcut.key);
 }
 
-/** 娴犲酣鈧銆嶆稉顓⌒掗弸鎰挬閸欑増鐖ｇ拠鍡礉閺堫亝瀵氱€规碍妞傛担璺ㄦ暏 navigator.platform */
+/** 浠庨€夐」涓В鏋愬钩鍙版爣璇嗭紝鏈寚瀹氭椂浣跨敤 navigator.platform */
 function resolvePlatform(options: ShortcutMatchOptions | undefined): string {
   return options?.platform ?? navigator.platform;
 }
 
 /**
- * 娴犲酣鈧銆嶆稉顓⌒掗弸鎰彥閹圭兘鏁崠褰掑帳娑撳﹣绗呴弬鍥风礉閺堫亝瀵氱€规氨娈戦弶鈥叉姒涙顓绘稉?false閵? *
- * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 鐎瑰本鏆ｉ惃鍕爱闁板秳绗傛稉瀣瀮
+ * 浠庨€夐」涓В鏋愬揩鎹烽敭鍖归厤涓婁笅鏂囷紝鏈寚瀹氱殑鏉′欢榛樿涓?false銆? *
+ * @param options - 鍖归厤閫夐」
+ * @returns 瀹屾暣鐨勫尮閰嶄笂涓嬫枃
  */
 function resolveContext(options: ShortcutMatchOptions | undefined): ShortcutMatchContext {
   return {
@@ -360,8 +367,9 @@ function resolveContext(options: ShortcutMatchOptions | undefined): ShortcutMatc
 }
 
 /**
- * 闁帒缍婂Ч鍌氣偓?when 鐎涙劕褰為惃?AST 閼哄倻鍋ｉ妴? * 閺€顖涘瘮閺嶅洩鐦戠粭锔肩礄identifier閿涘鈧礁褰囬崣宥忕礄not閿涘鈧線鈧槒绶稉搴礄and閿涘鈧線鈧槒绶幋鏍电礄or閿涘娲撶粔宥堝Ν閻愬湱琚崹瀣ㄢ偓? *
- * @param node - when 鐎涙劕褰?AST 閼哄倻鍋? * @param context - 娑撳﹣绗呴弬鍥ㄦ蒋娴犺泛褰夐柌? * @returns 鐎涙劕褰炲Ч鍌氣偓鑲╃波閺? */
+ * 閫掑綊姹傚€?when 瀛愬彞鐨?AST 鑺傜偣銆? * 鏀寔鏍囪瘑绗︼紙identifier锛夈€佸彇鍙嶏紙not锛夈€侀€昏緫涓庯紙and锛夈€侀€昏緫鎴栵紙or锛夊洓绉嶈妭鐐圭被鍨嬨€? *
+ * @param node - when 瀛愬彞 AST 鑺傜偣
+ * @param context - 涓婁笅鏂囨潯浠跺彉閲? * @returns 瀛愬彞姹傚€肩粨鏋? */
 function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContext): boolean {
   switch (node.type) {
     case "identifier":
@@ -378,8 +386,9 @@ function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContex
 }
 
 /**
- * 閸掋倖鏌?when 鐎涙劕褰為弰顖氭儊閸︺劎绮扮€规矮绗傛稉瀣瀮娑擃厽鍨氱粩瀣ㄢ偓鍌涙￥ when 鐎涙劕褰為弮鍫曠帛鐠併倛绻戦崶?true閵? *
- * @param whenAst - when 鐎涙劕褰?AST 閺嶇濡悙? * @param context - 娑撳﹣绗呴弬鍥ㄦ蒋娴犺泛褰夐柌? * @returns 鐎涙劕褰為弰顖氭儊閹存劗鐝? */
+ * 鍒ゆ柇 when 瀛愬彞鏄惁鍦ㄧ粰瀹氫笂涓嬫枃涓垚绔嬨€傛棤 when 瀛愬彞鏃堕粯璁よ繑鍥?true銆? *
+ * @param whenAst - when 瀛愬彞 AST 鏍硅妭鐐? * @param context - 涓婁笅鏂囨潯浠跺彉閲? * @returns 瀛愬彞鏄惁鎴愮珛
+ */
 function matchesWhenClause(
   whenAst: KeybindingWhenNode | undefined,
   context: ShortcutMatchContext,
@@ -389,9 +398,9 @@ function matchesWhenClause(
 }
 
 /**
- * 閻㈢喐鍨氳箛顐ｅ祹闁款喚娈戦崘鑼崐濡偓濞村鏁敍宀€鏁ゆ禍搴″灲閺傤厺琚辨稉顏勬彥閹圭兘鏁弰顖氭儊娴兼矮楠囬悽鐔峰暱缁愪降鈧? * 鐏忓棙瀵滈柨顔尖偓鐓庢嫲娣囶噣銈伴柨顔剧矋閸氬牅璐熼崬顖欑閺嶅洩鐦戠€涙顑佹稉灞傗偓? *
- * @param shortcut - 韫囶偅宓庨柨顔款潐閸? * @param platform - 鏉╂劘顢戦獮鍐插酱
- * @returns 閸愯尙鐛婂Λ鈧ù瀣暛鐎涙顑佹稉? */
+ * 鐢熸垚蹇嵎閿殑鍐茬獊妫€娴嬮敭锛岀敤浜庡垽鏂袱涓揩鎹烽敭鏄惁浼氫骇鐢熷啿绐併€? * 灏嗘寜閿€煎拰淇グ閿粍鍚堜负鍞竴鏍囪瘑瀛楃涓层€? *
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴
+ * @returns 鍐茬獊妫€娴嬮敭瀛楃涓? */
 function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.platform): string {
   const useMetaForMod = isMacPlatform(platform);
   const metaKey = shortcut.metaKey || (shortcut.modKey && useMetaForMod);
@@ -407,9 +416,10 @@ function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.
 }
 
 /**
- * 閸︺劌鎻╅幑鐑芥暛闁板秶鐤嗛崚妤勩€冩稉顓熺叀閹电偓瀵氱€规艾鎳℃禒銈囨畱閺堝鏅ヨ箛顐ｅ祹闁款喓鈧? * 娴犲骸鍨悰銊︽汞鐏忔儳鎮滈崜宥変憾閸樺棴绱欓崥搴″毉閻滄壆娈戠憴鍕灟娴兼ê鍘涚痪褎娲挎姗堢礆閿涘矁鐑︽潻鍥у嚒鐞氼偅娲挎妯圭喘閸忓牏楠囩憴鍕灟閸楃姷鏁ら惃鍕彥閹圭兘鏁妴? *
- * @param keybindings - 韫囶偅宓庨柨顕€鍘ょ純顔煎灙鐞? * @param command - 閻╊喗鐖ｉ崨鎴掓姢
- * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 閸栧綊鍘ら崚鎵畱韫囶偅宓庨柨顕嗙礉閺堫亝澹橀崚鎷岀箲閸?null
+ * 鍦ㄥ揩鎹烽敭閰嶇疆鍒楄〃涓煡鎵炬寚瀹氬懡浠ょ殑鏈夋晥蹇嵎閿€? * 浠庡垪琛ㄦ湯灏惧悜鍓嶉亶鍘嗭紙鍚庡嚭鐜扮殑瑙勫垯浼樺厛绾ф洿楂橈級锛岃烦杩囧凡琚洿楂樹紭鍏堢骇瑙勫垯鍗犵敤鐨勫揩鎹烽敭銆? *
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑蹇嵎閿紝鏈壘鍒拌繑鍥?null
  */
 function findEffectiveShortcutForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -440,10 +450,11 @@ function findEffectiveShortcutForCommand(
 }
 
 /**
- * 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら幐鍥х暰閸涙垝鎶ら惃鍕彥閹圭兘鏁妴? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param keybindings - 韫囶偅宓庨柨顕€鍘ょ純顔煎灙鐞? * @param command - 閻╊喗鐖ｉ崨鎴掓姢
- * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 閺勵垰鎯侀崠褰掑帳
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鎸囧畾鍛戒护鐨勫揩鎹烽敭銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 鍖归厤閫夐」
+ * @returns 鏄惁鍖归厤
  */
 function matchesCommandShortcut(
   event: ShortcutEventLike,
@@ -455,9 +466,10 @@ function matchesCommandShortcut(
 }
 
 /**
- * 娴犲骸鎻╅幑鐑芥暛闁板秶鐤嗛崚妤勩€冩稉顓⌒掗弸鎰版暛閻╂ü绨ㄦ禒璺侯嚠鎼存梻娈戦崨鎴掓姢閵? * 娴犲骸鍨悰銊︽汞鐏忔儳鎮滈崜宥変憾閸樺棴绱濇潻鏂挎礀缁楊兛绔存稉顏勫爱闁板秶娈戦崨鎴掓姢閵? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param keybindings - 韫囶偅宓庨柨顕€鍘ょ純顔煎灙鐞? * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 閸栧綊鍘ら崚鎵畱閸涙垝鎶ら敍灞炬弓閹垫儳鍩屾潻鏂挎礀 null
+ * 浠庡揩鎹烽敭閰嶇疆鍒楄〃涓В鏋愰敭鐩樹簨浠跺搴旂殑鍛戒护銆? * 浠庡垪琛ㄦ湯灏惧悜鍓嶉亶鍘嗭紝杩斿洖绗竴涓尮閰嶇殑鍛戒护銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑鍛戒护锛屾湭鎵惧埌杩斿洖 null
  */
 function resolveShortcutCommandFromBindings(
   event: ShortcutEventLike,
@@ -479,8 +491,9 @@ function resolveShortcutCommandFromBindings(
 }
 
 /**
- * 娴犲海鏁ら幋鐤殰鐎规矮绠熼柊宥囩枂娑擃厽褰侀崣鏍ㄦ弓鐞氼偉顩惄鏍畱姒涙顓昏箛顐ｅ祹闁款喖娲栭柅鈧い骞库偓? *
- * @param keybindings - 閻劍鍩涢懛顏勭暰娑斿娈戣箛顐ｅ祹闁款噣鍘ょ純? * @returns 閺堫亣顫﹂悽銊﹀煕鐟曞棛娲婇惃鍕帛鐠併倕鎻╅幑鐑芥暛閸掓銆? */
+ * 浠庣敤鎴疯嚜瀹氫箟閰嶇疆涓彁鍙栨湭琚鐩栫殑榛樿蹇嵎閿洖閫€椤广€? *
+ * @param keybindings - 鐢ㄦ埛鑷畾涔夌殑蹇嵎閿厤缃? * @returns 鏈鐢ㄦ埛瑕嗙洊鐨勯粯璁ゅ揩鎹烽敭鍒楄〃
+ */
 function getFallbackBindings(
   keybindings: ResolvedKeybindingsConfig,
 ): ReadonlyArray<ResolvedKeybindingRule> {
@@ -489,9 +502,10 @@ function getFallbackBindings(
 }
 
 /**
- * 鐟欙絾鐎介柨顔炬磸娴滃娆㈢€电懓绨查惃鍕嚒娴犮們鈧倷绱崗鍫濇躬閻劍鍩涢懛顏勭暰娑斿鍘ょ純顔昏厬閺屻儲澹橀敍? * 閺堫亝澹橀崚鐗堟閸ョ偤鈧偓閸掍即绮拋銈呮彥閹圭兘鏁柊宥囩枂閵? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param keybindings - 閻劍鍩涢懛顏勭暰娑斿娈戣箛顐ｅ祹闁款噣鍘ょ純? * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 閸栧綊鍘ら崚鎵畱閸涙垝鎶ら弽鍥槕缁楋讣绱濋張顏呭閸掓媽绻戦崶?null
+ * 瑙ｆ瀽閿洏浜嬩欢瀵瑰簲鐨勫懡浠ゃ€備紭鍏堝湪鐢ㄦ埛鑷畾涔夐厤缃腑鏌ユ壘锛? * 鏈壘鍒版椂鍥為€€鍒伴粯璁ゅ揩鎹烽敭閰嶇疆銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 鐢ㄦ埛鑷畾涔夌殑蹇嵎閿厤缃? * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑鍛戒护鏍囪瘑绗︼紝鏈壘鍒拌繑鍥?null
  *
  * @example
  * ```ts
@@ -518,8 +532,8 @@ export function resolveShortcutCommand(
 }
 
 /**
- * 鐏忓棙瀵滈柨顔尖偓鍏肩壐瀵繐瀵叉稉鍝勫讲鐠囪崵娈戦弽鍥╊劮閺傚洦婀伴妴? * 婢跺嫮鎮婇悧瑙勭暕闁款喖顩х粚鐑樼壐閵嗕焦鏌熼崥鎴︽暛閵嗕笒scape 缁涘鈧? *
- * @param key - 閹稿鏁崐? * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫭鐖ｇ粵? */
+ * 灏嗘寜閿€兼牸寮忓寲涓哄彲璇荤殑鏍囩鏂囨湰銆? * 澶勭悊鐗规畩閿绌烘牸銆佹柟鍚戦敭銆丒scape 绛夈€? *
+ * @param key - 鎸夐敭鍊? * @returns 鏍煎紡鍖栧悗鐨勬爣绛? */
 function formatShortcutKeyLabel(key: string): string {
   if (key === " ") return "Space";
   if (key.length === 1) return key.toUpperCase();
@@ -532,12 +546,13 @@ function formatShortcutKeyLabel(key: string): string {
 }
 
 /**
- * 鐏忓棗鎻╅幑鐑芥暛鐟欏嫬鍨弽鐓庣础閸栨牔璐熼崣顖濐嚢閻ㄥ嫭鐖ｇ粵鎯х摟缁楋缚瑕嗛妴? * macOS 娴ｈ法鏁ょ粭锕€褰块敍鍫氬閳便儮鍤欓埍鍐跨礆閿涘苯鍙炬禒鏍ч挬閸欓濞囬悽銊︽瀮鐎涙绱機trl+Alt+Shift+Meta閿涘鈧? *
- * @param shortcut - 韫囶偅宓庨柨顔款潐閸? * @param platform - 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform
- * @returns 閺嶇厧绱￠崠鏍ф倵閻ㄥ嫬鎻╅幑鐑芥暛閺嶅洨顒? *
+ * 灏嗗揩鎹烽敭瑙勫垯鏍煎紡鍖栦负鍙鐨勬爣绛惧瓧绗︿覆銆? * macOS 浣跨敤绗﹀彿锛堚寴鈱モ嚙鈱冿級锛屽叾浠栧钩鍙颁娇鐢ㄦ枃瀛楋紙Ctrl+Alt+Shift+Meta锛夈€? *
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏍煎紡鍖栧悗鐨勫揩鎹烽敭鏍囩
+ *
  * @example
  * ```ts
- * formatShortcutLabel(shortcut, "MacIntel") // "閳辨ǚ鍤橬"
+ * formatShortcutLabel(shortcut, "MacIntel") // "鈱樷嚙N"
  * formatShortcutLabel(shortcut, "Win32")    // "Ctrl+Shift+N"
  * ```
  */
@@ -565,17 +580,17 @@ export function formatShortcutLabel(
   return parts.join("+");
 }
 
-/** macOS 娣囶噣銈伴柨顔绢儊閸欑兘娉﹂崥鍫礉閻劋绨幏鍡楀瀻韫囶偅宓庨柨顔界垼缁?*/
-const MODIFIER_SYMBOLS = new Set(["閳?, "閳?, "閳?, "閳?]);
+/** macOS 淇グ閿鍙烽泦鍚堬紝鐢ㄤ簬鎷嗗垎蹇嵎閿爣绛?*/
+const MODIFIER_SYMBOLS = new Set(["鈱?, "鈱?, "鈱?, "鈬?]);
 
 /**
- * 鐏忓棗鎻╅幑鐑芥暛閺嶅洨顒风€涙顑佹稉鍙夊閸掑棔璐熼悪顒傜彌閻ㄥ嫪鎱ㄦ浼存暛閸滃本瀵滈柨顕€鍎撮崚鍡愨偓? * 閺€顖涘瘮娑撱倗顫掗弽鐓庣础閿涙瓙indows 妞嬪孩鐗搁惃?"+" 閸掑棝娈ч崪?macOS 妞嬪孩鐗搁惃鍕儊閸欓攱瀚鹃幒銉ｂ偓? *
- * @param shortcutLabel - 韫囶偅宓庨柨顔界垼缁涙儳鐡х粭锔胯
- * @returns 閹峰棗鍨庨崥搴ｆ畱閸氬嫰鍎撮崚鍡樻殶缂? *
+ * 灏嗗揩鎹烽敭鏍囩瀛楃涓叉媶鍒嗕负鐙珛鐨勪慨楗伴敭鍜屾寜閿儴鍒嗐€? * 鏀寔涓ょ鏍煎紡锛歐indows 椋庢牸鐨?"+" 鍒嗛殧鍜?macOS 椋庢牸鐨勭鍙锋嫾鎺ャ€? *
+ * @param shortcutLabel - 蹇嵎閿爣绛惧瓧绗︿覆
+ * @returns 鎷嗗垎鍚庣殑鍚勯儴鍒嗘暟缁? *
  * @example
  * ```ts
  * splitShortcutLabel("Ctrl+Shift+N") // ["Ctrl", "Shift", "N"]
- * splitShortcutLabel("閳辨ǚ鍤橬")          // ["閳?, "閳?, "N"]
+ * splitShortcutLabel("鈱樷嚙N")          // ["鈱?, "鈬?, "N"]
  * ```
  */
 export function splitShortcutLabel(shortcutLabel: string): string[] {
@@ -600,9 +615,9 @@ export function splitShortcutLabel(shortcutLabel: string): string[] {
 }
 
 /**
- * 閼惧嘲褰囬幐鍥х暰閸涙垝鎶ら惃鍕彥閹圭兘鏁弽鍥╊劮鐎涙顑佹稉灞傗偓? * 娴兼ê鍘涢崷銊ф暏閹寸柉鍤滅€规矮绠熼柊宥囩枂娑擃厽鐓￠幍鎾呯礉閺堫亝澹橀崚鐗堟閸ョ偤鈧偓閸掍即绮拋銈夊帳缂冾喓鈧? * 瑜版挻婀幓鎰返娑撳﹣绗呴弬鍥ㄦ閿涘瞼娲块幒銉﹀瘻閸涙垝鎶ら崠褰掑帳閿涘牅绗夌拠鍕強 when 鐎涙劕褰為敍澶変簰閹绘劙鐝幀褑鍏橀妴? *
- * @param keybindings - 韫囶偅宓庨柨顕€鍘ょ純顔煎灙鐞? * @param command - 閻╊喗鐖ｉ崨鎴掓姢
- * @param options - 楠炲啿褰撮崪灞肩瑐娑撳鏋冮柅澶愩€嶉敍灞肩瘍閸欘垯浜掗惄瀛樺复娴肩姴鍙嗛獮鍐插酱鐎涙顑佹稉? * @returns 韫囶偅宓庨柨顔界垼缁涙儳鐡х粭锔胯閿涘本婀幍鎯у煂鏉╂柨娲?null
+ * 鑾峰彇鎸囧畾鍛戒护鐨勫揩鎹烽敭鏍囩瀛楃涓层€? * 浼樺厛鍦ㄧ敤鎴疯嚜瀹氫箟閰嶇疆涓煡鎵撅紝鏈壘鍒版椂鍥為€€鍒伴粯璁ら厤缃€? * 褰撴湭鎻愪緵涓婁笅鏂囨椂锛岀洿鎺ユ寜鍛戒护鍖归厤锛堜笉璇勪及 when 瀛愬彞锛変互鎻愰珮鎬ц兘銆? *
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 骞冲彴鍜屼笂涓嬫枃閫夐」锛屼篃鍙互鐩存帴浼犲叆骞冲彴瀛楃涓? * @returns 蹇嵎閿爣绛惧瓧绗︿覆锛屾湭鎵惧埌杩斿洖 null
  */
 export function shortcutLabelForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -643,16 +658,16 @@ export function shortcutLabelForCommand(
 }
 
 /**
- * 閺嶈宓佺槐銏犵穿閼惧嘲褰囩痪璺ㄢ柤鐠哄疇娴嗛崨鎴掓姢閵嗗倻鍌ㄥ鏇″瘱閸?0-8 鐎电懓绨?thread.jump.1 閸?thread.jump.9閵? *
- * @param index - 缁捐法鈻肩槐銏犵穿閿? 鐠у嘲顫愰敍? * @returns 缁捐法鈻肩捄瀹犳祮閸涙垝鎶ら敍宀€鍌ㄥ鏇＄Ш閻ｅ矁绻戦崶?null
+ * 鏍规嵁绱㈠紩鑾峰彇绾跨▼璺宠浆鍛戒护銆傜储寮曡寖鍥?0-8 瀵瑰簲 thread.jump.1 鍒?thread.jump.9銆? *
+ * @param index - 绾跨▼绱㈠紩锛? 璧峰锛? * @returns 绾跨▼璺宠浆鍛戒护锛岀储寮曡秺鐣岃繑鍥?null
  */
 export function threadJumpCommandForIndex(index: number): ThreadJumpKeybindingCommand | null {
   return THREAD_JUMP_KEYBINDING_COMMANDS[index] ?? null;
 }
 
 /**
- * 閺嶈宓佺痪璺ㄢ柤鐠哄疇娴嗛崨鎴掓姢閼惧嘲褰囬崗鍓佸偍瀵洑缍呯純顔衡偓? *
- * @param command - 缁捐法鈻肩捄瀹犳祮閸涙垝鎶ょ€涙顑佹稉? * @returns 缁便垹绱╂担宥囩枂閿? 鐠у嘲顫愰敍澶涚礉閺堫亝澹橀崚鎷岀箲閸?null
+ * 鏍规嵁绾跨▼璺宠浆鍛戒护鑾峰彇鍏剁储寮曚綅缃€? *
+ * @param command - 绾跨▼璺宠浆鍛戒护瀛楃涓? * @returns 绱㈠紩浣嶇疆锛? 璧峰锛夛紝鏈壘鍒拌繑鍥?null
  */
 export function threadJumpIndexFromCommand(command: string): number | null {
   const index = THREAD_JUMP_KEYBINDING_COMMANDS.indexOf(command as ThreadJumpKeybindingCommand);
@@ -660,9 +675,10 @@ export function threadJumpIndexFromCommand(command: string): number | null {
 }
 
 /**
- * 閸掋倖鏌囪ぐ鎾冲闁款喚娲忔禍瀣╂閺勵垰鎯佹惔鏃€妯夌粈铏瑰殠缁嬪鐑︽潪顒佸絹缁€鎭掆偓? * 瑜版挻瀵滄稉瀣╃啊缁捐法鈻肩捄瀹犳祮韫囶偅宓庨柨顔炬畱娣囶噣銈伴柨顔剧矋閸氬牊妞傛潻鏂挎礀 true閵? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param keybindings - 韫囶偅宓庨柨顕€鍘ょ純顔煎灙鐞? * @param options - 閸栧綊鍘ら柅澶愩€? * @returns 閺勵垰鎯佹惔鏃€妯夌粈铏瑰殠缁嬪鐑︽潪顒佸絹缁€? */
+ * 鍒ゆ柇褰撳墠閿洏浜嬩欢鏄惁搴旀樉绀虹嚎绋嬭烦杞彁绀恒€? * 褰撴寜涓嬩簡绾跨▼璺宠浆蹇嵎閿殑淇グ閿粍鍚堟椂杩斿洖 true銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param options - 鍖归厤閫夐」
+ * @returns 鏄惁搴旀樉绀虹嚎绋嬭烦杞彁绀? */
 export function shouldShowThreadJumpHints(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -684,7 +700,7 @@ export function shouldShowThreadJumpHints(
   return false;
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ょ紒鍫㈩伂閸掑洦宕茶箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢鍒囨崲蹇嵎閿?*/
 export function isTerminalToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -693,7 +709,7 @@ export function isTerminalToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.toggle", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ょ紒鍫㈩伂閸掑棗鐫嗚箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢鍒嗗睆蹇嵎閿?*/
 export function isTerminalSplitShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -702,7 +718,7 @@ export function isTerminalSplitShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.split", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦缂佸牏顏箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓缁堢蹇嵎閿?*/
 export function isTerminalNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -711,7 +727,7 @@ export function isTerminalNewShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.new", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら崗鎶芥４缂佸牏顏箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鍏抽棴缁堢蹇嵎閿?*/
 export function isTerminalCloseShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -720,7 +736,7 @@ export function isTerminalCloseShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.close", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ゆ笟褑绔熼弽蹇撳瀼閹广垹鎻╅幑鐑芥暛 */
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤渚ц竟鏍忓垏鎹㈠揩鎹烽敭 */
 export function isSidebarToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -729,7 +745,7 @@ export function isSidebarToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "sidebar.toggle", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘?Diff 闂堛垺婢橀崚鍥ㄥ床韫囶偅宓庨柨?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤 Diff 闈㈡澘鍒囨崲蹇嵎閿?*/
 export function isDiffToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -738,7 +754,7 @@ export function isDiffToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "diff.toggle", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ゅù蹇氼潔閸ｃ劑娼伴弶鍨瀼閹广垹鎻╅幑鐑芥暛 */
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤娴忚鍣ㄩ潰鏉垮垏鎹㈠揩鎹烽敭 */
 export function isBrowserToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -747,7 +763,7 @@ export function isBrowserToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "browser.toggle", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦缁捐法鈻艰箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓绾跨▼蹇嵎閿?*/
 export function isChatNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -756,7 +772,7 @@ export function isChatNewShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.new", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら崷銊︽付閺備即銆嶉惄顔昏厬閺傛澘缂撶痪璺ㄢ柤韫囶偅宓庨柨?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鍦ㄦ渶鏂伴」鐩腑鏂板缓绾跨▼蹇嵎閿?*/
 export function isChatNewLatestProjectShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -766,7 +782,7 @@ export function isChatNewLatestProjectShortcut(
 }
 
 /**
- * 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦閼卞﹤銇夎箛顐ｅ祹闁款喓鈧? * 閸氬本妞傞崠褰掑帳 chat.newChat 閸?chat.newLocal 娑撱倓閲滈崨鎴掓姢閵? */
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓鑱婂ぉ蹇嵎閿€? * 鍚屾椂鍖归厤 chat.newChat 鍜?chat.newLocal 涓や釜鍛戒护銆? */
 export function isChatNewChatShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -778,10 +794,10 @@ export function isChatNewChatShortcut(
   );
 }
 
-/** isChatNewLocalShortcut 閻ㄥ嫬鍩嗛崥宥忕礉娑?isChatNewChatShortcut 鐞涘奔璐熸稉鈧懛?*/
+/** isChatNewLocalShortcut 鐨勫埆鍚嶏紝涓?isChatNewChatShortcut 琛屼负涓€鑷?*/
 export const isChatNewLocalShortcut = isChatNewChatShortcut;
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦 Claude 缁捐法鈻艰箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Claude 绾跨▼蹇嵎閿?*/
 export function isChatNewClaudeShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -790,7 +806,7 @@ export function isChatNewClaudeShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newClaude", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦 Codex 缁捐法鈻艰箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Codex 绾跨▼蹇嵎閿?*/
 export function isChatNewCodexShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -799,7 +815,7 @@ export function isChatNewCodexShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCodex", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦 Cursor 缁捐法鈻艰箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Cursor 绾跨▼蹇嵎閿?*/
 export function isChatNewCursorShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -808,7 +824,7 @@ export function isChatNewCursorShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCursor", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら弬鏉跨紦 Gemini 缁捐法鈻艰箛顐ｅ祹闁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Gemini 绾跨▼蹇嵎閿?*/
 export function isChatNewGeminiShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -817,7 +833,7 @@ export function isChatNewGeminiShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newGemini", options);
 }
 
-/** 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ら幍鎾崇磻閺€鎯版缂傛牞绶崳銊ユ彥閹圭兘鏁?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鎵撳紑鏀惰棌缂栬緫鍣ㄥ揩鎹烽敭 */
 export function isOpenFavoriteEditorShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -827,10 +843,10 @@ export function isOpenFavoriteEditorShortcut(
 }
 
 /**
- * 閸掋倖鏌囬柨顔炬磸娴滃娆㈤弰顖氭儊閸栧綊鍘ょ紒鍫㈩伂濞撳懎鐫嗚箛顐ｅ祹闁款噯绱機trl+L閿涘鈧? * 濮濄倕鎻╅幑鐑芥暛娑撳秹鈧俺绻冭箛顐ｅ祹闁款噣鍘ょ純顔鹃兇缂佺噦绱濋懓灞炬Ц绾剛绱惍浣稿灲鐎规哎鈧? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param platform - 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform
- * @returns 閺勵垰鎯侀崠褰掑帳缂佸牏顏〒鍛潌韫囶偅宓庨柨? */
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢娓呭睆蹇嵎閿紙Ctrl+L锛夈€? * 姝ゅ揩鎹烽敭涓嶉€氳繃蹇嵎閿厤缃郴缁燂紝鑰屾槸纭紪鐮佸垽瀹氥€? *
+ * @param event - 閿洏浜嬩欢
+ * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏄惁鍖归厤缁堢娓呭睆蹇嵎閿? */
 export function isTerminalClearShortcut(
   event: ShortcutEventLike,
   platform = navigator.platform,
@@ -845,11 +861,12 @@ export function isTerminalClearShortcut(
 }
 
 /**
- * 鐟欙絾鐎界紒鍫㈩伂娑擃厾娈戠€佃壈鍩呰箛顐ｅ祹闁款噯绱欓幐澶婂礋鐠?鐞涘矂顩?鐞涘苯鐔捄瀹犳祮閿涘鈧? * 鏉╂柨娲栫€电懓绨查惃鍕矒缁旑垵娴嗘稊澶婄碍閸掓绱濇笟娑氱矒缁旑垱膩閹风喎娅掗惄瀛樺复閸欐垿鈧降鈧? *
- * - macOS: Alt+Arrow 閹稿宕熺拠宥堢儲鏉烆剨绱滳md+Arrow 鐠哄啿鍩岀悰宀勵浕/鐞涘苯鐔? * - Windows/Linux: Ctrl+Arrow 閹?Alt+Arrow 閹稿宕熺拠宥堢儲鏉? *
- * @param event - 闁款喚娲忔禍瀣╂
- * @param platform - 鏉╂劘顢戦獮鍐插酱閿涘矂绮拋銈勫▏閻?navigator.platform
- * @returns 缂佸牏顏潪顑跨疅鎼村繐鍨€涙顑佹稉璇х礉娑撳秴灏柊宥堢箲閸?null
+ * 瑙ｆ瀽缁堢涓殑瀵艰埅蹇嵎閿紙鎸夊崟璇?琛岄/琛屽熬璺宠浆锛夈€? * 杩斿洖瀵瑰簲鐨勭粓绔浆涔夊簭鍒楋紝渚涚粓绔ā鎷熷櫒鐩存帴鍙戦€併€? *
+ * - macOS: Alt+Arrow 鎸夊崟璇嶈烦杞紝Cmd+Arrow 璺冲埌琛岄/琛屽熬
+ * - Windows/Linux: Ctrl+Arrow 鎴?Alt+Arrow 鎸夊崟璇嶈烦杞? *
+ * @param event - 閿洏浜嬩欢
+ * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 缁堢杞箟搴忓垪瀛楃涓诧紝涓嶅尮閰嶈繑鍥?null
  */
 export function terminalNavigationShortcutData(
   event: ShortcutEventLike,
