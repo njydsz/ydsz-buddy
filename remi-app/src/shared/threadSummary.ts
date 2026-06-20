@@ -283,13 +283,15 @@ export function deriveThreadSummaryState(input: {
     latestTurn: input.latestTurn,
   });
 
-  // 4. 构建并返回摘要状  return {
+  // 4. 构建并返回摘要状态
+  return {
     latestUserMessageAt,
     pendingApprovalCount: openApprovals.size,
     pendingUserInputCount: openUserInputs.size,
     hasPendingApprovals: openApprovals.size > 0,
     hasPendingUserInput: openUserInputs.size > 0,
-    // 如果最新计划尚未实施，则认为存在可执行的计    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
+    // 如果最新计划尚未实施，则认为存在可执行的计划
+    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
   };
 }
 

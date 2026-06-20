@@ -4,6 +4,7 @@ import babel from "@rolldown/plugin-babel";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 import pkg from "./package.json" with { type: "json" };
+import path from "node:path";
 
 const port = Number(process.env.PORT ?? 1420);
 const sourcemapEnv = process.env.REMI_CODE_SOURCEMAP?.trim().toLowerCase();
@@ -14,6 +15,8 @@ const buildSourcemap =
     : sourcemapEnv === "hidden"
       ? "hidden"
       : true;
+
+const effectDir = path.resolve(require.resolve("effect"), "..");
 
 export default defineConfig({
   plugins: [
@@ -31,6 +34,7 @@ export default defineConfig({
       "@pierre/diffs/react",
       "@pierre/diffs/worker/worker.js",
       "react-icons/gr",
+      "effect",
     ],
   },
   define: {
@@ -39,6 +43,13 @@ export default defineConfig({
   },
   resolve: {
     tsconfigPaths: true,
+    conditions: ["module", "browser", "development", "import", "default"],
+    alias: {
+      "effect/Schema": path.join(effectDir, "dist/esm/index.js"),
+      "effect/unstable/rpc": path.join(effectDir, "dist/esm/index.js"),
+      "effect/unstable/socket": path.join(effectDir, "dist/esm/index.js"),
+      "effect/unstable/socket/Socket": path.join(effectDir, "dist/esm/index.js"),
+    },
   },
   // Tauri 配置
   clearScreen: false,

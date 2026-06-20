@@ -462,7 +462,7 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
     providers.claudeAgent = {
       ...(hasOwn(patch, "claudeBinaryPath") ? { binaryPath: patch.claudeBinaryPath ?? "" } : {}),
       ...(hasOwn(patch, "customClaudeModels")
-        ? { customModels: patch.customClaudeModels ?? [] }
+        ? { customModels: [...(patch.customClaudeModels ?? [])] }
         : {}),
     };
   }
@@ -475,7 +475,7 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
       ...(hasOwn(patch, "cursorApiEndpoint") ? { apiEndpoint: patch.cursorApiEndpoint ?? "" } : {}),
       ...(hasOwn(patch, "cursorBinaryPath") ? { binaryPath: patch.cursorBinaryPath ?? "" } : {}),
       ...(hasOwn(patch, "customCursorModels")
-        ? { customModels: patch.customCursorModels ?? [] }
+        ? { customModels: [...(patch.customCursorModels ?? [])] }
         : {}),
     };
   }
@@ -483,14 +483,14 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
     providers.gemini = {
       ...(hasOwn(patch, "geminiBinaryPath") ? { binaryPath: patch.geminiBinaryPath ?? "" } : {}),
       ...(hasOwn(patch, "customGeminiModels")
-        ? { customModels: patch.customGeminiModels ?? [] }
+        ? { customModels: [...(patch.customGeminiModels ?? [])] }
         : {}),
     };
   }
   if (hasOwn(patch, "grokBinaryPath") || hasOwn(patch, "customGrokModels")) {
     providers.grok = {
       ...(hasOwn(patch, "grokBinaryPath") ? { binaryPath: patch.grokBinaryPath ?? "" } : {}),
-      ...(hasOwn(patch, "customGrokModels") ? { customModels: patch.customGrokModels ?? [] } : {}),
+      ...(hasOwn(patch, "customGrokModels") ? { customModels: [...(patch.customGrokModels ?? [])] } : {}),
     };
   }
   if (
@@ -505,7 +505,7 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
       ...(hasOwn(patch, "kiloServerPassword")
         ? { serverPassword: patch.kiloServerPassword ?? "" }
         : {}),
-      ...(hasOwn(patch, "customKiloModels") ? { customModels: patch.customKiloModels ?? [] } : {}),
+      ...(hasOwn(patch, "customKiloModels") ? { customModels: [...(patch.customKiloModels ?? [])] } : {}),
     };
   }
   if (
@@ -523,7 +523,7 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
         ? { serverPassword: patch.openCodeServerPassword ?? "" }
         : {}),
       ...(hasOwn(patch, "customOpenCodeModels")
-        ? { customModels: patch.customOpenCodeModels ?? [] }
+        ? { customModels: [...(patch.customOpenCodeModels ?? [])] }
         : {}),
     };
   }
@@ -535,7 +535,7 @@ function appSettingsPatchToServerSettingsPatch(patch: Partial<AppSettings>): Ser
     providers.pi = {
       ...(hasOwn(patch, "piAgentDir") ? { agentDir: patch.piAgentDir ?? "" } : {}),
       ...(hasOwn(patch, "piBinaryPath") ? { binaryPath: patch.piBinaryPath ?? "" } : {}),
-      ...(hasOwn(patch, "customPiModels") ? { customModels: patch.customPiModels ?? [] } : {}),
+      ...(hasOwn(patch, "customPiModels") ? { customModels: [...(patch.customPiModels ?? [])] } : {}),
     };
   }
 

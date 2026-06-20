@@ -117,7 +117,8 @@ export function applyServerSettingsPatch(
     selectionPatch.provider !== current.textGenerationModelSelection.provider
       ? DEFAULT_MODEL_BY_PROVIDER[selectionPatch.provider]
       : current.textGenerationModelSelection.model);
-  // 确定 options：替换模式下仅使用补丁中options，非替换模式下深度合  const options = shouldReplaceTextGenerationModelSelection(selectionPatch)
+  // 确定 options：替换模式下仅使用补丁中 options，非替换模式下深度合并
+  const options = shouldReplaceTextGenerationModelSelection(selectionPatch)
     ? selectionPatch.options
     : (selectionPatch.options ?? current.textGenerationModelSelection.options);
 
