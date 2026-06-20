@@ -1,6 +1,8 @@
-// FILE: useTranscriptAssistantSelectionAction.ts
-// Purpose: Own the assistant highlight -> floating action -> composer insertion flow for transcript selections.
-// Layer: Chat transcript interaction controller
+/**
+ * @module useTranscriptAssistantSelectionAction
+ * @description 管理聊天记录中助手消息的高亮选中 → 浮动操作 → 插入编辑器的完整交互流程。
+ * 当用户在转录面板中选中助手消息文本时，显示浮动操作按钮，点击后将选中文本作为引用附件插入到编辑器中。
+ */
 
 import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS } from "~/contracts";
 import {
@@ -25,35 +27,64 @@ import {
   type TranscriptAssistantSelection,
 } from "./chatSelectionActions";
 
+/** 待确认的转录选区操作状态，包含选区信息及浮动按钮的定位 */
 export interface PendingTranscriptSelectionAction {
+  /** 助手消息的选区内容 */
   selection: TranscriptAssistantSelection;
+  /** 浮动按钮的左侧偏移量（px） */
   left: number;
+  /** 浮动按钮的顶部偏移量（px） */
   top: number;
+  /** 浮动按钮的放置方向 */
   placement: "top" | "bottom";
 }
 
+/** useTranscriptAssistantSelectionAction hook 的配置选项 */
 interface UseTranscriptAssistantSelectionActionOptions {
+  /** 当前会话线程 ID */
   threadId: string;
+  /** 是否启用选区操作功能 */
   enabled: boolean;
+  /** 编辑器中图片附件的引用 */
   composerImagesRef: MutableRefObject<ReadonlyArray<unknown>>;
+  /** 编辑器中助手选区附件的引用 */
   composerAssistantSelectionsRef: MutableRefObject<
     ReadonlyArray<ComposerAssistantSelectionAttachment>
   >;
+  /** 将助手选区附件添加到编辑器草稿的回调 */
   addComposerAssistantSelectionToDraft: (
     selection: ComposerAssistantSelectionAttachment,
   ) => boolean;
+  /** 调度编辑器聚焦的回调 */
   scheduleComposerFocus: () => void;
+  /** 消息区域的 click capture 基础事件处理器 */
   onMessagesClickCaptureBase: MouseEventHandler<HTMLDivElement>;
+  /** 消息区域的 pointerdown 基础事件处理器 */
   onMessagesPointerDownBase: PointerEventHandler<HTMLDivElement>;
+  /** 消息区域的 pointerup 基础事件处理器 */
   onMessagesPointerUpBase: PointerEventHandler<HTMLDivElement>;
+  /** 消息区域的 pointercancel 基础事件处理器 */
   onMessagesPointerCancelBase: PointerEventHandler<HTMLDivElement>;
+  /** 消息区域的 scroll 基础事件处理器 */
   onMessagesScrollBase: () => void;
+  /** 消息区域的 wheel 基础事件处理器 */
   onMessagesWheelBase: WheelEventHandler<HTMLDivElement>;
+  /** 消息区域的 touchstart 基础事件处理器 */
   onMessagesTouchStartBase: TouchEventHandler<HTMLDivElement>;
+  /** 消息区域的 touchmove 基础事件处理器 */
   onMessagesTouchMoveBase: TouchEventHandler<HTMLDivElement>;
+  /** 消息区域的 touchend 基础事件处理器 */
   onMessagesTouchEndBase: TouchEventHandler<HTMLDivElement>;
 }
 
+/**
+ * 管理转录面板中助手消息选区的交互 hook。
+ * 监听鼠标/触摸事件，在用户选中助手文本后显示浮动操作按钮，
+ * 点击按钮将选中文本作为引用附件插入到编辑器草稿中。
+ *
+ * @param options - hook 配置选项
+ * @returns 选区操作状态及事件处理器
+ */
 export function useTranscriptAssistantSelectionAction(
   options: UseTranscriptAssistantSelectionActionOptions,
 ) {

@@ -36,6 +36,7 @@ function Alert({
   );
 }
 
+/** 提示信息标题 */
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

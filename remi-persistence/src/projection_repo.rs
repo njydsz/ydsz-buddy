@@ -108,6 +108,20 @@ pub trait ProjectionRepository: Send + Sync {
     /// 成功时返回线程列表 `Vec<Thread>`，如果没有线程返回空列表
     fn list_threads(&self) -> PersistenceResult<Vec<Thread>>;
 
+    /// 列出项目下的所有线程
+    ///
+    /// 查询指定项目下所有未被软删除的线程，按创建时间倒序排列。
+    /// 用于不变量检查（如校验项目没有关联线程）。
+    ///
+    /// # 参数
+    ///
+    /// * `project_id` - 项目 ID
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回线程列表 `Vec<Thread>`，如果项目下没有线程返回空列表
+    fn list_threads_by_project(&self, project_id: ProjectId) -> PersistenceResult<Vec<Thread>>;
+
     /// 删除项目（软删除）
     ///
     /// 将项目的 `deleted_at` 字段设置为当前时间，标记为已删除。
@@ -463,6 +477,26 @@ impl ProjectionRepository for SqliteProjectionRepository {
         )?;
 
         // query_map 已收集所有行并处理错误
+        Ok(rows)
+    }
+
+    /// 列出指定项目下所有未被软删除的线程
+    ///
+    /// 与 `list_threads` 的区别在于增加了 `project_id` 过滤条件，
+    /// 常用于编排层的不变量校验（如删除项目前确认无关联线程）。
+    fn list_threads_by_project(&self, project_id: ProjectId) -> PersistenceResult<Vec<Thread>> {
+        let rows = self.client.query_map(
+            "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
+                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
+                    latest_user_message_at, has_pending_approvals, has_pending_user_input,
+                    has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
+                    session, created_at, updated_at, archived_at, deleted_at, handoff
+             FROM projection_threads WHERE deleted_at IS NULL AND project_id = ?1 ORDER BY created_at DESC",
+            &[&project_id.to_string()],
+            row_to_thread,
+        )?;
+
         Ok(rows)
     }
 

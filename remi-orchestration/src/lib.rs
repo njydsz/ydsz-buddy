@@ -117,6 +117,16 @@ pub mod query;
 pub mod reactor;
 /// 运行时收据总线，发布-订阅运行时事件
 pub mod runtime_receipt_bus;
+/// 线程导入路由决策
+pub mod import_thread_route;
+/// 项目元数据投影
+pub mod project_metadata_projection;
+/// 分发命令归一化
+pub mod dispatch_command_normalization;
+/// 领域不变量检查器
+pub mod invariants;
+/// 线程交接模块
+pub mod handoff;
 
 // ==================== 公开导出 ====================
 
@@ -132,3 +142,13 @@ pub use query::*;
 pub use reactor::*;
 /// 导出运行时收据总线类型（RuntimeReceiptBus、OrchestrationRuntimeReceipt 等）
 pub use runtime_receipt_bus::*;
+/// 导出线程导入路由类型
+pub use import_thread_route::*;
+/// 导出项目元数据投影类型
+pub use project_metadata_projection::*;
+/// 导出分发命令归一化类型
+pub use dispatch_command_normalization::*;
+/// 导出领域不变量检查器
+pub use invariants::*;
+/// 导出线程交接模块
+pub use handoff::*;

@@ -1,7 +1,8 @@
-// FILE: useComposerVoiceController.ts
-// Purpose: Own the composer voice-note state machine for recording, cancellation, and transcription.
-// Layer: Chat composer hook
-// Depends on: useVoiceRecorder, ChatView voice helper logic, and the native API voice endpoint.
+/**
+ * @module useComposerVoiceController
+ * @description 管理编辑器语音笔记的状态机，包括录音、取消和语音转文字的完整生命周期。
+ * 将异步转写逻辑从 ChatView 组件中抽离，使 ChatView 保持 UI 聚焦。
+ */
 
 import { type ProviderKind, type ServerProviderStatus, type ThreadId } from "~/contracts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,29 +18,53 @@ import {
   sanitizeVoiceErrorMessage,
 } from "../ChatView.logic";
 
+/** useComposerVoiceController hook 的配置选项 */
 interface UseComposerVoiceControllerOptions {
+  /** 当前激活的项目 */
   activeProject: Project | undefined;
+  /** 当前激活的线程 ID */
   activeThreadId: ThreadId | null;
+  /** 当前线程 ID */
   threadId: ThreadId;
+  /** 当前选中的服务提供者类型 */
   selectedProvider: ProviderKind;
+  /** 当前服务提供者的状态信息 */
   activeProviderStatus: ServerProviderStatus | null;
+  /** 待处理的用户输入数量 */
   pendingUserInputCount: number;
+  /** 语音转写完成后的回调，接收转写文本 */
   onTranscriptReady: (transcript: string) => void;
+  /** 刷新语音状态的回调 */
   refreshVoiceStatus: () => void;
 }
 
+/** useComposerVoiceController hook 的返回结果 */
 interface UseComposerVoiceControllerResult {
+  /** 是否正在录音 */
   isVoiceRecording: boolean;
+  /** 是否正在转写语音 */
   isVoiceTranscribing: boolean;
+  /** 语音波形级别数据 */
   voiceWaveformLevels: readonly number[];
+  /** 录音时长的格式化标签 */
   voiceRecordingDurationLabel: string;
+  /** 是否显示语音笔记控件 */
   showVoiceNotesControl: boolean;
+  /** 开始语音录音 */
   startComposerVoiceRecording: () => Promise<void>;
+  /** 提交语音录音（停止录音并转写） */
   submitComposerVoiceRecording: () => Promise<void>;
+  /** 取消语音录音 */
   cancelComposerVoiceRecording: () => void;
 }
 
-// Keeps the async transcription lifecycle out of ChatView so the component can stay UI-focused.
+/**
+ * 编辑器语音控制器 hook。
+ * 管理语音笔记的录音、提交转写和取消操作，将异步转写生命周期从 ChatView 中解耦。
+ *
+ * @param options - hook 配置选项
+ * @returns 语音控制器的状态和操作方法
+ */
 export function useComposerVoiceController(
   options: UseComposerVoiceControllerOptions,
 ): UseComposerVoiceControllerResult {

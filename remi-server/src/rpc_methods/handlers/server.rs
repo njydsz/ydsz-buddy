@@ -80,7 +80,7 @@ pub async fn register_server_methods(
                 // 确保目录存在
                 if let Some(parent) = settings_path.parent() {
                     tokio::fs::create_dir_all(parent).await.map_err(|e| {
-                        crate::error::ServerError::Internal(format!(
+                        crate::error::ServerError::InternalError(format!(
                             "Failed to create settings directory: {}",
                             e
                         ))
@@ -89,14 +89,14 @@ pub async fn register_server_methods(
 
                 // 写入配置文件
                 let content = serde_json::to_string_pretty(&new_settings).map_err(|e| {
-                    crate::error::ServerError::Internal(format!(
+                    crate::error::ServerError::InternalError(format!(
                         "Failed to serialize settings: {}",
                         e
                     ))
                 })?;
 
                 tokio::fs::write(settings_path, content).await.map_err(|e| {
-                    crate::error::ServerError::Internal(format!(
+                    crate::error::ServerError::InternalError(format!(
                         "Failed to write settings file: {}",
                         e
                     ))
@@ -128,8 +128,8 @@ pub async fn register_server_methods(
             let config = config.clone();
             let push_channel_manager = push_channel_manager.clone();
             async move {
-                let mut errors = Vec::new();
-                let mut warnings = Vec::new();
+                let mut errors: Vec<String> = Vec::new();
+                let mut warnings: Vec<String> = Vec::new();
 
                 // 检查数据库文件
                 if !config.db_path.exists() {

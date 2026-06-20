@@ -271,8 +271,8 @@ mod tests {
                 &[&project_id, &"local".to_string(), &"Test Project".to_string(), &"/tmp".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
             ).unwrap();
             client.execute(
-                "INSERT INTO projection_threads (thread_id, project_id, title, model_selection_json, runtime_mode, interaction_mode, env_mode, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
-                &[&thread_id.to_string(), &project_id, &"Test Thread".to_string(), &"gpt-4".to_string(), &"local".to_string(), &"default".to_string(), &"default".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
+                "INSERT INTO projection_threads (thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode, messages, proposed_plans, activities, checkpoints, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+                &[&thread_id.to_string(), &project_id, &"Test Thread".to_string(), &"gpt-4".to_string(), &"local".to_string(), &"default".to_string(), &"default".to_string(), &"[]", &"[]", &"[]", &"[]", &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
             ).unwrap();
         }
 

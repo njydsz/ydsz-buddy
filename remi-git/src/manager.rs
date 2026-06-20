@@ -608,9 +608,9 @@ impl GitManager {
 
         info!("准备 PR 线程: PR #{}, 分支: {}", pr_number, branch_name);
 
-        // 创建 worktree
+        // 创建 worktree（不指定基础引用，从当前 HEAD 派生）
         self.core
-            .create_worktree(cwd, worktree_path, &branch_name)
+            .create_worktree(cwd, worktree_path, &branch_name, None)
             .await?;
 
         Ok(branch_name)

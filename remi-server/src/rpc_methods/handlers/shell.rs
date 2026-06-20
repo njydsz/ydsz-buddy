@@ -99,7 +99,7 @@ pub async fn register_shell_methods(
                         .creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS)
                         .spawn()
                         .map_err(|e| {
-                            crate::error::ServerError::Internal(format!(
+                            crate::error::ServerError::InternalError(format!(
                                 "Failed to spawn editor: {}",
                                 e
                             ))
@@ -170,7 +170,7 @@ fn resolve_editor_command(
         .find(|cmd| is_command_available(cmd))
         .or_else(|| commands.first())
         .ok_or_else(|| {
-            crate::error::ServerError::Internal(format!("No command available for editor: {}", id))
+            crate::error::ServerError::InternalError(format!("No command available for editor: {}", id))
         })?;
 
     // 根据启动样式构建参数

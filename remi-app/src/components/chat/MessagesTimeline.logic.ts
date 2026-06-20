@@ -1,7 +1,8 @@
-// FILE: MessagesTimeline.logic.ts
-// Purpose: Owns the pure row-derivation helpers used by the transcript hot path.
-// Layer: Web chat presentation helpers
-// Exports: row derivation, structural sharing, copy/timer helpers
+/**
+ * @module MessagesTimeline.logic
+ * @description 聊天转录面板的纯逻辑辅助函数，负责行数据推导、结构化共享和复制/计时等工具函数。
+ * 所有函数均为纯函数，不依赖 React 状态，可安全地在渲染热路径中使用。
+ */
 
 import { type MessageId, type TurnId } from "~/contracts";
 import { type TimelineEntry, type WorkLogEntry } from "../../session-logic";

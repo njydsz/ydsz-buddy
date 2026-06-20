@@ -137,6 +137,9 @@ fn build_service_container(
 
     info!("服务容器初始化完成");
 
+    // 共享 ServerConfig 供 ServiceContainer 的 config 字段使用
+    let services_config = Arc::new(config.clone());
+
     Ok(ServiceContainer {
         orchestration_engine,
         projection_query,
@@ -152,6 +155,7 @@ fn build_service_container(
         analytics_service,
         metrics_collector,
         push_channel_manager,
+        config: services_config,
     })
 }
 

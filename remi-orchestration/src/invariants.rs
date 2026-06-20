@@ -302,14 +302,17 @@ pub fn require_turn_running(
     thread_id: ThreadId,
     turn_id: &str,
 ) -> OrchestrationResult<()> {
+    use remi_core::models::TurnStatus;
+
     let thread = projection_repo
         .get_thread(thread_id)?
         .ok_or_else(|| OrchestrationError::CommandError(format!("Thread {} not found", thread_id)))?;
 
+    // Thread 模型只保留 latest_turn，因此仅校验最新 turn 是否匹配且处于运行状态
     let turn = thread
-        .turns
-        .iter()
-        .find(|t| t.id.to_string() == turn_id)
+        .latest_turn
+        .as_ref()
+        .filter(|t| t.id == turn_id)
         .ok_or_else(|| {
             OrchestrationError::CommandError(format!(
                 "Turn {} not found in thread {}",
@@ -317,7 +320,7 @@ pub fn require_turn_running(
             ))
         })?;
 
-    if !turn.is_running() {
+    if turn.status != TurnStatus::Running {
         return Err(OrchestrationError::CommandError(format!(
             "Turn {} is not running (status: {:?})",
             turn_id, turn.status
@@ -329,17 +332,20 @@ pub fn require_turn_running(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use remi_persistence::SqliteProjectionRepository;
+    use remi_persistence::{run_migrations, SqliteClient, SqliteProjectionRepository};
     use std::sync::Arc;
     use tempfile::TempDir;
 
     /// 创建测试用的 SQLite 投影仓库
     ///
-    /// 使用临时目录创建独立的数据库文件，确保测试之间互不影响
+    /// 使用临时目录创建独立的数据库文件，确保测试之间互不影响。
+    /// 同时执行迁移以确保表结构存在。
     fn setup_test_repo() -> Arc<SqliteProjectionRepository> {
         let temp_dir = TempDir::new().unwrap();
         let db_path = temp_dir.path().join("test.db");
-        Arc::new(SqliteProjectionRepository::new(db_path.to_str().unwrap()).unwrap())
+        let client = SqliteClient::new(&db_path).unwrap();
+        run_migrations(&client).unwrap();
+        Arc::new(SqliteProjectionRepository::new(client))
     }
 
     /// 测试项目存在性校验：不存在的项目应返回错误
@@ -361,6 +367,28 @@ mod tests {
 
         // 线程不存在时应成功
         let result = require_thread_not_exists(repo.as_ref(), thread_id);
+        assert!(result.is_ok());
+    }
+
+    /// 测试项目必须没有关联线程的校验
+    #[test]
+    fn test_require_project_has_no_threads() {
+        let repo = setup_test_repo();
+        let project_id = uuid::Uuid::new_v4();
+
+        // 新建项目下应无任何线程，校验应通过
+        let result = require_project_has_no_threads(repo.as_ref(), project_id);
+        assert!(result.is_ok());
+    }
+
+    /// 测试工作区根目录可用性校验：未占用的路径应通过
+    #[test]
+    fn test_require_workspace_root_available() {
+        let repo = setup_test_repo();
+        let workspace_root = "/tmp/remi-test-workspace";
+
+        // 当前仓库中未注册任何项目，路径应判定为可用
+        let result = require_workspace_root_available(repo.as_ref(), workspace_root, None);
         assert!(result.is_ok());
     }
 }

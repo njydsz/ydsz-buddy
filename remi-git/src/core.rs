@@ -746,17 +746,26 @@ impl GitCore {
         cwd: &str,
         worktree_path: &str,
         branch_name: &str,
+        base: Option<String>,
     ) -> GitResult<()> {
+        // 基础命令：git worktree add <path> -b <branch>
+        let mut args = vec![
+            "worktree".to_string(),
+            "add".to_string(),
+            worktree_path.to_string(),
+            "-b".to_string(),
+            branch_name.to_string(),
+        ];
+        // 可选的基础引用（如 commit/branch/tag）
+        if let Some(b) = base {
+            if !b.trim().is_empty() {
+                args.push(b);
+            }
+        }
         self.execute(ExecuteGitInput {
             operation: "worktree add".to_string(),
             cwd: cwd.to_string(),
-            args: vec![
-                "worktree".to_string(),
-                "add".to_string(),
-                worktree_path.to_string(),
-                "-b".to_string(),
-                branch_name.to_string(),
-            ],
+            args,
             env: vec![],
             allow_non_zero_exit: false,
             timeout_ms: None,

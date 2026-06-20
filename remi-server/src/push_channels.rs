@@ -365,6 +365,28 @@ impl PushChannelManager {
         let channels = self.channels.read().await;
         channels.keys().cloned().collect()
     }
+
+    /// 获取当前活跃的通道（即至少存在一个订阅者的通道）
+    ///
+    /// 遍历所有通道，统计每个通道的接收端数量（`receiver_count`），
+    /// 仅返回订阅者数 > 0 的通道名称。
+    ///
+    /// # 返回值
+    ///
+    /// 活跃通道的名称列表
+    pub async fn active_channels(&self) -> Vec<String> {
+        let channels = self.channels.read().await;
+        channels
+            .iter()
+            .filter_map(|(name, tx)| {
+                if tx.receiver_count() > 0 {
+                    Some(name.clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
 }
 
 impl Default for PushChannelManager {
