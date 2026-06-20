@@ -1087,7 +1087,6 @@ impl GitCore {
         from_commit: &str,
         to_commit: &str,
     ) -> GitResult<String> {
-        // TODO: cwd 硬编码为 "."，应改为接受参数以支持指定工作目录
         let result = self
             .execute(ExecuteGitInput {
                 operation: "diff".to_string(),
@@ -1095,6 +1094,44 @@ impl GitCore {
                 args: vec![
                     "diff".to_string(),
                     format!("{}...{}", from_commit, to_commit),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        Ok(result.stdout)
+    }
+
+    /// 计算从空树到指定提交的差异
+    ///
+    /// 用于获取某个提交引入的所有变更（相对于空状态）。
+    ///
+    /// # 参数
+    ///
+    /// - `to_commit`: 目标提交的 SHA 或引用
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: Unified Diff 格式的文本
+    /// - `Err(GitError::CommandError)`: 命令执行失败
+    pub async fn diff_from_empty(
+        &self,
+        to_commit: &str,
+    ) -> GitResult<String> {
+        // 使用 git diff-tree 从空树到指定提交
+        // 4b825dc642cb6eb9a060e54bf8d69288fbee4904 是 Git 的空树 SHA
+        let empty_tree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "diff-tree".to_string(),
+                cwd: ".".to_string(),
+                args: vec![
+                    "diff-tree".to_string(),
+                    "-p".to_string(),
+                    empty_tree.to_string(),
+                    to_commit.to_string(),
                 ],
                 env: vec![],
                 allow_non_zero_exit: false,

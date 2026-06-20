@@ -1,6 +1,8 @@
-// FILE: subagentPresentation.ts
-// Purpose: Normalizes subagent identity, nickname colors, and status labels for sidebar/chat UI.
-// Exports: Shared presentation helpers consumed by sidebar rows, chat cards, and thread hydration.
+/**
+ * @file subagentPresentation.ts
+ * @description 子代理身份、昵称颜色和状态标签的归一化处理，
+ * 供侧边栏行、聊天卡片和线程水合等 UI 组件消费。
+ */
 
 import {
   buildSubagentIdentityDirectory,
@@ -33,8 +35,10 @@ const GENERIC_SUBAGENT_TITLES = new Set([
   "thread",
 ]);
 
+/** 子代理状态类型 */
 export type SubagentStatusKind = "running" | "completed" | "failed" | "stopped" | "queued" | "idle";
 
+/** 子代理展示信息，包含主标签、昵称、角色、标题、完整标签和强调色 */
 export interface SubagentPresentation {
   primaryLabel: string;
   nickname: string | null;
@@ -203,12 +207,28 @@ function hashLabelSeed(seed: string): number {
   return hash;
 }
 
+/**
+ * 根据种子值计算子代理强调色
+ *
+ * @param seed - 种子字符串（通常为昵称或主标签）
+ * @returns 十六进制颜色值
+ */
 export function subagentAccentColor(seed: string | null | undefined): string {
   const normalized = normalizeWhitespace(seed)?.toLowerCase() ?? "subagent";
   const index = hashLabelSeed(normalized) % SUBAGENT_ACCENT_PALETTE.length;
   return SUBAGENT_ACCENT_PALETTE[index] ?? SUBAGENT_ACCENT_PALETTE[0];
 }
 
+/**
+ * 解析子代理展示信息
+ *
+ * @param input - 解析输入
+ * @param input.nickname - 显式昵称
+ * @param input.role - 显式角色
+ * @param input.title - 线程标题
+ * @param input.fallbackId - 备选 ID
+ * @returns 子代理展示信息对象
+ */
 export function resolveSubagentPresentation(input: {
   nickname?: string | null | undefined;
   role?: string | null | undefined;
@@ -241,6 +261,14 @@ export function resolveSubagentPresentation(input: {
   };
 }
 
+/**
+ * 从线程对象解析子代理展示信息
+ *
+ * @param input - 解析输入
+ * @param input.thread - 线程对象
+ * @param input.threads - 线程列表（用于从父线程活动中提取身份信息）
+ * @returns 子代理展示信息对象
+ */
 export function resolveSubagentPresentationForThread(input: {
   thread: Pick<
     SubagentThreadLike,
@@ -264,6 +292,13 @@ export function resolveSubagentPresentationForThread(input: {
   });
 }
 
+/**
+ * 归一化子代理状态类型
+ *
+ * @param status - 原始状态字符串
+ * @param isActive - 是否为活跃状态
+ * @returns 归一化后的状态类型，若无法识别则返回 null
+ */
 export function normalizeSubagentStatusKind(
   status: string | null | undefined,
   isActive = false,
@@ -327,6 +362,13 @@ export function normalizeSubagentStatusKind(
   return null;
 }
 
+/**
+ * 将子代理状态转换为人可读的标签
+ *
+ * @param status - 原始状态字符串
+ * @param isActive - 是否为活跃状态
+ * @returns 人可读的状态标签（如 "Running"、"Completed"）
+ */
 export function humanizeSubagentStatus(
   status: string | null | undefined,
   isActive = false,
@@ -352,6 +394,12 @@ export function humanizeSubagentStatus(
   }
 }
 
+/**
+ * 格式化子代理模型标签
+ *
+ * @param model - 模型标识
+ * @returns 格式化后的模型显示名称
+ */
 export function formatSubagentModelLabel(model: string | null | undefined): string | undefined {
   return formatModelDisplayName(normalizeWhitespace(model));
 }

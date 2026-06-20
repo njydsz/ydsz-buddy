@@ -37,6 +37,8 @@ mod server;
 mod telemetry;
 /// 推送通道订阅 RPC 方法
 mod subscription;
+/// Shell 操作 RPC 方法
+mod shell;
 
 pub use orchestration::*;
 pub use provider::*;
@@ -48,3 +50,4 @@ pub use checkpoint::*;
 pub use server::*;
 pub use telemetry::*;
 pub use subscription::*;
+pub use shell::*;

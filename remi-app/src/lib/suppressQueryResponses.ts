@@ -1,15 +1,22 @@
+/**
+ * @file suppressQueryResponses.ts
+ * @description 抑制终端查询响应中泄漏的可见垃圾文本。
+ * 仅抑制响应使用与查询不同的终止字节的序列，避免误吞真实命令。
+ */
+
 import type { Terminal } from "@xterm/xterm";
 
 /**
- * Suppress terminal query responses that leak as visible garbage text.
+ * 抑制终端查询响应，防止其作为可见垃圾文本泄漏
  *
- * Only suppresses sequences where the response uses a DIFFERENT final byte
- * than the query, so we never accidentally eat real commands.
+ * @param terminal - xterm Terminal 实例
+ * @returns 取消抑制的清理函数
  *
- * - CSI R  �?Cursor Position Report (query is CSI 6n)
- * - CSI I  �?Focus In report (mode 1004, no query)
- * - CSI O  �?Focus Out report (mode 1004, no query)
- * - CSI $y �?Mode Report (query is CSI $p)
+ * @remarks 抑制的序列包括：
+ * - CSI R — 光标位置报告（查询为 CSI 6n）
+ * - CSI I — 焦点进入报告（模式 1004，无查询）
+ * - CSI O — 焦点离开报告（模式 1004，无查询）
+ * - CSI $y — 模式报告（查询为 CSI $p）
  */
 export function suppressQueryResponses(terminal: Terminal): () => void {
   const disposables: { dispose(): void }[] = [];

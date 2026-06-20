@@ -358,5 +358,277 @@ pub async fn register_git_methods(
         })
         .await;
 
+    // git.createWorktree - 创建 worktree
+    let git_core = services.git_core.clone();
+    router
+        .register("git.createWorktree", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let worktree_path = params
+                    .get("worktreePath")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing worktreePath".to_string())
+                    })?;
+
+                let branch = params
+                    .get("branch")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing branch".to_string())
+                    })?;
+
+                let base = params
+                    .get("base")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                git_core.create_worktree(cwd, worktree_path, branch, base).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.removeWorktree - 删除 worktree
+    let git_core = services.git_core.clone();
+    router
+        .register("git.removeWorktree", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let worktree_path = params
+                    .get("worktreePath")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing worktreePath".to_string())
+                    })?;
+
+                git_core.remove_worktree(cwd, worktree_path).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.createDetachedWorktree - 创建分离的 worktree
+    let git_core = services.git_core.clone();
+    router
+        .register("git.createDetachedWorktree", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let worktree_path = params
+                    .get("worktreePath")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing worktreePath".to_string())
+                    })?;
+
+                let commit = params
+                    .get("commit")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing commit".to_string())
+                    })?;
+
+                git_core.create_detached_worktree(cwd, worktree_path, commit).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.stashDrop - 删除最新的 stash
+    let git_core = services.git_core.clone();
+    router
+        .register("git.stashDrop", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                git_core.stash_drop(cwd).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.stashInfo - 获取 stash 信息
+    let git_core = services.git_core.clone();
+    router
+        .register("git.stashInfo", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let info = git_core.stash_info(cwd).await?;
+                Ok(serde_json::json!({ "info": info }))
+            }
+        })
+        .await;
+
+    // git.removeIndexLock - 删除 index.lock 文件
+    let git_core = services.git_core.clone();
+    router
+        .register("git.removeIndexLock", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                git_core.remove_index_lock(cwd).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.init - 初始化 Git 仓库
+    let git_core = services.git_core.clone();
+    router
+        .register("git.init", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                git_core.init_repo(cwd).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.readWorkingTreeDiff - 读取工作树的完整差异
+    let git_core = services.git_core.clone();
+    router
+        .register("git.readWorkingTreeDiff", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let patch = git_core.read_working_tree_patch(cwd).await?;
+                Ok(serde_json::json!({ "patch": patch }))
+            }
+        })
+        .await;
+
+    // git.summarizeDiff - 获取差异摘要
+    let git_core = services.git_core.clone();
+    router
+        .register("git.summarizeDiff", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let staged = params
+                    .get("staged")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
+                let diff = git_core.diff(cwd, staged).await?;
+                
+                // 解析 diff 统计信息
+                let mut additions = 0;
+                let mut deletions = 0;
+                let mut files_changed = 0;
+                
+                for line in diff.lines() {
+                    if line.starts_with("diff --git") {
+                        files_changed += 1;
+                    } else if line.starts_with("+") && !line.starts_with("+++") {
+                        additions += 1;
+                    } else if line.starts_with("-") && !line.starts_with("---") {
+                        deletions += 1;
+                    }
+                }
+                
+                Ok(serde_json::json!({
+                    "additions": additions,
+                    "deletions": deletions,
+                    "filesChanged": files_changed
+                }))
+            }
+        })
+        .await;
+
     info!("Git RPC 方法注册完成");
 }

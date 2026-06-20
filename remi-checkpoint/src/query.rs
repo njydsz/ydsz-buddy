@@ -382,3 +382,28 @@ impl CheckpointDiffQuery {
         Ok(diff)
     }
 }
+
+/// 解析 Unified Diff 文本的统计信息
+///
+/// 从 Git Diff 输出中统计新增行数、删除行数和变更文件数。
+fn parse_diff_stats(diff: &str) -> DiffStats {
+    let mut additions = 0;
+    let mut deletions = 0;
+    let mut files_changed = 0;
+
+    for line in diff.lines() {
+        if line.starts_with("diff --git") {
+            files_changed += 1;
+        } else if line.starts_with('+') && !line.starts_with("+++") {
+            additions += 1;
+        } else if line.starts_with('-') && !line.starts_with("---") {
+            deletions += 1;
+        }
+    }
+
+    DiffStats {
+        additions,
+        deletions,
+        files_changed,
+    }
+}
