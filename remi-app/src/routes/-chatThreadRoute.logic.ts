@@ -1,97 +1,97 @@
 /**
- * @file 聊天线程路由逻辑辅助模块
- * @description 提供路由级别的聊天面板状态转换和降级处理的确定性逻辑
- * @layer 路由 UI 逻辑辅助�? * @exports 线程标题降级、深度链接引导重放处理、面板切换辅助函�? */
+ * @file èŠå¤©çº¿ç¨‹è·¯ç”±é€»è¾‘è¾…åŠ©æ¨¡å—
+ * @description æä¾›è·¯ç”±çº§åˆ«çš„èŠå¤©é¢æ¿çŠ¶æ€è½¬æ¢å’Œé™çº§å¤„ç†çš„ç¡®å®šæ€§é€»è¾‘
+ * @layer è·¯ç”± UI é€»è¾‘è¾…åŠ©ï¿½? * @exports çº¿ç¨‹æ ‡é¢˜é™çº§ã€æ·±åº¦é“¾æŽ¥å¼•å¯¼é‡æ”¾å¤„ç†ã€é¢æ¿åˆ‡æ¢è¾…åŠ©å‡½ï¿½? */
 
 import type { ThreadId, TurnId } from "~/contracts";
 
 import type { ChatRightPanel, DiffRouteSearch } from "../diffRouteSearch";
 
 /**
- * 聊天面板状态快�? * @description 表示当前聊天面板的完整状态，包括面板类型和差异对比信�? */
+ * èŠå¤©é¢æ¿çŠ¶æ€å¿«ï¿½? * @description è¡¨ç¤ºå½“å‰èŠå¤©é¢æ¿çš„å®Œæ•´çŠ¶æ€ï¼ŒåŒ…æ‹¬é¢æ¿ç±»åž‹å’Œå·®å¼‚å¯¹æ¯”ä¿¡ï¿½? */
 export interface ChatPanelStateSnapshot {
-  /** 当前激活的面板类型，null 表示无面板打开 */
+  /** å½“å‰æ¿€æ´»çš„é¢æ¿ç±»åž‹ï¼Œnull è¡¨ç¤ºæ— é¢æ¿æ‰“å¼€ */
   panel: ChatRightPanel | null;
-  /** 差异对比的轮�?ID，用于定位具体的代码变更 */
+  /** å·®å¼‚å¯¹æ¯”çš„è½®ï¿½?IDï¼Œç”¨äºŽå®šä½å…·ä½“çš„ä»£ç å˜æ›´ */
   diffTurnId: TurnId | null;
-  /** 差异对比的文件路�?*/
+  /** å·®å¼‚å¯¹æ¯”çš„æ–‡ä»¶è·¯ï¿½?*/
   diffFilePath: string | null;
 }
 
 /**
- * 聊天面板状态补�? * @description 用于部分更新面板状态，所有字段都是可选的
+ * èŠå¤©é¢æ¿çŠ¶æ€è¡¥ï¿½? * @description ç”¨äºŽéƒ¨åˆ†æ›´æ–°é¢æ¿çŠ¶æ€ï¼Œæ‰€æœ‰å­—æ®µéƒ½æ˜¯å¯é€‰çš„
  */
 export interface ChatPanelStatePatch {
-  /** 面板类型 */
+  /** é¢æ¿ç±»åž‹ */
   panel?: ChatRightPanel | null;
-  /** 差异对比的轮�?ID */
+  /** å·®å¼‚å¯¹æ¯”çš„è½®ï¿½?ID */
   diffTurnId?: TurnId | null;
-  /** 差异对比的文件路�?*/
+  /** å·®å¼‚å¯¹æ¯”çš„æ–‡ä»¶è·¯ï¿½?*/
   diffFilePath?: string | null;
 }
 
 /**
- * 路由面板引导结果
- * @description 表示�?URL 搜索参数中解析面板状态的引导结果
+ * è·¯ç”±é¢æ¿å¼•å¯¼ç»“æžœ
+ * @description è¡¨ç¤ºï¿½?URL æœç´¢å‚æ•°ä¸­è§£æžé¢æ¿çŠ¶æ€çš„å¼•å¯¼ç»“æžœ
  */
 export interface RoutePanelBootstrapResult {
-  /** 下一个应用的搜索键，用于避免重复应用相同的状�?*/
+  /** ä¸‹ä¸€ä¸ªåº”ç”¨çš„æœç´¢é”®ï¼Œç”¨äºŽé¿å…é‡å¤åº”ç”¨ç›¸åŒçš„çŠ¶ï¿½?*/
   nextAppliedSearchKey: string | null;
-  /** 面板状态补丁，null 表示无需更新 */
+  /** é¢æ¿çŠ¶æ€è¡¥ä¸ï¼Œnull è¡¨ç¤ºæ— éœ€æ›´æ–° */
   panelPatch: ChatPanelStatePatch | null;
 }
 
 /**
- * 分割面板最大化决策
- * @description 当用户最大化某个分割面板时，决定如何处理其他面板
+ * åˆ†å‰²é¢æ¿æœ€å¤§åŒ–å†³ç­–
+ * @description å½“ç”¨æˆ·æœ€å¤§åŒ–æŸä¸ªåˆ†å‰²é¢æ¿æ—¶ï¼Œå†³å®šå¦‚ä½•å¤„ç†å…¶ä»–é¢æ¿
  */
 export interface SplitPaneMaximizeDecision {
-  /** 要移除的分割视图 ID */
+  /** è¦ç§»é™¤çš„åˆ†å‰²è§†å›¾ ID */
   splitViewIdToRemove: string;
-  /** 保留的线�?ID */
+  /** ä¿ç•™çš„çº¿ï¿½?ID */
   threadId: ThreadId;
-  /** 保留的面板状�?*/
+  /** ä¿ç•™çš„é¢æ¿çŠ¶ï¿½?*/
   panelState: ChatPanelStateSnapshot | null;
 }
 
 /**
- * 分割面板关闭决策
- * @description 联合类型，表示关闭分割面板时的不同处理策�? */
+ * åˆ†å‰²é¢æ¿å…³é—­å†³ç­–
+ * @description è”åˆç±»åž‹ï¼Œè¡¨ç¤ºå…³é—­åˆ†å‰²é¢æ¿æ—¶çš„ä¸åŒå¤„ç†ç­–ï¿½? */
 export type SplitPaneCloseDecision =
   | {
-      /** 单线程模式：关闭分割视图，保留单个线�?*/
+      /** å•çº¿ç¨‹æ¨¡å¼ï¼šå…³é—­åˆ†å‰²è§†å›¾ï¼Œä¿ç•™å•ä¸ªçº¿ï¿½?*/
       kind: "single-thread";
       threadId: ThreadId;
       splitViewIdToRemove: string;
     }
   | {
-      /** 分割线程模式：保留分割视图，但切换到另一个线�?*/
+      /** åˆ†å‰²çº¿ç¨‹æ¨¡å¼ï¼šä¿ç•™åˆ†å‰²è§†å›¾ï¼Œä½†åˆ‡æ¢åˆ°å¦ä¸€ä¸ªçº¿ï¿½?*/
       kind: "split-thread";
       threadId: ThreadId;
       splitViewId: string;
     }
   | {
-      /** 新聊天模式：关闭所有分割，创建新的聊天 */
+      /** æ–°èŠå¤©æ¨¡å¼ï¼šå…³é—­æ‰€æœ‰åˆ†å‰²ï¼Œåˆ›å»ºæ–°çš„èŠå¤© */
       kind: "new-chat";
     };
 
 /**
- * 解析线程选择器标题
- * @description 当线程标题为空时返回默认标题 "New chat"，否则返回原始标题
- * @param title - 线程标题，可能为 null
- * @returns 显示用的线程标题
+ * è§£æžçº¿ç¨‹é€‰æ‹©å™¨æ ‡é¢˜
+ * @description å½“çº¿ç¨‹æ ‡é¢˜ä¸ºç©ºæ—¶è¿”å›žé»˜è®¤æ ‡é¢˜ "New chat"ï¼Œå¦åˆ™è¿”å›žåŽŸå§‹æ ‡é¢˜
+ * @param title - çº¿ç¨‹æ ‡é¢˜ï¼Œå¯èƒ½ä¸º null
+ * @returns æ˜¾ç¤ºç”¨çš„çº¿ç¨‹æ ‡é¢˜
  */
 export function resolveThreadPickerTitle(title: string | null): string {
   return title || "New chat";
 }
 
 /**
- * 创建路由面板搜索键
- * @description 根据 scopeId 和搜索参数生成唯一键，用于判断面板状态是否已应用过。
- * 当搜索参数中无面板相关信息时返回 null
- * @param input.scopeId - 作用域 ID
- * @param input.search - 差异路由搜索参数
- * @returns 序列化的搜索键，或 null（无面板状态时）
+ * åˆ›å»ºè·¯ç”±é¢æ¿æœç´¢é”®
+ * @description æ ¹æ® scopeId å’Œæœç´¢å‚æ•°ç”Ÿæˆå”¯ä¸€é”®ï¼Œç”¨äºŽåˆ¤æ–­é¢æ¿çŠ¶æ€æ˜¯å¦å·²åº”ç”¨è¿‡ã€‚
+ * å½“æœç´¢å‚æ•°ä¸­æ— é¢æ¿ç›¸å…³ä¿¡æ¯æ—¶è¿”å›ž null
+ * @param input.scopeId - ä½œç”¨åŸŸ ID
+ * @param input.search - å·®å¼‚è·¯ç”±æœç´¢å‚æ•°
+ * @returns åºåˆ—åŒ–çš„æœç´¢é”®ï¼Œæˆ– nullï¼ˆæ— é¢æ¿çŠ¶æ€æ—¶ï¼‰
  */
 function createRoutePanelSearchKey(input: {
   scopeId: string;
@@ -116,13 +116,13 @@ function createRoutePanelSearchKey(input: {
 }
 
 /**
- * 解析路由面板引导状态
- * @description 根据 URL 搜索参数解析面板状态，生成面板补丁。
- * 通过搜索键去重，避免重复应用相同的面板状态
- * @param input.scopeId - 作用域 ID
- * @param input.search - 差异路由搜索参数
- * @param input.lastAppliedSearchKey - 上次已应用的搜索键
- * @returns 引导结果，包含下一个搜索键和面板补丁
+ * è§£æžè·¯ç”±é¢æ¿å¼•å¯¼çŠ¶æ€
+ * @description æ ¹æ® URL æœç´¢å‚æ•°è§£æžé¢æ¿çŠ¶æ€ï¼Œç”Ÿæˆé¢æ¿è¡¥ä¸ã€‚
+ * é€šè¿‡æœç´¢é”®åŽ»é‡ï¼Œé¿å…é‡å¤åº”ç”¨ç›¸åŒçš„é¢æ¿çŠ¶æ€
+ * @param input.scopeId - ä½œç”¨åŸŸ ID
+ * @param input.search - å·®å¼‚è·¯ç”±æœç´¢å‚æ•°
+ * @param input.lastAppliedSearchKey - ä¸Šæ¬¡å·²åº”ç”¨çš„æœç´¢é”®
+ * @returns å¼•å¯¼ç»“æžœï¼ŒåŒ…å«ä¸‹ä¸€ä¸ªæœç´¢é”®å’Œé¢æ¿è¡¥ä¸
  */
 export function resolveRoutePanelBootstrap(input: {
   scopeId: string;
@@ -159,12 +159,12 @@ export function resolveRoutePanelBootstrap(input: {
 }
 
 /**
- * 解析切换聊天面板的补丁
- * @description 切换指定面板的开关状态：如果当前面板已经是目标面板则关闭，否则打开目标面板。
- * 差异对比的轮次 ID 和文件路径保持不变
- * @param previousState - 之前的面板状态快照
- * @param panel - 要切换的面板类型
- * @returns 面板状态补丁
+ * è§£æžåˆ‡æ¢èŠå¤©é¢æ¿çš„è¡¥ä¸
+ * @description åˆ‡æ¢æŒ‡å®šé¢æ¿çš„å¼€å…³çŠ¶æ€ï¼šå¦‚æžœå½“å‰é¢æ¿å·²ç»æ˜¯ç›®æ ‡é¢æ¿åˆ™å…³é—­ï¼Œå¦åˆ™æ‰“å¼€ç›®æ ‡é¢æ¿ã€‚
+ * å·®å¼‚å¯¹æ¯”çš„è½®æ¬¡ ID å’Œæ–‡ä»¶è·¯å¾„ä¿æŒä¸å˜
+ * @param previousState - ä¹‹å‰çš„é¢æ¿çŠ¶æ€å¿«ç…§
+ * @param panel - è¦åˆ‡æ¢çš„é¢æ¿ç±»åž‹
+ * @returns é¢æ¿çŠ¶æ€è¡¥ä¸
  */
 export function resolveToggledChatPanelPatch(
   previousState: ChatPanelStateSnapshot,
@@ -178,13 +178,13 @@ export function resolveToggledChatPanelPatch(
 }
 
 /**
- * 解析分割面板最大化决策
- * @description 展开分割面板时退出分割模式，选中的聊天成为唯一的显示界面。
- * 如果没有聚焦的线程 ID 则返回 null
- * @param input.splitViewId - 分割视图 ID
- * @param input.focusedThreadId - 当前聚焦的线程 ID
- * @param input.focusedPanelState - 当前聚焦的面板状态
- * @returns 最大化决策，或 null（无聚焦线程时）
+ * è§£æžåˆ†å‰²é¢æ¿æœ€å¤§åŒ–å†³ç­–
+ * @description å±•å¼€åˆ†å‰²é¢æ¿æ—¶é€€å‡ºåˆ†å‰²æ¨¡å¼ï¼Œé€‰ä¸­çš„èŠå¤©æˆä¸ºå”¯ä¸€çš„æ˜¾ç¤ºç•Œé¢ã€‚
+ * å¦‚æžœæ²¡æœ‰èšç„¦çš„çº¿ç¨‹ ID åˆ™è¿”å›ž null
+ * @param input.splitViewId - åˆ†å‰²è§†å›¾ ID
+ * @param input.focusedThreadId - å½“å‰èšç„¦çš„çº¿ç¨‹ ID
+ * @param input.focusedPanelState - å½“å‰èšç„¦çš„é¢æ¿çŠ¶æ€
+ * @returns æœ€å¤§åŒ–å†³ç­–ï¼Œæˆ– nullï¼ˆæ— èšç„¦çº¿ç¨‹æ—¶ï¼‰
  */
 export function resolveSplitPaneMaximizeDecision(input: {
   splitViewId: string;
@@ -203,16 +203,16 @@ export function resolveSplitPaneMaximizeDecision(input: {
 }
 
 /**
- * 解析分割面板关闭决策
- * @description 关闭侧边聊天是返回源线程的操作。根据关闭的线程和剩余面板数量，
- * 决定是回到单线程模式、保留分割视图切换到另一线程，还是创建新聊天
- * @param input.splitViewId - 分割视图 ID
- * @param input.sourceThreadId - 源线程 ID
- * @param input.closingThreadId - 正在关闭的线程 ID
- * @param input.closingSidechatSourceThreadId - 正在关闭的侧边聊天的源线程 ID
- * @param input.nextFocusedThreadId - 下一个聚焦的线程 ID
- * @param input.nextLeafCount - 关闭后剩余的叶子节点数量
- * @returns 关闭决策，包含单线程、分割线程或新聊天三种策略
+ * è§£æžåˆ†å‰²é¢æ¿å…³é—­å†³ç­–
+ * @description å…³é—­ä¾§è¾¹èŠå¤©æ˜¯è¿”å›žæºçº¿ç¨‹çš„æ“ä½œã€‚æ ¹æ®å…³é—­çš„çº¿ç¨‹å’Œå‰©ä½™é¢æ¿æ•°é‡ï¼Œ
+ * å†³å®šæ˜¯å›žåˆ°å•çº¿ç¨‹æ¨¡å¼ã€ä¿ç•™åˆ†å‰²è§†å›¾åˆ‡æ¢åˆ°å¦ä¸€çº¿ç¨‹ï¼Œè¿˜æ˜¯åˆ›å»ºæ–°èŠå¤©
+ * @param input.splitViewId - åˆ†å‰²è§†å›¾ ID
+ * @param input.sourceThreadId - æºçº¿ç¨‹ ID
+ * @param input.closingThreadId - æ­£åœ¨å…³é—­çš„çº¿ç¨‹ ID
+ * @param input.closingSidechatSourceThreadId - æ­£åœ¨å…³é—­çš„ä¾§è¾¹èŠå¤©çš„æºçº¿ç¨‹ ID
+ * @param input.nextFocusedThreadId - ä¸‹ä¸€ä¸ªèšç„¦çš„çº¿ç¨‹ ID
+ * @param input.nextLeafCount - å…³é—­åŽå‰©ä½™çš„å¶å­èŠ‚ç‚¹æ•°é‡
+ * @returns å…³é—­å†³ç­–ï¼ŒåŒ…å«å•çº¿ç¨‹ã€åˆ†å‰²çº¿ç¨‹æˆ–æ–°èŠå¤©ä¸‰ç§ç­–ç•¥
  */
 export function resolveSplitPaneCloseDecision(input: {
   splitViewId: string;

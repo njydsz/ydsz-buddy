@@ -1,7 +1,7 @@
 /**
- * @file Provider 模型选项管理
+ * @file Provider 妯″瀷閫夐」绠＄悊
  *
- * 提供�?Provider 模型选项的格式化、合并、分组和构建工具函数�? * 支持多种 Provider（Codex、Claude、Cursor、Gemini、Grok、OpenCode、Pi、Kilo�? * 的模型选项处理，包括模型名称格式化、选项合并去重、按上游 Provider 分组�? * 收藏模型分组以及模型选项补丁构建�? */
+ * 鎻愪緵鍚?Provider 妯″瀷閫夐」鐨勬牸寮忓寲銆佸悎骞躲€佸垎缁勫拰鏋勫缓宸ュ叿鍑芥暟銆? * 鏀寔澶氱 Provider锛圕odex銆丆laude銆丆ursor銆丟emini銆丟rok銆丱penCode銆丳i銆並ilo锛? * 鐨勬ā鍨嬮€夐」澶勭悊锛屽寘鎷ā鍨嬪悕绉版牸寮忓寲銆侀€夐」鍚堝苟鍘婚噸銆佹寜涓婃父 Provider 鍒嗙粍銆? * 鏀惰棌妯″瀷鍒嗙粍浠ュ強妯″瀷閫夐」琛ヤ竵鏋勫缓銆? */
 
 import { formatModelDisplayName, geminiModelOptionsFromEffortValue } from "~/shared/model";
 import type {
@@ -25,53 +25,53 @@ import type {
   ProviderModelOptions,
 } from "~/contracts";
 
-/** 根据 ProviderKind 索引的模型选项类型 */
+/** 鏍规嵁 ProviderKind 绱㈠紩鐨勬ā鍨嬮€夐」绫诲瀷 */
 export type ProviderOptions = ProviderModelOptions[ProviderKind];
 
 /**
- * Provider 模型选项，表示选择器中的一个可选项�? */
+ * Provider 妯″瀷閫夐」锛岃〃绀洪€夋嫨鍣ㄤ腑鐨勪竴涓彲閫夐」銆? */
 export interface ProviderModelOption {
-  /** 模型的唯一标识 slug */
+  /** 妯″瀷鐨勫敮涓€鏍囪瘑 slug */
   slug: string;
-  /** 模型的显示名�?*/
+  /** 妯″瀷鐨勬樉绀哄悕绉?*/
   name: string;
-  /** 上游 Provider ID（如 "anthropic"�?openai"�?*/
+  /** 涓婃父 Provider ID锛堝 "anthropic"銆?openai"锛?*/
   upstreamProviderId?: string;
-  /** 上游 Provider 显示名称 */
+  /** 涓婃父 Provider 鏄剧ず鍚嶇О */
   upstreamProviderName?: string;
 }
 
 /**
- * Provider 模型选项分组，用于在选择器中按上�?Provider 归类显示�? */
+ * Provider 妯″瀷閫夐」鍒嗙粍锛岀敤浜庡湪閫夋嫨鍣ㄤ腑鎸変笂娓?Provider 褰掔被鏄剧ず銆? */
 export interface ProviderModelOptionGroup {
-  /** 分组的唯一�?*/
+  /** 鍒嗙粍鐨勫敮涓€閿?*/
   key: string;
-  /** 分组的显示标签，null 表示无分组标�?*/
+  /** 鍒嗙粍鐨勬樉绀烘爣绛撅紝null 琛ㄧず鏃犲垎缁勬爣绛?*/
   label: string | null;
-  /** 分组内的模型选项列表 */
+  /** 鍒嗙粍鍐呯殑妯″瀷閫夐」鍒楄〃 */
   options: ProviderModelOption[];
 }
 
 /**
- * 将模型标识符人性化显示。将分隔符替换为空格并首字母大写�? *
- * @param value - 原始模型标识�? * @returns 人性化后的显示名称
+ * 灏嗘ā鍨嬫爣璇嗙浜烘€у寲鏄剧ず銆傚皢鍒嗛殧绗︽浛鎹负绌烘牸骞堕瀛楁瘝澶у啓銆? *
+ * @param value - 鍘熷妯″瀷鏍囪瘑绗? * @returns 浜烘€у寲鍚庣殑鏄剧ず鍚嶇О
  */
 function humanizeModelIdentifier(value: string): string {
   return value.replace(/[-_/]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-/** 生成模型选项的去重键，基�?slug 的小写标准化 */
+/** 鐢熸垚妯″瀷閫夐」鐨勫幓閲嶉敭锛屽熀浜?slug 鐨勫皬鍐欐爣鍑嗗寲 */
 function modelOptionKey(option: Pick<ProviderModelOption, "slug">): string {
   return option.slug.trim().toLowerCase();
 }
 
 /**
- * 格式�?Provider 模型选项的显示名称�? * 不同 Provider 有不同的名称格式化策略：
- * - Cursor: 去除方括号后缀参数
- * - Kilo/OpenCode/Pi: 提取路径最后一段并人性化
- * - 其他: 使用共享�?formatModelDisplayName
+ * 鏍煎紡鍖?Provider 妯″瀷閫夐」鐨勬樉绀哄悕绉般€? * 涓嶅悓 Provider 鏈変笉鍚岀殑鍚嶇О鏍煎紡鍖栫瓥鐣ワ細
+ * - Cursor: 鍘婚櫎鏂规嫭鍙峰悗缂€鍙傛暟
+ * - Kilo/OpenCode/Pi: 鎻愬彇璺緞鏈€鍚庝竴娈靛苟浜烘€у寲
+ * - 鍏朵粬: 浣跨敤鍏变韩鐨?formatModelDisplayName
  *
- * @param input - 包含 provider �?slug 的输入对�? * @returns 格式化后的模型显示名�? */
+ * @param input - 鍖呭惈 provider 鍜?slug 鐨勮緭鍏ュ璞? * @returns 鏍煎紡鍖栧悗鐨勬ā鍨嬫樉绀哄悕绉? */
 export function formatProviderModelOptionName(input: {
   provider: ProviderKind;
   slug: string;
@@ -96,10 +96,10 @@ export function formatProviderModelOptionName(input: {
 }
 
 /**
- * 合并两组模型选项，优先保�?preferred 中的选项，fallback 中不重复的选项追加到末尾�? *
- * @param preferred - 优先的模型选项列表
- * @param fallback - 回退的模型选项列表
- * @returns 合并后的模型选项数组
+ * 鍚堝苟涓ょ粍妯″瀷閫夐」锛屼紭鍏堜繚鐣?preferred 涓殑閫夐」锛宖allback 涓笉閲嶅鐨勯€夐」杩藉姞鍒版湯灏俱€? *
+ * @param preferred - 浼樺厛鐨勬ā鍨嬮€夐」鍒楄〃
+ * @param fallback - 鍥為€€鐨勬ā鍨嬮€夐」鍒楄〃
+ * @returns 鍚堝苟鍚庣殑妯″瀷閫夐」鏁扮粍
  */
 export function mergeProviderModelOptions(
   preferred: ReadonlyArray<ProviderModelOption>,
@@ -121,10 +121,10 @@ export function mergeProviderModelOptions(
 }
 
 /**
- * 将模型选项按上�?Provider 分组。相�?upstreamProviderId 的选项归入同一组，
- * 无上�?Provider 信息的选项归入 "__ungrouped__" 组�? *
- * @param options - 模型选项列表
- * @returns 分组后的模型选项数组
+ * 灏嗘ā鍨嬮€夐」鎸変笂娓?Provider 鍒嗙粍銆傜浉鍚?upstreamProviderId 鐨勯€夐」褰掑叆鍚屼竴缁勶紝
+ * 鏃犱笂娓?Provider 淇℃伅鐨勯€夐」褰掑叆 "__ungrouped__" 缁勩€? *
+ * @param options - 妯″瀷閫夐」鍒楄〃
+ * @returns 鍒嗙粍鍚庣殑妯″瀷閫夐」鏁扮粍
  */
 export function groupProviderModelOptions(
   options: ReadonlyArray<ProviderModelOption>,
@@ -163,9 +163,9 @@ export function groupProviderModelOptions(
 }
 
 /**
- * 将模型选项按上�?Provider 分组，并将收藏的模型提取到独立的 "Favourites" 分组中�? * 如果没有收藏模型，行为与 groupProviderModelOptions 一致�? *
- * @param input - 包含选项列表、收�?slug 集合和可选分组标签的输入对象
- * @returns 带收藏分组的模型选项分组数组
+ * 灏嗘ā鍨嬮€夐」鎸変笂娓?Provider 鍒嗙粍锛屽苟灏嗘敹钘忕殑妯″瀷鎻愬彇鍒扮嫭绔嬬殑 "Favourites" 鍒嗙粍涓€? * 濡傛灉娌℃湁鏀惰棌妯″瀷锛岃涓轰笌 groupProviderModelOptions 涓€鑷淬€? *
+ * @param input - 鍖呭惈閫夐」鍒楄〃銆佹敹钘?slug 闆嗗悎鍜屽彲閫夊垎缁勬爣绛剧殑杈撳叆瀵硅薄
+ * @returns 甯︽敹钘忓垎缁勭殑妯″瀷閫夐」鍒嗙粍鏁扮粍
  */
 export function groupProviderModelOptionsWithFavorites(input: {
   options: ReadonlyArray<ProviderModelOption>;
@@ -195,11 +195,11 @@ export function groupProviderModelOptionsWithFavorites(input: {
 }
 
 /**
- * 根据补丁构建指定 Provider 的下一个模型选项状态�? * 对于 Gemini，切�?thinkingLevel/thinkingBudget 时会清除之前的思维相关配置�? *
- * @param provider - Provider 类型
- * @param modelOptions - 当前模型选项
- * @param patch - 要应用的选项补丁
- * @returns 合并后的模型选项
+ * 鏍规嵁琛ヤ竵鏋勫缓鎸囧畾 Provider 鐨勪笅涓€涓ā鍨嬮€夐」鐘舵€併€? * 瀵逛簬 Gemini锛屽垏鎹?thinkingLevel/thinkingBudget 鏃朵細娓呴櫎涔嬪墠鐨勬€濈淮鐩稿叧閰嶇疆銆? *
+ * @param provider - Provider 绫诲瀷
+ * @param modelOptions - 褰撳墠妯″瀷閫夐」
+ * @param patch - 瑕佸簲鐢ㄧ殑閫夐」琛ヤ竵
+ * @returns 鍚堝苟鍚庣殑妯″瀷閫夐」
  */
 export function buildNextProviderOptions(
   provider: ProviderKind,
@@ -242,10 +242,10 @@ export function buildNextProviderOptions(
 }
 
 /**
- * 根据选项 ID 和值构建模型选项补丁�? * 对于 Gemini �?thinkingLevel/thinkingBudget，会通过 effort 值推导出完整的选项集�? *
- * @param provider - Provider 类型
- * @param optionId - 选项 ID
- * @param value - 选项�? * @returns 选项补丁对象
+ * 鏍规嵁閫夐」 ID 鍜屽€兼瀯寤烘ā鍨嬮€夐」琛ヤ竵銆? * 瀵逛簬 Gemini 鐨?thinkingLevel/thinkingBudget锛屼細閫氳繃 effort 鍊兼帹瀵煎嚭瀹屾暣鐨勯€夐」闆嗐€? *
+ * @param provider - Provider 绫诲瀷
+ * @param optionId - 閫夐」 ID
+ * @param value - 閫夐」鍊? * @returns 閫夐」琛ヤ竵瀵硅薄
  */
 export function buildProviderOptionPatch(
   provider: ProviderKind,
@@ -263,11 +263,11 @@ export function buildProviderOptionPatch(
 }
 
 /**
- * 构建模型选择对象。根�?Provider 类型返回对应的强类型 ModelSelection�? * 包含多个重载签名以确保类型安全�? *
- * @param provider - Provider 类型
- * @param model - 模型标识
- * @param options - 可选的模型选项
- * @returns 对应类型的模型选择对象
+ * 鏋勫缓妯″瀷閫夋嫨瀵硅薄銆傛牴鎹?Provider 绫诲瀷杩斿洖瀵瑰簲鐨勫己绫诲瀷 ModelSelection銆? * 鍖呭惈澶氫釜閲嶈浇绛惧悕浠ョ‘淇濈被鍨嬪畨鍏ㄣ€? *
+ * @param provider - Provider 绫诲瀷
+ * @param model - 妯″瀷鏍囪瘑
+ * @param options - 鍙€夌殑妯″瀷閫夐」
+ * @returns 瀵瑰簲绫诲瀷鐨勬ā鍨嬮€夋嫨瀵硅薄
  */
 export function buildModelSelection(
   provider: "codex",

@@ -2349,7 +2349,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
       // Clear the draft now that the server thread exists (mirrors EventRouter behavior).
       useComposerDraftStore.getState().clearDraftThread(newThreadId);
 
-      // The route should still be on the new thread ï¿?not redirected away.
+      // The route should still be on the new thread é”Ÿ?not redirected away.
       await waitForURL(
         mounted.router,
         (path) => path === newThreadPath,

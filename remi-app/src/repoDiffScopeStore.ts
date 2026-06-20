@@ -1,33 +1,33 @@
 /**
- * @file 仓库 Diff 范围状态管�? *
- * 管理 Diff 面板和头部徽章共享的当前仓库 Diff 范围�? * 支持 workingTree（工作树）、unstaged（未暂存）、staged（已暂存）、branch（分支）
- * 四种范围，使�?Zustand + persist 中间件持久化�?localStorage�? */
+ * @file 浠撳簱 Diff 鑼冨洿鐘舵€佺鐞? *
+ * 绠＄悊 Diff 闈㈡澘鍜屽ご閮ㄥ窘绔犲叡浜殑褰撳墠浠撳簱 Diff 鑼冨洿銆? * 鏀寔 workingTree锛堝伐浣滄爲锛夈€乽nstaged锛堟湭鏆傚瓨锛夈€乻taged锛堝凡鏆傚瓨锛夈€乥ranch锛堝垎鏀級
+ * 鍥涚鑼冨洿锛屼娇鐢?Zustand + persist 涓棿浠舵寔涔呭寲鍒?localStorage銆? */
 
 import type { GitReadWorkingTreeDiffInput } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** 仓库 Diff 范围类型 */
+/** 浠撳簱 Diff 鑼冨洿绫诲瀷 */
 export type RepoDiffScope = NonNullable<GitReadWorkingTreeDiffInput["scope"]>;
 
-/** 默认�?Diff 范围：工作树 */
+/** 榛樿鐨?Diff 鑼冨洿锛氬伐浣滄爲 */
 export const DEFAULT_REPO_DIFF_SCOPE: RepoDiffScope = "workingTree";
 
-/** Diff 范围的显示标签映�?*/
+/** Diff 鑼冨洿鐨勬樉绀烘爣绛炬槧灏?*/
 export const REPO_DIFF_SCOPE_LABELS: Record<RepoDiffScope, string> = {
-  /** 工作树：包含所有未提交的更�?*/
+  /** 宸ヤ綔鏍戯細鍖呭惈鎵€鏈夋湭鎻愪氦鐨勬洿鏀?*/
   workingTree: "Working tree",
-  /** 未暂存：仅未暂存的更�?*/
+  /** 鏈殏瀛橈細浠呮湭鏆傚瓨鐨勬洿鏀?*/
   unstaged: "Unstaged",
-  /** 已暂存：仅已暂存的更�?*/
+  /** 宸叉殏瀛橈細浠呭凡鏆傚瓨鐨勬洿鏀?*/
   staged: "Staged",
-  /** 分支：与目标分支的差�?*/
+  /** 鍒嗘敮锛氫笌鐩爣鍒嗘敮鐨勫樊寮?*/
   branch: "Branch",
 };
 
 /**
- * 判断给定字符串是否为有效�?Diff 范围值�? *
- * @param value - 待判断的字符�? * @returns 是否为有效的 RepoDiffScope
+ * 鍒ゆ柇缁欏畾瀛楃涓叉槸鍚︿负鏈夋晥鐨?Diff 鑼冨洿鍊笺€? *
+ * @param value - 寰呭垽鏂殑瀛楃涓? * @returns 鏄惁涓烘湁鏁堢殑 RepoDiffScope
  */
 export function isRepoDiffScope(value: string): value is RepoDiffScope {
   return (
@@ -35,19 +35,19 @@ export function isRepoDiffScope(value: string): value is RepoDiffScope {
   );
 }
 
-/** Diff 范围 Store 的状态接�?*/
+/** Diff 鑼冨洿 Store 鐨勭姸鎬佹帴鍙?*/
 interface RepoDiffScopeStore {
-  /** 当前 Diff 范围 */
+  /** 褰撳墠 Diff 鑼冨洿 */
   scope: RepoDiffScope;
-  /** 设置 Diff 范围 */
+  /** 璁剧疆 Diff 鑼冨洿 */
   setScope: (scope: RepoDiffScope) => void;
 }
 
-/** localStorage 中的存储�?*/
+/** localStorage 涓殑瀛樺偍閿?*/
 const REPO_DIFF_SCOPE_STORAGE_KEY = "remicode:repo-diff-scope:v1";
 
 /**
- * Diff 范围 Zustand Store�? * 持久化到 localStorage，记录用户选择�?Diff 范围�? */
+ * Diff 鑼冨洿 Zustand Store銆? * 鎸佷箙鍖栧埌 localStorage锛岃褰曠敤鎴烽€夋嫨鐨?Diff 鑼冨洿銆? */
 export const useRepoDiffScopeStore = create<RepoDiffScopeStore>()(
   persist(
     (set) => ({

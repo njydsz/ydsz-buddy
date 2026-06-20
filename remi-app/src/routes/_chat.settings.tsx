@@ -1,10 +1,10 @@
 /**
- * @file 设置页面路由
- * @description 渲染独立的设置界面，包含侧边栏分组导航和各设置面板。
- * 涵盖通用、外观、通知、行为、工作树、归档、模型、提供方、高级等设置分组，
- * 以及模型渠道管理和主题包编辑器。
- * @layer 路由页面
- * @exports Route - TanStack Router 路由定义，路径为 `/_chat/settings`
+ * @file è®¾ç½®é¡µé¢è·¯ç”±
+ * @description æ¸²æŸ“ç‹¬ç«‹çš„è®¾ç½®ç•Œé¢ï¼ŒåŒ…å«ä¾§è¾¹æ åˆ†ç»„å¯¼èˆªå’Œå„è®¾ç½®é¢æ¿ã€‚
+ * æ¶µç›–é€šç”¨ã€å¤–è§‚ã€é€šçŸ¥ã€è¡Œä¸ºã€å·¥ä½œæ ‘ã€å½’æ¡£ã€æ¨¡åž‹ã€æä¾›æ–¹ã€é«˜çº§ç­‰è®¾ç½®åˆ†ç»„ï¼Œ
+ * ä»¥åŠæ¨¡åž‹æ¸ é“ç®¡ç†å’Œä¸»é¢˜åŒ…ç¼–è¾‘å™¨ã€‚
+ * @layer è·¯ç”±é¡µé¢
+ * @exports Route - TanStack Router è·¯ç”±å®šä¹‰ï¼Œè·¯å¾„ä¸º `/_chat/settings`
  */
 
 import {
@@ -115,9 +115,9 @@ import { formatRelativeTime } from "../components/Sidebar";
 import { formatWorktreePathForDisplay } from "../worktreeCleanup";
 import { sameProviderOrder } from "../providerOrdering";
 
-// ── Settings taxonomy ──────────────────────────────────────────────────────
+// â”€â”€ Settings taxonomy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── Model Channels (Service Gateways) ──────────────────────────────────────
+// â”€â”€ Model Channels (Service Gateways) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type ModelChannelId =
   | "deepseek"
@@ -139,40 +139,40 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "deepseek",
     name: "DeepSeek",
-    subtitle: "深度求索 · DeepSeek",
-    balance: "¥177.52",
+    subtitle: "æ·±åº¦æ±‚ç´¢ Â· DeepSeek",
+    balance: "Â¥177.52",
     iconColor: "#4D6BFA",
   },
   {
     id: "siliconflow",
-    name: "硅基流动",
-    subtitle: "硅基流动 · SiliconFlow",
-    balance: "¥110.87",
+    name: "ç¡…åŸºæµåŠ¨",
+    subtitle: "ç¡…åŸºæµåŠ¨ Â· SiliconFlow",
+    balance: "Â¥110.87",
     iconColor: "#6366F1",
   },
   {
     id: "volcano",
-    name: "火山方舟",
-    subtitle: "字节跳动 · 火山方舟",
+    name: "ç«å±±æ–¹èˆŸ",
+    subtitle: "å­—èŠ‚è·³åŠ¨ Â· ç«å±±æ–¹èˆŸ",
     iconColor: "#3B82F6",
   },
   {
     id: "tongyi",
-    name: "通义千问",
-    subtitle: "阿里�?· 百炼平台",
+    name: "é€šä¹‰åƒé—®",
+    subtitle: "é˜¿é‡Œï¿½?Â· ç™¾ç‚¼å¹³å°",
     iconColor: "#F97316",
   },
   {
     id: "kimi",
     name: "Kimi",
-    subtitle: "月之暗面 · Kimi",
-    balance: "¥13.96",
+    subtitle: "æœˆä¹‹æš—é¢ Â· Kimi",
+    balance: "Â¥13.96",
     iconColor: "#1F2937",
   },
   {
     id: "minimax",
     name: "MiniMax",
-    subtitle: "MiniMax · 海螺 AI",
+    subtitle: "MiniMax Â· æµ·èžº AI",
     iconColor: "#10B981",
   },
 ];
@@ -482,7 +482,7 @@ function buildInstallProviderSettings(
   }));
 }
 
-// ── Settings UI primitives ────────────────────────────────────────────────
+// â”€â”€ Settings UI primitives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -659,7 +659,7 @@ function providerUpdateFailureMessage(provider: ServerProviderStatus | undefined
   return state.output?.trim() || state.message || "The provider update did not complete.";
 }
 
-// ── Route screen ───────────────────────────────────────────────────────────
+// â”€â”€ Route screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SettingsRouteView() {
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
@@ -1906,7 +1906,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM�?
+                  placeholder="-apple-system, BlinkMï¿½?
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2552,11 +2552,11 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="网关代理">
+      <SettingsSection title="ç½‘å…³ä»£ç†">
         <div className="space-y-2">
           <SettingsRow
-            title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
+            title="æœ¬åœ° API ç½‘å…³"
+            description="å¯åŠ¨åŽå¯é€šè¿‡ç»Ÿä¸€æœ¬åœ°ç«¯ç‚¹è®¿é—®æ‰€æœ‰å·²å¯ç”¨çš„æ¨¡åž‹æ¸ é“ï¿½?
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2566,7 +2566,7 @@ function SettingsRouteView() {
           />
           {gatewayRunning ? (
             <div className="mt-4 space-y-5 border-t border-border pt-4">
-              {/* ── Local API ── */}
+              {/* â”€â”€ Local API â”€â”€ */}
               <div>
                 <h4 className="mb-2 text-sm font-semibold text-foreground">Local API</h4>
                 <p className="mb-2 text-xs text-muted-foreground">
@@ -2604,7 +2604,7 @@ function SettingsRouteView() {
                 </div>
               </div>
 
-              {/* ── Agent Setup ── */}
+              {/* â”€â”€ Agent Setup â”€â”€ */}
               <div>
                 <h4 className="mb-3 text-sm font-semibold text-foreground">Agent Setup</h4>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -2859,14 +2859,14 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="模型渠道接入">
+      <SettingsSection title="æ¨¡åž‹æ¸ é“æŽ¥å…¥">
         <div className="space-y-2">
           <SettingsRow
-            title="服务渠道"
-            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
+            title="æœåŠ¡æ¸ é“"
+            description="ç®¡ç†ç¬¬ä¸‰æ–¹æ¨¡ï¿½?API æ¸ é“æŽ¥å…¥ï¼Œå¯ç”¨åŽå¯åœ¨å¯¹åº”æä¾›å•†ä¸­ä½¿ç”¨è¿™äº›æ¸ é“ï¿½?
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} å·²å¯ï¿½?
               </span>
             }
           >
@@ -2903,7 +2903,7 @@ function SettingsRouteView() {
                           <span>{channel.name}</span>
                           {channel.balance ? (
                             <span className="text-xs font-normal text-emerald-500">
-                              余额 {channel.balance}
+                              ä½™é¢ {channel.balance}
                             </span>
                           ) : null}
                         </div>

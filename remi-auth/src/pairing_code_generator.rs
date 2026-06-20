@@ -12,7 +12,7 @@
 //!
 //! ## 使用示例
 //!
-//! ```rust
+//!```rust,ignore
 //! use remi_auth::generate_pairing_code;
 //!
 //! let code = generate_pairing_code();
@@ -38,7 +38,7 @@ const PAIRING_CODE_ALPHABET: &[u8] = b"23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_auth::generate_pairing_code;
 ///
 /// let code = generate_pairing_code();

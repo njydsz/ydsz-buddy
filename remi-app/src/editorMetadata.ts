@@ -1,6 +1,6 @@
 /**
- * @file 编辑器元数据模块
- * @description 为支持的编辑器提供统一的标签和图标解析能力�? *              用于聊天头部�?打开方式"选择器等 UI 组件�? *              确保新增编辑器时无需在多处重复维护编辑器列表�? */
+ * @file 缂栬緫鍣ㄥ厓鏁版嵁妯″潡
+ * @description 涓烘敮鎸佺殑缂栬緫鍣ㄦ彁渚涚粺涓€鐨勬爣绛惧拰鍥炬爣瑙ｆ瀽鑳藉姏銆? *              鐢ㄤ簬鑱婂ぉ澶撮儴鍜?鎵撳紑鏂瑰紡"閫夋嫨鍣ㄧ瓑 UI 缁勪欢锛? *              纭繚鏂板缂栬緫鍣ㄦ椂鏃犻渶鍦ㄥ澶勯噸澶嶇淮鎶ょ紪杈戝櫒鍒楄〃銆? */
 
 import { EDITORS, type EditorId } from "~/contracts";
 import type { Icon } from "./components/Icons";
@@ -15,15 +15,15 @@ import { FolderClosedIcon } from "./lib/icons";
 import { isMacPlatform, isWindowsPlatform } from "./lib/utils";
 
 /**
- * 编辑器选项，用�?UI 展示
- * @property value - 编辑器标�? * @property label - 编辑器显示名�? * @property Icon - 编辑器图标组�? */
+ * 缂栬緫鍣ㄩ€夐」锛岀敤浜?UI 灞曠ず
+ * @property value - 缂栬緫鍣ㄦ爣璇? * @property label - 缂栬緫鍣ㄦ樉绀哄悕绉? * @property Icon - 缂栬緫鍣ㄥ浘鏍囩粍浠? */
 export interface EditorOption {
   readonly value: EditorId;
   readonly label: string;
   readonly Icon: Icon;
 }
 
-/** 编辑�?ID 到图标组件的映射，未配置的编辑器将使用默认图�?*/
+/** 缂栬緫鍣?ID 鍒板浘鏍囩粍浠剁殑鏄犲皠锛屾湭閰嶇疆鐨勭紪杈戝櫒灏嗕娇鐢ㄩ粯璁ゅ浘鏍?*/
 const EDITOR_ICONS: Partial<Record<EditorId, Icon>> = {
   cursor: CursorIcon,
   trae: OpenCodeIcon,
@@ -37,8 +37,8 @@ const EDITOR_ICONS: Partial<Record<EditorId, Icon>> = {
 };
 
 /**
- * 解析编辑器的显示标签
- * 根据共享编辑器目录构建标签，新增编辑器无需在多处重复维�? * @param editorId - 编辑器标�? * @param platform - 平台标识字符�? * @returns 编辑器的显示名称，文件管理器会根据平台返�?Finder/Explorer/Files
+ * 瑙ｆ瀽缂栬緫鍣ㄧ殑鏄剧ず鏍囩
+ * 鏍规嵁鍏变韩缂栬緫鍣ㄧ洰褰曟瀯寤烘爣绛撅紝鏂板缂栬緫鍣ㄦ棤闇€鍦ㄥ澶勯噸澶嶇淮鎶? * @param editorId - 缂栬緫鍣ㄦ爣璇? * @param platform - 骞冲彴鏍囪瘑瀛楃涓? * @returns 缂栬緫鍣ㄧ殑鏄剧ず鍚嶇О锛屾枃浠剁鐞嗗櫒浼氭牴鎹钩鍙拌繑鍥?Finder/Explorer/Files
  */
 export function resolveEditorLabel(editorId: EditorId, platform: string): string {
   if (editorId === "file-manager") {
@@ -49,18 +49,18 @@ export function resolveEditorLabel(editorId: EditorId, platform: string): string
 }
 
 /**
- * 解析编辑器的图标组件
- * 即使品牌专用图标尚未配置，也返回默认图标以保�?UI 健壮�? * @param editorId - 编辑器标�? * @returns 图标组件，未匹配时返�?OpenCodeIcon
+ * 瑙ｆ瀽缂栬緫鍣ㄧ殑鍥炬爣缁勪欢
+ * 鍗充娇鍝佺墝涓撶敤鍥炬爣灏氭湭閰嶇疆锛屼篃杩斿洖榛樿鍥炬爣浠ヤ繚鎸?UI 鍋ュ．鎬? * @param editorId - 缂栬緫鍣ㄦ爣璇? * @returns 鍥炬爣缁勪欢锛屾湭鍖归厤鏃惰繑鍥?OpenCodeIcon
  */
 export function resolveEditorIcon(editorId: EditorId): Icon {
   return EDITOR_ICONS[editorId] ?? OpenCodeIcon;
 }
 
 /**
- * 解析当前可用的编辑器选项列表
- * 根据可用编辑器列表过滤共享编辑器目录，生成包含标签和图标的完整选项
- * @param platform - 平台标识字符�? * @param availableEditors - 当前可用的编辑器 ID 列表
- * @returns 编辑器选项数组，包含标识、标签和图标
+ * 瑙ｆ瀽褰撳墠鍙敤鐨勭紪杈戝櫒閫夐」鍒楄〃
+ * 鏍规嵁鍙敤缂栬緫鍣ㄥ垪琛ㄨ繃婊ゅ叡浜紪杈戝櫒鐩綍锛岀敓鎴愬寘鍚爣绛惧拰鍥炬爣鐨勫畬鏁撮€夐」
+ * @param platform - 骞冲彴鏍囪瘑瀛楃涓? * @param availableEditors - 褰撳墠鍙敤鐨勭紪杈戝櫒 ID 鍒楄〃
+ * @returns 缂栬緫鍣ㄩ€夐」鏁扮粍锛屽寘鍚爣璇嗐€佹爣绛惧拰鍥炬爣
  */
 export function resolveAvailableEditorOptions(
   platform: string,

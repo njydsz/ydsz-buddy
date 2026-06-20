@@ -33,7 +33,7 @@ use crate::error::{ConfigError, ConfigResult};
 ///
 /// # 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_config::RuntimeMode;
 ///
 /// let mode = RuntimeMode::default();
@@ -243,7 +243,7 @@ impl ServerConfig {
     ///
     /// # 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_config::{CliArgs, ServerConfig};

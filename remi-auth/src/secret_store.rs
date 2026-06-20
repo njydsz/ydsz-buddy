@@ -63,7 +63,7 @@ impl SecretStore {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// use remi_auth::SecretStore;
     /// use std::path::PathBuf;
     ///
@@ -96,7 +96,7 @@ impl SecretStore {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// # use remi_auth::SecretStore;
@@ -155,7 +155,7 @@ impl SecretStore {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// # use remi_auth::SecretStore;

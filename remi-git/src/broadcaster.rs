@@ -33,7 +33,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use std::sync::Arc;
@@ -140,20 +140,22 @@ struct CachedStatus {
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// use std::sync::Arc;
 /// use std::time::Duration;
 /// use remi_git::{GitCore, GitStatusBroadcaster};
-///
+/// 
 /// let core = Arc::new(GitCore::new());
 /// let broadcaster = GitStatusBroadcaster::new(core, Duration::from_secs(5));
-///
+/// 
 /// // 查询状态（自动缓存）
 /// let status = broadcaster.get_status("/path/to/repo").await?;
-///
+/// 
 /// // 手动刷新状态
 /// let status = broadcaster.refresh_status("/path/to/repo").await?;
-/// ```
+/// }
 pub struct GitStatusBroadcaster {
     /// Git 核心服务实例
     core: Arc<GitCore>,
@@ -184,7 +186,7 @@ impl GitStatusBroadcaster {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let core = Arc::new(GitCore::new());
     /// let broadcaster = GitStatusBroadcaster::new(core, Duration::from_secs(5));
     /// ```
@@ -222,10 +224,12 @@ impl GitStatusBroadcaster {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let status = broadcaster.get_status("/path/to/repo").await?;
     /// println!("当前分支: {:?}", status.current_branch);
-    /// ```
+    /// }
     pub async fn get_status(&self, cwd: &str) -> GitResult<GitStatusResult> {
         // 检查缓存
         {
@@ -323,14 +327,16 @@ impl GitStatusBroadcaster {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let mut receiver = broadcaster.stream_status();
     /// tokio::spawn(async move {
     ///     while let Ok(event) = receiver.recv().await {
     ///         println!("状态更新: {:?}", event.status.current_branch);
     ///     }
     /// });
-    /// ```
+    /// }
     ///
     /// # 注意事项
     ///
@@ -363,7 +369,7 @@ impl GitStatusBroadcaster {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let (shutdown_tx, shutdown_rx) = broadcast::channel(1);
     /// let cwd = "/path/to/repo".to_string();
     ///

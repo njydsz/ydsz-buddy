@@ -1,6 +1,6 @@
 /**
- * @file Git React Query 集成模块
- * @description 提供 Git 操作�?React Query 查询和变更配置�? *              包含状态查询、分支列表、工作树差异、提交操作等�? */
+ * @file Git React Query 闆嗘垚妯″潡
+ * @description 鎻愪緵 Git 鎿嶄綔鐨?React Query 鏌ヨ鍜屽彉鏇撮厤缃€? *              鍖呭惈鐘舵€佹煡璇€€佸垎鏀垪琛ㄣ€佸伐浣滄爲宸紓銆佹彁浜ゆ搷浣滅瓑銆? */
 
 import type {
   GitReadWorkingTreeDiffInput,
@@ -11,37 +11,37 @@ import { mutationOptions, queryOptions, type QueryClient } from "@tanstack/react
 import { ensureNativeApi } from "../nativeApi";
 import { buildPatchCacheKey } from "./diffRendering";
 
-/** Git 状态查询过期时间（毫秒�?*/
+/** Git 鐘舵€佹煡璇㈣繃鏈熸椂闂达紙姣锛?*/
 const GIT_STATUS_STALE_TIME_MS = 30_000;
-/** Git 状态查询刷新间隔（毫秒�?*/
+/** Git 鐘舵€佹煡璇㈠埛鏂伴棿闅旓紙姣锛?*/
 const GIT_STATUS_REFETCH_INTERVAL_MS = 60_000;
-/** Git 分支列表查询过期时间（毫秒） */
+/** Git 鍒嗘敮鍒楄〃鏌ヨ杩囨湡鏃堕棿锛堟绉掞級 */
 const GIT_BRANCHES_STALE_TIME_MS = 15_000;
-/** Git 分支列表查询刷新间隔（毫秒） */
+/** Git 鍒嗘敮鍒楄〃鏌ヨ鍒锋柊闂撮殧锛堟绉掞級 */
 const GIT_BRANCHES_REFETCH_INTERVAL_MS = 60_000;
-/** Git 差异摘要缓存保留时间（毫秒，30分钟�?*/
+/** Git 宸紓鎽樿缂撳瓨淇濈暀鏃堕棿锛堟绉掞紝30鍒嗛挓锛?*/
 const GIT_DIFF_SUMMARY_GC_TIME_MS = 30 * 60_000;
-/** Git 工作树差异查询过期时间（毫秒�?*/
+/** Git 宸ヤ綔鏍戝樊寮傛煡璇㈣繃鏈熸椂闂达紙姣锛?*/
 const GIT_WORKING_TREE_DIFF_STALE_TIME_MS = 5_000;
-/** Git 工作树差异实时刷新间隔（毫秒�?*/
+/** Git 宸ヤ綔鏍戝樊寮傚疄鏃跺埛鏂伴棿闅旓紙姣锛?*/
 export const GIT_WORKING_TREE_DIFF_LIVE_REFETCH_INTERVAL_MS = 4_000;
 
 /**
- * Git 查询键工�? * 用于生成 React Query 的查询键
+ * Git 鏌ヨ閿伐鍘? * 鐢ㄤ簬鐢熸垚 React Query 鐨勬煡璇㈤敭
  */
 export const gitQueryKeys = {
-  /** 所�?Git 查询的根�?*/
+  /** 鎵€鏈?Git 鏌ヨ鐨勬牴閿?*/
   all: ["git"] as const,
-  /** Git 状态查询键 */
+  /** Git 鐘舵€佹煡璇㈤敭 */
   status: (cwd: string | null) => ["git", "status", cwd] as const,
-  /** Git 分支列表查询�?*/
+  /** Git 鍒嗘敮鍒楄〃鏌ヨ閿?*/
   branches: (cwd: string | null) => ["git", "branches", cwd] as const,
-  /** Git 工作树差异查询键 */
+  /** Git 宸ヤ綔鏍戝樊寮傛煡璇㈤敭 */
   workingTreeDiff: (
     cwd: string | null,
     scope: GitReadWorkingTreeDiffInput["scope"] = "workingTree",
   ) => ["git", "working-tree-diff", cwd, scope] as const,
-  /** Git 差异摘要查询�?*/
+  /** Git 宸紓鎽樿鏌ヨ閿?*/
   diffSummary: (
     cacheScope: string | null,
     model: string | null,
@@ -61,27 +61,27 @@ export const gitQueryKeys = {
 };
 
 /**
- * Git 变更键工�? * 用于生成 React Query 的变更键
+ * Git 鍙樻洿閿伐鍘? * 鐢ㄤ簬鐢熸垚 React Query 鐨勫彉鏇撮敭
  */
 export const gitMutationKeys = {
-  /** Git 初始化变更键 */
+  /** Git 鍒濆鍖栧彉鏇撮敭 */
   init: (cwd: string | null) => ["git", "mutation", "init", cwd] as const,
-  /** Git 检出变更键 */
+  /** Git 妫€鍑哄彉鏇撮敭 */
   checkout: (cwd: string | null) => ["git", "mutation", "checkout", cwd] as const,
-  /** Git 堆叠操作变更�?*/
+  /** Git 鍫嗗彔鎿嶄綔鍙樻洿閿?*/
   runStackedAction: (cwd: string | null) => ["git", "mutation", "run-stacked-action", cwd] as const,
-  /** Git 拉取变更�?*/
+  /** Git 鎷夊彇鍙樻洿閿?*/
   pull: (cwd: string | null) => ["git", "mutation", "pull", cwd] as const,
-  /** Git 准备拉取请求线程变更�?*/
+  /** Git 鍑嗗鎷夊彇璇锋眰绾跨▼鍙樻洿閿?*/
   preparePullRequestThread: (cwd: string | null) =>
     ["git", "mutation", "prepare-pull-request-thread", cwd] as const,
-  /** Git 线程交接变更�?*/
+  /** Git 绾跨▼浜ゆ帴鍙樻洿閿?*/
   handoffThread: (cwd: string | null) => ["git", "mutation", "handoff-thread", cwd] as const,
 };
 
 /**
- * 使所�?Git 查询失效
- * @param queryClient - React Query 客户�? * @returns 失效操作�?Promise
+ * 浣挎墍鏈?Git 鏌ヨ澶辨晥
+ * @param queryClient - React Query 瀹㈡埛绔? * @returns 澶辨晥鎿嶄綔鐨?Promise
  */
 export function invalidateGitQueries(queryClient: QueryClient) {
   return Promise.all([
@@ -93,10 +93,10 @@ export function invalidateGitQueries(queryClient: QueryClient) {
 }
 
 /**
- * 使指定工作目录的 Git 查询失效
- * 限定实时文件变更的失效范围，避免影响不相关的项目/工作�?Git 缓存
- * @param queryClient - React Query 客户�? * @param cwds - 工作目录列表
- * @returns 失效操作�?Promise
+ * 浣挎寚瀹氬伐浣滅洰褰曠殑 Git 鏌ヨ澶辨晥
+ * 闄愬畾瀹炴椂鏂囦欢鍙樻洿鐨勫け鏁堣寖鍥达紝閬垮厤褰卞搷涓嶇浉鍏崇殑椤圭洰/宸ヤ綔鏍?Git 缂撳瓨
+ * @param queryClient - React Query 瀹㈡埛绔? * @param cwds - 宸ヤ綔鐩綍鍒楄〃
+ * @returns 澶辨晥鎿嶄綔鐨?Promise
  */
 export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iterable<string>) {
   const uniqueCwds = [...new Set([...cwds].filter((cwd) => cwd.length > 0))];
@@ -111,9 +111,9 @@ export function invalidateGitQueriesForCwds(queryClient: QueryClient, cwds: Iter
 }
 
 /**
- * Git 状态查询选项
- * @param cwd - 工作目录
- * @returns React Query 查询选项
+ * Git 鐘舵€佹煡璇㈤€夐」
+ * @param cwd - 宸ヤ綔鐩綍
+ * @returns React Query 鏌ヨ閫夐」
  */
 export function gitStatusQueryOptions(cwd: string | null) {
   return queryOptions({
@@ -132,9 +132,9 @@ export function gitStatusQueryOptions(cwd: string | null) {
 }
 
 /**
- * Git 分支列表查询选项
- * @param cwd - 工作目录
- * @returns React Query 查询选项
+ * Git 鍒嗘敮鍒楄〃鏌ヨ閫夐」
+ * @param cwd - 宸ヤ綔鐩綍
+ * @returns React Query 鏌ヨ閫夐」
  */
 export function gitBranchesQueryOptions(cwd: string | null) {
   return queryOptions({
@@ -153,10 +153,10 @@ export function gitBranchesQueryOptions(cwd: string | null) {
 }
 
 /**
- * Git 解析拉取请求查询选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.reference - Git 引用（分支名、提交哈希等�? * @returns React Query 查询选项
+ * Git 瑙ｆ瀽鎷夊彇璇锋眰鏌ヨ閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.reference - Git 寮曠敤锛堝垎鏀悕銆佹彁浜ゅ搱甯岀瓑锛? * @returns React Query 鏌ヨ閫夐」
  */
 export function gitResolvePullRequestQueryOptions(input: {
   cwd: string | null;
@@ -179,13 +179,13 @@ export function gitResolvePullRequestQueryOptions(input: {
 }
 
 /**
- * Git 工作树差异查询选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.scope - 差异范围，默认为 "workingTree"
- * @param input.enabled - 是否启用查询
- * @param input.refetchInterval - 刷新间隔
- * @returns React Query 查询选项
+ * Git 宸ヤ綔鏍戝樊寮傛煡璇㈤€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.scope - 宸紓鑼冨洿锛岄粯璁や负 "workingTree"
+ * @param input.enabled - 鏄惁鍚敤鏌ヨ
+ * @param input.refetchInterval - 鍒锋柊闂撮殧
+ * @returns React Query 鏌ヨ閫夐」
  */
 export function gitWorkingTreeDiffQueryOptions(input: {
   cwd: string | null;
@@ -213,14 +213,14 @@ export function gitWorkingTreeDiffQueryOptions(input: {
 }
 
 /**
- * Git 差异摘要查询选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.cacheScope - 缓存作用�? * @param input.patch - 补丁文本
- * @param input.model - 文本生成模型
- * @param input.codexHomePath - Codex 主目录路�? * @param input.providerOptions - 提供商选项
- * @param input.enabled - 是否启用查询
- * @returns React Query 查询选项
+ * Git 宸紓鎽樿鏌ヨ閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.cacheScope - 缂撳瓨浣滅敤鍩? * @param input.patch - 琛ヤ竵鏂囨湰
+ * @param input.model - 鏂囨湰鐢熸垚妯″瀷
+ * @param input.codexHomePath - Codex 涓荤洰褰曡矾寰? * @param input.providerOptions - 鎻愪緵鍟嗛€夐」
+ * @param input.enabled - 鏄惁鍚敤鏌ヨ
+ * @returns React Query 鏌ヨ閫夐」
  */
 export function gitSummarizeDiffQueryOptions(input: {
   cwd: string | null;
@@ -231,7 +231,7 @@ export function gitSummarizeDiffQueryOptions(input: {
   providerOptions?: ProviderStartOptions | null;
   enabled?: boolean;
 }) {
-  // 按补丁哈希缓存摘要，避免重新打开相同差异时重新生�?  const normalizedPatch = input.patch?.trim() ?? null;
+  // 鎸夎ˉ涓佸搱甯岀紦瀛樻憳瑕侊紝閬垮厤閲嶆柊鎵撳紑鐩稿悓宸紓鏃堕噸鏂扮敓鎴?  const normalizedPatch = input.patch?.trim() ?? null;
   const patchKey =
     normalizedPatch && normalizedPatch.length > 0
       ? buildPatchCacheKey(normalizedPatch, "git-diff-summary")
@@ -274,10 +274,10 @@ export function gitSummarizeDiffQueryOptions(input: {
 }
 
 /**
- * Git 初始化变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 鍒濆鍖栧彉鏇撮€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitInitMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
@@ -294,10 +294,10 @@ export function gitInitMutationOptions(input: { cwd: string | null; queryClient:
 }
 
 /**
- * Git 检出变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 妫€鍑哄彉鏇撮€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitCheckoutMutationOptions(input: {
   cwd: string | null;
@@ -317,12 +317,12 @@ export function gitCheckoutMutationOptions(input: {
 }
 
 /**
- * Git 运行堆叠操作变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @param input.model - 文本生成模型
- * @param input.codexHomePath - Codex 主目录路�? * @param input.providerOptions - 提供商选项
- * @returns React Query 变更选项
+ * Git 杩愯鍫嗗彔鎿嶄綔鍙樻洿閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @param input.model - 鏂囨湰鐢熸垚妯″瀷
+ * @param input.codexHomePath - Codex 涓荤洰褰曡矾寰? * @param input.providerOptions - 鎻愪緵鍟嗛€夐」
+ * @returns React Query 鍙樻洿閫夐」
  */
 export function gitRunStackedActionMutationOptions(input: {
   cwd: string | null;
@@ -367,10 +367,10 @@ export function gitRunStackedActionMutationOptions(input: {
 }
 
 /**
- * Git 拉取变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 鎷夊彇鍙樻洿閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitPullMutationOptions(input: { cwd: string | null; queryClient: QueryClient }) {
   return mutationOptions({
@@ -387,9 +387,9 @@ export function gitPullMutationOptions(input: { cwd: string | null; queryClient:
 }
 
 /**
- * Git 创建工作树变更选项
- * @param input - 输入参数
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 鍒涘缓宸ヤ綔鏍戝彉鏇撮€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
@@ -416,9 +416,9 @@ export function gitCreateWorktreeMutationOptions(input: { queryClient: QueryClie
 }
 
 /**
- * Git 创建分离工作树变更选项
- * @param input - 输入参数
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 鍒涘缓鍒嗙宸ヤ綔鏍戝彉鏇撮€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
@@ -435,9 +435,9 @@ export function gitCreateDetachedWorktreeMutationOptions(input: { queryClient: Q
 }
 
 /**
- * Git 移除工作树变更选项
- * @param input - 输入参数
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 绉婚櫎宸ヤ綔鏍戝彉鏇撮€夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClient }) {
   return mutationOptions({
@@ -454,10 +454,10 @@ export function gitRemoveWorktreeMutationOptions(input: { queryClient: QueryClie
 }
 
 /**
- * Git 准备拉取请求线程变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 鍑嗗鎷夊彇璇锋眰绾跨▼鍙樻洿閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitPreparePullRequestThreadMutationOptions(input: {
   cwd: string | null;
@@ -481,10 +481,10 @@ export function gitPreparePullRequestThreadMutationOptions(input: {
 }
 
 /**
- * Git 线程交接变更选项
- * @param input - 输入参数
- * @param input.cwd - 工作目录
- * @param input.queryClient - React Query 客户�? * @returns React Query 变更选项
+ * Git 绾跨▼浜ゆ帴鍙樻洿閫夐」
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.cwd - 宸ヤ綔鐩綍
+ * @param input.queryClient - React Query 瀹㈡埛绔? * @returns React Query 鍙樻洿閫夐」
  */
 export function gitHandoffThreadMutationOptions(input: {
   cwd: string | null;

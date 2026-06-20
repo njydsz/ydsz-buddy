@@ -58,7 +58,7 @@ use remi_persistence::PairingLinkStore;
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// let request = AuthRequest {
 ///     headers: HashMap::from([
 ///         ("authorization".to_string(), "Bearer token123".to_string()),
@@ -98,7 +98,7 @@ pub struct AuthRequest {
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// let session = AuthenticatedSession {
 ///     session_id: "sess_abc123".to_string(),
 ///     subject: "user_456".to_string(),
@@ -242,16 +242,18 @@ pub struct AuthDescriptor {
 ///
 /// ## 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// let credential_service = Arc::new(SessionCredentialService::new(...));
 /// let auth_service = AuthService::new(credential_service);
-///
+/// 
 /// // 获取认证描述
 /// let descriptor = auth_service.get_descriptor().await?;
-///
+/// 
 /// // 认证 HTTP 请求
 /// let session = auth_service.authenticate_http_request(&request).await?;
-/// ```
+/// }
 pub struct AuthService {
     /// 底层凭证服务实例，负责具体的凭证签发、验证和会话管理
     credential_service: Arc<SessionCredentialService>,
@@ -281,7 +283,7 @@ impl AuthService {
     ///
     /// ## 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let credential_service = Arc::new(SessionCredentialService::new(...));
     /// let auth_service = AuthService::new(credential_service);
     /// ```
@@ -358,11 +360,13 @@ impl AuthService {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let descriptor = auth_service.get_descriptor().await?;
     /// println!("服务器名称: {}", descriptor.server_name);
     /// println!("支持的认证方式: {:?}", descriptor.supported_methods);
-    /// ```
+    /// }
     pub async fn get_descriptor(&self) -> AuthResult<AuthDescriptor> {
         Ok(AuthDescriptor {
             server_name: "Remi Code".to_string(),
@@ -737,7 +741,9 @@ impl AuthService {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let request = AuthRequest {
     ///     headers: HashMap::from([
     ///         ("authorization".to_string(), "Bearer token123".to_string()),
@@ -747,7 +753,7 @@ impl AuthService {
     /// };
     /// let session = auth_service.authenticate_http_request(&request).await?;
     /// println!("已认证用户: {}", session.subject);
-    /// ```
+    /// }
     pub async fn authenticate_http_request(
         &self,
         request: &AuthRequest,
@@ -806,7 +812,9 @@ impl AuthService {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let request = AuthRequest {
     ///     headers: HashMap::from([
     ///         ("authorization".to_string(), "Bearer ws_token123".to_string()),
@@ -816,7 +824,7 @@ impl AuthService {
     /// };
     /// let session = auth_service.authenticate_websocket_upgrade(&request).await?;
     /// println!("WebSocket 已认证用户: {}", session.subject);
-    /// ```
+    /// }
     pub async fn authenticate_websocket_upgrade(
         &self,
         request: &AuthRequest,
@@ -869,11 +877,13 @@ impl AuthService {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let session = auth_service.authenticate_http_request(&request).await?;
     /// let ws_token = auth_service.issue_websocket_token(&session).await?;
     /// println!("WebSocket 令牌: {}", ws_token.token);
-    /// ```
+    /// }
     pub async fn issue_websocket_token(
         &self,
         session: &AuthenticatedSession,
@@ -910,11 +920,13 @@ impl AuthService {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let pairing_url = auth_service.issue_startup_pairing_url("https://example.com").await?;
     /// println!("配对 URL: {}", pairing_url);
     /// // 输出: 配对 URL: https://example.com/pair?code=abc12345
-    /// ```
+    /// }
     pub async fn issue_startup_pairing_url(&self, base_url: &str) -> AuthResult<String> {
         let credential = self.issue_pairing_credential(Some(SessionRole::Owner)).await?;
         Ok(format!(

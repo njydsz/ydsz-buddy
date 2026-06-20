@@ -1,27 +1,27 @@
 /**
- * @file 最近项目状态管�? *
- * 管理用户最近使用的项目 ID�? * 使用 Zustand + persist 中间件将状态持久化�?localStorage�? * 支持设置和清除最近项�?ID。清除时可指定项�?ID 以避免误删其他项目的记录�? */
+ * @file 鏈€杩戦」鐩姸鎬佺鐞? *
+ * 绠＄悊鐢ㄦ埛鏈€杩戜娇鐢ㄧ殑椤圭洰 ID銆? * 浣跨敤 Zustand + persist 涓棿浠跺皢鐘舵€佹寔涔呭寲鍒?localStorage锛? * 鏀寔璁剧疆鍜屾竻闄ゆ渶杩戦」鐩?ID銆傛竻闄ゆ椂鍙寚瀹氶」鐩?ID 浠ラ伩鍏嶈鍒犲叾浠栭」鐩殑璁板綍銆? */
 
 import type { ProjectId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** localStorage 中的存储�?*/
+/** localStorage 涓殑瀛樺偍閿?*/
 const LATEST_PROJECT_STORAGE_KEY = "remicode:latest-project:v1";
 
-/** 最近项�?Store 的状态接�?*/
+/** 鏈€杩戦」鐩?Store 鐨勭姸鎬佹帴鍙?*/
 interface LatestProjectStore {
-  /** 最近使用的项目 ID，无项目时为 null */
+  /** 鏈€杩戜娇鐢ㄧ殑椤圭洰 ID锛屾棤椤圭洰鏃朵负 null */
   latestProjectId: ProjectId | null;
-  /** 设置最近项�?ID */
+  /** 璁剧疆鏈€杩戦」鐩?ID */
   setLatestProjectId: (projectId: ProjectId) => void;
   /**
-   * 清除最近项�?ID�?   * 传入 projectId 时，仅当当前记录匹配时才清除，避免误删�?   * 不传 projectId 时无条件清除�?   */
+   * 娓呴櫎鏈€杩戦」鐩?ID銆?   * 浼犲叆 projectId 鏃讹紝浠呭綋褰撳墠璁板綍鍖归厤鏃舵墠娓呴櫎锛岄伩鍏嶈鍒犮€?   * 涓嶄紶 projectId 鏃舵棤鏉′欢娓呴櫎銆?   */
   clearLatestProjectId: (projectId?: ProjectId) => void;
 }
 
 /**
- * 最近项�?Zustand Store�? * 持久化到 localStorage，记录用户最后使用的项目�? */
+ * 鏈€杩戦」鐩?Zustand Store銆? * 鎸佷箙鍖栧埌 localStorage锛岃褰曠敤鎴锋渶鍚庝娇鐢ㄧ殑椤圭洰銆? */
 export const useLatestProjectStore = create<LatestProjectStore>()(
   persist(
     (set) => ({

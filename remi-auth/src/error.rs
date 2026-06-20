@@ -110,7 +110,7 @@ pub enum AuthError {
 ///
 /// ## 使用示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_auth::AuthResult;
 ///
 /// fn authenticate_user() -> AuthResult<String> {

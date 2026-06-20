@@ -1,7 +1,7 @@
 /**
  * @file BranchToolbar.tsx
- * @description 聊天线程的紧凑工作区控件栏，包含本地用量弹出面板、
- *              内联工作区交接操作、运行时访问开关和分支选择器。
+ * @description èŠå¤©çº¿ç¨‹çš„ç´§å‡‘å·¥ä½œåŒºæŽ§ä»¶æ ï¼ŒåŒ…å«æœ¬åœ°ç”¨é‡å¼¹å‡ºé¢æ¿ã€
+ *              å†…è”å·¥ä½œåŒºäº¤æŽ¥æ“ä½œã€è¿è¡Œæ—¶è®¿é—®å¼€å…³å’Œåˆ†æ”¯é€‰æ‹©å™¨ã€‚
  */
 import type { ThreadId, RuntimeMode } from "~/contracts";
 import { LuSplit } from "react-icons/lu";
@@ -94,7 +94,7 @@ export function RuntimeUsageControls({
           }
           title={
             runtimeMode === "full-access"
-              ? "Full access �?click to require approvals"
+              ? "Full access ï¿½?click to require approvals"
               : "Ask every action"
           }
         >

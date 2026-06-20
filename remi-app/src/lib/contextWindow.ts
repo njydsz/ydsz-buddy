@@ -1,34 +1,34 @@
 /**
- * @file 上下文窗口管理模�? * @description 提供上下文窗口使用情况的快照、计算和格式化功能�? *              用于跟踪和展示模型上下文窗口�?token 使用情况�? */
+ * @file 涓婁笅鏂囩獥鍙ｇ鐞嗘ā鍧? * @description 鎻愪緵涓婁笅鏂囩獥鍙ｄ娇鐢ㄦ儏鍐电殑蹇収銆佽绠楀拰鏍煎紡鍖栧姛鑳姐€? *              鐢ㄤ簬璺熻釜鍜屽睍绀烘ā鍨嬩笂涓嬫枃绐楀彛鐨?token 浣跨敤鎯呭喌銆? */
 
 import type { OrchestrationThreadActivity, ThreadTokenUsageSnapshot } from "~/contracts";
 
 /**
- * 将未知值转换为记录对象（内部函数）
- * @param value - 未知�? * @returns 如果是对象则返回记录，否则返�?null
+ * 灏嗘湭鐭ュ€艰浆鎹负璁板綍瀵硅薄锛堝唴閮ㄥ嚱鏁帮級
+ * @param value - 鏈煡鍊? * @returns 濡傛灉鏄璞″垯杩斿洖璁板綍锛屽惁鍒欒繑鍥?null
  */
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 }
 
 /**
- * 将未知值转换为有限数字（内部函数）
- * @param value - 未知�? * @returns 如果是有限数字则返回，否则返�?null
+ * 灏嗘湭鐭ュ€艰浆鎹负鏈夐檺鏁板瓧锛堝唴閮ㄥ嚱鏁帮級
+ * @param value - 鏈煡鍊? * @returns 濡傛灉鏄湁闄愭暟瀛楀垯杩斿洖锛屽惁鍒欒繑鍥?null
  */
 function asFiniteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 /**
- * 将未知值转换为布尔值（内部函数�? * @param value - 未知�? * @returns 如果是布尔值则返回，否则返�?null
+ * 灏嗘湭鐭ュ€艰浆鎹负甯冨皵鍊硷紙鍐呴儴鍑芥暟锛? * @param value - 鏈煡鍊? * @returns 濡傛灉鏄竷灏斿€煎垯杩斿洖锛屽惁鍒欒繑鍥?null
  */
 function asBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
 }
 
 /**
- * 将未知值转换为上下文窗口百分比（内部函数）
- * @param value - 未知�? * @returns 限制�?0-100 范围内的百分比值，如果无效则返�?null
+ * 灏嗘湭鐭ュ€艰浆鎹负涓婁笅鏂囩獥鍙ｇ櫨鍒嗘瘮锛堝唴閮ㄥ嚱鏁帮級
+ * @param value - 鏈煡鍊? * @returns 闄愬埗鍦?0-100 鑼冨洿鍐呯殑鐧惧垎姣斿€硷紝濡傛灉鏃犳晥鍒欒繑鍥?null
  */
 function asContextWindowPercent(value: unknown): number | null {
   const percent = asFiniteNumber(value);
@@ -39,8 +39,8 @@ function asContextWindowPercent(value: unknown): number | null {
 }
 
 /**
- * 可空上下文窗口使用量类型
- * �?ThreadTokenUsageSnapshot 中可选的字段也标记为可空
+ * 鍙┖涓婁笅鏂囩獥鍙ｄ娇鐢ㄩ噺绫诲瀷
+ * 灏?ThreadTokenUsageSnapshot 涓彲閫夌殑瀛楁涔熸爣璁颁负鍙┖
  */
 type NullableContextWindowUsage = {
   readonly [Key in keyof ThreadTokenUsageSnapshot]: undefined extends ThreadTokenUsageSnapshot[Key]
@@ -49,60 +49,60 @@ type NullableContextWindowUsage = {
 };
 
 /**
- * 上下文窗口快照接�? * 包含 token 使用量、剩余量、百分比等信�? */
+ * 涓婁笅鏂囩獥鍙ｅ揩鐓ф帴鍙? * 鍖呭惈 token 浣跨敤閲忋€佸墿浣欓噺銆佺櫨鍒嗘瘮绛変俊鎭? */
 export type ContextWindowSnapshot = NullableContextWindowUsage & {
-  /** 剩余 token 数量 */
+  /** 鍓╀綑 token 鏁伴噺 */
   readonly remainingTokens: number | null;
-  /** 已使用百分比 */
+  /** 宸蹭娇鐢ㄧ櫨鍒嗘瘮 */
   readonly usedPercentage: number | null;
-  /** 剩余百分�?*/
+  /** 鍓╀綑鐧惧垎姣?*/
   readonly remainingPercentage: number | null;
-  /** 更新时间�?*/
+  /** 鏇存柊鏃堕棿鎴?*/
   readonly updatedAt: string;
 };
 
 /**
- * 上下文窗口选择状态接�? */
+ * 涓婁笅鏂囩獥鍙ｉ€夋嫨鐘舵€佹帴鍙? */
 export interface ContextWindowSelectionStatus {
-  /** 当前活动的上下文窗口标签 */
+  /** 褰撳墠娲诲姩鐨勪笂涓嬫枃绐楀彛鏍囩 */
   readonly activeLabel: string | null;
-  /** 已选择的上下文窗口标签 */
+  /** 宸查€夋嫨鐨勪笂涓嬫枃绐楀彛鏍囩 */
   readonly selectedLabel: string | null;
-  /** 待生效的选择标签（与当前活动不同时显示） */
+  /** 寰呯敓鏁堢殑閫夋嫨鏍囩锛堜笌褰撳墠娲诲姩涓嶅悓鏃舵樉绀猴級 */
   readonly pendingSelectedLabel: string | null;
 }
 
 /**
- * 上下文窗口仪表显示信息接�? */
+ * 涓婁笅鏂囩獥鍙ｄ华琛ㄦ樉绀轰俊鎭帴鍙? */
 export interface ContextWindowMeterDisplay {
-  /** 已使用百分比标签 */
+  /** 宸蹭娇鐢ㄧ櫨鍒嗘瘮鏍囩 */
   readonly usedPercentageLabel: string | null;
-  /** token 使用量标�?*/
+  /** token 浣跨敤閲忔爣绛?*/
   readonly tokenUsageLabel: string;
-  /** 是否有可靠的 token 比例数据 */
+  /** 鏄惁鏈夊彲闈犵殑 token 姣斾緥鏁版嵁 */
   readonly hasReliableTokenRatio: boolean;
-  /** 规范化后的百分比�?-100�?*/
+  /** 瑙勮寖鍖栧悗鐨勭櫨鍒嗘瘮锛?-100锛?*/
   readonly normalizedPercentage: number;
-  /** 紧凑标签 */
+  /** 绱у噾鏍囩 */
   readonly compactLabel: string;
-  /** 无障碍标�?*/
+  /** 鏃犻殰纰嶆爣绛?*/
   readonly ariaLabel: string;
 }
 
-/** 已知的上下文窗口最�?token 配置 */
+/** 宸茬煡鐨勪笂涓嬫枃绐楀彛鏈€澶?token 閰嶇疆 */
 const KNOWN_CONTEXT_WINDOW_MAX_TOKENS = {
   "200k": 200_000,
   "1m": 1_000_000,
 } as const;
 
 /**
- * 从活动列表中提取最新的使用量快照（内部函数�? * @param activities - 线程活动列表
- * @returns 最新的上下文窗口使用量快照，如果未找到则返�?null
+ * 浠庢椿鍔ㄥ垪琛ㄤ腑鎻愬彇鏈€鏂扮殑浣跨敤閲忓揩鐓э紙鍐呴儴鍑芥暟锛? * @param activities - 绾跨▼娲诲姩鍒楄〃
+ * @returns 鏈€鏂扮殑涓婁笅鏂囩獥鍙ｄ娇鐢ㄩ噺蹇収锛屽鏋滄湭鎵惧埌鍒欒繑鍥?null
  */
 function deriveLatestUsageContextWindowSnapshot(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): ContextWindowSnapshot | null {
-  // 从后向前遍历，找到最新的 context-window.updated 活动
+  // 浠庡悗鍚戝墠閬嶅巻锛屾壘鍒版渶鏂扮殑 context-window.updated 娲诲姩
   for (let index = activities.length - 1; index >= 0; index -= 1) {
     const activity = activities[index];
     if (!activity || activity.kind !== "context-window.updated") {
@@ -115,21 +115,21 @@ function deriveLatestUsageContextWindowSnapshot(
     const payloadUsedPercent = asContextWindowPercent(payload?.usedPercent);
     const maxTokens = asFiniteNumber(payload?.maxTokens);
     
-    // 跳过无效的使用量数据
+    // 璺宠繃鏃犳晥鐨勪娇鐢ㄩ噺鏁版嵁
     if (usedTokens <= 0 && payloadUsedPercent === null && (maxTokens === null || maxTokens <= 0)) {
       continue;
     }
 
-    // 计算已使用百分比
+    // 璁＄畻宸蹭娇鐢ㄧ櫨鍒嗘瘮
     const usedPercentage =
       payloadUsedPercent ??
       (maxTokens !== null && maxTokens > 0 ? Math.min(100, (usedTokens / maxTokens) * 100) : null);
     
-    // 判断 token 使用量是否可�?    const hasReliableTokenUsage =
+    // 鍒ゆ柇 token 浣跨敤閲忔槸鍚﹀彲闈?    const hasReliableTokenUsage =
       rawUsedTokens !== null &&
       (usedTokens > 0 || payloadUsedPercent === null || (maxTokens !== null && maxTokens > 0));
     
-    // 计算剩余 token 和百分比
+    // 璁＄畻鍓╀綑 token 鍜岀櫨鍒嗘瘮
     const remainingTokens =
       maxTokens !== null && hasReliableTokenUsage
         ? Math.max(0, Math.round(maxTokens - usedTokens))
@@ -164,13 +164,13 @@ function deriveLatestUsageContextWindowSnapshot(
 }
 
 /**
- * 从活动列表中提取最新的配置最�?token 数（内部函数�? * @param activities - 线程活动列表
- * @returns 配置的最�?token 数，如果未找到则返回 null
+ * 浠庢椿鍔ㄥ垪琛ㄤ腑鎻愬彇鏈€鏂扮殑閰嶇疆鏈€澶?token 鏁帮紙鍐呴儴鍑芥暟锛? * @param activities - 绾跨▼娲诲姩鍒楄〃
+ * @returns 閰嶇疆鐨勬渶澶?token 鏁帮紝濡傛灉鏈壘鍒板垯杩斿洖 null
  */
 function deriveLatestConfiguredContextWindowMaxTokens(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): number | null {
-  // 从后向前遍历，找到最新的 context-window.configured 活动
+  // 浠庡悗鍚戝墠閬嶅巻锛屾壘鍒版渶鏂扮殑 context-window.configured 娲诲姩
   for (let index = activities.length - 1; index >= 0; index -= 1) {
     const activity = activities[index];
     if (!activity || activity.kind !== "context-window.configured") {
@@ -188,8 +188,8 @@ function deriveLatestConfiguredContextWindowMaxTokens(
 }
 
 /**
- * 从活动列表中派生最新的上下文窗口快�? * @param activities - 线程活动列表
- * @returns 最新的上下文窗口快照，如果未找到则返回 null
+ * 浠庢椿鍔ㄥ垪琛ㄤ腑娲剧敓鏈€鏂扮殑涓婁笅鏂囩獥鍙ｅ揩鐓? * @param activities - 绾跨▼娲诲姩鍒楄〃
+ * @returns 鏈€鏂扮殑涓婁笅鏂囩獥鍙ｅ揩鐓э紝濡傛灉鏈壘鍒板垯杩斿洖 null
  */
 export function deriveLatestContextWindowSnapshot(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -201,7 +201,7 @@ export function deriveLatestContextWindowSnapshot(
     return null;
   }
 
-  // 优先使用配置的最�?token �?  const usedTokens = usageSnapshot?.usedTokens ?? 0;
+  // 浼樺厛浣跨敤閰嶇疆鐨勬渶澶?token 鏁?  const usedTokens = usageSnapshot?.usedTokens ?? 0;
   const maxTokens = configuredMaxTokens ?? usageSnapshot?.maxTokens ?? null;
   const usedPercentage =
     usageSnapshot?.usedPercent ??
@@ -242,8 +242,8 @@ export function deriveLatestContextWindowSnapshot(
 }
 
 /**
- * 根据选择值派生上下文窗口快照
- * @param selectedValue - 选择的上下文窗口值（�?"200k" �?"1m"�? * @returns 对应的上下文窗口快照，如果值无效则返回 null
+ * 鏍规嵁閫夋嫨鍊兼淳鐢熶笂涓嬫枃绐楀彛蹇収
+ * @param selectedValue - 閫夋嫨鐨勪笂涓嬫枃绐楀彛鍊硷紙濡?"200k" 鎴?"1m"锛? * @returns 瀵瑰簲鐨勪笂涓嬫枃绐楀彛蹇収锛屽鏋滃€兼棤鏁堝垯杩斿洖 null
  */
 export function deriveSelectedContextWindowSnapshot(
   selectedValue: string | null | undefined,
@@ -259,7 +259,7 @@ export function deriveSelectedContextWindowSnapshot(
     return null;
   }
 
-  // 返回一个初始状态的快照，表示尚未使�?  return {
+  // 杩斿洖涓€涓垵濮嬬姸鎬佺殑蹇収锛岃〃绀哄皻鏈娇鐢?  return {
     usedTokens: 0,
     usedPercent: null,
     totalProcessedTokens: null,
@@ -284,7 +284,7 @@ export function deriveSelectedContextWindowSnapshot(
 }
 
 /**
- * 格式化百分比值（内部函数�? * @param value - 百分比�? * @returns 格式化后的百分比字符串，如果无效则返�?null
+ * 鏍煎紡鍖栫櫨鍒嗘瘮鍊硷紙鍐呴儴鍑芥暟锛? * @param value - 鐧惧垎姣斿€? * @returns 鏍煎紡鍖栧悗鐨勭櫨鍒嗘瘮瀛楃涓诧紝濡傛灉鏃犳晥鍒欒繑鍥?null
  */
 function formatPercentage(value: number | null): string | null {
   if (value === null || !Number.isFinite(value)) {
@@ -297,7 +297,7 @@ function formatPercentage(value: number | null): string | null {
 }
 
 /**
- * 派生上下文窗口仪表显示信�? * @param usage - 上下文窗口快�? * @returns 仪表显示信息对象
+ * 娲剧敓涓婁笅鏂囩獥鍙ｄ华琛ㄦ樉绀轰俊鎭? * @param usage - 涓婁笅鏂囩獥鍙ｅ揩鐓? * @returns 浠〃鏄剧ず淇℃伅瀵硅薄
  */
 export function deriveContextWindowMeterDisplay(
   usage: ContextWindowSnapshot,
@@ -322,9 +322,9 @@ export function deriveContextWindowMeterDisplay(
 }
 
 /**
- * 派生累计成本（美元）
- * @param activities - 线程活动列表
- * @returns 累计成本，如果未找到则返�?null
+ * 娲剧敓绱鎴愭湰锛堢編鍏冿級
+ * @param activities - 绾跨▼娲诲姩鍒楄〃
+ * @returns 绱鎴愭湰锛屽鏋滄湭鎵惧埌鍒欒繑鍥?null
  */
 export function deriveCumulativeCostUsd(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -333,7 +333,7 @@ export function deriveCumulativeCostUsd(
   let latestCumulative: number | null = null;
   let foundTurnDelta = false;
   
-  // 遍历所�?turn.completed 活动，累计成�?  for (const activity of activities) {
+  // 閬嶅巻鎵€鏈?turn.completed 娲诲姩锛岀疮璁℃垚鏈?  for (const activity of activities) {
     if (activity.kind !== "turn.completed") continue;
     const payload = asRecord(activity.payload);
     const cumulativeCost = asFiniteNumber(payload?.cumulativeCostUsd);
@@ -354,8 +354,8 @@ export function deriveCumulativeCostUsd(
 }
 
 /**
- * 格式化上下文窗口选择标签
- * @param value - 选择�? * @returns 格式化后的标签，如果无效则返�?null
+ * 鏍煎紡鍖栦笂涓嬫枃绐楀彛閫夋嫨鏍囩
+ * @param value - 閫夋嫨鍊? * @returns 鏍煎紡鍖栧悗鐨勬爣绛撅紝濡傛灉鏃犳晥鍒欒繑鍥?null
  */
 export function formatContextWindowSelectionLabel(value: string | null | undefined): string | null {
   if (typeof value !== "string") {
@@ -375,7 +375,7 @@ export function formatContextWindowSelectionLabel(value: string | null | undefin
 }
 
 /**
- * 从最�?token 数推断选择�? * @param maxTokens - 最�?token �? * @returns 匹配的选择值，如果无匹配则返回 null
+ * 浠庢渶澶?token 鏁版帹鏂€夋嫨鍊? * @param maxTokens - 鏈€澶?token 鏁? * @returns 鍖归厤鐨勯€夋嫨鍊硷紝濡傛灉鏃犲尮閰嶅垯杩斿洖 null
  */
 export function inferContextWindowSelectionValue(
   maxTokens: number | null | undefined,
@@ -384,7 +384,7 @@ export function inferContextWindowSelectionValue(
     return null;
   }
   
-  // 找到最接近的已知配�?  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
+  // 鎵惧埌鏈€鎺ヨ繎鐨勫凡鐭ラ厤缃?  const bestMatch = Object.entries(KNOWN_CONTEXT_WINDOW_MAX_TOKENS).reduce<{
     value: string | null;
     relativeDistance: number;
   }>(
@@ -395,12 +395,12 @@ export function inferContextWindowSelectionValue(
     { value: null, relativeDistance: Number.POSITIVE_INFINITY },
   );
   
-  // 仅当相对距离�?20% 以内时才返回匹配�?  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
+  // 浠呭綋鐩稿璺濈鍦?20% 浠ュ唴鏃舵墠杩斿洖鍖归厤鍊?  return bestMatch.relativeDistance <= 0.2 ? bestMatch.value : null;
 }
 
 /**
- * 派生上下文窗口选择状�? * @param input - 输入参数
- * @param input.activeSnapshot - 当前活动的快�? * @param input.selectedValue - 用户选择的�? * @returns 选择状态对�? */
+ * 娲剧敓涓婁笅鏂囩獥鍙ｉ€夋嫨鐘舵€? * @param input - 杈撳叆鍙傛暟
+ * @param input.activeSnapshot - 褰撳墠娲诲姩鐨勫揩鐓? * @param input.selectedValue - 鐢ㄦ埛閫夋嫨鐨勫€? * @returns 閫夋嫨鐘舵€佸璞? */
 export function deriveContextWindowSelectionStatus(input: {
   activeSnapshot: ContextWindowSnapshot | null;
   selectedValue: string | null | undefined;
@@ -426,7 +426,7 @@ export function deriveContextWindowSelectionStatus(input: {
 }
 
 /**
- * 格式化成本（美元�? * @param value - 成本�? * @returns 格式化后的成本字符串
+ * 鏍煎紡鍖栨垚鏈紙缇庡厓锛? * @param value - 鎴愭湰鍊? * @returns 鏍煎紡鍖栧悗鐨勬垚鏈瓧绗︿覆
  */
 export function formatCostUsd(value: number): string {
   if (value < 0.0001) return `$${value.toFixed(6)}`;
@@ -437,9 +437,9 @@ export function formatCostUsd(value: number): string {
 }
 
 /**
- * 格式化上下文窗口 token 数量
- * @param value - token 数量
- * @returns 格式化后的字符串（如 "1.5k" �?"2m"�? */
+ * 鏍煎紡鍖栦笂涓嬫枃绐楀彛 token 鏁伴噺
+ * @param value - token 鏁伴噺
+ * @returns 鏍煎紡鍖栧悗鐨勫瓧绗︿覆锛堝 "1.5k" 鎴?"2m"锛? */
 export function formatContextWindowTokens(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) {
     return "0";

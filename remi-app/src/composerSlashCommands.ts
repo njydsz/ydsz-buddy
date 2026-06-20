@@ -1,16 +1,16 @@
 /**
  * @file composerSlashCommands.ts
- * @description Composer 斜杠命令的定义、解析和过滤模块�? * 管理内置斜杠命令列表（如 /clear�?compact�?model 等）�? * 提供命令解析、搜索过滤、Provider 原生命令兼容等功能�? */
+ * @description Composer 鏂滄潬鍛戒护鐨勫畾涔夈€佽В鏋愬拰杩囨护妯″潡銆? * 绠＄悊鍐呯疆鏂滄潬鍛戒护鍒楄〃锛堝 /clear銆?compact銆?model 绛夛級锛? * 鎻愪緵鍛戒护瑙ｆ瀽銆佹悳绱㈣繃婊ゃ€丳rovider 鍘熺敓鍛戒护鍏煎绛夊姛鑳姐€? */
 
 import type { GitBranch, ProviderKind } from "~/contracts";
 
 /**
- * 内置 Composer 斜杠命令列表�? * - `clear`：清除当前对话上下文
- * - `compact`：压缩当前线程上下文以释放空�? * - `model`：切换当前线程的响应模型
- * - `plan`：切换到计划模式
- * - `default`：切换回普通聊天模�? * - `review`：启动代码审�? * - `fork`：将线程分叉到本地或�?worktree
- * - `side`：从当前线程打开受保护的侧边聊天
- * - `status`：显示上下文使用量和速率限制状�? * - `subagents`：插入委托子代理工作的提�? * - `fast`：开启或关闭快速模�? */
+ * 鍐呯疆 Composer 鏂滄潬鍛戒护鍒楄〃銆? * - `clear`锛氭竻闄ゅ綋鍓嶅璇濅笂涓嬫枃
+ * - `compact`锛氬帇缂╁綋鍓嶇嚎绋嬩笂涓嬫枃浠ラ噴鏀剧┖闂? * - `model`锛氬垏鎹㈠綋鍓嶇嚎绋嬬殑鍝嶅簲妯″瀷
+ * - `plan`锛氬垏鎹㈠埌璁″垝妯″紡
+ * - `default`锛氬垏鎹㈠洖鏅€氳亰澶╂ā寮? * - `review`锛氬惎鍔ㄤ唬鐮佸鏌? * - `fork`锛氬皢绾跨▼鍒嗗弶鍒版湰鍦版垨鏂?worktree
+ * - `side`锛氫粠褰撳墠绾跨▼鎵撳紑鍙椾繚鎶ょ殑渚ц竟鑱婂ぉ
+ * - `status`锛氭樉绀轰笂涓嬫枃浣跨敤閲忓拰閫熺巼闄愬埗鐘舵€? * - `subagents`锛氭彃鍏ュ鎵樺瓙浠ｇ悊宸ヤ綔鐨勬彁绀? * - `fast`锛氬紑鍚垨鍏抽棴蹇€熸ā寮? */
 export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "clear",
   "compact",
@@ -25,35 +25,35 @@ export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "fast",
 ] as const;
 
-/** 内置 Composer 斜杠命令类型，从 BUILT_IN_COMPOSER_SLASH_COMMANDS 推导 */
+/** 鍐呯疆 Composer 鏂滄潬鍛戒护绫诲瀷锛屼粠 BUILT_IN_COMPOSER_SLASH_COMMANDS 鎺ㄥ */
 export type ComposerSlashCommand = (typeof BUILT_IN_COMPOSER_SLASH_COMMANDS)[number];
 
 /**
- * 斜杠命令定义，包含命令名、标签、描述和来源
+ * 鏂滄潬鍛戒护瀹氫箟锛屽寘鍚懡浠ゅ悕銆佹爣绛俱€佹弿杩板拰鏉ユ簮
  */
 export interface ComposerSlashCommandDefinition {
-  /** 命令�?*/
+  /** 鍛戒护鍚?*/
   command: ComposerSlashCommand;
-  /** 显示标签（如 `/clear`�?*/
+  /** 鏄剧ず鏍囩锛堝 `/clear`锛?*/
   label: `/${ComposerSlashCommand}`;
-  /** 命令描述 */
+  /** 鍛戒护鎻忚堪 */
   description: string;
-  /** 命令来源：`"app"` 为应用级命令，`"shared"` 为共享命�?*/
+  /** 鍛戒护鏉ユ簮锛歚"app"` 涓哄簲鐢ㄧ骇鍛戒护锛宍"shared"` 涓哄叡浜懡浠?*/
   source: "app" | "shared";
 }
 
 /**
- * 斜杠命令调用结果，包含命令名和参�? */
+ * 鏂滄潬鍛戒护璋冪敤缁撴灉锛屽寘鍚懡浠ゅ悕鍜屽弬鏁? */
 export interface ComposerSlashInvocation {
-  /** 命令�?*/
+  /** 鍛戒护鍚?*/
   command: ComposerSlashCommand;
-  /** 命令参数文本 */
+  /** 鍛戒护鍙傛暟鏂囨湰 */
   args: string;
 }
 
-/** `/fast` 命令的操作类�?*/
+/** `/fast` 鍛戒护鐨勬搷浣滅被鍨?*/
 export type FastSlashCommandAction = "toggle" | "on" | "off" | "status" | "invalid";
-/** `/fork` 命令的目标类�?*/
+/** `/fork` 鍛戒护鐨勭洰鏍囩被鍨?*/
 export type ForkSlashCommandTarget = "local" | "worktree";
 
 function normalizeSlashCommandName(value: string): string {
@@ -110,9 +110,9 @@ function shouldKeepBuiltInSlashCommandDespiteNativeCollision(
 }
 
 /**
- * 判断是否应在 Composer 菜单中隐�?Provider 原生命令�? * 例如 Codex �?`/review` 命令由应用内置命令替代，不应重复显示�? *
- * @param provider - Provider 类型
- * @param command - 命令�? * @returns 是否应隐�? */
+ * 鍒ゆ柇鏄惁搴斿湪 Composer 鑿滃崟涓殣钘?Provider 鍘熺敓鍛戒护銆? * 渚嬪 Codex 鐨?`/review` 鍛戒护鐢卞簲鐢ㄥ唴缃懡浠ゆ浛浠ｏ紝涓嶅簲閲嶅鏄剧ず銆? *
+ * @param provider - Provider 绫诲瀷
+ * @param command - 鍛戒护鍚? * @returns 鏄惁搴旈殣钘? */
 export function shouldHideProviderNativeCommandFromComposerMenu(
   provider: ProviderKind,
   command: string,
@@ -122,9 +122,9 @@ export function shouldHideProviderNativeCommandFromComposerMenu(
 }
 
 /**
- * 获取 Provider 原生命令的搜索词（包含命令名及其别名）�? * 用于�?Composer 命令面板中支持按别名搜索�? *
- * @param provider - Provider 类型
- * @param command - 命令�? * @returns 搜索词数组（命令�?+ 别名�? */
+ * 鑾峰彇 Provider 鍘熺敓鍛戒护鐨勬悳绱㈣瘝锛堝寘鍚懡浠ゅ悕鍙婂叾鍒悕锛夈€? * 鐢ㄤ簬鍦?Composer 鍛戒护闈㈡澘涓敮鎸佹寜鍒悕鎼滅储銆? *
+ * @param provider - Provider 绫诲瀷
+ * @param command - 鍛戒护鍚? * @returns 鎼滅储璇嶆暟缁勶紙鍛戒护鍚?+ 鍒悕锛? */
 export function getProviderNativeSlashCommandSearchTerms(
   provider: ProviderKind,
   command: string,
@@ -206,27 +206,27 @@ const COMPOSER_SLASH_COMMAND_DEFINITIONS: Record<
 };
 
 /**
- * 判断给定值是否为内置 Composer 斜杠命令
+ * 鍒ゆ柇缁欏畾鍊兼槸鍚︿负鍐呯疆 Composer 鏂滄潬鍛戒护
  *
- * @param value - 待判断的字符�? * @returns 是否为内置命令（类型守卫�? */
+ * @param value - 寰呭垽鏂殑瀛楃涓? * @returns 鏄惁涓哄唴缃懡浠わ紙绫诲瀷瀹堝崼锛? */
 export function isBuiltInComposerSlashCommand(value: string): value is ComposerSlashCommand {
   const normalizedValue = normalizeSlashCommandName(value);
   return BUILT_IN_COMPOSER_SLASH_COMMANDS.some((command) => command === normalizedValue);
 }
 
 /**
- * 解析文本为斜杠命令调用（使用全部内置命令�? *
- * @param text - 待解析的文本
- * @returns 命令调用结果，不匹配时返�?null
+ * 瑙ｆ瀽鏂囨湰涓烘枩鏉犲懡浠よ皟鐢紙浣跨敤鍏ㄩ儴鍐呯疆鍛戒护锛? *
+ * @param text - 寰呰В鏋愮殑鏂囨湰
+ * @returns 鍛戒护璋冪敤缁撴灉锛屼笉鍖归厤鏃惰繑鍥?null
  */
 export function parseComposerSlashInvocation(text: string): ComposerSlashInvocation | null {
   return parseComposerSlashInvocationForCommands(text, BUILT_IN_COMPOSER_SLASH_COMMANDS);
 }
 
 /**
- * 解析文本为指定命令列表中的斜杠命令调�? *
- * @param text - 待解析的文本
- * @param commands - 允许的命令列�? * @returns 命令调用结果，不匹配时返�?null
+ * 瑙ｆ瀽鏂囨湰涓烘寚瀹氬懡浠ゅ垪琛ㄤ腑鐨勬枩鏉犲懡浠よ皟鐢? *
+ * @param text - 寰呰В鏋愮殑鏂囨湰
+ * @param commands - 鍏佽鐨勫懡浠ゅ垪琛? * @returns 鍛戒护璋冪敤缁撴灉锛屼笉鍖归厤鏃惰繑鍥?null
  */
 export function parseComposerSlashInvocationForCommands(
   text: string,
@@ -247,8 +247,8 @@ export function parseComposerSlashInvocationForCommands(
 }
 
 /**
- * 获取指定斜杠命令的定�? *
- * @param command - 命令�? * @returns 命令定义
+ * 鑾峰彇鎸囧畾鏂滄潬鍛戒护鐨勫畾涔? *
+ * @param command - 鍛戒护鍚? * @returns 鍛戒护瀹氫箟
  */
 export function getComposerSlashCommandDefinition(
   command: ComposerSlashCommand,
@@ -257,10 +257,10 @@ export function getComposerSlashCommandDefinition(
 }
 
 /**
- * 根据查询文本过滤匹配的斜杠命令�? * 支持按命令名、标签或描述进行模糊搜索�? *
- * @param query - 搜索查询文本
- * @param commands - 待过滤的命令列表，默认为全部内置命令
- * @returns 匹配的命令定义列�? */
+ * 鏍规嵁鏌ヨ鏂囨湰杩囨护鍖归厤鐨勬枩鏉犲懡浠ゃ€? * 鏀寔鎸夊懡浠ゅ悕銆佹爣绛炬垨鎻忚堪杩涜妯＄硦鎼滅储銆? *
+ * @param query - 鎼滅储鏌ヨ鏂囨湰
+ * @param commands - 寰呰繃婊ょ殑鍛戒护鍒楄〃锛岄粯璁や负鍏ㄩ儴鍐呯疆鍛戒护
+ * @returns 鍖归厤鐨勫懡浠ゅ畾涔夊垪琛? */
 export function filterComposerSlashCommands(
   query: string,
   commands: ReadonlyArray<ComposerSlashCommand> = BUILT_IN_COMPOSER_SLASH_COMMANDS,
@@ -286,8 +286,8 @@ function hasMeaningfulComposerText(prompt: string): boolean {
 }
 
 /**
- * 判断是否可以提供 `/fork` 命令�? * 仅在 Composer 为空（无文本、无附件、无上下文）且处于默认交互模式时可用�? *
- * @param input - Composer 状态信�? * @returns 是否可以提供 `/fork` 命令
+ * 鍒ゆ柇鏄惁鍙互鎻愪緵 `/fork` 鍛戒护銆? * 浠呭湪 Composer 涓虹┖锛堟棤鏂囨湰銆佹棤闄勪欢銆佹棤涓婁笅鏂囷級涓斿浜庨粯璁や氦浜掓ā寮忔椂鍙敤銆? *
+ * @param input - Composer 鐘舵€佷俊鎭? * @returns 鏄惁鍙互鎻愪緵 `/fork` 鍛戒护
  */
 export function canOfferForkSlashCommand(input: {
   prompt: string;
@@ -308,8 +308,8 @@ export function canOfferForkSlashCommand(input: {
 }
 
 /**
- * 判断是否可以提供 `/side` 命令�? * 仅在 Composer 为空、处于默认交互模式且当前不是侧边聊天时可用�? *
- * @param input - Composer 状态信�? * @returns 是否可以提供 `/side` 命令
+ * 鍒ゆ柇鏄惁鍙互鎻愪緵 `/side` 鍛戒护銆? * 浠呭湪 Composer 涓虹┖銆佸浜庨粯璁や氦浜掓ā寮忎笖褰撳墠涓嶆槸渚ц竟鑱婂ぉ鏃跺彲鐢ㄣ€? *
+ * @param input - Composer 鐘舵€佷俊鎭? * @returns 鏄惁鍙互鎻愪緵 `/side` 鍛戒护
  */
 export function canOfferSideSlashCommand(input: {
   prompt: string;
@@ -332,8 +332,8 @@ export function canOfferSideSlashCommand(input: {
 }
 
 /**
- * 判断是否可以提供 `/review` 命令�? * 仅在 Composer 为空（无文本、无附件、无上下文）时可用�? *
- * @param input - Composer 状态信�? * @returns 是否可以提供 `/review` 命令
+ * 鍒ゆ柇鏄惁鍙互鎻愪緵 `/review` 鍛戒护銆? * 浠呭湪 Composer 涓虹┖锛堟棤鏂囨湰銆佹棤闄勪欢銆佹棤涓婁笅鏂囷級鏃跺彲鐢ㄣ€? *
+ * @param input - Composer 鐘舵€佷俊鎭? * @returns 鏄惁鍙互鎻愪緵 `/review` 鍛戒护
  */
 export function canOfferReviewSlashCommand(input: {
   prompt: string;
@@ -352,8 +352,8 @@ export function canOfferReviewSlashCommand(input: {
 }
 
 /**
- * 构建 `/subagents` 命令的提示文本�? * 如果已有用户输入，则在末尾追加子代理委托指令�? *
- * @param existingPrompt - 用户已有的提示文�? * @returns 包含子代理委托指令的完整提示
+ * 鏋勫缓 `/subagents` 鍛戒护鐨勬彁绀烘枃鏈€? * 濡傛灉宸叉湁鐢ㄦ埛杈撳叆锛屽垯鍦ㄦ湯灏捐拷鍔犲瓙浠ｇ悊濮旀墭鎸囦护銆? *
+ * @param existingPrompt - 鐢ㄦ埛宸叉湁鐨勬彁绀烘枃鏈? * @returns 鍖呭惈瀛愪唬鐞嗗鎵樻寚浠ょ殑瀹屾暣鎻愮ず
  */
 export function buildSubagentsPrompt(existingPrompt: string): string {
   const cannedPrompt =
@@ -363,9 +363,9 @@ export function buildSubagentsPrompt(existingPrompt: string): string {
 }
 
 /**
- * 构建 `/review` 命令的提示文本�? * 根据审查目标（未提交更改或分支差异）生成不同的审查指令�? *
- * @param input.target - 审查目标：`"changes"` 审查未提交更改，`"base-branch"` 审查分支差异
- * @returns 审查提示文本
+ * 鏋勫缓 `/review` 鍛戒护鐨勬彁绀烘枃鏈€? * 鏍规嵁瀹℃煡鐩爣锛堟湭鎻愪氦鏇存敼鎴栧垎鏀樊寮傦級鐢熸垚涓嶅悓鐨勫鏌ユ寚浠ゃ€? *
+ * @param input.target - 瀹℃煡鐩爣锛歚"changes"` 瀹℃煡鏈彁浜ゆ洿鏀癸紝`"base-branch"` 瀹℃煡鍒嗘敮宸紓
+ * @returns 瀹℃煡鎻愮ず鏂囨湰
  */
 export function buildReviewPrompt(input: { target: "changes" | "base-branch" }): string {
   const baseInstruction =
@@ -377,9 +377,9 @@ export function buildReviewPrompt(input: { target: "changes" | "base-branch" }):
 }
 
 /**
- * 解析 `/fast` 命令的操作类�? *
- * @param text - 命令文本
- * @returns 操作类型，非 `/fast` 命令时返�?null
+ * 瑙ｆ瀽 `/fast` 鍛戒护鐨勬搷浣滅被鍨? *
+ * @param text - 鍛戒护鏂囨湰
+ * @returns 鎿嶄綔绫诲瀷锛岄潪 `/fast` 鍛戒护鏃惰繑鍥?null
  */
 export function parseFastSlashCommandAction(text: string): FastSlashCommandAction | null {
   const invocation = parseComposerSlashInvocation(text);
@@ -403,10 +403,10 @@ export function parseFastSlashCommandAction(text: string): FastSlashCommandActio
 }
 
 /**
- * 解析 `/fork` 斜杠命令的根分支�? * 按优先级查找：当�?worktree 匹配的分�?�?当前分支 �?活跃线程分支�? *
- * @param input.branches - Git 分支列表
- * @param input.activeProjectCwd - 活跃项目的工作目�? * @param input.activeThreadBranch - 活跃线程的分支名
- * @returns 根分支名，无法确定时返回 null
+ * 瑙ｆ瀽 `/fork` 鏂滄潬鍛戒护鐨勬牴鍒嗘敮銆? * 鎸変紭鍏堢骇鏌ユ壘锛氬綋鍓?worktree 鍖归厤鐨勫垎鏀?鈫?褰撳墠鍒嗘敮 鈫?娲昏穬绾跨▼鍒嗘敮銆? *
+ * @param input.branches - Git 鍒嗘敮鍒楄〃
+ * @param input.activeProjectCwd - 娲昏穬椤圭洰鐨勫伐浣滅洰褰? * @param input.activeThreadBranch - 娲昏穬绾跨▼鐨勫垎鏀悕
+ * @returns 鏍瑰垎鏀悕锛屾棤娉曠‘瀹氭椂杩斿洖 null
  */
 export function resolveComposerSlashRootBranch(input: {
   branches: ReadonlyArray<GitBranch> | null | undefined;
@@ -428,15 +428,15 @@ export function resolveComposerSlashRootBranch(input: {
 }
 
 /**
- * 获取当前可用�?Composer 斜杠命令列表�? * 根据 Provider 类型和功能支持情况过滤可用命令，
- * 同时排除�?Provider 原生命令冲突的内置命令�? *
- * @param input.provider - 当前 Provider 类型
- * @param input.supportsFastSlashCommand - 是否支持 `/fast` 命令
- * @param input.canOfferCompactCommand - 是否可以提供 `/compact` 命令
- * @param input.canOfferReviewCommand - 是否可以提供 `/review` 命令
- * @param input.canOfferForkCommand - 是否可以提供 `/fork` 命令
- * @param input.canOfferSideCommand - 是否可以提供 `/side` 命令
- * @param input.providerNativeCommandNames - Provider 原生命令名列�? * @returns 可用的命令列�? */
+ * 鑾峰彇褰撳墠鍙敤鐨?Composer 鏂滄潬鍛戒护鍒楄〃銆? * 鏍规嵁 Provider 绫诲瀷鍜屽姛鑳芥敮鎸佹儏鍐佃繃婊ゅ彲鐢ㄥ懡浠わ紝
+ * 鍚屾椂鎺掗櫎涓?Provider 鍘熺敓鍛戒护鍐茬獊鐨勫唴缃懡浠ゃ€? *
+ * @param input.provider - 褰撳墠 Provider 绫诲瀷
+ * @param input.supportsFastSlashCommand - 鏄惁鏀寔 `/fast` 鍛戒护
+ * @param input.canOfferCompactCommand - 鏄惁鍙互鎻愪緵 `/compact` 鍛戒护
+ * @param input.canOfferReviewCommand - 鏄惁鍙互鎻愪緵 `/review` 鍛戒护
+ * @param input.canOfferForkCommand - 鏄惁鍙互鎻愪緵 `/fork` 鍛戒护
+ * @param input.canOfferSideCommand - 鏄惁鍙互鎻愪緵 `/side` 鍛戒护
+ * @param input.providerNativeCommandNames - Provider 鍘熺敓鍛戒护鍚嶅垪琛? * @returns 鍙敤鐨勫懡浠ゅ垪琛? */
 export function getAvailableComposerSlashCommands(input: {
   provider: ProviderKind;
   supportsFastSlashCommand: boolean;
@@ -481,10 +481,10 @@ export function getAvailableComposerSlashCommands(input: {
 }
 
 /**
- * 判断指定命令是否�?Provider 原生命令（包含别名匹配）
+ * 鍒ゆ柇鎸囧畾鍛戒护鏄惁涓?Provider 鍘熺敓鍛戒护锛堝寘鍚埆鍚嶅尮閰嶏級
  *
- * @param provider - Provider 类型
- * @param commandNames - Provider 原生命令名列�? * @param command - 待判断的命令�? * @returns 是否�?Provider 原生命令
+ * @param provider - Provider 绫诲瀷
+ * @param commandNames - Provider 鍘熺敓鍛戒护鍚嶅垪琛? * @param command - 寰呭垽鏂殑鍛戒护鍚? * @returns 鏄惁涓?Provider 鍘熺敓鍛戒护
  */
 export function hasProviderNativeSlashCommand(
   provider: ProviderKind,
@@ -496,8 +496,8 @@ export function hasProviderNativeSlashCommand(
 }
 
 /**
- * 构建 `/review` 斜杠命令的完整提示文本�? * 支持指定审查目标（未提交更改或基准分支）和额外关注点�? *
- * @param args - 命令参数，可包含 `base` 关键字指定审查基准分�? * @returns 完整的审查提示文�? */
+ * 鏋勫缓 `/review` 鏂滄潬鍛戒护鐨勫畬鏁存彁绀烘枃鏈€? * 鏀寔鎸囧畾瀹℃煡鐩爣锛堟湭鎻愪氦鏇存敼鎴栧熀鍑嗗垎鏀級鍜岄澶栧叧娉ㄧ偣銆? *
+ * @param args - 鍛戒护鍙傛暟锛屽彲鍖呭惈 `base` 鍏抽敭瀛楁寚瀹氬鏌ュ熀鍑嗗垎鏀? * @returns 瀹屾暣鐨勫鏌ユ彁绀烘枃鏈? */
 export function buildSlashReviewComposerPrompt(args: string): string {
   const trimmedArgs = args.trim();
   const normalizedArgs = trimmedArgs.toLowerCase();
@@ -517,9 +517,9 @@ export function buildSlashReviewComposerPrompt(args: string): string {
 }
 
 /**
- * 解析 `/fork` 命令的目标参数�? * 仅接�?`local` �?`worktree` 作为有效参数�? *
- * @param args - 命令参数文本
- * @returns 解析结果，包含目标类型和是否无效
+ * 瑙ｆ瀽 `/fork` 鍛戒护鐨勭洰鏍囧弬鏁般€? * 浠呮帴鍙?`local` 鎴?`worktree` 浣滀负鏈夋晥鍙傛暟銆? *
+ * @param args - 鍛戒护鍙傛暟鏂囨湰
+ * @returns 瑙ｆ瀽缁撴灉锛屽寘鍚洰鏍囩被鍨嬪拰鏄惁鏃犳晥
  */
 export function parseForkSlashCommandArgs(args: string): {
   target: ForkSlashCommandTarget | null;

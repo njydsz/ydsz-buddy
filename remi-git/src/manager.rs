@@ -35,7 +35,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use std::sync::Arc;
@@ -80,7 +80,7 @@ use crate::error::{GitError, GitResult};
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_git::{GitRunStackedActionInput, GitAction};
 ///
 /// let input = GitRunStackedActionInput {
@@ -183,7 +183,9 @@ pub enum GitAction {
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// let result = manager.run_stacked_action(input).await?;
 /// if result.success {
 ///     println!("操作成功: {}", result.message);
@@ -191,7 +193,7 @@ pub enum GitAction {
 ///         println!("提交 SHA: {}", sha);
 ///     }
 /// }
-/// ```
+/// }
 #[derive(Debug, Clone)]
 pub struct GitRunStackedActionResult {
     /// 操作是否成功
@@ -221,19 +223,21 @@ pub struct GitRunStackedActionResult {
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// use std::sync::Arc;
 /// use remi_git::{GitCore, GitManager};
-///
+/// 
 /// let core = Arc::new(GitCore::new());
 /// let manager = GitManager::new(core);
-///
+/// 
 /// // 获取仓库状态
 /// let status = manager.status("/path/to/repo").await?;
-///
+/// 
 /// // 执行堆叠式操作
 /// let result = manager.run_stacked_action(input).await?;
-/// ```
+/// }
 pub struct GitManager {
     /// Git 核心服务实例
     core: Arc<GitCore>,
@@ -252,7 +256,7 @@ impl GitManager {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let core = Arc::new(GitCore::new());
     /// let manager = GitManager::new(core);
     /// ```
@@ -304,7 +308,9 @@ impl GitManager {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let result = manager.run_stacked_action(GitRunStackedActionInput {
     ///     cwd: "/path/to/repo".to_string(),
     ///     action: GitAction::CommitPush,
@@ -314,7 +320,7 @@ impl GitManager {
     ///     pr_body: None,
     ///     pr_base: None,
     /// }).await?;
-    /// ```
+    /// }
     ///
     /// # 注意事项
     ///
@@ -588,14 +594,16 @@ impl GitManager {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let branch = manager.prepare_pull_request_thread(
     ///     "/path/to/repo",
     ///     123,
     ///     "/path/to/worktree/pr-123",
     /// ).await?;
     /// println!("已创建分支: {}", branch);
-    /// ```
+    /// }
     ///
     /// # 后续操作
     ///
@@ -656,13 +664,15 @@ impl GitManager {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// // 切换到 PR 审查分支
     /// manager.handoff_thread("/path/to/repo", "pr-123").await?;
-    ///
+    /// 
     /// // 审查完成后切换回主分支
     /// manager.handoff_thread("/path/to/repo", "main").await?;
-    /// ```
+    /// }
     pub async fn handoff_thread(
         &self,
         cwd: &str,

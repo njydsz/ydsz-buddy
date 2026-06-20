@@ -1,8 +1,8 @@
 /**
  * @file ChatView.tsx
- * @description 聊天主视图组件，承载消息时间线、编辑器、差异面板和终端工作区，
- *              是应用核心交互界面。整合消息收发、附件管理、自动滚动、
- *              语音输入、模型选择等完整聊天交互流程。
+ * @description èŠå¤©ä¸»è§†å›¾ç»„ä»¶ï¼Œæ‰¿è½½æ¶ˆæ¯æ—¶é—´çº¿ã€ç¼–è¾‘å™¨ã€å·®å¼‚é¢æ¿å’Œç»ˆç«¯å·¥ä½œåŒºï¼Œ
+ *              æ˜¯åº”ç”¨æ ¸å¿ƒäº¤äº’ç•Œé¢ã€‚æ•´åˆæ¶ˆæ¯æ”¶å‘ã€é™„ä»¶ç®¡ç†ã€è‡ªåŠ¨æ»šåŠ¨ã€
+ *              è¯­éŸ³è¾“å…¥ã€æ¨¡åž‹é€‰æ‹©ç­‰å®Œæ•´èŠå¤©äº¤äº’æµç¨‹ã€‚
  */
 import {
   type ApprovalRequestId,
@@ -4176,7 +4176,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers �?skills are provider-specific.
+  // Clear selected skills when switching providers ï¿½?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -5347,7 +5347,7 @@ export default function ChatView({
               : "The current browser context could not be attached.";
       toastManager.add({
         type: "warning",
-        title: "Couldn’t attach the in-app browser context",
+        title: "Couldnâ€™t attach the in-app browser context",
         description,
       });
     }
@@ -7737,7 +7737,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode �?click to return to normal build mode"
+                            title="Plan mode ï¿½?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8481,7 +8481,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode �?click to return to normal build mode"
+                                        title="Plan mode ï¿½?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

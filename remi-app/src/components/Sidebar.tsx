@@ -1,7 +1,7 @@
 /**
  * @file Sidebar.tsx
- * @description 项目/线程侧边栏组件，渲染项目列表、线程行状态、排序和线程操作，
- *              支持项目折叠、线程置顶、搜索过滤、新建聊天等功能。
+ * @description é¡¹ç›®/çº¿ç¨‹ä¾§è¾¹æ ç»„ä»¶ï¼Œæ¸²æŸ“é¡¹ç›®åˆ—è¡¨ã€çº¿ç¨‹è¡ŒçŠ¶æ€ã€æŽ’åºå’Œçº¿ç¨‹æ“ä½œï¼Œ
+ *              æ”¯æŒé¡¹ç›®æŠ˜å ã€çº¿ç¨‹ç½®é¡¶ã€æœç´¢è¿‡æ»¤ã€æ–°å»ºèŠå¤©ç­‰åŠŸèƒ½ã€‚
  */
 
 import {
@@ -457,7 +457,7 @@ function ThreadMetaChipStack({ chips }: { chips: ThreadMetaChip[] }) {
       </Tooltip>
     );
   }
-  const tooltipText = chips.map((chip) => chip.tooltip).join(" · ");
+  const tooltipText = chips.map((chip) => chip.tooltip).join(" Â· ");
   const chipSize = 14;
   const step = 8;
   const width = chipSize + step * (chips.length - 1);
@@ -2578,7 +2578,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms �?this is a folder-level operation, and
+      // Bulk archive always confirms ï¿½?this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [
@@ -5057,13 +5057,13 @@ export default function Sidebar() {
   const newTerminalThreadShortcutLabel = shortcutLabelForCommand(keybindings, "chat.newTerminal");
   const searchShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.search") ??
-    (isMacPlatform(navigator.platform) ? "⌘K" : "Ctrl+K");
+    (isMacPlatform(navigator.platform) ? "âŒ˜K" : "Ctrl+K");
   const importThreadShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.importThread") ??
-    (isMacPlatform(navigator.platform) ? "⌘I" : "Ctrl+I");
+    (isMacPlatform(navigator.platform) ? "âŒ˜I" : "Ctrl+I");
   const addProjectShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.addProject") ??
-    (isMacPlatform(navigator.platform) ? "⇧⌘O" : "Ctrl+Shift+O");
+    (isMacPlatform(navigator.platform) ? "â‡§âŒ˜O" : "Ctrl+Shift+O");
   const searchPaletteProjects = useMemo<SidebarSearchProject[]>(
     () =>
       projects.map((project) => ({

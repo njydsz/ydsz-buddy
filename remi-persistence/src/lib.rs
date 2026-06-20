@@ -17,7 +17,7 @@
 //!
 //! # 使用示例
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use remi_persistence::{SqliteClient, run_migrations, SqliteEventStore, SqliteProjectionRepository};

@@ -3,7 +3,7 @@
 // Purpose: Stores composer drafts, model selections, queued turns, and sticky provider choices.
 // Layer: Web state store
 // Depends on: contracts schemas, app model resolution helpers, and zustand persistence.
-// TODO: 迁移期间临时跳过类型检查。当前仍使用旧版 Effect Schema API�?// 需后续改写�?zod 或新�?Effect Schema�?
+// TODO: 杩佺Щ鏈熼棿涓存椂璺宠繃绫诲瀷妫€鏌ャ€傚綋鍓嶄粛浣跨敤鏃х増 Effect Schema API锛?// 闇€鍚庣画鏀瑰啓涓?zod 鎴栨柊鐗?Effect Schema銆?
 import {
   type ClaudeCodeEffort,
   type CodexReasoningEffort,
@@ -56,11 +56,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-/** Composer 草稿持久化存储的 localStorage 键名 */
+/** Composer 鑽夌ǹ鎸佷箙鍖栧瓨鍌ㄧ殑 localStorage 閿悕 */
 export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
-/** 草稿线程的环境模式：`"local"` 为本地环境，`"worktree"` �?worktree 环境 */
+/** 鑽夌ǹ绾跨▼鐨勭幆澧冩ā寮忥細`"local"` 涓烘湰鍦扮幆澧冿紝`"worktree"` 涓?worktree 鐜 */
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
 const DraftThreadEntryPointSchema = Schema.Literals(["chat", "terminal"]);
 const COMPOSER_PROVIDER_KINDS = [
@@ -91,7 +91,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** 持久化的图片附件 Schema，用�?localStorage 序列�?*/
+/** 鎸佷箙鍖栫殑鍥剧墖闄勪欢 Schema锛岀敤浜?localStorage 搴忓垪鍖?*/
 export const PersistedComposerImageAttachment = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -99,21 +99,21 @@ export const PersistedComposerImageAttachment = Schema.Struct({
   sizeBytes: Schema.Number,
   dataUrl: Schema.String,
 });
-/** 持久化图片附件的类型，从 Schema 推导 */
+/** 鎸佷箙鍖栧浘鐗囬檮浠剁殑绫诲瀷锛屼粠 Schema 鎺ㄥ */
 export type PersistedComposerImageAttachment = typeof PersistedComposerImageAttachment.Type;
 
 /**
- * Composer 图片附件，包含运行时信息（File 对象和预�?URL）�? * �?PersistedComposerImageAttachment 不同，此类型包含不可序列化的 File 对象�? */
+ * Composer 鍥剧墖闄勪欢锛屽寘鍚繍琛屾椂淇℃伅锛團ile 瀵硅薄鍜岄瑙?URL锛夈€? * 涓?PersistedComposerImageAttachment 涓嶅悓锛屾绫诲瀷鍖呭惈涓嶅彲搴忓垪鍖栫殑 File 瀵硅薄銆? */
 export interface ComposerImageAttachment extends Omit<ChatImageAttachment, "previewUrl"> {
   previewUrl: string;
   file: File;
 }
 
-/** Composer 助手选择附件类型，与 ChatAssistantSelectionAttachment 一�?*/
+/** Composer 鍔╂墜閫夋嫨闄勪欢绫诲瀷锛屼笌 ChatAssistantSelectionAttachment 涓€鑷?*/
 export type ComposerAssistantSelectionAttachment = ChatAssistantSelectionAttachment;
 
 /**
- * 排队中的 Composer 聊天轮次�? * 当用户在当前轮次未完成时发送新消息，消息会被放入队列等待处理�? */
+ * 鎺掗槦涓殑 Composer 鑱婂ぉ杞銆? * 褰撶敤鎴峰湪褰撳墠杞鏈畬鎴愭椂鍙戦€佹柊娑堟伅锛屾秷鎭細琚斁鍏ラ槦鍒楃瓑寰呭鐞嗐€? */
 export interface QueuedComposerChatTurn {
   id: string;
   kind: "chat";
@@ -135,7 +135,7 @@ export interface QueuedComposerChatTurn {
   envMode: DraftThreadEnvMode;
 }
 
-/** 排队中的计划跟进轮次，用�?plan 模式下的后续操作 */
+/** 鎺掗槦涓殑璁″垝璺熻繘杞锛岀敤浜?plan 妯″紡涓嬬殑鍚庣画鎿嶄綔 */
 export interface QueuedComposerPlanFollowUp {
   id: string;
   kind: "plan-follow-up";
@@ -151,7 +151,7 @@ export interface QueuedComposerPlanFollowUp {
   runtimeMode: RuntimeMode;
 }
 
-/** 排队中的 Composer 轮次联合类型（聊天轮次或计划跟进轮次�?*/
+/** 鎺掗槦涓殑 Composer 杞鑱斿悎绫诲瀷锛堣亰澶╄疆娆℃垨璁″垝璺熻繘杞锛?*/
 export type QueuedComposerTurn = QueuedComposerChatTurn | QueuedComposerPlanFollowUp;
 
 const PersistedTerminalContextDraft = Schema.Struct({
@@ -324,7 +324,7 @@ const PersistedComposerDraftStoreStorage = Schema.Struct({
 });
 
 /**
- * Composer 线程草稿状态，包含编辑器内容、附件、模型选择等运行时信息�? * 每个线程对应一个草稿状态，用于在用户切换线程时保留未发送的内容�? */
+ * Composer 绾跨▼鑽夌ǹ鐘舵€侊紝鍖呭惈缂栬緫鍣ㄥ唴瀹广€侀檮浠躲€佹ā鍨嬮€夋嫨绛夎繍琛屾椂淇℃伅銆? * 姣忎釜绾跨▼瀵瑰簲涓€涓崏绋跨姸鎬侊紝鐢ㄤ簬鍦ㄧ敤鎴峰垏鎹㈢嚎绋嬫椂淇濈暀鏈彂閫佺殑鍐呭銆? */
 export interface ComposerThreadDraftState {
   prompt: string;
   images: ComposerImageAttachment[];
@@ -340,7 +340,7 @@ export interface ComposerThreadDraftState {
 }
 
 /**
- * 草稿线程状态，记录线程的项目归属、分支、环境模式等元信息�? * �?ComposerThreadDraftState 不同，此接口关注线程的上下文信息而非编辑器内容�? */
+ * 鑽夌ǹ绾跨▼鐘舵€侊紝璁板綍绾跨▼鐨勯」鐩綊灞炪€佸垎鏀€佺幆澧冩ā寮忕瓑鍏冧俊鎭€? * 涓?ComposerThreadDraftState 涓嶅悓锛屾鎺ュ彛鍏虫敞绾跨▼鐨勪笂涓嬫枃淇℃伅鑰岄潪缂栬緫鍣ㄥ唴瀹广€? */
 export interface DraftThreadState {
   projectId: ProjectId;
   createdAt: string;
@@ -360,7 +360,7 @@ interface ProjectDraftThread extends DraftThreadState {
 }
 
 /**
- * Composer 草稿存储的完整状态接口�? * 管理所有线程的草稿内容、草稿线程元信息、项目映射以及粘性模型选择�? */
+ * Composer 鑽夌ǹ瀛樺偍鐨勫畬鏁寸姸鎬佹帴鍙ｃ€? * 绠＄悊鎵€鏈夌嚎绋嬬殑鑽夌ǹ鍐呭銆佽崏绋跨嚎绋嬪厓淇℃伅銆侀」鐩槧灏勪互鍙婄矘鎬фā鍨嬮€夋嫨銆? */
 export interface ComposerDraftStoreState {
   draftsByThreadId: Record<ThreadId, ComposerThreadDraftState>;
   draftThreadsByThreadId: Record<ThreadId, DraftThreadState>;
@@ -466,7 +466,7 @@ export interface ComposerDraftStoreState {
 }
 
 /**
- * 有效�?Composer 模型状态，包含当前选中的模型和模型选项�? * �?deriveEffectiveComposerModelState 计算得出�? */
+ * 鏈夋晥鐨?Composer 妯″瀷鐘舵€侊紝鍖呭惈褰撳墠閫変腑鐨勬ā鍨嬪拰妯″瀷閫夐」銆? * 鐢?deriveEffectiveComposerModelState 璁＄畻寰楀嚭銆? */
 export interface EffectiveComposerModelState {
   selectedModel: ModelSlug;
   modelOptions: ProviderModelOptions | null;
@@ -1085,7 +1085,7 @@ function normalizeModelSelection(
   return makeModelSelection(provider, model, options);
 }
 
-// ── Legacy sync helpers (used only during migration from v2 storage) ──
+// 鈹€鈹€ Legacy sync helpers (used only during migration from v2 storage) 鈹€鈹€
 
 function legacySyncModelSelectionOptions(
   modelSelection: ModelSelection | null,
@@ -1130,7 +1130,7 @@ function legacyReplaceProviderModelOptions(
   });
 }
 
-// ── New helpers for the consolidated representation ────────────────────
+// 鈹€鈹€ New helpers for the consolidated representation 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 function legacyToModelSelectionByProvider(
   modelSelection: ModelSelection | null,
@@ -1158,15 +1158,15 @@ function legacyToModelSelectionByProvider(
 }
 
 /**
- * 推导有效�?Composer 模型状态�? *
- * 按优先级合并多个来源的模型选择：草�?> 线程 > 项目 > 默认值�? * 同时考虑可用模型列表，确保最终选中的模型是可用的�? *
- * @param input.draft - 草稿状态中的模型选择信息
- * @param input.selectedProvider - 当前选中�?Provider
- * @param input.threadModelSelection - 线程级别的模型选择
- * @param input.projectModelSelection - 项目级别的模型选择
- * @param input.customModelsByProvider - �?Provider 的自定义模型列表
- * @param input.availableModelOptionsByProvider - �?Provider 的可用模型选项
- * @returns 有效的模型状�? */
+ * 鎺ㄥ鏈夋晥鐨?Composer 妯″瀷鐘舵€併€? *
+ * 鎸変紭鍏堢骇鍚堝苟澶氫釜鏉ユ簮鐨勬ā鍨嬮€夋嫨锛氳崏绋?> 绾跨▼ > 椤圭洰 > 榛樿鍊笺€? * 鍚屾椂鑰冭檻鍙敤妯″瀷鍒楄〃锛岀‘淇濇渶缁堥€変腑鐨勬ā鍨嬫槸鍙敤鐨勩€? *
+ * @param input.draft - 鑽夌ǹ鐘舵€佷腑鐨勬ā鍨嬮€夋嫨淇℃伅
+ * @param input.selectedProvider - 褰撳墠閫変腑鐨?Provider
+ * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.customModelsByProvider - 鍚?Provider 鐨勮嚜瀹氫箟妯″瀷鍒楄〃
+ * @param input.availableModelOptionsByProvider - 鍚?Provider 鐨勫彲鐢ㄦā鍨嬮€夐」
+ * @returns 鏈夋晥鐨勬ā鍨嬬姸鎬? */
 export function deriveEffectiveComposerModelState(input: {
   draft:
     | Pick<ComposerThreadDraftState, "modelSelectionByProvider" | "activeProvider">
@@ -1245,11 +1245,11 @@ export function deriveEffectiveComposerModelState(input: {
 }
 
 /**
- * 解析首选的 Composer 模型选择，用于草稿线程提升为正式线程时的模型持久化�? * 保持终端优先的线程创建与 Composer 的优先级一致�? *
- * @param input.draft - 草稿状�? * @param input.threadModelSelection - 线程级别的模型选择
- * @param input.projectModelSelection - 项目级别的模型选择
- * @param input.defaultProvider - 默认 Provider
- * @returns 首选的模型选择
+ * 瑙ｆ瀽棣栭€夌殑 Composer 妯″瀷閫夋嫨锛岀敤浜庤崏绋跨嚎绋嬫彁鍗囦负姝ｅ紡绾跨▼鏃剁殑妯″瀷鎸佷箙鍖栥€? * 淇濇寔缁堢浼樺厛鐨勭嚎绋嬪垱寤轰笌 Composer 鐨勪紭鍏堢骇涓€鑷淬€? *
+ * @param input.draft - 鑽夌ǹ鐘舵€? * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.defaultProvider - 榛樿 Provider
+ * @returns 棣栭€夌殑妯″瀷閫夋嫨
  */
 export function resolvePreferredComposerModelSelection(input: {
   draft:
@@ -2237,7 +2237,7 @@ function toHydratedThreadDraft(
   };
 }
 
-/** Composer 草稿存储�?Zustand hook，基�?persist 中间件实�?localStorage 持久�?*/
+/** Composer 鑽夌ǹ瀛樺偍鐨?Zustand hook锛屽熀浜?persist 涓棿浠跺疄鐜?localStorage 鎸佷箙鍖?*/
 export const useComposerDraftStore = create<ComposerDraftStoreState>()(
   persist(
     (set, get) => ({
@@ -2746,10 +2746,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided �?use them
+              // Explicit options provided 锟?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection �?preserve existing options, update provider+model
+              // No options in selection 锟?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
@@ -3457,22 +3457,22 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
 );
 
 /**
- * 获取指定线程的草稿状态�? * 如果线程没有草稿，返回空草稿状态（EMPTY_THREAD_DRAFT）�? *
- * @param threadId - 线程 ID
- * @returns 线程草稿状�? */
+ * 鑾峰彇鎸囧畾绾跨▼鐨勮崏绋跨姸鎬併€? * 濡傛灉绾跨▼娌℃湁鑽夌ǹ锛岃繑鍥炵┖鑽夌ǹ鐘舵€侊紙EMPTY_THREAD_DRAFT锛夈€? *
+ * @param threadId - 绾跨▼ ID
+ * @returns 绾跨▼鑽夌ǹ鐘舵€? */
 export function useComposerThreadDraft(threadId: ThreadId): ComposerThreadDraftState {
   return useComposerDraftStore((state) => state.draftsByThreadId[threadId] ?? EMPTY_THREAD_DRAFT);
 }
 
 /**
- * React hook：获取指定线程的有效模型状态�? * 内部使用 useMemo 缓存计算结果，避免不必要的重渲染�? *
- * @param input.threadId - 线程 ID
- * @param input.selectedProvider - 当前选中�?Provider
- * @param input.threadModelSelection - 线程级别的模型选择
- * @param input.projectModelSelection - 项目级别的模型选择
- * @param input.customModelsByProvider - �?Provider 的自定义模型列表
- * @param input.availableModelOptionsByProvider - �?Provider 的可用模型选项
- * @returns 有效的模型状�? */
+ * React hook锛氳幏鍙栨寚瀹氱嚎绋嬬殑鏈夋晥妯″瀷鐘舵€併€? * 鍐呴儴浣跨敤 useMemo 缂撳瓨璁＄畻缁撴灉锛岄伩鍏嶄笉蹇呰鐨勯噸娓叉煋銆? *
+ * @param input.threadId - 绾跨▼ ID
+ * @param input.selectedProvider - 褰撳墠閫変腑鐨?Provider
+ * @param input.threadModelSelection - 绾跨▼绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.projectModelSelection - 椤圭洰绾у埆鐨勬ā鍨嬮€夋嫨
+ * @param input.customModelsByProvider - 鍚?Provider 鐨勮嚜瀹氫箟妯″瀷鍒楄〃
+ * @param input.availableModelOptionsByProvider - 鍚?Provider 鐨勫彲鐢ㄦā鍨嬮€夐」
+ * @returns 鏈夋晥鐨勬ā鍨嬬姸鎬? */
 export function useEffectiveComposerModelState(input: {
   threadId: ThreadId;
   selectedProvider: ProviderKind;
@@ -3509,8 +3509,8 @@ export function useEffectiveComposerModelState(input: {
 }
 
 /**
- * 将已提升为服务端线程的草稿标记为"正在提升"状态�? * 先标记再由路�?Composer 在服务端线程启动后执行清理�? *
- * @param serverThreadIds - 已提升的服务端线�?ID 集合
+ * 灏嗗凡鎻愬崌涓烘湇鍔＄绾跨▼鐨勮崏绋挎爣璁颁负"姝ｅ湪鎻愬崌"鐘舵€併€? * 鍏堟爣璁板啀鐢辫矾鐢?Composer 鍦ㄦ湇鍔＄绾跨▼鍚姩鍚庢墽琛屾竻鐞嗐€? *
+ * @param serverThreadIds - 宸叉彁鍗囩殑鏈嶅姟绔嚎绋?ID 闆嗗悎
  */
 export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
@@ -3523,8 +3523,8 @@ export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>)
 }
 
 /**
- * 完成已提升草稿线程的清理工作，删除对应的草稿数据�? *
- * @param serverThreadIds - 已提升的服务端线�?ID 集合
+ * 瀹屾垚宸叉彁鍗囪崏绋跨嚎绋嬬殑娓呯悊宸ヤ綔锛屽垹闄ゅ搴旂殑鑽夌ǹ鏁版嵁銆? *
+ * @param serverThreadIds - 宸叉彁鍗囩殑鏈嶅姟绔嚎绋?ID 闆嗗悎
  */
 export function finalizePromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();

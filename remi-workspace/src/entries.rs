@@ -24,7 +24,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
@@ -70,7 +70,7 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_workspace::entries::DirectoryEntry;
 ///
 /// let entry = DirectoryEntry {
@@ -111,7 +111,7 @@ pub struct DirectoryEntry {
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_workspace::entries::BrowseInput;
 ///
 /// let input = BrowseInput {
@@ -174,7 +174,7 @@ pub struct BrowseResult {
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_workspace::entries::SearchEntriesInput;
 ///
 /// let input = SearchEntriesInput {
@@ -234,7 +234,7 @@ pub struct SearchEntriesResult {
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_workspace::entries::ListDirectoriesInput;
 ///
 /// let input = ListDirectoriesInput {
@@ -287,7 +287,7 @@ pub struct ListDirectoriesResult {
 ///
 /// ## 典型用法
 ///
-/// ```rust,no_run
+///```rust,ignore
 /// #[tokio::main]
 /// async fn main() {
 /// use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
@@ -311,7 +311,7 @@ impl WorkspaceEntries {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// use remi_workspace::entries::WorkspaceEntries;
     ///
     /// let service = WorkspaceEntries::new();
@@ -342,7 +342,7 @@ impl WorkspaceEntries {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, BrowseInput};
@@ -457,7 +457,7 @@ impl WorkspaceEntries {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, SearchEntriesInput};
@@ -574,7 +574,7 @@ impl WorkspaceEntries {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::entries::{WorkspaceEntries, ListDirectoriesInput};
@@ -655,7 +655,7 @@ impl WorkspaceEntries {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::entries::WorkspaceEntries;

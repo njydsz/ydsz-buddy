@@ -1,15 +1,15 @@
 /**
- * @file Cursor 模型变体处理
+ * @file Cursor 妯″瀷鍙樹綋澶勭悊
  *
- * 处理 Cursor Provider 的模型变体归并逻辑。Cursor CLI 会为同一基础模型
- * 生成多个变体（如不同推理强度、fast 模式、thinking 模式等）�? * 本模块将这些变体归并为统一的模型条目，合并推理强度选项、上下文窗口选项等�? */
+ * 澶勭悊 Cursor Provider 鐨勬ā鍨嬪彉浣撳綊骞堕€昏緫銆侰ursor CLI 浼氫负鍚屼竴鍩虹妯″瀷
+ * 鐢熸垚澶氫釜鍙樹綋锛堝涓嶅悓鎺ㄧ悊寮哄害銆乫ast 妯″紡銆乼hinking 妯″紡绛夛級锛? * 鏈ā鍧楀皢杩欎簺鍙樹綋褰掑苟涓虹粺涓€鐨勬ā鍨嬫潯鐩紝鍚堝苟鎺ㄧ悊寮哄害閫夐」銆佷笂涓嬫枃绐楀彛閫夐」绛夈€? */
 
 import type { ProviderModelDescriptor } from "~/contracts";
 
 /**
- * 根据 value 字段去重，保留首次出现的元素�? *
- * @param values - 待去重的数组
- * @returns 去重后的数组
+ * 鏍规嵁 value 瀛楁鍘婚噸锛屼繚鐣欓娆″嚭鐜扮殑鍏冪礌銆? *
+ * @param values - 寰呭幓閲嶇殑鏁扮粍
+ * @returns 鍘婚噸鍚庣殑鏁扮粍
  */
 function uniqueByValue<T extends { readonly value: string }>(values: ReadonlyArray<T>): T[] {
   const seen = new Set<string>();
@@ -25,8 +25,8 @@ function uniqueByValue<T extends { readonly value: string }>(values: ReadonlyArr
 }
 
 /**
- * 将推理强度值转换为可读标签�? *
- * @param value - 推理强度原始值（�?"xhigh"�?max"�?low"�? * @returns 格式化后的标�? */
+ * 灏嗘帹鐞嗗己搴﹀€艰浆鎹负鍙鏍囩銆? *
+ * @param value - 鎺ㄧ悊寮哄害鍘熷鍊硷紙濡?"xhigh"銆?max"銆?low"锛? * @returns 鏍煎紡鍖栧悗鐨勬爣绛? */
 function cursorReasoningLabel(value: string): string {
   switch (value) {
     case "xhigh":
@@ -39,9 +39,9 @@ function cursorReasoningLabel(value: string): string {
 }
 
 /**
- * �?Cursor CLI 模型名称中解析推理强度（reasoning effort）后缀�? * 从模型名称末尾向前扫描，识别 "max"�?none"�?low"�?medium"�?high"�?xhigh" 等标记�? * "extra-high" 会被归一化为 "xhigh"�? *
- * @param model - Cursor CLI 模型名称
- * @returns 推理强度值，未找到返�?undefined
+ * 浠?Cursor CLI 妯″瀷鍚嶇О涓В鏋愭帹鐞嗗己搴︼紙reasoning effort锛夊悗缂€銆? * 浠庢ā鍨嬪悕绉版湯灏惧悜鍓嶆壂鎻忥紝璇嗗埆 "max"銆?none"銆?low"銆?medium"銆?high"銆?xhigh" 绛夋爣璁般€? * "extra-high" 浼氳褰掍竴鍖栦负 "xhigh"銆? *
+ * @param model - Cursor CLI 妯″瀷鍚嶇О
+ * @returns 鎺ㄧ悊寮哄害鍊硷紝鏈壘鍒拌繑鍥?undefined
  */
 function parseCursorCliReasoningEffort(model: string): string | undefined {
   const tokens = model.trim().toLowerCase().split("-");
@@ -70,19 +70,19 @@ function parseCursorCliReasoningEffort(model: string): string | undefined {
 }
 
 /**
- * 去除 Cursor 模型名称中的参数化后缀（方括号内容）�? * 例如 "claude-3.5-sonnet[thinking]" �?"claude-3.5-sonnet"
+ * 鍘婚櫎 Cursor 妯″瀷鍚嶇О涓殑鍙傛暟鍖栧悗缂€锛堟柟鎷彿鍐呭锛夈€? * 渚嬪 "claude-3.5-sonnet[thinking]" 鈫?"claude-3.5-sonnet"
  *
- * @param value - 原始模型名称
- * @returns 去除参数化后缀的名�? */
+ * @param value - 鍘熷妯″瀷鍚嶇О
+ * @returns 鍘婚櫎鍙傛暟鍖栧悗缂€鐨勫悕绉? */
 function stripCursorParameterizedSuffix(value: string): string {
   return value.trim().replace(/\[[^\]]*\]$/u, "");
 }
 
 /**
- * �?Cursor 模型变体�?slug 标准化为基础模型 ID�? * 依次去除：参数化后缀�?fast 后缀、推理强度后缀�?thinking 后缀�? * 重复�?-fast 和推理强度后缀�?max 后缀（codex-max 除外），
- * 并对 Claude 模型名称进行版本号和家族名的重排序�? *
- * @param model - 模型 slug
- * @returns 基础模型 ID，输入为空时返回 null
+ * 灏?Cursor 妯″瀷鍙樹綋鐨?slug 鏍囧噯鍖栦负鍩虹妯″瀷 ID銆? * 渚濇鍘婚櫎锛氬弬鏁板寲鍚庣紑銆?fast 鍚庣紑銆佹帹鐞嗗己搴﹀悗缂€銆?thinking 鍚庣紑銆? * 閲嶅鐨?-fast 鍜屾帹鐞嗗己搴﹀悗缂€銆?max 鍚庣紑锛坈odex-max 闄ゅ锛夛紝
+ * 骞跺 Claude 妯″瀷鍚嶇О杩涜鐗堟湰鍙峰拰瀹舵棌鍚嶇殑閲嶆帓搴忋€? *
+ * @param model - 妯″瀷 slug
+ * @returns 鍩虹妯″瀷 ID锛岃緭鍏ヤ负绌烘椂杩斿洖 null
  *
  * @example
  * ```ts
@@ -121,9 +121,9 @@ export function normalizeCursorModelVariantBaseId(model: string | null | undefin
 }
 
 /**
- * 去除变体显示名称中的模式后缀（如 "Fast"�?Thinking"�?High"�?1M" 等）�? *
- * @param name - 原始显示名称
- * @returns 去除后缀的名�? */
+ * 鍘婚櫎鍙樹綋鏄剧ず鍚嶇О涓殑妯″紡鍚庣紑锛堝 "Fast"銆?Thinking"銆?High"銆?1M" 绛夛級銆? *
+ * @param name - 鍘熷鏄剧ず鍚嶇О
+ * @returns 鍘婚櫎鍚庣紑鐨勫悕绉? */
 function removeVariantNameSuffix(name: string): string {
   return name
     .replace(/\s+Fast$/iu, "")
@@ -135,11 +135,11 @@ function removeVariantNameSuffix(name: string): string {
 }
 
 /**
- * 根据基础模型 slug 推断该分组的默认推理强度�? * - GPT/Codex 系列默认 medium
- * - Claude 系列默认 high
- * - 其他系列取第一个可用�? *
- * @param baseSlug - 基础模型 slug
- * @param efforts - 可用的推理强度值列�? * @returns 默认推理强度，无可用值时返回 undefined
+ * 鏍规嵁鍩虹妯″瀷 slug 鎺ㄦ柇璇ュ垎缁勭殑榛樿鎺ㄧ悊寮哄害銆? * - GPT/Codex 绯诲垪榛樿 medium
+ * - Claude 绯诲垪榛樿 high
+ * - 鍏朵粬绯诲垪鍙栫涓€涓彲鐢ㄥ€? *
+ * @param baseSlug - 鍩虹妯″瀷 slug
+ * @param efforts - 鍙敤鐨勬帹鐞嗗己搴﹀€煎垪琛? * @returns 榛樿鎺ㄧ悊寮哄害锛屾棤鍙敤鍊兼椂杩斿洖 undefined
  */
 function defaultEffortForGroup(
   baseSlug: string,
@@ -158,8 +158,8 @@ function defaultEffortForGroup(
 }
 
 /**
- * 判断模型是否�?1M 上下文窗口变体�? * 通过 defaultContextWindow、contextWindowOptions 或名称中�?"1M" 标识判断�? *
- * @param model - 模型描述�? * @returns 是否�?1M 上下文窗口变�? */
+ * 鍒ゆ柇妯″瀷鏄惁涓?1M 涓婁笅鏂囩獥鍙ｅ彉浣撱€? * 閫氳繃 defaultContextWindow銆乧ontextWindowOptions 鎴栧悕绉颁腑鐨?"1M" 鏍囪瘑鍒ゆ柇銆? *
+ * @param model - 妯″瀷鎻忚堪绗? * @returns 鏄惁涓?1M 涓婁笅鏂囩獥鍙ｅ彉浣? */
 function isCursorOneMillionVariant(model: ProviderModelDescriptor): boolean {
   if (model.defaultContextWindow === "1m") {
     return true;
@@ -173,9 +173,9 @@ function isCursorOneMillionVariant(model: ProviderModelDescriptor): boolean {
 }
 
 /**
- * �?Cursor 的多个模型变体归并为统一的模型条目�? * 按基础模型 ID 分组，合并各变体的推理强度选项、上下文窗口选项�? * fast 模式�?thinking 模式支持状态�? *
- * @param models - 原始的模型描述符列表
- * @returns 归并后的模型描述符列�? */
+ * 灏?Cursor 鐨勫涓ā鍨嬪彉浣撳綊骞朵负缁熶竴鐨勬ā鍨嬫潯鐩€? * 鎸夊熀纭€妯″瀷 ID 鍒嗙粍锛屽悎骞跺悇鍙樹綋鐨勬帹鐞嗗己搴﹂€夐」銆佷笂涓嬫枃绐楀彛閫夐」銆? * fast 妯″紡鍜?thinking 妯″紡鏀寔鐘舵€併€? *
+ * @param models - 鍘熷鐨勬ā鍨嬫弿杩扮鍒楄〃
+ * @returns 褰掑苟鍚庣殑妯″瀷鎻忚堪绗﹀垪琛? */
 export function collapseCursorModelVariants(
   models: ReadonlyArray<ProviderModelDescriptor>,
 ): ProviderModelDescriptor[] {

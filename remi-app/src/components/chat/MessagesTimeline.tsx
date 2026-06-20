@@ -1,6 +1,6 @@
 /**
  * @file MessagesTimeline.tsx
- * @description 聊天消息时间线组件，负责渲染聊天记录行并使用 LegendList 管理滚动/跟随行为�? * 该组件是 Web 端聊天展示层的核心组件，处理用户消息、助手回复、工具调用日志�? * 文件变更摘要等多种时间线行的渲染逻辑�? * @layer Web 聊天展示组件
+ * @description 鑱婂ぉ娑堟伅鏃堕棿绾跨粍浠讹紝璐熻矗娓叉煋鑱婂ぉ璁板綍琛屽苟浣跨敤 LegendList 绠＄悊婊氬姩/璺熼殢琛屼负銆? * 璇ョ粍浠舵槸 Web 绔亰澶╁睍绀哄眰鐨勬牳蹇冪粍浠讹紝澶勭悊鐢ㄦ埛娑堟伅銆佸姪鎵嬪洖澶嶃€佸伐鍏疯皟鐢ㄦ棩蹇椼€? * 鏂囦欢鍙樻洿鎽樿绛夊绉嶆椂闂寸嚎琛岀殑娓叉煋閫昏緫銆? * @layer Web 鑱婂ぉ灞曠ず缁勪欢
  * @exports MessagesTimeline
  */
 
@@ -100,12 +100,12 @@ import {
 import { RiRobot3Line } from "react-icons/ri";
 import { deriveUserMessagePreviewState } from "./userMessagePreview";
 
-/** 工作日志条目最大可见数量，超出后显�?查看更多" */
+/** 宸ヤ綔鏃ュ織鏉＄洰鏈€澶у彲瑙佹暟閲忥紝瓒呭嚭鍚庢樉绀?鏌ョ湅鏇村" */
 const MAX_VISIBLE_WORK_LOG_ENTRIES = 6;
-/** 内联工具调用条目最大可见数�?*/
+/** 鍐呰仈宸ュ叿璋冪敤鏉＄洰鏈€澶у彲瑙佹暟閲?*/
 const MAX_VISIBLE_INLINE_TOOL_ENTRIES = 4;
 
-/** 技能立方体图标，用�?MCP 工具调用条目 */
+/** 鎶€鑳界珛鏂逛綋鍥炬爣锛岀敤浜?MCP 宸ュ叿璋冪敤鏉＄洰 */
 const SkillCubeIcon: LucideIcon = (props) => (
   <svg {...props} viewBox="0 0 24 24" fill="none">
     <path
@@ -132,14 +132,14 @@ const SkillCubeIcon: LucideIcon = (props) => (
   </svg>
 );
 
-/** 代理任务图标，用于协作代理工具调用条�?*/
+/** 浠ｇ悊浠诲姟鍥炬爣锛岀敤浜庡崗浣滀唬鐞嗗伐鍏疯皟鐢ㄦ潯鐩?*/
 const AgentTaskIcon: LucideIcon = (props) => (
   <RiRobot3Line className={props.className} style={props.style} />
 );
 
-/** 代理默认颜色样式 */
+/** 浠ｇ悊榛樿棰滆壊鏍峰紡 */
 const DEFAULT_AGENT_COLOR = { bg: "rgb(245 158 11 / 0.15)", text: "rgb(245 158 11)" };
-/** 代理颜色映射表，按颜色名称提供背景色和文字色 */
+/** 浠ｇ悊棰滆壊鏄犲皠琛紝鎸夐鑹插悕绉版彁渚涜儗鏅壊鍜屾枃瀛楄壊 */
 const AGENT_COLOR_STYLES: Record<string, { bg: string; text: string }> = {
   violet: { bg: "rgb(139 92 246 / 0.15)", text: "rgb(139 92 246)" },
   fuchsia: { bg: "rgb(217 70 239 / 0.15)", text: "rgb(217 70 239)" },
@@ -150,8 +150,8 @@ const AGENT_COLOR_STYLES: Record<string, { bg: string; text: string }> = {
 };
 
 /**
- * 用户消息调度模式标签组件�? * 当用户消息的 dispatchMode �?"steer" 时，显示 "Steering conversation" 标签�? * 将引导标记视觉上附加到整条已发送消息堆栈上�? * @param dispatchMode - 消息调度模式
- * @param hasLeadingMedia - 是否有前置媒体（图片或助手选择�? */
+ * 鐢ㄦ埛娑堟伅璋冨害妯″紡鏍囩缁勪欢銆? * 褰撶敤鎴锋秷鎭殑 dispatchMode 涓?"steer" 鏃讹紝鏄剧ず "Steering conversation" 鏍囩锛? * 灏嗗紩瀵兼爣璁拌瑙変笂闄勫姞鍒版暣鏉″凡鍙戦€佹秷鎭爢鏍堜笂銆? * @param dispatchMode - 娑堟伅璋冨害妯″紡
+ * @param hasLeadingMedia - 鏄惁鏈夊墠缃獟浣擄紙鍥剧墖鎴栧姪鎵嬮€夋嫨锛? */
 function UserDispatchModeChip({
   dispatchMode,
   hasLeadingMedia,
@@ -176,14 +176,14 @@ function UserDispatchModeChip({
   );
 }
 
-/** 从路径中提取文件名部�?*/
+/** 浠庤矾寰勪腑鎻愬彇鏂囦欢鍚嶉儴鍒?*/
 function basename(value: string): string {
   const slash = Math.max(value.lastIndexOf("/"), value.lastIndexOf("\\"));
   return slash >= 0 ? value.slice(slash + 1) : value;
 }
 
 /**
- * MessagesTimeline 组件�?Props 类型定义�? * 包含聊天时间线渲染所需的所有配置和回调�? */
+ * MessagesTimeline 缁勪欢鐨?Props 绫诲瀷瀹氫箟銆? * 鍖呭惈鑱婂ぉ鏃堕棿绾挎覆鏌撴墍闇€鐨勬墍鏈夐厤缃拰鍥炶皟銆? */
 interface MessagesTimelineProps {
   hasMessages: boolean;
   isWorking: boolean;
@@ -227,8 +227,8 @@ interface MessagesTimelineProps {
 }
 
 /**
- * 聊天消息时间线组件�? * 负责渲染聊天记录中的用户消息、助手回复、工具调用日志、文件变更摘要等行，
- * 并使�?LegendList 管理虚拟化滚动和实时跟随行为�? * @param props - MessagesTimelineProps
+ * 鑱婂ぉ娑堟伅鏃堕棿绾跨粍浠躲€? * 璐熻矗娓叉煋鑱婂ぉ璁板綍涓殑鐢ㄦ埛娑堟伅銆佸姪鎵嬪洖澶嶃€佸伐鍏疯皟鐢ㄦ棩蹇椼€佹枃浠跺彉鏇存憳瑕佺瓑琛岋紝
+ * 骞朵娇鐢?LegendList 绠＄悊铏氭嫙鍖栨粴鍔ㄥ拰瀹炴椂璺熼殢琛屼负銆? * @param props - MessagesTimelineProps
  */
 export const MessagesTimeline = memo(function MessagesTimeline({
   hasMessages,
@@ -732,7 +732,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                 inlineWorkSummary,
               ]
                 .filter((value): value is string => Boolean(value))
-                .join(" �?")
+                .join(" 锟?")
             ) : (
               <>
                 <LiveMessageMeta
@@ -740,7 +740,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                   durationStart={row.durationStart}
                   timestampFormat={timestampFormat}
                 />
-                {inlineWorkSummary ? <> �?{inlineWorkSummary}</> : null}
+                {inlineWorkSummary ? <> 锟?{inlineWorkSummary}</> : null}
               </>
             )
           ) : (
@@ -753,7 +753,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               inlineWorkSummary,
             ]
               .filter((value): value is string => Boolean(value))
-              .join(" �?")
+              .join(" 锟?")
           );
           return (
             <>
@@ -1072,13 +1072,13 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   );
 });
 
-/** 时间线消息行的消息类型提�?*/
+/** 鏃堕棿绾挎秷鎭鐨勬秷鎭被鍨嬫彁鍙?*/
 type TimelineMessage = Extract<MessagesTimelineRow, { kind: "message" }>["message"];
-/** 时间线工作日志条目类型提�?*/
+/** 鏃堕棿绾垮伐浣滄棩蹇楁潯鐩被鍨嬫彁鍙?*/
 type TimelineWorkEntry = Extract<MessagesTimelineRow, { kind: "work" }>["groupedEntries"][number];
 
 /**
- * 复用稳定行引用的 Hook�? * 在流式更新时，仅对可见内容实际发生变化的行触�?React 重新渲染�? * 避免不必要的整列表刷新�? */
+ * 澶嶇敤绋冲畾琛屽紩鐢ㄧ殑 Hook銆? * 鍦ㄦ祦寮忔洿鏂版椂锛屼粎瀵瑰彲瑙佸唴瀹瑰疄闄呭彂鐢熷彉鍖栫殑琛岃Е鍙?React 閲嶆柊娓叉煋锛? * 閬垮厤涓嶅繀瑕佺殑鏁村垪琛ㄥ埛鏂般€? */
 function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
   const previousStateRef = useRef<StableMessagesTimelineRowsState>({
     byId: new Map<string, MessagesTimelineRow>(),
@@ -1093,7 +1093,7 @@ function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
 }
 
 /**
- * 工作计时器组件�? * 将实时时钟限定在小型叶子组件内，避免活跃的助手回合每秒强制整个对话树重新渲染�? */
+ * 宸ヤ綔璁℃椂鍣ㄧ粍浠躲€? * 灏嗗疄鏃舵椂閽熼檺瀹氬湪灏忓瀷鍙跺瓙缁勪欢鍐咃紝閬垮厤娲昏穬鐨勫姪鎵嬪洖鍚堟瘡绉掑己鍒舵暣涓璇濇爲閲嶆柊娓叉煋銆? */
 function WorkingTimer({ createdAt }: { createdAt: string }) {
   const textRef = useRef<HTMLSpanElement>(null);
   const initialText = formatWorkingTimerNow(createdAt);
@@ -1114,7 +1114,7 @@ function WorkingTimer({ createdAt }: { createdAt: string }) {
   return <span ref={textRef}>{initialText}</span>;
 }
 
-/** 实时消息元信息组件，显示创建时间和持续时�?*/
+/** 瀹炴椂娑堟伅鍏冧俊鎭粍浠讹紝鏄剧ず鍒涘缓鏃堕棿鍜屾寔缁椂闀?*/
 function LiveMessageMeta({
   createdAt,
   durationStart,
@@ -1147,7 +1147,7 @@ function LiveMessageMeta({
   return <span ref={textRef}>{initialText}</span>;
 }
 
-/** 格式化工作计时器文本，返回如 "5s"�?2m 30s"�?1h 5m" 格式 */
+/** 鏍煎紡鍖栧伐浣滆鏃跺櫒鏂囨湰锛岃繑鍥炲 "5s"銆?2m 30s"銆?1h 5m" 鏍煎紡 */
 function formatWorkingTimer(startIso: string, endIso: string): string | null {
   const startedAtMs = Date.parse(startIso);
   const endedAtMs = Date.parse(endIso);
@@ -1171,12 +1171,12 @@ function formatWorkingTimer(startIso: string, endIso: string): string | null {
   return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
 }
 
-/** 使用当前时间格式化工作计时器 */
+/** 浣跨敤褰撳墠鏃堕棿鏍煎紡鍖栧伐浣滆鏃跺櫒 */
 function formatWorkingTimerNow(startIso: string): string {
   return formatWorkingTimer(startIso, new Date().toISOString()) ?? "0s";
 }
 
-/** 格式化实时消息元信息（创建时�?+ 持续时长�?*/
+/** 鏍煎紡鍖栧疄鏃舵秷鎭厓淇℃伅锛堝垱寤烘椂闂?+ 鎸佺画鏃堕暱锛?*/
 function formatLiveMessageMetaNow(
   createdAt: string,
   durationStart: string,
@@ -1189,22 +1189,22 @@ function formatLiveMessageMetaNow(
   );
 }
 
-/** 格式化消息元信息，拼接时间戳和持续时�?*/
+/** 鏍煎紡鍖栨秷鎭厓淇℃伅锛屾嫾鎺ユ椂闂存埑鍜屾寔缁椂闀?*/
 function formatMessageMeta(
   createdAt: string,
   duration: string | null,
   timestampFormat: TimestampFormat,
 ): string {
   if (!duration) return formatShortTimestamp(createdAt, timestampFormat);
-  return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
+  return `${formatShortTimestamp(createdAt, timestampFormat)} 锟?${duration}`;
 }
 
-/** 格式化内联工作摘要（当前未实现，返回 null�?*/
+/** 鏍煎紡鍖栧唴鑱斿伐浣滄憳瑕侊紙褰撳墠鏈疄鐜帮紝杩斿洖 null锛?*/
 function formatInlineWorkSummary(_groupedEntries: TimelineWorkEntry[]): string | null {
   return null;
 }
 
-/** 判断条目列表是否全部为工具调用类�?*/
+/** 鍒ゆ柇鏉＄洰鍒楄〃鏄惁鍏ㄩ儴涓哄伐鍏疯皟鐢ㄧ被鍨?*/
 function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   entries: ReadonlyArray<T> | undefined,
 ): entries is ReadonlyArray<T> {
@@ -1214,7 +1214,7 @@ function hasOnlyToolToneEntries<T extends { tone: TimelineWorkEntry["tone"] }>(
   return entries.every((entry) => entry.tone === "tool");
 }
 
-/** 用户消息中的终端上下文内联标签组�?*/
+/** 鐢ㄦ埛娑堟伅涓殑缁堢涓婁笅鏂囧唴鑱旀爣绛剧粍浠?*/
 const UserMessageTerminalContextInlineLabel = memo(
   function UserMessageTerminalContextInlineLabel(props: { context: ParsedTerminalContextEntry }) {
     const tooltipText =
@@ -1648,7 +1648,7 @@ function extractFilePathFromDetail(detail: string): string | null {
       return filePath.trim();
     }
   } catch {
-    // Not valid JSON �?try regex fallback
+    // Not valid JSON 锟?try regex fallback
     const match = /"(?:file_path|filePath|path|filename)"\s*:\s*"([^"]+)"/i.exec(detail);
     if (match?.[1]) return match[1];
   }
@@ -1704,7 +1704,7 @@ function workEntryPreview(
     const filePath = extractFilePathFromDetail(workEntry.detail);
     if (filePath) return basename(filePath);
 
-    // For file-related entries, the heading alone is enough �?don't show raw JSON
+    // For file-related entries, the heading alone is enough 锟?don't show raw JSON
     if (isFileRelated) return null;
 
     // For other entries, if the detail looks like raw JSON, skip it
@@ -1714,7 +1714,7 @@ function workEntryPreview(
     const readLinesMatch = /^Read\s+(\d+\s+lines?)$/i.exec(trimmedDetail);
     if (readLinesMatch?.[1]) return readLinesMatch[1];
 
-    // Clean, non-JSON detail �?show it
+    // Clean, non-JSON detail 锟?show it
     return trimmedDetail;
   }
 
@@ -1815,7 +1815,7 @@ function subagentSecondaryLabel(
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(" �?");
+  return parts.join(" 锟?");
 }
 
 function subagentStatusClasses(
@@ -1851,7 +1851,7 @@ function subagentCardSummary(workEntry: TimelineWorkEntry): string {
 function subagentCardMeta(workEntry: TimelineWorkEntry): string | null {
   const modelLabel = formatSubagentModelLabel(workEntry.subagentAction?.model);
   if (modelLabel && workEntry.subagentAction?.prompt) {
-    return `${modelLabel} �?${workEntry.subagentAction.prompt}`;
+    return `${modelLabel} 锟?${workEntry.subagentAction.prompt}`;
   }
   return modelLabel ?? workEntry.subagentAction?.prompt ?? null;
 }

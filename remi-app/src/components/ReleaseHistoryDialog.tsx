@@ -1,7 +1,7 @@
 /**
  * @file ReleaseHistoryDialog.tsx
- * @description 独立的完整发布历史对话框，供"设置 > 关于"入口使用，
- *              镜像更新后对话框的"完整更新日志"视图，但不锚定当前版本。
+ * @description ç‹¬ç«‹çš„å®Œæ•´å‘å¸ƒåŽ†å²å¯¹è¯æ¡†ï¼Œä¾›"è®¾ç½® > å…³äºŽ"å…¥å£ä½¿ç”¨ï¼Œ
+ *              é•œåƒæ›´æ–°åŽå¯¹è¯æ¡†çš„"å®Œæ•´æ›´æ–°æ—¥å¿—"è§†å›¾ï¼Œä½†ä¸é”šå®šå½“å‰ç‰ˆæœ¬ã€‚
  */
 
 import { ChangelogAccordion } from "../whatsNew/ChangelogAccordion";
@@ -40,7 +40,7 @@ export default function ReleaseHistoryDialog({
   defaultExpandedVersion = null,
 }: ReleaseHistoryDialogProps) {
   // Sort at render time so the source of truth (`entries.ts`) stays free of
-  // ordering rules �?authors can prepend, append, or reorder entries freely.
+  // ordering rules ï¿½?authors can prepend, append, or reorder entries freely.
   const sorted = sortEntriesByVersionDesc(entries);
 
   return (

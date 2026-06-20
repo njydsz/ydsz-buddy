@@ -1,7 +1,7 @@
 /**
  * @file GitActionsControl.tsx
- * @description 聊天头部 Git 操作控件，包含提交对话框、推送/PR 操作和进度提示，
- *              整合 Git React Query 挂钩和原生 Shell 桥接。
+ * @description èŠå¤©å¤´éƒ¨ Git æ“ä½œæŽ§ä»¶ï¼ŒåŒ…å«æäº¤å¯¹è¯æ¡†ã€æŽ¨é€/PR æ“ä½œå’Œè¿›åº¦æç¤ºï¼Œ
+ *              æ•´åˆ Git React Query æŒ‚é’©å’ŒåŽŸç”Ÿ Shell æ¡¥æŽ¥ã€‚
  */
 
 import type {
@@ -526,14 +526,14 @@ export default function GitActionsControl({
           progress.lastOutputLine = null;
           break;
         case "action_finished":
-          // Don't clear timestamps here �?the HTTP response handler (line 496)
+          // Don't clear timestamps here ï¿½?the HTTP response handler (line 496)
           // sets activeGitActionProgressRef to null and shows the success toast.
           // Clearing timestamps early causes the "Running for Xs" description
           // to disappear before the success state renders, leaving a bare
           // "Pushing..." toast in the gap between the WS event and HTTP response.
           return;
         case "action_failed":
-          // Same reasoning as action_finished �?let the HTTP error handler
+          // Same reasoning as action_finished ï¿½?let the HTTP error handler
           // manage the final toast state to avoid a flash of bare title.
           return;
       }

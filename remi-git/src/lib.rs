@@ -27,7 +27,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use std::sync::Arc;

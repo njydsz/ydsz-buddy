@@ -1,8 +1,8 @@
 /**
- * @file 快捷键绑定系�? *
- * 负责管理应用内所有快捷键的解析、匹配和格式化。包括：
- * - 默认快捷键配置（侧边栏、聊天、终端、线程跳转等�? * - 键盘事件与快捷键规则的匹配逻辑
- * - 快捷键标签的格式化与拆分（支�?macOS �?Windows/Linux 平台差异�? * - 各类快捷键判定的便捷函数
+ * @file 蹇嵎閿粦瀹氱郴缁? *
+ * 璐熻矗绠＄悊搴旂敤鍐呮墍鏈夊揩鎹烽敭鐨勮В鏋愩€佸尮閰嶅拰鏍煎紡鍖栥€傚寘鎷細
+ * - 榛樿蹇嵎閿厤缃紙渚ц竟鏍忋€佽亰澶┿€佺粓绔€佺嚎绋嬭烦杞瓑锛? * - 閿洏浜嬩欢涓庡揩鎹烽敭瑙勫垯鐨勫尮閰嶉€昏緫
+ * - 蹇嵎閿爣绛剧殑鏍煎紡鍖栦笌鎷嗗垎锛堟敮鎸?macOS 鍜?Windows/Linux 骞冲彴宸紓锛? * - 鍚勭被蹇嵎閿垽瀹氱殑渚挎嵎鍑芥暟
  */
 
 import {
@@ -17,52 +17,52 @@ import {
 import { isMacPlatform } from "./lib/utils";
 
 /**
- * 快捷键事件的轻量表示，兼容原�?KeyboardEvent 和自定义事件对象�? * 用于在快捷键匹配时统一处理键盘输入�? */
+ * 蹇嵎閿簨浠剁殑杞婚噺琛ㄧず锛屽吋瀹瑰師鐢?KeyboardEvent 鍜岃嚜瀹氫箟浜嬩欢瀵硅薄銆? * 鐢ㄤ簬鍦ㄥ揩鎹烽敭鍖归厤鏃剁粺涓€澶勭悊閿洏杈撳叆銆? */
 export interface ShortcutEventLike {
-  /** 事件类型，如 "keydown" */
+  /** 浜嬩欢绫诲瀷锛屽 "keydown" */
   type?: string;
-  /** 物理按键代码，如 "KeyA"�?Digit1" */
+  /** 鐗╃悊鎸夐敭浠ｇ爜锛屽 "KeyA"銆?Digit1" */
   code?: string;
-  /** 按键值，�?"a"�?1"�?Escape" */
+  /** 鎸夐敭鍊硷紝濡?"a"銆?1"銆?Escape" */
   key: string;
-  /** 是否按下 Meta 键（macOS �?Command 键） */
+  /** 鏄惁鎸変笅 Meta 閿紙macOS 涓?Command 閿級 */
   metaKey: boolean;
-  /** 是否按下 Ctrl �?*/
+  /** 鏄惁鎸変笅 Ctrl 閿?*/
   ctrlKey: boolean;
-  /** 是否按下 Shift �?*/
+  /** 鏄惁鎸変笅 Shift 閿?*/
   shiftKey: boolean;
-  /** 是否按下 Alt 键（macOS �?Option 键） */
+  /** 鏄惁鎸変笅 Alt 閿紙macOS 涓?Option 閿級 */
   altKey: boolean;
 }
 
 /**
- * 快捷键匹配的上下文环境，用于判断 when 子句的条件�? * 描述当前 UI 状态以决定哪些快捷键生效�? */
+ * 蹇嵎閿尮閰嶇殑涓婁笅鏂囩幆澧冿紝鐢ㄤ簬鍒ゆ柇 when 瀛愬彞鐨勬潯浠躲€? * 鎻忚堪褰撳墠 UI 鐘舵€佷互鍐冲畾鍝簺蹇嵎閿敓鏁堛€? */
 export interface ShortcutMatchContext {
-  /** 终端是否获得焦点 */
+  /** 缁堢鏄惁鑾峰緱鐒︾偣 */
   terminalFocus: boolean;
-  /** 终端是否打开 */
+  /** 缁堢鏄惁鎵撳紑 */
   terminalOpen: boolean;
-  /** 其他自定义上下文条件 */
+  /** 鍏朵粬鑷畾涔変笂涓嬫枃鏉′欢 */
   [key: string]: boolean;
 }
 
-/** 快捷键匹配时的可选配�?*/
+/** 蹇嵎閿尮閰嶆椂鐨勫彲閫夐厤缃?*/
 interface ShortcutMatchOptions {
-  /** 运行平台，默认使�?navigator.platform */
+  /** 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform */
   platform?: string;
-  /** 匹配上下文，用于 when 子句求�?*/
+  /** 鍖归厤涓婁笅鏂囷紝鐢ㄤ簬 when 瀛愬彞姹傚€?*/
   context?: Partial<ShortcutMatchContext>;
 }
 
-/** 快捷键标签解析的配置选项 */
+/** 蹇嵎閿爣绛捐В鏋愮殑閰嶇疆閫夐」 */
 interface ResolvedShortcutLabelOptions extends ShortcutMatchOptions {
-  /** 运行平台，默认使�?navigator.platform */
+  /** 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform */
   platform?: string;
 }
 
 /**
- * 创建一个快捷键对象，默认启�?modKey（macOS �?Command，其他为 Ctrl）�? *
- * @param key - 按键�? * @param overrides - 可选的修饰键覆�? * @returns 完整的快捷键对象
+ * 鍒涘缓涓€涓揩鎹烽敭瀵硅薄锛岄粯璁ゅ惎鐢?modKey锛坢acOS 涓?Command锛屽叾浠栦负 Ctrl锛夈€? *
+ * @param key - 鎸夐敭鍊? * @param overrides - 鍙€夌殑淇グ閿鐩? * @returns 瀹屾暣鐨勫揩鎹烽敭瀵硅薄
  *
  * @example
  * ```ts
@@ -85,42 +85,42 @@ function commandShortcut(
 }
 
 /**
- * 创建 when 子句的标识符节点，表示一个上下文条件变量�? *
- * @param name - 条件变量名称
- * @returns 标识符类型的 when 子句节点
+ * 鍒涘缓 when 瀛愬彞鐨勬爣璇嗙鑺傜偣锛岃〃绀轰竴涓笂涓嬫枃鏉′欢鍙橀噺銆? *
+ * @param name - 鏉′欢鍙橀噺鍚嶇О
+ * @returns 鏍囪瘑绗︾被鍨嬬殑 when 瀛愬彞鑺傜偣
  */
 function whenIdentifier(name: string): KeybindingWhenNode {
   return { type: "identifier", name };
 }
 
 /**
- * 创建 when 子句的取反节点，表示对子条件的逻辑非�? *
- * @param node - 需要取反的子节�? * @returns 取反类型�?when 子句节点
+ * 鍒涘缓 when 瀛愬彞鐨勫彇鍙嶈妭鐐癸紝琛ㄧず瀵瑰瓙鏉′欢鐨勯€昏緫闈炪€? *
+ * @param node - 闇€瑕佸彇鍙嶇殑瀛愯妭鐐? * @returns 鍙栧弽绫诲瀷鐨?when 瀛愬彞鑺傜偣
  */
 function whenNot(node: KeybindingWhenNode): KeybindingWhenNode {
   return { type: "not", node };
 }
 
 /**
- * 创建 when 子句的逻辑与节点，表示两个子条件同时满足�? *
- * @param left - 左子节点
- * @param right - 右子节点
- * @returns 逻辑与类型的 when 子句节点
+ * 鍒涘缓 when 瀛愬彞鐨勯€昏緫涓庤妭鐐癸紝琛ㄧず涓や釜瀛愭潯浠跺悓鏃舵弧瓒炽€? *
+ * @param left - 宸﹀瓙鑺傜偣
+ * @param right - 鍙冲瓙鑺傜偣
+ * @returns 閫昏緫涓庣被鍨嬬殑 when 瀛愬彞鑺傜偣
  */
 function whenAnd(left: KeybindingWhenNode, right: KeybindingWhenNode): KeybindingWhenNode {
   return { type: "and", left, right };
 }
 
-/** when 子句：终端未获得焦点 */
+/** when 瀛愬彞锛氱粓绔湭鑾峰緱鐒︾偣 */
 const whenNotTerminalFocus = whenNot(whenIdentifier("terminalFocus"));
-/** when 子句：终端未获得焦点且终端工作区未打开（用于线程跳转快捷键�?*/
+/** when 瀛愬彞锛氱粓绔湭鑾峰緱鐒︾偣涓旂粓绔伐浣滃尯鏈墦寮€锛堢敤浜庣嚎绋嬭烦杞揩鎹烽敭锛?*/
 const whenThreadJumpAvailable = whenAnd(
   whenNotTerminalFocus,
   whenNot(whenIdentifier("terminalWorkspaceOpen")),
 );
 
 /**
- * 默认快捷键回退配置。当用户未自定义某命令的快捷键时，使用此列表中的绑定�? * 配置项按优先级从低到高排列，后出现的规则优先级更高�? */
+ * 榛樿蹇嵎閿洖閫€閰嶇疆銆傚綋鐢ㄦ埛鏈嚜瀹氫箟鏌愬懡浠ょ殑蹇嵎閿椂锛屼娇鐢ㄦ鍒楄〃涓殑缁戝畾銆? * 閰嶇疆椤规寜浼樺厛绾т粠浣庡埌楂樻帓鍒楋紝鍚庡嚭鐜扮殑瑙勫垯浼樺厛绾ф洿楂樸€? */
 export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
   {
     command: "sidebar.addProject",
@@ -233,18 +233,18 @@ export const DEFAULT_SHORTCUT_FALLBACKS: ResolvedKeybindingsConfig = [
   },
 ];
 
-/** 终端中按 Alt+B 向后跳一个单词的转义序列 */
+/** 缁堢涓寜 Alt+B 鍚戝悗璺充竴涓崟璇嶇殑杞箟搴忓垪 */
 const TERMINAL_WORD_BACKWARD = "\u001bb";
-/** 终端中按 Alt+F 向前跳一个单词的转义序列 */
+/** 缁堢涓寜 Alt+F 鍚戝墠璺充竴涓崟璇嶇殑杞箟搴忓垪 */
 const TERMINAL_WORD_FORWARD = "\u001bf";
-/** 终端中按 Ctrl+A 跳到行首的转义序�?*/
+/** 缁堢涓寜 Ctrl+A 璺冲埌琛岄鐨勮浆涔夊簭鍒?*/
 const TERMINAL_LINE_START = "\u0001";
-/** 终端中按 Ctrl+E 跳到行尾的转义序�?*/
+/** 缁堢涓寜 Ctrl+E 璺冲埌琛屽熬鐨勮浆涔夊簭鍒?*/
 const TERMINAL_LINE_END = "\u0005";
 
 /**
- * 键盘事件 code �?key 的别名映射表�? * 用于将物理按键代码（�?"KeyA"）映射为逻辑按键值（�?"a"），
- * 以便在快捷键匹配时兼容不同键盘布局�? */
+ * 閿洏浜嬩欢 code 鍒?key 鐨勫埆鍚嶆槧灏勮〃銆? * 鐢ㄤ簬灏嗙墿鐞嗘寜閿唬鐮侊紙濡?"KeyA"锛夋槧灏勪负閫昏緫鎸夐敭鍊硷紙濡?"a"锛夛紝
+ * 浠ヤ究鍦ㄥ揩鎹烽敭鍖归厤鏃跺吋瀹逛笉鍚岄敭鐩樺竷灞€銆? */
 const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
   BracketLeft: ["["],
   BracketRight: ["]"],
@@ -287,8 +287,8 @@ const EVENT_CODE_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = {
 };
 
 /**
- * 将键盘事件的 key 值标准化为小写，并处理特殊键的别名�? *
- * @param key - 原始 key �? * @returns 标准化后�?key �? */
+ * 灏嗛敭鐩樹簨浠剁殑 key 鍊兼爣鍑嗗寲涓哄皬鍐欙紝骞跺鐞嗙壒娈婇敭鐨勫埆鍚嶃€? *
+ * @param key - 鍘熷 key 鍊? * @returns 鏍囧噯鍖栧悗鐨?key 鍊? */
 function normalizeEventKey(key: string): string {
   const normalized = key.toLowerCase();
   if (normalized === "esc") return "escape";
@@ -298,9 +298,9 @@ function normalizeEventKey(key: string): string {
 }
 
 /**
- * 解析键盘事件中所有可能的按键值集合�? * 包括事件本身�?key 值和通过 code 映射出的别名�? *
- * @param event - 键盘事件
- * @returns 所有可能的按键值集�? */
+ * 瑙ｆ瀽閿洏浜嬩欢涓墍鏈夊彲鑳界殑鎸夐敭鍊奸泦鍚堛€? * 鍖呮嫭浜嬩欢鏈韩鐨?key 鍊煎拰閫氳繃 code 鏄犲皠鍑虹殑鍒悕銆? *
+ * @param event - 閿洏浜嬩欢
+ * @returns 鎵€鏈夊彲鑳界殑鎸夐敭鍊奸泦鍚? */
 function resolveEventKeys(event: ShortcutEventLike): Set<string> {
   const keys = new Set([normalizeEventKey(event.key)]);
   const aliases = event.code ? EVENT_CODE_KEY_ALIASES[event.code] : undefined;
@@ -313,10 +313,10 @@ function resolveEventKeys(event: ShortcutEventLike): Set<string> {
 }
 
 /**
- * 判断键盘事件的修饰键是否与快捷键规则匹配�? * modKey �?macOS 上映射为 Meta（Command），在其他平台映射为 Ctrl�? *
- * @param event - 键盘事件
- * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
- * @returns 修饰键是否匹�? */
+ * 鍒ゆ柇閿洏浜嬩欢鐨勪慨楗伴敭鏄惁涓庡揩鎹烽敭瑙勫垯鍖归厤銆? * modKey 鍦?macOS 涓婃槧灏勪负 Meta锛圕ommand锛夛紝鍦ㄥ叾浠栧钩鍙版槧灏勪负 Ctrl銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 淇グ閿槸鍚﹀尮閰? */
 function matchesShortcutModifiers(
   event: ShortcutEventLike,
   shortcut: KeybindingShortcut,
@@ -334,10 +334,10 @@ function matchesShortcutModifiers(
 }
 
 /**
- * 判断键盘事件是否完全匹配某个快捷键规则（修饰�?+ 按键值）�? *
- * @param event - 键盘事件
- * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
- * @returns 是否匹配
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁瀹屽叏鍖归厤鏌愪釜蹇嵎閿鍒欙紙淇グ閿?+ 鎸夐敭鍊硷級銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏄惁鍖归厤
  */
 function matchesShortcut(
   event: ShortcutEventLike,
@@ -348,15 +348,15 @@ function matchesShortcut(
   return resolveEventKeys(event).has(shortcut.key);
 }
 
-/** 从选项中解析平台标识，未指定时使用 navigator.platform */
+/** 浠庨€夐」涓В鏋愬钩鍙版爣璇嗭紝鏈寚瀹氭椂浣跨敤 navigator.platform */
 function resolvePlatform(options: ShortcutMatchOptions | undefined): string {
   return options?.platform ?? navigator.platform;
 }
 
 /**
- * 从选项中解析快捷键匹配上下文，未指定的条件默认�?false�? *
- * @param options - 匹配选项
- * @returns 完整的匹配上下文
+ * 浠庨€夐」涓В鏋愬揩鎹烽敭鍖归厤涓婁笅鏂囷紝鏈寚瀹氱殑鏉′欢榛樿涓?false銆? *
+ * @param options - 鍖归厤閫夐」
+ * @returns 瀹屾暣鐨勫尮閰嶄笂涓嬫枃
  */
 function resolveContext(options: ShortcutMatchOptions | undefined): ShortcutMatchContext {
   return {
@@ -367,9 +367,9 @@ function resolveContext(options: ShortcutMatchOptions | undefined): ShortcutMatc
 }
 
 /**
- * 递归求�?when 子句�?AST 节点�? * 支持标识符（identifier）、取反（not）、逻辑与（and）、逻辑或（or）四种节点类型�? *
- * @param node - when 子句 AST 节点
- * @param context - 上下文条件变�? * @returns 子句求值结�? */
+ * 閫掑綊姹傚€?when 瀛愬彞鐨?AST 鑺傜偣銆? * 鏀寔鏍囪瘑绗︼紙identifier锛夈€佸彇鍙嶏紙not锛夈€侀€昏緫涓庯紙and锛夈€侀€昏緫鎴栵紙or锛夊洓绉嶈妭鐐圭被鍨嬨€? *
+ * @param node - when 瀛愬彞 AST 鑺傜偣
+ * @param context - 涓婁笅鏂囨潯浠跺彉閲? * @returns 瀛愬彞姹傚€肩粨鏋? */
 function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContext): boolean {
   switch (node.type) {
     case "identifier":
@@ -386,8 +386,8 @@ function evaluateWhenNode(node: KeybindingWhenNode, context: ShortcutMatchContex
 }
 
 /**
- * 判断 when 子句是否在给定上下文中成立。无 when 子句时默认返�?true�? *
- * @param whenAst - when 子句 AST 根节�? * @param context - 上下文条件变�? * @returns 子句是否成立
+ * 鍒ゆ柇 when 瀛愬彞鏄惁鍦ㄧ粰瀹氫笂涓嬫枃涓垚绔嬨€傛棤 when 瀛愬彞鏃堕粯璁よ繑鍥?true銆? *
+ * @param whenAst - when 瀛愬彞 AST 鏍硅妭鐐? * @param context - 涓婁笅鏂囨潯浠跺彉閲? * @returns 瀛愬彞鏄惁鎴愮珛
  */
 function matchesWhenClause(
   whenAst: KeybindingWhenNode | undefined,
@@ -398,9 +398,9 @@ function matchesWhenClause(
 }
 
 /**
- * 生成快捷键的冲突检测键，用于判断两个快捷键是否会产生冲突�? * 将按键值和修饰键组合为唯一标识字符串�? *
- * @param shortcut - 快捷键规�? * @param platform - 运行平台
- * @returns 冲突检测键字符�? */
+ * 鐢熸垚蹇嵎閿殑鍐茬獊妫€娴嬮敭锛岀敤浜庡垽鏂袱涓揩鎹烽敭鏄惁浼氫骇鐢熷啿绐併€? * 灏嗘寜閿€煎拰淇グ閿粍鍚堜负鍞竴鏍囪瘑瀛楃涓层€? *
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴
+ * @returns 鍐茬獊妫€娴嬮敭瀛楃涓? */
 function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.platform): string {
   const useMetaForMod = isMacPlatform(platform);
   const metaKey = shortcut.metaKey || (shortcut.modKey && useMetaForMod);
@@ -416,10 +416,10 @@ function shortcutConflictKey(shortcut: KeybindingShortcut, platform = navigator.
 }
 
 /**
- * 在快捷键配置列表中查找指定命令的有效快捷键�? * 从列表末尾向前遍历（后出现的规则优先级更高），跳过已被更高优先级规则占用的快捷键�? *
- * @param keybindings - 快捷键配置列�? * @param command - 目标命令
- * @param options - 匹配选项
- * @returns 匹配到的快捷键，未找到返�?null
+ * 鍦ㄥ揩鎹烽敭閰嶇疆鍒楄〃涓煡鎵炬寚瀹氬懡浠ょ殑鏈夋晥蹇嵎閿€? * 浠庡垪琛ㄦ湯灏惧悜鍓嶉亶鍘嗭紙鍚庡嚭鐜扮殑瑙勫垯浼樺厛绾ф洿楂橈級锛岃烦杩囧凡琚洿楂樹紭鍏堢骇瑙勫垯鍗犵敤鐨勫揩鎹烽敭銆? *
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑蹇嵎閿紝鏈壘鍒拌繑鍥?null
  */
 function findEffectiveShortcutForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -450,11 +450,11 @@ function findEffectiveShortcutForCommand(
 }
 
 /**
- * 判断键盘事件是否匹配指定命令的快捷键�? *
- * @param event - 键盘事件
- * @param keybindings - 快捷键配置列�? * @param command - 目标命令
- * @param options - 匹配选项
- * @returns 是否匹配
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鎸囧畾鍛戒护鐨勫揩鎹烽敭銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 鍖归厤閫夐」
+ * @returns 鏄惁鍖归厤
  */
 function matchesCommandShortcut(
   event: ShortcutEventLike,
@@ -466,10 +466,10 @@ function matchesCommandShortcut(
 }
 
 /**
- * 从快捷键配置列表中解析键盘事件对应的命令�? * 从列表末尾向前遍历，返回第一个匹配的命令�? *
- * @param event - 键盘事件
- * @param keybindings - 快捷键配置列�? * @param options - 匹配选项
- * @returns 匹配到的命令，未找到返回 null
+ * 浠庡揩鎹烽敭閰嶇疆鍒楄〃涓В鏋愰敭鐩樹簨浠跺搴旂殑鍛戒护銆? * 浠庡垪琛ㄦ湯灏惧悜鍓嶉亶鍘嗭紝杩斿洖绗竴涓尮閰嶇殑鍛戒护銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑鍛戒护锛屾湭鎵惧埌杩斿洖 null
  */
 function resolveShortcutCommandFromBindings(
   event: ShortcutEventLike,
@@ -491,8 +491,8 @@ function resolveShortcutCommandFromBindings(
 }
 
 /**
- * 从用户自定义配置中提取未被覆盖的默认快捷键回退项�? *
- * @param keybindings - 用户自定义的快捷键配�? * @returns 未被用户覆盖的默认快捷键列表
+ * 浠庣敤鎴疯嚜瀹氫箟閰嶇疆涓彁鍙栨湭琚鐩栫殑榛樿蹇嵎閿洖閫€椤广€? *
+ * @param keybindings - 鐢ㄦ埛鑷畾涔夌殑蹇嵎閿厤缃? * @returns 鏈鐢ㄦ埛瑕嗙洊鐨勯粯璁ゅ揩鎹烽敭鍒楄〃
  */
 function getFallbackBindings(
   keybindings: ResolvedKeybindingsConfig,
@@ -502,10 +502,10 @@ function getFallbackBindings(
 }
 
 /**
- * 解析键盘事件对应的命令。优先在用户自定义配置中查找�? * 未找到时回退到默认快捷键配置�? *
- * @param event - 键盘事件
- * @param keybindings - 用户自定义的快捷键配�? * @param options - 匹配选项
- * @returns 匹配到的命令标识符，未找到返�?null
+ * 瑙ｆ瀽閿洏浜嬩欢瀵瑰簲鐨勫懡浠ゃ€備紭鍏堝湪鐢ㄦ埛鑷畾涔夐厤缃腑鏌ユ壘锛? * 鏈壘鍒版椂鍥為€€鍒伴粯璁ゅ揩鎹烽敭閰嶇疆銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 鐢ㄦ埛鑷畾涔夌殑蹇嵎閿厤缃? * @param options - 鍖归厤閫夐」
+ * @returns 鍖归厤鍒扮殑鍛戒护鏍囪瘑绗︼紝鏈壘鍒拌繑鍥?null
  *
  * @example
  * ```ts
@@ -532,8 +532,8 @@ export function resolveShortcutCommand(
 }
 
 /**
- * 将按键值格式化为可读的标签文本�? * 处理特殊键如空格、方向键、Escape 等�? *
- * @param key - 按键�? * @returns 格式化后的标�? */
+ * 灏嗘寜閿€兼牸寮忓寲涓哄彲璇荤殑鏍囩鏂囨湰銆? * 澶勭悊鐗规畩閿绌烘牸銆佹柟鍚戦敭銆丒scape 绛夈€? *
+ * @param key - 鎸夐敭鍊? * @returns 鏍煎紡鍖栧悗鐨勬爣绛? */
 function formatShortcutKeyLabel(key: string): string {
   if (key === " ") return "Space";
   if (key.length === 1) return key.toUpperCase();
@@ -546,13 +546,13 @@ function formatShortcutKeyLabel(key: string): string {
 }
 
 /**
- * 将快捷键规则格式化为可读的标签字符串�? * macOS 使用符号（⌘⌥⇧⌃），其他平台使用文字（Ctrl+Alt+Shift+Meta）�? *
- * @param shortcut - 快捷键规�? * @param platform - 运行平台，默认使�?navigator.platform
- * @returns 格式化后的快捷键标签
+ * 灏嗗揩鎹烽敭瑙勫垯鏍煎紡鍖栦负鍙鐨勬爣绛惧瓧绗︿覆銆? * macOS 浣跨敤绗﹀彿锛堚寴鈱モ嚙鈱冿級锛屽叾浠栧钩鍙颁娇鐢ㄦ枃瀛楋紙Ctrl+Alt+Shift+Meta锛夈€? *
+ * @param shortcut - 蹇嵎閿鍒? * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏍煎紡鍖栧悗鐨勫揩鎹烽敭鏍囩
  *
  * @example
  * ```ts
- * formatShortcutLabel(shortcut, "MacIntel") // "⌘⇧N"
+ * formatShortcutLabel(shortcut, "MacIntel") // "鈱樷嚙N"
  * formatShortcutLabel(shortcut, "Win32")    // "Ctrl+Shift+N"
  * ```
  */
@@ -580,17 +580,17 @@ export function formatShortcutLabel(
   return parts.join("+");
 }
 
-/** macOS 修饰键符号集合，用于拆分快捷键标�?*/
-const MODIFIER_SYMBOLS = new Set(["�?, "�?, "�?, "�?]);
+/** macOS 淇グ閿鍙烽泦鍚堬紝鐢ㄤ簬鎷嗗垎蹇嵎閿爣绛?*/
+const MODIFIER_SYMBOLS = new Set(["鈱?, "鈱?, "鈱?, "鈬?]);
 
 /**
- * 将快捷键标签字符串拆分为独立的修饰键和按键部分�? * 支持两种格式：Windows 风格�?"+" 分隔�?macOS 风格的符号拼接�? *
- * @param shortcutLabel - 快捷键标签字符串
- * @returns 拆分后的各部分数�? *
+ * 灏嗗揩鎹烽敭鏍囩瀛楃涓叉媶鍒嗕负鐙珛鐨勪慨楗伴敭鍜屾寜閿儴鍒嗐€? * 鏀寔涓ょ鏍煎紡锛歐indows 椋庢牸鐨?"+" 鍒嗛殧鍜?macOS 椋庢牸鐨勭鍙锋嫾鎺ャ€? *
+ * @param shortcutLabel - 蹇嵎閿爣绛惧瓧绗︿覆
+ * @returns 鎷嗗垎鍚庣殑鍚勯儴鍒嗘暟缁? *
  * @example
  * ```ts
  * splitShortcutLabel("Ctrl+Shift+N") // ["Ctrl", "Shift", "N"]
- * splitShortcutLabel("⌘⇧N")          // ["�?, "�?, "N"]
+ * splitShortcutLabel("鈱樷嚙N")          // ["鈱?, "鈬?, "N"]
  * ```
  */
 export function splitShortcutLabel(shortcutLabel: string): string[] {
@@ -615,9 +615,9 @@ export function splitShortcutLabel(shortcutLabel: string): string[] {
 }
 
 /**
- * 获取指定命令的快捷键标签字符串�? * 优先在用户自定义配置中查找，未找到时回退到默认配置�? * 当未提供上下文时，直接按命令匹配（不评估 when 子句）以提高性能�? *
- * @param keybindings - 快捷键配置列�? * @param command - 目标命令
- * @param options - 平台和上下文选项，也可以直接传入平台字符�? * @returns 快捷键标签字符串，未找到返回 null
+ * 鑾峰彇鎸囧畾鍛戒护鐨勫揩鎹烽敭鏍囩瀛楃涓层€? * 浼樺厛鍦ㄧ敤鎴疯嚜瀹氫箟閰嶇疆涓煡鎵撅紝鏈壘鍒版椂鍥為€€鍒伴粯璁ら厤缃€? * 褰撴湭鎻愪緵涓婁笅鏂囨椂锛岀洿鎺ユ寜鍛戒护鍖归厤锛堜笉璇勪及 when 瀛愬彞锛変互鎻愰珮鎬ц兘銆? *
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param command - 鐩爣鍛戒护
+ * @param options - 骞冲彴鍜屼笂涓嬫枃閫夐」锛屼篃鍙互鐩存帴浼犲叆骞冲彴瀛楃涓? * @returns 蹇嵎閿爣绛惧瓧绗︿覆锛屾湭鎵惧埌杩斿洖 null
  */
 export function shortcutLabelForCommand(
   keybindings: ResolvedKeybindingsConfig,
@@ -658,16 +658,16 @@ export function shortcutLabelForCommand(
 }
 
 /**
- * 根据索引获取线程跳转命令。索引范�?0-8 对应 thread.jump.1 �?thread.jump.9�? *
- * @param index - 线程索引�? 起始�? * @returns 线程跳转命令，索引越界返�?null
+ * 鏍规嵁绱㈠紩鑾峰彇绾跨▼璺宠浆鍛戒护銆傜储寮曡寖鍥?0-8 瀵瑰簲 thread.jump.1 鍒?thread.jump.9銆? *
+ * @param index - 绾跨▼绱㈠紩锛? 璧峰锛? * @returns 绾跨▼璺宠浆鍛戒护锛岀储寮曡秺鐣岃繑鍥?null
  */
 export function threadJumpCommandForIndex(index: number): ThreadJumpKeybindingCommand | null {
   return THREAD_JUMP_KEYBINDING_COMMANDS[index] ?? null;
 }
 
 /**
- * 根据线程跳转命令获取其索引位置�? *
- * @param command - 线程跳转命令字符�? * @returns 索引位置�? 起始），未找到返�?null
+ * 鏍规嵁绾跨▼璺宠浆鍛戒护鑾峰彇鍏剁储寮曚綅缃€? *
+ * @param command - 绾跨▼璺宠浆鍛戒护瀛楃涓? * @returns 绱㈠紩浣嶇疆锛? 璧峰锛夛紝鏈壘鍒拌繑鍥?null
  */
 export function threadJumpIndexFromCommand(command: string): number | null {
   const index = THREAD_JUMP_KEYBINDING_COMMANDS.indexOf(command as ThreadJumpKeybindingCommand);
@@ -675,10 +675,10 @@ export function threadJumpIndexFromCommand(command: string): number | null {
 }
 
 /**
- * 判断当前键盘事件是否应显示线程跳转提示�? * 当按下了线程跳转快捷键的修饰键组合时返回 true�? *
- * @param event - 键盘事件
- * @param keybindings - 快捷键配置列�? * @param options - 匹配选项
- * @returns 是否应显示线程跳转提�? */
+ * 鍒ゆ柇褰撳墠閿洏浜嬩欢鏄惁搴旀樉绀虹嚎绋嬭烦杞彁绀恒€? * 褰撴寜涓嬩簡绾跨▼璺宠浆蹇嵎閿殑淇グ閿粍鍚堟椂杩斿洖 true銆? *
+ * @param event - 閿洏浜嬩欢
+ * @param keybindings - 蹇嵎閿厤缃垪琛? * @param options - 鍖归厤閫夐」
+ * @returns 鏄惁搴旀樉绀虹嚎绋嬭烦杞彁绀? */
 export function shouldShowThreadJumpHints(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -700,7 +700,7 @@ export function shouldShowThreadJumpHints(
   return false;
 }
 
-/** 判断键盘事件是否匹配终端切换快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢鍒囨崲蹇嵎閿?*/
 export function isTerminalToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -709,7 +709,7 @@ export function isTerminalToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.toggle", options);
 }
 
-/** 判断键盘事件是否匹配终端分屏快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢鍒嗗睆蹇嵎閿?*/
 export function isTerminalSplitShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -718,7 +718,7 @@ export function isTerminalSplitShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.split", options);
 }
 
-/** 判断键盘事件是否匹配新建终端快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓缁堢蹇嵎閿?*/
 export function isTerminalNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -727,7 +727,7 @@ export function isTerminalNewShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.new", options);
 }
 
-/** 判断键盘事件是否匹配关闭终端快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鍏抽棴缁堢蹇嵎閿?*/
 export function isTerminalCloseShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -736,7 +736,7 @@ export function isTerminalCloseShortcut(
   return matchesCommandShortcut(event, keybindings, "terminal.close", options);
 }
 
-/** 判断键盘事件是否匹配侧边栏切换快捷键 */
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤渚ц竟鏍忓垏鎹㈠揩鎹烽敭 */
 export function isSidebarToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -745,7 +745,7 @@ export function isSidebarToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "sidebar.toggle", options);
 }
 
-/** 判断键盘事件是否匹配 Diff 面板切换快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤 Diff 闈㈡澘鍒囨崲蹇嵎閿?*/
 export function isDiffToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -754,7 +754,7 @@ export function isDiffToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "diff.toggle", options);
 }
 
-/** 判断键盘事件是否匹配浏览器面板切换快捷键 */
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤娴忚鍣ㄩ潰鏉垮垏鎹㈠揩鎹烽敭 */
 export function isBrowserToggleShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -763,7 +763,7 @@ export function isBrowserToggleShortcut(
   return matchesCommandShortcut(event, keybindings, "browser.toggle", options);
 }
 
-/** 判断键盘事件是否匹配新建线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓绾跨▼蹇嵎閿?*/
 export function isChatNewShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -772,7 +772,7 @@ export function isChatNewShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.new", options);
 }
 
-/** 判断键盘事件是否匹配在最新项目中新建线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鍦ㄦ渶鏂伴」鐩腑鏂板缓绾跨▼蹇嵎閿?*/
 export function isChatNewLatestProjectShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -782,7 +782,7 @@ export function isChatNewLatestProjectShortcut(
 }
 
 /**
- * 判断键盘事件是否匹配新建聊天快捷键�? * 同时匹配 chat.newChat �?chat.newLocal 两个命令�? */
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓鑱婂ぉ蹇嵎閿€? * 鍚屾椂鍖归厤 chat.newChat 鍜?chat.newLocal 涓や釜鍛戒护銆? */
 export function isChatNewChatShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -794,10 +794,10 @@ export function isChatNewChatShortcut(
   );
 }
 
-/** isChatNewLocalShortcut 的别名，�?isChatNewChatShortcut 行为一�?*/
+/** isChatNewLocalShortcut 鐨勫埆鍚嶏紝涓?isChatNewChatShortcut 琛屼负涓€鑷?*/
 export const isChatNewLocalShortcut = isChatNewChatShortcut;
 
-/** 判断键盘事件是否匹配新建 Claude 线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Claude 绾跨▼蹇嵎閿?*/
 export function isChatNewClaudeShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -806,7 +806,7 @@ export function isChatNewClaudeShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newClaude", options);
 }
 
-/** 判断键盘事件是否匹配新建 Codex 线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Codex 绾跨▼蹇嵎閿?*/
 export function isChatNewCodexShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -815,7 +815,7 @@ export function isChatNewCodexShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCodex", options);
 }
 
-/** 判断键盘事件是否匹配新建 Cursor 线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Cursor 绾跨▼蹇嵎閿?*/
 export function isChatNewCursorShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -824,7 +824,7 @@ export function isChatNewCursorShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newCursor", options);
 }
 
-/** 判断键盘事件是否匹配新建 Gemini 线程快捷�?*/
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鏂板缓 Gemini 绾跨▼蹇嵎閿?*/
 export function isChatNewGeminiShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -833,7 +833,7 @@ export function isChatNewGeminiShortcut(
   return matchesCommandShortcut(event, keybindings, "chat.newGemini", options);
 }
 
-/** 判断键盘事件是否匹配打开收藏编辑器快捷键 */
+/** 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤鎵撳紑鏀惰棌缂栬緫鍣ㄥ揩鎹烽敭 */
 export function isOpenFavoriteEditorShortcut(
   event: ShortcutEventLike,
   keybindings: ResolvedKeybindingsConfig,
@@ -843,10 +843,10 @@ export function isOpenFavoriteEditorShortcut(
 }
 
 /**
- * 判断键盘事件是否匹配终端清屏快捷键（Ctrl+L）�? * 此快捷键不通过快捷键配置系统，而是硬编码判定�? *
- * @param event - 键盘事件
- * @param platform - 运行平台，默认使�?navigator.platform
- * @returns 是否匹配终端清屏快捷�? */
+ * 鍒ゆ柇閿洏浜嬩欢鏄惁鍖归厤缁堢娓呭睆蹇嵎閿紙Ctrl+L锛夈€? * 姝ゅ揩鎹烽敭涓嶉€氳繃蹇嵎閿厤缃郴缁燂紝鑰屾槸纭紪鐮佸垽瀹氥€? *
+ * @param event - 閿洏浜嬩欢
+ * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 鏄惁鍖归厤缁堢娓呭睆蹇嵎閿? */
 export function isTerminalClearShortcut(
   event: ShortcutEventLike,
   platform = navigator.platform,
@@ -861,12 +861,12 @@ export function isTerminalClearShortcut(
 }
 
 /**
- * 解析终端中的导航快捷键（按单�?行首/行尾跳转）�? * 返回对应的终端转义序列，供终端模拟器直接发送�? *
- * - macOS: Alt+Arrow 按单词跳转，Cmd+Arrow 跳到行首/行尾
- * - Windows/Linux: Ctrl+Arrow �?Alt+Arrow 按单词跳�? *
- * @param event - 键盘事件
- * @param platform - 运行平台，默认使�?navigator.platform
- * @returns 终端转义序列字符串，不匹配返�?null
+ * 瑙ｆ瀽缁堢涓殑瀵艰埅蹇嵎閿紙鎸夊崟璇?琛岄/琛屽熬璺宠浆锛夈€? * 杩斿洖瀵瑰簲鐨勭粓绔浆涔夊簭鍒楋紝渚涚粓绔ā鎷熷櫒鐩存帴鍙戦€併€? *
+ * - macOS: Alt+Arrow 鎸夊崟璇嶈烦杞紝Cmd+Arrow 璺冲埌琛岄/琛屽熬
+ * - Windows/Linux: Ctrl+Arrow 鎴?Alt+Arrow 鎸夊崟璇嶈烦杞? *
+ * @param event - 閿洏浜嬩欢
+ * @param platform - 杩愯骞冲彴锛岄粯璁や娇鐢?navigator.platform
+ * @returns 缁堢杞箟搴忓垪瀛楃涓诧紝涓嶅尮閰嶈繑鍥?null
  */
 export function terminalNavigationShortcutData(
   event: ShortcutEventLike,

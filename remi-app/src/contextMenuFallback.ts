@@ -1,21 +1,21 @@
 /**
- * @file 右键菜单回退实现
+ * @file 鍙抽敭鑿滃崟鍥為€€瀹炵幇
  *
- * 提供命令式的 DOM 右键菜单，匹配应用的 Base UI 菜单样式�? * �?Web 环境中当原生菜单不可用时作为回退方案�? * 显示定位下拉菜单并返回用户点击的选项 ID�? */
+ * 鎻愪緵鍛戒护寮忕殑 DOM 鍙抽敭鑿滃崟锛屽尮閰嶅簲鐢ㄧ殑 Base UI 鑿滃崟鏍峰紡銆? * 鍦?Web 鐜涓綋鍘熺敓鑿滃崟涓嶅彲鐢ㄦ椂浣滀负鍥為€€鏂规锛? * 鏄剧ず瀹氫綅涓嬫媺鑿滃崟骞惰繑鍥炵敤鎴风偣鍑荤殑閫夐」 ID銆? */
 
 import type { ContextMenuItem } from "~/contracts";
 
 /**
- * 带图标扩展的右键菜单项�? * 在基础 ContextMenuItem 上增�?SVG 图标字符串支持�? */
+ * 甯﹀浘鏍囨墿灞曠殑鍙抽敭鑿滃崟椤广€? * 鍦ㄥ熀纭€ ContextMenuItem 涓婂鍔?SVG 鍥炬爣瀛楃涓叉敮鎸併€? */
 export interface ContextMenuItemWithIcon<T extends string = string> extends ContextMenuItem<T> {
-  /** SVG 图标字符�?*/
+  /** SVG 鍥炬爣瀛楃涓?*/
   icon?: string;
 }
 
 /**
- * 显示命令式的右键菜单�? * 在指定位置显示下拉菜单，支持键盘导航（上下箭头、Enter、Escape）�? * 菜单溢出视口时自动调整位置�? *
- * @param items - 菜单项列�? * @param position - 菜单显示位置，默认为 (0, 0)
- * @returns Promise，点击菜单项返回�?ID，关闭返�?null
+ * 鏄剧ず鍛戒护寮忕殑鍙抽敭鑿滃崟銆? * 鍦ㄦ寚瀹氫綅缃樉绀轰笅鎷夎彍鍗曪紝鏀寔閿洏瀵艰埅锛堜笂涓嬬澶淬€丒nter銆丒scape锛夈€? * 鑿滃崟婧㈠嚭瑙嗗彛鏃惰嚜鍔ㄨ皟鏁翠綅缃€? *
+ * @param items - 鑿滃崟椤瑰垪琛? * @param position - 鑿滃崟鏄剧ず浣嶇疆锛岄粯璁や负 (0, 0)
+ * @returns Promise锛岀偣鍑昏彍鍗曢」杩斿洖鍏?ID锛屽叧闂繑鍥?null
  *
  * @example
  * ```ts

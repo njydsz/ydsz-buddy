@@ -1,15 +1,15 @@
 /**
- * @file 模型配置与选择管理模块
+ * @file 妯″瀷閰嶇疆涓庨€夋嫨绠＄悊妯″潡
  *
  * @description
- * 提供 AI 模型选项查询、能力解析、模型参数归一化、显示名称格式化等核心功能�? * 支持多种 AI 服务提供商（Claude、Codex、Cursor、Gemini、Grok、Pi、OpenCode、Kilo），
- * 并为每种提供商提供统一的模型选择与能力描述接口�? *
- * 核心功能�? * - 模型选项与默认模型查�? * - 模型能力（Capabilities）解析与查询
- * - Gemini 思维配置（budget/level）解�? * - 模型 Slug 归一化与解析
- * - 各提供商模型选项归一�? * - 提供商选项描述符构�? * - Claude Ultrathink 提示词前缀处理
+ * 鎻愪緵 AI 妯″瀷閫夐」鏌ヨ銆佽兘鍔涜В鏋愩€佹ā鍨嬪弬鏁板綊涓€鍖栥€佹樉绀哄悕绉版牸寮忓寲绛夋牳蹇冨姛鑳姐€? * 鏀寔澶氱 AI 鏈嶅姟鎻愪緵鍟嗭紙Claude銆丆odex銆丆ursor銆丟emini銆丟rok銆丳i銆丱penCode銆並ilo锛夛紝
+ * 骞朵负姣忕鎻愪緵鍟嗘彁渚涚粺涓€鐨勬ā鍨嬮€夋嫨涓庤兘鍔涙弿杩版帴鍙ｃ€? *
+ * 鏍稿績鍔熻兘锛? * - 妯″瀷閫夐」涓庨粯璁ゆā鍨嬫煡璇? * - 妯″瀷鑳藉姏锛圕apabilities锛夎В鏋愪笌鏌ヨ
+ * - Gemini 鎬濈淮閰嶇疆锛坆udget/level锛夎В鏋? * - 妯″瀷 Slug 褰掍竴鍖栦笌瑙ｆ瀽
+ * - 鍚勬彁渚涘晢妯″瀷閫夐」褰掍竴鍖? * - 鎻愪緵鍟嗛€夐」鎻忚堪绗︽瀯寤? * - Claude Ultrathink 鎻愮ず璇嶅墠缂€澶勭悊
  *
  * @module model
- * @layer 共享工具�? */
+ * @layer 鍏变韩宸ュ叿灞? */
 import {
   DEFAULT_MODEL_BY_PROVIDER,
   MODEL_CAPABILITIES_INDEX,
@@ -38,11 +38,11 @@ import {
 } from "~/contracts";
 
 /**
- * 按服务提供商索引的模�?Slug 集合
+ * 鎸夋湇鍔℃彁渚涘晢绱㈠紩鐨勬ā鍨?Slug 闆嗗悎
  *
  * @description
- * �?`MODEL_OPTIONS_BY_PROVIDER` 构建的按提供商分组的 Slug Set 集合�? * 用于 O(1) 时间复杂度判断某个模�?Slug 是否属于指定提供商，
- * 避免遍历数组进行查找�? *
+ * 浠?`MODEL_OPTIONS_BY_PROVIDER` 鏋勫缓鐨勬寜鎻愪緵鍟嗗垎缁勭殑 Slug Set 闆嗗悎锛? * 鐢ㄤ簬 O(1) 鏃堕棿澶嶆潅搴﹀垽鏂煇涓ā鍨?Slug 鏄惁灞炰簬鎸囧畾鎻愪緵鍟嗭紝
+ * 閬垮厤閬嶅巻鏁扮粍杩涜鏌ユ壘銆? *
  * @constant {Record<ProviderKind, ReadonlySet<ModelSlug>>}
  *
  * @example
@@ -63,13 +63,13 @@ const MODEL_SLUG_SET_BY_PROVIDER: Record<ProviderKind, ReadonlySet<ModelSlug>> =
 };
 
 /**
- * 可选择的模型选项
+ * 鍙€夋嫨鐨勬ā鍨嬮€夐」
  *
  * @description
- * 用于 UI 下拉列表中展示的模型选项，包含标识符和显示名称�? * �?`getModelOptions` 返回的选项列表中的每个元素类型�? *
+ * 鐢ㄤ簬 UI 涓嬫媺鍒楄〃涓睍绀虹殑妯″瀷閫夐」锛屽寘鍚爣璇嗙鍜屾樉绀哄悕绉般€? * 鐢?`getModelOptions` 杩斿洖鐨勯€夐」鍒楄〃涓殑姣忎釜鍏冪礌绫诲瀷銆? *
  * @interface SelectableModelOption
  *
- * @property {string} slug - 模型唯一标识符（Slug），用于 API 调用和内部引�? * @property {string} name - 模型显示名称，用�?UI 展示
+ * @property {string} slug - 妯″瀷鍞竴鏍囪瘑绗︼紙Slug锛夛紝鐢ㄤ簬 API 璋冪敤鍜屽唴閮ㄥ紩鐢? * @property {string} name - 妯″瀷鏄剧ず鍚嶇О锛岀敤浜?UI 灞曠ず
  *
  * @example
  * ```ts
@@ -77,17 +77,17 @@ const MODEL_SLUG_SET_BY_PROVIDER: Record<ProviderKind, ReadonlySet<ModelSlug>> =
  * ```
  */
 export interface SelectableModelOption {
-  /** 模型唯一标识符（Slug�?*/
+  /** 妯″瀷鍞竴鏍囪瘑绗︼紙Slug锛?*/
   slug: string;
-  /** 模型显示名称，用�?UI 展示 */
+  /** 妯″瀷鏄剧ず鍚嶇О锛岀敤浜?UI 灞曠ず */
   name: string;
 }
 
 /**
- * Gemini 思维配置类型
+ * Gemini 鎬濈淮閰嶇疆绫诲瀷
  *
  * @description
- * 标识 Gemini 模型使用的思维配置方式�? * - `"budget"` 表示基于 Token 预算配置（适用�?Gemini 2.5 系列�? * - `"level"` 表示基于级别配置（适用�?Gemini 3 系列�? *
+ * 鏍囪瘑 Gemini 妯″瀷浣跨敤鐨勬€濈淮閰嶇疆鏂瑰紡锛? * - `"budget"` 琛ㄧず鍩轰簬 Token 棰勭畻閰嶇疆锛堥€傜敤浜?Gemini 2.5 绯诲垪锛? * - `"level"` 琛ㄧず鍩轰簬绾у埆閰嶇疆锛堥€傜敤浜?Gemini 3 绯诲垪锛? *
  * @type {GeminiThinkingConfigKind}
  *
  * @example
@@ -98,13 +98,13 @@ export interface SelectableModelOption {
  */
 export type GeminiThinkingConfigKind = "budget" | "level";
 
-/** 匹配 Gemini 3 系列模型 ID 的正则表达式（如 gemini-3.0、auto-gemini-3 等） */
+/** 鍖归厤 Gemini 3 绯诲垪妯″瀷 ID 鐨勬鍒欒〃杈惧紡锛堝 gemini-3.0銆乤uto-gemini-3 绛夛級 */
 const GEMINI_3_MODEL_PATTERN = /^(?:auto-)?gemini-3(?:[.-]|$)/i;
-/** 匹配 Gemini 2.5 系列模型 ID 的正则表达式（如 gemini-2.5-pro、auto-gemini-2.5 等） */
+/** 鍖归厤 Gemini 2.5 绯诲垪妯″瀷 ID 鐨勬鍒欒〃杈惧紡锛堝 gemini-2.5-pro銆乤uto-gemini-2.5 绛夛級 */
 const GEMINI_2_5_MODEL_PATTERN = /^(?:auto-)?gemini-2\.5(?:[.-]|$)/i;
-/** Gemini 思维级别合法值集�?*/
+/** Gemini 鎬濈淮绾у埆鍚堟硶鍊奸泦鍚?*/
 const GEMINI_THINKING_LEVEL_SET = new Set<GeminiThinkingLevel>(["LOW", "HIGH"]);
-/** Pi 思维级别合法值集�?*/
+/** Pi 鎬濈淮绾у埆鍚堟硶鍊奸泦鍚?*/
 const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "off",
   "minimal",
@@ -113,7 +113,7 @@ const PI_THINKING_LEVEL_SET = new Set<PiThinkingLevel>([
   "high",
   "xhigh",
 ]);
-/** Gemini 思维预算字符串到数值的映射�?*/
+/** Gemini 鎬濈淮棰勭畻瀛楃涓插埌鏁板€肩殑鏄犲皠琛?*/
 const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
   ["-1", -1],
   ["0", 0],
@@ -121,10 +121,10 @@ const GEMINI_THINKING_BUDGET_MAP = new Map<string, GeminiThinkingBudget>([
 ]);
 
 /**
- * 空的模型能力对象
+ * 绌虹殑妯″瀷鑳藉姏瀵硅薄
  *
  * @description
- * 所有能力字段均为默认�?空值，用作未知模型或无特殊能力模型的回退值�? * 当无法识别模型或模型无特殊能力配置时，使用此对象作为默认值�? *
+ * 鎵€鏈夎兘鍔涘瓧娈靛潎涓洪粯璁ゅ€?绌哄€硷紝鐢ㄤ綔鏈煡妯″瀷鎴栨棤鐗规畩鑳藉姏妯″瀷鐨勫洖閫€鍊笺€? * 褰撴棤娉曡瘑鍒ā鍨嬫垨妯″瀷鏃犵壒娈婅兘鍔涢厤缃椂锛屼娇鐢ㄦ瀵硅薄浣滀负榛樿鍊笺€? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -141,17 +141,17 @@ export const EMPTY_MODEL_CAPABILITIES: ModelCapabilities = {
   contextWindowOptions: [],
 };
 /**
- * Gemini 模型的默认能力对�? *
+ * Gemini 妯″瀷鐨勯粯璁よ兘鍔涘璞? *
  * @description
- * 当前�?`EMPTY_MODEL_CAPABILITIES` 相同，用�?Gemini 模型无法识别系列时的回退�? *
+ * 褰撳墠涓?`EMPTY_MODEL_CAPABILITIES` 鐩稿悓锛岀敤浜?Gemini 妯″瀷鏃犳硶璇嗗埆绯诲垪鏃剁殑鍥為€€銆? *
  * @constant {ModelCapabilities}
  */
 export const DEFAULT_GEMINI_MODEL_CAPABILITIES = EMPTY_MODEL_CAPABILITIES;
 
 /**
- * Gemini 3 系列模型的能力描�? *
+ * Gemini 3 绯诲垪妯″瀷鐨勮兘鍔涙弿杩? *
  * @description
- * 支持基于级别（HIGH/LOW）的思维配置，不支持快速模式和思维切换�? * 适用�?Gemini 3.0 及以上版本的模型�? *
+ * 鏀寔鍩轰簬绾у埆锛圚IGH/LOW锛夌殑鎬濈淮閰嶇疆锛屼笉鏀寔蹇€熸ā寮忓拰鎬濈淮鍒囨崲銆? * 閫傜敤浜?Gemini 3.0 鍙婁互涓婄増鏈殑妯″瀷銆? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -172,9 +172,9 @@ export const GEMINI_3_MODEL_CAPABILITIES: ModelCapabilities = {
 };
 
 /**
- * Gemini 2.5 系列模型的能力描�? *
+ * Gemini 2.5 绯诲垪妯″瀷鐨勮兘鍔涙弿杩? *
  * @description
- * 支持基于 Token 预算（Dynamic/-1�?12）的思维配置，不支持快速模式和思维切换�? * 适用�?Gemini 2.5 系列模型�? *
+ * 鏀寔鍩轰簬 Token 棰勭畻锛圖ynamic/-1銆?12锛夌殑鎬濈淮閰嶇疆锛屼笉鏀寔蹇€熸ā寮忓拰鎬濈淮鍒囨崲銆? * 閫傜敤浜?Gemini 2.5 绯诲垪妯″瀷銆? *
  * @constant {ModelCapabilities}
  *
  * @example
@@ -195,33 +195,33 @@ export const GEMINI_2_5_MODEL_CAPABILITIES: ModelCapabilities = {
 };
 
 /**
- * 类型守卫：判断值是否为 Gemini 思维级别
+ * 绫诲瀷瀹堝崼锛氬垽鏂€兼槸鍚︿负 Gemini 鎬濈淮绾у埆
  *
- * @param value - 待检查的�? * @returns 如果值是合法�?GeminiThinkingLevel 返回 true
+ * @param value - 寰呮鏌ョ殑鍊? * @returns 濡傛灉鍊兼槸鍚堟硶鐨?GeminiThinkingLevel 杩斿洖 true
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function isGeminiThinkingLevel(value: string): value is GeminiThinkingLevel {
   return GEMINI_THINKING_LEVEL_SET.has(value as GeminiThinkingLevel);
 }
 
 /**
- * 类型守卫：判断值是否为 Gemini 思维预算
+ * 绫诲瀷瀹堝崼锛氬垽鏂€兼槸鍚︿负 Gemini 鎬濈淮棰勭畻
  *
- * @param value - 待检查的�? * @returns 如果值是合法�?GeminiThinkingBudget 字符串返�?true
+ * @param value - 寰呮鏌ョ殑鍊? * @returns 濡傛灉鍊兼槸鍚堟硶鐨?GeminiThinkingBudget 瀛楃涓茶繑鍥?true
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function isGeminiThinkingBudget(value: string): value is `${GeminiThinkingBudget}` {
   return GEMINI_THINKING_BUDGET_MAP.has(value);
 }
 
 /**
- * 清洗 Gemini 模型别名的片段，生成可用�?API 调用标识符的字符�? *
+ * 娓呮礂 Gemini 妯″瀷鍒悕鐨勭墖娈碉紝鐢熸垚鍙敤浜?API 璋冪敤鏍囪瘑绗︾殑瀛楃涓? *
  * @description
- * 将模型名称转换为小写、移除非法字符、替换为连字符，
- * 生成适合作为 API 别名标识符的片段�? *
- * @param value - 原始模型名称字符�? * @returns 清洗后的别名片段，如果结果为空则返回 "model"
+ * 灏嗘ā鍨嬪悕绉拌浆鎹负灏忓啓銆佺Щ闄ら潪娉曞瓧绗︺€佹浛鎹负杩炲瓧绗︼紝
+ * 鐢熸垚閫傚悎浣滀负 API 鍒悕鏍囪瘑绗︾殑鐗囨銆? *
+ * @param value - 鍘熷妯″瀷鍚嶇О瀛楃涓? * @returns 娓呮礂鍚庣殑鍒悕鐗囨锛屽鏋滅粨鏋滀负绌哄垯杩斿洖 "model"
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function sanitizeGeminiAliasSegment(value: string): string {
   const sanitized = value
     .trim()
@@ -232,12 +232,12 @@ function sanitizeGeminiAliasSegment(value: string): string {
 }
 
 /**
- * 获取指定提供商的模型选项列表
+ * 鑾峰彇鎸囧畾鎻愪緵鍟嗙殑妯″瀷閫夐」鍒楄〃
  *
  * @description
- * 返回指定提供商支持的所有模型选项，包�?slug �?name 等信息�? * 默认提供商为 "codex"�? *
- * @param provider - 提供商类型，默认�?"codex"
- * @returns 该提供商支持的模型选项数组
+ * 杩斿洖鎸囧畾鎻愪緵鍟嗘敮鎸佺殑鎵€鏈夋ā鍨嬮€夐」锛屽寘鍚?slug 鍜?name 绛変俊鎭€? * 榛樿鎻愪緵鍟嗕负 "codex"銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
+ * @returns 璇ユ彁渚涘晢鏀寔鐨勬ā鍨嬮€夐」鏁扮粍
  *
  * @example
  * ```ts
@@ -250,24 +250,24 @@ export function getModelOptions(provider: ProviderKind = "codex") {
 }
 
 /**
- * 判断指定提供商是否有默认模型
+ * 鍒ゆ柇鎸囧畾鎻愪緵鍟嗘槸鍚︽湁榛樿妯″瀷
  *
  * @description
- * �?"pi" 之外的所有提供商都有默认模型�? *
- * @param provider - 提供商类�? * @returns 如果提供商有默认模型返回 true
+ * 闄?"pi" 涔嬪鐨勬墍鏈夋彁渚涘晢閮芥湁榛樿妯″瀷銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @returns 濡傛灉鎻愪緵鍟嗘湁榛樿妯″瀷杩斿洖 true
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function hasDefaultModel(provider: ProviderKind): provider is ProviderWithDefaultModel {
   return provider !== "pi";
 }
 
 /**
- * 获取指定提供商的默认模型 Slug
+ * 鑾峰彇鎸囧畾鎻愪緵鍟嗙殑榛樿妯″瀷 Slug
  *
  * @description
- * 返回指定提供商的默认模型标识符�?pi" 提供商没有默认模型，返回 null�? * 其他提供商返�?`DEFAULT_MODEL_BY_PROVIDER` 中配置的默认模型�? *
- * @param provider - 提供商类型，默认�?"codex"
- * @returns 默认模型�?Slug�?pi" 提供商返�?null
+ * 杩斿洖鎸囧畾鎻愪緵鍟嗙殑榛樿妯″瀷鏍囪瘑绗︺€?pi" 鎻愪緵鍟嗘病鏈夐粯璁ゆā鍨嬶紝杩斿洖 null銆? * 鍏朵粬鎻愪緵鍟嗚繑鍥?`DEFAULT_MODEL_BY_PROVIDER` 涓厤缃殑榛樿妯″瀷銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
+ * @returns 榛樿妯″瀷鐨?Slug锛?pi" 鎻愪緵鍟嗚繑鍥?null
  *
  * @example
  * ```ts
@@ -284,13 +284,13 @@ export function getDefaultModel(provider: ProviderKind = "codex"): ModelSlug | n
 }
 
 /**
- * 获取 Gemini 模型的思维配置类型
+ * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮閰嶇疆绫诲瀷
  *
  * @description
- * 根据模型 ID 判断其使用的思维配置方式�? * - Gemini 3 系列返回 `"level"`（基于级别）
- * - Gemini 2.5 系列返回 `"budget"`（基�?Token 预算�? * - 其他模型返回 null
+ * 鏍规嵁妯″瀷 ID 鍒ゆ柇鍏朵娇鐢ㄧ殑鎬濈淮閰嶇疆鏂瑰紡锛? * - Gemini 3 绯诲垪杩斿洖 `"level"`锛堝熀浜庣骇鍒級
+ * - Gemini 2.5 绯诲垪杩斿洖 `"budget"`锛堝熀浜?Token 棰勭畻锛? * - 鍏朵粬妯″瀷杩斿洖 null
  *
- * @param model - 模型 ID 字符�? * @returns 思维配置类型，无法识别时返回 null
+ * @param model - 妯″瀷 ID 瀛楃涓? * @returns 鎬濈淮閰嶇疆绫诲瀷锛屾棤娉曡瘑鍒椂杩斿洖 null
  *
  * @example
  * ```ts
@@ -316,23 +316,23 @@ export function getGeminiThinkingConfigKind(
 }
 
 /**
- * 获取 Gemini 模型的能力描�? *
+ * 鑾峰彇 Gemini 妯″瀷鐨勮兘鍔涙弿杩? *
  * @description
- * 根据模型 ID 返回对应�?Gemini 能力描述对象�? * 自动识别 Gemini 3（level 模式）和 Gemini 2.5（budget 模式）系列，
- * 无法识别时返回提供的回退能力对象�? *
- * @param modelId - 模型 ID 字符�? * @param fallbackCapabilities - 无法识别时的回退能力对象，默认为 `EMPTY_MODEL_CAPABILITIES`
- * @returns 匹配�?Gemini 模型能力描述
+ * 鏍规嵁妯″瀷 ID 杩斿洖瀵瑰簲鐨?Gemini 鑳藉姏鎻忚堪瀵硅薄銆? * 鑷姩璇嗗埆 Gemini 3锛坙evel 妯″紡锛夊拰 Gemini 2.5锛坆udget 妯″紡锛夌郴鍒楋紝
+ * 鏃犳硶璇嗗埆鏃惰繑鍥炴彁渚涚殑鍥為€€鑳藉姏瀵硅薄銆? *
+ * @param modelId - 妯″瀷 ID 瀛楃涓? * @param fallbackCapabilities - 鏃犳硶璇嗗埆鏃剁殑鍥為€€鑳藉姏瀵硅薄锛岄粯璁や负 `EMPTY_MODEL_CAPABILITIES`
+ * @returns 鍖归厤鐨?Gemini 妯″瀷鑳藉姏鎻忚堪
  *
  * @example
  * ```ts
  * geminiCapabilitiesForModel('gemini-3.0-pro');
- * // 返回 GEMINI_3_MODEL_CAPABILITIES
+ * // 杩斿洖 GEMINI_3_MODEL_CAPABILITIES
  *
  * geminiCapabilitiesForModel('gemini-2.5-flash');
- * // 返回 GEMINI_2_5_MODEL_CAPABILITIES
+ * // 杩斿洖 GEMINI_2_5_MODEL_CAPABILITIES
  *
  * geminiCapabilitiesForModel('unknown-model');
- * // 返回 EMPTY_MODEL_CAPABILITIES
+ * // 杩斿洖 EMPTY_MODEL_CAPABILITIES
  * ```
  */
 export function geminiCapabilitiesForModel(
@@ -354,11 +354,11 @@ export function geminiCapabilitiesForModel(
 }
 
 /**
- * 模型 Slug 到显示名称的映射�? *
+ * 妯″瀷 Slug 鍒版樉绀哄悕绉扮殑鏄犲皠琛? *
  * @description
- * 从所有提供商的模型选项中构建的全局映射表，
- * 用于将模�?Slug 转换为人类可读的显示名称�? * 键为小写�?Slug，值为对应�?name�? *
- * @private 此常量为内部实现细节，不应直接使�? */
+ * 浠庢墍鏈夋彁渚涘晢鐨勬ā鍨嬮€夐」涓瀯寤虹殑鍏ㄥ眬鏄犲皠琛紝
+ * 鐢ㄤ簬灏嗘ā鍨?Slug 杞崲涓轰汉绫诲彲璇荤殑鏄剧ず鍚嶇О銆? * 閿负灏忓啓鐨?Slug锛屽€间负瀵瑰簲鐨?name銆? *
+ * @private 姝ゅ父閲忎负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヤ娇鐢? */
 const MODEL_NAME_BY_SLUG = new Map(
   Object.values(MODEL_OPTIONS_BY_PROVIDER)
     .flat()
@@ -366,12 +366,12 @@ const MODEL_NAME_BY_SLUG = new Map(
 );
 
 /**
- * 将未知的 GPT 模型 Slug 转换为人类可读的名称
+ * 灏嗘湭鐭ョ殑 GPT 妯″瀷 Slug 杞崲涓轰汉绫诲彲璇荤殑鍚嶇О
  *
  * @description
- * 专门处理�?"gpt-" 开头的模型 Slug，将其格式化�?"GPT-{version} {rest}" 的形式�? * �?"gpt-" 开头的 Slug 原样返回�? *
- * @param slug - 模型 Slug 字符�? * @returns 格式化后的显示名�? *
- * @private 此函数为内部实现细节，不应直接调�? *
+ * 涓撻棬澶勭悊浠?"gpt-" 寮€澶寸殑妯″瀷 Slug锛屽皢鍏舵牸寮忓寲涓?"GPT-{version} {rest}" 鐨勫舰寮忋€? * 闈?"gpt-" 寮€澶寸殑 Slug 鍘熸牱杩斿洖銆? *
+ * @param slug - 妯″瀷 Slug 瀛楃涓? * @returns 鏍煎紡鍖栧悗鐨勬樉绀哄悕绉? *
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? *
  * @example
  * ```ts
  * humanizeUnknownModelSlug('gpt-4-turbo'); // 'GPT-4 Turbo'
@@ -387,11 +387,11 @@ function humanizeUnknownModelSlug(slug: string): string {
 }
 
 /**
- * 格式化模型显示名�? *
+ * 鏍煎紡鍖栨ā鍨嬫樉绀哄悕绉? *
  * @description
- * 将模�?Slug 转换为人类可读的显示名称�? * 优先从全局映射表中查找已知模型的名称，
- * 未找到时使用 `humanizeUnknownModelSlug` 进行格式化�? *
- * @param model - 模型 Slug �?ID 字符�? * @returns 格式化后的显示名称，输入为空时返�?undefined
+ * 灏嗘ā鍨?Slug 杞崲涓轰汉绫诲彲璇荤殑鏄剧ず鍚嶇О銆? * 浼樺厛浠庡叏灞€鏄犲皠琛ㄤ腑鏌ユ壘宸茬煡妯″瀷鐨勫悕绉帮紝
+ * 鏈壘鍒版椂浣跨敤 `humanizeUnknownModelSlug` 杩涜鏍煎紡鍖栥€? *
+ * @param model - 妯″瀷 Slug 鎴?ID 瀛楃涓? * @returns 鏍煎紡鍖栧悗鐨勬樉绀哄悕绉帮紝杈撳叆涓虹┖鏃惰繑鍥?undefined
  *
  * @example
  * ```ts
@@ -410,12 +410,12 @@ export function formatModelDisplayName(model: string | null | undefined): string
 }
 
 /**
- * 获取 Gemini 模型的思维配置选中�? *
+ * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮閰嶇疆閫変腑鍊? *
  * @description
- * 从模型选项中提取当前选中的思维配置值�? * 优先返回匹配能力列表中有效级别的值，其次返回任意非空值�? *
- * @param caps - 模型能力描述对象
- * @param modelOptions - Gemini 模型选项，可能包�?thinkingLevel �?thinkingBudget
- * @returns 匹配的思维配置值，未找到返�?null
+ * 浠庢ā鍨嬮€夐」涓彁鍙栧綋鍓嶉€変腑鐨勬€濈淮閰嶇疆鍊笺€? * 浼樺厛杩斿洖鍖归厤鑳藉姏鍒楄〃涓湁鏁堢骇鍒殑鍊硷紝鍏舵杩斿洖浠绘剰闈炵┖鍊笺€? *
+ * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @param modelOptions - Gemini 妯″瀷閫夐」锛屽彲鑳藉寘鍚?thinkingLevel 鎴?thinkingBudget
+ * @returns 鍖归厤鐨勬€濈淮閰嶇疆鍊硷紝鏈壘鍒拌繑鍥?null
  *
  * @example
  * ```ts
@@ -442,12 +442,12 @@ export function getGeminiThinkingSelectionValue(
 }
 
 /**
- * 从思维配置值解�?Gemini 模型选项
+ * 浠庢€濈淮閰嶇疆鍊艰В鏋?Gemini 妯″瀷閫夐」
  *
  * @description
- * 将字符串形式的思维配置值转换为结构化的 GeminiModelOptions 对象�? * 支持识别 level 格式（如 "HIGH"�?LOW"）和 budget 格式（如 "-1"�?512"）�? *
- * @param value - 思维配置值字符串
- * @returns 解析后的 GeminiModelOptions，无法识别返�?undefined
+ * 灏嗗瓧绗︿覆褰㈠紡鐨勬€濈淮閰嶇疆鍊艰浆鎹负缁撴瀯鍖栫殑 GeminiModelOptions 瀵硅薄銆? * 鏀寔璇嗗埆 level 鏍煎紡锛堝 "HIGH"銆?LOW"锛夊拰 budget 鏍煎紡锛堝 "-1"銆?512"锛夈€? *
+ * @param value - 鎬濈淮閰嶇疆鍊煎瓧绗︿覆
+ * @returns 瑙ｆ瀽鍚庣殑 GeminiModelOptions锛屾棤娉曡瘑鍒繑鍥?undefined
  *
  * @example
  * ```ts
@@ -475,12 +475,12 @@ export function geminiModelOptionsFromEffortValue(
 }
 
 /**
- * 获取 Gemini 模型的思维别名
+ * 鑾峰彇 Gemini 妯″瀷鐨勬€濈淮鍒悕
  *
  * @description
- * 根据 Gemini 模型 ID 和模型选项，生成用�?API 调用的思维配置别名�? * 别名格式�?`remicode-gemini-{base}-thinking-{level|budget}-{value}`�? *
- * @param model - 模型 ID 字符�? * @param modelOptions - Gemini 模型选项
- * @returns 生成的思维别名，无法生成返�?null
+ * 鏍规嵁 Gemini 妯″瀷 ID 鍜屾ā鍨嬮€夐」锛岀敓鎴愮敤浜?API 璋冪敤鐨勬€濈淮閰嶇疆鍒悕銆? * 鍒悕鏍煎紡涓?`remicode-gemini-{base}-thinking-{level|budget}-{value}`銆? *
+ * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - Gemini 妯″瀷閫夐」
+ * @returns 鐢熸垚鐨勬€濈淮鍒悕锛屾棤娉曠敓鎴愯繑鍥?null
  *
  * @example
  * ```ts
@@ -523,12 +523,12 @@ export function getGeminiThinkingModelAlias(
 }
 
 /**
- * 解析 Gemini API 的模�?ID
+ * 瑙ｆ瀽 Gemini API 鐨勬ā鍨?ID
  *
  * @description
- * 如果模型有思维配置别名，则返回别名；否则返回原始模�?ID�? * 别名优先级高于原�?ID，确�?API 调用使用正确的思维配置�? *
- * @param model - 原始模型 ID 字符�? * @param modelOptions - Gemini 模型选项
- * @returns 最终用�?API 调用的模�?ID
+ * 濡傛灉妯″瀷鏈夋€濈淮閰嶇疆鍒悕锛屽垯杩斿洖鍒悕锛涘惁鍒欒繑鍥炲師濮嬫ā鍨?ID銆? * 鍒悕浼樺厛绾ч珮浜庡師濮?ID锛岀‘淇?API 璋冪敤浣跨敤姝ｇ‘鐨勬€濈淮閰嶇疆銆? *
+ * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param modelOptions - Gemini 妯″瀷閫夐」
+ * @returns 鏈€缁堢敤浜?API 璋冪敤鐨勬ā鍨?ID
  *
  * @example
  * ```ts
@@ -546,16 +546,16 @@ export function resolveGeminiApiModelId(
   return getGeminiThinkingModelAlias(model, modelOptions) ?? model;
 }
 
-// ── Effort 辅助函数 ────────────────────────────────────────────────────
+// 鈹€鈹€ Effort 杈呭姪鍑芥暟 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 /**
- * 检查能力对象中是否包含指定的推理努力级�? *
- * @param caps - 模型能力描述对象
- * @param value - 待检查的推理努力级别�? * @returns 如果能力对象中包含该级别返回 true，否则返�?false
+ * 妫€鏌ヨ兘鍔涘璞′腑鏄惁鍖呭惈鎸囧畾鐨勬帹鐞嗗姫鍔涚骇鍒? *
+ * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @param value - 寰呮鏌ョ殑鎺ㄧ悊鍔姏绾у埆鍊? * @returns 濡傛灉鑳藉姏瀵硅薄涓寘鍚绾у埆杩斿洖 true锛屽惁鍒欒繑鍥?false
  *
  * @example
  * ```ts
- * hasEffortLevel(caps, 'high'); // true �?false
+ * hasEffortLevel(caps, 'high'); // true 鎴?false
  * ```
  */
 export function hasEffortLevel(caps: ModelCapabilities, value: string): boolean {
@@ -563,39 +563,39 @@ export function hasEffortLevel(caps: ModelCapabilities, value: string): boolean 
 }
 
 /**
- * 获取能力对象中的默认推理努力级别�? *
- * @param caps - 模型能力描述对象
- * @returns 默认的推理努力级别值，无默认值时返回 null
+ * 鑾峰彇鑳藉姏瀵硅薄涓殑榛樿鎺ㄧ悊鍔姏绾у埆鍊? *
+ * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @returns 榛樿鐨勬帹鐞嗗姫鍔涚骇鍒€硷紝鏃犻粯璁ゅ€兼椂杩斿洖 null
  */
 export function getDefaultEffort(caps: ModelCapabilities): string | null {
   return caps.reasoningEffortLevels.find((l) => l.isDefault)?.value ?? null;
 }
 
 /**
- * 检查能力对象中是否包含指定的上下文窗口选项
+ * 妫€鏌ヨ兘鍔涘璞′腑鏄惁鍖呭惈鎸囧畾鐨勪笂涓嬫枃绐楀彛閫夐」
  *
- * @param caps - 模型能力描述对象
- * @param value - 待检查的上下文窗口选项�? * @returns 如果能力对象中包含该选项返回 true，否则返�?false
+ * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @param value - 寰呮鏌ョ殑涓婁笅鏂囩獥鍙ｉ€夐」鍊? * @returns 濡傛灉鑳藉姏瀵硅薄涓寘鍚閫夐」杩斿洖 true锛屽惁鍒欒繑鍥?false
  */
 export function hasContextWindowOption(caps: ModelCapabilities, value: string): boolean {
   return caps.contextWindowOptions.some((option) => option.value === value);
 }
 
 /**
- * 获取能力对象中的默认上下文窗口选项�? *
- * @param caps - 模型能力描述对象
- * @returns 默认的上下文窗口选项值，无默认值时返回 null
+ * 鑾峰彇鑳藉姏瀵硅薄涓殑榛樿涓婁笅鏂囩獥鍙ｉ€夐」鍊? *
+ * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @returns 榛樿鐨勪笂涓嬫枃绐楀彛閫夐」鍊硷紝鏃犻粯璁ゅ€兼椂杩斿洖 null
  */
 export function getDefaultContextWindow(caps: ModelCapabilities): string | null {
   return caps.contextWindowOptions.find((option) => option.isDefault)?.value ?? null;
 }
 
 /**
- * 解析带标签选项的�? *
+ * 瑙ｆ瀽甯︽爣绛鹃€夐」鐨勫€? *
  * @description
- * 从选项列表中解析给定原始值的有效性。如果原始值在选项列表中存在则直接返回�? * 否则返回选项列表中的默认值或第一个选项值�? *
- * @param options - 带标签的选项数组，每项包�?value 和可选的 isDefault
- * @param rawValue - 原始输入�? * @returns 解析后的有效值，选项列表为空时返回原始值（修剪后）
+ * 浠庨€夐」鍒楄〃涓В鏋愮粰瀹氬師濮嬪€肩殑鏈夋晥鎬с€傚鏋滃師濮嬪€煎湪閫夐」鍒楄〃涓瓨鍦ㄥ垯鐩存帴杩斿洖锛? * 鍚﹀垯杩斿洖閫夐」鍒楄〃涓殑榛樿鍊兼垨绗竴涓€夐」鍊笺€? *
+ * @param options - 甯︽爣绛剧殑閫夐」鏁扮粍锛屾瘡椤瑰寘鍚?value 鍜屽彲閫夌殑 isDefault
+ * @param rawValue - 鍘熷杈撳叆鍊? * @returns 瑙ｆ瀽鍚庣殑鏈夋晥鍊硷紝閫夐」鍒楄〃涓虹┖鏃惰繑鍥炲師濮嬪€硷紙淇壀鍚庯級
  *
  * @example
  * ```ts
@@ -607,7 +607,7 @@ export function getDefaultContextWindow(caps: ModelCapabilities): string | null 
  * resolveLabeledOptionValue(
  *   [{ value: 'high', isDefault: true }, { value: 'low' }],
  *   'invalid'
- * ); // 'high'（回退到默认值）
+ * ); // 'high'锛堝洖閫€鍒伴粯璁ゅ€硷級
  * ```
  */
 export function resolveLabeledOptionValue(
@@ -625,11 +625,11 @@ export function resolveLabeledOptionValue(
 }
 
 /**
- * 提供商选项选择值的输入类型
+ * 鎻愪緵鍟嗛€夐」閫夋嫨鍊肩殑杈撳叆绫诲瀷
  *
  * @description
- * 支持三种输入格式�? * - ProviderOptionSelection 数组（结构化选择列表�? * - Record<string, unknown> 对象（键值对映射�? * - null/undefined（无选择�? *
- * @private 此类型为内部实现细节，不应直接使�? */
+ * 鏀寔涓夌杈撳叆鏍煎紡锛? * - ProviderOptionSelection 鏁扮粍锛堢粨鏋勫寲閫夋嫨鍒楄〃锛? * - Record<string, unknown> 瀵硅薄锛堥敭鍊煎鏄犲皠锛? * - null/undefined锛堟棤閫夋嫨锛? *
+ * @private 姝ょ被鍨嬩负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヤ娇鐢? */
 type ProviderOptionSelectionsInput =
   | ReadonlyArray<ProviderOptionSelection>
   | Record<string, unknown>
@@ -637,12 +637,12 @@ type ProviderOptionSelectionsInput =
   | undefined;
 
 /**
- * 深拷贝提供商选项描述�? *
+ * 娣辨嫹璐濇彁渚涘晢閫夐」鎻忚堪绗? *
  * @description
- * 对描述符进行深拷贝，确保修改不会影响原始数据�? * 对于 "select" 类型的描述符，额外拷�?options 数组�?promptInjectedValues 数组�? *
- * @param descriptor - 原始描述�? * @returns 深拷贝后的描述符
+ * 瀵规弿杩扮杩涜娣辨嫹璐濓紝纭繚淇敼涓嶄細褰卞搷鍘熷鏁版嵁銆? * 瀵逛簬 "select" 绫诲瀷鐨勬弿杩扮锛岄澶栨嫹璐?options 鏁扮粍鍜?promptInjectedValues 鏁扮粍銆? *
+ * @param descriptor - 鍘熷鎻忚堪绗? * @returns 娣辨嫹璐濆悗鐨勬弿杩扮
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function cloneProviderOptionDescriptor(
   descriptor: ProviderOptionDescriptor,
 ): ProviderOptionDescriptor {
@@ -659,13 +659,13 @@ function cloneProviderOptionDescriptor(
 }
 
 /**
- * 从选项选择值中提取指定 ID 的�? *
+ * 浠庨€夐」閫夋嫨鍊间腑鎻愬彇鎸囧畾 ID 鐨勫€? *
  * @description
- * 支持数组和对象两种输入格式，提取指定 ID 对应的选择值�? * 数值类型会自动转换为字符串�? *
- * @param selections - 选项选择值输�? * @param id - 选项 ID
- * @returns 提取到的值（string �?boolean），未找到返�?undefined
+ * 鏀寔鏁扮粍鍜屽璞′袱绉嶈緭鍏ユ牸寮忥紝鎻愬彇鎸囧畾 ID 瀵瑰簲鐨勯€夋嫨鍊笺€? * 鏁板€肩被鍨嬩細鑷姩杞崲涓哄瓧绗︿覆銆? *
+ * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
+ * @returns 鎻愬彇鍒扮殑鍊硷紙string 鎴?boolean锛夛紝鏈壘鍒拌繑鍥?undefined
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function providerOptionSelectionValue(
   selections: ProviderOptionSelectionsInput,
   id: string,
@@ -685,9 +685,9 @@ function providerOptionSelectionValue(
 }
 
 /**
- * 获取提供商选项的选择值（string �?boolean�? *
- * @param selections - 选项选择值输�? * @param id - 选项 ID
- * @returns 提取到的值，未找到返�?undefined
+ * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勯€夋嫨鍊硷紙string 鎴?boolean锛? *
+ * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
+ * @returns 鎻愬彇鍒扮殑鍊硷紝鏈壘鍒拌繑鍥?undefined
  */
 export function getProviderOptionSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -697,9 +697,9 @@ export function getProviderOptionSelectionValue(
 }
 
 /**
- * 获取提供商选项的字符串类型选择�? *
- * @param selections - 选项选择值输�? * @param id - 选项 ID
- * @returns 字符串类型的选择值，非字符串或未找到返回 undefined
+ * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勫瓧绗︿覆绫诲瀷閫夋嫨鍊? *
+ * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
+ * @returns 瀛楃涓茬被鍨嬬殑閫夋嫨鍊硷紝闈炲瓧绗︿覆鎴栨湭鎵惧埌杩斿洖 undefined
  */
 export function getProviderOptionStringSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -710,9 +710,9 @@ export function getProviderOptionStringSelectionValue(
 }
 
 /**
- * 获取提供商选项的布尔类型选择�? *
- * @param selections - 选项选择值输�? * @param id - 选项 ID
- * @returns 布尔类型的选择值，非布尔或未找到返�?undefined
+ * 鑾峰彇鎻愪緵鍟嗛€夐」鐨勫竷灏旂被鍨嬮€夋嫨鍊? *
+ * @param selections - 閫夐」閫夋嫨鍊艰緭鍏? * @param id - 閫夐」 ID
+ * @returns 甯冨皵绫诲瀷鐨勯€夋嫨鍊硷紝闈炲竷灏旀垨鏈壘鍒拌繑鍥?undefined
  */
 export function getProviderOptionBooleanSelectionValue(
   selections: ProviderOptionSelectionsInput,
@@ -723,12 +723,12 @@ export function getProviderOptionBooleanSelectionValue(
 }
 
 /**
- * 获取模型选择中指�?ID 的选项�? *
+ * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勯€夐」鍊? *
  * @description
- * �?ModelSelection 对象�?options 字段中提取指�?ID 的值�? * �?`getProviderOptionSelectionValue` 的便捷封装�? *
- * @param modelSelection - 模型选择对象
- * @param id - 选项 ID
- * @returns 提取到的值，未找到返�?undefined
+ * 浠?ModelSelection 瀵硅薄鐨?options 瀛楁涓彁鍙栨寚瀹?ID 鐨勫€笺€? * 鏄?`getProviderOptionSelectionValue` 鐨勪究鎹峰皝瑁呫€? *
+ * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
+ * @param id - 閫夐」 ID
+ * @returns 鎻愬彇鍒扮殑鍊硷紝鏈壘鍒拌繑鍥?undefined
  */
 export function getModelSelectionOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -741,10 +741,10 @@ export function getModelSelectionOptionValue(
 }
 
 /**
- * 获取模型选择中指�?ID 的字符串类型选项�? *
- * @param modelSelection - 模型选择对象
- * @param id - 选项 ID
- * @returns 字符串类型的选项值，未找到返�?undefined
+ * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勫瓧绗︿覆绫诲瀷閫夐」鍊? *
+ * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
+ * @param id - 閫夐」 ID
+ * @returns 瀛楃涓茬被鍨嬬殑閫夐」鍊硷紝鏈壘鍒拌繑鍥?undefined
  */
 export function getModelSelectionStringOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -757,10 +757,10 @@ export function getModelSelectionStringOptionValue(
 }
 
 /**
- * 获取模型选择中指�?ID 的布尔类型选项�? *
- * @param modelSelection - 模型选择对象
- * @param id - 选项 ID
- * @returns 布尔类型的选项值，未找到返�?undefined
+ * 鑾峰彇妯″瀷閫夋嫨涓寚瀹?ID 鐨勫竷灏旂被鍨嬮€夐」鍊? *
+ * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
+ * @param id - 閫夐」 ID
+ * @returns 甯冨皵绫诲瀷鐨勯€夐」鍊硷紝鏈壘鍒拌繑鍥?undefined
  */
 export function getModelSelectionBooleanOptionValue(
   modelSelection: ModelSelection | null | undefined,
@@ -773,13 +773,13 @@ export function getModelSelectionBooleanOptionValue(
 }
 
 /**
- * 解析选择类型描述符的当前�? *
+ * 瑙ｆ瀽閫夋嫨绫诲瀷鎻忚堪绗︾殑褰撳墠鍊? *
  * @description
- * 如果原始值在选项列表中存在则直接返回�? * 否则使用描述符的 currentValue 或选项列表中的默认值�? *
- * @param descriptor - 选择类型的描述符
- * @param rawValue - 原始输入�? * @returns 解析后的选项 ID，无法确定返�?undefined
+ * 濡傛灉鍘熷鍊煎湪閫夐」鍒楄〃涓瓨鍦ㄥ垯鐩存帴杩斿洖锛? * 鍚﹀垯浣跨敤鎻忚堪绗︾殑 currentValue 鎴栭€夐」鍒楄〃涓殑榛樿鍊笺€? *
+ * @param descriptor - 閫夋嫨绫诲瀷鐨勬弿杩扮
+ * @param rawValue - 鍘熷杈撳叆鍊? * @returns 瑙ｆ瀽鍚庣殑閫夐」 ID锛屾棤娉曠‘瀹氳繑鍥?undefined
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function resolveDescriptorChoiceValue(
   descriptor: Extract<ProviderOptionDescriptor, { type: "select" }>,
   rawValue: string | null | undefined,
@@ -792,13 +792,13 @@ function resolveDescriptorChoiceValue(
 }
 
 /**
- * 为描述符设置当前�? *
+ * 涓烘弿杩扮璁剧疆褰撳墠鍊? *
  * @description
- * 根据描述符类型和原始值，设置描述符的 currentValue 字段�? * - 布尔类型：直接设置布尔�? * - 选择类型：使�?`resolveDescriptorChoiceValue` 解析有效�? * - 无法确定值时移除 currentValue 字段
+ * 鏍规嵁鎻忚堪绗︾被鍨嬪拰鍘熷鍊硷紝璁剧疆鎻忚堪绗︾殑 currentValue 瀛楁锛? * - 甯冨皵绫诲瀷锛氱洿鎺ヨ缃竷灏斿€? * - 閫夋嫨绫诲瀷锛氫娇鐢?`resolveDescriptorChoiceValue` 瑙ｆ瀽鏈夋晥鍊? * - 鏃犳硶纭畾鍊兼椂绉婚櫎 currentValue 瀛楁
  *
- * @param descriptor - 原始描述�? * @param rawValue - 原始输入�? * @returns 更新�?currentValue 的描述符
+ * @param descriptor - 鍘熷鎻忚堪绗? * @param rawValue - 鍘熷杈撳叆鍊? * @returns 鏇存柊浜?currentValue 鐨勬弿杩扮
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function withProviderOptionCurrentValue(
   descriptor: ProviderOptionDescriptor,
   rawValue: string | boolean | undefined,
@@ -818,19 +818,19 @@ function withProviderOptionCurrentValue(
 }
 
 /**
- * 获取推理努力级别描述符的选项 ID
+ * 鑾峰彇鎺ㄧ悊鍔姏绾у埆鎻忚堪绗︾殑閫夐」 ID
  *
  * @description
- * 根据提供商类型和能力对象，确定推理努力级别选项�?ID 名称�? * - claudeAgent: "effort"
+ * 鏍规嵁鎻愪緵鍟嗙被鍨嬪拰鑳藉姏瀵硅薄锛岀‘瀹氭帹鐞嗗姫鍔涚骇鍒€夐」鐨?ID 鍚嶇О锛? * - claudeAgent: "effort"
  * - kilo/opencode: "variant"
- * - gemini: 根据 effort 值格式判断为 "thinkingBudget" �?"thinkingLevel"
+ * - gemini: 鏍规嵁 effort 鍊兼牸寮忓垽鏂负 "thinkingBudget" 鎴?"thinkingLevel"
  * - pi: "thinkingLevel"
- * - 其他: "reasoningEffort"
+ * - 鍏朵粬: "reasoningEffort"
  *
- * @param provider - 提供商类�? * @param caps - 模型能力描述对象
- * @returns 推理努力级别选项�?ID
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @returns 鎺ㄧ悊鍔姏绾у埆閫夐」鐨?ID
  *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function reasoningDescriptorId(provider: ProviderKind, caps: ModelCapabilities): string {
   if (provider === "claudeAgent") {
     return "effort";
@@ -851,13 +851,13 @@ function reasoningDescriptorId(provider: ProviderKind, caps: ModelCapabilities):
 }
 
 /**
- * 从能力对象构建旧版选项描述符列�? *
+ * 浠庤兘鍔涘璞℃瀯寤烘棫鐗堥€夐」鎻忚堪绗﹀垪琛? *
  * @description
- * 当模型能力对象未提供 `optionDescriptors` 时，使用此函数从能力字段
- * 构建兼容的旧版描述符列表。包括推理努力级别、上下文窗口�? * 快速模式和思维切换等选项�? *
- * @param provider - 提供商类�? * @param caps - 模型能力描述对象
- * @returns 旧版格式的选项描述符数�? *
- * @private 此函数为内部实现细节，不应直接调�? */
+ * 褰撴ā鍨嬭兘鍔涘璞℃湭鎻愪緵 `optionDescriptors` 鏃讹紝浣跨敤姝ゅ嚱鏁颁粠鑳藉姏瀛楁
+ * 鏋勫缓鍏煎鐨勬棫鐗堟弿杩扮鍒楄〃銆傚寘鎷帹鐞嗗姫鍔涚骇鍒€佷笂涓嬫枃绐楀彛銆? * 蹇€熸ā寮忓拰鎬濈淮鍒囨崲绛夐€夐」銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @param caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @returns 鏃х増鏍煎紡鐨勯€夐」鎻忚堪绗︽暟缁? *
+ * @private 姝ゅ嚱鏁颁负鍐呴儴瀹炵幇缁嗚妭锛屼笉搴旂洿鎺ヨ皟鐢? */
 function legacyCapabilityDescriptors(
   provider: ProviderKind,
   caps: ModelCapabilities,
@@ -909,11 +909,11 @@ function legacyCapabilityDescriptors(
 }
 
 /**
- * 获取提供商的选项描述符列�? *
+ * 鑾峰彇鎻愪緵鍟嗙殑閫夐」鎻忚堪绗﹀垪琛? *
  * @description
- * 返回指定提供商和模型能力的选项描述符列表�? * 优先使用能力对象中的 `optionDescriptors`（新版格式）�? * 否则使用 `legacyCapabilityDescriptors`（旧版格式）构建�? * 每个描述符会根据传入的选择值更�?currentValue�? *
- * @param input.provider - 提供商类�? * @param input.caps - 模型能力描述对象
- * @param input.selections - 可选的选项选择值，用于设置描述符的当前�? * @returns 选项描述符数�? *
+ * 杩斿洖鎸囧畾鎻愪緵鍟嗗拰妯″瀷鑳藉姏鐨勯€夐」鎻忚堪绗﹀垪琛ㄣ€? * 浼樺厛浣跨敤鑳藉姏瀵硅薄涓殑 `optionDescriptors`锛堟柊鐗堟牸寮忥級锛? * 鍚﹀垯浣跨敤 `legacyCapabilityDescriptors`锛堟棫鐗堟牸寮忥級鏋勫缓銆? * 姣忎釜鎻忚堪绗︿細鏍规嵁浼犲叆鐨勯€夋嫨鍊兼洿鏂?currentValue銆? *
+ * @param input.provider - 鎻愪緵鍟嗙被鍨? * @param input.caps - 妯″瀷鑳藉姏鎻忚堪瀵硅薄
+ * @param input.selections - 鍙€夌殑閫夐」閫夋嫨鍊硷紝鐢ㄤ簬璁剧疆鎻忚堪绗︾殑褰撳墠鍊? * @returns 閫夐」鎻忚堪绗︽暟缁? *
  * @example
  * ```ts
  * const descriptors = getProviderOptionDescriptors({
@@ -940,13 +940,13 @@ export function getProviderOptionDescriptors(input: {
 }
 
 /**
- * 获取提供商选项描述符的当前�? *
+ * 鑾峰彇鎻愪緵鍟嗛€夐」鎻忚堪绗︾殑褰撳墠鍊? *
  * @description
- * 从描述符中提取当前选中的值：
- * - 布尔类型：直接返�?currentValue
- * - 选择类型：返�?currentValue 或默认选项�?ID
+ * 浠庢弿杩扮涓彁鍙栧綋鍓嶉€変腑鐨勫€硷細
+ * - 甯冨皵绫诲瀷锛氱洿鎺ヨ繑鍥?currentValue
+ * - 閫夋嫨绫诲瀷锛氳繑鍥?currentValue 鎴栭粯璁ら€夐」鐨?ID
  *
- * @param descriptor - 选项描述�? * @returns 当前值，描述符为空时返回 undefined
+ * @param descriptor - 閫夐」鎻忚堪绗? * @returns 褰撳墠鍊硷紝鎻忚堪绗︿负绌烘椂杩斿洖 undefined
  */
 export function getProviderOptionCurrentValue(
   descriptor: ProviderOptionDescriptor | null | undefined,
@@ -961,13 +961,13 @@ export function getProviderOptionCurrentValue(
 }
 
 /**
- * 获取提供商选项描述符的当前显示标签
+ * 鑾峰彇鎻愪緵鍟嗛€夐」鎻忚堪绗︾殑褰撳墠鏄剧ず鏍囩
  *
  * @description
- * 从描述符中提取当前选中值的显示标签�? * - 布尔类型：返�?"On" �?"Off"
- * - 选择类型：返回当前选项�?label
+ * 浠庢弿杩扮涓彁鍙栧綋鍓嶉€変腑鍊肩殑鏄剧ず鏍囩锛? * - 甯冨皵绫诲瀷锛氳繑鍥?"On" 鎴?"Off"
+ * - 閫夋嫨绫诲瀷锛氳繑鍥炲綋鍓嶉€夐」鐨?label
  *
- * @param descriptor - 选项描述�? * @returns 当前值的显示标签，无法确定返�?undefined
+ * @param descriptor - 閫夐」鎻忚堪绗? * @returns 褰撳墠鍊肩殑鏄剧ず鏍囩锛屾棤娉曠‘瀹氳繑鍥?undefined
  */
 export function getProviderOptionCurrentLabel(
   descriptor: ProviderOptionDescriptor | null | undefined,
@@ -985,10 +985,10 @@ export function getProviderOptionCurrentLabel(
 }
 
 /**
- * 从选项描述符列表构建选择值数�? *
+ * 浠庨€夐」鎻忚堪绗﹀垪琛ㄦ瀯寤洪€夋嫨鍊兼暟缁? *
  * @description
- * 遍历描述符列表，提取每个描述符的当前值，构建 ProviderOptionSelection 数组�? * 仅包�?string �?boolean 类型的值�? *
- * @param descriptors - 选项描述符数�? * @returns 选择值数组，描述符列表为空时返回 undefined
+ * 閬嶅巻鎻忚堪绗﹀垪琛紝鎻愬彇姣忎釜鎻忚堪绗︾殑褰撳墠鍊硷紝鏋勫缓 ProviderOptionSelection 鏁扮粍銆? * 浠呭寘鍚?string 鎴?boolean 绫诲瀷鐨勫€笺€? *
+ * @param descriptors - 閫夐」鎻忚堪绗︽暟缁? * @returns 閫夋嫨鍊兼暟缁勶紝鎻忚堪绗﹀垪琛ㄤ负绌烘椂杩斿洖 undefined
  */
 export function buildProviderOptionSelectionsFromDescriptors(
   descriptors: ReadonlyArray<ProviderOptionDescriptor> | null | undefined,
@@ -1005,23 +1005,23 @@ export function buildProviderOptionSelectionsFromDescriptors(
   return selections.length > 0 ? selections : undefined;
 }
 
-// ── 数据驱动的模型能力解�?────────────────────────────────────────────
+// 鈹€鈹€ 鏁版嵁椹卞姩鐨勬ā鍨嬭兘鍔涜В鏋?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 /**
- * 获取指定提供商和模型的能力描�? *
+ * 鑾峰彇鎸囧畾鎻愪緵鍟嗗拰妯″瀷鐨勮兘鍔涙弿杩? *
  * @description
- * 从全局能力索引中查找模型的能力描述。对�?Gemini 提供商，
- * 额外支持基于模型 ID 的系列识别。未找到时返回空能力对象�? *
- * @param provider - 提供商类�? * @param model - 模型 ID �?Slug
- * @returns 模型能力描述对象
+ * 浠庡叏灞€鑳藉姏绱㈠紩涓煡鎵炬ā鍨嬬殑鑳藉姏鎻忚堪銆傚浜?Gemini 鎻愪緵鍟嗭紝
+ * 棰濆鏀寔鍩轰簬妯″瀷 ID 鐨勭郴鍒楄瘑鍒€傛湭鎵惧埌鏃惰繑鍥炵┖鑳藉姏瀵硅薄銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @param model - 妯″瀷 ID 鎴?Slug
+ * @returns 妯″瀷鑳藉姏鎻忚堪瀵硅薄
  *
  * @example
  * ```ts
  * getModelCapabilities('claudeAgent', 'claude-sonnet-4-20250514');
- * // 返回该模型的能力描述
+ * // 杩斿洖璇ユā鍨嬬殑鑳藉姏鎻忚堪
  *
  * getModelCapabilities('codex', 'unknown-model');
- * // 返回 EMPTY_MODEL_CAPABILITIES
+ * // 杩斿洖 EMPTY_MODEL_CAPABILITIES
  * ```
  */
 export function getModelCapabilities(
@@ -1039,12 +1039,12 @@ export function getModelCapabilities(
 }
 
 /**
- * 判断文本中是否包�?Claude Ultrathink 提示�? *
+ * 鍒ゆ柇鏂囨湰涓槸鍚﹀寘鍚?Claude Ultrathink 鎻愮ず璇? *
  * @description
- * 检查文本中是否包含 "ultrathink" 关键字（不区分大小写），
- * 用于判断是否需要为 Claude 模型添加 Ultrathink 前缀�? *
- * @param text - 待检查的文本
- * @returns 如果包含 ultrathink 关键字返�?true，否则返�?false
+ * 妫€鏌ユ枃鏈腑鏄惁鍖呭惈 "ultrathink" 鍏抽敭瀛楋紙涓嶅尯鍒嗗ぇ灏忓啓锛夛紝
+ * 鐢ㄤ簬鍒ゆ柇鏄惁闇€瑕佷负 Claude 妯″瀷娣诲姞 Ultrathink 鍓嶇紑銆? *
+ * @param text - 寰呮鏌ョ殑鏂囨湰
+ * @returns 濡傛灉鍖呭惈 ultrathink 鍏抽敭瀛楄繑鍥?true锛屽惁鍒欒繑鍥?false
  *
  * @example
  * ```ts
@@ -1057,15 +1057,15 @@ export function isClaudeUltrathinkPrompt(text: string | null | undefined): boole
 }
 
 /**
- * 归一化模�?Slug
+ * 褰掍竴鍖栨ā鍨?Slug
  *
  * @description
- * 将模�?ID 转换为标准化�?Slug 格式�? * 1. 去除首尾空白
- * 2. 对于 claudeAgent 提供商，移除末尾的方括号标记（如 `[1m]`�? * 3. 查找别名映射表，将别名转换为标准 Slug
- * 4. 无别名时直接使用处理后的字符串作�?Slug
+ * 灏嗘ā鍨?ID 杞崲涓烘爣鍑嗗寲鐨?Slug 鏍煎紡锛? * 1. 鍘婚櫎棣栧熬绌虹櫧
+ * 2. 瀵逛簬 claudeAgent 鎻愪緵鍟嗭紝绉婚櫎鏈熬鐨勬柟鎷彿鏍囪锛堝 `[1m]`锛? * 3. 鏌ユ壘鍒悕鏄犲皠琛紝灏嗗埆鍚嶈浆鎹负鏍囧噯 Slug
+ * 4. 鏃犲埆鍚嶆椂鐩存帴浣跨敤澶勭悊鍚庣殑瀛楃涓蹭綔涓?Slug
  *
- * @param model - 原始模型 ID 字符�? * @param provider - 提供商类型，默认�?"codex"
- * @returns 归一化后的模�?Slug，输入为空时返回 null
+ * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨?Slug锛岃緭鍏ヤ负绌烘椂杩斿洖 null
  *
  * @example
  * ```ts
@@ -1097,21 +1097,21 @@ export function normalizeModelSlug(
 }
 
 /**
- * 从选项列表中解析可选择的模�?Slug
+ * 浠庨€夐」鍒楄〃涓В鏋愬彲閫夋嫨鐨勬ā鍨?Slug
  *
  * @description
- * 按以下优先级解析模型 Slug�? * 1. 精确匹配选项�?slug
- * 2. 不区分大小写匹配选项�?name
- * 3. 归一化后匹配选项�?slug
+ * 鎸変互涓嬩紭鍏堢骇瑙ｆ瀽妯″瀷 Slug锛? * 1. 绮剧‘鍖归厤閫夐」鐨?slug
+ * 2. 涓嶅尯鍒嗗ぇ灏忓啓鍖归厤閫夐」鐨?name
+ * 3. 褰掍竴鍖栧悗鍖归厤閫夐」鐨?slug
  *
- * @param provider - 提供商类�? * @param value - 用户输入的模型标识（Slug 或名称）
- * @param options - 可选择的模型选项列表
- * @returns 匹配到的模型 Slug，未匹配返回 null
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @param value - 鐢ㄦ埛杈撳叆鐨勬ā鍨嬫爣璇嗭紙Slug 鎴栧悕绉帮級
+ * @param options - 鍙€夋嫨鐨勬ā鍨嬮€夐」鍒楄〃
+ * @returns 鍖归厤鍒扮殑妯″瀷 Slug锛屾湭鍖归厤杩斿洖 null
  *
  * @example
  * ```ts
  * resolveSelectableModel('codex', 'gpt-4', options);     // 'gpt-4'
- * resolveSelectableModel('codex', 'GPT-4', options);     // 'gpt-4'（按名称匹配�? * resolveSelectableModel('codex', 'invalid', options);   // null
+ * resolveSelectableModel('codex', 'GPT-4', options);     // 'gpt-4'锛堟寜鍚嶇О鍖归厤锛? * resolveSelectableModel('codex', 'invalid', options);   // null
  * ```
  */
 export function resolveSelectableModel(
@@ -1148,18 +1148,18 @@ export function resolveSelectableModel(
 }
 
 /**
- * 解析模型 Slug，确保返回有效的模型标识
+ * 瑙ｆ瀽妯″瀷 Slug锛岀‘淇濊繑鍥炴湁鏁堢殑妯″瀷鏍囪瘑
  *
  * @description
- * 归一化模�?ID 并验证其是否属于指定提供商的已知模型�? * 如果归一化后�?Slug 不在提供商的模型集合中，则回退到该提供商的默认模型�? * "pi" 提供商没有默认模型，未知 Slug 时返回归一化后的值�? *
- * @param model - 原始模型 ID 字符�? * @param provider - 提供商类型，默认�?"codex"
- * @returns 有效的模�?Slug，输入为空时返回提供商的默认模型
+ * 褰掍竴鍖栨ā鍨?ID 骞堕獙璇佸叾鏄惁灞炰簬鎸囧畾鎻愪緵鍟嗙殑宸茬煡妯″瀷銆? * 濡傛灉褰掍竴鍖栧悗鐨?Slug 涓嶅湪鎻愪緵鍟嗙殑妯″瀷闆嗗悎涓紝鍒欏洖閫€鍒拌鎻愪緵鍟嗙殑榛樿妯″瀷銆? * "pi" 鎻愪緵鍟嗘病鏈夐粯璁ゆā鍨嬶紝鏈煡 Slug 鏃惰繑鍥炲綊涓€鍖栧悗鐨勫€笺€? *
+ * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @param provider - 鎻愪緵鍟嗙被鍨嬶紝榛樿涓?"codex"
+ * @returns 鏈夋晥鐨勬ā鍨?Slug锛岃緭鍏ヤ负绌烘椂杩斿洖鎻愪緵鍟嗙殑榛樿妯″瀷
  *
  * @example
  * ```ts
  * resolveModelSlug('gpt-4', 'codex');     // 'gpt-4'
- * resolveModelSlug('invalid', 'codex');    // 'o3'（回退到默认模型）
- * resolveModelSlug(null, 'codex');         // 'o3'（默认模型）
+ * resolveModelSlug('invalid', 'codex');    // 'o3'锛堝洖閫€鍒伴粯璁ゆā鍨嬶級
+ * resolveModelSlug(null, 'codex');         // 'o3'锛堥粯璁ゆā鍨嬶級
  * ```
  */
 export function resolveModelSlug(
@@ -1180,13 +1180,13 @@ export function resolveModelSlug(
 }
 
 /**
- * 解析指定提供商的模型 Slug
+ * 瑙ｆ瀽鎸囧畾鎻愪緵鍟嗙殑妯″瀷 Slug
  *
  * @description
- * �?`resolveModelSlug` 的参数顺序调整版本，便于以提供商为第一参数调用�? *
- * @param provider - 提供商类�? * @param model - 原始模型 ID 字符�? * @returns 有效的模�?Slug
+ * 鏄?`resolveModelSlug` 鐨勫弬鏁伴『搴忚皟鏁寸増鏈紝渚夸簬浠ユ彁渚涘晢涓虹涓€鍙傛暟璋冪敤銆? *
+ * @param provider - 鎻愪緵鍟嗙被鍨? * @param model - 鍘熷妯″瀷 ID 瀛楃涓? * @returns 鏈夋晥鐨勬ā鍨?Slug
  *
- * @see {@link resolveModelSlug} - 核心解析逻辑
+ * @see {@link resolveModelSlug} - 鏍稿績瑙ｆ瀽閫昏緫
  */
 export function resolveModelSlugForProvider(
   provider: ProviderKind,
@@ -1196,12 +1196,12 @@ export function resolveModelSlugForProvider(
 }
 
 /**
- * 修剪字符串，空值返�?null
+ * 淇壀瀛楃涓诧紝绌哄€艰繑鍥?null
  *
  * @description
- * 将字符串去除首尾空白，如果结果为空字符串则返�?null�? * �?string 类型的输入直接返�?null�? *
- * @template T - 字符串字面量类型
- * @param value - 待修剪的�? * @returns 修剪后的非空字符串，�?null
+ * 灏嗗瓧绗︿覆鍘婚櫎棣栧熬绌虹櫧锛屽鏋滅粨鏋滀负绌哄瓧绗︿覆鍒欒繑鍥?null銆? * 闈?string 绫诲瀷鐨勮緭鍏ョ洿鎺ヨ繑鍥?null銆? *
+ * @template T - 瀛楃涓插瓧闈㈤噺绫诲瀷
+ * @param value - 寰呬慨鍓殑鍊? * @returns 淇壀鍚庣殑闈炵┖瀛楃涓诧紝鎴?null
  *
  * @example
  * ```ts
@@ -1218,13 +1218,13 @@ export function trimOrNull<T extends string>(value: T | null | undefined): T | n
 }
 
 /**
- * 归一�?Codex 模型选项
+ * 褰掍竴鍖?Codex 妯″瀷閫夐」
  *
  * @description
- * �?Codex 模型选项归一化为仅包含与默认值不同的字段�? * - reasoningEffort：仅当与默认值不同时保留
- * - fastMode：仅当为 true 时保�? *
- * @param model - 模型 ID 字符�? * @param modelOptions - 原始 Codex 模型选项
- * @returns 归一化后的模型选项，所有字段与默认值相同时返回 undefined
+ * 灏?Codex 妯″瀷閫夐」褰掍竴鍖栦负浠呭寘鍚笌榛樿鍊间笉鍚岀殑瀛楁锛? * - reasoningEffort锛氫粎褰撲笌榛樿鍊间笉鍚屾椂淇濈暀
+ * - fastMode锛氫粎褰撲负 true 鏃朵繚鐣? *
+ * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Codex 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾墍鏈夊瓧娈典笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
  */
 export function normalizeCodexModelOptions(
   model: string | null | undefined,
@@ -1242,12 +1242,12 @@ export function normalizeCodexModelOptions(
 }
 
 /**
- * 归一�?Claude 模型选项
+ * 褰掍竴鍖?Claude 妯″瀷閫夐」
  *
  * @description
- * �?Claude 模型选项归一化为仅包含与默认值不同的字段�? * - effort：排除提示注入的级别和默认级�? * - contextWindow：仅当与默认值不同且有效时保�? * - thinking：仅当为 false 时保留（关闭思维�? * - fastMode：仅当为 true 时保�? *
- * @param model - 模型 ID 字符�? * @param modelOptions - 原始 Claude 模型选项
- * @returns 归一化后的模型选项，所有字段与默认值相同时返回 undefined
+ * 灏?Claude 妯″瀷閫夐」褰掍竴鍖栦负浠呭寘鍚笌榛樿鍊间笉鍚岀殑瀛楁锛? * - effort锛氭帓闄ゆ彁绀烘敞鍏ョ殑绾у埆鍜岄粯璁ょ骇鍒? * - contextWindow锛氫粎褰撲笌榛樿鍊间笉鍚屼笖鏈夋晥鏃朵繚鐣? * - thinking锛氫粎褰撲负 false 鏃朵繚鐣欙紙鍏抽棴鎬濈淮锛? * - fastMode锛氫粎褰撲负 true 鏃朵繚鐣? *
+ * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Claude 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾墍鏈夊瓧娈典笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
  */
 export function normalizeClaudeModelOptions(
   model: string | null | undefined,
@@ -1285,12 +1285,12 @@ export function normalizeClaudeModelOptions(
 }
 
 /**
- * 解析 API 调用使用的模�?ID
+ * 瑙ｆ瀽 API 璋冪敤浣跨敤鐨勬ā鍨?ID
  *
  * @description
- * 根据模型选择信息生成最终用�?API 调用的模�?ID�? * 对于 Claude 提供商，如果选择�?1M 上下文窗口，会在模型 ID 后追�?`[1m]` 标记�? * 其他提供商直接返回原始模�?ID�? *
- * @param modelSelection - 模型选择对象
- * @returns 用于 API 调用的模�?ID 字符�? *
+ * 鏍规嵁妯″瀷閫夋嫨淇℃伅鐢熸垚鏈€缁堢敤浜?API 璋冪敤鐨勬ā鍨?ID銆? * 瀵逛簬 Claude 鎻愪緵鍟嗭紝濡傛灉閫夋嫨浜?1M 涓婁笅鏂囩獥鍙ｏ紝浼氬湪妯″瀷 ID 鍚庤拷鍔?`[1m]` 鏍囪銆? * 鍏朵粬鎻愪緵鍟嗙洿鎺ヨ繑鍥炲師濮嬫ā鍨?ID銆? *
+ * @param modelSelection - 妯″瀷閫夋嫨瀵硅薄
+ * @returns 鐢ㄤ簬 API 璋冪敤鐨勬ā鍨?ID 瀛楃涓? *
  * @example
  * ```ts
  * resolveApiModelId({ provider: 'claudeAgent', model: 'claude-sonnet-4', options: { contextWindow: '1m' } });
@@ -1314,12 +1314,12 @@ export function resolveApiModelId(modelSelection: ModelSelection): string {
 }
 
 /**
- * 归一�?Gemini 模型选项
+ * 褰掍竴鍖?Gemini 妯″瀷閫夐」
  *
  * @description
- * �?Gemini 模型选项归一化，仅保留与默认值不同的思维配置�? * 如果思维配置值与默认值相同，返回 undefined�? *
- * @param model - 模型 ID 字符�? * @param modelOptions - 原始 Gemini 模型选项
- * @returns 归一化后的模型选项，与默认值相同时返回 undefined
+ * 灏?Gemini 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欎笌榛樿鍊间笉鍚岀殑鎬濈淮閰嶇疆銆? * 濡傛灉鎬濈淮閰嶇疆鍊间笌榛樿鍊肩浉鍚岋紝杩斿洖 undefined銆? *
+ * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Gemini 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屼笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
  */
 export function normalizeGeminiModelOptions(
   model: string | null | undefined,
@@ -1348,12 +1348,12 @@ export function normalizeGeminiModelOptions(
 }
 
 /**
- * 归一�?Grok 模型选项
+ * 褰掍竴鍖?Grok 妯″瀷閫夐」
  *
  * @description
- * �?Grok 模型选项归一化，仅保留与默认值不同的推理努力级别�? *
- * @param model - 模型 ID 字符�? * @param modelOptions - 原始 Grok 模型选项
- * @returns 归一化后的模型选项，与默认值相同时返回 undefined
+ * 灏?Grok 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欎笌榛樿鍊间笉鍚岀殑鎺ㄧ悊鍔姏绾у埆銆? *
+ * @param model - 妯″瀷 ID 瀛楃涓? * @param modelOptions - 鍘熷 Grok 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屼笌榛樿鍊肩浉鍚屾椂杩斿洖 undefined
  */
 export function normalizeGrokModelOptions(
   model: string | null | undefined,
@@ -1371,12 +1371,12 @@ export function normalizeGrokModelOptions(
 }
 
 /**
- * 归一�?Pi 模型选项
+ * 褰掍竴鍖?Pi 妯″瀷閫夐」
  *
  * @description
- * �?Pi 模型选项归一化，仅保留有效的思维级别�? *
- * @param modelOptions - 原始 Pi 模型选项
- * @returns 归一化后的模型选项，无效值时返回 undefined
+ * 灏?Pi 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欐湁鏁堢殑鎬濈淮绾у埆銆? *
+ * @param modelOptions - 鍘熷 Pi 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏁堝€兼椂杩斿洖 undefined
  */
 export function normalizePiModelOptions(
   modelOptions: PiModelOptions | null | undefined,
@@ -1388,12 +1388,12 @@ export function normalizePiModelOptions(
 }
 
 /**
- * 归一�?OpenCode 模型选项
+ * 褰掍竴鍖?OpenCode 妯″瀷閫夐」
  *
  * @description
- * �?OpenCode 模型选项归一化，仅保留非空的 variant �?agent 字段�? *
- * @param modelOptions - 原始 OpenCode 模型选项
- * @returns 归一化后的模型选项，无有效字段时返�?undefined
+ * 灏?OpenCode 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欓潪绌虹殑 variant 鍜?agent 瀛楁銆? *
+ * @param modelOptions - 鍘熷 OpenCode 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏈夋晥瀛楁鏃惰繑鍥?undefined
  */
 export function normalizeOpenCodeModelOptions(
   modelOptions: OpenCodeModelOptions | null | undefined,
@@ -1408,12 +1408,12 @@ export function normalizeOpenCodeModelOptions(
 }
 
 /**
- * 归一�?Cursor 模型选项
+ * 褰掍竴鍖?Cursor 妯″瀷閫夐」
  *
  * @description
- * �?Cursor 模型选项归一化，仅保留非空的字段�? *
- * @param modelOptions - 原始 Cursor 模型选项
- * @returns 归一化后的模型选项，无有效字段时返�?undefined
+ * 灏?Cursor 妯″瀷閫夐」褰掍竴鍖栵紝浠呬繚鐣欓潪绌虹殑瀛楁銆? *
+ * @param modelOptions - 鍘熷 Cursor 妯″瀷閫夐」
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨嬮€夐」锛屾棤鏈夋晥瀛楁鏃惰繑鍥?undefined
  */
 export function normalizeCursorModelOptions(
   modelOptions: CursorModelOptions | null | undefined,
@@ -1428,22 +1428,22 @@ export function normalizeCursorModelOptions(
 }
 
 /**
- * �?Claude 提示词添�?Ultrathink 前缀
+ * 涓?Claude 鎻愮ず璇嶆坊鍔?Ultrathink 鍓嶇紑
  *
  * @description
- * 当推理努力级别为 "ultrathink" 时，在提示词前添�?"Ultrathink:" 前缀�? * 如果提示词已�?"Ultrathink:" 开头，则不重复添加�? * �?ultrathink 级别或空提示词不做任何处理�? *
- * @param text - 原始提示词文�? * @param effort - Claude 推理努力级别
- * @returns 处理后的提示词文�? *
+ * 褰撴帹鐞嗗姫鍔涚骇鍒负 "ultrathink" 鏃讹紝鍦ㄦ彁绀鸿瘝鍓嶆坊鍔?"Ultrathink:" 鍓嶇紑銆? * 濡傛灉鎻愮ず璇嶅凡浠?"Ultrathink:" 寮€澶达紝鍒欎笉閲嶅娣诲姞銆? * 闈?ultrathink 绾у埆鎴栫┖鎻愮ず璇嶄笉鍋氫换浣曞鐞嗐€? *
+ * @param text - 鍘熷鎻愮ず璇嶆枃鏈? * @param effort - Claude 鎺ㄧ悊鍔姏绾у埆
+ * @returns 澶勭悊鍚庣殑鎻愮ず璇嶆枃鏈? *
  * @example
  * ```ts
- * applyClaudePromptEffortPrefix('请分析这段代�?, 'ultrathink');
- * // 'Ultrathink:\n请分析这段代�?
+ * applyClaudePromptEffortPrefix('璇峰垎鏋愯繖娈典唬鐮?, 'ultrathink');
+ * // 'Ultrathink:\n璇峰垎鏋愯繖娈典唬鐮?
  *
- * applyClaudePromptEffortPrefix('请分析这段代�?, 'high');
- * // '请分析这段代�?（非 ultrathink 级别不处理）
+ * applyClaudePromptEffortPrefix('璇峰垎鏋愯繖娈典唬鐮?, 'high');
+ * // '璇峰垎鏋愯繖娈典唬鐮?锛堥潪 ultrathink 绾у埆涓嶅鐞嗭級
  *
- * applyClaudePromptEffortPrefix('Ultrathink:\n请分�?, 'ultrathink');
- * // 'Ultrathink:\n请分�?（已有前缀不重复添加）
+ * applyClaudePromptEffortPrefix('Ultrathink:\n璇峰垎鏋?, 'ultrathink');
+ * // 'Ultrathink:\n璇峰垎鏋?锛堝凡鏈夊墠缂€涓嶉噸澶嶆坊鍔狅級
  * ```
  */
 export function applyClaudePromptEffortPrefix(

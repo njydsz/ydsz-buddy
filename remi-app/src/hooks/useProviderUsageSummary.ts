@@ -1,6 +1,6 @@
 /**
  * @file useProviderUsageSummary.ts
- * @description 提供商使用量摘要 Hook - 合并多个来源的使用量信号为统一�?UI 摘要
+ * @description 鎻愪緵鍟嗕娇鐢ㄩ噺鎽樿 Hook - 鍚堝苟澶氫釜鏉ユ簮鐨勪娇鐢ㄩ噺淇″彿涓虹粺涓€鐨?UI 鎽樿
  * @module hooks/useProviderUsageSummary
  */
 
@@ -27,19 +27,19 @@ import {
 import { serverProviderUsageSnapshotQueryOptions } from "~/lib/serverReactQuery";
 
 /**
- * 提供商使用量摘要 Hook
+ * 鎻愪緵鍟嗕娇鐢ㄩ噺鎽樿 Hook
  * 
  * @description
- * 从多个来源合并使用量信号，生成统一�?UI 友好摘要�? * 1. 线程活动（从线程列表中推导）
- * 2. 服务器端本地归档（提供商使用量快照）
- * 3. 开放使用量快照（如 OpenAI 等）
+ * 浠庡涓潵婧愬悎骞朵娇鐢ㄩ噺淇″彿锛岀敓鎴愮粺涓€鐨?UI 鍙嬪ソ鎽樿锛? * 1. 绾跨▼娲诲姩锛堜粠绾跨▼鍒楄〃涓帹瀵硷級
+ * 2. 鏈嶅姟鍣ㄧ鏈湴褰掓。锛堟彁渚涘晢浣跨敤閲忓揩鐓э級
+ * 3. 寮€鏀句娇鐢ㄩ噺蹇収锛堝 OpenAI 绛夛級
  * 
- * 合并后的数据包括�? * - 速率限制信息（rateLimits�? * - 使用量明细（usageLines�? * - 学习更多链接（learnMoreHref�? * - 加载状态（isLoading�? * 
- * @param input - 输入参数对象
- * @param input.provider - 提供商类型（null �?undefined 表示不查询）
- * @param input.threads - 线程列表（用于推导账户级别的速率限制�? * @param input.codexHomePath - Codex 主目录路径（�?codex 提供商需要）
+ * 鍚堝苟鍚庣殑鏁版嵁鍖呮嫭锛? * - 閫熺巼闄愬埗淇℃伅锛坮ateLimits锛? * - 浣跨敤閲忔槑缁嗭紙usageLines锛? * - 瀛︿範鏇村閾炬帴锛坙earnMoreHref锛? * - 鍔犺浇鐘舵€侊紙isLoading锛? * 
+ * @param input - 杈撳叆鍙傛暟瀵硅薄
+ * @param input.provider - 鎻愪緵鍟嗙被鍨嬶紙null 鎴?undefined 琛ㄧず涓嶆煡璇級
+ * @param input.threads - 绾跨▼鍒楄〃锛堢敤浜庢帹瀵艰处鎴风骇鍒殑閫熺巼闄愬埗锛? * @param input.codexHomePath - Codex 涓荤洰褰曡矾寰勶紙浠?codex 鎻愪緵鍟嗛渶瑕侊級
  * 
- * @returns 使用量摘要对�? * 
+ * @returns 浣跨敤閲忔憳瑕佸璞? * 
  * @example
  * ```tsx
  * const { rateLimits, usageLines, learnMoreHref, isLoading } = useProviderUsageSummary({
@@ -55,7 +55,7 @@ import { serverProviderUsageSnapshotQueryOptions } from "~/lib/serverReactQuery"
  *   <UsagePanel>
  *     {rateLimits.map(limit => <RateLimitCard key={limit.id} limit={limit} />)}
  *     {usageLines.map(line => <UsageLineItem key={line.id} line={line} />)}
- *     {learnMoreHref && <a href={learnMoreHref}>了解更多</a>}
+ *     {learnMoreHref && <a href={learnMoreHref}>浜嗚В鏇村</a>}
  *   </UsagePanel>
  * );
  * ```
@@ -65,40 +65,40 @@ export function useProviderUsageSummary(input: {
   threads: ReadonlyArray<Pick<OrchestrationThread, "activities">>;
   codexHomePath?: string | null;
 }) {
-  // 查询服务器端的提供商使用量快�?  const providerUsageSnapshotQuery = useQuery(
+  // 鏌ヨ鏈嶅姟鍣ㄧ鐨勬彁渚涘晢浣跨敤閲忓揩鐓?  const providerUsageSnapshotQuery = useQuery(
     serverProviderUsageSnapshotQueryOptions({
       provider: input.provider,
       homePath: input.provider === "codex" ? input.codexHomePath || null : null,
     }),
   );
   
-  // 查询开放使用量快照
+  // 鏌ヨ寮€鏀句娇鐢ㄩ噺蹇収
   const openUsageSnapshotQuery = useQuery(openUsageProviderSnapshotQueryOptions(input.provider));
 
   /**
-   * 合并所有来源的速率限制
+   * 鍚堝苟鎵€鏈夋潵婧愮殑閫熺巼闄愬埗
    * 
    * @description
-   * 合并优先级：
-   * 1. 从线程活动推导的账户级别限制
-   * 2. 服务器端使用量快照的限制
-   * 3. 开放使用量快照的限�?   */
+   * 鍚堝苟浼樺厛绾э細
+   * 1. 浠庣嚎绋嬫椿鍔ㄦ帹瀵肩殑璐︽埛绾у埆闄愬埗
+   * 2. 鏈嶅姟鍣ㄧ浣跨敤閲忓揩鐓х殑闄愬埗
+   * 3. 寮€鏀句娇鐢ㄩ噺蹇収鐨勯檺鍒?   */
   const rateLimits = useMemo<ReadonlyArray<ProviderRateLimit>>(() => {
-    // 从线程活动推导的限制（过滤当前提供商�?    const derivedRateLimits = deriveAccountRateLimits(input.threads).filter((rateLimit) =>
+    // 浠庣嚎绋嬫椿鍔ㄦ帹瀵肩殑闄愬埗锛堣繃婊ゅ綋鍓嶆彁渚涘晢锛?    const derivedRateLimits = deriveAccountRateLimits(input.threads).filter((rateLimit) =>
       input.provider ? rateLimit.provider === input.provider : true,
     );
     
-    // 服务器端使用量快照的限制
+    // 鏈嶅姟鍣ㄧ浣跨敤閲忓揩鐓х殑闄愬埗
     const serverUsageRateLimit = normalizeServerProviderUsageRateLimit(
       providerUsageSnapshotQuery.data,
     );
     
-    // 开放使用量快照的限�?    const openUsageSnapshot = normalizeOpenUsageSnapshot(
+    // 寮€鏀句娇鐢ㄩ噺蹇収鐨勯檺鍒?    const openUsageSnapshot = normalizeOpenUsageSnapshot(
       openUsageSnapshotQuery.data,
       input.provider,
     );
     
-    // 合并所有限�?    return mergeProviderRateLimits(
+    // 鍚堝苟鎵€鏈夐檺鍒?    return mergeProviderRateLimits(
       derivedRateLimits,
       mergeProviderRateLimits(
         serverUsageRateLimit ? [serverUsageRateLimit] : [],
@@ -108,10 +108,10 @@ export function useProviderUsageSummary(input: {
   }, [input.provider, input.threads, openUsageSnapshotQuery.data, providerUsageSnapshotQuery.data]);
 
   /**
-   * 使用量明细行
+   * 浣跨敤閲忔槑缁嗚
    * 
    * @description
-   * 优先使用服务器端数据，如果没有则使用开放使用量数据
+   * 浼樺厛浣跨敤鏈嶅姟鍣ㄧ鏁版嵁锛屽鏋滄病鏈夊垯浣跨敤寮€鏀句娇鐢ㄩ噺鏁版嵁
    */
   const usageLines = useMemo(() => {
     const serverUsageLines = normalizeServerProviderUsageLines(providerUsageSnapshotQuery.data);
@@ -122,10 +122,10 @@ export function useProviderUsageSummary(input: {
   }, [openUsageSnapshotQuery.data, providerUsageSnapshotQuery.data]);
 
   /**
-   * 学习更多链接
+   * 瀛︿範鏇村閾炬帴
    * 
    * @description
-   * 优先从速率限制中推导，否则使用提供商默认链�?   */
+   * 浼樺厛浠庨€熺巼闄愬埗涓帹瀵硷紝鍚﹀垯浣跨敤鎻愪緵鍟嗛粯璁ら摼鎺?   */
   const learnMoreHref = useMemo(
     () =>
       deriveRateLimitLearnMoreHref(rateLimits) ?? deriveProviderUsageLearnMoreHref(input.provider),
@@ -133,9 +133,9 @@ export function useProviderUsageSummary(input: {
   );
 
   /**
-   * 加载状�?   * 
+   * 鍔犺浇鐘舵€?   * 
    * @description
-   * 当提供商已指定、查询正在进行中、且没有任何数据时，认为正在加载
+   * 褰撴彁渚涘晢宸叉寚瀹氥€佹煡璇㈡鍦ㄨ繘琛屼腑銆佷笖娌℃湁浠讳綍鏁版嵁鏃讹紝璁や负姝ｅ湪鍔犺浇
    */
   const isLoading =
     input.provider !== null &&

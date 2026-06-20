@@ -1,7 +1,7 @@
 /**
  * @file RateLimitBanner
- * @description 显示当前账户的速率限制状态横幅，包括已达限制和接近限制两种状态，
- *              支持显示重置倒计时和利用率百分比，并提供关闭操作。
+ * @description æ˜¾ç¤ºå½“å‰è´¦æˆ·çš„é€ŸçŽ‡é™åˆ¶çŠ¶æ€æ¨ªå¹…ï¼ŒåŒ…æ‹¬å·²è¾¾é™åˆ¶å’ŒæŽ¥è¿‘é™åˆ¶ä¸¤ç§çŠ¶æ€ï¼Œ
+ *              æ”¯æŒæ˜¾ç¤ºé‡ç½®å€’è®¡æ—¶å’Œåˆ©ç”¨çŽ‡ç™¾åˆ†æ¯”ï¼Œå¹¶æä¾›å…³é—­æ“ä½œã€‚
  */
 
 import { memo } from "react";
@@ -10,32 +10,32 @@ import { Alert, AlertAction, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";
 
-/** 速率限制状态，描述当前账户的请求频率限制情况 */
+/** é€ŸçŽ‡é™åˆ¶çŠ¶æ€ï¼Œæè¿°å½“å‰è´¦æˆ·çš„è¯·æ±‚é¢‘çŽ‡é™åˆ¶æƒ…å†µ */
 export type RateLimitStatus = {
-  /** 限制状态：rejected 表示请求被拒绝，allowed_warning 表示接近限制 */
+  /** é™åˆ¶çŠ¶æ€ï¼šrejected è¡¨ç¤ºè¯·æ±‚è¢«æ‹’ç»ï¼Œallowed_warning è¡¨ç¤ºæŽ¥è¿‘é™åˆ¶ */
   status: "rejected" | "allowed_warning";
-  /** 限制重置时间（ISO 8601 格式） */
+  /** é™åˆ¶é‡ç½®æ—¶é—´ï¼ˆISO 8601 æ ¼å¼ï¼‰ */
   resetsAt?: string;
-  /** 当前利用率（0-1 之间的小数） */
+  /** å½“å‰åˆ©ç”¨çŽ‡ï¼ˆ0-1 ä¹‹é—´çš„å°æ•°ï¼‰ */
   utilization?: number;
 };
 
 /**
- * 将未知值安全转换为普通对象。
+ * å°†æœªçŸ¥å€¼å®‰å…¨è½¬æ¢ä¸ºæ™®é€šå¯¹è±¡ã€‚
  *
- * @param value - 待转换的值
- * @returns 转换后的普通对象，若非对象则返回 null
+ * @param value - å¾…è½¬æ¢çš„å€¼
+ * @returns è½¬æ¢åŽçš„æ™®é€šå¯¹è±¡ï¼Œè‹¥éžå¯¹è±¡åˆ™è¿”å›ž null
  */
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 }
 
 /**
- * 从线程活动列表中推导出最新的速率限制状态。
- * 从最新活动向前遍历，跳过已过期的限制记录。
+ * ä»Žçº¿ç¨‹æ´»åŠ¨åˆ—è¡¨ä¸­æŽ¨å¯¼å‡ºæœ€æ–°çš„é€ŸçŽ‡é™åˆ¶çŠ¶æ€ã€‚
+ * ä»Žæœ€æ–°æ´»åŠ¨å‘å‰éåŽ†ï¼Œè·³è¿‡å·²è¿‡æœŸçš„é™åˆ¶è®°å½•ã€‚
  *
- * @param activities - 线程活动列表
- * @returns 最新的速率限制状态，若无有效记录则返回 null
+ * @param activities - çº¿ç¨‹æ´»åŠ¨åˆ—è¡¨
+ * @returns æœ€æ–°çš„é€ŸçŽ‡é™åˆ¶çŠ¶æ€ï¼Œè‹¥æ— æœ‰æ•ˆè®°å½•åˆ™è¿”å›ž null
  */
 export function deriveLatestRateLimitStatus(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -48,7 +48,7 @@ export function deriveLatestRateLimitStatus(
     if (!payload) continue;
     const status = payload.status;
     if (status !== "rejected" && status !== "allowed_warning") continue;
-    // If resetsAt is in the past, the limit has expired �?skip
+    // If resetsAt is in the past, the limit has expired ï¿½?skip
     if (typeof payload.resetsAt === "string") {
       const resetsAtMs = Date.parse(payload.resetsAt);
       if (!Number.isNaN(resetsAtMs) && resetsAtMs < now) continue;
@@ -63,10 +63,10 @@ export function deriveLatestRateLimitStatus(
 }
 
 /**
- * 格式化限制重置时间为可读的倒计时文本。
+ * æ ¼å¼åŒ–é™åˆ¶é‡ç½®æ—¶é—´ä¸ºå¯è¯»çš„å€’è®¡æ—¶æ–‡æœ¬ã€‚
  *
- * @param resetsAt - ISO 8601 格式的重置时间
- * @returns 格式化后的倒计时字符串，如 " Resets in 5s." 或 " Resets in 2m."
+ * @param resetsAt - ISO 8601 æ ¼å¼çš„é‡ç½®æ—¶é—´
+ * @returns æ ¼å¼åŒ–åŽçš„å€’è®¡æ—¶å­—ç¬¦ä¸²ï¼Œå¦‚ " Resets in 5s." æˆ– " Resets in 2m."
  */
 function formatResetsAt(resetsAt: string): string {
   const ms = Date.parse(resetsAt);
@@ -78,11 +78,11 @@ function formatResetsAt(resetsAt: string): string {
 }
 
 /**
- * 速率限制横幅组件。
- * 根据速率限制状态显示错误或警告提示，包含限制描述、重置倒计时和关闭按钮。
+ * é€ŸçŽ‡é™åˆ¶æ¨ªå¹…ç»„ä»¶ã€‚
+ * æ ¹æ®é€ŸçŽ‡é™åˆ¶çŠ¶æ€æ˜¾ç¤ºé”™è¯¯æˆ–è­¦å‘Šæç¤ºï¼ŒåŒ…å«é™åˆ¶æè¿°ã€é‡ç½®å€’è®¡æ—¶å’Œå…³é—­æŒ‰é’®ã€‚
  *
- * @param props.onDismiss - 关闭横幅的回调函数
- * @param props.rateLimitStatus - 当前的速率限制状态，为 null 时不渲染
+ * @param props.onDismiss - å…³é—­æ¨ªå¹…çš„å›žè°ƒå‡½æ•°
+ * @param props.rateLimitStatus - å½“å‰çš„é€ŸçŽ‡é™åˆ¶çŠ¶æ€ï¼Œä¸º null æ—¶ä¸æ¸²æŸ“
  */
 export const RateLimitBanner = memo(function RateLimitBanner({
   onDismiss,

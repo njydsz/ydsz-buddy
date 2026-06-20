@@ -1,6 +1,6 @@
 /**
- * @file 项目脚本工具模块
- * @description 提供项目脚本�?ID 生成、命令映射、工作目录解析和环境变量构建等工具函数�? */
+ * @file 椤圭洰鑴氭湰宸ュ叿妯″潡
+ * @description 鎻愪緵椤圭洰鑴氭湰鐨?ID 鐢熸垚銆佸懡浠ゆ槧灏勩€佸伐浣滅洰褰曡В鏋愬拰鐜鍙橀噺鏋勫缓绛夊伐鍏峰嚱鏁般€? */
 
 import {
   MAX_SCRIPT_ID_LENGTH,
@@ -10,8 +10,8 @@ import {
 } from "~/contracts";
 
 /**
- * 归一化脚�?ID：转小写、替换非法字符为连字符、去除首尾连字符、截断至最大长�? * @param value - 原始脚本名称
- * @returns 归一化后的脚�?ID
+ * 褰掍竴鍖栬剼鏈?ID锛氳浆灏忓啓銆佹浛鎹㈤潪娉曞瓧绗︿负杩炲瓧绗︺€佸幓闄ら灏捐繛瀛楃銆佹埅鏂嚦鏈€澶ч暱搴? * @param value - 鍘熷鑴氭湰鍚嶇О
+ * @returns 褰掍竴鍖栧悗鐨勮剼鏈?ID
  */
 function normalizeScriptId(value: string): string {
   const cleaned = value
@@ -29,15 +29,15 @@ function normalizeScriptId(value: string): string {
 }
 
 /**
- * 根据脚本 ID 生成快捷键命令标�? * @param scriptId - 脚本 ID
- * @returns 快捷键命�? */
+ * 鏍规嵁鑴氭湰 ID 鐢熸垚蹇嵎閿懡浠ゆ爣璇? * @param scriptId - 鑴氭湰 ID
+ * @returns 蹇嵎閿懡浠? */
 export const commandForProjectScript = (scriptId: string): KeybindingCommand =>
   SCRIPT_RUN_COMMAND_PATTERN.makeUnsafe(`script.${scriptId}.run`);
 
 /**
- * 从快捷键命令中提取脚�?ID
- * @param command - 快捷键命令字符串
- * @returns 脚本 ID，非脚本命令返回 null
+ * 浠庡揩鎹烽敭鍛戒护涓彁鍙栬剼鏈?ID
+ * @param command - 蹇嵎閿懡浠ゅ瓧绗︿覆
+ * @returns 鑴氭湰 ID锛岄潪鑴氭湰鍛戒护杩斿洖 null
  */
 export function projectScriptIdFromCommand(command: string): string | null {
   const trimmed = command.trim();
@@ -49,11 +49,11 @@ export function projectScriptIdFromCommand(command: string): string | null {
 }
 
 /**
- * 生成下一个可用的项目脚本 ID
- * 基于脚本名称生成 ID，若已存在则添加数字后缀，直到找到可�?ID
- * @param name - 脚本名称
- * @param existingIds - 已存在的脚本 ID 集合
- * @returns 唯一的脚�?ID
+ * 鐢熸垚涓嬩竴涓彲鐢ㄧ殑椤圭洰鑴氭湰 ID
+ * 鍩轰簬鑴氭湰鍚嶇О鐢熸垚 ID锛岃嫢宸插瓨鍦ㄥ垯娣诲姞鏁板瓧鍚庣紑锛岀洿鍒版壘鍒板彲鐢?ID
+ * @param name - 鑴氭湰鍚嶇О
+ * @param existingIds - 宸插瓨鍦ㄧ殑鑴氭湰 ID 闆嗗悎
+ * @returns 鍞竴鐨勮剼鏈?ID
  */
 export function nextProjectScriptId(name: string, existingIds: Iterable<string>): string {
   const taken = new Set(Array.from(existingIds));
@@ -73,12 +73,12 @@ export function nextProjectScriptId(name: string, existingIds: Iterable<string>)
     suffix += 1;
   }
 
-  // 兜底方案：仅在数千个后缀都耗尽时触�?  return `${baseId}-${Date.now()}`.slice(0, MAX_SCRIPT_ID_LENGTH);
+  // 鍏滃簳鏂规锛氫粎鍦ㄦ暟鍗冧釜鍚庣紑閮借€楀敖鏃惰Е鍙?  return `${baseId}-${Date.now()}`.slice(0, MAX_SCRIPT_ID_LENGTH);
 }
 
 /**
- * 项目脚本运行时环境变量输�? * @property project.cwd - 项目根目�? * @property worktreePath - 工作树路径（可选）
- * @property extraEnv - 额外环境变量（可选）
+ * 椤圭洰鑴氭湰杩愯鏃剁幆澧冨彉閲忚緭鍏? * @property project.cwd - 椤圭洰鏍圭洰褰? * @property worktreePath - 宸ヤ綔鏍戣矾寰勶紙鍙€夛級
+ * @property extraEnv - 棰濆鐜鍙橀噺锛堝彲閫夛級
  */
 interface ProjectScriptRuntimeEnvInput {
   project: {
@@ -89,7 +89,7 @@ interface ProjectScriptRuntimeEnvInput {
 }
 
 /**
- * 解析项目脚本的工作目�? * 优先使用工作树路径，否则使用项目根目�? * @param input - 包含项目和工作树路径的输�? * @returns 脚本运行的工作目�? */
+ * 瑙ｆ瀽椤圭洰鑴氭湰鐨勫伐浣滅洰褰? * 浼樺厛浣跨敤宸ヤ綔鏍戣矾寰勶紝鍚﹀垯浣跨敤椤圭洰鏍圭洰褰? * @param input - 鍖呭惈椤圭洰鍜屽伐浣滄爲璺緞鐨勮緭鍏? * @returns 鑴氭湰杩愯鐨勫伐浣滅洰褰? */
 export function projectScriptCwd(input: {
   project: {
     cwd: string;
@@ -100,9 +100,9 @@ export function projectScriptCwd(input: {
 }
 
 /**
- * 构建项目脚本的运行时环境变量
- * 包含项目根目录、工作树路径等标准变量，可与额外环境变量合并
- * @param input - 运行时环境变量输�? * @returns 环境变量键值对
+ * 鏋勫缓椤圭洰鑴氭湰鐨勮繍琛屾椂鐜鍙橀噺
+ * 鍖呭惈椤圭洰鏍圭洰褰曘€佸伐浣滄爲璺緞绛夋爣鍑嗗彉閲忥紝鍙笌棰濆鐜鍙橀噺鍚堝苟
+ * @param input - 杩愯鏃剁幆澧冨彉閲忚緭鍏? * @returns 鐜鍙橀噺閿€煎
  */
 export function projectScriptRuntimeEnv(
   input: ProjectScriptRuntimeEnvInput,
@@ -120,8 +120,8 @@ export function projectScriptRuntimeEnv(
 }
 
 /**
- * 获取主要的项目脚本（非工作树创建时运行的脚本�? * 优先返回第一个非 runOnWorktreeCreate 的脚�? * @param scripts - 项目脚本列表
- * @returns 主要脚本，无匹配时返回第一个脚本或 null
+ * 鑾峰彇涓昏鐨勯」鐩剼鏈紙闈炲伐浣滄爲鍒涘缓鏃惰繍琛岀殑鑴氭湰锛? * 浼樺厛杩斿洖绗竴涓潪 runOnWorktreeCreate 鐨勮剼鏈? * @param scripts - 椤圭洰鑴氭湰鍒楄〃
+ * @returns 涓昏鑴氭湰锛屾棤鍖归厤鏃惰繑鍥炵涓€涓剼鏈垨 null
  */
 export function primaryProjectScript(scripts: ProjectScript[]): ProjectScript | null {
   const regular = scripts.find((script) => !script.runOnWorktreeCreate);
@@ -129,8 +129,8 @@ export function primaryProjectScript(scripts: ProjectScript[]): ProjectScript | 
 }
 
 /**
- * 获取工作树创建时的设置脚�? * @param scripts - 项目脚本列表
- * @returns 设置脚本，无匹配时返�?null
+ * 鑾峰彇宸ヤ綔鏍戝垱寤烘椂鐨勮缃剼鏈? * @param scripts - 椤圭洰鑴氭湰鍒楄〃
+ * @returns 璁剧疆鑴氭湰锛屾棤鍖归厤鏃惰繑鍥?null
  */
 export function setupProjectScript(scripts: ProjectScript[]): ProjectScript | null {
   return scripts.find((script) => script.runOnWorktreeCreate) ?? null;

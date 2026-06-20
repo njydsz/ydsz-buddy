@@ -1,12 +1,12 @@
 /**
- * @file Provider 排序管理
+ * @file Provider 鎺掑簭绠＄悊
  *
- * 维护 Provider 选择器中的排序稳定性，确保设置页面、搜索和菜单中的顺序一致�? * 提供默认排序、排序标准化、排序比较等工具函数�? */
+ * 缁存姢 Provider 閫夋嫨鍣ㄤ腑鐨勬帓搴忕ǔ瀹氭€э紝纭繚璁剧疆椤甸潰銆佹悳绱㈠拰鑿滃崟涓殑椤哄簭涓€鑷淬€? * 鎻愪緵榛樿鎺掑簭銆佹帓搴忔爣鍑嗗寲銆佹帓搴忔瘮杈冪瓑宸ュ叿鍑芥暟銆? */
 
 import type { ProviderKind } from "~/contracts";
 
 /**
- * Provider 的默认显示顺序�? * 此顺序决定了侧边栏、选择器等 UI �?Provider 的排列位置�? */
+ * Provider 鐨勯粯璁ゆ樉绀洪『搴忋€? * 姝ら『搴忓喅瀹氫簡渚ц竟鏍忋€侀€夋嫨鍣ㄧ瓑 UI 涓?Provider 鐨勬帓鍒椾綅缃€? */
 export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "codex",
   "claudeAgent",
@@ -18,21 +18,21 @@ export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "pi",
 ];
 
-/** 基于 DEFAULT_PROVIDER_ORDER 构建�?Provider 类型集合，用于快速查�?*/
+/** 鍩轰簬 DEFAULT_PROVIDER_ORDER 鏋勫缓鐨?Provider 绫诲瀷闆嗗悎锛岀敤浜庡揩閫熸煡鎵?*/
 const PROVIDER_KIND_SET: ReadonlySet<ProviderKind> = new Set(DEFAULT_PROVIDER_ORDER);
 
 /**
- * 判断给定字符串是否为有效�?ProviderKind 类型�? *
- * @param value - 待判断的字符�? * @returns 是否为有效的 ProviderKind
+ * 鍒ゆ柇缁欏畾瀛楃涓叉槸鍚︿负鏈夋晥鐨?ProviderKind 绫诲瀷銆? *
+ * @param value - 寰呭垽鏂殑瀛楃涓? * @returns 鏄惁涓烘湁鏁堢殑 ProviderKind
  */
 export function isProviderKind(value: string): value is ProviderKind {
   return PROVIDER_KIND_SET.has(value as ProviderKind);
 }
 
 /**
- * 标准化隐藏的 Provider 列表�? * 过滤无效值和重复项，仅保留有效的 ProviderKind�? *
- * @param hiddenProviders - 原始隐藏 Provider 列表
- * @returns 去重后的有效 ProviderKind 数组
+ * 鏍囧噯鍖栭殣钘忕殑 Provider 鍒楄〃銆? * 杩囨护鏃犳晥鍊煎拰閲嶅椤癸紝浠呬繚鐣欐湁鏁堢殑 ProviderKind銆? *
+ * @param hiddenProviders - 鍘熷闅愯棌 Provider 鍒楄〃
+ * @returns 鍘婚噸鍚庣殑鏈夋晥 ProviderKind 鏁扮粍
  */
 export function normalizeHiddenProviders(hiddenProviders: ReadonlyArray<string>): ProviderKind[] {
   const seen = new Set<ProviderKind>();
@@ -47,9 +47,9 @@ export function normalizeHiddenProviders(hiddenProviders: ReadonlyArray<string>)
 }
 
 /**
- * 标准�?Provider 排序列表�? * 过滤无效值和重复项，并将用户未指定的 Provider 按默认顺序追加到末尾�? *
- * @param providerOrder - 原始 Provider 排序列表
- * @returns 标准化后的完�?ProviderKind 排序数组
+ * 鏍囧噯鍖?Provider 鎺掑簭鍒楄〃銆? * 杩囨护鏃犳晥鍊煎拰閲嶅椤癸紝骞跺皢鐢ㄦ埛鏈寚瀹氱殑 Provider 鎸夐粯璁ら『搴忚拷鍔犲埌鏈熬銆? *
+ * @param providerOrder - 鍘熷 Provider 鎺掑簭鍒楄〃
+ * @returns 鏍囧噯鍖栧悗鐨勫畬鏁?ProviderKind 鎺掑簭鏁扮粍
  */
 export function normalizeProviderOrder(providerOrder: ReadonlyArray<string>): ProviderKind[] {
   const seen = new Set<ProviderKind>();
@@ -69,8 +69,8 @@ export function normalizeProviderOrder(providerOrder: ReadonlyArray<string>): Pr
 }
 
 /**
- * 判断两个 Provider 排序列表是否完全相同（顺序和元素一致）�? *
- * @param left - 第一个排序列�? * @param right - 第二个排序列�? * @returns 是否相同
+ * 鍒ゆ柇涓や釜 Provider 鎺掑簭鍒楄〃鏄惁瀹屽叏鐩稿悓锛堥『搴忓拰鍏冪礌涓€鑷达級銆? *
+ * @param left - 绗竴涓帓搴忓垪琛? * @param right - 绗簩涓帓搴忓垪琛? * @returns 鏄惁鐩稿悓
  */
 export function sameProviderOrder(
   left: ReadonlyArray<ProviderKind>,
@@ -80,11 +80,11 @@ export function sameProviderOrder(
 }
 
 /**
- * 按照指定排序比较两个 Provider 的先后顺序�? * 不在排序列表中的 Provider 排在末尾，按默认顺序排列�? *
- * @param providerOrder - 排序规则列表
- * @param left - 第一�?Provider
- * @param right - 第二�?Provider
- * @returns 负数表示 left 在前，正数表�?right 在前�? 表示相同
+ * 鎸夌収鎸囧畾鎺掑簭姣旇緝涓や釜 Provider 鐨勫厛鍚庨『搴忋€? * 涓嶅湪鎺掑簭鍒楄〃涓殑 Provider 鎺掑湪鏈熬锛屾寜榛樿椤哄簭鎺掑垪銆? *
+ * @param providerOrder - 鎺掑簭瑙勫垯鍒楄〃
+ * @param left - 绗竴涓?Provider
+ * @param right - 绗簩涓?Provider
+ * @returns 璐熸暟琛ㄧず left 鍦ㄥ墠锛屾鏁拌〃绀?right 鍦ㄥ墠锛? 琛ㄧず鐩稿悓
  */
 export function compareProvidersByOrder(
   providerOrder: ReadonlyArray<ProviderKind>,

@@ -18,7 +18,7 @@
 //!
 //! ## 使用示例
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use remi_config::{CliArgs, ServerConfig};

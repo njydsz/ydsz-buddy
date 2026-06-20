@@ -1,32 +1,32 @@
 /**
- * @file 置顶线程状态管�? *
- * 管理侧边栏中全局置顶的聊天线�?ID 列表�? * 使用 Zustand + persist 中间件将状态持久化�?localStorage�? * 支持置顶、取消置顶、切换置顶状态和清理无效置顶等操作�? */
+ * @file 缃《绾跨▼鐘舵€佺鐞? *
+ * 绠＄悊渚ц竟鏍忎腑鍏ㄥ眬缃《鐨勮亰澶╃嚎绋?ID 鍒楄〃銆? * 浣跨敤 Zustand + persist 涓棿浠跺皢鐘舵€佹寔涔呭寲鍒?localStorage锛? * 鏀寔缃《銆佸彇娑堢疆椤躲€佸垏鎹㈢疆椤剁姸鎬佸拰娓呯悊鏃犳晥缃《绛夋搷浣溿€? */
 
 import { type ThreadId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** 置顶线程 Store 的状态接�?*/
+/** 缃《绾跨▼ Store 鐨勭姸鎬佹帴鍙?*/
 interface PinnedThreadsStoreState {
-  /** 置顶的线�?ID 列表 */
+  /** 缃《鐨勭嚎绋?ID 鍒楄〃 */
   pinnedThreadIds: ThreadId[];
-  /** 置顶指定线程 */
+  /** 缃《鎸囧畾绾跨▼ */
   pinThread: (threadId: ThreadId) => void;
-  /** 取消置顶指定线程 */
+  /** 鍙栨秷缃《鎸囧畾绾跨▼ */
   unpinThread: (threadId: ThreadId) => void;
-  /** 切换指定线程的置顶状�?*/
+  /** 鍒囨崲鎸囧畾绾跨▼鐨勭疆椤剁姸鎬?*/
   togglePinnedThread: (threadId: ThreadId) => void;
-  /** 清理不在线程列表中的无效置顶�?*/
+  /** 娓呯悊涓嶅湪绾跨▼鍒楄〃涓殑鏃犳晥缃《椤?*/
   prunePinnedThreads: (threadIds: readonly ThreadId[]) => void;
 }
 
-/** localStorage 中的存储�?*/
+/** localStorage 涓殑瀛樺偍閿?*/
 const PINNED_THREADS_STORAGE_KEY = "remicode:pinned-threads:v1";
 
 /**
- * 标准化置顶线�?ID 列表，去除空字符串和重复项�? *
- * @param threadIds - 原始线程 ID 列表
- * @returns 去重后的有效线程 ID 数组
+ * 鏍囧噯鍖栫疆椤剁嚎绋?ID 鍒楄〃锛屽幓闄ょ┖瀛楃涓插拰閲嶅椤广€? *
+ * @param threadIds - 鍘熷绾跨▼ ID 鍒楄〃
+ * @returns 鍘婚噸鍚庣殑鏈夋晥绾跨▼ ID 鏁扮粍
  */
 function normalizePinnedThreadIds(threadIds: readonly ThreadId[]): ThreadId[] {
   const seen = new Set<ThreadId>();
@@ -44,7 +44,7 @@ function normalizePinnedThreadIds(threadIds: readonly ThreadId[]): ThreadId[] {
 }
 
 /**
- * 置顶线程 Zustand Store�? * 持久化到 localStorage，支持置�?取消置顶/切换/清理操作�? * 序列化时自动标准化去重，反序列化时合并校验�? */
+ * 缃《绾跨▼ Zustand Store銆? * 鎸佷箙鍖栧埌 localStorage锛屾敮鎸佺疆椤?鍙栨秷缃《/鍒囨崲/娓呯悊鎿嶄綔銆? * 搴忓垪鍖栨椂鑷姩鏍囧噯鍖栧幓閲嶏紝鍙嶅簭鍒楀寲鏃跺悎骞舵牎楠屻€? */
 export const usePinnedThreadsStore = create<PinnedThreadsStoreState>()(
   persist(
     (set) => ({

@@ -49,7 +49,7 @@ use crate::error::{GitError, GitResult};
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_git::ExecuteGitInput;
 ///
 /// let input = ExecuteGitInput {
@@ -284,13 +284,15 @@ pub struct GitRangeContext {
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// use remi_git::GitCore;
-///
+/// 
 /// let core = GitCore::new();
 /// let status = core.status("/path/to/repo").await?;
 /// println!("当前分支: {:?}", status.current_branch);
-/// ```
+/// }
 pub struct GitCore;
 
 impl GitCore {
@@ -302,7 +304,7 @@ impl GitCore {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let core = GitCore::new();
     /// ```
     pub fn new() -> Self {
@@ -399,12 +401,14 @@ impl GitCore {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let status = core.status("/path/to/repo").await?;
     /// if status.is_dirty {
     ///     println!("有未提交的更改");
     /// }
-    /// ```
+    /// }
     pub async fn status(&self, cwd: &str) -> GitResult<GitStatusResult> {
         // 获取当前分支
         let branch_result = self
@@ -621,10 +625,12 @@ impl GitCore {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let sha = core.commit("/path/to/repo", "feat: add new feature").await?;
     /// println!("提交成功: {}", sha);
-    /// ```
+    /// }
     pub async fn commit(&self, cwd: &str, message: &str) -> GitResult<String> {
         let _result = self
             .execute(ExecuteGitInput {

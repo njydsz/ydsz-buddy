@@ -1,7 +1,7 @@
 /**
- * Net 模块 - 网络工具服务
+ * Net 妯″潡 - 缃戠粶宸ュ叿鏈嶅姟
  *
- * 提供启动阶段常用的网络辅助功能，包括端口可用性检测、环回地址检查�? * 临时端口预留等能力。基�?Effect 框架实现，保证类型安全和可组合性�? *
+ * 鎻愪緵鍚姩闃舵甯哥敤鐨勭綉缁滆緟鍔╁姛鑳斤紝鍖呮嫭绔彛鍙敤鎬ф娴嬨€佺幆鍥炲湴鍧€妫€鏌ャ€? * 涓存椂绔彛棰勭暀绛夎兘鍔涖€傚熀浜?Effect 妗嗘灦瀹炵幇锛屼繚璇佺被鍨嬪畨鍏ㄥ拰鍙粍鍚堟€с€? *
  * @module Net
  */
 import * as Net from "node:net";
@@ -9,11 +9,11 @@ import * as Net from "node:net";
 import { Data, Effect, Layer, ServiceMap } from "effect";
 
 /**
- * 网络操作错误类型
+ * 缃戠粶鎿嶄綔閿欒绫诲瀷
  *
- * 用于封装网络操作中可能出现的错误，包含错误消息和可选的原始错误原因�? * 继承�?Effect �?TaggedError，支持模式匹配和错误处理�? *
- * @property message - 错误描述信息
- * @property cause - 可选的原始错误对象，用于保留错误堆栈和详细信息
+ * 鐢ㄤ簬灏佽缃戠粶鎿嶄綔涓彲鑳藉嚭鐜扮殑閿欒锛屽寘鍚敊璇秷鎭拰鍙€夌殑鍘熷閿欒鍘熷洜銆? * 缁ф壙鑷?Effect 鐨?TaggedError锛屾敮鎸佹ā寮忓尮閰嶅拰閿欒澶勭悊銆? *
+ * @property message - 閿欒鎻忚堪淇℃伅
+ * @property cause - 鍙€夌殑鍘熷閿欒瀵硅薄锛岀敤浜庝繚鐣欓敊璇爢鏍堝拰璇︾粏淇℃伅
  */
 export class NetError extends Data.TaggedError("NetError")<{
   readonly message: string;
@@ -21,11 +21,11 @@ export class NetError extends Data.TaggedError("NetError")<{
 }> {}
 
 /**
- * 类型守卫函数：判断一个值是否为带有 code 属性的 ErrnoException
+ * 绫诲瀷瀹堝崼鍑芥暟锛氬垽鏂竴涓€兼槸鍚︿负甯︽湁 code 灞炴€х殑 ErrnoException
  *
- * Node.js 的系统错误通常包含一�?code 属性（�?'EADDRINUSE'�?ECONNREFUSED' 等）�? * 该函数用于安全地检查并收窄错误类型�? *
- * @param cause - 待检查的错误对象
- * @returns 如果 cause 是带�?string 类型 code 属性的对象则返�?true
+ * Node.js 鐨勭郴缁熼敊璇€氬父鍖呭惈涓€涓?code 灞炴€э紙濡?'EADDRINUSE'銆?ECONNREFUSED' 绛夛級锛? * 璇ュ嚱鏁扮敤浜庡畨鍏ㄥ湴妫€鏌ュ苟鏀剁獎閿欒绫诲瀷銆? *
+ * @param cause - 寰呮鏌ョ殑閿欒瀵硅薄
+ * @returns 濡傛灉 cause 鏄甫鏈?string 绫诲瀷 code 灞炴€х殑瀵硅薄鍒欒繑鍥?true
  */
 function isErrnoExceptionWithCode(cause: unknown): cause is {
   readonly code: string;
@@ -39,24 +39,24 @@ function isErrnoExceptionWithCode(cause: unknown): cause is {
 }
 
 /**
- * 安全关闭 TCP 服务�? *
- * 在清理阶段调用，忽略关闭过程中可能出现的错误�? * 避免因为关闭失败而影响后续的清理逻辑�? *
- * @param server - 要关闭的 Net.Server 实例
+ * 瀹夊叏鍏抽棴 TCP 鏈嶅姟鍣? *
+ * 鍦ㄦ竻鐞嗛樁娈佃皟鐢紝蹇界暐鍏抽棴杩囩▼涓彲鑳藉嚭鐜扮殑閿欒锛? * 閬垮厤鍥犱负鍏抽棴澶辫触鑰屽奖鍝嶅悗缁殑娓呯悊閫昏緫銆? *
+ * @param server - 瑕佸叧闂殑 Net.Server 瀹炰緥
  */
 const closeServer = (server: Net.Server) => {
   try {
     server.close();
   } catch {
-    // 忽略清理阶段的关闭失�?  }
+    // 蹇界暐娓呯悊闃舵鐨勫叧闂け璐?  }
 };
 
 /**
- * 尝试预留一个临时端�? *
- * 通过创建一个临时的 TCP 服务器来探测指定端口是否可用�? * 如果传入的端口为 0，操作系统会自动分配一个可用的临时端口�? * 预留成功后立即关闭服务器，释放端口供后续使用�? *
- * 工作流程�? * 1. 创建 TCP 服务器并调用 unref()，避免阻止进程退�? * 2. 监听指定端口（port �?0 时由 OS 分配�? * 3. 获取实际分配的端口号
- * 4. 关闭服务器并返回端口�? * 5. 如果过程中出现错误，返回 NetError
+ * 灏濊瘯棰勭暀涓€涓复鏃剁鍙? *
+ * 閫氳繃鍒涘缓涓€涓复鏃剁殑 TCP 鏈嶅姟鍣ㄦ潵鎺㈡祴鎸囧畾绔彛鏄惁鍙敤銆? * 濡傛灉浼犲叆鐨勭鍙ｄ负 0锛屾搷浣滅郴缁熶細鑷姩鍒嗛厤涓€涓彲鐢ㄧ殑涓存椂绔彛銆? * 棰勭暀鎴愬姛鍚庣珛鍗冲叧闂湇鍔″櫒锛岄噴鏀剧鍙ｄ緵鍚庣画浣跨敤銆? *
+ * 宸ヤ綔娴佺▼锛? * 1. 鍒涘缓 TCP 鏈嶅姟鍣ㄥ苟璋冪敤 unref()锛岄伩鍏嶉樆姝㈣繘绋嬮€€鍑? * 2. 鐩戝惉鎸囧畾绔彛锛坧ort 涓?0 鏃剁敱 OS 鍒嗛厤锛? * 3. 鑾峰彇瀹為檯鍒嗛厤鐨勭鍙ｅ彿
+ * 4. 鍏抽棴鏈嶅姟鍣ㄥ苟杩斿洖绔彛鍙? * 5. 濡傛灉杩囩▼涓嚭鐜伴敊璇紝杩斿洖 NetError
  *
- * @param port - 要预留的端口号，0 表示由操作系统自动分�? * @returns Effect，成功时返回预留的端口号，失败时返回 NetError
+ * @param port - 瑕侀鐣欑殑绔彛鍙凤紝0 琛ㄧず鐢辨搷浣滅郴缁熻嚜鍔ㄥ垎閰? * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
  */
 const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
   Effect.callback<number, NetError>((resume) => {
@@ -64,23 +64,23 @@ const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
     let settled = false;
 
     /**
-     * 确保回调只被调用一�?     * Effect.callback 要求 resume 只能被调用一次，该函数通过 settled 标志位保证这一�?     */
+     * 纭繚鍥炶皟鍙璋冪敤涓€娆?     * Effect.callback 瑕佹眰 resume 鍙兘琚皟鐢ㄤ竴娆★紝璇ュ嚱鏁伴€氳繃 settled 鏍囧織浣嶄繚璇佽繖涓€鐐?     */
     const settle = (effect: Effect.Effect<number, NetError>) => {
       if (settled) return;
       settled = true;
       resume(effect);
     };
 
-    // 调用 unref() 使服务器不会阻止 Node.js 进程退�?    server.unref();
+    // 璋冪敤 unref() 浣挎湇鍔″櫒涓嶄細闃绘 Node.js 杩涚▼閫€鍑?    server.unref();
 
-    // 监听错误事件（如端口被占用、权限不足等�?    server.once("error", (cause) => {
+    // 鐩戝惉閿欒浜嬩欢锛堝绔彛琚崰鐢ㄣ€佹潈闄愪笉瓒崇瓑锛?    server.once("error", (cause) => {
       settle(Effect.fail(new NetError({ message: "Could not find an available port.", cause })));
     });
 
-    // 监听成功后获取端口号并关闭服务器
+    // 鐩戝惉鎴愬姛鍚庤幏鍙栫鍙ｅ彿骞跺叧闂湇鍔″櫒
     server.listen(port, () => {
       const address = server.address();
-      // address 可能�?string、null �?object，这里只处理 object 情况
+      // address 鍙兘鏄?string銆乶ull 鎴?object锛岃繖閲屽彧澶勭悊 object 鎯呭喌
       const resolved = typeof address === "object" && address !== null ? address.port : 0;
       server.close(() => {
         if (resolved > 0) {
@@ -91,73 +91,73 @@ const tryReservePort = (port: number): Effect.Effect<number, NetError> =>
       });
     });
 
-    // 返回清理逻辑：当 Effect 被中断时关闭服务�?    return Effect.sync(() => {
+    // 杩斿洖娓呯悊閫昏緫锛氬綋 Effect 琚腑鏂椂鍏抽棴鏈嶅姟鍣?    return Effect.sync(() => {
       closeServer(server);
     });
   });
 
 /**
- * 网络服务接口定义
+ * 缃戠粶鏈嶅姟鎺ュ彛瀹氫箟
  *
- * 描述�?NetService 提供的所有网络辅助功能，包括�? * - 检查指定主机和端口的可绑定�? * - 检查环回地址（IPv4 �?IPv6）上的端口可用�? * - 预留临时环回端口
- * - 查找可用端口（支持首选端口）
+ * 鎻忚堪浜?NetService 鎻愪緵鐨勬墍鏈夌綉缁滆緟鍔╁姛鑳斤紝鍖呮嫭锛? * - 妫€鏌ユ寚瀹氫富鏈哄拰绔彛鐨勫彲缁戝畾鎬? * - 妫€鏌ョ幆鍥炲湴鍧€锛圛Pv4 鍜?IPv6锛変笂鐨勭鍙ｅ彲鐢ㄦ€? * - 棰勭暀涓存椂鐜洖绔彛
+ * - 鏌ユ壘鍙敤绔彛锛堟敮鎸侀閫夌鍙ｏ級
  */
 export interface NetServiceShape {
   /**
-   * 检�?TCP 服务器是否可以绑定到指定的主机和端口
+   * 妫€鏌?TCP 鏈嶅姟鍣ㄦ槸鍚﹀彲浠ョ粦瀹氬埌鎸囧畾鐨勪富鏈哄拰绔彛
    *
-   * @param port - 要检查的端口�?   * @param host - 要检查的主机地址
-   * @returns Effect，返�?boolean 表示是否可以绑定
+   * @param port - 瑕佹鏌ョ殑绔彛鍙?   * @param host - 瑕佹鏌ョ殑涓绘満鍦板潃
+   * @returns Effect锛岃繑鍥?boolean 琛ㄧず鏄惁鍙互缁戝畾
    */
   readonly canListenOnHost: (port: number, host: string) => Effect.Effect<boolean>;
 
   /**
-   * 检查环回地址�?27.0.0.1 �?::1）上的端口可用�?   *
-   * 同时检�?IPv4 �?IPv6 环回地址，只有两者都可用时才返回 true�?   * 这确保了服务可以在双栈环境下正常启动�?   *
-   * @param port - 要检查的端口�?   * @returns Effect，返�?boolean 表示端口在环回地址上是否可�?   */
+   * 妫€鏌ョ幆鍥炲湴鍧€锛?27.0.0.1 鍜?::1锛変笂鐨勭鍙ｅ彲鐢ㄦ€?   *
+   * 鍚屾椂妫€鏌?IPv4 鍜?IPv6 鐜洖鍦板潃锛屽彧鏈変袱鑰呴兘鍙敤鏃舵墠杩斿洖 true銆?   * 杩欑‘淇濅簡鏈嶅姟鍙互鍦ㄥ弻鏍堢幆澧冧笅姝ｅ父鍚姩銆?   *
+   * @param port - 瑕佹鏌ョ殑绔彛鍙?   * @returns Effect锛岃繑鍥?boolean 琛ㄧず绔彛鍦ㄧ幆鍥炲湴鍧€涓婃槸鍚﹀彲鐢?   */
   readonly isPortAvailableOnLoopback: (port: number) => Effect.Effect<boolean>;
 
   /**
-   * 预留一个临时环回端口并立即释放
+   * 棰勭暀涓€涓复鏃剁幆鍥炵鍙ｅ苟绔嬪嵆閲婃斁
    *
-   * 通过绑定到端�?0 让操作系统自动分配可用端口，获取端口号后立即关闭服务器�?   * 返回的端口号可以用于后续的服务启动，确保端口在检查时确实可用�?   *
-   * @param host - 可选的主机地址，默认为 "127.0.0.1"
-   * @returns Effect，成功时返回预留的端口号，失败时返回 NetError
+   * 閫氳繃缁戝畾鍒扮鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶅彲鐢ㄧ鍙ｏ紝鑾峰彇绔彛鍙峰悗绔嬪嵆鍏抽棴鏈嶅姟鍣ㄣ€?   * 杩斿洖鐨勭鍙ｅ彿鍙互鐢ㄤ簬鍚庣画鐨勬湇鍔″惎鍔紝纭繚绔彛鍦ㄦ鏌ユ椂纭疄鍙敤銆?   *
+   * @param host - 鍙€夌殑涓绘満鍦板潃锛岄粯璁や负 "127.0.0.1"
+   * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
    */
   readonly reserveLoopbackPort: (host?: string) => Effect.Effect<number, NetError>;
 
   /**
-   * 查找一个可用的监听端口
+   * 鏌ユ壘涓€涓彲鐢ㄧ殑鐩戝惉绔彛
    *
-   * 优先尝试使用首选端口，如果该端口不可用（被占用或权限不足）�?   * 则回退到让操作系统自动分配一个临时端口（port = 0）�?   *
-   * @param preferred - 首选的端口�?   * @returns Effect，返回可用的端口号，失败时返�?NetError
+   * 浼樺厛灏濊瘯浣跨敤棣栭€夌鍙ｏ紝濡傛灉璇ョ鍙ｄ笉鍙敤锛堣鍗犵敤鎴栨潈闄愪笉瓒筹級锛?   * 鍒欏洖閫€鍒拌鎿嶄綔绯荤粺鑷姩鍒嗛厤涓€涓复鏃剁鍙ｏ紙port = 0锛夈€?   *
+   * @param preferred - 棣栭€夌殑绔彛鍙?   * @returns Effect锛岃繑鍥炲彲鐢ㄧ殑绔彛鍙凤紝澶辫触鏃惰繑鍥?NetError
    */
   readonly findAvailablePort: (preferred: number) => Effect.Effect<number, NetError>;
 }
 
 /**
- * NetService - 启动阶段网络辅助工具的服务标�? *
- * 基于 Effect �?ServiceMap 实现，提供依赖注入能力�? * 通过 NetService.layer 可以获取该服务的实现层，供其他模块使用�? *
- * 服务标识符：@remi-code/shared/Net/NetService
+ * NetService - 鍚姩闃舵缃戠粶杈呭姪宸ュ叿鐨勬湇鍔℃爣绛? *
+ * 鍩轰簬 Effect 鐨?ServiceMap 瀹炵幇锛屾彁渚涗緷璧栨敞鍏ヨ兘鍔涖€? * 閫氳繃 NetService.layer 鍙互鑾峰彇璇ユ湇鍔＄殑瀹炵幇灞傦紝渚涘叾浠栨ā鍧椾娇鐢ㄣ€? *
+ * 鏈嶅姟鏍囪瘑绗︼細@remi-code/shared/Net/NetService
  */
 export class NetService extends ServiceMap.Service<NetService, NetServiceShape>()(
   "~/shared/Net/NetService",
 ) {
   /**
-   * NetService 的实现层
+   * NetService 鐨勫疄鐜板眰
    *
-   * 使用 Layer.sync 创建同步层，提供 NetServiceShape 接口的完整实现�?   * 所有方法都基于 Effect.callback 封装 Node.js 的异步网络操作，
-   * 确保�?Effect 生态系统的无缝集成�?   */
+   * 浣跨敤 Layer.sync 鍒涘缓鍚屾灞傦紝鎻愪緵 NetServiceShape 鎺ュ彛鐨勫畬鏁村疄鐜般€?   * 鎵€鏈夋柟娉曢兘鍩轰簬 Effect.callback 灏佽 Node.js 鐨勫紓姝ョ綉缁滄搷浣滐紝
+   * 纭繚涓?Effect 鐢熸€佺郴缁熺殑鏃犵紳闆嗘垚銆?   */
   static readonly layer = Layer.sync(NetService, () => {
     /**
-     * 检�?TCP 服务器是否可以绑定到指定的主机和端口
+     * 妫€鏌?TCP 鏈嶅姟鍣ㄦ槸鍚﹀彲浠ョ粦瀹氬埌鎸囧畾鐨勪富鏈哄拰绔彛
      *
-     * 实现细节�?     * - 创建临时 TCP 服务器并尝试绑定
-     * - 如果出现 EADDRNOTAVAIL 错误（地址不可用），视为可�?     *   这是为了兼容没有 IPv6 支持的环境，避免环回可用性检查失�?     * - 其他错误（如 EADDRINUSE）视为不可用
-     * - 绑定成功后立即关闭服务器并返�?true
+     * 瀹炵幇缁嗚妭锛?     * - 鍒涘缓涓存椂 TCP 鏈嶅姟鍣ㄥ苟灏濊瘯缁戝畾
+     * - 濡傛灉鍑虹幇 EADDRNOTAVAIL 閿欒锛堝湴鍧€涓嶅彲鐢級锛岃涓哄彲鐢?     *   杩欐槸涓轰簡鍏煎娌℃湁 IPv6 鏀寔鐨勭幆澧冿紝閬垮厤鐜洖鍙敤鎬ф鏌ュけ璐?     * - 鍏朵粬閿欒锛堝 EADDRINUSE锛夎涓轰笉鍙敤
+     * - 缁戝畾鎴愬姛鍚庣珛鍗冲叧闂湇鍔″櫒骞惰繑鍥?true
      *
-     * @param port - 要检查的端口�?     * @param host - 要检查的主机地址
-     * @returns Effect，返�?boolean 表示是否可以绑定
+     * @param port - 瑕佹鏌ョ殑绔彛鍙?     * @param host - 瑕佹鏌ョ殑涓绘満鍦板潃
+     * @returns Effect锛岃繑鍥?boolean 琛ㄧず鏄惁鍙互缁戝畾
      */
     const canListenOnHost = (port: number, host: string): Effect.Effect<boolean> =>
       Effect.callback<boolean>((resume) => {
@@ -173,8 +173,8 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
         server.unref();
 
         server.once("error", (cause) => {
-          // EADDRNOTAVAIL 表示地址不可用（�?IPv6 未启用）
-          // 将其视为"可用"是为了避免在只有 IPv4 的环境中检查失�?          if (isErrnoExceptionWithCode(cause) && cause.code === "EADDRNOTAVAIL") {
+          // EADDRNOTAVAIL 琛ㄧず鍦板潃涓嶅彲鐢紙濡?IPv6 鏈惎鐢級
+          // 灏嗗叾瑙嗕负"鍙敤"鏄负浜嗛伩鍏嶅湪鍙湁 IPv4 鐨勭幆澧冧腑妫€鏌ュけ璐?          if (isErrnoExceptionWithCode(cause) && cause.code === "EADDRNOTAVAIL") {
             settle(true);
             return;
           }
@@ -195,11 +195,11 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
       });
 
     /**
-     * 预留一个临时环回端口并立即释放
+     * 棰勭暀涓€涓复鏃剁幆鍥炵鍙ｅ苟绔嬪嵆閲婃斁
      *
-     * 通过绑定到端�?0 让操作系统自动分配可用端口，获取端口号后立即关闭服务器�?     * 返回的端口号可以用于后续的服务启动，确保端口在检查时确实可用�?     *
-     * @param host - 环回地址，默认为 "127.0.0.1"
-     * @returns Effect，成功时返回预留的端口号，失败时返回 NetError
+     * 閫氳繃缁戝畾鍒扮鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶅彲鐢ㄧ鍙ｏ紝鑾峰彇绔彛鍙峰悗绔嬪嵆鍏抽棴鏈嶅姟鍣ㄣ€?     * 杩斿洖鐨勭鍙ｅ彿鍙互鐢ㄤ簬鍚庣画鐨勬湇鍔″惎鍔紝纭繚绔彛鍦ㄦ鏌ユ椂纭疄鍙敤銆?     *
+     * @param host - 鐜洖鍦板潃锛岄粯璁や负 "127.0.0.1"
+     * @returns Effect锛屾垚鍔熸椂杩斿洖棰勭暀鐨勭鍙ｅ彿锛屽け璐ユ椂杩斿洖 NetError
      */
     const reserveLoopbackPort = (host = "127.0.0.1"): Effect.Effect<number, NetError> =>
       Effect.callback<number, NetError>((resume) => {
@@ -236,8 +236,8 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
     return {
       canListenOnHost,
       /**
-       * 检查环回地址上的端口可用�?       *
-       * 同时检�?IPv4�?27.0.0.1）和 IPv6�?:1）环回地址�?       * 使用 Effect.zipWith 并行执行两个检查，只有两者都可用时才返回 true�?       */
+       * 妫€鏌ョ幆鍥炲湴鍧€涓婄殑绔彛鍙敤鎬?       *
+       * 鍚屾椂妫€鏌?IPv4锛?27.0.0.1锛夊拰 IPv6锛?:1锛夌幆鍥炲湴鍧€锛?       * 浣跨敤 Effect.zipWith 骞惰鎵ц涓や釜妫€鏌ワ紝鍙湁涓よ€呴兘鍙敤鏃舵墠杩斿洖 true銆?       */
       isPortAvailableOnLoopback: (port) =>
         Effect.zipWith(
           canListenOnHost(port, "127.0.0.1"),
@@ -246,9 +246,9 @@ export class NetService extends ServiceMap.Service<NetService, NetServiceShape>(
         ),
       reserveLoopbackPort,
       /**
-       * 查找可用端口
+       * 鏌ユ壘鍙敤绔彛
        *
-       * 优先尝试使用首选端口，如果失败（端口被占用等）�?       * 则回退到使用端�?0 让操作系统自动分配�?       * 使用 Effect.catch 捕获第一次尝试的失败并执行回退逻辑�?       */
+       * 浼樺厛灏濊瘯浣跨敤棣栭€夌鍙ｏ紝濡傛灉澶辫触锛堢鍙ｈ鍗犵敤绛夛級锛?       * 鍒欏洖閫€鍒颁娇鐢ㄧ鍙?0 璁╂搷浣滅郴缁熻嚜鍔ㄥ垎閰嶃€?       * 浣跨敤 Effect.catch 鎹曡幏绗竴娆″皾璇曠殑澶辫触骞舵墽琛屽洖閫€閫昏緫銆?       */
       findAvailablePort: (preferred) =>
         Effect.catch(tryReservePort(preferred), () => tryReservePort(0)),
     } satisfies NetServiceShape;

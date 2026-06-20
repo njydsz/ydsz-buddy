@@ -1,7 +1,7 @@
 /**
  * @file ComposerPendingUserInputPanel
- * @description 编辑器中待处理用户输入的面板组件，用于展示计划确认问题、
- *              选项列表和快捷键选择，支持单选和多选模式及自动推进。
+ * @description ç¼–è¾‘å™¨ä¸­å¾…å¤„ç†ç”¨æˆ·è¾“å…¥çš„é¢æ¿ç»„ä»¶ï¼Œç”¨äºŽå±•ç¤ºè®¡åˆ’ç¡®è®¤é—®é¢˜ã€
+ *              é€‰é¡¹åˆ—è¡¨å’Œå¿«æ·é”®é€‰æ‹©ï¼Œæ”¯æŒå•é€‰å’Œå¤šé€‰æ¨¡å¼åŠè‡ªåŠ¨æŽ¨è¿›ã€‚
  */
 
 import { type ApprovalRequestId } from "~/contracts";
@@ -14,33 +14,33 @@ import {
 import { CheckIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-/** ComposerPendingUserInputPanel 组件的属性接口 */
+/** ComposerPendingUserInputPanel ç»„ä»¶çš„å±žæ€§æŽ¥å£ */
 interface PendingUserInputPanelProps {
-  /** 待处理的用户输入列表 */
+  /** å¾…å¤„ç†çš„ç”¨æˆ·è¾“å…¥åˆ—è¡¨ */
   pendingUserInputs: PendingUserInput[];
-  /** 正在响应的审批请求 ID 列表 */
+  /** æ­£åœ¨å“åº”çš„å®¡æ‰¹è¯·æ±‚ ID åˆ—è¡¨ */
   respondingRequestIds: ApprovalRequestId[];
-  /** 各问题的草稿答案映射 */
+  /** å„é—®é¢˜çš„è‰ç¨¿ç­”æ¡ˆæ˜ å°„ */
   answers: Record<string, PendingUserInputDraftAnswer>;
-  /** 当前活跃问题的索引 */
+  /** å½“å‰æ´»è·ƒé—®é¢˜çš„ç´¢å¼• */
   questionIndex: number;
-  /** 切换选项选中状态的回调 */
+  /** åˆ‡æ¢é€‰é¡¹é€‰ä¸­çŠ¶æ€çš„å›žè°ƒ */
   onToggleOption: (questionId: string, optionLabel: string) => PendingUserInputDraftAnswer | null;
-  /** 推进到下一个问题的回调 */
+  /** æŽ¨è¿›åˆ°ä¸‹ä¸€ä¸ªé—®é¢˜çš„å›žè°ƒ */
   onAdvance: (answerOverrides?: Record<string, PendingUserInputDraftAnswer>) => void;
 }
 
 /**
- * 待处理用户输入面板组件。
- * 展示当前待确认的计划问题，提供选项列表和快捷键操作，
- * 单选模式下选中后自动推进，多选模式下需手动提交。
+ * å¾…å¤„ç†ç”¨æˆ·è¾“å…¥é¢æ¿ç»„ä»¶ã€‚
+ * å±•ç¤ºå½“å‰å¾…ç¡®è®¤çš„è®¡åˆ’é—®é¢˜ï¼Œæä¾›é€‰é¡¹åˆ—è¡¨å’Œå¿«æ·é”®æ“ä½œï¼Œ
+ * å•é€‰æ¨¡å¼ä¸‹é€‰ä¸­åŽè‡ªåŠ¨æŽ¨è¿›ï¼Œå¤šé€‰æ¨¡å¼ä¸‹éœ€æ‰‹åŠ¨æäº¤ã€‚
  *
- * @param props.pendingUserInputs - 待处理的用户输入列表
- * @param props.respondingRequestIds - 正在响应的请求 ID
- * @param props.answers - 草稿答案映射
- * @param props.questionIndex - 当前问题索引
- * @param props.onToggleOption - 切换选项回调
- * @param props.onAdvance - 推进回调
+ * @param props.pendingUserInputs - å¾…å¤„ç†çš„ç”¨æˆ·è¾“å…¥åˆ—è¡¨
+ * @param props.respondingRequestIds - æ­£åœ¨å“åº”çš„è¯·æ±‚ ID
+ * @param props.answers - è‰ç¨¿ç­”æ¡ˆæ˜ å°„
+ * @param props.questionIndex - å½“å‰é—®é¢˜ç´¢å¼•
+ * @param props.onToggleOption - åˆ‡æ¢é€‰é¡¹å›žè°ƒ
+ * @param props.onAdvance - æŽ¨è¿›å›žè°ƒ
  */
 export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserInputPanel({
   pendingUserInputs,
@@ -68,8 +68,8 @@ export const ComposerPendingUserInputPanel = memo(function ComposerPendingUserIn
 });
 
 /**
- * 待处理用户输入卡片组件。
- * 渲染单个待确认问题的选项列表，支持键盘快捷键和自动推进逻辑。
+ * å¾…å¤„ç†ç”¨æˆ·è¾“å…¥å¡ç‰‡ç»„ä»¶ã€‚
+ * æ¸²æŸ“å•ä¸ªå¾…ç¡®è®¤é—®é¢˜çš„é€‰é¡¹åˆ—è¡¨ï¼Œæ”¯æŒé”®ç›˜å¿«æ·é”®å’Œè‡ªåŠ¨æŽ¨è¿›é€»è¾‘ã€‚
  */
 const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard({
   prompt,
@@ -95,7 +95,7 @@ const ComposerPendingUserInputCard = memo(function ComposerPendingUserInputCard(
   }, [onAdvance]);
 
   // Cancel a pending auto-advance on unmount, and whenever the active question
-  // changes or a response goes in flight �?otherwise a manual Next/Submit landing
+  // changes or a response goes in flight ï¿½?otherwise a manual Next/Submit landing
   // inside the 200ms window leaves a stale timer that advances or submits again.
   useEffect(() => {
     return () => {

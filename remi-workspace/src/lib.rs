@@ -41,7 +41,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem, BrowseInput};

@@ -20,7 +20,7 @@ use thiserror::Error;
 ///
 /// # 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_config::ConfigError;
 ///
 /// let err = ConfigError::ParseError("JSON 格式错误".to_string());

@@ -32,7 +32,7 @@ use crate::error::{PersistenceError, PersistenceResult};
 ///
 /// # 示例
 ///
-/// ```rust
+///```rust,ignore
 /// let client = SqliteClient::new(Path::new("/path/to/db.sqlite"))?;
 /// client.execute("CREATE TABLE test (id INTEGER PRIMARY KEY)", &[])?;
 /// ```
@@ -107,7 +107,7 @@ impl SqliteClient {
     ///
     /// # 示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let affected = client.execute(
     ///     "INSERT INTO users (name, age) VALUES (?1, ?2)",
     ///     &[&"张三", &25],

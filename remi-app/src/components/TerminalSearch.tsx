@@ -1,24 +1,24 @@
 /**
  * @file TerminalSearch.tsx
- * @description 终端搜索栏组件，基于 xterm SearchAddon 提供查找、大小写切换、
- *              上/下一个匹配项导航等搜索功能。作为浮动搜索条覆盖在终端视口上方。
+ * @description ç»ˆç«¯æœç´¢æ ç»„ä»¶ï¼ŒåŸºäºŽ xterm SearchAddon æä¾›æŸ¥æ‰¾ã€å¤§å°å†™åˆ‡æ¢ã€
+ *              ä¸Š/ä¸‹ä¸€ä¸ªåŒ¹é…é¡¹å¯¼èˆªç­‰æœç´¢åŠŸèƒ½ã€‚ä½œä¸ºæµ®åŠ¨æœç´¢æ¡è¦†ç›–åœ¨ç»ˆç«¯è§†å£ä¸Šæ–¹ã€‚
  */
 import type { SearchAddon, ISearchOptions } from "@xterm/addon-search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-/** 终端搜索栏组件属性 */
+/** ç»ˆç«¯æœç´¢æ ç»„ä»¶å±žæ€§ */
 interface TerminalSearchProps {
-  /** xterm 搜索插件实例，null 表示搜索功能不可用 */
+  /** xterm æœç´¢æ’ä»¶å®žä¾‹ï¼Œnull è¡¨ç¤ºæœç´¢åŠŸèƒ½ä¸å¯ç”¨ */
   searchAddon: SearchAddon | null;
-  /** 搜索栏是否可见 */
+  /** æœç´¢æ æ˜¯å¦å¯è§ */
   isOpen: boolean;
-  /** 关闭搜索栏的回调 */
+  /** å…³é—­æœç´¢æ çš„å›žè°ƒ */
   onClose: () => void;
 }
 
-/** 搜索结果高亮装饰样式配置 */
+/** æœç´¢ç»“æžœé«˜äº®è£…é¥°æ ·å¼é…ç½® */
 const SEARCH_DECORATIONS = {
   matchBackground: "#515c6a",
   matchBorder: "#74879f",
@@ -29,8 +29,8 @@ const SEARCH_DECORATIONS = {
 } satisfies NonNullable<ISearchOptions["decorations"]>;
 
 /**
- * 终端搜索栏组件
- * 提供查找输入、大小写切换、上/下一个匹配项导航和关闭功能
+ * ç»ˆç«¯æœç´¢æ ç»„ä»¶
+ * æä¾›æŸ¥æ‰¾è¾“å…¥ã€å¤§å°å†™åˆ‡æ¢ã€ä¸Š/ä¸‹ä¸€ä¸ªåŒ¹é…é¡¹å¯¼èˆªå’Œå…³é—­åŠŸèƒ½
  */
 export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,7 +85,7 @@ export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchP
   };
 
   // Re-run search when case sensitivity or search addon changes
-  // (but not on query change �?handleInputChange handles that).
+  // (but not on query change ï¿½?handleInputChange handles that).
   const prevCaseSensitiveRef = useRef(caseSensitive);
   const prevSearchAddonRef = useRef<SearchAddon | null>(searchAddon);
   useEffect(() => {

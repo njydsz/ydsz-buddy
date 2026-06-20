@@ -1,7 +1,7 @@
 /**
  * @file PluginsView.tsx
- * @description 插件浏览页面，读取提供者发现数据并渲染按市场分组的插件网格，
- *              包含搜索、提供者工具栏和空状态提示。
+ * @description æ’ä»¶æµè§ˆé¡µé¢ï¼Œè¯»å–æä¾›è€…å‘çŽ°æ•°æ®å¹¶æ¸²æŸ“æŒ‰å¸‚åœºåˆ†ç»„çš„æ’ä»¶ç½‘æ ¼ï¼Œ
+ *              åŒ…å«æœç´¢ã€æä¾›è€…å·¥å…·æ å’Œç©ºçŠ¶æ€æç¤ºã€‚
  */
 
 import { useDeferredValue } from "react";
@@ -74,7 +74,7 @@ export function PluginsView() {
                 <InlineWarning>
                   {data.pluginsQuery.data?.marketplaceLoadErrors
                     .map((err) => `${sectionTitle(err.marketplacePath)}: ${err.message}`)
-                    .join(" �?")}
+                    .join(" ï¿½?")}
                 </InlineWarning>
               ) : null}
             </div>

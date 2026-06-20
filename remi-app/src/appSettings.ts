@@ -1,6 +1,6 @@
 /**
- * @file 应用设置管理
- * @description 管理应用的本地设置与服务器设置，包括 Schema 定义、归一化�? * 服务器同步、自定义模型管理、提供者配置等�? * 设置分为两类�? * - 本地设置：仅存储�?localStorage 中（如侧边栏位置、字体大小等 UI 偏好�? * - 服务器设置：同步到服务器端（如二进制路径、自定义模型列表等）
+ * @file 搴旂敤璁剧疆绠＄悊
+ * @description 绠＄悊搴旂敤鐨勬湰鍦拌缃笌鏈嶅姟鍣ㄨ缃紝鍖呮嫭 Schema 瀹氫箟銆佸綊涓€鍖栥€? * 鏈嶅姟鍣ㄥ悓姝ャ€佽嚜瀹氫箟妯″瀷绠＄悊銆佹彁渚涜€呴厤缃瓑銆? * 璁剧疆鍒嗕负涓ょ被锛? * - 鏈湴璁剧疆锛氫粎瀛樺偍鍦?localStorage 涓紙濡備晶杈规爮浣嶇疆銆佸瓧浣撳ぇ灏忕瓑 UI 鍋忓ソ锛? * - 鏈嶅姟鍣ㄨ缃細鍚屾鍒版湇鍔″櫒绔紙濡備簩杩涘埗璺緞銆佽嚜瀹氫箟妯″瀷鍒楄〃绛夛級
  */
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -32,63 +32,63 @@ import { ensureNativeApi } from "./nativeApi";
 import { serverQueryKeys, serverSettingsQueryOptions } from "./lib/serverReactQuery";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "./i18n";
 
-/** 本地设置�?localStorage key */
+/** 鏈湴璁剧疆鐨?localStorage key */
 const APP_SETTINGS_STORAGE_KEY = "remicode:app-settings:v1";
-/** 服务器设置迁移完成的 localStorage 标记 key */
+/** 鏈嶅姟鍣ㄨ缃縼绉诲畬鎴愮殑 localStorage 鏍囪 key */
 const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "remicode:server-settings-migrated:v1";
-/** 每个提供者允许的最大自定义模型数量 */
+/** 姣忎釜鎻愪緵鑰呭厑璁哥殑鏈€澶ц嚜瀹氫箟妯″瀷鏁伴噺 */
 const MAX_CUSTOM_MODEL_COUNT = 32;
-/** 自定义模�?slug 的最大长�?*/
+/** 鑷畾涔夋ā鍨?slug 鐨勬渶澶ч暱搴?*/
 export const MAX_CUSTOM_MODEL_LENGTH = 256;
-/** 聊天字体最小像素�?*/
+/** 鑱婂ぉ瀛椾綋鏈€灏忓儚绱犲€?*/
 export const MIN_CHAT_FONT_SIZE_PX = 11;
-/** 聊天字体最大像素�?*/
+/** 鑱婂ぉ瀛椾綋鏈€澶у儚绱犲€?*/
 export const MAX_CHAT_FONT_SIZE_PX = 18;
-/** 聊天字体默认像素�?*/
+/** 鑱婂ぉ瀛椾綋榛樿鍍忕礌鍊?*/
 export const DEFAULT_CHAT_FONT_SIZE_PX = 12;
 
-/** 时间戳格�?Schema：locale（本地化）�?2-hour�?2小时制）�?4-hour�?4小时制） */
+/** 鏃堕棿鎴虫牸寮?Schema锛歭ocale锛堟湰鍦板寲锛夈€?2-hour锛?2灏忔椂鍒讹級銆?4-hour锛?4灏忔椂鍒讹級 */
 export const TimestampFormat = Schema.Literal("locale", "12-hour", "24-hour");
-/** 时间戳格式类�?*/
+/** 鏃堕棿鎴虫牸寮忕被鍨?*/
 export type TimestampFormat = typeof TimestampFormat.Type;
-/** 默认时间戳格�?*/
+/** 榛樿鏃堕棿鎴虫牸寮?*/
 export const DEFAULT_TIMESTAMP_FORMAT: TimestampFormat = "locale";
-/** 侧边栏位�?Schema：left（左侧）、right（右侧） */
+/** 渚ц竟鏍忎綅缃?Schema锛歭eft锛堝乏渚э級銆乺ight锛堝彸渚э級 */
 export const SidebarSide = Schema.Literal("left", "right");
-/** 侧边栏位置类�?*/
+/** 渚ц竟鏍忎綅缃被鍨?*/
 export type SidebarSide = typeof SidebarSide.Type;
-/** 默认侧边栏位�?*/
+/** 榛樿渚ц竟鏍忎綅缃?*/
 export const DEFAULT_SIDEBAR_SIDE: SidebarSide = "left";
-/** 侧边栏项目排�?Schema：updated_at（按更新时间）、created_at（按创建时间）、manual（手动排序） */
+/** 渚ц竟鏍忛」鐩帓搴?Schema锛歶pdated_at锛堟寜鏇存柊鏃堕棿锛夈€乧reated_at锛堟寜鍒涘缓鏃堕棿锛夈€乵anual锛堟墜鍔ㄦ帓搴忥級 */
 export const SidebarProjectSortOrder = Schema.Literal("updated_at", "created_at", "manual");
-/** 侧边栏项目排序类�?*/
+/** 渚ц竟鏍忛」鐩帓搴忕被鍨?*/
 export type SidebarProjectSortOrder = typeof SidebarProjectSortOrder.Type;
-/** 默认侧边栏项目排序方�?*/
+/** 榛樿渚ц竟鏍忛」鐩帓搴忔柟寮?*/
 export const DEFAULT_SIDEBAR_PROJECT_SORT_ORDER: SidebarProjectSortOrder = "manual";
-/** 侧边栏线程排�?Schema：updated_at（按更新时间）、created_at（按创建时间�?*/
+/** 渚ц竟鏍忕嚎绋嬫帓搴?Schema锛歶pdated_at锛堟寜鏇存柊鏃堕棿锛夈€乧reated_at锛堟寜鍒涘缓鏃堕棿锛?*/
 export const SidebarThreadSortOrder = Schema.Literal("updated_at", "created_at");
-/** 侧边栏线程排序类�?*/
+/** 渚ц竟鏍忕嚎绋嬫帓搴忕被鍨?*/
 export type SidebarThreadSortOrder = typeof SidebarThreadSortOrder.Type;
-/** 默认侧边栏线程排序方�?*/
+/** 榛樿渚ц竟鏍忕嚎绋嬫帓搴忔柟寮?*/
 export const DEFAULT_SIDEBAR_THREAD_SORT_ORDER: SidebarThreadSortOrder = "updated_at";
-/** 语言设置 Schema */
+/** 璇█璁剧疆 Schema */
 export const LanguageSchema = Schema.Literal("en", "zh");
-/** 语言设置类型 */
+/** 璇█璁剧疆绫诲瀷 */
 export type LanguageSetting = typeof LanguageSchema.Type;
-/** 默认语言设置 */
+/** 榛樿璇█璁剧疆 */
 export const DEFAULT_LANGUAGE_SETTING: LanguageSetting = DEFAULT_LANGUAGE;
 
 /**
- * 获取默认的原生字体平滑设�? *
- * @description macOS/iOS 默认启用字体平滑，其他平台默认关闭�? *
- * @param platform - 平台标识字符串，默认�?navigator.platform
- * @returns 是否启用原生字体平滑
+ * 鑾峰彇榛樿鐨勫師鐢熷瓧浣撳钩婊戣缃? *
+ * @description macOS/iOS 榛樿鍚敤瀛椾綋骞虫粦锛屽叾浠栧钩鍙伴粯璁ゅ叧闂€? *
+ * @param platform - 骞冲彴鏍囪瘑瀛楃涓诧紝榛樿鍙?navigator.platform
+ * @returns 鏄惁鍚敤鍘熺敓瀛椾綋骞虫粦
  */
 export function getDefaultNativeFontSmoothing(platform = globalThis.navigator?.platform ?? "") {
   return /mac|iphone|ipad|ipod/i.test(platform);
 }
 
-/** 自定义模型设置字段名联合类型 */
+/** 鑷畾涔夋ā鍨嬭缃瓧娈靛悕鑱斿悎绫诲瀷 */
 type CustomModelSettingsKey =
   | "customCodexModels"
   | "customClaudeModels"
@@ -99,25 +99,25 @@ type CustomModelSettingsKey =
   | "customOpenCodeModels"
   | "customPiModels";
 
-/** 提供者自定义模型配置 */
+/** 鎻愪緵鑰呰嚜瀹氫箟妯″瀷閰嶇疆 */
 export type ProviderCustomModelConfig = {
-  /** 提供者类�?*/
+  /** 鎻愪緵鑰呯被鍨?*/
   provider: ProviderKind;
-  /** 对应的设置字段名 */
+  /** 瀵瑰簲鐨勮缃瓧娈靛悕 */
   settingsKey: CustomModelSettingsKey;
-  /** 对应的默认设置字段名 */
+  /** 瀵瑰簲鐨勯粯璁よ缃瓧娈靛悕 */
   defaultSettingsKey: CustomModelSettingsKey;
-  /** 配置标题 */
+  /** 閰嶇疆鏍囬 */
   title: string;
-  /** 配置描述 */
+  /** 閰嶇疆鎻忚堪 */
   description: string;
-  /** 输入框占位文�?*/
+  /** 杈撳叆妗嗗崰浣嶆枃鏈?*/
   placeholder: string;
-  /** 输入示例 */
+  /** 杈撳叆绀轰緥 */
   example: string;
 };
 
-/** 各提供者的内置模型 slug 集合，用于去重自定义模型 */
+/** 鍚勬彁渚涜€呯殑鍐呯疆妯″瀷 slug 闆嗗悎锛岀敤浜庡幓閲嶈嚜瀹氫箟妯″瀷 */
 const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>> = {
   codex: new Set(getModelOptions("codex").map((option) => option.slug)),
   claudeAgent: new Set(getModelOptions("claudeAgent").map((option) => option.slug)),
@@ -129,7 +129,7 @@ const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>
   pi: new Set(getModelOptions("pi").map((option) => option.slug)),
 };
 
-/** Provider 类型 Schema */
+/** Provider 绫诲瀷 Schema */
 const ProviderKindSchema = Schema.Literal(
   "codex",
   "claudeAgent",
@@ -149,7 +149,7 @@ const withDefaults =
       Schema.withConstructorDefault(() => fallback() as never),
     );
 
-/** 应用设置 Schema，使�?Effect Schema 定义所有字段及默认�?*/
+/** 搴旂敤璁剧疆 Schema锛屼娇鐢?Effect Schema 瀹氫箟鎵€鏈夊瓧娈靛強榛樿鍊?*/
 export const AppSettingsSchema = Schema.Struct({
   claudeBinaryPath: Schema.String.pipe(Schema.maxLength(4096)).pipe(withDefaults(() => "")),
   chatFontSizePx: Schema.Number.pipe(withDefaults(() => DEFAULT_CHAT_FONT_SIZE_PX)),
@@ -215,17 +215,17 @@ export const AppSettingsSchema = Schema.Struct({
     }),
   ).pipe(withDefaults(() => [])),
 });
-/** 应用设置类型，从 Schema 自动推导 */
+/** 搴旂敤璁剧疆绫诲瀷锛屼粠 Schema 鑷姩鎺ㄥ */
 export type AppSettings = typeof AppSettingsSchema.Type;
 type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
 type MutableServerSettingsPatch = Mutable<ServerSettingsPatch>;
 type MutableServerSettingsProvidersPatch = Mutable<NonNullable<ServerSettingsPatch["providers"]>>;
 
-/** 应用模型选项，扩�?ProviderModelOption 增加提供者和自定义标�?*/
+/** 搴旂敤妯″瀷閫夐」锛屾墿灞?ProviderModelOption 澧炲姞鎻愪緵鑰呭拰鑷畾涔夋爣璇?*/
 export interface AppModelOption extends ProviderModelOption {
-  /** 提供者类�?*/
+  /** 鎻愪緵鑰呯被鍨?*/
   provider: ProviderKind;
-  /** 是否为用户自定义模型 */
+  /** 鏄惁涓虹敤鎴疯嚜瀹氫箟妯″瀷 */
   isCustom: boolean;
 }
 
@@ -307,15 +307,15 @@ const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConf
   },
 };
 
-/** 所有提供者的自定义模型配置列�?*/
+/** 鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬮厤缃垪琛?*/
 export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFIG);
 
 /**
- * 归一化自定义模型 slug 列表
+ * 褰掍竴鍖栬嚜瀹氫箟妯″瀷 slug 鍒楄〃
  *
- * @description 对输入的模型 slug 列表进行去重、长度限制、内置模型过滤等归一化处理�? *
- * @param models - 待归一化的模型 slug 可迭代对�? * @param provider - 提供者类型，默认�?"codex"
- * @returns 归一化后的模�?slug 数组
+ * @description 瀵硅緭鍏ョ殑妯″瀷 slug 鍒楄〃杩涜鍘婚噸銆侀暱搴﹂檺鍒躲€佸唴缃ā鍨嬭繃婊ょ瓑褰掍竴鍖栧鐞嗐€? *
+ * @param models - 寰呭綊涓€鍖栫殑妯″瀷 slug 鍙凯浠ｅ璞? * @param provider - 鎻愪緵鑰呯被鍨嬶紝榛樿涓?"codex"
+ * @returns 褰掍竴鍖栧悗鐨勬ā鍨?slug 鏁扮粍
  */
 export function normalizeCustomModelSlugs(
   models: Iterable<string | null | undefined>,
@@ -347,10 +347,10 @@ export function normalizeCustomModelSlugs(
 }
 
 /**
- * 归一化聊天字体大�? *
- * @description 将字体大小限制在 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 范围内，
- * 无效值回退为默认值�? *
- * @param value - 输入的字体大小�? * @returns 归一化后的字体大�? */
+ * 褰掍竴鍖栬亰澶╁瓧浣撳ぇ灏? *
+ * @description 灏嗗瓧浣撳ぇ灏忛檺鍒跺湪 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 鑼冨洿鍐咃紝
+ * 鏃犳晥鍊煎洖閫€涓洪粯璁ゅ€笺€? *
+ * @param value - 杈撳叆鐨勫瓧浣撳ぇ灏忓€? * @returns 褰掍竴鍖栧悗鐨勫瓧浣撳ぇ灏? */
 export function normalizeChatFontSizePx(value: number | null | undefined): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return DEFAULT_CHAT_FONT_SIZE_PX;
@@ -601,20 +601,20 @@ function buildInitialServerSettingsMigrationPatch(settings: AppSettings): Server
 }
 
 /**
- * 归一化存储的应用设置
+ * 褰掍竴鍖栧瓨鍌ㄧ殑搴旂敤璁剧疆
  *
- * @description 对从 localStorage 读取的设置进行归一化处理，
- * 确保自定义模型、字体大小、提供者顺序等字段符合约束�? *
- * @param settings - 待归一化的应用设置
- * @returns 归一化后的应用设�? */
+ * @description 瀵逛粠 localStorage 璇诲彇鐨勮缃繘琛屽綊涓€鍖栧鐞嗭紝
+ * 纭繚鑷畾涔夋ā鍨嬨€佸瓧浣撳ぇ灏忋€佹彁渚涜€呴『搴忕瓑瀛楁绗﹀悎绾︽潫銆? *
+ * @param settings - 寰呭綊涓€鍖栫殑搴旂敤璁剧疆
+ * @returns 褰掍竴鍖栧悗鐨勫簲鐢ㄨ缃? */
 export function normalizeStoredAppSettings(settings: AppSettings): AppSettings {
   return normalizeAppSettings(settings);
 }
 
 /**
- * 获取指定提供者的自定义模型列�? *
- * @param settings - 应用设置（仅需自定义模型相关字段）
- * @param provider - 提供者类�? * @returns 自定义模�?slug 列表
+ * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑鑷畾涔夋ā鍨嬪垪琛? *
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
+ * @param provider - 鎻愪緵鑰呯被鍨? * @returns 鑷畾涔夋ā鍨?slug 鍒楄〃
  */
 export function getCustomModelsForProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
@@ -624,9 +624,9 @@ export function getCustomModelsForProvider(
 }
 
 /**
- * 获取指定提供者的默认自定义模型列�? *
- * @param defaults - 默认设置（仅需自定义模型相关字段）
- * @param provider - 提供者类�? * @returns 默认自定义模�?slug 列表
+ * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑榛樿鑷畾涔夋ā鍨嬪垪琛? *
+ * @param defaults - 榛樿璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
+ * @param provider - 鎻愪緵鑰呯被鍨? * @returns 榛樿鑷畾涔夋ā鍨?slug 鍒楄〃
  */
 export function getDefaultCustomModelsForProvider(
   defaults: Pick<AppSettings, CustomModelSettingsKey>,
@@ -636,8 +636,8 @@ export function getDefaultCustomModelsForProvider(
 }
 
 /**
- * 构造指定提供者的自定义模型补�? *
- * @param provider - 提供者类�? * @param models - 新的自定义模型列�? * @returns 仅包含该提供者自定义模型字段的设置补�? */
+ * 鏋勯€犳寚瀹氭彁渚涜€呯殑鑷畾涔夋ā鍨嬭ˉ涓? *
+ * @param provider - 鎻愪緵鑰呯被鍨? * @param models - 鏂扮殑鑷畾涔夋ā鍨嬪垪琛? * @returns 浠呭寘鍚鎻愪緵鑰呰嚜瀹氫箟妯″瀷瀛楁鐨勮缃ˉ涓? */
 export function patchCustomModels(
   provider: ProviderKind,
   models: string[],
@@ -648,9 +648,9 @@ export function patchCustomModels(
 }
 
 /**
- * 获取所有提供者的自定义模型映�? *
- * @param settings - 应用设置（仅需自定义模型相关字段）
- * @returns 按提供者类型索引的自定义模型列表映�? */
+ * 鑾峰彇鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬫槧灏? *
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
+ * @returns 鎸夋彁渚涜€呯被鍨嬬储寮曠殑鑷畾涔夋ā鍨嬪垪琛ㄦ槧灏? */
 export function getCustomModelsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
 ): Record<ProviderKind, readonly string[]> {
@@ -667,11 +667,11 @@ export function getCustomModelsByProvider(
 }
 
 /**
- * 获取应用模型选项列表
+ * 鑾峰彇搴旂敤妯″瀷閫夐」鍒楄〃
  *
- * @description 合并内置模型和自定义模型，去重后返回完整的模型选项列表�? * 若当前选中的模型不在列表中，会自动追加�? *
- * @param provider - 提供者类�? * @param customModels - 自定义模�?slug 列表
- * @param selectedModel - 当前选中的模�?slug，可�? * @returns 模型选项列表
+ * @description 鍚堝苟鍐呯疆妯″瀷鍜岃嚜瀹氫箟妯″瀷锛屽幓閲嶅悗杩斿洖瀹屾暣鐨勬ā鍨嬮€夐」鍒楄〃銆? * 鑻ュ綋鍓嶉€変腑鐨勬ā鍨嬩笉鍦ㄥ垪琛ㄤ腑锛屼細鑷姩杩藉姞銆? *
+ * @param provider - 鎻愪緵鑰呯被鍨? * @param customModels - 鑷畾涔夋ā鍨?slug 鍒楄〃
+ * @param selectedModel - 褰撳墠閫変腑鐨勬ā鍨?slug锛屽彲閫? * @returns 妯″瀷閫夐」鍒楄〃
  */
 export function getAppModelOptions(
   provider: ProviderKind,
@@ -722,10 +722,10 @@ export function getAppModelOptions(
 }
 
 /**
- * 获取 Git 文本生成模型选项列表
+ * 鑾峰彇 Git 鏂囨湰鐢熸垚妯″瀷閫夐」鍒楄〃
  *
- * @description 合并 Codex、Kilo、OpenCode 三个提供者的模型选项�? * 去重后返回完整的文本生成模型列表�? *
- * @param settings - 应用设置（仅需相关字段�? * @returns 去重后的文本生成模型选项列表
+ * @description 鍚堝苟 Codex銆並ilo銆丱penCode 涓変釜鎻愪緵鑰呯殑妯″瀷閫夐」锛? * 鍘婚噸鍚庤繑鍥炲畬鏁寸殑鏂囨湰鐢熸垚妯″瀷鍒楄〃銆? *
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€鐩稿叧瀛楁锛? * @returns 鍘婚噸鍚庣殑鏂囨湰鐢熸垚妯″瀷閫夐」鍒楄〃
  */
 export function getGitTextGenerationModelOptions(
   settings: Pick<
@@ -771,11 +771,11 @@ export function getGitTextGenerationModelOptions(
 }
 
 /**
- * 解析应用模型选择
+ * 瑙ｆ瀽搴旂敤妯″瀷閫夋嫨
  *
- * @description 根据提供者、自定义模型列表和当前选中模型�? * 解析出最终可用的模型 slug�? *
- * @param provider - 提供者类�? * @param customModels - 各提供者的自定义模型映�? * @param selectedModel - 当前选中的模�?slug
- * @returns 解析后的模型 slug 字符�? */
+ * @description 鏍规嵁鎻愪緵鑰呫€佽嚜瀹氫箟妯″瀷鍒楄〃鍜屽綋鍓嶉€変腑妯″瀷锛? * 瑙ｆ瀽鍑烘渶缁堝彲鐢ㄧ殑妯″瀷 slug銆? *
+ * @param provider - 鎻愪緵鑰呯被鍨? * @param customModels - 鍚勬彁渚涜€呯殑鑷畾涔夋ā鍨嬫槧灏? * @param selectedModel - 褰撳墠閫変腑鐨勬ā鍨?slug
+ * @returns 瑙ｆ瀽鍚庣殑妯″瀷 slug 瀛楃涓? */
 export function resolveAppModelSelection(
   provider: ProviderKind,
   customModels: Record<ProviderKind, readonly string[]>,
@@ -789,10 +789,10 @@ export function resolveAppModelSelection(
 }
 
 /**
- * 获取所有提供者的自定义模型选项映射
+ * 鑾峰彇鎵€鏈夋彁渚涜€呯殑鑷畾涔夋ā鍨嬮€夐」鏄犲皠
  *
- * @param settings - 应用设置（仅需自定义模型相关字段）
- * @returns 按提供者类型索引的模型选项列表映射
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€鑷畾涔夋ā鍨嬬浉鍏冲瓧娈碉級
+ * @returns 鎸夋彁渚涜€呯被鍨嬬储寮曠殑妯″瀷閫夐」鍒楄〃鏄犲皠
  */
 export function getCustomModelOptionsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
@@ -811,12 +811,12 @@ export function getCustomModelOptionsByProvider(
 }
 
 /**
- * 获取提供者启动选项
+ * 鑾峰彇鎻愪緵鑰呭惎鍔ㄩ€夐」
  *
- * @description 从应用设置中提取各提供者的二进制路径、服务器 URL 等配置，
- * 构�?ProviderStartOptions 对象用于启动提供者进程�? *
- * @param settings - 应用设置（仅需二进制路径相关字段）
- * @returns 提供者启动选项，无配置时返�?undefined
+ * @description 浠庡簲鐢ㄨ缃腑鎻愬彇鍚勬彁渚涜€呯殑浜岃繘鍒惰矾寰勩€佹湇鍔″櫒 URL 绛夐厤缃紝
+ * 鏋勯€?ProviderStartOptions 瀵硅薄鐢ㄤ簬鍚姩鎻愪緵鑰呰繘绋嬨€? *
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€浜岃繘鍒惰矾寰勭浉鍏冲瓧娈碉級
+ * @returns 鎻愪緵鑰呭惎鍔ㄩ€夐」锛屾棤閰嶇疆鏃惰繑鍥?undefined
  */
 export function getProviderStartOptions(
   settings: Pick<
@@ -910,10 +910,10 @@ export function getProviderStartOptions(
 }
 
 /**
- * 获取指定提供者的自定义二进制路径
+ * 鑾峰彇鎸囧畾鎻愪緵鑰呯殑鑷畾涔変簩杩涘埗璺緞
  *
- * @param settings - 应用设置（仅需二进制路径相关字段）
- * @param provider - 提供者类�? * @returns 自定义二进制路径字符�? */
+ * @param settings - 搴旂敤璁剧疆锛堜粎闇€浜岃繘鍒惰矾寰勭浉鍏冲瓧娈碉級
+ * @param provider - 鎻愪緵鑰呯被鍨? * @returns 鑷畾涔変簩杩涘埗璺緞瀛楃涓? */
 export function getCustomBinaryPathForProvider(
   settings: Pick<
     AppSettings,
@@ -949,12 +949,12 @@ export function getCustomBinaryPathForProvider(
 }
 
 /**
- * React Hook：获取和更新应用设置
+ * React Hook锛氳幏鍙栧拰鏇存柊搴旂敤璁剧疆
  *
- * @description 合并本地 localStorage 设置和服务器设置�? * 提供更新和重置方法。首次加载时自动将本地设置迁移到服务器�? *
- * @returns 设置对象及操作方�? * @returns settings - 合并后的应用设置
- * @returns updateSettings - 更新设置的函数（同时更新本地和服务器�? * @returns resetSettings - 重置为默认设置的函数
- * @returns defaults - 合并了服务器默认值的默认设置
+ * @description 鍚堝苟鏈湴 localStorage 璁剧疆鍜屾湇鍔″櫒璁剧疆锛? * 鎻愪緵鏇存柊鍜岄噸缃柟娉曘€傞娆″姞杞芥椂鑷姩灏嗘湰鍦拌缃縼绉诲埌鏈嶅姟鍣ㄣ€? *
+ * @returns 璁剧疆瀵硅薄鍙婃搷浣滄柟娉? * @returns settings - 鍚堝苟鍚庣殑搴旂敤璁剧疆
+ * @returns updateSettings - 鏇存柊璁剧疆鐨勫嚱鏁帮紙鍚屾椂鏇存柊鏈湴鍜屾湇鍔″櫒锛? * @returns resetSettings - 閲嶇疆涓洪粯璁よ缃殑鍑芥暟
+ * @returns defaults - 鍚堝苟浜嗘湇鍔″櫒榛樿鍊肩殑榛樿璁剧疆
  */
 export function useAppSettings() {
   const queryClient = useQueryClient();

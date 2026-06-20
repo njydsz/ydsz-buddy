@@ -1,6 +1,6 @@
 /**
  * @file session-logic.ts
- * @description 会话逻辑模块，负责从编排活动流中推导 UI 状态�? * 包括工作日志条目推导、待审批请求管理、待处理用户输入�? * 活跃任务列表、提议计划状态、时间线条目组装以及会话阶段判断�? */
+ * @description 浼氳瘽閫昏緫妯″潡锛岃礋璐ｄ粠缂栨帓娲诲姩娴佷腑鎺ㄥ UI 鐘舵€併€? * 鍖呮嫭宸ヤ綔鏃ュ織鏉＄洰鎺ㄥ銆佸緟瀹℃壒璇锋眰绠＄悊銆佸緟澶勭悊鐢ㄦ埛杈撳叆銆? * 娲昏穬浠诲姟鍒楄〃銆佹彁璁鍒掔姸鎬併€佹椂闂寸嚎鏉＄洰缁勮浠ュ強浼氳瘽闃舵鍒ゆ柇銆? */
 
 import {
   ApprovalRequestId,
@@ -33,11 +33,11 @@ import type {
   TurnDiffSummary,
 } from "./types";
 
-/** Provider 选择器类型别�?*/
+/** Provider 閫夋嫨鍣ㄧ被鍨嬪埆鍚?*/
 export type ProviderPickerKind = ProviderKind;
 
 /**
- * 可选的 Provider 列表，用�?Composer �?Provider 选择�? */
+ * 鍙€夌殑 Provider 鍒楄〃锛岀敤浜?Composer 鐨?Provider 閫夋嫨鍣? */
 export const PROVIDER_OPTIONS: Array<{
   value: ProviderPickerKind;
   label: string;
@@ -54,48 +54,48 @@ export const PROVIDER_OPTIONS: Array<{
 ];
 
 /**
- * 工作日志条目，表示线程活动流中的一条可展示记录
+ * 宸ヤ綔鏃ュ織鏉＄洰锛岃〃绀虹嚎绋嬫椿鍔ㄦ祦涓殑涓€鏉″彲灞曠ず璁板綍
  */
 export interface WorkLogEntry {
-  /** 条目唯一 ID */
+  /** 鏉＄洰鍞竴 ID */
   id: string;
-  /** 创建时间（ISO 格式�?*/
+  /** 鍒涘缓鏃堕棿锛圛SO 鏍煎紡锛?*/
   createdAt: string;
-  /** 显示标签 */
+  /** 鏄剧ず鏍囩 */
   label: string;
-  /** 详细信息 */
+  /** 璇︾粏淇℃伅 */
   detail?: string;
-  /** 执行的命令（可读格式�?*/
+  /** 鎵ц鐨勫懡浠わ紙鍙鏍煎紡锛?*/
   command?: string;
-  /** 原始命令文本 */
+  /** 鍘熷鍛戒护鏂囨湰 */
   rawCommand?: string;
-  /** 命令预览文本 */
+  /** 鍛戒护棰勮鏂囨湰 */
   preview?: string;
-  /** 变更的文件列�?*/
+  /** 鍙樻洿鐨勬枃浠跺垪琛?*/
   changedFiles?: ReadonlyArray<string>;
-  /** 条目语气：`"thinking"` 思考中、`"tool"` 工具调用、`"info"` 信息、`"error"` 错误 */
+  /** 鏉＄洰璇皵锛歚"thinking"` 鎬濊€冧腑銆乣"tool"` 宸ュ叿璋冪敤銆乣"info"` 淇℃伅銆乣"error"` 閿欒 */
   tone: "thinking" | "tool" | "info" | "error";
-  /** 工具可读标题 */
+  /** 宸ュ叿鍙鏍囬 */
   toolTitle?: string;
-  /** 工具名称 */
+  /** 宸ュ叿鍚嶇О */
   toolName?: string;
-  /** 工具调用 ID */
+  /** 宸ュ叿璋冪敤 ID */
   toolCallId?: string;
-  /** 工具生命周期项类�?*/
+  /** 宸ュ叿鐢熷懡鍛ㄦ湡椤圭被鍨?*/
   itemType?: ToolLifecycleItemType;
-  /** 待审批请求类�?*/
+  /** 寰呭鎵硅姹傜被鍨?*/
   requestKind?: PendingApproval["requestKind"];
-  /** 子代理列�?*/
+  /** 瀛愪唬鐞嗗垪琛?*/
   subagents?: ReadonlyArray<WorkLogSubagent>;
-  /** 子代理操作信�?*/
+  /** 瀛愪唬鐞嗘搷浣滀俊鎭?*/
   subagentAction?: WorkLogSubagentAction;
 }
 
-/** 工作日志展示版本号，用于缓存失效 */
+/** 宸ヤ綔鏃ュ織灞曠ず鐗堟湰鍙凤紝鐢ㄤ簬缂撳瓨澶辨晥 */
 export const WORK_LOG_PRESENTATION_VERSION = 5;
 
 /**
- * 工作日志中的子代理信�? */
+ * 宸ヤ綔鏃ュ織涓殑瀛愪唬鐞嗕俊鎭? */
 export interface WorkLogSubagent {
   threadId: string;
   providerThreadId?: string | undefined;
@@ -112,7 +112,7 @@ export interface WorkLogSubagent {
   isActive?: boolean | undefined;
 }
 
-/** 子代理操作信息，描述子代理的工具调用状�?*/
+/** 瀛愪唬鐞嗘搷浣滀俊鎭紝鎻忚堪瀛愪唬鐞嗙殑宸ュ叿璋冪敤鐘舵€?*/
 export interface WorkLogSubagentAction {
   tool: string;
   status: string;
@@ -128,7 +128,7 @@ interface DerivedWorkLogEntry extends WorkLogEntry {
   toolName?: string;
 }
 
-/** 待审批请求，表示需要用户批准的操作 */
+/** 寰呭鎵硅姹傦紝琛ㄧず闇€瑕佺敤鎴锋壒鍑嗙殑鎿嶄綔 */
 export interface PendingApproval {
   requestId: ApprovalRequestId;
   requestKind: "command" | "file-read" | "file-change";
@@ -136,14 +136,14 @@ export interface PendingApproval {
   detail?: string;
 }
 
-/** 待处理的用户输入请求，包含需要用户回答的问题 */
+/** 寰呭鐞嗙殑鐢ㄦ埛杈撳叆璇锋眰锛屽寘鍚渶瑕佺敤鎴峰洖绛旂殑闂 */
 export interface PendingUserInput {
   requestId: ApprovalRequestId;
   createdAt: string;
   questions: ReadonlyArray<UserInputQuestion>;
 }
 
-/** 活跃任务列表状态，表示当前轮次的任务进�?*/
+/** 娲昏穬浠诲姟鍒楄〃鐘舵€侊紝琛ㄧず褰撳墠杞鐨勪换鍔¤繘搴?*/
 export interface ActiveTaskListState {
   createdAt: string;
   turnId: TurnId | null;
@@ -154,12 +154,12 @@ export interface ActiveTaskListState {
   }>;
 }
 
-/** 活跃后台任务状态，统计当前正在运行的后台任务数�?*/
+/** 娲昏穬鍚庡彴浠诲姟鐘舵€侊紝缁熻褰撳墠姝ｅ湪杩愯鐨勫悗鍙颁换鍔℃暟閲?*/
 export interface ActiveBackgroundTasksState {
   activeCount: number;
 }
 
-/** 最新的提议计划状�?*/
+/** 鏈€鏂扮殑鎻愯璁″垝鐘舵€?*/
 export interface LatestProposedPlanState {
   id: OrchestrationProposedPlanId;
   createdAt: string;
@@ -171,7 +171,7 @@ export interface LatestProposedPlanState {
 }
 
 /**
- * 时间线条目类型，用于聊天界面的时间线渲染�? * 包含消息、提议计划和工作日志三种类型�? */
+ * 鏃堕棿绾挎潯鐩被鍨嬶紝鐢ㄤ簬鑱婂ぉ鐣岄潰鐨勬椂闂寸嚎娓叉煋銆? * 鍖呭惈娑堟伅銆佹彁璁鍒掑拰宸ヤ綔鏃ュ織涓夌绫诲瀷銆? */
 export type TimelineEntry =
   | {
       id: string;
@@ -193,9 +193,9 @@ export type TimelineEntry =
     };
 
 /**
- * 格式化持续时间为人可读的字符�? *
- * @param durationMs - 持续时间（毫秒）
- * @returns 格式化后的字符串（如 "1.5s"�?2m 30s"�? *
+ * 鏍煎紡鍖栨寔缁椂闂翠负浜哄彲璇荤殑瀛楃涓? *
+ * @param durationMs - 鎸佺画鏃堕棿锛堟绉掞級
+ * @returns 鏍煎紡鍖栧悗鐨勫瓧绗︿覆锛堝 "1.5s"銆?2m 30s"锛? *
  * @example
  * formatDuration(500)   // => "500ms"
  * formatDuration(1500)  // => "1.5s"
@@ -214,9 +214,9 @@ export function formatDuration(durationMs: number): string {
 }
 
 /**
- * 格式化两个时间点之间的经过时�? *
- * @param startIso - 开始时间（ISO 格式�? * @param endIso - 结束时间（ISO 格式），未提供时返回 null
- * @returns 格式化后的经过时间，时间无效时返�?null
+ * 鏍煎紡鍖栦袱涓椂闂寸偣涔嬮棿鐨勭粡杩囨椂闂? *
+ * @param startIso - 寮€濮嬫椂闂达紙ISO 鏍煎紡锛? * @param endIso - 缁撴潫鏃堕棿锛圛SO 鏍煎紡锛夛紝鏈彁渚涙椂杩斿洖 null
+ * @returns 鏍煎紡鍖栧悗鐨勭粡杩囨椂闂达紝鏃堕棿鏃犳晥鏃惰繑鍥?null
  */
 export function formatElapsed(startIso: string, endIso: string | undefined): string | null {
   if (!endIso) return null;
@@ -235,9 +235,9 @@ type LatestTurnTiming = Pick<
 type SessionActivityState = Pick<ThreadSession, "orchestrationStatus" | "activeTurnId">;
 
 /**
- * 判断最新轮次是否已结束（完成、中断或出错�? *
- * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状�? * @returns 最新轮次是否已结束
+ * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫锛堝畬鎴愩€佷腑鏂垨鍑洪敊锛? *
+ * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
+ * @param session - 浼氳瘽娲诲姩鐘舵€? * @returns 鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫
  */
 export function isLatestTurnSettled(
   latestTurn: LatestTurnTiming | null,
@@ -254,10 +254,10 @@ export function isLatestTurnSettled(
 }
 
 /**
- * 判断最新轮次是否仍在活跃（�?isLatestTurnSettled 互为反函数）
+ * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚︿粛鍦ㄦ椿璺冿紙涓?isLatestTurnSettled 浜掍负鍙嶅嚱鏁帮級
  *
- * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状�? * @returns 最新轮次是否仍在活�? */
+ * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
+ * @param session - 浼氳瘽娲诲姩鐘舵€? * @returns 鏈€鏂拌疆娆℃槸鍚︿粛鍦ㄦ椿璺? */
 export function hasLiveLatestTurn(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -269,9 +269,9 @@ export function hasLiveLatestTurn(
 }
 
 /**
- * 推导活跃工作的开始时间�? * 优先使用正在运行的轮次开始时间，其次使用消息发送时间�? *
- * @param latestTurn - 最新轮次的时间信息
- * @param session - 会话活动状�? * @param sendStartedAt - 消息发送的开始时�? * @returns 活跃工作的开始时�? */
+ * 鎺ㄥ娲昏穬宸ヤ綔鐨勫紑濮嬫椂闂淬€? * 浼樺厛浣跨敤姝ｅ湪杩愯鐨勮疆娆″紑濮嬫椂闂达紝鍏舵浣跨敤娑堟伅鍙戦€佹椂闂淬€? *
+ * @param latestTurn - 鏈€鏂拌疆娆＄殑鏃堕棿淇℃伅
+ * @param session - 浼氳瘽娲诲姩鐘舵€? * @param sendStartedAt - 娑堟伅鍙戦€佺殑寮€濮嬫椂闂? * @returns 娲昏穬宸ヤ綔鐨勫紑濮嬫椂闂? */
 export function deriveActiveWorkStartedAt(
   latestTurn: LatestTurnTiming | null,
   session: SessionActivityState | null,
@@ -321,8 +321,8 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 }
 
 /**
- * 从活动流中推导当前待审批的请求列表�? * 跟踪审批请求的开启和解决事件，自动清理过期的待审批项�? *
- * @param activities - 编排活动�? * @returns 按创建时间排序的待审批请求列�? */
+ * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶅緟瀹℃壒鐨勮姹傚垪琛ㄣ€? * 璺熻釜瀹℃壒璇锋眰鐨勫紑鍚拰瑙ｅ喅浜嬩欢锛岃嚜鍔ㄦ竻鐞嗚繃鏈熺殑寰呭鎵归」銆? *
+ * @param activities - 缂栨帓娲诲姩娴? * @returns 鎸夊垱寤烘椂闂存帓搴忕殑寰呭鎵硅姹傚垪琛? */
 export function derivePendingApprovals(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingApproval[] {
@@ -430,8 +430,8 @@ function parseUserInputQuestions(
 }
 
 /**
- * 从活动流中推导当前待处理的用户输入请求列表�? * 跟踪用户输入请求的开启和解决事件，自动清理过期的请求�? *
- * @param activities - 编排活动�? * @returns 按创建时间排序的待处理用户输入列�? */
+ * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶅緟澶勭悊鐨勭敤鎴疯緭鍏ヨ姹傚垪琛ㄣ€? * 璺熻釜鐢ㄦ埛杈撳叆璇锋眰鐨勫紑鍚拰瑙ｅ喅浜嬩欢锛岃嚜鍔ㄦ竻鐞嗚繃鏈熺殑璇锋眰銆? *
+ * @param activities - 缂栨帓娲诲姩娴? * @returns 鎸夊垱寤烘椂闂存帓搴忕殑寰呭鐞嗙敤鎴疯緭鍏ュ垪琛? */
 export function derivePendingUserInputs(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
 ): PendingUserInput[] {
@@ -526,9 +526,9 @@ function toActiveTaskListState(activity: OrchestrationThreadActivity): ActiveTas
 }
 
 /**
- * 从活动流中推导当前活跃的任务列表状态�? * 优先显示当前轮次的任务，若无则回退到最近未完成的先前轮次任务�? *
- * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID
- * @returns 活跃任务列表状态，无活跃任务时返回 null
+ * 浠庢椿鍔ㄦ祦涓帹瀵煎綋鍓嶆椿璺冪殑浠诲姟鍒楄〃鐘舵€併€? * 浼樺厛鏄剧ず褰撳墠杞鐨勪换鍔★紝鑻ユ棤鍒欏洖閫€鍒版渶杩戞湭瀹屾垚鐨勫厛鍓嶈疆娆′换鍔°€? *
+ * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID
+ * @returns 娲昏穬浠诲姟鍒楄〃鐘舵€侊紝鏃犳椿璺冧换鍔℃椂杩斿洖 null
  */
 export function deriveActiveTaskListState(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -579,9 +579,9 @@ export function deriveActiveTaskListState(
 }
 
 /**
- * 统计当前活跃的后台任务数量（排除 plan 类型任务）�? * 用于紧凑 UI 中展示代理活动状态�? *
- * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID
- * @returns 活跃后台任务状态，无活跃任务时返回 null
+ * 缁熻褰撳墠娲昏穬鐨勫悗鍙颁换鍔℃暟閲忥紙鎺掗櫎 plan 绫诲瀷浠诲姟锛夈€? * 鐢ㄤ簬绱у噾 UI 涓睍绀轰唬鐞嗘椿鍔ㄧ姸鎬併€? *
+ * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID
+ * @returns 娲昏穬鍚庡彴浠诲姟鐘舵€侊紝鏃犳椿璺冧换鍔℃椂杩斿洖 null
  */
 export function deriveActiveBackgroundTasksState(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -634,9 +634,9 @@ export function deriveActiveBackgroundTasksState(
 }
 
 /**
- * 判断最新轮次是否仍�?尾部工作"正在进行�? * �?Provider 仍有可见的助手文本在流式输出或后台任务更新时，UI 应保�?工作�?状态�? *
- * @param input.latestTurn - 最新轮次信�? * @param input.messages - 消息列表
- * @param input.activities - 活动�? * @param input.session - 会话状�? * @returns 是否仍有尾部工作
+ * 鍒ゆ柇鏈€鏂拌疆娆℃槸鍚︿粛鏈?灏鹃儴宸ヤ綔"姝ｅ湪杩涜銆? * 褰?Provider 浠嶆湁鍙鐨勫姪鎵嬫枃鏈湪娴佸紡杈撳嚭鎴栧悗鍙颁换鍔℃洿鏂版椂锛孶I 搴斾繚鎸?宸ヤ綔涓?鐘舵€併€? *
+ * @param input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @param input.messages - 娑堟伅鍒楄〃
+ * @param input.activities - 娲诲姩娴? * @param input.session - 浼氳瘽鐘舵€? * @returns 鏄惁浠嶆湁灏鹃儴宸ヤ綔
  */
 export function hasLiveTurnTailWork(input: {
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "completedAt"> | null;
@@ -679,10 +679,10 @@ function isCollabAgentToolActivity(activity: OrchestrationThreadActivity): boole
 }
 
 /**
- * 查找最新的提议计划状态�? * 优先查找当前轮次的计划，若无则回退到全局最新计划�? *
- * @param proposedPlans - 提议计划列表
- * @param latestTurnId - 最新轮�?ID
- * @returns 最新的提议计划状态，无计划时返回 null
+ * 鏌ユ壘鏈€鏂扮殑鎻愯璁″垝鐘舵€併€? * 浼樺厛鏌ユ壘褰撳墠杞鐨勮鍒掞紝鑻ユ棤鍒欏洖閫€鍒板叏灞€鏈€鏂拌鍒掋€? *
+ * @param proposedPlans - 鎻愯璁″垝鍒楄〃
+ * @param latestTurnId - 鏈€鏂拌疆娆?ID
+ * @returns 鏈€鏂扮殑鎻愯璁″垝鐘舵€侊紝鏃犺鍒掓椂杩斿洖 null
  */
 export function findLatestProposedPlan(
   proposedPlans: ReadonlyArray<ProposedPlan>,
@@ -715,11 +715,11 @@ export function findLatestProposedPlan(
 }
 
 /**
- * 查找侧边栏应显示的提议计划�? * 当最新轮次未结束时，优先显示其关联的源计划�? *
- * @param input.threads - 线程列表
- * @param input.latestTurn - 最新轮次信�? * @param input.latestTurnSettled - 最新轮次是否已结束
- * @param input.threadId - 当前线程 ID
- * @returns 侧边栏应显示的提议计划状�? */
+ * 鏌ユ壘渚ц竟鏍忓簲鏄剧ず鐨勬彁璁鍒掋€? * 褰撴渶鏂拌疆娆℃湭缁撴潫鏃讹紝浼樺厛鏄剧ず鍏跺叧鑱旂殑婧愯鍒掋€? *
+ * @param input.threads - 绾跨▼鍒楄〃
+ * @param input.latestTurn - 鏈€鏂拌疆娆′俊鎭? * @param input.latestTurnSettled - 鏈€鏂拌疆娆℃槸鍚﹀凡缁撴潫
+ * @param input.threadId - 褰撳墠绾跨▼ ID
+ * @returns 渚ц竟鏍忓簲鏄剧ず鐨勬彁璁鍒掔姸鎬? */
 export function findSidebarProposedPlan(input: {
   threads: ReadonlyArray<Pick<Thread, "id" | "proposedPlans">>;
   latestTurn: Pick<OrchestrationLatestTurn, "turnId" | "sourceProposedPlan"> | null;
@@ -745,8 +745,8 @@ export function findSidebarProposedPlan(input: {
 }
 
 /**
- * 判断提议计划是否可操作（尚未实施�? *
- * @param proposedPlan - 提议计划状�? * @returns 是否可操�? */
+ * 鍒ゆ柇鎻愯璁″垝鏄惁鍙搷浣滐紙灏氭湭瀹炴柦锛? *
+ * @param proposedPlan - 鎻愯璁″垝鐘舵€? * @returns 鏄惁鍙搷浣? */
 export function hasActionableProposedPlan(
   proposedPlan: LatestProposedPlanState | Pick<ProposedPlan, "implementedAt"> | null,
 ): boolean {
@@ -754,8 +754,8 @@ export function hasActionableProposedPlan(
 }
 
 /**
- * 从活动流中推导工作日志条目列表�? * 过滤掉不需要展示的活动类型（如任务生命周期、速率限制更新等）�? * 并将同一工具调用的多个生命周期事件合并为单条目�? *
- * @param activities - 编排活动�? * @param latestTurnId - 最新轮�?ID，为 undefined 时显示所有轮�? * @returns 工作日志条目列表
+ * 浠庢椿鍔ㄦ祦涓帹瀵煎伐浣滄棩蹇楁潯鐩垪琛ㄣ€? * 杩囨护鎺変笉闇€瑕佸睍绀虹殑娲诲姩绫诲瀷锛堝浠诲姟鐢熷懡鍛ㄦ湡銆侀€熺巼闄愬埗鏇存柊绛夛級锛? * 骞跺皢鍚屼竴宸ュ叿璋冪敤鐨勫涓敓鍛藉懆鏈熶簨浠跺悎骞朵负鍗曟潯鐩€? *
+ * @param activities - 缂栨帓娲诲姩娴? * @param latestTurnId - 鏈€鏂拌疆娆?ID锛屼负 undefined 鏃舵樉绀烘墍鏈夎疆娆? * @returns 宸ヤ綔鏃ュ織鏉＄洰鍒楄〃
  */
 export function deriveWorkLogEntries(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
@@ -1763,9 +1763,9 @@ function compareActivityLifecycleRank(kind: string): number {
 }
 
 /**
- * 判断指定轮次是否有工具活�? *
- * @param activities - 编排活动�? * @param turnId - 轮次 ID
- * @returns 是否有工具活�? */
+ * 鍒ゆ柇鎸囧畾杞鏄惁鏈夊伐鍏锋椿鍔? *
+ * @param activities - 缂栨帓娲诲姩娴? * @param turnId - 杞 ID
+ * @returns 鏄惁鏈夊伐鍏锋椿鍔? */
 export function hasToolActivityForTurn(
   activities: ReadonlyArray<OrchestrationThreadActivity>,
   turnId: TurnId | null | undefined,
@@ -1775,11 +1775,11 @@ export function hasToolActivityForTurn(
 }
 
 /**
- * 将消息、提议计划和工作日志合并为统一的时间线条目列表，按创建时间排序�? * 如果助手消息关联了提议计划，会从消息文本中移除计划块�? *
- * @param messages - 聊天消息列表
- * @param proposedPlans - 提议计划列表
- * @param workEntries - 工作日志条目列表
- * @returns 按时间排序的时间线条目列�? */
+ * 灏嗘秷鎭€佹彁璁鍒掑拰宸ヤ綔鏃ュ織鍚堝苟涓虹粺涓€鐨勬椂闂寸嚎鏉＄洰鍒楄〃锛屾寜鍒涘缓鏃堕棿鎺掑簭銆? * 濡傛灉鍔╂墜娑堟伅鍏宠仈浜嗘彁璁鍒掞紝浼氫粠娑堟伅鏂囨湰涓Щ闄よ鍒掑潡銆? *
+ * @param messages - 鑱婂ぉ娑堟伅鍒楄〃
+ * @param proposedPlans - 鎻愯璁″垝鍒楄〃
+ * @param workEntries - 宸ヤ綔鏃ュ織鏉＄洰鍒楄〃
+ * @returns 鎸夋椂闂存帓搴忕殑鏃堕棿绾挎潯鐩垪琛? */
 export function deriveTimelineEntries(
   messages: ChatMessage[],
   proposedPlans: ProposedPlan[],
@@ -1828,10 +1828,10 @@ export function deriveTimelineEntries(
 }
 
 /**
- * 根据轮次差异摘要推断每个轮次的检查点序号
+ * 鏍规嵁杞宸紓鎽樿鎺ㄦ柇姣忎釜杞鐨勬鏌ョ偣搴忓彿
  *
- * @param summaries - 轮次差异摘要列表
- * @returns 轮次 ID 到检查点序号的映�? */
+ * @param summaries - 杞宸紓鎽樿鍒楄〃
+ * @returns 杞 ID 鍒版鏌ョ偣搴忓彿鐨勬槧灏? */
 export function inferCheckpointTurnCountByTurnId(
   summaries: TurnDiffSummary[],
 ): Record<TurnId, number> {
@@ -1846,8 +1846,8 @@ export function inferCheckpointTurnCountByTurnId(
 }
 
 /**
- * 从会话状态推导会话阶�? *
- * @param session - 线程会话状�? * @returns 会话阶段：`"disconnected"` 已断开、`"connecting"` 连接中、`"running"` 运行中、`"ready"` 就绪
+ * 浠庝細璇濈姸鎬佹帹瀵间細璇濋樁娈? *
+ * @param session - 绾跨▼浼氳瘽鐘舵€? * @returns 浼氳瘽闃舵锛歚"disconnected"` 宸叉柇寮€銆乣"connecting"` 杩炴帴涓€乣"running"` 杩愯涓€乣"ready"` 灏辩华
  */
 export function derivePhase(session: ThreadSession | null): SessionPhase {
   if (!session || session.status === "closed") return "disconnected";

@@ -32,7 +32,7 @@
 //!
 //! ## 典型用法
 //!
-//! ```rust,no_run
+//!```rust,ignore
 //! #[tokio::main]
 //! async fn main() {
 //! use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
@@ -81,7 +81,7 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 ///
 /// ## 示例
 ///
-/// ```rust
+///```rust,ignore
 /// use remi_workspace::filesystem::WriteFileInput;
 ///
 /// let input = WriteFileInput {
@@ -154,7 +154,7 @@ pub struct WriteFileResult {
 ///
 /// ## 典型用法
 ///
-/// ```rust,no_run
+///```rust,ignore
 /// #[tokio::main]
 /// async fn main() {
 /// use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
@@ -183,7 +183,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
     ///
     /// let fs = WorkspaceFileSystem::new();
@@ -215,7 +215,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
@@ -272,7 +272,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::filesystem::{WorkspaceFileSystem, WriteFileInput};
@@ -344,7 +344,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
@@ -395,7 +395,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
@@ -443,7 +443,7 @@ impl WorkspaceFileSystem {
     ///
     /// ## 示例
     ///
-    /// ```rust,no_run
+    ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;

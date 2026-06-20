@@ -1,49 +1,49 @@
 /**
- * @file 待用户输入（Pending User Input）处�? *
- * 处理 AI Provider 请求用户输入时的草稿答案管理和进度计算�? * 支持单选和多选问题，提供答案解析、选项切换、进度推导等功能�? * �?ChatView 和编辑器面板使用�? */
+ * @file 寰呯敤鎴疯緭鍏ワ紙Pending User Input锛夊鐞? *
+ * 澶勭悊 AI Provider 璇锋眰鐢ㄦ埛杈撳叆鏃剁殑鑽夌ǹ绛旀绠＄悊鍜岃繘搴﹁绠椼€? * 鏀寔鍗曢€夊拰澶氶€夐棶棰橈紝鎻愪緵绛旀瑙ｆ瀽銆侀€夐」鍒囨崲銆佽繘搴︽帹瀵肩瓑鍔熻兘锛? * 渚?ChatView 鍜岀紪杈戝櫒闈㈡澘浣跨敤銆? */
 
 import type { ProviderUserInputAnswers, UserInputQuestion } from "~/contracts";
 
 /**
- * 待用户输入的草稿答案，记录用户当前的选择状态�? */
+ * 寰呯敤鎴疯緭鍏ョ殑鑽夌ǹ绛旀锛岃褰曠敤鎴峰綋鍓嶇殑閫夋嫨鐘舵€併€? */
 export interface PendingUserInputDraftAnswer {
-  /** 已选择的选项标签列表 */
+  /** 宸查€夋嫨鐨勯€夐」鏍囩鍒楄〃 */
   selectedOptionLabels?: string[];
-  /** 自定义输入的答案文本 */
+  /** 鑷畾涔夎緭鍏ョ殑绛旀鏂囨湰 */
   customAnswer?: string;
 }
 
 /**
- * 待用户输入的进度信息，描述当前问题的回答状态和导航信息�? */
+ * 寰呯敤鎴疯緭鍏ョ殑杩涘害淇℃伅锛屾弿杩板綋鍓嶉棶棰樼殑鍥炵瓟鐘舵€佸拰瀵艰埅淇℃伅銆? */
 export interface PendingUserInputProgress {
-  /** 当前问题索引 */
+  /** 褰撳墠闂绱㈠紩 */
   questionIndex: number;
-  /** 当前活跃的问题，无问题时�?null */
+  /** 褰撳墠娲昏穬鐨勯棶棰橈紝鏃犻棶棰樻椂涓?null */
   activeQuestion: UserInputQuestion | null;
-  /** 当前问题的草稿答�?*/
+  /** 褰撳墠闂鐨勮崏绋跨瓟妗?*/
   activeDraft: PendingUserInputDraftAnswer | undefined;
-  /** 已选择的选项标签列表（标准化后） */
+  /** 宸查€夋嫨鐨勯€夐」鏍囩鍒楄〃锛堟爣鍑嗗寲鍚庯級 */
   selectedOptionLabels: string[];
-  /** 自定义答案文�?*/
+  /** 鑷畾涔夌瓟妗堟枃鏈?*/
   customAnswer: string;
-  /** 已解析的答案值，单选为字符串，多选为字符串数组，未回答为 null */
+  /** 宸茶В鏋愮殑绛旀鍊硷紝鍗曢€変负瀛楃涓诧紝澶氶€変负瀛楃涓叉暟缁勶紝鏈洖绛斾负 null */
   resolvedAnswer: string | string[] | null;
-  /** 是否正在使用自定义答�?*/
+  /** 鏄惁姝ｅ湪浣跨敤鑷畾涔夌瓟妗?*/
   usingCustomAnswer: boolean;
-  /** 已回答的问题数量 */
+  /** 宸插洖绛旂殑闂鏁伴噺 */
   answeredQuestionCount: number;
-  /** 是否为最后一个问�?*/
+  /** 鏄惁涓烘渶鍚庝竴涓棶棰?*/
   isLastQuestion: boolean;
-  /** 所有问题是否已回答完毕 */
+  /** 鎵€鏈夐棶棰樻槸鍚﹀凡鍥炵瓟瀹屾瘯 */
   isComplete: boolean;
-  /** 是否可以前进到下一�?*/
+  /** 鏄惁鍙互鍓嶈繘鍒颁笅涓€棰?*/
   canAdvance: boolean;
 }
 
 /**
- * 标准化草稿答案文本，去除首尾空格，空字符串返�?null�? *
- * @param value - 原始答案文本
- * @returns 标准化后的文本，无效时返�?null
+ * 鏍囧噯鍖栬崏绋跨瓟妗堟枃鏈紝鍘婚櫎棣栧熬绌烘牸锛岀┖瀛楃涓茶繑鍥?null銆? *
+ * @param value - 鍘熷绛旀鏂囨湰
+ * @returns 鏍囧噯鍖栧悗鐨勬枃鏈紝鏃犳晥鏃惰繑鍥?null
  */
 function normalizeDraftAnswer(value: string | undefined): string | null {
   if (typeof value !== "string") {
@@ -55,9 +55,9 @@ function normalizeDraftAnswer(value: string | undefined): string | null {
 }
 
 /**
- * 标准化选项选择列表，过滤无效值、去除空格并去重�? * �?UI 和提交逻辑共享同一标准列表�? *
- * @param value - 原始选项标签列表
- * @returns 标准化后的选项标签数组
+ * 鏍囧噯鍖栭€夐」閫夋嫨鍒楄〃锛岃繃婊ゆ棤鏁堝€笺€佸幓闄ょ┖鏍煎苟鍘婚噸銆? * 浣?UI 鍜屾彁浜ら€昏緫鍏变韩鍚屼竴鏍囧噯鍒楄〃銆? *
+ * @param value - 鍘熷閫夐」鏍囩鍒楄〃
+ * @returns 鏍囧噯鍖栧悗鐨勯€夐」鏍囩鏁扮粍
  */
 function normalizeSelectedOptionLabels(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) {
@@ -73,10 +73,10 @@ function normalizeSelectedOptionLabels(value: string[] | undefined): string[] {
 }
 
 /**
- * 解析单个问题的最终答案。优先使用自定义答案，其次使用选项选择�? * 多选问题返回字符串数组，单选问题返回字符串�? *
- * @param question - 用户输入问题
- * @param draft - 草稿答案
- * @returns 解析后的答案，未回答返回 null
+ * 瑙ｆ瀽鍗曚釜闂鐨勬渶缁堢瓟妗堛€備紭鍏堜娇鐢ㄨ嚜瀹氫箟绛旀锛屽叾娆′娇鐢ㄩ€夐」閫夋嫨銆? * 澶氶€夐棶棰樿繑鍥炲瓧绗︿覆鏁扮粍锛屽崟閫夐棶棰樿繑鍥炲瓧绗︿覆銆? *
+ * @param question - 鐢ㄦ埛杈撳叆闂
+ * @param draft - 鑽夌ǹ绛旀
+ * @returns 瑙ｆ瀽鍚庣殑绛旀锛屾湭鍥炵瓟杩斿洖 null
  */
 export function resolvePendingUserInputAnswer(
   question: UserInputQuestion,
@@ -96,9 +96,9 @@ export function resolvePendingUserInputAnswer(
 }
 
 /**
- * 设置自定义答案。当自定义答案非空时清除选项选择，否则保留之前的选项�? *
- * @param draft - 当前草稿答案
- * @param customAnswer - 新的自定义答案文�? * @returns 更新后的草稿答案
+ * 璁剧疆鑷畾涔夌瓟妗堛€傚綋鑷畾涔夌瓟妗堥潪绌烘椂娓呴櫎閫夐」閫夋嫨锛屽惁鍒欎繚鐣欎箣鍓嶇殑閫夐」銆? *
+ * @param draft - 褰撳墠鑽夌ǹ绛旀
+ * @param customAnswer - 鏂扮殑鑷畾涔夌瓟妗堟枃鏈? * @returns 鏇存柊鍚庣殑鑽夌ǹ绛旀
  */
 export function setPendingUserInputCustomAnswer(
   draft: PendingUserInputDraftAnswer | undefined,
@@ -116,11 +116,11 @@ export function setPendingUserInputCustomAnswer(
 }
 
 /**
- * 切换选项的选择状态。多选模式下在列表中添加或移除选项�? * 单选模式下直接替换为当前选项。切换选项时清除自定义答案�? *
- * @param question - 用户输入问题
- * @param draft - 当前草稿答案
- * @param optionLabel - 要切换的选项标签
- * @returns 更新后的草稿答案
+ * 鍒囨崲閫夐」鐨勯€夋嫨鐘舵€併€傚閫夋ā寮忎笅鍦ㄥ垪琛ㄤ腑娣诲姞鎴栫Щ闄ら€夐」锛? * 鍗曢€夋ā寮忎笅鐩存帴鏇挎崲涓哄綋鍓嶉€夐」銆傚垏鎹㈤€夐」鏃舵竻闄よ嚜瀹氫箟绛旀銆? *
+ * @param question - 鐢ㄦ埛杈撳叆闂
+ * @param draft - 褰撳墠鑽夌ǹ绛旀
+ * @param optionLabel - 瑕佸垏鎹㈢殑閫夐」鏍囩
+ * @returns 鏇存柊鍚庣殑鑽夌ǹ绛旀
  */
 export function togglePendingUserInputOptionSelection(
   question: UserInputQuestion,
@@ -148,10 +148,10 @@ export function togglePendingUserInputOptionSelection(
 }
 
 /**
- * 构建所有问题的最终答案映射。任一问题未回答则返回 null�? *
- * @param questions - 问题列表
- * @param draftAnswers - 各问题的草稿答案映射
- * @returns 答案映射（问�?ID �?答案值），存在未回答问题时返�?null
+ * 鏋勫缓鎵€鏈夐棶棰樼殑鏈€缁堢瓟妗堟槧灏勩€備换涓€闂鏈洖绛斿垯杩斿洖 null銆? *
+ * @param questions - 闂鍒楄〃
+ * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
+ * @returns 绛旀鏄犲皠锛堥棶棰?ID 鈫?绛旀鍊硷級锛屽瓨鍦ㄦ湭鍥炵瓟闂鏃惰繑鍥?null
  */
 export function buildPendingUserInputAnswers(
   questions: ReadonlyArray<UserInputQuestion>,
@@ -171,9 +171,9 @@ export function buildPendingUserInputAnswers(
 }
 
 /**
- * 判断答案映射是否完整（所有问题都有有效答案）�? *
- * @param answers - 答案映射
- * @returns 是否所有问题都已回�? */
+ * 鍒ゆ柇绛旀鏄犲皠鏄惁瀹屾暣锛堟墍鏈夐棶棰橀兘鏈夋湁鏁堢瓟妗堬級銆? *
+ * @param answers - 绛旀鏄犲皠
+ * @returns 鏄惁鎵€鏈夐棶棰橀兘宸插洖绛? */
 export function hasCompletePendingUserInputAnswers(answers: ProviderUserInputAnswers): boolean {
   const entries = Object.entries(answers);
   if (entries.length === 0) {
@@ -194,9 +194,9 @@ export function hasCompletePendingUserInputAnswers(answers: ProviderUserInputAns
 }
 
 /**
- * 从答案映射中移除值为 null �?undefined 的条目�? *
- * @param answers - 原始答案映射
- * @returns 过滤后的答案映射
+ * 浠庣瓟妗堟槧灏勪腑绉婚櫎鍊间负 null 鎴?undefined 鐨勬潯鐩€? *
+ * @param answers - 鍘熷绛旀鏄犲皠
+ * @returns 杩囨护鍚庣殑绛旀鏄犲皠
  */
 export function omitNullPendingUserInputAnswers(
   answers: ProviderUserInputAnswers,
@@ -207,10 +207,10 @@ export function omitNullPendingUserInputAnswers(
 }
 
 /**
- * 统计已回答的问题数量�? *
- * @param questions - 问题列表
- * @param draftAnswers - 各问题的草稿答案映射
- * @returns 已回答的问题数量
+ * 缁熻宸插洖绛旂殑闂鏁伴噺銆? *
+ * @param questions - 闂鍒楄〃
+ * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
+ * @returns 宸插洖绛旂殑闂鏁伴噺
  */
 export function countAnsweredPendingUserInputQuestions(
   questions: ReadonlyArray<UserInputQuestion>,
@@ -222,10 +222,10 @@ export function countAnsweredPendingUserInputQuestions(
 }
 
 /**
- * 查找第一个未回答问题的索引。所有问题都已回答时返回最后一个问题的索引�? *
- * @param questions - 问题列表
- * @param draftAnswers - 各问题的草稿答案映射
- * @returns 第一个未回答问题的索�? */
+ * 鏌ユ壘绗竴涓湭鍥炵瓟闂鐨勭储寮曘€傛墍鏈夐棶棰橀兘宸插洖绛旀椂杩斿洖鏈€鍚庝竴涓棶棰樼殑绱㈠紩銆? *
+ * @param questions - 闂鍒楄〃
+ * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
+ * @returns 绗竴涓湭鍥炵瓟闂鐨勭储寮? */
 export function findFirstUnansweredPendingUserInputQuestionIndex(
   questions: ReadonlyArray<UserInputQuestion>,
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,
@@ -238,11 +238,11 @@ export function findFirstUnansweredPendingUserInputQuestionIndex(
 }
 
 /**
- * 推导待用户输入的完整进度信息�? * 计算当前问题、答案状态、完成度等，�?UI 渲染使用�? *
- * @param questions - 问题列表
- * @param draftAnswers - 各问题的草稿答案映射
- * @param questionIndex - 当前问题索引
- * @returns 完整的进度信息对�? */
+ * 鎺ㄥ寰呯敤鎴疯緭鍏ョ殑瀹屾暣杩涘害淇℃伅銆? * 璁＄畻褰撳墠闂銆佺瓟妗堢姸鎬併€佸畬鎴愬害绛夛紝渚?UI 娓叉煋浣跨敤銆? *
+ * @param questions - 闂鍒楄〃
+ * @param draftAnswers - 鍚勯棶棰樼殑鑽夌ǹ绛旀鏄犲皠
+ * @param questionIndex - 褰撳墠闂绱㈠紩
+ * @returns 瀹屾暣鐨勮繘搴︿俊鎭璞? */
 export function derivePendingUserInputProgress(
   questions: ReadonlyArray<UserInputQuestion>,
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,

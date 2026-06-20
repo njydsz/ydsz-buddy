@@ -1,7 +1,7 @@
 /**
  * @file ChatMarkdown.tsx
- * @description 聊天 Markdown 渲染组件，支持语法高亮、本地文件链接、
- *              LaTeX 数学公式、GFM 扩展语法等，用于助手消息和计划内容的渲染。
+ * @description èŠå¤© Markdown æ¸²æŸ“ç»„ä»¶ï¼Œæ”¯æŒè¯­æ³•é«˜äº®ã€æœ¬åœ°æ–‡ä»¶é“¾æŽ¥ã€
+ *              LaTeX æ•°å­¦å…¬å¼ã€GFM æ‰©å±•è¯­æ³•ç­‰ï¼Œç”¨äºŽåŠ©æ‰‹æ¶ˆæ¯å’Œè®¡åˆ’å†…å®¹çš„æ¸²æŸ“ã€‚
  */
 
 import { DiffsHighlighter, getSharedHighlighter, SupportedLanguages } from "@pierre/diffs";
@@ -500,10 +500,10 @@ function getHighlighterPromise(language: string): Promise<DiffsHighlighter> {
   }).catch((err) => {
     highlighterPromiseCache.delete(language);
     if (language === "text") {
-      // "text" itself failed �?Shiki cannot initialize at all, surface the error
+      // "text" itself failed ï¿½?Shiki cannot initialize at all, surface the error
       throw err;
     }
-    // Language not supported by Shiki �?fall back to "text"
+    // Language not supported by Shiki ï¿½?fall back to "text"
     return getHighlighterPromise("text");
   });
   highlighterPromiseCache.set(language, promise);

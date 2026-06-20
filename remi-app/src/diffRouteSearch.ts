@@ -1,39 +1,39 @@
 /**
- * @file Diff 路由搜索参数处理
+ * @file Diff 璺敱鎼滅储鍙傛暟澶勭悊
  *
- * 解析和管理聊天界面中�?Diff 视图相关�?URL 搜索参数�? * 支持面板类型（浏览器/Diff）、Diff 开关、Diff 轮次 ID 和文件路径等参数的解析与清理�? */
+ * 瑙ｆ瀽鍜岀鐞嗚亰澶╃晫闈腑涓?Diff 瑙嗗浘鐩稿叧鐨?URL 鎼滅储鍙傛暟銆? * 鏀寔闈㈡澘绫诲瀷锛堟祻瑙堝櫒/Diff锛夈€丏iff 寮€鍏炽€丏iff 杞 ID 鍜屾枃浠惰矾寰勭瓑鍙傛暟鐨勮В鏋愪笌娓呯悊銆? */
 
 import { TurnId } from "~/contracts";
 
-/** 聊天右侧面板类型 */
+/** 鑱婂ぉ鍙充晶闈㈡澘绫诲瀷 */
 export type ChatRightPanel = "browser" | "diff";
 
 /**
- * Diff 路由的搜索参数结构�? * 对应 URL �?diff 相关的查询参数�? */
+ * Diff 璺敱鐨勬悳绱㈠弬鏁扮粨鏋勩€? * 瀵瑰簲 URL 涓?diff 鐩稿叧鐨勬煡璇㈠弬鏁般€? */
 export interface DiffRouteSearch {
-  /** 分屏视图 ID */
+  /** 鍒嗗睆瑙嗗浘 ID */
   splitViewId?: string | undefined;
-  /** 面板类型：浏览器�?Diff */
+  /** 闈㈡澘绫诲瀷锛氭祻瑙堝櫒鎴?Diff */
   panel?: ChatRightPanel | undefined;
-  /** Diff 是否打开�?1" 表示打开 */
+  /** Diff 鏄惁鎵撳紑锛?1" 琛ㄧず鎵撳紑 */
   diff?: "1" | undefined;
-  /** Diff 轮次 ID */
+  /** Diff 杞 ID */
   diffTurnId?: TurnId | undefined;
-  /** Diff 文件路径 */
+  /** Diff 鏂囦欢璺緞 */
   diffFilePath?: string | undefined;
 }
 
 /**
- * 判断值是否表�?Diff 打开状态�? * 接受 "1"、数�?1 或布尔�?true�? *
- * @param value - 待判断的�? * @returns 是否表示 Diff 打开
+ * 鍒ゆ柇鍊兼槸鍚﹁〃绀?Diff 鎵撳紑鐘舵€併€? * 鎺ュ彈 "1"銆佹暟瀛?1 鎴栧竷灏斿€?true銆? *
+ * @param value - 寰呭垽鏂殑鍊? * @returns 鏄惁琛ㄧず Diff 鎵撳紑
  */
 function isDiffOpenValue(value: unknown): boolean {
   return value === "1" || value === 1 || value === true;
 }
 
 /**
- * 标准化搜索参数中的字符串值，去除首尾空格，空字符串返�?undefined�? *
- * @param value - 原始�? * @returns 标准化后的字符串，无效时返回 undefined
+ * 鏍囧噯鍖栨悳绱㈠弬鏁颁腑鐨勫瓧绗︿覆鍊硷紝鍘婚櫎棣栧熬绌烘牸锛岀┖瀛楃涓茶繑鍥?undefined銆? *
+ * @param value - 鍘熷鍊? * @returns 鏍囧噯鍖栧悗鐨勫瓧绗︿覆锛屾棤鏁堟椂杩斿洖 undefined
  */
 function normalizeSearchString(value: unknown): string | undefined {
   if (typeof value !== "string") {
@@ -44,9 +44,9 @@ function normalizeSearchString(value: unknown): string | undefined {
 }
 
 /**
- * 从搜索参数中移除 Diff 相关的参数，保留其他参数不变�? *
- * @param params - 原始搜索参数对象
- * @returns 去除 Diff 相关参数后的对象
+ * 浠庢悳绱㈠弬鏁颁腑绉婚櫎 Diff 鐩稿叧鐨勫弬鏁帮紝淇濈暀鍏朵粬鍙傛暟涓嶅彉銆? *
+ * @param params - 鍘熷鎼滅储鍙傛暟瀵硅薄
+ * @returns 鍘婚櫎 Diff 鐩稿叧鍙傛暟鍚庣殑瀵硅薄
  */
 export function stripDiffSearchParams<T extends Record<string, unknown>>(
   params: T,
@@ -62,9 +62,9 @@ export function stripDiffSearchParams<T extends Record<string, unknown>>(
 }
 
 /**
- * 解析 URL 搜索参数�?Diff 路由搜索对象�? * 处理面板类型、Diff 开关、轮�?ID 和文件路径等参数的标准化和关联逻辑�? *
- * @param search - URL 搜索参数对象
- * @returns 解析后的 DiffRouteSearch 对象
+ * 瑙ｆ瀽 URL 鎼滅储鍙傛暟涓?Diff 璺敱鎼滅储瀵硅薄銆? * 澶勭悊闈㈡澘绫诲瀷銆丏iff 寮€鍏炽€佽疆娆?ID 鍜屾枃浠惰矾寰勭瓑鍙傛暟鐨勬爣鍑嗗寲鍜屽叧鑱旈€昏緫銆? *
+ * @param search - URL 鎼滅储鍙傛暟瀵硅薄
+ * @returns 瑙ｆ瀽鍚庣殑 DiffRouteSearch 瀵硅薄
  */
 export function parseDiffRouteSearch(search: Record<string, unknown>): DiffRouteSearch {
   const splitViewId = normalizeSearchString(search.splitViewId);

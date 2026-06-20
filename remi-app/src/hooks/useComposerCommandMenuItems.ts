@@ -127,7 +127,8 @@ export function useComposerCommandMenuItems(input: {
 
       // 构建代理项：优先使用动态代理，否则使用静态别名
       const agentItems: ComposerCommandItem[] = (() => {
-        // 有动态代理时使用动态代理        if (dynamicAgents.length > 0) {
+        // 有动态代理时使用动态代理
+        if (dynamicAgents.length > 0) {
           return dynamicAgents
             .filter(({ name, displayName }) => {
               if (!query) return true;
@@ -144,7 +145,8 @@ export function useComposerCommandMenuItems(input: {
               description: displayName,
             }));
         }
-        // 静态回退：使用预定义的代理别名        return getAgentMentionAutocompleteAliases(provider)
+        // 静态回退：使用预定义的代理别名
+        return getAgentMentionAutocompleteAliases(provider)
           .filter(({ alias, displayName }) => {
             if (!query) return true;
             const searchBlob = `${alias} ${displayName}`.toLowerCase();
@@ -161,7 +163,8 @@ export function useComposerCommandMenuItems(input: {
           }));
       })();
 
-      // 构建插件项：仅显示已安装的插件      const pluginItems = providerPlugins
+      // 构建插件项：仅显示已安装的插件
+      const pluginItems = providerPlugins
         .filter(({ plugin }) => isInstalledProviderPlugin(plugin))
         .filter(({ plugin }) => {
           if (!query) return true;
@@ -189,7 +192,8 @@ export function useComposerCommandMenuItems(input: {
             ]
           : [];
       
-      // 路径项：工作区条目      const pathItems = workspaceEntries.map((entry) => ({
+      // 路径项：工作区条目
+      const pathItems = workspaceEntries.map((entry) => ({
         id: `path:${entry.kind}:${entry.path}`,
         type: "path" as const,
         path: entry.path,
@@ -202,7 +206,8 @@ export function useComposerCommandMenuItems(input: {
       return [...pluginItems, ...localRootItems, ...pathItems, ...agentItems];
     }
 
-    // 处理斜杠命令触发器：显示内置命令、提供商原生命令、技能    if (composerTrigger.kind === "slash-command") {
+    // 处理斜杠命令触发器：显示内置命令、提供商原生命令、技能
+    if (composerTrigger.kind === "slash-command") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       const availableCommands = getAvailableComposerSlashCommands({
         provider,
@@ -214,7 +219,8 @@ export function useComposerCommandMenuItems(input: {
         providerNativeCommandNames: providerNativeCommands.map((command) => command.name),
       });
       
-      // 内置斜杠命令项      const builtInItems = filterComposerSlashCommands(
+      // 内置斜杠命令项
+      const builtInItems = filterComposerSlashCommands(
         composerTrigger.query,
         availableCommands,
       ).map((definition) => ({
@@ -269,7 +275,8 @@ export function useComposerCommandMenuItems(input: {
       return [...builtInItems, ...providerCommandItems, ...skillItems];
     }
 
-    // 处理技能触发器：仅显示技能    if (composerTrigger.kind === "skill") {
+    // 处理技能触发器：仅显示技能
+    if (composerTrigger.kind === "skill") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       return providerSkills
         .filter((skill) => {

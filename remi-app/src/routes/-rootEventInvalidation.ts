@@ -1,7 +1,7 @@
 /**
- * @file 根路由事件失效化模块
- * @description 分类流式编排事件，判断哪些事件应该使共享查询缓存失效
- * @layer 根路由工具函�? * @exports 提供者和 Git 查询缓存的事件失效化判断函数
+ * @file 鏍硅矾鐢变簨浠跺け鏁堝寲妯″潡
+ * @description 鍒嗙被娴佸紡缂栨帓浜嬩欢锛屽垽鏂摢浜涗簨浠跺簲璇ヤ娇鍏变韩鏌ヨ缂撳瓨澶辨晥
+ * @layer 鏍硅矾鐢卞伐鍏峰嚱鏁? * @exports 鎻愪緵鑰呭拰 Git 鏌ヨ缂撳瓨鐨勪簨浠跺け鏁堝寲鍒ゆ柇鍑芥暟
  */
 
 import type { OrchestrationEvent, ThreadId } from "~/contracts";
@@ -11,36 +11,36 @@ import type { AppState } from "../store";
 import { getThreadFromState } from "../threadDerivation";
 
 /**
- * 文件变更事件类型集合
- * @description 这些事件会导致文件系统发生变化，需要使相关缓存失效
+ * 鏂囦欢鍙樻洿浜嬩欢绫诲瀷闆嗗悎
+ * @description 杩欎簺浜嬩欢浼氬鑷存枃浠剁郴缁熷彂鐢熷彉鍖栵紝闇€瑕佷娇鐩稿叧缂撳瓨澶辨晥
  */
 const FILE_CHANGE_EVENT_TYPES = new Set<OrchestrationEvent["type"]>([
-  "thread.turn-diff-completed", // 轮次差异对比完成
-  "thread.reverted", // 线程已回�?  "thread.conversation-rolled-back", // 对话已回�?]);
+  "thread.turn-diff-completed", // 杞宸紓瀵规瘮瀹屾垚
+  "thread.reverted", // 绾跨▼宸插洖婊?  "thread.conversation-rolled-back", // 瀵硅瘽宸插洖婊?]);
 
 /**
- * 判断是否应该使提供者查询缓存失�? * @param event - 编排事件对象
- * @returns 如果事件类型属于文件变更事件，则返回 true，表示需要刷新提供者相关缓�? */
+ * 鍒ゆ柇鏄惁搴旇浣挎彁渚涜€呮煡璇㈢紦瀛樺け鏁? * @param event - 缂栨帓浜嬩欢瀵硅薄
+ * @returns 濡傛灉浜嬩欢绫诲瀷灞炰簬鏂囦欢鍙樻洿浜嬩欢锛屽垯杩斿洖 true锛岃〃绀洪渶瑕佸埛鏂版彁渚涜€呯浉鍏崇紦瀛? */
 export function shouldInvalidateProviderQueriesForEvent(event: OrchestrationEvent): boolean {
   return FILE_CHANGE_EVENT_TYPES.has(event.type);
 }
 
 /**
- * 判断是否应该�?Git 查询缓存失效
- * @param event - 编排事件对象
- * @returns 如果事件是文件变更事件，或者是包含分支/环境/worktree 等元数据变更�?meta-updated 事件，则返回 true
- * @description Git 缓存失效范围比提供者缓存更广，还包括线程元数据中与 Git 相关的字段变�? */
+ * 鍒ゆ柇鏄惁搴旇浣?Git 鏌ヨ缂撳瓨澶辨晥
+ * @param event - 缂栨帓浜嬩欢瀵硅薄
+ * @returns 濡傛灉浜嬩欢鏄枃浠跺彉鏇翠簨浠讹紝鎴栬€呮槸鍖呭惈鍒嗘敮/鐜/worktree 绛夊厓鏁版嵁鍙樻洿鐨?meta-updated 浜嬩欢锛屽垯杩斿洖 true
+ * @description Git 缂撳瓨澶辨晥鑼冨洿姣旀彁渚涜€呯紦瀛樻洿骞匡紝杩樺寘鎷嚎绋嬪厓鏁版嵁涓笌 Git 鐩稿叧鐨勫瓧娈靛彉鏇? */
 export function shouldInvalidateGitQueriesForEvent(event: OrchestrationEvent): boolean {
-  // 文件变更事件必然需要刷�?Git 缓存
+  // 鏂囦欢鍙樻洿浜嬩欢蹇呯劧闇€瑕佸埛鏂?Git 缂撳瓨
   if (FILE_CHANGE_EVENT_TYPES.has(event.type)) {
     return true;
   }
 
-  // �?meta-updated 事件不需要处�?  if (event.type !== "thread.meta-updated") {
+  // 闈?meta-updated 浜嬩欢涓嶉渶瑕佸鐞?  if (event.type !== "thread.meta-updated") {
     return false;
   }
 
-  // 检�?meta-updated 事件中是否包�?Git 相关的元数据变更
+  // 妫€鏌?meta-updated 浜嬩欢涓槸鍚﹀寘鍚?Git 鐩稿叧鐨勫厓鏁版嵁鍙樻洿
   return (
     event.payload.branch !== undefined ||
     event.payload.envMode !== undefined ||
@@ -52,10 +52,10 @@ export function shouldInvalidateGitQueriesForEvent(event: OrchestrationEvent): b
 }
 
 /**
- * 获取需要刷�?Git 缓存的线�?ID
- * @param event - 编排事件对象
- * @returns 如果事件需要刷�?Git 缓存且包含线�?ID，则返回该线�?ID，否则返�?null
- * @description 用于定位需要刷新缓存的具体线程
+ * 鑾峰彇闇€瑕佸埛鏂?Git 缂撳瓨鐨勭嚎绋?ID
+ * @param event - 缂栨帓浜嬩欢瀵硅薄
+ * @returns 濡傛灉浜嬩欢闇€瑕佸埛鏂?Git 缂撳瓨涓斿寘鍚嚎绋?ID锛屽垯杩斿洖璇ョ嚎绋?ID锛屽惁鍒欒繑鍥?null
+ * @description 鐢ㄤ簬瀹氫綅闇€瑕佸埛鏂扮紦瀛樼殑鍏蜂綋绾跨▼
  */
 export function getGitInvalidationThreadIdForEvent(event: OrchestrationEvent): ThreadId | null {
   if (!shouldInvalidateGitQueriesForEvent(event)) {
@@ -65,21 +65,21 @@ export function getGitInvalidationThreadIdForEvent(event: OrchestrationEvent): T
 }
 
 /**
- * 解析需要刷�?Git 缓存的线程工作目�? * @param state - 应用状态对�? * @param threadId - 线程 ID
- * @returns 线程对应的工作目录路径，如果无法解析则返�?null
- * @description 在领域事件应用后解析，确�?worktree 元数据变更指向新的工作目�? */
+ * 瑙ｆ瀽闇€瑕佸埛鏂?Git 缂撳瓨鐨勭嚎绋嬪伐浣滅洰褰? * @param state - 搴旂敤鐘舵€佸璞? * @param threadId - 绾跨▼ ID
+ * @returns 绾跨▼瀵瑰簲鐨勫伐浣滅洰褰曡矾寰勶紝濡傛灉鏃犳硶瑙ｆ瀽鍒欒繑鍥?null
+ * @description 鍦ㄩ鍩熶簨浠跺簲鐢ㄥ悗瑙ｆ瀽锛岀‘淇?worktree 鍏冩暟鎹彉鏇存寚鍚戞柊鐨勫伐浣滅洰褰? */
 export function resolveGitInvalidationCwdForThreadId(
   state: AppState,
   threadId: ThreadId,
 ): string | null {
-  // 优先从状态中获取线程，如果不存在则从线程列表中查�?  const thread =
+  // 浼樺厛浠庣姸鎬佷腑鑾峰彇绾跨▼锛屽鏋滀笉瀛樺湪鍒欎粠绾跨▼鍒楄〃涓煡鎵?  const thread =
     getThreadFromState(state, threadId) ??
     state.threads.find((candidate) => candidate.id === threadId);
   if (!thread) {
     return null;
   }
-  // 获取线程所属项目的根工作目�?  const projectCwd = state.projects.find((project) => project.id === thread.projectId)?.cwd ?? null;
-  // 根据项目目录、环境模式和 worktree 路径解析最终的工作目录
+  // 鑾峰彇绾跨▼鎵€灞為」鐩殑鏍瑰伐浣滅洰褰?  const projectCwd = state.projects.find((project) => project.id === thread.projectId)?.cwd ?? null;
+  // 鏍规嵁椤圭洰鐩綍銆佺幆澧冩ā寮忓拰 worktree 璺緞瑙ｆ瀽鏈€缁堢殑宸ヤ綔鐩綍
   return resolveThreadWorkspaceCwd({
     projectCwd,
     envMode: thread.envMode,

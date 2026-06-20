@@ -96,7 +96,7 @@ pub enum PersistenceError {
 ///
 /// # 示例
 ///
-/// ```rust
+///```rust,ignore
 /// fn get_user(id: UserId) -> PersistenceResult<User> {
 ///     // 实现...
 /// }

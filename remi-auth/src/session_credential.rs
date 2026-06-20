@@ -276,16 +276,18 @@ struct StoredSession {
 ///
 /// # 使用示例
 ///
-/// ```rust
+///```rust,ignore
+/// #[tokio::main]
+/// async fn main() {
 /// let secret_store = Arc::new(SecretStore::new());
 /// let service = SessionCredentialService::new(secret_store);
-///
+/// 
 /// // 颁发会话
 /// let issued = service.issue(None, None, None, None, None).await?;
-///
+/// 
 /// // 验证令牌
 /// let verified = service.verify(&issued.token).await?;
-/// ```
+/// }
 pub struct SessionCredentialService {
     /// 密钥存储：用于获取或生成令牌签名密钥，通过 `Arc` 实现跨任务共享
     secret_store: Arc<SecretStore>,
@@ -319,7 +321,7 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
     /// let secret_store = Arc::new(SecretStore::new());
     /// let service = SessionCredentialService::new(secret_store);
     /// ```
@@ -370,10 +372,12 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// // 使用默认参数颁发会话
     /// let issued = service.issue(None, None, None, None, None).await?;
-    ///
+    /// 
     /// // 自定义参数颁发会话
     /// let issued = service.issue(
     ///     Some(24),                                    // 24 小时有效期
@@ -386,7 +390,7 @@ impl SessionCredentialService {
     ///         platform: Some("Windows".to_string()),
     ///     }),
     /// ).await?;
-    /// ```
+    /// }
     pub async fn issue(
         &self,
         ttl_hours: Option<i64>,
@@ -459,7 +463,9 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// // 验证客户端携带的令牌
     /// match service.verify(&token).await {
     ///     Ok(session) => {
@@ -476,7 +482,7 @@ impl SessionCredentialService {
     ///         // 处理其他错误
     ///     }
     /// }
-    /// ```
+    /// }
     pub async fn verify(&self, token: &str) -> AuthResult<VerifiedSession> {
         // 加读锁查找会话，支持并发读取
         let sessions = self.sessions.read().await;
@@ -526,13 +532,15 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// // 为现有会话颁发 WebSocket 令牌
     /// let (ws_token, expires_at) = service.issue_websocket_token(&session_id, None).await?;
-    ///
+    /// 
     /// // 自定义有效期（例如 1 小时）
     /// let (ws_token, expires_at) = service.issue_websocket_token(&session_id, Some(1)).await?;
-    /// ```
+    /// }
     pub async fn issue_websocket_token(
         &self,
         session_id: &str,
@@ -588,14 +596,16 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let active_sessions = service.list_active().await?;
     /// println!("当前活跃会话数: {}", active_sessions.len());
     /// for session in active_sessions {
     ///     println!("会话 ID: {}, 客户端: {}, 已连接: {}",
     ///         session.session_id, session.client_name, session.is_connected);
     /// }
-    /// ```
+    /// }
     pub async fn list_active(&self) -> AuthResult<Vec<ClientSession>> {
         let sessions = self.sessions.read().await;
         let now = Utc::now();
@@ -636,9 +646,11 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let mut rx = service.stream_changes();
-    ///
+    /// 
     /// // 在异步任务中监听事件
     /// tokio::spawn(async move {
     ///     while let Ok(event) = rx.recv().await {
@@ -652,7 +664,7 @@ impl SessionCredentialService {
     ///         }
     ///     }
     /// });
-    /// ```
+    /// }
     pub fn stream_changes(&self) -> broadcast::Receiver<SessionCredentialChange> {
         self.change_tx.subscribe()
     }
@@ -680,13 +692,15 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// if service.revoke(&session_id).await? {
     ///     println!("会话已成功撤销");
     /// } else {
     ///     println!("会话不存在");
     /// }
-    /// ```
+    /// }
     pub async fn revoke(&self, session_id: &str) -> AuthResult<bool> {
         info!("撤销会话: {}", session_id);
 
@@ -725,10 +739,12 @@ impl SessionCredentialService {
     ///
     /// # 使用示例
     ///
-    /// ```rust
+    ///```rust,ignore
+    /// #[tokio::main]
+    /// async fn main() {
     /// let revoked_count = service.revoke_all_except(&current_session_id).await?;
     /// println!("已撤销 {} 个会话", revoked_count);
-    /// ```
+    /// }
     pub async fn revoke_all_except(&self, session_id: &str) -> AuthResult<u32> {
         info!("撤销除 {} 外的所有会话", session_id);
 

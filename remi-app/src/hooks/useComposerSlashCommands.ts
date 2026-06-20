@@ -1,6 +1,6 @@
 /**
  * @file useComposerSlashCommands.ts
- * @description 编辑器斜杠命�?Hook - 处理各种斜杠命令的执行逻辑
+ * @description ç¼–è¾‘å™¨æ–œæ å‘½ï¿½?Hook - å¤„ç†å„ç§æ–œæ å‘½ä»¤çš„æ‰§è¡Œé€»è¾‘
  * @module hooks/useComposerSlashCommands
  */
 
@@ -39,57 +39,57 @@ import { buildNextProviderOptions } from "../providerModelOptions";
 import { resolveForkThreadEnvironment } from "../lib/threadEnvironment";
 import { type SplitViewId, useSplitViewStore } from "../splitViewStore";
 
-/** 编辑器快照类�?*/
+/** ç¼–è¾‘å™¨å¿«ç…§ç±»ï¿½?*/
 type ComposerSnapshot = {
   value: string;
   cursor: number;
   expandedCursor: number;
 };
 
-/** 斜杠命令项类�?*/
+/** æ–œæ å‘½ä»¤é¡¹ç±»ï¿½?*/
 type SlashCommandItem = Extract<ComposerCommandItem, { type: "slash-command" }>;
 
 /**
- * 判断提示替换是否成功应用
+ * åˆ¤æ–­æç¤ºæ›¿æ¢æ˜¯å¦æˆåŠŸåº”ç”¨
  */
 function wasPromptReplacementApplied(result: number | false): boolean {
   return result !== false;
 }
 
 /**
- * 编辑器斜杠命�?Hook
+ * ç¼–è¾‘å™¨æ–œæ å‘½ï¿½?Hook
  *
  * @description
- * 处理编辑器中各种斜杠命令的执行逻辑，包括：
- * - /clear: 清空对话
- * - /compact: 压缩线程上下文 * - /plan /default: 切换交互模式
- * - /status: 显示状态对话框
- * - /subagents: 子代理管理
- * - /review: 代码审查
- * - /fast: 快速模式切换 * - /fork: 线程分叉
- * - /side: 侧边聊天
+ * å¤„ç†ç¼–è¾‘å™¨ä¸­å„ç§æ–œæ å‘½ä»¤çš„æ‰§è¡Œé€»è¾‘ï¼ŒåŒ…æ‹¬ï¼š
+ * - /clear: æ¸…ç©ºå¯¹è¯
+ * - /compact: åŽ‹ç¼©çº¿ç¨‹ä¸Šä¸‹æ–‡ * - /plan /default: åˆ‡æ¢äº¤äº’æ¨¡å¼
+ * - /status: æ˜¾ç¤ºçŠ¶æ€å¯¹è¯æ¡†
+ * - /subagents: å­ä»£ç†ç®¡ç†
+ * - /review: ä»£ç å®¡æŸ¥
+ * - /fast: å¿«é€Ÿæ¨¡å¼åˆ‡æ¢ * - /fork: çº¿ç¨‹åˆ†å‰
+ * - /side: ä¾§è¾¹èŠå¤©
  *
- * @param input - 输入参数对象
- * @param input.activeProject - 当前活动项目
- * @param input.activeThread - 当前活动线程
- * @param input.activeRootBranch - 当前根分支 * @param input.isServerThread - 是否为服务器线程
- * @param input.supportsFastSlashCommand - 是否支持快速命令
- * @param input.canOfferCompactCommand - 是否可提供压缩命令
- * @param input.canOfferSideCommand - 是否可提供侧边命令 * @param input.supportsTextNativeReviewCommand - 是否支持文本原生审查命令
- * @param input.fastModeEnabled - 快速模式是否已启用
- * @param input.providerNativeCommands - 提供商原生命令列表 * @param input.providerCommandDiscoveryCwd - 命令发现工作目录
- * @param input.selectedProvider - 当前选中的提供商
- * @param input.currentProviderModelOptions - 当前提供商模型选项
- * @param input.selectedModelSelection - 当前选中的模型
- * @param input.runtimeMode - 运行时模式 * @param input.interactionMode - 交互模式
- * @param input.threadId - 线程 ID
- * @param input.syncServerShellSnapshot - 同步服务器 Shell 快照
- * @param input.navigateToThread - 导航到线程 * @param input.handleClearConversation - 清空对话处理
- * @param input.handleInteractionModeChange - 交互模式切换处理
- * @param input.openForkTargetPicker - 打开分叉目标选择器
- * @param input.openReviewTargetPicker - 打开审查目标选择器 * @param input.setComposerDraftProviderModelOptions - 设置编辑器草稿提供商模型选项
- * @param input.editorActions - 编辑器操作集合 *
- * @returns 斜杠命令处理相关的状态和方法
+ * @param input - è¾“å…¥å‚æ•°å¯¹è±¡
+ * @param input.activeProject - å½“å‰æ´»åŠ¨é¡¹ç›®
+ * @param input.activeThread - å½“å‰æ´»åŠ¨çº¿ç¨‹
+ * @param input.activeRootBranch - å½“å‰æ ¹åˆ†æ”¯ * @param input.isServerThread - æ˜¯å¦ä¸ºæœåŠ¡å™¨çº¿ç¨‹
+ * @param input.supportsFastSlashCommand - æ˜¯å¦æ”¯æŒå¿«é€Ÿå‘½ä»¤
+ * @param input.canOfferCompactCommand - æ˜¯å¦å¯æä¾›åŽ‹ç¼©å‘½ä»¤
+ * @param input.canOfferSideCommand - æ˜¯å¦å¯æä¾›ä¾§è¾¹å‘½ä»¤ * @param input.supportsTextNativeReviewCommand - æ˜¯å¦æ”¯æŒæ–‡æœ¬åŽŸç”Ÿå®¡æŸ¥å‘½ä»¤
+ * @param input.fastModeEnabled - å¿«é€Ÿæ¨¡å¼æ˜¯å¦å·²å¯ç”¨
+ * @param input.providerNativeCommands - æä¾›å•†åŽŸç”Ÿå‘½ä»¤åˆ—è¡¨ * @param input.providerCommandDiscoveryCwd - å‘½ä»¤å‘çŽ°å·¥ä½œç›®å½•
+ * @param input.selectedProvider - å½“å‰é€‰ä¸­çš„æä¾›å•†
+ * @param input.currentProviderModelOptions - å½“å‰æä¾›å•†æ¨¡åž‹é€‰é¡¹
+ * @param input.selectedModelSelection - å½“å‰é€‰ä¸­çš„æ¨¡åž‹
+ * @param input.runtimeMode - è¿è¡Œæ—¶æ¨¡å¼ * @param input.interactionMode - äº¤äº’æ¨¡å¼
+ * @param input.threadId - çº¿ç¨‹ ID
+ * @param input.syncServerShellSnapshot - åŒæ­¥æœåŠ¡å™¨ Shell å¿«ç…§
+ * @param input.navigateToThread - å¯¼èˆªåˆ°çº¿ç¨‹ * @param input.handleClearConversation - æ¸…ç©ºå¯¹è¯å¤„ç†
+ * @param input.handleInteractionModeChange - äº¤äº’æ¨¡å¼åˆ‡æ¢å¤„ç†
+ * @param input.openForkTargetPicker - æ‰“å¼€åˆ†å‰ç›®æ ‡é€‰æ‹©å™¨
+ * @param input.openReviewTargetPicker - æ‰“å¼€å®¡æŸ¥ç›®æ ‡é€‰æ‹©å™¨ * @param input.setComposerDraftProviderModelOptions - è®¾ç½®ç¼–è¾‘å™¨è‰ç¨¿æä¾›å•†æ¨¡åž‹é€‰é¡¹
+ * @param input.editorActions - ç¼–è¾‘å™¨æ“ä½œé›†åˆ *
+ * @returns æ–œæ å‘½ä»¤å¤„ç†ç›¸å…³çš„çŠ¶æ€å’Œæ–¹æ³•
  *
  * @example
  * ```tsx
@@ -177,7 +177,8 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 获取当前可用的内置斜杠命令列�?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  // èŽ·å–å½“å‰å¯ç”¨çš„å†…ç½®æ–œæ å‘½ä»¤åˆ—è¡¨
+  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -188,7 +189,7 @@ export function useComposerSlashCommands(input: {
   });
 
   /**
-   * 压缩当前提供商线程的上下文。   * 仅在服务器线程且会话未关闭时可用
+   * åŽ‹ç¼©å½“å‰æä¾›å•†çº¿ç¨‹çš„ä¸Šä¸‹æ–‡ã€‚   * ä»…åœ¨æœåŠ¡å™¨çº¿ç¨‹ä¸”ä¼šè¯æœªå…³é—­æ—¶å¯ç”¨
    */
   const compactProviderThread = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
@@ -235,8 +236,8 @@ export function useComposerSlashCommands(input: {
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
   /**
-   * 从斜杠命令设置快速模式。
-   * 更新提供商模型选项中的快速模式配置。   */
+   * ä»Žæ–œæ å‘½ä»¤è®¾ç½®å¿«é€Ÿæ¨¡å¼ã€‚
+   * æ›´æ–°æä¾›å•†æ¨¡åž‹é€‰é¡¹ä¸­çš„å¿«é€Ÿæ¨¡å¼é…ç½®ã€‚   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -254,8 +255,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 执行 /fast 斜杠命令
-   * 支持 /fast, /fast on, /fast off, /fast status 等语法。   */
+   * æ‰§è¡Œ /fast æ–œæ å‘½ä»¤
+   * æ”¯æŒ /fast, /fast on, /fast off, /fast status ç­‰è¯­æ³•ã€‚   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -297,8 +298,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建分叉线程。
-   * 复制当前线程的消息并创建新线程。   */
+   * ä»Žæ–œæ å‘½ä»¤åˆ›å»ºåˆ†å‰çº¿ç¨‹ã€‚
+   * å¤åˆ¶å½“å‰çº¿ç¨‹çš„æ¶ˆæ¯å¹¶åˆ›å»ºæ–°çº¿ç¨‹ã€‚   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -360,8 +361,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建侧边聊天线程。
-   * 在当前线程旁边打开一个新的聊天窗口。   */
+   * ä»Žæ–œæ å‘½ä»¤åˆ›å»ºä¾§è¾¹èŠå¤©çº¿ç¨‹ã€‚
+   * åœ¨å½“å‰çº¿ç¨‹æ—è¾¹æ‰“å¼€ä¸€ä¸ªæ–°çš„èŠå¤©çª—å£ã€‚   */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
       const api = readNativeApi();
@@ -447,8 +448,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 启动 Codex 审查流程
-   * @param target - 审查目标：changes（当前更改）、base-branch（基础分支）   */
+   * å¯åŠ¨ Codex å®¡æŸ¥æµç¨‹
+   * @param target - å®¡æŸ¥ç›®æ ‡ï¼šchangesï¼ˆå½“å‰æ›´æ”¹ï¼‰ã€base-branchï¼ˆåŸºç¡€åˆ†æ”¯ï¼‰   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();
@@ -555,14 +556,14 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 处理审查目标选择
+   * å¤„ç†å®¡æŸ¥ç›®æ ‡é€‰æ‹©
    *
    * @description
-   * 根据选中的审查目标和当前提供商类型，执行不同的审查流程：
-   * - Codex 提供商：直接启动原生审查
-   * - 其他提供商：将审查提示词插入编辑器
+   * æ ¹æ®é€‰ä¸­çš„å®¡æŸ¥ç›®æ ‡å’Œå½“å‰æä¾›å•†ç±»åž‹ï¼Œæ‰§è¡Œä¸åŒçš„å®¡æŸ¥æµç¨‹ï¼š
+   * - Codex æä¾›å•†ï¼šç›´æŽ¥å¯åŠ¨åŽŸç”Ÿå®¡æŸ¥
+   * - å…¶ä»–æä¾›å•†ï¼šå°†å®¡æŸ¥æç¤ºè¯æ’å…¥ç¼–è¾‘å™¨
    *
-   * @param target - 审查目标类型："changes"（当前更改）或 "base-branch"（基础分支）
+   * @param target - å®¡æŸ¥ç›®æ ‡ç±»åž‹ï¼š"changes"ï¼ˆå½“å‰æ›´æ”¹ï¼‰æˆ– "base-branch"ï¼ˆåŸºç¡€åˆ†æ”¯ï¼‰
    */
   const handleReviewTargetSelection = useCallback(
     async (target: "changes" | "base-branch") => {
@@ -578,13 +579,13 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 处理分叉目标选择
+   * å¤„ç†åˆ†å‰ç›®æ ‡é€‰æ‹©
    *
    * @description
-   * 根据用户选择的分叉目标（本地或工作树），创建分叉线程。
-   * 失败时显示错误通知。
+   * æ ¹æ®ç”¨æˆ·é€‰æ‹©çš„åˆ†å‰ç›®æ ‡ï¼ˆæœ¬åœ°æˆ–å·¥ä½œæ ‘ï¼‰ï¼Œåˆ›å»ºåˆ†å‰çº¿ç¨‹ã€‚
+   * å¤±è´¥æ—¶æ˜¾ç¤ºé”™è¯¯é€šçŸ¥ã€‚
    *
-   * @param target - 分叉目标类型："local"（本地）或 "worktree"（工作树）
+   * @param target - åˆ†å‰ç›®æ ‡ç±»åž‹ï¼š"local"ï¼ˆæœ¬åœ°ï¼‰æˆ– "worktree"ï¼ˆå·¥ä½œæ ‘ï¼‰
    */
   const handleForkTargetSelection = useCallback(
     async (target: ForkSlashCommandTarget) => {
@@ -605,13 +606,13 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 检查 Claude 提供商的 /fast 斜杠命令可用性
+   * æ£€æŸ¥ Claude æä¾›å•†çš„ /fast æ–œæ å‘½ä»¤å¯ç”¨æ€§
    *
    * @description
-   * 通过 Claude 命令发现接口查询当前账户/环境是否支持 /fast 命令。
-   * 如果不可用，清除编辑器草稿并显示提示通知。
+   * é€šè¿‡ Claude å‘½ä»¤å‘çŽ°æŽ¥å£æŸ¥è¯¢å½“å‰è´¦æˆ·/çŽ¯å¢ƒæ˜¯å¦æ”¯æŒ /fast å‘½ä»¤ã€‚
+   * å¦‚æžœä¸å¯ç”¨ï¼Œæ¸…é™¤ç¼–è¾‘å™¨è‰ç¨¿å¹¶æ˜¾ç¤ºæç¤ºé€šçŸ¥ã€‚
    *
-   * @returns 是否支持 /fast 命令
+   * @returns æ˜¯å¦æ”¯æŒ /fast å‘½ä»¤
    */
   const checkClaudeFastSlashCommandAvailability = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
@@ -661,23 +662,23 @@ export function useComposerSlashCommands(input: {
   }, [editorActions, providerCommandDiscoveryCwd, threadId]);
 
   /**
-   * 处理独立斜杠命令输入
+   * å¤„ç†ç‹¬ç«‹æ–œæ å‘½ä»¤è¾“å…¥
    *
    * @description
-   * 当用户在编辑器中直接输入完整的斜杠命令（如 "/clear"、"/compact"）时触发。
-   * 解析命令文本并执行对应的操作，包括：
-   * - /clear: 清空对话
-   * - /compact: 压缩上下文
-   * - /plan /default: 切换交互模式
-   * - /status: 打开状态对话框
-   * - /subagents: 插入子代理提示词
-   * - /review: 启动代码审查
-   * - /fast: 切换快速模式
-   * - /fork: 创建分叉线程
-   * - /side: 创建侧边聊天
+   * å½“ç”¨æˆ·åœ¨ç¼–è¾‘å™¨ä¸­ç›´æŽ¥è¾“å…¥å®Œæ•´çš„æ–œæ å‘½ä»¤ï¼ˆå¦‚ "/clear"ã€"/compact"ï¼‰æ—¶è§¦å‘ã€‚
+   * è§£æžå‘½ä»¤æ–‡æœ¬å¹¶æ‰§è¡Œå¯¹åº”çš„æ“ä½œï¼ŒåŒ…æ‹¬ï¼š
+   * - /clear: æ¸…ç©ºå¯¹è¯
+   * - /compact: åŽ‹ç¼©ä¸Šä¸‹æ–‡
+   * - /plan /default: åˆ‡æ¢äº¤äº’æ¨¡å¼
+   * - /status: æ‰“å¼€çŠ¶æ€å¯¹è¯æ¡†
+   * - /subagents: æ’å…¥å­ä»£ç†æç¤ºè¯
+   * - /review: å¯åŠ¨ä»£ç å®¡æŸ¥
+   * - /fast: åˆ‡æ¢å¿«é€Ÿæ¨¡å¼
+   * - /fork: åˆ›å»ºåˆ†å‰çº¿ç¨‹
+   * - /side: åˆ›å»ºä¾§è¾¹èŠå¤©
    *
-   * @param trimmed - 去除首尾空格后的命令文本
-   * @returns 是否成功处理了该命令（true 表示已消费，false 表示未识别）
+   * @param trimmed - åŽ»é™¤é¦–å°¾ç©ºæ ¼åŽçš„å‘½ä»¤æ–‡æœ¬
+   * @returns æ˜¯å¦æˆåŠŸå¤„ç†äº†è¯¥å‘½ä»¤ï¼ˆtrue è¡¨ç¤ºå·²æ¶ˆè´¹ï¼Œfalse è¡¨ç¤ºæœªè¯†åˆ«ï¼‰
    */
   const handleStandaloneSlashCommand = useCallback(
     async (trimmed: string): Promise<boolean> => {
@@ -827,17 +828,17 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 处理斜杠命令菜单选择
+   * å¤„ç†æ–œæ å‘½ä»¤èœå•é€‰æ‹©
    *
    * @description
-   * 当用户从命令菜单中选择一个斜杠命令项时触发。
-   * 根据命令类型执行不同的编辑器操作：
-   * - /model: 在编辑器中插入 "/model " 并保留菜单
-   * - /clear, /compact, /plan, /default, /status, /fast: 清除命令文本并执行对应操作
-   * - /subagents, /review: 在编辑器中插入对应的提示词
-   * - /fork, /side: 清除命令文本并打开目标选择器或执行操作
+   * å½“ç”¨æˆ·ä»Žå‘½ä»¤èœå•ä¸­é€‰æ‹©ä¸€ä¸ªæ–œæ å‘½ä»¤é¡¹æ—¶è§¦å‘ã€‚
+   * æ ¹æ®å‘½ä»¤ç±»åž‹æ‰§è¡Œä¸åŒçš„ç¼–è¾‘å™¨æ“ä½œï¼š
+   * - /model: åœ¨ç¼–è¾‘å™¨ä¸­æ’å…¥ "/model " å¹¶ä¿ç•™èœå•
+   * - /clear, /compact, /plan, /default, /status, /fast: æ¸…é™¤å‘½ä»¤æ–‡æœ¬å¹¶æ‰§è¡Œå¯¹åº”æ“ä½œ
+   * - /subagents, /review: åœ¨ç¼–è¾‘å™¨ä¸­æ’å…¥å¯¹åº”çš„æç¤ºè¯
+   * - /fork, /side: æ¸…é™¤å‘½ä»¤æ–‡æœ¬å¹¶æ‰“å¼€ç›®æ ‡é€‰æ‹©å™¨æˆ–æ‰§è¡Œæ“ä½œ
    *
-   * @param item - 用户选中的斜杠命令菜单项
+   * @param item - ç”¨æˆ·é€‰ä¸­çš„æ–œæ å‘½ä»¤èœå•é¡¹
    */
   const handleSlashCommandSelection = useCallback(
     (item: SlashCommandItem) => {

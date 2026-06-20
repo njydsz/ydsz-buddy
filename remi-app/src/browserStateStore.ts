@@ -1,50 +1,50 @@
 /**
- * @file 浏览器状态轻量缓�? * @description 按线程维度缓存浏览器元数据�? * 实际的浏览器渲染面在 Tauri 桌面端，Web 端仅保留足够的状�? * 以渲染标签页/工具栏，并在线程切换时保持可预测的行为�? */
+ * @file 娴忚鍣ㄧ姸鎬佽交閲忕紦瀛? * @description 鎸夌嚎绋嬬淮搴︾紦瀛樻祻瑙堝櫒鍏冩暟鎹€? * 瀹為檯鐨勬祻瑙堝櫒娓叉煋闈㈠湪 Tauri 妗岄潰绔紝Web 绔粎淇濈暀瓒冲鐨勭姸鎬? * 浠ユ覆鏌撴爣绛鹃〉/宸ュ叿鏍忥紝骞跺湪绾跨▼鍒囨崲鏃朵繚鎸佸彲棰勬祴鐨勮涓恒€? */
 
 import type { ThreadBrowserState, ThreadId } from "~/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** localStorage 持久�?key */
+/** localStorage 鎸佷箙鍖?key */
 const BROWSER_STATE_STORAGE_KEY = "remicode:browser-state:v1";
-/** 每个线程保留的最大历史记录条�?*/
+/** 姣忎釜绾跨▼淇濈暀鐨勬渶澶у巻鍙茶褰曟潯鏁?*/
 const BROWSER_HISTORY_LIMIT = 12;
-/** 空历史记录的常量引用，避免重复创建空数组 */
+/** 绌哄巻鍙茶褰曠殑甯搁噺寮曠敤锛岄伩鍏嶉噸澶嶅垱寤虹┖鏁扮粍 */
 const EMPTY_BROWSER_HISTORY: BrowserHistoryEntry[] = [];
 
-/** 浏览器历史记录条�?*/
+/** 娴忚鍣ㄥ巻鍙茶褰曟潯鐩?*/
 export interface BrowserHistoryEntry {
-  /** 页面 URL */
+  /** 椤甸潰 URL */
   url: string;
-  /** 页面标题 */
+  /** 椤甸潰鏍囬 */
   title: string;
-  /** 标签�?ID */
+  /** 鏍囩椤?ID */
   tabId: string;
 }
 
-/** 浏览器状�?store 内部接口 */
+/** 娴忚鍣ㄧ姸鎬?store 鍐呴儴鎺ュ彛 */
 interface BrowserStateStore {
-  /** 按线�?ID 索引的浏览器状�?*/
+  /** 鎸夌嚎绋?ID 绱㈠紩鐨勬祻瑙堝櫒鐘舵€?*/
   threadStatesByThreadId: Record<string, ThreadBrowserState | undefined>;
-  /** 按线�?ID 索引的最近浏览历�?*/
+  /** 鎸夌嚎绋?ID 绱㈠紩鐨勬渶杩戞祻瑙堝巻鍙?*/
   recentHistoryByThreadId: Record<string, BrowserHistoryEntry[] | undefined>;
-  /** 更新或插入线程浏览器状�?*/
+  /** 鏇存柊鎴栨彃鍏ョ嚎绋嬫祻瑙堝櫒鐘舵€?*/
   upsertThreadState: (state: ThreadBrowserState) => void;
-  /** 移除线程浏览器状�?*/
+  /** 绉婚櫎绾跨▼娴忚鍣ㄧ姸鎬?*/
   removeThreadState: (threadId: ThreadId) => void;
 }
 
-/** 归一化历�?URL，将 about:blank 视为�?URL */
+/** 褰掍竴鍖栧巻鍙?URL锛屽皢 about:blank 瑙嗕负绌?URL */
 function normalizeHistoryUrl(url: string): string {
   const trimmed = url.trim();
   return trimmed === "about:blank" ? "" : trimmed;
 }
 
 /**
- * 更新或插入最近浏览历史条�? *
- * @description 将新条目插入列表头部，去重同 URL 的旧条目�? * 并限制列表长度不超过 BROWSER_HISTORY_LIMIT�? *
- * @param entries - 已有的历史条目列�? * @param nextEntry - 新的历史条目
- * @returns 更新后的历史条目列表
+ * 鏇存柊鎴栨彃鍏ユ渶杩戞祻瑙堝巻鍙叉潯鐩? *
+ * @description 灏嗘柊鏉＄洰鎻掑叆鍒楄〃澶撮儴锛屽幓閲嶅悓 URL 鐨勬棫鏉＄洰锛? * 骞堕檺鍒跺垪琛ㄩ暱搴︿笉瓒呰繃 BROWSER_HISTORY_LIMIT銆? *
+ * @param entries - 宸叉湁鐨勫巻鍙叉潯鐩垪琛? * @param nextEntry - 鏂扮殑鍘嗗彶鏉＄洰
+ * @returns 鏇存柊鍚庣殑鍘嗗彶鏉＄洰鍒楄〃
  */
 function upsertRecentHistoryEntry(
   entries: BrowserHistoryEntry[] | undefined,
@@ -66,11 +66,11 @@ function upsertRecentHistoryEntry(
 }
 
 /**
- * 判断两份历史记录是否相同
+ * 鍒ゆ柇涓や唤鍘嗗彶璁板綍鏄惁鐩稿悓
  *
- * @description 用于避免在历史内容未变时产生新的引用，减少不必要的重渲染�? *
- * @param previousEntries - 之前的历史条�? * @param nextEntries - 新的历史条目
- * @returns 是否完全相同
+ * @description 鐢ㄤ簬閬垮厤鍦ㄥ巻鍙插唴瀹规湭鍙樻椂浜х敓鏂扮殑寮曠敤锛屽噺灏戜笉蹇呰鐨勯噸娓叉煋銆? *
+ * @param previousEntries - 涔嬪墠鐨勫巻鍙叉潯鐩? * @param nextEntries - 鏂扮殑鍘嗗彶鏉＄洰
+ * @returns 鏄惁瀹屽叏鐩稿悓
  */
 function sameBrowserHistoryEntries(
   previousEntries: BrowserHistoryEntry[] | undefined,
@@ -97,7 +97,7 @@ function sameBrowserHistoryEntries(
   });
 }
 
-/** 浏览器状�?Zustand store，带 localStorage 持久�?*/
+/** 娴忚鍣ㄧ姸鎬?Zustand store锛屽甫 localStorage 鎸佷箙鍖?*/
 export const useBrowserStateStore = create<BrowserStateStore>()(
   persist(
     (set) => ({
@@ -169,9 +169,9 @@ export const useBrowserStateStore = create<BrowserStateStore>()(
 );
 
 /**
- * 选择指定线程的浏览器状�? *
- * @param threadId - 线程 ID
- * @returns Zustand 选择器，返回该线程的浏览器状�? */
+ * 閫夋嫨鎸囧畾绾跨▼鐨勬祻瑙堝櫒鐘舵€? *
+ * @param threadId - 绾跨▼ ID
+ * @returns Zustand 閫夋嫨鍣紝杩斿洖璇ョ嚎绋嬬殑娴忚鍣ㄧ姸鎬? */
 export function selectThreadBrowserState(
   threadId: ThreadId,
 ): (store: BrowserStateStore) => ThreadBrowserState | undefined {
@@ -179,10 +179,10 @@ export function selectThreadBrowserState(
 }
 
 /**
- * 选择指定线程的浏览器历史记录
+ * 閫夋嫨鎸囧畾绾跨▼鐨勬祻瑙堝櫒鍘嗗彶璁板綍
  *
- * @param threadId - 线程 ID
- * @returns Zustand 选择器，返回该线程的浏览历史列表
+ * @param threadId - 绾跨▼ ID
+ * @returns Zustand 閫夋嫨鍣紝杩斿洖璇ョ嚎绋嬬殑娴忚鍘嗗彶鍒楄〃
  */
 export function selectThreadBrowserHistory(
   threadId: ThreadId,

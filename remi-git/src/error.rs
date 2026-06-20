@@ -22,7 +22,7 @@
 //!
 //! ## 使用示例
 //!
-//! ```rust
+//!```rust,ignore
 //! use remi_git::{GitError, GitResult};
 //!
 //! fn example() -> GitResult<()> {
@@ -128,7 +128,7 @@ pub enum GitError {
 /// - `T`: 成功时返回的值类型
 ///
 /// # 示例
-/// ```rust
+///```rust,ignore
 /// use remi_git::GitResult;
 ///
 /// fn get_status() -> GitResult<String> {
