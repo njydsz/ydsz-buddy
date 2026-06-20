@@ -134,6 +134,10 @@ pub struct GitStatusResult {
     pub modified_files: Vec<String>,
     /// 未跟踪的文件列表
     pub untracked_files: Vec<String>,
+    /// 领先上游的提交数
+    pub ahead_count: u32,
+    /// 落后上游的提交数
+    pub behind_count: u32,
     /// 关联的 Pull Request 信息（TODO: 待实现）
     pub pr: Option<PullRequestInfo>,
 }
@@ -394,6 +398,40 @@ impl GitCore {
             None
         };
 
+        // 获取 ahead/behind 计数
+        let (ahead_count, behind_count) = if upstream_ref.is_some() {
+            let count_result = self
+                .execute(ExecuteGitInput {
+                    operation: "rev-list --left-right --count HEAD...@{u}".to_string(),
+                    cwd: cwd.to_string(),
+                    args: vec![
+                        "rev-list".to_string(),
+                        "--left-right".to_string(),
+                        "--count".to_string(),
+                        "HEAD...@{u}".to_string(),
+                    ],
+                    env: vec![],
+                    allow_non_zero_exit: true,
+                    timeout_ms: None,
+                })
+                .await?;
+
+            if count_result.code == 0 {
+                let parts: Vec<&str> = count_result.stdout.trim().split_whitespace().collect();
+                if parts.len() == 2 {
+                    let ahead = parts[0].parse::<u32>().unwrap_or(0);
+                    let behind = parts[1].parse::<u32>().unwrap_or(0);
+                    (ahead, behind)
+                } else {
+                    (0, 0)
+                }
+            } else {
+                (0, 0)
+            }
+        } else {
+            (0, 0)
+        };
+
         // 获取状态
         let status_result = self
             .execute(ExecuteGitInput {
@@ -439,6 +477,8 @@ impl GitCore {
             staged_files,
             modified_files,
             untracked_files,
+            ahead_count,
+            behind_count,
             pr: None, // TODO: 实现 PR 信息获取
         })
     }

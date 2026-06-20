@@ -183,7 +183,7 @@ pub struct VerifiedSession {
 ///
 /// - [`ClientSession`] 是对外暴露的精简视图，不包含敏感的 `token` 和 `subject` 字段
 /// - [`StoredSession`] 是内部存储的完整视图，包含所有字段
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ClientSession {
     /// 会话唯一标识符
     pub session_id: String,

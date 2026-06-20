@@ -160,7 +160,7 @@ pub struct PairingCredentialResult {
 /// 配对链接是配对码的持久化形式，通常存储在数据库中。管理员可以通过
 /// [`AuthService::list_pairing_links`] 查看所有配对链接，通过
 /// [`AuthService::revoke_pairing_link`] 撤销未使用的链接。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PairingLink {
     /// 配对链接的唯一标识符，用于管理和撤销操作
     pub id: String,
@@ -211,7 +211,7 @@ pub struct WebSocketTokenResult {
 ///
 /// 客户端在连接服务前，可通过 [`AuthService::get_descriptor`] 获取服务描述，
 /// 了解服务支持的认证方式，从而选择合适的认证流程。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct AuthDescriptor {
     /// 服务器名称，用于标识当前认证服务所属的服务
     pub server_name: String,
@@ -257,6 +257,13 @@ pub struct AuthService {
     credential_service: Arc<SessionCredentialService>,
     /// 配对链接存储实例，负责配对链接的持久化管理
     pairing_store: Option<Arc<dyn PairingLinkStore>>,
+    /// 引导凭证（Bootstrap Token），用于首次启动时的初始认证
+    ///
+    /// 来源优先级：
+    /// 1. 环境变量 `REMI_BOOTSTRAP_TOKEN`
+    /// 2. 文件 `~/.remi-code/userdata/bootstrap_token`（首次访问时自动生成）
+    /// 3. 显式传入（通过 `with_bootstrap_token` 构造函数）
+    bootstrap_token: Option<String>,
 }
 
 impl AuthService {
@@ -282,6 +289,7 @@ impl AuthService {
         Self {
             credential_service,
             pairing_store: None,
+            bootstrap_token: load_bootstrap_token(),
         }
     }
 
@@ -304,6 +312,32 @@ impl AuthService {
         Self {
             credential_service,
             pairing_store: Some(pairing_store),
+            bootstrap_token: load_bootstrap_token(),
+        }
+    }
+
+    /// # 创建带显式引导凭证的认证服务
+    ///
+    /// 通过共享的底层凭证服务实例、配对链接存储实例和显式指定的引导凭证创建认证服务门面。
+    ///
+    /// ## 参数
+    ///
+    /// - `credential_service`: 底层凭证服务的共享实例
+    /// - `pairing_store`: 配对链接存储实例
+    /// - `bootstrap_token`: 显式指定的引导凭证，设为 `None` 则禁用 Bootstrap 认证
+    ///
+    /// ## 返回值
+    ///
+    /// 返回新创建的 [`AuthService`] 实例。
+    pub fn with_bootstrap_token(
+        credential_service: Arc<SessionCredentialService>,
+        pairing_store: Option<Arc<dyn PairingLinkStore>>,
+        bootstrap_token: Option<String>,
+    ) -> Self {
+        Self {
+            credential_service,
+            pairing_store,
+            bootstrap_token,
         }
     }
 
@@ -419,23 +453,37 @@ impl AuthService {
             }
         }
 
-        // 如果没有配对链接存储或配对链接消费失败，使用默认的引导凭证验证
-        // 这里可以添加固定的引导凭证验证逻辑，或者允许任何非空凭证
-        // 当前实现：允许任何非空凭证（用于开发阶段）
-        let session = self
-            .credential_service
-            .issue(
-                None,
-                None,
-                Some(SessionMethod::Bootstrap),
-                Some(SessionRole::Client),
-                Some(client_metadata),
-            )
-            .await?;
+        // 如果没有配对链接存储或配对链接不存在，验证引导凭证
+        // 引导凭证必须与配置的 bootstrap_token 匹配
+        if let Some(ref expected_token) = self.bootstrap_token {
+            if credential != expected_token.as_str() {
+                info!("引导凭证验证失败：凭证不匹配");
+                return Err(AuthError::AuthenticationFailed(
+                    "引导凭证无效".to_string(),
+                ));
+            }
+            info!("引导凭证验证成功");
 
-        let session_token = session.token.clone();
+            // 引导凭证验证通过，颁发 Owner 角色会话（首次启动）
+            let session = self
+                .credential_service
+                .issue(
+                    None,
+                    None,
+                    Some(SessionMethod::Bootstrap),
+                    Some(SessionRole::Owner),
+                    Some(client_metadata),
+                )
+                .await?;
 
-        Ok((session, session_token))
+            let session_token = session.token.clone();
+            return Ok((session, session_token));
+        }
+
+        // 未配置引导凭证，拒绝认证
+        Err(AuthError::AuthenticationFailed(
+            "未配置引导凭证，无法完成 Bootstrap 认证。请设置 REMI_BOOTSTRAP_TOKEN 环境变量或创建 bootstrap_token 文件".to_string(),
+        ))
     }
 
     /// # 颁发配对凭证
@@ -874,4 +922,69 @@ impl AuthService {
             base_url, credential.pairing_code
         ))
     }
+}
+
+/// 加载引导凭证（Bootstrap Token）
+///
+/// 按以下优先级加载：
+/// 1. 环境变量 `REMI_BOOTSTRAP_TOKEN`
+/// 2. 文件 `~/.remi-code/userdata/bootstrap_token`（首次访问时自动生成）
+///
+/// 如果环境变量未设置且文件不存在，则生成一个新的随机 token 并持久化到文件，
+/// 确保首次启动时自动生成引导凭证。
+///
+/// # 返回值
+///
+/// 返回 `Some(token)` 表示成功加载或生成，返回 `None` 表示无法确定用户主目录。
+fn load_bootstrap_token() -> Option<String> {
+    // 优先从环境变量读取
+    if let Ok(token) = std::env::var("REMI_BOOTSTRAP_TOKEN") {
+        if !token.is_empty() {
+            return Some(token);
+        }
+    }
+
+    // 尝试从文件读取
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .ok()?;
+
+    let state_dir = std::path::Path::new(&home)
+        .join(".remi-code")
+        .join("userdata");
+
+    let token_path = state_dir.join("bootstrap_token");
+
+    // 如果文件存在，读取并返回
+    if token_path.exists() {
+        if let Ok(content) = std::fs::read_to_string(&token_path) {
+            let token = content.trim().to_string();
+            if !token.is_empty() {
+                return Some(token);
+            }
+        }
+    }
+
+    // 文件不存在或读取失败，生成新 token 并持久化
+    let token = uuid::Uuid::new_v4().to_string();
+
+    // 确保目录存在
+    let _ = std::fs::create_dir_all(&state_dir);
+
+    // 写入文件（设置文件权限为仅所有者可读写，在 Unix 上生效）
+    if std::fs::write(&token_path, &token).is_ok() {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            if let Ok(metadata) = std::fs::metadata(&token_path) {
+                let mut perms = metadata.permissions();
+                perms.set_mode(0o600); // rw-------
+                let _ = std::fs::set_permissions(&token_path, perms);
+            }
+        }
+        info!("已生成新的引导凭证并持久化到: {}", token_path.display());
+        return Some(token);
+    }
+
+    None
 }

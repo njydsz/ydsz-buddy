@@ -221,8 +221,8 @@ pub async fn git_status(
     Ok(GitStatus {
         branch: status.current_branch.unwrap_or_else(|| "HEAD".to_string()),
         changes,
-        ahead: 0, // TODO: 计算 ahead/behind
-        behind: 0,
+        ahead: status.ahead_count as usize,
+        behind: status.behind_count as usize,
     })
 }
 

@@ -15,7 +15,7 @@ use crate::rpc::RpcRouter;
 use super::handlers::{
     register_orchestration_methods, register_provider_methods, register_git_methods,
     register_terminal_methods, register_workspace_methods, register_auth_methods,
-    register_checkpoint_methods,
+    register_checkpoint_methods, register_server_methods,
 };
 
 /// 服务容器
@@ -70,7 +70,10 @@ pub async fn register_all_methods(
     register_auth_methods(router.clone(), services.clone()).await;
 
     // 检查点方法
-    register_checkpoint_methods(router, services).await;
+    register_checkpoint_methods(router.clone(), services.clone()).await;
+
+    // 服务器方法
+    register_server_methods(router, services).await;
 
     info!("RPC 方法注册完成");
 }
