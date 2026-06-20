@@ -358,7 +358,7 @@ describe("Keybindings update toast", () => {
       sendServerConfigUpdatedPush([]);
       await waitForNoToast("Keybindings updated");
 
-      // Remount the app 锟?onServerConfigUpdated replays the cached value
+      // Remount the app —onServerConfigUpdated replays the cached value
       // synchronously on subscribe. This should NOT produce a toast.
       await mounted.cleanup();
       const remounted = await mountApp();

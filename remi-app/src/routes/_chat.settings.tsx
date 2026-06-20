@@ -1902,7 +1902,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM鈥?
+                  placeholder="-apple-system, BlinkM…
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />

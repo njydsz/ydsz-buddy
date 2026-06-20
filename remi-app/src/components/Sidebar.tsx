@@ -2576,7 +2576,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms 锟?this is a folder-level operation, and
+      // Bulk archive always confirms —this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [

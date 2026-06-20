@@ -44,7 +44,7 @@ export const DirectoryTreePicker = memo(function DirectoryTreePicker({
           rootPath={rootPath}
           emptyLabel={emptyLabel}
           unavailableLabel="Home directory unavailable."
-          loadingLabel={includeFiles ? "Loading entries鈥? : "Loading folders鈥?}
+          loadingLabel={includeFiles ? "Loading entries…" : "Loading folders…"}
           className="max-h-96 overflow-auto px-2 py-2"
           includeFiles={includeFiles}
           onSelectEntry={async (absolutePath, entry: ProjectFileSystemEntry) => {

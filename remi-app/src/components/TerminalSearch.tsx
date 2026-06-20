@@ -71,7 +71,7 @@ export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchP
   };
 
   // Re-run search when case sensitivity or search addon changes
-  // (but not on query change 鈥?handleInputChange handles that).
+  // (but not on query change …handleInputChange handles that).
   const prevCaseSensitiveRef = useRef(caseSensitive);
   const prevSearchAddonRef = useRef<SearchAddon | null>(searchAddon);
   useEffect(() => {

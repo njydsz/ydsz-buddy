@@ -148,7 +148,7 @@ function buildDiffPanelUnsafeCSS(theme: "light" | "dark"): string {
   cursor: pointer;
 }
 
-/* Hide the default change-type icon (blue circle) 鈥?replaced by chevron + file-type icon. */
+/* Hide the default change-type icon (blue circle) …replaced by chevron + file-type icon. */
 [data-change-icon] {
   display: none;
 }

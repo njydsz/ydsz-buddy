@@ -2746,10 +2746,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided 锟?use them
+              // Explicit options provided —use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection 锟?preserve existing options, update provider+model
+              // No options in selection —preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,

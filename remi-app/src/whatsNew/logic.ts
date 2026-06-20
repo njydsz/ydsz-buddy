@@ -1,7 +1,7 @@
 // FILE: whatsNew/logic.ts
 // Purpose: Pure, stateless helpers for the "What's new" surfaces.
 // Layer: shared UI logic (importable by hook, components, and tests).
-// Depends on: nothing runtime 鈥?only types below.
+// Depends on: nothing runtime …only types below.
 //
 // The logic here deliberately avoids React, storage, and the changelog data.
 // That lets us unit-test version arithmetic and selection rules in isolation
@@ -12,7 +12,7 @@
  * IndieDevs "feature card" format so each bullet can carry a screenshot and
  * a longer technical blurb, not just a title.
  *
- * `image`, `imageAlt`, and `details` are optional 鈥?a release can still ship
+ * `image`, `imageAlt`, and `details` are optional …a release can still ship
  * text-only notes when visuals aren't available yet.
  */
 export interface WhatsNewFeature {
@@ -32,7 +32,7 @@ export interface WhatsNewFeature {
  *
  * `heroImage` / `heroImageAlt` are optional artwork shown on the post-update
  * popout card (the little "New: ..." pill in the bottom-left corner). When
- * omitted, the card falls back to a gradient + icon 鈥?so a release without a
+ * omitted, the card falls back to a gradient + icon …so a release without a
  * screenshot still gets a polished entry point.
  */
 export interface WhatsNewEntry {
@@ -46,7 +46,7 @@ export interface WhatsNewEntry {
 /**
  * Parse a `MAJOR.MINOR.PATCH` string into a numeric tuple. Non-numeric or
  * missing segments fall back to 0 so a malformed version never crashes the
- * dialog 鈥?it just sorts as the lowest possible value.
+ * dialog …it just sorts as the lowest possible value.
  */
 export function parseVersion(version: string): readonly [number, number, number] {
   const [rawMajor = "0", rawMinor = "0", rawPatch = "0"] = version.split(".");
@@ -75,7 +75,7 @@ export function compareVersions(a: string, b: string): number {
 /**
  * Return the given entries sorted by version in descending order (newest
  * first). This is the canonical "display order" used everywhere we present a
- * list of releases to the user 鈥?both the post-update dialog and the
+ * list of releases to the user …both the post-update dialog and the
  * settings surface go through here to avoid drift between the two views.
  */
 export function sortEntriesByVersionDesc(
@@ -86,7 +86,7 @@ export function sortEntriesByVersionDesc(
 
 /**
  * Inputs to `resolveWhatsNewState`. Kept as a plain object so the hook can
- * pass the same shape it already has 鈥?no parameter juggling.
+ * pass the same shape it already has …no parameter juggling.
  */
 export interface WhatsNewInputs {
   /** All changelog entries known at build time. Order is not assumed. */
@@ -96,7 +96,7 @@ export interface WhatsNewInputs {
   /**
    * The last version the user acknowledged. `null` means "never dismissed a
    * What's New dialog", which on the very first launch we treat as a fresh
-   * install 鈥?we silently mark the current version as seen instead of showing
+   * install …we silently mark the current version as seen instead of showing
    * the entire historical changelog.
    */
   readonly lastSeenVersion: string | null;
@@ -109,7 +109,7 @@ export interface WhatsNewInputs {
  *   `currentEntry` drives the default "What's new?" view; `allEntries` is
  *   the full history for the "Complete changelog" secondary view. On
  *   dismiss, persist `nextLastSeenVersion`.
- * - `silent-bootstrap`: first launch or no curated entry for this upgrade 鈥? *   no dialog, just record `nextLastSeenVersion` so we don't dump the
+ * - `silent-bootstrap`: first launch or no curated entry for this upgrade — *   no dialog, just record `nextLastSeenVersion` so we don't dump the
  *   backlog on the user or re-evaluate on every launch.
  * - `noop`: nothing to do. Either the user is already up to date or the
  *   current version is older than what they've seen (e.g. a downgrade).
@@ -135,7 +135,7 @@ export type WhatsNewState =
  * The IndieDevs-style dialog always anchors on the *current* release entry
  * (the one matching `currentVersion`), then offers the full changelog as a
  * secondary view. So here we don't try to batch up "all skipped releases"
- * into the main view 鈥?we just confirm the current release has curated
+ * into the main view …we just confirm the current release has curated
  * notes and surface them, letting the accordion handle history.
  */
 export function resolveWhatsNewState(inputs: WhatsNewInputs): WhatsNewState {
@@ -149,7 +149,7 @@ export function resolveWhatsNewState(inputs: WhatsNewInputs): WhatsNewState {
   }
 
   // Already up to date, or the user somehow downgraded. Either way, don't
-  // surface anything 鈥?we only move the marker forward, never backward.
+  // surface anything …we only move the marker forward, never backward.
   if (compareVersions(currentVersion, lastSeenVersion) <= 0) {
     return { kind: "noop" };
   }
@@ -158,7 +158,7 @@ export function resolveWhatsNewState(inputs: WhatsNewInputs): WhatsNewState {
     (entry) => compareVersions(entry.version, currentVersion) === 0,
   );
   if (!currentEntry) {
-    // No curated notes for the installed build 鈥?silently advance so we
+    // No curated notes for the installed build …silently advance so we
     // don't re-evaluate on every launch.
     return { kind: "silent-bootstrap", nextLastSeenVersion: currentVersion };
   }

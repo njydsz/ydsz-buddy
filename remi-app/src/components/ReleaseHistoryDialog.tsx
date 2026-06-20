@@ -1,9 +1,9 @@
 // FILE: ReleaseHistoryDialog.tsx
 // Purpose: Standalone dialog that shows the full curated release history. Used
 // by the Settings > About row so users can revisit any past release notes on
-// demand 鈥?mirrors the "Complete changelog" view of the post-update dialog
+// demand …mirrors the "Complete changelog" view of the post-update dialog
 // without the "current release" anchor.
-// Layer: Settings overlay 鈥?mounted lazily from the settings panel when the
+// Layer: Settings overlay …mounted lazily from the settings panel when the
 // user asks to view history.
 
 import { ChangelogAccordion } from "../whatsNew/ChangelogAccordion";
@@ -42,7 +42,7 @@ export default function ReleaseHistoryDialog({
   defaultExpandedVersion = null,
 }: ReleaseHistoryDialogProps) {
   // Sort at render time so the source of truth (`entries.ts`) stays free of
-  // ordering rules 鈥?authors can prepend, append, or reorder entries freely.
+  // ordering rules …authors can prepend, append, or reorder entries freely.
   const sorted = sortEntriesByVersionDesc(entries);
 
   return (

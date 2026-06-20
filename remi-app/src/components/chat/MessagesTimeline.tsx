@@ -732,7 +732,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                 inlineWorkSummary,
               ]
                 .filter((value): value is string => Boolean(value))
-                .join(" 锟?")
+                .join(" —")
             ) : (
               <>
                 <LiveMessageMeta
@@ -740,7 +740,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                   durationStart={row.durationStart}
                   timestampFormat={timestampFormat}
                 />
-                {inlineWorkSummary ? <> 锟?{inlineWorkSummary}</> : null}
+                {inlineWorkSummary ? <> —{inlineWorkSummary}</> : null}
               </>
             )
           ) : (
@@ -753,7 +753,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               inlineWorkSummary,
             ]
               .filter((value): value is string => Boolean(value))
-              .join(" 锟?")
+              .join(" —")
           );
           return (
             <>
@@ -1196,7 +1196,7 @@ function formatMessageMeta(
   timestampFormat: TimestampFormat,
 ): string {
   if (!duration) return formatShortTimestamp(createdAt, timestampFormat);
-  return `${formatShortTimestamp(createdAt, timestampFormat)} 锟?${duration}`;
+  return `${formatShortTimestamp(createdAt, timestampFormat)} —${duration}`;
 }
 
 /** 鏍煎紡鍖栧唴鑱斿伐浣滄憳瑕侊紙褰撳墠鏈疄鐜帮紝杩斿洖 null锛?*/
@@ -1648,7 +1648,7 @@ function extractFilePathFromDetail(detail: string): string | null {
       return filePath.trim();
     }
   } catch {
-    // Not valid JSON 锟?try regex fallback
+    // Not valid JSON —try regex fallback
     const match = /"(?:file_path|filePath|path|filename)"\s*:\s*"([^"]+)"/i.exec(detail);
     if (match?.[1]) return match[1];
   }
@@ -1704,7 +1704,7 @@ function workEntryPreview(
     const filePath = extractFilePathFromDetail(workEntry.detail);
     if (filePath) return basename(filePath);
 
-    // For file-related entries, the heading alone is enough 锟?don't show raw JSON
+    // For file-related entries, the heading alone is enough —don't show raw JSON
     if (isFileRelated) return null;
 
     // For other entries, if the detail looks like raw JSON, skip it
@@ -1714,7 +1714,7 @@ function workEntryPreview(
     const readLinesMatch = /^Read\s+(\d+\s+lines?)$/i.exec(trimmedDetail);
     if (readLinesMatch?.[1]) return readLinesMatch[1];
 
-    // Clean, non-JSON detail 锟?show it
+    // Clean, non-JSON detail —show it
     return trimmedDetail;
   }
 
@@ -1815,7 +1815,7 @@ function subagentSecondaryLabel(
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(" 锟?");
+  return parts.join(" —");
 }
 
 function subagentStatusClasses(
@@ -1851,7 +1851,7 @@ function subagentCardSummary(workEntry: TimelineWorkEntry): string {
 function subagentCardMeta(workEntry: TimelineWorkEntry): string | null {
   const modelLabel = formatSubagentModelLabel(workEntry.subagentAction?.model);
   if (modelLabel && workEntry.subagentAction?.prompt) {
-    return `${modelLabel} 锟?${workEntry.subagentAction.prompt}`;
+    return `${modelLabel} —${workEntry.subagentAction.prompt}`;
   }
   return modelLabel ?? workEntry.subagentAction?.prompt ?? null;
 }

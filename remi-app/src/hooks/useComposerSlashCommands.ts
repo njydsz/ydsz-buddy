@@ -172,7 +172,8 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 鑾峰彇褰撳墠鍙敤鐨勫唴缃枩鏉犲懡浠ゅ垪琛?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  // 获取当前可用的内置斜杠命令列表
+  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -230,7 +231,8 @@ export function useComposerSlashCommands(input: {
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
   /**
-   * 浠庢枩鏉犲懡浠よ缃揩閫熸ā寮?   * 鏇存柊鎻愪緵鍟嗘ā鍨嬮€夐」涓殑蹇€熸ā寮忛厤缃?   */
+   * 获取斜杠命令的过滤结果，根据查询字符串进行匹配
+   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -249,7 +251,8 @@ export function useComposerSlashCommands(input: {
 
   /**
    * 鎵ц /fast 鏂滄潬鍛戒护
-   * 鏀寔 /fast, /fast on, /fast off, /fast status 绛夎娉?   */
+   * 匹配 /fast, /fast on, /fast off, /fast status 等命令
+   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -291,7 +294,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 浠庢枩鏉犲懡浠ゅ垱寤哄垎鍙夌嚎绋?   * 澶嶅埗褰撳墠绾跨▼鐨勬秷鎭苟鍒涘缓鏂扮嚎绋?   */
+   * 获取斜杠命令的描述文本，包含命令名称和简短说明
+   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -353,7 +357,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 浠庢枩鏉犲懡浠ゅ垱寤轰晶杈硅亰澶╃嚎绋?   * 鍦ㄥ綋鍓嶇嚎绋嬫梺杈规墦寮€涓€涓柊鐨勮亰澶╃獥鍙?   */
+   * 获取斜杠命令的排序依据，按命令名称和来源排序
+   */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
       const api = readNativeApi();
@@ -440,7 +445,8 @@ export function useComposerSlashCommands(input: {
 
   /**
    * 鍚姩 Codex 瀹℃煡娴佺▼
-   * @param target - 瀹℃煡鐩爣锛歝hanges锛堝綋鍓嶆洿鏀癸級鎴?base-branch锛堝熀纭€鍒嗘敮锛?   */
+   * @param target - 目标对象，包含 changes 和 base-branch 等属性
+   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();

@@ -30,7 +30,7 @@ export interface WhatsNewDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   /**
-   * The entry matching the installed build. `null` means "nothing to show" 鈥?   * the hook only flips `open=true` when we have an entry, so normally this is
+   * The entry matching the installed build. `null` means "nothing to show" —   * the hook only flips `open=true` when we have an entry, so normally this is
    * non-null while the dialog is visible. We still guard against the null
    * case to keep the UI tolerant of mid-transition re-renders.
    */
@@ -59,7 +59,7 @@ export default function WhatsNewDialog({
   }, [open]);
 
   // Guard against a race where the hook has already reset but base-ui is
-  // still transitioning 鈥?rendering an empty card would briefly flash a
+  // still transitioning …rendering an empty card would briefly flash a
   // confusing empty state.
   if (!currentEntry) {
     return (

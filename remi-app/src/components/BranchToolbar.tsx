@@ -92,7 +92,7 @@ export function RuntimeUsageControls({
           }
           title={
             runtimeMode === "full-access"
-              ? "Full access 锟?click to require approvals"
+              ? "Full access —click to require approvals"
               : "Ask every action"
           }
         >

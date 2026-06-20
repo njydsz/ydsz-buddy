@@ -126,7 +126,7 @@ export function formatAssistantSelectionPreview(text: string): string {
   }
   const firstLine = normalized.split("\n")[0] ?? normalized;
   return firstLine.length > ASSISTANT_SELECTION_PREVIEW_MAX_CHARS
-    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}鈥
+    ? `${firstLine.slice(0, ASSISTANT_SELECTION_PREVIEW_MAX_CHARS - 1)}…`
     : firstLine;
 }
 

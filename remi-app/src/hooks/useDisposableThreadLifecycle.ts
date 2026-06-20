@@ -43,12 +43,14 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
   const temporaryThreadIds = useTemporaryThreadStore((store) => store.temporaryThreadIds);
   const clearTemporaryThread = useTemporaryThreadStore((store) => store.clearTemporaryThread);
   
-  // 鑾峰彇鍒濆鑽夌ǹ绾跨▼鐘舵€侊紙浠呯敤浜庡垵濮嬪寲 ref锛?  const initialDraftThread =
+  // 获取初始草稿线程状态（仅用于初始化 ref）
+  const initialDraftThread =
     activeThreadId !== null
       ? useComposerDraftStore.getState().draftThreadsByThreadId[activeThreadId]
       : undefined;
   
-  // 璺熻釜涓婁竴涓嚎绋嬬殑鐘舵€侊紝鐢ㄤ簬妫€娴嬬嚎绋嬪垏鎹?  const previousThreadStateRef = useRef<{
+  // 跟踪上一个线程的状态，用于检测线程切换
+  const previousThreadStateRef = useRef<{
     threadId: ThreadId | null;
     wasTemporary: boolean;
   }>({
@@ -58,7 +60,8 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
       initialDraftThread?.isTemporary === true,
   });
   
-  // 姝ｅ湪閿€姣佷腑鐨勭嚎绋?ID 闆嗗悎锛岄槻姝㈤噸澶嶉攢姣?  const disposingThreadIdsRef = useRef<Set<ThreadId>>(new Set());
+  // 正在销毁中的线程 ID 集合，防止重复销毁
+  const disposingThreadIdsRef = useRef<Set<ThreadId>>(new Set());
 
   useEffect(() => {
     const previousThreadState = previousThreadStateRef.current;
@@ -73,18 +76,21 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
         : false,
     };
 
-    // 鍒ゆ柇鏄惁闇€瑕侀攢姣佷笂涓€涓嚎绋?    const disposableThreadId = resolveDisposableThreadIdToDispose({
+    // 判断是否需要销毁上一个线程
+    const disposableThreadId = resolveDisposableThreadIdToDispose({
       previousThreadId: previousThreadState.threadId,
       nextThreadId: activeThreadId,
       previousThreadWasTemporary: previousThreadState.wasTemporary,
       draftThreadsByThreadId,
     });
     
-    // 鏃犻渶閿€姣佹垨姝ｅ湪閿€姣佷腑锛岀洿鎺ヨ繑鍥?    if (!disposableThreadId || disposingThreadIdsRef.current.has(disposableThreadId)) {
+    // 无需销毁或正在销毁中，直接返回
+    if (!disposableThreadId || disposingThreadIdsRef.current.has(disposableThreadId)) {
       return;
     }
 
-    // 鏍囪涓烘鍦ㄩ攢姣?    disposingThreadIdsRef.current.add(disposableThreadId);
+    // 标记为正在销毁
+    disposingThreadIdsRef.current.add(disposableThreadId);
     
     // 鎵ц寮傛娓呯悊娴佺▼
     void (async () => {
@@ -106,7 +112,8 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
               .catch(() => undefined);
           }
 
-          // 2. 鍏抽棴缁堢骞跺垹闄ゅ巻鍙茶褰?          await api.terminal
+          // 2. 关闭终端并删除历史记录
+          await api.terminal
             .close({ threadId: disposableThreadId, deleteHistory: true })
             .catch(() => undefined);
 
@@ -128,7 +135,8 @@ export function useDisposableThreadLifecycle(activeThreadId: ThreadId | null): v
           }
         }
 
-        // 4. 娓呯悊鎵€鏈夋湰鍦扮姸鎬?        clearDraftThread(disposableThreadId);
+        // 4. 清理所有相关的本地状态（草稿、终端状态、分屏视图、临时标记）
+        clearDraftThread(disposableThreadId);
         clearTerminalState(disposableThreadId);
         removeThreadFromSplitViews(disposableThreadId);
         clearTemporaryThread(disposableThreadId);
