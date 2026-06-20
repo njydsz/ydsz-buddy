@@ -1,12 +1,12 @@
 /**
  * @file rateLimits.ts
- * @description 速率限制解析、归一化、格式化和行派生的集中处理模块，
- * 使 UI 组件保持纯展示职责。支持多种 Provider 的速率限制数据格式。
+ * @description é€ŸçŽ‡é™åˆ¶è§£æžã€å½’ä¸€åŒ–ã€æ ¼å¼åŒ–å’Œè¡Œæ´¾ç”Ÿçš„é›†ä¸­å¤„ç†æ¨¡å—ï¼Œ
+ * ä½ UI ç»„ä»¶äæŒçº¯å±•ç¤ºèŒè´£ã€‚æ”¯æŒå¤šç§ Provider çš„é€ŸçŽ‡é™åˆ¶æ•°æ®æ ¼å¼ã€‚
  */
 
 import type { OrchestrationThread } from "~/contracts";
 
-/** 速率限制窗口，包含窗口标签、已用百分比、重置时间等信息 */
+/** é€ŸçŽ‡é™åˆ¶çª—å£ï¼ŒåŒ…å«çª—å£æ ‡ç­¾ã€å·²ç”¨ç™¾åˆ†æ¯”ã€é‡ç½®æ—¶é—´ç­‰ä¡æ¯ */
 export interface RateLimitWindow {
   window: string;
   usedPercent?: number;
@@ -15,7 +15,7 @@ export interface RateLimitWindow {
   windowDurationMins?: number;
 }
 
-/** Provider 速率限制，包含 Provider 标识、更新时间及限制窗口列表 */
+/** Provider é€ŸçŽ‡é™åˆ¶ï¼ŒåŒ…å« Provider æ ‡è¯†ã€æ›´æ–°æ—¶é—´åŠé™åˆ¶çª—å£åˆ—è¡¨ */
 export interface ProviderRateLimit {
   provider: string;
   updatedAt: string;
@@ -27,7 +27,7 @@ export interface ProviderRateLimit {
   status?: string;
 }
 
-/** 可见的速率限制行，用于 UI 展示 */
+/** å¯è§çš„é€ŸçŽ‡é™åˆ¶è¡Œï¼Œç”¨äºŽ UI å±•ç¤º */
 export interface VisibleRateLimitRow {
   id: string;
   label: string;
@@ -89,11 +89,11 @@ function windowLabelFromDuration(windowDurationMins: number | undefined): string
 }
 
 /**
- * 归一化速率限制窗口标签
+ * å½’ä¸€åŒ–é€ŸçŽ‡é™åˆ¶çª—å£æ ‡ç­¾
  *
- * @param label - 原始标签
- * @param windowDurationMins - 窗口时长（分钟）
- * @returns 归一化后的标签（如 "5h"、"Weekly"、"Sonnet"、"Current"）
+ * @param label - åŽŸå§‹æ ‡ç­¾
+ * @param windowDurationMins - çª—å£æ—¶é•ï¼ˆåˆ†é’Ÿï¼‰
+ * @returns å½’ä¸€åŒ–åŽçš„æ ‡ç­¾ï¼ˆå¦‚ "5h"ã€"Weekly"ã€"Sonnet"ã€"Current"ï¼‰
  */
 export function normalizeRateLimitLabel(
   label: string | undefined,
@@ -265,10 +265,10 @@ function extractFallbackLimits(payload: Record<string, unknown>): RateLimitWindo
 }
 
 /**
- * 从线程活动列表中派生账户级别的速率限制
+ * ä»Žçºç¨‹æ´»åŠ¨åˆ—è¡¨ä¸­æ´¾ç”Ÿè´¦æˆ·çº§åˆ«çš„é€ŸçŽ‡é™åˆ¶
  *
- * @param threads - 线程列表
- * @returns 按 Provider 分组的速率限制数组
+ * @param threads - çºç¨‹åˆ—è¡¨
+ * @returns æŒ‰ Provider åˆ†ç»„çš„é€ŸçŽ‡é™åˆ¶æ•°ç»„
  */
 export function deriveAccountRateLimits(
   threads: ReadonlyArray<Pick<OrchestrationThread, "activities">>,
@@ -318,10 +318,10 @@ export function deriveAccountRateLimits(
 }
 
 /**
- * 从速率限制数组中派生可见的速率限制行
+ * ä»Žé€ŸçŽ‡é™åˆ¶æ•°ç»„ä¸­æ´¾ç”Ÿå¯è§çš„é€ŸçŽ‡é™åˆ¶è¡Œ
  *
- * @param rateLimits - Provider 速率限制数组
- * @returns 可见的速率限制行数组，按窗口标签排序
+ * @param rateLimits - Provider é€ŸçŽ‡é™åˆ¶æ•°ç»„
+ * @returns å¯è§çš„é€ŸçŽ‡é™åˆ¶è¡Œæ•°ç»„ï¼ŒæŒ‰çª—å£æ ‡ç­¾æŽ’åº
  */
 export function deriveVisibleRateLimitRows(
   rateLimits: ReadonlyArray<ProviderRateLimit>,
@@ -375,21 +375,21 @@ export function deriveVisibleRateLimitRows(
 }
 
 /**
- * 格式化速率限制剩余百分比
+ * æ ¼å¼åŒ–é€ŸçŽ‡é™åˆ¶å‰©ä½™ç™¾åˆ†æ¯”
  *
- * @param remainingPercent - 剩余百分比
- * @returns 格式化后的字符串（如 "85%"）
+ * @param remainingPercent - å‰©ä½™ç™¾åˆ†æ¯”
+ * @returns æ ¼å¼åŒ–åŽçš„å­—ç¬¦ä¸²ï¼ˆå¦‚ "85%"ï¼‰
  */
 export function formatRateLimitRemainingPercent(remainingPercent: number | undefined): string {
-  if (remainingPercent === undefined) return "�?;
+  if (remainingPercent === undefined) return "ï½?;
   return `${Math.round(Math.min(100, Math.max(0, remainingPercent)))}%`;
 }
 
 /**
- * 格式化速率限制重置时间
+ * æ ¼å¼åŒ–é€ŸçŽ‡é™åˆ¶é‡ç½®æ—¶é—´
  *
- * @param resetsAt - 重置时间的 ISO 字符串
- * @returns 格式化后的时间字符串（24小时内显示时分，否则显示月日）
+ * @param resetsAt - é‡ç½®æ—¶é—´çš„ ISO å­—ç¬¦ä¸²
+ * @returns æ ¼å¼åŒ–åŽçš„æ—¶é—´å­—ç¬¦ä¸²ï¼ˆ24å°æ—¶å†…æ˜¾ç¤ºæ—¶åˆ†ï¼Œå¦åˆ™æ˜¾ç¤ºæœˆæ—¥ï¼‰
  */
 export function formatRateLimitResetTime(resetsAt: string): string {
   const resetMs = Date.parse(resetsAt);
@@ -410,10 +410,10 @@ export function formatRateLimitResetTime(resetsAt: string): string {
 }
 
 /**
- * 从速率限制数组中派生"了解更多"链接
+ * ä»Žé€ŸçŽ‡é™åˆ¶æ•°ç»„ä¸­æ´¾ç”Ÿ"äº†è§£æ›´å¤š"é“¾æŽ¥
  *
- * @param rateLimits - Provider 速率限制数组
- * @returns 了解更多链接，若存在多个 Provider 则返回 null
+ * @param rateLimits - Provider é€ŸçŽ‡é™åˆ¶æ•°ç»„
+ * @returns äº†è§£æ›´å¤šé“¾æŽ¥ï¼Œè‹¥å­˜åœ¨å¤šä¸ª Provider åˆ™è”å›ž null
  */
 export function deriveRateLimitLearnMoreHref(
   rateLimits: ReadonlyArray<ProviderRateLimit>,
@@ -426,10 +426,10 @@ export function deriveRateLimitLearnMoreHref(
 }
 
 /**
- * 根据 Provider 类型派生用量"了解更多"链接
+ * æ ¹æ® Provider ç±»åž‹æ´¾ç”Ÿç”¨é‡"äº†è§£æ›´å¤š"é“¾æŽ¥
  *
- * @param provider - Provider 标识
- * @returns 对应的用量文档链接，若无法匹配则返回 null
+ * @param provider - Provider æ ‡è¯†
+ * @returns å¯¹åº”çš„ç”¨é‡æ–‡æ¡£é“¾æŽ¥ï¼Œè‹¥æ— æ³•åŒ¹é…åˆ™è”å›ž null
  */
 export function deriveProviderUsageLearnMoreHref(
   provider: string | null | undefined,
@@ -486,11 +486,11 @@ function mergeProviderRateLimit(
 }
 
 /**
- * 合并两组 Provider 速率限制（preferred 优先于 fallback）
+ * åˆå¹¶ä¸¤ç»„ Provider é€ŸçŽ‡é™åˆ¶ï¼ˆpreferred ä¼˜å…ˆäºŽ fallbackï¼‰
  *
- * @param preferred - 优先的速率限制数组
- * @param fallback - 备选的速率限制数组
- * @returns 合并后的速率限制数组
+ * @param preferred - ä¼˜å…ˆçš„é€ŸçŽ‡é™åˆ¶æ•°ç»„
+ * @param fallback - å¤‡é€‰çš„é€ŸçŽ‡é™åˆ¶æ•°ç»„
+ * @returns åˆå¹¶åŽçš„é€ŸçŽ‡é™åˆ¶æ•°ç»„
  */
 export function mergeProviderRateLimits(
   preferred: ReadonlyArray<ProviderRateLimit>,

@@ -35,7 +35,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
   rootPath,
   emptyLabel = "No folders found",
   unavailableLabel = "Home directory unavailable.",
-  loadingLabel = "Loading foldersâ€?,
+  loadingLabel = "Loading folderséˆ¥?,
   className,
   includeFiles = false,
   query = "",
@@ -176,7 +176,7 @@ export const DirectoryTreeBrowser = memo(function DirectoryTreeBrowser({
               <span className="truncate text-foreground/95">{entry.name}</span>
             </button>
             {isDirectory && isLoadingChildren ? (
-              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loadingâ€?/span>
+              <span className="shrink-0 text-[11px] text-muted-foreground/45">Loadingéˆ¥?/span>
             ) : null}
           </div>,
           ...renderedChildren,

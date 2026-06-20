@@ -1,6 +1,6 @@
 /**
  * @file useComposerCommandMenuItems.ts
- * @description 编辑器命令菜单项 Hook - 根据触发器类型生成命令菜单项
+ * @description 缂栬緫鍣ㄥ懡浠よ彍鍗曢」 Hook - 鏍规嵁瑙﹀彂鍣ㄧ被鍨嬬敓鎴愬懡浠よ彍鍗曢」
  * @module hooks/useComposerCommandMenuItems
  */
 
@@ -35,13 +35,13 @@ import {
 } from "../composerSlashCommands";
 import type { ComposerCommandItem } from "../components/chat/ComposerCommandMenu";
 
-/** 插件建议项类�?*/
+/** 鎻掍欢寤鸿椤圭被鍨?*/
 type ComposerPluginSuggestion = {
   plugin: ProviderPluginDescriptor;
   mention: ProviderMentionReference;
 };
 
-/** 可搜索的模型选项类型 */
+/** 鍙悳绱㈢殑妯″瀷閫夐」绫诲瀷 */
 type SearchableModelOption = {
   provider: ProviderKind;
   providerLabel: string;
@@ -54,14 +54,14 @@ type SearchableModelOption = {
 };
 
 /**
- * 编辑器命令菜单项 Hook
+ * 缂栬緫鍣ㄥ懡浠よ彍鍗曢」 Hook
  *
  * @description
- * 根据编辑器触发器类型（mention、slash-command、skill、model）生成对应的命令菜单项�? * 支持插件、代理、路径、技能、模型等多种类型的命令建议�? *
- * @param input - 输入参数对象
- * @param input.composerTrigger - 编辑器触发器，决定菜单类�? * @param input.provider - 当前提供商类�? * @param input.providerPlugins - 提供商插件列�? * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerSkills - 提供商技能列�? * @param input.workspaceEntries - 工作区条目列�? * @param input.searchableModelOptions - 可搜索的模型选项
- * @param input.supportsFastSlashCommand - 是否支持快速斜杠命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferReviewCommand - 是否可提供审查命�? * @param input.canOfferForkCommand - 是否可提供分叉命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.dynamicAgents - 动态代理列�? *
- * @returns 过滤和映射后的命令菜单项数组
+ * 鏍规嵁缂栬緫鍣ㄨЕ鍙戝櫒绫诲瀷锛坢ention銆乻lash-command銆乻kill銆乵odel锛夌敓鎴愬搴旂殑鍛戒护鑿滃崟椤广€? * 鏀寔鎻掍欢銆佷唬鐞嗐€佽矾寰勩€佹妧鑳姐€佹ā鍨嬬瓑澶氱绫诲瀷鐨勫懡浠ゅ缓璁€? *
+ * @param input - 杈撳叆鍙傛暟瀵硅薄
+ * @param input.composerTrigger - 缂栬緫鍣ㄨЕ鍙戝櫒锛屽喅瀹氳彍鍗曠被鍨? * @param input.provider - 褰撳墠鎻愪緵鍟嗙被鍨? * @param input.providerPlugins - 鎻愪緵鍟嗘彃浠跺垪琛? * @param input.providerNativeCommands - 鎻愪緵鍟嗗師鐢熷懡浠ゅ垪琛? * @param input.providerSkills - 鎻愪緵鍟嗘妧鑳藉垪琛? * @param input.workspaceEntries - 宸ヤ綔鍖烘潯鐩垪琛? * @param input.searchableModelOptions - 鍙悳绱㈢殑妯″瀷閫夐」
+ * @param input.supportsFastSlashCommand - 鏄惁鏀寔蹇€熸枩鏉犲懡浠? * @param input.canOfferCompactCommand - 鏄惁鍙彁渚涘帇缂╁懡浠? * @param input.canOfferReviewCommand - 鏄惁鍙彁渚涘鏌ュ懡浠? * @param input.canOfferForkCommand - 鏄惁鍙彁渚涘垎鍙夊懡浠? * @param input.canOfferSideCommand - 鏄惁鍙彁渚涗晶杈瑰懡浠? * @param input.dynamicAgents - 鍔ㄦ€佷唬鐞嗗垪琛? *
+ * @returns 杩囨护鍜屾槧灏勫悗鐨勫懡浠よ彍鍗曢」鏁扮粍
  *
  * @example
  * ```tsx
@@ -69,7 +69,7 @@ type SearchableModelOption = {
  *   composerTrigger: trigger,
  *   provider: "openai",
  *   providerPlugins: plugins,
- *   // ... 其他参数
+ *   // ... 鍏朵粬鍙傛暟
  * });
  * ```
  */
@@ -105,14 +105,14 @@ export function useComposerCommandMenuItems(input: {
   } = input;
 
   return useMemo<ComposerCommandItem[]>(() => {
-    // 无触发器时返回空数组
+    // 鏃犺Е鍙戝櫒鏃惰繑鍥炵┖鏁扮粍
     if (!composerTrigger) return [];
 
-    // 处理 @ 提及触发器：显示插件、本地文件夹、路径、代�?    if (composerTrigger.kind === "mention") {
+    // 澶勭悊 @ 鎻愬強瑙﹀彂鍣細鏄剧ず鎻掍欢銆佹湰鍦版枃浠跺す銆佽矾寰勩€佷唬鐞?    if (composerTrigger.kind === "mention") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
 
-      // 构建代理项：优先使用动态代理，否则使用静态别�?      const agentItems: ComposerCommandItem[] = (() => {
-        // 有动态代理时使用动态代�?        if (dynamicAgents.length > 0) {
+      // 鏋勫缓浠ｇ悊椤癸細浼樺厛浣跨敤鍔ㄦ€佷唬鐞嗭紝鍚﹀垯浣跨敤闈欐€佸埆鍚?      const agentItems: ComposerCommandItem[] = (() => {
+        // 鏈夊姩鎬佷唬鐞嗘椂浣跨敤鍔ㄦ€佷唬鐞?        if (dynamicAgents.length > 0) {
           return dynamicAgents
             .filter(({ name, displayName }) => {
               if (!query) return true;
@@ -129,7 +129,7 @@ export function useComposerCommandMenuItems(input: {
               description: displayName,
             }));
         }
-        // 静态回退：使用预定义的代理别�?        return getAgentMentionAutocompleteAliases(provider)
+        // 闈欐€佸洖閫€锛氫娇鐢ㄩ瀹氫箟鐨勪唬鐞嗗埆鍚?        return getAgentMentionAutocompleteAliases(provider)
           .filter(({ alias, displayName }) => {
             if (!query) return true;
             const searchBlob = `${alias} ${displayName}`.toLowerCase();
@@ -146,7 +146,7 @@ export function useComposerCommandMenuItems(input: {
           }));
       })();
 
-      // 构建插件项：仅显示已安装的插�?      const pluginItems = providerPlugins
+      // 鏋勫缓鎻掍欢椤癸細浠呮樉绀哄凡瀹夎鐨勬彃浠?      const pluginItems = providerPlugins
         .filter(({ plugin }) => isInstalledProviderPlugin(plugin))
         .filter(({ plugin }) => {
           if (!query) return true;
@@ -161,7 +161,7 @@ export function useComposerCommandMenuItems(input: {
           description: plugin.interface?.shortDescription ?? plugin.source.path,
         }));
       
-      // 本地文件夹项：匹配快捷方式时显示
+      // 鏈湴鏂囦欢澶归」锛氬尮閰嶅揩鎹锋柟寮忔椂鏄剧ず
       const localRootItems =
         matchesLocalFolderMentionShortcut(composerTrigger.query) && composerTrigger.query !== "/"
           ? [
@@ -174,7 +174,7 @@ export function useComposerCommandMenuItems(input: {
             ]
           : [];
       
-      // 路径项：工作区条�?      const pathItems = workspaceEntries.map((entry) => ({
+      // 璺緞椤癸細宸ヤ綔鍖烘潯鐩?      const pathItems = workspaceEntries.map((entry) => ({
         id: `path:${entry.kind}:${entry.path}`,
         type: "path" as const,
         path: entry.path,
@@ -183,11 +183,11 @@ export function useComposerCommandMenuItems(input: {
         description: entry.parentPath ?? "",
       }));
       
-      // 按主要意图排序：插件优先，然后本地上下文，最后是代理
+      // 鎸変富瑕佹剰鍥炬帓搴忥細鎻掍欢浼樺厛锛岀劧鍚庢湰鍦颁笂涓嬫枃锛屾渶鍚庢槸浠ｇ悊
       return [...pluginItems, ...localRootItems, ...pathItems, ...agentItems];
     }
 
-    // 处理斜杠命令触发器：显示内置命令、提供商原生命令、技�?    if (composerTrigger.kind === "slash-command") {
+    // 澶勭悊鏂滄潬鍛戒护瑙﹀彂鍣細鏄剧ず鍐呯疆鍛戒护銆佹彁渚涘晢鍘熺敓鍛戒护銆佹妧鑳?    if (composerTrigger.kind === "slash-command") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       const availableCommands = getAvailableComposerSlashCommands({
         provider,
@@ -199,7 +199,7 @@ export function useComposerCommandMenuItems(input: {
         providerNativeCommandNames: providerNativeCommands.map((command) => command.name),
       });
       
-      // 内置斜杠命令�?      const builtInItems = filterComposerSlashCommands(
+      // 鍐呯疆鏂滄潬鍛戒护椤?      const builtInItems = filterComposerSlashCommands(
         composerTrigger.query,
         availableCommands,
       ).map((definition) => ({
@@ -211,7 +211,7 @@ export function useComposerCommandMenuItems(input: {
         source: definition.source,
       }));
       
-      // 提供商原生命令项
+      // 鎻愪緵鍟嗗師鐢熷懡浠ら」
       const providerCommandItems = providerNativeCommands
         .filter(
           (command) => !shouldHideProviderNativeCommandFromComposerMenu(provider, command.name),
@@ -234,7 +234,7 @@ export function useComposerCommandMenuItems(input: {
           description: command.description ?? `Run ${provider} native command`,
         }));
       
-      // 技能项：仅 Claude 提供商使用斜杠前缀
+      // 鎶€鑳介」锛氫粎 Claude 鎻愪緵鍟嗕娇鐢ㄦ枩鏉犲墠缂€
       const skillItems: ComposerCommandItem[] =
         provider === "claudeAgent"
           ? providerSkills
@@ -254,7 +254,7 @@ export function useComposerCommandMenuItems(input: {
       return [...builtInItems, ...providerCommandItems, ...skillItems];
     }
 
-    // 处理技能触发器：仅显示技�?    if (composerTrigger.kind === "skill") {
+    // 澶勭悊鎶€鑳借Е鍙戝櫒锛氫粎鏄剧ず鎶€鑳?    if (composerTrigger.kind === "skill") {
       const query = normalizeProviderDiscoveryText(composerTrigger.query);
       return providerSkills
         .filter((skill) => {
@@ -270,7 +270,7 @@ export function useComposerCommandMenuItems(input: {
         }));
     }
 
-    // 默认：显示模型选项
+    // 榛樿锛氭樉绀烘ā鍨嬮€夐」
     return searchableModelOptions
       .filter(({ searchSlug, searchName, searchProvider, searchUpstreamProvider }) => {
         const query = composerTrigger.query.trim().toLowerCase();
@@ -288,7 +288,7 @@ export function useComposerCommandMenuItems(input: {
         provider,
         model: slug,
         label: name,
-        description: `${providerLabel} · ${slug}`,
+        description: `${providerLabel} 路 ${slug}`,
       }));
   }, [
     canOfferForkCommand,

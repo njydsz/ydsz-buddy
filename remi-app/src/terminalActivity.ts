@@ -1,23 +1,23 @@
 /**
  * @file terminalActivity.ts
- * @description 终端活动状态转换器�? * 将后端推送的 TerminalEvent 转换为前端使用的 TerminalActivityUpdate�? * 提取 Agent 状态和子进程运行信息，用于终端 UI 的活动指示器展示�? */
+ * @description 缁堢娲诲姩鐘舵€佽浆鎹㈠櫒銆? * 灏嗗悗绔帹閫佺殑 TerminalEvent 杞崲涓哄墠绔娇鐢ㄧ殑 TerminalActivityUpdate锛? * 鎻愬彇 Agent 鐘舵€佸拰瀛愯繘绋嬭繍琛屼俊鎭紝鐢ㄤ簬缁堢 UI 鐨勬椿鍔ㄦ寚绀哄櫒灞曠ず銆? */
 
 import type { TerminalEvent } from "~/contracts";
 import type { TerminalActivityState } from "~/shared/terminalThreads";
 
 /**
- * 终端活动状态更新数据，包含 Agent 运行状态和子进程信息�? */
+ * 缁堢娲诲姩鐘舵€佹洿鏂版暟鎹紝鍖呭惈 Agent 杩愯鐘舵€佸拰瀛愯繘绋嬩俊鎭€? */
 export interface TerminalActivityUpdate {
-  /** Agent 当前活动状态，�?null 表示无活�?*/
+  /** Agent 褰撳墠娲诲姩鐘舵€侊紝涓?null 琛ㄧず鏃犳椿鍔?*/
   agentState: TerminalActivityState | null;
-  /** 是否有正在运行的子进�?*/
+  /** 鏄惁鏈夋鍦ㄨ繍琛岀殑瀛愯繘绋?*/
   hasRunningSubprocess: boolean;
 }
 
 /**
- * 从终端事件中提取活动状态更新�? * 仅处�?"activity" 类型的事件，其他类型（started/restarted/exited）返回重置状态�? *
- * @param event - 后端推送的终端事件
- * @returns 活动状态更新数据，若事件类型无法映射则返回 null
+ * 浠庣粓绔簨浠朵腑鎻愬彇娲诲姩鐘舵€佹洿鏂般€? * 浠呭鐞?"activity" 绫诲瀷鐨勪簨浠讹紝鍏朵粬绫诲瀷锛坰tarted/restarted/exited锛夎繑鍥為噸缃姸鎬併€? *
+ * @param event - 鍚庣鎺ㄩ€佺殑缁堢浜嬩欢
+ * @returns 娲诲姩鐘舵€佹洿鏂版暟鎹紝鑻ヤ簨浠剁被鍨嬫棤娉曟槧灏勫垯杩斿洖 null
  *
  * @example
  * ```ts

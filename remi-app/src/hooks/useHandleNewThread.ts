@@ -1,6 +1,6 @@
 /**
  * @file useHandleNewThread.ts
- * @description 新建线程 Hook - 处理创建新线程的复杂逻辑
+ * @description 鏂板缓绾跨▼ Hook - 澶勭悊鍒涘缓鏂扮嚎绋嬬殑澶嶆潅閫昏緫
  * @module hooks/useHandleNewThread
  */
 
@@ -32,15 +32,15 @@ import { useTemporaryThreadStore } from "../temporaryThreadStore";
 import { useTerminalStateStore } from "../terminalStateStore";
 
 /**
- * 新建线程 Hook
+ * 鏂板缓绾跨▼ Hook
  *
  * @description
- * 处理创建新线程的复杂逻辑，包括：
- * - 复用已存储的草稿线程
- * - 复用当前活动的草稿线�? * - 创建全新的线�? * - 处理终端入口�?vs 聊天入口�? * - 应用提供商和模型覆盖
- * - 导航到新线程
+ * 澶勭悊鍒涘缓鏂扮嚎绋嬬殑澶嶆潅閫昏緫锛屽寘鎷細
+ * - 澶嶇敤宸插瓨鍌ㄧ殑鑽夌ǹ绾跨▼
+ * - 澶嶇敤褰撳墠娲诲姩鐨勮崏绋跨嚎绋? * - 鍒涘缓鍏ㄦ柊鐨勭嚎绋? * - 澶勭悊缁堢鍏ュ彛鐐?vs 鑱婂ぉ鍏ュ彛鐐? * - 搴旂敤鎻愪緵鍟嗗拰妯″瀷瑕嗙洊
+ * - 瀵艰埅鍒版柊绾跨▼
  *
- * @returns 包含线程创建方法和相关状态的对象
+ * @returns 鍖呭惈绾跨▼鍒涘缓鏂规硶鍜岀浉鍏崇姸鎬佺殑瀵硅薄
  *
  * @example
  * ```tsx
@@ -67,7 +67,7 @@ export function useHandleNewThread() {
       const wantsTemporaryThread = options?.temporary === true;
       
       /**
-       * 应用提供商覆�?       * 如果指定了提供商，设置对应的默认模型
+       * 搴旂敤鎻愪緵鍟嗚鐩?       * 濡傛灉鎸囧畾浜嗘彁渚涘晢锛岃缃搴旂殑榛樿妯″瀷
        */
       const applyProviderOverride = (threadId: ThreadId) => {
         if (!options?.provider) {
@@ -84,7 +84,7 @@ export function useHandleNewThread() {
       };
       
       /**
-       * 恢复编辑器草稿状�?       */
+       * 鎭㈠缂栬緫鍣ㄨ崏绋跨姸鎬?       */
       const restoreComposerDraft = (
         threadId: ThreadId,
         draftState: ComposerThreadDraftState | null,
@@ -106,8 +106,8 @@ export function useHandleNewThread() {
       };
       
       /**
-       * 激活线程入口点
-       * 根据入口点类型打开对应的页�?       */
+       * 婵€娲荤嚎绋嬪叆鍙ｇ偣
+       * 鏍规嵁鍏ュ彛鐐圭被鍨嬫墦寮€瀵瑰簲鐨勯〉闈?       */
       const activateThreadEntryPoint = (threadId: ThreadId) => {
         if (entryPoint === "terminal") {
           openTerminalThreadPage(threadId, { terminalOnly: true });
@@ -127,17 +127,17 @@ export function useHandleNewThread() {
       } = useComposerDraftStore.getState();
       const shouldForceFreshThread = options?.fresh === true;
 
-      // 强制创建新线程时，清除项目的草稿线程 ID
+      // 寮哄埗鍒涘缓鏂扮嚎绋嬫椂锛屾竻闄ら」鐩殑鑽夌ǹ绾跨▼ ID
       if (shouldForceFreshThread) {
         clearProjectDraftThreadId(projectId, entryPoint);
       }
 
-      // 获取已存储的草稿线程候�?      const storedDraftThreadCandidate = getDraftThreadByProjectId(projectId, entryPoint);
-      // 获取当前活动的草稿线程候�?      const latestActiveDraftThreadCandidate: DraftThreadState | null = focusedThreadId
+      // 鑾峰彇宸插瓨鍌ㄧ殑鑽夌ǹ绾跨▼鍊欓€?      const storedDraftThreadCandidate = getDraftThreadByProjectId(projectId, entryPoint);
+      // 鑾峰彇褰撳墠娲诲姩鐨勮崏绋跨嚎绋嬪€欓€?      const latestActiveDraftThreadCandidate: DraftThreadState | null = focusedThreadId
         ? getDraftThread(focusedThreadId)
         : null;
       
-      // 确定使用哪个草稿线程
+      // 纭畾浣跨敤鍝釜鑽夌ǹ绾跨▼
       const storedDraftThread =
         !shouldForceFreshThread &&
         !wantsTemporaryThread &&
@@ -151,7 +151,7 @@ export function useHandleNewThread() {
           ? latestActiveDraftThreadCandidate
           : null;
       
-      // 解析线程引导计划
+      // 瑙ｆ瀽绾跨▼寮曞璁″垝
       const bootstrapPlan = resolveThreadBootstrapPlan({
         storedDraftThread,
         latestActiveDraftThread,
@@ -160,7 +160,7 @@ export function useHandleNewThread() {
         routeThreadId: focusedThreadId,
       });
       
-      // 读取项目的默认模型选择
+      // 璇诲彇椤圭洰鐨勯粯璁ゆā鍨嬮€夋嫨
       const projectDefaultModelSelection =
         useStore.getState().projects.find((project) => project.id === projectId)
           ?.defaultModelSelection ?? null;
@@ -171,7 +171,7 @@ export function useHandleNewThread() {
       );
       
       /**
-       * 解析终端线程创建状�?       */
+       * 瑙ｆ瀽缁堢绾跨▼鍒涘缓鐘舵€?       */
       const resolveCreationState = (
         targetThreadId: ThreadId,
         draftThread: DraftThreadState | null,
@@ -190,8 +190,8 @@ export function useHandleNewThread() {
         });
       
       /**
-       * 创建终端线程
-       * 终端入口需要立即创建真实的编排线程
+       * 鍒涘缓缁堢绾跨▼
+       * 缁堢鍏ュ彛闇€瑕佺珛鍗冲垱寤虹湡瀹炵殑缂栨帓绾跨▼
        */
       const createTerminalThread = async (
         threadId: ThreadId,
@@ -221,7 +221,7 @@ export function useHandleNewThread() {
         );
       };
       
-      // 情况 1：使用已存储的草稿线�?      if (bootstrapPlan.kind === "stored") {
+      // 鎯呭喌 1锛氫娇鐢ㄥ凡瀛樺偍鐨勮崏绋跨嚎绋?      if (bootstrapPlan.kind === "stored") {
         return (async () => {
           if (wantsTemporaryThread) {
             markTemporaryThread(bootstrapPlan.threadId);
@@ -276,7 +276,7 @@ export function useHandleNewThread() {
 
       clearProjectDraftThreadId(projectId, entryPoint);
 
-      // 情况 2：使用路由中的线�?      if (bootstrapPlan.kind === "route") {
+      // 鎯呭喌 2锛氫娇鐢ㄨ矾鐢变腑鐨勭嚎绋?      if (bootstrapPlan.kind === "route") {
         if (wantsTemporaryThread) {
           markTemporaryThread(bootstrapPlan.threadId);
         }
@@ -301,7 +301,7 @@ export function useHandleNewThread() {
         return Promise.resolve();
       }
 
-      // 情况 3：创建全新线�?      const threadId = newThreadId();
+      // 鎯呭喌 3锛氬垱寤哄叏鏂扮嚎绋?      const threadId = newThreadId();
       if (wantsTemporaryThread) {
         markTemporaryThread(threadId);
       }

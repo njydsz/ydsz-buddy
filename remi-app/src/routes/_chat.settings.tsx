@@ -111,9 +111,9 @@ import { formatRelativeTime } from "../components/Sidebar";
 import { formatWorktreePathForDisplay } from "../worktreeCleanup";
 import { sameProviderOrder } from "../providerOrdering";
 
-// ── Settings taxonomy ──────────────────────────────────────────────────────
+// 鈹€鈹€ Settings taxonomy 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
-// ── Model Channels (Service Gateways) ──────────────────────────────────────
+// 鈹€鈹€ Model Channels (Service Gateways) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 type ModelChannelId =
   | "deepseek"
@@ -135,40 +135,40 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "deepseek",
     name: "DeepSeek",
-    subtitle: "深度求索 · DeepSeek",
-    balance: "¥177.52",
+    subtitle: "娣卞害姹傜储 路 DeepSeek",
+    balance: "楼177.52",
     iconColor: "#4D6BFA",
   },
   {
     id: "siliconflow",
-    name: "硅基流动",
-    subtitle: "硅基流动 · SiliconFlow",
-    balance: "¥110.87",
+    name: "纭呭熀娴佸姩",
+    subtitle: "纭呭熀娴佸姩 路 SiliconFlow",
+    balance: "楼110.87",
     iconColor: "#6366F1",
   },
   {
     id: "volcano",
-    name: "火山方舟",
-    subtitle: "字节跳动 · 火山方舟",
+    name: "鐏北鏂硅垷",
+    subtitle: "瀛楄妭璺冲姩 路 鐏北鏂硅垷",
     iconColor: "#3B82F6",
   },
   {
     id: "tongyi",
-    name: "通义千问",
-    subtitle: "阿里�?· 百炼平台",
+    name: "閫氫箟鍗冮棶",
+    subtitle: "闃块噷浜?路 鐧剧偧骞冲彴",
     iconColor: "#F97316",
   },
   {
     id: "kimi",
     name: "Kimi",
-    subtitle: "月之暗面 · Kimi",
-    balance: "¥13.96",
+    subtitle: "鏈堜箣鏆楅潰 路 Kimi",
+    balance: "楼13.96",
     iconColor: "#1F2937",
   },
   {
     id: "minimax",
     name: "MiniMax",
-    subtitle: "MiniMax · 海螺 AI",
+    subtitle: "MiniMax 路 娴疯灪 AI",
     iconColor: "#10B981",
   },
 ];
@@ -478,7 +478,7 @@ function buildInstallProviderSettings(
   }));
 }
 
-// ── Settings UI primitives ────────────────────────────────────────────────
+// 鈹€鈹€ Settings UI primitives 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -655,7 +655,7 @@ function providerUpdateFailureMessage(provider: ServerProviderStatus | undefined
   return state.output?.trim() || state.message || "The provider update did not complete.";
 }
 
-// ── Route screen ───────────────────────────────────────────────────────────
+// 鈹€鈹€ Route screen 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 function SettingsRouteView() {
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
@@ -1902,7 +1902,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM�?
+                  placeholder="-apple-system, BlinkM鈥?
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2548,11 +2548,11 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="网关代理">
+      <SettingsSection title="缃戝叧浠ｇ悊">
         <div className="space-y-2">
           <SettingsRow
-            title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
+            title="鏈湴 API 缃戝叧"
+            description="鍚姩鍚庡彲閫氳繃缁熶竴鏈湴绔偣璁块棶鎵€鏈夊凡鍚敤鐨勬ā鍨嬫笭閬撱€?
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2562,7 +2562,7 @@ function SettingsRouteView() {
           />
           {gatewayRunning ? (
             <div className="mt-4 space-y-5 border-t border-border pt-4">
-              {/* ── Local API ── */}
+              {/* 鈹€鈹€ Local API 鈹€鈹€ */}
               <div>
                 <h4 className="mb-2 text-sm font-semibold text-foreground">Local API</h4>
                 <p className="mb-2 text-xs text-muted-foreground">
@@ -2600,7 +2600,7 @@ function SettingsRouteView() {
                 </div>
               </div>
 
-              {/* ── Agent Setup ── */}
+              {/* 鈹€鈹€ Agent Setup 鈹€鈹€ */}
               <div>
                 <h4 className="mb-3 text-sm font-semibold text-foreground">Agent Setup</h4>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -2855,14 +2855,14 @@ function SettingsRouteView() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="模型渠道接入">
+      <SettingsSection title="妯″瀷娓犻亾鎺ュ叆">
         <div className="space-y-2">
           <SettingsRow
-            title="服务渠道"
-            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
+            title="鏈嶅姟娓犻亾"
+            description="绠＄悊绗笁鏂规ā鍨?API 娓犻亾鎺ュ叆锛屽惎鐢ㄥ悗鍙湪瀵瑰簲鎻愪緵鍟嗕腑浣跨敤杩欎簺娓犻亾銆?
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 宸插惎鐢?
               </span>
             }
           >
@@ -2899,7 +2899,7 @@ function SettingsRouteView() {
                           <span>{channel.name}</span>
                           {channel.balance ? (
                             <span className="text-xs font-normal text-emerald-500">
-                              余额 {channel.balance}
+                              浣欓 {channel.balance}
                             </span>
                           ) : null}
                         </div>

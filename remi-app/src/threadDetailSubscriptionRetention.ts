@@ -1,40 +1,40 @@
 /**
  * @file threadDetailSubscriptionRetention.ts
- * @description 在路�?侧边栏切换期间保持最近使用的线程详情订阅处于活跃状态�? * 通过引用计数和延迟淘汰机制，避免频繁切换视图时反复建�?断开订阅�? * 从而减少网络开销和加载延迟�? *
- * 核心机制�? * - retain/release：引用计数管理，支持多个消费者同时持有同一订阅
- * - 延迟淘汰：引用计数归零后不立即释放，而是等待 15 分钟超时后再淘汰
- * - 容量限制：最多缓�?32 个订阅，超出时按最近访问时间淘汰空闲条�? * - 活跃保护：正在运行中的线程（�?idle/stopped 状态）不会被淘�? */
+ * @description 鍦ㄨ矾鐢?渚ц竟鏍忓垏鎹㈡湡闂翠繚鎸佹渶杩戜娇鐢ㄧ殑绾跨▼璇︽儏璁㈤槄澶勪簬娲昏穬鐘舵€併€? * 閫氳繃寮曠敤璁℃暟鍜屽欢杩熸窐姹版満鍒讹紝閬垮厤棰戠箒鍒囨崲瑙嗗浘鏃跺弽澶嶅缓绔?鏂紑璁㈤槄锛? * 浠庤€屽噺灏戠綉缁滃紑閿€鍜屽姞杞藉欢杩熴€? *
+ * 鏍稿績鏈哄埗锛? * - retain/release锛氬紩鐢ㄨ鏁扮鐞嗭紝鏀寔澶氫釜娑堣垂鑰呭悓鏃舵寔鏈夊悓涓€璁㈤槄
+ * - 寤惰繜娣樻卑锛氬紩鐢ㄨ鏁板綊闆跺悗涓嶇珛鍗抽噴鏀撅紝鑰屾槸绛夊緟 15 鍒嗛挓瓒呮椂鍚庡啀娣樻卑
+ * - 瀹归噺闄愬埗锛氭渶澶氱紦瀛?32 涓闃咃紝瓒呭嚭鏃舵寜鏈€杩戣闂椂闂存窐姹扮┖闂叉潯鐩? * - 娲昏穬淇濇姢锛氭鍦ㄨ繍琛屼腑鐨勭嚎绋嬶紙闈?idle/stopped 鐘舵€侊級涓嶄細琚窐姹? */
 
 import type { ThreadId } from "~/contracts";
 import { useSyncExternalStore } from "react";
 import { useStore } from "./store";
 
-/** 空闲订阅的淘汰延迟时间（15 分钟），引用计数归零后等待此时间再淘�?*/
+/** 绌洪棽璁㈤槄鐨勬窐姹板欢杩熸椂闂达紙15 鍒嗛挓锛夛紝寮曠敤璁℃暟褰掗浂鍚庣瓑寰呮鏃堕棿鍐嶆窐姹?*/
 const THREAD_DETAIL_RETENTION_EVICTION_MS = 15 * 60 * 1000;
-/** 最大缓存的线程详情订阅数量，超出时�?LRU 策略淘汰空闲条目 */
+/** 鏈€澶х紦瀛樼殑绾跨▼璇︽儏璁㈤槄鏁伴噺锛岃秴鍑烘椂鎸?LRU 绛栫暐娣樻卑绌洪棽鏉＄洰 */
 const MAX_CACHED_THREAD_DETAIL_SUBSCRIPTIONS = 32;
 
 /**
- * 被保留的线程订阅条目，包含引用计数和淘汰调度信息�? */
+ * 琚繚鐣欑殑绾跨▼璁㈤槄鏉＄洰锛屽寘鍚紩鐢ㄨ鏁板拰娣樻卑璋冨害淇℃伅銆? */
 type RetainedThreadEntry = {
-  /** 当前持有该订阅的消费者数量，归零后进入淘汰倒计�?*/
+  /** 褰撳墠鎸佹湁璇ヨ闃呯殑娑堣垂鑰呮暟閲忥紝褰掗浂鍚庤繘鍏ユ窐姹板€掕鏃?*/
   refCount: number;
-  /** 最后一次被访问的时间戳（毫秒），用�?LRU 排序 */
+  /** 鏈€鍚庝竴娆¤璁块棶鐨勬椂闂存埑锛堟绉掞級锛岀敤浜?LRU 鎺掑簭 */
   lastAccessedAt: number;
-  /** 淘汰定时器，引用计数归零后设置的延迟淘汰计时�?*/
+  /** 娣樻卑瀹氭椂鍣紝寮曠敤璁℃暟褰掗浂鍚庤缃殑寤惰繜娣樻卑璁℃椂鍣?*/
   evictionTimeout: ReturnType<typeof setTimeout> | null;
 };
 
-/** 线程 ID 到其保留条目的映射表 */
+/** 绾跨▼ ID 鍒板叾淇濈暀鏉＄洰鐨勬槧灏勮〃 */
 const retainedThreadEntries = new Map<ThreadId, RetainedThreadEntry>();
-/** useSyncExternalStore 的订阅监听器集合 */
+/** useSyncExternalStore 鐨勮闃呯洃鍚櫒闆嗗悎 */
 const listeners = new Set<() => void>();
-/** 保留线程 ID 变更的监听器集合，接收最新的线程 ID 列表 */
+/** 淇濈暀绾跨▼ ID 鍙樻洿鐨勭洃鍚櫒闆嗗悎锛屾帴鏀舵渶鏂扮殑绾跨▼ ID 鍒楄〃 */
 const retainedThreadIdChangeListeners = new Set<(threadIds: readonly ThreadId[]) => void>();
-/** 缓存的保留线�?ID 快照，避免每次调�?getSnapshot 时重新计�?*/
+/** 缂撳瓨鐨勪繚鐣欑嚎绋?ID 蹇収锛岄伩鍏嶆瘡娆¤皟鐢?getSnapshot 鏃堕噸鏂拌绠?*/
 let cachedSnapshot: readonly ThreadId[] = [];
 
-/** 通知所有监听器保留的线�?ID 列表已发生变�?*/
+/** 閫氱煡鎵€鏈夌洃鍚櫒淇濈暀鐨勭嚎绋?ID 鍒楄〃宸插彂鐢熷彉鍖?*/
 function emitChange(): void {
   cachedSnapshot = [...retainedThreadEntries.keys()];
   for (const listener of listeners) {
@@ -46,9 +46,9 @@ function emitChange(): void {
 }
 
 /**
- * 判断指定线程是否处于非空闲状态（正在运行或有待处理事项）�? * 非空闲线程不应被淘汰，以保证用户可见的活跃状态不被意外中断�? *
- * @param threadId - 待检查的线程 ID
- * @returns 若线程处于非空闲状态则返回 true
+ * 鍒ゆ柇鎸囧畾绾跨▼鏄惁澶勪簬闈炵┖闂茬姸鎬侊紙姝ｅ湪杩愯鎴栨湁寰呭鐞嗕簨椤癸級銆? * 闈炵┖闂茬嚎绋嬩笉搴旇娣樻卑锛屼互淇濊瘉鐢ㄦ埛鍙鐨勬椿璺冪姸鎬佷笉琚剰澶栦腑鏂€? *
+ * @param threadId - 寰呮鏌ョ殑绾跨▼ ID
+ * @returns 鑻ョ嚎绋嬪浜庨潪绌洪棽鐘舵€佸垯杩斿洖 true
  */
 function isNonIdleThread(threadId: ThreadId): boolean {
   const state = useStore.getState();
@@ -94,16 +94,16 @@ function isNonIdleThread(threadId: ThreadId): boolean {
 }
 
 /**
- * 判断指定条目是否应被淘汰�? * 仅当引用计数�?0 且线程处于空闲状态时才可淘汰�? *
- * @param threadId - 线程 ID
- * @param entry - 保留条目
- * @returns 若应被淘汰则返回 true
+ * 鍒ゆ柇鎸囧畾鏉＄洰鏄惁搴旇娣樻卑銆? * 浠呭綋寮曠敤璁℃暟涓?0 涓旂嚎绋嬪浜庣┖闂茬姸鎬佹椂鎵嶅彲娣樻卑銆? *
+ * @param threadId - 绾跨▼ ID
+ * @param entry - 淇濈暀鏉＄洰
+ * @returns 鑻ュ簲琚窐姹板垯杩斿洖 true
  */
 function shouldEvictEntry(threadId: ThreadId, entry: RetainedThreadEntry): boolean {
   return entry.refCount === 0 && !isNonIdleThread(threadId);
 }
 
-/** 清除条目上的淘汰定时�?*/
+/** 娓呴櫎鏉＄洰涓婄殑娣樻卑瀹氭椂鍣?*/
 function clearEvictionTimeout(entry: RetainedThreadEntry): void {
   if (entry.evictionTimeout === null) {
     return;
@@ -113,9 +113,9 @@ function clearEvictionTimeout(entry: RetainedThreadEntry): void {
 }
 
 /**
- * 为指定条目安排延迟淘汰。先清除已有定时器，再设置新的延迟淘汰计时�? * 若条目不应被淘汰（引用计�?> 0 或线程活跃），则不设置定时器�? *
- * @param threadId - 线程 ID
- * @param entry - 保留条目
+ * 涓烘寚瀹氭潯鐩畨鎺掑欢杩熸窐姹般€傚厛娓呴櫎宸叉湁瀹氭椂鍣紝鍐嶈缃柊鐨勫欢杩熸窐姹拌鏃躲€? * 鑻ユ潯鐩笉搴旇娣樻卑锛堝紩鐢ㄨ鏁?> 0 鎴栫嚎绋嬫椿璺冿級锛屽垯涓嶈缃畾鏃跺櫒銆? *
+ * @param threadId - 绾跨▼ ID
+ * @param entry - 淇濈暀鏉＄洰
  */
 function scheduleEviction(threadId: ThreadId, entry: RetainedThreadEntry): void {
   clearEvictionTimeout(entry);
@@ -133,8 +133,8 @@ function scheduleEviction(threadId: ThreadId, entry: RetainedThreadEntry): void 
 }
 
 /**
- * 当缓存数量超过最大限制时，按最近访问时间从早到晚淘汰空闲条目，
- * 直到缓存数量降至最大限制以内�? */
+ * 褰撶紦瀛樻暟閲忚秴杩囨渶澶ч檺鍒舵椂锛屾寜鏈€杩戣闂椂闂翠粠鏃╁埌鏅氭窐姹扮┖闂叉潯鐩紝
+ * 鐩村埌缂撳瓨鏁伴噺闄嶈嚦鏈€澶ч檺鍒朵互鍐呫€? */
 function evictIdleEntriesToCapacity(): void {
   if (retainedThreadEntries.size <= MAX_CACHED_THREAD_DETAIL_SUBSCRIPTIONS) {
     return;
@@ -161,8 +161,8 @@ function evictIdleEntriesToCapacity(): void {
 }
 
 /**
- * 重新审视所有保留条目的淘汰状态�? * �?Store 状态变化时调用，确保之前因活跃而无法淘汰的条目
- * 在变为空闲后能正确进入淘汰倒计时�? */
+ * 閲嶆柊瀹¤鎵€鏈変繚鐣欐潯鐩殑娣樻卑鐘舵€併€? * 鍦?Store 鐘舵€佸彉鍖栨椂璋冪敤锛岀‘淇濅箣鍓嶅洜娲昏穬鑰屾棤娉曟窐姹扮殑鏉＄洰
+ * 鍦ㄥ彉涓虹┖闂插悗鑳芥纭繘鍏ユ窐姹板€掕鏃躲€? */
 function reconcileRetentionEntries(): void {
   for (const [threadId, entry] of retainedThreadEntries) {
     clearEvictionTimeout(entry);
@@ -173,21 +173,21 @@ function reconcileRetentionEntries(): void {
   evictIdleEntriesToCapacity();
 }
 
-/** 监听 Store 变化，在线程状态改变时重新审视淘汰策略 */
+/** 鐩戝惉 Store 鍙樺寲锛屽湪绾跨▼鐘舵€佹敼鍙樻椂閲嶆柊瀹¤娣樻卑绛栫暐 */
 useStore.subscribe(() => {
   reconcileRetentionEntries();
 });
 
 /**
- * 保留指定线程的详情订阅（引用计数 +1）�? * 若该线程尚未被保留，则创建新的保留条目；若已存在，则增加引用计数并清除淘汰定时器�? *
- * @param threadId - 需要保留订阅的线程 ID
- * @returns 释放函数，调用时将引用计�?-1（releaseThreadDetailSubscription 的快捷方式）
+ * 淇濈暀鎸囧畾绾跨▼鐨勮鎯呰闃咃紙寮曠敤璁℃暟 +1锛夈€? * 鑻ヨ绾跨▼灏氭湭琚繚鐣欙紝鍒欏垱寤烘柊鐨勪繚鐣欐潯鐩紱鑻ュ凡瀛樺湪锛屽垯澧炲姞寮曠敤璁℃暟骞舵竻闄ゆ窐姹板畾鏃跺櫒銆? *
+ * @param threadId - 闇€瑕佷繚鐣欒闃呯殑绾跨▼ ID
+ * @returns 閲婃斁鍑芥暟锛岃皟鐢ㄦ椂灏嗗紩鐢ㄨ鏁?-1锛坮eleaseThreadDetailSubscription 鐨勫揩鎹锋柟寮忥級
  *
  * @example
  * ```ts
  * const release = retainThreadDetailSubscription("thread-123");
- * // ... 使用线程详情数据
- * release(); // 不再需要时释放
+ * // ... 浣跨敤绾跨▼璇︽儏鏁版嵁
+ * release(); // 涓嶅啀闇€瑕佹椂閲婃斁
  * ```
  */
 export function retainThreadDetailSubscription(threadId: ThreadId): () => void {
@@ -211,8 +211,8 @@ export function retainThreadDetailSubscription(threadId: ThreadId): () => void {
 }
 
 /**
- * 释放指定线程的详情订阅（引用计数 -1）�? * 引用计数归零后进入延迟淘汰倒计时，不会立即移除�? *
- * @param threadId - 需要释放订阅的线程 ID
+ * 閲婃斁鎸囧畾绾跨▼鐨勮鎯呰闃咃紙寮曠敤璁℃暟 -1锛夈€? * 寮曠敤璁℃暟褰掗浂鍚庤繘鍏ュ欢杩熸窐姹板€掕鏃讹紝涓嶄細绔嬪嵆绉婚櫎銆? *
+ * @param threadId - 闇€瑕侀噴鏀捐闃呯殑绾跨▼ ID
  */
 export function releaseThreadDetailSubscription(threadId: ThreadId): void {
   const entry = retainedThreadEntries.get(threadId);
@@ -231,8 +231,8 @@ export function releaseThreadDetailSubscription(threadId: ThreadId): void {
 }
 
 /**
- * 订阅保留线程 ID 列表变化的监听器（用�?useSyncExternalStore）�? *
- * @param listener - 当保留列表变化时调用的回调函�? * @returns 取消订阅的函�? */
+ * 璁㈤槄淇濈暀绾跨▼ ID 鍒楄〃鍙樺寲鐨勭洃鍚櫒锛堢敤浜?useSyncExternalStore锛夈€? *
+ * @param listener - 褰撲繚鐣欏垪琛ㄥ彉鍖栨椂璋冪敤鐨勫洖璋冨嚱鏁? * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function subscribeRetainedThreadDetailIds(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
@@ -241,9 +241,9 @@ export function subscribeRetainedThreadDetailIds(listener: () => void): () => vo
 }
 
 /**
- * 订阅保留线程 ID 列表变化的监听器（带参数版本）�? * 回调函数接收最新的保留线程 ID 列表作为参数�? *
- * @param listener - 当保留列表变化时调用的回调函数，参数为最新的线程 ID 列表
- * @returns 取消订阅的函�? */
+ * 璁㈤槄淇濈暀绾跨▼ ID 鍒楄〃鍙樺寲鐨勭洃鍚櫒锛堝甫鍙傛暟鐗堟湰锛夈€? * 鍥炶皟鍑芥暟鎺ユ敹鏈€鏂扮殑淇濈暀绾跨▼ ID 鍒楄〃浣滀负鍙傛暟銆? *
+ * @param listener - 褰撲繚鐣欏垪琛ㄥ彉鍖栨椂璋冪敤鐨勫洖璋冨嚱鏁帮紝鍙傛暟涓烘渶鏂扮殑绾跨▼ ID 鍒楄〃
+ * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function subscribeRetainedThreadDetailIdChanges(
   listener: (threadIds: readonly ThreadId[]) => void,
 ): () => void {
@@ -254,22 +254,22 @@ export function subscribeRetainedThreadDetailIdChanges(
 }
 
 /**
- * 获取当前保留的线�?ID 列表快照（用�?useSyncExternalStore �?getSnapshot）�? *
- * @returns 当前保留的线�?ID 只读数组
+ * 鑾峰彇褰撳墠淇濈暀鐨勭嚎绋?ID 鍒楄〃蹇収锛堢敤浜?useSyncExternalStore 鐨?getSnapshot锛夈€? *
+ * @returns 褰撳墠淇濈暀鐨勭嚎绋?ID 鍙鏁扮粍
  */
 export function getRetainedThreadDetailIdsSnapshot(): readonly ThreadId[] {
   return cachedSnapshot;
 }
 
 /**
- * React Hook：获取当前保留的线程详情订阅 ID 列表�? * 基于 useSyncExternalStore 实现，当保留列表变化时自动触发重渲染�? *
- * @returns 当前保留的线�?ID 只读数组
+ * React Hook锛氳幏鍙栧綋鍓嶄繚鐣欑殑绾跨▼璇︽儏璁㈤槄 ID 鍒楄〃銆? * 鍩轰簬 useSyncExternalStore 瀹炵幇锛屽綋淇濈暀鍒楄〃鍙樺寲鏃惰嚜鍔ㄨЕ鍙戦噸娓叉煋銆? *
+ * @returns 褰撳墠淇濈暀鐨勭嚎绋?ID 鍙鏁扮粍
  *
  * @example
  * ```tsx
  * function MyComponent() {
  *   const retainedIds = useRetainedThreadDetailIds();
- *   return <div>保留的线程数: {retainedIds.length}</div>;
+ *   return <div>淇濈暀鐨勭嚎绋嬫暟: {retainedIds.length}</div>;
  * }
  * ```
  */
@@ -282,7 +282,7 @@ export function useRetainedThreadDetailIds(): readonly ThreadId[] {
 }
 
 /**
- * 重置所有保留的线程详情订阅（仅用于测试）�? * 清除所有淘汰定时器并清空保留条目，触发变更通知�? */
+ * 閲嶇疆鎵€鏈変繚鐣欑殑绾跨▼璇︽儏璁㈤槄锛堜粎鐢ㄤ簬娴嬭瘯锛夈€? * 娓呴櫎鎵€鏈夋窐姹板畾鏃跺櫒骞舵竻绌轰繚鐣欐潯鐩紝瑙﹀彂鍙樻洿閫氱煡銆? */
 export function resetRetainedThreadDetailSubscriptionsForTests(): void {
   for (const entry of retainedThreadEntries.values()) {
     clearEvictionTimeout(entry);

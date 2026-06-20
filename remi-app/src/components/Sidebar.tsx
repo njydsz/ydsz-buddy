@@ -455,7 +455,7 @@ function ThreadMetaChipStack({ chips }: { chips: ThreadMetaChip[] }) {
       </Tooltip>
     );
   }
-  const tooltipText = chips.map((chip) => chip.tooltip).join(" · ");
+  const tooltipText = chips.map((chip) => chip.tooltip).join(" 路 ");
   const chipSize = 14;
   const step = 8;
   const width = chipSize + step * (chips.length - 1);
@@ -2576,7 +2576,7 @@ export default function Sidebar() {
         return;
       }
 
-      // Bulk archive always confirms �?this is a folder-level operation, and
+      // Bulk archive always confirms 锟?this is a folder-level operation, and
       // `appSettings.confirmThreadArchive` (default `false`) is scoped to
       // single-thread archiving where the user explicitly picked one row.
       const archiveLines = [
@@ -5055,13 +5055,13 @@ export default function Sidebar() {
   const newTerminalThreadShortcutLabel = shortcutLabelForCommand(keybindings, "chat.newTerminal");
   const searchShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.search") ??
-    (isMacPlatform(navigator.platform) ? "⌘K" : "Ctrl+K");
+    (isMacPlatform(navigator.platform) ? "鈱楰" : "Ctrl+K");
   const importThreadShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.importThread") ??
-    (isMacPlatform(navigator.platform) ? "⌘I" : "Ctrl+I");
+    (isMacPlatform(navigator.platform) ? "鈱業" : "Ctrl+I");
   const addProjectShortcutLabel =
     shortcutLabelForCommand(keybindings, "sidebar.addProject") ??
-    (isMacPlatform(navigator.platform) ? "⇧⌘O" : "Ctrl+Shift+O");
+    (isMacPlatform(navigator.platform) ? "鈬р寴O" : "Ctrl+Shift+O");
   const searchPaletteProjects = useMemo<SidebarSearchProject[]>(
     () =>
       projects.map((project) => ({

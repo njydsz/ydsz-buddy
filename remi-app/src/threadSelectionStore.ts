@@ -1,8 +1,8 @@
 /**
  * @file threadSelectionStore.ts
- * @description 侧边栏线程多选状态的 Zustand Store�? *
- * 支持三种选择模式�? * - Cmd/Ctrl+Click：切换单个线程的选中状�? * - Shift+Click：范围选择（从锚点线程到目标线程之间的所有线程）
- * - 批量操作：对已选中的线程集合执行批量操�? *
+ * @description 渚ц竟鏍忕嚎绋嬪閫夌姸鎬佺殑 Zustand Store銆? *
+ * 鏀寔涓夌閫夋嫨妯″紡锛? * - Cmd/Ctrl+Click锛氬垏鎹㈠崟涓嚎绋嬬殑閫変腑鐘舵€? * - Shift+Click锛氳寖鍥撮€夋嫨锛堜粠閿氱偣绾跨▼鍒扮洰鏍囩嚎绋嬩箣闂寸殑鎵€鏈夌嚎绋嬶級
+ * - 鎵归噺鎿嶄綔锛氬宸查€変腑鐨勭嚎绋嬮泦鍚堟墽琛屾壒閲忔搷浣? *
  * @example
  * ```tsx
  * const { selectedThreadIds, toggleThread, rangeSelectTo, clearSelection } = useThreadSelectionStore();
@@ -38,11 +38,11 @@ interface ThreadSelectionStore extends ThreadSelectionState {
   hasSelection: () => boolean;
 }
 
-/** 空集合常量，用于 clearSelection 时避免创建新�?Set 实例 */
+/** 绌洪泦鍚堝父閲忥紝鐢ㄤ簬 clearSelection 鏃堕伩鍏嶅垱寤烘柊鐨?Set 瀹炰緥 */
 const EMPTY_SET = new Set<ThreadId>();
 
 /**
- * 线程多选状�?Store，提供选择、取消选择、范围选择等操作�? *
+ * 绾跨▼澶氶€夌姸鎬?Store锛屾彁渚涢€夋嫨銆佸彇娑堥€夋嫨銆佽寖鍥撮€夋嫨绛夋搷浣溿€? *
  * @example
  * ```tsx
  * function Sidebar() {
@@ -75,7 +75,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
     set((state) => {
       const anchor = state.anchorThreadId;
       if (anchor === null) {
-        // No anchor yet �?treat as a single toggle
+        // No anchor yet 锟?treat as a single toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };
@@ -84,7 +84,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
       const anchorIndex = orderedThreadIds.indexOf(anchor);
       const targetIndex = orderedThreadIds.indexOf(threadId);
       if (anchorIndex === -1 || targetIndex === -1) {
-        // Anchor or target not in this list (different project?) �?fallback to toggle
+        // Anchor or target not in this list (different project?) 锟?fallback to toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };

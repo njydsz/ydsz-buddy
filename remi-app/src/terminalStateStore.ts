@@ -1,11 +1,11 @@
 /**
  * @file terminalStateStore.ts
- * @description �?threadId 索引的终�?UI 状态的 Zustand Store�? *
- * 管理每个线程的终端面板状态，包括�? * - 终端的打开/关闭、展示模式（抽屉/工作区）
- * - 终端标签页的创建、关闭、分割、切�? * - 终端元数据（标签、CLI 类型、标题覆盖）
- * - 终端活动状态（运行中子进程、Agent 注意力状态）
- * - 工作区布局（双�?仅终端等�? *
- * 状态通过 localStorage 持久化，启动时自动恢复�? * 终端过渡辅助函数保持私有，以约束公共 API 仅暴�?store actions/selectors�? */
+ * @description 鎸?threadId 绱㈠紩鐨勭粓绔?UI 鐘舵€佺殑 Zustand Store銆? *
+ * 绠＄悊姣忎釜绾跨▼鐨勭粓绔潰鏉跨姸鎬侊紝鍖呮嫭锛? * - 缁堢鐨勬墦寮€/鍏抽棴銆佸睍绀烘ā寮忥紙鎶藉眽/宸ヤ綔鍖猴級
+ * - 缁堢鏍囩椤电殑鍒涘缓銆佸叧闂€佸垎鍓层€佸垏鎹? * - 缁堢鍏冩暟鎹紙鏍囩銆丆LI 绫诲瀷銆佹爣棰樿鐩栵級
+ * - 缁堢娲诲姩鐘舵€侊紙杩愯涓瓙杩涚▼銆丄gent 娉ㄦ剰鍔涚姸鎬侊級
+ * - 宸ヤ綔鍖哄竷灞€锛堝弻鏍?浠呯粓绔瓑锛? *
+ * 鐘舵€侀€氳繃 localStorage 鎸佷箙鍖栵紝鍚姩鏃惰嚜鍔ㄦ仮澶嶃€? * 缁堢杩囨浮杈呭姪鍑芥暟淇濇寔绉佹湁锛屼互绾︽潫鍏叡 API 浠呮毚闇?store actions/selectors銆? */
 
 import { type TerminalActivityState, type TerminalCliKind } from "~/shared/terminalThreads";
 import type { ThreadId } from "~/contracts";
@@ -38,41 +38,41 @@ import {
 } from "./workspaceTerminalLayoutPresets";
 
 /**
- * 单个线程的终�?UI 状态�? * 包含终端面板的展示方式、布局、标签页列表和运行时活动信息�? */
+ * 鍗曚釜绾跨▼鐨勭粓绔?UI 鐘舵€併€? * 鍖呭惈缁堢闈㈡澘鐨勫睍绀烘柟寮忋€佸竷灞€銆佹爣绛鹃〉鍒楄〃鍜岃繍琛屾椂娲诲姩淇℃伅銆? */
 export interface ThreadTerminalState {
-  /** 终端入口面：从聊天页进入还是终端页进�?*/
+  /** 缁堢鍏ュ彛闈細浠庤亰澶╅〉杩涘叆杩樻槸缁堢椤佃繘鍏?*/
   entryPoint: ThreadPrimarySurface;
-  /** 终端面板是否打开 */
+  /** 缁堢闈㈡澘鏄惁鎵撳紑 */
   terminalOpen: boolean;
-  /** 展示模式：抽屉模式或工作区模�?*/
+  /** 灞曠ず妯″紡锛氭娊灞夋ā寮忔垨宸ヤ綔鍖烘ā寮?*/
   presentationMode: ThreadTerminalPresentationMode;
-  /** 工作区布局：双栏（聊天+终端）或仅终�?*/
+  /** 宸ヤ綔鍖哄竷灞€锛氬弻鏍忥紙鑱婂ぉ+缁堢锛夋垨浠呯粓绔?*/
   workspaceLayout: ThreadTerminalWorkspaceLayout;
-  /** 工作区当前激活的标签�?*/
+  /** 宸ヤ綔鍖哄綋鍓嶆縺娲荤殑鏍囩椤?*/
   workspaceActiveTab: ThreadTerminalWorkspaceTab;
-  /** 终端面板高度（抽屉模式下使用�?*/
+  /** 缁堢闈㈡澘楂樺害锛堟娊灞夋ā寮忎笅浣跨敤锛?*/
   terminalHeight: number;
-  /** 当前线程拥有的所有终�?ID 列表 */
+  /** 褰撳墠绾跨▼鎷ユ湁鐨勬墍鏈夌粓绔?ID 鍒楄〃 */
   terminalIds: string[];
-  /** 终端 ID 到显示标签的映射 */
+  /** 缁堢 ID 鍒版樉绀烘爣绛剧殑鏄犲皠 */
   terminalLabelsById: Record<string, string>;
-  /** 终端 ID 到用户自定义标题覆盖的映�?*/
+  /** 缁堢 ID 鍒扮敤鎴疯嚜瀹氫箟鏍囬瑕嗙洊鐨勬槧灏?*/
   terminalTitleOverridesById: Record<string, string>;
-  /** 终端 ID �?CLI 类型（codex/claude）的映射 */
+  /** 缁堢 ID 鍒?CLI 绫诲瀷锛坈odex/claude锛夌殑鏄犲皠 */
   terminalCliKindsById: Record<string, TerminalCliKind>;
-  /** 终端 ID 到注意力状态（attention/review）的映射 */
+  /** 缁堢 ID 鍒版敞鎰忓姏鐘舵€侊紙attention/review锛夌殑鏄犲皠 */
   terminalAttentionStatesById: Record<string, "attention" | "review">;
-  /** 当前有子进程正在运行的终�?ID 列表 */
+  /** 褰撳墠鏈夊瓙杩涚▼姝ｅ湪杩愯鐨勭粓绔?ID 鍒楄〃 */
   runningTerminalIds: string[];
-  /** 当前激活的终端 ID */
+  /** 褰撳墠婵€娲荤殑缁堢 ID */
   activeTerminalId: string;
-  /** 终端面板组列表（每个组包含一个布局树） */
+  /** 缁堢闈㈡澘缁勫垪琛紙姣忎釜缁勫寘鍚竴涓竷灞€鏍戯級 */
   terminalGroups: ThreadTerminalGroup[];
-  /** 当前激活的面板�?ID */
+  /** 褰撳墠婵€娲荤殑闈㈡澘缁?ID */
   activeTerminalGroupId: string;
 }
 
-/** localStorage 持久化键�?*/
+/** localStorage 鎸佷箙鍖栭敭鍚?*/
 const TERMINAL_STATE_STORAGE_KEY = "remicode:terminal-state:v1";
 
 function normalizeTerminalIds(terminalIds: string[]): string[] {
@@ -492,10 +492,10 @@ function stripVolatileTerminalRuntimeState(state: ThreadTerminalState): ThreadTe
 }
 
 /**
- * 清理并归一化持久化的终端状态映射表�? * 移除运行时临时状态（注意力状态、运行中终端列表），
- * 并删除与默认状态相同的条目以减少存储体积�? *
- * @param terminalStateByThreadId - 持久化的线程终端状态映射表
- * @returns 清理后的映射�? */
+ * 娓呯悊骞跺綊涓€鍖栨寔涔呭寲鐨勭粓绔姸鎬佹槧灏勮〃銆? * 绉婚櫎杩愯鏃朵复鏃剁姸鎬侊紙娉ㄦ剰鍔涚姸鎬併€佽繍琛屼腑缁堢鍒楄〃锛夛紝
+ * 骞跺垹闄や笌榛樿鐘舵€佺浉鍚岀殑鏉＄洰浠ュ噺灏戝瓨鍌ㄤ綋绉€? *
+ * @param terminalStateByThreadId - 鎸佷箙鍖栫殑绾跨▼缁堢鐘舵€佹槧灏勮〃
+ * @returns 娓呯悊鍚庣殑鏄犲皠琛? */
 export function sanitizePersistedTerminalStateByThreadId(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState> | null | undefined,
 ): Record<ThreadId, ThreadTerminalState> {
@@ -1218,10 +1218,10 @@ function applyThreadWorkspaceLayoutPreset(
 }
 
 /**
- * 从终端状态映射表中选取指定线程的终端状态�? * 若线�?ID 为空或不存在对应状态，返回默认终端状态�? *
- * @param terminalStateByThreadId - 线程终端状态映射表
- * @param threadId - 目标线程 ID
- * @returns 该线程的终端状态（保证不为 null�? */
+ * 浠庣粓绔姸鎬佹槧灏勮〃涓€夊彇鎸囧畾绾跨▼鐨勭粓绔姸鎬併€? * 鑻ョ嚎绋?ID 涓虹┖鎴栦笉瀛樺湪瀵瑰簲鐘舵€侊紝杩斿洖榛樿缁堢鐘舵€併€? *
+ * @param terminalStateByThreadId - 绾跨▼缁堢鐘舵€佹槧灏勮〃
+ * @param threadId - 鐩爣绾跨▼ ID
+ * @returns 璇ョ嚎绋嬬殑缁堢鐘舵€侊紙淇濊瘉涓嶄负 null锛? */
 export function selectThreadTerminalState(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>,
   threadId: ThreadId,
@@ -1262,7 +1262,7 @@ function updateTerminalStateByThreadId(
 }
 
 /**
- * 终端状�?Store 的完整接口，包含状态和所有操作方法�? */
+ * 缁堢鐘舵€?Store 鐨勫畬鏁存帴鍙ｏ紝鍖呭惈鐘舵€佸拰鎵€鏈夋搷浣滄柟娉曘€? */
 interface TerminalStateStoreState {
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>;
   openChatThreadPage: (threadId: ThreadId) => void;
@@ -1320,7 +1320,7 @@ interface TerminalStateStoreState {
 }
 
 /**
- * 终端状�?Zustand Store，按 threadId 管理终端 UI 状态�? * 通过 persist 中间件将状态持久化�?localStorage�? *
+ * 缁堢鐘舵€?Zustand Store锛屾寜 threadId 绠＄悊缁堢 UI 鐘舵€併€? * 閫氳繃 persist 涓棿浠跺皢鐘舵€佹寔涔呭寲鍒?localStorage銆? *
  * @example
  * ```tsx
  * const { activeTerminalId, splitTerminal, closeTerminal } = useTerminalStateStore();

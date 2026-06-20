@@ -1,6 +1,6 @@
 /**
- * @file 基于 WebSocket �?NativeApi 实现
- * @description 通过 WsTransport 实现 NativeApi 接口，将所有原生能力调�? *              转换�?WebSocket RPC 请求。同时提供服务器推送事件的订阅机制�? *              以及浏览器状态的后备（fallback）管理�? *              �?Tauri 原生桥接不可用时，作�?Web 端的默认实现�? */
+ * @file 鍩轰簬 WebSocket 鐨?NativeApi 瀹炵幇
+ * @description 閫氳繃 WsTransport 瀹炵幇 NativeApi 鎺ュ彛锛屽皢鎵€鏈夊師鐢熻兘鍔涜皟鐢? *              杞崲涓?WebSocket RPC 璇锋眰銆傚悓鏃舵彁渚涙湇鍔″櫒鎺ㄩ€佷簨浠剁殑璁㈤槄鏈哄埗锛? *              浠ュ強娴忚鍣ㄧ姸鎬佺殑鍚庡锛坒allback锛夌鐞嗐€? *              褰?Tauri 鍘熺敓妗ユ帴涓嶅彲鐢ㄦ椂锛屼綔涓?Web 绔殑榛樿瀹炵幇銆? */
 
 import {
   type AuthBootstrapInput,
@@ -40,26 +40,26 @@ import { showContextMenuFallback } from "./contextMenuFallback";
 import { WsTransport } from "./wsTransport";
 import { tauriBridge } from "./lib/tauri-bridge";
 
-/** 单例实例，缓存已创建�?NativeApi �?WsTransport */
+/** 鍗曚緥瀹炰緥锛岀紦瀛樺凡鍒涘缓鐨?NativeApi 鍜?WsTransport */
 let instance: { api: NativeApi; transport: WsTransport } | null = null;
-/** 服务器欢迎消息监听器集合 */
+/** 鏈嶅姟鍣ㄦ杩庢秷鎭洃鍚櫒闆嗗悎 */
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
-/** 服务器配置更新监听器集合 */
+/** 鏈嶅姟鍣ㄩ厤缃洿鏂扮洃鍚櫒闆嗗悎 */
 const serverConfigUpdatedListeners = new Set<(payload: ServerConfigUpdatedPayload) => void>();
-/** 服务�?Provider 状态更新监听器集合 */
+/** 鏈嶅姟鍣?Provider 鐘舵€佹洿鏂扮洃鍚櫒闆嗗悎 */
 const serverProviderStatusesUpdatedListeners = new Set<
   (payload: ServerProviderStatusesUpdatedPayload) => void
 >();
-/** 服务器维护状态更新监听器集合 */
+/** 鏈嶅姟鍣ㄧ淮鎶ょ姸鎬佹洿鏂扮洃鍚櫒闆嗗悎 */
 const serverMaintenanceUpdatedListeners = new Set<(payload: ServerLifecycleStreamEvent) => void>();
-/** 服务器设置更新监听器集合 */
+/** 鏈嶅姟鍣ㄨ缃洿鏂扮洃鍚櫒闆嗗悎 */
 const serverSettingsUpdatedListeners = new Set<(payload: ServerSettingsUpdatedPayload) => void>();
-/** Git 操作进度监听器集�?*/
+/** Git 鎿嶄綔杩涘害鐩戝惉鍣ㄩ泦鍚?*/
 const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => void>();
 
 /**
- * 过滤用户输入应答中的 null/undefined �? * 仅对 thread.user-input.respond 类型的命令生效，移除 answers 中无效的空值条�? * @param command - 编排调度命令
- * @returns 过滤后的命令
+ * 杩囨护鐢ㄦ埛杈撳叆搴旂瓟涓殑 null/undefined 鍊? * 浠呭 thread.user-input.respond 绫诲瀷鐨勫懡浠ょ敓鏁堬紝绉婚櫎 answers 涓棤鏁堢殑绌哄€兼潯鐩? * @param command - 缂栨帓璋冨害鍛戒护
+ * @returns 杩囨护鍚庣殑鍛戒护
  */
 function omitNullUserInputAnswers(
   command: ClientOrchestrationCommand,
@@ -77,24 +77,24 @@ function omitNullUserInputAnswers(
     ),
   };
 }
-/** 终端事件监听器集�?*/
+/** 缁堢浜嬩欢鐩戝惉鍣ㄩ泦鍚?*/
 const terminalEventListeners = new Set<(payload: TerminalEvent) => void>();
-/** 编排领域事件监听器集�?*/
+/** 缂栨帓棰嗗煙浜嬩欢鐩戝惉鍣ㄩ泦鍚?*/
 const orchestrationDomainEventListeners = new Set<(payload: OrchestrationEvent) => void>();
-/** 编排 Shell 事件监听器集�?*/
+/** 缂栨帓 Shell 浜嬩欢鐩戝惉鍣ㄩ泦鍚?*/
 const orchestrationShellEventListeners = new Set<(payload: OrchestrationShellStreamItem) => void>();
-/** 编排线程事件监听器集�?*/
+/** 缂栨帓绾跨▼浜嬩欢鐩戝惉鍣ㄩ泦鍚?*/
 const orchestrationThreadEventListeners = new Set<
   (payload: OrchestrationThreadStreamItem) => void
 >();
-/** 后备浏览器状态监听器集合 */
+/** 鍚庡娴忚鍣ㄧ姸鎬佺洃鍚櫒闆嗗悎 */
 const fallbackBrowserStateListeners = new Set<(state: ThreadBrowserState) => void>();
-/** 后备浏览器状态缓存，key �?threadId */
+/** 鍚庡娴忚鍣ㄧ姸鎬佺紦瀛橈紝key 涓?threadId */
 const fallbackBrowserStates = new Map<ThreadId, ThreadBrowserState>();
 
 /**
- * 创建默认的浏览器状�? * @param threadId - 线程 ID
- * @returns 初始浏览器状态，版本�?0，未打开，无标签�? */
+ * 鍒涘缓榛樿鐨勬祻瑙堝櫒鐘舵€? * @param threadId - 绾跨▼ ID
+ * @returns 鍒濆娴忚鍣ㄧ姸鎬侊紝鐗堟湰涓?0锛屾湭鎵撳紑锛屾棤鏍囩椤? */
 function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   return {
     threadId,
@@ -107,8 +107,8 @@ function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
 }
 
 /**
- * 根据 URL 生成默认的浏览器标签页标�? * @param url - 标签�?URL
- * @returns 标签页标题，空白页返�?"New tab"，否则返回域名或原始 URL
+ * 鏍规嵁 URL 鐢熸垚榛樿鐨勬祻瑙堝櫒鏍囩椤垫爣棰? * @param url - 鏍囩椤?URL
+ * @returns 鏍囩椤垫爣棰橈紝绌虹櫧椤佃繑鍥?"New tab"锛屽惁鍒欒繑鍥炲煙鍚嶆垨鍘熷 URL
  */
 function defaultBrowserTitle(url: string): string {
   if (url === "about:blank") {
@@ -122,10 +122,10 @@ function defaultBrowserTitle(url: string): string {
 }
 
 /**
- * 发送带认证�?HTTP JSON 请求
- * @param path - 请求路径
- * @param options - 请求选项，包括方法和请求�? * @returns 解析后的 JSON 响应
- * @throws 当响应状态码�?2xx 时抛出错�? */
+ * 鍙戦€佸甫璁よ瘉鐨?HTTP JSON 璇锋眰
+ * @param path - 璇锋眰璺緞
+ * @param options - 璇锋眰閫夐」锛屽寘鎷柟娉曞拰璇锋眰浣? * @returns 瑙ｆ瀽鍚庣殑 JSON 鍝嶅簲
+ * @throws 褰撳搷搴旂姸鎬佺爜闈?2xx 鏃舵姏鍑洪敊璇? */
 async function requestAuthJson<T>(
   path: string,
   options: {
@@ -159,9 +159,9 @@ async function requestAuthJson<T>(
 }
 
 /**
- * 创建后备浏览器标签页
- * @param url - 初始 URL，默认为 about:blank
- * @returns 新建的标签页对象
+ * 鍒涘缓鍚庡娴忚鍣ㄦ爣绛鹃〉
+ * @param url - 鍒濆 URL锛岄粯璁や负 about:blank
+ * @returns 鏂板缓鐨勬爣绛鹃〉瀵硅薄
  */
 function createFallbackTab(url = "about:blank") {
   return {
@@ -179,8 +179,8 @@ function createFallbackTab(url = "about:blank") {
 }
 
 /**
- * 深拷贝浏览器状态（包括标签页列表）
- * @param state - 原始浏览器状�? * @returns 深拷贝后的浏览器状�? */
+ * 娣辨嫹璐濇祻瑙堝櫒鐘舵€侊紙鍖呮嫭鏍囩椤靛垪琛級
+ * @param state - 鍘熷娴忚鍣ㄧ姸鎬? * @returns 娣辨嫹璐濆悗鐨勬祻瑙堝櫒鐘舵€? */
 function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   return {
     ...state,
@@ -189,8 +189,8 @@ function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
 }
 
 /**
- * 获取指定线程的后备浏览器状态，不存在则创建默认状�? * @param threadId - 线程 ID
- * @returns 浏览器状�? */
+ * 鑾峰彇鎸囧畾绾跨▼鐨勫悗澶囨祻瑙堝櫒鐘舵€侊紝涓嶅瓨鍦ㄥ垯鍒涘缓榛樿鐘舵€? * @param threadId - 绾跨▼ ID
+ * @returns 娴忚鍣ㄧ姸鎬? */
 function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const existing = fallbackBrowserStates.get(threadId);
   if (existing) {
@@ -202,9 +202,9 @@ function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
 }
 
 /**
- * 通知所有后备浏览器状态监听器状态已更新
- * @param threadId - 线程 ID
- * @returns 更新后的浏览器状态副�? */
+ * 閫氱煡鎵€鏈夊悗澶囨祻瑙堝櫒鐘舵€佺洃鍚櫒鐘舵€佸凡鏇存柊
+ * @param threadId - 绾跨▼ ID
+ * @returns 鏇存柊鍚庣殑娴忚鍣ㄧ姸鎬佸壇鏈? */
 function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const state = cloneBrowserState(getFallbackBrowserState(threadId));
   for (const listener of fallbackBrowserStateListeners) {
@@ -213,15 +213,15 @@ function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return state;
 }
 
-/** 标记后备浏览器状态已变更，递增版本�?*/
+/** 鏍囪鍚庡娴忚鍣ㄧ姸鎬佸凡鍙樻洿锛岄€掑鐗堟湰鍙?*/
 function markFallbackBrowserStateChanged(state: ThreadBrowserState): void {
   state.version += 1;
 }
 
 /**
- * 确保指定线程的后备浏览器工作区已初始�? * 如果没有标签页则创建一个默认标签页，并标记为已打开
- * @param threadId - 线程 ID
- * @returns 初始化后的浏览器状�? */
+ * 纭繚鎸囧畾绾跨▼鐨勫悗澶囨祻瑙堝櫒宸ヤ綔鍖哄凡鍒濆鍖? * 濡傛灉娌℃湁鏍囩椤靛垯鍒涘缓涓€涓粯璁ゆ爣绛鹃〉锛屽苟鏍囪涓哄凡鎵撳紑
+ * @param threadId - 绾跨▼ ID
+ * @returns 鍒濆鍖栧悗鐨勬祻瑙堝櫒鐘舵€? */
 function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState {
   const state = getFallbackBrowserState(threadId);
   if (state.tabs.length === 0) {
@@ -234,11 +234,11 @@ function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState 
 }
 
 /**
- * 解析后备浏览器中的目标标签页
- * 优先匹配指定 tabId，其次匹配当前活跃标签页，最后使用第一个标签页
- * 若均不存在则创建新标签页
- * @param state - 浏览器状�? * @param tabId - 可选的目标标签�?ID
- * @returns 匹配到的标签�? */
+ * 瑙ｆ瀽鍚庡娴忚鍣ㄤ腑鐨勭洰鏍囨爣绛鹃〉
+ * 浼樺厛鍖归厤鎸囧畾 tabId锛屽叾娆″尮閰嶅綋鍓嶆椿璺冩爣绛鹃〉锛屾渶鍚庝娇鐢ㄧ涓€涓爣绛鹃〉
+ * 鑻ュ潎涓嶅瓨鍦ㄥ垯鍒涘缓鏂版爣绛鹃〉
+ * @param state - 娴忚鍣ㄧ姸鎬? * @param tabId - 鍙€夌殑鐩爣鏍囩椤?ID
+ * @returns 鍖归厤鍒扮殑鏍囩椤? */
 function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
   const existing =
     (tabId ? state.tabs.find((tab) => tab.id === tabId) : undefined) ??
@@ -255,9 +255,9 @@ function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
 }
 
 /**
- * 订阅服务器欢迎消�? * 如果在调用之前已收到欢迎消息，监听器会同步触发并传入缓存的消息，
- * 避免 WebSocket 连接�?React effect 注册之间的竞态条�? * @param listener - 欢迎消息回调函数
- * @returns 取消订阅的函�? */
+ * 璁㈤槄鏈嶅姟鍣ㄦ杩庢秷鎭? * 濡傛灉鍦ㄨ皟鐢ㄤ箣鍓嶅凡鏀跺埌娆㈣繋娑堟伅锛岀洃鍚櫒浼氬悓姝ヨЕ鍙戝苟浼犲叆缂撳瓨鐨勬秷鎭紝
+ * 閬垮厤 WebSocket 杩炴帴涓?React effect 娉ㄥ唽涔嬮棿鐨勭珵鎬佹潯浠? * @param listener - 娆㈣繋娑堟伅鍥炶皟鍑芥暟
+ * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): () => void {
   welcomeListeners.add(listener);
 
@@ -276,8 +276,8 @@ export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): 
 }
 
 /**
- * 订阅服务器配置更新事�? * 对迟注册的订阅者回放最新的更新，避免错过配置校验反�? * @param listener - 配置更新回调函数
- * @returns 取消订阅的函�? */
+ * 璁㈤槄鏈嶅姟鍣ㄩ厤缃洿鏂颁簨浠? * 瀵硅繜娉ㄥ唽鐨勮闃呰€呭洖鏀炬渶鏂扮殑鏇存柊锛岄伩鍏嶉敊杩囬厤缃牎楠屽弽棣? * @param listener - 閰嶇疆鏇存柊鍥炶皟鍑芥暟
+ * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function onServerConfigUpdated(
   listener: (payload: ServerConfigUpdatedPayload) => void,
 ): () => void {
@@ -299,8 +299,8 @@ export function onServerConfigUpdated(
 }
 
 /**
- * 订阅 Provider 状态更新事件，无需强制完整配置重载
- * @param listener - Provider 状态更新回调函�? * @returns 取消订阅的函�? */
+ * 璁㈤槄 Provider 鐘舵€佹洿鏂颁簨浠讹紝鏃犻渶寮哄埗瀹屾暣閰嶇疆閲嶈浇
+ * @param listener - Provider 鐘舵€佹洿鏂板洖璋冨嚱鏁? * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function onServerProviderStatusesUpdated(
   listener: (payload: ServerProviderStatusesUpdatedPayload) => void,
 ): () => void {
@@ -322,7 +322,7 @@ export function onServerProviderStatusesUpdated(
 }
 
 /**
- * 订阅服务器维护状态更新事�? * @param listener - 维护状态更新回调函�? * @returns 取消订阅的函�? */
+ * 璁㈤槄鏈嶅姟鍣ㄧ淮鎶ょ姸鎬佹洿鏂颁簨浠? * @param listener - 缁存姢鐘舵€佹洿鏂板洖璋冨嚱鏁? * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function onServerMaintenanceUpdated(
   listener: (payload: ServerLifecycleStreamEvent) => void,
 ): () => void {
@@ -344,8 +344,8 @@ export function onServerMaintenanceUpdated(
 }
 
 /**
- * 订阅服务器设置更新事�? * @param listener - 设置更新回调函数
- * @returns 取消订阅的函�? */
+ * 璁㈤槄鏈嶅姟鍣ㄨ缃洿鏂颁簨浠? * @param listener - 璁剧疆鏇存柊鍥炶皟鍑芥暟
+ * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁? */
 export function onServerSettingsUpdated(
   listener: (payload: ServerSettingsUpdatedPayload) => void,
 ): () => void {
@@ -367,9 +367,9 @@ export function onServerSettingsUpdated(
 }
 
 /**
- * 创建基于 WebSocket �?NativeApi 实例（单例模式）
- * 如果已有未销毁的实例则直接返回，否则创建新的 WsTransport 并注册所有推送频道监听器
- * @returns NativeApi 实例
+ * 鍒涘缓鍩轰簬 WebSocket 鐨?NativeApi 瀹炰緥锛堝崟渚嬫ā寮忥級
+ * 濡傛灉宸叉湁鏈攢姣佺殑瀹炰緥鍒欑洿鎺ヨ繑鍥烇紝鍚﹀垯鍒涘缓鏂扮殑 WsTransport 骞舵敞鍐屾墍鏈夋帹閫侀閬撶洃鍚櫒
+ * @returns NativeApi 瀹炰緥
  */
 export function createWsNativeApi(): NativeApi {
   if (instance) {
@@ -756,7 +756,7 @@ export function createWsNativeApi(): NativeApi {
   return api;
 }
 
-/** Vite HMR 热更新时清理所有资�?*/
+/** Vite HMR 鐑洿鏂版椂娓呯悊鎵€鏈夎祫婧?*/
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     instance?.transport.dispose();

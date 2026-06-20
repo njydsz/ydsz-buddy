@@ -47,9 +47,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "deepseek",
     name: "DeepSeek",
     nameEn: "DeepSeek",
-    subtitle: "深度求索 · DeepSeek",
+    subtitle: "æ·±åº¦æ±‚ç´¢ Â· DeepSeek",
     subtitleEn: "DeepSeek",
-    balance: "¥177.52",
+    balance: "Â¥177.52",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
         <rect width="24" height="24" rx="6" fill="#4D6BFA" />
@@ -59,11 +59,11 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "siliconflow",
-    name: "硅基流动",
+    name: "ç¡…åŸºæµåŠ¨",
     nameEn: "SiliconFlow",
-    subtitle: "硅基流动 · SiliconFlow",
+    subtitle: "ç¡…åŸºæµåŠ¨ Â· SiliconFlow",
     subtitleEn: "SiliconFlow",
-    balance: "¥110.87",
+    balance: "Â¥110.87",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
         <rect width="24" height="24" rx="6" fill="#6366F1" />
@@ -73,9 +73,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "volcano",
-    name: "火山方舟",
+    name: "ç«å±±æ–¹èˆŸ",
     nameEn: "Volcano Ark",
-    subtitle: "字节跳动 · 火山方舟",
+    subtitle: "å­—èŠ‚è·³åŠ¨ Â· ç«å±±æ–¹èˆŸ",
     subtitleEn: "ByteDance Volcano Ark",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -86,9 +86,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "tongyi",
-    name: "通义千问",
+    name: "é€šä¹‰åƒé—®",
     nameEn: "Tongyi Qianwen",
-    subtitle: "阿里�?· 百炼平台",
+    subtitle: "é˜é‡Œï½?Â· ç™¾ç‚¼å¹³å°",
     subtitleEn: "Alibaba Cloud BaiLian",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -101,9 +101,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "kimi",
     name: "Kimi",
     nameEn: "Kimi",
-    subtitle: "月之暗面 · Kimi",
+    subtitle: "æœˆä¹‹æš—é¢ Â· Kimi",
     subtitleEn: "Moonshot AI",
-    balance: "¥13.96",
+    balance: "Â¥13.96",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
         <rect width="24" height="24" rx="6" fill="#1F2937" />
@@ -115,7 +115,7 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "minimax",
     name: "MiniMax",
     nameEn: "MiniMax",
-    subtitle: "MiniMax · 海螺 AI",
+    subtitle: "MiniMax Â· æµ·èžº AI",
     subtitleEn: "MiniMax HaiLuo AI",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -185,7 +185,7 @@ function ChannelListItem({
           {channel.name}
           {channel.balance ? (
             <span className="text-xs font-normal text-emerald-500">
-              余额 {channel.balance}
+              ä½™é¢ {channel.balance}
             </span>
           ) : null}
         </span>
@@ -230,10 +230,10 @@ export const ModelChannelSection = memo(function ModelChannelSection() {
       <MenuGroup>
         <MenuGroupLabel className="flex items-center justify-between px-2 py-1.5">
           <span className="font-medium text-muted-foreground text-xs">
-            服务渠道
+            æœåŠ¡æ¸ é“
           </span>
           <span className="text-[11px] text-muted-foreground/70">
-            ({enabledCount}/{totalCount} 已启�?
+            ({enabledCount}/{totalCount} å·²å¯ï½?
           </span>
         </MenuGroupLabel>
         <div className="space-y-0.5 px-1 py-1">
@@ -291,9 +291,9 @@ export const ModelChannelPicker = memo(function ModelChannelPicker({
             isOpen && "rotate-90"
           )}
         />
-        <span className="flex-1">服务渠道</span>
+        <span className="flex-1">æœåŠ¡æ¸ é“</span>
         <span className="text-[11px] text-muted-foreground/70">
-          ({enabledIds.length}/{CHANNELS.length} 已启�?
+          ({enabledIds.length}/{CHANNELS.length} å·²å¯ï½?
         </span>
       </MenuSubTrigger>
       <MenuSubPopup className="[--available-height:min(24rem,70vh)] w-72">

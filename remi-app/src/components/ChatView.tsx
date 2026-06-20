@@ -4170,7 +4170,7 @@ export default function ChatView({
     });
   }, [prompt, providerPlugins]);
 
-  // Clear selected skills when switching providers �?skills are provider-specific.
+  // Clear selected skills when switching providers 锟?skills are provider-specific.
   useEffect(() => {
     setSelectedComposerSkills([]);
     setSelectedComposerMentions([]);
@@ -5341,7 +5341,7 @@ export default function ChatView({
               : "The current browser context could not be attached.";
       toastManager.add({
         type: "warning",
-        title: "Couldn’t attach the in-app browser context",
+        title: "Couldn鈥檛 attach the in-app browser context",
         description,
       });
     }
@@ -7731,7 +7731,7 @@ export default function ChatView({
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
-                            title="Plan mode �?click to return to normal build mode"
+                            title="Plan mode 锟?click to return to normal build mode"
                           >
                             <GoTasklist className="size-3.5" />
                             <span className="sr-only sm:not-sr-only">Plan</span>
@@ -8475,7 +8475,7 @@ export default function ChatView({
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
-                                        title="Plan mode �?click to return to normal build mode"
+                                        title="Plan mode 锟?click to return to normal build mode"
                                       >
                                         <GoTasklist className="size-3.5" />
                                         <span className="sr-only sm:not-sr-only">Plan</span>

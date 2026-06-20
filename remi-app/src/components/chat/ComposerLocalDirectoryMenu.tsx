@@ -33,7 +33,7 @@ import {
 
 type EntriesByPath = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 
-// Delay search requests until the user stops typing â€?keeps chat input smooth
+// Delay search requests until the user stops typing éˆ¥?keeps chat input smooth
 // because every keystroke reshapes mentionQuery in the parent.
 const LOCAL_SEARCH_DEBOUNCE_MS = 220;
 const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
@@ -503,14 +503,14 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
         </div>
         {isAwaitingHomeDir ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Waiting for home directory from serverâ€?          </p>
+            Waiting for home directory from serveréˆ¥?          </p>
         ) : isLoading && visibleCount === 0 ? (
-          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local filesâ€?/p>
+          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local fileséˆ¥?/p>
         ) : errorMessage ? (
           <p className="px-2 py-1.5 text-destructive/80 text-[11px]">{errorMessage}</p>
         ) : isSearchPending ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Searching nested filesâ€?          </p>
+            Searching nested fileséˆ¥?          </p>
         ) : visibleCount === 0 ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
             {filter.trim().length > 0 ? "No matches." : "No files or folders here."}

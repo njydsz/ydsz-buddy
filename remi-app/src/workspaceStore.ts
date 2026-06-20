@@ -1,7 +1,7 @@
 /**
  * @file workspaceStore.ts
- * @description 持久化的终端工作区页面状态管�?Store�? *
- * 管理终端专属的工作区页面，每个工作区页面拥有独立的终端布局预设�? * 同时维护用户主目录路径，供终端路径解析使用�? * 状态通过 localStorage 持久化�? */
+ * @description 鎸佷箙鍖栫殑缁堢宸ヤ綔鍖洪〉闈㈢姸鎬佺鐞?Store銆? *
+ * 绠＄悊缁堢涓撳睘鐨勫伐浣滃尯椤甸潰锛屾瘡涓伐浣滃尯椤甸潰鎷ユ湁鐙珛鐨勭粓绔竷灞€棰勮銆? * 鍚屾椂缁存姢鐢ㄦ埛涓荤洰褰曡矾寰勶紝渚涚粓绔矾寰勮В鏋愪娇鐢ㄣ€? * 鐘舵€侀€氳繃 localStorage 鎸佷箙鍖栥€? */
 
 import { type ThreadId } from "~/contracts";
 import { create } from "zustand";
@@ -13,17 +13,17 @@ import {
 } from "./workspaceTerminalLayoutPresets";
 
 /**
- * 工作区页面数据，包含 ID、标题、布局预设和时间戳�? */
+ * 宸ヤ綔鍖洪〉闈㈡暟鎹紝鍖呭惈 ID銆佹爣棰樸€佸竷灞€棰勮鍜屾椂闂存埑銆? */
 interface WorkspacePage {
-  /** 工作区唯一标识 */
+  /** 宸ヤ綔鍖哄敮涓€鏍囪瘑 */
   id: string;
-  /** 工作区显示标�?*/
+  /** 宸ヤ綔鍖烘樉绀烘爣棰?*/
   title: string;
-  /** 终端布局预设 ID */
+  /** 缁堢甯冨眬棰勮 ID */
   layoutPresetId: WorkspaceLayoutPresetId;
-  /** 创建时间（ISO 格式�?*/
+  /** 鍒涘缓鏃堕棿锛圛SO 鏍煎紡锛?*/
   createdAt: string;
-  /** 最后更新时间（ISO 格式�?*/
+  /** 鏈€鍚庢洿鏂版椂闂达紙ISO 鏍煎紡锛?*/
   updatedAt: string;
 }
 
@@ -39,7 +39,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-/** localStorage 持久化键�?*/
+/** localStorage 鎸佷箙鍖栭敭鍚?*/
 const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
@@ -136,9 +136,9 @@ function reorderAtIndex<T>(items: readonly T[], fromIndex: number, toIndex: numb
 }
 
 /**
- * 将工作区 ID 转换为合成的线程 ID�? * 工作区页面使用合成的线程 ID 与终端状�?Store 关联�? * 使得工作区页面可以复用线程级别的终端状态管理�? *
- * @param workspaceId - 工作�?ID
- * @returns 合成的线�?ID，格式为 "workspace:{workspaceId}"
+ * 灏嗗伐浣滃尯 ID 杞崲涓哄悎鎴愮殑绾跨▼ ID銆? * 宸ヤ綔鍖洪〉闈娇鐢ㄥ悎鎴愮殑绾跨▼ ID 涓庣粓绔姸鎬?Store 鍏宠仈锛? * 浣垮緱宸ヤ綔鍖洪〉闈㈠彲浠ュ鐢ㄧ嚎绋嬬骇鍒殑缁堢鐘舵€佺鐞嗐€? *
+ * @param workspaceId - 宸ヤ綔鍖?ID
+ * @returns 鍚堟垚鐨勭嚎绋?ID锛屾牸寮忎负 "workspace:{workspaceId}"
  *
  * @example
  * ```ts
@@ -150,7 +150,7 @@ export function workspaceThreadId(workspaceId: string): ThreadId {
 }
 
 /**
- * 工作区页面状�?Zustand Store�? * 管理工作区页面的增删改查、重命名、排序和布局预设切换�? * 通过 persist 中间件将状态持久化�?localStorage�? *
+ * 宸ヤ綔鍖洪〉闈㈢姸鎬?Zustand Store銆? * 绠＄悊宸ヤ綔鍖洪〉闈㈢殑澧炲垹鏀规煡銆侀噸鍛藉悕銆佹帓搴忓拰甯冨眬棰勮鍒囨崲銆? * 閫氳繃 persist 涓棿浠跺皢鐘舵€佹寔涔呭寲鍒?localStorage銆? *
  * @example
  * ```tsx
  * const { workspacePages, createWorkspace, deleteWorkspace } = useWorkspaceStore();

@@ -1,6 +1,6 @@
 /**
- * @file 聊天索引路由模块
- * @description 应用启动时恢复上次聊天路由，若无可用记录则创建新的家庭聊天草�? * @layer 路由�? * @depends sidebar UI 持久化、共享的新建聊天处理器（用于空状态回退�? */
+ * @file 鑱婂ぉ绱㈠紩璺敱妯″潡
+ * @description 搴旂敤鍚姩鏃舵仮澶嶄笂娆¤亰澶╄矾鐢憋紝鑻ユ棤鍙敤璁板綍鍒欏垱寤烘柊鐨勫搴亰澶╄崏绋? * @layer 璺敱灞? * @depends sidebar UI 鎸佷箙鍖栥€佸叡浜殑鏂板缓鑱婂ぉ澶勭悊鍣紙鐢ㄤ簬绌虹姸鎬佸洖閫€锛? */
 
 import { ThreadId } from "~/contracts";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -14,33 +14,33 @@ import { useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 
 /**
- * 聊天索引路由视图组件
- * @description 应用启动时的入口路由，负责恢复上次的聊天会话或创建新会话
- * 工作流程�? * 1. 等待线程和分割视图数据水合完�? * 2. 尝试从本地存储恢复上次的线程路由
- * 3. 若无法恢复，则创建新的聊天会�? * 4. 若创建失败，展示错误信息并提供重试按�? */
+ * 鑱婂ぉ绱㈠紩璺敱瑙嗗浘缁勪欢
+ * @description 搴旂敤鍚姩鏃剁殑鍏ュ彛璺敱锛岃礋璐ｆ仮澶嶄笂娆＄殑鑱婂ぉ浼氳瘽鎴栧垱寤烘柊浼氳瘽
+ * 宸ヤ綔娴佺▼锛? * 1. 绛夊緟绾跨▼鍜屽垎鍓茶鍥炬暟鎹按鍚堝畬鎴? * 2. 灏濊瘯浠庢湰鍦板瓨鍌ㄦ仮澶嶄笂娆＄殑绾跨▼璺敱
+ * 3. 鑻ユ棤娉曟仮澶嶏紝鍒欏垱寤烘柊鐨勮亰澶╀細璇? * 4. 鑻ュ垱寤哄け璐ワ紝灞曠ず閿欒淇℃伅骞舵彁渚涢噸璇曟寜閽? */
 function ChatIndexRouteView() {
   const { handleNewChat } = useHandleNewChat();
   const navigate = useNavigate();
-  /** 线程数据是否已从持久化存储加载完�?*/
+  /** 绾跨▼鏁版嵁鏄惁宸蹭粠鎸佷箙鍖栧瓨鍌ㄥ姞杞藉畬鎴?*/
   const threadsHydrated = useStore((store) => store.threadsHydrated);
-  /** 所有可用的线程 ID 列表 */
+  /** 鎵€鏈夊彲鐢ㄧ殑绾跨▼ ID 鍒楄〃 */
   const threadIds = useStore((state) => state.threadIds ?? []);
-  /** 分割视图数据是否已水�?*/
+  /** 鍒嗗壊瑙嗗浘鏁版嵁鏄惁宸叉按鍚?*/
   const splitViewsHydrated = useSplitViewStore((state) => state.hasHydrated);
-  /** 所有分割视图的映射�?*/
+  /** 鎵€鏈夊垎鍓茶鍥剧殑鏄犲皠琛?*/
   const splitViewsById = useSplitViewStore((state) => state.splitViewsById);
-  /** 过滤出有效的分割视图 ID 列表 */
+  /** 杩囨护鍑烘湁鏁堢殑鍒嗗壊瑙嗗浘 ID 鍒楄〃 */
   const splitViewIds = useMemo(
     () => Object.keys(splitViewsById).filter((splitViewId) => splitViewsById[splitViewId]),
     [splitViewsById],
   );
-  /** 重试计数器，每次重试时递增以触�?useEffect 重新执行 */
+  /** 閲嶈瘯璁℃暟鍣紝姣忔閲嶈瘯鏃堕€掑浠ヨЕ鍙?useEffect 閲嶆柊鎵ц */
   const [attempt, setAttempt] = useState(0);
-  /** 错误信息，用于在启动屏幕展示失败原因 */
+  /** 閿欒淇℃伅锛岀敤浜庡湪鍚姩灞忓箷灞曠ず澶辫触鍘熷洜 */
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // 等待数据水合完成后再执行恢复逻辑
+    // 绛夊緟鏁版嵁姘村悎瀹屾垚鍚庡啀鎵ц鎭㈠閫昏緫
     if (!threadsHydrated || !splitViewsHydrated) {
       return;
     }
@@ -49,7 +49,7 @@ function ChatIndexRouteView() {
     setErrorMessage(null);
 
     void (async () => {
-      // 尝试从本地存储恢复上次的线程路由
+      // 灏濊瘯浠庢湰鍦板瓨鍌ㄦ仮澶嶄笂娆＄殑绾跨▼璺敱
       const restorableRoute = resolveRestorableThreadRoute({
         lastThreadRoute: readSidebarUiState().lastThreadRoute,
         availableThreadIds: new Set(threadIds),
@@ -70,7 +70,7 @@ function ChatIndexRouteView() {
         return;
       }
 
-      // 无法恢复时，创建新的聊天会话
+      // 鏃犳硶鎭㈠鏃讹紝鍒涘缓鏂扮殑鑱婂ぉ浼氳瘽
       const result = await handleNewChat({ fresh: true });
       if (cancelled || result.ok) {
         return;
@@ -100,8 +100,8 @@ function ChatIndexRouteView() {
 }
 
 /**
- * 聊天索引路由定义
- * @description 定义 /_chat/ 路由，作为应用启动时的默认入�? */
+ * 鑱婂ぉ绱㈠紩璺敱瀹氫箟
+ * @description 瀹氫箟 /_chat/ 璺敱锛屼綔涓哄簲鐢ㄥ惎鍔ㄦ椂鐨勯粯璁ゅ叆鍙? */
 export const Route = createFileRoute("/_chat/")({
   component: ChatIndexRouteView,
 });

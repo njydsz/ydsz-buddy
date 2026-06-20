@@ -1,6 +1,6 @@
 /**
- * @file 本地图片 URL 处理模块
- * @description �?Markdown 图片预览和下载构建认证的本地图片 URL�? *              依赖 wsHttpUrl（以便桌面请求携带附件使用的旧版启动令牌�? *              �?@remi-code/shared/localImage（用于规范路由和扩展名白名单）�? */
+ * @file 鏈湴鍥剧墖 URL 澶勭悊妯″潡
+ * @description 涓?Markdown 鍥剧墖棰勮鍜屼笅杞芥瀯寤鸿璇佺殑鏈湴鍥剧墖 URL銆? *              渚濊禆 wsHttpUrl锛堜互渚挎闈㈣姹傛惡甯﹂檮浠朵娇鐢ㄧ殑鏃х増鍚姩浠ょ墝锛? *              鍜?@remi-code/shared/localImage锛堢敤浜庤鑼冭矾鐢卞拰鎵╁睍鍚嶇櫧鍚嶅崟锛夈€? */
 
 import {
   LOCAL_IMAGE_ROUTE_PATH,
@@ -11,12 +11,12 @@ import { isWindowsAbsolutePath } from "~/shared/path";
 import { resolveWsHttpUrl } from "./wsHttpUrl";
 
 /**
- * 规范�?Markdown 图片路径（内部函数）
- * @param src - 原始图片路径
- * @returns 规范化后的路径（解码 URL 编码�? */
+ * 瑙勮寖鍖?Markdown 鍥剧墖璺緞锛堝唴閮ㄥ嚱鏁帮級
+ * @param src - 鍘熷鍥剧墖璺緞
+ * @returns 瑙勮寖鍖栧悗鐨勮矾寰勶紙瑙ｇ爜 URL 缂栫爜锛? */
 function normalizeMarkdownImagePath(src: string): string {
   const trimmed = src.trim();
-  // 处理 file:// 协议
+  // 澶勭悊 file:// 鍗忚
   if (trimmed.startsWith("file://")) {
     try {
       return decodeURIComponent(new URL(trimmed).pathname);
@@ -32,7 +32,7 @@ function normalizeMarkdownImagePath(src: string): string {
 }
 
 /**
- * 判断是否为本地图�?Markdown �? * @param src - 图片源路�? * @returns 是否为本地图片路�? */
+ * 鍒ゆ柇鏄惁涓烘湰鍦板浘鐗?Markdown 婧? * @param src - 鍥剧墖婧愯矾寰? * @returns 鏄惁涓烘湰鍦板浘鐗囪矾寰? */
 export function isLocalImageMarkdownSrc(src: string | undefined): src is string {
   if (!src) {
     return false;
@@ -41,8 +41,8 @@ export function isLocalImageMarkdownSrc(src: string | undefined): src is string 
   if (!SUPPORTED_LOCAL_IMAGE_EXTENSION_REGEX.test(normalized)) {
     return false;
   }
-  // �?Windows 绝对路径（如 C:\foo\bar.png）视为本地图片，
-  // 尽管其盘符前缀可能看起来像 URI 方案
+  // 灏?Windows 缁濆璺緞锛堝 C:\foo\bar.png锛夎涓烘湰鍦板浘鐗囷紝
+  // 灏界鍏剁洏绗﹀墠缂€鍙兘鐪嬭捣鏉ュ儚 URI 鏂规
   if (isWindowsAbsolutePath(normalized)) {
     return true;
   }
@@ -55,10 +55,10 @@ export function isLocalImageMarkdownSrc(src: string | undefined): src is string 
 }
 
 /**
- * 构建本地图片 URL
- * @param input - 输入参数
- * @param input.src - 图片源路�? * @param input.cwd - 当前工作目录
- * @param input.download - 是否为下载模�? * @returns 构建后的本地图片 URL
+ * 鏋勫缓鏈湴鍥剧墖 URL
+ * @param input - 杈撳叆鍙傛暟
+ * @param input.src - 鍥剧墖婧愯矾寰? * @param input.cwd - 褰撳墠宸ヤ綔鐩綍
+ * @param input.download - 鏄惁涓轰笅杞芥ā寮? * @returns 鏋勫缓鍚庣殑鏈湴鍥剧墖 URL
  */
 export function buildLocalImageUrl(input: {
   readonly src: string;
@@ -72,15 +72,15 @@ export function buildLocalImageUrl(input: {
   if (input.download) {
     params.set("download", "1");
   }
-  // 始终通过 WS 派生�?HTTP 源路由，以便桌面版本（自定义协议�?  // 包含附件已使用的相同旧版启动令牌；在 Web/开发环境（页面和服务器共享源）
-  // 中，这会回退到相同的相对路径
+  // 濮嬬粓閫氳繃 WS 娲剧敓鐨?HTTP 婧愯矾鐢憋紝浠ヤ究妗岄潰鐗堟湰锛堣嚜瀹氫箟鍗忚锛?  // 鍖呭惈闄勪欢宸蹭娇鐢ㄧ殑鐩稿悓鏃х増鍚姩浠ょ墝锛涘湪 Web/寮€鍙戠幆澧冿紙椤甸潰鍜屾湇鍔″櫒鍏变韩婧愶級
+  // 涓紝杩欎細鍥為€€鍒扮浉鍚岀殑鐩稿璺緞
   return resolveWsHttpUrl(`${LOCAL_IMAGE_ROUTE_PATH}?${params.toString()}`);
 }
 
 /**
- * 从图片路径提取文件名
- * @param src - 图片路径
- * @returns 文件�? */
+ * 浠庡浘鐗囪矾寰勬彁鍙栨枃浠跺悕
+ * @param src - 鍥剧墖璺緞
+ * @returns 鏂囦欢鍚? */
 export function localImageFileName(src: string): string {
   const normalized = normalizeMarkdownImagePath(src);
   const slash = Math.max(normalized.lastIndexOf("/"), normalized.lastIndexOf("\\"));

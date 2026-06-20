@@ -1,6 +1,6 @@
 /**
  * @file splitView.logic.ts
- * @description 分屏视图面板树的纯函数辅助模块�? * 提供面板查找、替换、删除、深度计算、分割可行性判断等功能�? * 以及旧版分屏视图的迁移支持。不依赖 DOM �?React�? */
+ * @description 鍒嗗睆瑙嗗浘闈㈡澘鏍戠殑绾嚱鏁拌緟鍔╂ā鍧椼€? * 鎻愪緵闈㈡澘鏌ユ壘銆佹浛鎹€€佸垹闄ゃ€佹繁搴﹁绠椼€佸垎鍓插彲琛屾€у垽鏂瓑鍔熻兘锛? * 浠ュ強鏃х増鍒嗗睆瑙嗗浘鐨勮縼绉绘敮鎸併€備笉渚濊禆 DOM 鎴?React銆? */
 
 import type { ProjectId, ThreadId } from "~/contracts";
 import type {
@@ -13,9 +13,9 @@ import type {
 } from "./splitViewStore";
 
 /**
- * 清除面板的右侧面板状态（关闭面板、清除差异信息）
+ * 娓呴櫎闈㈡澘鐨勫彸渚ч潰鏉跨姸鎬侊紙鍏抽棴闈㈡澘銆佹竻闄ゅ樊寮備俊鎭級
  *
- * @param panelState - 当前面板状�? * @returns 重置后的面板状�? */
+ * @param panelState - 褰撳墠闈㈡澘鐘舵€? * @returns 閲嶇疆鍚庣殑闈㈡澘鐘舵€? */
 export function clearSplitViewPanePanelState(
   panelState: SplitViewPanePanelState,
 ): SplitViewPanePanelState {
@@ -30,11 +30,11 @@ export function clearSplitViewPanePanelState(
 // --- pane lookup ---
 
 /**
- * 在面板树中按 ID 查找面板节点
+ * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘闈㈡澘鑺傜偣
  *
- * @param root - 面板树根节点
- * @param paneId - 目标面板 ID
- * @returns 找到的面板节点，未找到时返回 null
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 鐩爣闈㈡澘 ID
+ * @returns 鎵惧埌鐨勯潰鏉胯妭鐐癸紝鏈壘鍒版椂杩斿洖 null
  */
 export function findPaneById(root: Pane, paneId: PaneId): Pane | null {
   if (root.id === paneId) {
@@ -47,11 +47,11 @@ export function findPaneById(root: Pane, paneId: PaneId): Pane | null {
 }
 
 /**
- * 在面板树中按 ID 查找叶子面板
+ * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘鍙跺瓙闈㈡澘
  *
- * @param root - 面板树根节点
- * @param paneId - 目标面板 ID
- * @returns 找到的叶子面板，未找到或非叶子节点时返回 null
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 鐩爣闈㈡澘 ID
+ * @returns 鎵惧埌鐨勫彾瀛愰潰鏉匡紝鏈壘鍒版垨闈炲彾瀛愯妭鐐规椂杩斿洖 null
  */
 export function findLeafPaneById(root: Pane, paneId: PaneId): LeafPane | null {
   const found = findPaneById(root, paneId);
@@ -59,11 +59,11 @@ export function findLeafPaneById(root: Pane, paneId: PaneId): LeafPane | null {
 }
 
 /**
- * 在面板树中按 ID 查找分割节点
+ * 鍦ㄩ潰鏉挎爲涓寜 ID 鏌ユ壘鍒嗗壊鑺傜偣
  *
- * @param root - 面板树根节点
- * @param paneId - 目标面板 ID
- * @returns 找到的分割节点，未找到或非分割节点时返回 null
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 鐩爣闈㈡澘 ID
+ * @returns 鎵惧埌鐨勫垎鍓茶妭鐐癸紝鏈壘鍒版垨闈炲垎鍓茶妭鐐规椂杩斿洖 null
  */
 export function findSplitNodeById(root: Pane, paneId: PaneId): SplitNode | null {
   const found = findPaneById(root, paneId);
@@ -71,10 +71,10 @@ export function findSplitNodeById(root: Pane, paneId: PaneId): SplitNode | null 
 }
 
 /**
- * 查找直接包含指定面板的父分割节点�? * 如果面板 ID 是根节点，返�?null�? *
- * @param root - 面板树根节点
- * @param paneId - 目标面板 ID
- * @returns 父分割节点，面板为根节点时返�?null
+ * 鏌ユ壘鐩存帴鍖呭惈鎸囧畾闈㈡澘鐨勭埗鍒嗗壊鑺傜偣銆? * 濡傛灉闈㈡澘 ID 鏄牴鑺傜偣锛岃繑鍥?null銆? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 鐩爣闈㈡澘 ID
+ * @returns 鐖跺垎鍓茶妭鐐癸紝闈㈡澘涓烘牴鑺傜偣鏃惰繑鍥?null
  */
 export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | null {
   if (root.kind === "leaf") {
@@ -87,10 +87,10 @@ export function findParentSplitNode(root: Pane, paneId: PaneId): SplitNode | nul
 }
 
 /**
- * 计算面板在树中的深度（根节点深度�?0�? *
- * @param root - 面板树根节点
- * @param paneId - 目标面板 ID
- * @returns 面板深度，未找到时返�?null
+ * 璁＄畻闈㈡澘鍦ㄦ爲涓殑娣卞害锛堟牴鑺傜偣娣卞害涓?0锛? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 鐩爣闈㈡澘 ID
+ * @returns 闈㈡澘娣卞害锛屾湭鎵惧埌鏃惰繑鍥?null
  */
 export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
   if (root.id === paneId) {
@@ -108,9 +108,9 @@ export function findPaneDepth(root: Pane, paneId: PaneId): number | null {
 }
 
 /**
- * 收集面板树中的所有叶子面�? *
- * @param root - 面板树根节点
- * @returns 叶子面板数组
+ * 鏀堕泦闈㈡澘鏍戜腑鐨勬墍鏈夊彾瀛愰潰鏉? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @returns 鍙跺瓙闈㈡澘鏁扮粍
  */
 export function collectLeaves(root: Pane): LeafPane[] {
   if (root.kind === "leaf") {
@@ -122,11 +122,11 @@ export function collectLeaves(root: Pane): LeafPane[] {
 // --- pane mutation (immutable) ---
 
 /**
- * 在面板树中替换指定面板节点（不可变操作）�? * 如果没有实际变更，返回原树引用以保持引用相等性�? *
- * @param root - 面板树根节点
- * @param paneId - 要替换的面板 ID
- * @param replacement - 替换面板
- * @returns 替换后的新面板树
+ * 鍦ㄩ潰鏉挎爲涓浛鎹㈡寚瀹氶潰鏉胯妭鐐癸紙涓嶅彲鍙樻搷浣滐級銆? * 濡傛灉娌℃湁瀹為檯鍙樻洿锛岃繑鍥炲師鏍戝紩鐢ㄤ互淇濇寔寮曠敤鐩哥瓑鎬с€? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 瑕佹浛鎹㈢殑闈㈡澘 ID
+ * @param replacement - 鏇挎崲闈㈡澘
+ * @returns 鏇挎崲鍚庣殑鏂伴潰鏉挎爲
  */
 export function replacePaneInTree(root: Pane, paneId: PaneId, replacement: Pane): Pane {
   if (root.id === paneId) {
@@ -144,20 +144,20 @@ export function replacePaneInTree(root: Pane, paneId: PaneId, replacement: Pane)
 }
 
 /**
- * 删除叶子面板的结果，包含新树根和被移除的叶子 ID 列表
+ * 鍒犻櫎鍙跺瓙闈㈡澘鐨勭粨鏋滐紝鍖呭惈鏂版爲鏍瑰拰琚Щ闄ょ殑鍙跺瓙 ID 鍒楄〃
  */
 export interface RemoveLeafResult {
-  /** 删除后的新树根，所有叶子被移除时为 null */
+  /** 鍒犻櫎鍚庣殑鏂版爲鏍癸紝鎵€鏈夊彾瀛愯绉婚櫎鏃朵负 null */
   nextRoot: Pane | null;
-  /** 被移除的叶子面板 ID 列表 */
+  /** 琚Щ闄ょ殑鍙跺瓙闈㈡澘 ID 鍒楄〃 */
   removedLeafIds: PaneId[];
 }
 
 /**
- * 从面板树中移除所有匹配指定线�?ID 的叶子面板�? * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树�? *
- * @param root - 面板树根节点
- * @param threadId - 要移除的线程 ID
- * @returns 删除结果
+ * 浠庨潰鏉挎爲涓Щ闄ゆ墍鏈夊尮閰嶆寚瀹氱嚎绋?ID 鐨勫彾瀛愰潰鏉裤€? * 澶卞幓鎵€鏈夊彾瀛愮殑瀛愭爲浼氭姌鍙犱负 null锛屼粎鍓╀竴渚у瓙鏍戠殑鍒嗗壊鑺傜偣浼氭姌鍙犱负璇ュ瓙鏍戙€? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param threadId - 瑕佺Щ闄ょ殑绾跨▼ ID
+ * @returns 鍒犻櫎缁撴灉
  */
 export function removeLeafByThreadId(root: Pane, threadId: ThreadId): RemoveLeafResult {
   if (root.kind === "leaf") {
@@ -191,11 +191,11 @@ export function removeLeafByThreadId(root: Pane, threadId: ThreadId): RemoveLeaf
 }
 
 /**
- * 从面板树中移除指定面�?ID 的叶子面板�? * 失去所有叶子的子树会折叠为 null，仅剩一侧子树的分割节点会折叠为该子树，
- * 使剩余面板自动调整大小�? *
- * @param root - 面板树根节点
- * @param paneId - 要移除的叶子面板 ID
- * @returns 删除结果
+ * 浠庨潰鏉挎爲涓Щ闄ゆ寚瀹氶潰鏉?ID 鐨勫彾瀛愰潰鏉裤€? * 澶卞幓鎵€鏈夊彾瀛愮殑瀛愭爲浼氭姌鍙犱负 null锛屼粎鍓╀竴渚у瓙鏍戠殑鍒嗗壊鑺傜偣浼氭姌鍙犱负璇ュ瓙鏍戯紝
+ * 浣垮墿浣欓潰鏉胯嚜鍔ㄨ皟鏁村ぇ灏忋€? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param paneId - 瑕佺Щ闄ょ殑鍙跺瓙闈㈡澘 ID
+ * @returns 鍒犻櫎缁撴灉
  */
 export function removeLeafByPaneId(root: Pane, paneId: PaneId): RemoveLeafResult {
   if (root.kind === "leaf") {
@@ -231,9 +231,9 @@ export function removeLeafByPaneId(root: Pane, paneId: PaneId): RemoveLeafResult
 // --- structural rules ---
 
 /**
- * 判断叶子面板是否可以在指定方向上分割，不超过深度上限 2�? * 当父节点方向�?null（根级叶子）时，任何方向都允许�? * 深度上限确保最多形�?2×2 的网格布局�? *
- * @param parentDirection - 父分割节点的方向，根级为 null
- * @param requestedDirection - 请求的分割方�? * @returns 是否可以分割
+ * 鍒ゆ柇鍙跺瓙闈㈡澘鏄惁鍙互鍦ㄦ寚瀹氭柟鍚戜笂鍒嗗壊锛屼笉瓒呰繃娣卞害涓婇檺 2銆? * 褰撶埗鑺傜偣鏂瑰悜涓?null锛堟牴绾у彾瀛愶級鏃讹紝浠讳綍鏂瑰悜閮藉厑璁搞€? * 娣卞害涓婇檺纭繚鏈€澶氬舰鎴?2脳2 鐨勭綉鏍煎竷灞€銆? *
+ * @param parentDirection - 鐖跺垎鍓茶妭鐐圭殑鏂瑰悜锛屾牴绾т负 null
+ * @param requestedDirection - 璇锋眰鐨勫垎鍓叉柟鍚? * @returns 鏄惁鍙互鍒嗗壊
  */
 export function canSubdivide(
   parentDirection: SplitDirection | null,
@@ -246,10 +246,10 @@ export function canSubdivide(
 }
 
 /**
- * 判断面板树中指定叶子面板是否可以在指定方向上分割�? * 综合检查面板存在性、深度限制和方向限制�? *
- * @param root - 面板树根节点
- * @param targetPaneId - 目标叶子面板 ID
- * @param requestedDirection - 请求的分割方�? * @returns 是否可以分割
+ * 鍒ゆ柇闈㈡澘鏍戜腑鎸囧畾鍙跺瓙闈㈡澘鏄惁鍙互鍦ㄦ寚瀹氭柟鍚戜笂鍒嗗壊銆? * 缁煎悎妫€鏌ラ潰鏉垮瓨鍦ㄦ€с€佹繁搴﹂檺鍒跺拰鏂瑰悜闄愬埗銆? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @param targetPaneId - 鐩爣鍙跺瓙闈㈡澘 ID
+ * @param requestedDirection - 璇锋眰鐨勫垎鍓叉柟鍚? * @returns 鏄惁鍙互鍒嗗壊
  */
 export function canSubdividePane(
   root: Pane,
@@ -268,9 +268,9 @@ export function canSubdividePane(
 }
 
 /**
- * 解析默认聚焦的叶子面�?ID（DFS 序列中的第一个叶子）�? * 如果没有叶子，回退到根节点 ID�? *
- * @param root - 面板树根节点
- * @returns 默认聚焦的叶子面�?ID
+ * 瑙ｆ瀽榛樿鑱氱劍鐨勫彾瀛愰潰鏉?ID锛圖FS 搴忓垪涓殑绗竴涓彾瀛愶級銆? * 濡傛灉娌℃湁鍙跺瓙锛屽洖閫€鍒版牴鑺傜偣 ID銆? *
+ * @param root - 闈㈡澘鏍戞牴鑺傜偣
+ * @returns 榛樿鑱氱劍鐨勫彾瀛愰潰鏉?ID
  */
 export function resolveDefaultFocusLeafId(root: Pane): PaneId {
   const leaves = collectLeaves(root);
@@ -280,7 +280,7 @@ export function resolveDefaultFocusLeafId(root: Pane): PaneId {
 // --- legacy split-view migration ---
 
 /**
- * 旧版分屏视图结构（左右两面板的扁平结构），用于迁移到新的树形结构
+ * 鏃х増鍒嗗睆瑙嗗浘缁撴瀯锛堝乏鍙充袱闈㈡澘鐨勬墎骞崇粨鏋勶級锛岀敤浜庤縼绉诲埌鏂扮殑鏍戝舰缁撴瀯
  */
 export interface LegacySplitViewLike {
   id: string;
@@ -297,9 +297,9 @@ export interface LegacySplitViewLike {
 }
 
 /**
- * 判断给定值是否为旧版分屏视图结构
+ * 鍒ゆ柇缁欏畾鍊兼槸鍚︿负鏃х増鍒嗗睆瑙嗗浘缁撴瀯
  *
- * @param value - 待判断的�? * @returns 是否为旧版分屏视图结构（类型守卫�? */
+ * @param value - 寰呭垽鏂殑鍊? * @returns 鏄惁涓烘棫鐗堝垎灞忚鍥剧粨鏋勶紙绫诲瀷瀹堝崼锛? */
 export function isLegacySplitViewLike(value: unknown): value is LegacySplitViewLike {
   if (!value || typeof value !== "object") {
     return false;

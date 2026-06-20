@@ -11,7 +11,7 @@
 //   - `version` must match `apps/web/package.json#version` exactly. The
 //     logic compares versions as semver and only opens the dialog when the
 //     installed build has a curated entry here.
-//   - `date` is rendered verbatim �?pick whatever format you want (e.g.
+//   - `date` is rendered verbatim ï½?pick whatever format you want (e.g.
 //     `"Apr 18"`, `"2026-04-18"`), just be consistent release-to-release.
 //   - Each feature takes an `id` (stable, unique per release), a short
 //     `title`, a marketing `description`, and optionally an `image`
@@ -548,31 +548,31 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "project-import-path-browsing",
-        title: "🗂�?Project import browsing got smarter",
+        title: "ðŸ—‚ï½?Project import browsing got smarter",
         description:
           "The import palette can now browse nearby paths more directly, helping you find and open the right project location with less guesswork.",
       },
       {
         id: "provider-usage-in-branch-toolbar",
-        title: "📊 Provider usage is visible in-context",
+        title: "ðŸ“Š Provider usage is visible in-context",
         description:
           "The branch toolbar now surfaces provider usage snapshots, making it easier to keep an eye on current usage without leaving your working view.",
       },
       {
         id: "desktop-boot-splash-screen",
-        title: "🚀 Desktop startup feels clearer",
+        title: "ðŸš€ Desktop startup feels clearer",
         description:
           "Remi Code now shows a proper splash screen while the desktop backend spins up, so launch feels intentional instead of looking briefly stalled.",
       },
       {
         id: "provider-capability-and-theme-polish",
-        title: "🎛�?Better provider and theme polish",
+        title: "ðŸŽ›ï½?Better provider and theme polish",
         description:
           "Model capability handling, theme editing, and related picker behavior were tightened up so settings feel more consistent and trustworthy.",
       },
       {
         id: "desktop-release-reliability",
-        title: "🛠�?Desktop release plumbing is sturdier",
+        title: "ðŸ› ï½?Desktop release plumbing is sturdier",
         description:
           "Startup readiness checks, desktop packaging config, and platform entitlements were refined to make desktop builds and app boot more reliable.",
       },
@@ -584,31 +584,31 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "theme-pack-editor",
-        title: "🎨 Theme packs are editable",
+        title: "ðŸŽ¨ Theme packs are editable",
         description:
           "The new theme pack editor lets you tune UI colors directly in Remi Code, with shared theme tokens keeping the sidebar, composer, transcript, and controls in sync.",
       },
       {
         id: "sidebar-notifications",
-        title: "🔔 Sidebar notifications are easier to read",
+        title: "ðŸ”” Sidebar notifications are easier to read",
         description:
           "Thread activity now surfaces more clearly in the sidebar, so updates, background work, and attention states are easier to spot without opening every conversation.",
       },
       {
         id: "steadier-transcript-performance",
-        title: "🧵 Steadier transcripts under load",
+        title: "ðŸ§µ Steadier transcripts under load",
         description:
           "Transcript rendering and sidebar-owned state were separated more cleanly, reducing unnecessary churn while long conversations and live agent output are moving.",
       },
       {
         id: "runtime-mode-recovery",
-        title: "🛡�?Safer runtime-mode recovery",
+        title: "ðŸ›¡ï½?Safer runtime-mode recovery",
         description:
           "Codex runtime permissions now propagate more reliably across resumed sessions and provider restarts, keeping the app closer to the mode you actually selected.",
       },
       {
         id: "composer-and-picker-polish",
-        title: "�?Cleaner composer and picker styling",
+        title: "ï½?Cleaner composer and picker styling",
         description:
           "Composer chrome, picker hover states, runtime controls, and changed-file rows picked up a more consistent visual pass across light and dark themes.",
       },
@@ -620,25 +620,25 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "local-folder-browsing-in-composer",
-        title: "📂 Browse local folders right from the composer",
+        title: "ðŸ“‚ Browse local folders right from the composer",
         description:
           "Folder mentions now open a real local directory picker, so you can drill into nearby files and attach the right path without leaving the chat flow.",
       },
       {
         id: "cleaner-file-and-folder-mentions",
-        title: "🗂�?Cleaner file and folder mentions",
+        title: "ðŸ—‚ï½?Cleaner file and folder mentions",
         description:
           "Mention chips, file trees, and changed-file rows now use a lighter shared icon system that keeps paths easier to scan across the app.",
       },
       {
         id: "desktop-browser-and-runtime-upgrades",
-        title: "🌐 Stronger desktop browser runtime",
+        title: "ðŸŒ Stronger desktop browser runtime",
         description:
           "The desktop browser path picked up better IPC plumbing, screenshots, clipboard support, and more efficient state syncing for browser-driven tasks.",
       },
       {
         id: "safer-startup-and-provider-recovery",
-        title: "🛟 Smoother startup and provider recovery",
+        title: "ðŸ›Ÿ Smoother startup and provider recovery",
         description:
           "Project hydration, desktop startup, auth visibility, and aborted-turn cleanup were tightened up so sessions recover more predictably after interruptions.",
       },
@@ -650,19 +650,19 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "steering-conversation-label",
-        title: "↪︎ Steering messages are clearly marked",
+        title: "â†ªï¸Ž Steering messages are clearly marked",
         description:
           "Messages sent with steering now keep a lightweight 'Steering conversation' label above the bubble, even after the app reconciles with the server.",
       },
       {
         id: "calmer-foreground-update-checks",
-        title: "🚦 Less aggressive background return checks",
+        title: "ðŸš¦ Less aggressive background return checks",
         description:
           "Desktop update checks now wait for a real background return instead of reacting to every tiny blur/focus bounce.",
       },
       {
         id: "update-check-timeout-recovery",
-        title: "🛟 No more stuck checking state",
+        title: "ðŸ›Ÿ No more stuck checking state",
         description:
           "If the updater never answers, Remi Code now times out and recovers instead of hanging on a permanent Checking status.",
       },
@@ -674,31 +674,31 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "gemini-provider-support",
-        title: "�?Gemini support is here",
+        title: "ï½?Gemini support is here",
         description:
           "Use Gemini alongside Codex and Claude Agent, with provider-aware models and handoff support built into the app.",
       },
       {
         id: "custom-provider-binaries",
-        title: "🛠�?Custom binary paths for every provider",
+        title: "ðŸ› ï½?Custom binary paths for every provider",
         description:
           "Point Remi Code at your own Codex, Claude, or Gemini binary when your setup lives outside the default install path.",
       },
       {
         id: "assistant-selections-as-context",
-        title: "📎 Reuse assistant replies as attachments",
+        title: "ðŸ“Ž Reuse assistant replies as attachments",
         description:
           "Select parts of an assistant response and send them back as structured context in your next prompt.",
       },
       {
         id: "stronger-thread-continuity",
-        title: "🧵 Better thread continuity",
+        title: "ðŸ§µ Better thread continuity",
         description:
           "The app now remembers your last open thread, carries pull request context into draft threads, and keeps sidebar state more stable.",
       },
       {
         id: "stability-and-update-polish",
-        title: "🩹 Smoother recovery and update checks",
+        title: "ðŸ©¹ Smoother recovery and update checks",
         description:
           "Project creation recovery, foreground update checks, and a few rough edges around long messages and download state have been tightened up.",
       },
@@ -710,35 +710,35 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "chats-are-now-available",
-        title: "💬 Chats are now available!",
+        title: "ðŸ’¬ Chats are now available!",
         description: "Write without a selected project, or create threads from there.",
       },
       {
         id: "new-shortcuts",
-        title: "⌨️ New shortcuts",
+        title: "âŒ¨ï¸ New shortcuts",
         description:
           "Quickly open a new chat or jump to your latest project thread with dedicated shortcuts.",
       },
       {
         id: "claude-1m-context",
-        title: "🧠 Claude 1M context support",
+        title: "ðŸ§  Claude 1M context support",
         description:
           "Take full advantage of Claude's 1M-token context window for long conversations and large codebases.",
       },
       {
         id: "bulk-thread-actions",
-        title: "📁 Bulk thread actions",
+        title: "ðŸ“ Bulk thread actions",
         description: "Select multiple threads at once and act on them together.",
       },
       {
         id: "cleaner-reasoning-picker",
-        title: "�?Cleaner reasoning picker order",
+        title: "ï½?Cleaner reasoning picker order",
         description:
           "The reasoning picker has been reordered to make the most common choices quicker to reach.",
       },
       {
         id: "polished-ui-ux",
-        title: "💻 New polished UI/UX",
+        title: "ðŸ’» New polished UI/UX",
         description: "A round of visual and interaction polish across the app.",
       },
     ],
@@ -749,17 +749,17 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     features: [
       {
         id: "whats-new-dialog",
-        title: "🆕 What's new, inline",
+        title: "ðŸ†• What's new, inline",
         description:
           "Every update now opens a one-time dialog highlighting the latest changes, so you don't have to hunt through a changelog to know what shipped.",
         details:
-          "The dialog only shows up once per release �?dismiss it and it stays out of your way until the next version.",
+          "The dialog only shows up once per release ï½?dismiss it and it stays out of your way until the next version.",
       },
       {
         id: "release-history-settings",
-        title: "📚 Release history in Settings",
+        title: "ðŸ“š Release history in Settings",
         description:
-          "A full changelog lives under Settings �?Release history, grouped by version in a collapsible accordion.",
+          "A full changelog lives under Settings ï½?Release history, grouped by version in a collapsible accordion.",
         details:
           "Revisit any past release at any time. The same notes as the post-update dialog, nothing to hunt for.",
       },

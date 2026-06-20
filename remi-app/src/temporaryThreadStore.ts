@@ -1,23 +1,23 @@
 /**
- * @file 临时线程状态管�? *
- * 管理临时线程的标记状态。临时线程是指不需要持久化到侧边栏的线程，
- * 例如通过快捷键快速创建的线程。使�?Zustand 纯内�?Store（不持久化）�? * 页面刷新后临时标记自动清除�? */
+ * @file 涓存椂绾跨▼鐘舵€佺鐞? *
+ * 绠＄悊涓存椂绾跨▼鐨勬爣璁扮姸鎬併€備复鏃剁嚎绋嬫槸鎸囦笉闇€瑕佹寔涔呭寲鍒颁晶杈规爮鐨勭嚎绋嬶紝
+ * 渚嬪閫氳繃蹇嵎閿揩閫熷垱寤虹殑绾跨▼銆備娇鐢?Zustand 绾唴瀛?Store锛堜笉鎸佷箙鍖栵級锛? * 椤甸潰鍒锋柊鍚庝复鏃舵爣璁拌嚜鍔ㄦ竻闄ゃ€? */
 
 import { type ThreadId } from "~/contracts";
 import { create } from "zustand";
 
-/** 临时线程 Store 的状态接�?*/
+/** 涓存椂绾跨▼ Store 鐨勭姸鎬佹帴鍙?*/
 interface TemporaryThreadStoreState {
-  /** 临时线程 ID 集合，值为 true 表示该线程为临时线程 */
+  /** 涓存椂绾跨▼ ID 闆嗗悎锛屽€间负 true 琛ㄧず璇ョ嚎绋嬩负涓存椂绾跨▼ */
   temporaryThreadIds: Record<ThreadId, true | undefined>;
-  /** 将指定线程标记为临时线程 */
+  /** 灏嗘寚瀹氱嚎绋嬫爣璁颁负涓存椂绾跨▼ */
   markTemporaryThread: (threadId: ThreadId) => void;
-  /** 清除指定线程的临时标�?*/
+  /** 娓呴櫎鎸囧畾绾跨▼鐨勪复鏃舵爣璁?*/
   clearTemporaryThread: (threadId: ThreadId) => void;
 }
 
 /**
- * 临时线程 Zustand Store�? * 纯内存状态，不持久化�?localStorage�? * 页面刷新后所有临时线程标记自动清除�? */
+ * 涓存椂绾跨▼ Zustand Store銆? * 绾唴瀛樼姸鎬侊紝涓嶆寔涔呭寲鍒?localStorage銆? * 椤甸潰鍒锋柊鍚庢墍鏈変复鏃剁嚎绋嬫爣璁拌嚜鍔ㄦ竻闄ゃ€? */
 export const useTemporaryThreadStore = create<TemporaryThreadStoreState>((set) => ({
   temporaryThreadIds: {},
   markTemporaryThread: (threadId) => {

@@ -1,6 +1,6 @@
 /**
  * @file useComposerSlashCommands.ts
- * @description 编辑器斜杠命�?Hook - 处理各种斜杠命令的执行逻辑
+ * @description 缂栬緫鍣ㄦ枩鏉犲懡浠?Hook - 澶勭悊鍚勭鏂滄潬鍛戒护鐨勬墽琛岄€昏緫
  * @module hooks/useComposerSlashCommands
  */
 
@@ -39,52 +39,52 @@ import { buildNextProviderOptions } from "../providerModelOptions";
 import { resolveForkThreadEnvironment } from "../lib/threadEnvironment";
 import { type SplitViewId, useSplitViewStore } from "../splitViewStore";
 
-/** 编辑器快照类�?*/
+/** 缂栬緫鍣ㄥ揩鐓х被鍨?*/
 type ComposerSnapshot = {
   value: string;
   cursor: number;
   expandedCursor: number;
 };
 
-/** 斜杠命令项类�?*/
+/** 鏂滄潬鍛戒护椤圭被鍨?*/
 type SlashCommandItem = Extract<ComposerCommandItem, { type: "slash-command" }>;
 
 /**
- * 判断提示替换是否成功应用
+ * 鍒ゆ柇鎻愮ず鏇挎崲鏄惁鎴愬姛搴旂敤
  */
 function wasPromptReplacementApplied(result: number | false): boolean {
   return result !== false;
 }
 
 /**
- * 编辑器斜杠命�?Hook
+ * 缂栬緫鍣ㄦ枩鏉犲懡浠?Hook
  *
  * @description
- * 处理编辑器中各种斜杠命令的执行逻辑，包括：
- * - /clear: 清空对话
- * - /compact: 压缩线程上下�? * - /plan /default: 切换交互模式
- * - /status: 显示状态对话框
- * - /subagents: 子代理管�? * - /review: 代码审查
- * - /fast: 快速模式切�? * - /fork: 线程分叉
- * - /side: 侧边聊天
+ * 澶勭悊缂栬緫鍣ㄤ腑鍚勭鏂滄潬鍛戒护鐨勬墽琛岄€昏緫锛屽寘鎷細
+ * - /clear: 娓呯┖瀵硅瘽
+ * - /compact: 鍘嬬缉绾跨▼涓婁笅鏂? * - /plan /default: 鍒囨崲浜や簰妯″紡
+ * - /status: 鏄剧ず鐘舵€佸璇濇
+ * - /subagents: 瀛愪唬鐞嗙鐞? * - /review: 浠ｇ爜瀹℃煡
+ * - /fast: 蹇€熸ā寮忓垏鎹? * - /fork: 绾跨▼鍒嗗弶
+ * - /side: 渚ц竟鑱婂ぉ
  *
- * @param input - 输入参数对象
- * @param input.activeProject - 当前活动项目
- * @param input.activeThread - 当前活动线程
- * @param input.activeRootBranch - 当前根分�? * @param input.isServerThread - 是否为服务器线程
- * @param input.supportsFastSlashCommand - 是否支持快速命�? * @param input.canOfferCompactCommand - 是否可提供压缩命�? * @param input.canOfferSideCommand - 是否可提供侧边命�? * @param input.supportsTextNativeReviewCommand - 是否支持文本原生审查命令
- * @param input.fastModeEnabled - 快速模式是否已启用
- * @param input.providerNativeCommands - 提供商原生命令列�? * @param input.providerCommandDiscoveryCwd - 命令发现工作目录
- * @param input.selectedProvider - 当前选中的提供商
- * @param input.currentProviderModelOptions - 当前提供商模型选项
- * @param input.selectedModelSelection - 当前选中的模�? * @param input.runtimeMode - 运行时模�? * @param input.interactionMode - 交互模式
- * @param input.threadId - 线程 ID
- * @param input.syncServerShellSnapshot - 同步服务�?Shell 快照
- * @param input.navigateToThread - 导航到线�? * @param input.handleClearConversation - 清空对话处理
- * @param input.handleInteractionModeChange - 交互模式切换处理
- * @param input.openForkTargetPicker - 打开分叉目标选择�? * @param input.openReviewTargetPicker - 打开审查目标选择�? * @param input.setComposerDraftProviderModelOptions - 设置编辑器草稿提供商模型选项
- * @param input.editorActions - 编辑器操作集�? *
- * @returns 斜杠命令处理相关的状态和方法
+ * @param input - 杈撳叆鍙傛暟瀵硅薄
+ * @param input.activeProject - 褰撳墠娲诲姩椤圭洰
+ * @param input.activeThread - 褰撳墠娲诲姩绾跨▼
+ * @param input.activeRootBranch - 褰撳墠鏍瑰垎鏀? * @param input.isServerThread - 鏄惁涓烘湇鍔″櫒绾跨▼
+ * @param input.supportsFastSlashCommand - 鏄惁鏀寔蹇€熷懡浠? * @param input.canOfferCompactCommand - 鏄惁鍙彁渚涘帇缂╁懡浠? * @param input.canOfferSideCommand - 鏄惁鍙彁渚涗晶杈瑰懡浠? * @param input.supportsTextNativeReviewCommand - 鏄惁鏀寔鏂囨湰鍘熺敓瀹℃煡鍛戒护
+ * @param input.fastModeEnabled - 蹇€熸ā寮忔槸鍚﹀凡鍚敤
+ * @param input.providerNativeCommands - 鎻愪緵鍟嗗師鐢熷懡浠ゅ垪琛? * @param input.providerCommandDiscoveryCwd - 鍛戒护鍙戠幇宸ヤ綔鐩綍
+ * @param input.selectedProvider - 褰撳墠閫変腑鐨勬彁渚涘晢
+ * @param input.currentProviderModelOptions - 褰撳墠鎻愪緵鍟嗘ā鍨嬮€夐」
+ * @param input.selectedModelSelection - 褰撳墠閫変腑鐨勬ā鍨? * @param input.runtimeMode - 杩愯鏃舵ā寮? * @param input.interactionMode - 浜や簰妯″紡
+ * @param input.threadId - 绾跨▼ ID
+ * @param input.syncServerShellSnapshot - 鍚屾鏈嶅姟鍣?Shell 蹇収
+ * @param input.navigateToThread - 瀵艰埅鍒扮嚎绋? * @param input.handleClearConversation - 娓呯┖瀵硅瘽澶勭悊
+ * @param input.handleInteractionModeChange - 浜や簰妯″紡鍒囨崲澶勭悊
+ * @param input.openForkTargetPicker - 鎵撳紑鍒嗗弶鐩爣閫夋嫨鍣? * @param input.openReviewTargetPicker - 鎵撳紑瀹℃煡鐩爣閫夋嫨鍣? * @param input.setComposerDraftProviderModelOptions - 璁剧疆缂栬緫鍣ㄨ崏绋挎彁渚涘晢妯″瀷閫夐」
+ * @param input.editorActions - 缂栬緫鍣ㄦ搷浣滈泦鍚? *
+ * @returns 鏂滄潬鍛戒护澶勭悊鐩稿叧鐨勭姸鎬佸拰鏂规硶
  *
  * @example
  * ```tsx
@@ -172,7 +172,7 @@ export function useComposerSlashCommands(input: {
   } = input;
   const providerNativeCommandNames = providerNativeCommands.map((command) => command.name);
   const createSplitViewFromDrop = useSplitViewStore((store) => store.createFromDrop);
-  // 获取当前可用的内置斜杠命令列�?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
+  // 鑾峰彇褰撳墠鍙敤鐨勫唴缃枩鏉犲懡浠ゅ垪琛?  const availableBuiltInSlashCommands = getAvailableComposerSlashCommands({
     provider: selectedProvider,
     supportsFastSlashCommand,
     canOfferCompactCommand,
@@ -183,7 +183,7 @@ export function useComposerSlashCommands(input: {
   });
 
   /**
-   * 压缩当前提供商线程的上下�?   * 仅在服务器线程且会话未关闭时可用
+   * 鍘嬬缉褰撳墠鎻愪緵鍟嗙嚎绋嬬殑涓婁笅鏂?   * 浠呭湪鏈嶅姟鍣ㄧ嚎绋嬩笖浼氳瘽鏈叧闂椂鍙敤
    */
   const compactProviderThread = useCallback(async (): Promise<boolean> => {
     const api = readNativeApi();
@@ -230,7 +230,7 @@ export function useComposerSlashCommands(input: {
   }, [activeThread, canOfferCompactCommand, isServerThread]);
 
   /**
-   * 从斜杠命令设置快速模�?   * 更新提供商模型选项中的快速模式配�?   */
+   * 浠庢枩鏉犲懡浠よ缃揩閫熸ā寮?   * 鏇存柊鎻愪緵鍟嗘ā鍨嬮€夐」涓殑蹇€熸ā寮忛厤缃?   */
   const setFastModeFromSlashCommand = useCallback(
     (enabled: boolean) => {
       setComposerDraftProviderModelOptions(
@@ -248,8 +248,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 执行 /fast 斜杠命令
-   * 支持 /fast, /fast on, /fast off, /fast status 等语�?   */
+   * 鎵ц /fast 鏂滄潬鍛戒护
+   * 鏀寔 /fast, /fast on, /fast off, /fast status 绛夎娉?   */
   const runFastSlashCommand = useCallback(
     (text: string) => {
       const action = parseFastSlashCommandAction(text);
@@ -291,7 +291,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建分叉线�?   * 复制当前线程的消息并创建新线�?   */
+   * 浠庢枩鏉犲懡浠ゅ垱寤哄垎鍙夌嚎绋?   * 澶嶅埗褰撳墠绾跨▼鐨勬秷鎭苟鍒涘缓鏂扮嚎绋?   */
   const createForkThreadFromSlashCommand = useCallback(
     async (inputOptions?: { target?: ForkSlashCommandTarget }) => {
       const api = readNativeApi();
@@ -353,7 +353,7 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 从斜杠命令创建侧边聊天线�?   * 在当前线程旁边打开一个新的聊天窗�?   */
+   * 浠庢枩鏉犲懡浠ゅ垱寤轰晶杈硅亰澶╃嚎绋?   * 鍦ㄥ綋鍓嶇嚎绋嬫梺杈规墦寮€涓€涓柊鐨勮亰澶╃獥鍙?   */
   const createSidechatFromSlashCommand = useCallback(
     async (inputOptions?: { initialPrompt?: string }) => {
       const api = readNativeApi();
@@ -439,8 +439,8 @@ export function useComposerSlashCommands(input: {
   );
 
   /**
-   * 启动 Codex 审查流程
-   * @param target - 审查目标：changes（当前更改）�?base-branch（基础分支�?   */
+   * 鍚姩 Codex 瀹℃煡娴佺▼
+   * @param target - 瀹℃煡鐩爣锛歝hanges锛堝綋鍓嶆洿鏀癸級鎴?base-branch锛堝熀纭€鍒嗘敮锛?   */
   const runCodexReviewStart = useCallback(
     async (target: "changes" | "base-branch") => {
       const api = readNativeApi();

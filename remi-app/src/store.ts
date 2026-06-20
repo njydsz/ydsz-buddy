@@ -1,9 +1,9 @@
 /**
- * @file 应用核心状态管�? * @description 将编排层快照归一化为稳定的客户端状态，驱动 Web 应用渲染�? * 导出 Zustand store 及纯状态转换辅助函数，供运行时引导流程共享使用�? *
- * 核心设计原则�? * - 引用稳定性：通过浅比较和深比较保持未变化对象的引用不变，减少重渲�? * - 归一化切片：将线程数据拆分为 shell/session/turnState/message 等独立切片，
- *   使高频流式更新仅影响活跃线程的切片，不触发侧边栏全局重建
- * - 热路径优化：提供 HotPath 变体函数，跳过线程数组和侧边栏摘要更新，
- *   将流式消息的写入开销降到最�? */
+ * @file 搴旂敤鏍稿績鐘舵€佺鐞? * @description 灏嗙紪鎺掑眰蹇収褰掍竴鍖栦负绋冲畾鐨勫鎴风鐘舵€侊紝椹卞姩 Web 搴旂敤娓叉煋銆? * 瀵煎嚭 Zustand store 鍙婄函鐘舵€佽浆鎹㈣緟鍔╁嚱鏁帮紝渚涜繍琛屾椂寮曞娴佺▼鍏变韩浣跨敤銆? *
+ * 鏍稿績璁捐鍘熷垯锛? * - 寮曠敤绋冲畾鎬э細閫氳繃娴呮瘮杈冨拰娣辨瘮杈冧繚鎸佹湭鍙樺寲瀵硅薄鐨勫紩鐢ㄤ笉鍙橈紝鍑忓皯閲嶆覆鏌? * - 褰掍竴鍖栧垏鐗囷細灏嗙嚎绋嬫暟鎹媶鍒嗕负 shell/session/turnState/message 绛夌嫭绔嬪垏鐗囷紝
+ *   浣块珮棰戞祦寮忔洿鏂颁粎褰卞搷娲昏穬绾跨▼鐨勫垏鐗囷紝涓嶈Е鍙戜晶杈规爮鍏ㄥ眬閲嶅缓
+ * - 鐑矾寰勪紭鍖栵細鎻愪緵 HotPath 鍙樹綋鍑芥暟锛岃烦杩囩嚎绋嬫暟缁勫拰渚ц竟鏍忔憳瑕佹洿鏂帮紝
+ *   灏嗘祦寮忔秷鎭殑鍐欏叆寮€閿€闄嶅埌鏈€浣? */
 
 import { Fragment, type ReactNode, createElement, useEffect } from "react";
 import {
@@ -39,44 +39,44 @@ import { deriveThreadSummaryMetadata } from "~/shared/threadSummary";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import { toAttachmentPreviewUrl } from "./lib/wsHttpUrl";
 
-// ── 状态定�?────────────────────────────────────────────────────────────
+// 鈹€鈹€ 鐘舵€佸畾涔?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 /**
- * 应用全局状�? *
- * @description 采用归一化切片设计，将线程数据拆分为多个按线�?ID 索引的独立映射，
- * 使高频流式更新仅影响活跃线程的切片，不触发侧边栏全局重建�? */
+ * 搴旂敤鍏ㄥ眬鐘舵€? *
+ * @description 閲囩敤褰掍竴鍖栧垏鐗囪璁★紝灏嗙嚎绋嬫暟鎹媶鍒嗕负澶氫釜鎸夌嚎绋?ID 绱㈠紩鐨勭嫭绔嬫槧灏勶紝
+ * 浣块珮棰戞祦寮忔洿鏂颁粎褰卞搷娲昏穬绾跨▼鐨勫垏鐗囷紝涓嶈Е鍙戜晶杈规爮鍏ㄥ眬閲嶅缓銆? */
 export interface AppState {
-  /** 项目列表 */
+  /** 椤圭洰鍒楄〃 */
   projects: Project[];
-  /** 线程完整视图模型列表（由切片重建�?*/
+  /** 绾跨▼瀹屾暣瑙嗗浘妯″瀷鍒楄〃锛堢敱鍒囩墖閲嶅缓锛?*/
   threads: Thread[];
-  /** 侧边栏线程摘要映射，用于侧边栏行的轻量渲�?*/
+  /** 渚ц竟鏍忕嚎绋嬫憳瑕佹槧灏勶紝鐢ㄤ簬渚ц竟鏍忚鐨勮交閲忔覆鏌?*/
   sidebarThreadSummaryById: Record<string, SidebarThreadSummary>;
-  /** 线程数据是否已完成首次水�?*/
+  /** 绾跨▼鏁版嵁鏄惁宸插畬鎴愰娆℃按鍚?*/
   threadsHydrated: boolean;
-  /** 线程 ID 有序列表 */
+  /** 绾跨▼ ID 鏈夊簭鍒楄〃 */
   threadIds?: ThreadId[];
-  /** 线程外壳映射（不含消息等重型数据�?*/
+  /** 绾跨▼澶栧３鏄犲皠锛堜笉鍚秷鎭瓑閲嶅瀷鏁版嵁锛?*/
   threadShellById?: Record<ThreadId, ThreadShell>;
-  /** 线程会话映射 */
+  /** 绾跨▼浼氳瘽鏄犲皠 */
   threadSessionById?: Record<ThreadId, ThreadSession | null>;
-  /** 线程回合状态映�?*/
+  /** 绾跨▼鍥炲悎鐘舵€佹槧灏?*/
   threadTurnStateById?: Record<ThreadId, ThreadTurnState>;
-  /** 按线程索引的消息 ID 列表 */
+  /** 鎸夌嚎绋嬬储寮曠殑娑堟伅 ID 鍒楄〃 */
   messageIdsByThreadId?: Record<ThreadId, MessageId[]>;
-  /** 按线程索引的消息映射 */
+  /** 鎸夌嚎绋嬬储寮曠殑娑堟伅鏄犲皠 */
   messageByThreadId?: Record<ThreadId, Record<MessageId, ChatMessage>>;
-  /** 按线程索引的活动 ID 列表 */
+  /** 鎸夌嚎绋嬬储寮曠殑娲诲姩 ID 鍒楄〃 */
   activityIdsByThreadId?: Record<ThreadId, string[]>;
-  /** 按线程索引的活动映射 */
+  /** 鎸夌嚎绋嬬储寮曠殑娲诲姩鏄犲皠 */
   activityByThreadId?: Record<ThreadId, Record<string, Thread["activities"][number]>>;
-  /** 按线程索引的提议计划 ID 列表 */
+  /** 鎸夌嚎绋嬬储寮曠殑鎻愯璁″垝 ID 鍒楄〃 */
   proposedPlanIdsByThreadId?: Record<ThreadId, string[]>;
-  /** 按线程索引的提议计划映射 */
+  /** 鎸夌嚎绋嬬储寮曠殑鎻愯璁″垝鏄犲皠 */
   proposedPlanByThreadId?: Record<ThreadId, Record<string, Thread["proposedPlans"][number]>>;
-  /** 按线程索引的回合差异 ID 列表 */
+  /** 鎸夌嚎绋嬬储寮曠殑鍥炲悎宸紓 ID 鍒楄〃 */
   turnDiffIdsByThreadId?: Record<ThreadId, TurnId[]>;
-  /** 按线程索引的回合差异摘要映射 */
+  /** 鎸夌嚎绋嬬储寮曠殑鍥炲悎宸紓鎽樿鏄犲皠 */
   turnDiffSummaryByThreadId?: Record<ThreadId, Record<TurnId, Thread["turnDiffSummaries"][number]>>;
 }
 
@@ -99,18 +99,18 @@ type ThreadUserInputResponseRequestedEvent = Extract<
   { type: "thread.user-input-response-requested" }
 >;
 
-/** 持久化状态的 localStorage key */
+/** 鎸佷箙鍖栫姸鎬佺殑 localStorage key */
 const PERSISTED_STATE_KEY = "remicode:renderer-state:v8";
-/** 旧版持久�?key 列表，首次加载后自动清理 */
+/** 鏃х増鎸佷箙鍖?key 鍒楄〃锛岄娆″姞杞藉悗鑷姩娓呯悊 */
 const LEGACY_PERSISTED_STATE_KEYS = [
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",
   "codething:renderer-state:v2",
   "codething:renderer-state:v1",
 ] as const;
-/** 每个线程保留的最大消息数 */
+/** 姣忎釜绾跨▼淇濈暀鐨勬渶澶ф秷鎭暟 */
 const MAX_THREAD_MESSAGES = 2_000;
-/** 每个线程保留的最大活动数 */
+/** 姣忎釜绾跨▼淇濈暀鐨勬渶澶ф椿鍔ㄦ暟 */
 const MAX_THREAD_ACTIVITIES = 500;
 const EMPTY_THREAD_IDS: ThreadId[] = [];
 const EMPTY_THREAD_SHELL_BY_ID: Record<ThreadId, ThreadShell> = {};
@@ -130,7 +130,7 @@ const EMPTY_TURN_DIFF_BY_THREAD: Record<
   ThreadId,
   Record<TurnId, Thread["turnDiffSummaries"][number]>
 > = {};
-/** 影响侧边栏摘要的活动类型集合 */
+/** 褰卞搷渚ц竟鏍忔憳瑕佺殑娲诲姩绫诲瀷闆嗗悎 */
 const THREAD_SUMMARY_ACTIVITY_KINDS = new Set([
   "approval.requested",
   "approval.resolved",
@@ -139,7 +139,7 @@ const THREAD_SUMMARY_ACTIVITY_KINDS = new Set([
   "user-input.resolved",
   "provider.user-input.respond.failed",
 ]);
-/** 待处理的交互请求类型集合 */
+/** 寰呭鐞嗙殑浜や簰璇锋眰绫诲瀷闆嗗悎 */
 const PENDING_INTERACTION_REQUEST_KINDS = new Set(["approval.requested", "user-input.requested"]);
 
 const initialState: AppState = {
@@ -201,9 +201,9 @@ function rememberProjectLocalNames(
   }
 }
 
-// ── 持久化辅�?──────────────────────────────────────────────────────
+// 鈹€鈹€ 鎸佷箙鍖栬緟鍔?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
-/** �?localStorage 读取持久化状态（项目展开/排序/本地名称�?*/
+/** 浠?localStorage 璇诲彇鎸佷箙鍖栫姸鎬侊紙椤圭洰灞曞紑/鎺掑簭/鏈湴鍚嶇О锛?*/
 function readPersistedState(): AppState {
   if (typeof window === "undefined") return initialState;
   try {
@@ -243,7 +243,7 @@ function readPersistedState(): AppState {
 
 let legacyKeysCleanedUp = false;
 
-/** 将项�?UI 状态（展开/排序/本地名称）写�?localStorage，同时清理旧�?key */
+/** 灏嗛」鐩?UI 鐘舵€侊紙灞曞紑/鎺掑簭/鏈湴鍚嶇О锛夊啓鍏?localStorage锛屽悓鏃舵竻鐞嗘棫鐗?key */
 function persistState(state: AppState): void {
   if (typeof window === "undefined") return;
   try {
@@ -269,19 +269,19 @@ function persistState(state: AppState): void {
     // Ignore quota/storage errors to avoid breaking chat UX.
   }
 }
-/** 防抖持久化，避免 localStorage 频繁写入 */
+/** 闃叉姈鎸佷箙鍖栵紝閬垮厤 localStorage 棰戠箒鍐欏叆 */
 const debouncedPersistState = new Debouncer(persistState, { wait: 500 });
 
 /**
- * 立即同步持久化当前应用状�? *
- * @param state - 应用状态，默认取当�?store 状�? */
+ * 绔嬪嵆鍚屾鎸佷箙鍖栧綋鍓嶅簲鐢ㄧ姸鎬? *
+ * @param state - 搴旂敤鐘舵€侊紝榛樿鍙栧綋鍓?store 鐘舵€? */
 export function persistAppStateNow(state: AppState = useStore.getState()): void {
   persistState(state);
 }
 
-// ── 纯函数辅�?──────────────────────────────────────────────────────
+// 鈹€鈹€ 绾嚱鏁拌緟鍔?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
-/** 更新线程列表中指�?ID 的线程，若未变化则返回原数组引用 */
+/** 鏇存柊绾跨▼鍒楄〃涓寚瀹?ID 鐨勭嚎绋嬶紝鑻ユ湭鍙樺寲鍒欒繑鍥炲師鏁扮粍寮曠敤 */
 function updateThread(
   threads: Thread[],
   threadId: ThreadId,
@@ -337,7 +337,7 @@ function threadSessionsEqual(
   );
 }
 
-// 保持乐观的分支流程完成标记在同一分支/工作树标识下持续有效�?// 但当线程切换到新的分支上下文时让服务器重新初始化�?function resolveCreateBranchFlowCompletedMerge(input: {
+// 淇濇寔涔愯鐨勫垎鏀祦绋嬪畬鎴愭爣璁板湪鍚屼竴鍒嗘敮/宸ヤ綔鏍戞爣璇嗕笅鎸佺画鏈夋晥锛?// 浣嗗綋绾跨▼鍒囨崲鍒版柊鐨勫垎鏀笂涓嬫枃鏃惰鏈嶅姟鍣ㄩ噸鏂板垵濮嬪寲銆?function resolveCreateBranchFlowCompletedMerge(input: {
   currentBranch: string | null;
   nextBranch: string | null;
   currentWorktreePath: string | null;
@@ -523,7 +523,7 @@ function buildTurnDiffSlice(thread: Thread): {
   };
 }
 
-// 复用读模型中未变化的分支，使每线程选择器在流式传输期间保持引用稳定�?function arraysShallowEqual<T>(
+// 澶嶇敤璇绘ā鍨嬩腑鏈彉鍖栫殑鍒嗘敮锛屼娇姣忕嚎绋嬮€夋嫨鍣ㄥ湪娴佸紡浼犺緭鏈熼棿淇濇寔寮曠敤绋冲畾銆?function arraysShallowEqual<T>(
   left: ReadonlyArray<T> | undefined,
   right: ReadonlyArray<T>,
 ): left is ReadonlyArray<T> {
@@ -1341,7 +1341,7 @@ function isStalePendingRequestFailureDetail(detail: unknown): boolean {
   );
 }
 
-// 保留旧的可操作提示，即使其时间轴行已超出上限�?function pendingInteractionRequestIds(
+// 淇濈暀鏃х殑鍙搷浣滄彁绀猴紝鍗充娇鍏舵椂闂磋酱琛屽凡瓒呭嚭涓婇檺銆?function pendingInteractionRequestIds(
   activities: readonly Thread["activities"][number][],
 ): Set<string> {
   const pendingRequestIds = new Set<string>();
@@ -1386,7 +1386,7 @@ function dedupeActivitiesById<TActivity extends Thread["activities"][number]>(
   return arraysShallowEqual(activities, result) ? (activities as TActivity[]) : result;
 }
 
-// 快照与实时事件竞争可能导致重复的活动 ID。保留具有最多工具细节的负载�?// 防止归一化状态回退到通用行�?function preferRicherActivity<TActivity extends Thread["activities"][number]>(
+// 蹇収涓庡疄鏃朵簨浠剁珵浜夊彲鑳藉鑷撮噸澶嶇殑娲诲姩 ID銆備繚鐣欏叿鏈夋渶澶氬伐鍏风粏鑺傜殑璐熻浇锛?// 闃叉褰掍竴鍖栫姸鎬佸洖閫€鍒伴€氱敤琛屻€?function preferRicherActivity<TActivity extends Thread["activities"][number]>(
   previous: TActivity,
   incoming: TActivity,
 ): TActivity {
@@ -1970,7 +1970,7 @@ function threadActivityUpdatesSummary(event: ThreadActivityAppendedEvent): boole
   return THREAD_SUMMARY_ACTIVITY_KINDS.has(event.payload.activity.kind);
 }
 
-// 侧边栏摘要可跟随回合边界更新，但不响应每个流式助手增量�?function threadMessageUpdatesSidebarSummary(event: ThreadMessageSentEvent): boolean {
+// 渚ц竟鏍忔憳瑕佸彲璺熼殢鍥炲悎杈圭晫鏇存柊锛屼絾涓嶅搷搴旀瘡涓祦寮忓姪鎵嬪閲忋€?function threadMessageUpdatesSidebarSummary(event: ThreadMessageSentEvent): boolean {
   return event.payload.role === "user" || !event.payload.streaming;
 }
 
@@ -2057,8 +2057,8 @@ function sidebarThreadSummariesEqual(
   );
 }
 
-// 保持侧边栏行状态轻量，使实时线程更新不会强制行组件
-// 在每次渲染时重新扫描每个线程的消�?活动集合�?function buildSidebarThreadSummary(
+// 淇濇寔渚ц竟鏍忚鐘舵€佽交閲忥紝浣垮疄鏃剁嚎绋嬫洿鏂颁笉浼氬己鍒惰缁勪欢
+// 鍦ㄦ瘡娆℃覆鏌撴椂閲嶆柊鎵弿姣忎釜绾跨▼鐨勬秷鎭?娲诲姩闆嗗悎銆?function buildSidebarThreadSummary(
   thread: Thread,
   previous?: SidebarThreadSummary,
 ): SidebarThreadSummary {
@@ -2183,7 +2183,7 @@ function writeThreadShellProjection(
   return nextState;
 }
 
-// 详情写入保持活跃线程切片最新，但侧边栏摘要�?shell 管理�?// 避免活跃聊天转录的高频变动扩散到导航树�?function writeThreadState(state: AppState, nextThread: Thread, previousThread?: Thread): AppState {
+// 璇︽儏鍐欏叆淇濇寔娲昏穬绾跨▼鍒囩墖鏈€鏂帮紝浣嗕晶杈规爮鎽樿鐢?shell 绠＄悊锛?// 閬垮厤娲昏穬鑱婂ぉ杞綍鐨勯珮棰戝彉鍔ㄦ墿鏁ｅ埌瀵艰埅鏍戙€?function writeThreadState(state: AppState, nextThread: Thread, previousThread?: Thread): AppState {
   const nextShell = toThreadShell(nextThread);
   const nextTurnState = toThreadTurnState(nextThread);
   const previousShell = state.threadShellById?.[nextThread.id];
@@ -2384,7 +2384,7 @@ function commitThreadProjection(
     return state;
   }
 
-// 让热路径详情同步跳过数组变动，不强制侧边栏所有权回到线程详情路径�?const shouldUpdateThreadArray = options?.updateThreadArray ?? true;
+// 璁╃儹璺緞璇︽儏鍚屾璺宠繃鏁扮粍鍙樺姩锛屼笉寮哄埗渚ц竟鏍忔墍鏈夋潈鍥炲埌绾跨▼璇︽儏璺緞銆?const shouldUpdateThreadArray = options?.updateThreadArray ?? true;
   const shouldUpdateSidebarSummary = options?.updateSidebarSummary ?? true;
   const threadExists = previousThread !== undefined;
   const threads = shouldUpdateThreadArray
@@ -2469,7 +2469,7 @@ function isProviderDiffPlaceholderRef(checkpointRef: string | null | undefined):
   return checkpointRef?.startsWith("provider-diff:") === true;
 }
 
-// 在提议计划关联的实时回合更新中保留关联，直到快照追上�?function buildLatestTurn(params: {
+// 鍦ㄦ彁璁鍒掑叧鑱旂殑瀹炴椂鍥炲悎鏇存柊涓繚鐣欏叧鑱旓紝鐩村埌蹇収杩戒笂銆?function buildLatestTurn(params: {
   previous: Thread["latestTurn"];
   turnId: NonNullable<Thread["latestTurn"]>["turnId"];
   state: NonNullable<Thread["latestTurn"]>["state"];
@@ -2702,7 +2702,7 @@ function applyTurnDiffSummaryToThread(
             requestedAt: thread.latestTurn?.requestedAt ?? nextSummary.completedAt,
             startedAt: thread.latestTurn?.startedAt ?? nextSummary.completedAt,
             completedAt: nextSummary.completedAt,
-            // 优先使用传入�?assistantMessageId；否则保留同一回合的旧值�?            // 回合差异事件可能在消息最终确定前到达并携�?null id—�?            // 它们不能抹除已被 thread.message-sent 记录的真�?id�?            assistantMessageId:
+            // 浼樺厛浣跨敤浼犲叆鐨?assistantMessageId锛涘惁鍒欎繚鐣欏悓涓€鍥炲悎鐨勬棫鍊笺€?            // 鍥炲悎宸紓浜嬩欢鍙兘鍦ㄦ秷鎭渶缁堢‘瀹氬墠鍒拌揪骞舵惡甯?null id鈥斺€?            // 瀹冧滑涓嶈兘鎶归櫎宸茶 thread.message-sent 璁板綍鐨勭湡瀹?id銆?            assistantMessageId:
               nextSummary.assistantMessageId ??
               (thread.latestTurn?.turnId === nextSummary.turnId
                 ? thread.latestTurn.assistantMessageId
@@ -3173,8 +3173,8 @@ function applyOrchestrationEvent(
       );
 
     case "thread.turn-interrupt-requested": {
-      // 中断请求是尽力而为的，可能失败或超时。保持最新回合时�?状态活跃，
-      // 直到提供者确认终端事件�?      return state;
+      // 涓柇璇锋眰鏄敖鍔涜€屼负鐨勶紝鍙兘澶辫触鎴栬秴鏃躲€備繚鎸佹渶鏂板洖鍚堟椂閽?鐘舵€佹椿璺冿紝
+      // 鐩村埌鎻愪緵鑰呯‘璁ょ粓绔簨浠躲€?      return state;
     }
 
     case "thread.session-stop-requested":
@@ -3262,8 +3262,8 @@ function applyOrchestrationEvent(
         state,
         event.payload.threadId,
         (thread) => {
-          // 响应命令被接受后立即隐藏编辑器提示；
-          // 提供者可能稍后追加自己的已解决活动�?          const syntheticResolvedActivity = {
+          // 鍝嶅簲鍛戒护琚帴鍙楀悗绔嬪嵆闅愯棌缂栬緫鍣ㄦ彁绀猴紱
+          // 鎻愪緵鑰呭彲鑳界◢鍚庤拷鍔犺嚜宸辩殑宸茶В鍐虫椿鍔ㄣ€?          const syntheticResolvedActivity = {
             id: `synthetic-user-input-resolved:${event.payload.requestId}:${event.sequence}` as EventId,
             tone: "info",
             kind: "user-input.resolved",
@@ -3574,10 +3574,10 @@ function applyOrchestrationEvent(
 }
 
 /**
- * 应用编排事件到状�? *
- * @description 处理编排层事件列表，更新线程数组和侧边栏摘要�? * 适用于非流式场景（如初始加载、快照同步）�? *
- * @param state - 当前应用状�? * @param events - 编排事件列表
- * @returns 更新后的应用状�? */
+ * 搴旂敤缂栨帓浜嬩欢鍒扮姸鎬? *
+ * @description 澶勭悊缂栨帓灞備簨浠跺垪琛紝鏇存柊绾跨▼鏁扮粍鍜屼晶杈规爮鎽樿銆? * 閫傜敤浜庨潪娴佸紡鍦烘櫙锛堝鍒濆鍔犺浇銆佸揩鐓у悓姝ワ級銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param events - 缂栨帓浜嬩欢鍒楄〃
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function applyOrchestrationEvents(
   state: AppState,
   events: ReadonlyArray<OrchestrationEvent>,
@@ -3589,14 +3589,14 @@ export function applyOrchestrationEvents(
 }
 
 /**
- * 应用编排事件到状态（热路径）
+ * 搴旂敤缂栨帓浜嬩欢鍒扮姸鎬侊紙鐑矾寰勶級
  *
- * @description 高性能变体，默认跳过线程数组和侧边栏摘要更新，
- * 适用于流式消息等高频场景。调用方可通过 options 覆盖默认行为�? *
- * @param state - 当前应用状�? * @param events - 编排事件列表
- * @param options - 可选配�? * @param options.updateThreadArray - 是否更新线程数组，默�?false
- * @param options.updateSidebarSummary - 是否更新侧边栏摘要，默认 false
- * @returns 更新后的应用状�? */
+ * @description 楂樻€ц兘鍙樹綋锛岄粯璁よ烦杩囩嚎绋嬫暟缁勫拰渚ц竟鏍忔憳瑕佹洿鏂帮紝
+ * 閫傜敤浜庢祦寮忔秷鎭瓑楂橀鍦烘櫙銆傝皟鐢ㄦ柟鍙€氳繃 options 瑕嗙洊榛樿琛屼负銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param events - 缂栨帓浜嬩欢鍒楄〃
+ * @param options - 鍙€夐厤缃? * @param options.updateThreadArray - 鏄惁鏇存柊绾跨▼鏁扮粍锛岄粯璁?false
+ * @param options.updateSidebarSummary - 鏄惁鏇存柊渚ц竟鏍忔憳瑕侊紝榛樿 false
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function applyOrchestrationEventsHotPath(
   state: AppState,
   events: ReadonlyArray<OrchestrationEvent>,
@@ -3616,13 +3616,13 @@ export function applyOrchestrationEventsHotPath(
   return nextState;
 }
 
-// ── 纯状态转换函�?────────────────────────────────────────────────────
+// 鈹€鈹€ 绾姸鎬佽浆鎹㈠嚱鏁?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 /**
- * 同步服务�?Shell 快照到状�? *
- * @description 处理编排层的 Shell 快照，更新项目列表和线程外壳信息�? * 并重建侧边栏摘要。标�?threadsHydrated �?true�? *
- * @param state - 当前应用状�? * @param snapshot - 服务�?Shell 快照
- * @returns 更新后的应用状�? */
+ * 鍚屾鏈嶅姟鍣?Shell 蹇収鍒扮姸鎬? *
+ * @description 澶勭悊缂栨帓灞傜殑 Shell 蹇収锛屾洿鏂伴」鐩垪琛ㄥ拰绾跨▼澶栧３淇℃伅锛? * 骞堕噸寤轰晶杈规爮鎽樿銆傛爣璁?threadsHydrated 涓?true銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param snapshot - 鏈嶅姟鍣?Shell 蹇収
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function syncServerShellSnapshot(
   state: AppState,
   snapshot: OrchestrationShellSnapshot,
@@ -3716,29 +3716,29 @@ function syncServerThreadDetailWithOptions(
 }
 
 /**
- * 同步服务器线程详情到状�? *
- * @description 合并服务器读模型中的线程详情到当前状态，
- * 更新线程数组和侧边栏摘要�? *
- * @param state - 当前应用状�? * @param thread - 服务器读模型中的线程数据
- * @returns 更新后的应用状�? */
+ * 鍚屾鏈嶅姟鍣ㄧ嚎绋嬭鎯呭埌鐘舵€? *
+ * @description 鍚堝苟鏈嶅姟鍣ㄨ妯″瀷涓殑绾跨▼璇︽儏鍒板綋鍓嶇姸鎬侊紝
+ * 鏇存柊绾跨▼鏁扮粍鍜屼晶杈规爮鎽樿銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param thread - 鏈嶅姟鍣ㄨ妯″瀷涓殑绾跨▼鏁版嵁
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function syncServerThreadDetail(state: AppState, thread: ReadModelThread): AppState {
   return syncServerThreadDetailWithOptions(state, thread, { updateThreadArray: true });
 }
 
 /**
- * 同步服务器线程详情到状态（热路径）
+ * 鍚屾鏈嶅姟鍣ㄧ嚎绋嬭鎯呭埌鐘舵€侊紙鐑矾寰勶級
  *
- * @description 高性能变体，跳过线程数组更新，将实时流式数据合并到现有状态中�? * 避免活跃聊天转录的高频变动扩散到导航树�? *
- * @param state - 当前应用状�? * @param thread - 服务器读模型中的线程数据
- * @returns 更新后的应用状�? */
+ * @description 楂樻€ц兘鍙樹綋锛岃烦杩囩嚎绋嬫暟缁勬洿鏂帮紝灏嗗疄鏃舵祦寮忔暟鎹悎骞跺埌鐜版湁鐘舵€佷腑锛? * 閬垮厤娲昏穬鑱婂ぉ杞綍鐨勯珮棰戝彉鍔ㄦ墿鏁ｅ埌瀵艰埅鏍戙€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param thread - 鏈嶅姟鍣ㄨ妯″瀷涓殑绾跨▼鏁版嵁
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function syncServerThreadDetailHotPath(state: AppState, thread: ReadModelThread): AppState {
   return syncServerThreadDetailWithOptions(state, thread, { updateThreadArray: false });
 }
 
 /**
- * 应用 Shell 流事件到状�? *
- * @description 处理 Shell 流事件（项目增删、线程增删）�? * 更新对应的状态切片和侧边栏摘要�? *
- * @param state - 当前应用状�? * @param event - Shell 流事�? * @returns 更新后的应用状�? */
+ * 搴旂敤 Shell 娴佷簨浠跺埌鐘舵€? *
+ * @description 澶勭悊 Shell 娴佷簨浠讹紙椤圭洰澧炲垹銆佺嚎绋嬪鍒狅級锛? * 鏇存柊瀵瑰簲鐨勭姸鎬佸垏鐗囧拰渚ц竟鏍忔憳瑕併€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param event - Shell 娴佷簨浠? * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function applyShellEvent(state: AppState, event: OrchestrationShellStreamEvent): AppState {
   switch (event.kind) {
     case "project-upserted":
@@ -3758,11 +3758,11 @@ export function applyShellEvent(state: AppState, event: OrchestrationShellStream
 }
 
 /**
- * 同步服务器读模型到状�? *
- * @description 全量同步编排层读模型，重建所有项目、线程和侧边栏摘要，
- * 清理不存在的线程切片数据。标�?threadsHydrated �?true�? *
- * @param state - 当前应用状�? * @param readModel - 服务器读模型
- * @returns 更新后的应用状�? */
+ * 鍚屾鏈嶅姟鍣ㄨ妯″瀷鍒扮姸鎬? *
+ * @description 鍏ㄩ噺鍚屾缂栨帓灞傝妯″瀷锛岄噸寤烘墍鏈夐」鐩€佺嚎绋嬪拰渚ц竟鏍忔憳瑕侊紝
+ * 娓呯悊涓嶅瓨鍦ㄧ殑绾跨▼鍒囩墖鏁版嵁銆傛爣璁?threadsHydrated 涓?true銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param readModel - 鏈嶅姟鍣ㄨ妯″瀷
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function syncServerReadModel(state: AppState, readModel: OrchestrationReadModel): AppState {
   rememberProjectUiState(state.projects);
   rememberProjectLocalNames(state.projects);
@@ -3848,11 +3848,11 @@ export function syncServerReadModel(state: AppState, readModel: OrchestrationRea
 }
 
 /**
- * 标记线程为已访问
+ * 鏍囪绾跨▼涓哄凡璁块棶
  *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param visitedAt - 访问时间（ISO 字符串），默认为当前时间
- * @returns 更新后的应用状�? */
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param threadId - 绾跨▼ ID
+ * @param visitedAt - 璁块棶鏃堕棿锛圛SO 瀛楃涓诧級锛岄粯璁や负褰撳墠鏃堕棿
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function markThreadVisited(
   state: AppState,
   threadId: ThreadId,
@@ -3874,10 +3874,10 @@ export function markThreadVisited(
 }
 
 /**
- * 标记线程为未�? *
- * @description �?lastVisitedAt 设置为最新回合完成时间之�?1ms�? * 使线程在侧边栏中显示为未读状态�? *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @returns 更新后的应用状�? */
+ * 鏍囪绾跨▼涓烘湭璇? *
+ * @description 灏?lastVisitedAt 璁剧疆涓烘渶鏂板洖鍚堝畬鎴愭椂闂翠箣鍓?1ms锛? * 浣跨嚎绋嬪湪渚ц竟鏍忎腑鏄剧ず涓烘湭璇荤姸鎬併€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param threadId - 绾跨▼ ID
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function markThreadUnread(state: AppState, threadId: ThreadId): AppState {
   return applyThreadUpdate(state, threadId, (thread) => {
     if (!thread.latestTurn?.completedAt) return thread;
@@ -3890,9 +3890,9 @@ export function markThreadUnread(state: AppState, threadId: ThreadId): AppState 
 }
 
 /**
- * 切换项目展开/折叠状�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @returns 更新后的应用状�? */
+ * 鍒囨崲椤圭洰灞曞紑/鎶樺彔鐘舵€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param projectId - 椤圭洰 ID
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function toggleProject(state: AppState, projectId: Project["id"]): AppState {
   return {
     ...state,
@@ -3901,10 +3901,10 @@ export function toggleProject(state: AppState, projectId: Project["id"]): AppSta
 }
 
 /**
- * 设置项目展开状�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @param expanded - 是否展开
- * @returns 更新后的应用状�? */
+ * 璁剧疆椤圭洰灞曞紑鐘舵€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param projectId - 椤圭洰 ID
+ * @param expanded - 鏄惁灞曞紑
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function setProjectExpanded(
   state: AppState,
   projectId: Project["id"],
@@ -3920,9 +3920,9 @@ export function setProjectExpanded(
 }
 
 /**
- * 设置所有项目的展开状�? *
- * @param state - 当前应用状�? * @param expanded - 是否展开
- * @returns 更新后的应用状�? */
+ * 璁剧疆鎵€鏈夐」鐩殑灞曞紑鐘舵€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param expanded - 鏄惁灞曞紑
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function setAllProjectsExpanded(state: AppState, expanded: boolean): AppState {
   let changed = false;
   const projects = state.projects.map((project) => {
@@ -3933,9 +3933,9 @@ export function setAllProjectsExpanded(state: AppState, expanded: boolean): AppS
   return changed ? { ...state, projects } : state;
 }
 
-// 仅保留一个项目展开，使批量折叠保留活跃聊天的上下文�?/**
- * 折叠除指定项目外的所有项�? *
- * @param state - 当前应用状�? * @param activeProjectId - 保持展开的项�?ID，为 null 时折叠全�? * @returns 更新后的应用状�? */
+// 浠呬繚鐣欎竴涓」鐩睍寮€锛屼娇鎵归噺鎶樺彔淇濈暀娲昏穬鑱婂ぉ鐨勪笂涓嬫枃銆?/**
+ * 鎶樺彔闄ゆ寚瀹氶」鐩鐨勬墍鏈夐」鐩? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param activeProjectId - 淇濇寔灞曞紑鐨勯」鐩?ID锛屼负 null 鏃舵姌鍙犲叏閮? * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function collapseProjectsExcept(
   state: AppState,
   activeProjectId: Project["id"] | null,
@@ -3951,11 +3951,11 @@ export function collapseProjectsExcept(
 }
 
 /**
- * 重排项目顺序
+ * 閲嶆帓椤圭洰椤哄簭
  *
- * @param state - 当前应用状�? * @param draggedProjectId - 被拖拽的项目 ID
- * @param targetProjectId - 目标位置的项�?ID
- * @returns 更新后的应用状�? */
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param draggedProjectId - 琚嫋鎷界殑椤圭洰 ID
+ * @param targetProjectId - 鐩爣浣嶇疆鐨勯」鐩?ID
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function reorderProjects(
   state: AppState,
   draggedProjectId: Project["id"],
@@ -3973,11 +3973,11 @@ export function reorderProjects(
 }
 
 /**
- * 本地重命名项�? *
- * @description 仅修改本地展示名称，不影响远程仓库名称�? * 重命名后立即持久化到 localStorage�? *
- * @param state - 当前应用状�? * @param projectId - 项目 ID
- * @param name - 新名称，�?null 时恢复为远程名称
- * @returns 更新后的应用状�? */
+ * 鏈湴閲嶅懡鍚嶉」鐩? *
+ * @description 浠呬慨鏀规湰鍦板睍绀哄悕绉帮紝涓嶅奖鍝嶈繙绋嬩粨搴撳悕绉般€? * 閲嶅懡鍚嶅悗绔嬪嵆鎸佷箙鍖栧埌 localStorage銆? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param projectId - 椤圭洰 ID
+ * @param name - 鏂板悕绉帮紝涓?null 鏃舵仮澶嶄负杩滅▼鍚嶇О
+ * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function renameProjectLocally(
   state: AppState,
   projectId: Project["id"],
@@ -4005,10 +4005,10 @@ export function renameProjectLocally(
 }
 
 /**
- * 设置线程错误信息
+ * 璁剧疆绾跨▼閿欒淇℃伅
  *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param error - 错误信息，为 null 时清�? * @returns 更新后的应用状�? */
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param threadId - 绾跨▼ ID
+ * @param error - 閿欒淇℃伅锛屼负 null 鏃舵竻闄? * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function setError(state: AppState, threadId: ThreadId, error: string | null): AppState {
   return applyThreadUpdate(state, threadId, (thread) => {
     if (thread.error === error) return thread;
@@ -4017,10 +4017,10 @@ export function setError(state: AppState, threadId: ThreadId, error: string | nu
 }
 
 /**
- * 设置线程工作区状�? *
- * @description 部分更新线程的工作区信息（环境模式、分支、工作树路径等）�? * 当工作目录变化时清除会话状态�? *
- * @param state - 当前应用状�? * @param threadId - 线程 ID
- * @param patch - 工作区状态补�? * @returns 更新后的应用状�? */
+ * 璁剧疆绾跨▼宸ヤ綔鍖虹姸鎬? *
+ * @description 閮ㄥ垎鏇存柊绾跨▼鐨勫伐浣滃尯淇℃伅锛堢幆澧冩ā寮忋€佸垎鏀€佸伐浣滄爲璺緞绛夛級锛? * 褰撳伐浣滅洰褰曞彉鍖栨椂娓呴櫎浼氳瘽鐘舵€併€? *
+ * @param state - 褰撳墠搴旂敤鐘舵€? * @param threadId - 绾跨▼ ID
+ * @param patch - 宸ヤ綔鍖虹姸鎬佽ˉ涓? * @returns 鏇存柊鍚庣殑搴旂敤鐘舵€? */
 export function setThreadWorkspace(
   state: AppState,
   threadId: ThreadId,
@@ -4085,9 +4085,9 @@ export function setThreadWorkspace(
   });
 }
 
-// ── Zustand Store ────────────────────────────────────────────────────
+// 鈹€鈹€ Zustand Store 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
-/** 应用 Store 接口，扩�?AppState 增加操作方法 */
+/** 搴旂敤 Store 鎺ュ彛锛屾墿灞?AppState 澧炲姞鎿嶄綔鏂规硶 */
 interface AppStore extends AppState {
   syncServerShellSnapshot: (snapshot: OrchestrationShellSnapshot) => void;
   syncServerThreadDetail: (thread: ReadModelThread) => void;
@@ -4108,7 +4108,7 @@ interface AppStore extends AppState {
   setThreadWorkspace: (threadId: ThreadId, patch: ThreadWorkspacePatch) => void;
 }
 
-/** Zustand 应用 Store 实例 */
+/** Zustand 搴旂敤 Store 瀹炰緥 */
 export const useStore = create<AppStore>((set) => ({
   ...readPersistedState(),
   syncServerShellSnapshot: (snapshot) => set((state) => syncServerShellSnapshot(state, snapshot)),
@@ -4145,24 +4145,24 @@ export const useStore = create<AppStore>((set) => ({
     set((state) => setThreadWorkspace(state, threadId, patch)),
 }));
 
-// 通过防抖订阅持久化状态变更，避免 localStorage 频繁写入
+// 閫氳繃闃叉姈璁㈤槄鎸佷箙鍖栫姸鎬佸彉鏇达紝閬垮厤 localStorage 棰戠箒鍐欏叆
 useStore.subscribe((state) => {
   rememberProjectUiState(state.projects);
   rememberProjectLocalNames(state.projects);
   debouncedPersistState.maybeExecute(state);
 });
 
-// 页面卸载前同步刷新待写入的持久化数据，防止数据丢�?if (typeof window !== "undefined") {
+// 椤甸潰鍗歌浇鍓嶅悓姝ュ埛鏂板緟鍐欏叆鐨勬寔涔呭寲鏁版嵁锛岄槻姝㈡暟鎹涪澶?if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", () => {
     persistAppStateNow();
   });
 }
 
 /**
- * Store Provider 组件
+ * Store Provider 缁勪欢
  *
- * @description 在组件挂载时立即持久化当前状态，确保初始状态被正确保存�? * 仅作�?Zustand Store 的入口包装，不提�?Context�? *
- * @param props.children - 子组�? */
+ * @description 鍦ㄧ粍浠舵寕杞芥椂绔嬪嵆鎸佷箙鍖栧綋鍓嶇姸鎬侊紝纭繚鍒濆鐘舵€佽姝ｇ‘淇濆瓨銆? * 浠呬綔涓?Zustand Store 鐨勫叆鍙ｅ寘瑁咃紝涓嶆彁渚?Context銆? *
+ * @param props.children - 瀛愮粍浠? */
 export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     persistAppStateNow();

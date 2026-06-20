@@ -532,7 +532,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
   };
 
   const isMac = isMacPlatform(platform);
-  const submitModifierLabel = isMac ? "�? : "Ctrl";
+  const submitModifierLabel = isMac ? "鈱? : "Ctrl";
 
   const handleBrowseInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isBrowsing) return;
@@ -972,7 +972,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                             </div>
                             <div className="truncate text-(length:--app-font-size-ui-meta,10px) text-muted-foreground/79">
                               {project.localName
-                                ? `${project.folderName} · ${project.cwd}`
+                                ? `${project.folderName} 路 ${project.cwd}`
                                 : project.cwd}
                             </div>
                           </div>
@@ -1083,11 +1083,11 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
                     <span>
                       {isAddingProject
                         ? "Adding project..."
-                        : "Type a path, ↑↓ to navigate folders."}
+                        : "Type a path, 鈫戔啌 to navigate folders."}
                     </span>
                     <span>
                       {hasHighlightedFolderItem
-                        ? `Enter to open · ${submitModifierLabel}+Enter to add`
+                        ? `Enter to open 路 ${submitModifierLabel}+Enter to add`
                         : hasHighlightedBrowseItem
                           ? "Enter to go up"
                           : "Enter to add project"}

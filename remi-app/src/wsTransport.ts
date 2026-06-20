@@ -1,7 +1,7 @@
 /**
- * @file WebSocket 传输层实�? * @description 基于 Effect RPC �?WebSocket 协议的双向通信传输层�? *              封装�?RPC 客户端的创建、连接管理、自动重连、流式订阅等功能�? *              为上层提供统一�?request/subscribe 接口，屏蔽底�?WebSocket 通信细节�? *              Tauri 迁移期间临时跳过类型检查，后续需替换�?Tauri event/invoke 实现�? */
+ * @file WebSocket 浼犺緭灞傚疄鐜? * @description 鍩轰簬 Effect RPC 鍜?WebSocket 鍗忚鐨勫弻鍚戦€氫俊浼犺緭灞傘€? *              灏佽浜?RPC 瀹㈡埛绔殑鍒涘缓銆佽繛鎺ョ鐞嗐€佽嚜鍔ㄩ噸杩炪€佹祦寮忚闃呯瓑鍔熻兘锛? *              涓轰笂灞傛彁渚涚粺涓€鐨?request/subscribe 鎺ュ彛锛屽睆钄藉簳灞?WebSocket 閫氫俊缁嗚妭銆? *              Tauri 杩佺Щ鏈熼棿涓存椂璺宠繃绫诲瀷妫€鏌ワ紝鍚庣画闇€鏇挎崲涓?Tauri event/invoke 瀹炵幇銆? */
 // @ts-nocheck
-// TODO: Tauri 迁移期间临时跳过类型检查。原文件基于 Effect RPC/WebSocket�?// 需替换�?Tauri event/invoke 实现�?
+// TODO: Tauri 杩佺Щ鏈熼棿涓存椂璺宠繃绫诲瀷妫€鏌ャ€傚師鏂囦欢鍩轰簬 Effect RPC/WebSocket锛?// 闇€鏇挎崲涓?Tauri event/invoke 瀹炵幇銆?
 import {
   ORCHESTRATION_WS_CHANNELS,
   ORCHESTRATION_WS_METHODS,
@@ -26,31 +26,31 @@ import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from 
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";
 
-/** 推送消息监听器类型，用于订阅指定频道的推送消�?*/
+/** 鎺ㄩ€佹秷鎭洃鍚櫒绫诲瀷锛岀敤浜庤闃呮寚瀹氶閬撶殑鎺ㄩ€佹秷鎭?*/
 type PushListener<C extends WsPushChannel> = (message: WsPushMessage<C>) => void;
 
-/** RPC 客户端工�?Effect 类型 */
+/** RPC 瀹㈡埛绔伐鍘?Effect 绫诲瀷 */
 type RpcClientEffect = typeof makeRpcClient;
-/** RPC 客户端实例类型，从工�?Effect 中推�?*/
+/** RPC 瀹㈡埛绔疄渚嬬被鍨嬶紝浠庡伐鍘?Effect 涓帹鏂?*/
 type RpcClientInstance =
   RpcClientEffect extends Effect.Effect<infer Client, any, any> ? Client : never;
 
-/** 传输层连接状�?*/
+/** 浼犺緭灞傝繛鎺ョ姸鎬?*/
 type TransportState = "connecting" | "open" | "closed" | "disposed";
 
-/** WebSocket RPC 通信错误 */
+/** WebSocket RPC 閫氫俊閿欒 */
 class WsTransportRpcError extends Data.TaggedError("WsTransportRpcError")<{
   readonly message: string;
   readonly cause?: unknown;
 }> {}
 
-/** 创建 RPC 客户端实例的 Effect，基�?WsRpcGroup 定义的方法集 */
+/** 鍒涘缓 RPC 瀹㈡埛绔疄渚嬬殑 Effect锛屽熀浜?WsRpcGroup 瀹氫箟鐨勬柟娉曢泦 */
 const makeRpcClient = RpcClient.make(WsRpcGroup);
 
 /**
- * 将原�?URL 解析�?RPC 端点地址
- * @param rawUrl - 原始 WebSocket 连接地址
- * @returns 追加�?`/ws` 路径的完�?URL
+ * 灏嗗師濮?URL 瑙ｆ瀽涓?RPC 绔偣鍦板潃
+ * @param rawUrl - 鍘熷 WebSocket 杩炴帴鍦板潃
+ * @returns 杩藉姞浜?`/ws` 璺緞鐨勫畬鏁?URL
  */
 function resolveRpcUrl(rawUrl: string): string {
   const url = new URL(rawUrl);
@@ -59,9 +59,9 @@ function resolveRpcUrl(rawUrl: string): string {
 }
 
 /**
- * 构建 WebSocket 连接地址
- * 优先级：显式 URL > Tauri Bridge URL > 环境变量 VITE_WS_URL > 当前页面协议自动推导
- * @param explicitUrl - 显式指定�?WebSocket URL，为 null 时自动推�? * @returns 可用于建�?WebSocket 连接的完�?URL
+ * 鏋勫缓 WebSocket 杩炴帴鍦板潃
+ * 浼樺厛绾э細鏄惧紡 URL > Tauri Bridge URL > 鐜鍙橀噺 VITE_WS_URL > 褰撳墠椤甸潰鍗忚鑷姩鎺ㄥ
+ * @param explicitUrl - 鏄惧紡鎸囧畾鐨?WebSocket URL锛屼负 null 鏃惰嚜鍔ㄦ帹瀵? * @returns 鍙敤浜庡缓绔?WebSocket 杩炴帴鐨勫畬鏁?URL
  */
 function makeSocketUrl(explicitUrl: string | null): string {
   if (explicitUrl) return resolveRpcUrl(explicitUrl);
@@ -77,9 +77,9 @@ function makeSocketUrl(explicitUrl: string | null): string {
 }
 
 /**
- * 构建 RPC 协议层，包含 WebSocket 传输层和 JSON 序列化层
- * @param url - WebSocket 连接地址
- * @returns Effect Layer，提�?RPC 协议支持
+ * 鏋勫缓 RPC 鍗忚灞傦紝鍖呭惈 WebSocket 浼犺緭灞傚拰 JSON 搴忓垪鍖栧眰
+ * @param url - WebSocket 杩炴帴鍦板潃
+ * @returns Effect Layer锛屾彁渚?RPC 鍗忚鏀寔
  */
 function makeProtocolLayer(url: string) {
   const socketLayer = Socket.layerWebSocket(url).pipe(
@@ -91,9 +91,9 @@ function makeProtocolLayer(url: string) {
 }
 
 /**
- * �?Effect Cause 转换为标�?Error 对象
- * @param cause - Effect 框架的错�?Cause
- * @returns 标准 Error 实例
+ * 灏?Effect Cause 杞崲涓烘爣鍑?Error 瀵硅薄
+ * @param cause - Effect 妗嗘灦鐨勯敊璇?Cause
+ * @returns 鏍囧噯 Error 瀹炰緥
  */
 function causeToError(cause: Cause.Cause<unknown>): Error {
   const error = Cause.squash(cause);
@@ -101,9 +101,9 @@ function causeToError(cause: Cause.Cause<unknown>): Error {
 }
 
 /**
- * 过滤用户输入应答中的 null/undefined �? * 当命令类型为 thread.user-input.respond 时，移除 answers 中值为 null �?undefined 的条目，
- * 避免后端接收到无效的空值应�? * @param input - 原始 RPC 请求参数
- * @returns 过滤后的请求参数
+ * 杩囨护鐢ㄦ埛杈撳叆搴旂瓟涓殑 null/undefined 鍊? * 褰撳懡浠ょ被鍨嬩负 thread.user-input.respond 鏃讹紝绉婚櫎 answers 涓€间负 null 鎴?undefined 鐨勬潯鐩紝
+ * 閬垮厤鍚庣鎺ユ敹鍒版棤鏁堢殑绌哄€煎簲绛? * @param input - 鍘熷 RPC 璇锋眰鍙傛暟
+ * @returns 杩囨护鍚庣殑璇锋眰鍙傛暟
  */
 function omitNullUserInputAnswers(input: unknown): unknown {
   if (!input || typeof input !== "object") {
@@ -127,15 +127,15 @@ function omitNullUserInputAnswers(input: unknown): unknown {
 }
 
 /**
- * 判断给定频道是否为服务器生命周期相关频道
- * @param channel - 频道标识
- * @returns 是否为服务器生命周期频道（serverWelcome �?serverMaintenanceUpdated�? */
+ * 鍒ゆ柇缁欏畾棰戦亾鏄惁涓烘湇鍔″櫒鐢熷懡鍛ㄦ湡鐩稿叧棰戦亾
+ * @param channel - 棰戦亾鏍囪瘑
+ * @returns 鏄惁涓烘湇鍔″櫒鐢熷懡鍛ㄦ湡棰戦亾锛坰erverWelcome 鎴?serverMaintenanceUpdated锛? */
 export function isServerLifecyclePushChannel(channel: string): boolean {
   return channel === WS_CHANNELS.serverWelcome || channel === WS_CHANNELS.serverMaintenanceUpdated;
 }
 
 /**
- * 判断是否需要保持服务器生命周期流处于活跃状�? * 当任一生命周期频道仍有订阅者时，流不应被关�? * @param activeChannels - 当前活跃的频道集�? * @returns 是否需要保持生命周期流
+ * 鍒ゆ柇鏄惁闇€瑕佷繚鎸佹湇鍔″櫒鐢熷懡鍛ㄦ湡娴佸浜庢椿璺冪姸鎬? * 褰撲换涓€鐢熷懡鍛ㄦ湡棰戦亾浠嶆湁璁㈤槄鑰呮椂锛屾祦涓嶅簲琚叧闂? * @param activeChannels - 褰撳墠娲昏穬鐨勯閬撻泦鍚? * @returns 鏄惁闇€瑕佷繚鎸佺敓鍛藉懆鏈熸祦
  */
 export function shouldKeepServerLifecycleStream(activeChannels: ReadonlySet<string>): boolean {
   return (
@@ -145,56 +145,56 @@ export function shouldKeepServerLifecycleStream(activeChannels: ReadonlySet<stri
 }
 
 /**
- * WebSocket 传输层核心类
- * 负责管理 WebSocket 连接的生命周期，包括�? * - RPC 请求的发送与响应接收
- * - 推送频道的订阅与取�? * - 连接断开后的自动重连（指数退避）
- * - 流式数据的订阅管�? *
+ * WebSocket 浼犺緭灞傛牳蹇冪被
+ * 璐熻矗绠＄悊 WebSocket 杩炴帴鐨勭敓鍛藉懆鏈燂紝鍖呮嫭锛? * - RPC 璇锋眰鐨勫彂閫佷笌鍝嶅簲鎺ユ敹
+ * - 鎺ㄩ€侀閬撶殑璁㈤槄涓庡彇娑? * - 杩炴帴鏂紑鍚庣殑鑷姩閲嶈繛锛堟寚鏁伴€€閬匡級
+ * - 娴佸紡鏁版嵁鐨勮闃呯鐞? *
  * @example
  * ```typescript
  * const transport = new WsTransport("ws://localhost:8080");
  * const unsubscribe = transport.subscribe(WS_CHANNELS.serverWelcome, (msg) => {
  *   console.log("Welcome:", msg.data);
  * });
- * // 取消订阅
+ * // 鍙栨秷璁㈤槄
  * unsubscribe();
  * transport.dispose();
  * ```
  */
 export class WsTransport {
-  /** 显式指定�?WebSocket URL，优先级最�?*/
+  /** 鏄惧紡鎸囧畾鐨?WebSocket URL锛屼紭鍏堢骇鏈€楂?*/
   private readonly explicitUrl: string | null;
-  /** 各频道的监听器集合，key 为频道名 */
+  /** 鍚勯閬撶殑鐩戝惉鍣ㄩ泦鍚堬紝key 涓洪閬撳悕 */
   private readonly listeners = new Map<string, Set<(message: WsPush) => void>>();
-  /** 各频道最近一次推送消息缓存，用于新订阅者的回放 */
+  /** 鍚勯閬撴渶杩戜竴娆℃帹閫佹秷鎭紦瀛橈紝鐢ㄤ簬鏂拌闃呰€呯殑鍥炴斁 */
   private readonly latestPushByChannel = new Map<string, WsPush>();
-  /** 消息序列号，用于推送消息排�?*/
+  /** 娑堟伅搴忓垪鍙凤紝鐢ㄤ簬鎺ㄩ€佹秷鎭帓搴?*/
   private sequence = 0;
-  /** 当前传输层状�?*/
+  /** 褰撳墠浼犺緭灞傜姸鎬?*/
   private state: TransportState = "connecting";
-  /** 是否已销�?*/
+  /** 鏄惁宸查攢姣?*/
   private disposed = false;
-  /** Effect ManagedRuntime，管�?RPC 客户端的生命周期 */
+  /** Effect ManagedRuntime锛岀鐞?RPC 瀹㈡埛绔殑鐢熷懡鍛ㄦ湡 */
   private runtime: ManagedRuntime.ManagedRuntime<RpcClient.Protocol, never>;
-  /** RPC 客户端的作用域，用于资源清理 */
+  /** RPC 瀹㈡埛绔殑浣滅敤鍩燂紝鐢ㄤ簬璧勬簮娓呯悊 */
   private clientScope: Scope.Closeable;
-  /** RPC 客户端实例的 Promise，支持异步初始化 */
+  /** RPC 瀹㈡埛绔疄渚嬬殑 Promise锛屾敮鎸佸紓姝ュ垵濮嬪寲 */
   private clientPromise: Promise<RpcClientInstance>;
-  /** 正在进行的重�?Promise，防止并发重�?*/
+  /** 姝ｅ湪杩涜鐨勯噸杩?Promise锛岄槻姝㈠苟鍙戦噸杩?*/
   private reconnectPromise: Promise<RpcClientInstance> | null = null;
-  /** 连续重连失败次数，用于计算退避延�?*/
+  /** 杩炵画閲嶈繛澶辫触娆℃暟锛岀敤浜庤绠楅€€閬垮欢杩?*/
   private reconnectFailures = 0;
-  /** 活跃流的清理函数映射，key 为流标识 */
+  /** 娲昏穬娴佺殑娓呯悊鍑芥暟鏄犲皠锛宬ey 涓烘祦鏍囪瘑 */
   private readonly streamCleanups = new Map<string, () => void>();
-  /** 正在主动停止的流标识集合，用于区分主动停止和异常断开 */
+  /** 姝ｅ湪涓诲姩鍋滄鐨勬祦鏍囪瘑闆嗗悎锛岀敤浜庡尯鍒嗕富鍔ㄥ仠姝㈠拰寮傚父鏂紑 */
   private readonly stoppingStreams = new Set<string>();
-  /** 是否已订�?Shell 事件�?*/
+  /** 鏄惁宸茶闃?Shell 浜嬩欢娴?*/
   private shellSubscribed = false;
-  /** 线程订阅参数映射，key �?threadId，重连时用于恢复订阅 */
+  /** 绾跨▼璁㈤槄鍙傛暟鏄犲皠锛宬ey 涓?threadId锛岄噸杩炴椂鐢ㄤ簬鎭㈠璁㈤槄 */
   private readonly threadSubscriptions = new Map<string, unknown>();
 
   /**
-   * 创建 WsTransport 实例
-   * @param url - 可选的 WebSocket 连接地址，不传则自动推导
+   * 鍒涘缓 WsTransport 瀹炰緥
+   * @param url - 鍙€夌殑 WebSocket 杩炴帴鍦板潃锛屼笉浼犲垯鑷姩鎺ㄥ
    */
   constructor(url?: string) {
     this.explicitUrl = url ?? null;
@@ -205,10 +205,10 @@ export class WsTransport {
   }
 
   /**
-   * 发�?RPC 请求并返回响�?   * 对于流式方法（如 git 操作、Shell/Thread 订阅），会启动对应的流处�?   * @param method - RPC 方法�?   * @param params - 请求参数
-   * @param _options - 可选配置（如超时时间），当前未使用
-   * @returns RPC 响应结果
-   * @throws 当传输层已销毁或方法不存在时抛出错误
+   * 鍙戦€?RPC 璇锋眰骞惰繑鍥炲搷搴?   * 瀵逛簬娴佸紡鏂规硶锛堝 git 鎿嶄綔銆丼hell/Thread 璁㈤槄锛夛紝浼氬惎鍔ㄥ搴旂殑娴佸鐞?   * @param method - RPC 鏂规硶鍚?   * @param params - 璇锋眰鍙傛暟
+   * @param _options - 鍙€夐厤缃紙濡傝秴鏃舵椂闂达級锛屽綋鍓嶆湭浣跨敤
+   * @returns RPC 鍝嶅簲缁撴灉
+   * @throws 褰撲紶杈撳眰宸查攢姣佹垨鏂规硶涓嶅瓨鍦ㄦ椂鎶涘嚭閿欒
    */
   async request<T = unknown>(
     method: string,
@@ -261,9 +261,9 @@ export class WsTransport {
   }
 
   /**
-   * 订阅指定频道的推送消�?   * 当首个监听器注册时自动启动对应的流，当最后一个监听器移除时自动停止流
-   * @param channel - 要订阅的推送频�?   * @param listener - 消息回调函数
-   * @param options - 订阅选项，replayLatest �?true 时会立即回放最近一条消�?   * @returns 取消订阅的函�?   * @example
+   * 璁㈤槄鎸囧畾棰戦亾鐨勬帹閫佹秷鎭?   * 褰撻涓洃鍚櫒娉ㄥ唽鏃惰嚜鍔ㄥ惎鍔ㄥ搴旂殑娴侊紝褰撴渶鍚庝竴涓洃鍚櫒绉婚櫎鏃惰嚜鍔ㄥ仠姝㈡祦
+   * @param channel - 瑕佽闃呯殑鎺ㄩ€侀閬?   * @param listener - 娑堟伅鍥炶皟鍑芥暟
+   * @param options - 璁㈤槄閫夐」锛宺eplayLatest 涓?true 鏃朵細绔嬪嵆鍥炴斁鏈€杩戜竴鏉℃秷鎭?   * @returns 鍙栨秷璁㈤槄鐨勫嚱鏁?   * @example
    * ```typescript
    * const unsub = transport.subscribe(WS_CHANNELS.serverConfigUpdated, (msg) => {
    *   console.log(msg.data);
@@ -300,8 +300,8 @@ export class WsTransport {
   }
 
   /**
-   * 获取指定频道最近一次推送消�?   * @param channel - 频道标识
-   * @returns 最近一次推送消息，若无缓存则返�?null
+   * 鑾峰彇鎸囧畾棰戦亾鏈€杩戜竴娆℃帹閫佹秷鎭?   * @param channel - 棰戦亾鏍囪瘑
+   * @returns 鏈€杩戜竴娆℃帹閫佹秷鎭紝鑻ユ棤缂撳瓨鍒欒繑鍥?null
    */
   getLatestPush<C extends WsPushChannel>(channel: C): WsPushMessage<C> | null {
     const latest = this.latestPushByChannel.get(channel);
@@ -309,13 +309,13 @@ export class WsTransport {
   }
 
   /**
-   * 获取当前传输层状�?   * @returns 传输层连接状�?   */
+   * 鑾峰彇褰撳墠浼犺緭灞傜姸鎬?   * @returns 浼犺緭灞傝繛鎺ョ姸鎬?   */
   getState(): TransportState {
     return this.state;
   }
 
   /**
-   * 销毁传输层，释放所有资�?   * 停止所有活跃流、关�?RPC 客户端连接、销毁运行时
+   * 閿€姣佷紶杈撳眰锛岄噴鏀炬墍鏈夎祫婧?   * 鍋滄鎵€鏈夋椿璺冩祦銆佸叧闂?RPC 瀹㈡埛绔繛鎺ャ€侀攢姣佽繍琛屾椂
    */
   dispose() {
     this.disposed = true;
@@ -327,7 +327,7 @@ export class WsTransport {
     });
   }
 
-  /** 创建新的 RPC 会话（运行时 + 客户端作用域 + 客户�?Promise�?*/
+  /** 鍒涘缓鏂扮殑 RPC 浼氳瘽锛堣繍琛屾椂 + 瀹㈡埛绔綔鐢ㄥ煙 + 瀹㈡埛绔?Promise锛?*/
   private createSession() {
     const runtime = ManagedRuntime.make(makeProtocolLayer(makeSocketUrl(this.explicitUrl)));
     const clientScope = runtime.runSync(Scope.make());
@@ -345,7 +345,7 @@ export class WsTransport {
   }
 
   /**
-   * 获取 RPC 客户端实例，连接失败时自动触发重�?   * @returns RPC 客户端实�?   */
+   * 鑾峰彇 RPC 瀹㈡埛绔疄渚嬶紝杩炴帴澶辫触鏃惰嚜鍔ㄨЕ鍙戦噸杩?   * @returns RPC 瀹㈡埛绔疄渚?   */
   private async getClient(): Promise<RpcClientInstance> {
     try {
       return await this.clientPromise;
@@ -356,8 +356,8 @@ export class WsTransport {
   }
 
   /**
-   * 执行重连操作，清理旧会话并创建新会话
-   * 使用互斥锁（reconnectPromise）防止并发重�?   * @returns 新的 RPC 客户端实�?   */
+   * 鎵ц閲嶈繛鎿嶄綔锛屾竻鐞嗘棫浼氳瘽骞跺垱寤烘柊浼氳瘽
+   * 浣跨敤浜掓枼閿侊紙reconnectPromise锛夐槻姝㈠苟鍙戦噸杩?   * @returns 鏂扮殑 RPC 瀹㈡埛绔疄渚?   */
   private reconnect(): Promise<RpcClientInstance> {
     if (this.reconnectPromise) return this.reconnectPromise;
 
@@ -380,9 +380,9 @@ export class WsTransport {
   }
 
   /**
-   * 打开新的重连会话，使用指数退避策略延迟重�?   * 重连成功后恢复所有频道订阅、Shell 订阅和线程订�?   * @returns 新的 RPC 客户端实�?   */
+   * 鎵撳紑鏂扮殑閲嶈繛浼氳瘽锛屼娇鐢ㄦ寚鏁伴€€閬跨瓥鐣ュ欢杩熼噸璇?   * 閲嶈繛鎴愬姛鍚庢仮澶嶆墍鏈夐閬撹闃呫€丼hell 璁㈤槄鍜岀嚎绋嬭闃?   * @returns 鏂扮殑 RPC 瀹㈡埛绔疄渚?   */
   private async openReconnectSession(): Promise<RpcClientInstance> {
-    // 指数退避：500ms * 2^failures，最�?5000ms
+    // 鎸囨暟閫€閬匡細500ms * 2^failures锛屾渶澶?5000ms
     const delayMs = Math.min(500 * 2 ** this.reconnectFailures, 5_000);
     this.reconnectFailures += 1;
     await new Promise((resolve) => window.setTimeout(resolve, delayMs));
@@ -407,9 +407,9 @@ export class WsTransport {
   }
 
   /**
-   * 向指定频道发送推送消息，通知所有监听器
-   * @param channel - 目标频道
-   * @param data - 推送数�?   */
+   * 鍚戞寚瀹氶閬撳彂閫佹帹閫佹秷鎭紝閫氱煡鎵€鏈夌洃鍚櫒
+   * @param channel - 鐩爣棰戦亾
+   * @param data - 鎺ㄩ€佹暟鎹?   */
   private emit<C extends WsPushChannel>(channel: C, data: WsPushMessage<C>["data"]): void {
     const message = {
       type: "push" as const,
@@ -430,8 +430,8 @@ export class WsTransport {
   }
 
   /**
-   * 启动指定频道的流式订�?   * 根据频道类型路由到对应的流处理逻辑
-   * @param channel - 要订阅的频道
+   * 鍚姩鎸囧畾棰戦亾鐨勬祦寮忚闃?   * 鏍规嵁棰戦亾绫诲瀷璺敱鍒板搴旂殑娴佸鐞嗛€昏緫
+   * @param channel - 瑕佽闃呯殑棰戦亾
    */
   private startChannelStream(channel: WsPushChannel): void {
     void this.getClient()
@@ -501,7 +501,7 @@ export class WsTransport {
   }
 
   /**
-   * 停止指定频道的流式订�?   * @param channel - 要停止的频道
+   * 鍋滄鎸囧畾棰戦亾鐨勬祦寮忚闃?   * @param channel - 瑕佸仠姝㈢殑棰戦亾
    */
   private stopChannelStream(channel: WsPushChannel): void {
     if (isServerLifecyclePushChannel(channel)) {
@@ -515,13 +515,13 @@ export class WsTransport {
       this.stopStream("orchestration.domain");
   }
 
-  /** 判断是否仍需保持生命周期流活�?*/
+  /** 鍒ゆ柇鏄惁浠嶉渶淇濇寔鐢熷懡鍛ㄦ湡娴佹椿璺?*/
   private shouldKeepLifecycleStream(): boolean {
     return shouldKeepServerLifecycleStream(new Set(this.listeners.keys()));
   }
 
   /**
-   * 启动服务器生命周期事件流（welcome + maintenance�?   * @param client - RPC 客户端实�?   */
+   * 鍚姩鏈嶅姟鍣ㄧ敓鍛藉懆鏈熶簨浠舵祦锛坵elcome + maintenance锛?   * @param client - RPC 瀹㈡埛绔疄渚?   */
   private startLifecycleStream(client: RpcClientInstance): void {
     const restartLifecycle = () => {
       if (!this.shouldKeepLifecycleStream()) return;
@@ -544,7 +544,7 @@ export class WsTransport {
   }
 
   /**
-   * 启动 Shell 事件�?   * @param client - RPC 客户端实�?   */
+   * 鍚姩 Shell 浜嬩欢娴?   * @param client - RPC 瀹㈡埛绔疄渚?   */
   private startShellStream(client: RpcClientInstance): void {
     const restartShell = () => {
       void this.getClient()
@@ -561,9 +561,9 @@ export class WsTransport {
   }
 
   /**
-   * 启动指定线程的事件流
-   * @param client - RPC 客户端实�?   * @param threadId - 线程 ID
-   * @param input - 订阅参数
+   * 鍚姩鎸囧畾绾跨▼鐨勪簨浠舵祦
+   * @param client - RPC 瀹㈡埛绔疄渚?   * @param threadId - 绾跨▼ ID
+   * @param input - 璁㈤槄鍙傛暟
    */
   private startThreadStream(client: RpcClientInstance, threadId: string, input: unknown): void {
     const key = `orchestration.thread:${threadId}`;
@@ -584,9 +584,9 @@ export class WsTransport {
   }
 
   /**
-   * 通用的流启动方法，订�?Effect Stream 并在流结束时自动处理重连或错�?   * @param key - 流的唯一标识，用于管理生命周�?   * @param stream - Effect Stream 实例
-   * @param listener - 事件回调
-   * @param restart - 流异常中断后的重启回�?   */
+   * 閫氱敤鐨勬祦鍚姩鏂规硶锛岃闃?Effect Stream 骞跺湪娴佺粨鏉熸椂鑷姩澶勭悊閲嶈繛鎴栭敊璇?   * @param key - 娴佺殑鍞竴鏍囪瘑锛岀敤浜庣鐞嗙敓鍛藉懆鏈?   * @param stream - Effect Stream 瀹炰緥
+   * @param listener - 浜嬩欢鍥炶皟
+   * @param restart - 娴佸紓甯镐腑鏂悗鐨勯噸鍚洖璋?   */
   private startStream<T>(
     key: string,
     stream: unknown,
@@ -629,8 +629,8 @@ export class WsTransport {
   }
 
   /**
-   * 停止指定标识的流
-   * @param key - 流的唯一标识
+   * 鍋滄鎸囧畾鏍囪瘑鐨勬祦
+   * @param key - 娴佺殑鍞竴鏍囪瘑
    */
   private stopStream(key: string): void {
     const cleanup = this.streamCleanups.get(key);
@@ -641,9 +641,9 @@ export class WsTransport {
   }
 
   /**
-   * 执行 Git 堆叠操作流，将进度事件推送到 gitActionProgress 频道
-   * @param client - RPC 客户端实�?   * @param params - Git 操作参数
-   * @returns Git 操作的最终结�?   * @throws 当流完成但未返回最终结果时抛出错误
+   * 鎵ц Git 鍫嗗彔鎿嶄綔娴侊紝灏嗚繘搴︿簨浠舵帹閫佸埌 gitActionProgress 棰戦亾
+   * @param client - RPC 瀹㈡埛绔疄渚?   * @param params - Git 鎿嶄綔鍙傛暟
+   * @returns Git 鎿嶄綔鐨勬渶缁堢粨鏋?   * @throws 褰撴祦瀹屾垚浣嗘湭杩斿洖鏈€缁堢粨鏋滄椂鎶涘嚭閿欒
    */
   private async runGitActionStream(
     client: RpcClientInstance,

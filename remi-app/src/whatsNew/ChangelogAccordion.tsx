@@ -3,7 +3,7 @@
 // "Release history" surface and the `WhatsNewDialog` "Complete changelog"
 // secondary view. Each row summarises a release; expanding reveals the
 // FeatureSection cards for that version.
-// Layer: presentational �?it assumes the caller has already sorted entries
+// Layer: presentational ï½?it assumes the caller has already sorted entries
 // newest-first (see `sortEntriesByVersionDesc`).
 
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function ChangelogAccordion({
   if (entries.length === 0) {
     return (
       <p className={cn("text-xs text-muted-foreground", className)}>
-        No release notes yet �?check back after the next update.
+        No release notes yet ï½?check back after the next update.
       </p>
     );
   }
@@ -55,27 +55,27 @@ export function ChangelogAccordion({
 }
 
 /**
- * 更新日志手风琴行组件
- * @description 渲染单个版本的可折叠行,包含版本信息和功能列表
- * @param props - 组件属性
- * @returns 手风琴行组件
+ * æ›´æ–°æ—¥å—æ‰‹é£Žç´è¡Œç»„ä»¶
+ * @description æ¸²æŸ“å•ä¸ªç‰ˆæœ¬çš„å¯æŠ˜å è¡Œ,åŒ…å«ç‰ˆæœ¬ä¡æ¯å’ŒåŠŸèƒ½åˆ—è¡¨
+ * @param props - ç»„ä»¶å±žæ€§
+ * @returns æ‰‹é£Žç´è¡Œç»„ä»¶
  */
 function ChangelogAccordionRow({
   entry,
   defaultOpen,
   isLast,
 }: {
-  /** 版本条目 */
+  /** ç‰ˆæœ¬æ¡ç›® */
   readonly entry: WhatsNewEntry;
-  /** 是否默认展开 */
+  /** æ˜¯å¦é»˜è®¤å±•å¼€ */
   readonly defaultOpen: boolean;
-  /** 是否为最后一行 */
+  /** æ˜¯å¦ä¸ºæœ€åŽä¸€è¡Œ */
   readonly isLast: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   const featureCount = entry.features.length;
-  const featureLabel = featureCount === 1 ? "1 个更新" : `${featureCount} 个更新`;
+  const featureLabel = featureCount === 1 ? "1 ä¸ªæ›´æ–°" : `${featureCount} ä¸ªæ›´æ–°`;
 
   return (
     <li className={cn(!isLast && "border-b border-border/40")}>
@@ -84,7 +84,7 @@ function ChangelogAccordionRow({
           <DisclosureChevron open={open} />
           <span className="flex flex-1 items-baseline gap-2">
             <span className="text-xs text-muted-foreground">{entry.date}</span>
-            <span className="text-sm font-semibold text-foreground">版本 {entry.version}</span>
+            <span className="text-sm font-semibold text-foreground">ç‰ˆæœ¬ {entry.version}</span>
             <span className="text-xs text-muted-foreground/70">({featureLabel})</span>
           </span>
         </CollapsibleTrigger>

@@ -389,7 +389,7 @@ export const ChatHeader = memo(function ChatHeader({
           </Tooltip>
         ) : null}
 
-        {/* Panel toggles menu ï¿?editor, terminal, browser, split chat. */}
+        {/* Panel toggles menu é”Ÿ?editor, terminal, browser, split chat. */}
         {!isDisposableThread &&
         (terminalAvailable ||
           activeProjectName ||

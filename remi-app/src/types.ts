@@ -1,7 +1,7 @@
 /**
- * @file 共享视图模型类型定义
- * @description 定义 Web 应用层的运行�?UI 类型，包括线程、项目、终端布局、侧边栏摘要等，
- * �?store、路由和组件广泛消费�? */
+ * @file 鍏变韩瑙嗗浘妯″瀷绫诲瀷瀹氫箟
+ * @description 瀹氫箟 Web 搴旂敤灞傜殑杩愯鏃?UI 绫诲瀷锛屽寘鎷嚎绋嬨€侀」鐩€佺粓绔竷灞€銆佷晶杈规爮鎽樿绛夛紝
+ * 琚?store銆佽矾鐢卞拰缁勪欢骞挎硾娑堣垂銆? */
 
 import type {
   ModelSelection,
@@ -26,224 +26,224 @@ import type {
   ThreadEnvironmentMode,
 } from "~/contracts";
 
-/** 会话阶段：disconnected �?connecting �?ready �?running */
+/** 浼氳瘽闃舵锛歞isconnected 鈫?connecting 鈫?ready 鈫?running */
 export type SessionPhase = "disconnected" | "connecting" | "ready" | "running";
-/** 默认运行时模式：完全访问权限 */
+/** 榛樿杩愯鏃舵ā寮忥細瀹屽叏璁块棶鏉冮檺 */
 export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";
 
-/** 默认交互模式 */
+/** 榛樿浜や簰妯″紡 */
 export const DEFAULT_INTERACTION_MODE: ProviderInteractionMode = "default";
-/** 默认线程终端面板高度（像素） */
+/** 榛樿绾跨▼缁堢闈㈡澘楂樺害锛堝儚绱狅級 */
 export const DEFAULT_THREAD_TERMINAL_HEIGHT = 280;
-/** 默认终端面板 ID */
+/** 榛樿缁堢闈㈡澘 ID */
 export const DEFAULT_THREAD_TERMINAL_ID = "default";
-/** 每个终端分组允许的最大终端数�?*/
+/** 姣忎釜缁堢鍒嗙粍鍏佽鐨勬渶澶х粓绔暟閲?*/
 export const MAX_TERMINALS_PER_GROUP = 6;
-/** 终端面板的展示模式：drawer（抽屉式）或 workspace（工作区式） */
+/** 缁堢闈㈡澘鐨勫睍绀烘ā寮忥細drawer锛堟娊灞夊紡锛夋垨 workspace锛堝伐浣滃尯寮忥級 */
 export type ThreadTerminalPresentationMode = "drawer" | "workspace";
-/** 终端工作区标签页类型：terminal（终端）�?chat（聊天） */
+/** 缁堢宸ヤ綔鍖烘爣绛鹃〉绫诲瀷锛歵erminal锛堢粓绔級鎴?chat锛堣亰澶╋級 */
 export type ThreadTerminalWorkspaceTab = "terminal" | "chat";
-/** 终端工作区布局模式：both（双面板）或 terminal-only（仅终端�?*/
+/** 缁堢宸ヤ綔鍖哄竷灞€妯″紡锛歜oth锛堝弻闈㈡澘锛夋垨 terminal-only锛堜粎缁堢锛?*/
 export type ThreadTerminalWorkspaceLayout = "both" | "terminal-only";
-/** 线程主界面：chat（聊天）�?terminal（终端） */
+/** 绾跨▼涓荤晫闈細chat锛堣亰澶╋級鎴?terminal锛堢粓绔級 */
 export type ThreadPrimarySurface = "chat" | "terminal";
-/** 项目脚本配置，直接复�?contracts 中的定义 */
+/** 椤圭洰鑴氭湰閰嶇疆锛岀洿鎺ュ鐢?contracts 涓殑瀹氫箟 */
 export type ProjectScript = ContractProjectScript;
 
-/** 终端分屏方向：horizontal（水平）�?vertical（垂直） */
+/** 缁堢鍒嗗睆鏂瑰悜锛歨orizontal锛堟按骞筹級鎴?vertical锛堝瀭鐩达級 */
 export type ThreadTerminalSplitDirection = "horizontal" | "vertical";
-/** 终端分屏位置：top / right / bottom / left */
+/** 缁堢鍒嗗睆浣嶇疆锛歵op / right / bottom / left */
 export type ThreadTerminalSplitPosition = "top" | "right" | "bottom" | "left";
 
-/** 终端布局叶子节点，表示一个包含终端实例的面板 */
+/** 缁堢甯冨眬鍙跺瓙鑺傜偣锛岃〃绀轰竴涓寘鍚粓绔疄渚嬬殑闈㈡澘 */
 export interface ThreadTerminalLeafNode {
-  /** 节点类型标识：终端叶�?*/
+  /** 鑺傜偣绫诲瀷鏍囪瘑锛氱粓绔彾瀛?*/
   type: "terminal";
-  /** 面板唯一 ID */
+  /** 闈㈡澘鍞竴 ID */
   paneId: string;
-  /** 面板中包含的终端 ID 列表 */
+  /** 闈㈡澘涓寘鍚殑缁堢 ID 鍒楄〃 */
   terminalIds: string[];
-  /** 当前激活的终端 ID */
+  /** 褰撳墠婵€娲荤殑缁堢 ID */
   activeTerminalId: string;
 }
 
-/** 终端布局分屏节点，表示一个可递归嵌套的分屏容�?*/
+/** 缁堢甯冨眬鍒嗗睆鑺傜偣锛岃〃绀轰竴涓彲閫掑綊宓屽鐨勫垎灞忓鍣?*/
 export interface ThreadTerminalSplitNode {
-  /** 节点类型标识：分�?*/
+  /** 鑺傜偣绫诲瀷鏍囪瘑锛氬垎灞?*/
   type: "split";
-  /** 分屏节点唯一 ID */
+  /** 鍒嗗睆鑺傜偣鍞竴 ID */
   id: string;
-  /** 分屏方向 */
+  /** 鍒嗗睆鏂瑰悜 */
   direction: ThreadTerminalSplitDirection;
-  /** 子节点列表，可嵌套叶子节点或分屏节点 */
+  /** 瀛愯妭鐐瑰垪琛紝鍙祵濂楀彾瀛愯妭鐐规垨鍒嗗睆鑺傜偣 */
   children: ThreadTerminalLayoutNode[];
-  /** 各子节点的权重比�?*/
+  /** 鍚勫瓙鑺傜偣鐨勬潈閲嶆瘮渚?*/
   weights: number[];
 }
 
-/** 终端布局节点：叶子节点或分屏节点的联合类�?*/
+/** 缁堢甯冨眬鑺傜偣锛氬彾瀛愯妭鐐规垨鍒嗗睆鑺傜偣鐨勮仈鍚堢被鍨?*/
 export type ThreadTerminalLayoutNode = ThreadTerminalLeafNode | ThreadTerminalSplitNode;
 
-/** 终端分组，包含布局信息和当前激活的终端 */
+/** 缁堢鍒嗙粍锛屽寘鍚竷灞€淇℃伅鍜屽綋鍓嶆縺娲荤殑缁堢 */
 export interface ThreadTerminalGroup {
-  /** 分组唯一 ID */
+  /** 鍒嗙粍鍞竴 ID */
   id: string;
-  /** 当前激活的终端 ID */
+  /** 褰撳墠婵€娲荤殑缁堢 ID */
   activeTerminalId: string;
-  /** 分组的布局�?*/
+  /** 鍒嗙粍鐨勫竷灞€鏍?*/
   layout: ThreadTerminalLayoutNode;
 }
 
-/** 聊天图片附件 */
+/** 鑱婂ぉ鍥剧墖闄勪欢 */
 export interface ChatImageAttachment {
-  /** 附件类型：图�?*/
+  /** 闄勪欢绫诲瀷锛氬浘鐗?*/
   type: "image";
-  /** 附件唯一 ID */
+  /** 闄勪欢鍞竴 ID */
   id: string;
-  /** 文件�?*/
+  /** 鏂囦欢鍚?*/
   name: string;
-  /** MIME 类型 */
+  /** MIME 绫诲瀷 */
   mimeType: string;
-  /** 文件大小（字节） */
+  /** 鏂囦欢澶у皬锛堝瓧鑺傦級 */
   sizeBytes: number;
-  /** 图片预览 URL，可�?*/
+  /** 鍥剧墖棰勮 URL锛屽彲閫?*/
   previewUrl?: string;
 }
 
-/** 聊天助手选择附件，引用助手消息中的文本片�?*/
+/** 鑱婂ぉ鍔╂墜閫夋嫨闄勪欢锛屽紩鐢ㄥ姪鎵嬫秷鎭腑鐨勬枃鏈墖娈?*/
 export interface ChatAssistantSelectionAttachment {
-  /** 附件类型：助手选择 */
+  /** 闄勪欢绫诲瀷锛氬姪鎵嬮€夋嫨 */
   type: "assistant-selection";
-  /** 附件唯一 ID */
+  /** 闄勪欢鍞竴 ID */
   id: string;
-  /** 被引用的助手消息 ID */
+  /** 琚紩鐢ㄧ殑鍔╂墜娑堟伅 ID */
   assistantMessageId: string;
-  /** 选中的文本内�?*/
+  /** 閫変腑鐨勬枃鏈唴瀹?*/
   text: string;
 }
 
-/** 聊天附件：图片或助手文本选择的联合类�?*/
+/** 鑱婂ぉ闄勪欢锛氬浘鐗囨垨鍔╂墜鏂囨湰閫夋嫨鐨勮仈鍚堢被鍨?*/
 export type ChatAttachment = ChatImageAttachment | ChatAssistantSelectionAttachment;
 
-/** 聊天消息 */
+/** 鑱婂ぉ娑堟伅 */
 export interface ChatMessage {
-  /** 消息唯一 ID */
+  /** 娑堟伅鍞竴 ID */
   id: MessageId;
-  /** 消息角色：user（用户）、assistant（助手）、system（系统） */
+  /** 娑堟伅瑙掕壊锛歶ser锛堢敤鎴凤級銆乤ssistant锛堝姪鎵嬶級銆乻ystem锛堢郴缁燂級 */
   role: "user" | "assistant" | "system";
-  /** 消息文本内容 */
+  /** 娑堟伅鏂囨湰鍐呭 */
   text: string;
-  /** 附件列表 */
+  /** 闄勪欢鍒楄〃 */
   attachments?: ChatAttachment[];
-  /** 消息调度模式 */
+  /** 娑堟伅璋冨害妯″紡 */
   dispatchMode?: TurnDispatchMode;
-  /** 所属回�?ID */
+  /** 鎵€灞炲洖鍚?ID */
   turnId?: TurnId | null;
-  /** 消息创建时间（ISO 字符串） */
+  /** 娑堟伅鍒涘缓鏃堕棿锛圛SO 瀛楃涓诧級 */
   createdAt: string;
-  /** 消息完成时间（ISO 字符串），流式消息完成后才有�?*/
+  /** 娑堟伅瀹屾垚鏃堕棿锛圛SO 瀛楃涓诧級锛屾祦寮忔秷鎭畬鎴愬悗鎵嶆湁鍊?*/
   completedAt?: string | undefined;
-  /** 是否正在流式输出�?*/
+  /** 鏄惁姝ｅ湪娴佸紡杈撳嚭涓?*/
   streaming: boolean;
-  /** 消息来源 */
+  /** 娑堟伅鏉ユ簮 */
   source?: OrchestrationMessageSource;
 }
 
-/** 提议的计�?*/
+/** 鎻愯鐨勮鍒?*/
 export interface ProposedPlan {
-  /** 计划唯一 ID */
+  /** 璁″垝鍞竴 ID */
   id: OrchestrationProposedPlanId;
-  /** 关联的回�?ID，可�?null */
+  /** 鍏宠仈鐨勫洖鍚?ID锛屽彲涓?null */
   turnId: TurnId | null;
-  /** 计划�?Markdown 内容 */
+  /** 璁″垝鐨?Markdown 鍐呭 */
   planMarkdown: string;
-  /** 实施时间，未实施时为 null */
+  /** 瀹炴柦鏃堕棿锛屾湭瀹炴柦鏃朵负 null */
   implementedAt: string | null;
-  /** 实施该计划的线程 ID，未实施时为 null */
+  /** 瀹炴柦璇ヨ鍒掔殑绾跨▼ ID锛屾湭瀹炴柦鏃朵负 null */
   implementationThreadId: ThreadId | null;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt: string;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt: string;
 }
 
-/** 回合差异中的文件变更记录 */
+/** 鍥炲悎宸紓涓殑鏂囦欢鍙樻洿璁板綍 */
 export interface TurnDiffFileChange {
-  /** 文件路径 */
+  /** 鏂囦欢璺緞 */
   path: string;
-  /** 变更类型（如 added/modified/deleted�?*/
+  /** 鍙樻洿绫诲瀷锛堝 added/modified/deleted锛?*/
   kind?: string | undefined;
-  /** 新增行数 */
+  /** 鏂板琛屾暟 */
   additions?: number | undefined;
-  /** 删除行数 */
+  /** 鍒犻櫎琛屾暟 */
   deletions?: number | undefined;
 }
 
-/** 回合差异摘要，记录一个回合的文件变更汇�?*/
+/** 鍥炲悎宸紓鎽樿锛岃褰曚竴涓洖鍚堢殑鏂囦欢鍙樻洿姹囨€?*/
 export interface TurnDiffSummary {
-  /** 回合 ID */
+  /** 鍥炲悎 ID */
   turnId: TurnId;
-  /** 完成时间 */
+  /** 瀹屾垚鏃堕棿 */
   completedAt: string;
-  /** 回合状�?*/
+  /** 鍥炲悎鐘舵€?*/
   status?: string | undefined;
-  /** 变更的文件列�?*/
+  /** 鍙樻洿鐨勬枃浠跺垪琛?*/
   files: TurnDiffFileChange[];
-  /** 检查点引用，用于回退操作 */
+  /** 妫€鏌ョ偣寮曠敤锛岀敤浜庡洖閫€鎿嶄綔 */
   checkpointRef?: CheckpointRef | undefined;
-  /** 关联的助手消�?ID */
+  /** 鍏宠仈鐨勫姪鎵嬫秷鎭?ID */
   assistantMessageId?: MessageId | undefined;
-  /** 检查点对应的回合序�?*/
+  /** 妫€鏌ョ偣瀵瑰簲鐨勫洖鍚堝簭鍙?*/
   checkpointTurnCount?: number | undefined;
 }
 
-/** 项目视图模型 */
+/** 椤圭洰瑙嗗浘妯″瀷 */
 export interface Project {
-  /** 项目唯一 ID */
+  /** 椤圭洰鍞竴 ID */
   id: ProjectId;
-  /** 项目类型 */
+  /** 椤圭洰绫诲瀷 */
   kind: ProjectKind;
-  /** 本地展示名称（可能被用户重命名） */
+  /** 鏈湴灞曠ず鍚嶇О锛堝彲鑳借鐢ㄦ埛閲嶅懡鍚嶏級 */
   name: string;
-  /** 远程仓库名称 */
+  /** 杩滅▼浠撳簱鍚嶇О */
   remoteName: string;
-  /** 工作区文件夹�?*/
+  /** 宸ヤ綔鍖烘枃浠跺す鍚?*/
   folderName: string;
-  /** 用户自定义的本地名称，null 表示使用远程名称 */
+  /** 鐢ㄦ埛鑷畾涔夌殑鏈湴鍚嶇О锛宯ull 琛ㄧず浣跨敤杩滅▼鍚嶇О */
   localName: string | null;
-  /** 项目工作目录绝对路径 */
+  /** 椤圭洰宸ヤ綔鐩綍缁濆璺緞 */
   cwd: string;
-  /** 默认模型选择配置 */
+  /** 榛樿妯″瀷閫夋嫨閰嶇疆 */
   defaultModelSelection: ModelSelection | null;
-  /** 侧边栏中是否展开 */
+  /** 渚ц竟鏍忎腑鏄惁灞曞紑 */
   expanded: boolean;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt?: string | undefined;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt?: string | undefined;
-  /** 项目脚本列表 */
+  /** 椤圭洰鑴氭湰鍒楄〃 */
   scripts: ProjectScript[];
 }
 
-/** 线程工作区状�?*/
+/** 绾跨▼宸ヤ綔鍖虹姸鎬?*/
 export interface ThreadWorkspaceState {
-  /** 环境模式：local（本地）�?worktree（工作树�?*/
+  /** 鐜妯″紡锛歭ocal锛堟湰鍦帮級鎴?worktree锛堝伐浣滄爲锛?*/
   envMode?: ThreadEnvironmentMode | undefined;
-  /** 当前 Git 分支�?*/
+  /** 褰撳墠 Git 鍒嗘敮鍚?*/
   branch: string | null;
-  /** 工作树路�?*/
+  /** 宸ヤ綔鏍戣矾寰?*/
   worktreePath: string | null;
-  /** 关联的工作树路径 */
+  /** 鍏宠仈鐨勫伐浣滄爲璺緞 */
   associatedWorktreePath?: string | null;
-  /** 关联的工作树分支 */
+  /** 鍏宠仈鐨勫伐浣滄爲鍒嗘敮 */
   associatedWorktreeBranch?: string | null;
-  /** 关联的工作树引用 */
+  /** 鍏宠仈鐨勫伐浣滄爲寮曠敤 */
   associatedWorktreeRef?: string | null;
-  /** 创建分支流程是否已完�?*/
+  /** 鍒涘缓鍒嗘敮娴佺▼鏄惁宸插畬鎴?*/
   createBranchFlowCompleted?: boolean;
 }
 
-/** 线程工作区补丁，用于部分更新工作区状�?*/
+/** 绾跨▼宸ヤ綔鍖鸿ˉ涓侊紝鐢ㄤ簬閮ㄥ垎鏇存柊宸ヤ綔鍖虹姸鎬?*/
 export interface ThreadWorkspacePatch {
   envMode?: ThreadEnvironmentMode | undefined;
   branch?: string | null;
@@ -254,210 +254,210 @@ export interface ThreadWorkspacePatch {
   createBranchFlowCompleted?: boolean;
 }
 
-/** 线程视图模型，包含完整的线程详情 */
+/** 绾跨▼瑙嗗浘妯″瀷锛屽寘鍚畬鏁寸殑绾跨▼璇︽儏 */
 export interface Thread extends ThreadWorkspaceState {
-  /** 线程唯一 ID */
+  /** 绾跨▼鍞竴 ID */
   id: ThreadId;
-  /** Codex 线程 ID，用于兼容旧�?*/
+  /** Codex 绾跨▼ ID锛岀敤浜庡吋瀹规棫鐗?*/
   codexThreadId: string | null;
-  /** 所属项�?ID */
+  /** 鎵€灞為」鐩?ID */
   projectId: ProjectId;
-  /** 线程标题 */
+  /** 绾跨▼鏍囬 */
   title: string;
-  /** 模型选择配置 */
+  /** 妯″瀷閫夋嫨閰嶇疆 */
   modelSelection: ModelSelection;
-  /** 运行时模�?*/
+  /** 杩愯鏃舵ā寮?*/
   runtimeMode: RuntimeMode;
-  /** 交互模式 */
+  /** 浜や簰妯″紡 */
   interactionMode: ProviderInteractionMode;
-  /** 当前会话信息 */
+  /** 褰撳墠浼氳瘽淇℃伅 */
   session: ThreadSession | null;
-  /** 聊天消息列表 */
+  /** 鑱婂ぉ娑堟伅鍒楄〃 */
   messages: ChatMessage[];
-  /** 提议的计划列�?*/
+  /** 鎻愯鐨勮鍒掑垪琛?*/
   proposedPlans: ProposedPlan[];
-  /** 错误信息 */
+  /** 閿欒淇℃伅 */
   error: string | null;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt: string;
-  /** 归档时间，null 表示未归�?*/
+  /** 褰掓。鏃堕棿锛宯ull 琛ㄧず鏈綊妗?*/
   archivedAt?: string | null;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt?: string | undefined;
-  /** 是否置顶 */
+  /** 鏄惁缃《 */
   isPinned?: boolean;
-  /** 最新回合信�?*/
+  /** 鏈€鏂板洖鍚堜俊鎭?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 待处理的来源提议计划 */
+  /** 寰呭鐞嗙殑鏉ユ簮鎻愯璁″垝 */
   pendingSourceProposedPlan?: OrchestrationLatestTurn["sourceProposedPlan"];
-  /** 最后访问时�?*/
+  /** 鏈€鍚庤闂椂闂?*/
   lastVisitedAt?: string | undefined;
-  /** 父线�?ID（子代理场景�?*/
+  /** 鐖剁嚎绋?ID锛堝瓙浠ｇ悊鍦烘櫙锛?*/
   parentThreadId?: ThreadId | null;
-  /** 子代�?ID */
+  /** 瀛愪唬鐞?ID */
   subagentAgentId?: string | null;
-  /** 子代理昵�?*/
+  /** 瀛愪唬鐞嗘樀绉?*/
   subagentNickname?: string | null;
-  /** 子代理角�?*/
+  /** 瀛愪唬鐞嗚鑹?*/
   subagentRole?: string | null;
-  /** 分叉来源线程 ID */
+  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 侧聊来源线程 ID */
+  /** 渚ц亰鏉ユ簮绾跨▼ ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 交接信息 */
+  /** 浜ゆ帴淇℃伅 */
   handoff?: ThreadHandoff | null;
-  /** 最近已知的 Pull Request 信息 */
+  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
-  /** 最新用户消息时�?*/
+  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
   latestUserMessageAt?: string | null;
-  /** 是否有待处理的审�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
   hasPendingApprovals?: boolean;
-  /** 是否有待处理的用户输�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
   hasPendingUserInput?: boolean;
-  /** 是否有可操作的提议计�?*/
+  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
   hasActionableProposedPlan?: boolean;
-  /** 回合差异摘要列表 */
+  /** 鍥炲悎宸紓鎽樿鍒楄〃 */
   turnDiffSummaries: TurnDiffSummary[];
-  /** 活动列表 */
+  /** 娲诲姩鍒楄〃 */
   activities: OrchestrationThreadActivity[];
 }
 
-/** 线程外壳信息，不包含消息等重型数据，用于侧边栏等轻量场景 */
+/** 绾跨▼澶栧３淇℃伅锛屼笉鍖呭惈娑堟伅绛夐噸鍨嬫暟鎹紝鐢ㄤ簬渚ц竟鏍忕瓑杞婚噺鍦烘櫙 */
 export interface ThreadShell extends ThreadWorkspaceState {
-  /** 线程唯一 ID */
+  /** 绾跨▼鍞竴 ID */
   id: ThreadId;
-  /** Codex 线程 ID */
+  /** Codex 绾跨▼ ID */
   codexThreadId: string | null;
-  /** 所属项�?ID */
+  /** 鎵€灞為」鐩?ID */
   projectId: ProjectId;
-  /** 线程标题 */
+  /** 绾跨▼鏍囬 */
   title: string;
-  /** 模型选择配置 */
+  /** 妯″瀷閫夋嫨閰嶇疆 */
   modelSelection: ModelSelection;
-  /** 运行时模�?*/
+  /** 杩愯鏃舵ā寮?*/
   runtimeMode: RuntimeMode;
-  /** 交互模式 */
+  /** 浜や簰妯″紡 */
   interactionMode: ProviderInteractionMode;
-  /** 错误信息 */
+  /** 閿欒淇℃伅 */
   error: string | null;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt: string;
-  /** 归档时间 */
+  /** 褰掓。鏃堕棿 */
   archivedAt?: string | null;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt?: string | undefined;
-  /** 是否置顶 */
+  /** 鏄惁缃《 */
   isPinned?: boolean;
-  /** 父线�?ID */
+  /** 鐖剁嚎绋?ID */
   parentThreadId?: ThreadId | null;
-  /** 子代�?ID */
+  /** 瀛愪唬鐞?ID */
   subagentAgentId?: string | null;
-  /** 子代理昵�?*/
+  /** 瀛愪唬鐞嗘樀绉?*/
   subagentNickname?: string | null;
-  /** 子代理角�?*/
+  /** 瀛愪唬鐞嗚鑹?*/
   subagentRole?: string | null;
-  /** 分叉来源线程 ID */
+  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 侧聊来源线程 ID */
+  /** 渚ц亰鏉ユ簮绾跨▼ ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 交接信息 */
+  /** 浜ゆ帴淇℃伅 */
   handoff?: ThreadHandoff | null;
-  /** 最近已知的 Pull Request 信息 */
+  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
-  /** 最新用户消息时�?*/
+  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
   latestUserMessageAt?: string | null;
-  /** 是否有待处理的审�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
   hasPendingApprovals?: boolean;
-  /** 是否有待处理的用户输�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
   hasPendingUserInput?: boolean;
-  /** 是否有可操作的提议计�?*/
+  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
   hasActionableProposedPlan?: boolean;
-  /** 最后访问时�?*/
+  /** 鏈€鍚庤闂椂闂?*/
   lastVisitedAt?: string | undefined;
 }
 
-/** 线程回合状态，仅包含最新回合和待处理的提议计划 */
+/** 绾跨▼鍥炲悎鐘舵€侊紝浠呭寘鍚渶鏂板洖鍚堝拰寰呭鐞嗙殑鎻愯璁″垝 */
 export interface ThreadTurnState {
-  /** 最新回合信�?*/
+  /** 鏈€鏂板洖鍚堜俊鎭?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 待处理的来源提议计划 */
+  /** 寰呭鐞嗙殑鏉ユ簮鎻愯璁″垝 */
   pendingSourceProposedPlan?: OrchestrationLatestTurn["sourceProposedPlan"];
 }
 
-/** 侧边栏线程摘要，用于侧边栏列表行的轻量渲�?*/
+/** 渚ц竟鏍忕嚎绋嬫憳瑕侊紝鐢ㄤ簬渚ц竟鏍忓垪琛ㄨ鐨勮交閲忔覆鏌?*/
 export interface SidebarThreadSummary {
-  /** 线程唯一 ID */
+  /** 绾跨▼鍞竴 ID */
   id: ThreadId;
-  /** 所属项�?ID */
+  /** 鎵€灞為」鐩?ID */
   projectId: ProjectId;
-  /** 线程标题 */
+  /** 绾跨▼鏍囬 */
   title: string;
-  /** 模型选择配置 */
+  /** 妯″瀷閫夋嫨閰嶇疆 */
   modelSelection: ModelSelection;
-  /** 交互模式 */
+  /** 浜や簰妯″紡 */
   interactionMode: ProviderInteractionMode;
-  /** 环境模式 */
+  /** 鐜妯″紡 */
   envMode?: ThreadEnvironmentMode | undefined;
-  /** 当前 Git 分支�?*/
+  /** 褰撳墠 Git 鍒嗘敮鍚?*/
   branch: string | null;
-  /** 工作树路�?*/
+  /** 宸ヤ綔鏍戣矾寰?*/
   worktreePath: string | null;
-  /** 当前会话信息 */
+  /** 褰撳墠浼氳瘽淇℃伅 */
   session: ThreadSession | null;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt: string;
-  /** 归档时间 */
+  /** 褰掓。鏃堕棿 */
   archivedAt?: string | null;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt?: string | undefined;
-  /** 是否置顶 */
+  /** 鏄惁缃《 */
   isPinned?: boolean;
-  /** 最新回合信�?*/
+  /** 鏈€鏂板洖鍚堜俊鎭?*/
   latestTurn: OrchestrationLatestTurn | null;
-  /** 最后访问时�?*/
+  /** 鏈€鍚庤闂椂闂?*/
   lastVisitedAt?: string | undefined;
-  /** 父线�?ID */
+  /** 鐖剁嚎绋?ID */
   parentThreadId?: ThreadId | null;
-  /** 子代�?ID */
+  /** 瀛愪唬鐞?ID */
   subagentAgentId?: string | null;
-  /** 子代理昵�?*/
+  /** 瀛愪唬鐞嗘樀绉?*/
   subagentNickname?: string | null;
-  /** 子代理角�?*/
+  /** 瀛愪唬鐞嗚鑹?*/
   subagentRole?: string | null;
-  /** 最新用户消息时�?*/
+  /** 鏈€鏂扮敤鎴锋秷鎭椂闂?*/
   latestUserMessageAt: string | null;
-  /** 是否有待处理的审�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勫鎵?*/
   hasPendingApprovals: boolean;
-  /** 是否有待处理的用户输�?*/
+  /** 鏄惁鏈夊緟澶勭悊鐨勭敤鎴疯緭鍏?*/
   hasPendingUserInput: boolean;
-  /** 是否有可操作的提议计�?*/
+  /** 鏄惁鏈夊彲鎿嶄綔鐨勬彁璁鍒?*/
   hasActionableProposedPlan: boolean;
-  /** 是否有正在进行的尾部工作（如文件写入�?*/
+  /** 鏄惁鏈夋鍦ㄨ繘琛岀殑灏鹃儴宸ヤ綔锛堝鏂囦欢鍐欏叆锛?*/
   hasLiveTailWork: boolean;
-  /** 分叉来源线程 ID */
+  /** 鍒嗗弶鏉ユ簮绾跨▼ ID */
   forkSourceThreadId?: ThreadId | null;
-  /** 侧聊来源线程 ID */
+  /** 渚ц亰鏉ユ簮绾跨▼ ID */
   sidechatSourceThreadId?: ThreadId | null;
-  /** 交接信息 */
+  /** 浜ゆ帴淇℃伅 */
   handoff?: ThreadHandoff | null;
-  /** 最近已知的 Pull Request 信息 */
+  /** 鏈€杩戝凡鐭ョ殑 Pull Request 淇℃伅 */
   lastKnownPr?: OrchestrationThreadPullRequest | null;
 }
 
-/** 线程会话信息 */
+/** 绾跨▼浼氳瘽淇℃伅 */
 export interface ThreadSession {
-  /** 提供者类�?*/
+  /** 鎻愪緵鑰呯被鍨?*/
   provider: ProviderKind;
-  /** 会话状态（�?legacy 状态映射） */
+  /** 浼氳瘽鐘舵€侊紙鍚?legacy 鐘舵€佹槧灏勶級 */
   status: SessionPhase | "error" | "closed";
-  /** 当前活跃的回�?ID */
+  /** 褰撳墠娲昏穬鐨勫洖鍚?ID */
   activeTurnId?: TurnId | undefined;
-  /** 创建时间 */
+  /** 鍒涘缓鏃堕棿 */
   createdAt: string;
-  /** 更新时间 */
+  /** 鏇存柊鏃堕棿 */
   updatedAt: string;
-  /** 最近一次错误信�?*/
+  /** 鏈€杩戜竴娆￠敊璇俊鎭?*/
   lastError?: string;
-  /** 编排层会话状�?*/
+  /** 缂栨帓灞備細璇濈姸鎬?*/
   orchestrationStatus: OrchestrationSessionStatus;
 }

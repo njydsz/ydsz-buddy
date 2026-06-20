@@ -1,3 +1,5 @@
 packages:
   - "remi-app"
   - "apps/marketing"
+allowBuilds:
+  esbuild: set this to true or false

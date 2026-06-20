@@ -25,7 +25,7 @@ export function deriveLatestRateLimitStatus(
     if (!payload) continue;
     const status = payload.status;
     if (status !== "rejected" && status !== "allowed_warning") continue;
-    // If resetsAt is in the past, the limit has expired â€?skip
+    // If resetsAt is in the past, the limit has expired éˆ¥?skip
     if (typeof payload.resetsAt === "string") {
       const resetsAtMs = Date.parse(payload.resetsAt);
       if (!Number.isNaN(resetsAtMs) && resetsAtMs < now) continue;

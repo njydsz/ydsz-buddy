@@ -95,7 +95,7 @@ function humanizeRequestKind(
 ): string | null {
   if (requestKind === "file-read") return "Read";
   if (requestKind === "file-change" || itemType === "file_change") return "Edited";
-  // Don't handle command types here â€?let humanizeCommandToolLabel produce more specific labels
+  // Don't handle command types here éˆ¥?let humanizeCommandToolLabel produce more specific labels
   if (itemType === "web_search") return "Searched the web";
   if (itemType === "image_generation") return "Generated image";
   if (itemType === "image_view") return "Viewed image";
