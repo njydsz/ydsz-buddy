@@ -771,7 +771,7 @@ export function BranchToolbarBranchSelector({
         value={itemValue}
         className={
           itemValue === resolvedActiveBranch
-            ? "bg-[var(--color-background-elevated-secondary)] text-[var(--color-text-foreground)]"
+            ? "bg-(--color-background-elevated-secondary) text-(--color-text-foreground)"
             : undefined
         }
         style={style}
@@ -820,7 +820,7 @@ export function BranchToolbarBranchSelector({
       value={resolvedActiveBranch}
     >
       <ComboboxTrigger
-        className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-[length:var(--app-font-size-ui-xs,10px)] font-normal text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-[var(--color-text-foreground)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-(length:--app-font-size-ui-xs,10px) font-normal text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-(--color-text-foreground) disabled:cursor-not-allowed disabled:opacity-50"
         disabled={(branchesQuery.isLoading && branches.length === 0) || isBranchActionPending}
       >
         <GoGitBranch className="size-3 shrink-0" />
@@ -830,7 +830,7 @@ export function BranchToolbarBranchSelector({
       <ComboboxPopup align="end" side="top" className="w-80">
         <div className="border-b p-1">
           <ComboboxInput
-            className="rounded-xl border-[color:var(--color-border)] bg-[var(--color-background-control-opaque)] shadow-none before:hidden has-focus-visible:border-[color:var(--color-border-focus)] has-focus-visible:ring-0 [&_input]:font-sans"
+            className="rounded-xl border-(--color-border) bg-(--color-background-control-opaque) shadow-none before:hidden has-focus-visible:border-(--color-border-focus) has-focus-visible:ring-0 [&_input]:font-sans"
             inputClassName="ring-0"
             placeholder="Search branches..."
             showTrigger={false}
@@ -866,10 +866,10 @@ export function BranchToolbarBranchSelector({
           )}
         </ComboboxList>
         {!isSelectingWorktreeBase ? (
-          <div className="border-t border-[color:var(--color-border-light)] p-1">
+          <div className="border-t border-(--color-border-light) p-1">
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-[var(--color-text-foreground)] transition-colors hover:bg-[var(--color-background-elevated-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-(--color-text-foreground) transition-colors hover:bg-(--color-background-elevated-secondary) disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isBranchActionPending}
               onClick={openCreateBranchDialog}
             >
@@ -973,7 +973,7 @@ export function BranchToolbarBranchSelector({
               </p>
             ) : stashDiscardDialog?.info ? (
               <>
-                <div className="grid gap-2 rounded-lg border border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)] p-3 text-sm">
+                <div className="grid gap-2 rounded-lg border border-(--color-border-light) bg-(--color-background-elevated-secondary) p-3 text-sm">
                   <div className="flex min-w-0 gap-2">
                     <span className="w-20 shrink-0 text-muted-foreground">Branch</span>
                     <span className="min-w-0 truncate font-medium">
@@ -1002,7 +1002,7 @@ export function BranchToolbarBranchSelector({
                     Changed files ({stashDiscardDialog.info.files.length})
                   </p>
                   {stashDiscardDialog.info.files.length > 0 ? (
-                    <ul className="max-h-48 overflow-auto rounded-lg border border-[color:var(--color-border-light)] bg-[var(--color-background-control-opaque)] py-1">
+                    <ul className="max-h-48 overflow-auto rounded-lg border border-(--color-border-light) bg-(--color-background-control-opaque) py-1">
                       {stashDiscardDialog.info.files.map((file) => (
                         <li
                           className="truncate px-3 py-1 font-mono text-muted-foreground text-xs"
@@ -1014,7 +1014,7 @@ export function BranchToolbarBranchSelector({
                       ))}
                     </ul>
                   ) : (
-                    <p className="rounded-lg border border-[color:var(--color-border-light)] px-3 py-2 text-muted-foreground text-sm">
+                    <p className="rounded-lg border border-(--color-border-light) px-3 py-2 text-muted-foreground text-sm">
                       Git did not report changed file names for this stash.
                     </p>
                   )}

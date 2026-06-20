@@ -305,7 +305,7 @@ mod tests {
 
         // 验证迁移版本
         let version = get_current_version(&client).unwrap();
-        assert_eq!(version, 5);
+        assert_eq!(version, 6);
 
         // 再次运行应该成功（幂等）
         let result = run_migrations(&client);

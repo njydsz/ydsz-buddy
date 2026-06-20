@@ -1,12 +1,12 @@
 //! # Remi Code Tauri 应用核心库
 //!
-//! 本模块是 Remi Code 桌面应用的核心库 crate，负责将 Tauri 框架与所有业务命令模块进行组装和启动。
+//! 本模块是 Remi Code 桌面应用的核心库 crate，负责将 Tauri 框架与系统命令模块进行组装和启动。
 //!
 //! ## 模块职责
 //!
-//! - 导入并聚合所有命令子模块（dialog、terminal、git、workspace 等）
+//! - 导入并聚合系统命令子模块（dialog、terminal、browser 等）
 //! - 初始化 Tauri Builder，注册所有插件（shell、dialog、fs、clipboard、notification、updater、process）
-//! - 管理全局应用状态（TerminalState、WorkspaceState、SettingsState 等）
+//! - 管理全局应用状态（TerminalState、BrowserState、UpdateState 等）
 //! - 注册所有 Tauri 命令（invoke_handler），供前端通过 `window.__TAURI__.invoke()` 调用
 //! - 启动 Tauri 事件循环
 //!
@@ -27,7 +27,7 @@
 //! ```text
 //! main.rs → lib.rs::run()
 //!              ├─ 注册插件（shell/dialog/fs/clipboard/notification/updater/process）
-//!              ├─ 注入状态（Terminal/Workspace/Settings/Orchestration/Provider/Browser/Update/Git）
+//!              ├─ 注入状态（Terminal/Browser/Update）
 //!              ├─ 绑定命令（greet + 所有 commands 模块导出的命令）
 //!              └─ 启动事件循环
 //! ```
@@ -41,17 +41,11 @@ mod commands;
 use commands::{
     dialog::*,         // 文件对话框、消息对话框相关命令
     terminal::*,       // 终端会话管理命令
-    git::*,            // Git 版本控制命令
-    workspace::*,      // 工作区/项目管理命令
-    settings::*,       // 应用设置读写命令
-    orchestration::*,  // AI 编排引擎（对话线程、消息）命令
-    provider::*,       // AI 模型提供商管理命令
     browser::*,        // 内嵌浏览器面板命令
     update::*,         // 应用自动更新命令
     window::*,         // 窗口主题、系统交互命令
     context_menu::*,   // 右键上下文菜单命令
     voice::*,          // 语音识别命令
-    server::*,         // 服务器相关命令
 };
 
 /// 示例问候命令（Tauri 脚手架生成的默认命令）
@@ -107,14 +101,8 @@ pub fn run() {
         // ========== 全局状态注入 ==========
         // 每个 State 对象在整个应用生命周期内唯一，各命令通过 `State<'_, XxxState>` 获取
         .manage(TerminalState::new())        // 终端会话状态（管理多个 PTY 会话）
-        .manage(WorkspaceState::new())       // 工作区状态（管理项目列表）
-        .manage(SettingsState::new())        // 设置状态（持久化用户配置）
-        .manage(OrchestrationState::new())   // AI 编排引擎状态（对话线程、消息流）
-        .manage(ProviderState::new())        // AI 模型提供商状态（API Key 管理）
         .manage(BrowserState::new())         // 内嵌浏览器状态（标签页管理）
         .manage(UpdateState::new())          // 自动更新状态（版本检查、下载进度）
-        .manage(GitState::new())             // Git 状态（仓库操作、状态广播）
-        .manage(ServerState::new())          // 服务器状态（配置、环境、设置）
 
         // ========== 命令注册 ==========
         // 将 Rust 函数注册为前端可通过 `invoke()` 调用的 IPC 命令
@@ -135,62 +123,6 @@ pub fn run() {
             close_terminal,                  // 关闭终端会话
             clear_terminal,                  // 清除终端屏幕
             restart_terminal,                // 重启终端会话
-
-            // Git 命令
-            git_status,                      // 获取 Git 状态
-            git_list_branches,               // 列出分支
-            git_checkout,                    // 切换分支
-            git_commit,                      // 提交更改
-            git_push,                        // 推送当前分支
-            git_pull,                        // 拉取当前分支
-            git_diff,                        // 获取差异
-            git_log,                         // 获取提交日志
-            git_create_branch,               // 创建分支
-            git_stash,                       // 暂存更改
-            git_stash_pop,                   // 恢复暂存
-
-            // 工作区命令
-            list_projects,                   // 列出项目
-            add_project,                     // 添加项目
-            remove_project,                  // 移除项目
-            read_file,                       // 读取文件内容
-            write_file,                      // 写入文件内容
-
-            // 设置命令
-            get_settings,                    // 获取设置
-            save_settings,                   // 保存设置
-
-            // AI 编排命令
-            create_thread,                   // 创建对话线程
-            send_message,                    // 发送消息
-            list_threads,                    // 列出线程
-            delete_thread,                   // 删除线程
-            rename_thread,                   // 重命名线程
-            orchestration_get_snapshot,      // 获取编排快照
-            orchestration_get_shell_snapshot, // 获取 Shell 快照
-            orchestration_dispatch_command,  // 分发编排命令
-            orchestration_import_thread,     // 导入线程
-            orchestration_repair_state,      // 修复状态
-            orchestration_get_turn_diff,     // 获取轮次差异
-            orchestration_get_full_thread_diff, // 获取完整线程差异
-            orchestration_replay_events,     // 重放事件
-            orchestration_subscribe_shell,   // 订阅 Shell 事件
-            orchestration_unsubscribe_shell, // 取消订阅 Shell
-            orchestration_subscribe_thread,  // 订阅线程事件
-            orchestration_unsubscribe_thread, // 取消订阅线程
-
-            // AI 模型提供商命令
-            list_models,                     // 列出可用模型
-            set_api_key,                     // 设置 API Key
-            get_provider_status,             // 获取提供商状态
-            provider_get_composer_capabilities, // 获取编辑器能力
-            provider_compact_thread,         // 压缩线程
-            provider_list_commands,          // 列出命令
-            provider_list_skills,            // 列出技能
-            provider_list_plugins,           // 列出插件
-            provider_read_plugin,            // 读取插件
-            provider_list_agents,            // 列出代理
-            skills_list_local,               // 列出本地技能
 
             // 内嵌浏览器命令
             browser_open,                    // 打开浏览器面板
@@ -224,18 +156,6 @@ pub fn run() {
 
             // 右键菜单命令
             show_context_menu,               // 显示上下文菜单
-
-            // 服务器命令
-            server_get_config,               // 获取服务器配置
-            server_get_environment,          // 获取环境信息
-            server_get_settings,             // 获取服务器设置
-            server_update_settings,          // 更新服务器设置
-            server_refresh_providers,        // 刷新提供商
-            server_update_provider,          // 更新提供商
-            server_list_worktrees,           // 列出工作树
-            server_get_provider_usage_snapshot, // 获取提供商使用快照
-            server_get_diagnostics,          // 获取诊断信息
-            server_upsert_keybinding,        // 更新/插入键绑定
 
             // 语音命令
             transcribe_voice,                // 语音转文字

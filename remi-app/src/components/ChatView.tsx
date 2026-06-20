@@ -800,7 +800,7 @@ function ComposerModelLoadingControl(props: { widthClassName: string }) {
       )}
     >
       <RefreshCwIcon aria-hidden="true" className="size-3.5 animate-spin" />
-      <span className="truncate text-[length:var(--app-font-size-ui-xs,11px)]">Loading models</span>
+      <span className="truncate text-(length:--app-font-size-ui-xs,11px)">Loading models</span>
     </div>
   );
 }
@@ -7345,12 +7345,12 @@ export default function ChatView({
   // Empty state: no active thread
   if (!activeThread) {
     return (
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--color-background-surface)] text-[var(--color-text-foreground-secondary)]">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-(--color-background-surface) text-(--color-text-foreground-secondary)">
         {!isDesktop && (
-          <header className="border-b border-[color:var(--color-border-light)] px-3 py-2 md:hidden">
+          <header className="border-b border-(--color-border-light) px-3 py-2 md:hidden">
             <div className="flex items-center gap-2">
               <SidebarHeaderTrigger className="size-7 shrink-0" />
-              <span className="text-sm font-medium text-[var(--color-text-foreground)]">
+              <span className="text-sm font-medium text-(--color-text-foreground)">
                 Threads
               </span>
             </div>
@@ -7359,7 +7359,7 @@ export default function ChatView({
         {isDesktop && (
           <div
             className={cn(
-              "drag-region flex h-[52px] shrink-0 items-center border-b border-[color:var(--color-border-light)] px-5",
+              "drag-region flex h-[52px] shrink-0 items-center border-b border-(--color-border-light) px-5",
               desktopTopBarTrafficLightGutterClassName,
             )}
           >
@@ -7486,14 +7486,14 @@ export default function ChatView({
                 key={queuedTurn.id}
                 data-testid="queued-follow-up-row"
                 className={cn(
-                  "chat-composer-surface flex items-center gap-2 border border-b-0 border-[color:var(--color-border)] px-2.5 py-2 text-[12px] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]",
+                  "chat-composer-surface flex items-center gap-2 border border-b-0 border-(--color-border) px-2.5 py-2 text-[12px] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]",
                   queuedTurnIndex === 0 && !taskListAboveComposer
                     ? "rounded-t-2xl"
                     : "rounded-none",
                 )}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                  <QueueArrow className="size-3 shrink-0 text-[var(--color-text-foreground-secondary)]" />
+                  <QueueArrow className="size-3 shrink-0 text-(--color-text-foreground-secondary)" />
                   <span className="truncate text-[12px] font-medium text-foreground/85">
                     {queuedTurn.previewText}
                   </span>
@@ -7501,7 +7501,7 @@ export default function ChatView({
                 <div className="flex shrink-0 items-center gap-0">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 rounded-lg bg-[var(--color-background-button-secondary)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-foreground)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)]"
+                    className="inline-flex items-center gap-1 rounded-lg bg-(--color-background-button-secondary) px-2 py-0.5 text-[11px] font-medium text-(--color-text-foreground) transition-colors hover:bg-(--color-background-button-secondary-hover)"
                     onClick={() => void onSteerQueuedComposerTurn(queuedTurn)}
                   >
                     <PiArrowBendDownRight className="size-3" />
@@ -7509,7 +7509,7 @@ export default function ChatView({
                   </button>
                   <button
                     type="button"
-                    className="inline-flex size-6 items-center justify-center rounded-lg text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
+                    className="inline-flex size-6 items-center justify-center rounded-lg text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
                     aria-label={messages.composer.deleteQueuedFollowUp}
                     onClick={() => removeQueuedComposerTurn(queuedTurn.id)}
                   >
@@ -7520,7 +7520,7 @@ export default function ChatView({
                       render={
                         <button
                           type="button"
-                          className="inline-flex size-6 items-center justify-center rounded-lg text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
+                          className="inline-flex size-6 items-center justify-center rounded-lg text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
                           aria-label={messages.composer.queuedFollowUpActions}
                         />
                       }
@@ -7553,20 +7553,20 @@ export default function ChatView({
         >
           <div
             className={cn(
-              "chat-composer-surface rounded-2xl border border-[color:var(--color-border-light)] transition-colors duration-200",
-              isDragOverComposer ? "!bg-[var(--color-background-control)]" : "",
+              "chat-composer-surface rounded-2xl border border-(--color-border-light) transition-colors duration-200",
+              isDragOverComposer ? "bg-(--color-background-control)!" : "",
               composerProviderState.composerSurfaceClassName,
             )}
           >
             {activePendingApproval ? (
-              <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+              <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                 <ComposerPendingApprovalPanel
                   approval={activePendingApproval}
                   pendingCount={pendingApprovals.length}
                 />
               </div>
             ) : pendingUserInputs.length > 0 ? (
-              <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+              <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                 <ComposerPendingUserInputPanel
                   pendingUserInputs={pendingUserInputs}
                   respondingRequestIds={respondingUserInputRequestIds}
@@ -7577,7 +7577,7 @@ export default function ChatView({
                 />
               </div>
             ) : showPlanFollowUpPrompt && activeProposedPlan ? (
-              <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+              <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                 <ComposerPlanFollowUpBanner
                   key={activeProposedPlan.id}
                   planTitle={proposedPlanTitle(activeProposedPlan.planMarkdown) ?? null}
@@ -7689,7 +7689,7 @@ export default function ChatView({
                       ? "min-w-0 shrink-0 gap-1"
                       : isComposerFooterCompact
                         ? "min-w-0 flex-1 gap-1 overflow-hidden"
-                        : "-m-1 min-w-0 flex-1 gap-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:min-w-max sm:overflow-visible",
+                        : "-m-1 min-w-0 flex-1 gap-1 overflow-x-auto p-1 scrollbar-none [&::-webkit-scrollbar]:hidden sm:min-w-max sm:overflow-visible",
                   )}
                 >
                   <ComposerExtrasMenu
@@ -7723,7 +7723,7 @@ export default function ChatView({
                           />
                           <Button
                             variant="ghost"
-                            className="shrink-0 whitespace-nowrap px-2 text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-sm,11px)] font-normal text-[var(--color-text-foreground-secondary)] hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)] sm:px-3"
+                            className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal text-(--color-text-foreground-secondary) hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground) sm:px-3"
                             size="sm"
                             type="button"
                             onClick={toggleInteractionMode}
@@ -7743,7 +7743,7 @@ export default function ChatView({
                           />
                           <Button
                             variant="ghost"
-                            className="shrink-0 whitespace-nowrap px-2 text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-sm,11px)] font-normal sm:px-3"
+                            className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal sm:px-3"
                             size="sm"
                             type="button"
                             onClick={togglePlanSidebar}
@@ -7772,7 +7772,7 @@ export default function ChatView({
                   )}
                 >
                   {isPreparingWorktree ? (
-                    <span className="text-[length:var(--app-font-size-ui-xs,10px)] text-[var(--color-text-foreground-secondary)]">
+                    <span className="text-(length:--app-font-size-ui-xs,10px) text-(--color-text-foreground-secondary)">
                       Preparing worktree...
                     </span>
                   ) : null}
@@ -7829,7 +7829,7 @@ export default function ChatView({
                   ) : phase === "running" ? (
                     <button
                       type="button"
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--color-text-foreground)] text-[var(--color-background-surface)] transition-all duration-150 hover:scale-105 sm:h-[26px] sm:w-[26px]"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-(--color-text-foreground) text-(--color-background-surface) transition-all duration-150 hover:scale-105 sm:h-[26px] sm:w-[26px]"
                       onClick={() => void onInterrupt()}
                       aria-label={messages.chat.stopGenerationAria}
                       title={messages.chat.stopGenerationTitle}
@@ -7897,7 +7897,7 @@ export default function ChatView({
                         ) : null}
                         <button
                           type="submit"
-                          className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-text-foreground)] text-[var(--color-background-surface)] transition-all duration-150 hover:scale-105 disabled:opacity-20 disabled:hover:scale-100 sm:h-8 sm:w-8"
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-(--color-text-foreground) text-(--color-background-surface) transition-all duration-150 hover:scale-105 disabled:opacity-20 disabled:hover:scale-100 sm:h-8 sm:w-8"
                           disabled={
                             isSendBusy ||
                             isConnecting ||
@@ -7979,7 +7979,7 @@ export default function ChatView({
   ) : (
     <div
       aria-hidden="true"
-      className="chat-composer-surface mx-auto w-full max-w-3xl rounded-2xl border border-[color:var(--color-border-light)] bg-background/65"
+      className="chat-composer-surface mx-auto w-full max-w-3xl rounded-2xl border border-(--color-border-light) bg-background/65"
       data-chat-composer-form="deferred"
       style={{ height: secondaryChromePlaceholderHeight }}
     />
@@ -7990,7 +7990,7 @@ export default function ChatView({
       {/* Top bar */}
       <header
         className={cn(
-          "border-b border-[color:var(--color-border-light)] px-3 sm:px-5",
+          "border-b border-(--color-border-light) px-3 sm:px-5",
           isDesktop ? "drag-region flex h-[52px] items-center" : "py-2 sm:py-3",
           desktopTopBarTrafficLightGutterClassName,
         )}
@@ -8220,14 +8220,14 @@ export default function ChatView({
                             key={queuedTurn.id}
                             data-testid="queued-follow-up-row"
                             className={cn(
-                              "chat-composer-surface flex items-center gap-2 border border-b-0 border-[color:var(--color-border)] px-2.5 py-2 text-[12px] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]",
+                              "chat-composer-surface flex items-center gap-2 border border-b-0 border-(--color-border) px-2.5 py-2 text-[12px] shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]",
                               queuedTurnIndex === 0 && !taskListAboveComposer
                                 ? "rounded-t-2xl"
                                 : "rounded-none",
                             )}
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                              <QueueArrow className="size-3 shrink-0 text-[var(--color-text-foreground-secondary)]" />
+                              <QueueArrow className="size-3 shrink-0 text-(--color-text-foreground-secondary)" />
                               <span className="truncate text-[12px] font-medium text-foreground/85">
                                 {queuedTurn.previewText}
                               </span>
@@ -8235,7 +8235,7 @@ export default function ChatView({
                             <div className="flex shrink-0 items-center gap-0">
                               <button
                                 type="button"
-                                className="inline-flex items-center gap-1 rounded-lg bg-[var(--color-background-button-secondary)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-foreground)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)]"
+                                className="inline-flex items-center gap-1 rounded-lg bg-(--color-background-button-secondary) px-2 py-0.5 text-[11px] font-medium text-(--color-text-foreground) transition-colors hover:bg-(--color-background-button-secondary-hover)"
                                 onClick={() => void onSteerQueuedComposerTurn(queuedTurn)}
                               >
                                 <PiArrowBendDownRight className="size-3" />
@@ -8243,7 +8243,7 @@ export default function ChatView({
                               </button>
                               <button
                                 type="button"
-                                className="inline-flex size-6 items-center justify-center rounded-lg text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
+                                className="inline-flex size-6 items-center justify-center rounded-lg text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
                                 aria-label={messages.composer.deleteQueuedFollowUp}
                                 onClick={() => removeQueuedComposerTurn(queuedTurn.id)}
                               >
@@ -8254,7 +8254,7 @@ export default function ChatView({
                                   render={
                                     <button
                                       type="button"
-                                      className="inline-flex size-6 items-center justify-center rounded-lg text-[var(--color-text-foreground-secondary)] transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
+                                      className="inline-flex size-6 items-center justify-center rounded-lg text-(--color-text-foreground-secondary) transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
                                       aria-label={messages.composer.queuedFollowUpActions}
                                     />
                                   }
@@ -8287,20 +8287,20 @@ export default function ChatView({
                     >
                       <div
                         className={cn(
-                          "chat-composer-surface rounded-2xl border border-[color:var(--color-border-light)] transition-colors duration-200",
-                          isDragOverComposer ? "!bg-[var(--color-background-control)]" : "",
+                          "chat-composer-surface rounded-2xl border border-(--color-border-light) transition-colors duration-200",
+                          isDragOverComposer ? "bg-(--color-background-control)!" : "",
                           composerProviderState.composerSurfaceClassName,
                         )}
                       >
                         {activePendingApproval ? (
-                          <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+                          <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                             <ComposerPendingApprovalPanel
                               approval={activePendingApproval}
                               pendingCount={pendingApprovals.length}
                             />
                           </div>
                         ) : pendingUserInputs.length > 0 ? (
-                          <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+                          <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                             <ComposerPendingUserInputPanel
                               pendingUserInputs={pendingUserInputs}
                               respondingRequestIds={respondingUserInputRequestIds}
@@ -8311,7 +8311,7 @@ export default function ChatView({
                             />
                           </div>
                         ) : showPlanFollowUpPrompt && activeProposedPlan ? (
-                          <div className="rounded-t-[23px] border-b border-[color:var(--color-border-light)] bg-[var(--color-background-elevated-secondary)]">
+                          <div className="rounded-t-[23px] border-b border-(--color-border-light) bg-(--color-background-elevated-secondary)">
                             <ComposerPlanFollowUpBanner
                               key={activeProposedPlan.id}
                               planTitle={proposedPlanTitle(activeProposedPlan.planMarkdown) ?? null}
@@ -8432,7 +8432,7 @@ export default function ChatView({
                                   ? "min-w-0 shrink-0 gap-1"
                                   : isComposerFooterCompact
                                     ? "min-w-0 flex-1 gap-1 overflow-hidden"
-                                    : "-m-1 min-w-0 flex-1 gap-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:min-w-max sm:overflow-visible",
+                                    : "-m-1 min-w-0 flex-1 gap-1 overflow-x-auto p-1 scrollbar-none [&::-webkit-scrollbar]:hidden sm:min-w-max sm:overflow-visible",
                               )}
                             >
                               <ComposerExtrasMenu
@@ -8467,7 +8467,7 @@ export default function ChatView({
                                       />
                                       <Button
                                         variant="ghost"
-                                        className="shrink-0 whitespace-nowrap px-2 text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-sm,11px)] font-normal text-[var(--color-text-foreground-secondary)] hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)] sm:px-3"
+                                        className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal text-(--color-text-foreground-secondary) hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground) sm:px-3"
                                         size="sm"
                                         type="button"
                                         onClick={toggleInteractionMode}
@@ -8487,7 +8487,7 @@ export default function ChatView({
                                       />
                                       <Button
                                         variant="ghost"
-                                        className="shrink-0 whitespace-nowrap px-2 text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-sm,11px)] font-normal sm:px-3"
+                                        className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal sm:px-3"
                                         size="sm"
                                         type="button"
                                         onClick={togglePlanSidebar}
@@ -8524,7 +8524,7 @@ export default function ChatView({
                               )}
                             >
                               {isPreparingWorktree ? (
-                                <span className="text-[length:var(--app-font-size-ui-xs,10px)] text-[var(--color-text-foreground-secondary)]">
+                                <span className="text-(length:--app-font-size-ui-xs,10px) text-(--color-text-foreground-secondary)">
                                   Preparing worktree...
                                 </span>
                               ) : null}
@@ -8582,7 +8582,7 @@ export default function ChatView({
                               ) : phase === "running" ? (
                                 <button
                                   type="button"
-                                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[var(--color-text-foreground)] text-[var(--color-background-surface)] transition-all duration-150 hover:scale-105 sm:h-[26px] sm:w-[26px]"
+                                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-(--color-text-foreground) text-(--color-background-surface) transition-all duration-150 hover:scale-105 sm:h-[26px] sm:w-[26px]"
                                   onClick={() => void onInterrupt()}
                                   aria-label={messages.chat.stopGenerationAria}
                                   title={messages.chat.stopGenerationTitle}
@@ -8655,7 +8655,7 @@ export default function ChatView({
                                     ) : null}
                                     <button
                                       type="submit"
-                                      className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-text-foreground)] text-[var(--color-background-surface)] transition-all duration-150 hover:scale-105 disabled:opacity-20 disabled:hover:scale-100 sm:h-8 sm:w-8"
+                                      className="flex h-7 w-7 items-center justify-center rounded-full bg-(--color-text-foreground) text-(--color-background-surface) transition-all duration-150 hover:scale-105 disabled:opacity-20 disabled:hover:scale-100 sm:h-8 sm:w-8"
                                       disabled={
                                         isSendBusy ||
                                         isConnecting ||
@@ -8880,7 +8880,7 @@ export default function ChatView({
             <img
               src={expandedImageItem.src}
               alt={expandedImageItem.name}
-              className="max-h-[86vh] max-w-[92vw] select-none rounded-lg border border-[color:var(--color-border)] bg-[var(--color-background-elevated-primary-opaque)] object-contain shadow-2xl"
+              className="max-h-[86vh] max-w-[92vw] select-none rounded-lg border border-(--color-border) bg-(--color-background-elevated-primary-opaque) object-contain shadow-2xl"
               draggable={false}
             />
             <p className="mt-2 max-w-[92vw] truncate text-center text-xs text-muted-foreground/80">

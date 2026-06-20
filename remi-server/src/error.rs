@@ -77,3 +77,9 @@ impl From<remi_orchestration::OrchestrationError> for ServerError {
         ServerError::InternalError(err.to_string())
     }
 }
+
+impl From<remi_telemetry::TelemetryError> for ServerError {
+    fn from(err: remi_telemetry::TelemetryError) -> Self {
+        ServerError::InternalError(err.to_string())
+    }
+}

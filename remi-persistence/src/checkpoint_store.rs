@@ -247,7 +247,35 @@ mod tests {
         
         let store = SqliteCheckpointStore::new(client);
 
+        let project_id = uuid::Uuid::new_v4().to_string();
         let thread_id = ThreadId::new_v4();
+
+        // 先插入 project（thread 有外键引用 project）
+        store.save_checkpoint(&Checkpoint {
+            id: "dummy".to_string(),
+            thread_id: ThreadId::new_v4(),
+            turn_id: "".to_string(),
+            git_ref: "".to_string(),
+            description: "".to_string(),
+            created_at: chrono::Utc::now(),
+        }).unwrap_err(); // 预期失败，因为 thread 不存在
+
+        // 直接通过 SQL 插入必要的依赖记录
+        {
+            let client = SqliteClient::new(&db_path).unwrap();
+            client.execute(
+                "INSERT INTO projection_projects (id, kind, title, workspace_root, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                &[&project_id, &"local".to_string(), &"Test Project".to_string(), &"/tmp".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
+            ).unwrap();
+            client.execute(
+                "INSERT INTO projection_threads (id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                &[&thread_id.to_string(), &project_id, &"Test Thread".to_string(), &"gpt-4".to_string(), &"local".to_string(), &"default".to_string(), &"default".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
+            ).unwrap();
+        }
+
+        // 重新创建 store（因为上面的 client 已 drop）
+        let client = SqliteClient::new(&db_path).unwrap();
+        let store = SqliteCheckpointStore::new(client);
 
         // 创建测试检查点
         let checkpoint = Checkpoint {

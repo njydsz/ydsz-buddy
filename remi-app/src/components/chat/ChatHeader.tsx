@@ -296,7 +296,7 @@ export const ChatHeader = memo(function ChatHeader({
                     render={
                       <Badge
                         variant="outline"
-                        className="hidden !h-6 shrink-0 items-center justify-center gap-1 rounded-md px-1.5 text-[10px] sm:inline-flex"
+                        className="hidden h-6! shrink-0 items-center justify-center gap-1 rounded-md px-1.5 text-[10px] sm:inline-flex"
                       >
                         <span className="inline-flex size-4 shrink-0 items-center justify-center">
                           {renderProviderIcon(handoffBadgeSourceProvider, "size-3")}
@@ -328,7 +328,7 @@ export const ChatHeader = memo(function ChatHeader({
                         size="xs"
                         variant="outline"
                         className={cn(
-                          "shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-[var(--sidebar-accent)] dark:[:hover,[data-pressed]]:bg-[var(--sidebar-accent)]",
+                          "shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-(--sidebar-accent) dark:[:hover,[data-pressed]]:bg-(--sidebar-accent)",
                           compact ? "gap-1" : "gap-1.5",
                         )}
                         aria-label={handoffActionLabel}
@@ -377,7 +377,7 @@ export const ChatHeader = memo(function ChatHeader({
                   type="button"
                   size="icon-xs"
                   variant="outline"
-                  className="shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-[var(--sidebar-accent)] dark:[:hover,[data-pressed]]:bg-[var(--sidebar-accent)]"
+                  className="shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-(--sidebar-accent) dark:[:hover,[data-pressed]]:bg-(--sidebar-accent)"
                   aria-label={inlineChatLayoutAction.label}
                   onClick={inlineChatLayoutAction.onClick}
                 >
@@ -402,7 +402,7 @@ export const ChatHeader = memo(function ChatHeader({
                 <Button
                   size="icon-xs"
                   variant="outline"
-                  className="shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-[var(--sidebar-accent)] dark:[:hover,[data-pressed]]:bg-[var(--sidebar-accent)]"
+                  className="shrink-0 bg-transparent not-disabled:before:shadow-none dark:not-disabled:before:shadow-none [:hover,[data-pressed]]:bg-(--sidebar-accent) dark:[:hover,[data-pressed]]:bg-(--sidebar-accent)"
                   aria-label="Panel toggles"
                 />
               }
@@ -412,7 +412,7 @@ export const ChatHeader = memo(function ChatHeader({
             <MenuPopup
               align="end"
               side="bottom"
-              className="w-50 rounded-lg border-[color:var(--color-border)] bg-[var(--composer-surface)] shadow-lg"
+              className="w-50 rounded-lg border-(--color-border) bg-(--composer-surface) shadow-lg"
             >
               {activeProjectName ? (
                 <MenuItem
@@ -498,7 +498,7 @@ export const ChatHeader = memo(function ChatHeader({
                 className={cn(
                   "shrink-0 border-0",
                   showDiffTotals
-                    ? "gap-2 px-1.5 text-[length:var(--app-font-size-ui-sm,11px)]"
+                    ? "gap-2 px-1.5 text-(length:--app-font-size-ui-sm,11px)"
                     : "",
                 )}
                 pressed={diffOpen}
@@ -510,10 +510,10 @@ export const ChatHeader = memo(function ChatHeader({
               >
                 {showDiffTotals ? (
                   <span className="inline-flex items-center gap-1">
-                    <span className="font-system-ui text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-xs,10px)] font-normal tracking-normal tabular-nums text-success">
+                    <span className="font-system-ui text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-xs,10px) font-normal tracking-normal tabular-nums text-success">
                       +{diffTotals?.additions ?? 0}
                     </span>
-                    <span className="font-system-ui text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-xs,10px)] font-normal tracking-normal tabular-nums text-destructive">
+                    <span className="font-system-ui text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-xs,10px) font-normal tracking-normal tabular-nums text-destructive">
                       -{diffTotals?.deletions ?? 0}
                     </span>
                   </span>

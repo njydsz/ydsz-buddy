@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use remi_core::commands::OrchestrationCommand;
-use remi_core::models::ThreadId;
+use remi_core::models::{ProjectId, ThreadId};
 use serde_json::Value;
 use tracing::info;
 
@@ -89,6 +89,50 @@ pub async fn register_orchestration_methods(
                         .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
                     None => Ok(Value::Null),
                 }
+            }
+        })
+        .await;
+
+    // orchestration.getProjectDetail
+    let query = services.projection_query.clone();
+    router
+        .register("orchestration.getProjectDetail", move |params: Option<Value>| {
+            let query = query.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let project_id_str = params
+                    .get("projectId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing projectId".to_string())
+                    })?;
+
+                let project_id: ProjectId = project_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid projectId: {}", e)))?;
+
+                let project = query.get_project_detail(project_id).await?;
+                match project {
+                    Some(p) => serde_json::to_value(p)
+                        .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
+                    None => Ok(Value::Null),
+                }
+            }
+        })
+        .await;
+
+    // orchestration.getCounts
+    let query = services.projection_query.clone();
+    router
+        .register("orchestration.getCounts", move |_params: Option<Value>| {
+            let query = query.clone();
+            async move {
+                let counts = query.get_counts().await?;
+                serde_json::to_value(counts)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;

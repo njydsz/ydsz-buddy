@@ -968,7 +968,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
                 <button
                   key={suggestion.id}
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-[var(--sidebar-accent)] hover:text-foreground"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-(--sidebar-accent) hover:text-foreground"
                   onMouseDown={(event) => {
                     event.preventDefault();
                     onChooseSuggestion(suggestion);
@@ -1014,7 +1014,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
           <MenuPopup
             align="end"
             side="bottom"
-            className="w-52 rounded-lg border-[color:var(--color-border)] bg-[var(--composer-surface)] shadow-lg"
+            className="w-52 rounded-lg border-(--color-border) bg-(--composer-surface) shadow-lg"
           >
             <MenuItem onClick={onCreateTab}>
               <PlusIcon className="size-4" />
@@ -1071,7 +1071,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
                 <div
                   key={tab.id}
                   className={cn(
-                    "group flex h-8 min-w-0 max-w-[14rem] items-center rounded-md border px-2 text-left text-xs transition-colors",
+                    "group flex h-8 min-w-0 max-w-56 items-center rounded-md border px-2 text-left text-xs transition-colors",
                     isActive
                       ? "border-border/70 text-foreground"
                       : "border-transparent text-muted-foreground hover:border-border/50 hover:text-foreground",
@@ -1120,7 +1120,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
           {browserChromeStatus ? (
             <div
               className={cn(
-                "max-w-[13rem] shrink-0 truncate rounded-full border px-2.5 py-1 text-[11px] leading-none sm:max-w-[16rem]",
+                "max-w-52 shrink-0 truncate rounded-full border px-2.5 py-1 text-[11px] leading-none sm:max-w-[16rem]",
                 browserChromeStatus.tone === "error"
                   ? "border-destructive/25 bg-destructive/8 text-destructive"
                   : "border-border/60 bg-background/80 text-muted-foreground",

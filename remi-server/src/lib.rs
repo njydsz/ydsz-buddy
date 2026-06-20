@@ -51,6 +51,8 @@ pub mod rpc_methods;
 pub mod server;
 /// WebSocket 连接管理模块，负责连接生命周期管理与消息处理
 pub mod websocket;
+/// 服务引导模块，提供统一的服务容器构造和启动逻辑
+pub mod bootstrap;
 
 pub use error::*;
 pub use push_channels::*;
@@ -58,3 +60,4 @@ pub use rpc::*;
 pub use rpc_methods::*;
 pub use server::*;
 pub use websocket::*;
+pub use bootstrap::*;

@@ -113,7 +113,7 @@ export interface ServerConfig {
   /** 配置问题列表（如快捷键配置错误） */
   issues: ServerConfigIssues;
   /** 所有 Provider 的状态列表 */
-  providers: ServerProviderStatuses;
+  providers: ServerProviderStatus[];
   /** 可用的编辑器列表 */
   availableEditors: EditorId[];
 }
@@ -228,12 +228,12 @@ export interface ServerUpsertKeybindingResult {
 /** 服务器配置更新事件载荷 */
 export interface ServerConfigUpdatedPayload {
   issues: ServerConfigIssues;
-  providers: ServerProviderStatuses;
+  providers: ServerProviderStatus[];
 }
 
 /** Provider 状态更新事件载荷 */
 export interface ServerProviderStatusesUpdatedPayload {
-  providers: ServerProviderStatuses;
+  providers: ServerProviderStatus[];
 }
 
 /** 服务器设置更新事件载荷 */

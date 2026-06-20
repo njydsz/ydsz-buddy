@@ -7,6 +7,7 @@ use remi_checkpoint::CheckpointStore;
 use remi_git::{GitCore, GitManager, GitStatusBroadcaster};
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
 use remi_provider::ProviderService;
+use remi_telemetry::{AnalyticsService, MetricsCollector};
 use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 use tracing::info;
@@ -15,7 +16,7 @@ use crate::rpc::RpcRouter;
 use super::handlers::{
     register_orchestration_methods, register_provider_methods, register_git_methods,
     register_terminal_methods, register_workspace_methods, register_auth_methods,
-    register_checkpoint_methods, register_server_methods,
+    register_checkpoint_methods, register_server_methods, register_telemetry_methods,
 };
 
 /// 服务容器
@@ -42,6 +43,10 @@ pub struct ServiceContainer {
     pub auth_service: Arc<AuthService>,
     /// 检查点存储
     pub checkpoint_store: Arc<CheckpointStore>,
+    /// 分析服务
+    pub analytics_service: Arc<AnalyticsService>,
+    /// 指标收集器
+    pub metrics_collector: Arc<MetricsCollector>,
 }
 
 /// 注册所有 RPC 方法
@@ -73,7 +78,10 @@ pub async fn register_all_methods(
     register_checkpoint_methods(router.clone(), services.clone()).await;
 
     // 服务器方法
-    register_server_methods(router, services).await;
+    register_server_methods(router.clone(), services.clone()).await;
+
+    // 遥测方法
+    register_telemetry_methods(router, services).await;
 
     info!("RPC 方法注册完成");
 }

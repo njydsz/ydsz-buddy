@@ -188,10 +188,12 @@ remi-code/
 ├── remi-persistence/             # 持久化层（SQLite）
 │   ├── src/
 │   │   ├── lib.rs
-│   │   ├── sqlite.rs            # SQLite 客户端封装
+│   │   ├── sqlite_client.rs     # SQLite 客户端封装
 │   │   ├── migrations.rs        # 数据库迁移
 │   │   ├── event_store.rs       # 事件存储
-│   │   └── projection.rs        # 投影存储
+│   │   ├── projection_repo.rs   # 投影存储
+│   │   ├── checkpoint_store.rs  # 检查点存储
+│   │   └── pairing_store.rs     # 配对链接存储
 │   └── Cargo.toml
 │
 ├── remi-orchestration/           # 编排引擎（CQRS/ES）
@@ -200,7 +202,8 @@ remi-code/
 │   │   ├── engine.rs            # 编排引擎核心
 │   │   ├── projector.rs         # 投影器
 │   │   ├── reactor.rs           # 命令反应器
-│   │   └── query.rs             # 读模型查询
+│   │   ├── query.rs             # 读模型查询
+│   │   └── runtime_receipt_bus.rs # 运行时凭证总线
 │   └── Cargo.toml
 │
 ├── remi-provider/                # AI Provider 管理
@@ -358,19 +361,24 @@ remi-cli
 - 投影器构建读模型
 - 状态查询与快照
 
-**命令体系**（30+ 种命令）：
+**命令体系**（31 种命令）：
 - 项目管理：`project.create`, `project.meta.update`, `project.delete`
-- 线程管理：`thread.create`, `thread.delete`, `thread.archive`
-- 消息交互：`thread.turn.start`, `thread.turn.interrupt`
+- 线程管理：`thread.create`, `thread.delete`, `thread.archive`, `thread.unarchive`, `thread.meta.update`, `thread.runtime-mode.set`, `thread.interaction-mode.set`, `thread.handoff.create`, `thread.fork.create`
+- 消息交互：`thread.turn.start`, `thread.turn.interrupt`, `thread.turn.dispatch-queued`
 - 审批流程：`thread.approval.respond`, `thread.user-input.respond`
 - 检查点：`thread.checkpoint.revert`, `thread.conversation.rollback`
+- 消息操作：`thread.message.edit-and-resend`, `thread.session.stop`, `thread.activity.append`
+- 内部命令：`thread.session.set`, `thread.messages.import`, `thread.message.assistant.delta`, `thread.message.assistant.complete`, `thread.proposed-plan.upsert`, `thread.turn.diff.complete`, `thread.revert.complete`, `thread.conversation.rollback.complete`
 
 **事件类型**（26 种事件）：
 - 项目事件：`project.created`, `project.meta-updated`, `project.deleted`
-- 线程事件：`thread.created`, `thread.deleted`, `thread.archived`
+- 线程事件：`thread.created`, `thread.deleted`, `thread.archived`, `thread.unarchived`, `thread.meta-updated`, `thread.runtime-mode-set`, `thread.interaction-mode-set`
 - 消息事件：`thread.message-sent`
-- Turn 事件：`thread.turn-started`, `thread.turn-interrupted`
-- 检查点事件：`thread.checkpoint-reverted`, `thread.turn-diff-completed`
+- Turn 事件：`thread.turn-queued`, `thread.turn-start-requested`, `thread.turn-interrupt-requested`
+- 审批事件：`thread.approval-response-requested`, `thread.user-input-response-requested`
+- 检查点事件：`thread.checkpoint-revert-requested`, `thread.reverted`, `thread.turn-diff-completed`
+- 回滚事件：`thread.conversation-rollback-requested`, `thread.conversation-rolled-back`
+- 其他事件：`thread.message-edit-resend-requested`, `thread.session-stop-requested`, `thread.session-set`, `thread.proposed-plan-upserted`, `thread.activity-appended`
 
 ### 5.2 Provider 服务 (remi-provider)
 
@@ -436,20 +444,25 @@ Git 服务提供完整的版本控制功能。
 
 WebSocket 服务器提供与前端通信的 RPC 接口。
 
-**RPC 方法**（60+ 方法）：
-- 编排方法（12 个）：`orchestration.dispatchCommand`, `orchestration.getSnapshot`
-- Git 方法（18 个）：`git.pull`, `git.status`, `git.listBranches`
-- 终端方法（7 个）：`terminal.open`, `terminal.write`, `terminal.resize`
-- 服务器方法（14 个）：`server.getConfig`, `server.getSettings`
-- Provider 方法（9 个）：`provider.listModels`, `provider.listCommands`
+**RPC 方法**（8 大类方法）：
+- 编排方法：`orchestration.dispatchCommand`, `orchestration.getSnapshot`
+- Git 方法：`git.pull`, `git.status`, `git.listBranches`
+- 终端方法：`terminal.open`, `terminal.write`, `terminal.resize`
+- 工作空间方法：`workspace.browse`, `workspace.readFile`, `workspace.writeFile`
+- Provider 方法：`provider.listModels`, `provider.sendTurn`
+- 认证方法：`auth.login`, `auth.validateToken`
+- 检查点方法：`checkpoint.create`, `checkpoint.revert`
+- 服务器方法：`server.getConfig`, `server.getSettings`
 
-**推送通道**（10 个）：
+**推送通道**（8 个）：
 - `server.welcome`：初始欢迎
 - `orchestration.domainEvent`：编排领域事件
 - `orchestration.shellEvent`：Shell 流事件
 - `orchestration.threadEvent`：线程详情流事件
 - `terminal.event`：终端输出事件
 - `git.actionProgress`：Git 操作进度
+- `provider.event`：Provider 运行时事件
+- `checkpoint.event`：检查点事件
 
 ---
 

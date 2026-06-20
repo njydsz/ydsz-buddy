@@ -263,7 +263,7 @@ impl ProjectionSnapshotQuery {
 ///
 /// - `project_count`: 项目总数
 /// - `thread_count`: 线程总数
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct ProjectionCounts {
     /// 项目总数
     pub project_count: usize,

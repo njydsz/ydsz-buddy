@@ -104,6 +104,9 @@ export interface AuthPairingLink {
   expiresAt: string;
 }
 
+/** 客户端设备类型枚举 */
+export type AuthClientMetadataDeviceType = "desktop" | "mobile" | "tablet" | "web" | "unknown";
+
 /** 客户端元数据，记录设备、浏览器、IP 等信息 */
 export interface AuthClientMetadata {
   /** 客户端标签（显示名称） */

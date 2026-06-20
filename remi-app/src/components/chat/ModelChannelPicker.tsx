@@ -176,7 +176,7 @@ function ChannelListItem({
     <div
       className={cn(
         "flex items-center gap-3 rounded-md px-2 py-2 transition-colors",
-        "hover:bg-[var(--color-background-elevated-secondary)]"
+        "hover:bg-(--color-background-elevated-secondary)"
       )}
     >
       {channel.icon}

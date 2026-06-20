@@ -27,3 +27,4 @@ tracing = { workspace = true }
 async-trait = { workspace = true }
 futures-util = { workspace = true }
 uuid = { workspace = true }
+anyhow = { workspace = true }

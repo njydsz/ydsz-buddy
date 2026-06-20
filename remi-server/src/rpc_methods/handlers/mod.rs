@@ -8,6 +8,7 @@ mod workspace;
 mod auth;
 mod checkpoint;
 mod server;
+mod telemetry;
 
 pub use orchestration::*;
 pub use provider::*;
@@ -17,3 +18,4 @@ pub use workspace::*;
 pub use auth::*;
 pub use checkpoint::*;
 pub use server::*;
+pub use telemetry::*;
