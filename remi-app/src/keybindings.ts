@@ -581,7 +581,7 @@ export function formatShortcutLabel(
 }
 
 /** macOS 淇グ閿鍙烽泦鍚堬紝鐢ㄤ簬鎷嗗垎蹇嵎閿爣绛?*/
-const MODIFIER_SYMBOLS = new Set(["鈱?, "鈱?, "鈱?, "鈬?]);
+const MODIFIER_SYMBOLS = new Set(["⌘", "⌥", "⇧", "⌃"]);
 
 /**
  * 灏嗗揩鎹烽敭鏍囩瀛楃涓叉媶鍒嗕负鐙珛鐨勪慨楗伴敭鍜屾寜閿儴鍒嗐€? * 鏀寔涓ょ鏍煎紡锛歐indows 椋庢牸鐨?"+" 鍒嗛殧鍜?macOS 椋庢牸鐨勭鍙锋嫾鎺ャ€? *

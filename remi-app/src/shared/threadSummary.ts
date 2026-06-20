@@ -1,6 +1,6 @@
 /**
  * @file threadSummary.ts
- * @description 线程摘要状态计算工具模�? * @purpose 提供线程元数据和状态计算的共享工具函数，用于追踪待审批、待用户输入等状�? * @exports 线程摘要状态和元数据计算函�? */
+ * @description 线程摘要状态计算工具模 * @purpose 提供线程元数据和状态计算的共享工具函数，用于追踪待审批、待用户输入等状 * @exports 线程摘要状态和元数据计算函 */
 
 import type {
   OrchestrationLatestTurn,
@@ -11,7 +11,7 @@ import type {
 
 /**
  * @interface ThreadSummaryMetadata
- * @description 线程摘要元数据接�? * @property {string | null} latestUserMessageAt - 最新用户消息的时间戳（ISO 格式�? * @property {boolean} hasPendingApprovals - 是否存在待审批的请求
+ * @description 线程摘要元数据接 * @property {string | null} latestUserMessageAt - 最新用户消息的时间戳（ISO 格式 * @property {boolean} hasPendingApprovals - 是否存在待审批的请求
  * @property {boolean} hasPendingUserInput - 是否存在待用户输入的请求
  * @property {boolean} hasActionableProposedPlan - 是否存在可执行的提议计划（尚未实施）
  */
@@ -24,7 +24,7 @@ export interface ThreadSummaryMetadata {
 
 /**
  * @interface ThreadSummaryState
- * @description 线程摘要状态接口，继承�?ThreadSummaryMetadata
+ * @description 线程摘要状态接口，继承ThreadSummaryMetadata
  * @property {number} pendingApprovalCount - 待审批请求的数量
  * @property {number} pendingUserInputCount - 待用户输入请求的数量
  */
@@ -35,7 +35,7 @@ export interface ThreadSummaryState extends ThreadSummaryMetadata {
 
 /**
  * @function maxIso
- * @description 比较两个 ISO 时间戳字符串，返回较大的一�? * @param {string | null} left - 左侧时间�? * @param {string} right - 右侧时间�? * @returns {string} 较大的时间戳
+ * @description 比较两个 ISO 时间戳字符串，返回较大的一 * @param {string | null} left - 左侧时间 * @param {string} right - 右侧时间 * @returns {string} 较大的时间戳
  * @note 用于追踪最新的用户消息时间
  */
 function maxIso(left: string | null, right: string): string {
@@ -50,13 +50,13 @@ function maxIso(left: string | null, right: string): string {
  * @description 按顺序比较两个活动对象，用于排序
  * @param {Object} left - 左侧活动对象
  * @param {Object} right - 右侧活动对象
- * @returns {number} 排序比较结果（负数表�?left 在前，正数表�?right 在前�? 表示相等�? * @note 优先�?sequence 排序，其次按 createdAt 排序，最后按 id 排序
+ * @returns {number} 排序比较结果（负数表left 在前，正数表right 在前 表示相等 * @note 优先sequence 排序，其次按 createdAt 排序，最后按 id 排序
  */
 function compareActivitiesByOrder(
   left: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
   right: Pick<OrchestrationThreadActivity, "createdAt" | "id" | "sequence">,
 ): number {
-  // 如果没有 sequence，使用最大值确保排在最�?  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
+  // 如果没有 sequence，使用最大值确保排在最  const leftSequence = left.sequence ?? Number.MAX_SAFE_INTEGER;
   const rightSequence = right.sequence ?? Number.MAX_SAFE_INTEGER;
   return (
     leftSequence - rightSequence ||
@@ -67,8 +67,8 @@ function compareActivitiesByOrder(
 
 /**
  * @function toPayloadRecord
- * @description 将未知类型的 payload 转换为记录对�? * @param {unknown} payload - 待转换的 payload
- * @returns {Record<string, unknown> | null} 如果是对象则返回记录，否则返�?null
+ * @description 将未知类型的 payload 转换为记录对 * @param {unknown} payload - 待转换的 payload
+ * @returns {Record<string, unknown> | null} 如果是对象则返回记录，否则返null
  */
 function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
   return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
@@ -76,7 +76,7 @@ function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
 
 /**
  * @function requestKindFromRequestType
- * @description 根据请求类型字符串推导请求种�? * @param {unknown} requestType - 请求类型字符�? * @returns {"command" | "file-read" | "file-change" | null} 请求种类，未识别返回 null
+ * @description 根据请求类型字符串推导请求种 * @param {unknown} requestType - 请求类型字符 * @returns {"command" | "file-read" | "file-change" | null} 请求种类，未识别返回 null
  * @note 支持多种请求类型命名格式
  */
 function requestKindFromRequestType(
@@ -98,8 +98,8 @@ function requestKindFromRequestType(
 
 /**
  * @function isStalePendingRequestFailureDetail
- * @description 检查失败详情是否表示过期的待处理请�? * @param {string | undefined} detail - 失败详情字符�? * @returns {boolean} 如果是过期请求的失败返回 true，否则返�?false
- * @note 用于清理已过期但未被正确关闭的审�?用户输入请求
+ * @description 检查失败详情是否表示过期的待处理请 * @param {string | undefined} detail - 失败详情字符 * @returns {boolean} 如果是过期请求的失败返回 true，否则返false
+ * @note 用于清理已过期但未被正确关闭的审用户输入请求
  */
 function isStalePendingRequestFailureDetail(detail: string | undefined): boolean {
   if (!detail) {
@@ -119,9 +119,9 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
 
 /**
  * @function hasStructuredUserInputQuestions
- * @description 检�?payload 中是否包含结构化的用户输入问�? * @param {Record<string, unknown> | null} payload - 待检查的 payload
- * @returns {boolean} 如果包含有效的结构化问题返回 true，否则返�?false
- * @note 结构化问题必须包�?id、header、question 和至少一个有效的 option（含 label �?description�? */
+ * @description 检payload 中是否包含结构化的用户输入问 * @param {Record<string, unknown> | null} payload - 待检查的 payload
+ * @returns {boolean} 如果包含有效的结构化问题返回 true，否则返false
+ * @note 结构化问题必须包id、header、question 和至少一个有效的 option（含 label description */
 function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null): boolean {
   const questions = payload?.questions;
   if (!Array.isArray(questions)) {
@@ -193,11 +193,11 @@ function resolveLatestProposedPlan(input: {
 
 /**
  * @function deriveThreadSummaryState
- * @description 从消息、活动和计划列表中推导线程摘要状�? * @param {Object} input - 输入参数
+ * @description 从消息、活动和计划列表中推导线程摘要状 * @param {Object} input - 输入参数
  * @param {ReadonlyArray} input.messages - 消息列表
  * @param {ReadonlyArray} input.activities - 活动列表
  * @param {ReadonlyArray} input.proposedPlans - 提议计划列表
- * @param {Object | null} input.latestTurn - 最新轮次信�? * @returns {ThreadSummaryState} 推导出的线程摘要状�? * @note 通过追踪活动事件来计算待审批和待用户输入的状�? */
+ * @param {Object | null} input.latestTurn - 最新轮次信 * @returns {ThreadSummaryState} 推导出的线程摘要状 * @note 通过追踪活动事件来计算待审批和待用户输入的状 */
 export function deriveThreadSummaryState(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<
@@ -219,13 +219,13 @@ export function deriveThreadSummaryState(input: {
   // 2. 追踪待审批和待用户输入的请求
   const openApprovals = new Map<string, true>();
   const openUserInputs = new Map<string, true>();
-  // 按顺序排序活动，确保事件处理的正确�?  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
+  // 按顺序排序活动，确保事件处理的正确  const orderedActivities = [...input.activities].toSorted(compareActivitiesByOrder);
   for (const activity of orderedActivities) {
     const payload = toPayloadRecord(activity.payload);
     const requestId = typeof payload?.requestId === "string" ? payload.requestId : null;
     const detail = typeof payload?.detail === "string" ? payload.detail : undefined;
 
-    // 处理审批请求开�?    if (activity.kind === "approval.requested" && requestId) {
+    // 处理审批请求开    if (activity.kind === "approval.requested" && requestId) {
       const requestKind =
         payload?.requestKind === "command" ||
         payload?.requestKind === "file-read" ||
@@ -254,7 +254,7 @@ export function deriveThreadSummaryState(input: {
       continue;
     }
 
-    // 处理用户输入请求开�?    if (activity.kind === "user-input.requested" && requestId) {
+    // 处理用户输入请求开    if (activity.kind === "user-input.requested" && requestId) {
       if (hasStructuredUserInputQuestions(payload)) {
         openUserInputs.set(requestId, true);
       }
@@ -283,23 +283,23 @@ export function deriveThreadSummaryState(input: {
     latestTurn: input.latestTurn,
   });
 
-  // 4. 构建并返回摘要状�?  return {
+  // 4. 构建并返回摘要状  return {
     latestUserMessageAt,
     pendingApprovalCount: openApprovals.size,
     pendingUserInputCount: openUserInputs.size,
     hasPendingApprovals: openApprovals.size > 0,
     hasPendingUserInput: openUserInputs.size > 0,
-    // 如果最新计划尚未实施，则认为存在可执行的计�?    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
+    // 如果最新计划尚未实施，则认为存在可执行的计    hasActionableProposedPlan: latestProposedPlan?.implementedAt === null,
   };
 }
 
 /**
  * @function deriveThreadSummaryMetadata
- * @description 从消息、活动和计划列表中推导线程摘要元数据（不包含计数�? * @param {Object} input - 输入参数
+ * @description 从消息、活动和计划列表中推导线程摘要元数据（不包含计数 * @param {Object} input - 输入参数
  * @param {ReadonlyArray} input.messages - 消息列表
  * @param {ReadonlyArray} input.activities - 活动列表
  * @param {ReadonlyArray} input.proposedPlans - 提议计划列表
- * @param {Object | null} input.latestTurn - 最新轮次信�? * @returns {ThreadSummaryMetadata} 推导出的线程摘要元数�? * @note 便捷封装：调�?deriveThreadSummaryState 并仅返回元数据部�? */
+ * @param {Object | null} input.latestTurn - 最新轮次信 * @returns {ThreadSummaryMetadata} 推导出的线程摘要元数 * @note 便捷封装：调deriveThreadSummaryState 并仅返回元数据部 */
 export function deriveThreadSummaryMetadata(input: {
   readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<
