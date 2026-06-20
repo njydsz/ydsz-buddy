@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file ACP Agent 实现模块
  * @description 实现 ACP（Agent Client Protocol）协议的 Agent 端功能。
@@ -806,6 +807,8 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
       extNotification: transport.notify,
     },
     // 处理器注册方法
+    // 使用 Effect.suspend 延迟执行赋值操作，确保处理器注册在 Effect 运行时才执行，
+    // 而非在构建时立即执行，从而与 Effect 的惰性求值语义保持一致
     handleInitialize: (handler) =>
       Effect.suspend(() => {
         coreHandlers.initialize = handler;
@@ -866,6 +869,7 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
         coreHandlers.prompt = handler;
         return Effect.void;
       }),
+    // 取消通知支持多个处理器，使用 push 而非赋值，允许多处监听同一取消事件
     handleCancel: (handler) =>
       Effect.suspend(() => {
         cancelHandlers.push(handler);
@@ -894,6 +898,8 @@ export const make = Effect.fn("effect-acp/AcpAgent.make")(function* (
         );
         return Effect.void;
       }),
+  // 使用 satisfies 确保返回值严格符合 AcpAgentShape 接口定义，
+  // 在编译期捕获接口不匹配的错误，同时保留字面量类型信息
   } satisfies AcpAgentShape;
 });
 

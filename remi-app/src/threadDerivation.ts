@@ -1,6 +1,12 @@
-// FILE: threadDerivation.ts
-// Purpose: Rebuild stable Thread objects from normalized shell/detail slices.
-// Exports: cached collection helpers and thread derivation for the web store hot path.
+/**
+ * @file threadDerivation.ts
+ * @description 从归一化的 shell/detail 切片中重建稳定的 Thread 对象。
+ * 提供 Web Store 热路径中使用的缓存集合辅助函数和线程派生逻辑。
+ *
+ * 核心思路：应用状态以归一化（扁平）形式存储，本模块负责在读取时
+ * 将分散的 shell、session、messages 等切片重新组装为完整的 Thread 对象，
+ * 并通过 WeakMap 缓存避免不必要的对象重建。
+ */
 
 import type { MessageId, ThreadId, TurnId } from "@remi-code/contracts";
 import type { AppState } from "./store";
@@ -14,24 +20,51 @@ import type {
   TurnDiffSummary,
 } from "./types";
 
+/** 空消息数组，作为默认返回值避免重复创建 */
 const EMPTY_MESSAGES: ChatMessage[] = [];
+/** 空活动列表，作为默认返回值避免重复创建 */
 const EMPTY_ACTIVITIES: Thread["activities"] = [];
+/** 空提议计划列表，作为默认返回值避免重复创建 */
 const EMPTY_PROPOSED_PLANS: ProposedPlan[] = [];
+/** 空变更差异摘要列表，作为默认返回值避免重复创建 */
 const EMPTY_TURN_DIFF_SUMMARIES: TurnDiffSummary[] = [];
+/** 空消息映射表，作为默认返回值避免重复创建 */
 const EMPTY_MESSAGE_MAP: Record<MessageId, ChatMessage> = {};
+/** 空活动映射表，作为默认返回值避免重复创建 */
 const EMPTY_ACTIVITY_MAP: Record<string, Thread["activities"][number]> = {};
+/** 空提议计划映射表，作为默认返回值避免重复创建 */
 const EMPTY_PROPOSED_PLAN_MAP: Record<string, ProposedPlan> = {};
+/** 空变更差异映射表，作为默认返回值避免重复创建 */
 const EMPTY_TURN_DIFF_MAP: Record<TurnId, TurnDiffSummary> = {};
+/** 空线程 ID 列表，作为默认返回值避免重复创建 */
 const EMPTY_THREAD_IDS: ThreadId[] = [];
+/** 空线程 Shell 映射表，作为默认返回值避免重复创建 */
 const EMPTY_THREAD_SHELL_MAP: Record<ThreadId, ThreadShell> = {};
+/** 空线程会话映射表，作为默认返回值避免重复创建 */
 const EMPTY_THREAD_SESSION_MAP: Record<ThreadId, ThreadSession | null> = {};
+/** 空线程轮次状态映射表，作为默认返回值避免重复创建 */
 const EMPTY_THREAD_TURN_STATE_MAP: Record<ThreadId, ThreadTurnState> = {};
+/** 空消息 ID 按线程分组映射表，作为默认返回值避免重复创建 */
 const EMPTY_MESSAGE_IDS_BY_THREAD: Record<ThreadId, MessageId[]> = {};
+/** 空活动 ID 按线程分组映射表，作为默认返回值避免重复创建 */
 const EMPTY_ACTIVITY_IDS_BY_THREAD: Record<ThreadId, string[]> = {};
+/** 空提议计划 ID 按线程分组映射表，作为默认返回值避免重复创建 */
 const EMPTY_PROPOSED_PLAN_IDS_BY_THREAD: Record<ThreadId, string[]> = {};
+/** 空变更差异 ID 按线程分组映射表，作为默认返回值避免重复创建 */
 const EMPTY_TURN_DIFF_IDS_BY_THREAD: Record<ThreadId, TurnId[]> = {};
 
+/**
+ * collectByIds 的缓存。外层 WeakMap 以 ID 数组为 key，
+ * 内层 WeakMap 以 byId 映射表为 key，缓存已收集的结果数组。
+ * 使用 WeakMap 确保当 key 被回收时缓存条目也会被自动清理。
+ */
 const collectedByIdsCache = new WeakMap<readonly string[], WeakMap<object, readonly unknown[]>>();
+
+/**
+ * Thread 对象的缓存。以 ThreadShell 为 key，存储其派生出的完整 Thread 及中间数据。
+ * 当所有子切片（session、messages 等）的引用均未变化时，直接返回缓存的 Thread 对象，
+ * 避免在 React 渲染路径上产生新的对象引用导致不必要的重渲染。
+ */
 const threadCache = new WeakMap<
   ThreadShell,
   {
@@ -45,6 +78,24 @@ const threadCache = new WeakMap<
   }
 >();
 
+/**
+ * 根据 ID 列表从映射表中收集对应的值，并利用 WeakMap 进行结果缓存。
+ * 当输入的 ids 或 byId 引用未变化时，直接返回缓存结果，避免重复计算。
+ *
+ * @template TKey - ID 的类型，必须为 string 子类型
+ * @template TValue - 映射表中值的类型
+ * @param ids - 需要收集的 ID 列表，为空或 undefined 时返回 emptyValue
+ * @param byId - ID 到值的映射表，为 undefined 时返回 emptyValue
+ * @param emptyValue - 当 ids 为空或 byId 为空时的默认返回值
+ * @returns 按 ids 顺序从 byId 中收集到的值数组（跳过不存在的条目）
+ *
+ * @example
+ * ```ts
+ * const ids = ["a", "b", "c"];
+ * const byId = { a: 1, c: 3 };
+ * collectByIds(ids, byId, []); // => [1, 3]
+ * ```
+ */
 export function collectByIds<TKey extends string, TValue>(
   ids: readonly TKey[] | undefined,
   byId: Record<TKey, TValue> | undefined,
@@ -72,6 +123,7 @@ export function collectByIds<TKey extends string, TValue>(
   return nextValues;
 }
 
+/** 从应用状态中选取指定线程的消息列表 */
 function selectThreadMessages(state: AppState, threadId: ThreadId): Thread["messages"] {
   return collectByIds(
     state.messageIdsByThreadId?.[threadId] ?? EMPTY_MESSAGE_IDS_BY_THREAD[threadId],
@@ -80,6 +132,7 @@ function selectThreadMessages(state: AppState, threadId: ThreadId): Thread["mess
   );
 }
 
+/** 从应用状态中选取指定线程的活动列表 */
 function selectThreadActivities(state: AppState, threadId: ThreadId): Thread["activities"] {
   return collectByIds(
     state.activityIdsByThreadId?.[threadId] ?? EMPTY_ACTIVITY_IDS_BY_THREAD[threadId],
@@ -88,6 +141,7 @@ function selectThreadActivities(state: AppState, threadId: ThreadId): Thread["ac
   );
 }
 
+/** 从应用状态中选取指定线程的提议计划列表 */
 function selectThreadProposedPlans(state: AppState, threadId: ThreadId): Thread["proposedPlans"] {
   return collectByIds(
     state.proposedPlanIdsByThreadId?.[threadId] ?? EMPTY_PROPOSED_PLAN_IDS_BY_THREAD[threadId],
@@ -96,6 +150,7 @@ function selectThreadProposedPlans(state: AppState, threadId: ThreadId): Thread[
   );
 }
 
+/** 从应用状态中选取指定线程的变更差异摘要列表 */
 function selectThreadTurnDiffSummaries(
   state: AppState,
   threadId: ThreadId,
@@ -107,6 +162,23 @@ function selectThreadTurnDiffSummaries(
   );
 }
 
+/**
+ * 从应用状态中派生指定线程的完整 Thread 对象。
+ * 通过 WeakMap 缓存机制，当所有子切片引用均未变化时返回缓存对象，
+ * 避免产生新的引用导致 React 组件不必要的重渲染。
+ *
+ * @param state - 应用全局状态
+ * @param threadId - 目标线程 ID
+ * @returns 完整的 Thread 对象，若线程不存在则返回 undefined
+ *
+ * @example
+ * ```ts
+ * const thread = getThreadFromState(appState, "thread-123");
+ * if (thread) {
+ *   console.log(thread.messages);
+ * }
+ * ```
+ */
 export function getThreadFromState(state: AppState, threadId: ThreadId): Thread | undefined {
   const shell = state.threadShellById?.[threadId] ?? EMPTY_THREAD_SHELL_MAP[threadId];
   if (!shell) {
@@ -157,6 +229,19 @@ export function getThreadFromState(state: AppState, threadId: ThreadId): Thread 
   return thread;
 }
 
+/**
+ * 从应用状态中派生所有线程的完整 Thread 对象列表。
+ * 内部调用 getThreadFromState 逐个派生，跳过不存在的线程。
+ *
+ * @param state - 应用全局状态
+ * @returns 所有有效线程的 Thread 对象数组
+ *
+ * @example
+ * ```ts
+ * const allThreads = getThreadsFromState(appState);
+ * allThreads.forEach(thread => console.log(thread.id));
+ * ```
+ */
 export function getThreadsFromState(state: AppState): Thread[] {
   const threadIds = state.threadIds ?? EMPTY_THREAD_IDS;
   return threadIds.flatMap((threadId) => {

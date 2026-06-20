@@ -1,6 +1,10 @@
-// FILE: workspaceTerminalLayoutPresets.ts
-// Purpose: Define reusable workspace terminal layout presets and map them to pane trees.
-// Layer: Workspace terminal domain helpers
+/**
+ * @file workspaceTerminalLayoutPresets.ts
+ * @description 定义可复用的工作区终端布局预设，并将其映射到面板树结构。
+ *
+ * 布局预设定义了终端面板的排列方式（单栏、双栏、四宫格等），
+ * 每个预设指定了终端槽位数量和对应的布局树构建逻辑。
+ */
 
 import {
   DEFAULT_THREAD_TERMINAL_ID,
@@ -8,6 +12,15 @@ import {
   type ThreadTerminalLayoutNode,
 } from "./types";
 
+/**
+ * 工作区终端布局预设 ID 类型。
+ * - "single"：单个终端
+ * - "two-columns"：两列并排
+ * - "two-rows"：两行堆叠
+ * - "top-main"：上方大面板 + 下方两个小面板
+ * - "left-main"：左侧大面板 + 右侧两个堆叠面板
+ * - "quad"：四宫格
+ */
 export type WorkspaceLayoutPresetId =
   | "single"
   | "two-columns"
@@ -16,15 +29,24 @@ export type WorkspaceLayoutPresetId =
   | "left-main"
   | "quad";
 
+/**
+ * 工作区终端布局预设定义。
+ */
 export interface WorkspaceLayoutPresetDefinition {
+  /** 预设唯一标识 */
   id: WorkspaceLayoutPresetId;
+  /** 预设显示标题 */
   title: string;
+  /** 预设描述 */
   description: string;
+  /** 该预设需要的终端槽位数量 */
   slotCount: number;
 }
 
+/** 默认布局预设 ID */
 export const DEFAULT_WORKSPACE_LAYOUT_PRESET_ID: WorkspaceLayoutPresetId = "single";
 
+/** 所有可用的布局预设定义列表 */
 export const WORKSPACE_LAYOUT_PRESETS: readonly WorkspaceLayoutPresetDefinition[] = [
   {
     id: "single",
@@ -107,6 +129,13 @@ function normalizePresetId(presetId: WorkspaceLayoutPresetId | string): Workspac
   );
 }
 
+/**
+ * 获取指定 ID 的布局预设定义。
+ * 若 ID 无效则返回默认的 "single" 预设。
+ *
+ * @param presetId - 预设 ID（可以是字符串）
+ * @returns 匹配的预设定义，或默认预设
+ */
 export function getWorkspaceLayoutPreset(
   presetId: WorkspaceLayoutPresetId | string,
 ): WorkspaceLayoutPresetDefinition {
@@ -123,12 +152,27 @@ export function getWorkspaceLayoutPreset(
   };
 }
 
+/**
+ * 获取指定预设的终端槽位数量。
+ *
+ * @param presetId - 预设 ID
+ * @returns 该预设需要的终端数量
+ */
 export function getWorkspaceLayoutPresetSlotCount(
   presetId: WorkspaceLayoutPresetId | string,
 ): number {
   return getWorkspaceLayoutPreset(presetId).slotCount;
 }
 
+/**
+ * 确保终端 ID 列表满足指定预设的槽位数量要求。
+ * 若终端数量不足，则通过 createTerminalId 回调生成新的终端 ID 补充。
+ *
+ * @param terminalIds - 现有的终端 ID 列表
+ * @param presetId - 目标预设 ID
+ * @param createTerminalId - 生成新终端 ID 的回调函数
+ * @returns 满足预设槽位数量要求的终端 ID 列表
+ */
 export function ensureTerminalIdsForPreset(
   terminalIds: readonly string[],
   presetId: WorkspaceLayoutPresetId | string,
@@ -208,6 +252,25 @@ function buildPresetLayout(input: {
   }
 }
 
+/**
+ * 根据布局预设创建终端面板组。
+ * 将终端 ID 分配到预设的各个槽位中，并构建对应的布局树。
+ *
+ * @param input - 创建参数
+ * @param input.presetId - 预设 ID
+ * @param input.terminalIds - 终端 ID 列表
+ * @param input.activeTerminalId - 活跃终端 ID（可选，默认取列表第一个）
+ * @returns 构建好的终端面板组
+ *
+ * @example
+ * ```ts
+ * const group = createWorkspaceTerminalGroupFromPreset({
+ *   presetId: "two-columns",
+ *   terminalIds: ["term-1", "term-2"],
+ *   activeTerminalId: "term-1",
+ * });
+ * ```
+ */
 export function createWorkspaceTerminalGroupFromPreset(input: {
   presetId: WorkspaceLayoutPresetId | string;
   terminalIds: readonly string[];

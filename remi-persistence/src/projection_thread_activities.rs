@@ -93,7 +93,7 @@ impl ThreadActivityRepository for SqliteThreadActivityRepository {
             .map(|(activity_id, thread_id_str, turn_id_str, tone, kind, summary, payload_json, sequence, created_at_str)| -> PersistenceResult<ThreadActivity> {
                 let thread_id = thread_id_str.parse::<uuid::Uuid>().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
                 let turn_id = turn_id_str;
-                let created_at = created_at_str.parse().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let created_at = created_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
                 Ok(ThreadActivity {
                     activity_id,

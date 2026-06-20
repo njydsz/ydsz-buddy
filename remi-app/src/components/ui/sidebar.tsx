@@ -592,7 +592,7 @@ function SidebarRail({
 
     const storedWidth = getLocalStorageItem(resolvedResizable.storageKey, Schema.Finite);
     if (storedWidth === null) return;
-    const clampedWidth = clampSidebarWidth(storedWidth, resolvedResizable);
+    const clampedWidth = clampSidebarWidth(storedWidth as number, resolvedResizable);
     wrapper.style.setProperty("--sidebar-width", `${clampedWidth}px`);
     resolvedResizable.onResize?.(clampedWidth);
   }, [resolvedResizable]);

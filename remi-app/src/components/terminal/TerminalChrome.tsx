@@ -1,7 +1,8 @@
-// FILE: TerminalChrome.tsx
-// Purpose: Reusable terminal chrome primitives for tab bars, sidebars, and toolbar actions.
-// Layer: Terminal presentation components
-// Depends on: terminal visual identities plus shared popover/button styling.
+/**
+ * @file TerminalChrome.tsx
+ * @description 终端外壳（Chrome）可复用的 UI 原语，用于渲染终端标签栏、侧边栏和工具栏操作按钮。
+ * 包含终端标签页栏、侧边栏列表、操作按钮组等核心 UI 组件。
+ */
 
 import type { ReactNode } from "react";
 
@@ -18,6 +19,13 @@ import type { ResolvedTerminalGroupLayout } from "./TerminalLayout";
 import TerminalActivityIndicator from "./TerminalActivityIndicator";
 import TerminalIdentityIcon from "./TerminalIdentityIcon";
 
+/**
+ * 根据终端视觉状态返回优先级数值，数值越大优先级越高。
+ * 用于在标签栏中决定显示哪个终端的状态指示器。
+ *
+ * @param state - 终端视觉状态
+ * @returns 优先级数值（1-4）
+ */
 function terminalVisualStatePriority(state: TerminalVisualState): number {
   switch (state) {
     case "attention":
@@ -31,20 +39,38 @@ function terminalVisualStatePriority(state: TerminalVisualState): number {
   }
 }
 
+/**
+ * 终端工具栏操作项配置，描述一个可点击的操作按钮。
+ */
 export interface TerminalChromeActionItem {
+  /** 是否禁用该操作 */
   disabled?: boolean;
+  /** 操作的文本标签，同时作为 tooltip 展示 */
   label: string;
+  /** 点击时的回调函数 */
   onClick: () => void;
+  /** 按钮内容，通常为图标 */
   children: ReactNode;
 }
 
+/**
+ * 终端操作按钮的内部 props，封装了带 tooltip 的按钮交互。
+ */
 interface TerminalActionButtonProps {
+  /** 按钮的 aria-label 及 tooltip 文本 */
   label: string;
+  /** 自定义样式类名 */
   className: string;
+  /** 点击回调 */
   onClick: () => void;
+  /** 按钮内容，通常为图标 */
   children: ReactNode;
 }
 
+/**
+ * 终端操作按钮组件，在 hover 时展示 tooltip 提示。
+ * 内部使用 Popover 实现 hover 触发的 tooltip 效果。
+ */
 function TerminalActionButton({ label, className, onClick, children }: TerminalActionButtonProps) {
   return (
     <Popover>
@@ -67,6 +93,13 @@ function TerminalActionButton({ label, className, onClick, children }: TerminalA
   );
 }
 
+/**
+ * 终端工具栏操作按钮组，根据不同变体（compact/workspace/sidebar）渲染操作按钮列表。
+ * compact 模式下按钮之间使用竖线分隔，workspace/sidebar 模式下使用边框分隔。
+ *
+ * @param props.actions - 操作项列表
+ * @param props.variant - 布局变体，影响按钮的间距和分隔样式
+ */
 export function TerminalChromeActions(props: {
   actions: ReadonlyArray<TerminalChromeActionItem>;
   variant: "compact" | "workspace" | "sidebar";
@@ -114,6 +147,18 @@ export function TerminalChromeActions(props: {
   );
 }
 
+/**
+ * 终端工作区标签栏组件，以水平标签页形式展示终端分组。
+ * 每个标签页显示终端图标、标题、活动状态指示器和关闭按钮。
+ * 标签页会自动选择该分组中优先级最高的终端状态作为预览状态。
+ *
+ * @param props.terminalGroups - 已解析的终端分组布局列表
+ * @param props.activeGroupId - 当前活跃的分组 ID
+ * @param props.terminalVisualIdentityById - 终端 ID 到视觉标识的映射
+ * @param props.actions - 工具栏操作项列表
+ * @param props.onActiveGroupChange - 切换活跃分组的回调
+ * @param props.onCloseGroup - 关闭分组的回调
+ */
 export function TerminalWorkspaceTabBar(props: {
   terminalGroups: ResolvedTerminalGroupLayout[];
   activeGroupId: string;
@@ -201,6 +246,22 @@ export function TerminalWorkspaceTabBar(props: {
   );
 }
 
+/**
+ * 终端侧边栏组件，以垂直列表形式展示终端分组和终端实例。
+ * 支持分组标题折叠展示、终端图标和状态指示器、关闭按钮等交互。
+ * 适用于终端数量较多需要分组管理的场景。
+ *
+ * @param props.terminalIds - 所有终端 ID 列表
+ * @param props.terminalGroups - 已解析的终端分组布局列表
+ * @param props.activeTerminalId - 当前活跃的终端 ID
+ * @param props.activeGroupId - 当前活跃的分组 ID
+ * @param props.showGroupHeaders - 是否显示分组标题
+ * @param props.closeShortcutLabel - 关闭快捷键的标签文本
+ * @param props.terminalVisualIdentityById - 终端 ID 到视觉标识的映射
+ * @param props.actions - 工具栏操作项列表
+ * @param props.onActiveTerminalChange - 切换活跃终端的回调
+ * @param props.onCloseTerminal - 关闭终端的回调
+ */
 export function TerminalSidebar(props: {
   terminalIds: string[];
   terminalGroups: ResolvedTerminalGroupLayout[];

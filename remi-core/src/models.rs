@@ -759,6 +759,23 @@ pub type CheckpointId = String;
 /// 标识符通常由系统在创建 Turn 时自动生成。
 pub type TurnId = String;
 
+/// 环境唯一标识符类型（UUID v4）
+pub type EnvironmentId = Uuid;
+
+/// # 执行环境描述符
+///
+/// 描述服务器实例的运行环境信息，包含平台、版本和工作区根目录。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExecutionEnvironmentDescriptor {
+    /// 操作系统和架构信息（如 "windows-x86_64"）
+    pub platform: String,
+    /// 服务器版本号
+    pub server_version: String,
+    /// 工作区根目录路径
+    pub workspace_root: String,
+}
+
 /// # 配对链接
 ///
 /// 表示一个配对链接的完整信息，用于客户端与服务端之间的安全配对流程。

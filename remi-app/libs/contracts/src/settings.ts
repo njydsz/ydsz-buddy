@@ -108,7 +108,11 @@ export interface ServerSettings {
   };
 }
 
-/** 服务器默认设置（所有字段使用默认值） */
+/**
+ * 服务器默认设置常量
+ *
+ * @description 包含所有字段的默认值，用于初始化服务器设置或作为回退值。
+ */
 export const DEFAULT_SERVER_SETTINGS: ServerSettings = {
   enableAssistantStreaming: false,
   defaultThreadEnvMode: "local",
@@ -176,11 +180,24 @@ export interface ServerSettingsPatch {
   };
 }
 
-/** 服务器设置操作错误，包含设置路径和详细错误信息 */
+/**
+ * 服务器设置操作错误
+ *
+ * @description 当服务器设置校验或应用失败时抛出的错误类，包含设置路径和详细错误信息。
+ *
+ * @example
+ * ```typescript
+ * throw new ServerSettingsError("providers.codex.binaryPath", "路径不能为空");
+ * ```
+ */
 export class ServerSettingsError extends Error {
+  /** 错误名称，固定为 "ServerSettingsError" */
   override readonly name = "ServerSettingsError";
+  /** 出错的设置路径（如 "providers.codex.binaryPath"） */
   readonly settingsPath: string;
+  /** 详细错误信息 */
   readonly detail: string;
+  /** 原始错误原因 */
   readonly cause?: unknown;
 
   constructor(settingsPath: string, detail: string, cause?: unknown) {

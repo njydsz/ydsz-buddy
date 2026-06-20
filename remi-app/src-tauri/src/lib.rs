@@ -145,9 +145,8 @@ pub fn run() {
     // 启动嵌入式 remi-server
     info!("启动嵌入式 remi-server...");
     let config = ServerConfig::default();
-    let bootstrap_result = runtime.block_on(async {
-        bootstrap_embedded(&config).await
-    }).expect("Failed to bootstrap embedded server");
+    let bootstrap_result = runtime.block_on(bootstrap_embedded(&config))
+        .expect("Failed to bootstrap embedded server");
 
     let server_addr = bootstrap_result.server_addr;
     info!("嵌入式服务器地址: {}", server_addr);

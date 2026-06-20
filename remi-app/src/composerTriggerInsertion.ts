@@ -1,12 +1,23 @@
-// FILE: composerTriggerInsertion.ts
-// Purpose: Pure helpers that normalise the text around a composer trigger replacement
-//          so back-to-back chips stay separated and a trailing space is never doubled.
-// Layer: Composer logic utilities (no DOM, no React)
-// Exports: ensureLeadingSpaceForReplacement, extendReplacementRangeForTrailingSpace
+/**
+ * @file composerTriggerInsertion.ts
+ * @description Composer 触发器替换的文本规范化辅助函数。
+ * 确保连续 chip 之间保持分隔符，且不会产生重复的尾部空格。
+ * 纯函数模块，不依赖 DOM 或 React。
+ */
 
-// If the replacement ends with a trailing space and the character at `rangeEnd`
-// is already a space, swallow it so the composer never ends up with two spaces
-// after the chip.
+/**
+ * 如果替换文本以空格结尾且原文本对应位置也是空格，则扩展替换范围以吞掉该空格，
+ * 避免 chip 后出现双空格。
+ *
+ * @param text - 原始文本
+ * @param rangeEnd - 替换范围的结束位置
+ * @param replacement - 替换文本
+ * @returns 可能调整后的替换范围结束位置
+ *
+ * @example
+ * extendReplacementRangeForTrailingSpace("hello  world", 6, "@path ")
+ * // => 7（吞掉了原文本中 rangeEnd 处的空格）
+ */
 export function extendReplacementRangeForTrailingSpace(
   text: string,
   rangeEnd: number,
@@ -18,11 +29,22 @@ export function extendReplacementRangeForTrailingSpace(
   return text[rangeEnd] === " " ? rangeEnd + 1 : rangeEnd;
 }
 
-// Guarantees a whitespace separator between chips when the trigger starts
-// directly after a non-whitespace character (e.g. the user typed `@bar` right
-// after an existing `@foo` chip). Without this, the two mentions render as
-// plain text because the segment parser requires whitespace on both sides.
-// An empty replacement is a pure clear, so we never prepend a stray space.
+/**
+ * 确保替换文本在非空白字符后有前导空格分隔。
+ *
+ * 当触发器紧跟在已有 chip 后面（如用户在 `@foo` 后直接输入 `@bar`），
+ * 段落解析器要求两侧都有空白才能识别 chip，因此需要自动插入前导空格。
+ * 空替换表示纯清除操作，不会添加多余空格。
+ *
+ * @param text - 原始文本
+ * @param rangeStart - 替换范围的起始位置
+ * @param replacement - 替换文本
+ * @returns 可能添加了前导空格的替换文本
+ *
+ * @example
+ * ensureLeadingSpaceForReplacement("@foo@bar", 4, "@baz ")
+ * // => " @baz "（在 @baz 前插入空格，因为前一个字符不是空白）
+ */
 export function ensureLeadingSpaceForReplacement(
   text: string,
   rangeStart: number,

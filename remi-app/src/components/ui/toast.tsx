@@ -372,11 +372,11 @@ function Toasts({ position = "top-right" }: { position: ToastPosition }) {
 
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <Toast.Title
-                    className="min-w-0 break-words font-medium"
+                    className="min-w-0 wrap-break-word font-medium"
                     data-slot="toast-title"
                   />
                   <Toast.Description
-                    className="min-w-0 break-words text-muted-foreground"
+                    className="min-w-0 wrap-break-word text-muted-foreground"
                     data-slot="toast-description"
                   />
                   <ToastActions
@@ -457,11 +457,11 @@ function AnchoredToasts() {
 
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <Toast.Title
-                          className="min-w-0 break-words font-medium"
+                          className="min-w-0 wrap-break-word font-medium"
                           data-slot="toast-title"
                         />
                         <Toast.Description
-                          className="min-w-0 break-words text-muted-foreground"
+                          className="min-w-0 wrap-break-word text-muted-foreground"
                           data-slot="toast-description"
                         />
                         <ToastActions

@@ -1504,9 +1504,9 @@ export default function Sidebar() {
       const latestThread = sortThreadsForSidebar(
         snapshot.threads
           .filter(
-            (thread: { projectId: ProjectId; archivedAt: string | null }) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
+            (thread) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
           )
-          .map((thread: { id: ThreadId; createdAt: string; updatedAt: string; latestUserMessageAt: string | null }) => ({
+          .map((thread) => ({
             id: thread.id,
             createdAt: thread.createdAt,
             updatedAt: thread.updatedAt,
@@ -1545,9 +1545,9 @@ export default function Sidebar() {
       const latestThread = sortThreadsForSidebar(
         snapshot.threads
           .filter(
-            (thread: { projectId: ProjectId; archivedAt: string | null }) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
+            (thread) => thread.projectId === projectId && (thread.archivedAt ?? null) === null,
           )
-          .map((thread: { id: ThreadId; createdAt: string; updatedAt: string; latestUserMessageAt: string | null }) => ({
+          .map((thread) => ({
             id: thread.id,
             createdAt: thread.createdAt,
             updatedAt: thread.updatedAt,
@@ -5037,7 +5037,7 @@ export default function Sidebar() {
         ? "bg-sky-500 hover:bg-sky-600"
         : shouldHighlightDesktopUpdateError(desktopUpdateState)
           ? "bg-rose-500 hover:bg-rose-600"
-          : "bg-[var(--info)] hover:brightness-110";
+          : "bg-(--info) hover:brightness-110";
   const desktopUpdateButtonHasSecondaryLabel =
     desktopUpdateButtonPresentation.secondaryLabel !== null;
   const desktopUpdateRowButtonClasses = cn(
@@ -5521,7 +5521,7 @@ export default function Sidebar() {
                                         setRenamingWorkspaceTitle(workspace.title);
                                       }
                                     }}
-                                    className="h-7 w-full rounded-md border border-(--color-border) bg-[var(--color-background-control-opaque)] px-2 text-(length:--app-font-size-ui,12px) text-(--color-text-foreground) outline-none focus:border-[color:var(--color-border-focus)]"
+                                    className="h-7 w-full rounded-md border border-(--color-border) bg-(--color-background-control-opaque) px-2 text-(length:--app-font-size-ui,12px) text-(--color-text-foreground) outline-none focus:border-(--color-border-focus)"
                                   />
                                 </div>
                               ) : (
@@ -5563,7 +5563,7 @@ export default function Sidebar() {
                                       />
                                     )}
                                     {workspace.terminalCount > 0 && (
-                                      <span className="shrink-0 text-[length:var(--app-font-size-ui-xs,10px)] tabular-nums text-muted-foreground/50">
+                                      <span className="shrink-0 text-(length:--app-font-size-ui-xs,10px) tabular-nums text-muted-foreground/50">
                                         {workspace.terminalCount}
                                       </span>
                                     )}

@@ -1,7 +1,20 @@
-// FILE: terminalPaneLayout.ts
-// Purpose: Pure helpers for terminal pane-tree normalization and split mutations.
-// Layer: Terminal domain helpers
-// Depends on: terminal layout types shared by the store and terminal UI.
+/**
+ * @file terminalPaneLayout.ts
+ * @description 终端面板树（Pane Tree）的归一化和分割操作的纯函数工具集。
+ *
+ * 终端面板布局采用树形结构表示：
+ * - 叶子节点（terminal）：包含一个或多个终端标签页
+ * - 分割节点（split）：将空间按水平或垂直方向分割为多个子节点
+ *
+ * 本模块提供：
+ * - 布局树的归一化/校验（sanitizeLayoutNode）
+ * - 分割操作（splitTerminalGroupLayout）
+ * - 移除操作（removeTerminalFromGroupLayout）
+ * - 标签页添加（addTerminalTabToGroupLayout）
+ * - 激活终端切换（setActiveTerminalInGroupLayout）
+ * - 分割大小调整（resizeTerminalGroupLayout）
+ * - 等分布局（equalizeTerminalGroupLayout）
+ */
 
 import {
   DEFAULT_THREAD_TERMINAL_ID,
@@ -54,6 +67,12 @@ function createTerminalLeaf(
   };
 }
 
+/**
+ * 判断布局节点是否为分割节点。
+ *
+ * @param node - 布局节点
+ * @returns 若为分割节点则返回 true，同时收窄类型为 ThreadTerminalSplitNode
+ */
 export function isTerminalSplitNode(
   node: ThreadTerminalLayoutNode,
 ): node is ThreadTerminalSplitNode {
@@ -157,6 +176,12 @@ function buildLegacyLayout(terminalIds: string[]): ThreadTerminalLayoutNode {
   };
 }
 
+/**
+ * 从布局树中递归收集所有终端 ID。
+ *
+ * @param node - 布局树的根节点
+ * @returns 布局中包含的所有终端 ID 列表
+ */
 export function collectTerminalIdsFromLayout(node: ThreadTerminalLayoutNode): string[] {
   if (node.type === "terminal") {
     const terminalIds = normalizePaneTerminalIds((node as RawTerminalLeafNode).terminalIds);
@@ -168,6 +193,14 @@ export function collectTerminalIdsFromLayout(node: ThreadTerminalLayoutNode): st
   return node.children.flatMap((child) => collectTerminalIdsFromLayout(child));
 }
 
+/**
+ * 在布局树中查找与指定终端相邻的终端 ID。
+ * 优先返回后一个终端，若为最后一个则返回前一个。
+ *
+ * @param node - 布局树的根节点
+ * @param terminalId - 目标终端 ID
+ * @returns 相邻终端 ID，不存在时返回 null
+ */
 export function findAdjacentTerminalId(
   node: ThreadTerminalLayoutNode,
   terminalId: string,
@@ -183,6 +216,13 @@ export function findAdjacentTerminalId(
   return null;
 }
 
+/**
+ * 查找布局树中第一个（最左侧/最顶部）终端 ID。
+ * 对于叶子节点，优先返回 activeTerminalId，其次返回 terminalIds 中的第一个。
+ *
+ * @param node - 布局树的根节点
+ * @returns 第一个终端 ID
+ */
 export function findFirstTerminalIdInLayout(node: ThreadTerminalLayoutNode): string {
   if (node.type === "terminal") {
     const terminalIds = collectTerminalIdsFromLayout(node);
@@ -197,6 +237,13 @@ export function findFirstTerminalIdInLayout(node: ThreadTerminalLayoutNode): str
   );
 }
 
+/**
+ * 判断布局树中是否包含指定的终端 ID。
+ *
+ * @param node - 布局树的根节点
+ * @param terminalId - 待查找的终端 ID
+ * @returns 若布局中包含该终端则返回 true
+ */
 export function layoutContainsTerminalId(
   node: ThreadTerminalLayoutNode,
   terminalId: string,
@@ -207,6 +254,15 @@ export function layoutContainsTerminalId(
   return node.children.some((child) => layoutContainsTerminalId(child, terminalId));
 }
 
+/**
+ * 归一化终端面板组，校验并修复布局数据。
+ * 过滤无效的终端 ID、修复 activeTerminalId、展平同方向嵌套分割、
+ * 若无有效布局则回退到旧版布局格式。
+ *
+ * @param group - 原始终端面板组数据（可能不完整）
+ * @param validTerminalIds - 当前有效的终端 ID 列表
+ * @returns 归一化后的 ThreadTerminalGroup，若完全无效则返回 null
+ */
 export function normalizeTerminalPaneGroup(
   group: RawTerminalGroup,
   validTerminalIds: string[],
@@ -332,6 +388,18 @@ function splitLayoutNode(input: {
   };
 }
 
+/**
+ * 在终端面板组的布局树中分割指定终端，在其指定方向插入新终端。
+ * 若目标终端不存在于布局中，则不做任何修改。
+ *
+ * @param input - 分割操作参数
+ * @param input.group - 终端面板组
+ * @param input.targetTerminalId - 被分割的目标终端 ID
+ * @param input.newTerminalId - 新插入的终端 ID
+ * @param input.position - 分割位置（left/right/top/bottom）
+ * @param input.splitId - 新分割节点的 ID
+ * @returns 分割后的终端面板组，若未发生分割则返回原组
+ */
 export function splitTerminalGroupLayout(input: {
   group: ThreadTerminalGroup;
   targetTerminalId: string;
@@ -422,6 +490,15 @@ function removeTerminalFromLayoutNode(
   };
 }
 
+/**
+ * 从终端面板组的布局树中移除指定终端。
+ * 移除后若叶子节点变空则删除该节点，若分割节点仅剩一个子节点则提升该子节点。
+ * 活跃终端会优先切换到被移除终端的相邻终端。
+ *
+ * @param group - 终端面板组
+ * @param terminalId - 待移除的终端 ID
+ * @returns 移除后的终端面板组，若组完全为空则返回 null
+ */
 export function removeTerminalFromGroupLayout(
   group: ThreadTerminalGroup,
   terminalId: string,
@@ -472,6 +549,14 @@ function updateLeafNode(
   return updated ? { node: { ...node, children: nextChildren }, updated } : { node, updated };
 }
 
+/**
+ * 在终端面板组的布局树中，将新终端作为标签页添加到目标终端所在的叶子节点。
+ *
+ * @param group - 终端面板组
+ * @param targetTerminalId - 目标终端 ID（新标签页将添加到同一叶子节点）
+ * @param newTerminalId - 新标签页的终端 ID
+ * @returns 更新后的终端面板组，若目标终端不存在则返回原组
+ */
 export function addTerminalTabToGroupLayout(
   group: ThreadTerminalGroup,
   targetTerminalId: string,
@@ -492,6 +577,14 @@ export function addTerminalTabToGroupLayout(
   };
 }
 
+/**
+ * 在终端面板组的布局树中设置活跃终端。
+ * 同时更新叶子节点的 activeTerminalId 和面板组的 activeTerminalId。
+ *
+ * @param group - 终端面板组
+ * @param terminalId - 要设为活跃的终端 ID
+ * @returns 更新后的终端面板组，若终端不存在或已是活跃状态则返回原组
+ */
 export function setActiveTerminalInGroupLayout(
   group: ThreadTerminalGroup,
   terminalId: string,
@@ -549,6 +642,14 @@ function resizeSplitNode(
     : { node, didResize };
 }
 
+/**
+ * 调整终端面板组中指定分割节点的子面板权重（大小比例）。
+ *
+ * @param group - 终端面板组
+ * @param splitId - 目标分割节点的 ID
+ * @param weights - 新的权重数组，与子节点一一对应
+ * @returns 更新后的终端面板组，若分割节点不存在则返回原组
+ */
 export function resizeTerminalGroupLayout(
   group: ThreadTerminalGroup,
   splitId: string,
@@ -569,10 +670,23 @@ function equalizeLayoutNode(node: ThreadTerminalLayoutNode): ThreadTerminalLayou
   };
 }
 
+/**
+ * 将终端面板组的布局树中所有分割节点的权重重置为等分。
+ *
+ * @param group - 终端面板组
+ * @returns 等分权重后的终端面板组
+ */
 export function equalizeTerminalGroupLayout(group: ThreadTerminalGroup): ThreadTerminalGroup {
   return { ...group, layout: equalizeLayoutNode(group.layout) };
 }
 
+/**
+ * 创建一个只包含单个终端的终端面板组。
+ *
+ * @param groupId - 面板组 ID
+ * @param terminalId - 终端 ID
+ * @returns 新创建的终端面板组
+ */
 export function createTerminalGroup(groupId: string, terminalId: string): ThreadTerminalGroup {
   return {
     id: groupId,

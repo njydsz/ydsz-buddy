@@ -349,69 +349,115 @@ export interface WsPushServerWelcome {
   data: WsWelcomePayload;
 }
 
+/** 服务器维护状态更新推送消息 */
 export interface WsPushServerMaintenanceUpdated {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：server.maintenanceUpdated */
   channel: typeof WS_CHANNELS.serverMaintenanceUpdated;
+  /** 服务器生命周期事件数据 */
   data: ServerLifecycleStreamEvent;
 }
 
+/** 服务器配置更新推送消息 */
 export interface WsPushServerConfigUpdated {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：server.configUpdated */
   channel: typeof WS_CHANNELS.serverConfigUpdated;
+  /** 服务器配置更新负载数据 */
   data: ServerConfigUpdatedPayload;
 }
 
+/** Provider 状态更新推送消息 */
 export interface WsPushServerProviderStatusesUpdated {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：server.providerStatusesUpdated */
   channel: typeof WS_CHANNELS.serverProviderStatusesUpdated;
+  /** Provider 状态更新负载数据 */
   data: ServerProviderStatusesUpdatedPayload;
 }
 
+/** 服务器设置更新推送消息 */
 export interface WsPushServerSettingsUpdated {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：server.settingsUpdated */
   channel: typeof WS_CHANNELS.serverSettingsUpdated;
+  /** 服务器设置更新负载数据 */
   data: ServerSettingsUpdatedPayload;
 }
 
+/** Git 操作进度推送消息 */
 export interface WsPushGitActionProgress {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：git.actionProgress */
   channel: typeof WS_CHANNELS.gitActionProgress;
+  /** Git 操作进度事件数据 */
   data: GitActionProgressEvent;
 }
 
+/** 终端事件推送消息 */
 export interface WsPushTerminalEvent {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：terminal.event */
   channel: typeof WS_CHANNELS.terminalEvent;
+  /** 终端事件数据 */
   data: TerminalEvent;
 }
 
+/** 编排领域事件推送消息 */
 export interface WsPushOrchestrationDomainEvent {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：编排领域事件通道 */
   channel: typeof ORCHESTRATION_WS_CHANNELS.domainEvent;
+  /** 编排领域事件数据 */
   data: OrchestrationEvent;
 }
 
+/** 编排 Shell 事件推送消息 */
 export interface WsPushOrchestrationShellEvent {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：编排 Shell 事件通道 */
   channel: typeof ORCHESTRATION_WS_CHANNELS.shellEvent;
+  /** 编排 Shell 流式事件数据 */
   data: OrchestrationShellStreamItem;
 }
 
+/** 编排线程事件推送消息 */
 export interface WsPushOrchestrationThreadEvent {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 通道：编排线程事件通道 */
   channel: typeof ORCHESTRATION_WS_CHANNELS.threadEvent;
+  /** 编排线程流式事件数据 */
   data: OrchestrationThreadStreamItem;
 }
 
+/** 所有推送通道名称的联合类型 */
 export type WsPushChannelSchema =
   | typeof WS_CHANNELS.gitActionProgress
   | typeof WS_CHANNELS.serverWelcome
@@ -424,6 +470,7 @@ export type WsPushChannelSchema =
   | typeof ORCHESTRATION_WS_CHANNELS.shellEvent
   | typeof ORCHESTRATION_WS_CHANNELS.threadEvent;
 
+/** 所有推送消息的联合类型 */
 export type WsPush =
   | WsPushServerWelcome
   | WsPushServerMaintenanceUpdated
@@ -436,15 +483,22 @@ export type WsPush =
   | WsPushOrchestrationShellEvent
   | WsPushOrchestrationThreadEvent;
 
+/** 根据通道类型提取对应的推送消息类型 */
 export type WsPushMessage<C extends WsPushChannel> = Extract<WsPush, { channel: C }>;
 
+/** 推送消息信封基础结构 */
 export interface WsPushEnvelopeBase {
+  /** 消息类型：push */
   type: "push";
+  /** 消息序列号 */
   sequence: WsPushSequence;
+  /** 推送通道名称 */
   channel: WsPushChannelSchema;
+  /** 推送负载数据 */
   data: unknown;
 }
 
 // ── Union of all server → client messages ─────────────────────────────
 
+/** 服务端 → 客户端消息联合类型，包含 RPC 响应和推送消息 */
 export type WsResponse = WebSocketResponse | WsPush;

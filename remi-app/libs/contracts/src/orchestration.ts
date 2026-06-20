@@ -1684,9 +1684,12 @@ export type OrchestrationEventType =
   | "thread.turn-diff-completed"
   | "thread.activity-appended";
 
+/** 编排聚合根类型：项目或线程 */
 export type OrchestrationAggregateKind = "project" | "thread";
+/** 编排参与者类型：客户端、服务端或提供者 */
 export type OrchestrationActorKind = "client" | "server" | "provider";
 
+/** 项目创建事件负载 */
 export interface ProjectCreatedPayload {
   projectId: ProjectId;
   kind?: ProjectKind;
@@ -1698,6 +1701,7 @@ export interface ProjectCreatedPayload {
   updatedAt: IsoDateTime;
 }
 
+/** 项目元数据更新事件负载 */
 export interface ProjectMetaUpdatedPayload {
   projectId: ProjectId;
   kind?: ProjectKind;
@@ -1708,11 +1712,13 @@ export interface ProjectMetaUpdatedPayload {
   updatedAt: IsoDateTime;
 }
 
+/** 项目删除事件负载 */
 export interface ProjectDeletedPayload {
   projectId: ProjectId;
   deletedAt: IsoDateTime;
 }
 
+/** 线程创建事件负载 */
 export interface ThreadCreatedPayload {
   threadId: ThreadId;
   projectId: ProjectId;
@@ -1740,23 +1746,27 @@ export interface ThreadCreatedPayload {
   updatedAt: IsoDateTime;
 }
 
+/** 线程删除事件负载 */
 export interface ThreadDeletedPayload {
   threadId: ThreadId;
   deletedAt: IsoDateTime;
 }
 
+/** 线程归档事件负载 */
 export interface ThreadArchivedPayload {
   threadId: ThreadId;
   archivedAt?: IsoDateTime;
   updatedAt?: IsoDateTime;
 }
 
+/** 线程取消归档事件负载 */
 export interface ThreadUnarchivedPayload {
   threadId: ThreadId;
   unarchivedAt?: IsoDateTime;
   updatedAt?: IsoDateTime;
 }
 
+/** 线程元数据更新事件负载 */
 export interface ThreadMetaUpdatedPayload {
   threadId: ThreadId;
   title?: TrimmedNonEmptyString;
@@ -1778,18 +1788,21 @@ export interface ThreadMetaUpdatedPayload {
   updatedAt: IsoDateTime;
 }
 
+/** 线程运行时模式设置事件负载 */
 export interface ThreadRuntimeModeSetPayload {
   threadId: ThreadId;
   runtimeMode: RuntimeMode;
   updatedAt: IsoDateTime;
 }
 
+/** 线程交互模式设置事件负载 */
 export interface ThreadInteractionModeSetPayload {
   threadId: ThreadId;
   interactionMode: ProviderInteractionMode;
   updatedAt: IsoDateTime;
 }
 
+/** 线程消息发送事件负载 */
 export interface ThreadMessageSentPayload {
   threadId: ThreadId;
   messageId: MessageId;
@@ -1806,6 +1819,7 @@ export interface ThreadMessageSentPayload {
   updatedAt: IsoDateTime;
 }
 
+/** 线程轮次启动请求事件负载 */
 export interface ThreadTurnStartRequestedPayload {
   threadId: ThreadId;
   messageId: MessageId;
@@ -1820,14 +1834,17 @@ export interface ThreadTurnStartRequestedPayload {
   createdAt: IsoDateTime;
 }
 
+/** 线程轮次排队事件负载，结构与轮次启动请求相同 */
 export type ThreadTurnQueuedPayload = ThreadTurnStartRequestedPayload;
 
+/** 线程轮次中断请求事件负载 */
 export interface ThreadTurnInterruptRequestedPayload {
   threadId: ThreadId;
   turnId?: TurnId;
   createdAt: IsoDateTime;
 }
 
+/** 线程审批响应请求事件负载 */
 export interface ThreadApprovalResponseRequestedPayload {
   threadId: ThreadId;
   requestId: ApprovalRequestId;
@@ -1835,6 +1852,7 @@ export interface ThreadApprovalResponseRequestedPayload {
   createdAt: IsoDateTime;
 }
 
+/** 线程用户输入响应请求事件负载（内部使用） */
 interface ThreadUserInputResponseRequestedPayload {
   threadId: ThreadId;
   requestId: ApprovalRequestId;
@@ -1842,17 +1860,20 @@ interface ThreadUserInputResponseRequestedPayload {
   createdAt: IsoDateTime;
 }
 
+/** 线程检查点回退请求事件负载 */
 export interface ThreadCheckpointRevertRequestedPayload {
   threadId: ThreadId;
   turnCount: NonNegativeInt;
   createdAt: IsoDateTime;
 }
 
+/** 线程回退完成事件负载 */
 export interface ThreadRevertedPayload {
   threadId: ThreadId;
   turnCount: NonNegativeInt;
 }
 
+/** 线程对话回滚请求事件负载 */
 export interface ThreadConversationRollbackRequestedPayload {
   threadId: ThreadId;
   messageId: MessageId;
@@ -1860,6 +1881,7 @@ export interface ThreadConversationRollbackRequestedPayload {
   createdAt: IsoDateTime;
 }
 
+/** 线程对话回滚完成事件负载 */
 export interface ThreadConversationRolledBackPayload {
   threadId: ThreadId;
   messageId: MessageId;
@@ -1868,6 +1890,7 @@ export interface ThreadConversationRolledBackPayload {
   skipAttachmentPrune?: boolean;
 }
 
+/** 线程消息编辑并重新发送请求事件负载 */
 export interface ThreadMessageEditResendRequestedPayload {
   threadId: ThreadId;
   messageId: MessageId;
@@ -1882,21 +1905,25 @@ export interface ThreadMessageEditResendRequestedPayload {
   createdAt: IsoDateTime;
 }
 
+/** 线程会话停止请求事件负载 */
 export interface ThreadSessionStopRequestedPayload {
   threadId: ThreadId;
   createdAt: IsoDateTime;
 }
 
+/** 线程会话设置事件负载 */
 export interface ThreadSessionSetPayload {
   threadId: ThreadId;
   session: OrchestrationSession;
 }
 
+/** 线程建议计划新增/更新事件负载 */
 export interface ThreadProposedPlanUpsertedPayload {
   threadId: ThreadId;
   proposedPlan: OrchestrationProposedPlan;
 }
 
+/** 线程轮次差异完成事件负载 */
 export interface ThreadTurnDiffCompletedPayload {
   threadId: ThreadId;
   turnId: TurnId;
@@ -1908,11 +1935,13 @@ export interface ThreadTurnDiffCompletedPayload {
   completedAt: IsoDateTime;
 }
 
+/** 线程活动追加事件负载 */
 export interface ThreadActivityAppendedPayload {
   threadId: ThreadId;
   activity: OrchestrationThreadActivity;
 }
 
+/** 编排事件元数据，包含 Provider 关联信息和适配器上下文 */
 export interface OrchestrationEventMetadata {
   providerTurnId?: TrimmedNonEmptyString;
   providerItemId?: ProviderItemId;
@@ -1921,6 +1950,7 @@ export interface OrchestrationEventMetadata {
   ingestedAt?: IsoDateTime;
 }
 
+/** 事件基础字段，所有编排事件的公共属性 */
 interface EventBaseFields {
   sequence: NonNegativeInt;
   eventId: EventId;
@@ -1933,6 +1963,7 @@ interface EventBaseFields {
   metadata: OrchestrationEventMetadata;
 }
 
+/** 编排事件联合类型，包含所有可能的领域事件 */
 export type OrchestrationEvent =
   | (EventBaseFields & { type: "project.created"; payload: ProjectCreatedPayload })
   | (EventBaseFields & { type: "project.meta-updated"; payload: ProjectMetaUpdatedPayload })
@@ -2000,11 +2031,13 @@ export type OrchestrationEvent =
     payload: ThreadActivityAppendedPayload;
   });
 
+/** 线程详情快照，包含完整线程数据和快照序列号 */
 export interface OrchestrationThreadDetailSnapshot {
   snapshotSequence: NonNegativeInt;
   thread: OrchestrationThread;
 }
 
+/** 线程事件流条目：完整快照或增量事件 */
 export type OrchestrationThreadStreamItem =
   | {
       kind: "snapshot";
@@ -2015,22 +2048,28 @@ export type OrchestrationThreadStreamItem =
       event: OrchestrationEvent;
     };
 
+/** 编排命令回执状态：已接受或已拒绝 */
 export type OrchestrationCommandReceiptStatus = "accepted" | "rejected";
 
+/** 轮次计数范围，用于差异查询时指定起止轮次 */
 export interface TurnCountRange {
   fromTurnCount: NonNegativeInt;
   toTurnCount: NonNegativeInt;
 }
 
+/** 线程轮次差异，包含线程 ID、轮次范围和统一差异文本 */
 export interface ThreadTurnDiff extends TurnCountRange {
   threadId: ThreadId;
   diff: string;
 }
 
+/** Provider 会话运行时状态枚举 */
 export type ProviderSessionRuntimeStatus = "starting" | "running" | "stopped" | "error";
 
+/** 投影线程轮次状态枚举 */
 export type ProjectionThreadTurnStatus = "running" | "completed" | "interrupted" | "error";
 
+/** 投影检查点行，用于持久化存储检查点信息 */
 export interface ProjectionCheckpointRow {
   threadId: ThreadId;
   turnId: TurnId;
@@ -2042,61 +2081,92 @@ export interface ProjectionCheckpointRow {
   completedAt: IsoDateTime;
 }
 
+/** 投影待审批状态枚举 */
 export type ProjectionPendingApprovalStatus = "pending" | "resolved";
+/** 投影待审批决策类型 */
 export type ProjectionPendingApprovalDecision = ProviderApprovalDecision | null;
 
+/** 命令分发结果，返回事件序列号 */
 export interface DispatchResult {
   sequence: NonNegativeInt;
 }
 
+/** 获取编排状态快照的输入参数（空） */
 export interface OrchestrationGetSnapshotInput {}
+/** 获取编排状态快照的结果 */
 export type OrchestrationGetSnapshotResult = OrchestrationReadModel;
 
+/** 获取 Shell 快照的输入参数（空） */
 export interface OrchestrationGetShellSnapshotInput {}
+/** 获取 Shell 快照的结果 */
 export type OrchestrationGetShellSnapshotResult = OrchestrationShellSnapshot;
 
+/** 修复编排状态的输入参数（空） */
 export interface OrchestrationRepairStateInput {}
+/** 修复编排状态的结果 */
 export type OrchestrationRepairStateResult = OrchestrationReadModel;
 
+/** 获取轮次差异的输入参数 */
 export interface OrchestrationGetTurnDiffInput extends TurnCountRange {
   threadId: ThreadId;
+  /** 是否忽略空白差异 */
   ignoreWhitespace?: boolean;
 }
+/** 获取轮次差异的结果 */
 export type OrchestrationGetTurnDiffResult = ThreadTurnDiff;
 
+/** 获取完整线程差异的输入参数 */
 export interface OrchestrationGetFullThreadDiffInput {
   threadId: ThreadId;
+  /** 目标轮次计数 */
   toTurnCount: NonNegativeInt;
+  /** 是否忽略空白差异 */
   ignoreWhitespace?: boolean;
 }
+/** 获取完整线程差异的结果 */
 export type OrchestrationGetFullThreadDiffResult = ThreadTurnDiff;
 
+/** 重放编排事件的输入参数 */
 export interface OrchestrationReplayEventsInput {
+  /** 起始序列号（不含），从该序列号之后开始重放 */
   fromSequenceExclusive: NonNegativeInt;
 }
+/** 重放编排事件的结果 */
 export type OrchestrationReplayEventsResult = Array<OrchestrationEvent>;
 
+/** 订阅 Shell 事件的输入参数（空） */
 export interface OrchestrationSubscribeShellInput {}
 
+/** 取消订阅 Shell 事件的输入参数（空） */
 export interface OrchestrationUnsubscribeShellInput {}
 
+/** 订阅线程事件的输入参数 */
 export interface OrchestrationSubscribeThreadInput {
   threadId: ThreadId;
 }
 
+/** 导入外部线程的输入参数 */
 export interface OrchestrationImportThreadInput {
   threadId: ThreadId;
   externalId: TrimmedNonEmptyString;
 }
 
+/** 导入外部线程的结果 */
 export interface OrchestrationImportThreadResult {
   threadId: ThreadId;
 }
 
+/** 取消订阅线程事件的输入参数 */
 export interface OrchestrationUnsubscribeThreadInput {
   threadId: ThreadId;
 }
 
+/**
+ * 编排 RPC Schema 映射
+ *
+ * @description 将每个编排 RPC 方法映射到其输入和输出类型，
+ * 用于 WebSocket RPC 框架的类型安全调用。
+ */
 export const OrchestrationRpcSchemas = {
   getSnapshot: {
     input: {} as OrchestrationGetSnapshotInput,

@@ -207,8 +207,8 @@ impl ProjectionRepository for SqliteProjectionRepository {
 
         // 执行插入或更新操作
         self.client.execute(
-            "INSERT OR REPLACE INTO projection_projects 
-             (id, kind, title, workspace_root, default_model_selection, scripts, created_at, updated_at, deleted_at)
+            "INSERT OR REPLACE INTO projection_projects
+             (project_id, kind, title, workspace_root, default_model_selection_json, scripts_json, created_at, updated_at, deleted_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             &[
                 &project.id.to_string(),
@@ -262,7 +262,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
         // 执行插入或更新操作
         self.client.execute(
             "INSERT OR REPLACE INTO projection_threads
-             (id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
+             (thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
               branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
               fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
               latest_user_message_at, has_pending_approvals, has_pending_user_input,
@@ -316,8 +316,8 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 4. 解析时间戳字符串为 DateTime 对象
     fn get_project(&self, id: ProjectId) -> PersistenceResult<Option<Project>> {
         let rows = self.client.query_map(
-            "SELECT id, kind, title, workspace_root, default_model_selection, scripts, created_at, updated_at, deleted_at
-             FROM projection_projects WHERE id = ?1",
+            "SELECT project_id, kind, title, workspace_root, default_model_selection_json, scripts_json, created_at, updated_at, deleted_at
+             FROM projection_projects WHERE project_id = ?1",
             &[&id.to_string()],
             |row| {
                 // 从数据库行提取各字段
@@ -371,13 +371,13 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 4. 解析时间戳字符串为 DateTime 对象
     fn get_thread(&self, id: ThreadId) -> PersistenceResult<Option<Thread>> {
         let rows = self.client.query_map(
-            "SELECT id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
+            "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
                     branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
                     fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
                     latest_user_message_at, has_pending_approvals, has_pending_user_input,
                     has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
                     session, created_at, updated_at, archived_at, deleted_at, handoff
-             FROM projection_threads WHERE id = ?1",
+             FROM projection_threads WHERE thread_id = ?1",
             &[&id.to_string()],
             row_to_thread,
         )?;
@@ -398,7 +398,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 3. 将每行数据映射为 Project 对象
     fn list_projects(&self) -> PersistenceResult<Vec<Project>> {
         let rows = self.client.query_map(
-            "SELECT id, kind, title, workspace_root, default_model_selection, scripts, created_at, updated_at, deleted_at
+            "SELECT project_id, kind, title, workspace_root, default_model_selection_json, scripts_json, created_at, updated_at, deleted_at
              FROM projection_projects WHERE deleted_at IS NULL ORDER BY created_at DESC",
             &[],
             |row| {
@@ -441,7 +441,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 3. 将每行数据映射为 Thread 对象
     fn list_threads(&self) -> PersistenceResult<Vec<Thread>> {
         let rows = self.client.query_map(
-            "SELECT id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
+            "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
                     branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
                     fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
                     latest_user_message_at, has_pending_approvals, has_pending_user_input,
@@ -461,7 +461,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 将项目的 `deleted_at` 字段设置为当前时间，而不是物理删除记录。
     fn delete_project(&self, id: ProjectId) -> PersistenceResult<()> {
         self.client.execute(
-            "UPDATE projection_projects SET deleted_at = datetime('now') WHERE id = ?1",
+            "UPDATE projection_projects SET deleted_at = datetime('now') WHERE project_id = ?1",
             &[&id.to_string()],
         )?;
         Ok(())
@@ -472,7 +472,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
     /// 将线程的 `deleted_at` 字段设置为当前时间，而不是物理删除记录。
     fn delete_thread(&self, id: ThreadId) -> PersistenceResult<()> {
         self.client.execute(
-            "UPDATE projection_threads SET deleted_at = datetime('now') WHERE id = ?1",
+            "UPDATE projection_threads SET deleted_at = datetime('now') WHERE thread_id = ?1",
             &[&id.to_string()],
         )?;
         Ok(())
@@ -512,7 +512,7 @@ impl ProjectionRepository for SqliteProjectionRepository {
 ///
 /// # 列顺序
 ///
-/// 0. id, 1. project_id, 2. title, 3. model_selection, 4. runtime_mode,
+/// 0. thread_id, 1. project_id, 2. title, 3. model_selection, 4. runtime_mode,
 /// 5. interaction_mode, 6. env_mode, 7. branch, 8. worktree_path,
 /// 9. associated_worktree, 10. is_pinned, 11. parent_thread_id, 12. subagent,
 /// 13. fork_source_thread_id, 14. sidechat_source_thread_id, 15. last_known_pr,
@@ -697,7 +697,10 @@ mod tests {
     fn test_projection_repository() {
         let temp_dir = std::env::temp_dir().join("remi-test-projection-repo");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
         run_migrations(&client).unwrap();
         

@@ -1,26 +1,47 @@
-// FILE: threadDetailSubscriptionRetention.ts
-// Purpose: Keep recently used thread-detail subscriptions warm across route/sidebar switches.
-// Layer: Web subscription retention utility
-// Exports: retain/release helpers plus React and imperative subscription listeners.
+/**
+ * @file threadDetailSubscriptionRetention.ts
+ * @description 在路由/侧边栏切换期间保持最近使用的线程详情订阅处于活跃状态。
+ * 通过引用计数和延迟淘汰机制，避免频繁切换视图时反复建立/断开订阅，
+ * 从而减少网络开销和加载延迟。
+ *
+ * 核心机制：
+ * - retain/release：引用计数管理，支持多个消费者同时持有同一订阅
+ * - 延迟淘汰：引用计数归零后不立即释放，而是等待 15 分钟超时后再淘汰
+ * - 容量限制：最多缓存 32 个订阅，超出时按最近访问时间淘汰空闲条目
+ * - 活跃保护：正在运行中的线程（非 idle/stopped 状态）不会被淘汰
+ */
 
 import type { ThreadId } from "@remi-code/contracts";
 import { useSyncExternalStore } from "react";
 import { useStore } from "./store";
 
+/** 空闲订阅的淘汰延迟时间（15 分钟），引用计数归零后等待此时间再淘汰 */
 const THREAD_DETAIL_RETENTION_EVICTION_MS = 15 * 60 * 1000;
+/** 最大缓存的线程详情订阅数量，超出时按 LRU 策略淘汰空闲条目 */
 const MAX_CACHED_THREAD_DETAIL_SUBSCRIPTIONS = 32;
 
+/**
+ * 被保留的线程订阅条目，包含引用计数和淘汰调度信息。
+ */
 type RetainedThreadEntry = {
+  /** 当前持有该订阅的消费者数量，归零后进入淘汰倒计时 */
   refCount: number;
+  /** 最后一次被访问的时间戳（毫秒），用于 LRU 排序 */
   lastAccessedAt: number;
+  /** 淘汰定时器，引用计数归零后设置的延迟淘汰计时器 */
   evictionTimeout: ReturnType<typeof setTimeout> | null;
 };
 
+/** 线程 ID 到其保留条目的映射表 */
 const retainedThreadEntries = new Map<ThreadId, RetainedThreadEntry>();
+/** useSyncExternalStore 的订阅监听器集合 */
 const listeners = new Set<() => void>();
+/** 保留线程 ID 变更的监听器集合，接收最新的线程 ID 列表 */
 const retainedThreadIdChangeListeners = new Set<(threadIds: readonly ThreadId[]) => void>();
+/** 缓存的保留线程 ID 快照，避免每次调用 getSnapshot 时重新计算 */
 let cachedSnapshot: readonly ThreadId[] = [];
 
+/** 通知所有监听器保留的线程 ID 列表已发生变化 */
 function emitChange(): void {
   cachedSnapshot = [...retainedThreadEntries.keys()];
   for (const listener of listeners) {
@@ -31,6 +52,13 @@ function emitChange(): void {
   }
 }
 
+/**
+ * 判断指定线程是否处于非空闲状态（正在运行或有待处理事项）。
+ * 非空闲线程不应被淘汰，以保证用户可见的活跃状态不被意外中断。
+ *
+ * @param threadId - 待检查的线程 ID
+ * @returns 若线程处于非空闲状态则返回 true
+ */
 function isNonIdleThread(threadId: ThreadId): boolean {
   const state = useStore.getState();
   const sidebarThread = state.sidebarThreadSummaryById[threadId];
@@ -74,10 +102,19 @@ function isNonIdleThread(threadId: ThreadId): boolean {
   );
 }
 
+/**
+ * 判断指定条目是否应被淘汰。
+ * 仅当引用计数为 0 且线程处于空闲状态时才可淘汰。
+ *
+ * @param threadId - 线程 ID
+ * @param entry - 保留条目
+ * @returns 若应被淘汰则返回 true
+ */
 function shouldEvictEntry(threadId: ThreadId, entry: RetainedThreadEntry): boolean {
   return entry.refCount === 0 && !isNonIdleThread(threadId);
 }
 
+/** 清除条目上的淘汰定时器 */
 function clearEvictionTimeout(entry: RetainedThreadEntry): void {
   if (entry.evictionTimeout === null) {
     return;
@@ -86,6 +123,13 @@ function clearEvictionTimeout(entry: RetainedThreadEntry): void {
   entry.evictionTimeout = null;
 }
 
+/**
+ * 为指定条目安排延迟淘汰。先清除已有定时器，再设置新的延迟淘汰计时。
+ * 若条目不应被淘汰（引用计数 > 0 或线程活跃），则不设置定时器。
+ *
+ * @param threadId - 线程 ID
+ * @param entry - 保留条目
+ */
 function scheduleEviction(threadId: ThreadId, entry: RetainedThreadEntry): void {
   clearEvictionTimeout(entry);
   if (!shouldEvictEntry(threadId, entry)) {
@@ -101,6 +145,10 @@ function scheduleEviction(threadId: ThreadId, entry: RetainedThreadEntry): void 
   }, THREAD_DETAIL_RETENTION_EVICTION_MS);
 }
 
+/**
+ * 当缓存数量超过最大限制时，按最近访问时间从早到晚淘汰空闲条目，
+ * 直到缓存数量降至最大限制以内。
+ */
 function evictIdleEntriesToCapacity(): void {
   if (retainedThreadEntries.size <= MAX_CACHED_THREAD_DETAIL_SUBSCRIPTIONS) {
     return;
@@ -126,6 +174,11 @@ function evictIdleEntriesToCapacity(): void {
   }
 }
 
+/**
+ * 重新审视所有保留条目的淘汰状态。
+ * 在 Store 状态变化时调用，确保之前因活跃而无法淘汰的条目
+ * 在变为空闲后能正确进入淘汰倒计时。
+ */
 function reconcileRetentionEntries(): void {
   for (const [threadId, entry] of retainedThreadEntries) {
     clearEvictionTimeout(entry);
@@ -136,10 +189,25 @@ function reconcileRetentionEntries(): void {
   evictIdleEntriesToCapacity();
 }
 
+/** 监听 Store 变化，在线程状态改变时重新审视淘汰策略 */
 useStore.subscribe(() => {
   reconcileRetentionEntries();
 });
 
+/**
+ * 保留指定线程的详情订阅（引用计数 +1）。
+ * 若该线程尚未被保留，则创建新的保留条目；若已存在，则增加引用计数并清除淘汰定时器。
+ *
+ * @param threadId - 需要保留订阅的线程 ID
+ * @returns 释放函数，调用时将引用计数 -1（releaseThreadDetailSubscription 的快捷方式）
+ *
+ * @example
+ * ```ts
+ * const release = retainThreadDetailSubscription("thread-123");
+ * // ... 使用线程详情数据
+ * release(); // 不再需要时释放
+ * ```
+ */
 export function retainThreadDetailSubscription(threadId: ThreadId): () => void {
   const existing = retainedThreadEntries.get(threadId);
   if (existing) {
@@ -160,6 +228,12 @@ export function retainThreadDetailSubscription(threadId: ThreadId): () => void {
   return () => releaseThreadDetailSubscription(threadId);
 }
 
+/**
+ * 释放指定线程的详情订阅（引用计数 -1）。
+ * 引用计数归零后进入延迟淘汰倒计时，不会立即移除。
+ *
+ * @param threadId - 需要释放订阅的线程 ID
+ */
 export function releaseThreadDetailSubscription(threadId: ThreadId): void {
   const entry = retainedThreadEntries.get(threadId);
   if (!entry) {
@@ -176,6 +250,12 @@ export function releaseThreadDetailSubscription(threadId: ThreadId): void {
   evictIdleEntriesToCapacity();
 }
 
+/**
+ * 订阅保留线程 ID 列表变化的监听器（用于 useSyncExternalStore）。
+ *
+ * @param listener - 当保留列表变化时调用的回调函数
+ * @returns 取消订阅的函数
+ */
 export function subscribeRetainedThreadDetailIds(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
@@ -183,6 +263,13 @@ export function subscribeRetainedThreadDetailIds(listener: () => void): () => vo
   };
 }
 
+/**
+ * 订阅保留线程 ID 列表变化的监听器（带参数版本）。
+ * 回调函数接收最新的保留线程 ID 列表作为参数。
+ *
+ * @param listener - 当保留列表变化时调用的回调函数，参数为最新的线程 ID 列表
+ * @returns 取消订阅的函数
+ */
 export function subscribeRetainedThreadDetailIdChanges(
   listener: (threadIds: readonly ThreadId[]) => void,
 ): () => void {
@@ -192,10 +279,29 @@ export function subscribeRetainedThreadDetailIdChanges(
   };
 }
 
+/**
+ * 获取当前保留的线程 ID 列表快照（用于 useSyncExternalStore 的 getSnapshot）。
+ *
+ * @returns 当前保留的线程 ID 只读数组
+ */
 export function getRetainedThreadDetailIdsSnapshot(): readonly ThreadId[] {
   return cachedSnapshot;
 }
 
+/**
+ * React Hook：获取当前保留的线程详情订阅 ID 列表。
+ * 基于 useSyncExternalStore 实现，当保留列表变化时自动触发重渲染。
+ *
+ * @returns 当前保留的线程 ID 只读数组
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const retainedIds = useRetainedThreadDetailIds();
+ *   return <div>保留的线程数: {retainedIds.length}</div>;
+ * }
+ * ```
+ */
 export function useRetainedThreadDetailIds(): readonly ThreadId[] {
   return useSyncExternalStore(
     subscribeRetainedThreadDetailIds,
@@ -204,6 +310,10 @@ export function useRetainedThreadDetailIds(): readonly ThreadId[] {
   );
 }
 
+/**
+ * 重置所有保留的线程详情订阅（仅用于测试）。
+ * 清除所有淘汰定时器并清空保留条目，触发变更通知。
+ */
 export function resetRetainedThreadDetailSubscriptionsForTests(): void {
   for (const entry of retainedThreadEntries.values()) {
     clearEvictionTimeout(entry);

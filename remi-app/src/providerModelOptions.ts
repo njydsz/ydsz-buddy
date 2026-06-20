@@ -1,3 +1,12 @@
+/**
+ * @file Provider 模型选项管理
+ *
+ * 提供各 Provider 模型选项的格式化、合并、分组和构建工具函数。
+ * 支持多种 Provider（Codex、Claude、Cursor、Gemini、Grok、OpenCode、Pi、Kilo）
+ * 的模型选项处理，包括模型名称格式化、选项合并去重、按上游 Provider 分组、
+ * 收藏模型分组以及模型选项补丁构建。
+ */
+
 import { formatModelDisplayName, geminiModelOptionsFromEffortValue } from "@remi-code/shared/model";
 import type {
   ClaudeModelOptions,
@@ -20,29 +29,60 @@ import type {
   ProviderModelOptions,
 } from "@remi-code/contracts";
 
+/** 根据 ProviderKind 索引的模型选项类型 */
 export type ProviderOptions = ProviderModelOptions[ProviderKind];
 
+/**
+ * Provider 模型选项，表示选择器中的一个可选项。
+ */
 export interface ProviderModelOption {
+  /** 模型的唯一标识 slug */
   slug: string;
+  /** 模型的显示名称 */
   name: string;
+  /** 上游 Provider ID（如 "anthropic"、"openai"） */
   upstreamProviderId?: string;
+  /** 上游 Provider 显示名称 */
   upstreamProviderName?: string;
 }
 
+/**
+ * Provider 模型选项分组，用于在选择器中按上游 Provider 归类显示。
+ */
 export interface ProviderModelOptionGroup {
+  /** 分组的唯一键 */
   key: string;
+  /** 分组的显示标签，null 表示无分组标签 */
   label: string | null;
+  /** 分组内的模型选项列表 */
   options: ProviderModelOption[];
 }
 
+/**
+ * 将模型标识符人性化显示。将分隔符替换为空格并首字母大写。
+ *
+ * @param value - 原始模型标识符
+ * @returns 人性化后的显示名称
+ */
 function humanizeModelIdentifier(value: string): string {
   return value.replace(/[-_/]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+/** 生成模型选项的去重键，基于 slug 的小写标准化 */
 function modelOptionKey(option: Pick<ProviderModelOption, "slug">): string {
   return option.slug.trim().toLowerCase();
 }
 
+/**
+ * 格式化 Provider 模型选项的显示名称。
+ * 不同 Provider 有不同的名称格式化策略：
+ * - Cursor: 去除方括号后缀参数
+ * - Kilo/OpenCode/Pi: 提取路径最后一段并人性化
+ * - 其他: 使用共享的 formatModelDisplayName
+ *
+ * @param input - 包含 provider 和 slug 的输入对象
+ * @returns 格式化后的模型显示名称
+ */
 export function formatProviderModelOptionName(input: {
   provider: ProviderKind;
   slug: string;
@@ -66,6 +106,13 @@ export function formatProviderModelOptionName(input: {
   return formatModelDisplayName(trimmedSlug) ?? trimmedSlug;
 }
 
+/**
+ * 合并两组模型选项，优先保留 preferred 中的选项，fallback 中不重复的选项追加到末尾。
+ *
+ * @param preferred - 优先的模型选项列表
+ * @param fallback - 回退的模型选项列表
+ * @returns 合并后的模型选项数组
+ */
 export function mergeProviderModelOptions(
   preferred: ReadonlyArray<ProviderModelOption>,
   fallback: ReadonlyArray<ProviderModelOption>,
@@ -85,6 +132,13 @@ export function mergeProviderModelOptions(
   return merged;
 }
 
+/**
+ * 将模型选项按上游 Provider 分组。相同 upstreamProviderId 的选项归入同一组，
+ * 无上游 Provider 信息的选项归入 "__ungrouped__" 组。
+ *
+ * @param options - 模型选项列表
+ * @returns 分组后的模型选项数组
+ */
 export function groupProviderModelOptions(
   options: ReadonlyArray<ProviderModelOption>,
 ): ProviderModelOptionGroup[] {
@@ -121,6 +175,13 @@ export function groupProviderModelOptions(
   return groupedOptions;
 }
 
+/**
+ * 将模型选项按上游 Provider 分组，并将收藏的模型提取到独立的 "Favourites" 分组中。
+ * 如果没有收藏模型，行为与 groupProviderModelOptions 一致。
+ *
+ * @param input - 包含选项列表、收藏 slug 集合和可选分组标签的输入对象
+ * @returns 带收藏分组的模型选项分组数组
+ */
 export function groupProviderModelOptionsWithFavorites(input: {
   options: ReadonlyArray<ProviderModelOption>;
   favoriteSlugs: ReadonlySet<string>;
@@ -148,6 +209,15 @@ export function groupProviderModelOptionsWithFavorites(input: {
   ];
 }
 
+/**
+ * 根据补丁构建指定 Provider 的下一个模型选项状态。
+ * 对于 Gemini，切换 thinkingLevel/thinkingBudget 时会清除之前的思维相关配置。
+ *
+ * @param provider - Provider 类型
+ * @param modelOptions - 当前模型选项
+ * @param patch - 要应用的选项补丁
+ * @returns 合并后的模型选项
+ */
 export function buildNextProviderOptions(
   provider: ProviderKind,
   modelOptions: ProviderOptions | null | undefined,
@@ -188,6 +258,15 @@ export function buildNextProviderOptions(
   } as PiModelOptions;
 }
 
+/**
+ * 根据选项 ID 和值构建模型选项补丁。
+ * 对于 Gemini 的 thinkingLevel/thinkingBudget，会通过 effort 值推导出完整的选项集。
+ *
+ * @param provider - Provider 类型
+ * @param optionId - 选项 ID
+ * @param value - 选项值
+ * @returns 选项补丁对象
+ */
 export function buildProviderOptionPatch(
   provider: ProviderKind,
   optionId: string,
@@ -203,6 +282,15 @@ export function buildProviderOptionPatch(
   return { [optionId]: value };
 }
 
+/**
+ * 构建模型选择对象。根据 Provider 类型返回对应的强类型 ModelSelection。
+ * 包含多个重载签名以确保类型安全。
+ *
+ * @param provider - Provider 类型
+ * @param model - 模型标识
+ * @param options - 可选的模型选项
+ * @returns 对应类型的模型选择对象
+ */
 export function buildModelSelection(
   provider: "codex",
   model: string,

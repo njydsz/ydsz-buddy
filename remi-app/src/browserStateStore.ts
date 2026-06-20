@@ -1,36 +1,59 @@
 /**
- * Lightweight browser metadata cache keyed by thread.
- *
- * The live browser surface stays in Tauri desktop; the web app only keeps enough
- * state to render tabs/toolbars and survive thread switches predictably.
+ * @file 浏览器状态轻量缓存
+ * @description 按线程维度缓存浏览器元数据。
+ * 实际的浏览器渲染面在 Tauri 桌面端，Web 端仅保留足够的状态
+ * 以渲染标签页/工具栏，并在线程切换时保持可预测的行为。
  */
 
 import type { ThreadBrowserState, ThreadId } from "@remi-code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+/** localStorage 持久化 key */
 const BROWSER_STATE_STORAGE_KEY = "remicode:browser-state:v1";
+/** 每个线程保留的最大历史记录条数 */
 const BROWSER_HISTORY_LIMIT = 12;
+/** 空历史记录的常量引用，避免重复创建空数组 */
 const EMPTY_BROWSER_HISTORY: BrowserHistoryEntry[] = [];
 
+/** 浏览器历史记录条目 */
 export interface BrowserHistoryEntry {
+  /** 页面 URL */
   url: string;
+  /** 页面标题 */
   title: string;
+  /** 标签页 ID */
   tabId: string;
 }
 
+/** 浏览器状态 store 内部接口 */
 interface BrowserStateStore {
+  /** 按线程 ID 索引的浏览器状态 */
   threadStatesByThreadId: Record<string, ThreadBrowserState | undefined>;
+  /** 按线程 ID 索引的最近浏览历史 */
   recentHistoryByThreadId: Record<string, BrowserHistoryEntry[] | undefined>;
+  /** 更新或插入线程浏览器状态 */
   upsertThreadState: (state: ThreadBrowserState) => void;
+  /** 移除线程浏览器状态 */
   removeThreadState: (threadId: ThreadId) => void;
 }
 
+/** 归一化历史 URL，将 about:blank 视为空 URL */
 function normalizeHistoryUrl(url: string): string {
   const trimmed = url.trim();
   return trimmed === "about:blank" ? "" : trimmed;
 }
 
+/**
+ * 更新或插入最近浏览历史条目
+ *
+ * @description 将新条目插入列表头部，去重同 URL 的旧条目，
+ * 并限制列表长度不超过 BROWSER_HISTORY_LIMIT。
+ *
+ * @param entries - 已有的历史条目列表
+ * @param nextEntry - 新的历史条目
+ * @returns 更新后的历史条目列表
+ */
 function upsertRecentHistoryEntry(
   entries: BrowserHistoryEntry[] | undefined,
   nextEntry: BrowserHistoryEntry,
@@ -50,6 +73,15 @@ function upsertRecentHistoryEntry(
   return nextEntries.slice(0, BROWSER_HISTORY_LIMIT);
 }
 
+/**
+ * 判断两份历史记录是否相同
+ *
+ * @description 用于避免在历史内容未变时产生新的引用，减少不必要的重渲染。
+ *
+ * @param previousEntries - 之前的历史条目
+ * @param nextEntries - 新的历史条目
+ * @returns 是否完全相同
+ */
 function sameBrowserHistoryEntries(
   previousEntries: BrowserHistoryEntry[] | undefined,
   nextEntries: BrowserHistoryEntry[],
@@ -75,6 +107,7 @@ function sameBrowserHistoryEntries(
   });
 }
 
+/** 浏览器状态 Zustand store，带 localStorage 持久化 */
 export const useBrowserStateStore = create<BrowserStateStore>()(
   persist(
     (set) => ({
@@ -145,12 +178,24 @@ export const useBrowserStateStore = create<BrowserStateStore>()(
   ),
 );
 
+/**
+ * 选择指定线程的浏览器状态
+ *
+ * @param threadId - 线程 ID
+ * @returns Zustand 选择器，返回该线程的浏览器状态
+ */
 export function selectThreadBrowserState(
   threadId: ThreadId,
 ): (store: BrowserStateStore) => ThreadBrowserState | undefined {
   return (store) => store.threadStatesByThreadId[threadId];
 }
 
+/**
+ * 选择指定线程的浏览器历史记录
+ *
+ * @param threadId - 线程 ID
+ * @returns Zustand 选择器，返回该线程的浏览历史列表
+ */
 export function selectThreadBrowserHistory(
   threadId: ThreadId,
 ): (store: BrowserStateStore) => BrowserHistoryEntry[] {

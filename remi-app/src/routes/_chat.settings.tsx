@@ -280,7 +280,7 @@ function SortableProviderVisibilityRow(props: {
         transition,
       }}
       className={cn(
-        "flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-[var(--color-background-elevated-secondary)]/40 px-3 py-2.5",
+        "flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-(--color-background-elevated-secondary)/40 px-3 py-2.5",
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
@@ -288,7 +288,7 @@ function SortableProviderVisibilityRow(props: {
         <button
           type="button"
           ref={setActivatorNodeRef}
-          className="inline-flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-foreground active:cursor-grabbing"
+          className="inline-flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-foreground active:cursor-grabbing"
           aria-label={`Reorder ${props.option.title}`}
           {...attributes}
           {...listeners}
@@ -510,7 +510,7 @@ function SettingsRow({
 }) {
   return (
     <div
-      className="rounded-xl border border-[color:var(--color-border-light)] bg-[var(--color-background-panel)] px-4 py-3.5 transition-colors hover:bg-[var(--sidebar-accent)]"
+      className="rounded-xl border border-(--color-border-light) bg-(--color-background-panel) px-4 py-3.5 transition-colors hover:bg-(--sidebar-accent)"
       data-slot="settings-row"
     >
       <div
@@ -585,7 +585,7 @@ function ProviderDocsLinks({
   label: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/60 bg-[var(--color-background-elevated-secondary)]/35 px-3 py-2.5">
+    <div className="rounded-lg border border-border/60 bg-(--color-background-elevated-secondary)/35 px-3 py-2.5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-xs font-medium text-foreground">{label}</span>
         <div className="flex flex-wrap gap-2">
@@ -595,7 +595,7 @@ function ProviderDocsLinks({
               href={doc.href}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-[var(--color-background-panel)] hover:text-foreground"
+              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-(--color-background-panel) hover:text-foreground"
             >
               <span>{doc.label}</span>
               <ExternalLinkIcon className="size-3" />
@@ -747,7 +747,7 @@ function SettingsRouteView() {
   );
   const orderedProviderVisibilityOptions = useMemo(
     () =>
-      settings.providerOrder.flatMap((provider: string) => {
+      settings.providerOrder.flatMap((provider: ProviderKind) => {
         const option = providerVisibilityOptionsByProvider.get(provider);
         return option ? [option] : [];
       }),
@@ -1534,7 +1534,7 @@ function SettingsRouteView() {
                       ) : (
                         <OpenAI className="size-3.5" />
                       )}
-                      {PROVIDER_DISPLAY_NAMES[settings.defaultProvider]}
+                      {PROVIDER_DISPLAY_NAMES[settings.defaultProvider as ProviderKind]}
                     </span>
                   </SelectValue>
                 </SelectTrigger>
@@ -2578,7 +2578,7 @@ function SettingsRouteView() {
                   ].map((ep) => (
                     <div
                       key={ep.label}
-                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm hover:bg-[var(--sidebar-accent)]"
+                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm hover:bg-(--sidebar-accent)"
                     >
                       <div className="flex items-center gap-4">
                         <span className="w-20 text-xs text-muted-foreground">{ep.label}</span>
@@ -2586,7 +2586,7 @@ function SettingsRouteView() {
                       </div>
                       <button
                         type="button"
-                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-[var(--color-background-elevated-secondary)] hover:text-foreground"
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-(--color-background-elevated-secondary) hover:text-foreground"
                         onClick={() => {
                           void navigator.clipboard.writeText(ep.url);
                           toastManager.add({ title: "Copied to clipboard", type: "success" });
@@ -2650,7 +2650,7 @@ function SettingsRouteView() {
                   ].map((agent) => (
                     <div
                       key={agent.name}
-                      className="flex items-center justify-between rounded-lg border border-border/40 bg-[var(--color-background-panel)] px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-border/40 bg-(--color-background-panel) px-3 py-2.5"
                     >
                       <div className="flex items-center gap-2.5">
                         <div
@@ -2873,7 +2873,7 @@ function SettingsRouteView() {
                   return (
                     <div
                       key={channel.id}
-                      className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 px-3 py-2.5 transition-colors hover:bg-[var(--sidebar-accent)]"
+                      className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 px-3 py-2.5 transition-colors hover:bg-(--sidebar-accent)"
                     >
                       <div
                         className="flex size-8 shrink-0 items-center justify-center rounded-md"
@@ -2968,16 +2968,16 @@ function SettingsRouteView() {
                 strategy={verticalListSortingStrategy}
               >
                 <div className="mt-4 space-y-2">
-                  {orderedProviderVisibilityOptions.map((option: { provider: string }) => (
+                  {orderedProviderVisibilityOptions.map((option: { provider: ProviderKind; title: string }) => (
                     <SortableProviderVisibilityRow
                       key={option.provider}
                       option={option}
-                      isHidden={hiddenProviderSet.has(option.provider)}
+                      isHidden={hiddenProviderSet.has(option.provider as ProviderKind)}
                       onHiddenChange={(hidden) =>
                         updateSettings({
                           hiddenProviders: setProviderHidden(
                             settings.hiddenProviders,
-                            option.provider,
+                            option.provider as ProviderKind,
                             hidden,
                           ),
                         })

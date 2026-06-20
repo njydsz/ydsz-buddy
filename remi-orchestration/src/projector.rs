@@ -256,7 +256,7 @@ impl Projector {
         // 逐个处理事件
         for stored_event in events {
             // 将事件 payload 从 JSON 反序列化为领域事件
-            let event: OrchestrationEvent = serde_json::from_str(&stored_event.payload)?;
+            let event: OrchestrationEvent = serde_json::from_str(&stored_event.payload_json)?;
             // 应用事件到投影仓库
             self.apply_event(&event).await?;
             // 更新已处理的序列号

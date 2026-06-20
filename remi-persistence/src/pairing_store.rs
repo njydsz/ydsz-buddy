@@ -440,7 +440,10 @@ mod tests {
     fn test_pairing_link_store() {
         let temp_dir = std::env::temp_dir().join("remi-test-pairing-store");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
         run_migrations(&client).unwrap();
         
@@ -498,7 +501,10 @@ mod tests {
     fn test_revoke_pairing_link() {
         let temp_dir = std::env::temp_dir().join("remi-test-pairing-revoke");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
         run_migrations(&client).unwrap();
         

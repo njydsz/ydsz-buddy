@@ -241,7 +241,10 @@ mod tests {
     fn test_checkpoint_store() {
         let temp_dir = std::env::temp_dir().join("remi-test-checkpoint-store");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
         run_migrations(&client).unwrap();
         
@@ -264,11 +267,11 @@ mod tests {
         {
             let client = SqliteClient::new(&db_path).unwrap();
             client.execute(
-                "INSERT INTO projection_projects (id, kind, title, workspace_root, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                "INSERT INTO projection_projects (project_id, kind, title, workspace_root, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 &[&project_id, &"local".to_string(), &"Test Project".to_string(), &"/tmp".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
             ).unwrap();
             client.execute(
-                "INSERT INTO projection_threads (id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                "INSERT INTO projection_threads (thread_id, project_id, title, model_selection_json, runtime_mode, interaction_mode, env_mode, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
                 &[&thread_id.to_string(), &project_id, &"Test Thread".to_string(), &"gpt-4".to_string(), &"local".to_string(), &"default".to_string(), &"default".to_string(), &chrono::Utc::now().to_rfc3339(), &chrono::Utc::now().to_rfc3339()],
             ).unwrap();
         }

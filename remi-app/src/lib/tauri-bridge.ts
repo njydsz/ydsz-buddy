@@ -1,3 +1,10 @@
+/**
+ * @file tauri-bridge.ts
+ * @description Tauri 桥接层 - 封装所有与 Tauri 桌面端后端的交互，提供统一的 API 接口
+ * @module lib/tauri-bridge
+ * @layer Web 原生桥接层
+ */
+
 import { invoke } from '@tauri-apps/api/core';
 import { listen, emit, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -26,18 +33,28 @@ import type {
 } from '@remi-code/contracts';
 import { WsTransport } from '../wsTransport';
 
-// TODO: 迁移完成后替换为 contracts 中的正式类型
+/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
 type Thread = unknown;
+/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
 type Message = unknown;
+/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
 type Model = unknown;
+/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
 type CreateThreadParams = unknown;
+/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
 type SendMessageParams = unknown;
 
-// 全局 WebSocket 传输实例
+/** 全局 WebSocket 传输实例 */
 let wsTransport: WsTransport | null = null;
 
 /**
  * 获取或创建 WebSocket 传输实例
+ *
+ * @description
+ * 懒初始化 WebSocket 连接。首次调用时通过 Tauri invoke 获取服务器 WS URL，
+ * 后续调用复用已创建的实例。
+ *
+ * @returns WebSocket 传输实例
  */
 async function getWsTransport(): Promise<WsTransport> {
   if (!wsTransport) {

@@ -9,7 +9,7 @@
 //! # 设计说明
 //!
 //! 事件存储采用追加写入模式，所有事件按序列号（sequence）递增排序。
-//! 每个事件包含聚合根信息（aggregate_kind + aggregate_id），便于按聚合查询事件。
+//! 每个事件包含聚合根信息（aggregate_kind + stream_id），便于按聚合查询事件。
 
 use async_trait::async_trait;
 use remi_core::events::OrchestrationEvent;
@@ -84,11 +84,9 @@ pub trait EventStore: Send + Sync {
 /// - `event_id`: 事件的唯一标识符（UUID）
 /// - `event_type`: 事件类型名称，如 "project.created"
 /// - `aggregate_kind`: 聚合根类型，如 "project" 或 "thread"
-/// - `aggregate_id`: 聚合根的唯一标识符
-/// - `payload`: 事件的 JSON 序列化负载
-/// - `occurred_at`: 事件发生的时间戳（RFC3339 格式）
-/// - `command_id`: 触发此事件的命令 ID（可选）
-/// - `metadata`: 事件的额外元数据（可选）
+/// - `stream_id`: 事件流 ID（聚合根的唯一标识符）
+/// - `payload_json`: 事件的 JSON 序列化负载
+/// - `metadata_json`: 事件的额外元数据（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StoredEvent {
     /// 事件序列号，全局唯一且递增
@@ -99,16 +97,24 @@ pub struct StoredEvent {
     pub event_type: String,
     /// 聚合根类型
     pub aggregate_kind: String,
-    /// 聚合根 ID
-    pub aggregate_id: String,
+    /// 事件流 ID（聚合根的唯一标识符）
+    pub stream_id: String,
+    /// 流版本
+    pub stream_version: i64,
     /// 事件负载（JSON 格式）
-    pub payload: String,
+    pub payload_json: String,
     /// 事件发生时间
     pub occurred_at: String,
     /// 触发命令 ID（可选）
     pub command_id: Option<String>,
-    /// 事件元数据（可选）
-    pub metadata: Option<String>,
+    /// 因果事件 ID（可选）
+    pub causation_event_id: Option<String>,
+    /// 关联 ID（可选）
+    pub correlation_id: Option<String>,
+    /// 参与者类型
+    pub actor_kind: String,
+    /// 事件元数据（JSON 格式）
+    pub metadata_json: String,
 }
 
 /// SQLite 事件存储实现
@@ -136,7 +142,7 @@ impl SqliteEventStore {
 
     /// 从事件中提取聚合根信息
     ///
-    /// 根据事件类型提取对应的聚合根类型、聚合根 ID 和事件类型名称。
+    /// 根据事件类型提取对应的聚合根类型、事件流 ID 和事件类型名称。
     /// 这是事件存储的关键辅助方法，用于将领域事件映射到数据库存储格式。
     ///
     /// # 参数
@@ -145,10 +151,10 @@ impl SqliteEventStore {
     ///
     /// # 返回值
     ///
-    /// 返回三元组 `(aggregate_kind, aggregate_id, event_type)`：
+    /// 返回三元组 `(aggregate_kind, stream_id, event_type)`：
     /// - `aggregate_kind`: 聚合根类型（如 "project"、"thread"）
-    /// - `aggregate_id`: 聚合根的唯一标识符
-    /// - `event_type`: 事件类型名称（如 "project.created"、"thread.message-sent"）
+    /// - `stream_id`: 事件流 ID（聚合根的唯一标识符）
+    /// - `event_type`: 事件类型名称（如 "project.created"、"thread.created"）
     ///
     /// # 实现说明
     ///
@@ -193,7 +199,7 @@ impl EventStore for SqliteEventStore {
     ///
     /// 实现步骤：
     /// 1. 生成唯一的事件 ID（UUID v4）
-    /// 2. 提取聚合根信息（类型、ID、事件类型名称）
+    /// 2. 提取聚合根信息（类型、流 ID、事件类型名称）
     /// 3. 将事件序列化为 JSON 格式
     /// 4. 插入数据库，由数据库自动生成序列号
     /// 5. 获取并返回最后插入的序列号
@@ -201,26 +207,37 @@ impl EventStore for SqliteEventStore {
         // 生成唯一的事件标识符
         let event_id = Uuid::new_v4().to_string();
         // 提取聚合根信息和事件类型
-        let (aggregate_kind, aggregate_id, event_type) = Self::extract_aggregate_info(event);
+        let (aggregate_kind, stream_id, event_type) = Self::extract_aggregate_info(event);
         // 将事件序列化为 JSON 字符串
-        let payload = serde_json::to_string(event)?;
+        let payload_json = serde_json::to_string(event)?;
         // 获取事件发生时间并转换为 RFC3339 格式
         let occurred_at = event.occurred_at().to_rfc3339();
         // 获取触发此事件的命令 ID（如果有）
         let command_id = event.command_id();
+        // 设置默认值（这些字段在当前事件结构中不存在，使用合理默认值）
+        let stream_version = 0;
+        let causation_event_id: Option<String> = None;
+        let correlation_id: Option<String> = None;
+        let actor_kind = "system".to_string();
+        let metadata_json = "{}".to_string();
 
         // 执行插入操作
         self.client.execute(
-            "INSERT INTO orchestration_events (event_id, event_type, aggregate_kind, aggregate_id, payload, occurred_at, command_id)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT INTO orchestration_events (event_id, aggregate_kind, stream_id, stream_version, event_type, occurred_at, command_id, causation_event_id, correlation_id, actor_kind, payload_json, metadata_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             &[
                 &event_id,
-                &event_type,
                 &aggregate_kind,
-                &aggregate_id,
-                &payload,
+                &stream_id,
+                &stream_version.to_string(),
+                &event_type,
                 &occurred_at,
                 &command_id,
+                &causation_event_id,
+                &correlation_id,
+                &actor_kind,
+                &payload_json,
+                &metadata_json,
             ],
         )?;
 
@@ -238,7 +255,7 @@ impl EventStore for SqliteEventStore {
     /// 4. 将每行数据映射为 `StoredEvent` 结构体
     fn read_events(&self, from_sequence: Sequence, limit: usize) -> PersistenceResult<Vec<StoredEvent>> {
         let rows = self.client.query_map(
-            "SELECT sequence, event_id, event_type, aggregate_kind, aggregate_id, payload, occurred_at, command_id, metadata
+            "SELECT sequence, event_id, event_type, aggregate_kind, stream_id, stream_version, payload_json, occurred_at, command_id, causation_event_id, correlation_id, actor_kind, metadata_json
              FROM orchestration_events
              WHERE sequence > ?1
              ORDER BY sequence ASC
@@ -251,11 +268,15 @@ impl EventStore for SqliteEventStore {
                     event_id: row.get(1)?,
                     event_type: row.get(2)?,
                     aggregate_kind: row.get(3)?,
-                    aggregate_id: row.get(4)?,
-                    payload: row.get(5)?,
-                    occurred_at: row.get(6)?,
-                    command_id: row.get(7)?,
-                    metadata: row.get(8)?,
+                    stream_id: row.get(4)?,
+                    stream_version: row.get(5)?,
+                    payload_json: row.get(6)?,
+                    occurred_at: row.get(7)?,
+                    command_id: row.get(8)?,
+                    causation_event_id: row.get(9)?,
+                    correlation_id: row.get(10)?,
+                    actor_kind: row.get(11)?,
+                    metadata_json: row.get(12)?,
                 })
             },
         )?;
@@ -290,7 +311,10 @@ mod tests {
     fn test_event_store() {
         let temp_dir = std::env::temp_dir().join("remi-test-event-store");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
         run_migrations(&client).unwrap();
         

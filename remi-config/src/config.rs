@@ -194,6 +194,30 @@ pub struct ServerConfig {
     pub log_websocket_events: bool,
 }
 
+impl Default for ServerConfig {
+    fn default() -> Self {
+        let base_dir = PathBuf::from(".remi-code-test");
+        let paths = Self::derive_paths(&base_dir).expect("Failed to derive paths");
+
+        Self {
+            mode: RuntimeMode::Desktop,
+            port: 3773,
+            host: None,
+            base_dir,
+            state_dir: paths.state_dir,
+            db_path: paths.db_path,
+            secrets_dir: paths.secrets_dir,
+            logs_dir: paths.logs_dir,
+            attachments_dir: paths.attachments_dir,
+            worktrees_dir: paths.worktrees_dir,
+            settings_path: paths.settings_path,
+            auth_token: None,
+            log_provider_events: false,
+            log_websocket_events: false,
+        }
+    }
+}
+
 impl ServerConfig {
     /// 从 CLI 参数和环境变量创建服务器配置
     ///

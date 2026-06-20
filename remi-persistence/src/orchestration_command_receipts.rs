@@ -81,7 +81,7 @@ impl CommandReceiptRepository for SqliteCommandReceiptRepository {
         let row = rows.into_iter().next();
         match row {
             Some((command_id, aggregate_kind, aggregate_id, accepted_at_str, result_sequence, status, error)) => {
-                let accepted_at = accepted_at_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(3))?;
+                let accepted_at = accepted_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
                 Ok(Some(CommandReceipt {
                     command_id,

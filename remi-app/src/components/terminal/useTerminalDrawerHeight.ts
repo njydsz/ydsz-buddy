@@ -1,7 +1,8 @@
-// FILE: useTerminalDrawerHeight.ts
-// Purpose: Encapsulates drawer-height state, clamping, and pointer-driven resize behavior.
-// Layer: Terminal interaction hook
-// Depends on: thread terminal sizing defaults and React pointer lifecycle hooks.
+/**
+ * @file useTerminalDrawerHeight.ts
+ * @description 封装终端抽屉的高度状态管理、边界约束和指针拖拽调整行为。
+ * 提供抽屉高度的状态管理、最小/最大高度约束以及拖拽调整交互逻辑。
+ */
 
 import {
   type PointerEvent as ReactPointerEvent,
@@ -13,14 +14,29 @@ import {
 
 import { DEFAULT_THREAD_TERMINAL_HEIGHT } from "../../types";
 
+/** 抽屉最小高度（像素），防止抽屉被拖拽到过小 */
 const MIN_DRAWER_HEIGHT = 180;
+/** 抽屉最大高度占视口高度的比例 */
 const MAX_DRAWER_HEIGHT_RATIO = 0.75;
 
+/**
+ * 计算抽屉的最大允许高度，基于视口高度和最大比例。
+ * 在 SSR 环境下返回默认终端高度。
+ *
+ * @returns 最大抽屉高度（像素）
+ */
 function maxDrawerHeight(): number {
   if (typeof window === "undefined") return DEFAULT_THREAD_TERMINAL_HEIGHT;
   return Math.max(MIN_DRAWER_HEIGHT, Math.floor(window.innerHeight * MAX_DRAWER_HEIGHT_RATIO));
 }
 
+/**
+ * 将抽屉高度约束在最小值和最大值之间。
+ * 如果传入的高度不是有效有限数，则使用默认终端高度。
+ *
+ * @param height - 待约束的高度值
+ * @returns 约束后的高度值（像素，四舍五入取整）
+ */
 export function clampTerminalDrawerHeight(height: number): number {
   const safeHeight = Number.isFinite(height) ? height : DEFAULT_THREAD_TERMINAL_HEIGHT;
   const maxHeight = maxDrawerHeight();

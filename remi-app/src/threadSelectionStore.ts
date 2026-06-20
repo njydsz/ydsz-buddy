@@ -1,8 +1,16 @@
 /**
- * Zustand store for sidebar thread multi-selection state.
+ * @file threadSelectionStore.ts
+ * @description 侧边栏线程多选状态的 Zustand Store。
  *
- * Supports Cmd/Ctrl+Click (toggle individual), Shift+Click (range select),
- * and bulk actions on the selected set.
+ * 支持三种选择模式：
+ * - Cmd/Ctrl+Click：切换单个线程的选中状态
+ * - Shift+Click：范围选择（从锚点线程到目标线程之间的所有线程）
+ * - 批量操作：对已选中的线程集合执行批量操作
+ *
+ * @example
+ * ```tsx
+ * const { selectedThreadIds, toggleThread, rangeSelectTo, clearSelection } = useThreadSelectionStore();
+ * ```
  */
 
 import type { ThreadId } from "@remi-code/contracts";
@@ -34,8 +42,21 @@ interface ThreadSelectionStore extends ThreadSelectionState {
   hasSelection: () => boolean;
 }
 
+/** 空集合常量，用于 clearSelection 时避免创建新的 Set 实例 */
 const EMPTY_SET = new Set<ThreadId>();
 
+/**
+ * 线程多选状态 Store，提供选择、取消选择、范围选择等操作。
+ *
+ * @example
+ * ```tsx
+ * function Sidebar() {
+ *   const selectedIds = useThreadSelectionStore((s) => s.selectedThreadIds);
+ *   const toggleThread = useThreadSelectionStore((s) => s.toggleThread);
+ *   const hasSelection = useThreadSelectionStore((s) => s.hasSelection);
+ * }
+ * ```
+ */
 export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) => ({
   selectedThreadIds: EMPTY_SET,
   anchorThreadId: null,
@@ -59,7 +80,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
     set((state) => {
       const anchor = state.anchorThreadId;
       if (anchor === null) {
-        // No anchor yet �?treat as a single toggle
+        // No anchor yet �?treat as a single toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };
@@ -68,7 +89,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
       const anchorIndex = orderedThreadIds.indexOf(anchor);
       const targetIndex = orderedThreadIds.indexOf(threadId);
       if (anchorIndex === -1 || targetIndex === -1) {
-        // Anchor or target not in this list (different project?) �?fallback to toggle
+        // Anchor or target not in this list (different project?) �?fallback to toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };

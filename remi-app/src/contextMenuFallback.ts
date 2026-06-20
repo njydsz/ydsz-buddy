@@ -1,13 +1,38 @@
+/**
+ * @file 右键菜单回退实现
+ *
+ * 提供命令式的 DOM 右键菜单，匹配应用的 Base UI 菜单样式。
+ * 在 Web 环境中当原生菜单不可用时作为回退方案，
+ * 显示定位下拉菜单并返回用户点击的选项 ID。
+ */
+
 import type { ContextMenuItem } from "@remi-code/contracts";
 
+/**
+ * 带图标扩展的右键菜单项。
+ * 在基础 ContextMenuItem 上增加 SVG 图标字符串支持。
+ */
 export interface ContextMenuItemWithIcon<T extends string = string> extends ContextMenuItem<T> {
-  icon?: string; // SVG string
+  /** SVG 图标字符串 */
+  icon?: string;
 }
 
 /**
- * Imperative DOM-based context menu that matches the app's Base UI menu styling.
- * Shows a positioned dropdown and returns a promise that resolves
- * with the clicked item id, or null if dismissed.
+ * 显示命令式的右键菜单。
+ * 在指定位置显示下拉菜单，支持键盘导航（上下箭头、Enter、Escape）。
+ * 菜单溢出视口时自动调整位置。
+ *
+ * @param items - 菜单项列表
+ * @param position - 菜单显示位置，默认为 (0, 0)
+ * @returns Promise，点击菜单项返回其 ID，关闭返回 null
+ *
+ * @example
+ * ```ts
+ * const result = await showContextMenuFallback(
+ *   [{ id: "copy", label: "Copy" }, { id: "delete", label: "Delete", destructive: true }],
+ *   { x: 100, y: 200 }
+ * );
+ * ```
  */
 export function showContextMenuFallback<T extends string>(
   items: readonly ContextMenuItemWithIcon<T>[],

@@ -1,7 +1,11 @@
-// FILE: MessagesTimeline.tsx
-// Purpose: Renders the chat transcript rows and lets LegendList own scrolling/follow behavior.
-// Layer: Web chat presentation component
-// Exports: MessagesTimeline
+/**
+ * @file MessagesTimeline.tsx
+ * @description 聊天消息时间线组件，负责渲染聊天记录行并使用 LegendList 管理滚动/跟随行为。
+ * 该组件是 Web 端聊天展示层的核心组件，处理用户消息、助手回复、工具调用日志、
+ * 文件变更摘要等多种时间线行的渲染逻辑。
+ * @layer Web 聊天展示组件
+ * @exports MessagesTimeline
+ */
 
 import { type MessageId, ThreadId, type TurnId } from "@remi-code/contracts";
 import { resolveLatestTailUserMessageEditTarget } from "@remi-code/shared/conversationEdit";
@@ -99,9 +103,12 @@ import {
 import { RiRobot3Line } from "react-icons/ri";
 import { deriveUserMessagePreviewState } from "./userMessagePreview";
 
+/** 工作日志条目最大可见数量，超出后显示"查看更多" */
 const MAX_VISIBLE_WORK_LOG_ENTRIES = 6;
+/** 内联工具调用条目最大可见数量 */
 const MAX_VISIBLE_INLINE_TOOL_ENTRIES = 4;
 
+/** 技能立方体图标，用于 MCP 工具调用条目 */
 const SkillCubeIcon: LucideIcon = (props) => (
   <svg {...props} viewBox="0 0 24 24" fill="none">
     <path
@@ -128,11 +135,14 @@ const SkillCubeIcon: LucideIcon = (props) => (
   </svg>
 );
 
+/** 代理任务图标，用于协作代理工具调用条目 */
 const AgentTaskIcon: LucideIcon = (props) => (
   <RiRobot3Line className={props.className} style={props.style} />
 );
 
+/** 代理默认颜色样式 */
 const DEFAULT_AGENT_COLOR = { bg: "rgb(245 158 11 / 0.15)", text: "rgb(245 158 11)" };
+/** 代理颜色映射表，按颜色名称提供背景色和文字色 */
 const AGENT_COLOR_STYLES: Record<string, { bg: string; text: string }> = {
   violet: { bg: "rgb(139 92 246 / 0.15)", text: "rgb(139 92 246)" },
   fuchsia: { bg: "rgb(217 70 239 / 0.15)", text: "rgb(217 70 239)" },
@@ -142,7 +152,13 @@ const AGENT_COLOR_STYLES: Record<string, { bg: string; text: string }> = {
   orange: { bg: "rgb(249 115 22 / 0.15)", text: "rgb(249 115 22)" },
 };
 
-// Keeps the steer marker visually attached to the whole sent-message stack.
+/**
+ * 用户消息调度模式标签组件。
+ * 当用户消息的 dispatchMode 为 "steer" 时，显示 "Steering conversation" 标签，
+ * 将引导标记视觉上附加到整条已发送消息堆栈上。
+ * @param dispatchMode - 消息调度模式
+ * @param hasLeadingMedia - 是否有前置媒体（图片或助手选择）
+ */
 function UserDispatchModeChip({
   dispatchMode,
   hasLeadingMedia,
@@ -167,11 +183,16 @@ function UserDispatchModeChip({
   );
 }
 
+/** 从路径中提取文件名部分 */
 function basename(value: string): string {
   const slash = Math.max(value.lastIndexOf("/"), value.lastIndexOf("\\"));
   return slash >= 0 ? value.slice(slash + 1) : value;
 }
 
+/**
+ * MessagesTimeline 组件的 Props 类型定义。
+ * 包含聊天时间线渲染所需的所有配置和回调。
+ */
 interface MessagesTimelineProps {
   hasMessages: boolean;
   isWorking: boolean;
@@ -214,6 +235,12 @@ interface MessagesTimelineProps {
   bottomContentInsetPx?: number | undefined;
 }
 
+/**
+ * 聊天消息时间线组件。
+ * 负责渲染聊天记录中的用户消息、助手回复、工具调用日志、文件变更摘要等行，
+ * 并使用 LegendList 管理虚拟化滚动和实时跟随行为。
+ * @param props - MessagesTimelineProps
+ */
 export const MessagesTimeline = memo(function MessagesTimeline({
   hasMessages,
   isWorking,
@@ -716,7 +743,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                 inlineWorkSummary,
               ]
                 .filter((value): value is string => Boolean(value))
-                .join(" �?")
+                .join(" �?")
             ) : (
               <>
                 <LiveMessageMeta
@@ -724,7 +751,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                   durationStart={row.durationStart}
                   timestampFormat={timestampFormat}
                 />
-                {inlineWorkSummary ? <> �?{inlineWorkSummary}</> : null}
+                {inlineWorkSummary ? <> �?{inlineWorkSummary}</> : null}
               </>
             )
           ) : (
@@ -737,7 +764,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               inlineWorkSummary,
             ]
               .filter((value): value is string => Boolean(value))
-              .join(" �?")
+              .join(" �?")
           );
           return (
             <>
@@ -805,7 +832,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                       <button
                         key={`inline-summary-edit:${row.message.id}:${file.path}`}
                         type="button"
-                        className="group flex w-full max-w-full items-baseline gap-1 px-0 py-[1px] text-left transition-opacity duration-150 hover:opacity-95"
+                        className="group flex w-full max-w-full items-baseline gap-1 px-0 py-px text-left transition-opacity duration-150 hover:opacity-95"
                         title={file.path}
                         onClick={() => onOpenTurnDiff(turnSummary!.turnId, file.path)}
                       >
@@ -816,7 +843,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                           Edited
                         </span>
                         <span
-                          className="font-system-ui max-w-[28rem] truncate underline-offset-2 group-hover:underline group-focus-visible:underline"
+                          className="font-system-ui max-w-md truncate underline-offset-2 group-hover:underline group-focus-visible:underline"
                           style={{
                             fontSize: `${normalizedChatFontSizePx}px`,
                             color: "var(--color-token-text-link-foreground)",
@@ -852,8 +879,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                     correspondingUserMessageId != null &&
                     revertTurnCountByUserMessageId.has(correspondingUserMessageId);
                   return (
-                    <div className="mt-5 overflow-hidden rounded-xl border border-[color:var(--color-border-light)] bg-[var(--composer-surface)]">
-                      <div className="flex items-center justify-between gap-2 border-b border-[color:var(--color-border-light)] px-3 py-2">
+                    <div className="mt-5 overflow-hidden rounded-xl border border-(--color-border-light) bg-(--composer-surface)">
+                      <div className="flex items-center justify-between gap-2 border-b border-(--color-border-light) px-3 py-2">
                         <span
                           className="truncate font-normal text-foreground/92"
                           style={{ fontSize: chatTypographyStyle.fontSize }}
@@ -865,7 +892,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                         <div className="flex items-center gap-4">
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground/70 transition-colors hover:bg-[var(--color-background-button-secondary-hover)] hover:text-foreground/80"
+                            className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground/70 transition-colors hover:bg-(--color-background-button-secondary-hover) hover:text-foreground/80"
                             aria-expanded={fileChangesExpanded}
                             aria-label={
                               fileChangesExpanded
@@ -897,12 +924,12 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                         </div>
                       </div>
                       {fileChangesExpanded && (
-                        <div className="bg-[var(--composer-surface)]">
+                        <div className="bg-(--composer-surface)">
                           {checkpointFiles.map((file) => (
                             <button
                               key={file.path}
                               type="button"
-                              className="group flex w-full items-center gap-2 border-t border-[color:var(--color-border-light)] px-3 py-1.5 text-left first:border-t-0 transition-colors hover:bg-[var(--color-background-button-secondary-hover)]"
+                              className="group flex w-full items-center gap-2 border-t border-(--color-border-light) px-3 py-1.5 text-left first:border-t-0 transition-colors hover:bg-(--color-background-button-secondary-hover)"
                               onClick={() => onOpenTurnDiff(turnSummary.turnId, file.path)}
                             >
                               <FileEntryIcon
@@ -1056,11 +1083,16 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   );
 });
 
+/** 时间线消息行的消息类型提取 */
 type TimelineMessage = Extract<MessagesTimelineRow, { kind: "message" }>["message"];
+/** 时间线工作日志条目类型提取 */
 type TimelineWorkEntry = Extract<MessagesTimelineRow, { kind: "work" }>["groupedEntries"][number];
 
-// Reuse stable row references so streaming updates only force React work for
-// rows whose visible content actually changed.
+/**
+ * 复用稳定行引用的 Hook。
+ * 在流式更新时，仅对可见内容实际发生变化的行触发 React 重新渲染，
+ * 避免不必要的整列表刷新。
+ */
 function useStableRows(rows: MessagesTimelineRow[]): MessagesTimelineRow[] {
   const previousStateRef = useRef<StableMessagesTimelineRowsState>({
     byId: new Map<string, MessagesTimelineRow>(),
@@ -1173,7 +1205,7 @@ function formatMessageMeta(
   timestampFormat: TimestampFormat,
 ): string {
   if (!duration) return formatShortTimestamp(createdAt, timestampFormat);
-  return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
+  return `${formatShortTimestamp(createdAt, timestampFormat)} �?${duration}`;
 }
 
 function formatInlineWorkSummary(_groupedEntries: TimelineWorkEntry[]): string | null {
@@ -1540,7 +1572,7 @@ const UserMessageBody = memo(function UserMessageBody(props: {
 
   return (
     <div
-      className="inline-block max-w-full min-w-0 whitespace-pre-wrap break-words font-system-ui text-foreground"
+      className="inline-block max-w-full min-w-0 whitespace-pre-wrap wrap-break-word font-system-ui text-foreground"
       style={props.chatTypographyStyle}
     >
       {renderUserMessageInlineText(props.text, "user-message-inline", props.resolvedTheme)}
@@ -1622,7 +1654,7 @@ function extractFilePathFromDetail(detail: string): string | null {
       return filePath.trim();
     }
   } catch {
-    // Not valid JSON �?try regex fallback
+    // Not valid JSON �?try regex fallback
     const match = /"(?:file_path|filePath|path|filename)"\s*:\s*"([^"]+)"/i.exec(detail);
     if (match?.[1]) return match[1];
   }
@@ -1678,7 +1710,7 @@ function workEntryPreview(
     const filePath = extractFilePathFromDetail(workEntry.detail);
     if (filePath) return basename(filePath);
 
-    // For file-related entries, the heading alone is enough �?don't show raw JSON
+    // For file-related entries, the heading alone is enough �?don't show raw JSON
     if (isFileRelated) return null;
 
     // For other entries, if the detail looks like raw JSON, skip it
@@ -1688,7 +1720,7 @@ function workEntryPreview(
     const readLinesMatch = /^Read\s+(\d+\s+lines?)$/i.exec(trimmedDetail);
     if (readLinesMatch?.[1]) return readLinesMatch[1];
 
-    // Clean, non-JSON detail �?show it
+    // Clean, non-JSON detail �?show it
     return trimmedDetail;
   }
 
@@ -1789,7 +1821,7 @@ function subagentSecondaryLabel(
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(" �?");
+  return parts.join(" �?");
 }
 
 function subagentStatusClasses(
@@ -1825,7 +1857,7 @@ function subagentCardSummary(workEntry: TimelineWorkEntry): string {
 function subagentCardMeta(workEntry: TimelineWorkEntry): string | null {
   const modelLabel = formatSubagentModelLabel(workEntry.subagentAction?.model);
   if (modelLabel && workEntry.subagentAction?.prompt) {
-    return `${modelLabel} �?${workEntry.subagentAction.prompt}`;
+    return `${modelLabel} �?${workEntry.subagentAction.prompt}`;
   }
   return modelLabel ?? workEntry.subagentAction?.prompt ?? null;
 }
@@ -1844,7 +1876,7 @@ function commandTooltipContent(command: string, displayText: string) {
           <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
             Raw call
           </div>
-          <code className="block whitespace-pre-wrap break-words font-chat-code text-[11px] text-foreground/92">
+          <code className="block whitespace-pre-wrap wrap-break-word font-chat-code text-[11px] text-foreground/92">
             {command}
           </code>
         </div>
@@ -1920,7 +1952,7 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
                 className={cn(
                   "group flex w-full max-w-full items-baseline gap-1 text-left transition-opacity duration-150",
                   compact
-                    ? "px-0 py-[1px] hover:opacity-95"
+                    ? "px-0 py-px hover:opacity-95"
                     : "rounded-md border border-border/45 bg-background/65 px-2 py-1 hover:bg-background/80",
                   canOpenEditedDiff ? "cursor-pointer" : "cursor-default",
                 )}
@@ -1938,7 +1970,7 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
                   Edited
                 </span>
                 <span
-                  className="font-system-ui max-w-[28rem] truncate underline-offset-2 group-hover:underline group-focus-visible:underline"
+                  className="font-system-ui max-w-md truncate underline-offset-2 group-hover:underline group-focus-visible:underline"
                   style={{
                     fontSize: `${rowFontSizePx}px`,
                     color: "var(--color-token-text-link-foreground)",

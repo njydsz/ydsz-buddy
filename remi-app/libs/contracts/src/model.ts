@@ -668,13 +668,31 @@ export const MODEL_OPTIONS_BY_PROVIDER = {
     },
   ],
 } as const satisfies Record<ProviderKind, readonly ModelDefinition[]>;
+
+/** 各 Provider 模型选项列表的类型定义 */
 export type ModelOptionsByProvider = typeof MODEL_OPTIONS_BY_PROVIDER;
 
+/** 内置模型标识（slug），从 MODEL_OPTIONS_BY_PROVIDER 中提取 */
 type BuiltInModelSlug = (typeof MODEL_OPTIONS_BY_PROVIDER)[ProviderKind][number]["slug"];
+
+/**
+ * 模型标识类型
+ *
+ * @description 支持内置模型 slug 和运行时动态发现的模型标识。
+ * 内置 slug 从 MODEL_OPTIONS_BY_PROVIDER 静态提取，
+ * 运行时模型通过 `string & {}` 交叉类型允许任意字符串值。
+ */
 export type ModelSlug = BuiltInModelSlug | (string & {});
 
+/** 拥有默认模型的 Provider 类型（排除 Pi，Pi 无默认模型） */
 export type ProviderWithDefaultModel = Exclude<ProviderKind, "pi">;
 
+/**
+ * 各 Provider 的默认模型映射
+ *
+ * @description 为每个拥有默认模型的 Provider 指定默认使用的模型 slug。
+ * 新建线程时若未指定模型，将使用此映射中的默认值。
+ */
 export const DEFAULT_MODEL_BY_PROVIDER: Record<ProviderWithDefaultModel, ModelSlug> = {
   codex: "gpt-5.5",
   claudeAgent: "claude-sonnet-4-6",
@@ -686,10 +704,20 @@ export const DEFAULT_MODEL_BY_PROVIDER: Record<ProviderWithDefaultModel, ModelSl
 };
 
 // Backward compatibility for existing Codex-only call sites.
+/** @deprecated 请使用 MODEL_OPTIONS_BY_PROVIDER.codex 代替 */
 export const MODEL_OPTIONS = MODEL_OPTIONS_BY_PROVIDER.codex;
+/** @deprecated 请使用 DEFAULT_MODEL_BY_PROVIDER.codex 代替 */
 export const DEFAULT_MODEL = DEFAULT_MODEL_BY_PROVIDER.codex;
+/** Git 文本生成默认模型标识 */
 export const DEFAULT_GIT_TEXT_GENERATION_MODEL = "gpt-5.4-mini" as const;
 
+/**
+ * 各 Provider 的模型别名映射
+ *
+ * @description 为每个 Provider 提供模型别名的快捷映射，将简短别名（如 "5.5"、"opus"）
+ * 解析为完整的模型 slug（如 "gpt-5.5"、"claude-opus-4-8"）。
+ * 用于用户输入和配置文件中的模型快捷引用。
+ */
 export const MODEL_SLUG_ALIASES_BY_PROVIDER: Record<ProviderKind, Record<string, ModelSlug>> = {
   codex: {
     "5.5": "gpt-5.5",
@@ -783,6 +811,18 @@ export {
 
 // ── Model capabilities index ──────────────────────────────────────────
 
+/**
+ * 模型能力索引
+ *
+ * @description 按 Provider 和模型 slug 索引的能力矩阵查找表。
+ * 用于快速查询指定 Provider 下特定模型的能力配置（推理努力程度、快速模式等）。
+ *
+ * @example
+ * ```typescript
+ * const capabilities = MODEL_CAPABILITIES_INDEX.codex["gpt-5.5"];
+ * // capabilities.reasoningEffortLevels → [...]
+ * ```
+ */
 export const MODEL_CAPABILITIES_INDEX = Object.fromEntries(
   Object.entries(MODEL_OPTIONS_BY_PROVIDER).map(([provider, models]) => [
     provider,
@@ -792,6 +832,11 @@ export const MODEL_CAPABILITIES_INDEX = Object.fromEntries(
 
 // ── Provider display names ────────────────────────────────────────────
 
+/**
+ * Provider 显示名称映射
+ *
+ * @description 各 Provider 在 UI 中展示的人类可读名称，用于界面标签、下拉选择等场景。
+ */
 export const PROVIDER_DISPLAY_NAMES: Record<ProviderKind, string> = {
   codex: "Codex",
   claudeAgent: "Claude",

@@ -1,7 +1,10 @@
-// FILE: shortcutsSheet.ts
-// Purpose: Build the shortcut reference sections shown by the keyboard shortcuts sheet.
-// Layer: UI helper
-// Depends on: keybinding label resolution, project script command mapping, and platform helpers.
+/**
+ * @file 快捷键参考面板
+ *
+ * 构建快捷键参考面板中显示的快捷键分区和条目。
+ * 根据当前上下文（终端工作区模式、桌面模式等）动态生成可用的快捷键列表，
+ * 包括当前可用快捷键、交替上下文快捷键和项目脚本快捷键。
+ */
 
 import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@remi-code/contracts";
 import { isMacPlatform } from "./lib/utils";
@@ -9,42 +12,72 @@ import { shortcutLabelForCommand } from "./keybindings";
 import { commandForProjectScript } from "./projectScripts";
 import type { ProjectScript } from "./types";
 
+/**
+ * 快捷键面板的上下文环境，用于决定哪些快捷键当前可用。
+ */
 export interface ShortcutSheetContext {
+  /** 终端是否获得焦点 */
   terminalFocus: boolean;
+  /** 终端是否打开 */
   terminalOpen: boolean;
+  /** 终端工作区是否打开 */
   terminalWorkspaceOpen: boolean;
+  /** 其他自定义上下文条件 */
   [key: string]: boolean;
 }
 
+/**
+ * 快捷键面板中的单个条目，描述一个快捷键的显示信息。
+ */
 export interface ShortcutSheetEntry {
+  /** 条目唯一 ID */
   id: string;
+  /** 快捷键名称 */
   label: string;
+  /** 快捷键功能描述 */
   description: string;
+  /** 格式化后的快捷键标签（如 "⌘N"、"Ctrl+Shift+N"） */
   shortcutLabel: string;
 }
 
+/**
+ * 快捷键面板中的分区，包含一组相关的快捷键条目。
+ */
 export interface ShortcutSheetSection {
+  /** 分区唯一 ID */
   id: string;
+  /** 分区标题 */
   title: string;
+  /** 分区描述 */
   description: string;
+  /** 分区视觉色调，"muted" 表示次要信息 */
   tone?: "default" | "muted";
+  /** 分区内的快捷键条目列表 */
   entries: ShortcutSheetEntry[];
 }
 
+/** 构建快捷键面板分区的配置选项 */
 interface BuildShortcutSheetSectionsOptions {
+  /** 快捷键配置列表 */
   keybindings: ResolvedKeybindingsConfig;
+  /** 项目脚本列表 */
   projectScripts: ReadonlyArray<ProjectScript>;
+  /** 运行平台 */
   platform: string;
+  /** 当前上下文环境 */
   context: ShortcutSheetContext;
+  /** 是否为桌面应用 */
   isDesktop: boolean;
 }
 
+/** 快捷键定义，关联命令与显示信息 */
 interface ShortcutDefinition {
   command: KeybindingCommand | readonly KeybindingCommand[];
   label: string;
   description: string;
 }
 
+/** 当前可用的快捷键定义列表（侧边栏、聊天、终端等通用操作） */
 const AVAILABLE_NOW_DEFINITIONS: readonly ShortcutDefinition[] = [
   {
     command: "sidebar.addProject",
@@ -138,6 +171,7 @@ const AVAILABLE_NOW_DEFINITIONS: readonly ShortcutDefinition[] = [
   },
 ] as const;
 
+/** 线程跳转快捷键定义列表（1-9 号线程快速跳转） */
 const THREAD_JUMP_DEFINITIONS: readonly ShortcutDefinition[] = Array.from(
   { length: 9 },
   (_, index) => ({
@@ -147,6 +181,7 @@ const THREAD_JUMP_DEFINITIONS: readonly ShortcutDefinition[] = Array.from(
   }),
 );
 
+/** 终端工作区快捷键定义列表（全屏终端、标签切换、关闭面板） */
 const WORKSPACE_DEFINITIONS: readonly ShortcutDefinition[] = [
   {
     command: "terminal.workspace.newFullWidth",
@@ -170,10 +205,26 @@ const WORKSPACE_DEFINITIONS: readonly ShortcutDefinition[] = [
   },
 ] as const;
 
+/**
+ * 生成 Mod+/ 快捷键的显示标签。
+ * macOS 显示 "⌘/"，其他平台显示 "Ctrl+/"。
+ *
+ * @param platform - 运行平台
+ * @returns 快捷键标签字符串
+ */
 function modSlashLabel(platform: string): string {
   return isMacPlatform(platform) ? "�?" : "Ctrl+/";
 }
 
+/**
+ * 将快捷键定义转换为面板条目。支持多个候选命令，返回第一个匹配的快捷键标签。
+ *
+ * @param definition - 快捷键定义
+ * @param keybindings - 快捷键配置列表
+ * @param platform - 运行平台
+ * @param context - 上下文环境
+ * @returns 面板条目，无匹配快捷键时返回 null
+ */
 function definitionToEntry(
   definition: ShortcutDefinition,
   keybindings: ResolvedKeybindingsConfig,
@@ -197,6 +248,15 @@ function definitionToEntry(
   };
 }
 
+/**
+ * 批量将快捷键定义转换为面板条目，过滤掉无匹配快捷键的条目。
+ *
+ * @param definitions - 快捷键定义列表
+ * @param keybindings - 快捷键配置列表
+ * @param platform - 运行平台
+ * @param context - 上下文环境
+ * @returns 面板条目数组
+ */
 function definitionsToEntries(
   definitions: ReadonlyArray<ShortcutDefinition>,
   keybindings: ResolvedKeybindingsConfig,
@@ -208,6 +268,16 @@ function definitionsToEntries(
     .filter((entry): entry is ShortcutSheetEntry => entry !== null);
 }
 
+/**
+ * 构建快捷键参考面板的完整分区列表。
+ * 根据当前上下文生成三个分区：
+ * 1. 当前可用快捷键（含导航快捷键）
+ * 2. 交替上下文快捷键（工作区/非工作区模式的另一套快捷键）
+ * 3. 项目脚本快捷键（如有）
+ *
+ * @param options - 构建配置选项
+ * @returns 快捷键面板分区数组
+ */
 export function buildShortcutSheetSections(
   options: BuildShortcutSheetSectionsOptions,
 ): ShortcutSheetSection[] {

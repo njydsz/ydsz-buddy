@@ -1,8 +1,25 @@
-// FILE: confirmDialogFallback.ts
-// Purpose: Renders the lightweight DOM-based confirm dialog used when confirmations come from the web/native bridge.
-// Layer: UI fallback helper
-// Depends on: global document/body and shared Tailwind theme tokens already loaded by the app.
+/**
+ * @file 确认对话框回退实现
+ *
+ * 当确认请求来自 Web/Native 桥接层时，提供轻量级的 DOM 确认对话框。
+ * 直接操作 DOM 创建模态对话框，不依赖 React 组件树，
+ * 使用应用已有的 Tailwind 主题变量保持视觉一致性。
+ */
 
+/**
+ * 显示轻量级的确认对话框。
+ * 将消息的第一行作为标题，其余行作为描述。
+ * 支持 Escape（取消）和 Enter（确认）键盘操作。
+ *
+ * @param message - 对话框消息，第一行为标题，后续行为描述
+ * @returns Promise，确认返回 true，取消返回 false
+ *
+ * @example
+ * ```ts
+ * const confirmed = await showConfirmDialogFallback("Delete file?\nThis action cannot be undone.");
+ * if (confirmed) { ... }
+ * ```
+ */
 export function showConfirmDialogFallback(message: string): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     // Split message into title (first line) and description (rest)

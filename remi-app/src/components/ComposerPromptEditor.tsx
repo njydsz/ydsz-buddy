@@ -957,7 +957,7 @@ function ComposerPromptEditorInner({
           contentEditable={
             <ContentEditable
               className={cn(
-                "font-system-ui block max-h-[200px] min-h-[3rem] w-full overflow-y-auto whitespace-pre-wrap break-words bg-transparent text-[length:var(--app-font-size-chat,12px)] leading-relaxed text-foreground focus:outline-none",
+                "font-system-ui block max-h-[200px] min-h-12 w-full overflow-y-auto whitespace-pre-wrap wrap-break-word bg-transparent text-(length:--app-font-size-chat,12px) leading-relaxed text-foreground focus:outline-none",
                 className,
               )}
               data-testid="composer-editor"
@@ -968,7 +968,7 @@ function ComposerPromptEditorInner({
           }
           placeholder={
             terminalContexts.length > 0 ? null : (
-              <div className="font-system-ui pointer-events-none absolute inset-0 text-[length:var(--app-font-size-chat,12px)] leading-relaxed text-muted-foreground/40">
+              <div className="font-system-ui pointer-events-none absolute inset-0 text-(length:--app-font-size-chat,12px) leading-relaxed text-muted-foreground/40">
                 {placeholder}
               </div>
             )

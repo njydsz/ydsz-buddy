@@ -30,6 +30,7 @@ export type ServerConfigIssue =
       index: number;
     };
 
+/** 快捷键配置问题列表 */
 type ServerConfigIssues = ServerConfigIssue[];
 
 /** Provider 状态枚举：就绪、警告、错误 */
@@ -133,25 +134,37 @@ export interface ServerListWorktreesResult {
 
 /** Provider 使用量限制信息，包含窗口、已用百分比、重置时间等 */
 export interface ServerProviderUsageLimit {
+  /** 限制窗口名称（如 "daily"、"monthly"） */
   window: TrimmedNonEmptyString;
+  /** 已使用百分比 */
   usedPercent?: number;
+  /** 限制重置时间 */
   resetsAt?: IsoDateTime;
+  /** 窗口持续时间（分钟） */
   windowDurationMins?: NonNegativeInt;
 }
 
 /** Provider 使用量信息行（标签-值对） */
 export interface ServerProviderUsageLine {
+  /** 行标签 */
   label: TrimmedNonEmptyString;
+  /** 行值 */
   value: TrimmedNonEmptyString;
+  /** 行副标题 */
   subtitle?: TrimmedNonEmptyString;
 }
 
 /** Provider 使用量快照，包含限制和使用量明细 */
 export interface ServerProviderUsageSnapshot {
+  /** Provider 类型 */
   provider: ProviderKind;
+  /** 快照更新时间 */
   updatedAt: IsoDateTime;
+  /** 使用量限制列表 */
   limits: ServerProviderUsageLimit[];
+  /** 使用量明细行 */
   usageLines: ServerProviderUsageLine[];
+  /** 数据来源 */
   source: TrimmedNonEmptyString;
 }
 
@@ -166,53 +179,83 @@ export type ServerGetProviderUsageSnapshotResult = ServerProviderUsageSnapshot |
 
 /** 服务器内存使用诊断信息 */
 export interface ServerDiagnosticsMemory {
+  /** 常驻内存集大小（字节） */
   rssBytes: NonNegativeInt;
+  /** 堆总大小（字节） */
   heapTotalBytes: NonNegativeInt;
+  /** 堆已使用大小（字节） */
   heapUsedBytes: NonNegativeInt;
+  /** 外部内存大小（字节） */
   externalBytes: NonNegativeInt;
+  /** ArrayBuffer 内存大小（字节） */
   arrayBuffersBytes: NonNegativeInt;
 }
 
 /** 子进程诊断信息 */
 export interface ServerDiagnosticsChildProcess {
+  /** 进程 ID */
   pid: NonNegativeInt;
+  /** 父进程 ID */
   ppid: NonNegativeInt;
+  /** 常驻内存集大小（字节） */
   rssBytes: NonNegativeInt;
+  /** 虚拟内存大小（字节） */
   virtualSizeBytes: NonNegativeInt;
+  /** 命令名称 */
   command: string;
+  /** 命令参数 */
   args: string;
 }
 
 /** 服务器诊断结果，包含进程信息、子进程、项目/线程统计 */
 export interface ServerDiagnosticsResult {
+  /** 诊断信息生成时间 */
   generatedAt: IsoDateTime;
+  /** 主进程信息 */
   process: {
+    /** 进程 ID */
     pid: NonNegativeInt;
+    /** 运行时长（秒） */
     uptimeSeconds: NonNegativeInt;
+    /** 内存使用信息 */
     memory: ServerDiagnosticsMemory;
   };
+  /** 子进程列表 */
   childProcesses: ServerDiagnosticsChildProcess[];
+  /** 子进程总数 */
   childProcessTotalCount: NonNegativeInt;
+  /** 子进程总内存（字节） */
   childProcessTotalRssBytes: NonNegativeInt;
+  /** 投影统计信息 */
   projection: {
+    /** 项目数量 */
     projectCount: NonNegativeInt;
+    /** 线程数量 */
     threadCount: NonNegativeInt;
   };
 }
 
 /** 语音转录请求输入，包含音频数据和元信息 */
 export interface ServerVoiceTranscriptionInput {
+  /** Provider 类型 */
   provider: ProviderKind;
+  /** 工作目录 */
   cwd: TrimmedNonEmptyString;
+  /** 线程 ID（可选） */
   threadId?: ThreadId;
+  /** 音频 MIME 类型 */
   mimeType: TrimmedNonEmptyString;
+  /** 音频采样率（Hz） */
   sampleRateHz: NonNegativeInt;
+  /** 音频时长（毫秒） */
   durationMs: NonNegativeInt;
+  /** 音频 Base64 编码数据 */
   audioBase64: TrimmedNonEmptyString;
 }
 
 /** 语音转录结果 */
 export interface ServerVoiceTranscriptionResult {
+  /** 转录文本 */
   text: TrimmedNonEmptyString;
 }
 
@@ -221,57 +264,80 @@ export type ServerUpsertKeybindingInput = KeybindingRule;
 
 /** 新增或更新快捷键规则的结果，返回更新后的配置和问题列表 */
 export interface ServerUpsertKeybindingResult {
+  /** 更新后的快捷键配置 */
   keybindings: ResolvedKeybindingsConfig;
+  /** 配置问题列表 */
   issues: ServerConfigIssues;
 }
 
 /** 服务器配置更新事件载荷 */
 export interface ServerConfigUpdatedPayload {
+  /** 配置问题列表 */
   issues: ServerConfigIssues;
+  /** 更新后的 Provider 状态列表 */
   providers: ServerProviderStatus[];
 }
 
 /** Provider 状态更新事件载荷 */
 export interface ServerProviderStatusesUpdatedPayload {
+  /** 更新后的 Provider 状态列表 */
   providers: ServerProviderStatus[];
 }
 
 /** 服务器设置更新事件载荷 */
 export interface ServerSettingsUpdatedPayload {
+  /** 更新后的服务器设置 */
   settings: ServerSettings;
 }
 
 /** 服务器生命周期欢迎事件载荷，包含初始项目信息 */
 export interface ServerLifecycleWelcomePayload {
+  /** 当前工作目录 */
   cwd: TrimmedNonEmptyString;
+  /** 用户主目录（可选） */
   homeDir?: TrimmedNonEmptyString;
+  /** 项目名称 */
   projectName: TrimmedNonEmptyString;
+  /** 引导项目 ID（可选） */
   bootstrapProjectId?: ProjectId;
+  /** 引导线程 ID（可选） */
   bootstrapThreadId?: ThreadId;
 }
 
 /** 服务器生命周期流事件：欢迎、就绪、维护任务 */
 export type ServerLifecycleStreamEvent =
   | {
+      /** 欢迎事件 */
       type: "welcome";
       payload: ServerLifecycleWelcomePayload;
     }
   | {
+      /** 就绪事件 */
       type: "ready";
       payload: {
+        /** 就绪时间 */
         at: IsoDateTime;
       };
     }
   | {
+      /** 维护任务事件 */
       type: "maintenance";
       payload: {
+        /** 维护任务类型 */
         task: "thread-retention";
+        /** 任务状态 */
         state: "started" | "progress" | "compacting" | "completed" | "failed";
+        /** 状态时间 */
         at: IsoDateTime;
+        /** 已删除数量 */
         deletedCount?: number;
+        /** 已清理数量 */
         purgedCount?: number;
+        /** 总数量 */
         totalCount?: number;
+        /** 空闲页数量 */
         freePageCount?: number;
+        /** 错误信息 */
         error?: string;
       };
     };
@@ -279,18 +345,22 @@ export type ServerLifecycleStreamEvent =
 /** 服务器配置流事件：快照、配置更新、Provider 状态更新、设置更新 */
 export type ServerConfigStreamEvent =
   | {
+      /** 完整配置快照 */
       type: "snapshot";
       config: ServerConfig;
     }
   | {
+      /** 配置更新事件 */
       type: "configUpdated";
       payload: ServerConfigUpdatedPayload;
     }
   | {
+      /** Provider 状态更新事件 */
       type: "providerStatuses";
       payload: ServerProviderStatusesUpdatedPayload;
     }
   | {
+      /** 设置更新事件 */
       type: "settingsUpdated";
       payload: ServerSettingsUpdatedPayload;
     };
@@ -300,10 +370,15 @@ export type ServerRefreshProvidersResult = ServerProviderStatusesUpdatedPayload;
 
 /** 更新 Provider 的输入参数 */
 export interface ServerProviderUpdateInput {
+  /** 要更新的 Provider 类型 */
   provider: ProviderKind;
 }
 
-/** Provider 更新失败错误 */
+/**
+ * Provider 更新失败错误
+ *
+ * @description 当 Provider 更新操作（如安装、升级）失败时抛出的错误类型。
+ */
 export class ServerProviderUpdateError extends Error {
   readonly _tag = "ServerProviderUpdateError";
   constructor(
@@ -315,7 +390,7 @@ export class ServerProviderUpdateError extends Error {
   }
 }
 
-/** Provider 更新结果 */
+/** Provider 更新结果，返回更新后的 Provider 状态列表 */
 export type ServerProviderUpdateResult = ServerProviderStatusesUpdatedPayload;
 
 /** 获取服务器设置的结果 */

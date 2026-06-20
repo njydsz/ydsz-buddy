@@ -295,11 +295,14 @@ mod tests {
     fn test_execute_and_query() {
         let temp_dir = std::env::temp_dir().join("remi-test-sqlite-2");
         let db_path = temp_dir.join("test.sqlite");
-        
+
+        // 清理旧数据库
+        let _ = std::fs::remove_dir_all(&temp_dir);
+
         let client = SqliteClient::new(&db_path).unwrap();
-        
+
         // 创建表
-        client.execute_batch("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT NOT NULL)").unwrap();
+        client.execute_batch("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT NOT NULL)").unwrap();
         
         // 插入数据
         client.execute("INSERT INTO test (name) VALUES (?1)", &[&"test_name"]).unwrap();

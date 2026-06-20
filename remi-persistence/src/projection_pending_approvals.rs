@@ -123,8 +123,8 @@ impl PendingApprovalRepository for SqlitePendingApprovalRepository {
                     "cancel" => Ok(ApprovalDecision::Cancel),
                     _ => Err(crate::error::PersistenceError::DatabaseError(format!("Invalid decision: {}", s))),
                 }).transpose()?;
-                let created_at = created_at_str.parse().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
-                let resolved_at = resolved_at_str.map(|s| s.parse()).transpose().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let created_at = created_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let resolved_at = resolved_at_str.map(|s| s.parse::<chrono::DateTime<chrono::Utc>>()).transpose().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
                 Ok(PendingApproval {
                     request_id,
@@ -176,8 +176,8 @@ impl PendingApprovalRepository for SqlitePendingApprovalRepository {
             "cancel" => Ok(ApprovalDecision::Cancel),
             _ => Err(crate::error::PersistenceError::DatabaseError(format!("Invalid decision: {}", s))),
         }).transpose()?;
-        let created_at = created_at_str.parse().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
-        let resolved_at = resolved_at_str.map(|s| s.parse()).transpose().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+        let created_at = created_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let resolved_at = resolved_at_str.map(|s| s.parse::<chrono::DateTime<chrono::Utc>>()).transpose().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
         Ok(Some(PendingApproval {
             request_id,

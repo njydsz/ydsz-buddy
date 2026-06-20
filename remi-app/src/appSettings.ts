@@ -1,5 +1,13 @@
+/**
+ * @file 应用设置管理
+ * @description 管理应用的本地设置与服务器设置，包括 Schema 定义、归一化、
+ * 服务器同步、自定义模型管理、提供者配置等。
+ * 设置分为两类：
+ * - 本地设置：仅存储在 localStorage 中（如侧边栏位置、字体大小等 UI 偏好）
+ * - 服务器设置：同步到服务器端（如二进制路径、自定义模型列表等）
+ */
+
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Option, Schema } from "effect";
 import {
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
@@ -28,34 +36,65 @@ import { ensureNativeApi } from "./nativeApi";
 import { serverQueryKeys, serverSettingsQueryOptions } from "./lib/serverReactQuery";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "./i18n";
 
+/** 本地设置的 localStorage key */
 const APP_SETTINGS_STORAGE_KEY = "remicode:app-settings:v1";
+/** 服务器设置迁移完成的 localStorage 标记 key */
 const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "remicode:server-settings-migrated:v1";
+/** 每个提供者允许的最大自定义模型数量 */
 const MAX_CUSTOM_MODEL_COUNT = 32;
+/** 自定义模型 slug 的最大长度 */
 export const MAX_CUSTOM_MODEL_LENGTH = 256;
+/** 聊天字体最小像素值 */
 export const MIN_CHAT_FONT_SIZE_PX = 11;
+/** 聊天字体最大像素值 */
 export const MAX_CHAT_FONT_SIZE_PX = 18;
+/** 聊天字体默认像素值 */
 export const DEFAULT_CHAT_FONT_SIZE_PX = 12;
 
+/** 时间戳格式 Schema：locale（本地化）、12-hour（12小时制）、24-hour（24小时制） */
 export const TimestampFormat = Schema.Literal("locale", "12-hour", "24-hour");
+/** 时间戳格式类型 */
 export type TimestampFormat = typeof TimestampFormat.Type;
+/** 默认时间戳格式 */
 export const DEFAULT_TIMESTAMP_FORMAT: TimestampFormat = "locale";
+/** 侧边栏位置 Schema：left（左侧）、right（右侧） */
 export const SidebarSide = Schema.Literal("left", "right");
+/** 侧边栏位置类型 */
 export type SidebarSide = typeof SidebarSide.Type;
+/** 默认侧边栏位置 */
 export const DEFAULT_SIDEBAR_SIDE: SidebarSide = "left";
+/** 侧边栏项目排序 Schema：updated_at（按更新时间）、created_at（按创建时间）、manual（手动排序） */
 export const SidebarProjectSortOrder = Schema.Literal("updated_at", "created_at", "manual");
+/** 侧边栏项目排序类型 */
 export type SidebarProjectSortOrder = typeof SidebarProjectSortOrder.Type;
+/** 默认侧边栏项目排序方式 */
 export const DEFAULT_SIDEBAR_PROJECT_SORT_ORDER: SidebarProjectSortOrder = "manual";
+/** 侧边栏线程排序 Schema：updated_at（按更新时间）、created_at（按创建时间） */
 export const SidebarThreadSortOrder = Schema.Literal("updated_at", "created_at");
+/** 侧边栏线程排序类型 */
 export type SidebarThreadSortOrder = typeof SidebarThreadSortOrder.Type;
+/** 默认侧边栏线程排序方式 */
 export const DEFAULT_SIDEBAR_THREAD_SORT_ORDER: SidebarThreadSortOrder = "updated_at";
+/** 语言设置 Schema */
 export const LanguageSchema = Schema.Literal("en", "zh");
+/** 语言设置类型 */
 export type LanguageSetting = typeof LanguageSchema.Type;
+/** 默认语言设置 */
 export const DEFAULT_LANGUAGE_SETTING: LanguageSetting = DEFAULT_LANGUAGE;
 
+/**
+ * 获取默认的原生字体平滑设置
+ *
+ * @description macOS/iOS 默认启用字体平滑，其他平台默认关闭。
+ *
+ * @param platform - 平台标识字符串，默认取 navigator.platform
+ * @returns 是否启用原生字体平滑
+ */
 export function getDefaultNativeFontSmoothing(platform = globalThis.navigator?.platform ?? "") {
   return /mac|iphone|ipad|ipod/i.test(platform);
 }
 
+/** 自定义模型设置字段名联合类型 */
 type CustomModelSettingsKey =
   | "customCodexModels"
   | "customClaudeModels"
@@ -65,16 +104,26 @@ type CustomModelSettingsKey =
   | "customKiloModels"
   | "customOpenCodeModels"
   | "customPiModels";
+
+/** 提供者自定义模型配置 */
 export type ProviderCustomModelConfig = {
+  /** 提供者类型 */
   provider: ProviderKind;
+  /** 对应的设置字段名 */
   settingsKey: CustomModelSettingsKey;
+  /** 对应的默认设置字段名 */
   defaultSettingsKey: CustomModelSettingsKey;
+  /** 配置标题 */
   title: string;
+  /** 配置描述 */
   description: string;
+  /** 输入框占位文本 */
   placeholder: string;
+  /** 输入示例 */
   example: string;
 };
 
+/** 各提供者的内置模型 slug 集合，用于去重自定义模型 */
 const BUILT_IN_MODEL_SLUGS_BY_PROVIDER: Record<ProviderKind, ReadonlySet<string>> = {
   codex: new Set(getModelOptions("codex").map((option) => option.slug)),
   claudeAgent: new Set(getModelOptions("claudeAgent").map((option) => option.slug)),
@@ -99,6 +148,7 @@ const withDefaults =
       Schema.withDecodingDefault(() => fallback()),
     );
 
+/** 应用设置 Schema，使用 Effect Schema 定义所有字段及默认值 */
 export const AppSettingsSchema = Schema.Struct({
   claudeBinaryPath: Schema.String.check(Schema.isMaxLength(4096)).pipe(withDefaults(() => "")),
   chatFontSizePx: Schema.Number.pipe(withDefaults(() => DEFAULT_CHAT_FONT_SIZE_PX)),
@@ -164,13 +214,17 @@ export const AppSettingsSchema = Schema.Struct({
     }),
   ).pipe(withDefaults(() => [])),
 });
+/** 应用设置类型，从 Schema 自动推导 */
 export type AppSettings = typeof AppSettingsSchema.Type;
 type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
 type MutableServerSettingsPatch = Mutable<ServerSettingsPatch>;
 type MutableServerSettingsProvidersPatch = Mutable<NonNullable<ServerSettingsPatch["providers"]>>;
 
+/** 应用模型选项，扩展 ProviderModelOption 增加提供者和自定义标识 */
 export interface AppModelOption extends ProviderModelOption {
+  /** 提供者类型 */
   provider: ProviderKind;
+  /** 是否为用户自定义模型 */
   isCustom: boolean;
 }
 
@@ -252,8 +306,18 @@ const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConf
   },
 };
 
+/** 所有提供者的自定义模型配置列表 */
 export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFIG);
 
+/**
+ * 归一化自定义模型 slug 列表
+ *
+ * @description 对输入的模型 slug 列表进行去重、长度限制、内置模型过滤等归一化处理。
+ *
+ * @param models - 待归一化的模型 slug 可迭代对象
+ * @param provider - 提供者类型，默认为 "codex"
+ * @returns 归一化后的模型 slug 数组
+ */
 export function normalizeCustomModelSlugs(
   models: Iterable<string | null | undefined>,
   provider: ProviderKind = "codex",
@@ -283,6 +347,15 @@ export function normalizeCustomModelSlugs(
   return normalizedModels;
 }
 
+/**
+ * 归一化聊天字体大小
+ *
+ * @description 将字体大小限制在 [MIN_CHAT_FONT_SIZE_PX, MAX_CHAT_FONT_SIZE_PX] 范围内，
+ * 无效值回退为默认值。
+ *
+ * @param value - 输入的字体大小值
+ * @returns 归一化后的字体大小
+ */
 export function normalizeChatFontSizePx(value: number | null | undefined): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return DEFAULT_CHAT_FONT_SIZE_PX;
@@ -532,10 +605,26 @@ function buildInitialServerSettingsMigrationPatch(settings: AppSettings): Server
   return appSettingsPatchToServerSettingsPatch(patch);
 }
 
+/**
+ * 归一化存储的应用设置
+ *
+ * @description 对从 localStorage 读取的设置进行归一化处理，
+ * 确保自定义模型、字体大小、提供者顺序等字段符合约束。
+ *
+ * @param settings - 待归一化的应用设置
+ * @returns 归一化后的应用设置
+ */
 export function normalizeStoredAppSettings(settings: AppSettings): AppSettings {
   return normalizeAppSettings(settings);
 }
 
+/**
+ * 获取指定提供者的自定义模型列表
+ *
+ * @param settings - 应用设置（仅需自定义模型相关字段）
+ * @param provider - 提供者类型
+ * @returns 自定义模型 slug 列表
+ */
 export function getCustomModelsForProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
   provider: ProviderKind,
@@ -543,6 +632,13 @@ export function getCustomModelsForProvider(
   return settings[PROVIDER_CUSTOM_MODEL_CONFIG[provider].settingsKey];
 }
 
+/**
+ * 获取指定提供者的默认自定义模型列表
+ *
+ * @param defaults - 默认设置（仅需自定义模型相关字段）
+ * @param provider - 提供者类型
+ * @returns 默认自定义模型 slug 列表
+ */
 export function getDefaultCustomModelsForProvider(
   defaults: Pick<AppSettings, CustomModelSettingsKey>,
   provider: ProviderKind,
@@ -550,6 +646,13 @@ export function getDefaultCustomModelsForProvider(
   return defaults[PROVIDER_CUSTOM_MODEL_CONFIG[provider].defaultSettingsKey];
 }
 
+/**
+ * 构造指定提供者的自定义模型补丁
+ *
+ * @param provider - 提供者类型
+ * @param models - 新的自定义模型列表
+ * @returns 仅包含该提供者自定义模型字段的设置补丁
+ */
 export function patchCustomModels(
   provider: ProviderKind,
   models: string[],
@@ -559,6 +662,12 @@ export function patchCustomModels(
   };
 }
 
+/**
+ * 获取所有提供者的自定义模型映射
+ *
+ * @param settings - 应用设置（仅需自定义模型相关字段）
+ * @returns 按提供者类型索引的自定义模型列表映射
+ */
 export function getCustomModelsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
 ): Record<ProviderKind, readonly string[]> {
@@ -574,6 +683,17 @@ export function getCustomModelsByProvider(
   };
 }
 
+/**
+ * 获取应用模型选项列表
+ *
+ * @description 合并内置模型和自定义模型，去重后返回完整的模型选项列表。
+ * 若当前选中的模型不在列表中，会自动追加。
+ *
+ * @param provider - 提供者类型
+ * @param customModels - 自定义模型 slug 列表
+ * @param selectedModel - 当前选中的模型 slug，可选
+ * @returns 模型选项列表
+ */
 export function getAppModelOptions(
   provider: ProviderKind,
   customModels: readonly string[],
@@ -622,6 +742,15 @@ export function getAppModelOptions(
   return options;
 }
 
+/**
+ * 获取 Git 文本生成模型选项列表
+ *
+ * @description 合并 Codex、Kilo、OpenCode 三个提供者的模型选项，
+ * 去重后返回完整的文本生成模型列表。
+ *
+ * @param settings - 应用设置（仅需相关字段）
+ * @returns 去重后的文本生成模型选项列表
+ */
 export function getGitTextGenerationModelOptions(
   settings: Pick<
     AppSettings,
@@ -665,6 +794,17 @@ export function getGitTextGenerationModelOptions(
   return deduped;
 }
 
+/**
+ * 解析应用模型选择
+ *
+ * @description 根据提供者、自定义模型列表和当前选中模型，
+ * 解析出最终可用的模型 slug。
+ *
+ * @param provider - 提供者类型
+ * @param customModels - 各提供者的自定义模型映射
+ * @param selectedModel - 当前选中的模型 slug
+ * @returns 解析后的模型 slug 字符串
+ */
 export function resolveAppModelSelection(
   provider: ProviderKind,
   customModels: Record<ProviderKind, readonly string[]>,
@@ -677,6 +817,12 @@ export function resolveAppModelSelection(
   );
 }
 
+/**
+ * 获取所有提供者的自定义模型选项映射
+ *
+ * @param settings - 应用设置（仅需自定义模型相关字段）
+ * @returns 按提供者类型索引的模型选项列表映射
+ */
 export function getCustomModelOptionsByProvider(
   settings: Pick<AppSettings, CustomModelSettingsKey>,
 ): Record<ProviderKind, ReadonlyArray<ProviderModelOption>> {
@@ -693,6 +839,15 @@ export function getCustomModelOptionsByProvider(
   };
 }
 
+/**
+ * 获取提供者启动选项
+ *
+ * @description 从应用设置中提取各提供者的二进制路径、服务器 URL 等配置，
+ * 构造 ProviderStartOptions 对象用于启动提供者进程。
+ *
+ * @param settings - 应用设置（仅需二进制路径相关字段）
+ * @returns 提供者启动选项，无配置时返回 undefined
+ */
 export function getProviderStartOptions(
   settings: Pick<
     AppSettings,
@@ -784,6 +939,13 @@ export function getProviderStartOptions(
   return Object.keys(providerOptions).length > 0 ? providerOptions : undefined;
 }
 
+/**
+ * 获取指定提供者的自定义二进制路径
+ *
+ * @param settings - 应用设置（仅需二进制路径相关字段）
+ * @param provider - 提供者类型
+ * @returns 自定义二进制路径字符串
+ */
 export function getCustomBinaryPathForProvider(
   settings: Pick<
     AppSettings,
@@ -818,6 +980,18 @@ export function getCustomBinaryPathForProvider(
   }
 }
 
+/**
+ * React Hook：获取和更新应用设置
+ *
+ * @description 合并本地 localStorage 设置和服务器设置，
+ * 提供更新和重置方法。首次加载时自动将本地设置迁移到服务器。
+ *
+ * @returns 设置对象及操作方法
+ * @returns settings - 合并后的应用设置
+ * @returns updateSettings - 更新设置的函数（同时更新本地和服务器）
+ * @returns resetSettings - 重置为默认设置的函数
+ * @returns defaults - 合并了服务器默认值的默认设置
+ */
 export function useAppSettings() {
   const queryClient = useQueryClient();
   const serverSettingsQuery = useQuery(serverSettingsQueryOptions());

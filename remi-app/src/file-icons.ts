@@ -1,16 +1,24 @@
-// FILE: file-icons.ts
-// Purpose: Resolve CDN URLs for file/folder icons using the Seti UI icon theme.
-// Layer: app-level utility shared by composer, diff panel, timeline, sidebar.
-// Depends on: jsDelivr serving the jesseweed/seti-ui repository.
+/**
+ * @file 文件图标解析模块
+ * @description 基于 Seti UI 图标主题，通过 CDN（jsDelivr）解析文件/文件夹图标 URL。
+ *              为编辑器、差异面板、时间线、侧边栏等组件提供统一的文件图标服务。
+ *              依赖 jsDelivr 托管的 jesseweed/seti-ui 仓库提供 SVG 图标。
+ */
 
+/** Seti UI 图标仓库的 Git 分支 */
 const SETI_ICONS_BRANCH = "master";
+/** Seti UI 图标 CDN 基础 URL */
 const SETI_ICONS_BASE_URL = `https://cdn.jsdelivr.net/gh/jesseweed/seti-ui@${SETI_ICONS_BRANCH}/icons`;
 
+/** 默认文件图标名称 */
 const DEFAULT_FILE_ICON = "default";
+/** 默认文件夹图标名称 */
 const DEFAULT_FOLDER_ICON = "folder";
 
-// Exact basename �?Seti icon name (case-insensitive lookup). Add entries here
-// when a well-known filename has a dedicated Seti icon we want to surface.
+/**
+ * 文件名（不含路径）到 Seti 图标名称的映射（不区分大小写）
+ * 当知名文件名有专属 Seti 图标时，在此添加映射
+ */
 const FILE_ICON_BY_BASENAME: Record<string, string> = {
   "package.json": "npm",
   "package-lock.json": "npm",
@@ -114,8 +122,10 @@ const FILE_ICON_BY_BASENAME: Record<string, string> = {
   procfile: "heroku",
 };
 
-// Extension �?Seti icon name. Longest extension wins because `extensionCandidates`
-// yields compound extensions first (e.g. `.d.ts` before `.ts`).
+/**
+ * 文件扩展名到 Seti 图标名称的映射
+ * 最长扩展名优先匹配，因为 extensionCandidates 先产出复合扩展名（如 `.d.ts` 先于 `.ts`）
+ */
 const FILE_ICON_BY_EXTENSION: Record<string, string> = {
   ts: "typescript",
   tsx: "react",
@@ -230,18 +240,29 @@ const FILE_ICON_BY_EXTENSION: Record<string, string> = {
   avif: "image",
 };
 
-// Seti ships a single `folder.svg` on the master branch; it has no per-name
-// folder variants, so every directory resolves to the default here. The map
-// exists so we can opportunistically add overrides later without touching
-// callers.
+/**
+ * 文件夹名称到图标名称的映射
+ * Seti 仅提供一个 folder.svg，无按名称区分的文件夹变体，
+ * 此映射预留以便后续添加覆盖项而无需修改调用方
+ */
 const FOLDER_ICON_BY_BASENAME: Record<string, string> = {};
 
+/**
+ * 提取路径中的文件名部分（支持正斜杠和反斜杠）
+ * @param pathValue - 文件路径
+ * @returns 文件名（不含目录部分）
+ */
 export function basenameOfPath(pathValue: string): string {
   const slashIndex = Math.max(pathValue.lastIndexOf("/"), pathValue.lastIndexOf("\\"));
   if (slashIndex === -1) return pathValue;
   return pathValue.slice(slashIndex + 1);
 }
 
+/**
+ * 判断路径是否看起来像已知文件类型
+ * @param pathValue - 文件路径
+ * @returns 是否匹配已知文件图标
+ */
 function pathLooksLikeKnownFile(pathValue: string): boolean {
   const basename = basenameOfPath(pathValue).toLowerCase();
   if (FILE_ICON_BY_BASENAME[basename]) {
@@ -250,6 +271,12 @@ function pathLooksLikeKnownFile(pathValue: string): boolean {
   return extensionCandidates(basename).some((candidate) => FILE_ICON_BY_EXTENSION[candidate]);
 }
 
+/**
+ * 根据路径推断条目类型（文件或目录）
+ * 优先通过已知文件图标判断，其次通过文件名特征推断
+ * @param pathValue - 文件/目录路径
+ * @returns "file" 或 "directory"
+ */
 export function inferEntryKindFromPath(pathValue: string): "file" | "directory" {
   const base = basenameOfPath(pathValue);
   if (pathLooksLikeKnownFile(pathValue)) {
@@ -264,6 +291,12 @@ export function inferEntryKindFromPath(pathValue: string): "file" | "directory" 
   return "directory";
 }
 
+/**
+ * 生成文件名的所有扩展名候选（从最具体到最通用）
+ * 例如 "file.d.ts" → ["d.ts", "ts"]，最长扩展名优先
+ * @param fileName - 文件名
+ * @returns 扩展名候选列表
+ */
 function extensionCandidates(fileName: string): string[] {
   const candidates: string[] = [];
   let dotIndex = fileName.indexOf(".");
@@ -275,6 +308,12 @@ function extensionCandidates(fileName: string): string[] {
   return candidates;
 }
 
+/**
+ * 解析文件路径对应的 Seti 图标名称
+ * 优先按文件名匹配，其次按扩展名匹配，最后使用默认图标
+ * @param pathValue - 文件路径
+ * @returns Seti 图标名称
+ */
 function resolveFileIconName(pathValue: string): string {
   const basename = basenameOfPath(pathValue).toLowerCase();
   const byName = FILE_ICON_BY_BASENAME[basename];
@@ -286,14 +325,24 @@ function resolveFileIconName(pathValue: string): string {
   return DEFAULT_FILE_ICON;
 }
 
+/**
+ * 解析文件夹路径对应的 Seti 图标名称
+ * @param pathValue - 文件夹路径
+ * @returns Seti 图标名称，当前统一返回默认文件夹图标
+ */
 function resolveFolderIconName(pathValue: string): string {
   const basename = basenameOfPath(pathValue).toLowerCase();
   return FOLDER_ICON_BY_BASENAME[basename] ?? DEFAULT_FOLDER_ICON;
 }
 
-// `theme` is accepted for signature compatibility with call sites. Seti renders
-// a single colored variant that reads fine on both light and dark backgrounds,
-// so we ignore it here.
+/**
+ * 获取文件/文件夹图标的 CDN URL
+ * Seti 渲染单一颜色变体，在亮色和暗色背景下均可读，因此忽略 theme 参数
+ * @param pathValue - 文件/文件夹路径
+ * @param kind - 条目类型，"file" 或 "directory"
+ * @param _theme - 主题（保留参数，当前未使用）
+ * @returns 图标 SVG 的 CDN URL
+ */
 export function getFileIconUrlForEntry(
   pathValue: string,
   kind: "file" | "directory",

@@ -85,13 +85,13 @@ impl ThreadProposedPlanRepository for SqliteThreadProposedPlanRepository {
         )?;
 
         rows.into_iter()
-            .map(|(plan_id, thread_id_str, turn_id_str, plan_markdown, implemented_at_str, impl_thread_id_str, created_at_str, updated_at_str)| {
-                let thread_id = thread_id_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(1))?;
-                let turn_id = turn_id_str.map(|s| s.parse()).transpose().map_err(|_| rusqlite::Error::InvalidColumnIndex(2))?;
-                let implemented_at = implemented_at_str.map(|s| s.parse()).transpose().map_err(|_| rusqlite::Error::InvalidColumnIndex(4))?;
-                let implementation_thread_id = impl_thread_id_str.map(|s| s.parse()).transpose().map_err(|_| rusqlite::Error::InvalidColumnIndex(5))?;
-                let created_at = created_at_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(6))?;
-                let updated_at = updated_at_str.parse().map_err(|_| rusqlite::Error::InvalidColumnIndex(7))?;
+            .map(|(plan_id, thread_id_str, turn_id_str, plan_markdown, implemented_at_str, impl_thread_id_str, created_at_str, updated_at_str)| -> PersistenceResult<ThreadProposedPlan> {
+                let thread_id = thread_id_str.parse::<uuid::Uuid>().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let turn_id = turn_id_str;
+                let implemented_at = implemented_at_str.map(|s| s.parse::<chrono::DateTime<chrono::Utc>>()).transpose().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let implementation_thread_id = impl_thread_id_str.map(|s| s.parse::<uuid::Uuid>()).transpose().map_err(|e: uuid::Error| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let created_at = created_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+                let updated_at = updated_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
                 Ok(ThreadProposedPlan {
                     plan_id,

@@ -61,9 +61,12 @@ export interface ClaudeSubagentAliasDefinition extends BaseAgentAliasDefinition 
   readonly model?: string;
 }
 
+/** Agent 别名定义联合类型，包含 Codex 和 Claude 两种别名定义 */
 export type AgentAliasDefinition = CodexAgentAliasDefinition | ClaudeSubagentAliasDefinition;
 
+/** 解析后的 Agent 别名，在别名定义基础上附加了别名标识符 */
 export type ResolvedAgentAlias = AgentAliasDefinition & {
+  /** 别名标识符（如 "explore"、"5.5" 等） */
   readonly alias: string;
 };
 
@@ -236,6 +239,11 @@ const CLAUDE_AGENT_MENTION_ALIASES: Record<string, ClaudeSubagentAliasDefinition
   },
 };
 
+/**
+ * 按 Provider 分组的 Agent 别名映射表
+ *
+ * @description 每个 Provider 对应一组别名定义，用于根据当前 Provider 查找可用的 Agent 别名。
+ */
 export const AGENT_MENTION_ALIASES_BY_PROVIDER: Record<
   ProviderKind,
   Record<string, AgentAliasDefinition>
@@ -250,7 +258,14 @@ export const AGENT_MENTION_ALIASES_BY_PROVIDER: Record<
   pi: {},
 } as const satisfies Record<ProviderKind, Record<string, AgentAliasDefinition>>;
 
-// Backward compatibility for legacy call sites that still expect a flat alias table.
+/**
+ * 所有 Provider 的 Agent 别名合集（扁平映射表）
+ *
+ * @description 向后兼容的扁平别名表，将所有 Provider 的别名合并为一个映射表。
+ * 适用于不需要区分 Provider 的场景。
+ *
+ * @deprecated 优先使用 AGENT_MENTION_ALIASES_BY_PROVIDER 按 Provider 查找
+ */
 export const AGENT_MENTION_ALIASES: Record<string, AgentAliasDefinition> = Object.assign(
   {},
   ...Object.values(AGENT_MENTION_ALIASES_BY_PROVIDER),

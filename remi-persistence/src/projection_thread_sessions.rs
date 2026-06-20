@@ -116,7 +116,7 @@ impl ThreadSessionRepository for SqliteThreadSessionRepository {
             _ => return Err(crate::error::PersistenceError::DatabaseError(format!("Invalid status: {}", status_str))),
         };
         let active_turn_id = active_turn_id_str;
-        let updated_at = updated_at_str.parse().map_err(|e| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
+        let updated_at = updated_at_str.parse::<chrono::DateTime<chrono::Utc>>().map_err(|e: chrono::ParseError| crate::error::PersistenceError::DatabaseError(e.to_string()))?;
 
         Ok(Some(ThreadSession {
             thread_id,

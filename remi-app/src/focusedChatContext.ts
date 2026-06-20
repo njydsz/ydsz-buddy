@@ -1,7 +1,8 @@
-// FILE: focusedChatContext.ts
-// Purpose: Resolves the currently focused chat context across single and split chat surfaces.
-// Layer: Route-aware UI helpers
-// Exports: pure resolver and hook used by shortcut, discovery, and thread creation flows
+/**
+ * @file 聚焦聊天上下文模块
+ * @description 解析当前聚焦的聊天上下文，支持单视图和分屏视图。
+ *              为快捷键、发现功能、线程创建等流程提供当前活跃线程和项目信息。
+ */
 
 import { ThreadId, type ThreadId as ThreadIdType } from "@remi-code/contracts";
 import { useParams, useSearch } from "@tanstack/react-router";
@@ -18,6 +19,16 @@ import { useStore } from "./store";
 import { createProjectSelector, createThreadSelector } from "./storeSelectors";
 import type { Project, Thread } from "./types";
 
+/**
+ * 聚焦聊天上下文，包含当前活跃的线程、草稿和项目信息
+ * @property routeThreadId - 路由参数中的线程 ID
+ * @property splitView - 当前分屏视图状态，无分屏时为 null
+ * @property focusedThreadId - 实际聚焦的线程 ID（考虑分屏后的结果）
+ * @property activeThread - 聚焦线程的完整数据
+ * @property activeDraftThread - 聚焦线程的草稿状态
+ * @property activeProject - 活跃项目数据
+ * @property activeProjectId - 活跃项目 ID
+ */
 export interface FocusedChatContext {
   routeThreadId: ThreadIdType | null;
   splitView: SplitView | null;
@@ -28,6 +39,12 @@ export interface FocusedChatContext {
   activeProjectId: Project["id"] | null;
 }
 
+/**
+ * 纯函数：解析聚焦的聊天上下文
+ * 分屏视图时取分屏聚焦面板的线程 ID，否则使用路由中的线程 ID
+ * @param input - 包含路由线程 ID、分屏视图、线程列表、项目列表和草稿的输入对象
+ * @returns 聚焦聊天上下文
+ */
 export function resolveFocusedChatContext(input: {
   routeThreadId: ThreadIdType | null;
   splitView: SplitView | null;
@@ -65,6 +82,11 @@ export function resolveFocusedChatContext(input: {
   };
 }
 
+/**
+ * React Hook：获取当前聚焦的聊天上下文
+ * 自动从路由参数、分屏视图状态、全局 store 中提取并计算聚焦信息
+ * @returns 聚焦聊天上下文
+ */
 export function useFocusedChatContext(): FocusedChatContext {
   const draftThreadsByThreadId = useComposerDraftStore((store) => store.draftThreadsByThreadId);
   const routeThreadId = useParams({
