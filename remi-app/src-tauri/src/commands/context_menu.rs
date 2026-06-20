@@ -74,7 +74,7 @@ pub async fn show_context_menu<R: Runtime>(
     position: Option<Position>,
 ) -> Result<Option<String>, String> {
     // 构建菜单
-    let mut menu_builder: MenuBuilder<R> = MenuBuilder::new(&app);
+    let mut menu_builder: MenuBuilder<R, AppHandle<R>> = MenuBuilder::new(&app);
 
     for it in &items {
         let label = if it.enabled {
@@ -95,11 +95,9 @@ pub async fn show_context_menu<R: Runtime>(
 
     // 监听菜单项点击事件
     let app_handle_for_event = app.clone();
-    menu.set_app_event_handler(move |_app, event| {
-        if let tauri::menu::MenuEvent::MenuItem(menu_id) = event {
-            let id = menu_id.0.clone();
-            let _ = app_handle_for_event.emit("context_menu://selected", id);
-        }
+    menu.set_app_event_handler(move |_app, menu_id| {
+        let id = menu_id.0.clone();
+        let _ = app_handle_for_event.emit("context_menu://selected", id);
     });
 
     // 弹出菜单
@@ -107,10 +105,10 @@ pub async fn show_context_menu<R: Runtime>(
         if let Some(pos) = position {
             let _ = win.popup_menu_at(
                 &menu,
-                Some(tauri::Position::Physical(tauri::PhysicalPosition {
+                tauri::Position::Physical(tauri::PhysicalPosition {
                     x: pos.x as i32,
                     y: pos.y as i32,
-                })),
+                }),
             );
         } else {
             let _ = win.popup_menu(&menu);

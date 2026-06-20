@@ -70,6 +70,9 @@ pub struct UpdateInfo {
     pub in_progress: bool,
     /// 错误信息（最近一次失败）
     pub error: Option<String>,
+    /// 已下载的更新包数据
+    #[serde(skip)]
+    pub downloaded_bytes: Vec<u8>,
 }
 
 /// 更新操作结果结构
@@ -93,6 +96,7 @@ impl Default for UpdateInfo {
             downloaded: false,
             in_progress: false,
             error: None,
+            downloaded_bytes: Vec::new(),
         }
     }
 }
@@ -165,7 +169,7 @@ pub async fn check_for_updates(
         Ok(Some(update)) => {
             let version = update.version.clone();
             let notes = update.body.clone().unwrap_or_default();
-            let pub_date = update.date.map(|d| d.to_rfc3339()).unwrap_or_default();
+            let pub_date = update.date.map(|d| d.to_string()).unwrap_or_default();
             let info_snapshot = {
                 let mut info = state.state.lock().map_err(|e| e.to_string())?;
                 info.available = true;
@@ -225,7 +229,7 @@ pub async fn download_update(
             let state_arc = state.state.clone();
             let update_clone = update.clone();
 
-            let on_progress = move |received: u64, total: Option<u64>| {
+            let on_progress = move |received: usize, total: Option<u64>| {
                 let pct = match total {
                     Some(t) if t > 0 => (received as f64 / t as f64) * 100.0,
                     _ => 0.0,
@@ -243,19 +247,20 @@ pub async fn download_update(
                 );
             };
 
-            match update_clone.download(on_progress).await {
+            match update_clone.download(on_progress, || {}).await {
                 Ok(bytes) => {
                     let info_snapshot = {
                         let mut info = state.state.lock().map_err(|e| e.to_string())?;
                         info.downloaded = true;
                         info.download_progress = 100.0;
                         info.in_progress = false;
+                        info.downloaded_bytes = bytes.clone();
                         info.clone()
                     };
                     let _ = app.emit("update://downloaded", &info_snapshot);
                     Ok(UpdateActionResult {
                         success: true,
-                        message: format!("Update downloaded ({} bytes)", bytes),
+                        message: format!("Update downloaded ({} bytes)", bytes.len()),
                     })
                 }
                 Err(e) => {
@@ -311,7 +316,11 @@ pub async fn install_update(
     match updater.check().await {
         Ok(Some(update)) => {
             // install 在内部会执行：关闭应用、以新版本重启
-            if let Err(e) = update.install().await {
+            let bytes = {
+                let info = state.state.lock().map_err(|e| e.to_string())?;
+                info.downloaded_bytes.clone()
+            };
+            if let Err(e) = update.install(&bytes) {
                 let msg = format!("Install failed: {e}");
                 state.set_error(msg.clone());
                 return Ok(UpdateActionResult {
