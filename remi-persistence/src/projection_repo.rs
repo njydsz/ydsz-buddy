@@ -164,6 +164,16 @@ pub trait ProjectionRepository: Send + Sync {
     ///
     /// 成功时返回 `Ok(())`，失败时返回 `PersistenceError`
     fn update_projection_state(&self, projector_name: &str, sequence: Sequence) -> PersistenceResult<()>;
+
+    /// 清空所有投影数据
+    ///
+    /// 删除所有项目和线程的投影数据，用于状态修复时重建。
+    /// 注意：此操作不可逆，应谨慎使用。
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回 `Ok(())`，失败时返回 `PersistenceError`
+    fn clear_all(&self) -> PersistenceResult<()>;
 }
 
 /// SQLite 投影仓库实现
@@ -501,6 +511,16 @@ impl ProjectionRepository for SqliteProjectionRepository {
             "INSERT OR REPLACE INTO projection_state (projector, last_applied_sequence, updated_at) VALUES (?1, ?2, ?3)",
             &[&projector_name, &sequence, &chrono::Utc::now().to_rfc3339()],
         )?;
+        Ok(())
+    }
+
+    /// 清空所有投影数据
+    ///
+    /// 删除所有项目和线程的投影数据，用于状态修复时重建。
+    fn clear_all(&self) -> PersistenceResult<()> {
+        self.client.execute("DELETE FROM projection_threads", &[])?;
+        self.client.execute("DELETE FROM projection_projects", &[])?;
+        self.client.execute("DELETE FROM projection_state", &[])?;
         Ok(())
     }
 }

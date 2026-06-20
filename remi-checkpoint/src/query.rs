@@ -211,14 +211,6 @@ impl CheckpointDiffQuery {
     /// - `Ok(Some(TurnDiff))`：成功获取到该轮次的 Diff 信息。
     /// - `Ok(None)`：该轮次尚无关联的检查点或无代码变更。
     /// - `Err(CheckpointError)`：查询过程中发生错误（如检查点不存在、Git 操作失败）。
-    ///
-    /// ## 实现状态
-    ///
-    /// > ⚠️ **TODO**：当前为桩实现，尚未完成以下逻辑：
-    /// > 1. 查找 Turn 对应的检查点记录。
-    /// > 2. 定位前一个检查点。
-    /// > 3. 调用 Git 计算两个检查点之间的 Diff。
-    /// > 4. 解析 Diff 文本并提取统计信息。
     pub async fn get_turn_diff(
         &self,
         thread_id: ThreadId,
@@ -226,12 +218,44 @@ impl CheckpointDiffQuery {
     ) -> CheckpointResult<Option<TurnDiff>> {
         debug!("获取 Turn Diff: thread_id={}, turn_id={}", thread_id, turn_id);
 
-        // TODO: 实现 Turn Diff 查询逻辑
-        // 1. 查找 Turn 对应的检查点
-        // 2. 计算与前一个检查点的 Diff
-        // 3. 解析 Diff 统计信息
+        // 1. 获取该线程的所有检查点，按时间排序
+        let checkpoints = self.checkpoint_store.list_checkpoints(thread_id).await?;
+        
+        // 2. 查找目标 turn_id 对应的检查点
+        let target_checkpoint = checkpoints
+            .iter()
+            .find(|cp| cp.turn_id == turn_id)
+            .ok_or_else(|| CheckpointError::NotFound(format!("Turn {} not found", turn_id)))?;
 
-        Ok(None)
+        // 3. 查找前一个检查点（按时间顺序）
+        let prev_checkpoint = checkpoints
+            .iter()
+            .find(|cp| cp.created_at < target_checkpoint.created_at)
+            .cloned();
+
+        // 4. 计算 Diff
+        let diff = if let Some(prev) = prev_checkpoint {
+            // 有前一个检查点，计算两者之间的 Diff
+            self.git_core
+                .diff_between_commits(&prev.git_ref, &target_checkpoint.git_ref)
+                .await
+                .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?
+        } else {
+            // 没有前一个检查点，计算从空到当前检查点的 Diff
+            self.git_core
+                .diff_from_empty(&target_checkpoint.git_ref)
+                .await
+                .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?
+        };
+
+        // 5. 解析统计信息
+        let stats = parse_diff_stats(&diff);
+
+        Ok(Some(TurnDiff {
+            turn_id,
+            diff,
+            stats,
+        }))
     }
 
     /// # 获取完整对话线程的代码变更差异
@@ -249,28 +273,54 @@ impl CheckpointDiffQuery {
     ///
     /// - `Ok(FullThreadDiff)`：成功获取全线程 Diff 信息（可能包含零个或多个轮次）。
     /// - `Err(CheckpointError)`：查询过程中发生错误。
-    ///
-    /// ## 实现状态
-    ///
-    /// > ⚠️ **TODO**：当前为桩实现，尚未完成以下逻辑：
-    /// > 1. 获取线程的所有检查点记录（按时间排序）。
-    /// > 2. 逐对计算相邻检查点之间的 Diff。
-    /// > 3. 汇总所有轮次的统计信息到 `total_stats`。
     pub async fn get_full_thread_diff(
         &self,
         thread_id: ThreadId,
     ) -> CheckpointResult<FullThreadDiff> {
         debug!("获取完整线程 Diff: thread_id={}", thread_id);
 
-        // TODO: 实现完整线程 Diff 查询逻辑
-        // 1. 获取线程的所有检查点
-        // 2. 计算每个 Turn 的 Diff
-        // 3. 汇总统计信息
+        // 1. 获取该线程的所有检查点，按时间排序
+        let checkpoints = self.checkpoint_store.list_checkpoints(thread_id).await?;
+        
+        let mut turns = Vec::new();
+        let mut total_stats = DiffStats::default();
+
+        // 2. 遍历所有检查点，计算每个 Turn 的 Diff
+        for (index, checkpoint) in checkpoints.iter().enumerate() {
+            let diff = if index == 0 {
+                // 第一个检查点，计算从空到当前的 Diff
+                self.git_core
+                    .diff_from_empty(&checkpoint.git_ref)
+                    .await
+                    .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?
+            } else {
+                // 后续检查点，计算与前一个的 Diff
+                let prev_checkpoint = &checkpoints[index - 1];
+                self.git_core
+                    .diff_between_commits(&prev_checkpoint.git_ref, &checkpoint.git_ref)
+                    .await
+                    .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?
+            };
+
+            // 3. 解析统计信息
+            let stats = parse_diff_stats(&diff);
+
+            // 4. 累加到总统计
+            total_stats.additions += stats.additions;
+            total_stats.deletions += stats.deletions;
+            total_stats.files_changed += stats.files_changed;
+
+            turns.push(TurnDiff {
+                turn_id: checkpoint.turn_id.clone(),
+                diff,
+                stats,
+            });
+        }
 
         Ok(FullThreadDiff {
             thread_id,
-            turns: vec![],
-            total_stats: DiffStats::default(),
+            turns,
+            total_stats,
         })
     }
 

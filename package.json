@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "remi-app",
-    "remi-app/libs/*"
+    "remi-app"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=remi-app",

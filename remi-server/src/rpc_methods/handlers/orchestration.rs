@@ -198,15 +198,16 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
-    // orchestration.repairState - 修复投影状态（待实现）
+    // orchestration.repairState - 修复投影状态
     // 参数: 无
-    // 返回: null（当前为占位实现）
-    let _engine = services.orchestration_engine.clone();
+    // 返回: { repairedEvents: number }
+    let engine = services.orchestration_engine.clone();
     router
         .register("orchestration.repairState", move |_params: Option<Value>| {
+            let engine = engine.clone();
             async move {
-                // TODO: OrchestrationEngine 当前没有 repair_state 方法，待实现后补充
-                Ok(Value::Null)
+                let repaired_events = engine.repair_state().await?;
+                Ok(serde_json::json!({ "repairedEvents": repaired_events }))
             }
         })
         .await;

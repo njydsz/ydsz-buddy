@@ -386,6 +386,49 @@ impl OrchestrationEngine {
         self.event_tx.subscribe()
     }
 
+    /// 修复投影状态
+    ///
+    /// 从事件存储中重放所有事件，重建投影仓库。
+    /// 当投影数据损坏或与事件存储不一致时调用此方法。
+    ///
+    /// # 返回值
+    ///
+    /// 成功时返回重放的事件总数，失败时返回相应错误。
+    pub async fn repair_state(&self) -> OrchestrationResult<usize> {
+        info!("开始修复投影状态...");
+
+        // 清空投影仓库
+        self.projection_repo.clear_all()?;
+
+        // 从事件存储中读取所有事件
+        let mut from_sequence = 0;
+        let mut total_events = 0;
+        let batch_size = 1000;
+
+        loop {
+            let events = self.event_store.read_events(from_sequence, batch_size)?;
+            if events.is_empty() {
+                break;
+            }
+
+            for stored_event in &events {
+                let event = &stored_event.event;
+                self.apply_projection(event).await?;
+                from_sequence = stored_event.sequence + 1;
+                total_events += 1;
+            }
+
+            // 更新当前序列号
+            {
+                let mut seq = self.current_sequence.write().await;
+                *seq = from_sequence.saturating_sub(1);
+            }
+        }
+
+        info!("投影状态修复完成，共重放 {} 个事件", total_events);
+        Ok(total_events)
+    }
+
     /// 命令处理主循环（内部方法）
     ///
     /// 持续从命令队列中消费消息，逐个处理并通过 oneshot 通道返回结果。
