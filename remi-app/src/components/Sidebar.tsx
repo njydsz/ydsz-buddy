@@ -1068,7 +1068,7 @@ function SortableWorkspaceItem({
   } = useSortable({ id: workspaceId });
 
   return (
-    <li
+    <div
       ref={setNodeRef}
       style={{
         transform: CSS.Translate.toString(transform),
@@ -1081,7 +1081,7 @@ function SortableWorkspaceItem({
       data-slot="sidebar-menu-item"
     >
       {children({ attributes, listeners, setActivatorNodeRef })}
-    </li>
+    </div>
   );
 }
 
@@ -1165,7 +1165,7 @@ export default function Sidebar() {
     // before the desktop projection caught up, ask the lightweight shell endpoint once.
     void api.orchestration
       .getShellSnapshot()
-      .then((snapshot) => {
+      .then((snapshot: OrchestrationShellSnapshot) => {
         if (cancelled || (snapshot.projects.length === 0 && snapshot.threads.length === 0)) {
           return;
         }
@@ -1474,7 +1474,7 @@ export default function Sidebar() {
       return;
     }
 
-    void api.shell.openExternal(prUrl).catch((error) => {
+    void api.shell.openExternal(prUrl).catch((error: unknown) => {
       toastManager.add({
         type: "error",
         title: "Unable to open PR link",
@@ -1708,7 +1708,7 @@ export default function Sidebar() {
   );
 
   const handleSidebarViewChange = useCallback(
-    (view: "threads" | "workspace") => {
+    async (view: "threads" | "workspace") => {
       if (view === "workspace") {
         const fallbackWorkspaceId = workspacePages[0]?.id;
         if (!fallbackWorkspaceId) {
@@ -1733,7 +1733,14 @@ export default function Sidebar() {
         return;
       }
 
-      void handleNewChat({ fresh: true });
+      const result = await handleNewChat({ fresh: true });
+      if (!result.ok) {
+        toastManager.add({
+          type: "error",
+          title: "Unable to create a new chat",
+          description: result.error,
+        });
+      }
     },
     [
       handleNewChat,
@@ -1904,7 +1911,7 @@ export default function Sidebar() {
               syncServerShellSnapshot(snapshot);
             }
             if (project && snapshot) {
-              const recovered = await openExistingProjectFromSnapshot(project.id, snapshot);
+              const recovered = await openExistingProjectFromSnapshot(project.id as ProjectId, snapshot);
               if (recovered) {
                 finishAddingProject();
                 return;
@@ -5275,7 +5282,7 @@ export default function Sidebar() {
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui">
             <div className="flex min-w-0 items-center gap-1">
               <RemiCodeWordmark />
-              <span className="truncate text-[14px] font-normal text-foreground/89">Code</span>
+              <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
             </div>
           </div>
         }
@@ -5567,17 +5574,25 @@ export default function Sidebar() {
                                         {workspace.terminalCount}
                                       </span>
                                     )}
-                                    <button
-                                      type="button"
+                                    <span
+                                      role="button"
+                                      tabIndex={0}
                                       className="sidebar-icon-button ml-auto inline-flex size-5 shrink-0 text-muted-foreground/50 opacity-0 transition-opacity group-hover/ws:opacity-100"
                                       aria-label="Delete workspace"
+                                      onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                          event.preventDefault();
+                                          event.stopPropagation();
+                                          void handleDeleteWorkspace(workspace.id);
+                                        }
+                                      }}
                                       onClick={(event) => {
                                         event.stopPropagation();
                                         void handleDeleteWorkspace(workspace.id);
                                       }}
                                     >
                                       <Trash2 className="size-3" />
-                                    </button>
+                                    </span>
                                   </SidebarMenuButton>
                                 </SidebarMenuItem>
                               )

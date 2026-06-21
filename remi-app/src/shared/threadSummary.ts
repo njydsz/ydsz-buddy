@@ -1,9 +1,9 @@
 import type {
   OrchestrationLatestTurn,
-  OrchestrationMessage,
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
 } from "@peakcode/contracts";
+import type { ChatMessage } from "../types";
 
 export interface ThreadSummaryMetadata {
   latestUserMessageAt: string | null;
@@ -221,7 +221,7 @@ export function deriveThreadSummaryState(input: {
 }
 
 export function deriveThreadSummaryMetadata(input: {
-  readonly messages: ReadonlyArray<Pick<OrchestrationMessage, "role" | "createdAt">>;
+  readonly messages: ReadonlyArray<Pick<ChatMessage, "role" | "createdAt">>;
   readonly activities: ReadonlyArray<
     Pick<OrchestrationThreadActivity, "createdAt" | "id" | "kind" | "payload" | "sequence">
   >;

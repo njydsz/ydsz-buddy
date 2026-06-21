@@ -44,6 +44,7 @@ export default defineConfig({
     alias: [
       // @peakcode workspace packages → local src/shared/ files
       { find: "@peakcode/contracts", replacement: path.resolve(__dirname, "src/contracts/index.ts") },
+      { find: "@remi-code/contracts", replacement: path.resolve(__dirname, "src/contracts/index.ts") },
       { find: "@peakcode/shared/model", replacement: path.resolve(__dirname, "src/shared/model.ts") },
       { find: "@peakcode/shared/threadSummary", replacement: path.resolve(__dirname, "src/shared/threadSummary.ts") },
       { find: "@peakcode/shared/threadWorkspace", replacement: path.resolve(__dirname, "src/shared/threadWorkspace.ts") },

@@ -132,6 +132,35 @@ pub async fn show_in_folder(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// 打开主窗口开发者工具命令
+///
+/// 打开主窗口的 WebKit 开发者工具（DevTools），用于调试前端代码。
+///
+/// # 参数
+///
+/// - `app`: Tauri 应用句柄，用于获取主窗口
+///
+/// # 返回值
+///
+/// - `Ok(())`: 打开成功
+/// - `Err(String)`: 打开失败（如窗口未找到）
+///
+/// # 使用场景
+///
+/// - 开发者调试前端代码时调用
+/// - 用户通过 F12 或右键菜单触发
+///
+/// # 设计说明
+///
+/// - 仅在 debug 模式下有效（release 模式下 devtools 不可用）
+/// - 通过窗口名称 `"main"` 获取主窗口
+#[tauri::command]
+pub async fn open_main_devtools(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("Window not found")?;
+    window.open_devtools();
+    Ok(())
+}
+
 /// 使用外部程序打开 URL 命令
 ///
 /// 使用系统默认浏览器（或其他关联程序）打开指定的 URL。

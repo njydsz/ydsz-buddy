@@ -1,7 +1,15 @@
+/**
+ * @file 基于 WebSocket 的 NativeApi 实现
+ * @description 通过 WsTransport 实现 NativeApi 接口，将所有原生能力调用
+ *              转换为 WebSocket RPC 请求。同时提供服务器推送事件的订阅机制，
+ *              以及浏览器状态的后备（fallback）管理。
+ *              当 Tauri 原生桥接不可用时，作为 Web 端的默认实现。
+ */
+
 import {
-  type AuthBearerBootstrapResult,
   type AuthBootstrapInput,
   type AuthBootstrapResult,
+  type AuthBearerBootstrapResult,
   type AuthClientSession,
   type AuthCreatePairingCredentialInput,
   type AuthPairingCredentialResult,
@@ -22,31 +30,46 @@ import {
   type TerminalEvent,
   ORCHESTRATION_WS_CHANNELS,
   ORCHESTRATION_WS_METHODS,
+  type ClientOrchestrationCommand,
   type ContextMenuItem,
   type NativeApi,
   ServerConfigUpdatedPayload,
   WS_CHANNELS,
   WS_METHODS,
   type WsWelcomePayload,
-} from "@peakcode/contracts";
+} from "@remi-code/contracts";
 
 import { showConfirmDialogFallback } from "./confirmDialogFallback";
 import { showContextMenuFallback } from "./contextMenuFallback";
 import { WsTransport } from "./wsTransport";
+import { tauriBridge } from "./lib/tauri-bridge";
 
+/** 单例实例，缓存已创建的 NativeApi 和 WsTransport */
 let instance: { api: NativeApi; transport: WsTransport } | null = null;
+/** 服务器欢迎消息监听器集合 */
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
+/** 服务器配置更新监听器集合 */
 const serverConfigUpdatedListeners = new Set<(payload: ServerConfigUpdatedPayload) => void>();
+/** 服务器 Provider 状态更新监听器集合 */
 const serverProviderStatusesUpdatedListeners = new Set<
   (payload: ServerProviderStatusesUpdatedPayload) => void
 >();
+/** 服务器维护状态更新监听器集合 */
 const serverMaintenanceUpdatedListeners = new Set<(payload: ServerLifecycleStreamEvent) => void>();
+/** 服务器设置更新监听器集合 */
 const serverSettingsUpdatedListeners = new Set<(payload: ServerSettingsUpdatedPayload) => void>();
+/** Git 操作进度监听器集合 */
 const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => void>();
 
+/**
+ * 过滤用户输入应答中的 null/undefined 值
+ * 仅对 thread.user-input.respond 类型的命令生效，移除 answers 中无效的空值条目
+ * @param command - 编排调度命令
+ * @returns 过滤后的命令
+ */
 function omitNullUserInputAnswers(
-  command: Parameters<NativeApi["orchestration"]["dispatchCommand"]>[0],
-) {
+  command: ClientOrchestrationCommand,
+): ClientOrchestrationCommand {
   if (command.type !== "thread.user-input.respond") {
     return command;
   }
@@ -60,15 +83,26 @@ function omitNullUserInputAnswers(
     ),
   };
 }
+/** 终端事件监听器集合 */
 const terminalEventListeners = new Set<(payload: TerminalEvent) => void>();
+/** 编排领域事件监听器集合 */
 const orchestrationDomainEventListeners = new Set<(payload: OrchestrationEvent) => void>();
+/** 编排 Shell 事件监听器集合 */
 const orchestrationShellEventListeners = new Set<(payload: OrchestrationShellStreamItem) => void>();
+/** 编排线程事件监听器集合 */
 const orchestrationThreadEventListeners = new Set<
   (payload: OrchestrationThreadStreamItem) => void
 >();
+/** 后备浏览器状态监听器集合 */
 const fallbackBrowserStateListeners = new Set<(state: ThreadBrowserState) => void>();
+/** 后备浏览器状态缓存，key 为 threadId */
 const fallbackBrowserStates = new Map<ThreadId, ThreadBrowserState>();
 
+/**
+ * 创建默认的浏览器状态
+ * @param threadId - 线程 ID
+ * @returns 初始浏览器状态，版本为 0，未打开，无标签页
+ */
 function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   return {
     threadId,
@@ -80,6 +114,11 @@ function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   };
 }
 
+/**
+ * 根据 URL 生成默认的浏览器标签页标题
+ * @param url - 标签页 URL
+ * @returns 标签页标题，空白页返回 "New tab"，否则返回域名或原始 URL
+ */
 function defaultBrowserTitle(url: string): string {
   if (url === "about:blank") {
     return "New tab";
@@ -91,6 +130,13 @@ function defaultBrowserTitle(url: string): string {
   }
 }
 
+/**
+ * 发送带认证的 HTTP JSON 请求
+ * @param path - 请求路径
+ * @param options - 请求选项，包括方法和请求体
+ * @returns 解析后的 JSON 响应
+ * @throws 当响应状态码非 2xx 时抛出错误
+ */
 async function requestAuthJson<T>(
   path: string,
   options: {
@@ -123,6 +169,11 @@ async function requestAuthJson<T>(
   return payload as T;
 }
 
+/**
+ * 创建后备浏览器标签页
+ * @param url - 初始 URL，默认为 about:blank
+ * @returns 新建的标签页对象
+ */
 function createFallbackTab(url = "about:blank") {
   return {
     id: crypto.randomUUID(),
@@ -138,6 +189,11 @@ function createFallbackTab(url = "about:blank") {
   };
 }
 
+/**
+ * 深拷贝浏览器状态（包括标签页列表）
+ * @param state - 原始浏览器状态
+ * @returns 深拷贝后的浏览器状态
+ */
 function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   return {
     ...state,
@@ -145,6 +201,11 @@ function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   };
 }
 
+/**
+ * 获取指定线程的后备浏览器状态，不存在则创建默认状态
+ * @param threadId - 线程 ID
+ * @returns 浏览器状态
+ */
 function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const existing = fallbackBrowserStates.get(threadId);
   if (existing) {
@@ -155,6 +216,11 @@ function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return initial;
 }
 
+/**
+ * 通知所有后备浏览器状态监听器状态已更新
+ * @param threadId - 线程 ID
+ * @returns 更新后的浏览器状态副本
+ */
 function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const state = cloneBrowserState(getFallbackBrowserState(threadId));
   for (const listener of fallbackBrowserStateListeners) {
@@ -163,10 +229,17 @@ function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return state;
 }
 
+/** 标记后备浏览器状态已变更，递增版本号 */
 function markFallbackBrowserStateChanged(state: ThreadBrowserState): void {
   state.version += 1;
 }
 
+/**
+ * 确保指定线程的后备浏览器工作区已初始化
+ * 如果没有标签页则创建一个默认标签页，并标记为已打开
+ * @param threadId - 线程 ID
+ * @returns 初始化后的浏览器状态
+ */
 function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState {
   const state = getFallbackBrowserState(threadId);
   if (state.tabs.length === 0) {
@@ -178,6 +251,14 @@ function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState 
   return state;
 }
 
+/**
+ * 解析后备浏览器中的目标标签页
+ * 优先匹配指定 tabId，其次匹配当前活跃标签页，最后使用第一个标签页
+ * 若均不存在则创建新标签页
+ * @param state - 浏览器状态
+ * @param tabId - 可选的目标标签页 ID
+ * @returns 匹配到的标签页
+ */
 function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
   const existing =
     (tabId ? state.tabs.find((tab) => tab.id === tabId) : undefined) ??
@@ -194,9 +275,11 @@ function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
 }
 
 /**
- * Subscribe to the server welcome message. If a welcome was already received
- * before this call, the listener fires synchronously with the cached payload.
- * This avoids the race between WebSocket connect and React effect registration.
+ * 订阅服务器欢迎消息
+ * 如果在调用之前已收到欢迎消息，监听器会同步触发并传入缓存的消息，
+ * 避免 WebSocket 连接与 React effect 注册之间的竞态条件
+ * @param listener - 欢迎消息回调函数
+ * @returns 取消订阅的函数
  */
 export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): () => void {
   welcomeListeners.add(listener);
@@ -216,8 +299,10 @@ export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): 
 }
 
 /**
- * Subscribe to server config update events. Replays the latest update for
- * late subscribers to avoid missing config validation feedback.
+ * 订阅服务器配置更新事件
+ * 对迟注册的订阅者回放最新的更新，避免错过配置校验反馈
+ * @param listener - 配置更新回调函数
+ * @returns 取消订阅的函数
  */
 export function onServerConfigUpdated(
   listener: (payload: ServerConfigUpdatedPayload) => void,
@@ -240,7 +325,9 @@ export function onServerConfigUpdated(
 }
 
 /**
- * Subscribe to provider status updates without forcing a full config reload.
+ * 订阅 Provider 状态更新事件，无需强制完整配置重载
+ * @param listener - Provider 状态更新回调函数
+ * @returns 取消订阅的函数
  */
 export function onServerProviderStatusesUpdated(
   listener: (payload: ServerProviderStatusesUpdatedPayload) => void,
@@ -262,6 +349,11 @@ export function onServerProviderStatusesUpdated(
   };
 }
 
+/**
+ * 订阅服务器维护状态更新事件
+ * @param listener - 维护状态更新回调函数
+ * @returns 取消订阅的函数
+ */
 export function onServerMaintenanceUpdated(
   listener: (payload: ServerLifecycleStreamEvent) => void,
 ): () => void {
@@ -282,6 +374,11 @@ export function onServerMaintenanceUpdated(
   };
 }
 
+/**
+ * 订阅服务器设置更新事件
+ * @param listener - 设置更新回调函数
+ * @returns 取消订阅的函数
+ */
 export function onServerSettingsUpdated(
   listener: (payload: ServerSettingsUpdatedPayload) => void,
 ): () => void {
@@ -302,6 +399,11 @@ export function onServerSettingsUpdated(
   };
 }
 
+/**
+ * 创建基于 WebSocket 的 NativeApi 实例（单例模式）
+ * 如果已有未销毁的实例则直接返回，否则创建新的 WsTransport 并注册所有推送频道监听器
+ * @returns NativeApi 实例
+ */
 export function createWsNativeApi(): NativeApi {
   if (instance) {
     if (instance.transport.getState() !== "disposed") {
@@ -415,12 +517,11 @@ export function createWsNativeApi(): NativeApi {
   const api: NativeApi = {
     dialogs: {
       pickFolder: async () => {
-        if (!window.desktopBridge) return null;
-        return window.desktopBridge.pickFolder();
+        return tauriBridge.pickFolder();
       },
       saveFile: async (input) => {
-        if (window.desktopBridge?.saveFile) {
-          return window.desktopBridge.saveFile(input);
+        if (tauriBridge.saveFile) {
+          return tauriBridge.saveFile(input);
         }
         const blob = new Blob([input.contents], { type: "text/markdown;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -466,23 +567,13 @@ export function createWsNativeApi(): NativeApi {
       openInEditor: (cwd, editor) =>
         transport.request(WS_METHODS.shellOpenInEditor, { cwd, editor }),
       openExternal: async (url) => {
-        if (window.desktopBridge) {
-          const opened = await window.desktopBridge.openExternal(url);
-          if (!opened) {
-            throw new Error("Unable to open link.");
-          }
-          return;
+        const opened = await tauriBridge.openExternal(url);
+        if (!opened) {
+          throw new Error("Unable to open link.");
         }
-
-        // Some mobile browsers can return null here even when the tab opens.
-        // Avoid false negatives and let the browser handle popup policy.
-        window.open(url, "_blank", "noopener,noreferrer");
       },
       showInFolder: async (path) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.showInFolder(path);
-        }
-        // No-op in browser - this is a desktop-only feature
+        await tauriBridge.showInFolder(path);
       },
     },
     git: {
@@ -525,10 +616,7 @@ export function createWsNativeApi(): NativeApi {
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
       ): Promise<T | null> => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.showContextMenu(items, position);
-        }
-        return showContextMenuFallback(items, position);
+        return tauriBridge.showContextMenu(items, position);
       },
     },
     server: {
@@ -578,10 +666,7 @@ export function createWsNativeApi(): NativeApi {
         transport.request(WS_METHODS.serverGetProviderUsageSnapshot, input),
       getDiagnostics: () => transport.request(WS_METHODS.serverGetDiagnostics),
       transcribeVoice: (input) => {
-        if (window.desktopBridge?.server?.transcribeVoice) {
-          return window.desktopBridge.server.transcribeVoice(input);
-        }
-        return transport.request(WS_METHODS.serverTranscribeVoice, input);
+        return tauriBridge.server?.transcribeVoice(input) ?? Promise.reject(new Error("Not available"));
       },
       upsertKeybinding: (input) => transport.request(WS_METHODS.serverUpsertKeybinding, input),
     },
@@ -644,157 +729,58 @@ export function createWsNativeApi(): NativeApi {
     },
     browser: {
       open: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.open(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        if (input.initialUrl && state.tabs.length > 0) {
-          const activeTab = resolveFallbackBrowserTab(state);
-          activeTab.url = input.initialUrl;
-          activeTab.title = defaultBrowserTitle(input.initialUrl);
-          activeTab.lastCommittedUrl = input.initialUrl;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.open(input);
       },
       close: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.close(input);
-        }
-        const state = getFallbackBrowserState(input.threadId);
-        state.open = false;
-        state.activeTabId = null;
-        state.tabs = [];
-        state.lastError = null;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.close(input);
       },
       hide: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.hide(input);
-        }
+        await tauriBridge.browser.hide(input);
       },
       getState: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.getState(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.getState(input);
       },
       setPanelBounds: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.setPanelBounds(input);
-          return;
-        }
+        await tauriBridge.browser.setPanelBounds(input);
       },
       attachWebview: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.attachWebview(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.attachWebview(input);
       },
       copyScreenshotToClipboard: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.copyScreenshotToClipboard(input);
-          return;
-        }
-        throw new Error("Browser screenshots require the desktop app.");
+        await tauriBridge.browser.copyScreenshotToClipboard(input);
       },
       captureScreenshot: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.captureScreenshot(input);
-        }
-        throw new Error("Browser screenshots require the desktop app.");
+        return tauriBridge.browser.captureScreenshot(input);
       },
       executeCdp: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.executeCdp(input);
-        }
-        throw new Error("Browser automation requires the desktop app.");
+        return tauriBridge.browser.executeCdp(input);
       },
       navigate: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.navigate(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = resolveFallbackBrowserTab(state, input.tabId);
-        tab.url = input.url;
-        tab.title = defaultBrowserTitle(input.url);
-        tab.lastCommittedUrl = input.url;
-        tab.lastError = null;
-        tab.status = "live";
-        state.activeTabId = tab.id;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.navigate(input);
       },
       reload: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.reload(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.reload(input);
       },
       goBack: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.goBack(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.goBack(input);
       },
       goForward: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.goForward(input);
-        }
-        return cloneBrowserState(getFallbackBrowserState(input.threadId));
+        return tauriBridge.browser.goForward(input);
       },
       newTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.newTab(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = createFallbackTab(input.url);
-        state.tabs = [...state.tabs, tab];
-        if (input.activate !== false || !state.activeTabId) {
-          state.activeTabId = tab.id;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.newTab(input);
       },
       closeTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.closeTab(input);
-        }
-        const state = getFallbackBrowserState(input.threadId);
-        state.tabs = state.tabs.filter((tab) => tab.id !== input.tabId);
-        if (state.tabs.length === 0) {
-          state.open = false;
-          state.activeTabId = null;
-        } else if (!state.tabs.some((tab) => tab.id === state.activeTabId)) {
-          state.activeTabId = state.tabs[0]?.id ?? null;
-        }
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.closeTab(input);
       },
       selectTab: async (input) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.selectTab(input);
-        }
-        const state = ensureFallbackBrowserWorkspace(input.threadId);
-        const tab = resolveFallbackBrowserTab(state, input.tabId);
-        state.activeTabId = tab.id;
-        markFallbackBrowserStateChanged(state);
-        return emitFallbackBrowserState(input.threadId);
+        return tauriBridge.browser.selectTab(input);
       },
       openDevTools: async (input) => {
-        if (window.desktopBridge) {
-          await window.desktopBridge.browser.openDevTools(input);
-        }
+        await tauriBridge.browser.openDevTools(input);
       },
       onState: (callback) => {
-        if (window.desktopBridge) {
-          return window.desktopBridge.browser.onState(callback);
-        }
-        fallbackBrowserStateListeners.add(callback);
-        return () => {
-          fallbackBrowserStateListeners.delete(callback);
-        };
+        return tauriBridge.browser.onState(callback);
       },
     },
   };
@@ -803,6 +789,7 @@ export function createWsNativeApi(): NativeApi {
   return api;
 }
 
+/** Vite HMR 热更新时清理所有资源 */
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     instance?.transport.dispose();
