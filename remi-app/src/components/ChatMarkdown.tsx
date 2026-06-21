@@ -609,6 +609,37 @@ function SuspenseShikiCodeBlock({
   );
 }
 
+/**
+ * @file 聊天 Markdown 渲染组件
+ *
+ * 渲染助手/计划等富文本内容：
+ *
+ * - 支持 GitHub Flavored Markdown（`remark-gfm`）
+ * - 支持 KaTeX 数学公式（行内 + 块级）
+ * - 支持代码块语法高亮（基于 `@pierre/diffs` / Shiki）
+ * - 本地文件链接自动调用 `openInPreferredEditor` 在 IDE 中打开
+ * - 本地图片支持点击放大
+ * - 字符串字面量中的美元符（路由参数等）经占位符保护避免被识别为数学公式
+ *
+ * ## 核心导出
+ *
+ * - `ChatMarkdown`（默认导出，已 `memo`）：Markdown 渲染组件
+ *
+ * ## 使用场景
+ *
+ * - 助手消息气泡
+ * - 计划卡片正文
+ * - 任何需要高亮/数学公式/链接跳转的 Markdown 文本
+ *
+ * ## 注意事项
+ *
+ * - 高亮结果使用 `LRUCache`（默认 500 条/50MB）缓存
+ * - 流式输出时不缓存高亮（避免每 token 重算）
+ * - 高亮失败时降级为纯文本并 `console.warn`
+ * - KaTeX 严格模式关闭，错误不抛出
+ * - 单 `$` 行内公式：紧贴非空白字符时识别为公式，松散时按字面量处理
+ * - 代码块复制按钮使用 `useCopyToClipboard`
+ */
 function ChatMarkdown({
   text,
   cwd,

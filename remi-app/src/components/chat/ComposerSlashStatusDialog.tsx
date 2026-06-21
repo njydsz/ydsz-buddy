@@ -1,3 +1,25 @@
+/**
+ * @file Composer 斜杠命令状态对话框
+ *
+ * 本组件展示斜杠命令（如 `/new`、`/clear`）执行过程中的状态：
+ *
+ * - **执行进度**：spinner + 步骤描述
+ * - **错误展示**：执行失败时显示错误信息
+ * - **重试选项**：可重试的命令
+ *
+ * ## 使用场景
+ *
+ * - `/new` 创建新线程的等待
+ * - `/clear` 清理临时线程的确认
+ * - `/compact` 压缩上下文的进度
+ *
+ * ## 注意事项
+ *
+ * - 长时间操作（>5s）显示详细步骤
+ * - 失败时支持取消操作
+ * - 自动关闭：成功后 500ms 自动关闭
+ */
+
 import type { ResolvedThreadWorkspaceState } from "~/shared/threadEnvironment";
 import type { ProviderInteractionMode } from "~/contracts";
 import type { DraftThreadEnvMode } from "../../composerDraftStore";

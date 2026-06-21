@@ -1,6 +1,34 @@
 // Purpose: Branch/worktree picker for the chat toolbar.
 // Coordinates branch checkout/create actions and decorates rows with git metadata.
 // Depends on: git React Query helpers, native API mutations, and toolbar selection rules.
+/**
+ * @file 分支/Worktree 选择器（分支工具栏专用）
+ *
+ * 在 ChatView 顶部分支工具栏中负责：
+ *
+ * - **分支下拉**：列出本地/远端分支、PR 引用、当前/默认/Worktree 标记
+ * - **搜索过滤**：`useDeferredValue` 优化大列表体验
+ * - **虚拟列表**：分支超过 40 时启用 `@tanstack/react-virtual` 渲染
+ * - **乐观更新**：`useOptimistic` 即时展示新分支名
+ * - **错误处理**：脏 worktree / index lock / stash 冲突等多场景错误降级
+ * - **创建分支**：支持从查询词预填
+ * - **PR 引用解析**：识别 `#123` / `org/repo#123` 等格式触发单独回调
+ *
+ * ## 核心导出
+ *
+ * - `BranchToolbarBranchSelector`：选择器组件
+ *
+ * ## 使用场景
+ *
+ * - BranchToolbar 主组件中嵌入
+ * - 工作区切换/线程起始创建
+ *
+ * ## 注意事项
+ *
+ * - 错误恢复流程依赖 toast 通道，重复点击会替换 toast
+ * - 选择远端分支时会把 HEAD 切换到对应的本地分支
+ * - stash 流程使用 `git stashAndCheckout` 原子化执行
+ */
 import type {
   GitBranch,
   GitStashInfoResult,

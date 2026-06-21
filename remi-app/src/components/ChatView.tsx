@@ -6375,7 +6375,7 @@ export default function ChatView({
         title: nextThreadTitle,
         modelSelection: nextThreadModelSelection,
         runtimeMode,
-        interactionMode: "default",
+        interactionMode: "agent",
         envMode: activeThread.envMode ?? (activeThread.worktreePath ? "worktree" : "local"),
         branch: activeThread.branch,
         worktreePath: activeThread.worktreePath,
@@ -7997,6 +7997,10 @@ export default function ChatView({
           activeProvider={activeThread.session?.provider ?? activeThread.modelSelection.provider}
           activeProjectName={activeProjectDisplayName}
           threadBreadcrumbs={threadBreadcrumbs}
+          runtimeMode={runtimeMode}
+          interactionMode={interactionMode}
+          onRuntimeModeChange={handleRuntimeModeChange}
+          onInteractionModeChange={handleInteractionModeChange}
           isSidechat={Boolean(activeThread.sidechatSourceThreadId)}
           showWindowControls={isFocusedPane}
           hideHandoffControls={terminalWorkspaceTerminalTabActive}

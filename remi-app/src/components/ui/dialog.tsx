@@ -1,3 +1,36 @@
+/**
+ * @file Dialog UI 原子组件
+ *
+ * 本文件定义 Dialog 模态对话框组件，基于 `@base-ui/react/dialog` 实现：
+ *
+ * - **多层级结构**：Root / Trigger / Portal / Backdrop / Viewport / Popup / Title / Description / Close
+ * - **a11y**：自动处理焦点陷阱、ESC 关闭、滚动锁定
+ * - **可定制动画**：通过 CSS 变量配置进入/退出动画
+ *
+ * ## 核心导出
+ *
+ * - `Dialog`：根组件（管理开关状态）
+ * - `DialogTrigger`：触发器
+ * - `DialogPortal`：传送门
+ * - `DialogBackdrop`：背景遮罩
+ * - `DialogPopup`：对话框主体
+ * - `DialogHeader` / `DialogFooter`：页头/页脚
+ * - `DialogTitle` / `DialogDescription`：标题/描述
+ * - `DialogClose`：关闭按钮
+ *
+ * ## 使用场景
+ *
+ * - 确认对话框（删除、退出等）
+ * - 表单对话框
+ * - 信息展示弹窗
+ *
+ * ## 注意事项
+ *
+ * - 必须包在 `Dialog.Root` 中
+ * - 长内容使用 `DialogPopup` 的滚动区域
+ * - 移动端全屏展示
+ */
+
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";

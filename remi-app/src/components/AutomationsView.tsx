@@ -39,6 +39,25 @@ const AUTOMATION_TEMPLATES: ReadonlyArray<AutomationTemplate> = [
   },
 ];
 
+/**
+ * @file 自动化（Automations）视图
+ *
+ * 侧边栏 "Automations" 标签对应的占位页：展示预置模板和"即将推出"提示。
+ *
+ * ## 核心导出
+ *
+ * - `AutomationsView`：自动化页主组件
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏 "Automations" 入口
+ *
+ * ## 注意事项
+ *
+ * - 当前为静态占位（按钮均 `disabled`）
+ * - 模板列表与提示文案来自 i18n
+ * - 模板 `prompt` 是给 AI 的种子 prompt，便于将来点击后生成具体 automation
+ */
 export function AutomationsView() {
   const messages = useMessages();
 

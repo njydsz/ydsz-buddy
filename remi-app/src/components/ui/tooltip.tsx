@@ -1,3 +1,34 @@
+/**
+ * @file Tooltip UI 原子组件
+ *
+ * 本文件定义 Tooltip 工具提示组件，基于 `@base-ui/react/tooltip` 实现：
+ *
+ * - **触发方式**：hover / focus / click
+ * - **位置**：top / right / bottom / left + 偏移量
+ * - **延迟**：进入/离开延迟可配置
+ * - **a11y**：自动添加 `aria-describedby`
+ *
+ * ## 核心导出
+ *
+ * - `Tooltip`：根组件
+ * - `TooltipTrigger`：触发器
+ * - `TooltipPopup`：提示内容
+ * - `TooltipArrow`：箭头
+ * - `TooltipProvider`：全局 provider
+ *
+ * ## 使用场景
+ *
+ * - 按钮功能说明
+ * - 截断文本的完整展示
+ * - 快捷键提示
+ *
+ * ## 注意事项
+ *
+ * - 不用于关键信息（屏幕阅读器不一定读取）
+ * - 移动端 hover 改为长按
+ * - 避免频繁弹出
+ */
+
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 
 import { cn } from "~/lib/utils";

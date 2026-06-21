@@ -1,3 +1,32 @@
+/**
+ * @file Alert UI 原子组件
+ *
+ * 本文件定义 Alert 提示条组件，用于展示简短的状态信息：
+ *
+ * - **多 variant**：default / info / success / warning / destructive
+ * - **结构**：Title + Description + 可选 Icon + Action
+ * - **角色**：自动添加 `role="alert"`（屏幕阅读器友好）
+ *
+ * ## 核心导出
+ *
+ * - `Alert`：根组件
+ * - `AlertTitle`：标题
+ * - `AlertDescription`：描述
+ * - `alertVariants`：cva 变体定义
+ *
+ * ## 使用场景
+ *
+ * - 表单校验错误提示
+ * - 操作成功/失败反馈
+ * - 系统状态通知
+ *
+ * ## 注意事项
+ *
+ * - 长内容应使用 `Toast` 而非 `Alert`
+ * - 错误类 alert 应使用 `aria-live="assertive"`
+ * - 移动端占满宽度
+ */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 

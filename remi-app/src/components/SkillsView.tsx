@@ -7,7 +7,15 @@
 
 import { useDeferredValue, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookIcon, CheckIcon, CircleAlertIcon, ExternalLinkIcon, SearchIcon } from "~/lib/icons";
+import {
+  BookIcon,
+  CheckIcon,
+  CircleAlertIcon,
+  ExternalLinkIcon,
+  RocketIcon,
+  SearchIcon,
+  TerminalIcon,
+} from "~/lib/icons";
 import { localSkillsQueryOptions } from "~/localSkillsReactQuery";
 import { useMessages } from "~/i18n/I18nContext";
 import { cn } from "~/lib/utils";
@@ -18,6 +26,11 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "./
 import { Skeleton } from "./ui/skeleton";
 import { ProviderDiscoveryToolbar } from "./PluginLibraryPresentation";
 import { useProviderDiscoveryData } from "./useProviderDiscoveryData";
+import {
+  colorClassForSkillRuntimeMode,
+  labelForSkillRuntimeMode,
+  skillRuntimeModeFor,
+} from "~/localSkillMode";
 
 const SKILL_SH_HOMEPAGE = "https://skill.sh/";
 
@@ -224,6 +237,9 @@ function LocalSkillsSection({
     );
   }
 
+  // 按 RuntimeMode 分组（Code 域在前，Work 域在后），保持布局稳定。
+  const grouped = groupLocalSkillsByMode(skills);
+
   return (
     <section>
       <div className="flex items-baseline justify-between gap-2">
@@ -234,12 +250,81 @@ function LocalSkillsSection({
           {messages.skills.localCount.replace("{count}", String(skills.length))}
         </span>
       </div>
-      <div className="mt-3 grid grid-cols-1 gap-2">
-        {skills.map((skill) => (
-          <LocalSkillCard key={`${skill.source}::${skill.name}`} skill={skill} />
-        ))}
+      <div className="mt-3 space-y-4">
+        {(["code", "work"] as const).map((mode) => {
+          const items = grouped.get(mode);
+          if (!items || items.length === 0) return null;
+          return (
+            <div key={mode} className="space-y-2" data-skill-mode={mode}>
+              <div className="flex items-center gap-1.5 px-1">
+                <SkillModeBadge mode={mode} />
+                <span className="text-[11px] text-muted-foreground/70">
+                  {items.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {items.map((skill) => (
+                  <LocalSkillCard
+                    key={`${skill.source}::${skill.name}`}
+                    skill={skill}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
+  );
+}
+
+function groupLocalSkillsByMode(
+  skills: ReadonlyArray<{
+    name: string;
+    description?: string | undefined;
+    version?: string | undefined;
+    homepage?: string | undefined;
+    path: string;
+    source: string;
+    sourceDir: string;
+    enabled: boolean;
+  }>,
+): Map<"code" | "work", typeof skills> {
+  const result = new Map<"code" | "work", typeof skills>();
+  for (const skill of skills) {
+    const mode = skillRuntimeModeFor(skill);
+    const key: "code" | "work" = mode === "work" ? "work" : "code";
+    const existing = result.get(key);
+    if (existing) {
+      (existing as Array<(typeof skills)[number]>).push(skill);
+    } else {
+      result.set(key, [skill] as unknown as typeof skills);
+    }
+  }
+  return result;
+}
+
+function SkillModeBadge({
+  mode,
+  compact = false,
+}: {
+  mode: "code" | "work";
+  compact?: boolean;
+}) {
+  const Icon = mode === "work" ? RocketIcon : TerminalIcon;
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 rounded-full border font-medium",
+        compact ? "h-4 px-1 text-[9.5px]" : "h-5 px-1.5 text-[10px]",
+        colorClassForSkillRuntimeMode(mode),
+      )}
+      data-skill-mode-badge={mode}
+      data-compact={compact ? "true" : "false"}
+    >
+      <Icon className={compact ? "size-2" : "size-2.5"} />
+      {labelForSkillRuntimeMode(mode)}
+    </span>
   );
 }
 
@@ -258,14 +343,19 @@ function LocalSkillCard({
   };
 }) {
   const sourceLabel = SOURCE_LABEL[skill.source] ?? SOURCE_LABEL.unknown ?? "Unknown";
+  const mode = skillRuntimeModeFor(skill);
   return (
-    <div className="group flex flex-col gap-2 rounded-xl border border-border/60 bg-background/60 px-4 py-3 transition-colors hover:border-border hover:bg-accent/30">
+    <div
+      className="group flex flex-col gap-2 rounded-xl border border-border/60 bg-background/60 px-4 py-3 transition-colors hover:border-border hover:bg-accent/30"
+      data-skill-mode={mode}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-[13px] font-semibold leading-snug text-foreground">
               {skill.name}
             </p>
+            <SkillModeBadge mode={mode === "work" ? "work" : "code"} compact />
             {skill.version ? (
               <span className="shrink-0 rounded-full border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground/80">
                 v{skill.version}

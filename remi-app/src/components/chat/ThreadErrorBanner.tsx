@@ -1,3 +1,28 @@
+/**
+ * @file 线程错误横幅组件
+ *
+ * 本组件展示线程执行过程中的错误提示：
+ *
+ * - **错误信息**：标题、详细描述、错误码
+ * - **恢复操作**：重试、回滚、查看详情
+ * - **可关闭**：用户可手动关闭
+ *
+ * ## 核心导出
+ *
+ * - `ThreadErrorBanner`：横幅组件
+ *
+ * ## 使用场景
+ *
+ * - 线程执行失败时展示
+ * - 网络异常
+ * - Provider 错误
+ *
+ * ## 注意事项
+ *
+ * - 严重错误（导致线程无法继续）应阻断操作
+ * - 错误信息包含修复建议
+ */
+
 import { memo } from "react";
 import { Alert, AlertAction, AlertDescription } from "../ui/alert";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";

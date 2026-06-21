@@ -1,3 +1,36 @@
+/**
+ * @file Sidebar UI 原子组件
+ *
+ * 本文件定义 Sidebar 侧边栏组件，基于 `@base-ui/react` 实现：
+ *
+ * - **复合结构**：Provider / Root / Header / Content / Footer / Group / Menu / Trigger / Rail
+ * - **持久化**：可记忆折叠/展开状态（通过 `useSidebar` Hook）
+ * - **响应式**：自动响应窗口宽度
+ * - **键盘导航**：完整支持键盘快捷键
+ *
+ * ## 核心导出
+ *
+ * - `SidebarProvider`：全局 Provider
+ * - `Sidebar`：根容器
+ * - `SidebarHeader` / `SidebarFooter`：页头/页脚
+ * - `SidebarContent`：滚动内容区
+ * - `SidebarGroup`：分组
+ * - `SidebarMenu`：菜单列表
+ * - `SidebarMenuItem` / `SidebarMenuButton` / `SidebarMenuAction`：菜单项
+ * - `SidebarTrigger`：折叠/展开触发器
+ * - `useSidebar`：获取上下文（折叠状态等）
+ *
+ * ## 使用场景
+ *
+ * - 应用主侧边栏
+ * - 设置面板的二级侧边栏
+ *
+ * ## 注意事项
+ *
+ * - 必须在 `SidebarProvider` 内使用
+ * - 折叠状态受 `collapsible` prop 控制
+ */
+
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";

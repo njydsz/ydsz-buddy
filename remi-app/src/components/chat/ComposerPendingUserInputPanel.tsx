@@ -1,3 +1,27 @@
+/**
+ * @file 待用户输入面板组件
+ *
+ * 本组件展示 AI 向用户提问的待办（多个选项、自由文本），用户选择后 AI 继续执行。
+ *
+ * ## 核心职责
+ *
+ * - **问题展示**：问题文本、选项列表
+ * - **答案提交**：单选 / 多选 / 自由文本
+ * - **跳过选项**：允许用户跳过
+ *
+ * ## 使用场景
+ *
+ * - AI 请求澄清（如"使用哪种实现方案？"）
+ * - AI 请求决策（如"提交信息风格？"）
+ * - AI 请求补充信息（如"应该测试哪些场景？"）
+ *
+ * ## 注意事项
+ *
+ * - 选项数超过 4 个时切换为列表展示
+ * - 多选问题需要全部选项提交后才返回
+ * - 自由文本支持 Markdown
+ */
+
 import { type ApprovalRequestId } from "~/contracts";
 import { memo, useEffect, useEffectEvent, useRef } from "react";
 import { type PendingUserInput } from "../../session-logic";

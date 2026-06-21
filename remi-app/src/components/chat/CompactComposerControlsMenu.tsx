@@ -1,3 +1,27 @@
+/**
+ * @file 紧凑型 Composer 控件菜单组件
+ *
+ * 本组件实现 Composer 右下角"..."菜单，集中展示交互模式（Build/Plan）、任务列表、设置入口等。
+ *
+ * ## 核心职责
+ *
+ * - **交互模式切换**：Build / Plan
+ * - **任务列表入口**：打开/关闭任务面板
+ * - **设置快捷入口**：跳转设置
+ * - **更多操作**：压缩、清理等
+ *
+ * ## 使用场景
+ *
+ * - Composer 工具栏溢出菜单
+ * - 移动端的 Composer 控制
+ * - 窄宽度下的折叠展示
+ *
+ * ## 注意事项
+ *
+ * - 仅在需要时显示（宽度足够时不显示）
+ * - 菜单项根据当前状态动态启用/禁用
+ */
+
 import { ProviderInteractionMode, RuntimeMode } from "~/contracts";
 import { memo, type ReactNode } from "react";
 import { EllipsisIcon, ListTodoIcon } from "~/lib/icons";

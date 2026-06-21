@@ -1,3 +1,35 @@
+/**
+ * @file Card UI 原子组件
+ *
+ * 本文件定义 Card 卡片组件，提供统一的容器样式：
+ *
+ * - **结构化分区**：Card / CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter
+ * - **阴影层级**：根据嵌套深度自动调整
+ * - **a11y**：作为语义化容器使用
+ *
+ * ## 核心导出
+ *
+ * - `Card`：根容器
+ * - `CardHeader`：页头（包含标题、描述、动作）
+ * - `CardTitle`：标题
+ * - `CardDescription`：描述
+ * - `CardAction`：右上角操作区
+ * - `CardContent`：主体内容
+ * - `CardFooter`：页脚（按钮组等）
+ *
+ * ## 使用场景
+ *
+ * - 列表项容器
+ * - 表单分组
+ * - 信息展示卡
+ *
+ * ## 注意事项
+ *
+ * - 卡片应有明确的边界（border + shadow）
+ * - 内部 padding 由 CardContent 自动处理
+ * - 移动端占满宽度
+ */
+
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";

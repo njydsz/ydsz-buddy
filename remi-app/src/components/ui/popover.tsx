@@ -1,3 +1,37 @@
+/**
+ * @file Popover UI 原子组件
+ *
+ * 本文件定义 Popover 弹出层组件，基于 `@base-ui/react/popover` 实现：
+ *
+ * - **触发方式**：click / hover / focus / manual
+ * - **位置**：自动选择最佳位置
+ * - **复合结构**：Root / Trigger / Portal / Backdrop / Popup / Title / Description / Close
+ * - **可定制**：modal 模式、动画
+ *
+ * ## 核心导出
+ *
+ * - `Popover`：根组件
+ * - `PopoverTrigger`：触发器
+ * - `PopoverPortal`：传送门
+ * - `PopoverPopup`：弹层主体
+ * - `PopoverTitle` / `PopoverDescription`：标题/描述
+ * - `PopoverClose`：关闭按钮
+ * - `PopoverArrow`：箭头
+ * - `PopoverAnchor`：定位锚点
+ *
+ * ## 使用场景
+ *
+ * - 命令面板
+ * - 设置菜单
+ * - 表单帮助说明
+ *
+ * ## 注意事项
+ *
+ * - 内部可包含任意内容
+ * - 自动避让屏幕边缘
+ * - 关闭操作触发 `onOpenChange(false)`
+ */
+
 "use client";
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";

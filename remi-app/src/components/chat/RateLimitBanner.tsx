@@ -1,3 +1,27 @@
+/**
+ * @file 速率限制横幅组件
+ *
+ * 本组件展示 Provider 速率限制触发的提示横幅：
+ *
+ * - **限制详情**：当前窗口、剩余量、重置时间
+ * - **建议操作**：等待、切换模型、联系管理员
+ * - **自动隐藏**：限制恢复后自动消失
+ *
+ * ## 核心导出
+ *
+ * - `RateLimitBanner`：横幅组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 顶部
+ * - 状态栏
+ *
+ * ## 注意事项
+ *
+ * - 不阻塞用户操作（仅提示）
+ * - 提供"查看详情"入口
+ */
+
 import { memo } from "react";
 import type { OrchestrationThreadActivity } from "~/contracts";
 import { Alert, AlertAction, AlertDescription } from "../ui/alert";

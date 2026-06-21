@@ -2,7 +2,33 @@
 // Purpose: Renders the in-app browser chrome and mirrors the native desktop view.
 // Layer: Desktop-only React component
 // Depends on: browserStateStore, nativeApi browser bridge, DiffPanelShell
-
+/**
+ * @file 内嵌浏览器面板
+ *
+ * 桌面端独占的浏览器面板，与原生桌面浏览器视图保持一致的 chrome：
+ *
+ * - **地址栏**：当前 URL 双向同步、联想输入、提交到后端
+ * - **导航按钮**：前进/后退/刷新
+ * - **多标签**：通过 `browserStateStore` 管理会话级 tab 列表
+ * - **截图捕获**：将浏览器截图作为图片附件注入到 Composer
+ * - **状态联动**：地址栏草稿/编辑态/历史记录均同步到 store
+ *
+ * ## 核心导出
+ *
+ * - `BrowserPanel`：浏览器面板主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 中的内嵌浏览器侧栏
+ * - 桌面壳主窗口
+ *
+ * ## 注意事项
+ *
+ * - 浏览器运行在原生 webview 中（由后端控制）
+ * - 截图通过 `browser.captureScreenshot` 转 base64 后注入 Composer
+ * - `DiffPanelShell` 提供"加载/错误/空"状态壳
+ * - 仅桌面端渲染
+ */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 import {

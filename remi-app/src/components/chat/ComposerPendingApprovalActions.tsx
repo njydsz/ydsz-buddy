@@ -1,3 +1,25 @@
+/**
+ * @file Composer 待审批操作组件
+ *
+ * 本组件提供"批准"/"拒绝"/"始终批准"三个操作按钮，
+ * 用于待审批请求的快速决策。
+ *
+ * ## 核心导出
+ *
+ * - `ComposerPendingApprovalActions`：操作按钮组
+ *
+ * ## 使用场景
+ *
+ * - ComposerPendingApprovalPanel 内部
+ * - 待审批消息行尾
+ *
+ * ## 注意事项
+ *
+ * - "始终批准" 仅对当前会话生效
+ * - 拒绝时可附带原因
+ * - 决策通过 WebSocket 实时同步
+ */
+
 import { type ApprovalRequestId, type ProviderApprovalDecision } from "~/contracts";
 import { memo } from "react";
 import { Button } from "../ui/button";

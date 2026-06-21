@@ -10,6 +10,28 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
+/**
+ * @file 应用导航按钮（返回/前进）
+ *
+ * 本组件在桌面端顶部栏渲染浏览器风格的"返回 / 前进"按钮，
+ * 与主窗口内的 `appNavigation` 历史栈联动，支持键盘快捷键提示。
+ *
+ * ## 核心导出
+ *
+ * - `AppNavigationButtons`：返回/前进按钮组
+ *
+ * ## 使用场景
+ *
+ * - 应用主窗口顶部 chrome 区域
+ * - 桌面端（Tauri/桌面壳）独占
+ *
+ * ## 注意事项
+ *
+ * - Web 端不渲染（非桌面环境直接返回 `null`）
+ * - 快捷键提示根据 macOS / 其他平台自动切换（⌘[ / ⌘] 或 Alt+Left / Alt+Right）
+ * - 历史栈为空时按钮自动禁用
+ * - `data-no-drag` 避免在自定义标题栏中触发拖拽
+ */
 export function AppNavigationButtons({ className }: { className?: string }) {
   const { canGoBack, canGoForward } = useAppNavigationState();
   const platform = typeof navigator === "undefined" ? "" : navigator.platform;

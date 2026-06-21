@@ -3,7 +3,37 @@
 // Layer: Component logic helper
 // Exports: browserAddressDisplayValue, normalizeBrowserAddressInput, buildBrowserAddressSuggestions
 // Depends on: browser tab metadata and thread-local browser history
-
+/**
+ * @file 浏览器面板逻辑工具
+ *
+ * 提供浏览器面板的纯函数逻辑：
+ *
+ * - `browserAddressDisplayValue`：根据 tab 状态计算地址栏显示值
+ * - `normalizeBrowserAddressInput`：把用户输入规整为合法 URL / 搜索 URL
+ * - `buildBrowserAddressSuggestions`：构建地址栏联想项（导航/标签/历史）
+ * - `resolveBrowserChromeStatus`：决定 chrome 状态（加载中/可前进/可后退）
+ * - `resolveBrowserAddressSync`：地址栏草稿与活动 tab 同步决策
+ *
+ * ## 核心导出
+ *
+ * - `browserAddressDisplayValue`
+ * - `normalizeBrowserAddressInput`
+ * - `buildBrowserAddressSuggestions`
+ * - `resolveBrowserChromeStatus`
+ * - `resolveBrowserAddressSync`
+ * - `BrowserAddressSuggestion`：联想项类型
+ * - `BrowserChromeStatus`：chrome 状态类型
+ *
+ * ## 使用场景
+ *
+ * - BrowserPanel 内部
+ *
+ * ## 注意事项
+ *
+ * - 不包含 React hooks，可在 reducer / 事件处理中调用
+ * - 输入为不含协议头时按 google 搜索处理
+ * - 联想条数上限 6
+ */
 import type { BrowserTabState } from "~/contracts";
 import type { BrowserHistoryEntry } from "../browserStateStore";
 

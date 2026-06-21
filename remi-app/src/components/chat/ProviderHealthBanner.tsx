@@ -1,3 +1,27 @@
+/**
+ * @file Provider 健康横幅组件
+ *
+ * 本组件展示 Provider 健康状态不可用时的提示横幅：
+ *
+ * - **不可用提示**：Provider 未配置 / 凭证错误 / 服务不可达
+ * - **操作入口**：跳转到设置
+ * - **自动隐藏**：Provider 恢复后自动消失
+ *
+ * ## 核心导出
+ *
+ * - `ProviderHealthBanner`：横幅组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 顶部
+ * - Provider 切换后的反馈
+ *
+ * ## 注意事项
+ *
+ * - 多个 Provider 不可用时合并展示
+ * - 提供"重试"按钮
+ */
+
 import { PROVIDER_DISPLAY_NAMES, type ServerProviderStatus } from "~/contracts";
 import { memo } from "react";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "../ui/alert";

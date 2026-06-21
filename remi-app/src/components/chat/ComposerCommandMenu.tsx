@@ -1,3 +1,37 @@
+/**
+ * @file Composer 命令菜单组件
+ *
+ * 本组件实现 Composer 中输入 `/` 或 `@` 时弹出的命令/提及菜单。
+ *
+ * ## 核心职责
+ *
+ * - **多源数据聚合**：合并 Agent 提及、Provider 技能、命令、插件、本地文件夹、文件提及
+ * - **模糊搜索**：基于 `normalizeProviderDiscoveryText` 的子串匹配
+ * - **键盘导航**：方向键 / Enter / Tab / Esc
+ * - **状态分组**：按"最近使用"与"全部"分组展示
+ *
+ * ## 数据源
+ *
+ * - Agent 提及（@alias）
+ * - Provider 技能（/skill）
+ * - Provider 命令（/command）
+ * - Provider 插件
+ * - 本地文件夹提及（@folder）
+ * - 文件提及（@file）
+ *
+ * ## 使用场景
+ *
+ * - Composer 菜单渲染
+ * - 跨 Provider 的统一命令入口
+ * - 助手/工具快速选择
+ *
+ * ## 注意事项
+ *
+ * - 菜单项按优先级排序（最近使用 > 收藏 > 字母序）
+ * - 搜索使用简单的子串匹配，性能良好
+ * - 插件与技能需要先安装才显示
+ */
+
 import {
   type ProjectEntry,
   type ModelSlug,

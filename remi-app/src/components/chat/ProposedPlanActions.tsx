@@ -1,3 +1,30 @@
+/**
+ * @file 提议计划操作组件
+ *
+ * 本组件展示对 AI 提议的计划（Plan）的可执行操作：
+ *
+ * - **接受计划**：切换为 Build 模式继续执行
+ * - **修改计划**：在 Composer 中编辑
+ * - **导出计划**：保存为 Markdown 文件
+ * - **拒绝计划**：放弃并说明原因
+ *
+ * ## 核心导出
+ *
+ * - `ProposedPlanActions`：操作按钮组
+ * - `buildProposedPlanMarkdownFilename`：生成导出文件名
+ *
+ * ## 使用场景
+ *
+ * - ProposedPlanCard 卡片底部
+ * - Composer 上方的"接受计划"提示
+ *
+ * ## 注意事项
+ *
+ * - 接受计划后自动从 Plan 模式切换为 Build 模式
+ * - 导出文件名包含线程标题
+ * - 拒绝需要用户输入原因
+ */
+
 import { memo, useMemo, useState, type ReactNode } from "react";
 import {
   buildProposedPlanMarkdownFilename,

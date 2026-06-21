@@ -1,3 +1,30 @@
+/**
+ * @file 上下文窗口计量器组件
+ *
+ * 本组件以进度条形式展示当前线程的上下文窗口使用情况：
+ *
+ * - **使用率展示**：百分比 / 绝对值
+ * - **状态颜色**：低（绿）/ 中（黄）/ 高（橙）/ 超限（红）
+ * - **输入/输出分布**：分别展示 input / output token
+ *
+ * ## 核心导出
+ *
+ * - `ContextWindowMeter`：计量器组件
+ * - `ContextWindowMeterDisplay`：展示数据
+ *
+ * ## 使用场景
+ *
+ * - Composer 底部状态栏
+ * - 线程详情页的统计信息
+ * - 自动压缩触发时的提示
+ *
+ * ## 注意事项
+ *
+ * - 超过 80% 触发警告
+ * - 超过 100% 时建议立即压缩
+ * - 模型上下文窗口大小来自模型元数据
+ */
+
 import {
   type ContextWindowSnapshot,
   deriveContextWindowMeterDisplay,

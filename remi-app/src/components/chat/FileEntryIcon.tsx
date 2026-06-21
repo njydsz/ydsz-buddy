@@ -1,3 +1,31 @@
+/**
+ * @file 文件条目图标组件
+ *
+ * 本组件根据文件扩展名和 MIME 类型返回对应的文件图标：
+ *
+ * - **扩展名识别**：ts / tsx / js / py / rs / md / json 等
+ * - **MIME 类型识别**：image / video / audio / archive
+ * - **特殊文件**：.gitignore / Dockerfile / LICENSE 等
+ * - **文件夹/通用图标**：作为兜底
+ *
+ * ## 核心导出
+ *
+ * - `FileEntryIcon`：图标组件
+ * - `getFileIconUrlForEntry`：根据条目获取图标 URL
+ *
+ * ## 使用场景
+ *
+ * - 文件浏览器（DirectoryTreeBrowser）
+ * - 文件提及（@ file）菜单
+ * - ChangedFilesTree 文件行
+ *
+ * ## 注意事项
+ *
+ * - 内部缓存图标 URL（基于文件路径）
+ * - 大小写不敏感的扩展名匹配
+ * - 二进制文件使用通用图标
+ */
+
 import { memo, useMemo, useState } from "react";
 import { getFileIconUrlForEntry } from "../../file-icons";
 import { FileIcon } from "~/lib/icons";

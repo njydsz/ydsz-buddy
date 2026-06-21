@@ -1,3 +1,30 @@
+/**
+ * @file 提议计划卡片组件
+ *
+ * 本组件以卡片形式展示 AI 提议的执行计划（Plan），包含：
+ *
+ * - **计划标题**
+ * - **计划步骤列表**（可折叠/展开）
+ * - **可操作状态**：未决/已接受/已拒绝
+ * - **操作按钮**：接受、修改、拒绝、导出
+ *
+ * ## 核心导出
+ *
+ * - `ProposedPlanCard`：卡片组件
+ * - `buildCollapsedProposedPlanPreviewMarkdown`：折叠预览
+ *
+ * ## 使用场景
+ *
+ * - Plan 模式下 AI 提交计划后的展示
+ * - 历史计划查看
+ *
+ * ## 注意事项
+ *
+ * - 步骤支持 Markdown（标题、列表、代码块）
+ * - 折叠时显示摘要 + 前 3 个步骤
+ * - 接受后步骤不可修改
+ */
+
 import { memo, useState, type CSSProperties } from "react";
 import {
   buildCollapsedProposedPlanPreviewMarkdown,

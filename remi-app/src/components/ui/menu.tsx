@@ -1,3 +1,39 @@
+/**
+ * @file Menu UI 原子组件
+ *
+ * 本文件定义 Menu 右键菜单组件，基于 `@base-ui/react/menu` 实现：
+ *
+ * - **复合结构**：Root / Trigger / Portal / Backdrop / Popup / Item / Group / Separator / CheckboxItem / RadioItem
+ * - **位置**：自动选择 + 手动指定
+ * - **键盘导航**：方向键 / Home / End / Enter
+ * - **a11y**：完整 ARIA Menu 角色
+ *
+ * ## 核心导出
+ *
+ * - `Menu`：根组件
+ * - `MenuTrigger`：触发器
+ * - `MenuPortal`：传送门
+ * - `MenuPopup`：菜单主体
+ * - `MenuItem`：菜单项
+ * - `MenuGroup`：分组
+ * - `MenuSeparator`：分隔线
+ * - `MenuCheckboxItem`：复选项
+ * - `MenuRadioGroup` / `MenuRadioItem`：单选组
+ * - `MenuLabel` / `MenuShortcut`：标签/快捷键
+ *
+ * ## 使用场景
+ *
+ * - 右键上下文菜单
+ * - 设置下拉菜单
+ * - 操作选择菜单
+ *
+ * ## 注意事项
+ *
+ * - 触发区域使用 `MenuTrigger` 而非外部状态
+ * - 菜单项支持 disabled 状态
+ * - 移动端用底部弹出
+ */
+
 "use client";
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";

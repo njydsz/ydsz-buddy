@@ -1,3 +1,34 @@
+/**
+ * @file Toast UI 原子组件
+ *
+ * 本文件定义 Toast 提示组件，基于 `@base-ui/react/toast` 实现：
+ *
+ * - **多 variant**：default / info / success / warning / destructive
+ * - **位置**：top-right / bottom-center / etc.
+ * - **生命周期**：自动消失（可配置）、手动关闭
+ * - **队列管理**：通过 `toastManager` 统一管理
+ *
+ * ## 核心导出
+ *
+ * - `Toast`：单条 toast 组件
+ * - `ToastTitle` / `ToastDescription`：标题/描述
+ * - `ToastAction` / `ToastClose`：动作/关闭按钮
+ * - `toastManager`：全局 toast 管理器
+ * - `toast()`：便捷调用函数
+ *
+ * ## 使用场景
+ *
+ * - 操作反馈（保存成功、提交完成）
+ * - 错误提示（网络异常、权限不足）
+ * - 通知（任务完成、新消息）
+ *
+ * ## 注意事项
+ *
+ * - 错误 toast 应使用 `aria-live="assertive"`
+ * - 同一时间最多展示 3 条
+ * - 自动消失时间默认 5 秒
+ */
+
 "use client";
 
 import { Toast, type ToastObject } from "@base-ui/react/toast";

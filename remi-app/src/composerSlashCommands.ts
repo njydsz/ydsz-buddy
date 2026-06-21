@@ -1,4 +1,4 @@
-import type { GitBranch, ProviderKind } from "@remi-claw/contracts";
+import type { GitBranch, ProviderKind, RuntimeMode } from "@remi-claw/contracts";
 
 export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "clear",
@@ -21,6 +21,11 @@ export interface ComposerSlashCommandDefinition {
   label: `/${ComposerSlashCommand}`;
   description: string;
   source: "app" | "shared";
+  /**
+   * 该指令所属的 RuntimeMode 维度。Code 域指令在所有模式下都可用；
+   * Work 域指令仅在 Work 模式下出现。
+   */
+  modes: ReadonlyArray<RuntimeMode>;
 }
 
 export interface ComposerSlashInvocation {
@@ -109,66 +114,77 @@ const COMPOSER_SLASH_COMMAND_DEFINITIONS: Record<
     label: "/clear",
     description: "Start a fresh thread and clear the current conversation context",
     source: "shared",
+    modes: ["code", "work"],
   },
   compact: {
     command: "compact",
     label: "/compact",
     description: "Compact the current thread context to free space",
     source: "app",
+    modes: ["code", "work"],
   },
   model: {
     command: "model",
     label: "/model",
     description: "Switch response model for this thread",
     source: "shared",
+    modes: ["code", "work"],
   },
   plan: {
     command: "plan",
     label: "/plan",
     description: "Switch this thread into plan mode",
     source: "app",
+    modes: ["code", "work"],
   },
   default: {
     command: "default",
     label: "/default",
     description: "Switch this thread back to normal chat mode",
     source: "app",
+    modes: ["code", "work"],
   },
   review: {
     command: "review",
     label: "/review",
     description: "Start a code review for current changes",
     source: "app",
+    modes: ["code"],
   },
   fork: {
     command: "fork",
     label: "/fork",
     description: "Fork this thread into local or a new worktree",
     source: "app",
+    modes: ["code"],
   },
   side: {
     command: "side",
     label: "/side",
     description: "Open a guarded sidechat from this thread",
     source: "app",
+    modes: ["code", "work"],
   },
   status: {
     command: "status",
     label: "/status",
     description: "Show context usage and rate-limit status",
     source: "app",
+    modes: ["code", "work"],
   },
   subagents: {
     command: "subagents",
     label: "/subagents",
     description: "Insert a prompt that asks the assistant to delegate work",
     source: "app",
+    modes: ["code", "work"],
   },
   fast: {
     command: "fast",
     label: "/fast",
     description: "Turn fast mode on or off for this thread",
     source: "app",
+    modes: ["code", "work"],
   },
 };
 
@@ -223,6 +239,36 @@ export function filterComposerSlashCommands(
   });
 
   return matches.map((command) => COMPOSER_SLASH_COMMAND_DEFINITIONS[command]);
+}
+
+/**
+ * 按 RuntimeMode 对 slash 指令分组。Code 域在前，Work 域在后；任一域
+ * 不存在条目时返回空数组而非省略键，方便 UI 渲染空状态。
+ */
+export function groupComposerSlashCommandsByMode(
+  definitions: ReadonlyArray<ComposerSlashCommandDefinition>,
+): Record<RuntimeMode, ComposerSlashCommandDefinition[]> {
+  const result: Record<RuntimeMode, ComposerSlashCommandDefinition[]> = {
+    code: [],
+    work: [],
+  };
+  for (const definition of definitions) {
+    for (const mode of definition.modes) {
+      result[mode].push(definition);
+    }
+  }
+  return result;
+}
+
+/**
+ * 根据当前 RuntimeMode 过滤可用 slash 指令。Code 域同时看到所有 modes
+ * 包含 "code" 的指令；Work 域同时看到所有 modes 包含 "work" 的指令。
+ */
+export function filterComposerSlashCommandsByMode(
+  definitions: ReadonlyArray<ComposerSlashCommandDefinition>,
+  mode: RuntimeMode,
+): ComposerSlashCommandDefinition[] {
+  return definitions.filter((definition) => definition.modes.includes(mode));
 }
 
 function hasMeaningfulComposerText(prompt: string): boolean {

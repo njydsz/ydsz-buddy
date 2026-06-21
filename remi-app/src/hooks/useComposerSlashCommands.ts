@@ -378,7 +378,7 @@ export function useComposerSlashCommands(input: {
             attachments: [],
           },
           modelSelection: selectedModelSelection,
-          runtimeMode: "approval-required",
+          runtimeMode: "work",
           interactionMode: "agent",
           createdAt: new Date().toISOString(),
         });

@@ -1,3 +1,28 @@
+/**
+ * @file Badge UI 原子组件
+ *
+ * 本文件定义 Badge 徽章组件，用于展示简短的状态标识：
+ *
+ * - **多 variant**：default / secondary / destructive / outline / success / warning
+ * - **a11y**：可作为 `<span>` 或链接/按钮的子元素
+ *
+ * ## 核心导出
+ *
+ * - `Badge`：徽章组件
+ * - `badgeVariants`：cva 变体定义
+ *
+ * ## 使用场景
+ *
+ * - 通知数量角标
+ * - 状态标识（已连接/已断开）
+ * - 标签展示（Beta/New）
+ *
+ * ## 注意事项
+ *
+ * - 颜色应与文案一致传达语义
+ * - 不用于交互，仅作展示
+ */
+
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";

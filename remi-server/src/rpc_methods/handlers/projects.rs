@@ -1,4 +1,4 @@
-//! # Projects RPC 方法模块
+﻿//! # Projects RPC 方法模块
 //!
 //! 为前端提供 `projects.*` 命名空间下的 RPC 方法，内部委托给
 //! `workspace_entries` / `workspace_filesystem` 完成实际文件操作。

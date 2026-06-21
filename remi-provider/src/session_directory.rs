@@ -21,7 +21,7 @@ pub enum SessionStatus {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = camelCase)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderRuntimeBinding {
     pub thread_id: String,
     pub provider: ProviderKind,
@@ -49,14 +49,14 @@ impl ProviderSessionDirectory {
 
     pub async fn get_provider(&self, thread_id: &str) -> ProviderResult<ProviderKind> {
         let binding = self.get_binding(thread_id).await?
-            .ok_or_else(|| ProviderError::SessionNotFound(format!(Provider binding not found for thread {}, thread_id)))?;
+            .ok_or_else(|| ProviderError::SessionNotFound(format!("Provider binding not found for thread {}", thread_id)))?;
         Ok(binding.provider)
     }
 
     pub async fn upsert(&self, binding: ProviderRuntimeBinding) -> ProviderResult<()> {
         let thread_id = binding.thread_id.clone();
         let mut bindings = self.bindings.write().await;
-        debug!(Updating session binding: thread_id={}, provider={:?}, thread_id, binding.provider);
+        debug!("Updating session binding: thread_id={}, provider={:?}", thread_id, binding.provider);
         bindings.insert(thread_id, binding);
         Ok(())
     }
@@ -64,9 +64,9 @@ impl ProviderSessionDirectory {
     pub async fn remove(&self, thread_id: &str) -> ProviderResult<()> {
         let mut bindings = self.bindings.write().await;
         if bindings.remove(thread_id).is_some() {
-            debug!(Deleted session binding: thread_id={}, thread_id);
+            debug!("Deleted session binding: thread_id={}", thread_id);
         } else {
-            warn!(Attempted to delete non-existent session binding: thread_id={}, thread_id);
+            warn!("Attempted to delete non-existent session binding: thread_id={}", thread_id);
         }
         Ok(())
     }
@@ -86,10 +86,10 @@ impl ProviderSessionDirectory {
         if let Some(binding) = bindings.get_mut(thread_id) {
             binding.status = status;
             binding.last_seen_at = chrono::Utc::now().to_rfc3339();
-            debug!(Updated session status: thread_id={}, status={:?}, thread_id, status);
+            debug!("Updated session status: thread_id={}, status={:?}", thread_id, status);
             Ok(())
         } else {
-            Err(ProviderError::SessionNotFound(format!(Session binding not found for thread {}, thread_id)))
+            Err(ProviderError::SessionNotFound(format!("Session binding not found for thread {}", thread_id)))
         }
     }
 
@@ -98,10 +98,10 @@ impl ProviderSessionDirectory {
         if let Some(binding) = bindings.get_mut(thread_id) {
             binding.resume_cursor = cursor;
             binding.last_seen_at = chrono::Utc::now().to_rfc3339();
-            debug!(Updated resume cursor: thread_id={}, thread_id);
+            debug!("Updated resume cursor: thread_id={}", thread_id);
             Ok(())
         } else {
-            Err(ProviderError::SessionNotFound(format!(Session binding not found for thread {}, thread_id)))
+            Err(ProviderError::SessionNotFound(format!("Session binding not found for thread {}", thread_id)))
         }
     }
 
@@ -116,10 +116,10 @@ impl ProviderSessionDirectory {
                 } else { binding.runtime_payload = Some(new_payload); }
             }
             binding.last_seen_at = chrono::Utc::now().to_rfc3339();
-            debug!(Updated runtime payload: thread_id={}, thread_id);
+            debug!("Updated runtime payload: thread_id={}", thread_id);
             Ok(())
         } else {
-            Err(ProviderError::SessionNotFound(format!(Session binding not found for thread {}, thread_id)))
+            Err(ProviderError::SessionNotFound(format!("Session binding not found for thread {}", thread_id)))
         }
     }
 
@@ -131,14 +131,14 @@ impl ProviderSessionDirectory {
             if let Ok(last_seen) = chrono::DateTime::parse_from_rfc3339(&binding.last_seen_at) {
                 let age = now.signed_duration_since(last_seen);
                 if age.num_seconds() > max_age_seconds {
-                    debug!(Cleaning up expired session: thread_id={}, age={}s, thread_id, age.num_seconds());
+                    debug!("Cleaning up expired session: thread_id={}, age={}s", thread_id, age.num_seconds());
                     removed += 1;
                     return false;
                 }
             }
             true
         });
-        if removed > 0 { debug!(Cleaned up {} expired sessions, removed); }
+        if removed > 0 { debug!("Cleaned up {} expired sessions", removed); }
         Ok(removed)
     }
 }

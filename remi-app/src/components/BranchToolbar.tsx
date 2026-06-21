@@ -67,6 +67,15 @@ export interface RuntimeUsageControlsProps {
   className?: string | undefined;
 }
 
+/**
+ * 运行时模式与上下文窗口的组合控件
+ *
+ * 提供：
+ * - Code / Work 模式切换按钮（带 tooltip 提示）
+ * - `ContextWindowMeter` 上下文窗口计量
+ *
+ * 控件整体放在工具栏右侧，方便用户在会话过程中随时感知上下文使用量。
+ */
 export function RuntimeUsageControls({
   runtimeMode,
   onRuntimeModeChange,
@@ -88,21 +97,21 @@ export function RuntimeUsageControls({
           type="button"
           className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-(length:--app-font-size-ui-xs,10px) font-normal transition-colors hover:text-(--color-text-foreground)"
           onClick={() =>
-            onRuntimeModeChange(runtimeMode === "full-access" ? "approval-required" : "full-access")
+            onRuntimeModeChange(runtimeMode === "code" ? "work" : "code")
           }
           title={
-            runtimeMode === "full-access"
-              ? "Full access —click to require approvals"
-              : "Ask every action"
+            runtimeMode === "code"
+              ? "Code mode —click to switch to Work"
+              : "Work mode —click to switch to Code"
           }
         >
-          {runtimeMode === "full-access" ? (
+          {runtimeMode === "code" ? (
             <FiThumbsUp className="size-3 shrink-0" />
           ) : (
             <HiOutlineHandRaised className="size-3 shrink-0" />
           )}
           <span className="leading-none">
-            {runtimeMode === "full-access" ? "Full access" : "Default permissions"}
+            {runtimeMode === "code" ? "Code" : "Work"}
           </span>
         </button>
       ) : null}
@@ -122,6 +131,35 @@ export function RuntimeUsageControls({
   );
 }
 
+/**
+ * @file 分支工具栏
+ *
+ * 渲染会话线程的紧凑工作区控制条：
+ *
+ * - **环境选择器**：本地 / 新建 worktree / 切换到 local
+ * - **分支选择器**：当前线程的 git 分支
+ * - **运行时切换**：Code / Work 模式
+ * - **上下文窗口计量**：当前会话上下文占用与累计成本
+ * - **速率限制折叠面板**：折叠展示当前 provider 配额
+ *
+ * ## 核心导出
+ *
+ * - `BranchToolbar`：默认导出，主工具栏组件
+ * - `RuntimeUsageControls`：运行时模式 + 上下文窗口组合控件
+ * - `RuntimeUsageControlsProps`：运行时控件的 props 类型
+ *
+ * ## 使用场景
+ *
+ * - ChatView 顶部、Composer 上方
+ * - 线程详情页头部
+ *
+ * ## 注意事项
+ *
+ * - 切换 cwd 关联分支时若存在运行中会话，会下发 `thread.session.stop` 命令
+ * - 状态同时同步到 serverThread 与 composerDraftThread，未持久化线程以草稿为准
+ * - 速率限制数据来源：当前 provider 的 `useProviderUsageSummary`
+ * - `envLocked` 为 true 时禁用本地↔worktree 切换
+ */
 export default function BranchToolbar({
   threadId,
   className,

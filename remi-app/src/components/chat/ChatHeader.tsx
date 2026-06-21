@@ -6,9 +6,11 @@
 import {
   type EditorId,
   type ProjectScript,
+  type ProviderInteractionMode,
   PROVIDER_DISPLAY_NAMES,
   type ProviderKind,
   type ResolvedKeybindingsConfig,
+  type RuntimeMode,
   type ThreadId,
 } from "~/contracts";
 import { isGenericChatThreadTitle } from "~/shared/chatThreads";
@@ -29,6 +31,7 @@ import { SidebarHeaderNavigationControls } from "../SidebarHeaderNavigationContr
 import { WindowCaptionButtons } from "../WindowCaptionButtons";
 import ProjectScriptsControl, { type NewProjectScriptInput } from "../ProjectScriptsControl";
 import { Toggle } from "../ui/toggle";
+import { ModeSwitcher } from "../ModeSwitcher";
 import { useSidebar } from "../ui/sidebar";
 import { isDesktop } from "~/env";
 import { cn } from "~/lib/utils";
@@ -123,6 +126,10 @@ export const ChatHeader = memo(function ChatHeader({
   activeProvider,
   activeProjectName,
   threadBreadcrumbs,
+  runtimeMode,
+  interactionMode,
+  onRuntimeModeChange,
+  onInteractionModeChange,
   hideHandoffControls = false,
   isGitRepo,
   openInCwd,
@@ -319,6 +326,12 @@ export const ChatHeader = memo(function ChatHeader({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2" data-no-drag>
+        <ModeSwitcher
+          runtimeMode={runtimeMode}
+          interactionMode={interactionMode}
+          onRuntimeModeChange={onRuntimeModeChange}
+          onInteractionModeChange={onInteractionModeChange}
+        />
         {!isDisposableThread && !hideHandoffControls ? (
           <Menu modal={false}>
             <Tooltip>
