@@ -177,6 +177,73 @@ pub struct ProviderCapabilities {
     pub supports_user_input: bool,
 }
 
+/// Provider 在线状态
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ServerProviderStatusState {
+    Ready,
+    Warning,
+    Error,
+}
+
+/// Provider 认证状态
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ServerProviderAuthStatus {
+    Authenticated,
+    Unauthenticated,
+    Unknown,
+}
+
+/// Provider 版本建议
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerProviderVersionAdvisory {
+    pub status: String,
+    pub current_version: Option<String>,
+    pub latest_version: Option<String>,
+    pub update_command: Option<String>,
+    pub can_update: bool,
+    pub checked_at: Option<String>,
+    pub message: Option<String>,
+}
+
+/// Provider 更新状态
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerProviderUpdateState {
+    pub status: String,
+    pub started_at: Option<String>,
+    pub finished_at: Option<String>,
+    pub message: Option<String>,
+    pub output: Option<String>,
+}
+
+/// 单个 Provider 的运行时状态
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerProviderStatus {
+    pub provider: ProviderKind,
+    pub status: ServerProviderStatusState,
+    pub available: bool,
+    pub auth_status: ServerProviderAuthStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth_label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub voice_transcription_available: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    pub checked_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version_advisory: Option<ServerProviderVersionAdvisory>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub update_state: Option<ServerProviderUpdateState>,
+}
+
 /// # Provider 运行时事件
 ///
 /// Provider 在运行时产生的事件，用于驱动状态更新和 UI 刷新。

@@ -30,6 +30,7 @@ use axum::{
 };
 use base64::Engine;
 use serde::Deserialize;
+use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, warn};
 
 use crate::attachment_store::{AttachmentKind, AttachmentStore};
@@ -67,7 +68,7 @@ impl HttpState {
 
 /// 把 HTTP 路由挂到一个空 Router 上
 ///
-/// 返回已绑定 `Arc<ServerState>` 的 Router，调用方直接 `merge` 即可。
+/// 返回已绑定 `Arc<ServerState>` 的 Router，调用方直接 `with_state` 即可。
 pub fn build_http_router() -> Router<Arc<ServerState>> {
     Router::new()
         .route("/api/local-image", get(local_image_handler))
@@ -76,6 +77,12 @@ pub fn build_http_router() -> Router<Arc<ServerState>> {
         .route(
             "/api/attachments/:id",
             get(attachment_read_handler).delete(attachment_delete_handler),
+        )
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
         )
 }
 

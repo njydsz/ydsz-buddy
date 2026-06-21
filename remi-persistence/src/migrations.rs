@@ -567,23 +567,12 @@ pub fn run_migrations(client: &SqliteClient) -> PersistenceResult<()> {
         if !applied {
             tracing::info!(version = migration.version, name = migration.name, "应用迁移");
 
-            if let Err(e) = client.execute_batch(migration.sql) {
-                let err_msg = e.to_string();
-                // 对于重复列错误，视为幂等：列已存在则无需再次添加，继续记录迁移版本
-                if err_msg.contains("duplicate column name") {
-                    tracing::warn!(
-                        version = migration.version,
-                        name = migration.name,
-                        error = %err_msg,
-                        "迁移中的列已存在，跳过该迁移"
-                    );
-                } else {
-                    return Err(PersistenceError::MigrationError(format!(
-                        "迁移 {} ({}) 失败: {}",
-                        migration.version, migration.name, e
-                    )));
-                }
-            }
+            client.execute_batch(migration.sql).map_err(|e| {
+                PersistenceError::MigrationError(format!(
+                    "迁移 {} ({}) 失败: {}",
+                    migration.version, migration.name, e
+                ))
+            })?;
 
             client.execute(
                 "INSERT INTO _migrations (version, name) VALUES (?1, ?2)",

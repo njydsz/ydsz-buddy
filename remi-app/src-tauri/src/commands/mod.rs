@@ -33,3 +33,14 @@ pub mod update;        // 自动更新命令
 pub mod window;        // 窗口/系统命令
 pub mod context_menu;  // 右键菜单命令
 pub mod voice;         // 语音识别命令
+
+// === Sprint 1-D 桌面补齐 ===
+pub mod backend_readiness;       // 嵌入式后端就绪状态
+pub mod server_listening_detector; // 端口轮询/等待
+pub mod desktop_user_data_profile;  // 桌面端用户画像
+pub mod sync_shell_environment;    // shell 环境同步
+pub mod media_permissions;        // 媒体权限查询/请求
+pub mod rotating_file_sink;       // 带轮转的文件日志落地
+pub mod runtime_arch;             // 运行时 CPU/OS 信息
+pub mod initial_backend_window_open; // 启动后窗口打开策略
+pub mod menu_shortcuts;           // 菜单/快捷键声明式模型

@@ -154,10 +154,26 @@ pub fn run() {
     // 在后台启动 WebSocket 服务器，并获取实际分配的监听地址
     let rpc_router = bootstrap_result.rpc_router.clone();
     let server_config = std::sync::Arc::new(config.clone());
-    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router, server_config);
+    let http_state = bootstrap_result.services.http_state.clone();
+    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router, server_config)
+        .with_http_state(http_state);
     let (server_addr, serve) = runtime.block_on(server.start())
         .expect("Failed to start embedded WebSocket server");
     info!("嵌入式服务器地址: {}", server_addr);
+
+    // 发布服务器生命周期事件
+    let push_cm = bootstrap_result.services.push_channel_manager.clone();
+    runtime.spawn(async move {
+        push_cm.publish_lifecycle_event("welcome", serde_json::json!({
+            "version": env!("CARGO_PKG_VERSION"),
+            "addr": server_addr.to_string(),
+        })).await;
+        push_cm.publish_lifecycle_event("ready", serde_json::json!({
+            "addr": server_addr.to_string(),
+            "timestamp": chrono::Utc::now().to_rfc3339(),
+        })).await;
+        info!("已发布服务器生命周期事件: welcome, ready");
+    });
 
     runtime.spawn(async move {
         if let Err(e) = serve.await {

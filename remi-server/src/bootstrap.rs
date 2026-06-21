@@ -25,7 +25,7 @@ use tracing::{info, warn};
 use remi_auth::{AuthService, SecretStore, SessionCredentialService};
 use remi_checkpoint::CheckpointStore;
 use remi_config::ServerConfig;
-use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService};
+use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService, ManagedWorktreeConfig, ManagedWorktreeService};
 use remi_orchestration::{
     CheckpointReactor, OrchestrationEngine, OrchestrationResult,
     ProjectionSnapshotQuery, ProviderCommandReactor, ThreadDeletionReactor,
@@ -141,6 +141,12 @@ async fn build_service_container(
     let git_text_generation = Arc::new(
         GitTextGenerationService::with_provider(git_core.clone(), provider_service.clone()),
     );
+    let managed_worktree = Arc::new(ManagedWorktreeService::new(
+        git_core.clone(),
+        ManagedWorktreeConfig::default(),
+    ));
+    // 启动 Worktree 后台清理任务
+    managed_worktree.clone().start_cleanup_task().await;
 
     // ===== 终端层 =====
     let terminal_manager = Arc::new(TerminalManager::new());
@@ -197,6 +203,7 @@ async fn build_service_container(
         git_manager,
         git_status_broadcaster,
         git_text_generation,
+        managed_worktree,
         terminal_manager,
         workspace_filesystem,
         workspace_entries,
@@ -393,8 +400,12 @@ pub async fn start_server(
     addr: SocketAddr,
     rpc_router: Arc<RpcRouter>,
     config: Arc<ServerConfig>,
+    http_state: Option<Arc<HttpState>>,
 ) -> Result<()> {
-    let server = WebSocketServer::new(addr, rpc_router, config);
+    let mut server = WebSocketServer::new(addr, rpc_router, config);
+    if let Some(state) = http_state {
+        server = server.with_http_state(state);
+    }
     let (actual_addr, serve) = server.start().await?;
     info!("WebSocket 服务器已启动，监听地址: {}", actual_addr);
     serve.await.map_err(anyhow::Error::from)

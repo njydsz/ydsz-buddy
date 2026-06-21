@@ -64,9 +64,9 @@ impl NormalizedMessage {
                 reason: cf.reason.into_owned(),
             })),
             Message::Frame(f) => NormalizedMessage::Frame(FrameControl {
-                opcode: f.opcode as u8,
-                fragmented: f.is_fragment,
-                payload: f.payload.to_vec(),
+                opcode: u8::from(f.header().opcode),
+                fragmented: !f.header().is_final,
+                payload: f.into_data(),
             }),
         }
     }
@@ -111,22 +111,27 @@ impl NormalizedMessage {
 
 impl From<tokio_tungstenite::tungstenite::protocol::frame::Frame> for FrameControl {
     fn from(f: tokio_tungstenite::tungstenite::protocol::frame::Frame) -> Self {
+        let header = f.header().clone();
         Self {
-            opcode: f.header().opcode as u8,
-            fragmented: f.header().is_fragment,
-            payload: f.into_data().to_vec(),
+            opcode: u8::from(header.opcode),
+            fragmented: !header.is_final,
+            payload: f.payload().to_vec(),
         }
     }
 }
 
 impl From<FrameControl> for tokio_tungstenite::tungstenite::protocol::frame::Frame {
     fn from(c: FrameControl) -> Self {
-        use tokio_tungstenite::tungstenite::protocol::frame::{coding::Data, Frame};
-        let mut frame = Frame::new(Data::from(c.payload));
-        if c.fragmented {
-            frame = frame.set_fragment(true);
-        }
-        frame
+        use tokio_tungstenite::tungstenite::protocol::frame::{
+            coding::OpCode, Frame, FrameHeader,
+        };
+        let opcode = OpCode::from(c.opcode);
+        let header = FrameHeader {
+            is_final: !c.fragmented,
+            opcode,
+            ..FrameHeader::default()
+        };
+        Frame::from_payload(header, c.payload)
     }
 }
 

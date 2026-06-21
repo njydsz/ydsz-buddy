@@ -280,38 +280,64 @@ impl ProcessRunner {
         mut child: tokio::process::Child,
         timeout_ms: Option<u64>,
     ) -> (String, String, (bool, bool), std::io::Result<std::process::ExitStatus>) {
-        let mut stdout_buf = Vec::new();
-        let mut stderr_buf = Vec::new();
+        let stdout_buf = std::sync::Arc::new(std::sync::Mutex::new(Vec::<u8>::new()));
+        let stderr_buf = std::sync::Arc::new(std::sync::Mutex::new(Vec::<u8>::new()));
 
-        if let Some(mut out) = child.stdout.take() {
-            let _ = out.read_to_end(&mut stdout_buf).await;
-        }
-        if let Some(mut err) = child.stderr.take() {
-            let _ = err.read_to_end(&mut stderr_buf).await;
-        }
+        let stdout = child.stdout.take();
+        let stderr = child.stderr.take();
 
-        let wait_fut = child.wait();
-        let result = if let Some(t) = timeout_ms {
-            match tokio::time::timeout(Duration::from_millis(t), wait_fut).await {
-                Ok(r) => r,
-                Err(_) => {
-                    let _ = child.kill().await;
-                    return (
-                        String::from_utf8_lossy(&stdout_buf).to_string(),
-                        String::from_utf8_lossy(&stderr_buf).to_string(),
-                        (true, false),
-                        child.wait().await,
-                    );
-                }
+        // 并发地读 stdout / stderr
+        let stdout_buf_c = stdout_buf.clone();
+        let stderr_buf_c = stderr_buf.clone();
+        let stdout_fut = async move {
+            if let Some(mut out) = stdout {
+                let mut buf = Vec::new();
+                let _ = out.read_to_end(&mut buf).await;
+                *stdout_buf_c.lock().unwrap() = buf;
             }
-        } else {
-            wait_fut.await
+        };
+        let stderr_fut = async move {
+            if let Some(mut err) = stderr {
+                let mut buf = Vec::new();
+                let _ = err.read_to_end(&mut buf).await;
+                *stderr_buf_c.lock().unwrap() = buf;
+            }
         };
 
+        let (timed_out, result) = if let Some(t) = timeout_ms {
+            // 用轮询 try_wait + sleep 替代 wait_fut，方便超时后能继续使用 child
+            let deadline = std::time::Instant::now() + Duration::from_millis(t);
+            let mut timed_out_flag = false;
+            let status = loop {
+                match child.try_wait() {
+                    Ok(Some(s)) => break Ok(s),
+                    Ok(None) => {
+                        let now = std::time::Instant::now();
+                        if now >= deadline {
+                            timed_out_flag = true;
+                            let _ = child.start_kill();
+                            break child.wait().await;
+                        }
+                        let remaining = deadline.saturating_duration_since(now);
+                        tokio::time::sleep(remaining.min(Duration::from_millis(20))).await;
+                    }
+                    Err(e) => break Err(e),
+                }
+            };
+            (timed_out_flag, status)
+        } else {
+            let r = child.wait().await;
+            (false, r)
+        };
+
+        // 不论是否超时，stdout/stderr 都要读完
+        tokio::join!(stdout_fut, stderr_fut);
+        let stdout_str = String::from_utf8_lossy(&stdout_buf.lock().unwrap()).to_string();
+        let stderr_str = String::from_utf8_lossy(&stderr_buf.lock().unwrap()).to_string();
         (
-            String::from_utf8_lossy(&stdout_buf).to_string(),
-            String::from_utf8_lossy(&stderr_buf).to_string(),
-            (false, false),
+            stdout_str,
+            stderr_str,
+            (timed_out, false),
             result,
         )
     }

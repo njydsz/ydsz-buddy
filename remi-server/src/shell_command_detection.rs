@@ -81,7 +81,6 @@ pub fn classify(line: &str) -> CommandClassification {
     let parts: Vec<&str> = trimmed.split_whitespace().collect();
     let program = parts[0];
     let sub = parts.get(1).copied();
-    let rest = &parts[1..];
 
     // 1) Interactive
     for kw in INTERACTIVE {
@@ -131,6 +130,44 @@ pub fn classify(line: &str) -> CommandClassification {
         };
     }
     // 4) Package / Build / Test / Lint
+    // 对 cargo 这种"包管理 + 自带子命令"的工具，优先根据子命令再分类
+    if let Some(sub_lower) = sub.map(|s| s.to_lowercase()) {
+        let cargo_test_kinds: &[&str] = &["test", "bench", "nextest", "tarpaulin"];
+        let cargo_build_kinds: &[&str] = &["build", "check", "clippy", "fmt", "rustc", "bench"];
+        let cargo_lint_kinds: &[&str] = &["clippy", "fmt", "fix", "miri"];
+        if program.eq_ignore_ascii_case("cargo") {
+            if cargo_test_kinds.contains(&sub_lower.as_str()) {
+                return CommandClassification {
+                    kind: CommandKind::Test,
+                    confidence: 0.95,
+                    subcommand: sub.map(|s| s.to_string()),
+                    needs_pty: false,
+                    needs_confirmation: false,
+                    note: Some(format!("cargo {} => 测试", sub_lower)),
+                };
+            }
+            if cargo_build_kinds.contains(&sub_lower.as_str()) && sub_lower != "test" {
+                return CommandClassification {
+                    kind: CommandKind::Build,
+                    confidence: 0.95,
+                    subcommand: sub.map(|s| s.to_string()),
+                    needs_pty: false,
+                    needs_confirmation: false,
+                    note: Some(format!("cargo {} => 构建", sub_lower)),
+                };
+            }
+            if cargo_lint_kinds.contains(&sub_lower.as_str()) && sub_lower != "test" {
+                return CommandClassification {
+                    kind: CommandKind::Lint,
+                    confidence: 0.9,
+                    subcommand: sub.map(|s| s.to_string()),
+                    needs_pty: false,
+                    needs_confirmation: false,
+                    note: Some(format!("cargo {} => Lint", sub_lower)),
+                };
+            }
+        }
+    }
     if PACKAGE.contains(&program.to_lowercase().as_str()) {
         return CommandClassification {
             kind: CommandKind::Package,

@@ -1,21 +1,22 @@
 <p align="center">
-  <img src="./remi-app/public/remicode.png" alt="Remi Code" width="128" />
+  <img src="./remi-app/public/remicode.png" alt="Remi Claw" width="128" />
 </p>
 
-<h1 align="center">Remi Code</h1>
+<h1 align="center">Remi Claw</h1>
 
 <p align="center">
-  <strong>高性能 AI 编程助手桌面应用</strong><br />
-  基于 Remi Code 迁移至 Rust + Tauri 技术栈，统一管理 Claude、Codex、Gemini、Grok 等 AI 代理
+  <strong>面向开发者与办公场景的双模式 AI 桌面助手</strong><br />
+  <code>Work 模式</code> 对标 Trea Work / Qoder Work / Kimi Work / WorkBuddy / QClaw / MimoClaw<br />
+  <code>Code 模式</code> 对标 ZCode / OpenCode / Trea IDE SOLO 模式
 </p>
 
 <p align="center">
-  <a href="#-快速开始">快速开始</a> •
+  <a href="#-一项目概述">项目概述</a> •
+  <a href="#-十一work--code-双模式">双模式</a> •
+  <a href="#-十二竞品能力对比与差距分析">竞品对比</a> •
+  <a href="#-十三下一步完善计划">完善计划</a> •
   <a href="#-核心特性">核心特性</a> •
-  <a href="#-技术架构">技术架构</a> •
-  <a href="#-核心模块">核心模块</a> •
-  <a href="#-开发指南">开发指南</a> •
-  <a href="#-迁移计划">迁移计划</a>
+  <a href="#-技术架构">技术架构</a>
 </p>
 
 ---
@@ -32,6 +33,9 @@
 - [八、迁移计划](#八迁移计划)
 - [九、性能指标](#九性能指标)
 - [十、贡献指南](#十贡献指南)
+- [十一、Work / Code 双模式](#十一work--code-双模式)
+- [十二、竞品能力对比与差距分析](#十二竞品能力对比与差距分析)
+- [十三、下一步完善计划](#十三下一步完善计划)
 - [附录](#附录)
 
 ---
@@ -40,24 +44,42 @@
 
 ### 1.1 项目定位
 
-**Remi Code** 是一个高性能、本地优先的 AI 编程助手桌面应用，基于 Remi Code 项目完整迁移至 Rust 技术栈。它提供了一个统一的界面来管理多个 AI 编程代理（Claude Code、Codex、Gemini、Grok、OpenCode 等），让开发者可以高效地与 AI 协作编程。
+**Remi Claw**（原 Remi Code 完成品牌升级后正式名称）是一个**双模式、本地优先的 AI 桌面助手**，使用 Rust + Tauri 构建。它在一个统一外壳内同时承载两种工作流：
+
+- **Work 模式** —— 任务驱动的"数字员工"形态，覆盖本地文档处理、浏览器自动化、长任务编排、日常办公场景，对标 Trea Work / Qoder Work / Kimi Work / WorkBuddy / QClaw / MimoClaw。
+- **Code 模式** —— 仓库内代码理解、编辑、构建、调试的"程序员副驾"形态，对标 ZCode / OpenCode / Trea IDE SOLO 模式。
+
+两种模式共用同一套 Provider 适配层、Orchestration 引擎、Skill / Plugin 体系和 Tauri 桌面壳，通过 Thread 上的 `runtime-mode` 字段做运行时分发，通过 `interaction-mode` 区分 Work / Code 的交互范式。
 
 ### 1.2 核心价值
 
 - 🚀 **极致性能**：Rust 后端带来卓越的性能表现，启动时间 < 1 秒，内存占用 < 50MB
-- 🔒 **本地优先**：所有数据和服务运行在本地，保护代码隐私
-- 🎨 **统一界面**：一个界面管理多个 AI 提供商，无缝切换
-- 🛠️ **完整功能**：Git 集成、终端管理、文件浏览器、差异对比等完整开发工具链
-- 📦 **轻量桌面**：基于 Tauri 2.x 构建，安装包体积减少 60-70%
+- 🔒 **本地优先**：所有数据和服务运行在本地，保护代码与办公内容隐私
+- 🧩 **双模式一体**：Work / Code 一个桌面、一份会话历史、一套 Skills 体系，按场景无缝切换
+- 🛠️ **多代理统一**：Claude、Codex、Gemini、Grok、OpenCode、Cursor、Kilo、Pi 等 Provider 统一接入
+- 🪄 **可扩展 Skill**：内置 Work / Code 各自的本地 Skills，支持插件式扩展
+- 📦 **轻量桌面**：基于 Tauri 2.x 构建，安装包体积相比 Electron 方案减少 60-70%
 
 ### 1.3 项目演进
 
-Remi Code 是独立发展的 Rust 迁移版本，目标是：
+Remi Claw 由原 Remi Code 完成品牌与产品形态升级，目标是：
 
 - **后端完全重写**：从 Node.js + Effect-TS 迁移到 Rust + Tokio
 - **前端适配**：从 Electron 迁移到 Tauri，保持 React 技术栈
-- **协议兼容**：WebSocket RPC 协议完全兼容，前端零改动
-- **性能提升**：充分利用 Rust 的性能优势，突破 Node.js 单线程瓶颈
+- **产品形态扩展**：从"纯代码副驾"扩展为"双模式桌面助手"，Work / Code 两种模式并存
+- **协议兼容**：WebSocket RPC 协议保持兼容，前端可在最小改动下接入新模式
+- **性能与隐私**：充分利用 Rust 的性能优势，突破 Node.js 单线程瓶颈
+
+### 1.4 双模式快速对照
+
+| 维度 | Work 模式 | Code 模式 |
+|------|-----------|-----------|
+| 主要竞品 | Trea Work、Qoder Work、Kimi Work、WorkBuddy、QClaw、MimoClaw | ZCode、OpenCode、Trea IDE SOLO |
+| 典型载体 | 本地文件夹、Office 文档、浏览器标签、桌面应用 | 本地 Git 仓库、编辑器、终端、构建系统 |
+| 核心能力 | 文档读写、浏览器自动化、长任务计划、办公协作 | 代码检索、编辑、Diff、Review、构建/调试 |
+| 交互范式 | 多步任务、待办列表、用户输入轮询 | Turn 驱动的代码修改闭环 |
+| 关键约束 | 不破坏本地文件结构；操作可回滚 | 不破坏构建/测试；Diff 必须可审查 |
+| 默认 Provider | Claude / Kimi 类长上下文模型 | Codex / Claude Code / Cursor |
 
 ---
 
@@ -519,8 +541,8 @@ WebSocket 服务器提供与前端通信的 RPC 接口。
 #### 克隆项目
 
 ```bash
-git clone https://github.com/remi-code/remi-code.git
-cd remi-code
+git clone https://github.com/remi-claw/remi-claw.git
+cd remi-claw
 ```
 
 #### 后端开发（Rust）
@@ -634,9 +656,20 @@ cargo doc -p remi-orchestration --open
 
 ## 八、迁移计划
 
+### 8.0 产品形态升级（品牌与双模式）
+
+品牌从 **Remi Code** 升级为 **Remi Claw**，并新增 **Work 模式**。迁移包含：
+
+- ✅ 文档、Logo、命名空间全部刷新为 Remi Claw
+- ⏳ `branding.ts` 中 `APP_BASE_NAME` 同步为 `Remi Claw`（待代码层落地）
+- ⏳ Thread 模型新增 `runtime-mode ∈ {work, code}`、`interaction-mode ∈ {chat, plan, agent, review}`
+- ⏳ Sidebar / ChatHeader 增加模式切换器与模式徽标
+- ⏳ Composer 命令菜单按模式分别提供 Work / Code 专属 Slash 命令
+- ⏳ Skill 库按 `mode` 字段分组（work / code / shared）
+
 ### 8.1 后端迁移阶段
 
-Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
+Remi Claw 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 | 阶段 | 模块 | 优先级 | 状态 |
 |------|------|--------|------|
@@ -747,7 +780,207 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 ---
 
-## 许可证
+## 十一、Work / Code 双模式
+
+### 11.1 设计目标
+
+Remi Claw 的核心定位是 **"一个桌面，两种脑回路"**：
+
+- 同一个 Thread 可以在两种模式间切换，模式切换不破坏会话历史；
+- 同一套 Provider 适配层、Orchestration 引擎、Skill / Plugin 体系被两种模式共享；
+- 模式决定了**默认 Skill 集、Composer 工具、风险控制策略、UI 布局**，但**不**决定模型本身（用户可自由选择）。
+
+### 11.2 Work 模式
+
+**对标产品**：Trea Work、Qoder Work、Kimi Work、WorkBuddy、QClaw、MimoClaw。
+
+**典型场景**：
+
+- 整理本地文件夹（批量重命名、分类、摘要）
+- 处理 Office / Markdown / PDF 文档（提取、翻译、改写、审校）
+- 浏览器自动化（表单填写、信息抓取、跨站点工作流）
+- 长任务调度（"下周前每天跑一次报表"）
+- 与办公生态（邮件、日历、IM）联动
+
+**模式特征**：
+
+| 维度 | 描述 |
+|------|------|
+| `runtime-mode` | `work` |
+| `interaction-mode` | `task` / `chat`（默认 `task`） |
+| 任务粒度 | 多步、长时、可被调度 |
+| 用户参与 | 高频「确认 / 补充输入」轮询 |
+| 上下文 | 文件系统 + 浏览器 + Office + 日历/邮件 |
+| 默认 Skill | `filesystem.batch`, `doc.rewrite`, `browser.act`, `mail.draft`, `schedule.cron` |
+| 风险控制 | 写入类操作默认 Dry-Run；批量操作要求二次确认 |
+| 状态展示 | 任务时间线 + 待办列表 + 用户输入请求面板 |
+
+### 11.3 Code 模式
+
+**对标产品**：ZCode、OpenCode、Trea IDE SOLO 模式。
+
+**典型场景**：
+
+- 在 Git 仓库内做特性开发、Bug 修复、重构
+- 阅读陌生代码、生成/补全代码、提交 PR
+- 终端命令执行、构建/调试/Test 闭环
+- Code Review、架构解释、依赖升级
+
+**模式特征**：
+
+| 维度 | 描述 |
+|------|------|
+| `runtime-mode` | `code` |
+| `interaction-mode` | `agent` / `plan` / `review`（默认 `agent`） |
+| 任务粒度 | 单 Turn 内代码修改闭环 |
+| 用户参与 | 审批 Diff、审批命令执行 |
+| 上下文 | 仓库 + 终端 + 编辑器 + Diff |
+| 默认 Skill | `repo.search`, `file.edit`, `git.commit`, `shell.run`, `test.run` |
+| 风险控制 | 写入类操作进入审批队列；危险命令强制二次确认 |
+| 状态展示 | Turn 时间线 + Diff 视图 + 终端抽屉 + 检查点回滚 |
+
+### 11.4 模式切换与共存
+
+- **全局默认**：应用首启时默认进入 **Code 模式**（沿袭 Remi Code 习惯）；用户可在 Settings 切换默认。
+- **Thread 级模式**：每个 Thread 持久化自己的 `runtime-mode`，切换 Thread 时自动恢复。
+- **运行时切换**：在 ChatHeader 通过下拉切换模式，模式变更不中断 Turn（已开始的 Turn 沿用旧模式至结束）。
+- **混合 Thread**：允许同一 Thread 内不同 Turn 处于不同模式（向后兼容，单条 Turn 的 `runtime-mode` 是权威）。
+- **统一体验**：Composer、Sidebar、Skill 选择器、Provider 选择器在两种模式中复用；只有"默认 Skill 集"和"风险控制档位"会随模式变化。
+
+### 11.5 命令协议层（已有体系）
+
+Remi Code 已具备的编排命令可直接支撑双模式，差异在 `runtime-mode` / `interaction-mode` 字段值：
+
+| 命令 | 双模式语义 |
+|------|-----------|
+| `thread.runtime-mode.set` | `work` 或 `code` |
+| `thread.interaction-mode.set` | `chat` / `plan` / `agent` / `review` / `task` |
+| `thread.create` | 默认 `code + agent`；Work 入口创建时使用 `work + task` |
+| `thread.turn.start` | 复用，按 `runtime-mode` 加载默认 Skill 集 |
+| `thread.approval.respond` | 两种模式共用，UI 呈现不同 |
+| `thread.checkpoint.revert` | 两种模式共用，Work 模式快照粒度更大（按任务快照） |
+
+---
+
+## 十二、竞品能力对比与差距分析
+
+> 评分标准：✅ 已具备 ｜ 🟡 部分具备 / 受限 ｜ ❌ 缺失
+
+### 12.1 Work 模式能力矩阵
+
+| 能力 | Trea Work | Qoder Work | Kimi Work | WorkBuddy | QClaw | MimoClaw | **Remi Claw（当前）** |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 本地文件系统批量操作 | ✅ | ✅ | 🟡 | ✅ | 🟡 | 🟡 | 🟡（Provider 受限） |
+| 浏览器自动化面板 | ✅ | ✅ | ❌ | ✅ | 🟡 | ✅ | 🟡（`BrowserPanel` 已存在，缺 Work 调度） |
+| 长任务 / Cron 调度 | ✅ | 🟡 | ❌ | ✅ | ✅ | 🟡 | ❌ |
+| Office 文档读写（docx/xlsx/pdf） | ✅ | ✅ | ✅ | 🟡 | 🟡 | 🟡 | ❌ |
+| 邮件 / 日历 集成 | 🟡 | 🟡 | ❌ | ✅ | ✅ | ❌ | ❌ |
+| 多步骤 Plan + 用户输入轮询 | ✅ | ✅ | 🟡 | ✅ | ✅ | ✅ | 🟡（已有 ComposerPendingUserInputPanel） |
+| 本地 Skill（work 域） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡（`SkillsView` 存在，未按 mode 分组） |
+| 任务时间线 / 待办 UI | ✅ | ✅ | 🟡 | ✅ | ✅ | ✅ | 🟡（`ActiveTaskListCard` 已有） |
+| 数字员工（Scheduled Agent） | ✅ | 🟡 | ❌ | ✅ | ✅ | 🟡 | ❌ |
+
+### 12.2 Code 模式能力矩阵
+
+| 能力 | ZCode | OpenCode | Trea IDE SOLO | **Remi Claw（当前）** |
+|------|:---:|:---:|:---:|:---:|
+| 多 Provider 适配（Claude/Codex/Gemini/Grok/Cursor/...） | 🟡 | ✅ | ✅ | 🟡（8 家适配器已写，但 Provider 运行时未注册完整） |
+| Plan / Proposed Plan 流程 | 🟡 | ✅ | ✅ | 🟡（`proposed-plan` 投影已存在） |
+| Diff 渲染（行内 / Side-by-side） | ✅ | ✅ | ✅ | 🟡（`@pierre/diffs` 已集成） |
+| 终端 + 任务关联 | ✅ | ✅ | ✅ | ✅（`ThreadTerminalDrawer`） |
+| Worktree / Branch 隔离 | ✅ | 🟡 | ✅ | 🟡（`worktreeCleanup` 已存在） |
+| Checkpoint 回滚 | 🟡 | ✅ | ✅ | 🟡（`remi-checkpoint` 已具备，UI 待接通） |
+| 仓库语义检索 | ✅ | 🟡 | ✅ | ❌ |
+| Build/Test/Run 闭环 | ✅ | ✅ | ✅ | 🟡（依赖外部 CI） |
+| PR Review / PR Thread | 🟡 | ❌ | ✅ | 🟡（`PullRequestThreadDialog` 已有） |
+| RateLimit / 用量可视化 | 🟡 | 🟡 | ✅ | 🟡（`ProviderUsagePanelContent` 已有） |
+| 插件 / Marketplace | ✅ | 🟡 | 🟡 | 🟡（`PluginLibrary` 存在，Marketplace 未做） |
+| Skills 库 | ✅ | ✅ | 🟡 | 🟡（`SkillsView` 存在） |
+
+### 12.3 跨模式 / 平台级能力
+
+| 能力 | Trea Work | Qoder Work | Kimi Work | WorkBuddy | QClaw | MimoClaw | ZCode | OpenCode | Trea IDE SOLO | **Remi Claw** |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 本地优先 / 离线可启动 | 🟡 | 🟡 | ❌ | 🟡 | ❌ | ❌ | 🟡 | ✅ | 🟡 | ✅ |
+| 跨平台桌面（Win/macOS/Linux） | ✅ | ✅ | ❌ | ✅ | ❌ | 🟡 | ✅ | ✅ | ✅ | ✅（Tauri 2.x） |
+| 多 Provider 并存 | ✅ | ✅ | ❌ | 🟡 | 🟡 | 🟡 | 🟡 | ✅ | ✅ | 🟡 |
+| WebSocket / RPC 协议开放 | 🟡 | 🟡 | 🟡 | ❌ | 🟡 | ❌ | 🟡 | ✅ | ✅ | ✅ |
+| 账号 / 团队协作 | ✅ | 🟡 | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | 🟡 | ❌ |
+| 模式切换 / 双模并存 | ✅ | ✅ | ❌ | 🟡 | ❌ | ❌ | ❌ | ❌ | ✅ | ⏳（进行中） |
+
+### 12.4 关键能力差距（按优先级）
+
+| 优先级 | 能力差距 | 受影响模式 | 竞品参照 |
+|:---:|------|:---:|------|
+| **P0** | Work 模式：定时 / Cron 调度器（Scheduled Agent） | Work | Trea Work、WorkBuddy、QClaw |
+| **P0** | Work 模式：Office 文档读写（docx/xlsx/pdf） | Work | Trea Work、Kimi Work、QClaw |
+| **P0** | Code 模式：补齐 Provider 运行时注册 + RPC 打通（首屏冷启动可用） | Code | OpenCode、Trea IDE SOLO |
+| **P0** | 双模：Thread 模型新增 `runtime-mode` / `interaction-mode` 字段与持久化 | 通用 | 全部 |
+| **P1** | Work 模式：浏览器自动化面板与 Work 任务编排打通 | Work | Trea Work、WorkBuddy、MimoClaw |
+| **P1** | Code 模式：仓库语义检索（symbol/语义级） | Code | ZCode、OpenCode |
+| **P1** | Work 模式：本地文件系统批量 Skill（dry-run + 二次确认） | Work | Trea Work、Qoder Work |
+| **P1** | 双模：Skill 库按 `mode` 分组与默认 Skill 集 | 通用 | 全部 |
+| **P2** | Work 模式：邮件 / 日历 集成 | Work | WorkBuddy、QClaw |
+| **P2** | Code 模式：插件 / Marketplace 上架流程 | Code | ZCode、OpenCode |
+| **P2** | 跨模式：团队协作 / Shared Thread | 通用 | Trea Work、WorkBuddy |
+| **P2** | Work 模式：数字员工（Scheduled Agent 模板市场） | Work | Trea Work、WorkBuddy |
+
+---
+
+## 十三、下一步完善计划
+
+> 计划按四阶段推进，每阶段以"能跑通、可演示、可发布"为关门标准。
+
+### 13.1 阶段 1：双模式骨架（P0，2 周）
+
+- 在 `remi-core` 领域模型中增加 `RuntimeMode ∈ {Work, Code}`、`InteractionMode ∈ {Chat, Plan, Agent, Review, Task}`，落到 Thread 元数据。
+- 在 `remi-orchestration` 增加 `thread.runtime-mode.set` / `thread.interaction-mode.set` 既有命令的语义补全（默认值、迁移策略）。
+- 在 `remi-server` RPC 注册以上命令的 query 端点，前端可读。
+- 前端：`branding.ts` → `Remi Claw`；Sidebar / ChatHeader 模式徽标 + 切换器。
+- **验收**：新建 Thread 时可选 Work / Code；已有 Thread 显示模式徽标；切换 Thread 时 UI 同步。
+
+### 13.2 阶段 2：Code 模式可用化（P0，3 周）
+
+- 注册全部 8 家 Provider Adapter 到运行时（`remi-provider::service`）。
+- 打通 `ProviderDiscoveryService`，前端可看到动态模型列表与能力位。
+- 补齐 `ProviderAdapter` trait 的 `capabilities` / `discover_models` / `list_tools`。
+- 跑通 Code 模式下的"打开仓库 → 提问 → 编辑 → Diff → 提交"全链路。
+- **验收**：在 8 家 Provider 中至少 3 家（Codex / Claude / OpenCode）可以端到端完成一次 Turn。
+
+### 13.3 阶段 3：Work 模式核心能力（P1，4 周）
+
+- 实现 `scheduler::CronScheduler`，Thread 上可挂"周期任务"，使用 Tokio interval。
+- 实现 `office` Skill 集合：docx 读/写、xlsx 读/写、pdf 文本提取（先本地 crate 后再考虑云端）。
+- 打通 `BrowserPanel` 与 Work 任务的事件总线：Work 任务可触发"打开标签 → 执行脚本 → 回填结果"。
+- 实现 `filesystem.batch` Skill：批量重命名 / 分类 / 摘要，强制 Dry-Run + 二次确认。
+- **验收**：演示场景"每周一拉取报表 → 用 docx Skill 摘要 → 邮件草稿入站"可完成。
+
+### 13.4 阶段 4：双模式打磨与生态（P1+P2，4 周）
+
+- Skill 库按 `mode ∈ {work, code, shared}` 分组；前端 Skill 浏览器按模式过滤。
+- 仓库语义检索（先用 ripgrep + tree-sitter 索引，后续替换为 tantivy）。
+- 插件 / Marketplace 雏形：本地插件市场 + 一键安装。
+- 团队协作：Shared Thread（只读分享 + 评论）。
+- **验收**：发布 Remi Claw 0.2.0（双模式 + 调度 + Office Skill + 仓库语义检索 + 插件雏形）。
+
+### 13.5 阶段 5：竞品对标攻坚（P2，迭代）
+
+- 数字员工模板市场（Work 模式 Scheduled Agent 模板）
+- 邮件 / 日历原生集成
+- Marketplace 上架流程 + 审核后台
+- 团队空间、权限分级、计费闸门
+
+### 13.6 风险与依赖
+
+| 风险项 | 描述 | 缓解 |
+|--------|------|------|
+| Provider 协议变更 | 第三方 CLI 协议（如 Codex、OpenCode）迭代快 | Provider Adapter 抽象 + 协议版本探测 |
+| Office 解析精度 | docx/xlsx 解析存在兼容性 | 先覆盖 docx + xlsx + pdf 文本，再做样式保留 |
+| 浏览器自动化稳定性 | 不同站点 DOM 差异大 | 优先结构化抽取，复杂场景回到用户操作 |
+| 双模式 UI 复杂度 | 同一界面承载两种脑回路 | 模式切换器 + 显式模式徽标；不引入"自动判断" |
+| 本地 Skill 安全 | 任意代码执行风险 | Skill 沙箱 + 危险 API 二次确认 + 审计日志 |
+
+---
 
 本项目采用 MIT 许可证。详见 [LICENSE](./LICENSE) 文件。
 
@@ -765,6 +998,11 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 | **Checkpoint** | 检查点，用于回滚和恢复 |
 | **Projection** | 投影，从事件流构建的读模型 |
 | **Worktree** | Git 工作树，用于并行开发 |
+| **Work 模式** | 任务驱动的"数字员工"形态（对标 Trea Work / WorkBuddy / QClaw） |
+| **Code 模式** | 仓库内代码副驾形态（对标 ZCode / OpenCode / Trea IDE SOLO） |
+| **`runtime-mode`** | Thread 的运行时分发字段，取值 `work` / `code` |
+| **`interaction-mode`** | Thread 的交互范式字段，取值 `chat` / `plan` / `agent` / `review` / `task` |
+| **Skill** | 可被 Provider 调用的本地能力单元，按 `mode` 分组（`work` / `code` / `shared`） |
 
 ### B. 相关链接
 
@@ -772,14 +1010,22 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 - [Tauri 官方文档](https://tauri.app/)
 - [Rust 官方文档](https://www.rust-lang.org/)
 - [Effect-TS 文档](https://effect.website/)
+- [竞品参考：Trea Work](https://work.trea.com/)
+- [竞品参考：Qoder Work](https://qoder.com/work)
+- [竞品参考：Kimi Work](https://kimi.moonshot.cn/)
+- [竞品参考：WorkBuddy](https://workbuddy.ai/)
+- [竞品参考：ZCode](https://zcode.ai/)
+- [竞品参考：OpenCode](https://opencode.ai/)
+- [竞品参考：Trea IDE](https://trea.com/)
 
 ### C. 联系方式
 
-- GitHub Issues: [报告问题](https://github.com/remi-code/remi-code/issues)
-- GitHub Discussions: [讨论区](https://github.com/remi-code/remi-code/discussions)
+- GitHub Issues: [报告问题](https://github.com/remi-claw/remi-claw/issues)
+- GitHub Discussions: [讨论区](https://github.com/remi-claw/remi-claw/discussions)
+- 内部反馈: 内部 Slack `#remi-claw-product`
 
 ---
 
-**文档版本**: v0.1.0  
-**最后更新**: 2026-06-19  
-**维护者**: Remi Code Team
+**文档版本**: v0.2.0（品牌升级 + Work/Code 双模式版）  
+**最后更新**: 2026-06-21  
+**维护者**: Remi Claw Team

@@ -74,6 +74,8 @@ async fn main() -> Result<()> {
         result.server_addr,
         result.rpc_router,
         std::sync::Arc::new(config.clone()),
+        Some(result.services.http_state.clone()),
+        Some(result.services.push_channel_manager.clone()),
     )
     .await?;
 

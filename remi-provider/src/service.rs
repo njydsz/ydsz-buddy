@@ -88,7 +88,8 @@ use std::sync::Arc;
 
 use remi_core::provider::{
     ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
-    ProviderTurnStartResult, TurnInput,
+    ProviderTurnStartResult, ServerProviderAuthStatus, ServerProviderStatus,
+    ServerProviderStatusState, TurnInput,
 };
 use serde_json::{json, Value};
 use tokio::sync::{broadcast, RwLock};
@@ -146,6 +147,11 @@ pub struct ProviderService {
     ///
     /// 用于检查和缓存 Provider 的健康状态，支持批量检查和缓存查询。
     health: ProviderHealth,
+
+    /// Provider API Key 存储
+    ///
+    /// 运行时内存中保存各 Provider 的 API Key，后续可接入持久化存储。
+    api_keys: Arc<RwLock<HashMap<ProviderKind, String>>>,
 }
 
 impl ProviderService {
@@ -170,6 +176,7 @@ impl ProviderService {
             adapters: Arc::new(RwLock::new(HashMap::new())),
             event_tx,
             health: ProviderHealth::new(),
+            api_keys: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 

@@ -49,6 +49,8 @@ pub struct ServiceContainer {
     pub git_status_broadcaster: Arc<GitStatusBroadcaster>,
     /// Git 文本生成服务（AI 辅助生成 commit message / PR 标题和描述）
     pub git_text_generation: Arc<GitTextGenerationService>,
+    /// 托管 Worktree 服务（Worktree 生命周期管理、清理）
+    pub managed_worktree: Arc<ManagedWorktreeService>,
     /// 终端管理器
     pub terminal_manager: Arc<TerminalManager>,
     /// 工作空间文件系统

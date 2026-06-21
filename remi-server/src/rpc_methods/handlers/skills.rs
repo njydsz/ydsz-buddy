@@ -12,7 +12,6 @@ use serde_json::Value;
 use tracing::{debug, info};
 
 use crate::rpc::RpcRouter;
-use crate::rpc_methods::registration::ServiceContainer;
 
 const SKILL_FILENAME: &str = "SKILL.md";
 
@@ -88,9 +87,9 @@ fn parse_frontmatter(text: &str) -> std::collections::HashMap<String, String> {
     let mut current_key: Option<String> = None;
     let mut current_list: Vec<String> = Vec::new();
 
-    let mut commit_list = |result: &mut std::collections::HashMap<String, String>,
-                           current_key: &mut Option<String>,
-                           current_list: &mut Vec<String>| {
+    let commit_list = |result: &mut std::collections::HashMap<String, String>,
+                       current_key: &mut Option<String>,
+                       current_list: &mut Vec<String>| {
         if let Some(key) = current_key.take() {
             if !current_list.is_empty() {
                 result.insert(key, strip_yaml_block_scalar(&current_list.join("\n")));

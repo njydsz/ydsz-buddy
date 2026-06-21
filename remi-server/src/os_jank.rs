@@ -23,7 +23,6 @@ use std::sync::atomic::{AtomicI64, Ordering};
 use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
-use tracing::warn;
 
 /// 性能快照
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -78,6 +77,11 @@ impl OsJankMonitor {
             last_heartbeat: Arc::new(AtomicI64::new(now_ms())),
             started_at: Instant::now(),
         }
+    }
+
+    /// 进程启动至今的时长
+    pub fn uptime(&self) -> Duration {
+        self.started_at.elapsed()
     }
 
     /// 上报一次业务心跳
@@ -153,9 +157,12 @@ fn now_ms() -> i64 {
 fn read_loadavg() -> (Option<f64>, Option<f64>, Option<f64>) {
     #[cfg(unix)]
     {
+        extern "C" {
+            fn getloadavg(loadavg: *mut f64, nelem: i32) -> i32;
+        }
         let mut buf = [0f64; 3];
         // SAFETY: getloadavg is safe to call with a valid buffer.
-        let r = unsafe { libc_getloadavg(buf.as_mut_ptr(), 3) };
+        let r = unsafe { getloadavg(buf.as_mut_ptr(), 3) };
         if r == 3 {
             (Some(buf[0]), Some(buf[1]), Some(buf[2]))
         } else {
@@ -166,21 +173,6 @@ fn read_loadavg() -> (Option<f64>, Option<f64>, Option<f64>) {
     {
         (None, None, None)
     }
-}
-
-#[cfg(unix)]
-extern "C" {
-    fn getloadavg(loadavg: *mut f64, nelem: i32) -> i32;
-}
-
-#[cfg(unix)]
-unsafe fn libc_getloadavg(p: *mut f64, n: i32) -> i32 {
-    getloadavg(p, n)
-}
-
-#[cfg(not(unix))]
-unsafe fn libc_getloadavg(_p: *mut f64, _n: i32) -> i32 {
-    -1
 }
 
 /// 读取可用/总内存（best-effort）

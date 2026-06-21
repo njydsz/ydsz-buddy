@@ -356,6 +356,17 @@ impl PushChannelManager {
         self.publish(channels::SERVER_EVENTS, notification).await;
     }
 
+    /// 发布服务器生命周期事件
+    ///
+    /// 便捷方法，用于发布服务器级别的生命周期事件（如 welcome、ready、shutdown）。
+    pub async fn publish_lifecycle_event(&self, event_type: &str, data: serde_json::Value) {
+        self.publish_server_event(ServerEvent {
+            event_type: event_type.to_string(),
+            data,
+        })
+        .await;
+    }
+
     /// 获取所有通道名称
     ///
     /// # 返回值
