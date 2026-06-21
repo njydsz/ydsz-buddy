@@ -440,7 +440,7 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
                 </h2>
               )}
             </div>
-            <div className="flex shrink-0 items-center gap-1.5 [-webkit-app-region:no-drag]">
+            <div className="flex shrink-0 items-center gap-1.5" data-no-drag>
               <Button
                 size="xs"
                 variant="outline"

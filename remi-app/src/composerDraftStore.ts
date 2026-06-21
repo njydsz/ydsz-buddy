@@ -2037,9 +2037,8 @@ function readPersistedAttachmentIdsFromStorage(threadId: ThreadId): string[] {
     return [];
   }
   try {
-    const persisted = getLocalStorageItem(
+    const persisted = getLocalStorageItem<typeof PersistedComposerDraftStoreStorage.Type>(
       COMPOSER_DRAFT_STORAGE_KEY,
-      PersistedComposerDraftStoreStorage,
     );
     if (!persisted || persisted.version !== COMPOSER_DRAFT_STORAGE_VERSION) {
       return [];

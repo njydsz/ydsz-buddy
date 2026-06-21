@@ -215,7 +215,8 @@ export function gitSummarizeDiffQueryOptions(input: {
   providerOptions?: ProviderStartOptions | null;
   enabled?: boolean;
 }) {
-  // 閹稿藟娑撲礁鎼辩敮宀€绱︾€涙ɑ鎲崇憰渚婄礉闁灝鍘ら柌宥嗘煀閹垫挸绱戦惄绋挎倱瀹割喖绱撻弮鍫曞櫢閺傛壆鏁撻幋?  const normalizedPatch = input.patch?.trim() ?? null;
+  // Normalize the patch input to a trimmed string or null when empty/missing.
+  const normalizedPatch = input.patch?.trim() ?? null;
   const patchKey =
     normalizedPatch && normalizedPatch.length > 0
       ? buildPatchCacheKey(normalizedPatch, "git-diff-summary")

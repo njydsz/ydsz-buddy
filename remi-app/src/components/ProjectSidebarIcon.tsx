@@ -13,7 +13,7 @@ const projectFaviconPresence = new Map<string, boolean>();
 function resolveServerHttpOrigin(): string {
   if (typeof window === "undefined") return "";
 
-  const bridgeWsUrl = tauriBridge.getWsUrl?.();
+  const bridgeWsUrl = tauriBridge.getCachedWsUrl?.();
   const envWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const wsCandidate =
     typeof bridgeWsUrl === "string" && bridgeWsUrl.length > 0

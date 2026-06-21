@@ -5288,7 +5288,7 @@ export default function Sidebar() {
     <Tooltip>
       <TooltipTrigger
         render={
-            <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui [-webkit-app-region:no-drag]">
+            <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui" data-no-drag>
               <div className="flex min-w-0 items-center gap-1">
                 <RemiCodeWordmark />
                 <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>

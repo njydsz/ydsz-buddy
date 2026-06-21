@@ -1,5 +1,6 @@
 import type {
   OrchestrationLatestTurn,
+  OrchestrationMessage,
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
 } from "@peakcode/contracts";
@@ -15,6 +16,36 @@ export interface ThreadSummaryMetadata {
 export interface ThreadSummaryState extends ThreadSummaryMetadata {
   pendingApprovalCount: number;
   pendingUserInputCount: number;
+}
+
+// Payload 类型定义
+export interface ApprovalRequestedPayload {
+  requestId: string;
+  requestKind?: "command" | "file-read" | "file-change";
+  requestType?: string;
+  detail?: string;
+}
+
+export interface UserInputQuestionOption {
+  label: string;
+  description: string;
+}
+
+export interface UserInputQuestion {
+  id: string;
+  header: string;
+  question: string;
+  options: UserInputQuestionOption[];
+}
+
+export interface UserInputRequestedPayload {
+  requestId: string;
+  questions: UserInputQuestion[];
+}
+
+export interface ActivityPayloadBase {
+  requestId?: string;
+  detail?: string;
 }
 
 function maxIso(left: string | null, right: string): string {
@@ -37,12 +68,12 @@ function compareActivitiesByOrder(
   );
 }
 
-function toPayloadRecord(payload: unknown): Record<string, unknown> | null {
-  return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
+function toPayloadRecord(payload: unknown): ActivityPayloadBase | null {
+  return payload && typeof payload === "object" ? (payload as ActivityPayloadBase) : null;
 }
 
 function requestKindFromRequestType(
-  requestType: unknown,
+  requestType: string | undefined,
 ): "command" | "file-read" | "file-change" | null {
   switch (requestType) {
     case "command_execution_approval":
@@ -74,16 +105,15 @@ function isStalePendingRequestFailureDetail(detail: string | undefined): boolean
   );
 }
 
-function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null): boolean {
-  const questions = payload?.questions;
+function hasStructuredUserInputQuestions(payload: ActivityPayloadBase | null): boolean {
+  const questions = (payload as UserInputRequestedPayload | null)?.questions;
   if (!Array.isArray(questions)) {
     return false;
   }
-  return questions.some((entry) => {
-    if (!entry || typeof entry !== "object") {
+  return questions.some((question) => {
+    if (!question || typeof question !== "object") {
       return false;
     }
-    const question = entry as Record<string, unknown>;
     const options = Array.isArray(question.options) ? question.options : null;
     return (
       typeof question.id === "string" &&
@@ -94,9 +124,8 @@ function hasStructuredUserInputQuestions(payload: Record<string, unknown> | null
         if (!option || typeof option !== "object") {
           return false;
         }
-        const optionRecord = option as Record<string, unknown>;
         return (
-          typeof optionRecord.label === "string" && typeof optionRecord.description === "string"
+          typeof option.label === "string" && typeof option.description === "string"
         );
       })
     );
@@ -158,12 +187,13 @@ export function deriveThreadSummaryState(input: {
     const detail = typeof payload?.detail === "string" ? payload.detail : undefined;
 
     if (activity.kind === "approval.requested" && requestId) {
+      const approvalPayload = payload as ApprovalRequestedPayload | null;
       const requestKind =
-        payload?.requestKind === "command" ||
-        payload?.requestKind === "file-read" ||
-        payload?.requestKind === "file-change"
-          ? payload.requestKind
-          : requestKindFromRequestType(payload?.requestType);
+        approvalPayload?.requestKind === "command" ||
+        approvalPayload?.requestKind === "file-read" ||
+        approvalPayload?.requestKind === "file-change"
+          ? approvalPayload.requestKind
+          : requestKindFromRequestType(approvalPayload?.requestType);
       if (requestKind) {
         openApprovals.set(requestId, true);
       }

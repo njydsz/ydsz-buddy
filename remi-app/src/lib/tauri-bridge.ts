@@ -128,21 +128,28 @@ export const tauriBridge = {
    * （如 `resolveServerHttpOrigin` / `resolveWsHttpUrl`）读取。
    */
   getWsUrl: async (): Promise<string | null> => {
-    if (cachedServerWsUrl) return cachedServerWsUrl;
+    if (cachedServerWsUrl) {
+      console.log("[tauri-bridge] getWsUrl: returning cached", cachedServerWsUrl);
+      return cachedServerWsUrl;
+    }
     try {
+      console.log("[tauri-bridge] getWsUrl: invoking get_server_ws_url...");
       const url = await invoke<string>("get_server_ws_url");
+      console.log("[tauri-bridge] getWsUrl: invoke returned", url);
       if (url && url.length > 0) {
         cachedServerWsUrl = url;
         return url;
       }
     } catch (error) {
-      console.warn("Failed to resolve embedded WebSocket URL from Tauri", error);
+      console.warn("[tauri-bridge] getWsUrl: invoke failed", error);
     }
     const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
+    console.log("[tauri-bridge] getWsUrl: envUrl =", envUrl);
     if (envUrl && envUrl.length > 0) {
       cachedServerWsUrl = envUrl;
       return envUrl;
     }
+    console.warn("[tauri-bridge] getWsUrl: no URL available, returning null");
     return null;
   },
 

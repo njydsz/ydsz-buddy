@@ -28,7 +28,11 @@ import { isTauri } from "./env";
  * 通过顶层 await 让 tauriBridge.getWsUrl() 在第一次渲染前完成，
  * 避免 fallback 到 `window.location` 引发 SocketOpenError。
  */
-await tauriBridge.getWsUrl();
+try {
+  await tauriBridge.getWsUrl();
+} catch {
+  // 预热失败时 WsTransport 会回退到环境变量或 window.location。
+}
 
 /**
  * 为无边框窗口的自定义标题栏初始化拖拽和双击最大化行为。

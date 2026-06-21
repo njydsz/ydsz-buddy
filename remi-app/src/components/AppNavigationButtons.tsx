@@ -24,9 +24,10 @@ export function AppNavigationButtons({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "-ms-1 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]",
+        "-ms-1 flex shrink-0 items-center gap-0.5",
         className,
       )}
+      data-no-drag
     >
       <Tooltip>
         <TooltipTrigger

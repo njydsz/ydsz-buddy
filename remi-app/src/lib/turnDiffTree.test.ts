@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import type { TurnDiffFileChange } from "../types";
 import { buildTurnDiffTree, summarizeTurnDiffStats } from "./turnDiffTree";
 
 const makeFile = (path: string, additions: number, deletions: number) => ({
@@ -28,8 +29,7 @@ describe("summarizeTurnDiffStats", () => {
   it("skips files with non-numeric stats", () => {
     const files = [
       makeFile("a.ts", 10, 2),
-      // @ts-expect-error intentionally invalid
-      { path: "b.ts", additions: "x", deletions: 1 },
+      { path: "b.ts", additions: "x", deletions: 1 } as unknown as TurnDiffFileChange,
     ];
     expect(summarizeTurnDiffStats(files)).toEqual({ additions: 10, deletions: 2 });
   });

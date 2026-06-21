@@ -25,9 +25,10 @@ export function WindowCaptionButtons({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center [-webkit-app-region:no-drag]",
+        "flex shrink-0 items-center",
         className,
       )}
+      data-no-drag
     >
       <CaptionButton
         aria-label="Minimize"

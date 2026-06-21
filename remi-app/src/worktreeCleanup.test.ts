@@ -13,30 +13,32 @@ const makeThread = (id: string, worktreePath: string | null): Thread =>
     worktreePath,
   } as unknown as Thread);
 
+const threadId = (id: string) => id as unknown as Thread["id"];
+
 describe("getOrphanedWorktreePathForThread", () => {
   it("returns null when thread does not exist", () => {
-    expect(getOrphanedWorktreePathForThread([], "missing")).toBeNull();
+    expect(getOrphanedWorktreePathForThread([], threadId("missing"))).toBeNull();
   });
 
   it("returns null when target thread has no worktree path", () => {
     const t = makeThread("a", null);
-    expect(getOrphanedWorktreePathForThread([t], "a")).toBeNull();
+    expect(getOrphanedWorktreePathForThread([t], threadId("a"))).toBeNull();
   });
 
   it("returns the path when only one thread uses it", () => {
     const t = makeThread("a", "/wt/a");
-    expect(getOrphanedWorktreePathForThread([t], "a")).toBe("/wt/a");
+    expect(getOrphanedWorktreePathForThread([t], threadId("a"))).toBe("/wt/a");
   });
 
   it("returns null when another thread shares the worktree path", () => {
     const a = makeThread("a", "/wt/shared");
     const b = makeThread("b", "/wt/shared");
-    expect(getOrphanedWorktreePathForThread([a, b], "a")).toBeNull();
+    expect(getOrphanedWorktreePathForThread([a, b], threadId("a"))).toBeNull();
   });
 
   it("trims whitespace and returns valid path", () => {
     const t = makeThread("a", "  /wt/a  ");
-    expect(getOrphanedWorktreePathForThread([t], "a")).toBe("/wt/a");
+    expect(getOrphanedWorktreePathForThread([t], threadId("a"))).toBe("/wt/a");
   });
 });
 

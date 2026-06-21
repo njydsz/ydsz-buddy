@@ -688,7 +688,7 @@ export default function DiffPanel({
 
   const headerRow = (
     <>
-      <div className="relative min-w-0 flex-1 [-webkit-app-region:no-drag]">
+      <div className="relative min-w-0 flex-1" data-no-drag>
         {canScrollTurnStripLeft && (
           <div className="pointer-events-none absolute inset-y-0 left-8 z-10 w-7 bg-linear-to-r from-card to-transparent" />
         )}
@@ -778,7 +778,7 @@ export default function DiffPanel({
           ))}
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1 [-webkit-app-region:no-drag]">
+      <div className="flex shrink-0 items-center gap-1" data-no-drag>
         {!isSidebarMode ? (
           <>
             <ToggleGroup
@@ -817,7 +817,7 @@ export default function DiffPanel({
         {onClosePanel ? (
           <button
             type="button"
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-transparent text-(--color-text-foreground) transition-colors hover:bg-(--sidebar-accent) [-webkit-app-region:no-drag]"
+            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-transparent text-(--color-text-foreground) transition-colors hover:bg-(--sidebar-accent)"
             onClick={(event) => {
               event.stopPropagation();
               onClosePanel();

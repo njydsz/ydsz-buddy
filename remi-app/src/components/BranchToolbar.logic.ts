@@ -5,8 +5,8 @@ import {
 } from "~/shared/threadWorkspace";
 import { Schema } from "effect";
 
-export const EnvMode = Schema.Literal("local", "worktree");
-export type EnvMode = typeof EnvMode.Type;
+export const EnvMode = Schema.Literals(["local", "worktree"] as const);
+export type EnvMode = "local" | "worktree";
 
 export function resolveEffectiveEnvMode(input: {
   activeWorktreePath: string | null;

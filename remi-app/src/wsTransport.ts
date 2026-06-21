@@ -45,16 +45,23 @@ function resolveRpcUrl(rawUrl: string): string {
 }
 
 function makeSocketUrl(explicitUrl: string | null): string {
-  if (explicitUrl) return resolveRpcUrl(explicitUrl);
+  if (explicitUrl) {
+    console.log("[wsTransport] makeSocketUrl: using explicitUrl", explicitUrl);
+    return resolveRpcUrl(explicitUrl);
+  }
   const bridgeUrl = window.desktopBridge?.getWsUrl() ?? tauriBridge.getCachedWsUrl?.();
   const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
+  console.log("[wsTransport] makeSocketUrl: bridgeUrl =", bridgeUrl, "envUrl =", envUrl);
+  console.log("[wsTransport] makeSocketUrl: window.location =", window.location.href);
   const rawUrl =
     bridgeUrl && bridgeUrl.length > 0
       ? bridgeUrl
       : envUrl && envUrl.length > 0
         ? envUrl
         : `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.hostname}:${window.location.port}`;
-  return resolveRpcUrl(rawUrl);
+  const resolved = resolveRpcUrl(rawUrl);
+  console.log("[wsTransport] makeSocketUrl: resolved =", resolved);
+  return resolved;
 }
 
 function makeProtocolLayer(url: string) {
@@ -245,8 +252,11 @@ export class WsTransport {
   private async getClient(): Promise<RpcClientInstance> {
     try {
       return await this.clientPromise;
-    } catch {
+    } catch (error) {
+      console.warn("[wsTransport] getClient: initial connection failed, retrying...", error);
       if (this.disposed) throw new Error("Transport disposed");
+      // 等待一段时间后重试，给服务器更多启动时间
+      await new Promise((resolve) => window.setTimeout(resolve, 1000));
       return this.reconnect();
     }
   }

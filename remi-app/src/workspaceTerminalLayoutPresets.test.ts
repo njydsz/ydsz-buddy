@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import type { ThreadTerminalLayoutNode } from "./types";
 import {
   createWorkspaceTerminalGroupFromPreset,
   DEFAULT_WORKSPACE_LAYOUT_PRESET_ID,
@@ -111,7 +112,7 @@ describe("createWorkspaceTerminalGroupFromPreset", () => {
       activeTerminalId: "t1",
     });
     if (group.layout.type === "split") {
-      const collectLeaves = (node: typeof group.layout): number => {
+      const collectLeaves = (node: ThreadTerminalLayoutNode): number => {
         if (node.type === "terminal") return 1;
         if (node.type === "split") {
           return node.children.reduce((acc, c) => acc + collectLeaves(c), 0);

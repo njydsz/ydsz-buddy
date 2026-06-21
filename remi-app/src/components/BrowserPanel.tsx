@@ -864,8 +864,8 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
   const header = (
     <div className="flex min-w-0 flex-1 items-center gap-2">
       {/* Keep the browser chrome interactive inside Tauri's draggable titlebar. */}
-      <div className="relative flex min-w-0 flex-1 items-center gap-2 [-webkit-app-region:no-drag]">
-        <div className="flex shrink-0 items-center gap-1 [-webkit-app-region:no-drag]">
+      <div className="relative flex min-w-0 flex-1 items-center gap-2" data-no-drag>
+        <div className="flex shrink-0 items-center gap-1" data-no-drag>
           <Button
             type="button"
             variant="ghost"
@@ -932,7 +932,8 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
           </Button>
         </div>
         <form
-          className="min-w-0 flex-1 [-webkit-app-region:no-drag]"
+          className="min-w-0 flex-1"
+          data-no-drag
           onSubmit={(event) => {
             event.preventDefault();
             onSubmitAddress();
@@ -958,11 +959,11 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
               setIsAddressFocused(false);
             }}
             placeholder="Search or enter a URL"
-            className="font-mono h-8 min-w-0 bg-background/70 text-xs [-webkit-app-region:no-drag]"
+            className="font-mono h-8 min-w-0 bg-background/70 text-xs"
           />
         </form>
         {showBrowserAddressSuggestions ? (
-          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-lg border border-border bg-popover shadow-lg [-webkit-app-region:no-drag]">
+          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-lg border border-border bg-popover shadow-lg" data-no-drag>
             <div className="max-h-64 overflow-auto p-1">
               {browserAddressSuggestions.map((suggestion) => (
                 <button
@@ -995,7 +996,7 @@ export function BrowserPanel({ mode, threadId, onClosePanel }: BrowserPanelProps
           </div>
         ) : null}
       </div>
-      <div className="flex shrink-0 items-center gap-1 [-webkit-app-region:no-drag]">
+      <div className="flex shrink-0 items-center gap-1" data-no-drag>
         <Menu modal={false}>
           <MenuTrigger
             render={

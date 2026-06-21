@@ -8848,7 +8848,7 @@ export default function ChatView({
 
       {expandedImage && expandedImageItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-6 [-webkit-app-region:no-drag]"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-6"
           role="dialog"
           aria-modal="true"
           aria-label={messages.chat.imagePreview}

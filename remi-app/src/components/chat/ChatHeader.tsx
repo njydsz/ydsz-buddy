@@ -275,7 +275,7 @@ export const ChatHeader = memo(function ChatHeader({
                       render={
                         <button
                           type="button"
-                          className="inline-flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background/55 hover:text-foreground [-webkit-app-region:no-drag]"
+                          className="inline-flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background/55 hover:text-foreground"
                           aria-label="Close selected sidechat"
                           onClick={(event) => {
                             event.stopPropagation();
@@ -315,7 +315,7 @@ export const ChatHeader = memo(function ChatHeader({
           </div>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2 [-webkit-app-region:no-drag]">
+      <div className="flex shrink-0 items-center gap-2" data-no-drag>
         {!isDisposableThread && !hideHandoffControls ? (
           <Menu modal={false}>
             <Tooltip>

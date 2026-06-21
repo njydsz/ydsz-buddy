@@ -55,6 +55,8 @@ pub mod websocket;
 pub mod bootstrap;
 /// 进程内 IPC 桥接模块，供嵌入式 Tauri 等同进程消费者使用
 pub mod ipc;
+/// 线程保留作业模块，定期清理过期/不活跃线程
+pub mod retention;
 
 pub use error::*;
 pub use push_channels::*;
@@ -64,3 +66,4 @@ pub use server::*;
 pub use websocket::*;
 pub use bootstrap::*;
 pub use ipc::*;
+pub use retention::*;

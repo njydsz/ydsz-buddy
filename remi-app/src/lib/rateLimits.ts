@@ -31,6 +31,64 @@ export interface VisibleRateLimitRow {
   windowDurationMins?: number;
 }
 
+// Payload type definitions for rate limit activities
+interface RateLimitWindowPayload {
+  usedPercent?: number;
+  utilization?: number;
+  resetsAt?: string | number;
+  windowDurationMins?: number;
+  window?: string;
+}
+
+interface RateLimitEntryPayload {
+  label?: string;
+  window?: string;
+  primary?: RateLimitWindowPayload;
+  secondary?: RateLimitWindowPayload;
+}
+
+interface RateLimitsByIdPayload {
+  [limitId: string]: RateLimitEntryPayload;
+}
+
+interface RateLimitArrayEntryPayload {
+  window: string;
+  usedPercent?: number;
+  utilization?: number;
+  resetsAt?: string | number;
+  windowDurationMins?: number;
+}
+
+interface CodexRateLimitPayload {
+  rateLimits?: {
+    rateLimits?: {
+      primary?: RateLimitWindowPayload;
+      secondary?: RateLimitWindowPayload;
+    };
+    primary?: RateLimitWindowPayload;
+    secondary?: RateLimitWindowPayload;
+  };
+}
+
+interface ClaudeRateLimitInfoPayload {
+  rateLimitType?: string;
+  utilization?: number;
+  resetsAt?: string;
+  status?: string;
+}
+
+interface RateLimitActivityPayload {
+  provider?: string;
+  rateLimitsByLimitId?: RateLimitsByIdPayload;
+  limits?: RateLimitArrayEntryPayload[];
+  rateLimits?: CodexRateLimitPayload["rateLimits"];
+  rate_limit_info?: ClaudeRateLimitInfoPayload;
+  usedPercent?: number;
+  utilization?: number;
+  resetsAt?: string | number;
+  windowDurationMins?: number;
+}
+
 const WINDOW_ORDER = new Map([
   ["5h", 0],
   ["Weekly", 1],
@@ -38,8 +96,8 @@ const WINDOW_ORDER = new Map([
   ["Current", 3],
 ]);
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+function asRateLimitPayload(value: unknown): RateLimitActivityPayload | null {
+  return value && typeof value === "object" ? (value as RateLimitActivityPayload) : null;
 }
 
 function clampPercent(value: number | undefined): number | undefined {
@@ -53,8 +111,8 @@ function toUsedPercent(value: number | undefined): number | undefined {
 }
 
 function resolveUsedPercent(values: {
-  usedPercent?: unknown;
-  utilization?: unknown;
+  usedPercent?: number;
+  utilization?: number;
 }): number | undefined {
   if (typeof values.usedPercent === "number") return clampPercent(values.usedPercent);
   if (typeof values.utilization === "number") return toUsedPercent(values.utilization);
@@ -117,11 +175,10 @@ function compareWindowLabels(a: string, b: string): number {
 
 function normalizeLimitWindow(
   label: string,
-  rawWindow: Record<string, unknown>,
+  rawWindow: RateLimitWindowPayload,
 ): RateLimitWindow | null {
   const usedPercent = resolveUsedPercent(rawWindow);
-  const windowDurationMins =
-    typeof rawWindow.windowDurationMins === "number" ? rawWindow.windowDurationMins : undefined;
+  const windowDurationMins = rawWindow.windowDurationMins;
   const resetsAt = toIsoReset(rawWindow.resetsAt);
 
   if (usedPercent === undefined && !resetsAt) return null;
@@ -141,22 +198,15 @@ function normalizeLimitWindow(
   return window;
 }
 
-function extractLimitsFromById(payload: Record<string, unknown>): RateLimitWindow[] | undefined {
-  const rateLimitsByLimitId = asRecord(payload.rateLimitsByLimitId);
+function extractLimitsFromById(payload: RateLimitActivityPayload): RateLimitWindow[] | undefined {
+  const rateLimitsByLimitId = payload.rateLimitsByLimitId;
   if (!rateLimitsByLimitId) return undefined;
 
   const limits = Object.values(rateLimitsByLimitId)
-    .map((entry) => asRecord(entry))
     .flatMap((entry) => {
-      if (!entry) return [];
-      const primary = asRecord(entry.primary);
+      const primary = entry.primary;
       if (!primary) return [];
-      const label =
-        typeof entry.label === "string"
-          ? entry.label
-          : typeof entry.window === "string"
-            ? entry.window
-            : "";
+      const label = entry.label ?? entry.window ?? "";
       const normalized = normalizeLimitWindow(label, primary);
       return normalized ? [normalized] : [];
     });
@@ -164,13 +214,12 @@ function extractLimitsFromById(payload: Record<string, unknown>): RateLimitWindo
   return limits.length > 0 ? limits : undefined;
 }
 
-function extractLimitsFromArray(payload: Record<string, unknown>): RateLimitWindow[] | undefined {
+function extractLimitsFromArray(payload: RateLimitActivityPayload): RateLimitWindow[] | undefined {
   if (!Array.isArray(payload.limits)) return undefined;
 
   const limits = payload.limits
-    .map((entry) => asRecord(entry))
     .flatMap((entry) => {
-      if (!entry || typeof entry.window !== "string") return [];
+      if (!entry.window) return [];
       const normalized = normalizeLimitWindow(entry.window, entry);
       return normalized ? [normalized] : [];
     });
@@ -179,34 +228,24 @@ function extractLimitsFromArray(payload: Record<string, unknown>): RateLimitWind
 }
 
 function extractLimitsFromCodexPayload(
-  payload: Record<string, unknown>,
+  payload: RateLimitActivityPayload,
 ): RateLimitWindow[] | undefined {
-  const rateLimitsRoot = asRecord(payload.rateLimits);
-  const nestedRateLimits =
-    rateLimitsRoot && asRecord(rateLimitsRoot.rateLimits)
-      ? asRecord(rateLimitsRoot.rateLimits)
-      : (rateLimitsRoot ?? payload);
-  if (!nestedRateLimits) return undefined;
+  const rateLimitsRoot = payload.rateLimits;
+  if (!rateLimitsRoot) return undefined;
 
-  const primary = asRecord(nestedRateLimits.primary);
-  const secondary = asRecord(nestedRateLimits.secondary);
+  const nestedRateLimits = rateLimitsRoot.rateLimits ?? rateLimitsRoot;
+  
+  const primary = nestedRateLimits.primary;
+  const secondary = nestedRateLimits.secondary;
   const limits: RateLimitWindow[] = [];
 
   if (primary) {
-    const normalized = normalizeLimitWindow("Session", {
-      usedPercent: primary.usedPercent,
-      resetsAt: primary.resetsAt,
-      windowDurationMins: primary.windowDurationMins,
-    });
+    const normalized = normalizeLimitWindow("Session", primary);
     if (normalized) limits.push(normalized);
   }
 
   if (secondary) {
-    const normalized = normalizeLimitWindow("Weekly", {
-      usedPercent: secondary.usedPercent,
-      resetsAt: secondary.resetsAt,
-      windowDurationMins: secondary.windowDurationMins,
-    });
+    const normalized = normalizeLimitWindow("Weekly", secondary);
     if (normalized) limits.push(normalized);
   }
 
@@ -214,12 +253,12 @@ function extractLimitsFromCodexPayload(
 }
 
 function extractLimitsFromClaudePayload(
-  payload: Record<string, unknown>,
+  payload: RateLimitActivityPayload,
 ): { limits?: RateLimitWindow[]; status?: string } | undefined {
-  const info = asRecord(payload.rate_limit_info);
+  const info = payload.rate_limit_info;
   if (!info) return undefined;
 
-  const rateLimitType = typeof info.rateLimitType === "string" ? info.rateLimitType : undefined;
+  const rateLimitType = info.rateLimitType;
   const windowDurationMins =
     rateLimitType === "five_hour" ? 300 : rateLimitType === "seven_day" ? 10_080 : undefined;
   const normalized = normalizeLimitWindow(rateLimitType ?? "Current", {
@@ -230,15 +269,14 @@ function extractLimitsFromClaudePayload(
 
   return {
     ...(normalized ? { limits: [normalized] } : {}),
-    ...(typeof info.status === "string" ? { status: info.status } : {}),
+    ...(info.status ? { status: info.status } : {}),
   };
 }
 
-function extractFallbackLimits(payload: Record<string, unknown>): RateLimitWindow[] | undefined {
+function extractFallbackLimits(payload: RateLimitActivityPayload): RateLimitWindow[] | undefined {
   const usedPercent = resolveUsedPercent(payload);
   const resetsAt = toIsoReset(payload.resetsAt);
-  const windowDurationMins =
-    typeof payload.windowDurationMins === "number" ? payload.windowDurationMins : undefined;
+  const windowDurationMins = payload.windowDurationMins;
 
   if (usedPercent === undefined && !resetsAt) return undefined;
 
@@ -267,7 +305,7 @@ export function deriveAccountRateLimits(
         continue;
       }
 
-      const payload = asRecord(activity.payload);
+      const payload = asRateLimitPayload(activity.payload);
       if (!payload) continue;
 
       const provider = typeof payload.provider === "string" ? payload.provider : "unknown";

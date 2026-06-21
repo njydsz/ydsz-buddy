@@ -3662,7 +3662,7 @@ function SettingsRouteView() {
             <span className="text-xs font-medium tracking-wide text-muted-foreground/70">
               {messages.settings.title}
             </span>
-            <div className="ms-auto flex items-center gap-2 [-webkit-app-region:no-drag]">
+            <div className="ms-auto flex items-center gap-2" data-no-drag>
               <Button
                 size="xs"
                 variant="outline"

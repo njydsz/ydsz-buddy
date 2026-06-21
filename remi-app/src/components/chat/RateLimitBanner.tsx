@@ -10,8 +10,15 @@ export type RateLimitStatus = {
   utilization?: number;
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+// Rate limit activity payload type
+interface RateLimitPayload {
+  status: "rejected" | "allowed_warning";
+  resetsAt?: string;
+  utilization?: number;
+}
+
+function asRateLimitPayload(value: unknown): RateLimitPayload | null {
+  return value && typeof value === "object" ? (value as RateLimitPayload) : null;
 }
 
 export function deriveLatestRateLimitStatus(
@@ -21,7 +28,7 @@ export function deriveLatestRateLimitStatus(
   for (let i = activities.length - 1; i >= 0; i--) {
     const activity = activities[i];
     if (!activity || activity.kind !== "account.rate-limited") continue;
-    const payload = asRecord(activity.payload);
+    const payload = asRateLimitPayload(activity.payload);
     if (!payload) continue;
     const status = payload.status;
     if (status !== "rejected" && status !== "allowed_warning") continue;
