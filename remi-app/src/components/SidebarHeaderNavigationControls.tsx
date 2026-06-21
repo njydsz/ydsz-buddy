@@ -7,13 +7,13 @@ import { AppNavigationButtons } from "./AppNavigationButtons";
 import { SidebarHeaderTrigger, useSidebar } from "./ui/sidebar";
 import { isDesktop } from "~/env";
 
-function RemiCodeWordmark() {
+function RemiClawWordmark() {
   return (
     <img
-      alt="Remi Code"
+      alt="Remi Claw"
       className="size-5 shrink-0 rounded-[5px] object-cover"
       draggable={false}
-      src="/remicode.png"
+      src="/remi-claw.png"
     />
   );
 }
@@ -25,7 +25,7 @@ export function SidebarHeaderNavigationControls() {
     <div className="flex shrink-0 items-center gap-2">
       {isDesktop && !open && (
         <div className="flex min-w-0 items-center gap-1">
-          <RemiCodeWordmark />
+          <RemiClawWordmark />
         </div>
       )}
       <AppNavigationButtons className="ms-0" />

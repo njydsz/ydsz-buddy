@@ -1,8 +1,8 @@
-﻿// FILE: threadActivation.logic.ts
+// FILE: threadActivation.logic.ts
 // Purpose: Pure routing decisions for opening threads as single chats or split panes.
 // Exports: split-aware activation resolvers shared by sidebar click, keyboard, and search flows.
 
-import type { ThreadId } from "@remicode/contracts";
+import type { ThreadId } from "@remi-claw/contracts";
 import {
   resolveSplitViewPaneIdForThread,
   type PaneId,

@@ -127,7 +127,7 @@ function createBaseServerConfig(): ServerConfig {
   return {
     cwd: "/repo/project",
     worktreesDir: "/repo/.codex/worktrees",
-    keybindingsConfigPath: "/repo/project/.remicode-keybindings.json",
+    keybindingsConfigPath: "/repo/project/.remi-claw-keybindings.json",
     keybindings: [],
     issues: [],
     providers: [
@@ -1715,7 +1715,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
             threadId: THREAD_ID,
             cwd: "/repo/project",
             env: {
-              REMICODE_PROJECT_ROOT: "/repo/project",
+              REMI_CLAW_PROJECT_ROOT: "/repo/project",
             },
           });
         },
@@ -1792,8 +1792,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
             threadId: THREAD_ID,
             cwd: "/repo/worktrees/feature-draft",
             env: {
-              REMICODE_PROJECT_ROOT: "/repo/project",
-              REMICODE_WORKTREE_PATH: "/repo/worktrees/feature-draft",
+              REMI_CLAW_PROJECT_ROOT: "/repo/project",
+              REMI_CLAW_WORKTREE_PATH: "/repo/worktrees/feature-draft",
             },
           });
         },
@@ -2504,7 +2504,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
               typeof request.newBranch === "string",
           );
           expect(createWorktreeRequest).toBeTruthy();
-          expect(createWorktreeRequest?.newBranch).toMatch(/^remicode\/[0-9a-f]{8}$/);
+          expect(createWorktreeRequest?.newBranch).toMatch(/^remi-claw\/[0-9a-f]{8}$/);
 
           const detachedRequest = wsRequests.find(
             (request) => request._tag === WS_METHODS.gitCreateDetachedWorktree,

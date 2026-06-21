@@ -1,8 +1,8 @@
-﻿// FILE: storeSelectors.ts
+// FILE: storeSelectors.ts
 // Purpose: Stable Zustand selectors for entity lookups and lightweight sidebar projections.
 // Exports: Selector factories used by routes and sidebar-heavy components.
 
-import type { ProjectId, ThreadId } from "@remicode/contracts";
+import type { ProjectId, ThreadId } from "@remi-claw/contracts";
 
 import type { AppState } from "./store";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";

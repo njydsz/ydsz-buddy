@@ -1,4 +1,4 @@
-import type { GitBranch, ProviderKind } from "@remicode/contracts";
+import type { GitBranch, ProviderKind } from "@remi-claw/contracts";
 
 export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "clear",

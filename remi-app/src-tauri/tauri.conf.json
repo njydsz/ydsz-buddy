@@ -1,7 +1,7 @@
 {
-  "productName": "Remi Code",
-  "version": "0.1.0",
-  "identifier": "org.remi.code",
+  "productName": "Remi Claw",
+  "version": "0.2.0",
+  "identifier": "org.remi.claw",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "Remi Code",
+        "title": "Remi Claw",
         "width": 1200,
         "height": 800,
         "minWidth": 800,
@@ -28,6 +28,19 @@
     ],
     "security": {
       "csp": null
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://releases.remi-claw.app/latest.json"
+      ],
+      "pubkey": "",
+      "showDialog": false,
+      "windows": {
+        "installMode": "passive"
+      }
     }
   },
   "bundle": {

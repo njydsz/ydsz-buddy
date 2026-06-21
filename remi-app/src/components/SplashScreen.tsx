@@ -15,10 +15,10 @@ export function SplashScreen({
     <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-5 select-none">
         <img
-          alt="Remi Code"
+          alt="Remi Claw"
           className="size-24 rounded-[26px] object-cover"
           draggable={false}
-          src="/remicode.png"
+          src="/remi-claw.png"
         />
 
         {errorMessage ? (

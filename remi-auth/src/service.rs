@@ -263,7 +263,7 @@ pub struct AuthService {
     ///
     /// 来源优先级：
     /// 1. 环境变量 `REMI_BOOTSTRAP_TOKEN`
-    /// 2. 文件 `~/.remi-code/userdata/bootstrap_token`（首次访问时自动生成）
+    /// 2. 文件 `~/.remi-claw/userdata/bootstrap_token`（首次访问时自动生成）
     /// 3. 显式传入（通过 `with_bootstrap_token` 构造函数）
     bootstrap_token: Option<String>,
 }
@@ -350,7 +350,7 @@ impl AuthService {
     /// ## 返回值
     ///
     /// 返回 [`AuthDescriptor`]，包含：
-    /// - `server_name`: 服务器名称（当前固定为 "Remi Code"）
+    /// - `server_name`: 服务器名称（当前固定为 "Remi Claw"）
     /// - `requires_auth`: 是否需要认证（当前固定为 `true`）
     /// - `supported_methods`: 支持的认证方式列表（Bootstrap、Pairing、Bearer）
     ///
@@ -369,7 +369,7 @@ impl AuthService {
     /// }
     pub async fn get_descriptor(&self) -> AuthResult<AuthDescriptor> {
         Ok(AuthDescriptor {
-            server_name: "Remi Code".to_string(),
+            server_name: "Remi Claw".to_string(),
             requires_auth: true,
             supported_methods: vec![
                 SessionMethod::Bootstrap,
@@ -940,7 +940,7 @@ impl AuthService {
 ///
 /// 按以下优先级加载：
 /// 1. 环境变量 `REMI_BOOTSTRAP_TOKEN`
-/// 2. 文件 `~/.remi-code/userdata/bootstrap_token`（首次访问时自动生成）
+/// 2. 文件 `~/.remi-claw/userdata/bootstrap_token`（首次访问时自动生成）
 ///
 /// 如果环境变量未设置且文件不存在，则生成一个新的随机 token 并持久化到文件，
 /// 确保首次启动时自动生成引导凭证。
@@ -962,7 +962,7 @@ fn load_bootstrap_token() -> Option<String> {
         .ok()?;
 
     let state_dir = std::path::Path::new(&home)
-        .join(".remi-code")
+        .join(".remi-claw")
         .join("userdata");
 
     let token_path = state_dir.join("bootstrap_token");

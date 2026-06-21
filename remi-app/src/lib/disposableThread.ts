@@ -3,7 +3,7 @@
 // Layer: Web route/domain helpers
 // Exports: switch-aware resolver for disposable thread cleanup
 
-import type { ThreadId } from "@remicode/contracts";
+import type { ThreadId } from "@remi-claw/contracts";
 import type { DraftThreadState } from "../composerDraftStore";
 
 export function resolveDisposableThreadIdToDispose(input: {

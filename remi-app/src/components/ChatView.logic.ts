@@ -1,4 +1,4 @@
-﻿import {
+import {
   ProjectId,
   ThreadId,
   type ModelSelection,
@@ -6,11 +6,11 @@
   type ProviderKind,
   type ServerProviderAuthStatus,
   type ThreadId as ThreadIdType,
-} from "@remicode/contracts";
-import { normalizeModelSlug } from "@remicode/shared/model";
-import { buildRemicodeBranchName } from "@remicode/shared/git";
-import { isGenericChatThreadTitle } from "@remicode/shared/chatThreads";
-import { isGenericTerminalThreadTitle } from "@remicode/shared/terminalThreads";
+} from "@remi-claw/contracts";
+import { normalizeModelSlug } from "@remi-claw/shared/model";
+import { buildRemiClawBranchName } from "@remi-claw/shared/git";
+import { isGenericChatThreadTitle } from "@remi-claw/shared/chatThreads";
+import { isGenericTerminalThreadTitle } from "@remi-claw/shared/terminalThreads";
 import {
   type ChatAssistantSelectionAttachment,
   type ChatMessage,
@@ -33,8 +33,8 @@ import { hasLiveTurnTailWork, type WorkLogEntry } from "../session-logic";
 import { localSubagentThreadId } from "./ChatView.selectors";
 import type { ProviderModelOption } from "../providerModelOptions";
 
-export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remicode:last-invoked-script-by-project";
-export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remicode:dismissed-provider-health-banners";
+export const LAST_INVOKED_SCRIPT_BY_PROJECT_KEY = "remi-claw:last-invoked-script-by-project";
+export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remi-claw:dismissed-provider-health-banners";
 
 export const LastInvokedScriptByProjectSchema = Schema.Record(ProjectId, Schema.String);
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
@@ -394,7 +394,7 @@ export function buildSuggestedWorktreeName(input: {
   associatedWorktreeBranch?: string | null;
   title?: string | null;
 }): string {
-  return buildRemicodeBranchName(input.associatedWorktreeBranch ?? input.title);
+  return buildRemiClawBranchName(input.associatedWorktreeBranch ?? input.title);
 }
 
 export function cloneComposerImageForRetry(

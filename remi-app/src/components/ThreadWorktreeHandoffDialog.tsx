@@ -85,7 +85,7 @@ export function ThreadWorktreeHandoffDialog({
                     onOpenChange(false);
                   }
                 }}
-                placeholder="remicode/feature-name"
+                placeholder="remi-claw\/feature-name"
               />
             </label>
           </form>

@@ -2,7 +2,7 @@
 // Purpose: Normalizes generic tool-call titles and humanizes command executions for timeline rows.
 // Layer: UI utility
 // Exports: deriveReadableToolTitle, deriveReadableCommandDisplay, deriveInlineCommandCall, normalizeCompactToolLabel
-// Depends on: @remi-code/contracts tool lifecycle item types
+// Depends on: @remi-claw/contracts tool lifecycle item types
 
 import type { ToolLifecycleItemType } from "~/contracts";
 

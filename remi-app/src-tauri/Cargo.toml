@@ -1,12 +1,12 @@
 [package]
-name = "remi-code"
-version = "0.1.0"
-description = "A Tauri App"
+name = "remi-claw"
+version = "0.2.0"
+description = "Remi Claw - 双模式 AI 桌面助手 (Work / Code)"
 authors = ["you"]
 edition = "2021"
 
 [lib]
-name = "remi_code_lib"
+name = "remi_claw_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

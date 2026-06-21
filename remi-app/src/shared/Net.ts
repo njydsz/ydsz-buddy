@@ -1,4 +1,4 @@
-﻿import * as Net from "node:net";
+import * as Net from "node:net";
 
 import { Data, Effect, Layer, ServiceMap } from "effect";
 
@@ -86,7 +86,7 @@ export interface NetServiceShape {
  * NetService - Service tag for startup networking helpers.
  */
 export class NetService extends ServiceMap.Service<NetService, NetServiceShape>()(
-  "@remicode/shared/Net/NetService",
+  "@remi-claw/shared/Net/NetService",
 ) {
   static readonly layer = Layer.sync(NetService, () => {
     /**

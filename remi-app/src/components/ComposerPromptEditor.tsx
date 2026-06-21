@@ -1012,7 +1012,7 @@ export const ComposerPromptEditor = forwardRef<
   const initialMentionReferencesRef = useRef(normalizedMentionReferences);
   const initialConfig = useMemo<InitialConfigType>(
     () => ({
-      namespace: "remicode-composer-editor",
+      namespace: "remi-claw-composer-editor",
       editable: true,
       nodes: [
         ComposerMentionNode,

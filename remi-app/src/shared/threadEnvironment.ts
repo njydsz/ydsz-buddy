@@ -1,4 +1,4 @@
-﻿import type { ThreadEnvironmentMode } from "@remicode/contracts";
+import type { ThreadEnvironmentMode } from "@remi-claw/contracts";
 
 export type ResolvedThreadWorkspaceState = "local" | "worktree-pending" | "worktree-ready";
 

@@ -23,7 +23,7 @@ use std::path::PathBuf;
 /// Rotating File Sink 配置
 #[derive(Debug, Clone)]
 pub struct RotatingSinkConfig {
-    /// 日志根目录（不含文件名），如 `C:/Users/me/.remi-code/logs/app`
+    /// 日志根目录（不含文件名），如 `C:/Users/me/.remi-claw/logs/app`
     pub dir: PathBuf,
     /// 日志文件基础名（不含扩展名），如 `remi` → 写入 `remi.log`
     pub base_name: String,

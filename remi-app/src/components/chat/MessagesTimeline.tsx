@@ -3,8 +3,8 @@
 // Layer: Web chat presentation component
 // Exports: MessagesTimeline
 
-import { type MessageId, ThreadId, type TurnId } from "@remicode/contracts";
-import { resolveLatestTailUserMessageEditTarget } from "@remicode/shared/conversationEdit";
+import { type MessageId, ThreadId, type TurnId } from "@remi-claw/contracts";
+import { resolveLatestTailUserMessageEditTarget } from "@remi-claw/shared/conversationEdit";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import {
   memo,
@@ -716,7 +716,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                 inlineWorkSummary,
               ]
                 .filter((value): value is string => Boolean(value))
-                .join(" â€¢ ")
+                .join(" â€?")
             ) : (
               <>
                 <LiveMessageMeta
@@ -724,7 +724,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                   durationStart={row.durationStart}
                   timestampFormat={timestampFormat}
                 />
-                {inlineWorkSummary ? <> â€¢ {inlineWorkSummary}</> : null}
+                {inlineWorkSummary ? <> â€?{inlineWorkSummary}</> : null}
               </>
             )
           ) : (
@@ -737,7 +737,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               inlineWorkSummary,
             ]
               .filter((value): value is string => Boolean(value))
-              .join(" â€¢ ")
+              .join(" â€?")
           );
           return (
             <>
@@ -1173,7 +1173,7 @@ function formatMessageMeta(
   timestampFormat: TimestampFormat,
 ): string {
   if (!duration) return formatShortTimestamp(createdAt, timestampFormat);
-  return `${formatShortTimestamp(createdAt, timestampFormat)} â€¢ ${duration}`;
+  return `${formatShortTimestamp(createdAt, timestampFormat)} â€?${duration}`;
 }
 
 function formatInlineWorkSummary(_groupedEntries: TimelineWorkEntry[]): string | null {
@@ -1622,7 +1622,7 @@ function extractFilePathFromDetail(detail: string): string | null {
       return filePath.trim();
     }
   } catch {
-    // Not valid JSON â€” try regex fallback
+    // Not valid JSON â€?try regex fallback
     const match = /"(?:file_path|filePath|path|filename)"\s*:\s*"([^"]+)"/i.exec(detail);
     if (match?.[1]) return match[1];
   }
@@ -1678,7 +1678,7 @@ function workEntryPreview(
     const filePath = extractFilePathFromDetail(workEntry.detail);
     if (filePath) return basename(filePath);
 
-    // For file-related entries, the heading alone is enough â€” don't show raw JSON
+    // For file-related entries, the heading alone is enough â€?don't show raw JSON
     if (isFileRelated) return null;
 
     // For other entries, if the detail looks like raw JSON, skip it
@@ -1688,7 +1688,7 @@ function workEntryPreview(
     const readLinesMatch = /^Read\s+(\d+\s+lines?)$/i.exec(trimmedDetail);
     if (readLinesMatch?.[1]) return readLinesMatch[1];
 
-    // Clean, non-JSON detail â€” show it
+    // Clean, non-JSON detail â€?show it
     return trimmedDetail;
   }
 
@@ -1789,7 +1789,7 @@ function subagentSecondaryLabel(
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(" â€¢ ");
+  return parts.join(" â€?");
 }
 
 function subagentStatusClasses(
@@ -1825,7 +1825,7 @@ function subagentCardSummary(workEntry: TimelineWorkEntry): string {
 function subagentCardMeta(workEntry: TimelineWorkEntry): string | null {
   const modelLabel = formatSubagentModelLabel(workEntry.subagentAction?.model);
   if (modelLabel && workEntry.subagentAction?.prompt) {
-    return `${modelLabel} â€¢ ${workEntry.subagentAction.prompt}`;
+    return `${modelLabel} â€?${workEntry.subagentAction.prompt}`;
   }
   return modelLabel ?? workEntry.subagentAction?.prompt ?? null;
 }

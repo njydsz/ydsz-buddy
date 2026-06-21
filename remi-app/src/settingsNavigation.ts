@@ -1,10 +1,7 @@
 /**
  * @file 设置页面导航
  *
- * 定义设置页面的分区分类体系，在主侧边栏和设置页面之间共享。
- * 包含分区 ID、导航项定义、分组信息和搜索标准化等工具。
- * 支持国际化（i18n）的导航项构建。
- */
+ * 定义设置页面的分区分类体系，在主侧边栏和设置页面之间共享�? * 包含分区 ID、导航项定义、分组信息和搜索标准化等工具�? * 支持国际化（i18n）的导航项构建�? */
 
 import {
   AdjustmentsIcon,
@@ -20,7 +17,7 @@ import {
 } from "./lib/icons";
 import { useMessages, type Messages } from "./i18n";
 
-/** 设置页面的分区 ID 列表，按显示顺序排列 */
+/** 设置页面的分�?ID 列表，按显示顺序排列 */
 export const SETTINGS_SECTION_IDS = [
   "general",
   "appearance",
@@ -35,16 +32,15 @@ export const SETTINGS_SECTION_IDS = [
 
 /** 设置分区 ID 类型 */
 export type SettingsSectionId = (typeof SETTINGS_SECTION_IDS)[number];
-/** 设置导航分组 ID：app（应用级）和 remicode（Remi Code 专属） */
-export type SettingsNavGroupId = "app" | "remicode";
+/** 设置导航分组 ID：app（应用级）和 remiClaw（Remi Claw 专属�?*/
+export type SettingsNavGroupId = "app" | "remiClaw";
 
 /**
- * 设置导航项，包含分区 ID、分组、标签、描述和图标。
- */
+ * 设置导航项，包含分区 ID、分组、标签、描述和图标�? */
 export type SettingsNavItem = {
   /** 分区 ID */
   id: SettingsSectionId;
-  /** 所属分组 */
+  /** 所属分�?*/
   group: SettingsNavGroupId;
   /** 显示标签 */
   label: string;
@@ -52,11 +48,11 @@ export type SettingsNavItem = {
   description: string;
   /** 图标组件 */
   icon: LucideIcon;
-  /** 眉标文字（分组标题下的小标签） */
+  /** 眉标文字（分组标题下的小标签�?*/
   eyebrow: string;
 };
 
-/** 内部使用的导航项规格，使用 i18n 键引用标签和描述 */
+/** 内部使用的导航项规格，使�?i18n 键引用标签和描述 */
 type SettingsNavItemSpec = {
   id: SettingsSectionId;
   group: SettingsNavGroupId;
@@ -66,7 +62,7 @@ type SettingsNavItemSpec = {
   descriptionKey: keyof Messages["settings"]["nav"];
 };
 
-/** 内部导航项规格列表，定义各设置分区的元数据 */
+/** 内部导航项规格列表，定义各设置分区的元数�?*/
 const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   {
     id: "general",
@@ -118,7 +114,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "models",
-    group: "remicode",
+    group: "remiClaw",
     icon: BrainIcon,
     eyebrow: "AI configuration",
     labelKey: "models",
@@ -126,7 +122,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "providers",
-    group: "remicode",
+    group: "remiClaw",
     icon: PlugIcon,
     eyebrow: "Picker visibility",
     labelKey: "providers",
@@ -134,7 +130,7 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
   },
   {
     id: "advanced",
-    group: "remicode",
+    group: "remiClaw",
     icon: WrenchIcon,
     eyebrow: "System tools",
     labelKey: "advanced",
@@ -143,11 +139,8 @@ const SETTINGS_NAV_ITEM_SPECS_INTERNAL: readonly SettingsNavItemSpec[] = [
 ] as const;
 
 /**
- * 根据国际化消息构建设置导航项列表。
- *
- * @param messages - 国际化消息对象
- * @returns 导航项数组
- */
+ * 根据国际化消息构建设置导航项列表�? *
+ * @param messages - 国际化消息对�? * @returns 导航项数�? */
 export function buildSettingsNavItems(messages: Messages): readonly SettingsNavItem[] {
   return SETTINGS_NAV_ITEM_SPECS_INTERNAL.map((spec) => {
     const entry = messages.settings.nav[spec.labelKey];
@@ -163,10 +156,8 @@ export function buildSettingsNavItems(messages: Messages): readonly SettingsNavI
 }
 
 /**
- * 根据国际化消息构建设置导航分组列表。
- *
- * @param messages - 国际化消息对象
- * @returns 分组列表
+ * 根据国际化消息构建设置导航分组列表�? *
+ * @param messages - 国际化消息对�? * @returns 分组列表
  */
 export function buildSettingsNavGroups(messages: Messages): ReadonlyArray<{
   id: SettingsNavGroupId;
@@ -174,11 +165,11 @@ export function buildSettingsNavGroups(messages: Messages): ReadonlyArray<{
 }> {
   return [
     { id: "app", label: messages.settings.groups.app },
-    { id: "remicode", label: messages.settings.groups.remicode },
+    { id: "remiClaw", label: messages.settings.groups.remiClaw },
   ];
 }
 
-/** React Hook：获取国际化后的设置导航项列表 */
+/** React Hook：获取国际化后的设置导航项列�?*/
 export function useSettingsNavItems(): readonly SettingsNavItem[] {
   const messages = useMessages();
   return buildSettingsNavItems(messages);
@@ -193,13 +184,13 @@ export function useSettingsNavGroups(): ReadonlyArray<{
   return buildSettingsNavGroups(messages);
 }
 
-/** 静态的设置导航分组列表（无国际化，用于非 React 上下文） */
+/** 静态的设置导航分组列表（无国际化，用于�?React 上下文） */
 export const SETTINGS_NAV_GROUPS: ReadonlyArray<{
   id: SettingsNavGroupId;
   label: string;
 }> = [
   { id: "app", label: "App" },
-  { id: "remicode", label: "Remi Code" },
+  { id: "remiClaw", label: "Remi Claw" },
 ] as const;
 
 /** 静态的设置导航项列表（无国际化，用于非 React 上下文） */
@@ -254,7 +245,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "models",
-    group: "remicode",
+    group: "remiClaw",
     label: "Models",
     description: "Git writing defaults and custom model slugs.",
     icon: BrainIcon,
@@ -262,7 +253,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "providers",
-    group: "remicode",
+    group: "remiClaw",
     label: "Providers",
     description: "Choose visible providers, review CLI installs, and update provider tools.",
     icon: PlugIcon,
@@ -270,7 +261,7 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
   },
   {
     id: "advanced",
-    group: "remicode",
+    group: "remiClaw",
     label: "Advanced",
     description: "Keybindings, recovery, and version info.",
     icon: WrenchIcon,
@@ -279,10 +270,8 @@ export const SETTINGS_NAV_ITEMS: readonly SettingsNavItem[] = [
 ] as const;
 
 /**
- * 标准化设置分区值。无效值回退为 "general"。
- *
- * @param value - 待标准化的值
- * @returns 有效的设置分区 ID
+ * 标准化设置分区值。无效值回退�?"general"�? *
+ * @param value - 待标准化的�? * @returns 有效的设置分�?ID
  */
 export function normalizeSettingsSection(value: unknown): SettingsSectionId {
   if (typeof value !== "string") {

@@ -3,7 +3,7 @@ import {
   type BrowserCaptureScreenshotResult,
   type NativeApi,
   type ThreadId,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 
 import type { ComposerImageAttachment } from "../composerDraftStore";
 

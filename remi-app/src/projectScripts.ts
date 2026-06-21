@@ -1,9 +1,9 @@
-﻿import {
+import {
   MAX_SCRIPT_ID_LENGTH,
   SCRIPT_RUN_COMMAND_PATTERN,
   type KeybindingCommand,
   type ProjectScript,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import { Schema } from "effect";
 
 function normalizeScriptId(value: string): string {
@@ -76,10 +76,10 @@ export function projectScriptRuntimeEnv(
   input: ProjectScriptRuntimeEnvInput,
 ): Record<string, string> {
   const env: Record<string, string> = {
-    Remicode_PROJECT_ROOT: input.project.cwd,
+    REMI_CLAW_PROJECT_ROOT: input.project.cwd,
   };
   if (input.worktreePath) {
-    env.Remicode_WORKTREE_PATH = input.worktreePath;
+    env.REMI_CLAW_WORKTREE_PATH = input.worktreePath;
   }
   if (input.extraEnv) {
     return { ...env, ...input.extraEnv };

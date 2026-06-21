@@ -1,11 +1,11 @@
-//! # Remi Code 桌面应用入口文件
+//! # Remi Claw 桌面应用入口文件
 //!
-//! 本文件是 Remi Code 桌面应用程序的主入口点（entry point）。
+//! 本文件是 Remi Claw 桌面应用程序的主入口点（entry point）。
 //!
 //! ## 模块职责
 //!
 //! - 配置 Windows 平台子系统属性，避免在 Release 模式下弹出额外的控制台窗口
-//! - 调用库 crate（`remi_code_lib`）中的 `run()` 函数启动 Tauri 应用
+//! - 调用库 crate（`remi_claw_lib`）中的 `run()` 函数启动 Tauri 应用
 //!
 //! ## 设计说明
 //!
@@ -25,7 +25,7 @@
 /// 应用程序主入口函数
 ///
 /// 直接委托给库 crate 的 `run()` 函数完成 Tauri 应用的初始化与启动。
-/// 所有插件注册、状态管理、命令绑定等逻辑均在 `remi_code_lib::run()` 中完成。
+/// 所有插件注册、状态管理、命令绑定等逻辑均在 `remi_claw_lib::run()` 中完成。
 fn main() {
-    remi_code_lib::run()
+    remi_claw_lib::run()
 }

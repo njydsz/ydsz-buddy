@@ -6,7 +6,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { type ProviderKind } from "@remicode/contracts";
+import { type ProviderKind } from "@remi-claw/contracts";
 import { getCustomBinaryPathForProvider, useAppSettings } from "../appSettings";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { serverConfigQueryOptions } from "../lib/serverReactQuery";

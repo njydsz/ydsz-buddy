@@ -1,6 +1,6 @@
-//! # Remi Code Tauri 应用核心库
+//! # Remi Claw Tauri 应用核心库
 //!
-//! 本模块是 Remi Code 桌面应用的核心库 crate，负责将 Tauri 框架与系统命令模块进行组装和启动。
+//! 本模块是 Remi Claw 桌面应用的核心库 crate，负责将 Tauri 框架与系统命令模块进行组装和启动。
 //!
 //! ## 模块职责
 //!
@@ -197,7 +197,7 @@ fn save_user_profile(
     profile.save(&p).map_err(|e| e.to_string())
 }
 
-/// 启动 Remi Code Tauri 桌面应用
+/// 启动 Remi Claw Tauri 桌面应用
 ///
 /// 本函数是整个应用的核心初始化入口，完成以下工作：
 ///
@@ -228,7 +228,7 @@ pub fn run() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    info!("启动 Remi Code Tauri 应用");
+    info!("启动 Remi Claw Tauri 应用");
 
     // 创建 Tokio 运行时
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
@@ -237,7 +237,7 @@ pub fn run() {
     info!("启动嵌入式 remi-server...");
     let home_dir = dirs::home_dir().expect("Failed to get home directory");
     let config = ServerConfig::default()
-        .with_base_dir(home_dir.join(".remi-code"))
+        .with_base_dir(home_dir.join(".remi-claw"))
         .expect("Failed to derive server paths");
     let bootstrap_result = runtime.block_on(bootstrap_embedded(&config))
         .expect("Failed to bootstrap embedded server");
@@ -282,7 +282,31 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init()) // 剪贴板管理
         .plugin(tauri_plugin_notification::init())   // 系统通知
         .plugin(tauri_plugin_process::init())        // 进程管理
-        // .plugin(tauri_plugin_updater::Builder::new().build()) // 应用自动更新（开发阶段禁用，endpoints/pubkey 未配置会导致 os error 2）
+        // 应用自动更新插件
+        // 支持通过环境变量覆盖 tauri.conf.json 中的静态配置：
+        //   REMI_UPDATER_ENDPOINTS：逗号分隔的 endpoint URL 列表
+        //   REMI_UPDATER_PUBKEY：签名校验公钥（为空则跳过校验）
+        .plugin({
+            let mut builder = tauri_plugin_updater::Builder::new();
+            if let Ok(endpoints_env) = std::env::var("REMI_UPDATER_ENDPOINTS") {
+                let endpoints: Vec<String> = endpoints_env
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+                if !endpoints.is_empty() {
+                    builder = builder.endpoints(endpoints);
+                    info!("更新源已通过 REMI_UPDATER_ENDPOINTS 覆盖: {} 个端点", endpoints.len());
+                }
+            }
+            if let Ok(pubkey) = std::env::var("REMI_UPDATER_PUBKEY") {
+                if !pubkey.is_empty() {
+                    builder = builder.pub_key(pubkey);
+                    info!("更新签名公钥已通过 REMI_UPDATER_PUBKEY 设置");
+                }
+            }
+            builder.build()
+        })
 
         // ========== 菜单事件处理 ==========
         .on_menu_event(|app_handle, event| {
@@ -366,6 +390,7 @@ pub fn run() {
             check_for_updates,               // 检查更新
             download_update,                 // 下载更新
             install_update,                  // 安装更新
+            should_check_for_updates_on_foreground, // 前台重检判断
 
             // 窗口/系统命令
             set_theme,                       // 设置主题

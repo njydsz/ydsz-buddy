@@ -300,8 +300,8 @@ const PROJECT_CONTEXT_MENU_ARCHIVE_ICON = renderToStaticMarkup(<HiOutlineArchive
 const PROJECT_CONTEXT_MENU_DELETE_THREADS_ICON = renderToStaticMarkup(<Trash2 />);
 
 type DebugFeatureFlagsWindow = Window & {
-  remicodeShowFeatureFlags?: () => void;
-  remicodeHideFeatureFlags?: () => void;
+  remiclawShowFeatureFlags?: () => void;
+  remiclawHideFeatureFlags?: () => void;
 };
 
 function readDebugFeatureFlagsMenuVisibility(): boolean {
@@ -456,7 +456,7 @@ function ThreadMetaChipStack({ chips }: { chips: ThreadMetaChip[] }) {
       </Tooltip>
     );
   }
-  const tooltipText = chips.map((chip) => chip.tooltip).join(" è·¯ ");
+  const tooltipText = chips.map((chip) => chip.tooltip).join(" è·?");
   const chipSize = 14;
   const step = 8;
   const width = chipSize + step * (chips.length - 1);
@@ -797,13 +797,13 @@ function prStatusIndicator(pr: ThreadPr): PrStatusIndicator | null {
   return null;
 }
 
-function RemiCodeWordmark() {
+function RemiClawWordmark() {
   return (
     <img
-      alt="Remi Code"
+      alt="Remi Claw"
       className="size-5 shrink-0 rounded-[5px] object-cover"
       draggable={false}
-      src="/remicode.png"
+      src="/remi-claw.png"
     />
   );
 }
@@ -1209,18 +1209,18 @@ export default function Sidebar() {
       updateVisibility();
     };
 
-    debugWindow.remicodeShowFeatureFlags = showFeatureFlags;
-    debugWindow.remicodeHideFeatureFlags = hideFeatureFlags;
+    debugWindow.remiclawShowFeatureFlags = showFeatureFlags;
+    debugWindow.remiclawHideFeatureFlags = hideFeatureFlags;
     window.addEventListener("storage", updateVisibility);
     updateVisibility();
 
     return () => {
       window.removeEventListener("storage", updateVisibility);
-      if (debugWindow.remicodeShowFeatureFlags === showFeatureFlags) {
-        delete debugWindow.remicodeShowFeatureFlags;
+      if (debugWindow.remiclawShowFeatureFlags === showFeatureFlags) {
+        delete debugWindow.remiclawShowFeatureFlags;
       }
-      if (debugWindow.remicodeHideFeatureFlags === hideFeatureFlags) {
-        delete debugWindow.remicodeHideFeatureFlags;
+      if (debugWindow.remiclawHideFeatureFlags === hideFeatureFlags) {
+        delete debugWindow.remiclawHideFeatureFlags;
       }
     };
   }, []);
@@ -5174,7 +5174,7 @@ export default function Sidebar() {
             toastManager.add({
               type: "info",
               title: "You're up to date",
-              description: `Remi Code ${nextState.currentVersion} is already the newest version.`,
+              description: `Remi Claw ${nextState.currentVersion} is already the newest version.`,
             });
             return;
           }
@@ -5293,7 +5293,7 @@ export default function Sidebar() {
         render={
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui">
             <div className="flex min-w-0 items-center gap-1">
-              <RemiCodeWordmark />
+              <RemiClawWordmark />
             </div>
           </div>
         }

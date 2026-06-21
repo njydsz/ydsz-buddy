@@ -75,6 +75,16 @@ pub mod os_jank;
 pub mod shell_command_detection;
 /// Bun WebSocket 兼容垫片（消息归一化 / 心跳 / close code）
 pub mod bun_websocket_compat;
+/// 启动访问控制模块（主机检测 / 端口解析）
+pub mod startup_access;
+/// 图片 MIME 类型检测模块（Base64 解析 / 扩展名推断）
+pub mod image_mime;
+/// 原子文件写入模块（临时文件 + 重命名）
+pub mod atomic_write;
+/// Provider 用量快照模块（本地用量归档读取）
+pub mod provider_usage_snapshot;
+/// 浏览器/编辑器启动服务模块
+pub mod open;
 
 pub use error::*;
 pub use push_channels::*;
@@ -94,3 +104,8 @@ pub use process_runner::*;
 pub use os_jank::*;
 pub use shell_command_detection::*;
 pub use bun_websocket_compat::*;
+pub use startup_access::*;
+pub use image_mime::*;
+pub use atomic_write::*;
+pub use provider_usage_snapshot::*;
+pub use open::*;

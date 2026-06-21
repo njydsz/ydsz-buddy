@@ -210,7 +210,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ServerState>) {
         "projectName": state.config.base_dir.file_name()
             .map(|n| n.to_string_lossy().to_string())
             .filter(|s| !s.is_empty())
-            .unwrap_or_else(|| "Remi Code".to_string()),
+            .unwrap_or_else(|| "Remi Claw".to_string()),
     });
     let welcome_notification = JsonRpcNotification {
         jsonrpc: "2.0".to_string(),

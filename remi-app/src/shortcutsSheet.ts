@@ -1,9 +1,9 @@
-﻿// FILE: shortcutsSheet.ts
+// FILE: shortcutsSheet.ts
 // Purpose: Build the shortcut reference sections shown by the keyboard shortcuts sheet.
 // Layer: UI helper
 // Depends on: keybinding label resolution, project script command mapping, and platform helpers.
 
-import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@remicode/contracts";
+import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@remi-claw/contracts";
 import { isMacPlatform } from "./lib/utils";
 import { shortcutLabelForCommand } from "./keybindings";
 import { commandForProjectScript } from "./projectScripts";
@@ -36,7 +36,7 @@ interface BuildShortcutSheetSectionsOptions {
   projectScripts: ReadonlyArray<ProjectScript>;
   platform: string;
   context: ShortcutSheetContext;
-  isElectron: boolean;
+  isTauri: boolean;
 }
 
 interface ShortcutDefinition {
@@ -171,7 +171,7 @@ const WORKSPACE_DEFINITIONS: readonly ShortcutDefinition[] = [
 ] as const;
 
 function modSlashLabel(platform: string): string {
-  return isMacPlatform(platform) ? "⌘/" : "Ctrl+/";
+  return isMacPlatform(platform) ? "?/" : "Ctrl+/";
 }
 
 function definitionToEntry(
@@ -228,7 +228,7 @@ export function buildShortcutSheetSections(
     ),
   ];
 
-  if (options.isElectron) {
+  if (options.isTauri) {
     const sidebarToggle = definitionToEntry(
       {
         command: "sidebar.toggle",

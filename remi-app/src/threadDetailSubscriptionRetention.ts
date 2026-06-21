@@ -1,9 +1,9 @@
-﻿// FILE: threadDetailSubscriptionRetention.ts
+// FILE: threadDetailSubscriptionRetention.ts
 // Purpose: Keep recently used thread-detail subscriptions warm across route/sidebar switches.
 // Layer: Web subscription retention utility
 // Exports: retain/release helpers plus React and imperative subscription listeners.
 
-import type { ThreadId } from "@remicode/contracts";
+import type { ThreadId } from "@remi-claw/contracts";
 import { useSyncExternalStore } from "react";
 import { useStore } from "./store";
 

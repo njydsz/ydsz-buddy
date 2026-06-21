@@ -9,6 +9,7 @@
 //! - **Worktree 管理**：支持 Git worktree 的创建与删除，实现多分支并行开发
 //! - **状态监控与广播**：实时获取仓库状态（分支、暂存、修改、未跟踪文件等），并通过事件广播机制通知订阅者
 //! - **高级操作编排**：提供堆叠式操作（提交→推送→创建 PR）等组合工作流
+//! - **GitHub 集成**：通过 `gh` CLI 封装 Pull Request、Issue 等 GitHub 操作
 //!
 //! ## 模块结构
 //!
@@ -17,6 +18,9 @@
 //! | [`core`] | Git 核心操作层，封装所有底层 Git 命令的执行 |
 //! | [`broadcaster`] | Git 状态广播器，负责状态的缓存、定时刷新与事件分发 |
 //! | [`manager`] | Git 高级操作管理器，编排堆叠式操作（commit/push/PR）和 worktree 线程切换 |
+//! | [`managed_worktree`] | 托管 Worktree 的生命周期管理 |
+//! | [`github_cli`] | GitHub CLI (`gh`) 命令封装，用于 PR/Issue 等操作 |
+//! | [`text_generation`] | 提交信息/PR 描述的 AI 文本生成辅助 |
 //! | [`error`] | 统一的错误类型定义，基于 `thiserror` 实现 |
 //!
 //! ## 使用场景

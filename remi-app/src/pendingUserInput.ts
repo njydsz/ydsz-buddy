@@ -1,9 +1,9 @@
-﻿// FILE: pendingUserInput.ts
+// FILE: pendingUserInput.ts
 // Purpose: Normalize draft answers and progress for pending user input prompts.
 // Layer: Web chat state utility
 // Exports: Draft answer helpers and progress derivation used by ChatView/composer panels.
 
-import type { ProviderUserInputAnswers, UserInputQuestion } from "@remicode/contracts";
+import type { ProviderUserInputAnswers, UserInputQuestion } from "@remi-claw/contracts";
 
 export interface PendingUserInputDraftAnswer {
   selectedOptionLabels?: string[];

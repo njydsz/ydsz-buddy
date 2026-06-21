@@ -3,7 +3,7 @@ import type {
   OrchestrationMessage,
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import type { ChatMessage } from "../types";
 
 export interface ThreadSummaryMetadata {

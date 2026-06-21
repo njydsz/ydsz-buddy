@@ -1,6 +1,6 @@
 //! # 服务器配置
 //!
-//! 本模块定义了 `remi-code` 后端服务器的完整配置体系，包括：
+//! 本模块定义了 `remi-claw` 后端服务器的完整配置体系，包括：
 //!
 //! - [`RuntimeMode`]：运行时模式枚举，标识当前部署形态（桌面端 / 服务端等）。
 //! - [`CliArgs`]：命令行参数定义，基于 `clap` 自动解析 CLI 输入与环境变量。
@@ -73,7 +73,7 @@ impl Default for RuntimeMode {
 /// | `--log-provider-events` | `REMI_LOG_PROVIDER_EVENTS` | 是否记录 Provider 事件日志 |
 /// | `--log-websocket-events` | `REMI_LOG_WEBSOCKET_EVENTS` | 是否记录 WebSocket 事件日志 |
 #[derive(Parser, Debug)]
-#[command(name = "remi-code", about = "Remi Code 后端服务器")]
+#[command(name = "remi-claw", about = "Remi Claw 后端服务器")]
 pub struct CliArgs {
     /// 服务器监听端口
     ///
@@ -92,7 +92,7 @@ pub struct CliArgs {
     /// 数据基础目录路径
     ///
     /// 所有子目录（数据库、日志、密钥等）均从此目录派生。
-    /// 未指定时默认使用用户主目录下的 `.remi-code` 目录。
+    /// 未指定时默认使用用户主目录下的 `.remi-claw` 目录。
     /// 可通过环境变量 `REMI_HOME_DIR` 设置。
     #[arg(long, env = "REMI_HOME_DIR")]
     pub home_dir: Option<PathBuf>,
@@ -195,8 +195,18 @@ pub struct ServerConfig {
 }
 
 impl Default for ServerConfig {
+    /// 返回一个用于单元测试 / 集成测试的默认配置
+    ///
+    /// 默认值说明：
+    /// - `base_dir` = `.remi-claw-test`（当前工作目录下的测试目录）
+    /// - `port` = `3773`（与生产环境一致，便于本地连通性测试）
+    /// - `host` = `None`（由调用方按需设置）
+    /// - `auth_token` = `None`（测试环境默认不启用认证）
+    /// - 日志开关均为 `false`（避免测试输出被淹没）
     fn default() -> Self {
-        let base_dir = PathBuf::from(".remi-code-test");
+        // 使用相对路径，避免污染用户主目录
+        let base_dir = PathBuf::from(".remi-claw-test");
+        // 此处 unwrap 是安全的：`.remi-claw-test` 是合法的 UTF-8 字符串
         let paths = Self::derive_paths(&base_dir).expect("Failed to derive paths");
 
         Self {
@@ -225,7 +235,7 @@ impl ServerConfig {
     /// 基础目录（`base_dir`）的确定逻辑：
     /// 1. 优先使用 `--home-dir` 参数指定的路径；
     /// 2. 若未指定，则尝试读取系统环境变量 `USERPROFILE`（Windows）或 `HOME`（Unix）；
-    /// 3. 在用户主目录下拼接 `.remi-code` 作为默认基础目录。
+    /// 3. 在用户主目录下拼接 `.remi-claw` 作为默认基础目录。
     ///
     /// # 参数
     ///
@@ -268,7 +278,7 @@ impl ServerConfig {
             let home = std::env::var("USERPROFILE")
                 .or_else(|_| std::env::var("HOME"))
                 .map_err(|_| ConfigError::EnvError("无法获取用户目录".to_string()))?;
-            PathBuf::from(home).join(".remi-code")
+            PathBuf::from(home).join(".remi-claw")
         };
 
         // 基于基础目录派生所有子目录和文件路径
@@ -343,17 +353,20 @@ impl ServerConfig {
     /// 使用新的基础目录重新派生所有路径
     ///
     /// 适用于在默认配置基础上覆盖数据根目录的场景（如桌面端使用用户主目录）。
+    /// 该方法会消费 `self` 并返回新的 `ServerConfig`，原实例不可再使用。
     ///
     /// # 参数
     ///
-    /// - `base_dir` — 新的基础目录路径
+    /// - `base_dir` — 新的基础目录路径，将作为 `self.base_dir` 的新值
     ///
     /// # 返回值
     ///
     /// - `Ok(Self)` — 路径重新派生后的配置
     /// - `Err(ConfigError::PathError)` — 路径派生失败
     pub fn with_base_dir(mut self, base_dir: PathBuf) -> ConfigResult<Self> {
+        // 重新计算所有子路径，确保与新的 base_dir 保持一致
         let paths = Self::derive_paths(&base_dir)?;
+        // 原地修改并返回 self，避免额外克隆
         self.base_dir = base_dir;
         self.state_dir = paths.state_dir;
         self.db_path = paths.db_path;

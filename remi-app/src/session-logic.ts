@@ -1,4 +1,4 @@
-﻿import {
+import {
   ApprovalRequestId,
   isToolLifecycleItemType,
   type OrchestrationLatestTurn,
@@ -9,14 +9,14 @@
   type UserInputQuestion,
   type ThreadId,
   type TurnId,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import {
   decodeSubagentAgentStates,
   extractSubagentIdentityHints,
   decodeSubagentReceiverAgents,
   decodeSubagentReceiverThreadIds,
-} from "@remicode/shared/subagents";
-import { summarizeToolRawOutput } from "@remicode/shared/toolOutputSummary";
+} from "@remi-claw/shared/subagents";
+import { summarizeToolRawOutput } from "@remi-claw/shared/toolOutputSummary";
 import { deriveReadableToolTitle, normalizeCompactToolLabel } from "./lib/toolCallLabel";
 import { stripProposedPlanBlocksFromText } from "./proposedPlan";
 

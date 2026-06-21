@@ -149,7 +149,7 @@ export function deriveTerminalAssistantMessageIds(
 }
 
 // Derives transcript rows from timeline entries while preserving the current
-// remicode behavior of attaching trailing work groups to the adjacent assistant reply.
+// Remi Claw behavior of attaching trailing work groups to the adjacent assistant reply.
 export function deriveMessagesTimelineRows(input: {
   timelineEntries: ReadonlyArray<TimelineEntry>;
   completionDividerBeforeEntryId: string | null;

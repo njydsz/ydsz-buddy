@@ -1,4 +1,4 @@
-ï»¿// FILE: store.ts
+// FILE: store.ts
 // Purpose: Normalizes orchestration snapshots into stable client state for the web app.
 // Exports: Zustand store plus pure state transition helpers shared by runtime bootstrap flows.
 
@@ -14,10 +14,10 @@ import {
   type OrchestrationShellStreamEvent,
   type OrchestrationSessionStatus,
   type TurnId,
-} from "@remicode/contracts";
-import { resolveThreadBranchRegressionGuard } from "@remicode/shared/git";
-import { normalizeModelSlug } from "@remicode/shared/model";
-import { normalizeWorkspaceRootForComparison } from "@remicode/shared/threadWorkspace";
+} from "@remi-claw/contracts";
+import { resolveThreadBranchRegressionGuard } from "@remi-claw/shared/git";
+import { normalizeModelSlug } from "@remi-claw/shared/model";
+import { normalizeWorkspaceRootForComparison } from "@remi-claw/shared/threadWorkspace";
 import { create } from "zustand";
 import {
   type ChatAttachment,
@@ -32,11 +32,11 @@ import {
 } from "./types";
 import { Debouncer } from "@tanstack/react-pacer";
 import { hasLiveTurnTailWork } from "./session-logic";
-import { deriveThreadSummaryMetadata } from "@remicode/shared/threadSummary";
+import { deriveThreadSummaryMetadata } from "@remi-claw/shared/threadSummary";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import { toAttachmentPreviewUrl } from "./lib/wsHttpUrl";
 
-// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ©¤©¤ State ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
 export interface AppState {
   projects: Project[];
@@ -76,7 +76,7 @@ type ThreadUserInputResponseRequestedEvent = Extract<
   { type: "thread.user-input-response-requested" }
 >;
 
-const PERSISTED_STATE_KEY = "remicode:renderer-state:v8";
+const PERSISTED_STATE_KEY = "remi-claw:renderer-state:v8";
 const LEGACY_PERSISTED_STATE_KEYS = [
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",
@@ -172,7 +172,7 @@ function rememberProjectLocalNames(
   }
 }
 
-// â”€â”€ Persist helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ©¤©¤ Persist helpers ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
 function readPersistedState(): AppState {
   if (typeof window === "undefined") return initialState;
@@ -244,7 +244,7 @@ export function persistAppStateNow(state: AppState = useStore.getState()): void 
   persistState(state);
 }
 
-// â”€â”€ Pure helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ©¤©¤ Pure helpers ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
 function updateThread(
   threads: Thread[],
@@ -2685,7 +2685,7 @@ function applyTurnDiffSummaryToThread(
             completedAt: nextSummary.completedAt,
             // Prefer the incoming assistantMessageId when present; otherwise keep
             // the previous one from the same turn. Turn-diff events may arrive
-            // before the message has been finalized and carry a null id â€” they
+            // before the message has been finalized and carry a null id ¡ª they
             // must not erase a real id already recorded by thread.message-sent.
             assistantMessageId:
               nextSummary.assistantMessageId ??
@@ -3591,7 +3591,7 @@ export function applyOrchestrationEventsHotPath(
   return nextState;
 }
 
-// â”€â”€ Pure state transition functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ©¤©¤ Pure state transition functions ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
 export function syncServerShellSnapshot(
   state: AppState,
@@ -3985,7 +3985,7 @@ export function setThreadWorkspace(
   });
 }
 
-// â”€â”€ Zustand store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ©¤©¤ Zustand store ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
 
 interface AppStore extends AppState {
   syncServerShellSnapshot: (snapshot: OrchestrationShellSnapshot) => void;

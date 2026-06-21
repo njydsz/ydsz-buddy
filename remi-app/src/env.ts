@@ -12,12 +12,22 @@ export const isTauri =
   typeof window !== "undefined" && "__TAURI__" in window;
 
 /**
- * 是否为桌面环境，等同于 isTauri
+ * 是否为桌面环境，等同于 {@link isTauri}。
+ * 旧称 `isElectron` 在 0.2.0 已下线，新代码请使用 `isTauri`。
  */
 export const isDesktop = isTauri;
 
 /**
- * 是否为 Electron 环境（向后兼容标识）
- * 项目已从 Electron 迁移到 Tauri，此常量始终为 false
+ * @deprecated 项目已从 Electron 迁移到 Tauri，此常量始终为 false。
+ * 仅用于尚未迁移的旧引用，新代码请使用 {@link isTauri}。
+ *
+ * @example
+ * ```ts
+ * // 旧代码（请勿新增）：
+ * if (isElectron) { ... }
+ *
+ * // 新代码：
+ * if (isTauri) { ... }
+ * ```
  */
 export const isElectron = false;

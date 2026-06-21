@@ -386,17 +386,35 @@ impl CheckpointDiffQuery {
 /// 解析 Unified Diff 文本的统计信息
 ///
 /// 从 Git Diff 输出中统计新增行数、删除行数和变更文件数。
+///
+/// ## 解析规则
+///
+/// - **新增行（`+`）**：以 `+` 开头但**不**以 `+++` 开头（排除文件头标识）
+/// - **删除行（`-`）**：以 `-` 开头但**不**以 `---` 开头（排除文件头标识）
+/// - **变更文件数**：`diff --git` 开头的行数
+///
+/// # 参数
+///
+/// - `diff` — Unified Diff 格式的文本，通常由 `git diff` 命令输出
+///
+/// # 返回值
+///
+/// 返回填充了统计数据的 [`DiffStats`] 结构体。
 fn parse_diff_stats(diff: &str) -> DiffStats {
+    // 累加器：以 0 初始化，逐行解析
     let mut additions = 0;
     let mut deletions = 0;
     let mut files_changed = 0;
 
     for line in diff.lines() {
         if line.starts_with("diff --git") {
+            // 每个文件级 diff 块以 "diff --git" 开头
             files_changed += 1;
         } else if line.starts_with('+') && !line.starts_with("+++") {
+            // 排除 "+++" 文件头标识
             additions += 1;
         } else if line.starts_with('-') && !line.starts_with("---") {
+            // 排除 "---" 文件头标识
             deletions += 1;
         }
     }

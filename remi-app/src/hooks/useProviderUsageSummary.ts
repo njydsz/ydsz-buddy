@@ -2,7 +2,7 @@
 // Purpose: Merge usage signals from thread activities, server-side local archives,
 // and provider-specific snapshots into one UI-friendly summary.
 
-import type { OrchestrationThread, ProviderKind } from "@remicode/contracts";
+import type { OrchestrationThread, ProviderKind } from "@remi-claw/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 

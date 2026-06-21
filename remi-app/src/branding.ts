@@ -5,7 +5,7 @@
  */
 
 /** 应用基础名称 */
-export const APP_BASE_NAME = "Remi Code";
+export const APP_BASE_NAME = "Remi Claw";
 
 /** 应用阶段标签，开发环境显示 "Dev"，生产环境显示 "Alpha" */
 export const APP_STAGE_LABEL = import.meta.env.DEV ? "Dev" : "Alpha";

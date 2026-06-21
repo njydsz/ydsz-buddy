@@ -41,7 +41,7 @@ function createBaseServerConfig(): ServerConfig {
   return {
     cwd: "/repo/project",
     worktreesDir: "/repo/.codex/worktrees",
-    keybindingsConfigPath: "/repo/project/.remicode-keybindings.json",
+    keybindingsConfigPath: "/repo/project/.remi-claw-keybindings.json",
     keybindings: [],
     issues: [],
     providers: [

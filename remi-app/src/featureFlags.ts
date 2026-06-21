@@ -1,57 +1,50 @@
 /**
- * @file 功能开关（Feature Flags）管理
+ * @file 功能开关（Feature Flags）管�? *
+ * 提供应用内功能开关的注册、持久化和响应式读取�? * 支持两种类型的功能开关：
+ * - action 类型：一次性触发动作，无开关状�? * - toggle 类型：可开�?关闭的开关，状态持久化�?localStorage
  *
- * 提供应用内功能开关的注册、持久化和响应式读取。
- * 支持两种类型的功能开关：
- * - action 类型：一次性触发动作，无开关状态
- * - toggle 类型：可开启/关闭的开关，状态持久化到 localStorage
- *
- * 使用 React 的 useSyncExternalStore 实现状态同步，
- * 支持跨标签页通过 StorageEvent 实时更新。
- */
+ * 使用 React �?useSyncExternalStore 实现状态同步，
+ * 支持跨标签页通过 StorageEvent 实时更新�? */
 
 import { useSyncExternalStore } from "react";
 
 /**
- * 功能开关定义，支持 action 和 toggle 两种类型。
- * - action: 触发一次性动作，无状态
- * - toggle: 可切换的开关，具有默认启用状态
- */
+ * 功能开关定义，支持 action �?toggle 两种类型�? * - action: 触发一次性动作，无状�? * - toggle: 可切换的开关，具有默认启用状�? */
 export type FeatureFlag =
   | {
-      /** action 类型功能开关标识 */
+      /** action 类型功能开关标�?*/
       id: "trigger-action-failed-toasts";
       kind: "action";
-      /** 开关显示标签 */
+      /** 开关显示标�?*/
       label: string;
-      /** 开关功能描述 */
+      /** 开关功能描�?*/
       description: string;
     }
   | {
-      /** toggle 类型功能开关标识 */
+      /** toggle 类型功能开关标�?*/
       id: ToggleFeatureFlagId;
       kind: "toggle";
-      /** 开关显示标签 */
+      /** 开关显示标�?*/
       label: string;
-      /** 开关功能描述 */
+      /** 开关功能描�?*/
       description: string;
       /** 默认是否启用 */
       defaultEnabled: boolean;
     };
 
-/** 可切换的功能开关 ID 枚举 */
+/** 可切换的功能开�?ID 枚举 */
 export type ToggleFeatureFlagId =
   | "persist-action-failed-debug-toasts"
   | "show-debug-task-banner"
   | "show-expanded-cursor-model-variants";
 
-/** 功能开关状态映射，键为开关 ID，值为是否启用 */
+/** 功能开关状态映射，键为开�?ID，值为是否启用 */
 type FeatureFlagState = Record<ToggleFeatureFlagId, boolean>;
 
-/** localStorage 中功能开关数据的存储键 */
-const FEATURE_FLAG_STORAGE_KEY = "remicode:feature-flags";
+/** localStorage 中功能开关数据的存储�?*/
+const FEATURE_FLAG_STORAGE_KEY = "remi-claw:feature-flags";
 
-/** 功能开关的默认状态 */
+/** 功能开关的默认状�?*/
 const DEFAULT_FEATURE_FLAG_STATE: FeatureFlagState = {
   "persist-action-failed-debug-toasts": false,
   "show-debug-task-banner": false,
@@ -91,11 +84,11 @@ export const FEATURE_FLAGS: readonly FeatureFlag[] = [
 
 /** 状态变更监听器集合 */
 const listeners = new Set<() => void>();
-/** 内存中的功能开关状态（用于 localStorage 不可用时的回退） */
+/** 内存中的功能开关状态（用于 localStorage 不可用时的回退�?*/
 let memoryState = DEFAULT_FEATURE_FLAG_STATE;
-/** 缓存的原始 localStorage 值，用于避免重复 JSON 解析 */
+/** 缓存的原�?localStorage 值，用于避免重复 JSON 解析 */
 let cachedRawFeatureFlagState: string | null | undefined;
-/** 缓存的解析后功能开关状态 */
+/** 缓存的解析后功能开关状�?*/
 let cachedFeatureFlagState = DEFAULT_FEATURE_FLAG_STATE;
 
 /** 检测当前环境是否可使用 localStorage */
@@ -104,12 +97,8 @@ function canUseLocalStorage(): boolean {
 }
 
 /**
- * 将未知值标准化为功能开关状态对象。
- * 对每个开关字段进行类型校验，无效值回退到默认状态。
- *
- * @param value - 待标准化的值
- * @returns 标准化后的功能开关状态
- */
+ * 将未知值标准化为功能开关状态对象�? * 对每个开关字段进行类型校验，无效值回退到默认状态�? *
+ * @param value - 待标准化的�? * @returns 标准化后的功能开关状�? */
 function normalizeFeatureFlagState(value: unknown): FeatureFlagState {
   if (!value || typeof value !== "object") {
     return DEFAULT_FEATURE_FLAG_STATE;
@@ -133,11 +122,8 @@ function normalizeFeatureFlagState(value: unknown): FeatureFlagState {
 }
 
 /**
- * 从 localStorage 读取功能开关状态。
- * 使用缓存机制避免重复 JSON 解析，localStorage 不可用时回退到内存状态。
- *
- * @returns 当前的功能开关状态
- */
+ * �?localStorage 读取功能开关状态�? * 使用缓存机制避免重复 JSON 解析，localStorage 不可用时回退到内存状态�? *
+ * @returns 当前的功能开关状�? */
 function readFeatureFlagState(): FeatureFlagState {
   if (!canUseLocalStorage()) {
     return memoryState;
@@ -158,11 +144,8 @@ function readFeatureFlagState(): FeatureFlagState {
 }
 
 /**
- * 将功能开关状态写入 localStorage 并通知所有监听器。
- * 写入失败时静默处理，因为功能开关是尽力而为的开发者工具。
- *
- * @param state - 要写入的功能开关状态
- */
+ * 将功能开关状态写�?localStorage 并通知所有监听器�? * 写入失败时静默处理，因为功能开关是尽力而为的开发者工具�? *
+ * @param state - 要写入的功能开关状�? */
 function writeFeatureFlagState(state: FeatureFlagState): void {
   memoryState = state;
 
@@ -183,11 +166,8 @@ function writeFeatureFlagState(state: FeatureFlagState): void {
 }
 
 /**
- * 订阅功能开关状态变更。同时监听 localStorage 的 storage 事件以支持跨标签页同步。
- *
- * @param listener - 状态变更回调函数
- * @returns 取消订阅的函数
- */
+ * 订阅功能开关状态变更。同时监�?localStorage �?storage 事件以支持跨标签页同步�? *
+ * @param listener - 状态变更回调函�? * @returns 取消订阅的函�? */
 function subscribeFeatureFlags(listener: () => void): () => void {
   listeners.add(listener);
 
@@ -211,9 +191,8 @@ function subscribeFeatureFlags(listener: () => void): () => void {
 }
 
 /**
- * 设置指定功能开关的启用状态，并持久化到 localStorage。
- *
- * @param id - 功能开关 ID
+ * 设置指定功能开关的启用状态，并持久化�?localStorage�? *
+ * @param id - 功能开�?ID
  * @param enabled - 是否启用
  */
 export function setFeatureFlagEnabled(id: ToggleFeatureFlagId, enabled: boolean): void {
@@ -224,11 +203,8 @@ export function setFeatureFlagEnabled(id: ToggleFeatureFlagId, enabled: boolean)
 }
 
 /**
- * React Hook：获取当前所有功能开关的状态。
- * 使用 useSyncExternalStore 实现响应式更新，支持跨标签页同步。
- *
- * @returns 当前功能开关状态映射
- *
+ * React Hook：获取当前所有功能开关的状态�? * 使用 useSyncExternalStore 实现响应式更新，支持跨标签页同步�? *
+ * @returns 当前功能开关状态映�? *
  * @example
  * ```tsx
  * const flags = useFeatureFlags();

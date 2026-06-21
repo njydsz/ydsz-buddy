@@ -1,4 +1,4 @@
-﻿{
+{
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
@@ -8,11 +8,8 @@
     "types": ["vite/client", "node", "@vitest/browser/matchers"],
     "paths": {
       "~/*": ["./src/*"],
-      "@remi-code/contracts": ["./src/contracts/index.ts"],
-      "@remicode/contracts": ["./src/contracts/index.ts"],
-      "@remicode/contracts": ["./src/contracts/index.ts"],
-      "@remicode/shared/*": ["./src/shared/*"],
-      "@remicode/shared/*": ["./src/shared/*"]
+      "@remi-claw/contracts": ["./src/contracts/index.ts"],
+      "@remi-claw/shared/*": ["./src/shared/*"]
     },
     "plugins": [
       {

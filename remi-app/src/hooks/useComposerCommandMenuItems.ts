@@ -5,8 +5,8 @@ import type {
   ProviderMentionReference,
   ProviderPluginDescriptor,
   ProviderSkillDescriptor,
-} from "@remicode/contracts";
-import { getAgentMentionAutocompleteAliases } from "@remicode/contracts";
+} from "@remi-claw/contracts";
+import { getAgentMentionAutocompleteAliases } from "@remi-claw/contracts";
 import { useMemo } from "react";
 import {
   buildCommandSearchBlob,

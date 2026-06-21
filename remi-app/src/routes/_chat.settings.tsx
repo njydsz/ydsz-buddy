@@ -9,10 +9,10 @@ import {
   type ServerProviderStatus,
   type ThreadId,
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getModelOptions, normalizeModelSlug } from "@remicode/shared/model";
+import { getModelOptions, normalizeModelSlug } from "@remi-claw/shared/model";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,
@@ -75,7 +75,7 @@ import { ThemePackEditor } from "../components/ThemePackEditor";
 import { SidebarHeaderTrigger, SidebarInset } from "../components/ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../components/ui/tooltip";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { isDesktop, isElectron } from "../env";
+import { isDesktop, isTauri } from "../env";
 import { useTheme } from "../hooks/useTheme";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
 import {
@@ -155,7 +155,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "tongyi",
     name: "通义千问",
-    subtitle: "阿里云 · 百炼平台",
+    subtitle: "阿里�?· 百炼平台",
     iconColor: "#F97316",
   },
   {
@@ -173,7 +173,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   },
 ];
 
-const MODEL_CHANNELS_STORAGE_KEY = "remicode:enabled-model-channels:v1";
+const MODEL_CHANNELS_STORAGE_KEY = "remi-claw:enabled-model-channels:v1";
 
 function readEnabledModelChannels(): ReadonlyArray<ModelChannelId> {
   try {
@@ -1181,7 +1181,7 @@ function SettingsRouteView() {
       return;
     }
 
-    if (isElectron) {
+    if (isTauri) {
       updateSettings({ enableSystemTaskCompletionNotifications: true });
       return;
     }
@@ -1229,7 +1229,7 @@ function SettingsRouteView() {
       return;
     }
 
-    const notification = new Notification(title, { body, tag: "remicode:test-notification" });
+    const notification = new Notification(title, { body, tag: "remi-claw:test-notification" });
     notification.addEventListener("click", () => {
       window.focus();
     });
@@ -1902,7 +1902,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM…"
+                  placeholder="-apple-system, BlinkM�?
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2552,7 +2552,7 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道。"
+            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
             control={
               <Switch
                 checked={gatewayRunning}
@@ -2859,10 +2859,10 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="服务渠道"
-            description="管理第三方模型 API 渠道接入，启用后可在对应提供商中使用这些渠道。"
+            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启用)
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
               </span>
             }
           >

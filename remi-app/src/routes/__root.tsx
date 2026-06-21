@@ -7,8 +7,8 @@ import {
   type OrchestrationThread,
   type ServerConfig,
   type ServerProviderStatus,
-} from "@remicode/contracts";
-import { defaultTerminalTitleForCliKind } from "@remicode/shared/terminalThreads";
+} from "@remi-claw/contracts";
+import { defaultTerminalTitleForCliKind } from "@remi-claw/shared/terminalThreads";
 import {
   Outlet,
   createRootRouteWithContext,
@@ -32,7 +32,7 @@ import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
 import { Button } from "../components/ui/button";
 import { AnchoredToastProvider, ToastProvider, toastManager } from "../components/ui/toast";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { isElectron } from "../env";
+import { isTauri } from "../env";
 import { useFocusedChatContext } from "../focusedChatContext";
 import { isTerminalFocused } from "../lib/terminalFocus";
 import {
@@ -395,7 +395,7 @@ function GlobalShortcutsDialog() {
         terminalOpen,
         terminalWorkspaceOpen,
       }}
-      isElectron={isElectron}
+      isTauri={isTauri}
     />
   );
 }
@@ -416,7 +416,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // Silent-bootstrap or noop — nothing to render on either surface.
+    // Silent-bootstrap or noop �?nothing to render on either surface.
     return null;
   }
 

@@ -1,16 +1,16 @@
-﻿// FILE: taskCompletion.tsx
+// FILE: taskCompletion.tsx
 // Purpose: Bridges thread completion and attention-needed events to in-app toasts and OS notifications.
 // Layer: Notification runtime
 // Exports: TaskCompletionNotifications and browser permission helpers
 
-import { ThreadId } from "@remicode/contracts";
+import { ThreadId } from "@remi-claw/contracts";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import { toastManager } from "../components/ui/toast";
 import { resolveVisibleToastThreadIds } from "../components/ui/toastRouteVisibility";
 import { useAppSettings } from "../appSettings";
 import { parseDiffRouteSearch } from "../diffRouteSearch";
-import { isElectron } from "../env";
+import { isTauri } from "../env";
 import { selectSplitView, useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 import { createAllThreadsSelector } from "../storeSelectors";
@@ -316,7 +316,7 @@ export function TaskCompletionNotifications() {
 export function buildNotificationSettingsSupportText(
   permissionState: BrowserNotificationPermissionState,
 ): string {
-  if (isElectron) {
+  if (isTauri) {
     return "Desktop app notifications use your operating system notification center.";
   }
   switch (permissionState) {

@@ -1,9 +1,9 @@
-﻿import {
+import {
   DEFAULT_MODEL_BY_PROVIDER,
   type ModelSelection,
   type ServerSettings,
   type ServerSettingsPatch,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import { deepMerge, type DeepPartial } from "./Struct";
 
 function shouldReplaceTextGenerationModelSelection(

@@ -6,7 +6,7 @@
 import { normalizeWorkspaceRootForComparison } from "~/shared/threadWorkspace";
 import type { LastThreadRoute } from "../chatRouteRestore";
 
-const SIDEBAR_UI_STATE_STORAGE_KEY = "remicode:sidebar-ui:v1";
+const SIDEBAR_UI_STATE_STORAGE_KEY = "remi-claw:sidebar-ui:v1";
 
 export type SidebarUiState = {
   chatSectionExpanded: boolean;

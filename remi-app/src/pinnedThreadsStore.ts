@@ -1,9 +1,9 @@
-﻿// FILE: pinnedThreadsStore.ts
+// FILE: pinnedThreadsStore.ts
 // Purpose: Persists the globally pinned chat thread ids used by the sidebar.
 // Layer: UI state store
 // Exports: usePinnedThreadsStore
 
-import { type ThreadId } from "@remicode/contracts";
+import { type ThreadId } from "@remi-claw/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -15,7 +15,7 @@ interface PinnedThreadsStoreState {
   prunePinnedThreads: (threadIds: readonly ThreadId[]) => void;
 }
 
-const PINNED_THREADS_STORAGE_KEY = "remicode:pinned-threads:v1";
+const PINNED_THREADS_STORAGE_KEY = "remi-claw:pinned-threads:v1";
 
 function normalizePinnedThreadIds(threadIds: readonly ThreadId[]): ThreadId[] {
   const seen = new Set<ThreadId>();

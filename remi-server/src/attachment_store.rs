@@ -107,7 +107,7 @@ pub struct AttachmentStoreConfig {
 impl Default for AttachmentStoreConfig {
     fn default() -> Self {
         Self {
-            root: PathBuf::from(".remi-code-test/userdata/attachments"),
+            root: PathBuf::from(".remi-claw-test/userdata/attachments"),
             max_size_bytes: 25 * 1024 * 1024,
             allowed_mime_prefixes: vec![
                 "image/".into(),

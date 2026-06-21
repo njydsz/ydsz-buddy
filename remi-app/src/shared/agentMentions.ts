@@ -1,9 +1,9 @@
-﻿import {
+import {
   resolveAgentAlias,
   type ClaudeSubagentAliasDefinition,
   type ProviderKind,
   type ResolvedAgentAlias,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 
 export interface ParsedAgentMentionInvocation {
   readonly alias: string;

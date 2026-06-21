@@ -24,7 +24,7 @@ import {
   ProviderStartOptions,
   RuntimeMode,
   ThreadId,
-} from "@remicode/contracts";
+} from "@remi-claw/contracts";
 import * as Schema from "effect/Schema";
 import * as Equal from "effect/Equal";
 import { DeepMutable } from "effect/Types";
@@ -33,7 +33,7 @@ import {
   normalizeModelSlug,
   resolveSelectableModel,
   resolveModelSlugForProvider,
-} from "@remicode/shared/model";
+} from "@remi-claw/shared/model";
 import { useMemo } from "react";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { resolveAppModelSelection } from "./appSettings";
@@ -55,7 +55,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
+export const COMPOSER_DRAFT_STORAGE_KEY = "remi-claw:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
@@ -2709,10 +2709,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided â†’ use them
+              // Explicit options provided â†?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection â†’ preserve existing options, update provider+model
+              // No options in selection â†?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,

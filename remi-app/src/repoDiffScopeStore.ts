@@ -1,9 +1,9 @@
-﻿// FILE: repoDiffScopeStore.ts
+// FILE: repoDiffScopeStore.ts
 // Purpose: Persists the active repo diff scope shared by the diff panel and header badge.
 // Layer: Web UI state store
 // Exports: repo diff scope labels, validation, and a persisted Zustand store.
 
-import type { GitReadWorkingTreeDiffInput } from "@remicode/contracts";
+import type { GitReadWorkingTreeDiffInput } from "@remi-claw/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -29,7 +29,7 @@ interface RepoDiffScopeStore {
   setScope: (scope: RepoDiffScope) => void;
 }
 
-const REPO_DIFF_SCOPE_STORAGE_KEY = "remicode:repo-diff-scope:v1";
+const REPO_DIFF_SCOPE_STORAGE_KEY = "remi-claw:repo-diff-scope:v1";
 
 export const useRepoDiffScopeStore = create<RepoDiffScopeStore>()(
   persist(

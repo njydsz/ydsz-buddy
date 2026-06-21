@@ -1,4 +1,4 @@
-﻿import type { NativeApi } from "@remicode/contracts";
+import type { NativeApi } from "@remi-claw/contracts";
 
 import { createWsNativeApi } from "./wsNativeApi";
 

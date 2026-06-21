@@ -16,16 +16,41 @@
 //! - 事件与命令采用带标签的枚举（tagged enum），便于序列化时区分变体
 //! - 使用 `chrono::DateTime<Utc>` 统一时间表示
 //! - 使用 `uuid::Uuid` 作为全局唯一标识符
+//!
+//! ## 架构定位
+//!
+//! 本 crate 是整个 Remi 系统的"领域语言"层，被以下模块依赖：
+//!
+//! - `remi-orchestration` - 编排器，消费本 crate 的事件与命令
+//! - `remi-persistence` - 持久化层，将本 crate 的领域模型存入数据库
+//! - `remi-provider` - AI Provider 集成，依赖 [`provider`] 子模块
+//! - `remi-server` - WebSocket / HTTP 服务，序列化本 crate 的类型与前端交互
+//!
+//! ## 使用建议
+//!
+//! - 在修改领域模型时，需同步更新 `remi-persistence` 的数据库 schema
+//! - 新增事件/命令时遵循 `{聚合根}.{动作}` 命名规范（如 `thread.turn-start`）
+//! - 所有时间字段统一使用 `DateTime<Utc>`，避免时区歧义
 
 /// 编排命令定义，包含项目与线程的所有可执行命令
+///
+/// 命令通过编排器（`remi-orchestration`）处理，产生领域事件，实现 CQRS 模式的"写"侧。
 pub mod commands;
 /// 统一错误类型与结果别名
+///
+/// 涵盖核心层的输入校验、资源未找到、序列化失败、无效操作和内部错误等场景。
 pub mod error;
 /// 编排事件定义，基于事件溯源模式的领域事件
+///
+/// 所有状态变更均通过事件表达，是领域模型"事实"的唯一来源。
 pub mod events;
 /// 领域模型定义，包含核心业务实体与值对象
+///
+/// 定义项目、线程、消息、活动、检查点等核心实体，是整个系统业务语义的基础。
 pub mod models;
 /// AI Provider 相关类型定义，包括 Provider 类型、模型选择、运行时事件等
+///
+/// 抽象不同 AI Provider 的差异，提供统一的 Provider 交互契约。
 pub mod provider;
 
 #[cfg(test)]

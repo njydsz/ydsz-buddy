@@ -4,7 +4,7 @@
 
 import { useCallback } from "react";
 import type { useNavigate } from "@tanstack/react-router";
-import type { ProjectId, ThreadId } from "@remicode/contracts";
+import type { ProjectId, ThreadId } from "@remi-claw/contracts";
 import type { LastThreadRoute } from "../chatRouteRestore";
 import { type PaneId, type SplitView, type SplitViewId } from "../splitViewStore";
 import { selectThreadTerminalState } from "../terminalStateStore";
