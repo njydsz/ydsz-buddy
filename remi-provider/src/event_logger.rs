@@ -279,3 +279,4 @@ mod tests {
         logger.close().await.unwrap();
     }
 }
+

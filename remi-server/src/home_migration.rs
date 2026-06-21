@@ -375,3 +375,4 @@ mod tests {
         assert!(dest.join("sub").join("b.txt").exists());
     }
 }
+

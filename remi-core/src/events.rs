@@ -1028,3 +1028,4 @@ pub struct ThreadActivityAppendedEvent {
     /// 追加的活动记录
     pub activity: Activity,
 }
+

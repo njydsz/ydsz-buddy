@@ -266,3 +266,4 @@ pub async fn register_auth_methods(
 
     info!("认证 RPC 方法注册完成");
 }
+

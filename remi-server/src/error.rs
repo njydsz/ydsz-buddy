@@ -117,3 +117,4 @@ impl From<remi_telemetry::TelemetryError> for ServerError {
         ServerError::InternalError(err.to_string())
     }
 }
+

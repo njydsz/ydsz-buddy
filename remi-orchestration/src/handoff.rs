@@ -402,3 +402,4 @@ mod tests {
         assert_eq!(truncate_text("this is a long text", 10), "this is...");
     }
 }
+

@@ -284,8 +284,12 @@ impl ProviderAdapter for CodexAdapter {
             supports_skill_mentions: true,
             supports_skill_discovery: true,
             supports_native_slash_command_discovery: false,
+            supports_plugin_mentions: true,
+            supports_plugin_discovery: true,
             supports_runtime_model_list: true,
             supports_turn_steering: true,
+            supports_thread_compaction: true,
+            supports_thread_import: false,
         }
     }
 
@@ -730,3 +734,4 @@ impl ProviderAdapter for CodexAdapter {
         })
     }
 }
+

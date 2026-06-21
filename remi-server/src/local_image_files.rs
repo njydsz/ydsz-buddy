@@ -370,3 +370,4 @@ mod tests {
         assert!(!is_windows_absolute("/usr/bin"));
     }
 }
+

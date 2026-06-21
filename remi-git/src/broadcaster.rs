@@ -50,9 +50,11 @@
 //! // 订阅状态变更
 //! let mut receiver = broadcaster.stream_status();
 //! tokio::spawn(async move {
-//!     while let Ok(event) = receiver.recv().await {
+//!
+while let Ok(event) = receiver.recv().await {
 //!         println!('仓库 {} 状态更新: {:?}', event.cwd, event.status.current_branch);
-//!     }
+//!
+}
 //! });
 //! }
 
@@ -332,9 +334,11 @@ impl GitStatusBroadcaster {
     /// async fn main() {
     /// let mut receiver = broadcaster.stream_status();
     /// tokio::spawn(async move {
-    ///     while let Ok(event) = receiver.recv().await {
+    ///
+while let Ok(event) = receiver.recv().await {
     ///         println!('状态更新: {:?}', event.status.current_branch);
-    ///     }
+    ///
+}
     /// });
     /// }
     ///

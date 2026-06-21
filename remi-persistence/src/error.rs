@@ -138,3 +138,4 @@ impl From<serde_json::Error> for PersistenceError {
         PersistenceError::SerializationError(err.to_string())
     }
 }
+

@@ -140,3 +140,4 @@ pub async fn register_all_methods(
 
     info!("RPC 方法注册完成");
 }
+

@@ -419,3 +419,4 @@ pub async fn register_terminal_methods(
         })
         .await;
 }
+

@@ -144,9 +144,11 @@
 //! // 订阅事件流
 //! let mut event_rx = engine.stream_domain_events();
 //! tokio::spawn(async move {
-//!     while let Ok(event) = event_rx.recv().await {
+//!
+while let Ok(event) = event_rx.recv().await {
 //!         // 处理事件...
-//!     }
+//!
+}
 //! });
 //! ```
 
@@ -1431,3 +1433,4 @@ pub struct ShellThread {
     /// 是否有待用户输入的请求
     pub has_pending_user_input: bool,
 }
+

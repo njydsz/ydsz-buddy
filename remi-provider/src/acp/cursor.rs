@@ -304,3 +304,4 @@ pub fn parse_cursor_cli_model_list(output: &str) -> Vec<CursorAcpModelChoice> {
 pub fn flatten_cursor_acp_model_choices(choices: &[CursorAcpModelChoice]) -> Vec<String> {
     choices.iter().map(|c| c.id.clone()).collect()
 }
+

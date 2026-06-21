@@ -192,3 +192,4 @@ pub async fn open_main_devtools(app: tauri::AppHandle) -> Result<(), String> {
 pub async fn open_external(url: String) -> Result<(), String> {
     open::that(&url).map_err(|e| e.to_string())
 }
+

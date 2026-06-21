@@ -34,12 +34,14 @@
 //!
 //! fn do_something() -> ProviderResult<()> {
 //!     // 成功时返回 Ok
-//!     Ok(())
+//!
+Ok(())
 //! }
 //!
 //! fn fail_example() -> ProviderResult<()> {
 //!     // 失败时返回具体错误
-//!     Err(ProviderError::ProviderNotFound('unknown'.to_string()))
+//!
+Err(ProviderError::ProviderNotFound('unknown'.to_string()))
 //! }
 //! ```
 
@@ -129,7 +131,9 @@ pub enum ProviderError {
 ///
 /// ```rust,ignore
 /// fn my_function() -> ProviderResult<String> {
-///     Ok('success'.to_string())
+///
+Ok('success'.to_string())
 /// }
 /// ```
 pub type ProviderResult<T> = Result<T, ProviderError>;
+

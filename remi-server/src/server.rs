@@ -259,3 +259,4 @@ async fn handle_socket(socket: WebSocket, state: Arc<ServerState>) {
 async fn health_handler() -> impl IntoResponse {
     "OK"
 }
+

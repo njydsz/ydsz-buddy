@@ -557,3 +557,4 @@ impl ProviderAdapter for CursorAdapter {
         Ok(self.event_tx.subscribe())
     }
 }
+

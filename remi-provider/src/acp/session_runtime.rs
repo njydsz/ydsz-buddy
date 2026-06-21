@@ -379,3 +379,4 @@ mod tests {
         assert!(rt.uptime() < Duration::from_secs(1));
     }
 }
+

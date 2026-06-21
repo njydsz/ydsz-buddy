@@ -235,3 +235,4 @@ pub async fn register_skills_methods(router: Arc<RpcRouter>) {
         })
         .await;
 }
+

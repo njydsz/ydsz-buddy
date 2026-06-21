@@ -602,3 +602,4 @@ impl Drop for JsonRpcClient {
         });
     }
 }
+

@@ -115,3 +115,4 @@ impl ThreadProposedPlanRepository for SqliteThreadProposedPlanRepository {
         Ok(())
     }
 }
+

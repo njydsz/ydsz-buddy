@@ -347,3 +347,4 @@ mod tests {
         assert!(d.decode(&raw).is_none());
     }
 }
+

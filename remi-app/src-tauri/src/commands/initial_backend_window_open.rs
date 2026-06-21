@@ -98,3 +98,4 @@ mod tests {
         assert!(!cfg.should_show_now());
     }
 }
+

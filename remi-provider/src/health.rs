@@ -360,3 +360,4 @@ async fn probe_provider_cli(binary: &str, provider: ProviderKind) -> ProviderHea
         }
     }
 }
+

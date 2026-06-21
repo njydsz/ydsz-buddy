@@ -86,3 +86,4 @@ mod tests {
         assert_eq!(info.family, OsFamily::Other);
     }
 }
+

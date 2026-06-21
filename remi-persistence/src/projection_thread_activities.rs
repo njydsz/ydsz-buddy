@@ -234,3 +234,4 @@ impl ThreadActivityRepository for SqliteThreadActivityRepository {
         Ok(())
     }
 }
+

@@ -66,3 +66,4 @@ pub async fn ipc_voice_transcribe(params: Value) -> Result<Value, String> {
         .dispatch("voice.transcribe", Some(params))
         .await
 }
+

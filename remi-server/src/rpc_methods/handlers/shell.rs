@@ -236,3 +236,4 @@ fn is_command_available(command: &str) -> bool {
     .map(|status| status.success())
     .unwrap_or(false)
 }
+

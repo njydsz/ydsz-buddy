@@ -5,7 +5,7 @@
 <h1 align="center">Remi Claw</h1>
 
 <p align="center">
-  <strong>双模式 AI 桌面助手 — 一个桌面，两种工作模式一键切换</strong><br />
+  <strong>是新一代 **AI 原生工作台** —**让 AI 替你工作，从想法到交付一站式完成**</strong><br />
   <code>Work 模式</code> 任务驱动的数字员工 · <code>Code 模式</code> 仓库内的程序员副驾
 </p>
 

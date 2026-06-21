@@ -115,3 +115,4 @@ pub async fn register_telemetry_methods(
 
     info!("遥测 RPC 方法注册完成");
 }
+

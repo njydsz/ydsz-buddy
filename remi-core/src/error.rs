@@ -21,7 +21,8 @@
 //!
 //! fn lookup_id(id: &str) -> CoreResult<String> {
 //!     // 查找资源...
-//!     Err(CoreError::NotFoundError(format!('资源 {} 不存在', id)))
+//!
+Err(CoreError::NotFoundError(format!('资源 {} 不存在', id)))
 //! }
 //! ```
 
@@ -141,7 +142,9 @@ pub enum CoreError {
 /// use remi_core::CoreResult;
 ///
 /// fn do_something() -> CoreResult<String> {
-///     Ok('成功'.to_string())
+///
+Ok('成功'.to_string())
 /// }
 /// ```
 pub type CoreResult<T> = Result<T, CoreError>;
+

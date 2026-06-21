@@ -391,3 +391,4 @@ pub async fn register_workspace_methods(
 
     info!("工作空间 RPC 方法注册完成");
 }
+

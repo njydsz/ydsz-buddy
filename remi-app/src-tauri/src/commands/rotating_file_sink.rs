@@ -160,3 +160,4 @@ mod tests {
         assert!(dir.join("app.1.log").exists());
     }
 }
+

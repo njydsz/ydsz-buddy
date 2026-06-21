@@ -250,3 +250,4 @@ pub fn apply_grok_acp_model_selection(
     settings.model_id = model_id.to_string();
     info!(model_id = %model_id, "应用 Grok ACP 模型选择");
 }
+

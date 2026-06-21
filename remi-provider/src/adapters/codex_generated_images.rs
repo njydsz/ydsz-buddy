@@ -178,3 +178,4 @@ pub fn safe_join(base: &Path, relative: &str) -> Option<PathBuf> {
         None
     }
 }
+

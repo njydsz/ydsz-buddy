@@ -57,21 +57,28 @@
 //!
 //! #[async_trait]
 //! impl ProviderAdapter for MyAdapter {
-//!     fn provider_kind(&self) -> ProviderKind {
-//!         ProviderKind::Custom
-//!     }
 //!
-//!     fn capabilities(&self) -> ProviderCapabilities {
+fn provider_kind(&self) -> ProviderKind {
+//!         ProviderKind::Custom
+//!
+}
+//!
+//!
+fn capabilities(&self) -> ProviderCapabilities {
 //!         ProviderCapabilities {
 //!             session_model_switch: SessionModelSwitchMode::InSession,
 //!             supports_skill_mentions: true,
 //!             // ... 其他能力配置
-//!         }
-//!     }
 //!
-//!     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
+}
+//!
+}
+//!
+//!
+async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
 //!         // 实现会话启动逻辑
-//!     }
+//!
+}
 //!
 //!     // ... 实现其他必需方法
 //! }
@@ -100,8 +107,12 @@ use crate::error::ProviderResult;
 /// - `supports_skill_mentions`: 是否支持技能提及（@mention 方式调用技能）
 /// - `supports_skill_discovery`: 是否支持技能发现（自动发现可用技能）
 /// - `supports_native_slash_command_discovery`: 是否支持原生命令发现（/command 形式）
+/// - `supports_plugin_mentions`: 是否支持插件提及（@plugin 形式调用插件）
+/// - `supports_plugin_discovery`: 是否支持插件发现（marketplace / plugin）
 /// - `supports_runtime_model_list`: 是否支持运行时获取可用模型列表
 /// - `supports_turn_steering`: 是否支持 Turn 转向（在运行中重定向对话方向）
+/// - `supports_thread_compaction`: 是否支持线程压缩（compactThread）
+/// - `supports_thread_import`: 是否支持线程导入（importThread）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderCapabilities {
     /// 会话中模型切换模式，决定切换模型时是否需要重启会话
@@ -122,6 +133,20 @@ pub struct ProviderCapabilities {
     /// 启用后，Provider 可以识别并处理原生的斜杠命令（如 /help、/clear 等）
     pub supports_native_slash_command_discovery: bool,
 
+    /// 是否支持插件提及功能
+    ///
+    /// 启用后，用户可以通过 @plugin 形式显式调用已启用的插件。
+    /// 新增字段：与前端 `ProviderComposerCapabilities.supportsPluginMentions` 对齐。
+    #[serde(default)]
+    pub supports_plugin_mentions: bool,
+
+    /// 是否支持插件发现功能
+    ///
+    /// 启用后，Provider 可发现 marketplace 中的可用插件。
+    /// 新增字段：与前端 `ProviderComposerCapabilities.supportsPluginDiscovery` 对齐。
+    #[serde(default)]
+    pub supports_plugin_discovery: bool,
+
     /// 是否支持运行时模型列表功能
     ///
     /// 启用后，可以在运行时动态获取 Provider 支持的模型列表
@@ -131,6 +156,20 @@ pub struct ProviderCapabilities {
     ///
     /// 启用后，可以在 Turn 执行过程中重定向对话方向，实现更灵活的交互
     pub supports_turn_steering: bool,
+
+    /// 是否支持线程压缩
+    ///
+    /// 启用后可通过 `compactThread` 接口压缩线程上下文，减少 token 消耗。
+    /// 新增字段：与前端 `ProviderComposerCapabilities.supportsThreadCompaction` 对齐。
+    #[serde(default)]
+    pub supports_thread_compaction: bool,
+
+    /// 是否支持线程导入
+    ///
+    /// 启用后可通过 `importThread` 接口导入外部线程快照。
+    /// 新增字段：与前端 `ProviderComposerCapabilities.supportsThreadImport` 对齐。
+    #[serde(default)]
+    pub supports_thread_import: bool,
 }
 
 /// 会话内模型切换模式
@@ -181,13 +220,17 @@ pub enum SessionModelSwitchMode {
 /// ```rust,ignore
 /// #[async_trait]
 /// impl ProviderAdapter for MyAdapter {
-///     fn provider_kind(&self) -> ProviderKind {
-///         ProviderKind::Custom
-///     }
 ///
-///     async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
+fn 
+///         ProviderKind::Custom
+///
+}
+///
+///
+async fn start_session(&self, input: ProviderSessionStartInput) -> ProviderResult<ProviderSession> {
 ///         // 实现会话启动逻辑
-///     }
+///
+}
 ///
 ///     // ... 实现其他必需方法
 /// }
@@ -410,10 +453,12 @@ pub trait ProviderAdapter: Send + Sync {
     /// ```rust,ignore
     /// let mut rx = adapter.stream_events().await?;
     /// tokio::spawn(async move {
-    ///     while let Ok(event) = rx.recv().await {
+    ///
+while let Ok(event) = rx.recv().await {
     ///         // 处理事件
     ///         println!('收到事件: {:?}', event);
-    ///     }
+    ///
+    }
     /// });
     /// ```
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>>;
@@ -573,3 +618,4 @@ pub trait ProviderAdapter: Send + Sync {
         ))
     }
 }
+

@@ -208,3 +208,4 @@ pub async fn register_projects_methods(
 
     info!("Projects RPC 方法注册完成");
 }
+

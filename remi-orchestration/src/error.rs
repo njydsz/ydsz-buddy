@@ -37,14 +37,19 @@
 //!
 //! fn process_command() -> OrchestrationResult<()> {
 //!     // 使用 ? 运算符自动转换错误
-//!     let event = serde_json::from_str::<Event>(json_str)?;
+//!
+let event = serde_json::from_str::<Event>(json_str)?;
 //!     
 //!     // 手动构造特定错误类型
-//!     if !valid {
-//!         return Err(OrchestrationError::CommandError('参数不合法'.into()));
-//!     }
+//!
+if !valid {
+//!
+return Err(OrchestrationError::CommandError('参数不合法'.into()));
+//!
+}
 //!     
-//!     Ok(())
+//!
+Ok(())
 //! }
 //! ```
 //!
@@ -117,7 +122,8 @@ pub enum OrchestrationError {
 ///
 /// ```ignore
 /// fn do_something() -> OrchestrationResult<String> {
-///     Ok('success'.to_string())
+///
+Ok('success'.to_string())
 /// }
 /// ```
 pub type OrchestrationResult<T> = Result<T, OrchestrationError>;
@@ -131,3 +137,4 @@ impl From<serde_json::Error> for OrchestrationError {
         OrchestrationError::SerializationError(err.to_string())
     }
 }
+

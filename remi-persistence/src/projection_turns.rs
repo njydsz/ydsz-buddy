@@ -359,3 +359,4 @@ fn row_to_turn(row: &rusqlite::Row<'_>) -> rusqlite::Result<ProjectionTurn> {
         checkpoint_files_json,
     })
 }
+

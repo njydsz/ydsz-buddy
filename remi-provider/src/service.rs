@@ -77,9 +77,11 @@
 //! // 订阅事件
 //! let mut rx = service.stream_events();
 //! tokio::spawn(async move {
-//!     while let Ok(event) = rx.recv().await {
+//!
+while let Ok(event) = rx.recv().await {
 //!         println!('收到事件: {:?}', event);
-//!     }
+//!
+}
 //! });
 //! ```
 
@@ -843,9 +845,11 @@ impl ProviderService {
     /// ```rust,ignore
     /// let mut rx = service.stream_events();
     /// tokio::spawn(async move {
-    ///     while let Ok(event) = rx.recv().await {
+    ///
+while let Ok(event) = rx.recv().await {
     ///         println!('收到事件: {:?}', event);
-    ///     }
+    ///
+    }
     /// });
     /// ```
     pub fn stream_events(&self) -> broadcast::Receiver<ProviderRuntimeEvent> {
@@ -879,3 +883,4 @@ impl Default for ProviderService {
 
 // 旧的 static_models_for / static_agents_for 已迁移到 `crate::catalog`，
 // 由 `ProviderAdapter` 默认实现统一提供，避免在 ProviderService 中重复维护。
+

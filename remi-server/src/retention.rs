@@ -246,3 +246,4 @@ mod tests {
         assert_eq!(config.max_threads, 1000);
     }
 }
+

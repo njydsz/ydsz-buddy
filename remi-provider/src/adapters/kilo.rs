@@ -506,3 +506,4 @@ impl ProviderAdapter for KiloAdapter {
         Ok(self.event_tx.subscribe())
     }
 }
+

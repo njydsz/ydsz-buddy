@@ -326,3 +326,4 @@ mod tests {
         assert_eq!(bus.subscriber_count(), 2);
     }
 }
+

@@ -73,3 +73,4 @@ pub fn open_in_default_editor(path: &str) -> Result<(), String> {
         open_in_folder(path)
     }
 }
+

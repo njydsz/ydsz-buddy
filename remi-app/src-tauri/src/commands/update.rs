@@ -593,3 +593,4 @@ mod tests {
         assert!(!state.should_check_on_foreground(120, 3600));
     }
 }
+

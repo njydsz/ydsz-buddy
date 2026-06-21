@@ -416,3 +416,4 @@ mod tests {
         assert_eq!(c.kind, CommandKind::Process);
     }
 }
+

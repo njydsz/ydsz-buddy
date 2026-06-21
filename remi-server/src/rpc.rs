@@ -320,3 +320,4 @@ pub fn create_notification(method: &str, params: Option<Value>) -> JsonRpcNotifi
         params,
     }
 }
+

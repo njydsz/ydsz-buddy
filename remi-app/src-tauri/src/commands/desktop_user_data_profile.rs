@@ -160,3 +160,4 @@ mod tests {
         assert_eq!(reloaded.locale, "zh-CN");
     }
 }
+

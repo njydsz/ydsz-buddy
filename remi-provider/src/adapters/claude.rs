@@ -301,8 +301,12 @@ impl ProviderAdapter for ClaudeAdapter {
             supports_skill_mentions: true,
             supports_skill_discovery: true,
             supports_native_slash_command_discovery: true,
+            supports_plugin_mentions: false,
+            supports_plugin_discovery: false,
             supports_runtime_model_list: true,
             supports_turn_steering: true,
+            supports_thread_compaction: true,
+            supports_thread_import: true,
         }
     }
 
@@ -800,3 +804,4 @@ impl ProviderAdapter for ClaudeAdapter {
         })
     }
 }
+

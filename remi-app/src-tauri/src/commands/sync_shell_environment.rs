@@ -234,3 +234,4 @@ mod tests {
         assert_eq!(ShellFlavor::from_program("pwsh"), ShellFlavor::PowerShell);
     }
 }
+

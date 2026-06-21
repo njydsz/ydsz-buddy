@@ -92,9 +92,11 @@
 //! // 5. 订阅事件流
 //! let mut event_rx = engine.stream_domain_events();
 //! tokio::spawn(async move {
-//!     while let Ok(event) = event_rx.recv().await {
+//!
+while let Ok(event) = event_rx.recv().await {
 //!         // 处理事件...
-//!     }
+//!
+}
 //! });
 //! ```
 //!
@@ -152,3 +154,4 @@ pub use dispatch_command_normalization::*;
 pub use invariants::*;
 /// 导出线程交接模块
 pub use handoff::*;
+

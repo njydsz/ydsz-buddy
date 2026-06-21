@@ -374,7 +374,8 @@ mod test {
 
     #[test]
     fn json_helper_in_message() {
-        // 简单确.?json! 宏工.?        let v = json!({
+        // 简单确.?json! 宏工.?
+        let v = json!({
             "user": "alice",
             "age": 30
         });
@@ -382,3 +383,4 @@ mod test {
         assert_eq!(v["age"], 30);
     }
 }
+

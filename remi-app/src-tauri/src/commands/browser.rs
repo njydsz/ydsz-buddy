@@ -1087,3 +1087,4 @@ pub async fn browser_open_dev_tools(
     }
     Ok(())
 }
+

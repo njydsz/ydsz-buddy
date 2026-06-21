@@ -430,3 +430,4 @@ pub async fn restart_terminal(
         Err("Terminal session not found".to_string())
     }
 }
+

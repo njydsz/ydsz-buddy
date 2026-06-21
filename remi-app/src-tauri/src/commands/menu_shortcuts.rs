@@ -165,3 +165,4 @@ mod tests {
         assert!(groups.iter().any(|g| g.id == "edit"));
     }
 }
+

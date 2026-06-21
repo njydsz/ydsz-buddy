@@ -6,7 +6,8 @@
 //! ## 核心概念
 //!
 //! - **Provider**: AI 服务提供商，如 OpenAI Codex、Anthropic Claude 等
-//! - **ModelSelection**: 模型选择配置，指定使用哪个 Provider 和模型
+//! - **Mod
+elSelection**: 模型选择配置，指定使用哪个 Provider 和模型
 //! - **ProviderSession**: 与 Provider 的运行时会话连接
 //! - **ProviderRuntimeEvent**: Provider 运行时产生的事件（会话启动、Turn 开始、流式输出等）
 
@@ -1017,3 +1018,4 @@ pub struct ServerVoiceTranscriptionResult {
     /// 转录后的文本
     pub text: String,
 }
+

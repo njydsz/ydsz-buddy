@@ -172,3 +172,4 @@ mod tests {
         assert!(cfg.providers.contains(&ProviderKind::Codex));
     }
 }
+

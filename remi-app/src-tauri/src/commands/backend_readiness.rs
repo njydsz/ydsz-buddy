@@ -162,3 +162,4 @@ mod tests {
         assert_eq!(r.last_error().as_deref(), Some("boom"));
     }
 }
+

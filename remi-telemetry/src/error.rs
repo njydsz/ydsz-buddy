@@ -54,7 +54,8 @@ use thiserror::Error;
 /// fn do_work() -> TelemetryResult<()> {
 ///     // 若底层 IO 失败，会自动转换为 TelemetryError::IoError
 ///     std::fs::File::open('metrics.json')?;
-///     Ok(())
+///
+Ok(())
 /// }
 /// ```
 #[derive(Error, Debug)]

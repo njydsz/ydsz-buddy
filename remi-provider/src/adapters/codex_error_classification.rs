@@ -135,3 +135,4 @@ mod tests {
         assert_eq!(r.class, CodexErrorClass::Unknown);
     }
 }
+

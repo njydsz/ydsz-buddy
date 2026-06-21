@@ -239,3 +239,4 @@ async fn register_unsubscribe_alias(router: Arc<RpcRouter>, method: &str) {
         })
         .await;
 }
+

@@ -334,3 +334,4 @@ mod tests {
         assert!(ct.to_str().unwrap().contains("application/json"));
     }
 }
+

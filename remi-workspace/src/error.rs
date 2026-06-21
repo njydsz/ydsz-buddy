@@ -41,10 +41,14 @@ use thiserror::Error;
 /// use remi_workspace::error::WorkspaceError;
 /// 
 /// fn check_path(path: &str) -> Result<(), WorkspaceError> {
-///     if path.contains('..') {
-///         return Err(WorkspaceError::PathOutsideRoot(path.to_string()));
-///     }
-///     Ok(())
+///
+if path.contains('..') {
+///
+return Err(WorkspaceError::PathOutsideRoot(path.to_string()));
+///
+}
+///
+Ok(())
 /// }
 /// }
 #[derive(Error, Debug)]
@@ -130,7 +134,8 @@ pub enum WorkspaceError {
 /// use remi_workspace::error::WorkspaceResult;
 /// 
 /// fn do_something() -> WorkspaceResult<String> {
-///     Ok('success'.to_string())
+///
+Ok('success'.to_string())
 /// }
 /// }
 pub type WorkspaceResult<T> = Result<T, WorkspaceError>;

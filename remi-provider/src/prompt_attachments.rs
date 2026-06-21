@@ -306,3 +306,4 @@ mod tests {
         assert_eq!(a.mime_type.as_deref(), Some("text/markdown"));
     }
 }
+

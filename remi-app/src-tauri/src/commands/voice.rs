@@ -112,3 +112,4 @@ pub async fn transcribe_voice(input: TranscribeVoiceInput) -> Result<TranscribeV
         Err(e) => Err(format!("Voice transcription failed: {e}")),
     }
 }
+

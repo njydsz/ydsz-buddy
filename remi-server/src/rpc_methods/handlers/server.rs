@@ -439,3 +439,4 @@ fn get_default_settings() -> Value {
         "fontSize": 14
     })
 }
+

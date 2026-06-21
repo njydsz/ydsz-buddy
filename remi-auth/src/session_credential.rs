@@ -380,11 +380,16 @@ impl SessionCredentialService {
     /// 
     /// // 自定义参数颁发会话
     /// let issued = service.issue(
-    ///     Some(24),                                    // 24 小时有效期
-    ///     Some('user_123'.to_string()),                // 用户 ID
-    ///     Some(SessionMethod::Bearer),                 // Bearer 认证
-    ///     Some(SessionRole::Client),                   // 客户端角色
-    ///     Some(ClientMetadata {                        // 客户端信息
+    ///
+Some(24),                                    // 24 小时有效期
+    ///
+Some('user_123'.to_string()),                // 用户 ID
+    ///
+Some(SessionMethod::Bearer),                 // Bearer 认证
+    ///
+Some(SessionRole::Client),                   // 客户端角色
+    ///
+Some(ClientMetadata {                        // 客户端信息
     ///         name: 'MyApp'.to_string(),
     ///         version: Some('1.0.0'.to_string()),
     ///         platform: Some('Windows'.to_string()),
@@ -468,19 +473,27 @@ impl SessionCredentialService {
     /// async fn main() {
     /// // 验证客户端携带的令牌
     /// match service.verify(&token).await {
-    ///     Ok(session) => {
+    ///
+Ok(session) => {
     ///         println!('用户 {} 验证通过', session.subject);
     ///         // 继续处理请求...
-    ///     }
-    ///     Err(AuthError::InvalidToken) => {
+    ///
+}
+    ///
+Err(AuthError::InvalidToken) => {
     ///         // 返回 401 Unauthorized
-    ///     }
-    ///     Err(AuthError::TokenExpired) => {
+    ///
+}
+    ///
+Err(AuthError::TokenExpired) => {
     ///         // 返回 401，提示客户端重新登录
-    ///     }
-    ///     Err(e) => {
+    ///
+}
+    ///
+Err(e) => {
     ///         // 处理其他错误
-    ///     }
+    ///
+}
     /// }
     /// }
     pub async fn verify(&self, token: &str) -> AuthResult<VerifiedSession> {
@@ -653,16 +666,22 @@ impl SessionCredentialService {
     /// 
     /// // 在异步任务中监听事件
     /// tokio::spawn(async move {
-    ///     while let Ok(event) = rx.recv().await {
-    ///         match event {
+    ///
+while let Ok(event) = rx.recv().await {
+    ///
+match event {
     ///             SessionCredentialChange::ClientUpserted(session) => {
     ///                 println!('会话创建/更新: {}', session.session_id);
-    ///             }
+    ///
+}
     ///             SessionCredentialChange::ClientRemoved(session_id) => {
     ///                 println!('会话移除: {}', session_id);
-    ///             }
-    ///         }
-    ///     }
+    ///
+}
+    ///
+}
+    ///
+}
     /// });
     /// }
     pub fn stream_changes(&self) -> broadcast::Receiver<SessionCredentialChange> {

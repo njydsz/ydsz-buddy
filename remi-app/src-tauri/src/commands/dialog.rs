@@ -214,3 +214,4 @@ pub async fn show_message(app: tauri::AppHandle, message: String, title: Option<
     msg.blocking_show();
     Ok(())
 }
+

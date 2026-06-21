@@ -328,9 +328,11 @@ pub struct TerminalCloseInput {
 /// // 订阅事件
 /// let mut rx = manager.subscribe();
 /// tokio::spawn(async move {
-///     while let Ok(event) = rx.recv().await {
+///
+while let Ok(event) = rx.recv().await {
 ///         // 处理终端事件...
-///     }
+///
+}
 /// });
 /// ```
 pub struct TerminalManager {

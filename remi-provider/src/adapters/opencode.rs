@@ -238,8 +238,12 @@ impl ProviderAdapter for OpenCodeAdapter {
             supports_skill_mentions: false,
             supports_skill_discovery: false,
             supports_native_slash_command_discovery: false,
+            supports_plugin_mentions: false,
+            supports_plugin_discovery: false,
             supports_runtime_model_list: true,
             supports_turn_steering: false,
+            supports_thread_compaction: false,
+            supports_thread_import: false,
         }
     }
 
@@ -506,3 +510,4 @@ impl ProviderAdapter for OpenCodeAdapter {
         Ok(self.event_tx.subscribe())
     }
 }
+

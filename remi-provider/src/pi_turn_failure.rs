@@ -247,3 +247,4 @@ mod tests {
         assert_eq!(d.kind, PiFailureKind::UserAbort);
     }
 }
+
