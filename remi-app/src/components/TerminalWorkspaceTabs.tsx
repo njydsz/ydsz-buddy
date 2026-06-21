@@ -36,13 +36,13 @@ export default function TerminalWorkspaceTabs({
 
   return (
     <div className="relative border-b border-border/70 bg-muted/10 px-3 sm:px-5">
-      <div className="flex min-w-0 items-end gap-1.5 overflow-x-auto pt-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex min-w-0 items-end gap-1.5 overflow-x-auto pt-1.5 scrollbar-none [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
           className={cn(
             tabClassName,
             activeTab === "terminal"
-              ? "z-[1] border-border/70 bg-[var(--composer-surface)] text-foreground"
+              ? "z-1 border-border/70 bg-(--composer-surface) text-foreground"
               : "border-transparent bg-transparent text-muted-foreground hover:bg-background/55 hover:text-foreground",
           )}
           onClick={() => {
@@ -62,7 +62,7 @@ export default function TerminalWorkspaceTabs({
           className={cn(
             tabClassName,
             activeTab === "chat"
-              ? "z-[1] border-border/70 bg-[var(--composer-surface)] text-foreground"
+              ? "z-1 border-border/70 bg-(--composer-surface) text-foreground"
               : "border-transparent bg-transparent text-muted-foreground hover:bg-background/55 hover:text-foreground",
           )}
           onClick={() => {

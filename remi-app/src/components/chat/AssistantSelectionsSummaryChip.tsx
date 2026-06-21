@@ -40,7 +40,7 @@ export function AssistantSelectionsSummaryChip(props: AssistantSelectionsSummary
             {props.onRemove ? (
               <button
                 type="button"
-                className="absolute right-0.5 inline-flex size-5 items-center justify-center rounded-full text-[var(--color-text-foreground-tertiary)] transition-all hover:bg-[var(--color-background-button-secondary-hover)] hover:text-[var(--color-text-foreground)]"
+                className="absolute right-0.5 inline-flex size-5 items-center justify-center rounded-full text-(--color-text-foreground-tertiary) transition-all hover:bg-(--color-background-button-secondary-hover) hover:text-(--color-text-foreground)"
                 aria-label="Remove selections"
                 onClick={(event) => {
                   event.preventDefault();
