@@ -316,7 +316,7 @@ impl ProviderDiscoveryService {
                         name: m.name,
                         context_window: m
                             .default_context_window
-                            .and_then(|w| w.parse::<u32>().ok())
+                            .and_then(|w: String| w.parse::<u32>().ok())
                             .unwrap_or(0),
                         description: m.upstream_provider_name,
                     })

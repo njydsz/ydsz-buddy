@@ -415,4 +415,66 @@ pub trait ProviderAdapter: Send + Sync {
     /// });
     /// ```
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>>;
+
+    /// 列出技能
+    async fn list_skills(
+        &self,
+        _input: remi_core::provider::ProviderListSkillsInput,
+    ) -> ProviderResult<remi_core::provider::ProviderListSkillsResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "list_skills not supported".to_string(),
+        ))
+    }
+
+    /// 列出命令
+    async fn list_commands(
+        &self,
+        _input: remi_core::provider::ProviderListCommandsInput,
+    ) -> ProviderResult<remi_core::provider::ProviderListCommandsResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "list_commands not supported".to_string(),
+        ))
+    }
+
+    /// 列出模型
+    async fn list_models(
+        &self,
+        _input: remi_core::provider::ProviderListModelsInput,
+    ) -> ProviderResult<remi_core::provider::ProviderListModelsResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "list_models not supported".to_string(),
+        ))
+    }
+
+    /// 列出 Agent
+    async fn list_agents(&self) -> ProviderResult<remi_core::provider::ProviderListAgentsResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "list_agents not supported".to_string(),
+        ))
+    }
+
+    /// 列出插件
+    async fn list_plugins(
+        &self,
+        _input: remi_core::provider::ProviderListPluginsInput,
+    ) -> ProviderResult<remi_core::provider::ProviderListPluginsResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "list_plugins not supported".to_string(),
+        ))
+    }
+
+    /// 读取插件详情
+    async fn read_plugin(
+        &self,
+        _input: remi_core::provider::ProviderReadPluginInput,
+    ) -> ProviderResult<remi_core::provider::ProviderReadPluginResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "read_plugin not supported".to_string(),
+        ))
+    }
+
+    /// 获取 Composer 能力
+    async fn get_composer_capabilities(&self) -> ProviderResult<ProviderCapabilities> {
+        Ok(self.capabilities())
+    }
 }

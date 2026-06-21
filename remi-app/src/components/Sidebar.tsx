@@ -805,36 +805,6 @@ function RemiCodeWordmark() {
   );
 }
 
-/**
- * Fixed-position header that stays visible at the top of the viewport
- * when the sidebar is collapsed on desktop. Shows the logo and collapse
- * toggle button so users can always reopen the sidebar.
- * Must be placed inside SidebarProvider but outside Sidebar.
- */
-export function FixedSidebarHeader() {
-  const { open } = useSidebar();
-
-  if (!isDesktop || open) {
-    return null;
-  }
-
-  return (
-    <div
-      className="fixed top-0 left-0 z-50 flex h-[44px] items-center gap-2 px-4 font-system-ui"
-      data-no-drag
-    >
-      <div className="flex min-w-0 items-center gap-1">
-        <RemiCodeWordmark />
-        <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
-      </div>
-      <SidebarTrigger
-        className="size-7 shrink-0 text-muted-foreground/75 hover:text-foreground"
-        aria-label="Toggle thread sidebar"
-      />
-    </div>
-  );
-}
-
 type SortableProjectHandleProps = Pick<
   ReturnType<typeof useSortable>,
   "attributes" | "listeners" | "setActivatorNodeRef"
