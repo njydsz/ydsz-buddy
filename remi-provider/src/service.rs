@@ -77,11 +77,9 @@
 //! // 订阅事件
 //! let mut rx = service.stream_events();
 //! tokio::spawn(async move {
-//!
-while let Ok(event) = rx.recv().await {
-//!         println!('收到事件: {:?}', event);
-//!
-}
+//!     while let Ok(event) = rx.recv().await {
+//!         println!("收到事件: {:?}", event);
+//!     }
 //! });
 //! ```
 

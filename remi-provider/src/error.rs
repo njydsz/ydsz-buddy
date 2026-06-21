@@ -34,14 +34,12 @@
 //!
 //! fn do_something() -> ProviderResult<()> {
 //!     // 成功时返回 Ok
-//!
-Ok(())
+//!     Ok(())
 //! }
 //!
 //! fn fail_example() -> ProviderResult<()> {
 //!     // 失败时返回具体错误
-//!
-Err(ProviderError::ProviderNotFound('unknown'.to_string()))
+//!     Err(ProviderError::ProviderNotFound("unknown".to_string()))
 //! }
 //! ```
 

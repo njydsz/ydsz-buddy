@@ -27,8 +27,7 @@
 //!
 //! fn example() -> GitResult<()> {
 //!     // 返回具体错误
-//!
-Err(GitError::BranchNotFound('main'.to_string()))
+//!     Err(GitError::BranchNotFound("main".to_string()))
 //! }
 //! ```
 

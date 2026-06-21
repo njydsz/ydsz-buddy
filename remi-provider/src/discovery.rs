@@ -501,6 +501,7 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_unregistered_provider() {
         let service = ProviderDiscoveryService::new();
 
         // 测试未注册的 Provider

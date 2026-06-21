@@ -188,12 +188,10 @@ pub enum GitAction {
 /// async fn main() {
 /// let result = manager.run_stacked_action(input).await?;
 /// if result.success {
-///     println!('操作成功: {}', result.message);
-///
-if let Some(sha) = result.commit_sha {
-///         println!('提交 SHA: {}', sha);
-///
-}
+///     println!("操作成功: {}", result.message);
+///     if let Some(sha) = result.commit_sha {
+///         println!("提交 SHA: {}", sha);
+///     }
 /// }
 /// }
 #[derive(Debug, Clone)]

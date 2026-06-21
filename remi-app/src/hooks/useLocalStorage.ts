@@ -119,7 +119,8 @@ export function useLocalStorage<T>(
   initialValue: T,
   _codec?: unknown,
 ): [T, (value: T | ((val: T) => T)) => void] {
-  // ��?localStorage 获取初始值或使用提供的初始��?  const [storedValue, setStoredValue] = useState<T>(() => {
+  // 从 localStorage 获取初始值或使用提供的初始值
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = getLocalStorageItem<T>(key);
       return item ?? initialValue;

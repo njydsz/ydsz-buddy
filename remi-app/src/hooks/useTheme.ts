@@ -172,7 +172,8 @@ function subscribe(listener: () => void): () => void {
  * 将主题状态应用到 DOM
  * 设置 CSS 变量、data 属性和 class
  * 
- * @param state - 主题状��? * @param suppressTransitions - 是否抑制过渡动画（用于初始加载）
+ * @param state - 主题状态
+ * @param suppressTransitions - 是否抑制过渡动画（用于初始加载）
  */
 function applyThemeState(state: ThemeState, suppressTransitions = false) {
   if (typeof document === "undefined" || typeof window === "undefined") {

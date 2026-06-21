@@ -76,7 +76,7 @@ pub struct PtySize {
 /// let mut buf = [0u8; 1024];
 /// if let Some(n) = pty.read(&mut buf) {
 ///     let output = String::from_utf8_lossy(&buf[..n]);
-///     println!("Output: {}", output);
+///     println!('Output: {}', output);
 /// }
 ///
 /// // 检查进程状态

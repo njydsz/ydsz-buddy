@@ -473,27 +473,19 @@ impl SessionCredentialService {
     /// async fn main() {
     /// // 验证客户端携带的令牌
     /// match service.verify(&token).await {
-    ///
-Ok(session) => {
-    ///         println!('用户 {} 验证通过', session.subject);
+    ///     Ok(session) => {
+    ///         println!("用户 {} 验证通过", session.subject);
     ///         // 继续处理请求...
-    ///
-}
-    ///
-Err(AuthError::InvalidToken) => {
+    ///     }
+    ///     Err(AuthError::InvalidToken) => {
     ///         // 返回 401 Unauthorized
-    ///
-}
-    ///
-Err(AuthError::TokenExpired) => {
+    ///     }
+    ///     Err(AuthError::TokenExpired) => {
     ///         // 返回 401，提示客户端重新登录
-    ///
-}
-    ///
-Err(e) => {
+    ///     }
+    ///     Err(e) => {
     ///         // 处理其他错误
-    ///
-}
+    ///     }
     /// }
     /// }
     pub async fn verify(&self, token: &str) -> AuthResult<VerifiedSession> {
