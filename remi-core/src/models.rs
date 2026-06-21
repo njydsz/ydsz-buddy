@@ -690,35 +690,125 @@ pub enum SessionStatus {
     Error,
 }
 
-/// # 运行时模式枚举
+/// # 运行时模式枚举（Remi Claw 0.2.0）
 ///
-/// 控制 AI 代理的行为模式：
-/// - [`Agent`](RuntimeMode::Agent) - 自主执行模式，AI 可以调用工具、修改文件
-/// - [`Ask`](RuntimeMode::Ask) - 仅问答模式，AI 只回答问题不执行操作
-/// - [`Plan`](RuntimeMode::Plan) - 规划模式，AI 生成执行计划供用户确认
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// 控制线程所属的产品主模式，调度不同的工具集与 Provider 链：
+///
+/// - [`Work`](RuntimeMode::Work) - 工作模式，调度 Office / 批量 / 调度 / 浏览器自动化
+/// - [`Code`](RuntimeMode::Code) - 代码模式，调度 Provider Adapter / 终端 / Git（默认）
+///
+/// ## 迁移说明
+///
+/// 0.1.x 的 `Agent/Ask/Plan` 三态在 0.2.0 重构为 Work/Code 双维度；旧的 `Agent/Ask/Plan`
+/// 在事件流中以小写字符串 `agent/ask/plan` 形式存在，反序列化时通过
+/// [`RuntimeMode::from_legacy`] 映射到新的 Work/Code 维度。
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum RuntimeMode {
-    /// 自主执行模式，AI 可以调用工具、修改文件
-    Agent,
-    /// 仅问答模式，AI 只回答问题不执行操作
-    Ask,
-    /// 规划模式，AI 生成执行计划供用户确认
-    Plan,
+    /// 工作模式：Office / 批量 / 调度 / 浏览器自动化
+    Work,
+    /// 代码模式：Provider / 终端 / Git（默认）
+    Code,
 }
 
-/// # 交互模式枚举
+/// 自定义反序列化：兼容旧版 `agent/ask/plan` 字符串
+impl<'de> Deserialize<'de> for RuntimeMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let raw = String::deserialize(deserializer)?;
+        Ok(Self::from_legacy(&raw))
+    }
+}
+
+impl Default for RuntimeMode {
+    fn default() -> Self {
+        Self::Code
+    }
+}
+
+impl RuntimeMode {
+    /// 从旧版 `agent/ask/plan` 字符串映射到新版 `work/code` 维度。
+    /// 未知值默认映射为 `Code`。
+    pub fn from_legacy(value: &str) -> Self {
+        match value.to_ascii_lowercase().as_str() {
+            "work" => Self::Work,
+            "code" => Self::Code,
+            "agent" | "ask" | "plan" => Self::Code,
+            _ => Self::Code,
+        }
+    }
+
+    pub fn is_work(&self) -> bool {
+        matches!(self, Self::Work)
+    }
+
+    pub fn is_code(&self) -> bool {
+        matches!(self, Self::Code)
+    }
+}
+
+/// # 交互模式枚举（Remi Claw 0.2.0）
 ///
-/// 控制对话的交互类型：
-/// - [`Chat`](InteractionMode::Chat) - 普通对话模式
-/// - [`Review`](InteractionMode::Review) - 代码审查模式
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// 控制 AI 在当前线程中的行为粒度。Work/Code 两种运行时模式共享同一套交互模式，
+/// 但具体可用值由运行时模式决定：
+///
+/// - [`Chat`](InteractionMode::Chat) - 普通对话，AI 只回答问题不执行副作用
+/// - [`Plan`](InteractionMode::Plan) - 规划模式，AI 先生成可审批的执行计划
+/// - [`Agent`](InteractionMode::Agent) - 自主模式，AI 可调用工具 / 修改文件（默认）
+/// - [`Review`](InteractionMode::Review) - 代码审查模式，AI 对 diff 进行评审
+/// - [`Task`](InteractionMode::Task) - 一次性任务模式，类似 Work 域的 Skill 执行
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum InteractionMode {
     /// 普通对话模式
     Chat,
+    /// 规划模式
+    Plan,
+    /// 自主执行模式（默认）
+    Agent,
     /// 代码审查模式
     Review,
+    /// 任务模式（Work 域）
+    Task,
+}
+
+/// 自定义反序列化：兼容旧版 `chat/review` 字符串
+impl<'de> Deserialize<'de> for InteractionMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let raw = String::deserialize(deserializer)?;
+        Ok(Self::from_legacy(&raw))
+    }
+}
+
+impl Default for InteractionMode {
+    fn default() -> Self {
+        Self::Agent
+    }
+}
+
+impl InteractionMode {
+    /// 从旧版 `chat/review` 字符串映射到新版 5 态。
+    /// 未知值默认映射为 `Agent`。
+    pub fn from_legacy(value: &str) -> Self {
+        match value.to_ascii_lowercase().as_str() {
+            "chat" => Self::Chat,
+            "plan" => Self::Plan,
+            "agent" => Self::Agent,
+            "review" => Self::Review,
+            "task" => Self::Task,
+            _ => Self::Agent,
+        }
+    }
+
+    /// 是否需要进入"会签"流程（Plan/Review 需要用户确认）
+    pub fn requires_approval(&self) -> bool {
+        matches!(self, Self::Plan | Self::Review)
+    }
 }
 
 /// # 环境模式枚举

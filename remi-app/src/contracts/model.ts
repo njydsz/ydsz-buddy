@@ -1,3 +1,34 @@
+/**
+ * @file 模型契约模块
+ *
+ * 本模块定义了 Remi 系统中各 AI Provider 模型的元数据、能力、选项契约，
+ * 涵盖 Claude、GPT、Codex、Cursor、自定义 Provider 等多源模型。
+ *
+ * ## 核心契约
+ *
+ * - `ModelSlug`：模型唯一标识（如 "claude-opus-4.5"）
+ * - `ModelFamily`：模型家族（claude / gpt / codex / cursor / 自定义）
+ * - `ModelCapabilities`：模型能力（工具调用、视觉、上下文窗口、思考等）
+ * - `ModelPromptFormat`：模型提示词格式（chat / completion / o1 等）
+ * - `ModelContextWindow`：模型上下文窗口（输入/输出 token 上限）
+ * - `ModelProviderOptions`：Provider 特定选项（reasoning_effort 等）
+ * - `CODEX_REASONING_EFFORT_OPTIONS`：Codex 推理强度选项
+ * - `CLAUDE_DEFAULT_MODELS`：Claude 默认模型列表
+ * - `OPENAI_DEFAULT_MODELS`：OpenAI 默认模型列表
+ *
+ * ## 使用场景
+ *
+ * - 模型选择器展示可用模型列表
+ * - Provider 启动时根据模型能力加载对应工具集
+ * - 上下文窗口监控（依据 `contextWindow`）
+ * - Provider 特定 UI 选项（如 reasoning effort 切换）
+ *
+ * ## 扩展性
+ *
+ * - 新增 Provider 时需添加对应的 `*_DEFAULT_MODELS` 列表
+ * - 自定义模型通过 `CustomModel` 描述，无需修改本模块
+ */
+
 import { Schema } from "effect";
 import { TrimmedNonEmptyString } from "./baseSchemas";
 import type { ProviderKind } from "./orchestration";

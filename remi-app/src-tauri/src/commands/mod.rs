@@ -44,3 +44,4 @@ pub mod rotating_file_sink;       // 带轮转的文件日志落地
 pub mod runtime_arch;             // 运行时 CPU/OS 信息
 pub mod initial_backend_window_open; // 启动后窗口打开策略
 pub mod menu_shortcuts;           // 菜单/快捷键声明式模型
+pub mod browser_use_pipe;       // Codex 兼容的浏览器使用管道服务器

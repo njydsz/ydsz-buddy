@@ -1014,5 +1014,41 @@ pub async fn register_git_methods(
         })
         .await;
 
+    // git.stashAndCheckout - 暂存当前变更并切换分支，切换成功后恢复暂存
+    // 参数: { cwd: string, branch: string }
+    // 返回: null
+    let git_core = services.git_core.clone();
+    let broadcaster = services.git_status_broadcaster.clone();
+    router
+        .register("git.stashAndCheckout", move |params: Option<Value>| {
+            let git_core = git_core.clone();
+            let broadcaster = broadcaster.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let branch = params
+                    .get("branch")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing branch".to_string())
+                    })?;
+
+                // 使用 GitCore 已有的 stash_and_checkout 方法
+                git_core.stash_and_checkout(cwd, branch).await?;
+                broadcaster.refresh_status(cwd).await?;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
     info!("Git RPC 方法注册完成");
 }

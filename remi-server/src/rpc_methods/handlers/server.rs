@@ -222,6 +222,211 @@ pub async fn register_server_methods(
         })
         .await;
 
+    // server.listWorktrees - 列出 Git Worktree（目前返回空列表）
+    // 参数: 无
+    // 返回: { worktrees: [] }
+    router
+        .register("server.listWorktrees", |_params: Option<Value>| {
+            async move {
+                // TODO: 实现实际的 worktree 列表查询
+                Ok(serde_json::json!({ "worktrees": [] }))
+            }
+        })
+        .await;
+
+    // server.updateProvider - 更新指定 Provider 的版本
+    // 参数: { providerName: string }
+    // 返回: { status: string, output?: string }
+    let provider_service = services.provider_service.clone();
+    router
+        .register("server.updateProvider", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_name = params
+                    .get("providerName")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams(
+                            "Missing providerName".to_string(),
+                        )
+                    })?;
+
+                // 获取 Provider 更新命令
+                let update_info = provider_service
+                    .get_provider_update_command(provider_name)
+                    .await;
+
+                match update_info {
+                    Some((cmd, args)) => {
+                        // 执行更新命令
+                        let output = tokio::process::Command::new(&cmd)
+                            .args(&args)
+                            .output()
+                            .await
+                            .map_err(|e| {
+                                crate::error::ServerError::InternalError(format!(
+                                    "Failed to execute update command: {}",
+                                    e
+                                ))
+                            })?;
+
+                        if output.status.success() {
+                            // 刷新 Provider 状态
+                            provider_service.refresh_providers().await?;
+                            Ok(serde_json::json!({
+                                "status": "succeeded",
+                                "output": String::from_utf8_lossy(&output.stdout).to_string()
+                            }))
+                        } else {
+                            Ok(serde_json::json!({
+                                "status": "failed",
+                                "output": String::from_utf8_lossy(&output.stderr).to_string()
+                            }))
+                        }
+                    }
+                    None => Ok(serde_json::json!({
+                        "status": "unsupported",
+                        "output": format!("Provider '{}' does not support updates", provider_name)
+                    })),
+                }
+            }
+        })
+        .await;
+
+    // server.getProviderUsageSnapshot - 获取 Provider 使用统计
+    // 参数: { providerName: string, homeDir?: string }
+    // 返回: UsageSnapshot | null
+    let provider_service = services.provider_service.clone();
+    router
+        .register("server.getProviderUsageSnapshot", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_name = params
+                    .get("providerName")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams(
+                            "Missing providerName".to_string(),
+                        )
+                    })?;
+
+                // 查询 Provider 使用统计
+                let snapshot = provider_service
+                    .get_usage_snapshot(provider_name)
+                    .await;
+
+                match snapshot {
+                    Some(s) => serde_json::to_value(s)
+                        .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
+                    None => Ok(Value::Null),
+                }
+            }
+        })
+        .await;
+
+    // server.upsertKeybinding - 创建或更新快捷键绑定
+    // 参数: { command: string, keys: string, when?: string }
+    // 返回: KeybindingRule[]
+    let config = services.config.clone();
+    router
+        .register("server.upsertKeybinding", move |params: Option<Value>| {
+            let config = config.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let command = params
+                    .get("command")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing command".to_string())
+                    })?
+                    .to_string();
+
+                let keys = params
+                    .get("keys")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing keys".to_string())
+                    })?
+                    .to_string();
+
+                let when = params
+                    .get("when")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                // 快捷键配置文件路径
+                let keybindings_path = config.base_dir.join("keybindings.json");
+
+                // 读取现有快捷键
+                let mut keybindings: Vec<serde_json::Value> =
+                    if keybindings_path.exists() {
+                        match tokio::fs::read_to_string(&keybindings_path).await {
+                            Ok(content) => serde_json::from_str(&content).unwrap_or_default(),
+                            Err(_) => Vec::new(),
+                        }
+                    } else {
+                        Vec::new()
+                    };
+
+                // 移除同名 command 的旧绑定
+                keybindings.retain(|kb| {
+                    kb.get("command")
+                        .and_then(|v| v.as_str())
+                        .map(|c| c != command)
+                        .unwrap_or(true)
+                });
+
+                // 添加新绑定
+                let new_rule = serde_json::json!({
+                    "command": command,
+                    "keys": keys,
+                    "when": when
+                });
+                keybindings.push(new_rule);
+
+                // 限制最大数量
+                const MAX_KEYBINDINGS: usize = 500;
+                if keybindings.len() > MAX_KEYBINDINGS {
+                    let start = keybindings.len() - MAX_KEYBINDINGS;
+                    keybindings = keybindings[start..].to_vec();
+                }
+
+                // 写入文件
+                if let Some(parent) = keybindings_path.parent() {
+                    tokio::fs::create_dir_all(parent).await.ok();
+                }
+                let content = serde_json::to_string_pretty(&keybindings).map_err(|e| {
+                    crate::error::ServerError::InternalError(format!(
+                        "Failed to serialize keybindings: {}",
+                        e
+                    ))
+                })?;
+                tokio::fs::write(&keybindings_path, content)
+                    .await
+                    .map_err(|e| {
+                        crate::error::ServerError::InternalError(format!(
+                            "Failed to write keybindings: {}",
+                            e
+                        ))
+                    })?;
+
+                serde_json::to_value(keybindings)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
     info!("服务器 RPC 方法注册完成");
 }
 

@@ -1,3 +1,34 @@
+/**
+ * @file Git 操作契约模块
+ *
+ * 本模块定义了 Remi 系统中与 Git 版本控制交互的所有 Schema，涵盖仓库状态查询、
+ * 分支管理、提交、推送、Pull Request、Worktree 等操作。
+ *
+ * ## 核心契约
+ *
+ * - `GitStatusInput/Result`：仓库状态（分支、暂存、修改、未跟踪文件等）
+ * - `GitBranchesInput/Result`：分支列表查询
+ * - `GitCommitInput/Result`：提交操作
+ * - `GitPushInput/Result`：推送操作
+ * - `GitPullRequestInput/Result`：PR 创建（通过 GitHub CLI）
+ * - `GitWorktreeInput/Result`：Worktree 创建/删除
+ * - `GitTextGenerationInput/Result`：AI 生成提交信息 / PR 描述
+ * - `GitHubAuthStatusResult`：GitHub 认证状态
+ *
+ * ## 协议流程
+ *
+ * 1. `gitStatus` 实时获取仓库状态，前端订阅状态变更事件
+ * 2. AI 生成提交信息：`gitTextGeneration` → 人工确认 → `gitCommit`
+ * 3. 推送并创建 PR：`gitPush` → `gitCreatePullRequest`
+ * 4. Worktree 切换：`gitWorktreeCreate` → 在新 worktree 中继续工作
+ *
+ * ## 性能注意
+ *
+ * - `gitStatus` 在大型仓库中可能耗时较长，建议使用 `GitStatusBroadcaster` 缓存
+ * - 提交信息生成应异步执行，避免阻塞 UI
+ * - PR 创建依赖 `gh` CLI，需先检查 `GitHubAuthStatus`
+ */
+
 import { Option, Schema } from "effect";
 import { NonNegativeInt, PositiveInt, TrimmedNonEmptyString } from "./baseSchemas";
 import { DEFAULT_GIT_TEXT_GENERATION_MODEL } from "./model";

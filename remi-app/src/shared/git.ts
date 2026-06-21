@@ -1,4 +1,29 @@
 /**
+ * @file Git 工具函数模块
+ *
+ * 本模块提供 Git 操作相关的工具函数，主要用于：
+ *
+ * - **分支名清理**：将任意字符串转换为合法的 git 分支名片段
+ * - **Worktree 分支前缀**：定义 Remi 管理的 worktree 分支命名规则
+ * - **路径分隔符处理**：跨平台路径与 Git 路径的转换
+ *
+ * ## 核心导出
+ *
+ * - `WORKTREE_BRANCH_PREFIX`：Remi 管理的 worktree 分支前缀（"remi-claw"）
+ * - `sanitizeGitBranchFragment`：清理字符串为合法分支名片段
+ *
+ * ## 使用场景
+ *
+ * - 创建 worktree 时生成唯一分支名
+ * - 用户输入的标题转为分支名
+ * - 与 git 子系统交互时的路径处理
+ *
+ * ## 注意事项
+ *
+ * - 分支片段最大 64 字符
+ * - 自动转小写、去除引号、合并分隔符
+ * - 非法字符替换为 `-`
+ *
  * Sanitize an arbitrary string into a valid, lowercase git branch fragment.
  * Strips quotes, collapses separators, limits to 64 chars.
  */

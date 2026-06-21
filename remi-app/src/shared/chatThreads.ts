@@ -2,6 +2,13 @@
 // Purpose: Shared chat-thread title helpers used by web and server flows.
 // Layer: Shared util
 // Exports: generic title checks plus fallback/generated title sanitizers
+//
+// 本文件定义了对话线程（Thread）标题的通用处理工具，被前端 UI 和后端服务共享使用。
+// 主要职责：
+// 1. 判断标题是否为通用占位标题（如 "New thread"）
+// 2. 将 AI 生成的标题清洗为合法的展示文本
+// 3. 限制标题长度（最多 50 字符，最多 4 个单词）
+// 4. 处理空白、特殊字符等边缘情况
 
 export const GENERIC_CHAT_THREAD_TITLE = "New thread";
 const MAX_CHAT_THREAD_TITLE_LENGTH = 50;

@@ -1,3 +1,37 @@
+/**
+ * @file Agent Mention 解析工具模块
+ *
+ * 本模块提供对 Composer 中输入的 `@alias(task)` 语法进行解析的工具。
+ * 解析后的结果会包含别名（alias）、任务内容（task）、位置（start/end）等元信息，
+ * 可用于触发对应的子代理委派流程。
+ *
+ * ## 核心功能
+ *
+ * - **解析 Mention**：从 Composer 文本中提取 `@alias(task)` 模式
+ * - **别名解析**：通过 `resolveAgentAlias` 查找对应的 Agent 定义
+ * - **位置标记**：记录每个 Mention 的起止位置，便于 UI 高亮
+ * - **任务内容提取**：支持嵌套括号、字符串转义等复杂情况
+ *
+ * ## 解析规则
+ *
+ * - 别名允许字符：`a-zA-Z0-9._-`
+ * - Mention 必须以 `@` 开头，前面必须是空白或字符串开头
+ * - 任务内容用 `(...)` 包裹，支持嵌套括号
+ * - Mention 后必须跟随空白或字符串结束
+ *
+ * ## 使用场景
+ *
+ * - Composer 中输入 `@review(this code)` 触发代码审查子代理
+ * - UI 高亮 Mention 文本
+ * - 提交前解析所有 Mention 以转换为子任务
+ *
+ * ## 注意事项
+ *
+ * - 解析失败时返回 `null`，不会抛出异常
+ * - 嵌套括号最多支持 3 层
+ * - 任务内容支持单引号/双引号字符串
+ */
+
 import {
   resolveAgentAlias,
   type ClaudeSubagentAliasDefinition,

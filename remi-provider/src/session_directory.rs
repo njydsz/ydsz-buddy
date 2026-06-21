@@ -1,17 +1,13 @@
 //! Provider 会话目录模块
 //!
-//! 本模块提供 Provider 会话的持久化存储管理功能。
-//!
+//! 本模块提�?Provider 会话的持久化存储管理功能�?//!
 //! # 核心功能
 //!
-//! - **会话存储**：管理会话的持久化信息（Provider 类型、状态等）
-//! - **绑定查询**：根据线程 ID 查询关联的 Provider
-//! - **生命周期管理**：支持会话的创建、更新、删除
-//!
+//! - **会话存储**：管理会话的持久化信息（Provider 类型、状态等�?//! - **绑定查询**：根据线�?ID 查询关联�?Provider
+//! - **生命周期管理**：支持会话的创建、更新、删�?//!
 //! # 使用场景
 //!
-//! - 恢复中断的会话
-//! - 查询线程关联的 Provider
+//! - 恢复中断的会�?//! - 查询线程关联�?Provider
 //! - 清理过期会话
 
 use std::collections::HashMap;
@@ -25,24 +21,17 @@ use remi_core::provider::ProviderKind;
 use remi_core::models::RuntimeMode;
 use crate::error::{ProviderError, ProviderResult};
 
-/// 会话运行时状态
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+/// 会话运行时状�?#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SessionStatus {
-    /// 启动中
-    Starting,
-    /// 运行中
-    Running,
-    /// 已停止
-    Stopped,
-    /// 错误状态
-    Error,
+    /// 启动�?    Starting,
+    /// 运行�?    Running,
+    /// 已停�?    Stopped,
+    /// 错误状�?    Error,
 }
 
-/// Provider 运行时绑定
-///
-/// 记录会话与 Provider 的关联信息。
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Provider 运行时绑�?///
+/// 记录会话�?Provider 的关联信息�?#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProviderRuntimeBinding {
     /// 线程 ID
@@ -51,12 +40,9 @@ pub struct ProviderRuntimeBinding {
     pub provider: ProviderKind,
     /// 适配器键（用于区分同一 Provider 的不同实例）
     pub adapter_key: String,
-    /// 运行时模式
-    pub runtime_mode: RuntimeMode,
-    /// 会话状态
-    pub status: SessionStatus,
-    /// 最后活跃时间（ISO 8601 格式）
-    pub last_seen_at: String,
+    /// 运行时模�?    pub runtime_mode: RuntimeMode,
+    /// 会话状�?    pub status: SessionStatus,
+    /// 最后活跃时间（ISO 8601 格式�?    pub last_seen_at: String,
     /// 恢复游标（用于断点续传）
     pub resume_cursor: Option<String>,
     /// 运行时载荷（适配器特定的元数据）
@@ -65,8 +51,7 @@ pub struct ProviderRuntimeBinding {
 
 /// Provider 会话目录
 ///
-/// 管理所有活跃的 Provider 会话绑定。
-pub struct ProviderSessionDirectory {
+/// 管理所有活跃的 Provider 会话绑定�?pub struct ProviderSessionDirectory {
     /// 会话绑定存储
     bindings: Arc<RwLock<HashMap<String, ProviderRuntimeBinding>>>,
 }
@@ -95,7 +80,7 @@ impl ProviderSessionDirectory {
             .await?
             .ok_or_else(|| {
                 ProviderError::SessionNotFound(format!(
-                    "未找到线程 '{}' 的 Provider 绑定",
+                    "未找到线�?'{}' �?Provider 绑定",
                     thread_id
                 ))
             })?;
@@ -103,8 +88,7 @@ impl ProviderSessionDirectory {
         Ok(binding.provider)
     }
 
-    /// 创建或更新会话绑定
-    pub async fn upsert(&self, binding: ProviderRuntimeBinding) -> ProviderResult<()> {
+    /// 创建或更新会话绑�?    pub async fn upsert(&self, binding: ProviderRuntimeBinding) -> ProviderResult<()> {
         let thread_id = binding.thread_id.clone();
         let mut bindings = self.bindings.write().await;
 
@@ -130,20 +114,18 @@ impl ProviderSessionDirectory {
         Ok(())
     }
 
-    /// 列出所有线程 ID
+    /// 列出所有线�?ID
     pub async fn list_thread_ids(&self) -> ProviderResult<Vec<String>> {
         let bindings = self.bindings.read().await;
         Ok(bindings.keys().cloned().collect())
     }
 
-    /// 列出所有绑定
-    pub async fn list_bindings(&self) -> ProviderResult<Vec<ProviderRuntimeBinding>> {
+    /// 列出所有绑�?    pub async fn list_bindings(&self) -> ProviderResult<Vec<ProviderRuntimeBinding>> {
         let bindings = self.bindings.read().await;
         Ok(bindings.values().cloned().collect())
     }
 
-    /// 更新会话状态
-    pub async fn update_status(
+    /// 更新会话状�?    pub async fn update_status(
         &self,
         thread_id: &str,
         status: SessionStatus,
@@ -154,13 +136,13 @@ impl ProviderSessionDirectory {
             binding.status = status;
             binding.last_seen_at = chrono::Utc::now().to_rfc3339();
             debug!(
-                "更新会话状态: thread_id={}, status={:?}",
+                "更新会话状�? thread_id={}, status={:?}",
                 thread_id, status
             );
             Ok(())
         } else {
             Err(ProviderError::SessionNotFound(format!(
-                "未找到线程 '{}' 的会话绑定",
+                "未找到线�?'{}' 的会话绑�?,
                 thread_id
             )))
         }
@@ -181,14 +163,13 @@ impl ProviderSessionDirectory {
             Ok(())
         } else {
             Err(ProviderError::SessionNotFound(format!(
-                "未找到线程 '{}' 的会话绑定",
+                "未找到线�?'{}' 的会话绑�?,
                 thread_id
             )))
         }
     }
 
-    /// 更新运行时载荷
-    pub async fn update_runtime_payload(
+    /// 更新运行时载�?    pub async fn update_runtime_payload(
         &self,
         thread_id: &str,
         payload: Option<serde_json::Value>,
@@ -214,11 +195,11 @@ impl ProviderSessionDirectory {
             }
 
             binding.last_seen_at = chrono::Utc::now().to_rfc3339();
-            debug!("更新运行时载荷: thread_id={}", thread_id);
+            debug!("更新运行时载�? thread_id={}", thread_id);
             Ok(())
         } else {
             Err(ProviderError::SessionNotFound(format!(
-                "未找到线程 '{}' 的会话绑定",
+                "未找到线�?'{}' 的会话绑�?,
                 thread_id
             )))
         }
@@ -226,8 +207,7 @@ impl ProviderSessionDirectory {
 
     /// 清理过期会话
     ///
-    /// 删除最后活跃时间超过指定秒数的会话。
-    pub async fn cleanup_stale_sessions(&self, max_age_seconds: i64) -> ProviderResult<usize> {
+    /// 删除最后活跃时间超过指定秒数的会话�?    pub async fn cleanup_stale_sessions(&self, max_age_seconds: i64) -> ProviderResult<usize> {
         let mut bindings = self.bindings.write().await;
         let now = chrono::Utc::now();
         let mut removed = 0;
@@ -245,7 +225,7 @@ impl ProviderSessionDirectory {
         });
 
         if removed > 0 {
-            debug!("清理了 {} 个过期会话", removed);
+            debug!("清理�?{} 个过期会�?, removed);
         }
 
         Ok(removed)
@@ -271,7 +251,7 @@ mod tests {
             thread_id: "thread-1".to_string(),
             provider: ProviderKind::ClaudeAgent,
             adapter_key: "claude".to_string(),
-            runtime_mode: RuntimeMode::Agent,
+            runtime_mode: RuntimeMode::Code,
             status: SessionStatus::Running,
             last_seen_at: chrono::Utc::now().to_rfc3339(),
             resume_cursor: None,
@@ -294,8 +274,7 @@ mod tests {
         assert_eq!(thread_ids.len(), 1);
         assert_eq!(thread_ids[0], "thread-1");
 
-        // 更新状态
-        directory
+        // 更新状�?        directory
             .update_status("thread-1", SessionStatus::Stopped)
             .await
             .unwrap();

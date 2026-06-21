@@ -1,3 +1,36 @@
+/**
+ * @file IPC 契约聚合模块
+ *
+ * 本模块是所有 IPC（进程间通信）调用的契约聚合入口，**不定义新的 Schema**，
+ * 仅重新导出其他子模块中的输入/输出类型，并按业务领域聚合为命名空间。
+ *
+ * ## 核心职责
+ *
+ * 1. **按业务领域聚合**：将各业务模块的契约聚合到统一命名空间下
+ *    - `AuthIpc`：认证相关调用
+ *    - `GitIpc`：Git 操作调用
+ *    - `ProjectIpc`：项目管理调用
+ *    - `ProviderIpc`：Provider 配置调用
+ *    - `ProviderRuntimeIpc`：Provider 运行时会话调用
+ *    - `EnvironmentIpc`：环境管理调用
+ *    - `SettingsIpc`：设置管理调用
+ *    - `KeybindingsIpc`：快捷键调用
+ *    - `TerminalIpc`：终端调用
+ *    - `EditorIpc`：编辑器调用
+ *    - `FilesystemIpc`：文件系统调用
+ *    - `WorkspaceIpc`：工作区调用
+ * 2. **提供统一调用点**：业务代码可通过 `Ipc.<domain>` 访问所有 IPC 契约
+ *
+ * ## 调用方向
+ *
+ * 客户端（Web）→ WebSocket/HTTP → 服务端（Tauri 后端）→ 业务逻辑
+ *
+ * ## 错误处理
+ *
+ * 所有 IPC 调用失败时会抛出 `IpcError`（来自 `@/lib/tauri-bridge`），
+ * 错误信息包含方法名、错误码和人类可读消息。
+ */
+
 import type {
   AuthBearerBootstrapResult,
   AuthBootstrapInput,

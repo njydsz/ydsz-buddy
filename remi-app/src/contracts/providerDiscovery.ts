@@ -2,6 +2,29 @@
 // Purpose: Defines provider discovery request/response contracts shared across web and server.
 // Layer: Shared contracts
 // Exports: provider discovery schemas and inferred types used by the WS/native API.
+//
+// 本模块定义了 Remi 系统中"Provider 能力发现"（Provider Discovery）相关的契约，
+// 用于探测本地或远程 Provider 的可用性、版本、能力、模型列表等信息。
+//
+// ## 核心契约
+//
+// - `ProviderDiscoveryRequest`：发现请求（指定 Provider 类型、可选路径）
+// - `ProviderDiscoveryResult`：发现结果（Provider 元数据 + 可用模型）
+// - `ProviderDiscoveryStatus`：发现状态枚举（discovered / unavailable / unsupported）
+// - `LocalProviderProbeInput`：本地 Provider 探测输入（指定可执行文件路径）
+// - `LocalProviderProbeResult`：本地 Provider 探测结果
+//
+// ## 使用场景
+//
+// - 启动时自动探测本地安装的 Claude Code / OpenCode / Codex CLI
+// - 添加自定义 Provider 时的能力探测
+// - 健康检查：定期探测 Provider 是否可用
+//
+// ## 协议设计
+//
+// - **异步探测**：探测操作可能耗时较长，UI 需要展示进度
+// - **缓存机制**：探测结果会被缓存，避免重复探测
+// - **失败兜底**：探测失败时返回 `unavailable` 而非抛出错误
 
 import { Schema } from "effect";
 import { TrimmedNonEmptyString } from "./baseSchemas";

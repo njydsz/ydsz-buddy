@@ -1,3 +1,36 @@
+/**
+ * @file 快捷键绑定契约模块
+ *
+ * 本模块定义了 Remi 系统中可自定义的快捷键（Keybinding）绑定与解析契约。
+ *
+ * ## 核心契约
+ *
+ * - `KeybindingChord`：单个按键组合（如 `Ctrl+Shift+P`）
+ * - `KeybindingSequence`：按键序列（如 `Ctrl+K Ctrl+C`）
+ * - `KeybindingConfig`：单个快捷键的完整配置
+ * - `KeybindingsConfig`：完整的快捷键配置文件
+ * - `KeybindingConflictReport`：快捷键冲突报告
+ * - `KEYBINDING_LABELS`：按键到展示标签的映射
+ *
+ * ## 协议设计
+ *
+ * - **键名标准化**：使用 `Ctrl`、`Shift`、`Alt`、`Meta` 等通用修饰符
+ * - **平台差异**：Mac 上 `Meta` 映射为 `Cmd`，其他平台为 `Win`
+ * - **冲突检测**：保存前会调用 `keybindingsValidate` 检测冲突
+ * - **When 表达式**：使用类 VSCode 的 `when` 上下文表达式
+ *
+ * ## 使用场景
+ *
+ * - 偏好设置中编辑快捷键
+ * - 全局快捷键监听器
+ * - 快捷键冲突检测与提示
+ *
+ * ## 注意事项
+ *
+ * - `value` 字符串最大长度 64 字符
+ * - `when` 表达式最大长度 256 字符
+ */
+
 import { Schema } from "effect";
 import { TrimmedString } from "./baseSchemas";
 

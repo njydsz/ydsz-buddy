@@ -6,7 +6,7 @@
 use std::sync::Arc;
 
 use remi_auth::AuthService;
-use remi_checkpoint::CheckpointStore;
+use remi_checkpoint::{CheckpointStore, CheckpointDiffQuery};
 use remi_config::ServerConfig;
 use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService, ManagedWorktreeService};
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
@@ -65,6 +65,8 @@ pub struct ServiceContainer {
     pub auth_service: Arc<AuthService>,
     /// 检查点存储
     pub checkpoint_store: Arc<CheckpointStore>,
+    /// 检查点 Diff 查询
+    pub checkpoint_diff_query: Arc<CheckpointDiffQuery>,
     /// 分析服务
     pub analytics_service: Arc<AnalyticsService>,
     /// 指标收集器

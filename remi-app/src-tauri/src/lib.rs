@@ -47,6 +47,7 @@ use commands::{
     update::*,         // 应用自动更新命令
     window::*,         // 窗口主题、系统交互命令
     voice::*,          // 语音识别命令
+    browser_use_pipe::*, // 浏览器使用管道服务器
 };
 
 use std::net::SocketAddr;
@@ -88,6 +89,25 @@ impl ServerState {
 #[tauri::command]
 fn get_server_ws_url(state: tauri::State<ServerState>) -> String {
     state.ws_url()
+}
+
+/// 浏览器使用管道服务器状态
+///
+/// 保存 Codex 兼容的浏览器使用管道服务器地址，
+/// 供外部 CLI 工具通过 TCP 与内嵌浏览器通信
+#[derive(Clone)]
+pub struct BrowserUsePipeState {
+    /// 管道服务器实际监听地址
+    pub addr: SocketAddr,
+}
+
+/// 获取浏览器使用管道服务器地址
+///
+/// 前端通过此命令获取 Codex 兼容管道的 TCP 地址，
+/// 可将其传递给外部 Codex CLI 工具
+#[tauri::command]
+fn get_browser_use_pipe_addr(state: tauri::State<BrowserUsePipeState>) -> String {
+    state.addr.to_string()
 }
 
 /// 示例问候命令（Tauri 脚手架生成的默认命令）
@@ -272,6 +292,14 @@ pub fn run() {
         }
     });
 
+    // 启动浏览器使用管道服务器
+    let pipe_addr = SocketAddr::from(([127, 0, 0, 1], 0));
+    let pipe_server = BrowserUsePipeServer::new(pipe_addr);
+    let pipe_bound_addr = runtime
+        .block_on(pipe_server.start())
+        .expect("Failed to start browser use pipe server");
+    info!("浏览器使用管道地址: {}", pipe_bound_addr);
+
     let bootstrap_result = Arc::new(bootstrap_result);
 
     tauri::Builder::default()
@@ -319,6 +347,7 @@ pub fn run() {
         .manage(BrowserState::new())         // 内嵌浏览器状态（标签页管理）
         .manage(UpdateState::new())          // 自动更新状态（版本检查、下载进度）
         .manage(ServerState::new(server_addr, bootstrap_result)) // 嵌入式服务器状态
+        .manage(BrowserUsePipeState { addr: pipe_bound_addr }) // 浏览器管道服务器状态
 
         // ========== 无边框窗口初始化 ==========
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
@@ -415,6 +444,9 @@ pub fn run() {
             get_window_open_strategy,        // 获取窗口打开策略
             load_user_profile,               // 加载用户画像
             save_user_profile,               // 保存用户画像
+
+            // 浏览器使用管道命令
+            get_browser_use_pipe_addr,       // 获取浏览器管道服务器地址
         ])
         // 生成 Tauri 上下文并启动事件循环
         .run(tauri::generate_context!())

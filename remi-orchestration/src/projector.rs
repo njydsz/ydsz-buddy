@@ -1,81 +1,43 @@
-//! # 投影器模块
-//!
-//! 本模块实现了异步投影器（Projector），负责从事件存储中持续消费领域事件，
-//! 并将事件应用到投影仓库以维护读模型（物化视图）。
-//!
+//! # 投影器模�?//!
+//! 本模块实现了异步投影器（Projector），负责从事件存储中持续消费领域事件�?//! 并将事件应用到投影仓库以维护读模型（物化视图）�?//!
 //! ## 工作原理
 //!
 //! 投影器采用轮询模式，定期从事件存储中读取新事件：
-//! 1. 启动时从投影仓库中恢复上次处理的序列号（断点续传）
-//! 2. 每隔 100ms 轮询一次事件存储，批量读取新事件
-//! 3. 逐个应用事件到投影仓库，更新读模型
-//! 4. 更新投影器的处理进度（序列号），支持断点续传
-//! 5. 收到关闭信号后优雅退出
-//!
+//! 1. 启动时从投影仓库中恢复上次处理的序列号（断点续传�?//! 2. 每隔 100ms 轮询一次事件存储，批量读取新事�?//! 3. 逐个应用事件到投影仓库，更新读模�?//! 4. 更新投影器的处理进度（序列号），支持断点续传
+//! 5. 收到关闭信号后优雅退�?//!
 //! ## 架构位置
 //!
 //! ```text
-//! ┌─────────────────┐
-//! │  EventStore     │
-//! │  (事件存储)     │
-//! └────────┬────────┘
-//!          │ read_events()
-//!          ↓
-//! ┌─────────────────┐
-//! │   Projector     │
-//! │  ┌───────────┐  │
-//! │  │ 轮询循环  │  │
-//! │  │ (100ms)   │  │
-//! │  └─────┬─────┘  │
-//! │        ↓        │
-//! │  ┌───────────┐  │
-//! │  │apply_event│  │
-//! │  └─────┬─────┘  │
-//! └────────┼────────┘
-//!          │
-//!          ↓
-//! ┌─────────────────┐
-//! │ ProjectionRepo  │
-//! │ (投影仓库)      │
-//! └─────────────────┘
-//! ```
+//! ┌─────────────────�?//! �? EventStore     �?//! �? (事件存储)     �?//! └────────┬────────�?//!          �?read_events()
+//!          �?//! ┌─────────────────�?//! �?  Projector     �?//! �? ┌───────────�? �?//! �? �?轮询循环  �? �?//! �? �?(100ms)   �? �?//! �? └─────┬─────�? �?//! �?       �?       �?//! �? ┌───────────�? �?//! �? │apply_event�? �?//! �? └─────┬─────�? �?//! └────────┼────────�?//!          �?//!          �?//! ┌─────────────────�?//! �?ProjectionRepo  �?//! �?(投影仓库)      �?//! └─────────────────�?//! ```
 //!
 //! ## 断点续传机制
 //!
-//! 投影器通过以下机制实现断点续传：
-//!
-//! 1. **状态持久化**：每次处理完一批事件后，将当前序列号写入投影仓库
-//! 2. **启动恢复**：启动时从投影仓库读取上次处理的序列号
-//! 3. **增量处理**：从恢复的序列号开始读取新事件，避免重复处理
-//!
+//! 投影器通过以下机制实现断点续传�?//!
+//! 1. **状态持久化**：每次处理完一批事件后，将当前序列号写入投影仓�?//! 2. **启动恢复**：启动时从投影仓库读取上次处理的序列�?//! 3. **增量处理**：从恢复的序列号开始读取新事件，避免重复处�?//!
 //! ```text
-//! 启动 → get_projection_state() → last_sequence
-//!   ↓
-//! 循环 → read_events(last_sequence, 100) → events
-//!   ↓
-//! 处理 → apply_event() for each event
-//!   ↓
-//! 更新 → last_sequence = max(event.sequence)
-//!   ↓
-//! 持久化 → update_projection_state(last_sequence)
+//! 启动 �?get_projection_state() �?last_sequence
+//!   �?//! 循环 �?read_events(last_sequence, 100) �?events
+//!   �?//! 处理 �?apply_event() for each event
+//!   �?//! 更新 �?last_sequence = max(event.sequence)
+//!   �?//! 持久�?�?update_projection_state(last_sequence)
 //! ```
 //!
 //! ## 性能参数
 //!
-//! | 参数 | 值 | 说明 |
+//! | 参数 | �?| 说明 |
 //! |------|-----|------|
-//! | 轮询间隔 | 100ms | 事件存储检查频率 |
-//! | 批量大小 | 100 条 | 单次最大读取事件数 |
-//! | 处理模式 | 串行 | 逐个应用事件，保证顺序 |
+//! | 轮询间隔 | 100ms | 事件存储检查频�?|
+//! | 批量大小 | 100 �?| 单次最大读取事件数 |
+//! | 处理模式 | 串行 | 逐个应用事件，保证顺�?|
 //!
-//! ## 与引擎内投影的区别
-//!
-//! | 特性 | 引擎内投影 | 本投影器 |
+//! ## 与引擎内投影的区�?//!
+//! | 特�?| 引擎内投�?| 本投影器 |
 //! |------|-----------|---------|
-//! | 执行时机 | 命令处理时同步执行 | 异步轮询执行 |
-//! | 数据源 | 内存中的事件 | 事件存储 |
-//! | 用途 | 维护主读模型 | 构建独立读模型、外部集成 |
-//! | 一致性 | 强一致（同事务） | 最终一致（异步） |
+//! | 执行时机 | 命令处理时同步执�?| 异步轮询执行 |
+//! | 数据�?| 内存中的事件 | 事件存储 |
+//! | 用�?| 维护主读模型 | 构建独立读模型、外部集�?|
+//! | 一致�?| 强一致（同事务） | 最终一致（异步�?|
 //!
 //! ## 使用示例
 //!
@@ -85,8 +47,7 @@
 //! use remi_persistence::{SqliteEventStore, SqliteProjectionRepository};
 //! use tokio::sync::broadcast;
 //!
-//! // 创建投影器
-//! let projector = Projector::new(
+//! // 创建投影�?//! let projector = Projector::new(
 //!     Arc::new(event_store),
 //!     Arc::new(projection_repo),
 //!     "main_projector",
@@ -96,30 +57,22 @@
 //! let (shutdown_tx, _) = broadcast::channel(1);
 //! let shutdown_rx = shutdown_tx.subscribe();
 //!
-//! // 启动投影器（通常在独立任务中运行）
-//! tokio::spawn(async move {
+//! // 启动投影器（通常在独立任务中运行�?//! tokio::spawn(async move {
 //!     projector.run(shutdown_rx).await.unwrap();
 //! });
 //!
-//! // 需要关闭时发送信号
-//! shutdown_tx.send(()).ok();
+//! // 需要关闭时发送信�?//! shutdown_tx.send(()).ok();
 //! ```
 //!
 //! ## 扩展指南
 //!
-//! 如需实现自定义投影逻辑：
-//!
-//! 1. 继承或修改 `apply_event` 方法
-//! 2. 根据事件类型执行相应的投影操作
-//! 3. 确保投影操作的幂等性（支持重试）
-//! 4. 考虑使用事务保证原子性
-//!
+//! 如需实现自定义投影逻辑�?//!
+//! 1. 继承或修�?`apply_event` 方法
+//! 2. 根据事件类型执行相应的投影操�?//! 3. 确保投影操作的幂等性（支持重试�?//! 4. 考虑使用事务保证原子�?//!
 //! ## 错误处理策略
 //!
 //! - **轮询错误**：记录警告日志，继续下次轮询
-//! - **处理错误**：记录警告日志，当前批次中断，下次重试
-//! - **关闭信号**：完成当前处理后优雅退出
-
+//! - **处理错误**：记录警告日志，当前批次中断，下次重�?//! - **关闭信号**：完成当前处理后优雅退�?
 use std::sync::Arc;
 
 use remi_core::events::OrchestrationEvent;
@@ -129,42 +82,28 @@ use tracing::{info, warn};
 
 use crate::error::OrchestrationResult;
 
-/// 异步投影器
-///
-/// 从事件存储中持续消费领域事件，并将事件应用到投影仓库以维护读模型。
-/// 支持断点续传，重启后自动从上次处理的序列号继续。
-///
+/// 异步投影�?///
+/// 从事件存储中持续消费领域事件，并将事件应用到投影仓库以维护读模型�?/// 支持断点续传，重启后自动从上次处理的序列号继续�?///
 /// # 使用场景
 ///
 /// - 构建独立的读模型（与引擎内投影解耦）
-/// - 异步消费事件流用于外部系统集成
-/// - 事件审计和日志记录
-///
+/// - 异步消费事件流用于外部系统集�?/// - 事件审计和日志记�?///
 /// # 生命周期
 ///
-/// 通过 [`Projector::run`] 启动，持续运行直到收到关闭信号。
-pub struct Projector {
-    /// 事件存储，用于读取领域事件
-    event_store: Arc<SqliteEventStore>,
-    /// 投影仓库，用于维护读模型和投影器状态
-    projection_repo: Arc<SqliteProjectionRepository>,
-    /// 投影器名称，用于标识和区分不同的投影器实例
-    projector_name: String,
+/// 通过 [`Projector::run`] 启动，持续运行直到收到关闭信号�?pub struct Projector {
+    /// 事件存储，用于读取领域事�?    event_store: Arc<SqliteEventStore>,
+    /// 投影仓库，用于维护读模型和投影器状�?    projection_repo: Arc<SqliteProjectionRepository>,
+    /// 投影器名称，用于标识和区分不同的投影器实�?    projector_name: String,
 }
 
 impl Projector {
-    /// 创建新的投影器实例
-    ///
+    /// 创建新的投影器实�?    ///
     /// # 参数
     ///
-    /// - `event_store`: 事件存储实例，提供事件读取能力
-    /// - `projection_repo`: 投影仓库实例，提供读模型更新和状态持久化能力
-    /// - `projector_name`: 投影器名称，用于标识投影器实例（如 "main_projector"）
-    ///
-    /// # 返回值
-    ///
-    /// 返回配置完成的投影器实例，需调用 [`Projector::run`] 启动运行。
-    pub fn new(
+    /// - `event_store`: 事件存储实例，提供事件读取能�?    /// - `projection_repo`: 投影仓库实例，提供读模型更新和状态持久化能力
+    /// - `projector_name`: 投影器名称，用于标识投影器实例（�?"main_projector"�?    ///
+    /// # 返回�?    ///
+    /// 返回配置完成的投影器实例，需调用 [`Projector::run`] 启动运行�?    pub fn new(
         event_store: Arc<SqliteEventStore>,
         projection_repo: Arc<SqliteProjectionRepository>,
         projector_name: &str,
@@ -178,37 +117,26 @@ impl Projector {
 
     /// 启动投影器主循环
     ///
-    /// 投影器启动后持续轮询事件存储，消费新事件并更新读模型。
-    /// 支持优雅关闭：收到关闭信号后完成当前批次处理后退出。
-    ///
+    /// 投影器启动后持续轮询事件存储，消费新事件并更新读模型�?    /// 支持优雅关闭：收到关闭信号后完成当前批次处理后退出�?    ///
     /// # 参数
     ///
-    /// - `shutdown`: 关闭信号接收器，当收到信号时投影器将优雅退出
-    ///
-    /// # 返回值
-    ///
-    /// 正常关闭时返回 `Ok(())`，发生不可恢复错误时返回相应错误。
-    ///
+    /// - `shutdown`: 关闭信号接收器，当收到信号时投影器将优雅退�?    ///
+    /// # 返回�?    ///
+    /// 正常关闭时返�?`Ok(())`，发生不可恢复错误时返回相应错误�?    ///
     /// # 运行流程
     ///
-    /// 1. 从投影仓库恢复上次处理的序列号（断点续传）
-    /// 2. 进入主循环，每 100ms 轮询一次事件存储
-    /// 3. 批量读取新事件（每次最多 100 条）
-    /// 4. 逐个应用事件到投影仓库
-    /// 5. 更新投影器处理进度
-    /// 6. 收到关闭信号后退出循环
-    pub async fn run(&self, mut shutdown: broadcast::Receiver<()>) -> OrchestrationResult<()> {
-        info!("投影器启动: {}", self.projector_name);
+    /// 1. 从投影仓库恢复上次处理的序列号（断点续传�?    /// 2. 进入主循环，�?100ms 轮询一次事件存�?    /// 3. 批量读取新事件（每次最�?100 条）
+    /// 4. 逐个应用事件到投影仓�?    /// 5. 更新投影器处理进�?    /// 6. 收到关闭信号后退出循�?    pub async fn run(&self, mut shutdown: broadcast::Receiver<()>) -> OrchestrationResult<()> {
+        info!("投影器启�? {}", self.projector_name);
 
         // 从投影仓库恢复上次处理的序列号，实现断点续传
         let mut last_sequence = self.projection_repo.get_projection_state(&self.projector_name)?;
-        info!("从序列号 {} 开始投影", last_sequence);
+        info!("从序列号 {} 开始投�?, last_sequence);
 
         loop {
             tokio::select! {
-                // 监听关闭信号，收到信号后优雅退出
-                _ = shutdown.recv() => {
-                    info!("投影器收到关闭信号");
+                // 监听关闭信号，收到信号后优雅退�?                _ = shutdown.recv() => {
+                    info!("投影器收到关闭信�?);
                     break;
                 }
                 // 定时轮询事件存储，每 100ms 检查一次新事件
@@ -224,43 +152,32 @@ impl Projector {
         Ok(())
     }
 
-    /// 处理新事件（内部方法）
-    ///
-    /// 从事件存储中批量读取新事件，逐个应用并更新投影器进度。
-    /// 每次最多处理 100 条事件，避免单次处理量过大。
-    ///
+    /// 处理新事件（内部方法�?    ///
+    /// 从事件存储中批量读取新事件，逐个应用并更新投影器进度�?    /// 每次最多处�?100 条事件，避免单次处理量过大�?    ///
     /// # 参数
     ///
     /// - `last_sequence`: 上次处理的序列号（可变引用），处理完成后更新为最新序列号
     ///
-    /// # 返回值
-    ///
-    /// 成功时返回 `Ok(())`，发生错误时返回相应错误。
-    ///
+    /// # 返回�?    ///
+    /// 成功时返�?`Ok(())`，发生错误时返回相应错误�?    ///
     /// # 处理流程
     ///
-    /// 1. 从事件存储读取新事件（从 `last_sequence` 开始，最多 100 条）
+    /// 1. 从事件存储读取新事件（从 `last_sequence` 开始，最�?100 条）
     /// 2. 如果没有新事件，直接返回
-    /// 3. 遍历事件列表，逐个反序列化并应用
-    /// 4. 更新 `last_sequence` 为最新处理的序列号
-    /// 5. 将投影器进度持久化到投影仓库
+    /// 3. 遍历事件列表，逐个反序列化并应�?    /// 4. 更新 `last_sequence` 为最新处理的序列�?    /// 5. 将投影器进度持久化到投影仓库
     async fn process_events(&self, last_sequence: &mut u64) -> OrchestrationResult<()> {
         // 从事件存储读取新事件
         let events = self.event_store.read_events(*last_sequence, 100)?;
 
-        // 没有新事件时直接返回，避免不必要的处理
-        if events.is_empty() {
+        // 没有新事件时直接返回，避免不必要的处�?        if events.is_empty() {
             return Ok(());
         }
 
         // 逐个处理事件
         for stored_event in events {
-            // 将事件 payload 从 JSON 反序列化为领域事件
-            let event: OrchestrationEvent = serde_json::from_str(&stored_event.payload_json)?;
-            // 应用事件到投影仓库
-            self.apply_event(&event).await?;
-            // 更新已处理的序列号
-            *last_sequence = stored_event.sequence;
+            // 将事�?payload �?JSON 反序列化为领域事�?            let event: OrchestrationEvent = serde_json::from_str(&stored_event.payload_json)?;
+            // 应用事件到投影仓�?            self.apply_event(&event).await?;
+            // 更新已处理的序列�?            *last_sequence = stored_event.sequence;
         }
 
         // 将投影器处理进度持久化，支持断点续传
@@ -269,19 +186,14 @@ impl Projector {
         Ok(())
     }
 
-    /// 应用单个事件到投影仓库
-    ///
-    /// 根据事件类型执行相应的投影操作，更新投影仓库中的项目和线程数据。
-    /// 对齐 RemiCode projector.ts 的 projectEvent 函数逻辑。
-    ///
+    /// 应用单个事件到投影仓�?    ///
+    /// 根据事件类型执行相应的投影操作，更新投影仓库中的项目和线程数据�?    /// 对齐 RemiClaw projector.ts �?projectEvent 函数逻辑�?    ///
     /// # 参数
     ///
     /// - `event`: 待应用的领域事件
     ///
-    /// # 返回值
-    ///
-    /// 成功时返回 `Ok(())`，发生错误时返回相应错误。
-    async fn apply_event(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
+    /// # 返回�?    ///
+    /// 成功时返�?`Ok(())`，发生错误时返回相应错误�?    async fn apply_event(&self, event: &OrchestrationEvent) -> OrchestrationResult<()> {
         use remi_core::events::OrchestrationEvent::*;
 
         match event {
@@ -315,11 +227,7 @@ impl Projector {
 
             // 线程事件
             ThreadCreated(e) => {
-                // 注意：此处使用默认值初始化线程，而非从事件中提取完整字段。
-                // 这是因为 Projector 的投影逻辑与 Engine 内的投影逻辑不同，
-                // Engine 内投影会从事件中提取完整字段，而 Projector 使用默认值。
-                // 后续事件（如 ThreadRuntimeModeSet 等）会逐步更新这些字段。
-                let thread = remi_core::models::Thread {
+                // 注意：此处使用默认值初始化线程，而非从事件中提取完整字段�?                // 这是因为 Projector 的投影逻辑�?Engine 内的投影逻辑不同�?                // Engine 内投影会从事件中提取完整字段，�?Projector 使用默认值�?                // 后续事件（如 ThreadRuntimeModeSet 等）会逐步更新这些字段�?                let thread = remi_core::models::Thread {
                     id: e.thread_id,
                     project_id: e.project_id,
                     title: e.title.clone(),
@@ -328,8 +236,8 @@ impl Projector {
                         model: String::new(),
                         options: None,
                     },
-                    runtime_mode: remi_core::models::RuntimeMode::Agent,
-                    interaction_mode: remi_core::models::InteractionMode::Chat,
+                    runtime_mode: remi_core::models::RuntimeMode::Code,
+                    interaction_mode: remi_core::models::InteractionMode::Agent,
                     env_mode: remi_core::models::EnvMode::Local,
                     branch: None,
                     worktree_path: None,
@@ -416,15 +324,12 @@ impl Projector {
                         existing.streaming = e.message.streaming;
                         existing.updated_at = e.message.updated_at;
                     } else {
-                        // 新消息：追加到消息列表
-                        thread.messages.push(e.message.clone());
-                        // 限制消息数量，防止内存无限增长
-                        if thread.messages.len() > 2000 {
+                        // 新消息：追加到消息列�?                        thread.messages.push(e.message.clone());
+                        // 限制消息数量，防止内存无限增�?                        if thread.messages.len() > 2000 {
                             thread.messages = thread.messages.split_off(thread.messages.len() - 2000);
                         }
                     }
-                    // 仅当消息角色为 User 时更新最新用户消息时间
-                    thread.latest_user_message_at = if e.message.role == remi_core::models::MessageRole::User {
+                    // 仅当消息角色�?User 时更新最新用户消息时�?                    thread.latest_user_message_at = if e.message.role == remi_core::models::MessageRole::User {
                         Some(e.occurred_at)
                     } else {
                         thread.latest_user_message_at
@@ -435,7 +340,7 @@ impl Projector {
             }
             ThreadTurnStartRequested(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    thread.runtime_mode = remi_core::models::RuntimeMode::Agent;
+                    thread.runtime_mode = remi_core::models::RuntimeMode::Code;
                     thread.updated_at = e.occurred_at;
                     self.projection_repo.save_thread(&thread)?;
                 }
@@ -449,11 +354,9 @@ impl Projector {
             }
             ThreadProposedPlanUpserted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 移除同 ID 的旧计划，添加新计划（Upsert 语义）
-                    thread.proposed_plans.retain(|p| p.id != e.plan.id);
+                    // 移除�?ID 的旧计划，添加新计划（Upsert 语义�?                    thread.proposed_plans.retain(|p| p.id != e.plan.id);
                     thread.proposed_plans.push(e.plan.clone());
-                    // 限制计划数量，防止内存无限增长
-                    if thread.proposed_plans.len() > 200 {
+                    // 限制计划数量，防止内存无限增�?                    if thread.proposed_plans.len() > 200 {
                         thread.proposed_plans = thread.proposed_plans.split_off(thread.proposed_plans.len() - 200);
                     }
                     thread.updated_at = e.occurred_at;
@@ -462,11 +365,9 @@ impl Projector {
             }
             ThreadActivityAppended(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 移除同 ID 的旧活动，添加新活动（去重 + 追加）
-                    thread.activities.retain(|a| a.id != e.activity.id);
+                    // 移除�?ID 的旧活动，添加新活动（去�?+ 追加�?                    thread.activities.retain(|a| a.id != e.activity.id);
                     thread.activities.push(e.activity.clone());
-                    // 限制活动数量，防止内存无限增长
-                    if thread.activities.len() > 500 {
+                    // 限制活动数量，防止内存无限增�?                    if thread.activities.len() > 500 {
                         thread.activities = thread.activities.split_off(thread.activities.len() - 500);
                     }
                     thread.updated_at = e.occurred_at;
@@ -486,8 +387,7 @@ impl Projector {
                     };
                     thread.checkpoints.retain(|c| c.turn_id != e.turn_id);
                     thread.checkpoints.push(checkpoint);
-                    // 限制检查点数量，防止内存无限增长
-                    if thread.checkpoints.len() > 500 {
+                    // 限制检查点数量，防止内存无限增�?                    if thread.checkpoints.len() > 500 {
                         thread.checkpoints = thread.checkpoints.split_off(thread.checkpoints.len() - 500);
                     }
                     thread.updated_at = e.occurred_at;
@@ -496,9 +396,7 @@ impl Projector {
             }
             ThreadReverted(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 回滚时清空所有可变状态，恢复到初始状态
-                    // 注意：这与 Engine 内投影的处理不同，Engine 仅移除指定检查点之后的数据
-                    thread.messages.clear();
+                    // 回滚时清空所有可变状态，恢复到初始状�?                    // 注意：这�?Engine 内投影的处理不同，Engine 仅移除指定检查点之后的数�?                    thread.messages.clear();
                     thread.proposed_plans.clear();
                     thread.activities.clear();
                     thread.checkpoints.clear();
@@ -509,8 +407,7 @@ impl Projector {
             }
             ThreadConversationRolledBack(e) => {
                 if let Some(mut thread) = self.projection_repo.get_thread(e.thread_id)? {
-                    // 找到目标消息索引，保留该消息及之前的所有消息，截断之后的消息
-                    if let Some(idx) = thread.messages.iter().position(|m| m.id == e.message_id) {
+                    // 找到目标消息索引，保留该消息及之前的所有消息，截断之后的消�?                    if let Some(idx) = thread.messages.iter().position(|m| m.id == e.message_id) {
                         thread.messages.truncate(idx + 1);
                     }
                     thread.updated_at = e.occurred_at;

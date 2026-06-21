@@ -369,18 +369,18 @@ pub struct ThreadCreateCommand {
 
 /// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `runtime_mode` 字段的反序列化默认值。
 ///
-/// 默认为 [`RuntimeMode::Agent`]（自主执行模式），因为大多数对话场景下用户期望 AI 主动执行操作，
-/// 而非仅回答问题或生成计划。
+/// 默认为 [`RuntimeMode::Code`]（代码模式），因为大多数场景下用户期望 AI 主动执行编码操作，
+/// 而非仅回答问题或生成计划。如需 Work 模式，调用方应显式传入。
 fn default_runtime_mode() -> RuntimeMode {
-    RuntimeMode::Agent
+    RuntimeMode::Code
 }
 
 /// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `interaction_mode` 字段的反序列化默认值。
 ///
-/// 默认为 [`InteractionMode::Chat`]（普通对话模式），这是最常用的交互方式，
-/// 代码审查模式（Review）需要用户显式选择。
+/// 默认为 [`InteractionMode::Agent`]（自主执行），这是最常用的交互方式。
+/// `Chat/Plan/Review/Task` 需要用户显式选择。
 fn default_interaction_mode() -> InteractionMode {
-    InteractionMode::Chat
+    InteractionMode::Agent
 }
 
 /// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `env_mode` 字段的反序列化默认值。

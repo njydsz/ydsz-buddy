@@ -1,3 +1,39 @@
+/**
+ * @file 项目契约模块
+ *
+ * 本模块定义了 Remi 系统中"项目"（Project）实体的所有契约，涵盖项目元数据、
+ * 列表查询、创建、删除、最近使用、搜索等操作。
+ *
+ * ## 核心契约
+ *
+ * - `Project`：项目完整信息（ID、路径、名称、创建时间、最近访问等）
+ * - `ProjectListInput/Result`：项目列表查询
+ * - `ProjectCreateInput/Result`：创建项目（指定目录）
+ * - `ProjectDeleteInput/Result`：删除项目
+ * - `ProjectRecentsInput/Result`：最近使用的项目
+ * - `ProjectSearchInput/Result`：项目搜索（按名称/路径）
+ * - `ProjectListDirectoriesInput/Result`：浏览目录以选择项目
+ * - `PROJECT_SEARCH_ENTRIES_MAX_LIMIT`：搜索结果数量上限
+ *
+ * ## 协议设计
+ *
+ * - **软删除**：项目被删除时仅标记 `isDeleted`，保留可恢复窗口
+ * - **最近使用**：通过 `lastOpenedAt` 排序，最近 10 个
+ * - **路径白名单**：项目根目录必须位于用户主目录下
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏项目列表
+ * - 启动页选择/创建项目
+ * - 跨项目切换
+ * - 全局项目搜索（Cmd+P）
+ *
+ * ## 性能注意
+ *
+ * - 项目列表应使用分页或限制返回数量（`PROJECT_SEARCH_ENTRIES_MAX_LIMIT = 200`）
+ * - 路径浏览（`listDirectories`）仅返回直接子项
+ */
+
 import { Schema } from "effect";
 import { PositiveInt, TrimmedNonEmptyString } from "./baseSchemas";
 

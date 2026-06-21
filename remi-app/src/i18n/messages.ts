@@ -380,7 +380,7 @@ export type Messages = {
     };
     groups: {
       app: string;
-      remicode: string;
+      remiclaw: string;
     };
     general: {
       heading: string;
@@ -1159,9 +1159,9 @@ const en: Messages = {
     },
     update: {
       availableTitle: "Update available",
-      availableDescription: (version) => `Remi Code ${version} is available.`,
+      availableDescription: (version) => `Remi Claw ${version} is available.`,
       upToDateTitle: "You're up to date",
-      upToDateDescription: (version) => `Remi Code ${version} is already the newest version.`,
+      upToDateDescription: (version) => `Remi Claw ${version} is already the newest version.`,
       checkFailedTitle: "Could not check for updates",
       checkFailedDescription: "An unexpected error occurred.",
       downloadedTitle: "Update downloaded",
@@ -1356,7 +1356,7 @@ const en: Messages = {
   },
   skills: {
     title: "Skills",
-    subtitle: "Give Remi Code new superpowers.",
+    subtitle: "Give Remi Claw new superpowers.",
     newSkill: "New skill",
     browseSkillSh: "Browse skill.sh",
     searchPlaceholder: "Search skills",
@@ -1364,7 +1364,7 @@ const en: Messages = {
     localCount: "{count} installed",
     localEmptyTitle: "No local skills found",
     localEmptyDescription:
-      "Remi Code scanned ~/.claude/skills, ~/.codex/skills, and ~/.agents/skills. Drop a skill folder containing a SKILL.md into one of those directories, then refresh.",
+      "Remi Claw scanned ~/.claude/skills, ~/.codex/skills, and ~/.agents/skills. Drop a skill folder containing a SKILL.md into one of those directories, then refresh.",
     localEmptySearchTitle: "No local skills match this search",
     localEmptySearchDescription: "Try a different keyword or clear the search.",
     providerHeading: "Provided by model",
@@ -1411,7 +1411,7 @@ const en: Messages = {
       },
       worktrees: {
         label: "Worktrees",
-        description: "Review and clean up the worktrees created by Remi Code.",
+        description: "Review and clean up the worktrees created by Remi Claw.",
       },
       archived: {
         label: "Archived",
@@ -1441,7 +1441,7 @@ const en: Messages = {
       sidebarOrganization: "Sidebar organization",
       language: {
         title: "Language",
-        description: "Choose the language used in the Remi Code interface.",
+        description: "Choose the language used in the Remi Claw interface.",
         english: "English",
         chinese: "中文",
       },
@@ -1487,7 +1487,7 @@ const en: Messages = {
       timeAndReadingSection: "Time and reading",
       theme: {
         title: "Theme",
-        description: "Choose how Remi Code looks across the app.",
+        description: "Choose how Remi Claw looks across the app.",
         system: "System",
         light: "Light",
         dark: "Dark",
@@ -1612,7 +1612,7 @@ const en: Messages = {
     },
     worktrees: {
       heading: "Worktrees",
-      description: "Review and clean up the worktrees created by Remi Code.",
+      description: "Review and clean up the worktrees created by Remi Claw.",
       managedSection: "Managed worktrees",
       loading: "Loading managed worktrees...",
       loadFailedFallback: "Unable to load worktrees.",
@@ -1708,7 +1708,7 @@ const en: Messages = {
       },
       updates: {
         title: "Provider updates",
-        description: "Update installed provider tools that Remi Code can safely update.",
+        description: "Update installed provider tools that Remi Claw can safely update.",
         statusNoUpdates: "No provider updates detected",
         statusAvailableOne: "1 update available",
         statusAvailableMany: (count) => `${count} updates available`,
@@ -1719,7 +1719,7 @@ const en: Messages = {
         commandLabel: "Command: ",
         runCommandTitle: (command) => `Run ${command}`,
         versionAdvisoryNoCommand:
-          "A newer version is available, but Remi Code could not identify a safe one-click update command for this installation.",
+          "A newer version is available, but Remi Claw could not identify a safe one-click update command for this installation.",
       },
       tools: {
         title: "Installed CLIs",
@@ -1895,7 +1895,7 @@ const en: Messages = {
   },
   whatsNew: {
     title: "What's new",
-    popoutTitle: "What's new in Remi Code",
+    popoutTitle: "What's new in Remi Claw",
     open: "Open",
     dismiss: "Dismiss",
     gotIt: "Got it",
@@ -2240,9 +2240,9 @@ const zh: Messages = {
     },
     update: {
       availableTitle: "有新版本可用",
-      availableDescription: (version) => `Remi Code ${version} 已可更新。`,
+      availableDescription: (version) => `Remi Claw ${version} 已可更新。`,
       upToDateTitle: "已是最新版�?,
-      upToDateDescription: (version) => `Remi Code ${version} 已是最新版本。`,
+      upToDateDescription: (version) => `Remi Claw ${version} 已是最新版本。`,
       checkFailedTitle: "无法检查更�?,
       checkFailedDescription: "发生意外错误�?,
       downloadedTitle: "更新已下�?,
@@ -2512,7 +2512,7 @@ const zh: Messages = {
     },
     groups: {
       app: "应用",
-      remicode: "Remi Code",
+      remiclaw: "Remi Claw",
     },
     general: {
       heading: "通用",

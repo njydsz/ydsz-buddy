@@ -1,3 +1,35 @@
+/**
+ * @file 服务端配置契约模块
+ *
+ * 本模块定义了 Remi 服务端（remi-server）的配置契约，涵盖运行模式、监听地址、
+ * 端口、状态目录、数据库路径等核心配置项。
+ *
+ * ## 核心契约
+ *
+ * - `RuntimeMode`：运行模式枚举（desktop / server / headless）
+ * - `ServerConfig`：服务端完整配置
+ * - `ServerStatusResult`：服务端运行时状态（端口、版本、启动时间等）
+ * - `ServerWorkspaceStatusResult`：工作区状态
+ * - `ServerUpdateCheckResult`：更新检查结果
+ *
+ * ## 协议设计
+ *
+ * - **配置来源**：CLI 参数、环境变量、配置文件按优先级合并
+ * - **运行时查询**：通过 `serverStatus` 拉取当前运行状态
+ * - **目录约定**：所有运行时数据均位于 `baseDir` 下，按子目录分类
+ *
+ * ## 使用场景
+ *
+ * - 启动时加载配置
+ * - 状态栏展示服务端运行信息
+ * - 升级检查（`serverUpdateCheck`）
+ *
+ * ## 注意事项
+ *
+ * - 路径均为绝对路径，跨平台使用 PathBuf
+ * - 配置变更需要重启服务才能生效
+ */
+
 import { Schema } from "effect";
 import {
   IsoDateTime,

@@ -1,3 +1,40 @@
+/**
+ * @file RPC 契约模块
+ *
+ * 本模块基于 Effect 的 `RpcGroup` 机制定义 Remi 系统的 RPC（远程过程调用）契约，
+ * 用于在客户端（Web）与服务端（Rust）之间实现类型安全的 RPC 调用。
+ *
+ * ## 核心概念
+ *
+ * - **Rpc**：单个 RPC 方法定义（输入、输出、错误、流式）
+ * - **RpcGroup**：RPC 方法的集合，类似于 API 控制器
+ * - **Router**：RPC 路由器，负责将请求分发到对应处理器
+ *
+ * ## 核心契约
+ *
+ * - `RemiRpcGroup`：Remi 系统所有 RPC 方法的集合
+ * - `RemiRpcRouter`：RPC 路由器，绑定所有方法的实现
+ * - 各业务域的 RpcGroup：Auth / Git / Project / Provider / Terminal / Settings 等
+ *
+ * ## 使用场景
+ *
+ * - 客户端使用 `RemiRpcRouter` 发起类型安全的远程调用
+ * - 服务端实现各 RpcGroup 并注册到 Router
+ * - 跨语言互操作：客户端 TypeScript，服务端 Rust
+ *
+ * ## 与 WS/IPC 的区别
+ *
+ * - **WS**：双向流式通信，适合长连接、实时事件
+ * - **IPC**：单次请求-响应，适合简单操作
+ * - **RPC**：类型安全的远程调用，适合复杂业务逻辑
+ *
+ * ## 注意事项
+ *
+ * - RPC 调用在网络层走 WebSocket
+ * - 错误通过 Effect 的 typed error 传递
+ * - 流式响应通过 `Stream` 类型实现
+ */
+
 import { Schema } from "effect";
 import * as Rpc from "effect/unstable/rpc/Rpc";
 import * as RpcGroup from "effect/unstable/rpc/RpcGroup";

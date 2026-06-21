@@ -1,3 +1,39 @@
+/**
+ * @file Provider 运行时会话契约模块
+ *
+ * 本模块定义了 Remi 系统中 Provider 运行时（Provider Runtime）的契约，
+ * 涵盖会话生命周期、运行时事件、工具调用、用户输入请求、审批请求等。
+ *
+ * ## 核心契约
+ *
+ * - `ProviderRuntimeSession`：运行时 Provider 会话
+ * - `ProviderRuntimeSessionInput`：运行时会话启动输入
+ * - `ProviderRuntimeEvent`：运行时事件（turn-start / delta / tool-call / error / done）
+ * - `ProviderRuntimeToolCall`：工具调用（名称、参数、状态）
+ * - `ProviderRuntimeToolResult`：工具调用结果
+ * - `ProviderRuntimeUserInputRequest`：用户输入请求（free-form / choice）
+ * - `ProviderRuntimeApprovalRequest`：审批请求（危险操作前）
+ * - `ProviderRuntimeSessionSnapshot`：运行时会话完整快照
+ * - `ProviderUsageSnapshot`：使用量快照（token、费用、速率限制）
+ *
+ * ## 协议设计
+ *
+ * - **事件流**：会话通过 `event` 流式推送，前端订阅实时更新
+ * - **请求响应**：用户输入/审批请求使用 request-id 关联响应
+ * - **快照同步**：断线重连后通过快照恢复状态
+ *
+ * ## 使用场景
+ *
+ * - 编排器订阅运行时事件并转换为编排事件
+ * - UI 展示工具调用进度、等待用户输入
+ * - 使用量监控（`ProviderUsageSnapshot`）
+ *
+ * ## 注意事项
+ *
+ * - `toolCallId` 全局唯一，不可复用
+ * - 错误事件（`error`）通常意味着会话已终止
+ */
+
 import { Option, Schema } from "effect";
 import {
   EventId,

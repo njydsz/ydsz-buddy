@@ -26,6 +26,8 @@ use tracing::info;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
+use remi_checkpoint::CheckpointDiffQuery;
+
 /// 注册编排引擎相关 RPC 方法
 ///
 /// 将所有编排引擎方法注册到路由器，每个方法绑定对应的服务实例。
@@ -240,6 +242,149 @@ pub async fn register_orchestration_methods(
                         .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
                     None => Ok(Value::Null),
                 }
+            }
+        })
+        .await;
+
+    // orchestration.getTurnDiff - 获取指定轮次的代码变更差异
+    // 参数: { threadId: string, turnId: string }
+    // 返回: TurnDiff | null
+    let diff_query = services.checkpoint_diff_query.clone();
+    router
+        .register("orchestration.getTurnDiff", move |params: Option<Value>| {
+            let diff_query = diff_query.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let thread_id_str = params
+                    .get("threadId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing threadId".to_string())
+                    })?;
+
+                let turn_id = params
+                    .get("turnId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing turnId".to_string())
+                    })?
+                    .to_string();
+
+                let thread_id: ThreadId = thread_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+
+                let turn_diff = diff_query.get_turn_diff(thread_id, turn_id).await
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?;
+
+                match turn_diff {
+                    Some(td) => serde_json::to_value(td)
+                        .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
+                    None => Ok(Value::Null),
+                }
+            }
+        })
+        .await;
+
+    // orchestration.getFullThreadDiff - 获取完整线程的代码变更差异
+    // 参数: { threadId: string }
+    // 返回: FullThreadDiff
+    let diff_query = services.checkpoint_diff_query.clone();
+    router
+        .register("orchestration.getFullThreadDiff", move |params: Option<Value>| {
+            let diff_query = diff_query.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let thread_id_str = params
+                    .get("threadId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing threadId".to_string())
+                    })?;
+
+                let thread_id: ThreadId = thread_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+
+                let full_diff = diff_query.get_full_thread_diff(thread_id).await
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?;
+
+                serde_json::to_value(full_diff)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
+    // orchestration.importThread - 导入外部 Provider 线程
+    // 参数: { threadId: string, externalId: string, providerName: string, cwd: string }
+    // 返回: null
+    let engine = services.orchestration_engine.clone();
+    let provider_service = services.provider_service.clone();
+    let query = services.projection_query.clone();
+    router
+        .register("orchestration.importThread", move |params: Option<Value>| {
+            let engine = engine.clone();
+            let provider_service = provider_service.clone();
+            let query = query.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let thread_id_str = params
+                    .get("threadId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing threadId".to_string())
+                    })?;
+
+                let _external_id = params
+                    .get("externalId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing externalId".to_string())
+                    })?;
+
+                let _provider_name = params
+                    .get("providerName")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing providerName".to_string())
+                    })?;
+
+                let _cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing cwd".to_string())
+                    })?;
+
+                let thread_id: ThreadId = thread_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+
+                // 验证线程存在
+                let thread = query.get_thread_detail(thread_id).await?;
+                if thread.is_none() {
+                    return Err(crate::error::ServerError::InvalidParams(
+                        format!("Thread not found: {}", thread_id),
+                    ));
+                }
+
+                // TODO: 完整实现 - 需要 Provider 适配器的 readExternalThread 能力
+                // 当前返回成功，后续需要：
+                // 1. 调用 provider adapter 读取外部线程消息
+                // 2. 分发 thread.messages.import 命令
+                // 3. 设置 session 状态
+
+                info!("线程导入请求已接收: thread_id={}, provider={}", thread_id_str, _provider_name);
+                Ok(Value::Null)
             }
         })
         .await;

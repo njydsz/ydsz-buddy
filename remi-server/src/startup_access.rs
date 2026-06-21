@@ -58,7 +58,7 @@ pub fn format_host_for_url(host: &str) -> String {
 /// 从监听地址中解析端口号
 ///
 /// 当无法从 address 中提取端口时，返回 fallback_port。
-pub fn resolve_listening_port(address: &std::net::SocketAddr, fallback_port: u16) -> u16 {
+pub fn resolve_listening_port(address: &std::net::SocketAddr, _fallback_port: u16) -> u16 {
     address.port()
 }
 

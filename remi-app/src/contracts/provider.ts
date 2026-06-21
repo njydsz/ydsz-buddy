@@ -1,3 +1,38 @@
+/**
+ * @file Provider 配置契约模块
+ *
+ * 本模块定义了 Remi 系统中 AI Provider（Claude / OpenAI / Codex / Cursor 等）
+ * 的配置、密钥、模型、可用性等契约。
+ *
+ * ## 核心契约
+ *
+ * - `ProviderConfig`：单个 Provider 的完整配置
+ * - `ProviderConfigMap`：Provider 配置集合（按 ProviderKind 索引）
+ * - `ProviderKeyConfig`：Provider 密钥配置（API Key / OAuth）
+ * - `ProviderModelOption`：Provider 可用模型选项
+ * - `ProviderAvailability`：Provider 可用性状态
+ * - `ProviderProbeInput/Result`：Provider 探测（健康检查）
+ * - `ProviderListResult`：Provider 列表查询结果
+ * - `ProviderUpdateInput`：Provider 配置更新
+ *
+ * ## 协议设计
+ *
+ * - **密钥隔离**：API Key 存储在后端 `remi-auth::SecretStore`，前端不直接持有
+ * - **元数据同步**：Provider 配置变更通过 WebSocket 广播
+ * - **多 Provider 聚合**：支持同时启用多个 Provider，按项目维度选择
+ *
+ * ## 使用场景
+ *
+ * - 设置面板中配置 Provider
+ * - 启动 Provider 前的健康检查
+ * - 模型选择器数据源
+ *
+ * ## 安全注意
+ *
+ * - `apiKey` 字段不参与前端序列化（仅后端持久化）
+ * - OAuth 流程在前端发起，最终 token 由后端保存
+ */
+
 import { Schema } from "effect";
 import { TrimmedNonEmptyString } from "./baseSchemas";
 import {

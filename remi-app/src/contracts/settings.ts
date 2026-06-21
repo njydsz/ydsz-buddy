@@ -1,3 +1,38 @@
+/**
+ * @file 用户设置契约模块
+ *
+ * 本模块定义了 Remi 系统用户级别的设置（Settings）契约，涵盖主题、字体、语言、
+ * 终端行为、Git 行为、隐私等所有可自定义选项。
+ *
+ * ## 核心契约
+ *
+ * - `UserSettings`：用户完整设置
+ * - `ThemePreference`：主题偏好（light / dark / system）
+ * - `FontFamilyConfig`：字体族配置
+ * - `TerminalSettings`：终端相关设置
+ * - `GitSettings`：Git 相关设置
+ * - `PrivacySettings`：隐私相关设置
+ * - `NotificationsSettings`：通知相关设置
+ * - `SettingsUpdateInput`：设置变更输入
+ *
+ * ## 协议设计
+ *
+ * - **持久化**：用户设置存储在 `settings.json`，与服务端配置分离
+ * - **实时同步**：设置变更通过 WebSocket 广播到所有打开的窗口
+ * - **默认值**：每个字段都有合理默认值，无需用户配置即可使用
+ *
+ * ## 使用场景
+ *
+ * - 偏好设置面板
+ * - 启动时加载用户设置
+ * - 跨设备同步（未来扩展）
+ *
+ * ## 注意事项
+ *
+ * - 设置变更立即生效，无需重启
+ * - 敏感字段（如 API Key）走独立的 Provider 配置
+ */
+
 import { Schema } from "effect";
 import { TrimmedString } from "./baseSchemas";
 import { DEFAULT_GIT_TEXT_GENERATION_MODEL } from "./model";

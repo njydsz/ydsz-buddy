@@ -1,6 +1,6 @@
 //! # Home 目录迁移
 //!
-//! 在 Remi Code 第一次启动时，将用户在其他工具（Peak Code / Codex / Claude Code / OpenCode）下
+//! 在 Remi Claw 第一次启动时，将用户在其他工具（Peak Code / Codex / Claude Code / OpenCode）下
 //! 积累的全局配置、Session 历史、模型选择等数据迁移到 Remi 自己的 home 目录。
 //!
 //! ## 迁移策略

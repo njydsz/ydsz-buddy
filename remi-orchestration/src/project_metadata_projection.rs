@@ -1,14 +1,8 @@
-//! # 项目元数据投影模块
-//!
-//! 本模块负责维护项目（Project）的元数据投影。
-//!
+//! # 项目元数据投影模�?//!
+//! 本模块负责维护项目（Project）的元数据投影�?//!
 //! ## 模块职责
 //!
-//! - **元数据派生**：从事件流派生项目元数据（标签、最近活动、统计信息等）
-//! - **统计信息**：维护线程数、消息数、活跃度等聚合指标
-//! - **缓存维护**：提供轻量级的内存索引以加速项目列表查询
-//! - **变更通知**：在元数据变更时发出通知供订阅者消费
-//!
+//! - **元数据派�?*：从事件流派生项目元数据（标签、最近活动、统计信息等�?//! - **统计信息**：维护线程数、消息数、活跃度等聚合指�?//! - **缓存维护**：提供轻量级的内存索引以加速项目列表查�?//! - **变更通知**：在元数据变更时发出通知供订阅者消�?//!
 //! ## 投影结构
 //!
 //! ```text
@@ -22,12 +16,9 @@
 //!
 //! ## 派生时机
 //!
-//! - 项目创建（`ProjectCreated`）
-//! - 项目元数据更新（`ProjectMetaUpdated`）
-//! - 线程创建（`ThreadCreated`）—— 递增线程计数并建立 thread_id → project_id 索引
-//! - 线程删除/归档（`ThreadDeleted` / `ThreadArchived`）—— 通过索引定位项目后递减计数
-//! - 任何消息事件（`ThreadMessageSent`）—— 通过索引更新时间戳
-
+//! - 项目创建（`ProjectCreated`�?//! - 项目元数据更新（`ProjectMetaUpdated`�?//! - 线程创建（`ThreadCreated`）—�?递增线程计数并建�?thread_id �?project_id 索引
+//! - 线程删除/归档（`ThreadDeleted` / `ThreadArchived`）—�?通过索引定位项目后递减计数
+//! - 任何消息事件（`ThreadMessageSent`）—�?通过索引更新时间�?
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -50,12 +41,10 @@ pub struct ProjectMetadataProjection {
     pub title: String,
     /// 工作区根路径
     pub workspace_root: String,
-    /// 线程总数（含已归档/已删除）
+    /// 线程总数（含已归�?已删除）
     pub thread_count: u32,
-    /// 活跃线程数（未归档、未删除）
-    pub active_thread_count: u32,
-    /// 最近活动时间
-    pub last_activity_at: Option<DateTime<Utc>>,
+    /// 活跃线程数（未归档、未删除�?    pub active_thread_count: u32,
+    /// 最近活动时�?    pub last_activity_at: Option<DateTime<Utc>>,
     /// 标签列表
     pub tags: Vec<String>,
     /// 派生时间（用于增量同步）
@@ -93,11 +82,8 @@ pub enum MetadataChange {
 
 /// 项目元数据投影器
 ///
-/// 维护所有项目的元数据投影，支持事件驱动的增量更新。
-/// 内部通过 `thread_id -> project_id` 反向索引，支持基于线程事件定位所属项目。
-pub struct ProjectMetadataProjector {
-    /// 投影仓库（id -> projection）
-    projections: Arc<RwLock<HashMap<ProjectId, ProjectMetadataProjection>>>,
+/// 维护所有项目的元数据投影，支持事件驱动的增量更新�?/// 内部通过 `thread_id -> project_id` 反向索引，支持基于线程事件定位所属项目�?pub struct ProjectMetadataProjector {
+    /// 投影仓库（id -> projection�?    projections: Arc<RwLock<HashMap<ProjectId, ProjectMetadataProjection>>>,
     /// 线程到项目的反向索引
     thread_to_project: Arc<RwLock<HashMap<ThreadId, ProjectId>>>,
     /// 变更广播
@@ -111,8 +97,7 @@ impl Default for ProjectMetadataProjector {
 }
 
 impl ProjectMetadataProjector {
-    /// 创建新的投影器
-    pub fn new() -> Self {
+    /// 创建新的投影�?    pub fn new() -> Self {
         let (change_tx, _) = broadcast::channel(256);
         Self {
             projections: Arc::new(RwLock::new(HashMap::new())),
@@ -121,8 +106,7 @@ impl ProjectMetadataProjector {
         }
     }
 
-    /// 订阅元数据变更
-    pub fn subscribe(&self) -> broadcast::Receiver<MetadataChange> {
+    /// 订阅元数据变�?    pub fn subscribe(&self) -> broadcast::Receiver<MetadataChange> {
         self.change_tx.subscribe()
     }
 
@@ -136,8 +120,7 @@ impl ProjectMetadataProjector {
         self.projections.read().await.values().cloned().collect()
     }
 
-    /// 通过线程 ID 查找所属项目
-    pub async fn project_of_thread(&self, thread_id: ThreadId) -> Option<ProjectId> {
+    /// 通过线程 ID 查找所属项�?    pub async fn project_of_thread(&self, thread_id: ThreadId) -> Option<ProjectId> {
         self.thread_to_project.read().await.get(&thread_id).copied()
     }
 
@@ -209,7 +192,7 @@ impl ProjectMetadataProjector {
                 }
             }
             _ => {
-                debug!("忽略事件对元数据投影的影响");
+                debug!("忽略事件对元数据投影的影�?);
             }
         }
         Ok(())
@@ -229,8 +212,7 @@ impl ProjectMetadataProjector {
         let _ = self.change_tx.send(MetadataChange::ActivityChanged(project_id));
     }
 
-    /// 清空所有投影（用于重建）
-    pub async fn clear(&self) {
+    /// 清空所有投影（用于重建�?    pub async fn clear(&self) {
         self.projections.write().await.clear();
         self.thread_to_project.write().await.clear();
     }
@@ -295,8 +277,7 @@ mod tests {
         let projector = ProjectMetadataProjector::new();
         let pid = Uuid::new_v4();
         let tid = Uuid::new_v4();
-        // 1. 先创建项目
-        projector
+        // 1. 先创建项�?        projector
             .apply(&OrchestrationEvent::ProjectCreated(ProjectCreatedEvent {
                 sequence: 0,
                 occurred_at: Utc::now(),
@@ -321,8 +302,8 @@ mod tests {
                     model: "gpt-5".to_string(),
                     options: None,
                 },
-                runtime_mode: RuntimeMode::Agent,
-                interaction_mode: InteractionMode::Chat,
+                runtime_mode: RuntimeMode::Code,
+                interaction_mode: InteractionMode::Agent,
                 env_mode: EnvMode::Local,
                 branch: None,
                 worktree_path: None,

@@ -1,7 +1,32 @@
 /**
- * Agent Mentions - @alias(task) syntax for subagent delegation.
+ * @file Agent Mentions 契约模块
  *
- * Provides provider-aware alias metadata used by the composer UI and provider runtimes.
+ * 本模块定义了 Remi 系统中"@alias(task)"语法用于子代理委派（subagent delegation）的契约。
+ * 提供 Provider 感知的别名元数据，供 Composer UI 和 Provider 运行时使用。
+ *
+ * ## 核心契约
+ *
+ * - `BaseAgentAliasDefinition`：Agent 别名基础定义
+ * - `ClaudeAgentAliasDefinition`：Claude Provider 的 Agent 别名定义
+ * - `CodexAgentAliasDefinition`：Codex Provider 的 Agent 别名定义
+ * - `OpenCodeAgentAliasDefinition`：OpenCode Provider 的 Agent 别名定义
+ * - `AgentAliasDefinition`：所有 Provider 的 Agent 别名联合类型
+ * - `AgentAliasKind`：Agent 别名类型枚举
+ * - `AgentAliasColor`：UI 展示色（紫/品红/青绿/青/琥珀/橙）
+ *
+ * ## 使用场景
+ *
+ * - Composer 中输入 `@` 触发 Agent 选择菜单
+ * - 通过 `@review(task)` 委派代码审查子任务
+ * - 多 Provider 场景下按 Provider 类型过滤可用 Agent
+ *
+ * ## 设计要点
+ *
+ * - 每个 Agent 别名与 Provider 强绑定，跨 Provider 不可混用
+ * - 颜色用于 UI 区分不同类型的 Agent
+ * - 显示名称（displayName）本地化通过 i18n key 实现
+ *
+ * Provider-aware alias metadata used by the composer UI and provider runtimes.
  */
 
 import type { ProviderKind } from "./orchestration";

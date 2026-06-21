@@ -1,16 +1,11 @@
 //! 事件存储模块
 //!
-//! 本模块实现了基于 SQLite 的事件存储系统，用于持久化领域事件。
-//! 事件存储是事件溯源（Event Sourcing）模式的核心组件，负责：
-//! - 追加新事件到事件流
-//! - 按序列号顺序读取事件
-//! - 跟踪事件序列号（用于投影同步）
-//!
+//! 本模块实现了基于 SQLite 的事件存储系统，用于持久化领域事件�?//! 事件存储是事件溯源（Event Sourcing）模式的核心组件，负责：
+//! - 追加新事件到事件�?//! - 按序列号顺序读取事件
+//! - 跟踪事件序列号（用于投影同步�?//!
 //! # 设计说明
 //!
-//! 事件存储采用追加写入模式，所有事件按序列号（sequence）递增排序。
-//! 每个事件包含聚合根信息（aggregate_kind + stream_id），便于按聚合查询事件。
-
+//! 事件存储采用追加写入模式，所有事件按序列号（sequence）递增排序�?//! 每个事件包含聚合根信息（aggregate_kind + stream_id），便于按聚合查询事件�?
 use async_trait::async_trait;
 use remi_core::events::OrchestrationEvent;
 use remi_core::models::Sequence;
@@ -22,87 +17,56 @@ use crate::sqlite_client::SqliteClient;
 
 /// 事件存储 trait
 ///
-/// 定义了事件存储的核心接口，所有事件存储实现都必须实现此 trait。
-/// 使用 `async_trait` 支持异步操作，并通过 `Send + Sync` 约束保证线程安全。
-///
+/// 定义了事件存储的核心接口，所有事件存储实现都必须实现�?trait�?/// 使用 `async_trait` 支持异步操作，并通过 `Send + Sync` 约束保证线程安全�?///
 /// # 主要功能
 ///
 /// - `append_event`: 追加事件到事件流
-/// - `read_events`: 从指定序列号开始读取事件
-/// - `get_latest_sequence`: 获取当前最新的序列号
-#[async_trait]
+/// - `read_events`: 从指定序列号开始读取事�?/// - `get_latest_sequence`: 获取当前最新的序列�?#[async_trait]
 pub trait EventStore: Send + Sync {
-    /// 追加事件到事件存储
-    ///
-    /// 将新事件持久化到数据库，并返回分配的序列号。
-    /// 序列号由数据库自动生成（自增主键），保证全局唯一且递增。
-    ///
+    /// 追加事件到事件存�?    ///
+    /// 将新事件持久化到数据库，并返回分配的序列号�?    /// 序列号由数据库自动生成（自增主键），保证全局唯一且递增�?    ///
     /// # 参数
     ///
     /// * `event` - 要追加的编排事件引用
     ///
-    /// # 返回值
-    ///
-    /// 成功时返回事件被分配的序列号（`Sequence`），失败时返回 `PersistenceError`
+    /// # 返回�?    ///
+    /// 成功时返回事件被分配的序列号（`Sequence`），失败时返�?`PersistenceError`
     fn append_event(&self, event: &OrchestrationEvent) -> PersistenceResult<Sequence>;
 
-    /// 从指定序列号开始读取事件
-    ///
-    /// 按序列号升序读取事件，支持分页查询。
-    /// 读取范围为 `(from_sequence, from_sequence + limit]`，即不包含 `from_sequence` 本身。
-    ///
+    /// 从指定序列号开始读取事�?    ///
+    /// 按序列号升序读取事件，支持分页查询�?    /// 读取范围�?`(from_sequence, from_sequence + limit]`，即不包�?`from_sequence` 本身�?    ///
     /// # 参数
     ///
-    /// * `from_sequence` - 起始序列号（不包含），从此序列号之后开始读取
-    /// * `limit` - 最大返回事件数量
-    ///
-    /// # 返回值
-    ///
-    /// 成功时返回 `StoredEvent` 列表，按序列号升序排列。
-    /// 如果没有更多事件，返回空列表。
-    fn read_events(&self, from_sequence: Sequence, limit: usize) -> PersistenceResult<Vec<StoredEvent>>;
+    /// * `from_sequence` - 起始序列号（不包含），从此序列号之后开始读�?    /// * `limit` - 最大返回事件数�?    ///
+    /// # 返回�?    ///
+    /// 成功时返�?`StoredEvent` 列表，按序列号升序排列�?    /// 如果没有更多事件，返回空列表�?    fn read_events(&self, from_sequence: Sequence, limit: usize) -> PersistenceResult<Vec<StoredEvent>>;
 
-    /// 获取当前最新的序列号
-    ///
-    /// 返回事件存储中已分配的最大序列号。
-    /// 如果事件存储为空，返回 0。
-    ///
-    /// # 返回值
-    ///
-    /// 当前最新的序列号，用于投影器跟踪已处理的事件位置
-    fn get_latest_sequence(&self) -> PersistenceResult<Sequence>;
+    /// 获取当前最新的序列�?    ///
+    /// 返回事件存储中已分配的最大序列号�?    /// 如果事件存储为空，返�?0�?    ///
+    /// # 返回�?    ///
+    /// 当前最新的序列号，用于投影器跟踪已处理的事件位�?    fn get_latest_sequence(&self) -> PersistenceResult<Sequence>;
 }
 
-/// 存储的事件表示
-///
-/// 从数据库中读取的事件数据，包含事件的所有元数据和负载信息。
-/// 此结构体是事件在数据库中的原始表示，尚未反序列化为具体的领域事件类型。
-///
+/// 存储的事件表�?///
+/// 从数据库中读取的事件数据，包含事件的所有元数据和负载信息�?/// 此结构体是事件在数据库中的原始表示，尚未反序列化为具体的领域事件类型�?///
 /// # 字段说明
 ///
-/// - `sequence`: 事件的全局序列号，用于排序和同步
-/// - `event_id`: 事件的唯一标识符（UUID）
-/// - `event_type`: 事件类型名称，如 "project.created"
-/// - `aggregate_kind`: 聚合根类型，如 "project" 或 "thread"
-/// - `stream_id`: 事件流 ID（聚合根的唯一标识符）
-/// - `payload_json`: 事件的 JSON 序列化负载
-/// - `metadata_json`: 事件的额外元数据（可选）
+/// - `sequence`: 事件的全局序列号，用于排序和同�?/// - `event_id`: 事件的唯一标识符（UUID�?/// - `event_type`: 事件类型名称，如 "project.created"
+/// - `aggregate_kind`: 聚合根类型，�?"project" �?"thread"
+/// - `stream_id`: 事件�?ID（聚合根的唯一标识符）
+/// - `payload_json`: 事件�?JSON 序列化负�?/// - `metadata_json`: 事件的额外元数据（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StoredEvent {
     /// 事件序列号，全局唯一且递增
     pub sequence: Sequence,
-    /// 事件唯一标识符
-    pub event_id: String,
+    /// 事件唯一标识�?    pub event_id: String,
     /// 事件类型名称
     pub event_type: String,
-    /// 聚合根类型
-    pub aggregate_kind: String,
-    /// 事件流 ID（聚合根的唯一标识符）
+    /// 聚合根类�?    pub aggregate_kind: String,
+    /// 事件�?ID（聚合根的唯一标识符）
     pub stream_id: String,
-    /// 流版本
-    pub stream_version: i64,
-    /// 事件负载（JSON 格式）
-    pub payload_json: String,
+    /// 流版�?    pub stream_version: i64,
+    /// 事件负载（JSON 格式�?    pub payload_json: String,
     /// 事件发生时间
     pub occurred_at: String,
     /// 触发命令 ID（可选）
@@ -111,17 +75,13 @@ pub struct StoredEvent {
     pub causation_event_id: Option<String>,
     /// 关联 ID（可选）
     pub correlation_id: Option<String>,
-    /// 参与者类型
-    pub actor_kind: String,
-    /// 事件元数据（JSON 格式）
-    pub metadata_json: String,
+    /// 参与者类�?    pub actor_kind: String,
+    /// 事件元数据（JSON 格式�?    pub metadata_json: String,
 }
 
 /// SQLite 事件存储实现
 ///
-/// 基于 SQLite 数据库的事件存储实现，提供事件的持久化和查询功能。
-/// 内部使用 `SqliteClient` 进行数据库操作。
-pub struct SqliteEventStore {
+/// 基于 SQLite 数据库的事件存储实现，提供事件的持久化和查询功能�?/// 内部使用 `SqliteClient` 进行数据库操作�?pub struct SqliteEventStore {
     /// SQLite 数据库客户端
     client: SqliteClient,
 }
@@ -131,36 +91,25 @@ impl SqliteEventStore {
     ///
     /// # 参数
     ///
-    /// * `client` - 已初始化的 SQLite 客户端实例
-    ///
-    /// # 返回值
-    ///
+    /// * `client` - 已初始化�?SQLite 客户端实�?    ///
+    /// # 返回�?    ///
     /// 返回新创建的 `SqliteEventStore` 实例
     pub fn new(client: SqliteClient) -> Self {
         Self { client }
     }
 
-    /// 从事件中提取聚合根信息
-    ///
-    /// 根据事件类型提取对应的聚合根类型、事件流 ID 和事件类型名称。
-    /// 这是事件存储的关键辅助方法，用于将领域事件映射到数据库存储格式。
-    ///
+    /// 从事件中提取聚合根信�?    ///
+    /// 根据事件类型提取对应的聚合根类型、事件流 ID 和事件类型名称�?    /// 这是事件存储的关键辅助方法，用于将领域事件映射到数据库存储格式�?    ///
     /// # 参数
     ///
     /// * `event` - 编排事件引用
     ///
-    /// # 返回值
-    ///
-    /// 返回三元组 `(aggregate_kind, stream_id, event_type)`：
-    /// - `aggregate_kind`: 聚合根类型（如 "project"、"thread"）
-    /// - `stream_id`: 事件流 ID（聚合根的唯一标识符）
-    /// - `event_type`: 事件类型名称（如 "project.created"、"thread.created"）
-    ///
+    /// # 返回�?    ///
+    /// 返回三元�?`(aggregate_kind, stream_id, event_type)`�?    /// - `aggregate_kind`: 聚合根类型（�?"project"�?thread"�?    /// - `stream_id`: 事件�?ID（聚合根的唯一标识符）
+    /// - `event_type`: 事件类型名称（如 "project.created"�?thread.created"�?    ///
     /// # 实现说明
     ///
-    /// 使用模式匹配遍历所有事件变体，提取对应的聚合根信息。
-    /// 事件类型名称采用 "聚合根.动作" 的命名约定，如 "project.created"。
-    fn extract_aggregate_info(event: &OrchestrationEvent) -> (String, String, String) {
+    /// 使用模式匹配遍历所有事件变体，提取对应的聚合根信息�?    /// 事件类型名称采用 "聚合�?动作" 的命名约定，�?"project.created"�?    fn extract_aggregate_info(event: &OrchestrationEvent) -> (String, String, String) {
         match event {
             // 项目相关事件
             OrchestrationEvent::ProjectCreated(e) => ("project".to_string(), e.project_id.to_string(), "project.created".to_string()),
@@ -195,25 +144,18 @@ impl SqliteEventStore {
 }
 
 impl EventStore for SqliteEventStore {
-    /// 追加事件到事件存储
-    ///
-    /// 实现步骤：
-    /// 1. 生成唯一的事件 ID（UUID v4）
-    /// 2. 提取聚合根信息（类型、流 ID、事件类型名称）
-    /// 3. 将事件序列化为 JSON 格式
-    /// 4. 插入数据库，由数据库自动生成序列号
-    /// 5. 获取并返回最后插入的序列号
-    fn append_event(&self, event: &OrchestrationEvent) -> PersistenceResult<Sequence> {
+    /// 追加事件到事件存�?    ///
+    /// 实现步骤�?    /// 1. 生成唯一的事�?ID（UUID v4�?    /// 2. 提取聚合根信息（类型、流 ID、事件类型名称）
+    /// 3. 将事件序列化�?JSON 格式
+    /// 4. 插入数据库，由数据库自动生成序列�?    /// 5. 获取并返回最后插入的序列�?    fn append_event(&self, event: &OrchestrationEvent) -> PersistenceResult<Sequence> {
         // 生成唯一的事件标识符
         let event_id = Uuid::new_v4().to_string();
         // 提取聚合根信息和事件类型
         let (aggregate_kind, stream_id, event_type) = Self::extract_aggregate_info(event);
-        // 将事件序列化为 JSON 字符串
-        let payload_json = serde_json::to_string(event)?;
+        // 将事件序列化�?JSON 字符�?        let payload_json = serde_json::to_string(event)?;
         // 获取事件发生时间并转换为 RFC3339 格式
         let occurred_at = event.occurred_at().to_rfc3339();
-        // 获取触发此事件的命令 ID（如果有）
-        let command_id = event.command_id();
+        // 获取触发此事件的命令 ID（如果有�?        let command_id = event.command_id();
         // 设置默认值（这些字段在当前事件结构中不存在，使用合理默认值）
         let stream_version = 0;
         let causation_event_id: Option<String> = None;
@@ -241,19 +183,14 @@ impl EventStore for SqliteEventStore {
             ],
         )?;
 
-        // 获取数据库自动生成的序列号
-        let sequence = self.client.last_insert_rowid()? as Sequence;
+        // 获取数据库自动生成的序列�?        let sequence = self.client.last_insert_rowid()? as Sequence;
         Ok(sequence)
     }
 
-    /// 从指定序列号开始读取事件
-    ///
-    /// 实现步骤：
-    /// 1. 构建查询语句，筛选序列号大于 `from_sequence` 的事件
-    /// 2. 按序列号升序排序
-    /// 3. 限制返回数量为 `limit`
-    /// 4. 将每行数据映射为 `StoredEvent` 结构体
-    fn read_events(&self, from_sequence: Sequence, limit: usize) -> PersistenceResult<Vec<StoredEvent>> {
+    /// 从指定序列号开始读取事�?    ///
+    /// 实现步骤�?    /// 1. 构建查询语句，筛选序列号大于 `from_sequence` 的事�?    /// 2. 按序列号升序排序
+    /// 3. 限制返回数量�?`limit`
+    /// 4. 将每行数据映射为 `StoredEvent` 结构�?    fn read_events(&self, from_sequence: Sequence, limit: usize) -> PersistenceResult<Vec<StoredEvent>> {
         let rows = self.client.query_map(
             "SELECT sequence, event_id, event_type, aggregate_kind, stream_id, stream_version, payload_json, occurred_at, command_id, causation_event_id, correlation_id, actor_kind, metadata_json
              FROM orchestration_events
@@ -262,8 +199,7 @@ impl EventStore for SqliteEventStore {
              LIMIT ?2",
             &[&from_sequence, &(limit as i64)],
             |row| {
-                // 将数据库行映射为 StoredEvent 结构体
-                Ok(StoredEvent {
+                // 将数据库行映射为 StoredEvent 结构�?                Ok(StoredEvent {
                     sequence: row.get(0)?,
                     event_id: row.get(1)?,
                     event_type: row.get(2)?,
@@ -284,11 +220,8 @@ impl EventStore for SqliteEventStore {
         Ok(rows)
     }
 
-    /// 获取当前最新的序列号
-    ///
-    /// 使用 `MAX(sequence)` 查询最大序列号，如果表为空则返回 0。
-    /// `COALESCE` 函数确保即使没有数据也返回 0 而非 NULL。
-    fn get_latest_sequence(&self) -> PersistenceResult<Sequence> {
+    /// 获取当前最新的序列�?    ///
+    /// 使用 `MAX(sequence)` 查询最大序列号，如果表为空则返�?0�?    /// `COALESCE` 函数确保即使没有数据也返�?0 而非 NULL�?    fn get_latest_sequence(&self) -> PersistenceResult<Sequence> {
         let sequence: Sequence = self.client.query_row(
             "SELECT COALESCE(MAX(sequence), 0) FROM orchestration_events",
             &[],
@@ -355,7 +288,7 @@ mod tests {
         let (client, temp_dir) = make_test_db("empty");
         let store = SqliteEventStore::new(client);
 
-        // 空表应返回 0
+        // 空表应返�?0
         assert_eq!(store.get_latest_sequence().unwrap(), 0);
         assert!(store.read_events(0, 10).unwrap().is_empty());
 
@@ -408,8 +341,7 @@ mod tests {
             store.append_event(&ev).unwrap();
         }
 
-        // 从序列号 5 之后读取 3 条
-        let page = store.read_events(5, 3).unwrap();
+        // 从序列号 5 之后读取 3 �?        let page = store.read_events(5, 3).unwrap();
         assert_eq!(page.len(), 3);
         assert_eq!(page[0].sequence, 6);
         assert_eq!(page[2].sequence, 8);
@@ -442,8 +374,8 @@ mod tests {
                 model: "gpt-5".to_string(),
                 options: None,
             },
-            runtime_mode: remi_core::models::RuntimeMode::Agent,
-            interaction_mode: remi_core::models::InteractionMode::Chat,
+            runtime_mode: remi_core::models::RuntimeMode::Code,
+            interaction_mode: remi_core::models::InteractionMode::Agent,
             env_mode: remi_core::models::EnvMode::Local,
             branch: None,
             worktree_path: None,

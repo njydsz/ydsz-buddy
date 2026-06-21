@@ -17,8 +17,8 @@
 //!
 //! # 迁移历史
 //!
-//! 本迁移序列对齐 RemiCode 的 37 个增量迁移，将最终 Schema 整合为
-//! 更紧凑的迁移集。版本号从 1 开始，与 RemiCode 迁移编号对应。
+//! 本迁移序列对齐 RemiClaw 的 37 个增量迁移，将最终 Schema 整合为
+//! 更紧凑的迁移集。版本号从 1 开始，与 RemiClaw 迁移编号对应。
 
 use crate::error::{PersistenceError, PersistenceResult};
 use crate::sqlite_client::SqliteClient;
@@ -39,9 +39,9 @@ pub struct Migration {
 /// 所有数据库迁移定义
 ///
 /// 按版本号顺序排列的迁移列表，包含系统所需的所有数据库 Schema 变更。
-/// 迁移对齐 RemiCode 的 37 个增量迁移，整合为最终 Schema。
+/// 迁移对齐 RemiClaw 的 37 个增量迁移，整合为最终 Schema。
 pub const MIGRATIONS: &[Migration] = &[
-    // ── 001: 编排事件表（对齐 RemiCode 001_OrchestrationEvents） ──
+    // ── 001: 编排事件表（对齐 RemiClaw 001_OrchestrationEvents） ──
     Migration {
         version: 1,
         name: "001_orchestration_events",
@@ -72,7 +72,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON orchestration_events(correlation_id);
         "#,
     },
-    // ── 002: 命令收据表（对齐 RemiCode 002_OrchestrationCommandReceipts） ──
+    // ── 002: 命令收据表（对齐 RemiClaw 002_OrchestrationCommandReceipts） ──
     Migration {
         version: 2,
         name: "002_orchestration_command_receipts",
@@ -93,7 +93,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON orchestration_command_receipts(result_sequence);
         "#,
     },
-    // ── 003: 检查点差异存储（对齐 RemiCode 003_CheckpointDiffBlobs） ──
+    // ── 003: 检查点差异存储（对齐 RemiClaw 003_CheckpointDiffBlobs） ──
     Migration {
         version: 3,
         name: "003_checkpoint_diff_blobs",
@@ -111,7 +111,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON checkpoint_diff_blobs(thread_id, to_turn_count);
         "#,
     },
-    // ── 004: Provider 会话运行时（对齐 RemiCode 004_ProviderSessionRuntime） ──
+    // ── 004: Provider 会话运行时（对齐 RemiClaw 004_ProviderSessionRuntime） ──
     Migration {
         version: 4,
         name: "004_provider_session_runtime",
@@ -133,7 +133,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON provider_session_runtime(provider_name);
         "#,
     },
-    // ── 005: 投影表 - 项目（对齐 RemiCode 005 + 028） ──
+    // ── 005: 投影表 - 项目（对齐 RemiClaw 005 + 028） ──
     Migration {
         version: 5,
         name: "005_projection_projects",
@@ -154,7 +154,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_projects(updated_at);
         "#,
     },
-    // ── 006: 投影表 - 线程（对齐 RemiCode 005 + 010/012/017/019-026/029/031/033/036） ──
+    // ── 006: 投影表 - 线程（对齐 RemiClaw 005 + 010/012/017/019-026/029/031/033/036） ──
     Migration {
         version: 6,
         name: "006_projection_threads",
@@ -199,7 +199,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_threads(parent_thread_id);
         "#,
     },
-    // ── 007: 投影表 - 线程消息（对齐 RemiCode 005 + 007/017/018/030） ──
+    // ── 007: 投影表 - 线程消息（对齐 RemiClaw 005 + 007/017/018/030） ──
     Migration {
         version: 7,
         name: "007_projection_thread_messages",
@@ -226,7 +226,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_thread_messages(thread_id, created_at DESC, message_id DESC);
         "#,
     },
-    // ── 008: 投影表 - 线程活动（对齐 RemiCode 005 + 008/037） ──
+    // ── 008: 投影表 - 线程活动（对齐 RemiClaw 005 + 008/037） ──
     Migration {
         version: 8,
         name: "008_projection_thread_activities",
@@ -257,7 +257,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 );
         "#,
     },
-    // ── 009: 投影表 - 线程会话（对齐 RemiCode 005 + 006/009） ──
+    // ── 009: 投影表 - 线程会话（对齐 RemiClaw 005 + 006/009） ──
     Migration {
         version: 9,
         name: "009_projection_thread_sessions",
@@ -278,7 +278,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_thread_sessions(provider_session_id);
         "#,
     },
-    // ── 010: 投影表 - 对话轮次（对齐 RemiCode 005 + 015） ──
+    // ── 010: 投影表 - 对话轮次（对齐 RemiClaw 005 + 015） ──
     Migration {
         version: 10,
         name: "010_projection_turns",
@@ -309,7 +309,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_turns(thread_id, checkpoint_turn_count, completed_at);
         "#,
     },
-    // ── 011: 投影表 - 待审批请求（对齐 RemiCode 005） ──
+    // ── 011: 投影表 - 待审批请求（对齐 RemiClaw 005） ──
     Migration {
         version: 11,
         name: "011_projection_pending_approvals",
@@ -328,7 +328,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_pending_approvals(thread_id, status);
         "#,
     },
-    // ── 012: 投影表 - 提议计划（对齐 RemiCode 013 + 014） ──
+    // ── 012: 投影表 - 提议计划（对齐 RemiClaw 013 + 014） ──
     Migration {
         version: 12,
         name: "012_projection_thread_proposed_plans",
@@ -348,7 +348,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_thread_proposed_plans(thread_id, created_at);
         "#,
     },
-    // ── 013: 投影状态跟踪表（对齐 RemiCode 005） ──
+    // ── 013: 投影状态跟踪表（对齐 RemiClaw 005） ──
     Migration {
         version: 13,
         name: "013_projection_state",
@@ -360,7 +360,7 @@ pub const MIGRATIONS: &[Migration] = &[
             );
         "#,
     },
-    // ── 014: 认证会话和配对链接（对齐 RemiCode 034_AuthAccessManagement） ──
+    // ── 014: 认证会话和配对链接（对齐 RemiClaw 034_AuthAccessManagement） ──
     Migration {
         version: 14,
         name: "014_auth_access_management",
@@ -422,7 +422,7 @@ pub const MIGRATIONS: &[Migration] = &[
             CREATE INDEX IF NOT EXISTS idx_checkpoints_created_at ON checkpoints(created_at);
         "#,
     },
-    // ── 016: 线程级额外列（对齐 RemiCode 021/022/023/026/031）
+    // ── 016: 线程级额外列（对齐 RemiClaw 021/022/023/026/031）
     //   - associated_worktree_branch / associated_worktree_ref：worktree 详情
     //   - shell_summary：项目根终端标题的轻量缓存
     //   - create_branch_flow_completed：分支创建流程完成标志
@@ -442,7 +442,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ADD COLUMN IF NOT EXISTS create_branch_flow_completed INTEGER NOT NULL DEFAULT 0;
         "#,
     },
-    // ── 017: 性能索引（对齐 RemiCode 037 ProjectionSnapshotCapIndexes）
+    // ── 017: 性能索引（对齐 RemiClaw 037 ProjectionSnapshotCapIndexes）
     //   - 列表页频繁按 updated_at / created_at 排序，需要降序索引
     //   - 快照读路径按 (project_id, updated_at DESC) 走索引
     Migration {
@@ -487,7 +487,7 @@ pub const MIGRATIONS: &[Migration] = &[
                 ON projection_thread_messages(turn_id);
         "#,
     },
-    // ── 020: Shell 摘要回填（对齐 RemiCode 027 BackfillProjectionThreadShellSummary）
+    // ── 020: Shell 摘要回填（对齐 RemiClaw 027 BackfillProjectionThreadShellSummary）
     //   - 已有线程没有 shell_summary 字段时统一回填 NULL，由 runtime 层异步计算
     //   - 使用 UPDATE 而非默认值，避免空串与 NULL 混淆
     Migration {

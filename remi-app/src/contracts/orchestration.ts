@@ -1,3 +1,40 @@
+/**
+ * @file 编排契约模块
+ *
+ * 本模块定义了 Remi 系统中编排层（Orchestration）的核心契约，
+ * 是前后端通信最频繁的契约集合，涵盖 Provider 类型、命令、事件、回复、快照等。
+ *
+ * ## 核心契约
+ *
+ * - `ProviderKind`：Provider 类型枚举（claude / openai / codex / cursor / 自定义）
+ * - `OrchestrationCommand`：编排命令（新增消息、中止轮次、批准工具等）
+ * - `OrchestrationEvent`：编排事件（轮次开始/结束、工具调用、错误等）
+ * - `OrchestrationReply`：编排回复（流式消息、最终消息、计划、问题等）
+ * - `OrchestrationSnapshot`：编排完整状态快照
+ * - `ProviderStartOptions`：Provider 启动参数
+ * - `AssistantMessageChunk`：流式 Assistant 消息片段
+ * - `ToolCall`、`ToolResult`：工具调用与结果
+ * - `UserInputRequest`、`ApprovalRequest`：用户输入/审批请求
+ *
+ * ## 协议设计
+ *
+ * - **命令-事件-回复三段式**：命令 → 事件 → 回复，形成完整生命周期
+ * - **增量流式**：通过 `*Chunk` 系列类型支持流式响应
+ * - **类型变体**：使用带标签的 Schema 区分消息类型
+ *
+ * ## 使用场景
+ *
+ * - WebSocket 消息的 payload 校验
+ * - 前端状态机根据事件类型更新 UI
+ * - 后端服务消费命令并产出事件
+ *
+ * ## 扩展性
+ *
+ * - 新增 Provider：扩展 `ProviderKind` 与 `ProviderStartOptions` 联合类型
+ * - 新增命令：扩展 `OrchestrationCommand` 联合类型
+ * - 新增事件：扩展 `OrchestrationEvent` 联合类型
+ */
+
 import { Option, Schema, SchemaIssue, Struct } from "effect";
 import {
   ClaudeModelOptions,

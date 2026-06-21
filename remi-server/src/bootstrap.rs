@@ -23,7 +23,7 @@ use tokio::sync::broadcast;
 use tracing::{info, warn};
 
 use remi_auth::{AuthService, SecretStore, SessionCredentialService};
-use remi_checkpoint::CheckpointStore;
+use remi_checkpoint::{CheckpointStore, CheckpointDiffQuery};
 use remi_config::ServerConfig;
 use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService, ManagedWorktreeConfig, ManagedWorktreeService};
 use remi_orchestration::{
@@ -182,6 +182,10 @@ async fn build_service_container(
         git_core.clone(),
         sqlite_checkpoint_store,
     ));
+    let checkpoint_diff_query = Arc::new(CheckpointDiffQuery::new(
+        checkpoint_store.clone(),
+        git_core.clone(),
+    ));
 
     // ===== 推送通道层 =====
     let push_channel_manager = Arc::new(PushChannelManager::new().await);
@@ -232,6 +236,7 @@ async fn build_service_container(
         workspace_entries,
         auth_service,
         checkpoint_store,
+        checkpoint_diff_query,
         analytics_service,
         metrics_collector,
         heartbeat_service,

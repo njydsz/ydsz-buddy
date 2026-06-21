@@ -1,3 +1,32 @@
+/**
+ * @file 日志工具模块
+ *
+ * 本模块提供日志相关的工具函数和类型：
+ *
+ * - **日志级别定义**：trace / debug / info / warn / error
+ * - **轮转文件接收器（Rotating File Sink）**：按大小轮转的日志文件
+ * - **结构化日志格式化**：JSON / 文本格式切换
+ * - **日志输出目标**：console / file / 远程
+ *
+ * ## 核心导出
+ *
+ * - `RotatingFileSinkOptions`：轮转文件接收器配置
+ * - `RotatingFileSink`：轮转文件接收器实现
+ * - `formatLogLine`：单行日志格式化
+ *
+ * ## 使用场景
+ *
+ * - 服务端日志写入 `logs/server.log`
+ * - 客户端错误日志写入 `logs/client.log`
+ * - 跨进程调试与问题排查
+ *
+ * ## 注意事项
+ *
+ * - 默认轮转大小 10MB，最多保留 5 个历史文件
+ * - 日志文件路径为绝对路径，避免相对路径歧义
+ * - 高频日志应使用 `info` 级别，避免 `debug` 级别影响性能
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 
