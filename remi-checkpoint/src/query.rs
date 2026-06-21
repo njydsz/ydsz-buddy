@@ -272,7 +272,11 @@ impl CheckpointDiffQuery {
     /// ## 返回值
     ///
     /// - `Ok(FullThreadDiff)`：成功获取全线程 Diff 信息（可能包含零个或多个轮次）。
-    /// - `Err(CheckpointError)`：查询过程中发生错误。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::DatabaseError`]：查询检查点列表时数据库操作失败。
+    /// - [`CheckpointError::GitOperationFailed`]：Git Diff 命令执行失败。
     pub async fn get_full_thread_diff(
         &self,
         thread_id: ThreadId,

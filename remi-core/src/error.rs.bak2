@@ -22,7 +22,7 @@
 //! fn lookup_id(id: &str) -> CoreResult<String> {
 //!     // 查找资源...
 //!
-Err(CoreError::NotFoundError(format!('资源 {} 不存在', id)))
+Err(CoreError::NotFoundError(format!("资源 {} 不存在", id)))
 //! }
 //! ```
 
@@ -104,8 +104,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::InvalidOperation("无法在已归档的线程中发送消息".to_string());
-    /// assert_eq!(err.to_string(), "无效操作: 无法在已归档的线程中发送消息");
+    /// let err = CoreError::InvalidOperation('无法在已归档的线程中发送消息'.to_string());
+    /// assert_eq!(err.to_string(), '无效操作: 无法在已归档的线程中发送消息');
     /// ```
     #[error("无效操作: {0}")]
     InvalidOperation(String),

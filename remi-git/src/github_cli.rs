@@ -160,12 +160,31 @@ impl GitHubCli {
 
     /// 合并 PR
     ///
+    /// 通过 `gh pr merge` 命令合并指定的 Pull Request。
+    ///
     /// # 参数
     ///
-    /// - `cwd`: 仓库工作目录
-    /// - `pr_number`: PR 编号
-    /// - `method`: 合并策略
-    /// - `delete_branch`: 合并后是否删除远程分支
+    /// - `cwd`: 仓库工作目录的绝对路径
+    /// - `pr_number`: PR 编号（必须是已开放且可合并的 PR）
+    /// - `method`: 合并策略（Merge/Squash/Rebase）
+    /// - `delete_branch`: 合并后是否删除远程源分支
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 合并成功
+    /// - `Err(GitError::CommandError)`: 合并失败（PR 不存在、有冲突、未通过检查等）
+    ///
+    /// # 注意事项
+    ///
+    /// - 合并前请确保 PR 已通过所有必需的审查和状态检查
+    /// - 如果有合并冲突，需要先解决冲突才能合并
+    /// - `delete_branch` 为 true 时，合并成功后会自动删除远程源分支
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// client.merge_pull_request("/path/to/repo", 123, MergeMethod::Squash, true).await?;
+    /// ```
     pub async fn merge_pull_request(
         &self,
         cwd: &str,
@@ -192,11 +211,24 @@ impl GitHubCli {
 
     /// 给 PR 添加评论
     ///
+    /// 通过 `gh pr comment` 命令在指定的 Pull Request 上添加评论。
+    ///
     /// # 参数
     ///
-    /// - `cwd`: 仓库工作目录
+    /// - `cwd`: 仓库工作目录的绝对路径
     /// - `pr_number`: PR 编号
-    /// - `body`: 评论内容
+    /// - `body`: 评论内容（支持 Markdown 格式）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 评论添加成功
+    /// - `Err(GitError::CommandError)`: 评论失败（PR 不存在、权限不足等）
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// client.comment_pull_request("/path/to/repo", 123, "LGTM! 🎉").await?;
+    /// ```
     pub async fn comment_pull_request(
         &self,
         cwd: &str,
