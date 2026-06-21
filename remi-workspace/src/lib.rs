@@ -49,7 +49,7 @@
 //! // 浏览工作空间根目录
 //! let entries = WorkspaceEntries::new();
 //! let result = entries.browse(BrowseInput {
-//!     cwd: "/path/to/workspace".to_string(),
+//!     cwd: '/path/to/workspace'.to_string(),
 //!     relative_path: None,
 //!     include_hidden: false,
 //!     max_depth: Some(2),
@@ -57,7 +57,7 @@
 //! 
 //! // 安全地读取文件
 //! let fs = WorkspaceFileSystem::new();
-//! let content = fs.read_file("/path/to/workspace", "src/main.rs").await.unwrap();
+//! let content = fs.read_file('/path/to/workspace', 'src/main.rs').await.unwrap();
 //! }
 
 /// 工作空间目录浏览与搜索模块，提供目录结构遍历、文件搜索和目录列举功能

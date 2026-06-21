@@ -1,3 +1,29 @@
+/**
+ * @file Diff 面板主组件
+ *
+ * ChatView 右侧（或底部）展示的 diff 面板：
+ *
+ * - **多模式**：`inline` / `sheet` / `sidebar`
+ * - **多数据源**：单 turn diff、工作区未提交 diff、PR diff
+ * - **虚拟列表**：长 diff 使用 `@pierre/diffs` 虚拟化渲染
+ * - **行内/分栏切换**：unified ↔ split
+ * - **主题联动**：跟随应用主题切换 diff 主题
+ *
+ * ## 核心导出
+ *
+ * - `DiffPanel`（默认导出）：主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 内嵌 diff 面板
+ * - 独立 diff 浮层（SheetView）
+ *
+ * ## 注意事项
+ *
+ * - 路由 `?turnId=` 决定加载的 diff 源
+ * - 工作区 diff 周期性 refetch（`GIT_WORKING_TREE_DIFF_LIVE_REFETCH_INTERVAL_MS`）
+ * - 文档级 diff 渲染使用 `DiffWorkerPoolProvider` 注入的 worker pool
+ */
 import { FileDiff, type FileDiffMetadata, Virtualizer } from "@pierre/diffs/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";

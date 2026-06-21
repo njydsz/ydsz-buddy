@@ -83,7 +83,7 @@ pub enum PushEvent {
 /// 用于通知编排引擎的状态变更，如 Turn 启动、完成、中断等。
 #[derive(Debug, Clone, Serialize)]
 pub struct OrchestrationEvent {
-    /// 事件类型标识，如 "turn_started"、"turn_completed"、"turn_interrupted"
+    /// 事件类型标识，如 'turn_started'、'turn_completed'、'turn_interrupted'
     pub event_type: String,
     /// 事件附加数据，具体结构取决于 event_type
     pub data: serde_json::Value,
@@ -96,7 +96,7 @@ pub struct OrchestrationEvent {
 pub struct ProviderStatusEvent {
     /// Provider 名称标识
     pub provider: String,
-    /// 当前状态，如 "connected"、"disconnected"、"error"
+    /// 当前状态，如 'connected'、'disconnected'、'error'
     pub status: String,
 }
 
@@ -120,7 +120,7 @@ pub struct GitStatusEvent {
 pub struct TerminalEvent {
     /// 终端会话 ID
     pub session_id: String,
-    /// 事件类型标识，如 "output"、"exit"、"error"
+    /// 事件类型标识，如 'output'、'exit'、'error'
     pub event_type: String,
     /// 事件附加数据，如终端输出内容、退出码等
     pub data: serde_json::Value,
@@ -131,7 +131,7 @@ pub struct TerminalEvent {
 /// 用于通知工作空间中文件的创建、修改、删除等变更。
 #[derive(Debug, Clone, Serialize)]
 pub struct WorkspaceEvent {
-    /// 事件类型标识，如 "created"、"modified"、"deleted"
+    /// 事件类型标识，如 'created'、'modified'、'deleted'
     pub event_type: String,
     /// 变更文件的路径
     pub path: String,
@@ -144,7 +144,7 @@ pub struct WorkspaceEvent {
 pub struct CheckpointEvent {
     /// 检查点 ID
     pub checkpoint_id: String,
-    /// 事件类型标识，如 "created"、"reverted"、"deleted"
+    /// 事件类型标识，如 'created'、'reverted'、'deleted'
     pub event_type: String,
 }
 
@@ -153,7 +153,7 @@ pub struct CheckpointEvent {
 /// 用于通知会话的创建、撤销等认证相关变更。
 #[derive(Debug, Clone, Serialize)]
 pub struct AuthEvent {
-    /// 事件类型标识，如 "session_created"、"session_revoked"
+    /// 事件类型标识，如 'session_created'、'session_revoked'
     pub event_type: String,
     /// 关联的会话 ID
     pub session_id: String,
@@ -164,7 +164,7 @@ pub struct AuthEvent {
 /// 用于通知服务器状态变更、告警等全局性事件。
 #[derive(Debug, Clone, Serialize)]
 pub struct ServerEvent {
-    /// 事件类型标识，如 "status_changed"、"warning"、"error"
+    /// 事件类型标识，如 'status_changed'、'warning'、'error'
     pub event_type: String,
     /// 事件附加数据
     pub data: serde_json::Value,
@@ -185,8 +185,8 @@ pub struct ServerEvent {
 ///
 /// // 发布事件
 /// manager.publish_git_status(GitStatusEvent {
-///     repo_path: "/path/to/repo".to_string(),
-///     branch: "main".to_string(),
+///     repo_path: '/path/to/repo'.to_string(),
+///     branch: 'main'.to_string(),
 ///     dirty: false,
 /// }).await;
 /// ```

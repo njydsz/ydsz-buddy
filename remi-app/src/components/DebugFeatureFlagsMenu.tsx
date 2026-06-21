@@ -1,7 +1,30 @@
 // FILE: DebugFeatureFlagsMenu.tsx
 // Purpose: Keeps local-only feature flag controls reusable without showing them in the product sidebar.
 // Exports: DebugFeatureFlagsMenu
-
+/**
+ * @file 调试用 Feature Flag 菜单
+ *
+ * 仅在本地调试构建中启用的功能开关菜单：
+ *
+ * - **Feature Flag 切换**：列出 `FEATURE_FLAGS` 中所有可切换项
+ * - **调试 Toast**：提供"模拟 git 错误"等本地 toast 触发器
+ * - **复用 UI**：从 `Sidebar` 抽出，避免污染产品侧栏
+ *
+ * ## 核心导出
+ *
+ * - `DebugFeatureFlagsMenu`：菜单组件
+ *
+ * ## 使用场景
+ *
+ * - 本地开发环境侧边栏
+ * - 调试 toast / 异常路径
+ *
+ * ## 注意事项
+ *
+ * - 仅在 `import.meta.env.DEV` 或调试构建中显示
+ * - 切换 flag 通过 `setFeatureFlagEnabled` 写入 `localStorage`
+ * - 不应在生产构建中渲染
+ */
 import { FlagIcon } from "~/lib/icons";
 import {
   FEATURE_FLAGS,

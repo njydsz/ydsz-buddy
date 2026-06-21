@@ -15,7 +15,7 @@
 //! ## 设计
 //!
 //! - 一个 Runtime 对应一个 child process
-//! - Runtime 不缓存 token 也不维护长连接状态，纯粹做"启动 / 停止 / 观测"
+//! - Runtime 不缓存 token 也不维护长连接状态，纯粹做'启动 / 停止 / 观测'
 //! - 上层（adapter / service）决定什么时候 start / stop
 
 use std::path::PathBuf;

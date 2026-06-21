@@ -1,3 +1,37 @@
+/**
+ * @file Git 操作控制逻辑工具
+ *
+ * GitActionsControl 使用的纯函数逻辑：
+ *
+ * - `GitActionMenuItem` / `GitQuickAction`：菜单/快捷动作项类型
+ * - `buildMenuItems`：根据 git 状态构建主菜单项
+ * - `buildGitActionProgressStages`：把进度事件映射到 UI 阶段
+ * - `requiresDefaultBranchConfirmation` / `requiresFeatureBranchForDefaultBranchAction`：默认分支保护
+ * - `resolveLiveThreadBranchUpdate`：实时线程分支元数据更新
+ *
+ * ## 核心导出
+ *
+ * - `GitActionIconName`
+ * - `GitDialogAction`
+ * - `GitActionMenuItem`
+ * - `GitQuickAction`
+ * - `buildMenuItems`
+ * - `buildGitActionProgressStages`
+ * - `requiresDefaultBranchConfirmation`
+ * - `requiresFeatureBranchForDefaultBranchAction`
+ * - `resolveLiveThreadBranchUpdate`
+ * - `DefaultBranchConfirmableAction`
+ *
+ * ## 使用场景
+ *
+ * - GitActionsControl 主组件
+ *
+ * ## 注意事项
+ *
+ * - 默认分支集合：main / master
+ * - 临时 worktree 分支（`isTemporaryWorktreeBranch`）不展示 push
+ * - 创建 PR 不可用时给出 "No branch changes" 提示
+ */
 import type {
   GitRunStackedActionResult,
   GitStackedAction,

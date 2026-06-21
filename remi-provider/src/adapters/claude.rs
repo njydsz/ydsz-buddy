@@ -117,7 +117,7 @@ impl ClaudeAdapter {
     ///
     /// # 参数
     ///
-    /// - `model`: 要使用的 Claude 模型名称（如 "claude-sonnet-4-5"）
+    /// - `model`: 要使用的 Claude 模型名称（如 'claude-sonnet-4-5'）
     /// - `cwd`: 子进程的工作目录
     ///
     /// # 返回值

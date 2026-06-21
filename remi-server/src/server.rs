@@ -8,7 +8,7 @@
 //! | 路径 | 方法 | 用途 |
 //! |------|------|------|
 //! | `/ws` | GET | WebSocket 升级端点，客户端通过此端点建立 WebSocket 连接 |
-//! | `/health` | GET | 健康检查端点，返回 "OK" 表示服务正常 |
+//! | `/health` | GET | 健康检查端点，返回 'OK' 表示服务正常 |
 //! | `/api/auth/session` | GET | 获取当前认证会话状态 |
 //! | `/api/auth/bootstrap` | POST | 交换引导凭证 |
 //! | `/api/auth/ws-token` | POST | 获取 WebSocket 认证令牌 |
@@ -255,7 +255,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ServerState>) {
 
 /// 健康检查处理函数
 ///
-/// 处理 `/health` 端点的 GET 请求，返回 "OK" 表示服务正常运行。
+/// 处理 `/health` 端点的 GET 请求，返回 'OK' 表示服务正常运行。
 async fn health_handler() -> impl IntoResponse {
     "OK"
 }

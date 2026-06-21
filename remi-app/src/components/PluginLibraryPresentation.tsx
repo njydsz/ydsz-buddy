@@ -4,7 +4,27 @@
 // Layer: Presentation
 // Exports: ProviderDiscoveryToolbar, PluginGridItem, SkillGridItem, ProviderToggleButton,
 //          PluginGlyph, SkillGlyph, InstalledStatus, ProviderIconByKind
-
+/**
+ * @file 插件库共享展示组件
+ *
+ * `PluginsView` 与 `SkillsView` 共用的展示组件：
+ *
+ * - `ProviderDiscoveryToolbar`：按 provider 切换的工具栏
+ * - `PluginGridItem` / `SkillGridItem`：网格项
+ * - `ProviderToggleButton`：单 provider 切换按钮
+ * - `PluginGlyph` / `SkillGlyph`：图标占位
+ * - `InstalledStatus`：已安装/未安装状态
+ * - `ProviderIconByKind`：按 provider 选取图标
+ *
+ * ## 使用场景
+ *
+ * - PluginsView / SkillsView 内部复用
+ *
+ * ## 注意事项
+ *
+ * - 不持有路由级状态，仅接收 props
+ * - 新增 provider 时只需扩展 `PROVIDER_DISPLAY_NAMES` 映射
+ */
 import { useState, type ReactNode, type SVGProps } from "react";
 import { HammerIcon, CheckIcon, type LucideIcon } from "~/lib/icons";
 import {

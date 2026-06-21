@@ -64,11 +64,11 @@
 //!
 //! // 启动会话
 //! let input = ProviderSessionStartInput {
-//!     thread_id: "thread-1".to_string(),
+//!     thread_id: 'thread-1'.to_string(),
 //!     provider: ProviderKind::ClaudeAgent,
-//!     model: "claude-3-opus".to_string(),
+//!     model: 'claude-3-opus'.to_string(),
 //! };
-//! let session = service.start_session("thread-1", input).await?;
+//! let session = service.start_session('thread-1', input).await?;
 //!
 //! // 发送消息
 //! let turn_input = TurnInput { /* ... */ };
@@ -78,7 +78,7 @@
 //! let mut rx = service.stream_events();
 //! tokio::spawn(async move {
 //!     while let Ok(event) = rx.recv().await {
-//!         println!("收到事件: {:?}", event);
+//!         println!('收到事件: {:?}', event);
 //!     }
 //! });
 //! ```
@@ -248,11 +248,11 @@ impl ProviderService {
     ///
     /// ```rust,ignore
     /// let input = ProviderSessionStartInput {
-    ///     thread_id: "thread-1".to_string(),
+    ///     thread_id: 'thread-1'.to_string(),
     ///     provider: ProviderKind::ClaudeAgent,
-    ///     model: "claude-3-opus".to_string(),
+    ///     model: 'claude-3-opus'.to_string(),
     /// };
-    /// let session = service.start_session("thread-1", input).await?;
+    /// let session = service.start_session('thread-1', input).await?;
     /// ```
     pub async fn start_session(
         &self,
@@ -615,7 +615,7 @@ impl ProviderService {
     ///
     /// # 参数
     ///
-    /// - `provider_name`: Provider 名称（如 "codex", "claude" 等）
+    /// - `provider_name`: Provider 名称（如 'codex', 'claude' 等）
     ///
     /// # 返回值
     ///
@@ -844,7 +844,7 @@ impl ProviderService {
     /// let mut rx = service.stream_events();
     /// tokio::spawn(async move {
     ///     while let Ok(event) = rx.recv().await {
-    ///         println!("收到事件: {:?}", event);
+    ///         println!('收到事件: {:?}', event);
     ///     }
     /// });
     /// ```

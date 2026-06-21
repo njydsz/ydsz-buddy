@@ -2,7 +2,29 @@
 // Purpose: Render the standard project folder icon with an optional favicon badge overlay.
 // Layer: Sidebar UI component
 // Exports: ProjectSidebarIcon
-
+/**
+ * @file 项目侧栏图标
+ *
+ * 侧边栏中项目的统一图标：
+ *
+ * - **闭合文件夹**：默认外观
+ * - **favicon 覆盖**：如果项目根目录有 `favicon.ico`，叠加显示
+ * - **缓存**：通过 `Map<projectId, boolean>` 记忆是否存在 favicon
+ *
+ * ## 核心导出
+ *
+ * - `ProjectSidebarIcon`：图标组件
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 项目列表
+ * - SidebarHeaderNavigationControls 内部
+ *
+ * ## 注意事项
+ *
+ * - 通过 `tauriBridge` 与环境变量获取 WebSocket origin
+ * - favicon 检测使用 HEAD 请求避免下载
+ */
 import { useEffect, useState } from "react";
 import { HiOutlineFolderOpen } from "react-icons/hi2";
 import { tauriBridge } from "../lib/tauri-bridge";

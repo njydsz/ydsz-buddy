@@ -112,7 +112,7 @@ impl CodexAdapter {
     ///
     /// # 参数
     ///
-    /// - `model`: 要使用的 Codex 模型名称（如 "gpt-5"）
+    /// - `model`: 要使用的 Codex 模型名称（如 'gpt-5'）
     /// - `cwd`: 子进程的工作目录
     ///
     /// # 返回值

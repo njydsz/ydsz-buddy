@@ -1,7 +1,33 @@
 // FILE: Sidebar.tsx
 // Purpose: Renders the project/thread sidebar, including row status, sorting, and thread actions.
 // Exports: Sidebar
-
+/**
+ * @file 侧边栏主组件
+ *
+ * 项目/线程侧边栏主视图：
+ *
+ * - **项目列表**：按文件夹展开/折叠、显示 favicon
+ * - **线程列表**：按状态排序/分组、显示最新活动
+ * - **行操作**：右键菜单（重命名/删除/固定）
+ * - **新增项目/线程**：顶部按钮
+ * - **搜索**：跨项目/线程过滤
+ * - **自动动画**：使用 `@formkit/auto-animate` 平滑列表变化
+ *
+ * ## 核心导出
+ *
+ * - `Sidebar`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 应用主窗口左侧
+ * - 拆分面板的左侧栏
+ *
+ * ## 注意事项
+ *
+ * - 折叠状态、行状态、最后访问路由通过 `Sidebar.uiState` 持久化
+ * - 排序选项由 `appSettings` 决定
+ * - 线程状态（活跃/待审批/错误）由 `session-logic` 派生
+ */
 import {
   ArrowLeftIcon,
   ChevronDownIcon,

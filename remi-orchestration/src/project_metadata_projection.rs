@@ -1,8 +1,8 @@
-﻿//! # 项目元数据投影模�./!
-//! 本模块负责维护项目（Project）的元数据投影�./!
+﻿//! # 项目元数据投影模../!
+//! 本模块负责维护项目（Project）的元数据投影../!
 //! ## 模块职责
 //!
-//! - **元数据派�.：从事件流派生项目元数据（标签、最近活动、统计信息等�./! - **统计信息**：维护线程数、消息数、活跃度等聚合指�./! - **缓存维护**：提供轻量级的内存索引以加速项目列表查�./! - **变更通知**：在元数据变更时发出通知供订阅者消�./!
+//! - **元数据派..：从事件流派生项目元数据（标签、最近活动、统计信息等../! - **统计信息**：维护线程数、消息数、活跃度等聚合指../! - **缓存维护**：提供轻量级的内存索引以加速项目列表查../! - **变更通知**：在元数据变更时发出通知供订阅者消../!
 //! ## 投影结构
 //!
 //! ```text
@@ -16,10 +16,12 @@
 //!
 //! ## 派生时机
 //!
-//! - 项目创建（`ProjectCreated`.?//! - 项目元数据更新（`ProjectMetaUpdated`.?//! - 线程创建（`ThreadCreated`）—.?递增线程计数并建.?thread_id .
+//! - 项目创建（`ProjectCreated`.
+//! - 项目元数据更新（`ProjectMetaUpdated`.
+//! - 线程创建（`ThreadCreated`）—.?递增线程计数并建.?thread_id .
 roject_id 索引
-//! - 线程删除/归档（`ThreadDeleted` / `ThreadArchived`）—�.过索引定位项目后递减计数
-//! - 任何消息事件（`ThreadMessageSent`）—�.过索引更新时间�.
+//! - 线程删除/归档（`ThreadDeleted` / `ThreadArchived`）—..过索引定位项目后递减计数
+//! - 任何消息事件（`ThreadMessageSent`）—..过索引更新时间..
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -42,7 +44,7 @@ pub struct ProjectMetadataProjection {
     pub title: String,
     /// 工作区根路径
     pub workspace_root: String,
-    /// 线程总数（含已归�.删除）
+    /// 线程总数（含已归..删除）
     pub thread_count: u32,
     /// 活跃线程数（未归档、未删除.
    pub active_thread_count: u32,
@@ -85,7 +87,8 @@ pub enum MetadataChange {
 
 /// 项目元数据投影器
 ///
-/// 维护所有项目的元数据投影，支持事件驱动的增量更新.?/// 内部通过 `thread_id -> project_id` 反向索引，支持基于线程事件定位所属项目.
+/// 维护所有项目的元数据投影，支持事件驱动的增量更新.
+/// 内部通过 `thread_id -> project_id` 反向索引，支持基于线程事件定位所属项目.
 ub struct ProjectMetadataProjector {
     /// 投影仓库（id -> projection.
    projections: Arc<RwLock<HashMap<ProjectId, ProjectMetadataProjection>>>,
@@ -200,7 +203,7 @@ impl ProjectMetadataProjector {
                 }
             }
             _ => {
-                debug!("忽略事件对元数据投影的影�?);
+                debug!("忽略事件对元数据投影的影.?);
             }
         }
         Ok(())

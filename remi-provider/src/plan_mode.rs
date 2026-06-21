@@ -1,6 +1,6 @@
 //! # Plan Mode 模块
 //!
-//! 实现"Plan Mode 状态机"——让 AI 在真正动手前先产出一份计划，
+//! 实现'Plan Mode 状态机'——让 AI 在真正动手前先产出一份计划，
 //! 用户审阅 / 修改 / 通过后再进入实施。
 //!
 //! ## 状态机
@@ -41,7 +41,7 @@
 //!
 //! ## 设计
 //!
-//! - 纯状态机（不持有 Provider 引用）——适配器负责把"事件"翻译成 transition
+//! - 纯状态机（不持有 Provider 引用）——适配器负责把'事件'翻译成 transition
 //! - 每个 plan 有一个稳定 `id`
 //! - 修订保留 `revision` 计数
 //! - 状态机只保证状态合法，不保证 Provider 真的执行
@@ -71,7 +71,7 @@ pub enum PlanState {
 }
 
 impl PlanState {
-    /// 是否处于"进行中"（不能直接 start）
+    /// 是否处于'进行中'（不能直接 start）
     pub fn is_in_progress(&self) -> bool {
         matches!(
             self,

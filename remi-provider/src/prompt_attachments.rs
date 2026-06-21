@@ -1,6 +1,6 @@
 //! # Prompt Attachments 模块
 //!
-//! 在构造 Provider turn 时附带的"上下文附件"——文件、目录、图片、URL、AGENTS.md 等。
+//! 在构造 Provider turn 时附带的'上下文附件'——文件、目录、图片、URL、AGENTS.md 等。
 //!
 //! ## 附件类型
 //!
@@ -21,7 +21,7 @@
 //!
 //! ```rust,ignore
 //! let mut att = PromptAttachments::new();
-//! att.add_file("src/main.rs", file_content);
+//! att.add_file('src/main.rs', file_content);
 //! att.add_agents_md(agents_md_content);
 //! let payload = att.to_provider_payload();
 //! ```

@@ -1,7 +1,25 @@
 // FILE: ChatView.selectors.ts
 // Purpose: Keep ChatView's thread-scoped selectors off the component hot path and out of the render file.
 // Exports: lineage/work-log selector factories used by ChatView.
-
+/**
+ * @file ChatView 线程作用域选择器
+ *
+ * 把 ChatView 频繁调用的 `zustand` selector 工厂抽离到独立文件，避免渲染文件过于庞大：
+ *
+ * - `localSubagentThreadId`：生成边聊线程 ID
+ * - `createRelevantWorkLogThreadsSelector`：按工作日志筛选相关线程
+ * - `createThreadLineageSelector`：构造线程家谱选择器
+ *
+ * ## 使用场景
+ *
+ * - ChatView 主组件
+ * - Sidebar 摘要显示
+ *
+ * ## 注意事项
+ *
+ * - 选择器使用 `useRef` 保持引用稳定，避免无限循环
+ * - 返回的 selector 必须配合 `useStore` 使用
+ */
 import {
   type MessageId,
   ThreadId,

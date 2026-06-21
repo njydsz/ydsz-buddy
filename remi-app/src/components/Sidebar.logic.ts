@@ -1,7 +1,34 @@
 // FILE: Sidebar.logic.ts
 // Purpose: Shared sidebar sorting and status helpers used by the thread list UI.
 // Exports: Sidebar row state derivation, add-project error helpers, sort utilities, and visibility helpers.
-
+/**
+ * @file 侧边栏逻辑工具
+ *
+ * 侧边栏使用的纯函数逻辑：
+ *
+ * - 线程行状态派生（活跃/待审批/错误/已结算）
+ * - 添加项目错误恢复（重复 project 提取）
+ * - 排序工具（按最近活动/按创建时间）
+ * - 可见性判断（搜索过滤、空状态）
+ * - 工作区根路径比较
+ *
+ * ## 核心导出
+ *
+ * - `extractDuplicateProjectCreateProjectId`
+ * - `isDuplicateProjectCreateError`
+ * - 排序工具
+ * - 可见性工具
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 主组件
+ * - 任何需要派生线程行状态的代码
+ *
+ * ## 注意事项
+ *
+ * - 不依赖 React，可在 reducer / store 中调用
+ * - 重复项目创建错误通过错误消息解析
+ */
 import type { KeybindingCommand, ProjectId, ThreadId } from "~/contracts";
 import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "../appSettings";
 import type { ChatMessage, Project, SidebarThreadSummary, Thread } from "../types";

@@ -38,7 +38,7 @@ pub enum ProviderKind {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProviderUsageLimit {
-    /// 窗口名称（如 "5h", "Weekly"）
+    /// 窗口名称（如 '5h', 'Weekly'）
     pub window: String,
     /// 已用百分比
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -55,11 +55,11 @@ pub struct ProviderUsageLimit {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProviderUsageLine {
-    /// 标签（如 "24h", "7d", "30d"）
+    /// 标签（如 '24h', '7d', '30d'）
     pub label: String,
-    /// 值（如 "12.5K tokens"）
+    /// 值（如 '12.5K tokens'）
     pub value: String,
-    /// 副标题（如 "3 recent sessions"）
+    /// 副标题（如 '3 recent sessions'）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subtitle: Option<String>,
 }

@@ -194,7 +194,7 @@ pub async fn project_favicon_handler(
 
 // ──────────────── Attachments ────────────────
 
-/// 简化的附件上传载荷：JSON `{ "name": "x.png", "mimeType": "image/png", "dataBase64": "..." }`
+/// 简化的附件上传载荷：JSON `{ 'name': 'x.png', 'mimeType': 'image/png', 'dataBase64': '...' }`
 #[derive(Debug, Deserialize)]
 pub struct AttachmentUploadBody {
     pub name: String,

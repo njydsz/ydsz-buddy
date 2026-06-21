@@ -5,7 +5,28 @@
 // without the "current release" anchor.
 // Layer: Settings overlay …mounted lazily from the settings panel when the
 // user asks to view history.
-
+/**
+ * @file 发布历史对话框
+ *
+ * 设置面板中"查看完整发布历史"按钮触发的对话框：
+ *
+ * - **完整 changelog**：列出所有 `WHATS_NEW_ENTRIES`
+ * - **按版本倒序**：通过 `sortEntriesByVersionDesc` 排序
+ * - **复用 ChangelogAccordion**：与"What's New"对话框共用渲染
+ *
+ * ## 核心导出
+ *
+ * - `ReleaseHistoryDialog`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Settings > About > "View full history"
+ *
+ * ## 注意事项
+ *
+ * - 与 `WhatsNewDialog` 共享条目数据，避免重复
+ * - 入口在"设置"面板中懒挂载
+ */
 import { ChangelogAccordion } from "../whatsNew/ChangelogAccordion";
 import { WHATS_NEW_ENTRIES } from "../whatsNew/entries";
 import { sortEntriesByVersionDesc, type WhatsNewEntry } from "../whatsNew/logic";

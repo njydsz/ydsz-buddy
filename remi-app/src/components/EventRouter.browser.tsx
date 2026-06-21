@@ -1,3 +1,24 @@
+/**
+ * @file EventRouter 浏览器端测试
+ *
+ * 验证 WebSocket 事件路由在真实浏览器中的行为：
+ *
+ * - **MSW WebSocket 拦截**：模拟后端推送的事件流
+ * - **路由注入**：通过 memory history 注入路由
+ * - **事件覆盖**：shell snapshot、turn diff、approval、user input 等
+ * - **副作用覆盖**：toast、composer 重置、错误恢复
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - 关键事件流回归
+ *
+ * ## 注意事项
+ *
+ * - 每个测试 `beforeEach` 重置所有 store
+ * - WebSocket 消息通过 `ws.link` 转发
+ * - 通过 `page` 上下文获得浏览器 page 对象
+ */
 import "../index.css";
 
 import {

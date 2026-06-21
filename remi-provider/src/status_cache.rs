@@ -12,8 +12,8 @@
 //!
 //! ## 与 `health` 模块的关系
 //!
-//! - `health` 模块关注"能不能跑 CLI"（粗粒度可用性）
-//! - 本模块关注"Provider 当前状态/认证/版本"（细粒度）
+//! - `health` 模块关注'能不能跑 CLI'（粗粒度可用性）
+//! - 本模块关注'Provider 当前状态/认证/版本'（细粒度）
 //!
 //! 两者互补：health 用于熔断与告警；status_cache 用于前端展示。
 
@@ -123,7 +123,7 @@ pub struct CachedProviderStatus {
     pub cli_available: bool,
     /// CLI 版本（若可读出）
     pub cli_version: Option<String>,
-    /// 认证状态字符串（如 "authenticated" / "expired" / "missing"）
+    /// 认证状态字符串（如 'authenticated' / 'expired' / 'missing'）
     pub auth_state: String,
     /// 最近一次刷新时间（毫秒时间戳）
     pub refreshed_at_ms: i64,

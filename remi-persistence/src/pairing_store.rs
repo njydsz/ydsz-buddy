@@ -144,8 +144,8 @@ impl SqlitePairingLinkStore {
     ///
     /// * `id` - 配对链接 ID
     /// * `credential` - 配对凭证字符串
-    /// * `method` - 配对方法（如 "desktop-bootstrap"、"one-time-token"）
-    /// * `role` - 配对角色（如 "client"、"owner"）
+    /// * `method` - 配对方法（如 'desktop-bootstrap'、'one-time-token'）
+    /// * `role` - 配对角色（如 'client'、'owner'）
     /// * `subject` - 配对主体标识
     /// * `label` - 配对链接的显示标签（可选）
     /// * `created_at_str` - 创建时间的 RFC3339 格式字符串

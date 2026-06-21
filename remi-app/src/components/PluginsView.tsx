@@ -4,7 +4,30 @@
 //          grid with a hero, search, and provider toolbar.
 // Layer: Route-level screen
 // Exports: PluginsView
-
+/**
+ * @file 插件浏览页
+ *
+ * `/plugins` 路由对应的插件浏览界面：
+ *
+ * - **Hero / 搜索**：顶部介绍 + 全局搜索
+ * - **Provider 工具栏**：按 provider 过滤
+ * - **网格展示**：插件卡片（已安装 / 未安装状态）
+ * - **空状态**：未配置 provider 时给出提示
+ *
+ * ## 核心导出
+ *
+ * - `PluginsView`：插件浏览页主组件
+ *
+ * ## 使用场景
+ *
+ * - 路由 `/plugins`（默认 tab）
+ *
+ * ## 注意事项
+ *
+ * - 与 `SkillsView` 共享 `useProviderDiscoveryData`
+ * - 搜索使用 `useDeferredValue` 优化大列表体验
+ * - 桌面/网络环境感知由 `isDesktop` 提供
+ */
 import { useDeferredValue } from "react";
 import { SearchIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

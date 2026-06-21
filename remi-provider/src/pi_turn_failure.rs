@@ -107,7 +107,7 @@ impl PiTurnFailureClassifier {
         Self {
             rules: vec![
                 // 顺序敏感：更具体的规则放前面，避免被通用词误匹配
-                // "context_length" 必须排在 "token" 前面，因为 tokens 包含 "token"
+                // 'context_length' 必须排在 'token' 前面，因为 tokens 包含 'token'
                 FailureRule {
                     keywords: &["context length", "context_length", "too long", "max tokens"],
                     kind: PiFailureKind::ContextOverflow,

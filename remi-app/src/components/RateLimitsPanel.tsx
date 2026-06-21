@@ -1,7 +1,29 @@
 // FILE: RateLimitsPanel.tsx
 // Purpose: Wraps the shared rate-limit summary UI in a collapsible panel fed by
 // orchestration thread activities.
-
+/**
+ * @file 速率限制面板
+ *
+ * 由 orchestrator 线程活动聚合的速率限制面板：
+ *
+ * - **聚合**：从多个线程活动派生 `ProviderRateLimit[]`
+ * - **折叠**：可最小化节省空间
+ * - **Learn more**：根据当前限制类型指向文档
+ *
+ * ## 核心导出
+ *
+ * - `RateLimitsPanel`（默认导出）：面板主组件
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 中的速率限制卡片
+ *
+ * ## 注意事项
+ *
+ * - 数据源：`OrchestrationThread.activities[]`
+ * - 派生函数：`deriveAccountRateLimits`
+ * - 默认折叠
+ */
 import { useMemo, useState } from "react";
 import type { OrchestrationThread } from "~/contracts";
 import { ChevronDownIcon, ExternalLinkIcon } from "~/lib/icons";

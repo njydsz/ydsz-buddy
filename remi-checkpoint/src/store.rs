@@ -29,15 +29,15 @@
 //! use remi_git::GitCore;
 //! use remi_persistence::SqliteCheckpointStore;
 //!
-//! let git_core = Arc::new(GitCore::new("/path/to/repo")?);
-//! let sqlite_store = Arc::new(SqliteCheckpointStore::new("/path/to/db")?);
+//! let git_core = Arc::new(GitCore::new('/path/to/repo')?);
+//! let sqlite_store = Arc::new(SqliteCheckpointStore::new('/path/to/db')?);
 //! let store = CheckpointStore::new(git_core, sqlite_store);
 //!
 //! // 创建检查点
 //! let checkpoint = store.create_checkpoint(
 //!     thread_id,
-//!     "abc123def456".to_string(),
-//!     "AI 生成代码后的检查点".to_string(),
+//!     'abc123def456'.to_string(),
+//!     'AI 生成代码后的检查点'.to_string(),
 //! ).await?;
 //!
 //! // 回滚到检查点
@@ -101,8 +101,8 @@ impl CheckpointStore {
     /// ## 使用示例
     ///
     /// ```rust,ignore
-    /// let git_core = Arc::new(GitCore::new("/path/to/repo")?);
-    /// let sqlite_store = Arc::new(SqliteCheckpointStore::new("/path/to/db")?);
+    /// let git_core = Arc::new(GitCore::new('/path/to/repo')?);
+    /// let sqlite_store = Arc::new(SqliteCheckpointStore::new('/path/to/db')?);
     /// let store = CheckpointStore::new(git_core, sqlite_store);
     /// ```
     pub fn new(git_core: Arc<GitCore>, checkpoint_store: Arc<SqliteCheckpointStore>) -> Self {

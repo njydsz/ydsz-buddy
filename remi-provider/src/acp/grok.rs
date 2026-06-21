@@ -41,11 +41,11 @@ pub struct GrokAcpRuntimeSettings {
     pub executable_path: Option<String>,
     /// 模型 ID
     ///
-    /// Grok 客户端使用的 AI 模型标识，如 "grok-4"、"grok-4-fast" 等
+    /// Grok 客户端使用的 AI 模型标识，如 'grok-4'、'grok-4-fast' 等
     pub model_id: String,
     /// API Key 环境变量名
     ///
-    /// 存储 Grok API Key 的环境变量名称，如 "XAI_API_KEY"。
+    /// 存储 Grok API Key 的环境变量名称，如 'XAI_API_KEY'。
     /// 当该环境变量存在时使用 API Key 认证，否则回退到 OAuth 认证。
     pub api_key_env: String,
 }
@@ -110,8 +110,8 @@ pub fn has_grok_api_key_env(settings: &GrokAcpRuntimeSettings) -> bool {
 /// 解析 Grok ACP 认证方式
 ///
 /// 根据 API Key 环境变量是否存在，确定使用的认证方式：
-/// - API Key 环境变量存在 → `"api_key"`
-/// - API Key 环境变量不存在 → `"oauth"`
+/// - API Key 环境变量存在 → `'api_key'`
+/// - API Key 环境变量不存在 → `'oauth'`
 ///
 /// # 参数
 ///
@@ -120,8 +120,8 @@ pub fn has_grok_api_key_env(settings: &GrokAcpRuntimeSettings) -> bool {
 /// # 返回值
 ///
 /// 返回认证方式标识字符串：
-/// - `"api_key"`: 使用 API Key 认证
-/// - `"oauth"`: 使用 OAuth 认证
+/// - `'api_key'`: 使用 API Key 认证
+/// - `'oauth'`: 使用 OAuth 认证
 pub fn resolve_grok_acp_auth_method_id(settings: &GrokAcpRuntimeSettings) -> String {
     if has_grok_api_key_env(settings) {
         "api_key".to_string()

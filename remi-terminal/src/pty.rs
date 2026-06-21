@@ -67,21 +67,21 @@ pub struct PtySize {
 ///
 /// ```ignore
 /// let env = HashMap::new();
-/// let mut pty = PtyProcess::new("/workspace", PtySize { cols: 80, rows: 24 }, &env);
+/// let mut pty = PtyProcess::new('/workspace', PtySize { cols: 80, rows: 24 }, &env);
 ///
 /// // 写入命令
-/// pty.write("ls -la\n");
+/// pty.write('ls -la\n');
 ///
 /// // 读取输出
 /// let mut buf = [0u8; 1024];
 /// if let Some(n) = pty.read(&mut buf) {
 ///     let output = String::from_utf8_lossy(&buf[..n]);
-///     println!("Output: {}", output);
+///     println!('Output: {}', output);
 /// }
 ///
 /// // 检查进程状态
 /// if pty.is_alive() {
-///     println!("Process {} is running", pty.pid());
+///     println!('Process {} is running', pty.pid());
 /// }
 ///
 /// // 进程会在 pty 离开作用域时自动终止

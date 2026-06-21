@@ -1,10 +1,14 @@
 //! # Remi Core 单元测试
 //!
-//! 本模块为 remi-core 提供跨子模块的集成测试�?//!
+//! 本模块为 remi-core 提供跨子模块的集成测试.
+//!
 //! ## 测试范围
 //!
 //! - 模型序列化与反序列化
-//! - 事件序列�?//! - 命令序列�?//! - ID 类型（UUID）生成与一致�?//! - 关键枚举�?
+//! - 事件序列.
+//! - 命令序列.
+//! - ID 类型（UUID）生成与一致.
+//! - 关键枚举.?
 #[cfg(test)]
 mod test {
     use crate::events::{
@@ -189,9 +193,9 @@ mod test {
             workspace_root: "/tmp".to_string(),
         };
         let v: Value = serde_json::to_value(OrchestrationEvent::ProjectCreated(e)).unwrap();
-        // 事件 tag 形如 "project.created"
+        // 事件 tag 形如 'project.created'
         assert_eq!(v["_tag"], "project.created");
-        // payload 字段�?camelCase
+        // payload 字段.?camelCase
         assert!(v.get("projectId").is_some());
         assert!(v.get("workspaceRoot").is_some());
     }
@@ -370,7 +374,7 @@ mod test {
 
     #[test]
     fn json_helper_in_message() {
-        // 简单确�?json! 宏工�?        let v = json!({
+        // 简单确.?json! 宏工.?        let v = json!({
             "user": "alice",
             "age": 30
         });

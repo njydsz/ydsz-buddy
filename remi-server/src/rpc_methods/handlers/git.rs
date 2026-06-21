@@ -132,7 +132,7 @@ pub async fn register_git_methods(
         .await;
 
     // git.runStackedAction - 执行堆叠 Git 操作（commit/push/PR 组合）
-    // 参数: { cwd: string, action: "commit"|"push"|"createPr"|"commitPush"|"commitPushPr",
+    // 参数: { cwd: string, action: 'commit'|'push'|'createPr'|'commitPush'|'commitPushPr',
     //         message?: string, prTitle?: string, prBody?: string, prBase?: string }
     // 返回: null
     let git_manager = services.git_manager.clone();
@@ -866,7 +866,7 @@ pub async fn register_git_methods(
         .await;
 
     // git.mergePullRequest - 合并 PR
-    // 参数: { cwd: string, prNumber: number, method: "merge"|"squash"|"rebase", deleteBranch?: boolean }
+    // 参数: { cwd: string, prNumber: number, method: 'merge'|'squash'|'rebase', deleteBranch?: boolean }
     // 返回: null
     let gh_merge = GitHubCli::new();
     router

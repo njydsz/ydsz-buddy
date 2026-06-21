@@ -1,7 +1,24 @@
 // FILE: FolderClosed.tsx
 // Purpose: Shared closed-folder glyph used by the sidebar and sidebar command palette.
 // Exports: FolderClosed
-
+/**
+ * @file 闭合文件夹图标
+ *
+ * 侧边栏与命令面板中复用的"闭合文件夹"图标：
+ *
+ * - 标准 24x24 viewBox
+ * - `currentColor` 颜色，继承父级文本色
+ * - `aria-hidden` 由父级标签承担语义
+ *
+ * ## 核心导出
+ *
+ * - `FolderClosed`：React 函数组件
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 折叠的目录
+ * - 命令面板中的目录项
+ */
 import type { SVGProps } from "react";
 
 export function FolderClosed(props: SVGProps<SVGSVGElement>) {

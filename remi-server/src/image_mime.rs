@@ -52,7 +52,7 @@ pub fn parse_base64_data_url(data_url: &str) -> Option<(String, String)> {
         return None;
     }
 
-    // 检查 header 是否以 ";base64" 结尾
+    // 检查 header 是否以 ';base64' 结尾
     let header_parts: Vec<&str> = header
         .split(';')
         .map(|p| p.trim())

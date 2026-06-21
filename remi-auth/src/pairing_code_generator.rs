@@ -42,7 +42,7 @@ const PAIRING_CODE_ALPHABET: &[u8] = b"23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 /// use remi_auth::generate_pairing_code;
 ///
 /// let code = generate_pairing_code();
-/// println!("Generated pairing code: {}", code);
+/// println!('Generated pairing code: {}', code);
 /// ```
 pub fn generate_pairing_code() -> String {
     let mut rng = OsRng;

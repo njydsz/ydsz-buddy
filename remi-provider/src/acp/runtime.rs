@@ -106,7 +106,7 @@ pub enum AcpSessionState {
 pub struct AcpSession {
     /// 会话 ID
     ///
-    /// 由运行时生成的唯一标识，格式为 "acp-{uuid}"
+    /// 由运行时生成的唯一标识，格式为 'acp-{uuid}'
     pub id: String,
     /// 线程 ID
     ///
@@ -184,7 +184,7 @@ impl Default for AcpRuntimeOptions {
 pub struct AcpSessionRuntime {
     /// 会话 ID
     ///
-    /// 由运行时生成的唯一标识，格式为 "acp-{uuid}"
+    /// 由运行时生成的唯一标识，格式为 'acp-{uuid}'
     session_id: String,
     /// 线程 ID
     ///

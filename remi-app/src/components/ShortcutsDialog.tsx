@@ -2,7 +2,31 @@
 // Purpose: Render a context-aware keyboard shortcuts reference as a slim, app-style dialog with search.
 // Layer: Chat shell overlay
 // Depends on: shared dialog UI, shortcut label builder, and current project script metadata.
-
+/**
+ * @file 键盘快捷键参考对话框
+ *
+ * 上下文感知的快捷键速查面板：
+ *
+ * - **分组**：按 Chat / Composer / Sidebar / ... 分组
+ * - **搜索**：过滤命令名 / 描述
+ * - **键位渲染**：使用 `ShortcutKbd` 渲染跨平台键位
+ * - **脚本联动**：当前项目的脚本快捷键一并展示
+ *
+ * ## 核心导出
+ *
+ * - `ShortcutsDialog`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 全局 "?" 快捷键触发
+ * - Sidebar 头部菜单入口
+ *
+ * ## 注意事项
+ *
+ * - 键位展示由 `ResolvedKeybindingsConfig` 决定
+ * - 平台差异（macOS / Windows）由 `ShortcutKbd` 处理
+ * - 搜索使用 `useDeferredValue` 优化大列表
+ */
 import type { ResolvedKeybindingsConfig } from "~/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {

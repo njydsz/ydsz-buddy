@@ -52,18 +52,18 @@
 //! use std::collections::HashMap;
 //!
 //! let client = JsonRpcClient::spawn(
-//!     "claude",
-//!     &["--json", "--model", "claude-sonnet-4-5"],
+//!     'claude',
+//!     &['--json', '--model', 'claude-sonnet-4-5'],
 //!     &HashMap::new(),
-//!     "/path/to/workdir",
+//!     '/path/to/workdir',
 //! ).await?;
 //!
 //! // 发送请求
-//! let response = client.request("session.initialize", Some(params)).await?;
+//! let response = client.request('session.initialize', Some(params)).await?;
 //!
 //! // 接收通知
 //! if let Some(notification) = client.recv_notification().await {
-//!     println!("收到通知: {}", notification.method);
+//!     println!('收到通知: {}', notification.method);
 //! }
 //!
 //! // 关闭客户端
@@ -96,17 +96,17 @@ use crate::error::{ProviderError, ProviderResult};
 ///
 /// # 字段说明
 ///
-/// - `jsonrpc`: 协议版本，固定为 `"2.0"`
+/// - `jsonrpc`: 协议版本，固定为 `'2.0'`
 /// - `id`: 请求唯一标识，用于关联响应
 /// - `method`: 要调用的远程方法名
 /// - `params`: 可选的方法参数，序列化时为 None 则省略
 #[derive(Debug, Clone, Serialize)]
 pub struct JsonRpcRequest {
-    /// 协议版本，固定为 "2.0"
+    /// 协议版本，固定为 '2.0'
     pub jsonrpc: String,
     /// 请求唯一标识，由 `AtomicU64` 自增生成
     pub id: u64,
-    /// 要调用的远程方法名（如 "session.initialize"、"turn.send" 等）
+    /// 要调用的远程方法名（如 'session.initialize'、'turn.send' 等）
     pub method: String,
     /// 可选的方法参数，为 None 时序列化时省略该字段
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -119,7 +119,7 @@ pub struct JsonRpcRequest {
 ///
 /// # 字段说明
 ///
-/// - `jsonrpc`: 协议版本，固定为 `"2.0"`
+/// - `jsonrpc`: 协议版本，固定为 `'2.0'`
 /// - `id`: 对应请求的 ID，None 时表示该消息为通知
 /// - `result`: 请求成功时的返回值
 /// - `error`: 请求失败时的错误信息
@@ -177,8 +177,8 @@ pub struct JsonRpcError {
 ///
 /// # 字段说明
 ///
-/// - `jsonrpc`: 协议版本，固定为 `"2.0"`
-/// - `method`: 通知的方法名（如 "session.update"、"turn.complete" 等）
+/// - `jsonrpc`: 协议版本，固定为 `'2.0'`
+/// - `method`: 通知的方法名（如 'session.update'、'turn.complete' 等）
 /// - `params`: 可选的通知参数
 #[derive(Debug, Clone, Deserialize)]
 pub struct JsonRpcNotification {
@@ -286,7 +286,7 @@ impl JsonRpcClient {
     ///
     /// # 参数
     ///
-    /// - `program`: Provider CLI 可执行文件名（如 "claude"、"codex" 等）
+    /// - `program`: Provider CLI 可执行文件名（如 'claude'、'codex' 等）
     /// - `args`: 传递给子进程的命令行参数
     /// - `env`: 额外的环境变量
     /// - `cwd`: 子进程的工作目录
@@ -305,10 +305,10 @@ impl JsonRpcClient {
     ///
     /// ```rust,ignore
     /// let client = JsonRpcClient::spawn(
-    ///     "claude",
-    ///     &["--json", "--model", "claude-sonnet-4-5"],
+    ///     'claude',
+    ///     &['--json', '--model', 'claude-sonnet-4-5'],
     ///     &HashMap::new(),
-    ///     "/path/to/workdir",
+    ///     '/path/to/workdir',
     /// ).await?;
     /// ```
     pub async fn spawn(

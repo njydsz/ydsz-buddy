@@ -1,11 +1,11 @@
 //! # Core Runtime Events 模块
 //!
-//! 跨 Provider / ACP 适配器的核心运行时事件类型与"事件总线"。
+//! 跨 Provider / ACP 适配器的核心运行时事件类型与'事件总线'。
 //!
 //! ## 背景
 //!
 //! - 不同 ACP Provider 推上来的事件命名 / 字段不一致（Cursor、Grok、Gemini 各有差异）
-//! - 适配器层负责把"原始事件"翻译成统一的 `CoreRuntimeEvent`
+//! - 适配器层负责把'原始事件'翻译成统一的 `CoreRuntimeEvent`
 //! - 上层（Service / Frontend）只认 `CoreRuntimeEvent`
 //!
 //! ## 事件类别
@@ -73,7 +73,7 @@ pub struct PermissionRequestSpec {
     pub request_id: String,
     pub action: String,
     pub reason: Option<String>,
-    /// 候选选项（"allow" / "deny" / "ask"）
+    /// 候选选项（'allow' / 'deny' / 'ask'）
     pub options: Vec<String>,
 }
 

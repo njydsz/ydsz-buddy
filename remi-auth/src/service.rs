@@ -61,10 +61,10 @@ use remi_persistence::PairingLinkStore;
 ///```rust,ignore
 /// let request = AuthRequest {
 ///     headers: HashMap::from([
-///         ("authorization".to_string(), "Bearer token123".to_string()),
+///         ('authorization'.to_string(), 'Bearer token123'.to_string()),
 ///     ]),
 ///     cookies: HashMap::new(),
-///     url: Some("/api/resource".to_string()),
+///     url: Some('/api/resource'.to_string()),
 /// };
 /// ```
 #[derive(Debug, Clone)]
@@ -100,8 +100,8 @@ pub struct AuthRequest {
 ///
 ///```rust,ignore
 /// let session = AuthenticatedSession {
-///     session_id: "sess_abc123".to_string(),
-///     subject: "user_456".to_string(),
+///     session_id: 'sess_abc123'.to_string(),
+///     subject: 'user_456'.to_string(),
 ///     method: SessionMethod::Bearer,
 ///     role: SessionRole::Client,
 ///     expires_at: Some(Utc::now() + Duration::hours(24)),
@@ -350,7 +350,7 @@ impl AuthService {
     /// ## 返回值
     ///
     /// 返回 [`AuthDescriptor`]，包含：
-    /// - `server_name`: 服务器名称（当前固定为 "Remi Claw"）
+    /// - `server_name`: 服务器名称（当前固定为 'Remi Claw'）
     /// - `requires_auth`: 是否需要认证（当前固定为 `true`）
     /// - `supported_methods`: 支持的认证方式列表（Bootstrap、Pairing、Bearer）
     ///
@@ -364,8 +364,8 @@ impl AuthService {
     /// #[tokio::main]
     /// async fn main() {
     /// let descriptor = auth_service.get_descriptor().await?;
-    /// println!("服务器名称: {}", descriptor.server_name);
-    /// println!("支持的认证方式: {:?}", descriptor.supported_methods);
+    /// println!('服务器名称: {}', descriptor.server_name);
+    /// println!('支持的认证方式: {:?}', descriptor.supported_methods);
     /// }
     pub async fn get_descriptor(&self) -> AuthResult<AuthDescriptor> {
         Ok(AuthDescriptor {
@@ -746,13 +746,13 @@ impl AuthService {
     /// async fn main() {
     /// let request = AuthRequest {
     ///     headers: HashMap::from([
-    ///         ("authorization".to_string(), "Bearer token123".to_string()),
+    ///         ('authorization'.to_string(), 'Bearer token123'.to_string()),
     ///     ]),
     ///     cookies: HashMap::new(),
-    ///     url: Some("/api/resource".to_string()),
+    ///     url: Some('/api/resource'.to_string()),
     /// };
     /// let session = auth_service.authenticate_http_request(&request).await?;
-    /// println!("已认证用户: {}", session.subject);
+    /// println!('已认证用户: {}', session.subject);
     /// }
     pub async fn authenticate_http_request(
         &self,
@@ -817,13 +817,13 @@ impl AuthService {
     /// async fn main() {
     /// let request = AuthRequest {
     ///     headers: HashMap::from([
-    ///         ("authorization".to_string(), "Bearer ws_token123".to_string()),
+    ///         ('authorization'.to_string(), 'Bearer ws_token123'.to_string()),
     ///     ]),
     ///     cookies: HashMap::new(),
-    ///     url: Some("/ws".to_string()),
+    ///     url: Some('/ws'.to_string()),
     /// };
     /// let session = auth_service.authenticate_websocket_upgrade(&request).await?;
-    /// println!("WebSocket 已认证用户: {}", session.subject);
+    /// println!('WebSocket 已认证用户: {}', session.subject);
     /// }
     pub async fn authenticate_websocket_upgrade(
         &self,
@@ -882,7 +882,7 @@ impl AuthService {
     /// async fn main() {
     /// let session = auth_service.authenticate_http_request(&request).await?;
     /// let ws_token = auth_service.issue_websocket_token(&session).await?;
-    /// println!("WebSocket 令牌: {}", ws_token.token);
+    /// println!('WebSocket 令牌: {}', ws_token.token);
     /// }
     pub async fn issue_websocket_token(
         &self,
@@ -923,8 +923,8 @@ impl AuthService {
     ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
-    /// let pairing_url = auth_service.issue_startup_pairing_url("https://example.com").await?;
-    /// println!("配对 URL: {}", pairing_url);
+    /// let pairing_url = auth_service.issue_startup_pairing_url('https://example.com').await?;
+    /// println!('配对 URL: {}', pairing_url);
     /// // 输出: 配对 URL: https://example.com/pair?code=abc12345
     /// }
     pub async fn issue_startup_pairing_url(&self, base_url: &str) -> AuthResult<String> {

@@ -60,7 +60,7 @@ impl GeneratedImageStore {
     /// # 参数
     ///
     /// - `data_base64`: Base64 编码的图片数据
-    /// - `mime`: MIME 类型（如 "image/png"）
+    /// - `mime`: MIME 类型（如 'image/png'）
     /// - `source_turn_id`: 产生这张图片的 Turn ID
     ///
     /// # 返回值

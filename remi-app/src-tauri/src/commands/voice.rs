@@ -11,7 +11,7 @@
 //! ## 核心功能
 //!
 //! 1. **语音转文字**：接收前端传来的音频数据，转发到服务端进行识别
-//! 2. **语言支持**：支持指定音频语言代码（如 "zh-CN"、"en-US"）
+//! 2. **语言支持**：支持指定音频语言代码（如 'zh-CN'、'en-US'）
 //! 3. **置信度返回**：返回识别结果的置信度分数
 //!
 //! ## 使用场景
@@ -33,9 +33,9 @@ use serde::{Deserialize, Serialize};
 pub struct TranscribeVoiceInput {
     /// 音频数据（Base64 编码）
     pub audio_data: String,
-    /// 音频格式（如 "wav"、"mp3"、"webm"）
+    /// 音频格式（如 'wav'、'mp3'、'webm'）
     pub format: String,
-    /// 语言代码（如 "zh-CN"、"en-US"），不提供时由服务自动检测
+    /// 语言代码（如 'zh-CN'、'en-US'），不提供时由服务自动检测
     pub language: Option<String>,
 }
 

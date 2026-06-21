@@ -35,7 +35,7 @@
 //!  dest_dir: <RemiHome>/imported/<source>/
 //!        │
 //!        ▼
-//!  state.json: { peakcode: "done", codex: "skipped", ... }
+//!  state.json: { peakcode: 'done', codex: 'skipped', ... }
 //! ```
 
 use std::fs;

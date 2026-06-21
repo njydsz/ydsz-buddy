@@ -317,9 +317,9 @@ pub struct TerminalCloseInput {
 ///
 /// // 打开终端
 /// let snapshot = manager.open(TerminalOpenInput {
-///     thread_id: "thread-1".into(),
-///     terminal_id: "term-1".into(),
-///     cwd: "/workspace".into(),
+///     thread_id: 'thread-1'.into(),
+///     terminal_id: 'term-1'.into(),
+///     cwd: '/workspace'.into(),
 ///     cols: Some(120),
 ///     rows: Some(30),
 ///     env: None,
@@ -370,7 +370,7 @@ impl TerminalManager {
     ///
     /// # 返回值
     ///
-    /// 格式为 `"{thread_id}:{terminal_id}"` 的字符串，用作会话存储的 HashMap 键。
+    /// 格式为 `'{thread_id}:{terminal_id}'` 的字符串，用作会话存储的 HashMap 键。
     fn session_key(thread_id: &str, terminal_id: &str) -> String {
         format!("{}:{}", thread_id, terminal_id)
     }

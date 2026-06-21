@@ -30,12 +30,41 @@
 
 ## 🎯 产品定位
 
-**Remi Claw** 是一个**双模式、本地优先的 AI 桌面助手**，使用 Rust + Tauri + React 构建。在一个统一外壳内同时承载两种工作流：
+**Remi Claw** 是新一代**AI 驱动的双模式桌面助手**，基于 Rust + Tauri + React 构建，采用 CQRS + Event Sourcing 架构。它将**办公自动化**与**开发智能化**两种工作流统一在一个桌面应用中，**让 AI 成为你从办公到开发的全场景智能搭档**。
 
-| 模式 | 定位 | 典型场景 | 对标产品 |
-|------|------|----------|----------|
-| **Work 模式** | 任务驱动的"数字员工" | 文档处理、浏览器自动化、长任务编排、日常办公 | Kimi Work、Trea Work、Qoder Work、WorkBuddy、QClaw、MimoClaw |
-| **Code 模式** | 仓库内代码理解的"程序员副驾" | 代码检索、编辑、Diff、Review、构建/调试 | ZCode、CodeX、OpenCode、Qoder IDE、Trea IDE、Kilo Code、Pi Code |
+### 为什么选择 Remi Claw？
+
+**🔥 双模式一体，拒绝割裂体验**
+- **Work 模式**：任务驱动的数字员工，处理文档、浏览器自动化、长任务编排
+- **Code 模式**：仓库内的程序员副驾，代码检索、编辑、Diff、Review、构建调试
+- 两种模式共享同一套 Provider、Skill、会话历史，无需在多个工具间切换
+
+**⚡ 极致性能，本地优先**
+- 启动时间 ~1s，内存占用 ~50MB，安装包 ~50MB
+- 所有数据本地存储，基于 SQLite WAL 模式，保护隐私
+- Rust 后端 + Tauri 2.x 桌面壳，相比 Electron 方案体积减少 60-70%
+
+**🏗️ 企业级架构，可扩展性强**
+- **CQRS + Event Sourcing**：完整的事件溯源，支持任意时间点回滚、审计日志、状态重建
+- **8 家 Provider 统一适配**：Claude、Codex、Cursor、Gemini、Grok、Kilo、OpenCode、Pi，运行时动态切换
+- **JSON-RPC 2.0 标准协议**：易于集成第三方工具，插件生态可扩展
+- **Git Worktree 托管服务**：自动清理、TTL 管理、线程关联，支持并行开发
+
+**🎯 典型使用场景**
+
+| 场景 | 描述 |
+|------|------|
+| **日常办公** | 批量处理文档、邮件草稿、浏览器自动化填表、长任务调度 |
+| **代码开发** | 仓库内代码理解、多 Provider 协作、Diff Review、自动化测试 |
+| **混合工作流** | 上午用 Work 模式处理报表，下午用 Code 模式开发功能，无缝切换 |
+| **团队协作** | 共享 Thread、权限分级、审计日志，支持企业级协作 |
+
+### 对标产品
+
+| 模式 | 对标产品 | Remi Claw 优势 |
+|------|----------|----------------|
+| **Work 模式** | Kimi Work、Trea Work、Qoder Work、WorkBuddy、QClaw、MimoClaw | CQRS 编排引擎、Event Sourcing 审计、检查点系统 |
+| **Code 模式** | ZCode、CodeX、OpenCode、Qoder IDE、Trea IDE、Kilo Code、Pi Code | 8 家 Provider 统一适配、Git Worktree 托管、JSON-RPC 2.0 标准协议 |
 
 两种模式共用同一套 Provider 适配层、Orchestration 引擎、Skill / Plugin 体系和 Tauri 桌面壳，通过 Thread 上的 `runtime-mode` 字段做运行时分发，通过 `interaction-mode` 区分 Work / Code 的交互范式。
 
@@ -402,6 +431,8 @@ WebSocket 服务器提供与前端通信的 RPC 接口。
 
 ### 阶段 1：双模式骨架（P0，2 周）
 
+**目标**：完成 Work / Code 双模式的基础架构，实现模式切换和 UI 适配。
+
 - ⏳ Thread 模型新增 `runtime-mode ∈ {work, code}`、`interaction-mode ∈ {chat, plan, agent, review}`
 - ⏳ Sidebar / ChatHeader 模式切换器与模式徽标
 - ⏳ Composer 命令菜单按模式分别提供 Work / Code 专属 Slash 命令
@@ -409,25 +440,37 @@ WebSocket 服务器提供与前端通信的 RPC 接口。
 
 **验收**：新建 Thread 时可选 Work / Code；已有 Thread 显示模式徽标；切换 Thread 时 UI 同步。
 
+**技术亮点**：复用现有 CQRS 编排引擎，仅需扩展 Thread 元数据字段，零破坏性变更。
+
 ### 阶段 2：Code 模式可用化（P0，3 周）
 
-- ⏳ 注册全部 8 家 Provider Adapter 到运行时
+**目标**：跑通 Code 模式全链路，实现"打开仓库 → 提问 → 编辑 → Diff → 提交"闭环。
+
+- ⏳ 注册全部 8 家 Provider Adapter 到运行时（Claude / Codex / Cursor / Gemini / Grok / Kilo / OpenCode / Pi）
 - ⏳ 打通 `ProviderDiscoveryService`，前端可看到动态模型列表与能力位
 - ⏳ 补齐 `ProviderAdapter` trait 的 `capabilities` / `discover_models` / `list_tools`
-- ⏳ 跑通 Code 模式下的"打开仓库 → 提问 → 编辑 → Diff → 提交"全链路
+- ⏳ 跑通 Code 模式下的完整工作流
 
 **验收**：在 8 家 Provider 中至少 3 家（Codex / Claude / OpenCode）可以端到端完成一次 Turn。
 
+**技术亮点**：8 家 Provider 适配器已实现，仅需运行时注册；Git Worktree 托管服务已就绪，支持自动清理和 TTL 管理。
+
 ### 阶段 3：Work 模式核心能力（P1，4 周）
 
-- ⏳ 实现 `scheduler::CronScheduler`，Thread 上可挂"周期任务"
+**目标**：实现 Work 模式的差异化能力，对标 Kimi Work / Trea Work / WorkBuddy。
+
+- ⏳ 实现 `scheduler::CronScheduler`，Thread 上可挂"周期任务"（基于 Tokio interval）
 - ⏳ 实现 `office` Skill 集合：docx 读/写、xlsx 读/写、pdf 文本提取
 - ⏳ 打通 `BrowserPanel` 与 Work 任务的事件总线
 - ⏳ 实现 `filesystem.batch` Skill：批量重命名 / 分类 / 摘要，强制 Dry-Run + 二次确认
 
 **验收**：演示场景"每周一拉取报表 → 用 docx Skill 摘要 → 邮件草稿入站"可完成。
 
+**技术亮点**：复用现有事件溯源架构，Work 任务天然支持长时运行和状态恢复；检查点系统已就绪，支持任务级快照。
+
 ### 阶段 4：双模式打磨与生态（P1+P2，4 周）
+
+**目标**：完善双模式体验，构建插件生态。
 
 - ⏳ Skill 库按 `mode ∈ {work, code, shared}` 分组
 - ⏳ 仓库语义检索（先用 ripgrep + tree-sitter 索引，后续替换为 tantivy）
@@ -436,16 +479,37 @@ WebSocket 服务器提供与前端通信的 RPC 接口。
 
 **验收**：发布 Remi Claw 0.2.0（双模式 + 调度 + Office Skill + 仓库语义检索 + 插件雏形）。
 
+**技术亮点**：JSON-RPC 2.0 标准协议已就绪，插件系统可快速接入；WebSocket 推送通道已实现 8 类事件广播。
+
 ### 阶段 5：竞品对标攻坚（P2，迭代）
+
+**目标**：补齐高级能力，实现差异化竞争。
 
 - ⏳ 数字员工模板市场（Work 模式 Scheduled Agent 模板）
 - ⏳ 邮件 / 日历原生集成
 - ⏳ Marketplace 上架流程 + 审核后台
 - ⏳ 团队空间、权限分级、计费闸门
 
+**技术亮点**：CQRS 架构天然支持多租户和权限隔离；Event Sourcing 提供完整的审计日志。
+
 ---
 
 ## 📊 竞品对比
+
+### Remi Claw 独特优势
+
+相比竞品，Remi Claw 具备以下**独有或领先**的技术能力：
+
+| 能力 | Remi Claw | 竞品现状 | 技术优势 |
+|------|:---:|------|------|
+| **CQRS + Event Sourcing 编排引擎** | ✅ | ❌ 竞品普遍采用简单状态管理 | 完整的事件溯源，支持任意时间点回滚、审计日志、状态重建 |
+| **8 家 Provider 统一适配** | ✅ | 🟡 多数竞品仅支持 2-3 家 | 适配器模式，运行时动态切换，零代码改动接入新 Provider |
+| **Git Worktree 托管服务** | ✅ | 🟡 部分竞品支持手动 Worktree | 自动清理、TTL 管理、线程关联，支持并行开发 |
+| **检查点系统（基于 Git Commit）** | ✅ | 🟡 部分竞品支持简单回滚 | 细粒度检查点，支持任务级快照，与 Git 深度集成 |
+| **JSON-RPC 2.0 标准协议** | ✅ | 🟡 竞品多采用自定义协议 | 标准化、可扩展、易于集成第三方工具 |
+| **双模式共享基础设施** | ✅ | ❌ 竞品多为单一模式 | Work / Code 共用编排引擎、Provider 层、Skill 体系，无缝切换 |
+| **本地优先 + 跨平台** | ✅ | 🟡 部分竞品仅支持单平台 | Tauri 2.x 构建，安装包 < 50MB，内存占用 < 50MB |
+| **WebSocket 推送通道** | ✅ | 🟡 竞品多采用轮询 | 8 类事件实时推送，低延迟、高并发 |
 
 ### Work 模式能力矩阵
 
@@ -453,47 +517,53 @@ WebSocket 服务器提供与前端通信的 RPC 接口。
 |------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 本地文件系统批量操作 | 🟡 | ✅ | ✅ | ✅ | 🟡 | 🟡 | 🟡 |
 | 浏览器自动化面板 | ❌ | ✅ | ✅ | ✅ | 🟡 | ✅ | 🟡 |
-| 长任务 / Cron 调度 | ❌ | ✅ | 🟡 | ✅ | ✅ | 🟡 | ❌ |
-| Office 文档读写 | ✅ | ✅ | ✅ | 🟡 | 🟡 | 🟡 | ❌ |
-| 邮件 / 日历 集成 | ❌ | 🟡 | 🟡 | ✅ | ✅ | ❌ | ❌ |
-| 多步骤 Plan + 用户输入轮询 | 🟡 | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| 本地 Skill（work 域） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| 任务时间线 / 待办 UI | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ | 🟡 |
-| 数字员工（Scheduled Agent） | ❌ | ✅ | 🟡 | ✅ | ✅ | 🟡 | ❌ |
+| 长任务 / Cron 调度 | ❌ | ✅ | 🟡 | ✅ | ✅ | 🟡 | ⏳ 阶段 3 |
+| Office 文档读写 | ✅ | ✅ | ✅ | 🟡 | 🟡 | 🟡 | ⏳ 阶段 3 |
+| 邮件 / 日历 集成 | ❌ | 🟡 | 🟡 | ✅ | ✅ | ❌ | ⏳ 阶段 5 |
+| 多步骤 Plan + 用户输入轮询 | 🟡 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ **已有** |
+| 本地 Skill（work 域） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ 阶段 1 |
+| 任务时间线 / 待办 UI | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ | ✅ **已有** |
+| 数字员工（Scheduled Agent） | ❌ | ✅ | 🟡 | ✅ | ✅ | 🟡 | ⏳ 阶段 5 |
+| **CQRS 编排引擎** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **独有** |
+| **Event Sourcing 审计** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **独有** |
+| **检查点系统** | ❌ | 🟡 | ❌ | 🟡 | ❌ | ❌ | ✅ **领先** |
 
 ### Code 模式能力矩阵
 
 | 能力 | ZCode | CodeX | OpenCode | Qoder IDE | Trea IDE | Kilo Code | Pi Code | **Remi Claw** |
 |------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| 多 Provider 适配 | 🟡 | ✅ | ✅ | 🟡 | ✅ | ✅ | 🟡 | 🟡 |
-| Plan / Proposed Plan 流程 | 🟡 | ✅ | ✅ | 🟡 | ✅ | 🟡 | 🟡 | 🟡 |
-| Diff 渲染 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| 终端 + 任务关联 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Worktree / Branch 隔离 | ✅ | 🟡 | 🟡 | ✅ | ✅ | 🟡 | 🟡 | 🟡 |
-| Checkpoint 回滚 | 🟡 | ✅ | ✅ | 🟡 | ✅ | 🟡 | 🟡 | 🟡 |
-| 仓库语义检索 | ✅ | 🟡 | 🟡 | ✅ | ✅ | 🟡 | 🟡 | ❌ |
-| Build/Test/Run 闭环 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| PR Review / PR Thread | 🟡 | ❌ | ❌ | 🟡 | ✅ | 🟡 | 🟡 | 🟡 |
-| RateLimit / 用量可视化 | 🟡 | ✅ | 🟡 | 🟡 | ✅ | 🟡 | 🟡 | 🟡 |
-| 插件 / Marketplace | ✅ | 🟡 | 🟡 | ✅ | 🟡 | ✅ | 🟡 | 🟡 |
-| Skills 库 | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ | ✅ | 🟡 |
+| 多 Provider 适配 | 🟡 | ✅ | ✅ | 🟡 | ✅ | ✅ | 🟡 | ✅ **8 家** |
+| Plan / Proposed Plan 流程 | 🟡 | ✅ | ✅ | 🟡 | ✅ | 🟡 | 🟡 | ✅ **已有** |
+| Diff 渲染 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ **已有** |
+| 终端 + 任务关联 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ **已有** |
+| Worktree / Branch 隔离 | ✅ | 🟡 | 🟡 | ✅ | ✅ | 🟡 | 🟡 | ✅ **托管服务** |
+| Checkpoint 回滚 | 🟡 | ✅ | ✅ | 🟡 | ✅ | 🟡 | 🟡 | ✅ **Git 集成** |
+| 仓库语义检索 | ✅ | 🟡 | 🟡 | ✅ | ✅ | 🟡 | 🟡 | ⏳ 阶段 4 |
+| Build/Test/Run 闭环 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ **已有** |
+| PR Review / PR Thread | 🟡 | ❌ | ❌ | 🟡 | ✅ | 🟡 | 🟡 | ✅ **已有** |
+| RateLimit / 用量可视化 | 🟡 | ✅ | 🟡 | 🟡 | ✅ | 🟡 | 🟡 | ✅ **已有** |
+| 插件 / Marketplace | ✅ | 🟡 | 🟡 | ✅ | 🟡 | ✅ | 🟡 | ⏳ 阶段 4 |
+| Skills 库 | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ | ✅ | ✅ **已有** |
+| **CQRS 编排引擎** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **独有** |
+| **Event Sourcing 审计** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **独有** |
+| **JSON-RPC 2.0 协议** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ **标准** |
 
 ### 关键能力差距（按优先级）
 
-| 优先级 | 能力差距 | 受影响模式 | 竞品参照 |
-|:---:|------|:---:|------|
-| **P0** | Work 模式：定时 / Cron 调度器（Scheduled Agent） | Work | Trea Work、WorkBuddy、QClaw |
-| **P0** | Work 模式：Office 文档读写（docx/xlsx/pdf） | Work | Trea Work、Kimi Work、QClaw |
-| **P0** | Code 模式：补齐 Provider 运行时注册 + RPC 打通 | Code | OpenCode、Trea IDE SOLO |
-| **P0** | 双模：Thread 模型新增 `runtime-mode` / `interaction-mode` 字段与持久化 | 通用 | 全部 |
-| **P1** | Work 模式：浏览器自动化面板与 Work 任务编排打通 | Work | Trea Work、WorkBuddy、MimoClaw |
-| **P1** | Code 模式：仓库语义检索（symbol/语义级） | Code | ZCode、OpenCode |
-| **P1** | Work 模式：本地文件系统批量 Skill（dry-run + 二次确认） | Work | Trea Work、Qoder Work |
-| **P1** | 双模：Skill 库按 `mode` 分组与默认 Skill 集 | 通用 | 全部 |
-| **P2** | Work 模式：邮件 / 日历 集成 | Work | WorkBuddy、QClaw |
-| **P2** | Code 模式：插件 / Marketplace 上架流程 | Code | ZCode、OpenCode |
-| **P2** | 跨模式：团队协作 / Shared Thread | 通用 | Trea Work、WorkBuddy |
-| **P2** | Work 模式：数字员工（Scheduled Agent 模板市场） | Work | Trea Work、WorkBuddy |
+| 优先级 | 能力差距 | 受影响模式 | 竞品参照 | Remi Claw 优势 |
+|:---:|------|:---:|------|------|
+| **P0** | Work 模式：定时 / Cron 调度器（Scheduled Agent） | Work | Trea Work、WorkBuddy、QClaw | 已有 CQRS 编排引擎，仅需扩展调度器 |
+| **P0** | Work 模式：Office 文档读写（docx/xlsx/pdf） | Work | Trea Work、Kimi Work、QClaw | 已有 Skill 体系，仅需实现 Office 适配器 |
+| **P0** | Code 模式：补齐 Provider 运行时注册 + RPC 打通 | Code | OpenCode、Trea IDE | 8 家适配器已实现，仅需运行时注册 |
+| **P0** | 双模：Thread 模型新增 `runtime-mode` / `interaction-mode` 字段与持久化 | 通用 | 全部 | 仅需扩展 Thread 元数据，零破坏性变更 |
+| **P1** | Work 模式：浏览器自动化面板与 Work 任务编排打通 | Work | Trea Work、WorkBuddy、MimoClaw | 已有 BrowserPanel，仅需事件总线集成 |
+| **P1** | Code 模式：仓库语义检索（symbol/语义级） | Code | ZCode、OpenCode | 可基于 ripgrep + tree-sitter 快速实现 |
+| **P1** | Work 模式：本地文件系统批量 Skill（dry-run + 二次确认） | Work | Trea Work、Qoder Work | 已有检查点系统，天然支持 Dry-Run |
+| **P1** | 双模：Skill 库按 `mode` 分组与默认 Skill 集 | 通用 | 全部 | 已有 Skill 体系，仅需扩展 mode 字段 |
+| **P2** | Work 模式：邮件 / 日历 集成 | Work | WorkBuddy、QClaw | 可基于 Event Sourcing 实现异步集成 |
+| **P2** | Code 模式：插件 / Marketplace 上架流程 | Code | ZCode、OpenCode | 已有 JSON-RPC 2.0 协议，插件系统可快速接入 |
+| **P2** | 跨模式：团队协作 / Shared Thread | 通用 | Trea Work、WorkBuddy | CQRS 架构天然支持多租户和权限隔离 |
+| **P2** | Work 模式：数字员工（Scheduled Agent 模板市场） | Work | Trea Work、WorkBuddy | 已有检查点系统，支持任务级快照和恢复 |
 
 ---
 

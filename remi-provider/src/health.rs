@@ -48,7 +48,7 @@
 //! // 检查单个 Provider
 //! let status = health.check_health(ProviderKind::ClaudeAgent).await?;
 //! if status.available {
-//!     println!("Provider 可用");
+//!     println!('Provider 可用');
 //! }
 //!
 //! // 批量检查
@@ -57,7 +57,7 @@
 //!
 //! // 查询缓存状态（不执行实际检查）
 //! if let Some(cached) = health.get_cached_status(ProviderKind::ClaudeAgent).await {
-//!     println!("上次检查时间: {}", cached.last_checked);
+//!     println!('上次检查时间: {}', cached.last_checked);
 //! }
 //! ```
 

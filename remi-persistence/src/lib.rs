@@ -24,7 +24,7 @@
 //! use std::path::Path;
 //! 
 //! // 初始化数据库客户端
-//! let client = SqliteClient::new(Path::new("/path/to/db.sqlite")).unwrap();
+//! let client = SqliteClient::new(Path::new('/path/to/db.sqlite')).unwrap();
 //! 
 //! // 执行数据库迁移
 //! run_migrations(&client).unwrap();

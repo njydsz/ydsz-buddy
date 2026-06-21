@@ -107,7 +107,7 @@ impl TerminalState {
 
 /// 启动后台 PTY 读取任务
 ///
-/// 在独立的 tokio 任务中持续读取 PTY 输出，并通过 `app.emit("terminal-output", payload)`
+/// 在独立的 tokio 任务中持续读取 PTY 输出，并通过 `app.emit('terminal-output', payload)`
 /// 推送到前端。读取循环在以下情况退出：
 /// - PTY 已关闭（read 返回 0 字节）
 /// - 读取发生错误

@@ -49,8 +49,8 @@ use crate::error::TelemetryResult;
 ///
 /// ## 序列化约定
 ///
-/// 通过 `#[serde(rename_all = "snake_case")]` 将变体名称序列化为蛇形命名格式
-/// （如 `Counter` → `"counter"`），便于与外部监控系统对接。
+/// 通过 `#[serde(rename_all = 'snake_case')]` 将变体名称序列化为蛇形命名格式
+/// （如 `Counter` → `'counter'`），便于与外部监控系统对接。
 ///
 /// ## 类型说明
 ///
@@ -88,10 +88,10 @@ pub enum MetricType {
 ///
 /// | 字段 | 类型 | 说明 |
 /// |------|------|------|
-/// | `name` | `String` | 指标名称（如 `"http_requests_total"`），用于唯一标识一类指标 |
+/// | `name` | `String` | 指标名称（如 `'http_requests_total'`），用于唯一标识一类指标 |
 /// | `metric_type` | `MetricType` | 指标类型（Counter/Gauge/Histogram），决定聚合语义 |
 /// | `value` | `f64` | 指标数值，Counter 为增量值，Gauge 为当前值，Histogram 为单次观测值 |
-/// | `labels` | `HashMap<String, String>` | 维度标签（如 `{"method": "GET", "status": "200"}`），用于多维度聚合与过滤 |
+/// | `labels` | `HashMap<String, String>` | 维度标签（如 `{'method': 'GET', 'status': '200'}`），用于多维度聚合与过滤 |
 /// | `timestamp` | `DateTime<Utc>` | 指标采集的 UTC 时间戳，采用 ISO 8601 格式序列化 |
 ///
 /// ## 使用场景
@@ -102,7 +102,7 @@ pub enum MetricType {
 /// - 通过 [`MetricsCollector::get_metrics`] 查询全部已记录指标。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetricRecord {
-    /// 指标名称（如 `"http_requests_total"`、"`response_time_seconds"`），
+    /// 指标名称（如 `'http_requests_total'`、'`response_time_seconds'`），
     /// 用于唯一标识一类指标，建议采用蛇形命名规范。
     pub name: String,
     /// 指标类型（Counter/Gauge/Histogram），决定该指标在外部监控系统中的聚合语义。
@@ -110,7 +110,7 @@ pub struct MetricRecord {
     /// 指标数值。对于 Counter 为增量值，对于 Gauge 为当前值，对于 Histogram 为单次观测值。
     pub value: f64,
     /// 维度标签，用于多维度聚合与过滤。
-    /// 例如 `{"method": "GET", "status": "200"}` 可按 HTTP 方法和状态码分别统计。
+    /// 例如 `{'method': 'GET', 'status': '200'}` 可按 HTTP 方法和状态码分别统计。
     pub labels: HashMap<String, String>,
     /// 指标采集的 UTC 时间戳，采用 ISO 8601 格式序列化。
     pub timestamp: DateTime<Utc>,
@@ -125,7 +125,7 @@ pub struct MetricRecord {
 ///
 /// 该结构体为纯数据快照，不包含更新逻辑。这是因为分位数计算（P95/P99）需要遍历
 /// 全部历史观测值，若在每次指标记录时实时计算会带来显著性能开销。
-/// 因此采用"延迟计算"策略：由上层服务在需要时根据 [`MetricRecord`] 聚合计算后填充，
+/// 因此采用'延迟计算'策略：由上层服务在需要时根据 [`MetricRecord`] 聚合计算后填充，
 /// 而非在 `MetricsCollector` 内部自动维护。
 ///
 /// ## 字段说明
@@ -186,19 +186,19 @@ pub struct PerformanceMetrics {
 /// let collector = MetricsCollector::new();
 ///
 /// // 记录计数器
-/// collector.increment_counter("http_requests_total", 1.0, HashMap::new()).await?;
+/// collector.increment_counter('http_requests_total', 1.0, HashMap::new()).await?;
 ///
 /// // 记录仪表
-/// collector.set_gauge("active_connections", 42.0, HashMap::new()).await?;
+/// collector.set_gauge('active_connections', 42.0, HashMap::new()).await?;
 ///
 /// // 记录直方图
-/// collector.observe_histogram("response_time_seconds", 0.123, HashMap::new()).await?;
+/// collector.observe_histogram('response_time_seconds', 0.123, HashMap::new()).await?;
 ///
 /// // 查询所有指标
 /// let metrics = collector.get_metrics().await?;
 ///
 /// // 获取运行时间
-/// println!("Uptime: {:?}", collector.uptime());
+/// println!('Uptime: {:?}', collector.uptime());
 /// ```
 pub struct MetricsCollector {
     /// 指标记录列表，按写入顺序存储所有已记录的指标数据。
@@ -272,10 +272,10 @@ impl MetricsCollector {
     ///
     /// ## 参数
     ///
-    /// - `name`: `&str` —— 指标名称（如 `"http_requests_total"`），建议采用蛇形命名规范。
+    /// - `name`: `&str` —— 指标名称（如 `'http_requests_total'`），建议采用蛇形命名规范。
     /// - `value`: `f64` —— 计数器增量值，通常为正数。
     /// - `labels`: [`HashMap<String, String>`] —— 维度标签，用于多维度聚合与过滤。
-    ///   例如 `{"method": "GET", "status": "200"}`。
+    ///   例如 `{'method': 'GET', 'status': '200'}`。
     ///
     /// ## 返回值
     ///
@@ -305,7 +305,7 @@ impl MetricsCollector {
     ///
     /// ## 参数
     ///
-    /// - `name`: `&str` —— 指标名称（如 `"active_connections"`），建议采用蛇形命名规范。
+    /// - `name`: `&str` —— 指标名称（如 `'active_connections'`），建议采用蛇形命名规范。
     /// - `value`: `f64` —— 仪表当前值，可为正数、负数或零。
     /// - `labels`: [`HashMap<String, String>`] —— 维度标签，用于多维度聚合与过滤。
     ///
@@ -338,10 +338,10 @@ impl MetricsCollector {
     ///
     /// ## 参数
     ///
-    /// - `name`: `&str` —— 指标名称（如 `"response_time_seconds"`），建议采用蛇形命名规范。
+    /// - `name`: `&str` —— 指标名称（如 `'response_time_seconds'`），建议采用蛇形命名规范。
     /// - `value`: `f64` —— 单次观测值（如本次请求的响应时间，单位秒）。
     /// - `labels`: [`HashMap<String, String>`] —— 维度标签，用于多维度聚合与过滤。
-    ///   例如 `{"endpoint": "/api/chat"}`。
+    ///   例如 `{'endpoint': '/api/chat'}`。
     ///
     /// ## 返回值
     ///

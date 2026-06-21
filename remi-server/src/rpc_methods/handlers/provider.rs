@@ -159,7 +159,7 @@ pub async fn register_provider_methods(
         .await;
 
     // provider.listSkills - 列出指定 Provider 的技能
-    // 参数: { provider: string, cwd: string, threadId?: string, forceReload?: boolean }
+    // 参数: { provider: string, cwd: string, threadId?: string, agentDir?: string, forceReload?: boolean }
     // 返回: Skill[]
     let provider_service = services.provider_service.clone();
     router
@@ -191,6 +191,7 @@ pub async fn register_provider_methods(
                     provider,
                     cwd: cwd.to_string(),
                     thread_id: params.get("threadId").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    agent_dir: params.get("agentDir").and_then(|v| v.as_str()).map(|s| s.to_string()),
                     force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
                 };
 
@@ -203,7 +204,7 @@ pub async fn register_provider_methods(
         .await;
 
     // provider.listCommands - 列出指定 Provider 的命令
-    // 参数: { provider: string, cwd: string, threadId?: string, forceReload?: boolean }
+    // 参数: { provider: string, cwd: string, threadId?: string, agentDir?: string, forceReload?: boolean }
     // 返回: Command[]
     let provider_service = services.provider_service.clone();
     router
@@ -235,6 +236,7 @@ pub async fn register_provider_methods(
                     provider,
                     cwd: cwd.to_string(),
                     thread_id: params.get("threadId").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    agent_dir: params.get("agentDir").and_then(|v| v.as_str()).map(|s| s.to_string()),
                     force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
                 };
 
@@ -271,6 +273,7 @@ pub async fn register_provider_methods(
                 let input = remi_core::provider::ProviderListPluginsInput {
                     provider,
                     cwd: params.get("cwd").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    thread_id: params.get("threadId").and_then(|v| v.as_str()).map(|s| s.to_string()),
                     force_remote_sync: params.get("forceRemoteSync").and_then(|v| v.as_bool()),
                     force_reload: params.get("forceReload").and_then(|v| v.as_bool()),
                 };

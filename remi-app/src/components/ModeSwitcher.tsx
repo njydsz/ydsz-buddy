@@ -3,7 +3,30 @@
 //          thread's RuntimeMode (work/code) and InteractionMode
 //          (chat/plan/agent/review/task). Used in the chat header.
 // Exports: ModeSwitcher, getModeBadgeLabel, getModeBadgeTooltip
-
+/**
+ * @file 模式切换器
+ *
+ * 聊天头部的"模式徽标 + 下拉"组合控件：
+ *
+ * - **RuntimeMode 切换**：work / code
+ * - **InteractionMode 切换**：chat / plan / agent / review / task
+ * - **徽标展示**：当前模式图标 + 标签 + tooltip
+ *
+ * ## 核心导出
+ *
+ * - `ModeSwitcher`：模式切换组件
+ * - `getModeBadgeLabel`：获取徽标标签
+ * - `getModeBadgeTooltip`：获取徽标 tooltip
+ *
+ * ## 使用场景
+ *
+ * - ChatView 头部
+ *
+ * ## 注意事项
+ *
+ * - InteractionMode 切换会立刻影响后续 turn 的 prompt
+ * - 模式变化会通过 `useStore` 同步到全局
+ */
 import { useCallback, useMemo } from "react";
 import { TbChevronDown } from "react-icons/tb";
 import {

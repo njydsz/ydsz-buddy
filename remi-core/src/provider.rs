@@ -67,14 +67,14 @@ impl std::fmt::Display for ProviderKind {
 /// ## 字段说明
 ///
 /// - `provider`: Provider 类型
-/// - `model`: 模型名称（如 "gpt-4"、"claude-3-opus" 等）
+/// - `model`: 模型名称（如 'gpt-4'、'claude-3-opus' 等）
 /// - `options`: 可选的模型参数（温度、最大 token 数等）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModelSelection {
     /// Provider 类型
     pub provider: ProviderKind,
-    /// 模型名称（如 "gpt-4"、"claude-3-opus" 等）
+    /// 模型名称（如 'gpt-4'、'claude-3-opus' 等）
     pub model: String,
     /// 可选的模型参数配置
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -527,7 +527,7 @@ pub struct ProviderStartReviewInput {
 ///
 /// 用户对 Provider 审批请求的决策。
 ///
-/// 每种决策都有"记住"变体，选择后系统会将该决策持久化，
+/// 每种决策都有'记住'变体，选择后系统会将该决策持久化，
 /// 后续遇到相同类型的审批请求时自动应用，无需用户重复确认。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -700,6 +700,9 @@ pub struct ProviderSkillDescriptor {
 /// # Provider 列出技能输入
 ///
 /// 列出可用技能时需要的输入参数。
+///
+/// 字段顺序与序列化（camelCase）严格对齐前端 `ProviderListSkillsInput` 契约
+/// （`remi-app/src/contracts/providerDiscovery.ts`）。
 #[derive(Debug, Clone)]
 pub struct ProviderListSkillsInput {
     /// Provider 类型
@@ -707,8 +710,13 @@ pub struct ProviderListSkillsInput {
     /// 工作目录
     pub cwd: String,
     /// 线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thread_id: Option<String>,
+    /// Agent 目录（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_dir: Option<String>,
     /// 是否强制重新加载
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_reload: Option<bool>,
 }
 
@@ -751,8 +759,13 @@ pub struct ProviderListCommandsInput {
     /// 工作目录
     pub cwd: String,
     /// 线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thread_id: Option<String>,
+    /// Agent 目录（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_dir: Option<String>,
     /// 是否强制重新加载
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_reload: Option<bool>,
 }
 
@@ -810,10 +823,16 @@ pub struct ProviderListPluginsInput {
     /// Provider 类型
     pub provider: ProviderKind,
     /// 工作目录（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cwd: Option<String>,
+    /// 线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thread_id: Option<String>,
     /// 是否强制远程同步
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_remote_sync: Option<bool>,
     /// 是否强制重新加载
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_reload: Option<bool>,
 }
 

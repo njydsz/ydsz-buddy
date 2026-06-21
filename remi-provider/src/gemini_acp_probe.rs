@@ -14,7 +14,7 @@
 //! ## 用途
 //!
 //! 在启动 ACP 适配器前先做一次能力握手，得到一个 `GeminiAcpCapabilityReport`，
-//! 上层据此决定走"完整 ACP"还是"降级到 plain 模式"。
+//! 上层据此决定走'完整 ACP'还是'降级到 plain 模式'。
 //!
 //! ## 实现
 //!
@@ -39,7 +39,7 @@ pub struct GeminiAcpCapabilityReport {
     pub supports_acp_flag: bool,
     /// 是否支持 `--experimental-acp` 标志（旧版）
     pub supports_experimental_acp: bool,
-    /// 推测的协议版本（"v1" / "v0"）
+    /// 推测的协议版本（'v1' / 'v0'）
     pub protocol_version: Option<String>,
     /// 是否需要在启动时传 `--model`
     pub requires_model_flag: bool,
@@ -137,7 +137,7 @@ fn classify_help(help: &str) -> GeminiAcpCapabilityReport {
     let supports_experimental_acp = lower.contains("--experimental-acp") || lower.contains("experimental acp");
     let requires_model_flag = lower.contains("--model") || lower.contains("requires --model");
 
-    // 推测协议版本：扫 "acp/v0" / "acp/v1"
+    // 推测协议版本：扫 'acp/v0' / 'acp/v1'
     let protocol_version = if lower.contains("acp/v1") {
         Some("v1".to_string())
     } else if lower.contains("acp/v0") || supports_acp_flag {

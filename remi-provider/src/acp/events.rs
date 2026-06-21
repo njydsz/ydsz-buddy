@@ -68,7 +68,7 @@ pub fn make_acp_content_delta_event(
 ///
 /// # 返回值
 ///
-/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: "tool_call"`
+/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: 'tool_call'`
 pub fn make_acp_tool_call_event(
     session_id: &str,
     turn_id: &str,
@@ -104,7 +104,7 @@ pub fn make_acp_tool_call_event(
 ///
 /// # 返回值
 ///
-/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: "plan_update"`
+/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: 'plan_update'`
 pub fn make_acp_plan_update_event(
     session_id: &str,
     turn_id: &str,
@@ -138,7 +138,7 @@ pub fn make_acp_plan_update_event(
 ///
 /// # 返回值
 ///
-/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: "token_usage"`
+/// 返回 `ProviderRuntimeEvent::SessionUpdate` 变体，data 中包含 `type: 'token_usage'`
 pub fn make_acp_token_usage_event(
     session_id: &str,
     turn_id: &str,

@@ -2,7 +2,7 @@
 //!
 //! 探测本机安装的 `codex` CLI 版本，用于：
 //!
-//! - 在前端"模型/Provider 详情"中展示
+//! - 在前端'模型/Provider 详情'中展示
 //! - 判断是否需要提示用户升级（兼容性）
 //! - 在认证时把版本作为能力声明的一部分
 //!
@@ -97,7 +97,7 @@ pub fn parse(raw: &str) -> CodexVersion {
     let first_line = raw.lines().next().unwrap_or("").trim();
     let mut working = first_line.to_string();
 
-    // 兼容 "codex 0.42.0 (commit abc)" — 取第一个看起来像版本号的 token
+    // 兼容 'codex 0.42.0 (commit abc)' — 取第一个看起来像版本号的 token
     if let Some(token) = first_line.split_whitespace().find(|t| t.contains('.')) {
         working = token.to_string();
     }

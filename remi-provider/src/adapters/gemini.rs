@@ -93,7 +93,7 @@ impl GeminiAdapter {
     ///
     /// # 参数
     ///
-    /// - `model`: 要使用的 Gemini 模型名称（如 "gemini-2-5-pro"）
+    /// - `model`: 要使用的 Gemini 模型名称（如 'gemini-2-5-pro'）
     /// - `cwd`: 子进程的工作目录
     ///
     /// # 返回值

@@ -105,7 +105,7 @@ pub struct AcpToolCall {
     pub id: String,
     /// 工具名称
     ///
-    /// 被调用的工具标识，如 "file_read"、"shell_exec" 等
+    /// 被调用的工具标识，如 'file_read'、'shell_exec' 等
     pub name: String,
     /// 调用参数
     ///
@@ -156,7 +156,7 @@ pub struct AcpPermissionRequest {
     pub id: String,
     /// 请求类型
     ///
-    /// 权限请求的分类，如 "file_write"、"shell_execute" 等
+    /// 权限请求的分类，如 'file_write'、'shell_execute' 等
     pub request_type: String,
     /// 请求描述
     ///
@@ -164,7 +164,7 @@ pub struct AcpPermissionRequest {
     pub description: String,
     /// 可用选项
     ///
-    /// 用户可以选择的审批选项列表，通常包含"允许"、"拒绝"等
+    /// 用户可以选择的审批选项列表，通常包含'允许'、'拒绝'等
     pub options: Vec<AcpPermissionOption>,
 }
 
@@ -179,7 +179,7 @@ pub struct AcpPermissionOption {
     pub id: String,
     /// 选项标签
     ///
-    /// 用户界面中显示的选项文本，如"允许"、"拒绝"、"仅本次允许"等
+    /// 用户界面中显示的选项文本，如'允许'、'拒绝'、'仅本次允许'等
     pub label: String,
     /// 是否为推荐选项
     ///
@@ -190,7 +190,7 @@ pub struct AcpPermissionOption {
 /// ACP 会话更新事件
 ///
 /// ACP 客户端通过 JSON-RPC 通知推送的会话更新事件，
-/// 使用 `#[serde(tag = "type")]` 实现带标签的枚举序列化。
+/// 使用 `#[serde(tag = 'type')]` 实现带标签的枚举序列化。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum AcpSessionUpdateEvent {
@@ -237,7 +237,7 @@ pub enum AcpSessionUpdateEvent {
     SessionComplete {
         /// 完成原因
         ///
-        /// 描述会话完成的原因，如 "task_completed"、"user_cancelled" 等
+        /// 描述会话完成的原因，如 'task_completed'、'user_cancelled' 等
         reason: String,
     },
     /// 错误事件
@@ -246,7 +246,7 @@ pub enum AcpSessionUpdateEvent {
     Error {
         /// 错误代码
         ///
-        /// 机器可读的错误标识，如 "rate_limit_exceeded"、"context_overflow" 等
+        /// 机器可读的错误标识，如 'rate_limit_exceeded'、'context_overflow' 等
         code: String,
         /// 错误消息
         ///
@@ -327,7 +327,7 @@ pub fn parse_session_update_event(event: &AcpSessionUpdateEvent) -> AcpParsedSes
 pub struct AcpSessionConfig {
     /// 模型 ID
     ///
-    /// 指定 ACP 客户端使用的 AI 模型标识，如 "gpt-4"、"claude-3-opus" 等
+    /// 指定 ACP 客户端使用的 AI 模型标识，如 'gpt-4'、'claude-3-opus' 等
     pub model_id: String,
     /// 系统提示
     ///
@@ -351,7 +351,7 @@ pub struct AcpSessionConfig {
 pub struct AcpSpawnInput {
     /// 可执行文件路径
     ///
-    /// ACP 客户端的可执行文件名或完整路径，如 "cursor-agent"、"grok" 等
+    /// ACP 客户端的可执行文件名或完整路径，如 'cursor-agent'、'grok' 等
     pub executable: String,
     /// 命令行参数
     ///

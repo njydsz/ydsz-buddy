@@ -45,13 +45,13 @@
 //! 
 //! // 启动后台刷新循环
 //! let shutdown_tx = broadcaster.shutdown_channel();
-//! tokio::spawn(broadcaster.run_refresh_loop("/path/to/repo".to_string(), shutdown_tx.subscribe()));
+//! tokio::spawn(broadcaster.run_refresh_loop('/path/to/repo'.to_string(), shutdown_tx.subscribe()));
 //! 
 //! // 订阅状态变更
 //! let mut receiver = broadcaster.stream_status();
 //! tokio::spawn(async move {
 //!     while let Ok(event) = receiver.recv().await {
-//!         println!("仓库 {} 状态更新: {:?}", event.cwd, event.status.current_branch);
+//!         println!('仓库 {} 状态更新: {:?}', event.cwd, event.status.current_branch);
 //!     }
 //! });
 //! }
@@ -151,10 +151,10 @@ struct CachedStatus {
 /// let broadcaster = GitStatusBroadcaster::new(core, Duration::from_secs(5));
 /// 
 /// // 查询状态（自动缓存）
-/// let status = broadcaster.get_status("/path/to/repo").await?;
+/// let status = broadcaster.get_status('/path/to/repo').await?;
 /// 
 /// // 手动刷新状态
-/// let status = broadcaster.refresh_status("/path/to/repo").await?;
+/// let status = broadcaster.refresh_status('/path/to/repo').await?;
 /// }
 pub struct GitStatusBroadcaster {
     /// Git 核心服务实例
@@ -227,8 +227,8 @@ impl GitStatusBroadcaster {
     ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
-    /// let status = broadcaster.get_status("/path/to/repo").await?;
-    /// println!("当前分支: {:?}", status.current_branch);
+    /// let status = broadcaster.get_status('/path/to/repo').await?;
+    /// println!('当前分支: {:?}', status.current_branch);
     /// }
     pub async fn get_status(&self, cwd: &str) -> GitResult<GitStatusResult> {
         // 检查缓存
@@ -270,7 +270,7 @@ impl GitStatusBroadcaster {
     ///
     /// # 使用场景
     ///
-    /// - 用户手动触发状态刷新（如点击"刷新"按钮）
+    /// - 用户手动触发状态刷新（如点击'刷新'按钮）
     /// - 执行 Git 操作后强制更新状态（如提交、推送后）
     pub async fn refresh_local_status(&self, cwd: &str) -> GitResult<GitStatusResult> {
         info!("刷新 Git 状态: {}", cwd);
@@ -333,7 +333,7 @@ impl GitStatusBroadcaster {
     /// let mut receiver = broadcaster.stream_status();
     /// tokio::spawn(async move {
     ///     while let Ok(event) = receiver.recv().await {
-    ///         println!("状态更新: {:?}", event.status.current_branch);
+    ///         println!('状态更新: {:?}', event.status.current_branch);
     ///     }
     /// });
     /// }
@@ -371,7 +371,7 @@ impl GitStatusBroadcaster {
     ///
     ///```rust,ignore
     /// let (shutdown_tx, shutdown_rx) = broadcast::channel(1);
-    /// let cwd = "/path/to/repo".to_string();
+    /// let cwd = '/path/to/repo'.to_string();
     ///
     /// tokio::spawn(broadcaster.run_refresh_loop(cwd, shutdown_rx));
     ///

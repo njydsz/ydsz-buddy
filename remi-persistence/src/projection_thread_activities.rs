@@ -35,8 +35,8 @@ use crate::sqlite_client::SqliteClient;
 /// - `activity_id`: 活动唯一标识符
 /// - `thread_id`: 所属线程 ID
 /// - `turn_id`: 关联的对话轮次 ID（可选）
-/// - `tone`: 活动语气/风格（如 "positive"、"negative"、"neutral"）
-/// - `kind`: 活动类型（如 "file-read"、"command-exec"、"code-gen"）
+/// - `tone`: 活动语气/风格（如 'positive'、'negative'、'neutral'）
+/// - `kind`: 活动类型（如 'file-read'、'command-exec'、'code-gen'）
 /// - `summary`: 活动摘要，用于在 UI 中快速展示
 /// - `payload_json`: 活动详细负载（JSON 格式），包含类型特定的详细信息
 /// - `sequence`: 活动序列号（可选），用于排序和定位
@@ -49,9 +49,9 @@ pub struct ThreadActivity {
     pub thread_id: ThreadId,
     /// 关联的对话轮次 ID（可选）
     pub turn_id: Option<TurnId>,
-    /// 活动语气/风格（如 "positive"、"negative"、"neutral"）
+    /// 活动语气/风格（如 'positive'、'negative'、'neutral'）
     pub tone: String,
-    /// 活动类型（如 "file-read"、"command-exec"、"code-gen"）
+    /// 活动类型（如 'file-read'、'command-exec'、'code-gen'）
     pub kind: String,
     /// 活动摘要，用于在 UI 中快速展示
     pub summary: String,

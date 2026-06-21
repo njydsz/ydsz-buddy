@@ -4,7 +4,29 @@
 //          a "Browse skill.sh" CTA so users can discover and install new skills.
 // Layer: Route-level screen
 // Exports: SkillsView
-
+/**
+ * @file 技能浏览页
+ *
+ * `/plugins?tab=skills` 对应的技能浏览界面：
+ *
+ * - **本地优先**：默认展示 `~/.claude/skills`、`~/.codex/skills`、`~/.agents/skills` 扫描结果
+ * - **CTA**：跳转到 skill.sh 浏览更多
+ * - **搜索**：跨技能名/描述过滤
+ * - **安装状态**：与已安装列表对比
+ *
+ * ## 核心导出
+ *
+ * - `SkillsView`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 路由 `/plugins?tab=skills`
+ *
+ * ## 注意事项
+ *
+ * - 数据来源：`localSkillsQueryOptions`
+ * - 搜索使用 `useDeferredValue`
+ */
 import { useDeferredValue, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {

@@ -39,6 +39,30 @@ export const DISMISSED_PROVIDER_HEALTH_BANNERS_KEY = "remi-claw:dismissed-provid
 export const LastInvokedScriptByProjectSchema = Schema.Record(ProjectId, Schema.String);
 export const DismissedProviderHealthBannersSchema = Schema.Array(Schema.String);
 
+/**
+ * @file ChatView 逻辑工具
+ *
+ * ChatView 组件中可复用的纯函数与本地存储常量：
+ *
+ * - `LAST_INVOKED_SCRIPT_BY_PROJECT_KEY` / `LastInvokedScriptByProjectSchema`：每个项目最近一次运行的脚本
+ * - `DISMISSED_PROVIDER_HEALTH_BANNERS_KEY` / `DismissedProviderHealthBannersSchema`：被关闭的 provider 健康横幅
+ * - `buildLocalDraftThread`：根据 draftStore 状态构建 `Thread` 视图模型
+ * - `resolveActiveThreadTitle`：解析线程标题（去除 generic fallback）
+ * - `filterSidechatTranscriptMessages`：过滤边聊线程消息
+ * - `revokeBlobPreviewUrl` / `revokeUserMessagePreviewUrls`：释放 blob URL
+ *
+ * ## 使用场景
+ *
+ * - ChatView 主组件
+ * - 任何需要从 store 派生 `Thread` 视图模型的代码
+ *
+ * ## 注意事项
+ *
+ * - 本地存储 key 与 `Effect.Schema` 配对使用，便于数据迁移/校验
+ * - 工具函数无 React 依赖
+ */
+
+/** 将本地 draft 转换为 `Thread` 视图模型，供 ChatView / Sidebar 共享 */
 export function buildLocalDraftThread(
   threadId: ThreadId,
   draftThread: DraftThreadState,

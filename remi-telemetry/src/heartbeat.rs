@@ -159,7 +159,7 @@ impl HeartbeatService {
 ///
 /// # 返回值
 ///
-/// - `Some(String)`：以 KB 为单位的字符串表示，如 `"12345"`。
+/// - `Some(String)`：以 KB 为单位的字符串表示，如 `'12345'`。
 /// - `None`：当前平台不支持或获取失败。
 ///
 /// # 平台支持
@@ -174,7 +174,7 @@ fn get_memory_usage() -> Option<String> {
         let content = std::fs::read_to_string("/proc/self/status").ok()?;
         for line in content.lines() {
             if line.starts_with("VmRSS:") {
-                // VmRSS 格式: "VmRSS:    12345 kB"
+                // VmRSS 格式: 'VmRSS:    12345 kB'
                 let kb = line
                     .split_whitespace()
                     .nth(1)?

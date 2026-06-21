@@ -21,7 +21,7 @@
 //!
 //! fn lookup_id(id: &str) -> CoreResult<String> {
 //!     // 查找资源...
-//!     Err(CoreError::NotFoundError(format!("资源 {} 不存在", id)))
+//!     Err(CoreError::NotFoundError(format!('资源 {} 不存在', id)))
 //! }
 //! ```
 
@@ -55,8 +55,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::ValidationError("项目标题不能为空".to_string());
-    /// assert_eq!(err.to_string(), "验证错误: 项目标题不能为空");
+    /// let err = CoreError::ValidationError('项目标题不能为空'.to_string());
+    /// assert_eq!(err.to_string(), '验证错误: 项目标题不能为空');
     /// ```
     #[error("验证错误: {0}")]
     ValidationError(String),
@@ -71,8 +71,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::NotFoundError("线程不存在".to_string());
-    /// assert_eq!(err.to_string(), "未找到: 线程不存在");
+    /// let err = CoreError::NotFoundError('线程不存在'.to_string());
+    /// assert_eq!(err.to_string(), '未找到: 线程不存在');
     /// ```
     #[error("未找到: {0}")]
     NotFoundError(String),
@@ -87,8 +87,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::SerializationError("JSON 解析失败: 缺少字段 'id'".to_string());
-    /// assert_eq!(err.to_string(), "序列化错误: JSON 解析失败: 缺少字段 'id'");
+    /// let err = CoreError::SerializationError('JSON 解析失败: 缺少字段 'id''.to_string());
+    /// assert_eq!(err.to_string(), '序列化错误: JSON 解析失败: 缺少字段 'id'');
     /// ```
     #[error("序列化错误: {0}")]
     SerializationError(String),
@@ -103,8 +103,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::InvalidOperation("无法在已归档的线程中发送消息".to_string());
-    /// assert_eq!(err.to_string(), "无效操作: 无法在已归档的线程中发送消息");
+    /// let err = CoreError::InvalidOperation('无法在已归档的线程中发送消息'.to_string());
+    /// assert_eq!(err.to_string(), '无效操作: 无法在已归档的线程中发送消息');
     /// ```
     #[error("无效操作: {0}")]
     InvalidOperation(String),
@@ -119,8 +119,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::InternalError("数据库连接超时".to_string());
-    /// assert_eq!(err.to_string(), "内部错误: 数据库连接超时");
+    /// let err = CoreError::InternalError('数据库连接超时'.to_string());
+    /// assert_eq!(err.to_string(), '内部错误: 数据库连接超时');
     /// ```
     #[error("内部错误: {0}")]
     InternalError(String),
@@ -141,7 +141,7 @@ pub enum CoreError {
 /// use remi_core::CoreResult;
 ///
 /// fn do_something() -> CoreResult<String> {
-///     Ok("成功".to_string())
+///     Ok('成功'.to_string())
 /// }
 /// ```
 pub type CoreResult<T> = Result<T, CoreError>;

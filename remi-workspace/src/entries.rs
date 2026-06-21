@@ -31,14 +31,14 @@
 //! 
 //! let entries = WorkspaceEntries::new();
 //! let result = entries.browse(BrowseInput {
-//!     cwd: "/path/to/workspace".to_string(),
-//!     relative_path: Some("src".to_string()),
+//!     cwd: '/path/to/workspace'.to_string(),
+//!     relative_path: Some('src'.to_string()),
 //!     include_hidden: false,
 //!     max_depth: Some(2),
 //! }).await.unwrap();
 //! 
 //! for entry in result.entries {
-//!     println!("{}: {}", entry.name, entry.path);
+//!     println!('{}: {}', entry.name, entry.path);
 //! }
 //! }
 
@@ -74,8 +74,8 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 /// use remi_workspace::entries::DirectoryEntry;
 ///
 /// let entry = DirectoryEntry {
-///     name: "main.rs".to_string(),
-///     path: "src/main.rs".to_string(),
+///     name: 'main.rs'.to_string(),
+///     path: 'src/main.rs'.to_string(),
 ///     is_directory: false,
 ///     size: Some(1024),
 /// };
@@ -106,7 +106,7 @@ pub struct DirectoryEntry {
 /// ## 使用场景
 ///
 /// - 浏览工作空间根目录：`relative_path = None`
-/// - 浏览特定子目录：`relative_path = Some("src/components")`
+/// - 浏览特定子目录：`relative_path = Some('src/components')`
 /// - 递归浏览整个目录树：`max_depth = None` 或较大的值
 ///
 /// ## 示例
@@ -115,8 +115,8 @@ pub struct DirectoryEntry {
 /// use remi_workspace::entries::BrowseInput;
 ///
 /// let input = BrowseInput {
-///     cwd: "/project".to_string(),
-///     relative_path: Some("src".to_string()),
+///     cwd: '/project'.to_string(),
+///     relative_path: Some('src'.to_string()),
 ///     include_hidden: false,
 ///     max_depth: Some(3),
 /// };
@@ -168,8 +168,8 @@ pub struct BrowseResult {
 ///
 /// ## 使用场景
 ///
-/// - 按文件名关键字搜索：`query = "main"`
-/// - 限定文件类型搜索：`file_pattern = Some("*.rs")`
+/// - 按文件名关键字搜索：`query = 'main'`
+/// - 限定文件类型搜索：`file_pattern = Some('*.rs')`
 /// - 限制结果数量：`max_results = Some(50)`
 ///
 /// ## 示例
@@ -178,10 +178,10 @@ pub struct BrowseResult {
 /// use remi_workspace::entries::SearchEntriesInput;
 ///
 /// let input = SearchEntriesInput {
-///     cwd: "/project".to_string(),
-///     query: "config".to_string(),
+///     cwd: '/project'.to_string(),
+///     query: 'config'.to_string(),
 ///     max_results: Some(50),
-///     file_pattern: Some("*.json".to_string()),
+///     file_pattern: Some('*.json'.to_string()),
 /// };
 /// ```
 #[derive(Debug, Clone)]
@@ -238,7 +238,7 @@ pub struct SearchEntriesResult {
 /// use remi_workspace::entries::ListDirectoriesInput;
 ///
 /// let input = ListDirectoriesInput {
-///     cwd: "/project".to_string(),
+///     cwd: '/project'.to_string(),
 ///     max_depth: Some(5),
 /// };
 /// ```
@@ -294,7 +294,7 @@ pub struct ListDirectoriesResult {
 /// 
 /// let service = WorkspaceEntries::new();
 /// let result = service.browse(BrowseInput {
-///     cwd: "/project".to_string(),
+///     cwd: '/project'.to_string(),
 ///     relative_path: None,
 ///     include_hidden: false,
 ///     max_depth: Some(2),
@@ -349,8 +349,8 @@ impl WorkspaceEntries {
     /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.browse(BrowseInput {
-    ///     cwd: "/project".to_string(),
-    ///     relative_path: Some("src".to_string()),
+    ///     cwd: '/project'.to_string(),
+    ///     relative_path: Some('src'.to_string()),
     ///     include_hidden: false,
     ///     max_depth: Some(2),
     /// }).await?;
@@ -464,10 +464,10 @@ impl WorkspaceEntries {
     /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.search(SearchEntriesInput {
-    ///     cwd: "/project".to_string(),
-    ///     query: "main".to_string(),
+    ///     cwd: '/project'.to_string(),
+    ///     query: 'main'.to_string(),
     ///     max_results: Some(50),
-    ///     file_pattern: Some("*.rs".to_string()),
+    ///     file_pattern: Some('*.rs'.to_string()),
     /// }).await?;
     /// }
     pub async fn search(&self, input: SearchEntriesInput) -> WorkspaceResult<SearchEntriesResult> {
@@ -581,7 +581,7 @@ impl WorkspaceEntries {
     /// 
     /// let service = WorkspaceEntries::new();
     /// let result = service.list_directories(ListDirectoriesInput {
-    ///     cwd: "/project".to_string(),
+    ///     cwd: '/project'.to_string(),
     ///     max_depth: Some(5),
     /// }).await?;
     /// }
@@ -661,7 +661,7 @@ impl WorkspaceEntries {
     /// use remi_workspace::entries::WorkspaceEntries;
     ///
     /// let service = WorkspaceEntries::new();
-    /// service.invalidate("/project").await;
+    /// service.invalidate('/project').await;
     /// }
     pub async fn invalidate(&self, _cwd: &str) {
         // TODO: 实现缓存失效逻辑

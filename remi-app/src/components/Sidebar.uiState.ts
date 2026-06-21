@@ -2,7 +2,31 @@
 // Purpose: Persists sidebar-only UI preferences plus the last chat route for restore flows.
 // Layer: Browser storage helper
 // Exports: sidebar UI state read/write helpers.
-
+/**
+ * @file 侧边栏 UI 状态持久化
+ *
+ * 侧边栏专属的 UI 偏好 + 上次聊天路由：
+ *
+ * - **存储 key**：`remi-claw:sidebar-ui:v1`
+ * - **状态字段**：聊天区域展开、线程列表展开、被关闭的状态提醒、上次路由
+ * - **迁移**：旧 key 读取后写入新 key
+ *
+ * ## 核心导出
+ *
+ * - `SidebarUiState`：状态类型
+ * - `loadSidebarUiState` / `saveSidebarUiState`：读写函数
+ * - `DEFAULT_SIDEBAR_UI_STATE`：默认值
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 主组件挂载时恢复
+ * - 应用启动时路由恢复
+ *
+ * ## 注意事项
+ *
+ * - 工作区根路径会做大小写无关的归一化
+ * - 字段缺失时回落到默认值
+ */
 import { normalizeWorkspaceRootForComparison } from "~/shared/threadWorkspace";
 import type { LastThreadRoute } from "../chatRouteRestore";
 

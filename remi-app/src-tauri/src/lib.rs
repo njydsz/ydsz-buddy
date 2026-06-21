@@ -353,7 +353,7 @@ pub fn run() {
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
         //   （tauri.conf.json 的 decorations 为全局开关，会同时影响 macOS 交通灯按钮，
         //    因此在运行时按平台分别处理）
-        // macOS：保留 decorations，配合 titleBarStyle = "Overlay" 绘制交通灯按钮
+        // macOS：保留 decorations，配合 titleBarStyle = 'Overlay' 绘制交通灯按钮
         .setup(|app| {
             #[cfg(not(target_os = "macos"))]
             {

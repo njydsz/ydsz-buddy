@@ -24,7 +24,7 @@
 //!
 //! ### 线程（Thread）
 //!
-//! 在 Remi 系统中，"线程"指的是一个独立的工作上下文，通常对应一个 Git worktree。
+//! 在 Remi 系统中，'线程'指的是一个独立的工作上下文，通常对应一个 Git worktree。
 //! 每个线程可以独立进行代码修改、提交和审查，互不干扰。
 //!
 //! ## 使用场景
@@ -46,13 +46,13 @@
 //! 
 //! // 执行提交并推送操作
 //! let result = manager.run_stacked_action(GitRunStackedActionInput {
-//!     cwd: "/path/to/repo".to_string(),
+//!     cwd: '/path/to/repo'.to_string(),
 //!     action: GitAction::CommitPush,
-//!     commit_message: Some("feat: add new feature".to_string()),
+//!     commit_message: Some('feat: add new feature'.to_string()),
 //!     feature_branch: None,
 //! }).await?;
 //! 
-//! println!("操作结果: {}", result.message);
+//! println!('操作结果: {}', result.message);
 //! }
 
 use std::sync::Arc;
@@ -84,10 +84,10 @@ use crate::error::{GitError, GitResult};
 /// use remi_git::{GitRunStackedActionInput, GitAction};
 ///
 /// let input = GitRunStackedActionInput {
-///     cwd: "/path/to/repo".to_string(),
+///     cwd: '/path/to/repo'.to_string(),
 ///     action: GitAction::CommitPush,
-///     commit_message: Some("feat: add login feature".to_string()),
-///     feature_branch: Some("feature/login".to_string()),
+///     commit_message: Some('feat: add login feature'.to_string()),
+///     feature_branch: Some('feature/login'.to_string()),
 ///     pr_title: None,
 ///     pr_body: None,
 ///     pr_base: None,
@@ -97,7 +97,7 @@ use crate::error::{GitError, GitResult};
 /// # 注意事项
 ///
 /// - 如果 `feature_branch` 已存在，会直接切换到该分支而不会报错
-/// - 如果 `commit_message` 为 None 且操作需要提交，会使用默认消息 "Update"
+/// - 如果 `commit_message` 为 None 且操作需要提交，会使用默认消息 'Update'
 /// - PR 创建通过 `gh` CLI 实现，需要预先安装并登录 GitHub CLI
 #[derive(Debug, Clone)]
 pub struct GitRunStackedActionInput {
@@ -161,7 +161,7 @@ pub enum GitAction {
     /// 提交并推送
     ///
     /// 执行 `git commit` 后紧跟 `git push`，是最常用的代码提交流程。
-    /// 如果提交消息为空，使用默认消息 "Update"。
+    /// 如果提交消息为空，使用默认消息 'Update'。
     CommitPush,
 
     /// 提交、推送并创建 Pull Request
@@ -188,9 +188,9 @@ pub enum GitAction {
 /// async fn main() {
 /// let result = manager.run_stacked_action(input).await?;
 /// if result.success {
-///     println!("操作成功: {}", result.message);
+///     println!('操作成功: {}', result.message);
 ///     if let Some(sha) = result.commit_sha {
-///         println!("提交 SHA: {}", sha);
+///         println!('提交 SHA: {}', sha);
 ///     }
 /// }
 /// }
@@ -233,7 +233,7 @@ pub struct GitRunStackedActionResult {
 /// let manager = GitManager::new(core);
 /// 
 /// // 获取仓库状态
-/// let status = manager.status("/path/to/repo").await?;
+/// let status = manager.status('/path/to/repo').await?;
 /// 
 /// // 执行堆叠式操作
 /// let result = manager.run_stacked_action(input).await?;
@@ -312,10 +312,10 @@ impl GitManager {
     /// #[tokio::main]
     /// async fn main() {
     /// let result = manager.run_stacked_action(GitRunStackedActionInput {
-    ///     cwd: "/path/to/repo".to_string(),
+    ///     cwd: '/path/to/repo'.to_string(),
     ///     action: GitAction::CommitPush,
-    ///     commit_message: Some("feat: add feature".to_string()),
-    ///     feature_branch: Some("feature/new".to_string()),
+    ///     commit_message: Some('feat: add feature'.to_string()),
+    ///     feature_branch: Some('feature/new'.to_string()),
     ///     pr_title: None,
     ///     pr_body: None,
     ///     pr_base: None,
@@ -324,9 +324,9 @@ impl GitManager {
     ///
     /// # 注意事项
     ///
-    /// - 如果 `commit_message` 为 None，会使用默认消息 "Update"
+    /// - 如果 `commit_message` 为 None，会使用默认消息 'Update'
     /// - PR 创建通过 `gh` CLI 实现，需要预先安装并登录
-    /// - PR 标题未指定时使用 `commit_message`，两者都为空时使用 "Update"
+    /// - PR 标题未指定时使用 `commit_message`，两者都为空时使用 'Update'
     pub async fn run_stacked_action(
         &self,
         input: GitRunStackedActionInput,
@@ -374,7 +374,7 @@ impl GitManager {
             }
             // 仅创建 PR：通过 gh CLI 创建 Pull Request
             GitAction::CreatePr => {
-                // PR 标题优先级：pr_title > commit_message > 默认值 "Update"
+                // PR 标题优先级：pr_title > commit_message > 默认值 'Update'
                 let pr_title = input
                     .pr_title
                     .or(input.commit_message.clone())
@@ -414,7 +414,7 @@ impl GitManager {
                 let commit_sha = self.core.commit(&input.cwd, message).await?;
                 self.core.push_current_branch(&input.cwd).await?;
 
-                // PR 标题优先级：pr_title > commit_message > 默认值 "Update"
+                // PR 标题优先级：pr_title > commit_message > 默认值 'Update'
                 let pr_title = input
                     .pr_title
                     .or(input.commit_message.clone())
@@ -598,11 +598,11 @@ impl GitManager {
     /// #[tokio::main]
     /// async fn main() {
     /// let branch = manager.prepare_pull_request_thread(
-    ///     "/path/to/repo",
+    ///     '/path/to/repo',
     ///     123,
-    ///     "/path/to/worktree/pr-123",
+    ///     '/path/to/worktree/pr-123',
     /// ).await?;
-    /// println!("已创建分支: {}", branch);
+    /// println!('已创建分支: {}', branch);
     /// }
     ///
     /// # 后续操作
@@ -668,10 +668,10 @@ impl GitManager {
     /// #[tokio::main]
     /// async fn main() {
     /// // 切换到 PR 审查分支
-    /// manager.handoff_thread("/path/to/repo", "pr-123").await?;
+    /// manager.handoff_thread('/path/to/repo', 'pr-123').await?;
     /// 
     /// // 审查完成后切换回主分支
-    /// manager.handoff_thread("/path/to/repo", "main").await?;
+    /// manager.handoff_thread('/path/to/repo', 'main').await?;
     /// }
     pub async fn handoff_thread(
         &self,
@@ -752,17 +752,17 @@ impl GitManager {
                     file_deletions = 0;
                 }
 
-                // 从 "diff --git a/path b/path" 格式中提取文件名
-                // 取 " b/" 之后的部分作为文件路径
+                // 从 'diff --git a/path b/path' 格式中提取文件名
+                // 取 ' b/' 之后的部分作为文件路径
                 if let Some(parts) = line.split(" b/").nth(1) {
                     current_file = Some(parts.to_string());
                 }
             } else if line.starts_with('+') && !line.starts_with("+++") {
-                // 以 '+' 开头但不是 "+++"（文件头），计为新增行
+                // 以 '+' 开头但不是 '+++'（文件头），计为新增行
                 file_additions += 1;
                 total_additions += 1;
             } else if line.starts_with('-') && !line.starts_with("---") {
-                // 以 '-' 开头但不是 "---"（文件头），计为删除行
+                // 以 '-' 开头但不是 '---'（文件头），计为删除行
                 file_deletions += 1;
                 total_deletions += 1;
             }
@@ -808,9 +808,9 @@ impl GitManager {
     ///
     /// - `cwd`: 仓库工作目录
     /// - `pr_ref`: PR 引用，可以是：
-    ///   - PR 编号（如 "123"）
-    ///   - PR URL（如 "https://github.com/owner/repo/pull/123"）
-    ///   - 分支引用（如 "owner:branch"）
+    ///   - PR 编号（如 '123'）
+    ///   - PR URL（如 'https://github.com/owner/repo/pull/123'）
+    ///   - 分支引用（如 'owner:branch'）
     ///
     /// # 返回值
     ///
@@ -836,7 +836,7 @@ impl GitManager {
             num
         } else if pr_ref.contains("/pull/") {
             // 格式2：GitHub PR URL，从中提取编号
-            // 例如 "https://github.com/owner/repo/pull/123" -> 123
+            // 例如 'https://github.com/owner/repo/pull/123' -> 123
             pr_ref
                 .split("/pull/")
                 .nth(1)
@@ -935,7 +935,7 @@ impl GitManager {
 /// - `title`: PR 标题
 /// - `head_ref`: 源分支名称（PR 的来源分支）
 /// - `base_ref`: 目标分支名称（PR 要合并到的分支）
-/// - `state`: PR 当前状态（"open"、"closed"、"merged"）
+/// - `state`: PR 当前状态（'open'、'closed'、'merged'）
 /// - `url`: PR 的 Web 访问链接
 /// - `author`: PR 创建者的 GitHub 用户名（可能为 None，如 API 返回格式异常）
 ///

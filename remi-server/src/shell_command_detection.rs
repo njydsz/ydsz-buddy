@@ -130,7 +130,7 @@ pub fn classify(line: &str) -> CommandClassification {
         };
     }
     // 4) Package / Build / Test / Lint
-    // 对 cargo 这种"包管理 + 自带子命令"的工具，优先根据子命令再分类
+    // 对 cargo 这种'包管理 + 自带子命令'的工具，优先根据子命令再分类
     if let Some(sub_lower) = sub.map(|s| s.to_lowercase()) {
         let cargo_test_kinds: &[&str] = &["test", "bench", "nextest", "tarpaulin"];
         let cargo_build_kinds: &[&str] = &["build", "check", "clippy", "fmt", "rustc", "bench"];

@@ -1,7 +1,30 @@
 // FILE: SplashScreen.tsx
 // Purpose: Render the branded startup face while the app is still booting a route or session.
 // Layer: Shared app loading presentation
-
+/**
+ * @file 启动屏
+ *
+ * 应用启动 / 路由加载 / 会话初始化过程中展示的占位界面：
+ *
+ * - **品牌 logo**：Remi Claw
+ * - **加载动画**：温和的 pulse
+ * - **错误态**：展示错误信息 + 重试按钮
+ *
+ * ## 核心导出
+ *
+ * - `SplashScreen`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 应用首次加载
+ * - 路由 Suspense 兜底
+ * - 关键初始化失败时
+ *
+ * ## 注意事项
+ *
+ * - `errorMessage` 与 `onRetry` 同时存在时才显示重试按钮
+ * - `select-none` 防止加载中文本被误选
+ */
 export function SplashScreen({
   errorMessage,
   onRetry,

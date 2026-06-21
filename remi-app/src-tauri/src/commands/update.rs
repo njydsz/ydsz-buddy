@@ -105,7 +105,7 @@ pub struct UpdateInfo {
     pub available: bool,
     /// 当前应用版本
     pub current_version: String,
-    /// 可用更新的版本号（如 "1.2.0"）
+    /// 可用更新的版本号（如 '1.2.0'）
     pub version: String,
     /// 更新公告
     pub notes: String,

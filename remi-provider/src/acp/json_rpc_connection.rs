@@ -10,9 +10,9 @@
 //! ## 协议
 //!
 //! ```text
-//! client -> server: { "jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {} }
-//! server -> client: { "jsonrpc": "2.0", "id": 1, "result": [...] }
-//! server -> client: { "jsonrpc": "2.0", "method": "session/update", "params": {...} }
+//! client -> server: { 'jsonrpc': '2.0', 'id': 1, 'method': 'tools/list', 'params': {} }
+//! server -> client: { 'jsonrpc': '2.0', 'id': 1, 'result': [...] }
+//! server -> client: { 'jsonrpc': '2.0', 'method': 'session/update', 'params': {...} }
 //! ```
 //!
 //! ## 设计

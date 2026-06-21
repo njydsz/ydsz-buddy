@@ -111,7 +111,7 @@ impl CursorAcpMessageDecoder {
     ///
     /// 期望格式：
     /// ```json
-    /// { "method": "session/update", "params": { "type": "text_delta|tool_call|plan|token_usage|...", "data": {...} } }
+    /// { 'method': 'session/update', 'params': { 'type': 'text_delta|tool_call|plan|token_usage|...', 'data': {...} } }
     /// ```
     pub fn decode(&self, raw: &serde_json::Value) -> Option<CoreRuntimeEvent> {
         let method = raw.get("method")?.as_str()?;

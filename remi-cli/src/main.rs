@@ -66,7 +66,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() -> Result<()> {
     // 1. 初始化日志系统
     // 优先读取 RUST_LOG 环境变量作为日志过滤条件，
-    // 若未设置则默认使用 "info" 级别，确保生产环境不会输出过多调试信息
+    // 若未设置则默认使用 'info' 级别，确保生产环境不会输出过多调试信息
     // fmt::layer 将日志以人类可读格式输出到 stdout
     tracing_subscriber::registry()
         .with(

@@ -1,4 +1,25 @@
 // Production CSS is part of the behavior under test because row height depends on it.
+/**
+ * @file ChatView 浏览器端测试
+ *
+ * 使用 `@vitest/browser` + `msw` 在真实浏览器中跑 ChatView 集成测试：
+ *
+ * - **MSW worker**：拦截 fetch / WebSocket 模拟后端
+ * - **路由注入**：通过 `RouterProvider` + `createMemoryHistory` 注入路由
+ * - **真实样式**：引入 `../index.css` 保证虚拟列表行高与生产一致
+ * - **行为覆盖**：自动滚动、临时线程、终端上下文、内联 placeholder 等
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - 关键用户流程回归
+ *
+ * ## 注意事项
+ *
+ * - 行高依赖生产 CSS，因此测试不能裁剪样式
+ * - 每个测试 `beforeEach` 重置所有 store
+ * - 通过 `page` 上下文获得浏览器 page 对象
+ */
 import "../index.css";
 
 import {

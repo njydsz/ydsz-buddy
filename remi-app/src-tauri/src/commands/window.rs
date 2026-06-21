@@ -35,7 +35,7 @@ use tauri::Manager;
 ///
 /// - `app`: Tauri 应用句柄，用于获取主窗口
 /// - `theme`: 主题名称字符串
-///   - `"dark"`: 切换到暗色主题
+///   - `'dark'`: 切换到暗色主题
 ///   - 其他值: 切换到亮色主题
 ///
 /// # 返回值
@@ -55,8 +55,8 @@ use tauri::Manager;
 ///
 /// # 设计说明
 ///
-/// - 通过窗口名称 `"main"` 获取主窗口
-/// - 仅支持 `"dark"` 和非 `"dark"` 两种模式
+/// - 通过窗口名称 `'main'` 获取主窗口
+/// - 仅支持 `'dark'` 和非 `'dark'` 两种模式
 #[tauri::command]
 pub async fn set_theme(app: tauri::AppHandle, theme: String) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("Window not found")?;
@@ -153,7 +153,7 @@ pub async fn show_in_folder(path: String) -> Result<(), String> {
 /// # 设计说明
 ///
 /// - 仅在 debug 模式下有效（release 模式下 devtools 不可用）
-/// - 通过窗口名称 `"main"` 获取主窗口
+/// - 通过窗口名称 `'main'` 获取主窗口
 #[tauri::command]
 pub async fn open_main_devtools(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("Window not found")?;
@@ -167,7 +167,7 @@ pub async fn open_main_devtools(app: tauri::AppHandle) -> Result<(), String> {
 ///
 /// # 参数
 ///
-/// - `url`: 要打开的 URL 字符串（如 "https://example.com"）
+/// - `url`: 要打开的 URL 字符串（如 'https://example.com'）
 ///
 /// # 返回值
 ///

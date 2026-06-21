@@ -1,3 +1,27 @@
+/**
+ * @file 终端搜索浮层
+ *
+ * 终端内的"查找"浮层（Ctrl+F / Cmd+F）：
+ *
+ * - **搜索 addon**：基于 `@xterm/addon-search`
+ * - **高亮配色**：自定义 `SEARCH_DECORATIONS`
+ * - **方向切换**：上一项 / 下一项
+ * - **关闭**：Esc 或 × 按钮
+ *
+ * ## 核心导出
+ *
+ * - `TerminalSearch`：主组件
+ * - `TerminalSearchProps`：组件 props
+ *
+ * ## 使用场景
+ *
+ * - 终端面板顶部浮层
+ *
+ * ## 注意事项
+ *
+ * - 搜索 addon 由调用方提供（避免重复创建）
+ * - `isOpen=false` 时只卸载 UI，不销毁 addon
+ */
 import type { SearchAddon, ISearchOptions } from "@xterm/addon-search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "~/lib/icons";

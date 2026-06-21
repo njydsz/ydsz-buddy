@@ -823,6 +823,36 @@ interface ChatViewProps {
   onCloseThreadPane?: () => void;
 }
 
+/**
+ * @file ChatView 主组件
+ *
+ * 单线程聊天视图的核心容器：
+ *
+ * - **顶部 chrome**：返回/前进、AppNavigationButtons、ThreadPinToggleButton
+ * - **分支工具栏**：BranchToolbar + BranchToolbarBranchSelector
+ * - **时间线**：基于 `@legendapp/list` 的虚拟化消息列表（支持 diff 模式）
+ * - **Composer**：消息输入、附件、@ mention、/ slash command
+ * - **侧栏**：Diff 面板、Browser 面板、Terminal drawer
+ * - **工作区状态**：worktree 选择、PR 检入、handoff 流程
+ * - **键盘 / 路由**：`useSearch` 解析 diff 面板开关、split view 状态
+ *
+ * ## 核心导出
+ *
+ * - `ChatView`（默认导出）：单线程视图组件
+ * - `ChatViewProps`：组件 props
+ *
+ * ## 使用场景
+ *
+ * - 路由 `/chat/$threadId` 主容器
+ * - SplitView 内的左右分栏
+ *
+ * ## 注意事项
+ *
+ * - 拆分布局下支持聚焦状态切换，焦点切换会暂停非活跃分栏的实时更新
+ * - 草稿与持久化线程双轨：composerDraftStore ↔ store
+ * - worktree / 分支切换会向 native 发送 `thread.session.stop` 命令
+ * - 路由参数 `?diff=` 控制 diff 面板自动展开
+ */
 export default function ChatView({
   threadId,
   paneScopeId = "single",

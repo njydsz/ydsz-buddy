@@ -1,6 +1,31 @@
 // Purpose: Scores sidebar palette results for actions, themes, projects, and chat threads.
 // Keeps search local and deterministic so the palette can rank title hits above
 // message-content hits while still surfacing a useful snippet for chat matches.
+/**
+ * @file 侧边栏搜索面板逻辑
+ *
+ * 侧边栏命令面板的本地确定性排序逻辑：
+ *
+ * - 标题命中权重高于内容命中
+ * - 聊天线程命中展示消息片段
+ * - 主题切换动作归并到同一组
+ * - 关键字支持
+ *
+ * ## 核心导出
+ *
+ * - `SidebarSearchAction`
+ * - `SidebarSearchTheme`
+ * - 评分/分组工具
+ *
+ * ## 使用场景
+ *
+ * - SidebarSearchPalette 主组件
+ *
+ * ## 注意事项
+ *
+ * - 不依赖 React，可在 reducer / store 调用
+ * - 路径使用 `basenameOfPath` 提取文件名以提升匹配
+ */
 import type { ProviderKind } from "~/contracts";
 import { basenameOfPath } from "../file-icons";
 import type { ThemeMode, ThemeVariant } from "../theme/theme.logic";

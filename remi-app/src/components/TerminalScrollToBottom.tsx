@@ -1,3 +1,26 @@
+/**
+ * @file 终端滚动到底部按钮
+ *
+ * 当终端滚动到上方时显示的"快速回到底部"浮动按钮：
+ *
+ * - **监听滚动**：通过 `requestAnimationFrame` 节流检查
+ * - **缓冲判断**：比较 `viewportY` 与 `baseY`
+ * - **平滑滚动**：调用 `terminal.scrollToBottom()`
+ *
+ * ## 核心导出
+ *
+ * - `TerminalScrollToBottom`：主组件
+ * - `TerminalScrollToBottomProps`：组件 props
+ *
+ * ## 使用场景
+ *
+ * - 终端面板右下角
+ *
+ * ## 注意事项
+ *
+ * - 仅在视口与缓冲底部不一致时可见
+ * - 使用 `onScroll` 订阅（来自 xterm）
+ */
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";

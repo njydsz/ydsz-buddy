@@ -19,7 +19,7 @@
 //!
 //! fn do_something() -> CheckpointResult<()> {
 //!     // 当检查点不存在时
-//!     Err(CheckpointError::NotFound("checkpoint-123".to_string()))
+//!     Err(CheckpointError::NotFound('checkpoint-123'.to_string()))
 //! }
 //! ```
 
@@ -99,7 +99,7 @@ pub enum CheckpointError {
 /// use remi_checkpoint::error::CheckpointResult;
 ///
 /// fn example() -> CheckpointResult<String> {
-///     Ok("success".to_string())
+///     Ok('success'.to_string())
 /// }
 /// ```
 pub type CheckpointResult<T> = Result<T, CheckpointError>;

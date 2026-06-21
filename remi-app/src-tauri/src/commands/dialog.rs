@@ -124,15 +124,15 @@ pub async fn save_file(
 ///
 /// # 字段说明
 ///
-/// - `name`: 过滤器显示名称（如 "Text Files"、"Image Files"）
-/// - `extensions`: 文件扩展名列表（如 ["txt", "md"]、["png", "jpg"]）
+/// - `name`: 过滤器显示名称（如 'Text Files'、'Image Files'）
+/// - `extensions`: 文件扩展名列表（如 ['txt', 'md']、['png', 'jpg']）
 ///
 /// # 使用示例
 ///
 /// ```json
 /// {
-///     "name": "Text Files",
-///     "extensions": ["txt", "md", "json"]
+///     'name': 'Text Files',
+///     'extensions': ['txt', 'md', 'json']
 /// }
 /// ```
 #[derive(Debug, Deserialize)]

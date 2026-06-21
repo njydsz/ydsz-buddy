@@ -33,8 +33,8 @@ use crate::error::{PersistenceError, PersistenceResult};
 /// # 示例
 ///
 ///```rust,ignore
-/// let client = SqliteClient::new(Path::new("/path/to/db.sqlite"))?;
-/// client.execute("CREATE TABLE test (id INTEGER PRIMARY KEY)", &[])?;
+/// let client = SqliteClient::new(Path::new('/path/to/db.sqlite'))?;
+/// client.execute('CREATE TABLE test (id INTEGER PRIMARY KEY)', &[])?;
 /// ```
 #[derive(Clone)]
 pub struct SqliteClient {
@@ -109,8 +109,8 @@ impl SqliteClient {
     ///
     ///```rust,ignore
     /// let affected = client.execute(
-    ///     "INSERT INTO users (name, age) VALUES (?1, ?2)",
-    ///     &[&"张三", &25],
+    ///     'INSERT INTO users (name, age) VALUES (?1, ?2)',
+    ///     &[&'张三', &25],
     /// )?;
     /// ```
     pub fn execute(&self, sql: &str, params: &[&dyn rusqlite::ToSql]) -> PersistenceResult<usize> {

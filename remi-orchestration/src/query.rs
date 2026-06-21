@@ -64,17 +64,17 @@
 //!
 //! // 获取 Shell 快照（适用于列表展示）
 //! let shell = query.get_shell_snapshot().await?;
-//! println!("项目数: {}, 线程数: {}", shell.projects.len(), shell.threads.len());
+//! println!('项目数: {}, 线程数: {}', shell.projects.len(), shell.threads.len());
 //!
 //! // 获取线程详情
 //! if let Some(thread) = query.get_thread_detail(thread_id).await? {
-//!     println!("线程标题: {}", thread.title);
-//!     println!("消息数: {}", thread.messages.len());
+//!     println!('线程标题: {}', thread.title);
+//!     println!('消息数: {}', thread.messages.len());
 //! }
 //!
 //! // 获取统计数据
 //! let counts = query.get_counts().await?;
-//! println!("项目: {}, 线程: {}", counts.project_count, counts.thread_count);
+//! println!('项目: {}, 线程: {}', counts.project_count, counts.thread_count);
 //! ```
 //!
 //! ## 注意事项

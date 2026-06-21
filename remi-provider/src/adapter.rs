@@ -412,7 +412,7 @@ pub trait ProviderAdapter: Send + Sync {
     /// tokio::spawn(async move {
     ///     while let Ok(event) = rx.recv().await {
     ///         // 处理事件
-    ///         println!("收到事件: {:?}", event);
+    ///         println!('收到事件: {:?}', event);
     ///     }
     /// });
     /// ```

@@ -1,7 +1,31 @@
 // FILE: ProviderUsagePanelContent.tsx
 // Purpose: Render a provider usage summary panel that can show both classic
 // rate-limit rows and archive-derived local usage lines in the same popover.
-
+/**
+ * @file Provider 用量面板内容
+ *
+ * 合并展示 provider 速率限制（来自后端）与本地归档用量：
+ *
+ * - **速率限制**：经典配额行（5h/周配额等）
+ * - **本地用量**：从归档派生的每日/每会话使用行
+ * - **Learn more 链接**：根据 provider / 行类型指向相应文档
+ *
+ * ## 核心导出
+ *
+ * - `ProviderUsagePanelContent`：主组件
+ * - `providerUsageLabel`：provider 名称展示
+ *
+ * ## 使用场景
+ *
+ * - BranchToolbar 的速率限制折叠面板
+ * - RateLimitsPanel
+ *
+ * ## 注意事项
+ *
+ * - 速率限制行与本地用量行展示在同一 popover
+ * - `showTitle=false` 时省略内嵌标题
+ * - `learnMoreHref` 由 `deriveProviderUsageLearnMoreHref` 派生
+ */
 import type { ProviderKind } from "~/contracts";
 import { memo, useMemo } from "react";
 

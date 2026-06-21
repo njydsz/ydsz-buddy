@@ -174,7 +174,7 @@ impl ProviderEventLogger {
     /// # 参数
     ///
     /// - `event`: 要记录的事件，必须实现 `Serialize`
-    /// - `thread_id`: 会话线程 ID，为 None 时使用 "_global"
+    /// - `thread_id`: 会话线程 ID，为 None 时使用 '_global'
     ///
     /// # 返回值
     ///

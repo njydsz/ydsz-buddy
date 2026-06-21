@@ -1,3 +1,29 @@
+/**
+ * @file Composer Prompt 编辑器（基于 Lexical）
+ *
+ * ChatView 中 Composer 输入框的富文本编辑器：
+ *
+ * - **基于 Lexical**：提供轻量级富文本能力（@ mention、/ 命令、占位符）
+ * - **斜杠命令**：`/` 触发命令菜单，支持 fork / side / review
+ * - **@ 提及**：`@` 触发 mention 弹层（文件/目录/技能）
+ * - **多行编辑**：Enter 发送、Shift+Enter 换行
+ * - **占位符**：内联终端上下文等以装饰节点占位
+ * - **撤销/重做**：内置 Lexical HistoryPlugin
+ *
+ * ## 核心导出
+ *
+ * - `ComposerPromptEditor`（`forwardRef`）：编辑器组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView Composer 输入区域
+ *
+ * ## 注意事项
+ *
+ * - 节点树由 Lexical 内部维护，外部通过命令插入/查询
+ * - 与 `composerDraftStore` 双向同步编辑内容
+ * - 光标位置由 `clampCollapsedComposerCursor` 等工具保证不越界
+ */
 import { LexicalComposer, type InitialConfigType } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";

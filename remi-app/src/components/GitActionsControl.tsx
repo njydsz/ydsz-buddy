@@ -2,7 +2,32 @@
 // Purpose: Render the chat-header git action control, commit dialog, and action toasts.
 // Layer: Header action control
 // Depends on: git React Query hooks, native shell bridges, and shared picker/menu primitives.
-
+/**
+ * @file Git 操作控制
+ *
+ * 聊天头部的 Git 动作按钮 + 提交弹窗 + 进度 toast：
+ *
+ * - **菜单**：commit / commit & push / push / 创建 PR 等动作
+ * - **提交弹窗**：编辑 commit message、选择分支、显示 diff stats
+ * - **进度 toast**：通过 `GitActionProgressEvent` 流式展示
+ * - **默认分支保护**：对 main/master 等要求二次确认
+ * - **重置/同步**：失败时重置进度、重新拉取状态
+ *
+ * ## 核心导出
+ *
+ * - `GitActionsControl`：主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 头部 chrome
+ *
+ * ## 注意事项
+ *
+ * - 提交 message 校验：必填、最小长度
+ * - 创建 PR 通过 native shell 打开浏览器
+ * - 临时 worktree 分支不展示 push 选项
+ * - 默认分支提交需要确认对话框
+ */
 import type {
   GitActionProgressEvent,
   GitStackedAction,

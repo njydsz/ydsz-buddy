@@ -245,7 +245,7 @@ pub struct BrowserCaptureScreenshotResult {
 ///
 /// - `thread_id`: 对话线程 ID
 /// - `tab_id`: 标签页 ID
-/// - `method`: CDP 方法名（如 "Page.navigate"、"Runtime.evaluate"）
+/// - `method`: CDP 方法名（如 'Page.navigate'、'Runtime.evaluate'）
 /// - `params`: CDP 方法参数（JSON 格式）
 #[derive(Debug, Deserialize)]
 pub struct BrowserExecuteCdpInput {
@@ -284,7 +284,7 @@ fn browser_window_label(thread_id: &str) -> String {
 /// 规范化 URL 输入
 ///
 /// 将用户输入的字符串转换为有效的 URL。
-/// - 空字符串或 "about:blank" 返回 "about:blank"
+/// - 空字符串或 'about:blank' 返回 'about:blank'
 /// - 包含空格的字符串视为搜索查询
 /// - 看起来像 URL 的字符串添加 https:// 前缀
 /// - 其他字符串视为搜索查询

@@ -1,3 +1,27 @@
+/**
+ * @file 项目脚本控制
+ *
+ * 聊天头部的"运行项目脚本"控件：
+ *
+ * - **脚本菜单**：列出 `ProjectScript[]` 并提供运行/编辑入口
+ * - **运行结果**：通过 toast 反馈成功/失败
+ * - **键盘快捷键**：与全局 keybinding 联动
+ * - **最近运行**：按项目维度记忆最近一次运行的脚本
+ *
+ * ## 核心导出
+ *
+ * - `ProjectScriptsControl`：主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 头部 chrome
+ *
+ * ## 注意事项
+ *
+ * - 脚本来源：`contracts.ProjectScript`
+ * - 最近一次运行通过 `LAST_INVOKED_SCRIPT_BY_PROJECT_KEY` 持久化
+ * - 脚本图标支持预设枚举
+ */
 import type {
   ProjectScript,
   ProjectScriptIcon,

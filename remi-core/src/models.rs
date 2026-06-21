@@ -152,7 +152,7 @@ pub struct Thread {
     /// 轻量终端标题摘要（用于 Sidebar 列表快速展示）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shell_summary: Option<String>,
-    /// 是否已完成"创建分支并打开线程"流程
+    /// 是否已完成'创建分支并打开线程'流程
     /// 用于隐藏首次创建引导横幅
     pub create_branch_flow_completed: bool,
     /// 是否置顶该线程
@@ -241,7 +241,7 @@ pub struct AssociatedWorktree {
 ///
 /// - `agent_id`: 子代理的唯一标识符
 /// - `nickname`: 子代理的显示昵称
-/// - `role`: 子代理的角色描述（如 "代码审查员"、"测试工程师" 等）
+/// - `role`: 子代理的角色描述（如 '代码审查员'、'测试工程师' 等）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubagentInfo {
@@ -497,12 +497,12 @@ pub enum DispatchMode {
 ///
 /// ## 字段说明
 ///
-/// - `provider`: Provider 名称（如 "codex"、"claudeAgent" 等）
+/// - `provider`: Provider 名称（如 'codex'、'claudeAgent' 等）
 /// - `model`: 使用的具体模型名称
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MessageSource {
-    /// Provider 名称（如 "codex"、"claudeAgent" 等）
+    /// Provider 名称（如 'codex'、'claudeAgent' 等）
     pub provider: String,
     /// 使用的具体模型名称
     pub model: String,
@@ -805,7 +805,7 @@ impl InteractionMode {
         }
     }
 
-    /// 是否需要进入"会签"流程（Plan/Review 需要用户确认）
+    /// 是否需要进入'会签'流程（Plan/Review 需要用户确认）
     pub fn requires_approval(&self) -> bool {
         matches!(self, Self::Plan | Self::Review)
     }
@@ -870,7 +870,7 @@ pub type EnvironmentId = Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExecutionEnvironmentDescriptor {
-    /// 操作系统和架构信息（如 "windows-x86_64"）
+    /// 操作系统和架构信息（如 'windows-x86_64'）
     pub platform: String,
     /// 服务器版本号
     pub server_version: String,

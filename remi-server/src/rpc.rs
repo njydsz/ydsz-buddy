@@ -42,13 +42,13 @@ use crate::error::ServerResult;
 /// `id` 字段用于匹配请求与响应，通知类消息无 `id`。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcRequest {
-    /// JSON-RPC 协议版本，固定为 "2.0"
+    /// JSON-RPC 协议版本，固定为 '2.0'
     /// 使用 Option 和默认值以兼容 Effect RPC 协议（不发送此字段）
     #[serde(default = "default_jsonrpc_version")]
     pub jsonrpc: String,
     /// 请求标识符，由客户端指定，用于匹配响应。通知消息无此字段
     pub id: Option<Value>,
-    /// 要调用的方法名，如 "git.status"、"terminal.open" 等
+    /// 要调用的方法名，如 'git.status'、'terminal.open' 等
     pub method: String,
     /// 方法调用参数，具体结构由各方法定义
     pub params: Option<Value>,
@@ -64,7 +64,7 @@ fn default_jsonrpc_version() -> String {
 /// 服务端对请求的响应，`result` 和 `error` 二者必有其一。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcResponse {
-    /// JSON-RPC 协议版本，固定为 "2.0"
+    /// JSON-RPC 协议版本，固定为 '2.0'
     pub jsonrpc: String,
     /// 对应请求的 ID
     pub id: Option<Value>,
@@ -96,9 +96,9 @@ pub struct JsonRpcError {
 /// 用于实时事件推送，如 Git 状态变更、终端输出等。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcNotification {
-    /// JSON-RPC 协议版本，固定为 "2.0"
+    /// JSON-RPC 协议版本，固定为 '2.0'
     pub jsonrpc: String,
-    /// 通知的方法名，如 "git.status"、"terminal.event" 等
+    /// 通知的方法名，如 'git.status'、'terminal.event' 等
     pub method: String,
     /// 通知参数，包含事件详情
     pub params: Option<Value>,
@@ -163,7 +163,7 @@ impl RpcRouter {
     ///
     /// # 参数
     ///
-    /// - `method`: 方法名，如 "git.status"、"terminal.open" 等
+    /// - `method`: 方法名，如 'git.status'、'terminal.open' 等
     /// - `handler`: 方法处理器，实现 [`RpcMethodHandler`] trait 的实例
     pub async fn register<H>(&self, method: &str, handler: H)
     where
@@ -311,7 +311,7 @@ pub fn error_response(id: Option<Value>, code: i32, message: String) -> JsonRpcR
 ///
 /// # 参数
 ///
-/// - `method`: 通知方法名，如 "git.status"、"terminal.event" 等
+/// - `method`: 通知方法名，如 'git.status'、'terminal.event' 等
 /// - `params`: 通知参数，包含事件详情
 pub fn create_notification(method: &str, params: Option<Value>) -> JsonRpcNotification {
     JsonRpcNotification {

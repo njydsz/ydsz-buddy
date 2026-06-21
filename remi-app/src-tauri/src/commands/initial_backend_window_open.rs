@@ -1,12 +1,12 @@
 //! # Initial Backend Window Open 模块
 //!
-//! 控制 Tauri 主窗口的"初始打开策略"——比如：
+//! 控制 Tauri 主窗口的'初始打开策略'——比如：
 //!
 //! - 是否在打开时先隐藏后端 splash，等 readiness 上来再显示？
 //! - 是否在 OS 启动时自启？
 //! - 启动后默认显示哪个路由？
 //!
-//! 这些策略是 `tauri.conf.json` 的补充——conf.json 写"静态"默认值，
+//! 这些策略是 `tauri.conf.json` 的补充——conf.json 写'静态'默认值，
 //! 运行时可以根据用户偏好 / 命令行参数动态调整。
 
 use serde::{Deserialize, Serialize};

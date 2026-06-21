@@ -8,7 +8,7 @@
 //! Homebrew / fnm / volta 等工具链位置，导致后端 spawn 子进程找不到命令。
 //! 在 Windows 上类似问题：服务进程拿不到用户 PATH。
 //!
-//! 本模块通过读取登录 shell 的环境变量并合并到当前进程，来"补救"这一情况。
+//! 本模块通过读取登录 shell 的环境变量并合并到当前进程，来'补救'这一情况。
 
 use std::collections::HashMap;
 use std::ffi::OsString;

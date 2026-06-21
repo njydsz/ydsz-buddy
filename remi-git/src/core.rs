@@ -40,9 +40,9 @@ use crate::error::{GitError, GitResult};
 ///
 /// # 字段说明
 ///
-/// - `operation`: 操作名称，用于日志记录和错误报告（如 "commit", "push"）
+/// - `operation`: 操作名称，用于日志记录和错误报告（如 'commit', 'push'）
 /// - `cwd`: 工作目录，Git 命令将在此目录下执行
-/// - `args`: Git 命令的参数列表（不包含 "git" 本身）
+/// - `args`: Git 命令的参数列表（不包含 'git' 本身）
 /// - `env`: 额外的环境变量，会注入到 Git 进程中
 /// - `allow_non_zero_exit`: 是否允许命令返回非零退出码（某些命令如 `git status` 在空仓库中会返回非零）
 /// - `timeout_ms`: 命令超时时间（毫秒），目前未实现超时控制，预留字段
@@ -53,9 +53,9 @@ use crate::error::{GitError, GitResult};
 /// use remi_git::ExecuteGitInput;
 ///
 /// let input = ExecuteGitInput {
-///     operation: "status".to_string(),
-///     cwd: "/path/to/repo".to_string(),
-///     args: vec!["status".to_string(), "--porcelain".to_string()],
+///     operation: 'status'.to_string(),
+///     cwd: '/path/to/repo'.to_string(),
+///     args: vec!['status'.to_string(), '--porcelain'.to_string()],
 ///     env: vec![],
 ///     allow_non_zero_exit: false,
 ///     timeout_ms: None,
@@ -67,7 +67,7 @@ pub struct ExecuteGitInput {
     pub operation: String,
     /// Git 命令执行的工作目录（必须是绝对路径）
     pub cwd: String,
-    /// Git 命令参数列表（例如：["commit", "-m", "message"]）
+    /// Git 命令参数列表（例如：['commit', '-m', 'message']）
     pub args: Vec<String>,
     /// 额外的环境变量键值对
     pub env: Vec<(String, String)>,
@@ -108,7 +108,7 @@ pub struct ExecuteGitResult {
 /// # 字段说明
 ///
 /// - `current_branch`: 当前所在分支名称（detached HEAD 状态下可能为 None）
-/// - `upstream_ref`: 上游跟踪分支引用（如 "origin/main"），未设置跟踪时为 None
+/// - `upstream_ref`: 上游跟踪分支引用（如 'origin/main'），未设置跟踪时为 None
 /// - `is_dirty`: 工作区是否有未提交的更改（包括暂存、修改、未跟踪文件）
 /// - `staged_files`: 已暂存的文件列表（等待提交）
 /// - `modified_files`: 已修改但未暂存的文件列表
@@ -124,9 +124,9 @@ pub struct ExecuteGitResult {
 pub struct GitStatusResult {
     /// 当前分支名称
     pub current_branch: Option<String>,
-    /// 上游跟踪分支（如 "origin/main"）
+    /// 上游跟踪分支（如 'origin/main'）
     pub upstream_ref: Option<String>,
-    /// 工作区是否"脏"（有未提交的更改）
+    /// 工作区是否'脏'（有未提交的更改）
     pub is_dirty: bool,
     /// 已暂存的文件列表（将包含在下次提交中）
     pub staged_files: Vec<String>,
@@ -174,7 +174,7 @@ pub struct PullRequestInfo {
 ///
 /// - `GitStatusResult` 面向前端 UI 展示，包含 PR 信息（预留字段）
 /// - `GitStatusDetails` 面向内部逻辑，包含 `has_upstream` 标志位，便于判断是否需要设置上游跟踪
-/// - `GitStatusDetails` 的 `branch` 字段在 detached HEAD 状态下返回 None（而非 "HEAD" 字符串）
+/// - `GitStatusDetails` 的 `branch` 字段在 detached HEAD 状态下返回 None（而非 'HEAD' 字符串）
 ///
 /// # 使用场景
 ///
@@ -193,7 +193,7 @@ pub struct GitStatusDetails {
     pub ahead_count: u32,
     /// 落后上游的提交数
     pub behind_count: u32,
-    /// 工作区是否"脏"（有未提交的更改）
+    /// 工作区是否'脏'（有未提交的更改）
     pub is_dirty: bool,
     /// 已暂存的文件列表
     pub staged_files: Vec<String>,
@@ -290,8 +290,8 @@ pub struct GitRangeContext {
 /// use remi_git::GitCore;
 /// 
 /// let core = GitCore::new();
-/// let status = core.status("/path/to/repo").await?;
-/// println!("当前分支: {:?}", status.current_branch);
+/// let status = core.status('/path/to/repo').await?;
+/// println!('当前分支: {:?}', status.current_branch);
 /// }
 pub struct GitCore;
 
@@ -404,9 +404,9 @@ impl GitCore {
     ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
-    /// let status = core.status("/path/to/repo").await?;
+    /// let status = core.status('/path/to/repo').await?;
     /// if status.is_dirty {
-    ///     println!("有未提交的更改");
+    ///     println!('有未提交的更改');
     /// }
     /// }
     pub async fn status(&self, cwd: &str) -> GitResult<GitStatusResult> {
@@ -628,8 +628,8 @@ impl GitCore {
     ///```rust,ignore
     /// #[tokio::main]
     /// async fn main() {
-    /// let sha = core.commit("/path/to/repo", "feat: add new feature").await?;
-    /// println!("提交成功: {}", sha);
+    /// let sha = core.commit('/path/to/repo', 'feat: add new feature').await?;
+    /// println!('提交成功: {}', sha);
     /// }
     pub async fn commit(&self, cwd: &str, message: &str) -> GitResult<String> {
         let _result = self
@@ -1295,7 +1295,7 @@ impl GitCore {
     ///
     /// - `cwd`: 仓库工作目录
     /// - `branch`: 本地分支名称
-    /// - `upstream`: 上游分支引用（如 "origin/main"）
+    /// - `upstream`: 上游分支引用（如 'origin/main'）
     ///
     /// # 返回值
     ///
@@ -1460,7 +1460,7 @@ impl GitCore {
     /// # 问题背景
     ///
     /// 当 Git 操作异常中断（如进程崩溃、用户手动终止）时，可能会残留 `.git/index.lock` 文件，
-    /// 导致后续所有 Git 操作都被阻塞并报错 "Unable to create index.lock: File exists"。
+    /// 导致后续所有 Git 操作都被阻塞并报错 'Unable to create index.lock: File exists'。
     /// 此方法用于安全地移除该锁文件，恢复仓库的正常操作。
     ///
     /// # 参数
@@ -1552,7 +1552,7 @@ impl GitCore {
 
         let branch = if branch_result.code == 0 {
             let b = branch_result.stdout.trim();
-            // "HEAD" 表示 detached HEAD 状态（不在任何分支上），转换为 None
+            // 'HEAD' 表示 detached HEAD 状态（不在任何分支上），转换为 None
             if b == "HEAD" { None } else { Some(b.to_string()) }
         } else {
             None
@@ -2017,7 +2017,7 @@ impl GitCore {
     /// # 参数
     ///
     /// - `cwd`: 仓库工作目录
-    /// - `key`: 配置键（如 "user.name"、"remote.origin.url"）
+    /// - `key`: 配置键（如 'user.name'、'remote.origin.url'）
     ///
     /// # 返回值
     ///
@@ -2117,7 +2117,7 @@ impl GitCore {
     ///
     /// 为每个未跟踪文件生成统一格式的补丁。由于 `git diff` 默认不包含未跟踪文件，
     /// 需要使用 `git diff --no-index /dev/null <file>` 的技巧来生成补丁，
-    /// 这样可以将未跟踪文件视为"从空文件新增"，使其补丁格式与已跟踪文件一致。
+    /// 这样可以将未跟踪文件视为'从空文件新增'，使其补丁格式与已跟踪文件一致。
     ///
     /// # 参数
     ///
@@ -2149,7 +2149,7 @@ impl GitCore {
 
         let mut patches = Vec::new();
         for file in untracked_files {
-            // 使用 --no-index 比较 /dev/null 和文件，模拟"从空文件新增"的补丁
+            // 使用 --no-index 比较 /dev/null 和文件，模拟'从空文件新增'的补丁
             // --src-prefix=a/ 和 --dst-prefix=b/ 使补丁路径格式与普通 diff 一致
             // --no-index 的退出码为 1（有差异时），因此需要 allow_non_zero_exit: true
             let result = self
@@ -2198,7 +2198,7 @@ impl GitCore {
     ///
     /// # 实现策略
     ///
-    /// 按优先级依次尝试 "main"、"master"、"develop" 三个常见的默认分支名称。
+    /// 按优先级依次尝试 'main'、'master'、'develop' 三个常见的默认分支名称。
     /// 如果 `git merge-base` 返回成功（退出码 0），说明该分支与当前分支有共同祖先，
     /// 即可作为基础分支使用。
     async fn resolve_base_branch(&self, cwd: &str, branch: &str) -> GitResult<String> {
@@ -2340,7 +2340,7 @@ impl GitCore {
     /// # 参数
     ///
     /// - `cwd`: 仓库工作目录
-    /// - `remote_name`: 远程仓库名称（如 "origin"）
+    /// - `remote_name`: 远程仓库名称（如 'origin'）
     ///
     /// # 返回值
     ///

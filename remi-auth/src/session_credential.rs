@@ -88,13 +88,13 @@ pub enum SessionMethod {
 /// - 客户端断开后重连时，用于识别同一客户端身份
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClientMetadata {
-    /// 客户端名称：人类可读的客户端标识，如 "MyApp Desktop"、"iPhone 客户端" 等。
+    /// 客户端名称：人类可读的客户端标识，如 'MyApp Desktop'、'iPhone 客户端' 等。
     /// 该字段为必填项，用于在管理界面展示。
     pub name: String,
-    /// 客户端版本：可选字段，记录客户端的软件版本号，如 "1.2.3"。
+    /// 客户端版本：可选字段，记录客户端的软件版本号，如 '1.2.3'。
     /// 用于问题排查和兼容性分析。
     pub version: Option<String>,
-    /// 客户端平台：可选字段，记录客户端运行的操作系统或平台，如 "Windows 11"、"iOS 17"。
+    /// 客户端平台：可选字段，记录客户端运行的操作系统或平台，如 'Windows 11'、'iOS 17'。
     /// 用于多端管理和统计分析。
     pub platform: Option<String>,
 }
@@ -103,7 +103,7 @@ pub struct ClientMetadata {
 ///
 /// 表示一次成功颁发的会话凭证，包含会话 ID、签名令牌、认证方式、客户端信息、
 /// 过期时间和角色。该结构体由 [`SessionCredentialService::issue`] 方法返回，
-/// 是客户端完成认证后获得的"通行证"。
+/// 是客户端完成认证后获得的'通行证'。
 ///
 /// # 使用场景
 ///
@@ -147,8 +147,8 @@ pub struct IssuedSession {
 ///
 /// # 与 IssuedSession 的区别
 ///
-/// - [`IssuedSession`] 是"颁发时"的视图，不包含 `subject`（由服务端内部记录）
-/// - [`VerifiedSession`] 是"验证时"的视图，包含完整的身份信息，`expires_at` 为可选字段
+/// - [`IssuedSession`] 是'颁发时'的视图，不包含 `subject`（由服务端内部记录）
+/// - [`VerifiedSession`] 是'验证时'的视图，包含完整的身份信息，`expires_at` 为可选字段
 #[derive(Debug, Clone)]
 pub struct VerifiedSession {
     /// 会话唯一标识符：与颁发时生成的 `session_id` 一致。
@@ -162,7 +162,7 @@ pub struct VerifiedSession {
     /// 过期时间：令牌的绝对过期时间点。某些特殊场景（如永久令牌）可能为 `None`。
     pub expires_at: Option<DateTime<Utc>>,
     /// 主题标识：标识该会话所属的用户或实体，如用户 ID、设备 ID 等。
-    /// 默认值为 "local"，表示本地会话。
+    /// 默认值为 'local'，表示本地会话。
     pub subject: String,
     /// 会话角色：该会话所属的角色（Owner 或 Client）。
     pub role: SessionRole,
@@ -175,7 +175,7 @@ pub struct VerifiedSession {
 ///
 /// # 使用场景
 ///
-/// - 管理后台展示"当前登录设备"列表
+/// - 管理后台展示'当前登录设备'列表
 /// - 监控系统统计活跃会话数量、连接状态分布
 /// - 安全审计追溯某个会话的创建时间和活跃情况
 ///
@@ -298,7 +298,7 @@ pub struct SessionCredentialService {
     /// 通道容量为 1000，超出时旧事件会被丢弃。
     change_tx: broadcast::Sender<SessionCredentialChange>,
     /// Cookie 名称：用于在 HTTP 响应中设置会话令牌的 Cookie 名称。
-    /// 默认值为 "remi_session"。
+    /// 默认值为 'remi_session'。
     cookie_name: String,
     /// 默认会话有效期（小时）：当颁发会话时未指定 TTL 时使用的默认值。
     /// 默认值为 72 小时（3 天）。
@@ -315,7 +315,7 @@ impl SessionCredentialService {
     /// # 返回值
     ///
     /// 返回初始化完成的 [`SessionCredentialService`] 实例，默认配置如下：
-    /// - Cookie 名称: `"remi_session"`
+    /// - Cookie 名称: `'remi_session'`
     /// - 默认会话有效期: 72 小时（3 天）
     /// - 变更事件通道容量: 1000
     ///
@@ -342,7 +342,7 @@ impl SessionCredentialService {
     /// # 返回值
     ///
     /// 返回用于 HTTP 响应中设置会话令牌的 Cookie 名称字符串引用。
-    /// 默认值为 `"remi_session"`。
+    /// 默认值为 `'remi_session'`。
     ///
     /// # 使用场景
     ///
@@ -360,10 +360,10 @@ impl SessionCredentialService {
     /// # 参数
     ///
     /// - `ttl_hours`: 会话有效期（小时）。默认使用 [`default_ttl_hours`](Self::default_ttl_hours)（72 小时）
-    /// - `subject`: 会话所属的用户或实体标识。默认为 `"local"`
+    /// - `subject`: 会话所属的用户或实体标识。默认为 `'local'`
     /// - `method`: 认证方式。默认为 [`SessionMethod::Bootstrap`]
     /// - `role`: 会话角色。默认为 [`SessionRole::Client`]
-    /// - `client`: 客户端元数据。默认为名称 `"unknown"` 的空元数据
+    /// - `client`: 客户端元数据。默认为名称 `'unknown'` 的空元数据
     ///
     /// # 返回值
     ///
@@ -381,13 +381,13 @@ impl SessionCredentialService {
     /// // 自定义参数颁发会话
     /// let issued = service.issue(
     ///     Some(24),                                    // 24 小时有效期
-    ///     Some("user_123".to_string()),                // 用户 ID
+    ///     Some('user_123'.to_string()),                // 用户 ID
     ///     Some(SessionMethod::Bearer),                 // Bearer 认证
     ///     Some(SessionRole::Client),                   // 客户端角色
     ///     Some(ClientMetadata {                        // 客户端信息
-    ///         name: "MyApp".to_string(),
-    ///         version: Some("1.0.0".to_string()),
-    ///         platform: Some("Windows".to_string()),
+    ///         name: 'MyApp'.to_string(),
+    ///         version: Some('1.0.0'.to_string()),
+    ///         platform: Some('Windows'.to_string()),
     ///     }),
     /// ).await?;
     /// }
@@ -469,7 +469,7 @@ impl SessionCredentialService {
     /// // 验证客户端携带的令牌
     /// match service.verify(&token).await {
     ///     Ok(session) => {
-    ///         println!("用户 {} 验证通过", session.subject);
+    ///         println!('用户 {} 验证通过', session.subject);
     ///         // 继续处理请求...
     ///     }
     ///     Err(AuthError::InvalidToken) => {
@@ -590,7 +590,7 @@ impl SessionCredentialService {
     ///
     /// # 使用场景
     ///
-    /// - 管理后台展示"当前登录设备"列表
+    /// - 管理后台展示'当前登录设备'列表
     /// - 监控系统统计活跃会话数量
     /// - 安全审计追溯当前所有有效会话
     ///
@@ -600,9 +600,9 @@ impl SessionCredentialService {
     /// #[tokio::main]
     /// async fn main() {
     /// let active_sessions = service.list_active().await?;
-    /// println!("当前活跃会话数: {}", active_sessions.len());
+    /// println!('当前活跃会话数: {}', active_sessions.len());
     /// for session in active_sessions {
-    ///     println!("会话 ID: {}, 客户端: {}, 已连接: {}",
+    ///     println!('会话 ID: {}, 客户端: {}, 已连接: {}',
     ///         session.session_id, session.client_name, session.is_connected);
     /// }
     /// }
@@ -656,10 +656,10 @@ impl SessionCredentialService {
     ///     while let Ok(event) = rx.recv().await {
     ///         match event {
     ///             SessionCredentialChange::ClientUpserted(session) => {
-    ///                 println!("会话创建/更新: {}", session.session_id);
+    ///                 println!('会话创建/更新: {}', session.session_id);
     ///             }
     ///             SessionCredentialChange::ClientRemoved(session_id) => {
-    ///                 println!("会话移除: {}", session_id);
+    ///                 println!('会话移除: {}', session_id);
     ///             }
     ///         }
     ///     }
@@ -696,9 +696,9 @@ impl SessionCredentialService {
     /// #[tokio::main]
     /// async fn main() {
     /// if service.revoke(&session_id).await? {
-    ///     println!("会话已成功撤销");
+    ///     println!('会话已成功撤销');
     /// } else {
-    ///     println!("会话不存在");
+    ///     println!('会话不存在');
     /// }
     /// }
     pub async fn revoke(&self, session_id: &str) -> AuthResult<bool> {
@@ -720,7 +720,7 @@ impl SessionCredentialService {
     /// 撤销除指定会话外的所有会话
     ///
     /// 批量移除内存存储中除指定 `session_id` 外的所有会话，并为每个被移除的会话广播
-    /// [`SessionCredentialChange::ClientRemoved`] 事件。适用于"踢出其他所有设备"的场景。
+    /// [`SessionCredentialChange::ClientRemoved`] 事件。适用于'踢出其他所有设备'的场景。
     ///
     /// # 参数
     ///
@@ -743,7 +743,7 @@ impl SessionCredentialService {
     /// #[tokio::main]
     /// async fn main() {
     /// let revoked_count = service.revoke_all_except(&current_session_id).await?;
-    /// println!("已撤销 {} 个会话", revoked_count);
+    /// println!('已撤销 {} 个会话', revoked_count);
     /// }
     pub async fn revoke_all_except(&self, session_id: &str) -> AuthResult<u32> {
         info!("撤销除 {} 外的所有会话", session_id);
@@ -841,7 +841,7 @@ impl SessionCredentialService {
     /// # 安全说明
     ///
     /// - 签名密钥通过 [`SecretStore::get_or_create_random`] 获取或生成，长度为 32 字节
-    /// - 密钥名称为 `"session_signing_key"`，全局唯一
+    /// - 密钥名称为 `'session_signing_key'`，全局唯一
     /// - 使用 HMAC-SHA256 算法保证令牌的完整性和防篡改性
     /// - 签名部分使用 Base64 URL 安全编码，适用于 HTTP 头、Cookie、URL 查询参数等场景
     async fn sign_token(&self, session_id: &str, expires_at: &DateTime<Utc>) -> AuthResult<String> {
@@ -852,7 +852,7 @@ impl SessionCredentialService {
             .await
             .map_err(|e| AuthError::SecretStoreError(e.to_string()))?;
 
-        // 构造签名负载："{session_id}:{expires_at_timestamp}"
+        // 构造签名负载：'{session_id}:{expires_at_timestamp}'
         let payload = format!("{}:{}", session_id, expires_at.timestamp());
 
         // 使用 HMAC-SHA256 算法计算签名
@@ -867,7 +867,7 @@ impl SessionCredentialService {
             result.into_bytes(),
         );
 
-        // 返回完整令牌："{payload}.{signature}"
+        // 返回完整令牌：'{payload}.{signature}'
         Ok(format!("{}.{}", payload, signature))
     }
 }

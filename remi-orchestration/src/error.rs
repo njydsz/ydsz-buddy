@@ -41,7 +41,7 @@
 //!     
 //!     // 手动构造特定错误类型
 //!     if !valid {
-//!         return Err(OrchestrationError::CommandError("参数不合法".into()));
+//!         return Err(OrchestrationError::CommandError('参数不合法'.into()));
 //!     }
 //!     
 //!     Ok(())
@@ -53,7 +53,7 @@
 //! 如需添加新的错误类型：
 //!
 //! 1. 在 `OrchestrationError` 枚举中添加新变体
-//! 2. 使用 `#[error("...")]` 定义错误消息格式
+//! 2. 使用 `#[error('...')]` 定义错误消息格式
 //! 3. 如需自动转换，添加 `#[from]` 属性或实现 `From` trait
 //! 4. 更新本文档的错误分类说明
 
@@ -117,7 +117,7 @@ pub enum OrchestrationError {
 ///
 /// ```ignore
 /// fn do_something() -> OrchestrationResult<String> {
-///     Ok("success".to_string())
+///     Ok('success'.to_string())
 /// }
 /// ```
 pub type OrchestrationResult<T> = Result<T, OrchestrationError>;

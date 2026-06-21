@@ -1,3 +1,31 @@
+/**
+ * @file 自定义图标集合
+ *
+ * 集中存放项目中使用的 SVG 图标与第三方图标（如 `react-icons/si` 的品牌 logo）：
+ *
+ * - **拖拽手柄**：`DotGrid2x3Icon`
+ * - **品牌 Logo**：`GitHubIcon` 等
+ * - **占位图标**：自定义 SVG（统一使用 24x24 viewBox）
+ *
+ * ## 核心导出
+ *
+ * - `Icon`：图标组件类型
+ * - `DotGrid2x3Icon`：拖拽手柄
+ * - `GitHubIcon`：GitHub logo
+ * - 其他项目内自定义 SVG
+ *
+ * ## 使用场景
+ *
+ * - Header 按钮
+ * - 菜单项前缀
+ * - 拖拽区域提示
+ *
+ * ## 注意事项
+ *
+ * - 所有图标使用 `currentColor`，便于主题适配
+ * - viewBox 统一为 0 0 24 24
+ * - 通过 `useId` 避免多实例 id 冲突
+ */
 import { type SVGProps, useId } from "react";
 import { SiAnthropic } from "react-icons/si";
 

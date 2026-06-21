@@ -1,3 +1,25 @@
+/**
+ * @file 侧边栏命令网格
+ *
+ * 侧边栏底部的快捷命令网格（线程 / 技能 / 历史 等）：
+ *
+ * - **网格布局**：2-3 列命令卡
+ * - **路由感知**：当前路由高亮
+ * - **i18n**：标签来自 `useMessages`
+ *
+ * ## 核心导出
+ *
+ * - `SidebarCommandGrid`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏底部
+ *
+ * ## 注意事项
+ *
+ * - 通过 `useSearch` 获取当前路由
+ * - 跳转使用 `useNavigate`
+ */
 import { type FC, useCallback } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { BookIcon, ClockIcon, PlugIcon } from "../lib/icons";

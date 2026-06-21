@@ -27,14 +27,14 @@
 //! use remi_checkpoint::store::CheckpointStore;
 //! use remi_git::GitCore;
 //!
-//! let git_core = Arc::new(GitCore::new("/path/to/repo")?);
+//! let git_core = Arc::new(GitCore::new('/path/to/repo')?);
 //! let store = Arc::new(CheckpointStore::new(git_core.clone()));
 //! let query = CheckpointDiffQuery::new(store, git_core);
 //!
 //! // 查询两个检查点之间的 Diff
 //! let diff = query.get_diff_between_checkpoints(
-//!     "checkpoint-id-1".to_string(),
-//!     "checkpoint-id-2".to_string(),
+//!     'checkpoint-id-1'.to_string(),
+//!     'checkpoint-id-2'.to_string(),
 //! ).await?;
 //! ```
 
@@ -408,13 +408,13 @@ fn parse_diff_stats(diff: &str) -> DiffStats {
 
     for line in diff.lines() {
         if line.starts_with("diff --git") {
-            // 每个文件级 diff 块以 "diff --git" 开头
+            // 每个文件级 diff 块以 'diff --git' 开头
             files_changed += 1;
         } else if line.starts_with('+') && !line.starts_with("+++") {
-            // 排除 "+++" 文件头标识
+            // 排除 '+++' 文件头标识
             additions += 1;
         } else if line.starts_with('-') && !line.starts_with("---") {
-            // 排除 "---" 文件头标识
+            // 排除 '---' 文件头标识
             deletions += 1;
         }
     }

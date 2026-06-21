@@ -1,7 +1,7 @@
 //! # Provider Maintenance 模块
 //!
 //! 周期性巡检所有注册的 Provider，刷新 `StatusCache` / `ProviderHealth`，
-//! 并在 Provider 长期不可用时触发"重连"或"熔断"决策。
+//! 并在 Provider 长期不可用时触发'重连'或'熔断'决策。
 //!
 //! ## 设计
 //!

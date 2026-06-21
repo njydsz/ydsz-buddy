@@ -87,7 +87,7 @@ impl GrokAdapter {
     ///
     /// # 参数
     ///
-    /// - `model`: 要使用的 Grok 模型名称（如 "grok-4"）
+    /// - `model`: 要使用的 Grok 模型名称（如 'grok-4'）
     /// - `cwd`: 子进程的工作目录
     ///
     /// # 返回值

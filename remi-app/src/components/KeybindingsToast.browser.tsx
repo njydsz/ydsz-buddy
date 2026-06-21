@@ -1,3 +1,22 @@
+/**
+ * @file Keybindings Toast 浏览器端测试
+ *
+ * 验证快捷键提示 toast 在真实浏览器中的行为：
+ *
+ * - **MSW WebSocket 拦截**：模拟后端配置推送
+ * - **路由注入**：通过 memory history 注入路由
+ * - **覆盖**：toast 弹出/关闭、首次安装提示、用户关闭持久化
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - 快捷键 toast 回归
+ *
+ * ## 注意事项
+ *
+ * - 每个测试 `beforeEach` 重置所有 store
+ * - 通过 `page` 上下文获得浏览器 page 对象
+ */
 import "../index.css";
 
 import {

@@ -285,16 +285,16 @@ impl GitHubCli {
 pub struct GitHubAuthStatus {
     /// 是否已登录
     pub logged_in: bool,
-    /// 登录账号（如 "octocat"）
+    /// 登录账号（如 'octocat'）
     pub account: Option<String>,
-    /// 认证协议（"HTTPS" / "SSH"）
+    /// 认证协议（'HTTPS' / 'SSH'）
     pub protocol: Option<String>,
 }
 
 fn extract_account(stdout: &str, stderr: &str) -> Option<String> {
     for line in format!("{stdout}\n{stderr}").lines() {
         if let Some(rest) = line.strip_prefix("Logged in to github.com account ") {
-            // 形如 "Logged in to github.com account octocat (oauth_token)"
+            // 形如 'Logged in to github.com account octocat (oauth_token)'
             let token = rest.split_whitespace().next()?;
             return Some(token.to_string());
         }

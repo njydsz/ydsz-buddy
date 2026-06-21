@@ -69,7 +69,7 @@ pub struct SkillInfo {
     pub name: String,
     /// 技能描述
     pub description: Option<String>,
-    /// 来源（如 "adapter", "cache"）
+    /// 来源（如 'adapter', 'cache'）
     pub source: String,
 }
 
@@ -375,17 +375,246 @@ impl Default for ProviderDiscoveryService {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::adapter::{ProviderAdapter, ProviderCapabilities, SessionModelSwitchMode};
+    use async_trait::async_trait;
+    use remi_core::provider::{
+        ProviderKind, ProviderListAgentsResult, ProviderListCommandsInput,
+        ProviderListCommandsResult, ProviderListModelsInput, ProviderListModelsResult,
+        ProviderListPluginsInput, ProviderListPluginsResult, ProviderListSkillsInput,
+        ProviderListSkillsResult, ProviderReadPluginInput, ProviderReadPluginResult,
+        ProviderSession, ProviderSessionStartInput, ProviderTurnStartResult, TurnInput,
+    };
+    use tokio::sync::broadcast;
+
+    /// 简单 mock 适配器，仅用于测试 discovery service 的 E2E 形状
+    struct MockAdapter {
+        kind: ProviderKind,
+        caps: ProviderCapabilities,
+    }
+
+    impl MockAdapter {
+        fn new(kind: ProviderKind, caps: ProviderCapabilities) -> Self {
+            Self { kind, caps }
+        }
+    }
+
+    #[async_trait]
+    impl ProviderAdapter for MockAdapter {
+        fn provider_kind(&self) -> ProviderKind {
+            self.kind
+        }
+        fn capabilities(&self) -> ProviderCapabilities {
+            self.caps.clone()
+        }
+        async fn start_session(
+            &self,
+            _input: ProviderSessionStartInput,
+        ) -> ProviderResult<ProviderSession> {
+            unimplemented!()
+        }
+        async fn send_turn(&self, _input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
+            unimplemented!()
+        }
+        async fn interrupt_turn(&self, _id: &str, _t: Option<&str>) -> ProviderResult<()> {
+            unimplemented!()
+        }
+        async fn stop_session(&self, _id: &str) -> ProviderResult<()> {
+            unimplemented!()
+        }
+        async fn stop_all(&self) -> ProviderResult<()> {
+            unimplemented!()
+        }
+        async fn list_sessions(&self) -> ProviderResult<Vec<ProviderSession>> {
+            Ok(vec![])
+        }
+        async fn has_session(&self, _id: &str) -> ProviderResult<bool> {
+            Ok(false)
+        }
+        async fn compact_thread(&self, _id: &str) -> ProviderResult<()> {
+            unimplemented!()
+        }
+        async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<remi_core::provider::ProviderRuntimeEvent>> {
+            let (tx, rx) = broadcast::channel(1);
+            drop(tx);
+            Ok(rx)
+        }
+        async fn list_skills(
+            &self,
+            _input: ProviderListSkillsInput,
+        ) -> ProviderResult<ProviderListSkillsResult> {
+            Ok(ProviderListSkillsResult {
+                skills: vec![],
+                source: Some("mock".to_string()),
+                cached: Some(false),
+            })
+        }
+        async fn list_commands(
+            &self,
+            _input: ProviderListCommandsInput,
+        ) -> ProviderResult<ProviderListCommandsResult> {
+            Ok(ProviderListCommandsResult {
+                commands: vec![],
+                source: Some("mock".to_string()),
+                cached: Some(false),
+            })
+        }
+        async fn list_models(
+            &self,
+            _input: ProviderListModelsInput,
+        ) -> ProviderResult<ProviderListModelsResult> {
+            Ok(ProviderListModelsResult {
+                models: vec![],
+                source: Some("mock".to_string()),
+                cached: Some(false),
+            })
+        }
+        async fn list_agents(&self) -> ProviderResult<ProviderListAgentsResult> {
+            Ok(ProviderListAgentsResult {
+                agents: vec![],
+                source: Some("mock".to_string()),
+                cached: Some(false),
+            })
+        }
+        async fn list_plugins(
+            &self,
+            _input: ProviderListPluginsInput,
+        ) -> ProviderResult<ProviderListPluginsResult> {
+            unimplemented!()
+        }
+        async fn read_plugin(
+            &self,
+            _input: ProviderReadPluginInput,
+        ) -> ProviderResult<ProviderReadPluginResult> {
+            unimplemented!()
+        }
+    }
+
+    /// marker trait to avoid bringing the real event type into the test
+    fn _adapter_runtime_event_marker() -> remi_core::provider::ProviderRuntimeEvent {
+        remi_core::provider::ProviderRuntimeEvent::TurnDelta {
+            session_id: String::new(),
+            turn_id: String::new(),
+            delta: String::new(),
+        }
+    }
 
     #[tokio::test]
-    async fn test_discovery_service() {
         let service = ProviderDiscoveryService::new();
 
         // 测试未注册的 Provider
         let result = service.get_composer_capabilities(ProviderKind::ClaudeAgent).await;
         assert!(result.is_err());
 
-        // 测试列出技能（应该返回空列表）
+        // 测试列出技能（应该返回错误，因为 Provider 未注册）
         let skills = service.list_skills(ProviderKind::ClaudeAgent).await;
         assert!(skills.is_err());
+    }
+
+    fn full_caps() -> ProviderCapabilities {
+        ProviderCapabilities {
+            session_model_switch: SessionModelSwitchMode::InSession,
+            supports_skill_mentions: true,
+            supports_skill_discovery: true,
+            supports_native_slash_command_discovery: true,
+            supports_plugin_mentions: true,
+            supports_plugin_discovery: true,
+            supports_runtime_model_list: true,
+            supports_turn_steering: true,
+            supports_thread_compaction: true,
+            supports_thread_import: true,
+        }
+    }
+
+    #[tokio::test]
+    async fn test_composer_capabilities_e2e_shape() {
+        // 模拟一次完整的 E2E：注册 Adapter -> 获取能力 -> 序列化为前端契约 JSON
+        let service = ProviderDiscoveryService::new();
+        let caps = full_caps();
+        service
+            .register_adapter(std::sync::Arc::new(MockAdapter::new(
+                ProviderKind::Codex,
+                caps,
+            )))
+            .await;
+
+        let info = service
+            .get_composer_capabilities(ProviderKind::Codex)
+            .await
+            .expect("获取 Codex 能力应成功");
+
+        // 验证：每个前端契约字段都存在且被正确序列化
+        let json = serde_json::to_value(&info).expect("序列化应成功");
+        assert_eq!(json["provider"], "codex");
+        assert_eq!(json["supportsSkillMentions"], true);
+        assert_eq!(json["supportsSkillDiscovery"], true);
+        assert_eq!(json["supportsNativeSlashCommandDiscovery"], true);
+        assert_eq!(json["supportsPluginMentions"], true);
+        assert_eq!(json["supportsPluginDiscovery"], true);
+        assert_eq!(json["supportsRuntimeModelList"], true);
+        assert_eq!(json["supportsTurnSteering"], true);
+        assert_eq!(json["supportsThreadCompaction"], true);
+        assert_eq!(json["supportsThreadImport"], true);
+    }
+
+    #[tokio::test]
+    async fn test_composer_capabilities_cache_hit() {
+        let service = ProviderDiscoveryService::new();
+        let caps = full_caps();
+        service
+            .register_adapter(std::sync::Arc::new(MockAdapter::new(
+                ProviderKind::ClaudeAgent,
+                caps,
+            )))
+            .await;
+
+        // 第一次获取
+        let first = service
+            .get_composer_capabilities(ProviderKind::ClaudeAgent)
+            .await
+            .expect("第一次获取应成功");
+        // 第二次获取应命中缓存（应与第一次返回内容一致）
+        let second = service
+            .get_composer_capabilities(ProviderKind::ClaudeAgent)
+            .await
+            .expect("第二次获取应成功");
+        assert_eq!(first.provider, second.provider);
+        assert_eq!(first.supports_skill_mentions, second.supports_skill_mentions);
+        assert_eq!(
+            first.supports_plugin_discovery,
+            second.supports_plugin_discovery
+        );
+        // 缓存被清除后应能重新获取
+        service.clear_cache().await;
+        let third = service
+            .get_composer_capabilities(ProviderKind::ClaudeAgent)
+            .await
+            .expect("清缓存后获取应成功");
+        assert_eq!(first.provider, third.provider);
+    }
+
+    #[test]
+    fn test_capabilities_info_alignment() {
+        // 静态校验：disabled 必须与前端契约字段一一对应
+        let info = ProviderCapabilitiesInfo::disabled(ProviderKind::Gemini);
+        let json = serde_json::to_value(&info).expect("序列化应成功");
+        let required = [
+            "provider",
+            "supportsSkillMentions",
+            "supportsSkillDiscovery",
+            "supportsNativeSlashCommandDiscovery",
+            "supportsPluginMentions",
+            "supportsPluginDiscovery",
+            "supportsRuntimeModelList",
+            "supportsTurnSteering",
+            "supportsThreadCompaction",
+            "supportsThreadImport",
+        ];
+        for field in required {
+            assert!(
+                json.get(field).is_some(),
+                "ProviderCapabilitiesInfo 缺少前端契约字段: {}",
+                field
+            );
+        }
     }
 }

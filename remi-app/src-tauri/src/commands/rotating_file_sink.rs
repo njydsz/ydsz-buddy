@@ -12,8 +12,8 @@
 //!
 //! ```rust,ignore
 //! use crate::commands::rotating_file_sink::RotatingFileSink;
-//! let mut sink = RotatingFileSink::with_defaults(logs_dir, "remi")?;
-//! sink.write_line("hello world");
+//! let mut sink = RotatingFileSink::with_defaults(logs_dir, 'remi')?;
+//! sink.write_line('hello world');
 //! ```
 
 use std::fs::{self, OpenOptions};

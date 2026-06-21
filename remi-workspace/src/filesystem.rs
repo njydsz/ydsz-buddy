@@ -41,17 +41,17 @@
 //! 
 //! // 安全地写入文件
 //! let result = fs.write_file(WriteFileInput {
-//!     cwd: "/project".to_string(),
-//!     relative_path: "src/main.rs".to_string(),
-//!     content: "fn main() {}".to_string(),
+//!     cwd: '/project'.to_string(),
+//!     relative_path: 'src/main.rs'.to_string(),
+//!     content: 'fn main() {}'.to_string(),
 //!     create_directories: true,
 //! }).await?;
 //! 
 //! // 读取文件
-//! let content = fs.read_file("/project", "src/main.rs").await?;
+//! let content = fs.read_file('/project', 'src/main.rs').await?;
 //! 
 //! // 检查文件是否存在
-//! let exists = fs.file_exists("/project", "src/main.rs").await?;
+//! let exists = fs.file_exists('/project', 'src/main.rs').await?;
 //! }
 
 use std::path::{Path, PathBuf};
@@ -85,9 +85,9 @@ use crate::error::{WorkspaceError, WorkspaceResult};
 /// use remi_workspace::filesystem::WriteFileInput;
 ///
 /// let input = WriteFileInput {
-///     cwd: "/project".to_string(),
-///     relative_path: "src/components/Button.tsx".to_string(),
-///     content: "export const Button = () => {}".to_string(),
+///     cwd: '/project'.to_string(),
+///     relative_path: 'src/components/Button.tsx'.to_string(),
+///     content: 'export const Button = () => {}'.to_string(),
 ///     create_directories: true,
 /// };
 /// ```
@@ -163,14 +163,14 @@ pub struct WriteFileResult {
 /// 
 /// // 写入文件
 /// let result = fs.write_file(WriteFileInput {
-///     cwd: "/project".to_string(),
-///     relative_path: "src/main.rs".to_string(),
-///     content: "fn main() {}".to_string(),
+///     cwd: '/project'.to_string(),
+///     relative_path: 'src/main.rs'.to_string(),
+///     content: 'fn main() {}'.to_string(),
 ///     create_directories: true,
 /// }).await?;
 /// 
 /// // 读取文件
-/// let content = fs.read_file("/project", "src/main.rs").await?;
+/// let content = fs.read_file('/project', 'src/main.rs').await?;
 /// }
 pub struct WorkspaceFileSystem;
 
@@ -220,11 +220,11 @@ impl WorkspaceFileSystem {
     /// async fn main() {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
     /// 
-    /// let path = WorkspaceFileSystem::validate_path("/project", "src/main.rs")?;
-    /// // path = "/project/src/main.rs"
+    /// let path = WorkspaceFileSystem::validate_path('/project', 'src/main.rs')?;
+    /// // path = '/project/src/main.rs'
     /// 
     /// // 以下会返回错误
-    /// let path = WorkspaceFileSystem::validate_path("/project", "../other/file.txt")?;
+    /// let path = WorkspaceFileSystem::validate_path('/project', '../other/file.txt')?;
     /// // Err(WorkspaceError::PathOutsideRoot)
     /// }
     pub fn validate_path(cwd: &str, relative_path: &str) -> WorkspaceResult<PathBuf> {
@@ -279,15 +279,15 @@ impl WorkspaceFileSystem {
     /// 
     /// let fs = WorkspaceFileSystem::new();
     /// let result = fs.write_file(WriteFileInput {
-    ///     cwd: "/project".to_string(),
-    ///     relative_path: "src/main.rs".to_string(),
-    ///     content: "fn main() {}".to_string(),
+    ///     cwd: '/project'.to_string(),
+    ///     relative_path: 'src/main.rs'.to_string(),
+    ///     content: 'fn main() {}'.to_string(),
     ///     create_directories: true,
     /// }).await?;
     /// 
-    /// println!("写入到: {}", result.absolute_path);
-    /// println!("字节数: {}", result.bytes_written);
-    /// println!("是否新建: {}", result.created);
+    /// println!('写入到: {}', result.absolute_path);
+    /// println!('字节数: {}', result.bytes_written);
+    /// println!('是否新建: {}', result.created);
     /// }
     pub async fn write_file(&self, input: WriteFileInput) -> WorkspaceResult<WriteFileResult> {
         let absolute_path = Self::validate_path(&input.cwd, &input.relative_path)?;
@@ -350,8 +350,8 @@ impl WorkspaceFileSystem {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
     /// 
     /// let fs = WorkspaceFileSystem::new();
-    /// let content = fs.read_file("/project", "src/main.rs").await?;
-    /// println!("文件内容: {}", content);
+    /// let content = fs.read_file('/project', 'src/main.rs').await?;
+    /// println!('文件内容: {}', content);
     /// }
     pub async fn read_file(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<String> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
@@ -360,7 +360,7 @@ impl WorkspaceFileSystem {
 
         let content = fs::read_to_string(&absolute_path).await.map_err(|e| {
             // 将 NotFound 类型的 I/O 错误转换为更具体的 FileNotFound 错误
-            // 便于上层调用方区分"文件不存在"和其他 I/O 异常
+            // 便于上层调用方区分'文件不存在'和其他 I/O 异常
             if e.kind() == std::io::ErrorKind::NotFound {
                 WorkspaceError::FileNotFound(relative_path.to_string())
             } else {
@@ -401,7 +401,7 @@ impl WorkspaceFileSystem {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
     /// 
     /// let fs = WorkspaceFileSystem::new();
-    /// fs.delete_file("/project", "src/old_file.txt").await?;
+    /// fs.delete_file('/project', 'src/old_file.txt').await?;
     /// }
     pub async fn delete_file(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<()> {
         let absolute_path = Self::validate_path(cwd, relative_path)?;
@@ -410,7 +410,7 @@ impl WorkspaceFileSystem {
 
         fs::remove_file(&absolute_path).await.map_err(|e| {
             // 将 NotFound 类型的 I/O 错误转换为更具体的 FileNotFound 错误
-            // 便于上层调用方区分"文件不存在"和其他 I/O 异常
+            // 便于上层调用方区分'文件不存在'和其他 I/O 异常
             if e.kind() == std::io::ErrorKind::NotFound {
                 WorkspaceError::FileNotFound(relative_path.to_string())
             } else {
@@ -449,11 +449,11 @@ impl WorkspaceFileSystem {
     /// use remi_workspace::filesystem::WorkspaceFileSystem;
     /// 
     /// let fs = WorkspaceFileSystem::new();
-    /// let exists = fs.file_exists("/project", "src/main.rs").await?;
+    /// let exists = fs.file_exists('/project', 'src/main.rs').await?;
     /// if exists {
-    ///     println!("文件存在");
+    ///     println!('文件存在');
     /// } else {
-    ///     println!("文件不存在");
+    ///     println!('文件不存在');
     /// }
     /// }
     pub async fn file_exists(&self, cwd: &str, relative_path: &str) -> WorkspaceResult<bool> {

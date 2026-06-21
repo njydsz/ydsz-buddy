@@ -1,13 +1,13 @@
 //! # Menu Shortcuts 模块
 //!
-//! 提供 Tauri 菜单 / 全局快捷键的"声明式"模型：每个菜单项有 id、显示文本、
+//! 提供 Tauri 菜单 / 全局快捷键的'声明式'模型：每个菜单项有 id、显示文本、
 //! 加速键（accelerator）、作用域（全局 / 局部）。
 //!
 //! ## 用法
 //!
 //! ```rust,ignore
 //! use crate::commands::menu_shortcuts::{MenuShortcut, MenuShortcutScope};
-//! let item = MenuShortcut::new("file.new_chat", "新建会话", "CmdOrCtrl+N")
+//! let item = MenuShortcut::new('file.new_chat', '新建会话', 'CmdOrCtrl+N')
 //!     .with_scope(MenuShortcutScope::Global);
 //! ```
 

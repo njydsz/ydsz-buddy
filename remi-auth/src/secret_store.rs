@@ -71,7 +71,7 @@ impl SecretStore {
     /// let store = SecretStore::new(None);
     ///
     /// // 创建带持久化路径的存储（待实现）
-    /// let store = SecretStore::new(Some(PathBuf::from("/path/to/secrets")));
+    /// let store = SecretStore::new(Some(PathBuf::from('/path/to/secrets')));
     /// ```
     pub fn new(storage_path: Option<PathBuf>) -> Self {
         Self {
@@ -102,8 +102,8 @@ impl SecretStore {
     /// # use remi_auth::SecretStore;
     /// # async fn example() {
     /// let store = SecretStore::new(None);
-    /// if let Some(key) = store.get("my_key").await.unwrap() {
-    ///     println!("密钥长度: {}", key.len());
+    /// if let Some(key) = store.get('my_key').await.unwrap() {
+    ///     println!('密钥长度: {}', key.len());
     /// }
     /// # }
     /// }
@@ -246,7 +246,7 @@ impl SecretStore {
     /// # use remi_auth::SecretStore;
     /// # async fn example() {
     /// let store = SecretStore::new(None);
-    /// let key = store.get_or_create_random("signing_key", 32).await.unwrap();
+    /// let key = store.get_or_create_random('signing_key', 32).await.unwrap();
     /// assert_eq!(key.len(), 32);
     /// # }
     /// }

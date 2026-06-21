@@ -1,3 +1,28 @@
+/**
+ * @file PR 线程对话框
+ *
+ * 检出 PR 到本地线程的对话框：
+ *
+ * - **PR 解析**：接受 `#123` / `org/repo#123` 引用
+ * - **防抖**：`useDebouncedValue` 优化远程查询
+ * - **结果预览**：标题、源/目标分支、作者、状态
+ * - **创建线程**：确认后创建新线程并切换过去
+ *
+ * ## 核心导出
+ *
+ * - `PullRequestThreadDialog`：主组件
+ *
+ * ## 使用场景
+ *
+ * - BranchToolbarBranchSelector 的 "Checkout Pull Request" 入口
+ * - 命令面板中的 "Checkout PR" 命令
+ *
+ * ## 注意事项
+ *
+ * - 解析通过 `parsePullRequestReference` 工具
+ * - 远程 PR 数据由 `gitResolvePullRequestQueryOptions` 提供
+ * - 创建线程通过 `gitPreparePullRequestThreadMutationOptions`
+ */
 import type { GitResolvePullRequestResult } from "~/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebouncedValue } from "@tanstack/react-pacer";

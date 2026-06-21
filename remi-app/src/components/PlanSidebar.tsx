@@ -1,3 +1,29 @@
+/**
+ * @file 计划侧栏
+ *
+ * 展示线程最近一次的计划卡片 + 当前活跃任务列表：
+ *
+ * - **计划卡片**：标题、Markdown 内容（用 ChatMarkdown 渲染）、行动按钮
+ * - **任务列表**：步骤状态、当前/完成/失败
+ * - **可折叠**：面板可最小化为窄条
+ * - **时间戳**：每条计划/任务显示创建时间
+ *
+ * ## 核心导出
+ *
+ * - `PlanSidebar`：侧栏主组件
+ *
+ * ## 使用场景
+ *
+ * - 拆分面板的右侧
+ * - 全屏 ChatView 的浮动侧栏
+ *
+ * ## 注意事项
+ *
+ * - 计划来自 `LatestProposedPlanState`
+ * - 任务列表来自 `ActiveTaskListState`
+ * - 用户接受/拒绝计划通过 `ProposedPlanActions` 触发
+ * - 自动跟随最新计划版本
+ */
 import { memo, useState } from "react";
 import { type TimestampFormat } from "../appSettings";
 import { Badge } from "./ui/badge";

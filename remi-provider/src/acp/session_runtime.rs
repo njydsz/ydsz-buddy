@@ -1,6 +1,6 @@
 //! # Session Runtime 模块
 //!
-//! 一个 ACP Provider 在客户端侧表现为"会话（Session）"：
+//! 一个 ACP Provider 在客户端侧表现为'会话（Session）'：
 //!
 //! - 一次会话 = 一个 thread + 一个稳定 session_id + 一次 ACP 长连接
 //! - 会话内可以发多次 turn
@@ -8,7 +8,7 @@
 //!
 //! ## 设计
 //!
-//! - `SessionRuntime` 是会话的"运行时包装"：聚合 `AcpJsonRpcConnection` + `EventBus` + 会话元数据
+//! - `SessionRuntime` 是会话的'运行时包装'：聚合 `AcpJsonRpcConnection` + `EventBus` + 会话元数据
 //! - 支持恢复（fork cursor）、停止、中断
 //! - 不持有任何 IO 句柄——IO 都在 `AcpJsonRpcConnection` 里
 //!
@@ -18,8 +18,8 @@
 //! let mut rt = SessionRuntime::new(SessionConfig::default());
 //! rt.connect(Arc::new(connection)).await?;
 //! rt.initialize().await?;
-//! rt.new_session(Some("thread-1")).await?;
-//! rt.send_turn("hello").await?;
+//! rt.new_session(Some('thread-1')).await?;
+//! rt.send_turn('hello').await?;
 //! ```
 
 use std::sync::Arc;

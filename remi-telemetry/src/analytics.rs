@@ -51,8 +51,8 @@ use crate::error::{TelemetryError, TelemetryResult};
 ///
 /// ## 序列化约定
 ///
-/// 通过 `#[serde(rename_all = "snake_case")]` 将变体名称序列化为蛇形命名格式
-/// （如 `ThreadCreated` → `"thread_created"`），便于与外部分析系统对接。
+/// 通过 `#[serde(rename_all = 'snake_case')]` 将变体名称序列化为蛇形命名格式
+/// （如 `ThreadCreated` → `'thread_created'`），便于与外部分析系统对接。
 ///
 /// ## 变体分类
 ///
@@ -141,8 +141,8 @@ pub enum AnalyticsEventType {
 /// | `id` | `String` | 事件全局唯一标识，由 UUID v4 生成 |
 /// | `event_type` | `AnalyticsEventType` | 事件业务类型 |
 /// | `thread_id` | `Option<ThreadId>` | 关联的对话线程 ID，部分全局事件（如会话启动）可能为空 |
-/// | `provider` | `Option<String>` | 触发事件的 LLM Provider 名称（如 `"openai"`），仅 Provider 相关事件有值 |
-/// | `model` | `Option<String>` | 触发事件的模型名称（如 `"gpt-4"`），仅 Provider 相关事件有值 |
+/// | `provider` | `Option<String>` | 触发事件的 LLM Provider 名称（如 `'openai'`），仅 Provider 相关事件有值 |
+/// | `model` | `Option<String>` | 触发事件的模型名称（如 `'gpt-4'`），仅 Provider 相关事件有值 |
 /// | `timestamp` | `DateTime<Utc>` | 事件发生的 UTC 时间戳 |
 /// | `metadata` | `HashMap<String, String>` | 可扩展的键值对元数据，用于携带业务自定义的附加信息 |
 ///
@@ -160,10 +160,10 @@ pub struct AnalyticsEvent {
     /// 关联的对话线程 ID。对于线程级事件（如 Turn 开始、检查点创建）必填；
     /// 对于全局事件（如会话启动）可为 `None`。
     pub thread_id: Option<ThreadId>,
-    /// 触发事件的 LLM Provider 名称（如 `"openai"`、`"anthropic"`）。
+    /// 触发事件的 LLM Provider 名称（如 `'openai'`、`'anthropic'`）。
     /// 仅在 `ProviderInvoked`、`TurnStarted` 等 Provider 相关事件中携带。
     pub provider: Option<String>,
-    /// 触发事件的具体模型名称（如 `"gpt-4"`、`"claude-3-opus"`）。
+    /// 触发事件的具体模型名称（如 `'gpt-4'`、`'claude-3-opus'`）。
     /// 仅在 `ProviderInvoked`、`TurnStarted` 等 Provider 相关事件中携带。
     pub model: Option<String>,
     /// 事件发生的 UTC 时间戳，采用 ISO 8601 格式序列化。
@@ -213,10 +213,10 @@ pub struct UsageStats {
     /// 累计创建的检查点总数。每次记录 `CheckpointCreated` 事件时自增 1。
     pub total_checkpoints: u64,
     /// 按 Provider 名称分组的调用次数分布。
-    /// 键为 Provider 标识（如 `"openai"`），值为对应的累计调用次数。
+    /// 键为 Provider 标识（如 `'openai'`），值为对应的累计调用次数。
     pub by_provider: HashMap<String, u64>,
     /// 按模型名称分组的调用次数分布。
-    /// 键为模型标识（如 `"gpt-4"`），值为对应的累计调用次数。
+    /// 键为模型标识（如 `'gpt-4'`），值为对应的累计调用次数。
     pub by_model: HashMap<String, u64>,
 }
 
@@ -250,7 +250,7 @@ pub struct UsageStats {
 ///
 /// // 查询使用统计
 /// let stats = service.get_usage_stats().await?;
-/// println!("总线程数: {}", stats.total_threads);
+/// println!('总线程数: {}', stats.total_threads);
 /// ```
 pub struct AnalyticsService {
     /// 事件历史列表，按写入顺序存储所有已记录的分析事件。
@@ -621,8 +621,8 @@ impl AnalyticsService {
     /// ## 参数
     ///
     /// - `thread_id`: [`ThreadId`] —— 当前 Turn 所属的对话线程标识。
-    /// - `provider`: [`String`] —— 本次 Turn 调用的 LLM Provider 名称（如 `"openai"`）。
-    /// - `model`: [`String`] —— 本次 Turn 使用的具体模型名称（如 `"gpt-4"`）。
+    /// - `provider`: [`String`] —— 本次 Turn 调用的 LLM Provider 名称（如 `'openai'`）。
+    /// - `model`: [`String`] —— 本次 Turn 使用的具体模型名称（如 `'gpt-4'`）。
     ///
     /// ## 返回值
     ///
@@ -656,8 +656,8 @@ impl AnalyticsService {
     /// ## 参数
     ///
     /// - `thread_id`: [`ThreadId`] —— 触发 Provider 调用的对话线程标识。
-    /// - `provider`: [`String`] —— 被调用的 LLM Provider 名称（如 `"anthropic"`）。
-    /// - `model`: [`String`] —— 被调用的具体模型名称（如 `"claude-3-opus"`）。
+    /// - `provider`: [`String`] —— 被调用的 LLM Provider 名称（如 `'anthropic'`）。
+    /// - `model`: [`String`] —— 被调用的具体模型名称（如 `'claude-3-opus'`）。
     ///
     /// ## 返回值
     ///

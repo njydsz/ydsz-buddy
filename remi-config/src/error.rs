@@ -23,8 +23,8 @@ use thiserror::Error;
 ///```rust,ignore
 /// use remi_config::ConfigError;
 ///
-/// let err = ConfigError::ParseError("JSON 格式错误".to_string());
-/// assert_eq!(format!("{}", err), "配置解析错误: JSON 格式错误");
+/// let err = ConfigError::ParseError('JSON 格式错误'.to_string());
+/// assert_eq!(format!('{}', err), '配置解析错误: JSON 格式错误');
 /// ```
 #[derive(Error, Debug)]
 pub enum ConfigError {

@@ -1,6 +1,6 @@
 //! # Backend Readiness 模块
 //!
-//! 检查嵌入式 remi-server 是否已经"就绪"，可被前端调用 RPC。
+//! 检查嵌入式 remi-server 是否已经'就绪'，可被前端调用 RPC。
 //!
 //! ## 就绪定义
 //!

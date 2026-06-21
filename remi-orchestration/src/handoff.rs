@@ -50,8 +50,8 @@ const HANDOFF_BOOTSTRAP_CHAR_BUDGET: usize = (PROVIDER_MAX_INPUT_CHARS * 75) / 1
 ///
 /// 移除消息文本中多余的空白和换行符，使文本更紧凑，减少引导文本的体积。
 /// 具体处理：
-/// - 移除换行符前的多余空格（`" \n"` → `"\n"`）
-/// - 将连续三个以上空行压缩为两个空行（`"\n\n\n"` → `"\n\n"`）
+/// - 移除换行符前的多余空格（`' \n'` → `'\n'`）
+/// - 将连续三个以上空行压缩为两个空行（`'\n\n\n'` → `'\n\n'`）
 /// - 去除首尾空白
 ///
 /// # 参数
@@ -102,9 +102,9 @@ fn truncate_text(text: &str, max_chars: usize) -> String {
 /// # 返回值
 ///
 /// 返回对应角色的标签字符串：
-/// - `Assistant` → `"Assistant"`
-/// - `User` → `"User"`
-/// - `System` → `"System"`
+/// - `Assistant` → `'Assistant'`
+/// - `User` → `'User'`
+/// - `System` → `'System'`
 fn role_label(role: &MessageRole) -> &'static str {
     match role {
         MessageRole::Assistant => "Assistant",
@@ -115,7 +115,7 @@ fn role_label(role: &MessageRole) -> &'static str {
 
 /// 列出导入的交接消息
 ///
-/// 从线程的消息列表中筛选出通过交接导入的消息（source 为 "handoff-import"），
+/// 从线程的消息列表中筛选出通过交接导入的消息（source 为 'handoff-import'），
 /// 仅包含用户和助手角色的非流式消息。
 ///
 /// # 参数
@@ -139,7 +139,7 @@ pub fn list_imported_handoff_messages(thread: &Thread) -> Vec<&Message> {
 
 /// 列出导入的分叉消息
 ///
-/// 从线程的消息列表中筛选出通过分叉导入的消息（source 为 "fork-import"），
+/// 从线程的消息列表中筛选出通过分叉导入的消息（source 为 'fork-import'），
 /// 仅包含用户和助手角色的非流式消息。
 ///
 /// # 参数
@@ -163,7 +163,7 @@ pub fn list_imported_fork_messages(thread: &Thread) -> Vec<&Message> {
 
 /// 检查线程是否包含原生交接消息
 ///
-/// 判断线程是否包含由当前 Provider 原生产生的对话消息（source 为 "native"）。
+/// 判断线程是否包含由当前 Provider 原生产生的对话消息（source 为 'native'）。
 /// 用于判断线程是否已有足够的原生对话，可以再次交接给其他 Provider。
 ///
 /// # 参数

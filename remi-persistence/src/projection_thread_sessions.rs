@@ -52,10 +52,10 @@ pub enum SessionStatus {
 ///
 /// - `thread_id`: 所属线程 ID（同时也是主键）
 /// - `status`: 会话当前状态（Idle/Active/Error）
-/// - `provider_name`: LLM 提供商名称（如 "openai"、"anthropic"）
+/// - `provider_name`: LLM 提供商名称（如 'openai'、'anthropic'）
 /// - `provider_session_id`: 提供商侧的会话 ID
 /// - `provider_thread_id`: 提供商侧的线程 ID
-/// - `runtime_mode`: 运行时模式（如 "full-access"、"sandbox"）
+/// - `runtime_mode`: 运行时模式（如 'full-access'、'sandbox'）
 /// - `active_turn_id`: 当前活跃的对话轮次 ID（可选）
 /// - `last_error`: 最近一次错误信息（可选，仅在 Error 状态时有值）
 /// - `updated_at`: 会话最后更新时间
@@ -65,13 +65,13 @@ pub struct ThreadSession {
     pub thread_id: ThreadId,
     /// 会话当前状态（Idle/Active/Error）
     pub status: SessionStatus,
-    /// LLM 提供商名称（如 "openai"、"anthropic"）
+    /// LLM 提供商名称（如 'openai'、'anthropic'）
     pub provider_name: Option<String>,
     /// 提供商侧的会话 ID
     pub provider_session_id: Option<String>,
     /// 提供商侧的线程 ID
     pub provider_thread_id: Option<String>,
-    /// 运行时模式（如 "full-access"、"sandbox"）
+    /// 运行时模式（如 'full-access'、'sandbox'）
     pub runtime_mode: String,
     /// 当前活跃的对话轮次 ID（可选）
     pub active_turn_id: Option<TurnId>,

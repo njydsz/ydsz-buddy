@@ -4,6 +4,31 @@
  * Keeps the sidebar search UX aligned with the shared command primitives so
  * keyboard navigation and shortcut labels behave like the rest of the app.
  */
+/**
+ * @file 侧边栏搜索面板
+ *
+ * 类命令面板的侧边栏搜索浮层：
+ *
+ * - **多类结果**：动作 / 主题 / 项目 / 聊天线程
+ * - **键盘导航**：方向键 / Enter / Esc
+ * - **优先级**：标题命中 > 内容命中
+ * - **本地确定性**：搜索在本地完成，结果可重复
+ *
+ * ## 核心导出
+ *
+ * - `SidebarSearchPalette`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏顶部搜索框触发
+ * - 全局 ⌘K / Ctrl+K 快捷键
+ *
+ * ## 注意事项
+ *
+ * - 排名由 `SidebarSearchPalette.logic` 提供
+ * - 主题切换会同步应用到 `useTheme`
+ * - 线程命中展示消息片段
+ */
 import {
   CheckIcon,
   DeviceLaptopIcon,
@@ -532,7 +557,7 @@ export function SidebarSearchPalette(props: SidebarSearchPaletteProps) {
   };
 
   const isMac = isMacPlatform(platform);
-  const submitModifierLabel = isMac ? "�? : "Ctrl";
+  const submitModifierLabel = isMac ? "�? : "Ctrl";
 
   const handleBrowseInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isBrowsing) return;
