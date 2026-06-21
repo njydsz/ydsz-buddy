@@ -144,11 +144,9 @@
 //! // 订阅事件流
 //! let mut event_rx = engine.stream_domain_events();
 //! tokio::spawn(async move {
-//!
-while let Ok(event) = event_rx.recv().await {
+//!     while let Ok(event) = event_rx.recv().await {
 //!         // 处理事件...
-//!
-}
+//!     }
 //! });
 //! ```
 
@@ -156,7 +154,7 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use remi_core::commands::OrchestrationCommand;
-use remi_core::events::OrchestrationEvent;
+use remi_core::events::{EventMetadata, OrchestrationEvent};
 use remi_core::models::{Project, ProjectId, ProjectKind, Sequence, Thread, ThreadId};
 use remi_persistence::{EventStore, ProjectionRepository, SqliteEventStore, SqliteProjectionRepository};
 use serde::{Deserialize, Serialize};
@@ -557,7 +555,8 @@ impl OrchestrationEngine {
                 events.push(OrchestrationEvent::ProjectCreated(remi_core::events::ProjectCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
-                    command_id,
+                    command_id: command_id.clone(),
+                    event_metadata: EventMetadata::new(),
                     project_id: c.project_id,
                     title: c.title,
                     workspace_root: c.workspace_root,
@@ -1211,7 +1210,10 @@ impl OrchestrationEngine {
                     thread.latest_turn = Some(remi_core::models::LatestTurn {
                         id: e.turn_id.clone(),
                         status: remi_core::models::TurnStatus::Queued,
-                        started_at: e.occurred_at,
+                        requested_at: Some(e.occurred_at),
+                        started_at: None,
+                        completed_at: None,
+                        assistant_message_id: None,
                     });
                     thread.updated_at = e.occurred_at;
                     self.projection_repo.save_thread(&thread)?;
@@ -1222,7 +1224,10 @@ impl OrchestrationEngine {
                     thread.latest_turn = Some(remi_core::models::LatestTurn {
                         id: e.turn_id.clone(),
                         status: remi_core::models::TurnStatus::Running,
-                        started_at: e.occurred_at,
+                        requested_at: None,
+                        started_at: Some(e.occurred_at),
+                        completed_at: None,
+                        assistant_message_id: None,
                     });
                     thread.updated_at = e.occurred_at;
                     self.projection_repo.save_thread(&thread)?;

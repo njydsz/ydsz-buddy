@@ -46,7 +46,7 @@
 
 use std::sync::Arc;
 use chrono::Utc;
-use remi_core::models::{Checkpoint, ThreadId};
+use remi_core::models::{Checkpoint, CheckpointStatus, ThreadId};
 use remi_git::GitCore;
 use remi_persistence::{CheckpointStore as CheckpointStoreTrait, SqliteCheckpointStore};
 use tracing::{debug, info};
@@ -162,7 +162,12 @@ impl CheckpointStore {
             turn_id,
             git_ref: commit_sha,
             description: message,
+            status: CheckpointStatus::Ready,
+            checkpoint_turn_count: 0,
+            files: vec![],
+            assistant_message_id: None,
             created_at: Utc::now(),
+            completed_at: None,
         };
 
         // 持久化到数据库

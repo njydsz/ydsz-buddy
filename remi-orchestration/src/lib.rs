@@ -92,11 +92,9 @@
 //! // 5. 订阅事件流
 //! let mut event_rx = engine.stream_domain_events();
 //! tokio::spawn(async move {
-//!
-while let Ok(event) = event_rx.recv().await {
+//!     while let Ok(event) = event_rx.recv().await {
 //!         // 处理事件...
-//!
-}
+//!     }
 //! });
 //! ```
 //!

@@ -60,7 +60,7 @@ use crate::store::CheckpointStore;
 /// | `turn_id` | `String` | 轮次的唯一标识符，用于关联对话上下文 |
 /// | `diff` | `String` | 该轮变更的完整 Unified Diff 格式文本 |
 /// | `stats` | [`DiffStats`] | 该轮变更的统计摘要（增删行数、变更文件数） |
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TurnDiff {
     /// 轮次唯一标识符
     ///
@@ -93,7 +93,7 @@ pub struct TurnDiff {
 /// | `thread_id` | [`ThreadId`] | 对话线程的唯一标识符 |
 /// | `turns` | `Vec<TurnDiff>` | 线程中每个轮次的 Diff 详情列表，按时间顺序排列 |
 /// | `total_stats` | [`DiffStats`] | 所有轮次合并后的全局统计信息 |
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FullThreadDiff {
     /// 对话线程唯一标识符
     ///
@@ -126,7 +126,7 @@ pub struct FullThreadDiff {
 ///
 /// 通过 `#[derive(Default)]` 实现，所有字段默认为 `0`，
 /// 适用于无变更或初始化场景。
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DiffStats {
     /// 新增行数
     ///

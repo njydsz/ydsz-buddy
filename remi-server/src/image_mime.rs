@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 
 /// MIME 类型到图片文件扩展名的映射表
-pub fn image_extension_by_mime_type() -> HashMap<&"static str, &"static str> {
+pub fn image_extension_by_mime_type() -> HashMap<&'static str, &'static str> {
     HashMap::from([
         ("image/avif", ".avif"),
         ("image/bmp", ".bmp"),

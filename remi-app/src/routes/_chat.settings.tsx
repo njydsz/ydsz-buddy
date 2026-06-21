@@ -155,7 +155,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   {
     id: "tongyi",
     name: "通义千问",
-    subtitle: "阿里�?· 百炼平台",
+    subtitle: "阿里云 · 百炼平台",
     iconColor: "#F97316",
   },
   {
@@ -1902,7 +1902,7 @@ function SettingsRouteView() {
                   className="w-full text-right sm:w-48"
                   value={settings.uiFontFamily}
                   onChange={(event) => updateSettings({ uiFontFamily: event.target.value })}
-                  placeholder="-apple-system, BlinkM�?
+                  placeholder="-apple-system, BlinkMacSystemFont"
                   spellCheck={false}
                   aria-label={messages.settings.appearance.typography.uiFontAria}
                 />
@@ -2859,10 +2859,10 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="服务渠道"
-            description="管理第三方模�?API 渠道接入，启用后可在对应提供商中使用这些渠道�?
+            description="管理第三方模型 API 渠道接入，启用后可在对应提供商中使用这些渠道"
             status={
               <span className="text-[11px] text-muted-foreground">
-                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启�?
+                ({enabledModelChannels.length}/{MODEL_CHANNELS.length} 已启用)
               </span>
             }
           >
