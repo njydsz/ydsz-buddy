@@ -22,11 +22,57 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::models::{
     Activity, AssociatedWorktree, EnvMode, HandoffInfo, InteractionMode, Message, MessageId,
     ProjectId, ProposedPlan, PullRequestInfo, RuntimeMode, Sequence, SubagentInfo, ThreadId,
 };
+
+/// Event Metadata
+///
+/// Common metadata fields shared by all orchestration events.
+/// These fields provide event tracing and correlation capabilities.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventMetadata {
+    /// Unique event identifier (UUID v4)
+    pub event_id: String,
+    /// ID of the event that caused this event (for causal tracing)
+    pub causation_event_id: Option<String>,
+    /// Correlation ID for distributed tracing
+    pub correlation_id: Option<String>,
+    /// Additional metadata (arbitrary JSON)
+    pub metadata: Option<Value>,
+}
+
+impl EventMetadata {
+    /// Create new event metadata with auto-generated event ID
+    pub fn new() -> Self {
+        Self {
+            event_id: uuid::Uuid::new_v4().to_string(),
+            causation_event_id: None,
+            correlation_id: None,
+            metadata: None,
+        }
+    }
+
+    /// Create new event metadata with causation
+    pub fn with_causation(causation_event_id: String) -> Self {
+        Self {
+            event_id: uuid::Uuid::new_v4().to_string(),
+            causation_event_id: Some(causation_event_id),
+            correlation_id: None,
+            metadata: None,
+        }
+    }
+}
+
+impl Default for EventMetadata {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 /// # 编排事件
 ///
