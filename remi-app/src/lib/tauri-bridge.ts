@@ -8,8 +8,8 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, emit, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { open, save, message as showMessage, confirm } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, readTextFile, mkdir, readDir } from '@tauri-apps/plugin-fs';
+import { open, save, message as showMessage, confirm, type OpenDialogOptions, type SaveDialogOptions, type MessageDialogOptions, type ConfirmDialogOptions } from '@tauri-apps/plugin-dialog';
+import { writeTextFile, readTextFile, mkdir, readDir, type MkdirOptions, type DirEntry } from '@tauri-apps/plugin-fs';
 import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
 import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 import type {
@@ -33,6 +33,42 @@ import type {
   OrchestrationThread,
   OrchestrationMessage,
   ModelSelection,
+  ServerConfig,
+  ServerGetEnvironmentResult,
+  ServerGetSettingsResult,
+  ServerUpdateSettingsInput,
+  ServerProviderUpdateInput,
+  ServerListWorktreesResult,
+  ServerGetProviderUsageSnapshotResult,
+  ServerDiagnosticsResult,
+  ServerUpsertKeybindingInput,
+  ServerProviderStatus,
+  ClientOrchestrationCommand,
+  OrchestrationReadModel,
+  OrchestrationShellSnapshot,
+  OrchestrationThreadDetailSnapshot,
+  OrchestrationProject,
+  OrchestrationEvent,
+  OrchestrationShellStreamItem,
+  OrchestrationThreadStreamItem,
+  DispatchResult,
+  OrchestrationReplayEventsResult,
+  ProviderComposerCapabilities,
+  ProviderGetComposerCapabilitiesInput,
+  ProviderCompactThreadInput,
+  ProviderListCommandsInput,
+  ProviderListCommandsResult,
+  ProviderListSkillsInput,
+  ProviderListSkillsResult,
+  ProviderListPluginsInput,
+  ProviderListPluginsResult,
+  ProviderReadPluginInput,
+  ProviderReadPluginResult,
+  ProviderListAgentsInput,
+  ProviderListAgentsResult,
+  ListLocalUserSkillsResult,
+  GitStatusResult,
+  OrchestrationCheckpointSummary,
 } from '~/contracts';
 import { WsTransport } from '../wsTransport';
 import { isTauri } from '~/env';
@@ -365,22 +401,22 @@ export const tauriBridge = {
       return await transport.request<ServerVoiceTranscriptionResult>('server.transcribeVoice', input);
     },
 
-    getConfig: async (): Promise<any> => {
+    getConfig: async (): Promise<ServerConfig> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getConfig');
+      return await transport.request<ServerConfig>('server.getConfig');
     },
 
-    getEnvironment: async (): Promise<any> => {
+    getEnvironment: async (): Promise<ServerGetEnvironmentResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getEnvironment');
+      return await transport.request<ServerGetEnvironmentResult>('server.getEnvironment');
     },
 
-    getSettings: async (): Promise<any> => {
+    getSettings: async (): Promise<ServerGetSettingsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getSettings');
+      return await transport.request<ServerGetSettingsResult>('server.getSettings');
     },
 
-    updateSettings: async (settings: any): Promise<void> => {
+    updateSettings: async (settings: ServerUpdateSettingsInput): Promise<void> => {
       const transport = await getWsTransport();
       return await transport.request<void>('server.updateSettings', { settings });
     },
@@ -390,27 +426,27 @@ export const tauriBridge = {
       return await transport.request<void>('server.refreshProviders');
     },
 
-    updateProvider: async (provider: any): Promise<void> => {
+    updateProvider: async (provider: ServerProviderUpdateInput): Promise<void> => {
       const transport = await getWsTransport();
       return await transport.request<void>('server.updateProvider', { provider });
     },
 
-    listWorktrees: async (): Promise<any[]> => {
+    listWorktrees: async (): Promise<ServerListWorktreesResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.listWorktrees');
+      return await transport.request<ServerListWorktreesResult>('server.listWorktrees');
     },
 
-    getProviderUsageSnapshot: async (): Promise<any> => {
+    getProviderUsageSnapshot: async (): Promise<ServerGetProviderUsageSnapshotResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getProviderUsageSnapshot');
+      return await transport.request<ServerGetProviderUsageSnapshotResult>('server.getProviderUsageSnapshot');
     },
 
-    getDiagnostics: async (): Promise<any> => {
+    getDiagnostics: async (): Promise<ServerDiagnosticsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getDiagnostics');
+      return await transport.request<ServerDiagnosticsResult>('server.getDiagnostics');
     },
 
-    upsertKeybinding: async (keybinding: any): Promise<void> => {
+    upsertKeybinding: async (keybinding: ServerUpsertKeybindingInput): Promise<void> => {
       const transport = await getWsTransport();
       return await transport.request<void>('server.upsertKeybinding', { keybinding });
     },
@@ -508,57 +544,57 @@ export const tauriBridge = {
     /**
      * 通用命令分发器 - 所有编排操作都通过此方法
      */
-    dispatchCommand: async (command: any): Promise<{ sequence: number }> => {
+    dispatchCommand: async (command: ClientOrchestrationCommand): Promise<DispatchResult> => {
       const transport = await getWsTransport();
-      return await transport.request<{ sequence: number }>('orchestration.dispatchCommand', command);
+      return await transport.request<DispatchResult>('orchestration.dispatchCommand', command);
     },
 
     /**
      * 获取完整快照
      */
-    getSnapshot: async (): Promise<any> => {
+    getSnapshot: async (): Promise<OrchestrationReadModel> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.getSnapshot');
+      return await transport.request<OrchestrationReadModel>('orchestration.getSnapshot');
     },
 
     /**
      * 获取 Shell 快照
      */
-    getShellSnapshot: async (): Promise<any> => {
+    getShellSnapshot: async (): Promise<OrchestrationShellSnapshot> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.getShellSnapshot');
+      return await transport.request<OrchestrationShellSnapshot>('orchestration.getShellSnapshot');
     },
 
     /**
      * 获取线程详情
      */
-    getThreadDetail: async (threadId: string): Promise<any> => {
+    getThreadDetail: async (threadId: string): Promise<OrchestrationThreadDetailSnapshot> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.getThreadDetail', { threadId });
+      return await transport.request<OrchestrationThreadDetailSnapshot>('orchestration.getThreadDetail', { threadId });
     },
 
     /**
      * 获取项目详情
      */
-    getProjectDetail: async (projectId: string): Promise<any> => {
+    getProjectDetail: async (projectId: string): Promise<OrchestrationProject> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.getProjectDetail', { projectId });
+      return await transport.request<OrchestrationProject>('orchestration.getProjectDetail', { projectId });
     },
 
     /**
      * 获取统计数据
      */
-    getCounts: async (): Promise<any> => {
+    getCounts: async (): Promise<Record<string, number>> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.getCounts');
+      return await transport.request<Record<string, number>>('orchestration.getCounts');
     },
 
     /**
      * 重放事件
      */
-    replayEvents: async (fromSequenceExclusive: number, limit?: number): Promise<any> => {
+    replayEvents: async (fromSequenceExclusive: number, limit?: number): Promise<OrchestrationReplayEventsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('orchestration.replayEvents', { fromSequenceExclusive, limit });
+      return await transport.request<OrchestrationReplayEventsResult>('orchestration.replayEvents', { fromSequenceExclusive, limit });
     },
 
     /**
@@ -572,8 +608,8 @@ export const tauriBridge = {
     /**
      * 监听域事件
      */
-    onDomainEvent: (listener: (event: any) => void) => {
-      return syncListen('orchestration-domain-event', (event) => {
+    onDomainEvent: (listener: (event: OrchestrationEvent) => void) => {
+      return syncListen<OrchestrationEvent>('orchestration-domain-event', (event) => {
         listener(event.payload);
       });
     },
@@ -581,14 +617,14 @@ export const tauriBridge = {
     /**
      * 监听 Shell 事件
      */
-    onShellEvent: (listener: (event: any) => void) => {
-      return syncListen('orchestration-shell-event', (event) => {
+    onShellEvent: (listener: (event: OrchestrationShellStreamItem) => void) => {
+      return syncListen<OrchestrationShellStreamItem>('orchestration-shell-event', (event) => {
         listener(event.payload);
       });
     },
 
-    onThreadEvent: (listener: (event: any) => void) => {
-      return syncListen('orchestration-thread-event', (event) => {
+    onThreadEvent: (listener: (event: OrchestrationThreadStreamItem) => void) => {
+      return syncListen<OrchestrationThreadStreamItem>('orchestration-thread-event', (event) => {
         listener(event.payload);
       });
     },
@@ -608,44 +644,44 @@ export const tauriBridge = {
       return await transport.request<void>('provider.setApiKey', { provider, key });
     },
 
-    getProviderStatus: async (): Promise<Record<string, any>> => {
+    getProviderStatus: async (): Promise<Record<string, ServerProviderStatus>> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.getProviderStatus');
+      return await transport.request<Record<string, ServerProviderStatus>>('provider.getProviderStatus');
     },
 
-    getComposerCapabilities: async (input: any): Promise<any> => {
+    getComposerCapabilities: async (input: ProviderGetComposerCapabilitiesInput): Promise<ProviderComposerCapabilities> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.getComposerCapabilities', input);
+      return await transport.request<ProviderComposerCapabilities>('provider.getComposerCapabilities', input);
     },
 
-    compactThread: async (input: any): Promise<void> => {
+    compactThread: async (input: ProviderCompactThreadInput): Promise<void> => {
       const transport = await getWsTransport();
       return await transport.request<void>('provider.compactThread', input);
     },
 
-    listCommands: async (input: any): Promise<any[]> => {
+    listCommands: async (input: ProviderListCommandsInput): Promise<ProviderListCommandsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.listCommands', input);
+      return await transport.request<ProviderListCommandsResult>('provider.listCommands', input);
     },
 
-    listSkills: async (input: any): Promise<any[]> => {
+    listSkills: async (input: ProviderListSkillsInput): Promise<ProviderListSkillsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.listSkills', input);
+      return await transport.request<ProviderListSkillsResult>('provider.listSkills', input);
     },
 
-    listPlugins: async (input: any): Promise<any[]> => {
+    listPlugins: async (input: ProviderListPluginsInput): Promise<ProviderListPluginsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.listPlugins', input);
+      return await transport.request<ProviderListPluginsResult>('provider.listPlugins', input);
     },
 
-    readPlugin: async (input: any): Promise<any> => {
+    readPlugin: async (input: ProviderReadPluginInput): Promise<ProviderReadPluginResult> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.readPlugin', input);
+      return await transport.request<ProviderReadPluginResult>('provider.readPlugin', input);
     },
 
-    listAgents: async (input: any): Promise<any[]> => {
+    listAgents: async (input: ProviderListAgentsInput): Promise<ProviderListAgentsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('provider.listAgents', input);
+      return await transport.request<ProviderListAgentsResult>('provider.listAgents', input);
     },
   },
 
@@ -653,9 +689,9 @@ export const tauriBridge = {
    * 技能模块 - 通过 WebSocket 调用
    */
   skills: {
-    listLocal: async (): Promise<any[]> => {
+    listLocal: async (): Promise<ListLocalUserSkillsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('skills.listLocal');
+      return await transport.request<ListLocalUserSkillsResult>('skills.listLocal');
     },
   },
 
@@ -698,9 +734,9 @@ export const tauriBridge = {
    * Git 操作相关命令
    */
   git: {
-    getStatus: async (cwd: string): Promise<any> => {
+    getStatus: async (cwd: string): Promise<GitStatusResult> => {
       const transport = await getWsTransport();
-      return await transport.request('git.status', { cwd });
+      return await transport.request<GitStatusResult>('git.status', { cwd });
     },
 
     listBranches: async (cwd: string): Promise<string[]> => {
@@ -766,9 +802,9 @@ export const tauriBridge = {
    * 工作区管理相关命令
    */
   workspace: {
-    listProjects: async (): Promise<any[]> => {
+    listProjects: async (): Promise<OrchestrationProject[]> => {
       const transport = await getWsTransport();
-      return await transport.request('workspace.listProjects', {});
+      return await transport.request<OrchestrationProject[]>('workspace.listProjects', {});
     },
 
     addProject: async (path: string): Promise<void> => {
@@ -797,12 +833,12 @@ export const tauriBridge = {
    * 设置管理相关命令
    */
   settings: {
-    get: async (): Promise<any> => {
+    get: async (): Promise<ServerGetSettingsResult> => {
       const transport = await getWsTransport();
-      return await transport.request('server.getSettings', {});
+      return await transport.request<ServerGetSettingsResult>('server.getSettings', {});
     },
 
-    save: async (settings: any): Promise<void> => {
+    save: async (settings: ServerUpdateSettingsInput): Promise<void> => {
       const transport = await getWsTransport();
       await transport.request('server.updateSettings', settings);
     },
@@ -812,19 +848,19 @@ export const tauriBridge = {
    * 检查点管理相关命令
    */
   checkpoint: {
-    create: async (threadId: string, commitSha: string, message: string): Promise<any> => {
+    create: async (threadId: string, commitSha: string, message: string): Promise<OrchestrationCheckpointSummary> => {
       const transport = await getWsTransport();
-      return await transport.request('checkpoint.create', { threadId, commitSha, message });
+      return await transport.request<OrchestrationCheckpointSummary>('checkpoint.create', { threadId, commitSha, message });
     },
 
-    get: async (checkpointId: string): Promise<any> => {
+    get: async (checkpointId: string): Promise<OrchestrationCheckpointSummary> => {
       const transport = await getWsTransport();
-      return await transport.request('checkpoint.get', { checkpointId });
+      return await transport.request<OrchestrationCheckpointSummary>('checkpoint.get', { checkpointId });
     },
 
-    list: async (threadId: string): Promise<any[]> => {
+    list: async (threadId: string): Promise<OrchestrationCheckpointSummary[]> => {
       const transport = await getWsTransport();
-      return await transport.request('checkpoint.list', { threadId });
+      return await transport.request<OrchestrationCheckpointSummary[]>('checkpoint.list', { threadId });
     },
 
     delete: async (checkpointId: string): Promise<void> => {
@@ -832,9 +868,9 @@ export const tauriBridge = {
       await transport.request('checkpoint.delete', { checkpointId });
     },
 
-    revert: async (threadId: string, checkpointId: string): Promise<any> => {
+    revert: async (threadId: string, checkpointId: string): Promise<void> => {
       const transport = await getWsTransport();
-      return await transport.request('checkpoint.revert', { threadId, checkpointId });
+      return await transport.request<void>('checkpoint.revert', { threadId, checkpointId });
     },
   },
 
@@ -890,8 +926,8 @@ export const tauriBridge = {
       });
     },
 
-    onGitStatusChanged: (callback: (status: any) => void) => {
-      return syncListen('git-status-changed', (event) => {
+    onGitStatusChanged: (callback: (status: GitStatusResult) => void) => {
+      return syncListen<GitStatusResult>('git-status-changed', (event) => {
         callback(event.payload);
       });
     },
@@ -926,20 +962,20 @@ export const tauriBridge = {
    * 对话框
    */
   dialog: {
-    open: async (options?: any): Promise<string | null> => {
+    open: async (options?: OpenDialogOptions): Promise<string | null> => {
       const result = await open(options);
       return Array.isArray(result) ? (result[0] ?? null) : result;
     },
 
-    save: async (options?: any): Promise<string | null> => {
+    save: async (options?: SaveDialogOptions): Promise<string | null> => {
       return await save(options);
     },
 
-    message: async (text: string, options?: any) => {
+    message: async (text: string, options?: string | MessageDialogOptions) => {
       return await showMessage(text, options);
     },
 
-    confirm: async (message: string, options?: any): Promise<boolean> => {
+    confirm: async (message: string, options?: string | ConfirmDialogOptions): Promise<boolean> => {
       return await confirm(message, options);
     },
   },
@@ -956,11 +992,11 @@ export const tauriBridge = {
       return await writeTextFile(path, content);
     },
 
-    createDir: async (path: string, options?: any): Promise<void> => {
+    createDir: async (path: string, options?: MkdirOptions): Promise<void> => {
       return await mkdir(path, options);
     },
 
-    readDir: async (path: string): Promise<any[]> => {
+    readDir: async (path: string): Promise<DirEntry[]> => {
       return await readDir(path);
     },
   },

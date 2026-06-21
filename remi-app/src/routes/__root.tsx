@@ -155,6 +155,7 @@ function RootRouteView() {
           <ProviderUpdateNotifications />
           <DesktopProjectBootstrap />
           <Outlet />
+          <WindowCaptionButtons className="fixed top-0 right-0 z-50" />
         </AnchoredToastProvider>
       </ToastProvider>
     </I18nProvider>

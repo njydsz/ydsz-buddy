@@ -10,7 +10,7 @@ import {
 } from "../appNavigation";
 import ShortcutsDialog from "../components/ShortcutsDialog";
 import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
-import ThreadSidebar from "../components/Sidebar";
+import ThreadSidebar, { FixedSidebarHeader } from "../components/Sidebar";
 import { isDesktop } from "../env";
 import { useHandleNewChat } from "../hooks/useHandleNewChat";
 import { useDisposableThreadLifecycle } from "../hooks/useDisposableThreadLifecycle";
@@ -513,6 +513,7 @@ function ChatRouteLayout() {
 
   return (
     <SidebarProvider defaultOpen>
+      <FixedSidebarHeader />
       <ThreadRetentionMaintenanceToast />
       <ChatRouteGlobalShortcuts />
       {side === "left" ? sidebarElement : null}

@@ -13,7 +13,6 @@ import { useAppSettings } from "~/appSettings";
 import { Button } from "~/components/ui/button";
 import { SidebarInset } from "~/components/ui/sidebar";
 import { SidebarHeaderNavigationControls } from "~/components/SidebarHeaderNavigationControls";
-import { WindowCaptionButtons } from "~/components/WindowCaptionButtons";
 import { useDesktopTopBarTrafficLightGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 import { cn } from "~/lib/utils";
 import {
@@ -460,7 +459,6 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
               >
                 <SettingsIcon className="size-3" />
               </Button>
-              <WindowCaptionButtons className="ms-1.5 -me-3 sm:-me-5" />
             </div>
           </div>
         </header>

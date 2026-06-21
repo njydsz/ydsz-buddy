@@ -32,7 +32,6 @@ import BrowserPanel from "../components/BrowserPanel";
 import { ProviderIcon } from "../components/ProviderIcon";
 import { ChatPaneDropOverlay } from "../components/chat-drop-overlay/ChatPaneDropOverlay";
 import { DiffWorkerPoolProvider } from "../components/DiffWorkerPoolProvider";
-import { WindowCaptionButtons } from "../components/WindowCaptionButtons";
 import {
   DiffPanelHeaderSkeleton,
   DiffPanelLoadingState,
@@ -882,7 +881,6 @@ function ChatMountSkeleton() {
           <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
           <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
         </div>
-        <WindowCaptionButtons className="ms-auto -me-4" />
       </div>
       <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 py-4">
         <div className="max-w-[82%] space-y-2 rounded-2xl border border-(--color-border-light) bg-muted/22 p-3">
