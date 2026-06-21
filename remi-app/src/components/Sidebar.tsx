@@ -799,9 +799,12 @@ function prStatusIndicator(pr: ThreadPr): PrStatusIndicator | null {
 
 function RemiCodeWordmark() {
   return (
-    <span aria-label="Remi Code" className="shrink-0 text-[14px] font-semibold text-foreground">
-      Remi
-    </span>
+    <img
+      alt="Remi Code"
+      className="size-5 shrink-0 rounded-[5px] object-cover"
+      draggable={false}
+      src="/remicode.png"
+    />
   );
 }
 

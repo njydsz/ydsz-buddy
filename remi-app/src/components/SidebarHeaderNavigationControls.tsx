@@ -9,9 +9,12 @@ import { isDesktop } from "~/env";
 
 function RemiCodeWordmark() {
   return (
-    <span aria-label="Remi Code" className="shrink-0 text-[14px] font-semibold text-foreground">
-      Remi
-    </span>
+    <img
+      alt="Remi Code"
+      className="size-5 shrink-0 rounded-[5px] object-cover"
+      draggable={false}
+      src="/remicode.png"
+    />
   );
 }
 
@@ -28,7 +31,7 @@ export function SidebarHeaderNavigationControls() {
       {isDesktop && !open && (
         <div className="flex min-w-0 items-center gap-1">
           <RemiCodeWordmark />
-          <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
+          <span className="truncate text-[14px] font-semibold text-foreground/89">Remi Soft</span>
         </div>
       )}
       <AppNavigationButtons className="ms-0" />

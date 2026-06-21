@@ -175,7 +175,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init()) // 剪贴板管理
         .plugin(tauri_plugin_notification::init())   // 系统通知
         .plugin(tauri_plugin_process::init())        // 进程管理
-        .plugin(tauri_plugin_updater::Builder::new().build()) // 应用自动更新
+        // .plugin(tauri_plugin_updater::Builder::new().build()) // 应用自动更新（开发阶段禁用，endpoints/pubkey 未配置会导致 os error 2）
 
         // ========== 菜单事件处理 ==========
         .on_menu_event(|app_handle, event| {

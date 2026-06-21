@@ -294,6 +294,7 @@ import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationContro
 import { SidebarHeaderTrigger } from "./ui/sidebar";
 import { useDesktopTopBarTrafficLightGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 import { ChatTranscriptPane } from "./chat/ChatTranscriptPane";
+import { ChatLandingPage, type LandingPageMode } from "./chat/ChatLandingPage";
 import { buildTurnDiffSummaryByAssistantMessageId } from "./chat/MessagesTimeline.logic";
 import { ComposerSlashStatusDialog } from "./chat/ComposerSlashStatusDialog";
 import { ExpandedImagePreview } from "./chat/ExpandedImagePreview";
@@ -7346,7 +7347,7 @@ export default function ChatView({
     setDismissedRateLimitBannerKey(activeRateLimitBannerDismissalKey);
   }, [activeRateLimitBannerDismissalKey]);
 
-  // Empty state: no active thread
+  // Empty state: no active thread — render landing page
   if (!activeThread) {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-(--color-background-surface) text-(--color-text-foreground-secondary)">
@@ -7368,14 +7369,12 @@ export default function ChatView({
             )}
           >
             <SidebarHeaderNavigationControls />
-            <span className="text-xs text-muted-foreground/50">No active thread</span>
           </div>
         )}
-        <div className="flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm">Select a thread or create a new one to get started.</p>
-          </div>
-        </div>
+        <ChatLandingPage
+          mode="work"
+          composerSection={null}
+        />
       </div>
     );
   }
@@ -8112,41 +8111,10 @@ export default function ChatView({
             )}
           >
             {isCenteredEmptyLanding ? (
-              <div className="chat-pane-enter flex flex-1 items-center justify-center px-3 sm:px-5">
-                <div className="flex w-full max-w-3xl flex-col justify-center">
-                  <div className="flex flex-col items-center gap-4 px-6 pb-5 text-center select-none">
-                    <img
-                      alt="Remi Code logo"
-                      className="size-12 rounded-lg object-contain"
-                      draggable={false}
-                      height={96}
-                      src="/remicode-hero.png"
-                      width={96}
-                    />
-                    <h2 className="text-[26px] font-normal leading-[1.15] tracking-[-0.015em] text-foreground/95 sm:text-[30px]">
-                      {isEmptyChatLanding ? (
-                        messages.chatEmptyState.whatShouldWeWorkOn
-                      ) : (
-                        <>
-                          {messages.chatEmptyState.whatShouldWeDoIn}{" "}
-                          <span className="text-muted-foreground/45">
-                            {activeProjectDisplayName ?? messages.chatEmptyState.thisFolder}
-                          </span>
-                          ?
-                        </>
-                      )}
-                    </h2>
-                  </div>
-                  {composerSection}
-                  {isGitRepo ? (
-                    <BranchToolbar {...branchToolbarProps} />
-                  ) : !isEmptyChatLanding ? (
-                    <div className="mx-auto flex w-full max-w-3xl items-center justify-end px-3 pb-3 pt-1">
-                      <RuntimeUsageControls {...runtimeUsageControlsProps} />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+              <ChatLandingPage
+                mode={(isEmptyChatLanding ? "work" : "code") as LandingPageMode}
+                composerSection={composerSection}
+              />
             ) : (
               <ChatTranscriptPane
                 activeThreadId={activeThread.id}
