@@ -1,3 +1,23 @@
+/**
+ * @file ChatTranscriptPane 浏览器端测试
+ *
+ * 验证聊天 transcript 在真实浏览器中的行为：
+ *
+ * - **虚拟列表**：长消息列表的滚动性能
+ * - **选区动作**：文本选择后浮层出现
+ * - **用户消息折叠**：超过 `COLLAPSED_USER_MESSAGE_MAX_CHARS` 时折叠
+ * - **profiler 钩子**：用于性能回归
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - transcript 性能/正确性回归
+ *
+ * ## 注意事项
+ *
+ * - 每个测试 `beforeEach` 重置所有 store
+ * - 使用 `LegendListRef` 测量滚动行为
+ */
 import "../../index.css";
 
 import { MessageId } from "~/contracts";

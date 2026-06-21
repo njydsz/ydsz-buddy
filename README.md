@@ -30,7 +30,7 @@
 
 ## 🎯 产品定位
 
-**Remi Claw** 是新一代**AI 驱动的双模式桌面助手**，基于 Rust + Tauri + React 构建，采用 CQRS + Event Sourcing 架构。它将**办公自动化**与**开发智能化**两种工作流统一在一个桌面应用中，**让 AI 成为你从办公到开发的全场景智能搭档**。
+**Remi Claw** 是新一代 **AI 原生工作台**，基于 Rust + Tauri + React 构建，采用 CQRS + Event Sourcing 架构。它将**办公自动化**与**开发智能化**统一在一个桌面应用中，**让 AI 替你工作，从想法到交付一站式完成**。
 
 ### 为什么选择 Remi Claw？
 

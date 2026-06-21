@@ -2,7 +2,29 @@
 // Purpose: Shared pin/unpin icon button reused by sidebar thread rows.
 // Layer: Sidebar UI primitive
 // Exports: ThreadPinToggleButton
-
+/**
+ * @file 线程固定切换按钮
+ *
+ * 侧边栏线程行的"固定 / 取消固定"图标按钮：
+ *
+ * - **两种展示**：`overlay`（悬停显示）/ `inline`（始终显示）
+ * - **状态**：通过 `pinned` 控制图标
+ * - **点击**：通过 `onToggle` 通知父组件
+ *
+ * ## 核心导出
+ *
+ * - `ThreadPinToggleButton`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Sidebar 线程行
+ * - 线程右键菜单
+ *
+ * ## 注意事项
+ *
+ * - `toneClassName` 用于覆盖默认色（如选中态）
+ * - 图标：`PinIcon`
+ */
 import type React from "react";
 import { PinIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

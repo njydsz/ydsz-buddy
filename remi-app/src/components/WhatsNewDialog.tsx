@@ -5,7 +5,30 @@
 // every curated release. Open/close state and the underlying data are owned
 // by `useWhatsNew`; this component is pure presentation.
 // Layer: Chat shell overlay (mounted once from the root route).
-
+/**
+ * @file "What's New" 对话框
+ *
+ * 升级后一次性展示的发布说明对话框：
+ *
+ * - **两种视图**：默认的"本次更新"卡片栈 + "完整更新日志"折叠列表
+ * - **数据来源**：`useWhatsNew` hook 提供的 `WHATS_NEW_ENTRIES`
+ * - **关闭持久化**：通过本地存储记忆已展示版本
+ *
+ * ## 核心导出
+ *
+ * - `WhatsNewDialog`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 应用升级后自动弹出
+ * - 设置中 "About" 入口
+ *
+ * ## 注意事项
+ *
+ * - 在路由根处挂载一次
+ * - 与 `ReleaseHistoryDialog` 共享 `ChangelogAccordion`
+ * - 纯展示组件，状态由 hook 提供
+ */
 import { useEffect, useState } from "react";
 
 import { ArrowLeftIcon, ArrowRightIcon } from "~/lib/icons";

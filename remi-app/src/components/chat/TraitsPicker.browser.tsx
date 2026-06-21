@@ -1,3 +1,23 @@
+/**
+ * @file TraitsPicker 浏览器端测试
+ *
+ * 验证技能选择器在真实浏览器中的行为：
+ *
+ * - **技能列表渲染**：跨 provider 汇总
+ * - **多选**：单线程支持多个 traits
+ * - **持久化**：选择写入 draft store
+ * - **键盘导航**：上下/Enter 选中
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - Traits 选择器回归
+ *
+ * ## 注意事项
+ *
+ * - 引入 `index.css` 保持与生产样式一致
+ * - mock 必要的 React Query 状态
+ */
 import "../../index.css";
 
 import {

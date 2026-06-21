@@ -5,7 +5,29 @@
 //          this component renders nothing there.
 // Layer: Shared web shell chrome
 // Depends on: tauriBridge window actions, isDesktop / isMacPlatform helpers
-
+/**
+ * @file 窗口标题栏按钮
+ *
+ * 桌面端无边框窗口的自定义标题栏按钮（最小化 / 最大化 / 关闭）：
+ *
+ * - **macOS**：保留原生 traffic light 按钮（`titleBarStyle: "Overlay"`）
+ * - **Windows / Linux**：渲染自定义三连按钮
+ * - **Tauri 调用**：通过 `tauriBridge` 调用窗口操作
+ *
+ * ## 核心导出
+ *
+ * - `WindowCaptionButtons`：主组件
+ *
+ * ## 使用场景
+ *
+ * - 桌面端顶部 chrome 右侧
+ *
+ * ## 注意事项
+ *
+ * - 运行时检测 Tauri 上下文（Tauri 2 早期只注入 `__TAURI_INTERNALS__`）
+ * - 平台检测：`isMacPlatform`
+ * - Web 端不渲染
+ */
 import { tauriBridge } from "~/lib/tauri-bridge";
 import { cn, isMacPlatform } from "~/lib/utils";
 import { LuMinus, LuSquare, LuX } from "react-icons/lu";

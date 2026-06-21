@@ -2,7 +2,29 @@
 // Purpose: Wrap the shared directory browser in a button-triggered popover picker.
 // Layer: Chat/home input helper
 // Depends on: DirectoryTreeBrowser and shared popover/button primitives.
-
+/**
+ * @file 目录树选择器
+ *
+ * 按钮触发的目录树 popover 选择器：
+ *
+ * - **触发按钮**：自定义 label 与图标
+ * - **popover 内容**：`DirectoryTreeBrowser` 复用
+ * - **onSelect**：选中路径回调
+ *
+ * ## 核心导出
+ *
+ * - `DirectoryTreePicker`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 中选择工作目录
+ * - 设置中选择项目根
+ *
+ * ## 注意事项
+ *
+ * - 通过 props 控制 rootPath
+ * - 选中后自动关闭 popover
+ */
 import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "~/contracts";
 import { memo, useState } from "react";
 import { FolderIcon } from "~/lib/icons";

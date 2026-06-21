@@ -2,7 +2,28 @@
 // Purpose: Isolate the transcript shell so composer state changes do not re-render it unnecessarily.
 // Layer: Chat transcript shell
 // Depends on: MessagesTimeline and ChatView's list-owned scroll contract.
-
+/**
+ * @file Chat Transcript Pane
+ *
+ * 聊天消息列表的外壳：
+ *
+ * - **独立 memo**：与 Composer 状态变化隔离，避免重渲染
+ * - **虚拟列表承载**：内部 `MessagesTimeline`
+ * - **滚动契约**：维护 list 引用、滚动事件、键盘事件
+ *
+ * ## 核心导出
+ *
+ * - `ChatTranscriptPane`：外壳组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 中 transcript 区域
+ *
+ * ## 注意事项
+ *
+ * - 不持有业务状态，所有数据通过 props 传入
+ * - 事件 handler 类型与 `MessagesTimeline` 对齐
+ */
 import { type MessageId, type ThreadId, type TurnId } from "~/contracts";
 import { type LegendListRef } from "@legendapp/list/react";
 import {

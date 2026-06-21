@@ -5,7 +5,30 @@
 // Exports: GeneratedMarkdownImage
 // Notes: Pure UI; image URL building lives in `~/lib/localImageUrls`. No data
 //        fetching here so the component stays trivially testable.
-
+/**
+ * @file AI 生成图片组件
+ *
+ * 渲染助手消息中嵌入的 AI 生成图片：
+ *
+ * - **加载骨架**：图片加载中显示骨架
+ * - **悬浮操作**：放大 / 下载
+ * - **错误卡片**：内联展示错误
+ * - **本地路径**：自动拼接 cwd + 相对路径
+ *
+ * ## 核心导出
+ *
+ * - `GeneratedMarkdownImage`：主组件
+ * - `GeneratedMarkdownImageProps`：组件 props
+ *
+ * ## 使用场景
+ *
+ * - ChatMarkdown 内嵌图片渲染
+ *
+ * ## 注意事项
+ *
+ * - URL 解析在 `~/lib/localImageUrls`
+ * - 不负责数据获取，仅展示
+ */
 import { type MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { DownloadIcon, Loader2Icon, Maximize2, TriangleAlertIcon } from "~/lib/icons";

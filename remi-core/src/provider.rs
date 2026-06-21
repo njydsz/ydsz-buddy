@@ -703,7 +703,8 @@ pub struct ProviderSkillDescriptor {
 ///
 /// 字段顺序与序列化（camelCase）严格对齐前端 `ProviderListSkillsInput` 契约
 /// （`remi-app/src/contracts/providerDiscovery.ts`）。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderListSkillsInput {
     /// Provider 类型
     pub provider: ProviderKind,
@@ -752,7 +753,8 @@ pub struct ProviderNativeCommandDescriptor {
 /// # Provider 列出命令输入
 ///
 /// 列出可用命令时需要的输入参数。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderListCommandsInput {
     /// Provider 类型
     pub provider: ProviderKind,
@@ -818,7 +820,8 @@ pub struct ProviderPluginMarketplaceDescriptor {
 /// # Provider 列出插件输入
 ///
 /// 列出可用插件时需要的输入参数。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderListPluginsInput {
     /// Provider 类型
     pub provider: ProviderKind,

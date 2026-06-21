@@ -1,7 +1,28 @@
 // FILE: WorkspaceSettingsSheet.tsx
 // Purpose: Render per-workspace terminal layout settings with visual preset previews.
 // Layer: Workspace UI controls
-
+/**
+ * @file 工作区设置 Sheet
+ *
+ * 终端工作区布局设置面板：
+ *
+ * - **预设预览**：每个布局预设提供 SVG 预览
+ * - **预设应用**：点击后切换布局
+ * - **当前高亮**：已选中的预设加边框
+ *
+ * ## 核心导出
+ *
+ * - `WorkspaceSettingsSheet`：主组件
+ *
+ * ## 使用场景
+ *
+ * - WorkspaceView 设置入口
+ *
+ * ## 注意事项
+ *
+ * - 预设定义：`workspaceTerminalLayoutPresets`
+ * - 选中态写入 `appSettings` 持久化
+ */
 import { CheckIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import {

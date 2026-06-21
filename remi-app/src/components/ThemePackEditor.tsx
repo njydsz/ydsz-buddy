@@ -2,7 +2,30 @@
 // Purpose: Per-variant theme card matching the Codex appearance settings layout.
 // Layer: Web settings UI
 // Exports: ThemePackEditor
-
+/**
+ * @file 主题包编辑器
+ *
+ * 设置面板中"外观 → 主题"对应的单个主题编辑卡片：
+ *
+ * - **色板编辑**：通过 `react-colorful` 提供 HexColorPicker
+ * - **CSS 变量**：编辑后实时写入 `document.documentElement.style`
+ * - **预设回退**：支持重置为默认
+ * - **导入/导出**：JSON 格式
+ *
+ * ## 核心导出
+ *
+ * - `ThemePackEditor`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Settings > Appearance > Theme
+ *
+ * ## 注意事项
+ *
+ * - 每个 variant（light/dark）独立编辑
+ * - 编辑即时保存到本地
+ * - 与 Codex 风格保持一致的卡片布局
+ */
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Button } from "./ui/button";

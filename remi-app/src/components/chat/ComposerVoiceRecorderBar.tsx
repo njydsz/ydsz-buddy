@@ -2,7 +2,29 @@
 // Purpose: Renders the expanded WhatsApp-style voice recorder UI inside the chat composer.
 // Layer: Chat composer presentation
 // Depends on: live waveform samples and caller-owned record/cancel/send actions.
-
+/**
+ * @file Composer 语音录制条
+ *
+ * 仿 WhatsApp 风格的扩展语音录制 UI：
+ *
+ * - **实时波形**：基于 `samples` 数组渲染
+ * - **录音时长**：通过 `durationLabel` 展示
+ * - **操作按钮**：取消 / 停止 / 发送
+ * - **转录中**：spinner
+ *
+ * ## 核心导出
+ *
+ * - `ComposerVoiceRecorderBar`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 中长按语音按钮展开
+ *
+ * ## 注意事项
+ *
+ * - 状态由 `useComposerVoiceController` 提供
+ * - 波形 sample 通过 `requestAnimationFrame` 滚动
+ */
 import { memo, useEffect, useRef, useState } from "react";
 import { FiArrowUp } from "react-icons/fi";
 import { IoStopSharp } from "react-icons/io5";

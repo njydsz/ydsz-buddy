@@ -1,3 +1,23 @@
+/**
+ * @file ProviderModelPicker 浏览器端测试
+ *
+ * 验证 Provider/Model 选择器在真实浏览器中的行为：
+ *
+ * - **Provider 过滤**：按可用性/类型过滤
+ * - **Model 搜索**：跨模型模糊搜索
+ * - **Model 选择**：写入 composer draft
+ * - **状态联动**：thread 工作区变化时刷新
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - Provider/Model 选择器回归
+ *
+ * ## 注意事项
+ *
+ * - 通过 `MODEL_OPTIONS_BY_PROVIDER` mock 模型数据
+ * - 使用 `getDefaultModel` 处理空选择
+ */
 import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "~/contracts";
 import { page } from "@vitest/browser/context";
 import { afterEach, describe, expect, it, vi } from "vitest";

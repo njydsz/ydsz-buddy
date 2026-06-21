@@ -2,7 +2,28 @@
 // Purpose: Render the inline composer popup used for browsing local files and folders after `@local`.
 // Layer: Chat composer UI
 // Depends on: the same Command primitives used by ComposerCommandMenu so both pickers share chrome.
-
+/**
+ * @file Composer 本地目录菜单
+ *
+ * Composer 中输入 `@local` 后弹出的本地文件/目录浏览面板：
+ *
+ * - **共享命令 UI**：与 `ComposerCommandMenu` 使用同一组 Command 原语
+ * - **imperative handle**：父组件可调用 focus / select 等
+ * - **本地文件系统**：通过 native API 列出 cwd 子项
+ *
+ * ## 核心导出
+ *
+ * - `ComposerLocalDirectoryMenu`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer `@local` 触发
+ *
+ * ## 注意事项
+ *
+ * - 数据通过 `ProjectFileSystemEntry` 描述
+ * - 选择走 `onSelectLocalSearch` 回调
+ */
 import type { ProjectFileSystemEntry, ProjectLocalSearchEntry } from "@remi-claw/contracts";
 import type { Ref } from "react";
 import {
@@ -33,7 +54,7 @@ import {
 
 type EntriesByPath = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 
-// Delay search requests until the user stops typing �?keeps chat input smooth
+// Delay search requests until the user stops typing �?keeps chat input smooth
 // because every keystroke reshapes mentionQuery in the parent.
 const LOCAL_SEARCH_DEBOUNCE_MS = 220;
 const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
@@ -503,14 +524,14 @@ export const ComposerLocalDirectoryMenu = memo(function ComposerLocalDirectoryMe
         </div>
         {isAwaitingHomeDir ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Waiting for home directory from server�?          </p>
+            Waiting for home directory from server�?          </p>
         ) : isLoading && visibleCount === 0 ? (
-          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files�?/p>
+          <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">Loading local files�?/p>
         ) : errorMessage ? (
           <p className="px-2 py-1.5 text-destructive/80 text-[11px]">{errorMessage}</p>
         ) : isSearchPending ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
-            Searching nested files�?          </p>
+            Searching nested files�?          </p>
         ) : visibleCount === 0 ? (
           <p className="px-2 py-1.5 text-muted-foreground/50 text-[11px]">
             {filter.trim().length > 0 ? "No matches." : "No files or folders here."}

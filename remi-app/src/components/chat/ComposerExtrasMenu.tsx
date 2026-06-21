@@ -2,7 +2,28 @@
 // Purpose: Hosts the composer `+` menu for attachments and quick composer mode toggles.
 // Layer: Chat composer presentation
 // Depends on: shared menu primitives, icon buttons, and caller-owned composer state callbacks.
-
+/**
+ * @file Composer 附加菜单
+ *
+ * Composer 工具栏的 "+" 按钮弹出的菜单：
+ *
+ * - **图片附件**：触发文件选择（仅图片）
+ * - **快速模式切换**：fast mode、reasoning effort 等
+ * - **任务列表开关**
+ *
+ * ## 核心导出
+ *
+ * - `ComposerExtrasMenu`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 工具栏右侧 "+" 按钮
+ *
+ * ## 注意事项
+ *
+ * - 状态通过 props 回调
+ * - 文件选择过滤为图片类型
+ */
 import { type ProviderInteractionMode } from "~/contracts";
 import { memo, useId, useRef, type ChangeEvent } from "react";
 import { GoTasklist } from "react-icons/go";

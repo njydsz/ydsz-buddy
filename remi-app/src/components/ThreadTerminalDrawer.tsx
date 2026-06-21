@@ -2,7 +2,32 @@
 // Purpose: Hosts the terminal drawer/workspace chrome and each xterm viewport for a thread.
 // Layer: Chat terminal workspace UI
 // Depends on: xterm addons, native terminal APIs, and terminal workspace state from ChatView.
-
+/**
+ * @file 线程终端抽屉
+ *
+ * ChatView 底部的终端抽屉：
+ *
+ * - **多终端组**：每个 thread 可拥有多个 `ThreadTerminalGroup`
+ * - **多布局**：分屏方向切换
+ * - **活动终端**：根据 `activeTerminalId` 高亮
+ * - **xterm 集成**：基于 `@xterm/xterm` 渲染真实终端
+ * - **搜索**：通过 `SearchAddon` 支持
+ * - **活动指示**：右上角展示运行活动
+ *
+ * ## 核心导出
+ *
+ * - `ThreadTerminalDrawer`：主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 底部终端抽屉
+ *
+ * ## 注意事项
+ *
+ * - 每个终端最多 `MAX_TERMINALS_PER_GROUP` 个
+ * - 终端输出通过 `terminalEventDispatcher` 接收
+ * - 终端上下文片段可一键插入到 Composer
+ */
 import { SearchAddon } from "@xterm/addon-search";
 import { Plus, SquareSplitHorizontal, SquareSplitVertical, Trash2 } from "~/lib/icons";
 import { type ThreadId } from "~/contracts";

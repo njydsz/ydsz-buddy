@@ -5,7 +5,31 @@
 //          stay in sync.
 // Layer: UI shared component/helper
 // Exports: MentionChipIcon, createMentionChipIconElement
-
+/**
+ * @file 提及芯片图标
+ *
+ * 文件/文件夹提及芯片的图标渲染器：
+ *
+ * - **文件夹**：使用 `HiOutlineFolderOpen`
+ * - **文件**：使用 Seti 风格文件类型图标
+ * - **双形态**：支持 Lexical DOM chip + React chip
+ * - **静态 markup**：`createMentionChipIconElement` 用于 DOM 场景
+ *
+ * ## 核心导出
+ *
+ * - `MentionChipIcon`：主组件
+ * - `createMentionChipIconElement`：返回 HTML 字符串
+ *
+ * ## 使用场景
+ *
+ * - Composer @ mention 芯片
+ * - 已发送消息中的引用芯片
+ *
+ * ## 注意事项
+ *
+ * - DOM 字符串用于 Lexical 节点属性
+ * - 颜色与 Seti 主题保持一致
+ */
 import { memo } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getFileIconUrlForEntry, inferEntryKindFromPath } from "~/file-icons";

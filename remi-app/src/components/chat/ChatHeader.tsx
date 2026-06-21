@@ -2,7 +2,33 @@
 // Purpose: Renders the chat top bar with project actions and panel toggles.
 // Layer: Chat shell header
 // Depends on: project action controls, git actions, and panel toggle callbacks
-
+/**
+ * @file ChatHeader 主组件
+ *
+ * ChatView 顶部 chrome 主栏：
+ *
+ * - **返回 / 前进**：桌面端独占
+ * - **线程标题**：可点击进入重命名
+ * - **Mode Switcher**：RuntimeMode + InteractionMode
+ * - **Git Actions**：commit / push / PR
+ * - **项目脚本**：运行项目脚本
+ * - **Diff / Browser 面板开关**
+ *
+ * ## 核心导出
+ *
+ * - `ChatHeader`：主组件
+ * - `resolveChatHeaderThreadIconKind`：根据线程类型返回图标
+ *
+ * ## 使用场景
+ *
+ * - ChatView 顶部
+ *
+ * ## 注意事项
+ *
+ * - 标题展示包含 generic fallback 检测
+ * - 右侧按钮组根据 `panelState` 与权限动态启用
+ * - 桌面端独占按钮通过 `isDesktop` 守卫
+ */
 import {
   type EditorId,
   type ProjectScript,

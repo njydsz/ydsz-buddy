@@ -2,7 +2,28 @@
 // Purpose: Renders the composer mic control for recording and transcribing a voice note.
 // Layer: Chat composer presentation
 // Depends on: shared button styling and caller-owned voice recording state callbacks.
-
+/**
+ * @file Composer 语音按钮
+ *
+ * Composer 工具栏的麦克风按钮：
+ *
+ * - **录音中**：显示红色状态 + 停止图标
+ * - **转录中**：显示 spinner
+ * - **默认**：麦克风图标
+ *
+ * ## 核心导出
+ *
+ * - `ComposerVoiceButton`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 工具栏
+ *
+ * ## 注意事项
+ *
+ * - 状态全部通过 props 传入
+ * - 录音时长通过 `durationLabel` 展示
+ */
 import { memo } from "react";
 
 import { Loader2Icon, MicIcon } from "~/lib/icons";

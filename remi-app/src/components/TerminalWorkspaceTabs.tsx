@@ -2,7 +2,28 @@
 // Purpose: Renders the top-level workspace switcher between terminal and chat surfaces.
 // Layer: Chat workspace chrome
 // Depends on: terminal workspace store layout state and shared className helpers.
-
+/**
+ * @file 终端工作区标签
+ *
+ * 顶部"Terminal / Chat"工作区切换标签：
+ *
+ * - **标签切换**：在终端与聊天两个主要 surface 间切换
+ * - **活动指示**：终端面板有运行活动时展示 spinner
+ * - **布局感知**：根据 `workspaceLayout` 渲染不同样式
+ *
+ * ## 核心导出
+ *
+ * - `TerminalWorkspaceTabs`（默认导出）：主组件
+ *
+ * ## 使用场景
+ *
+ * - ChatView 顶部 chrome
+ *
+ * ## 注意事项
+ *
+ * - `terminalCount` 决定标签徽标
+ * - 切换时由 `onSelectTab` 通知父组件
+ */
 import { cn } from "~/lib/utils";
 
 import TerminalActivityIndicator from "./terminal/TerminalActivityIndicator";

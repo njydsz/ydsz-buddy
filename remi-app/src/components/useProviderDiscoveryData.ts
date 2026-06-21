@@ -4,7 +4,30 @@
 //          search state in a single bundle so view components stay presentational.
 // Layer: Logic hook
 // Exports: useProviderDiscoveryData, type ProviderDiscoveryData
-
+/**
+ * @file Provider 发现数据 Hook
+ *
+ * `PluginsView` / `SkillsView` 共享的 provider 发现数据 hook：
+ *
+ * - **多 provider 查询**：每个 provider 单独的 React Query
+ * - **能力探测**：是否支持插件/技能/斜杠命令
+ * - **搜索状态**：本地搜索 + 过滤
+ *
+ * ## 核心导出
+ *
+ * - `useProviderDiscoveryData`：数据 hook
+ * - `ProviderDiscoveryData`：返回类型
+ *
+ * ## 使用场景
+ *
+ * - PluginsView / SkillsView
+ * - Composer 的技能/插件插入
+ *
+ * ## 注意事项
+ *
+ * - 焦点线程变化会重新计算
+ * - 搜索使用 `useDeferredValue` 优化
+ */
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {

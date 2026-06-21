@@ -2,7 +2,29 @@
 // Purpose: Render a lazy, recursive local browser rooted at a caller-provided path.
 // Layer: Chat/home filesystem UI helper
 // Exports: DirectoryTreeBrowser for inline and popover-based local file/folder navigation.
-
+/**
+ * @file 目录树浏览器
+ *
+ * 懒加载、递归的本地目录树：
+ *
+ * - **按需加载**：子目录在展开时通过 native API 拉取
+ * - **虚拟化**：超过阈值启用虚拟列表
+ * - **图标**：文件/文件夹根据类型显示
+ *
+ * ## 核心导出
+ *
+ * - `DirectoryTreeBrowser`：主组件
+ *
+ * ## 使用场景
+ *
+ * - `@local` 提及弹层
+ * - 文件选择对话框
+ *
+ * ## 注意事项
+ *
+ * - 通过 `rootPath` 限制根
+ * - 错误态：列出失败时给出占位
+ */
 import type { ProjectDirectoryEntry, ProjectFileSystemEntry } from "~/contracts";
 import type { ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";

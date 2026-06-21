@@ -2,7 +2,25 @@
 // Purpose: Verifies the composer `+` menu exposes image-only uploads and quick mode toggles.
 // Layer: Browser UI test
 // Depends on: vitest browser rendering helpers and the ComposerExtrasMenu component.
-
+/**
+ * @file ComposerExtrasMenu 浏览器端测试
+ *
+ * 验证 Composer "+" 菜单在真实浏览器中的行为：
+ *
+ * - **图片附件**：仅支持图片类型上传
+ * - **快速模式切换**：fast mode 等开关
+ * - **菜单项展示**：所有可选项可见
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - Composer 附加菜单回归
+ *
+ * ## 注意事项
+ *
+ * - 通过 `mountMenu` 工具函数挂载
+ * - 使用 `fastModeEnabled` 等 props 控制初始状态
+ */
 import "../../index.css";
 
 import { page } from "@vitest/browser/context";

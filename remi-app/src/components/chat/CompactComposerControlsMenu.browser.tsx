@@ -1,3 +1,23 @@
+/**
+ * @file CompactComposerControlsMenu 浏览器端测试
+ *
+ * 验证紧凑版 Composer 控制菜单在真实浏览器中的行为：
+ *
+ * - **Provider 切换**：通过菜单选择不同 provider
+ * - **Traits 选择**：选择/取消技能
+ * - **Plan 模式**：激活计划模式
+ * - **默认 model**：使用 `getDefaultModel` 作为初始值
+ *
+ * ## 使用场景
+ *
+ * - CI 浏览器集成测试
+ * - Composer 控制菜单回归
+ *
+ * ## 注意事项
+ *
+ * - 通过 `mountMenu` 工具函数快速挂载
+ * - `useComposerDraftStore` 在测试间重置
+ */
 import { ModelSelection, ThreadId } from "~/contracts";
 import { getDefaultModel } from "~/shared/model";
 import "../../index.css";

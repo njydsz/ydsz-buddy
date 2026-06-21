@@ -1,3 +1,26 @@
+/**
+ * @file 线程 Worktree 切换对话框
+ *
+ * 当用户选择"将线程切换到新 worktree"时弹出的对话框：
+ *
+ * - **输入 worktree 名称**：实时校验
+ * - **预填**：默认从线程分支派生
+ * - **busy 态**：handoff 进行中禁用按钮
+ *
+ * ## 核心导出
+ *
+ * - `ThreadWorktreeHandoffDialog`：主组件
+ * - `ThreadWorktreeHandoffDialogProps`：组件 props
+ *
+ * ## 使用场景
+ *
+ * - BranchToolbar "Hand off to new worktree"
+ *
+ * ## 注意事项
+ *
+ * - 名称校验与 `buildTemporaryWorktreeBranchName` 对齐
+ * - 取消不保存
+ */
 import { useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import {

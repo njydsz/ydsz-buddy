@@ -2,7 +2,29 @@
 // Purpose: Renders filename-first composer image attachments as compact pills with preview/remove actions.
 // Layer: Chat composer presentation
 // Depends on: composer draft image metadata, shared chip styles, and expanded image preview helpers.
-
+/**
+ * @file Composer 图片附件芯片
+ *
+ * Composer 中图片附件的胶囊化展示：
+ *
+ * - **文件名优先**：以文件名为主要标识
+ * - **预览/移除**：点击预览、×按钮移除
+ * - **共享样式**：使用 `COMPOSER_ATTACHMENT_CHIP_CLASS_NAME`
+ * - **错误态**：当图片无法加载时给出警告图标
+ *
+ * ## 核心导出
+ *
+ * - `ComposerImageAttachmentChip`：主组件
+ *
+ * ## 使用场景
+ *
+ * - Composer 上方附件条
+ *
+ * ## 注意事项
+ *
+ * - 预览通过 `buildExpandedImagePreview` 构造
+ * - 大小写：使用 `useMemo` 减少重算
+ */
 import { memo } from "react";
 import { type ComposerImageAttachment } from "../../composerDraftStore";
 import { CircleAlertIcon, XIcon } from "~/lib/icons";
