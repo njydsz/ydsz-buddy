@@ -28,10 +28,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import { ComposerExtrasMenu } from "./ComposerExtrasMenu";
+import type { ProviderInteractionMode } from "~/contracts";
 
 async function mountMenu(props?: {
   fastModeEnabled?: boolean;
-  interactionMode?: "default" | "plan";
+  interactionMode?: ProviderInteractionMode;
   supportsFastMode?: boolean;
 }) {
   const onAddPhotos = vi.fn();
@@ -41,7 +42,7 @@ async function mountMenu(props?: {
   document.body.append(host);
   const screen = await render(
     <ComposerExtrasMenu
-      interactionMode={props?.interactionMode ?? "default"}
+      interactionMode={props?.interactionMode ?? "chat"}
       supportsFastMode={props?.supportsFastMode ?? true}
       fastModeEnabled={props?.fastModeEnabled ?? false}
       onAddPhotos={onAddPhotos}

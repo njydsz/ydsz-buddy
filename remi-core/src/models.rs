@@ -570,6 +570,8 @@ pub enum ProposedPlanStatus {
 /// - `id`: 活动唯一标识
 /// - `kind`: 活动类型
 /// - `description`: 活动描述（人类可读的文本）
+/// - `payload`: 活动负载（类型化的判别联合）
+/// - `turn_id`: 关联的 Turn ID
 /// - `created_at`: 活动发生时间
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -580,6 +582,11 @@ pub struct Activity {
     pub kind: ActivityKind,
     /// 活动描述（人类可读的文本）
     pub description: String,
+    /// 活动负载（类型化的判别联合）
+    pub payload: ActivityPayload,
+    /// 关联的 Turn ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub turn_id: Option<String>,
     /// 活动发生时间（UTC）
     pub created_at: DateTime<Utc>,
 }
@@ -602,6 +609,83 @@ pub enum ActivityKind {
     TerminalCommand,
     /// Git 操作
     GitOperation,
+}
+
+/// # 活动负载枚举
+///
+/// 类型化的活动负载，每种变体包含对应活动类型的具体数据。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum ActivityPayload {
+    /// 工具调用负载
+    ToolCall {
+        /// 工具名称
+        tool_name: String,
+        /// 工具输入参数（JSON）
+        input: Option<serde_json::Value>,
+        /// 工具输出结果（JSON）
+        output: Option<serde_json::Value>,
+        /// 是否成功
+        success: bool,
+    },
+    /// 文件变更负载
+    FileChange {
+        /// 变更的文件路径列表
+        files: Vec<FileChangeEntry>,
+    },
+    /// 终端命令负载
+    TerminalCommand {
+        /// 执行的命令
+        command: String,
+        /// 命令输出
+        output: Option<String>,
+        /// 退出码
+        exit_code: Option<i32>,
+    },
+    /// Git 操作负载
+    GitOperation {
+        /// Git 操作类型（commit/push/pull/checkout 等）
+        operation: String,
+        /// 相关的分支或引用
+        ref_name: Option<String>,
+        /// 操作结果摘要
+        summary: Option<String>,
+    },
+    /// 消息活动负载
+    Message {
+        /// 消息 ID
+        message_id: String,
+        /// 消息角色
+        role: String,
+    },
+    /// 检查点活动负载
+    Checkpoint {
+        /// 检查点 ID
+        checkpoint_id: String,
+        /// 检查点操作（create/revert/delete）
+        operation: String,
+    },
+    /// 通用负载（用于未分类的活动）
+    Generic {
+        /// 额外数据（JSON）
+        data: Option<serde_json::Value>,
+    },
+}
+
+/// # 文件变更条目
+///
+/// 记录单个文件的变更信息。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileChangeEntry {
+    /// 文件路径
+    pub path: String,
+    /// 变更类型（added/modified/deleted）
+    pub change_type: String,
+    /// 新增行数
+    pub additions: Option<usize>,
+    /// 删除行数
+    pub deletions: Option<usize>,
 }
 
 /// # 检查点

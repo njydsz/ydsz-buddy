@@ -26,6 +26,8 @@ import { page } from "@vitest/browser/context";
 import { Profiler, useCallback, useRef, useState, type ProfilerOnRenderCallback } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
+// @ts-expect-error - matchers augmentation only needed for type checking
+import "@vitest/browser/matchers";
 
 import { ChatTranscriptPane } from "./ChatTranscriptPane";
 import { useTranscriptAssistantSelectionAction } from "./useTranscriptAssistantSelectionAction";

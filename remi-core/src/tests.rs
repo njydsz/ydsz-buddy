@@ -399,5 +399,128 @@ mod test {
         assert_eq!(v["user"], "alice");
         assert_eq!(v["age"], 30);
     }
-}
 
+
+    #[test]
+    fn event_metadata_serialization() {
+        // 验证 EventMetadata 序列化为 camelCase
+        let metadata = EventMetadata::new();
+        let v: Value = serde_json::to_value(&metadata).unwrap();
+        assert!(v.get("eventId").is_some());
+        assert!(v.get("causationEventId").is_some());
+        assert!(v.get("correlationId").is_some());
+        assert!(v.get("metadata").is_some());
+    }
+
+    #[test]
+    fn event_metadata_with_causation() {
+        // 验证 EventMetadata::with_causation 正确设置因果事件 ID
+        let metadata = EventMetadata::with_causation("cause-123".to_string());
+        assert_eq!(metadata.causation_event_id, Some("cause-123".to_string()));
+        assert!(metadata.event_id.len() > 0);
+    }
+
+    #[test]
+    fn checkpoint_status_serialization() {
+        // 验证 CheckpointStatus 枚举序列化为小写
+        use crate::models::CheckpointStatus;
+        
+        let s = serde_json::to_string(&CheckpointStatus::Ready).unwrap();
+        assert_eq!(s, "\"ready\"");
+        
+        let s = serde_json::to_string(&CheckpointStatus::Missing).unwrap();
+        assert_eq!(s, "\"missing\"");
+        
+        let s = serde_json::to_string(&CheckpointStatus::Error).unwrap();
+        assert_eq!(s, "\"error\"");
+    }
+
+    #[test]
+    fn activity_payload_serialization() {
+        // 验证 ActivityPayload 判别联合序列化
+        use crate::models::{ActivityPayload, FileChangeEntry};
+        
+        let payload = ActivityPayload::ToolCall {
+            tool_name: "read_file".to_string(),
+            input: Some(json!({"path": "/tmp/test.txt"})),
+            output: Some(json!({"content": "hello"})),
+            success: true,
+        };
+        let v: Value = serde_json::to_value(&payload).unwrap();
+        assert_eq!(v["type"], "toolCall");
+        // serde renames tool_name to tool_name (snake_case for enum variants)
+        assert!(v.get("tool_name").is_some() || v.get("toolName").is_some());
+        assert_eq!(v["success"], true);
+    }
+
+    #[test]
+    fn activity_payload_file_change_serialization() {
+        // 验证 ActivityPayload::FileChange 序列化
+        use crate::models::{ActivityPayload, FileChangeEntry};
+        
+        let payload = ActivityPayload::FileChange {
+            files: vec![
+                FileChangeEntry {
+                    path: "src/main.rs".to_string(),
+                    change_type: "modified".to_string(),
+                    additions: Some(10),
+                    deletions: Some(5),
+                },
+            ],
+        };
+        let v: Value = serde_json::to_value(&payload).unwrap();
+        assert_eq!(v["type"], "fileChange");
+        assert_eq!(v["files"][0]["path"], "src/main.rs");
+    }
+
+    #[test]
+    fn latest_turn_serialization() {
+        // 验证 LatestTurn 序列化为 camelCase
+        use crate::models::{LatestTurn, TurnStatus};
+        
+        let turn = LatestTurn {
+            id: "turn-1".to_string(),
+            status: TurnStatus::Running,
+            requested_at: Some(Utc::now()),
+            started_at: Some(Utc::now()),
+            completed_at: None,
+            assistant_message_id: None,
+        };
+        let v: Value = serde_json::to_value(&turn).unwrap();
+        assert!(v.get("requestedAt").is_some());
+        assert!(v.get("startedAt").is_some());
+        assert!(v.get("completedAt").is_none()); // None fields should be skipped
+    }
+
+    #[test]
+    fn checkpoint_serialization_with_new_fields() {
+        // 验证 Checkpoint 序列化包含新字段
+        use crate::models::{Checkpoint, CheckpointStatus, CheckpointFile};
+        
+        let checkpoint = Checkpoint {
+            id: "cp-1".to_string(),
+            thread_id: Uuid::new_v4(),
+            turn_id: "turn-1".to_string(),
+            git_ref: "abc123".to_string(),
+            description: "Test checkpoint".to_string(),
+            status: CheckpointStatus::Ready,
+            checkpoint_turn_count: 5,
+            files: vec![
+                CheckpointFile {
+                    path: "src/main.rs".to_string(),
+                    status: "modified".to_string(),
+                    additions: 10,
+                    deletions: 5,
+                },
+            ],
+            assistant_message_id: Some("msg-1".to_string()),
+            created_at: Utc::now(),
+            completed_at: Some(Utc::now()),
+        };
+        let v: Value = serde_json::to_value(&checkpoint).unwrap();
+        assert_eq!(v["status"], "ready");
+        assert_eq!(v["checkpointTurnCount"], 5);
+        assert_eq!(v["files"][0]["path"], "src/main.rs");
+        assert_eq!(v["assistantMessageId"], "msg-1");
+    }
+}

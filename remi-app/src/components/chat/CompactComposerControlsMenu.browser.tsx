@@ -32,7 +32,7 @@ import { useComposerDraftStore } from "../../composerDraftStore";
 
 async function mountMenu(props?: {
   activePlan?: boolean;
-  interactionMode?: "default" | "plan";
+  interactionMode?: "chat" | "plan";
   modelSelection?: ModelSelection;
   prompt?: string;
 }) {

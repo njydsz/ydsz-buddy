@@ -39,7 +39,7 @@ export function isMacPlatform(platform: string): boolean {
 }
 
 export function isWindowsPlatform(platform: string): boolean {
-  return /^win(dows)</i.test(platform);
+  return /^win(dows|[0-9])/i.test(platform);
 }
 
 export function isLinuxPlatform(platform: string): boolean {

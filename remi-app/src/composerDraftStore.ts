@@ -1479,10 +1479,15 @@ function normalizePersistedQueuedTurns(
       const mentions = Array.isArray(candidate.mentions)
         ? candidate.mentions.filter(Schema.is(ProviderMentionReference))
         : [];
+      const rawInteractionMode = candidate.interactionMode;
       const interactionMode =
-        candidate.interactionMode === "default" || candidate.interactionMode === "plan"
-          ? candidate.interactionMode
-          : null;
+        rawInteractionMode === "chat" || rawInteractionMode === "plan" ||
+        rawInteractionMode === "agent" || rawInteractionMode === "review" ||
+        rawInteractionMode === "task"
+          ? rawInteractionMode
+          : rawInteractionMode === "default"
+            ? "chat"
+            : null;
       const envMode =
         candidate.envMode === "local" || candidate.envMode === "worktree"
           ? candidate.envMode
@@ -1514,10 +1519,14 @@ function normalizePersistedQueuedTurns(
     }
     if (kind === "plan-follow-up") {
       const text = typeof candidate.text === "string" ? candidate.text : "";
+      const rawMode = candidate.interactionMode;
       const interactionMode =
-        candidate.interactionMode === "default" || candidate.interactionMode === "plan"
-          ? candidate.interactionMode
-          : null;
+        rawMode === "chat" || rawMode === "plan" || rawMode === "agent" ||
+        rawMode === "review" || rawMode === "task"
+          ? rawMode
+          : rawMode === "default"
+            ? "chat"
+            : null;
       if (interactionMode === null) {
         continue;
       }
@@ -2921,7 +2930,7 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           return;
         }
         const nextInteractionMode =
-          interactionMode === "plan" || interactionMode === "default" ? interactionMode : null;
+          interactionMode === "plan" || interactionMode === "chat" ? interactionMode : null;
         set((state) => {
           const existing = state.draftsByThreadId[threadId];
           if (!existing && nextInteractionMode === null) {

@@ -31,6 +31,7 @@
  */
 
 import {
+  DEFAULT_PROVIDER_INTERACTION_MODE,
   type ModelSelection,
   type OrchestrationShellSnapshot,
   type ProviderInteractionMode,
@@ -98,7 +99,7 @@ export function useComposerSlashCommands(input: {
   syncServerShellSnapshot: (snapshot: OrchestrationShellSnapshot) => void;
   navigateToThread: (threadId: ThreadId, options?: { splitViewId?: SplitViewId }) => Promise<void>;
   handleClearConversation: () => Promise<void> | void;
-  handleInteractionModeChange: (mode: "default" | "plan") => Promise<void> | void;
+  handleInteractionModeChange: (mode: ProviderInteractionMode) => Promise<void> | void;
   openForkTargetPicker: () => void;
   openReviewTargetPicker: () => void;
   setComposerDraftProviderModelOptions: (
@@ -619,7 +620,7 @@ export function useComposerSlashCommands(input: {
         return true;
       }
       if (slashInvocation.command === "plan" || slashInvocation.command === "default") {
-        await handleInteractionModeChange(slashInvocation.command === "plan" ? "plan" : "default");
+        await handleInteractionModeChange(slashInvocation.command === "plan" ? "plan" : "chat");
         editorActions.clearComposerSlashDraft();
         return true;
       }
@@ -790,7 +791,7 @@ export function useComposerSlashCommands(input: {
       }
 
       if (item.command === "plan" || item.command === "default") {
-        void handleInteractionModeChange(item.command === "plan" ? "plan" : "default");
+        void handleInteractionModeChange(item.command === "plan" ? "plan" : DEFAULT_PROVIDER_INTERACTION_MODE);
         const applied = clearSlashCommandFromComposer();
         if (wasPromptReplacementApplied(applied)) {
           editorActions.setComposerHighlightedItemId(null);

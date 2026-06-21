@@ -3819,7 +3819,7 @@ export default function ChatView({
     ],
   );
   const toggleInteractionMode = useCallback(() => {
-    handleInteractionModeChange(interactionMode === "plan" ? "default" : "plan");
+    handleInteractionModeChange(interactionMode === "plan" ? "chat" : "plan");
   }, [handleInteractionModeChange, interactionMode]);
   const togglePlanSidebar = useCallback(() => {
     setPlanSidebarOpen((open) => {
@@ -3834,7 +3834,7 @@ export default function ChatView({
   }, [activeTaskList?.turnId, sidebarProposedPlan?.turnId]);
   const setPlanMode = useCallback(
     (enabled: boolean) => {
-      handleInteractionModeChange(enabled ? "plan" : "default");
+      handleInteractionModeChange(enabled ? "plan" : "chat");
     },
     [handleInteractionModeChange],
   );
@@ -6143,7 +6143,7 @@ export default function ChatView({
         dispatchMode,
         runtimeMode: queuedTurn?.runtimeMode ?? runtimeMode,
         interactionMode: nextInteractionMode,
-        ...(nextInteractionMode === "default" && activeProposedPlan
+        ...(nextInteractionMode === "chat" && activeProposedPlan
           ? {
               sourceProposedPlan: {
                 threadId: activeThread.id,
@@ -6154,9 +6154,9 @@ export default function ChatView({
         createdAt: messageCreatedAt,
       });
       // Optimistically open the plan sidebar when implementing (not refining).
-      // "default" mode here means the agent is executing the plan, which produces
+      // "chat" mode here means the agent is executing the plan, which produces
       // step-tracking activities that the sidebar will display.
-      if (nextInteractionMode === "default") {
+      if (nextInteractionMode === "chat") {
         planSidebarDismissedForTurnRef.current = null;
         setPlanSidebarOpen(true);
       }

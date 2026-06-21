@@ -1,4 +1,8 @@
 allowBuilds:
-  esbuild: true
-  msgpackr-extract: true
-  msw: true
+  esbuild: set this to true or false
+  msgpackr-extract: set this to true or false
+  msw: set this to true or false
+onlyBuiltDependencies:
+  - esbuild
+  - msgpackr-extract
+  - msw

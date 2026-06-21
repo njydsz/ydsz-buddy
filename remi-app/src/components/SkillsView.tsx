@@ -42,6 +42,7 @@ import { localSkillsQueryOptions } from "~/localSkillsReactQuery";
 import { useMessages } from "~/i18n/I18nContext";
 import { cn } from "~/lib/utils";
 import { isDesktop } from "~/env";
+import type { LocalUserSkillSource } from "~/contracts";
 import { SidebarInset } from "./ui/sidebar";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "./ui/input-group";
@@ -217,7 +218,7 @@ function LocalSkillsSection({
     version?: string | undefined;
     homepage?: string | undefined;
     path: string;
-    source: string;
+    source: LocalUserSkillSource;
     sourceDir: string;
     enabled: boolean;
   }>;
@@ -307,7 +308,7 @@ function groupLocalSkillsByMode(
     version?: string | undefined;
     homepage?: string | undefined;
     path: string;
-    source: string;
+    source: LocalUserSkillSource;
     sourceDir: string;
     enabled: boolean;
   }>,
@@ -359,7 +360,7 @@ function LocalSkillCard({
     version?: string | undefined;
     homepage?: string | undefined;
     path: string;
-    source: string;
+    source: LocalUserSkillSource;
     sourceDir: string;
     enabled: boolean;
   };
