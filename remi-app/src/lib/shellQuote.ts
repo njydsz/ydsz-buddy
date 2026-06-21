@@ -21,7 +21,7 @@ export function quotePosixShellArgument(value: string): string {
   if (value.length === 0) {
     return "''";
   }
-  if (SAFE_TOKEN_PATTERN.test(value)) {
+  if (!value.startsWith("-") && SAFE_TOKEN_PATTERN.test(value)) {
     return value;
   }
   return `'${value.replaceAll("'", `'\\''`)}'`;

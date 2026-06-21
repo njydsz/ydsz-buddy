@@ -12,7 +12,7 @@ import { isWindowsPlatform } from "./utils";
 
 /** 閸掋倖鏌囩捄顖氱窞閺勵垰鎯佹稉鐑樻瀮娴犲墎閮寸紒鐔哥壌鐠侯垰绶為敍?/"閵?\"閹?Windows 閻╂顑侀弽鍦窗瑜版洩绱?*/
 function isRootPath(value: string): boolean {
-  return value === "/" || value === "\\" || /^[a-zA-Z]:[/\\]?$/.test(value);
+  return value === "/" || value === "\\" || /^[a-zA-Z]:[\\/]$/.test(value);
 }
 
 /** 閼惧嘲褰囩紒婵嗩嚠鐠侯垰绶為惃鍕挬閸欐壆琚崹?*/
