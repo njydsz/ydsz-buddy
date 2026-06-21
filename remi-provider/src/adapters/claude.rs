@@ -50,8 +50,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use remi_core::provider::{
-    ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
-    ProviderTurnStartResult, TurnInput,
+    ProviderKind, ProviderListAgentsResult, ProviderListCommandsInput, ProviderListCommandsResult,
+    ProviderListModelsInput, ProviderListModelsResult, ProviderListSkillsInput,
+    ProviderListSkillsResult, ProviderRuntimeEvent, ProviderSession,
+    ProviderSessionStartInput, ProviderTurnStartResult, TurnInput,
 };
 use serde_json::json;
 use tokio::sync::{broadcast, RwLock};
@@ -247,9 +249,26 @@ impl ClaudeAdapter {
             }
         }
     }
+
+    /// 启动一个轻量的临时 Claude 进程用于能力发现
+    ///
+    /// 不初始化会话，仅用于发送 `models.list` 等发现请求。
+    /// 如果环境变量中配置了 ANTHROPIC_API_KEY，会传递给子进程。
+    pub async fn spawn_discovery_client(&self) -> ProviderResult<JsonRpcClient> {
+        let cwd = std::env::current_dir()
+            .map_err(|e| ProviderError::AdapterError(format!("获取当前目录失败: {}", e)))?
+            .to_string_lossy()
+            .to_string();
+
+        let mut env = HashMap::new();
+        if let Ok(api_key) = std::env::var("ANTHROPIC_API_KEY") {
+            env.insert("ANTHROPIC_API_KEY".to_string(), api_key);
+        }
+
+        JsonRpcClient::spawn("claude", &["--json"], &env, &cwd).await
+    }
 }
 
-/// 默认实现，等同于 `new()`
 impl Default for ClaudeAdapter {
     fn default() -> Self {
         Self::new()
@@ -600,5 +619,184 @@ impl ProviderAdapter for ClaudeAdapter {
     /// 返回 `broadcast::Receiver<ProviderRuntimeEvent>`，用于异步接收事件
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
+    }
+
+    /// 列出可用模型
+    ///
+    /// 优先尝试通过临时 Claude 进程动态获取模型列表；
+    /// 动态获取失败时回退到内置静态模型目录。
+    async fn list_models(
+        &self,
+        _input: ProviderListModelsInput,
+    ) -> ProviderResult<ProviderListModelsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("models.list", None),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListModelsResult>(result)
+                                {
+                                    return Ok(ProviderListModelsResult {
+                                        models: parsed.models,
+                                        source: Some("claude-runtime".to_string()),
+                                        cached: Some(false),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Claude 模型列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Claude 模型列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Claude 发现进程失败: {}", e),
+        }
+
+        Ok(crate::catalog::default_models_for(self.provider_kind()))
+    }
+
+    /// 列出可用 Agent
+    ///
+    /// 优先尝试通过临时 Claude 进程动态获取 Agent 列表；
+    /// 动态获取失败时回退到内置静态 Agent 目录。
+    async fn list_agents(&self) -> ProviderResult<ProviderListAgentsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("agents.list", None),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListAgentsResult>(result)
+                                {
+                                    return Ok(ProviderListAgentsResult {
+                                        agents: parsed.agents,
+                                        source: Some("claude-runtime".to_string()),
+                                        cached: Some(false),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Claude Agent 列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Claude Agent 列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Claude 发现进程失败: {}", e),
+        }
+
+        Ok(crate::catalog::default_agents_for(self.provider_kind()))
+    }
+
+    /// 列出可用技能
+    ///
+    /// 优先尝试通过临时 Claude 进程动态获取技能列表；
+    /// 动态获取失败时返回空列表。
+    async fn list_skills(
+        &self,
+        input: ProviderListSkillsInput,
+    ) -> ProviderResult<ProviderListSkillsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let params = json!({
+                    "cwd": input.cwd,
+                    "threadId": input.thread_id,
+                    "forceReload": input.force_reload,
+                });
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("skills.list", Some(params)),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListSkillsResult>(result)
+                                {
+                                    return Ok(parsed);
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Claude 技能列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Claude 技能列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Claude 发现进程失败: {}", e),
+        }
+
+        Ok(ProviderListSkillsResult {
+            skills: vec![],
+            source: Some("static-catalog".to_string()),
+            cached: Some(false),
+        })
+    }
+
+    /// 列出可用原生斜杠命令
+    ///
+    /// 优先尝试通过临时 Claude 进程动态获取命令列表；
+    /// 动态获取失败时返回空列表。
+    async fn list_commands(
+        &self,
+        input: ProviderListCommandsInput,
+    ) -> ProviderResult<ProviderListCommandsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let params = json!({
+                    "cwd": input.cwd,
+                    "threadId": input.thread_id,
+                    "forceReload": input.force_reload,
+                });
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("commands.list", Some(params)),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListCommandsResult>(result)
+                                {
+                                    return Ok(parsed);
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Claude 命令列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Claude 命令列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Claude 发现进程失败: {}", e),
+        }
+
+        Ok(ProviderListCommandsResult {
+            commands: vec![],
+            source: Some("static-catalog".to_string()),
+            cached: Some(false),
+        })
     }
 }

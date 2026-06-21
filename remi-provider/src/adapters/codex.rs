@@ -55,7 +55,9 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use remi_core::provider::{
-    ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
+    ProviderKind, ProviderListAgentsResult, ProviderListCommandsInput, ProviderListCommandsResult,
+    ProviderListModelsInput, ProviderListModelsResult, ProviderListSkillsInput,
+    ProviderListSkillsResult, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
     ProviderTurnStartResult, TurnInput,
 };
 use serde_json::json;
@@ -229,6 +231,24 @@ impl CodexAdapter {
             }
         }
     }
+
+    /// 启动一个轻量的临时 Codex 进程用于能力发现
+    ///
+    /// 不初始化会话，仅用于发送 `models.list` 等发现请求。
+    /// 如果环境变量中配置了 OPENAI_API_KEY，会传递给子进程。
+    pub async fn spawn_discovery_client(&self) -> ProviderResult<JsonRpcClient> {
+        let cwd = std::env::current_dir()
+            .map_err(|e| ProviderError::AdapterError(format!("获取当前目录失败: {}", e)))?
+            .to_string_lossy()
+            .to_string();
+
+        let mut env = HashMap::new();
+        if let Ok(api_key) = std::env::var("OPENAI_API_KEY") {
+            env.insert("OPENAI_API_KEY".to_string(), api_key);
+        }
+
+        JsonRpcClient::spawn("codex", &["--json"], &env, &cwd).await
+    }
 }
 
 /// 默认实现，等同于 `new()`
@@ -253,19 +273,19 @@ impl ProviderAdapter for CodexAdapter {
 
     /// 获取适配器能力声明
     ///
-    /// Codex 是功能最基础的 Provider，所有可选能力均不支持。
+    /// Codex 支持运行时模型列表、技能提及/发现、Turn 转向和会话内模型切换。
     ///
     /// # 返回值
     ///
-    /// 返回所有可选能力关闭的 `ProviderCapabilities` 实例
+    /// 返回 Codex 能力声明的 `ProviderCapabilities` 实例
     fn capabilities(&self) -> ProviderCapabilities {
         ProviderCapabilities {
-            session_model_switch: SessionModelSwitchMode::Unsupported,
-            supports_skill_mentions: false,
-            supports_skill_discovery: false,
+            session_model_switch: SessionModelSwitchMode::InSession,
+            supports_skill_mentions: true,
+            supports_skill_discovery: true,
             supports_native_slash_command_discovery: false,
-            supports_runtime_model_list: false,
-            supports_turn_steering: false,
+            supports_runtime_model_list: true,
+            supports_turn_steering: true,
         }
     }
 
@@ -371,6 +391,39 @@ impl ProviderAdapter for CodexAdapter {
         if let Some(error) = result.error {
             return Err(ProviderError::AdapterError(format!(
                 "发送 Turn 失败: {}",
+                error.message
+            )));
+        }
+
+        Ok(ProviderTurnStartResult {
+            turn_id: input.turn_id,
+            thread_id: input.thread_id,
+        })
+    }
+
+    /// 转向 Turn（重定向运行中的对话）
+    ///
+    /// 在 Turn 执行过程中重定向对话方向。Codex 支持此功能。
+    async fn steer_turn(&self, input: TurnInput) -> ProviderResult<ProviderTurnStartResult> {
+        let sessions = self.sessions.read().await;
+        let client = sessions
+            .get(&input.thread_id)
+            .ok_or_else(|| ProviderError::SessionNotFound(input.thread_id.clone()))?;
+
+        let result = client
+            .request(
+                "turn.steer",
+                Some(json!({
+                    "threadId": input.thread_id,
+                    "turnId": input.turn_id,
+                    "message": input.message,
+                })),
+            )
+            .await?;
+
+        if let Some(error) = result.error {
+            return Err(ProviderError::AdapterError(format!(
+                "转向 Turn 失败: {}",
                 error.message
             )));
         }
@@ -530,5 +583,150 @@ impl ProviderAdapter for CodexAdapter {
     /// 返回 `broadcast::Receiver<ProviderRuntimeEvent>`，用于异步接收事件
     async fn stream_events(&self) -> ProviderResult<broadcast::Receiver<ProviderRuntimeEvent>> {
         Ok(self.event_tx.subscribe())
+    }
+
+    /// 列出可用模型
+    ///
+    /// 优先尝试通过临时 Codex 进程动态获取模型列表；
+    /// 动态获取失败时回退到内置静态模型目录。
+    async fn list_models(
+        &self,
+        _input: ProviderListModelsInput,
+    ) -> ProviderResult<ProviderListModelsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("models.list", None),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListModelsResult>(result)
+                                {
+                                    return Ok(ProviderListModelsResult {
+                                        models: parsed.models,
+                                        source: Some("codex-runtime".to_string()),
+                                        cached: Some(false),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Codex 模型列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Codex 模型列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Codex 发现进程失败: {}", e),
+        }
+
+        Ok(crate::catalog::default_models_for(self.provider_kind()))
+    }
+
+    /// 列出可用 Agent
+    ///
+    /// 优先尝试通过临时 Codex 进程动态获取 Agent 列表；
+    /// 动态获取失败时回退到内置静态 Agent 目录。
+    async fn list_agents(&self) -> ProviderResult<ProviderListAgentsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("agents.list", None),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListAgentsResult>(result)
+                                {
+                                    return Ok(ProviderListAgentsResult {
+                                        agents: parsed.agents,
+                                        source: Some("codex-runtime".to_string()),
+                                        cached: Some(false),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Codex Agent 列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Codex Agent 列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Codex 发现进程失败: {}", e),
+        }
+
+        Ok(crate::catalog::default_agents_for(self.provider_kind()))
+    }
+
+    /// 列出可用技能
+    ///
+    /// 优先尝试通过临时 Codex 进程动态获取技能列表；
+    /// 动态获取失败时返回空列表。
+    async fn list_skills(
+        &self,
+        input: ProviderListSkillsInput,
+    ) -> ProviderResult<ProviderListSkillsResult> {
+        match self.spawn_discovery_client().await {
+            Ok(client) => {
+                let params = json!({
+                    "cwd": input.cwd,
+                    "threadId": input.thread_id,
+                    "forceReload": input.force_reload,
+                });
+                let response = tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    client.request("skills.list", Some(params)),
+                )
+                .await;
+                let _ = client.close().await;
+
+                match response {
+                    Ok(Ok(resp)) => {
+                        if resp.error.is_none() {
+                            if let Some(result) = resp.result {
+                                if let Ok(parsed) =
+                                    serde_json::from_value::<ProviderListSkillsResult>(result)
+                                {
+                                    return Ok(parsed);
+                                }
+                            }
+                        }
+                    }
+                    Ok(Err(e)) => debug!("动态获取 Codex 技能列表失败: {}", e),
+                    Err(_) => debug!("动态获取 Codex 技能列表超时"),
+                }
+            }
+            Err(e) => debug!("启动 Codex 发现进程失败: {}", e),
+        }
+
+        Ok(ProviderListSkillsResult {
+            skills: vec![],
+            source: Some("static-catalog".to_string()),
+            cached: Some(false),
+        })
+    }
+
+    /// 列出可用原生斜杠命令
+    ///
+    /// Codex 当前不支持原生斜杠命令发现，返回空列表。
+    async fn list_commands(
+        &self,
+        _input: ProviderListCommandsInput,
+    ) -> ProviderResult<ProviderListCommandsResult> {
+        Ok(ProviderListCommandsResult {
+            commands: vec![],
+            source: Some("static-catalog".to_string()),
+            cached: Some(false),
+        })
     }
 }

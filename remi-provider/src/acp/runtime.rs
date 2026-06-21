@@ -58,6 +58,7 @@
 //! - 依赖 [`crate::error`] 模块定义错误类型
 //! - 被 [`crate::acp::cursor`] 和 [`crate::acp::grok`] 模块依赖
 
+use crate::acp::json_rpc_connection::{AcpJsonRpcRequest, AcpJsonRpcResponse};
 use crate::acp::model::AcpSpawnInput;
 use crate::error::{ProviderError, ProviderResult};
 use remi_core::provider::ProviderRuntimeEvent;
@@ -162,51 +163,6 @@ impl Default for AcpRuntimeOptions {
             request_timeout_secs: 30,
         }
     }
-}
-
-/// ACP JSON-RPC 请求
-///
-/// 遵循 JSON-RPC 2.0 规范的请求结构体，通过 stdin 发送给 ACP 客户端子进程。
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AcpJsonRpcRequest {
-    /// JSON-RPC 版本，固定为 "2.0"
-    pub jsonrpc: String,
-    /// 请求 ID，用于关联响应
-    pub id: u64,
-    /// 要调用的远程方法名
-    pub method: String,
-    /// 方法参数
-    pub params: serde_json::Value,
-}
-
-/// ACP JSON-RPC 响应
-///
-/// ACP 客户端子进程通过 stdout 返回的响应结构体。
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AcpJsonRpcResponse {
-    /// JSON-RPC 版本
-    pub jsonrpc: String,
-    /// 对应请求的 ID
-    pub id: u64,
-    /// 请求成功时的返回值
-    pub result: Option<serde_json::Value>,
-    /// 请求失败时的错误信息
-    pub error: Option<AcpJsonRpcError>,
-}
-
-/// ACP JSON-RPC 错误
-///
-/// 当 ACP 客户端处理请求失败时返回的错误详情。
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AcpJsonRpcError {
-    /// 错误代码
-    ///
-    /// 负数表示系统级错误，正数保留给自定义错误
-    pub code: i32,
-    /// 人类可读的错误描述
-    pub message: String,
-    /// 可选的附加错误数据
-    pub data: Option<serde_json::Value>,
 }
 
 /// ACP 会话运行时
@@ -381,9 +337,11 @@ impl AcpSessionRuntime {
 
                 // 解析 JSON-RPC 响应
                 if let Ok(response) = serde_json::from_str::<AcpJsonRpcResponse>(&line) {
-                    let mut pending = pending_responses_clone.lock().await;
-                    if let Some(sender) = pending.remove(&response.id) {
-                        let _ = sender.send(response);
+                    if let Some(resp_id) = response.id {
+                        let mut pending = pending_responses_clone.lock().await;
+                        if let Some(sender) = pending.remove(&resp_id) {
+                            let _ = sender.send(response);
+                        }
                     }
                 }
             }
@@ -455,9 +413,9 @@ impl AcpSessionRuntime {
         // 构建请求
         let request = AcpJsonRpcRequest {
             jsonrpc: "2.0".to_string(),
-            id: request_id,
+            id: Some(request_id),
             method: method.to_string(),
-            params,
+            params: Some(params),
         };
 
         if self.options.log_requests {
