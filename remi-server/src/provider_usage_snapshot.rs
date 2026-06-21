@@ -9,6 +9,7 @@ use chrono::{DateTime, Datelike};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::{Mutex, OnceLock};
 
 /// 用量快照缓存 TTL（30 秒）
 const USAGE_CACHE_TTL_MS: i64 = 30_000;
@@ -93,15 +94,14 @@ struct CachedUsageSnapshot {
 // ==============================
 
 /// 全局用量快照缓存
-static mut USAGE_SNAPSHOT_CACHE: Option<HashMap<String, CachedUsageSnapshot>> = None;
+static USAGE_SNAPSHOT_CACHE: OnceLock<Mutex<HashMap<String, CachedUsageSnapshot>>> =
+    OnceLock::new();
 
-fn get_cache() -> &'static mut HashMap<String, CachedUsageSnapshot> {
-    unsafe {
-        if USAGE_SNAPSHOT_CACHE.is_none() {
-            USAGE_SNAPSHOT_CACHE = Some(HashMap::new());
-        }
-        USAGE_SNAPSHOT_CACHE.as_mut().unwrap()
-    }
+fn get_cache() -> std::sync::MutexGuard<'static, HashMap<String, CachedUsageSnapshot>> {
+    USAGE_SNAPSHOT_CACHE
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 fn now_ms() -> i64 {
@@ -591,7 +591,7 @@ pub fn get_provider_usage_snapshot(
 
     // 更新缓存
     {
-        let cache = get_cache();
+        let mut cache = get_cache();
         cache.insert(
             cache_key,
             CachedUsageSnapshot {

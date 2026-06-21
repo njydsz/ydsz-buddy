@@ -315,25 +315,9 @@ pub fn run() {
         //   REMI_UPDATER_ENDPOINTS：逗号分隔的 endpoint URL 列表
         //   REMI_UPDATER_PUBKEY：签名校验公钥（为空则跳过校验）
         .plugin({
-            let mut builder = tauri_plugin_updater::Builder::new();
-            if let Ok(endpoints_env) = std::env::var("REMI_UPDATER_ENDPOINTS") {
-                let endpoints: Vec<String> = endpoints_env
-                    .split(',')
-                    .map(|s| s.trim().to_string())
-                    .filter(|s| !s.is_empty())
-                    .collect();
-                if !endpoints.is_empty() {
-                    builder = builder.endpoints(endpoints);
-                    info!("更新源已通过 REMI_UPDATER_ENDPOINTS 覆盖: {} 个端点", endpoints.len());
-                }
-            }
-            if let Ok(pubkey) = std::env::var("REMI_UPDATER_PUBKEY") {
-                if !pubkey.is_empty() {
-                    builder = builder.pub_key(pubkey);
-                    info!("更新签名公钥已通过 REMI_UPDATER_PUBKEY 设置");
-                }
-            }
-            builder.build()
+            // tauri-plugin-updater v2 默认从 tauri.conf.json 读取 endpoints/pubkey 配置
+            // 如果需要通过环境变量覆盖，可在此扩展 Builder 接口
+            tauri_plugin_updater::Builder::new().build()
         })
 
         // ========== 菜单事件处理 ==========

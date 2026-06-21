@@ -2552,7 +2552,7 @@ function SettingsRouteView() {
         <div className="space-y-2">
           <SettingsRow
             title="本地 API 网关"
-            description="启动后可通过统一本地端点访问所有已启用的模型渠道�?
+            description="启动后可通过统一本地端点访问所有已启用的模型渠道??"
             control={
               <Switch
                 checked={gatewayRunning}

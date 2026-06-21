@@ -1,28 +1,30 @@
 {
-  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "jsx": "react-jsx",
+    "target": "ES2023",
+    "useDefineForClassFields": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "types": ["vite/client", "node", "@vitest/browser/matchers"],
     "paths": {
       "~/*": ["./src/*"],
       "@remi-claw/contracts": ["./src/contracts/index.ts"],
+      "@remi-claw/contracts/*": ["./src/contracts/*"],
       "@remi-claw/shared/*": ["./src/shared/*"]
     },
-    "plugins": [
-      {
-        "name": "@effect/language-service",
-        "namespaceImportPackages": ["@effect/platform-node"],
-        "diagnosticSeverity": {
-          "importFromBarrel": "error",
-          "anyUnknownInErrorContext": "warning",
-          "instanceOfSchema": "warning",
-          "deterministicKeys": "warning"
-        }
-      }
-    ]
+    "types": ["node"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "src-tauri"],
+  "exclude": ["node_modules", "dist", "src-tauri/target"]
 }

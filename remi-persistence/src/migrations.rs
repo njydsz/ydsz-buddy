@@ -433,13 +433,13 @@ pub const MIGRATIONS: &[Migration] = &[
         name: "016_projection_threads_extras",
         sql: r#"
             ALTER TABLE projection_threads
-                ADD COLUMN IF NOT EXISTS associated_worktree_branch TEXT;
+                ADD COLUMN associated_worktree_branch TEXT;
             ALTER TABLE projection_threads
-                ADD COLUMN IF NOT EXISTS associated_worktree_ref TEXT;
+                ADD COLUMN associated_worktree_ref TEXT;
             ALTER TABLE projection_threads
-                ADD COLUMN IF NOT EXISTS shell_summary TEXT;
+                ADD COLUMN shell_summary TEXT;
             ALTER TABLE projection_threads
-                ADD COLUMN IF NOT EXISTS create_branch_flow_completed INTEGER NOT NULL DEFAULT 0;
+                ADD COLUMN create_branch_flow_completed INTEGER NOT NULL DEFAULT 0;
         "#,
     },
     // ── 017: 性能索引（对齐 RemiClaw 037 ProjectionSnapshotCapIndexes）

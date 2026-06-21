@@ -583,8 +583,8 @@ mod tests {
         assert_eq!(first.provider, second.provider);
         assert_eq!(first.supports_skill_mentions, second.supports_skill_mentions);
         assert_eq!(
-            first.supports_plugin_discovery,
-            second.supports_plugin_discovery
+            first.supports_skill_discovery,
+            second.supports_skill_discovery
         );
         // 缓存被清除后应能重新获取
         service.clear_cache().await;

@@ -42,6 +42,7 @@ use std::sync::Arc;
 
 use remi_core::models::ThreadId;
 use remi_git::GitCore;
+use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::error::{CheckpointError, CheckpointResult};

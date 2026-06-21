@@ -265,7 +265,7 @@ export function TerminalSidebar(props: {
                       }`}
                     >
                       {props.showGroupHeaders && (
-                        <span className="text-[10px] text-muted-foreground/80">��?/span>
+                        <span className="text-[10px] text-muted-foreground/80"></span>
                       )}
                       <button
                         type="button"

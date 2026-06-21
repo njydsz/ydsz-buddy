@@ -12,8 +12,8 @@
 #[cfg(test)]
 mod test {
     use crate::events::{
-        OrchestrationEvent, ProjectCreatedEvent, ProjectMetaUpdatedEvent, ProjectDeletedEvent,
-        ThreadCreatedEvent, ThreadMessageSentEvent,
+        EventMetadata, OrchestrationEvent, ProjectCreatedEvent, ProjectMetaUpdatedEvent,
+        ProjectDeletedEvent, ThreadCreatedEvent, ThreadMessageSentEvent,
     };
     use crate::commands::{
         OrchestrationCommand, ProjectCreateCommand, ThreadCreateCommand,
@@ -198,6 +198,7 @@ mod test {
             sequence: 1,
             occurred_at: Utc::now(),
             command_id: Some("cmd-1".to_string()),
+            event_metadata: EventMetadata::new(),
             project_id: Uuid::new_v4(),
             title: "Hello".to_string(),
             workspace_root: "/tmp".to_string(),

@@ -416,7 +416,7 @@ function GlobalWhatsNewSurface() {
   } = useWhatsNew();
 
   if (!currentEntry) {
-    // Silent-bootstrap or noop �?nothing to render on either surface.
+    // Silent-bootstrap or noop ??nothing to render on either surface.
     return null;
   }
 

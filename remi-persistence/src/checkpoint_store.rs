@@ -270,7 +270,12 @@ mod tests {
             turn_id: "".to_string(),
             git_ref: "".to_string(),
             description: "".to_string(),
+            status: remi_core::models::CheckpointStatus::Ready,
+            checkpoint_turn_count: 0,
+            files: vec![],
+            assistant_message_id: None,
             created_at: chrono::Utc::now(),
+            completed_at: None,
         }).unwrap_err(); // 预期失败，因为 thread 不存在
 
         // 直接通过 SQL 插入必要的依赖记录
@@ -297,7 +302,12 @@ mod tests {
             turn_id: "turn-1".to_string(),
             git_ref: "abc123".to_string(),
             description: "Test checkpoint".to_string(),
+            status: remi_core::models::CheckpointStatus::Ready,
+            checkpoint_turn_count: 1,
+            files: vec![],
+            assistant_message_id: None,
             created_at: Utc::now(),
+            completed_at: Some(Utc::now()),
         };
 
         // 保存检查点

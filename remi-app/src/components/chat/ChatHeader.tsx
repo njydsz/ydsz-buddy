@@ -83,6 +83,10 @@ interface ChatHeaderProps {
     threadId: ThreadId;
     title: string;
   }>;
+  runtimeMode: RuntimeMode;
+  interactionMode: ProviderInteractionMode;
+  onRuntimeModeChange: (mode: RuntimeMode) => void;
+  onInteractionModeChange: (mode: ProviderInteractionMode) => void;
   hideHandoffControls?: boolean;
   isGitRepo: boolean;
   openInCwd: string | null;

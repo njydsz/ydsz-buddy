@@ -482,7 +482,7 @@ function ThreadMetaChipStack({ chips }: { chips: ThreadMetaChip[] }) {
       </Tooltip>
     );
   }
-  const tooltipText = chips.map((chip) => chip.tooltip).join(" �?");
+  const tooltipText = chips.map((chip) => chip.tooltip).join(" ??");
   const chipSize = 14;
   const step = 8;
   const width = chipSize + step * (chips.length - 1);

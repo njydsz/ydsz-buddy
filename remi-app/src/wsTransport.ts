@@ -255,7 +255,8 @@ export class WsTransport {
     } catch (error) {
       console.warn("[wsTransport] getClient: initial connection failed, retrying...", error);
       if (this.disposed) throw new Error("Transport disposed");
-      // 等待一段时间后重试，给服务器更多启动时��?      await new Promise((resolve) => window.setTimeout(resolve, 3000));
+      // 等待一段时间后重试，给服务器更多启动时???
+      await new Promise((resolve) => window.setTimeout(resolve, 3000));
       return this.reconnect();
     }
   }

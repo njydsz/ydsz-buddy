@@ -4,7 +4,7 @@ import babel from "@rolldown/plugin-babel";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 import pkg from "./package.json" with { type: "json" };
-import path from "node:path";
+import * as path from "node:path";
 
 const port = Number(process.env.PORT ?? 1420);
 const sourcemapEnv = process.env.REMI_CLAW_SOURCEMAP?.trim().toLowerCase();
@@ -39,9 +39,10 @@ export default defineConfig({
     "import.meta.env.APP_VERSION": JSON.stringify(pkg.version),
   },
   resolve: {
-    tsconfigPaths: true,
     conditions: ["module", "browser", "development", "import", "default"],
     alias: [
+      // Project root alias used by source files (string form works in all Vite versions)
+      { find: "~", replacement: path.resolve(__dirname, "src") },
       // @remi-claw workspace packages → local src/shared/ files
       { find: "@remi-claw/contracts", replacement: path.resolve(__dirname, "src/contracts/index.ts") },
       { find: "@remi-claw/shared/model", replacement: path.resolve(__dirname, "src/shared/model.ts") },

@@ -26,8 +26,6 @@ use tracing::info;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
-use remi_checkpoint::CheckpointDiffQuery;
-
 /// 注册编排引擎相关 RPC 方法
 ///
 /// 将所有编排引擎方法注册到路由器，每个方法绑定对应的服务实例。
@@ -329,8 +327,8 @@ pub async fn register_orchestration_methods(
     let query = services.projection_query.clone();
     router
         .register("orchestration.importThread", move |params: Option<Value>| {
-            let engine = engine.clone();
-            let provider_service = provider_service.clone();
+            let _engine = engine.clone();
+            let _provider_service = provider_service.clone();
             let query = query.clone();
             async move {
                 let params = params.ok_or_else(|| {

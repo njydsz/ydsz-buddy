@@ -1,4 +1,4 @@
-﻿//! # 项目元数据投影模../!
+//! # 项目元数据投影模../!
 //! 本模块负责维护项目（Project）的元数据投影../!
 //! ## 模块职责
 //!
@@ -19,7 +19,7 @@
 //! - 项目创建（`ProjectCreated`.
 //! - 项目元数据更新（`ProjectMetaUpdated`.
 //! - 线程创建（`ThreadCreated`）—.?递增线程计数并建.?thread_id .
-roject_id 索引
+//! - 线程创建（`ThreadCreated`）—递增线程计数并建立 thread_id -> project_id 索引
 //! - 线程删除/归档（`ThreadDeleted` / `ThreadArchived`）—..过索引定位项目后递减计数
 //! - 任何消息事件（`ThreadMessageSent`）—..过索引更新时间..
 use std::collections::HashMap;
@@ -89,7 +89,7 @@ pub enum MetadataChange {
 ///
 /// 维护所有项目的元数据投影，支持事件驱动的增量更新.
 /// 内部通过 `thread_id -> project_id` 反向索引，支持基于线程事件定位所属项目.
-ub struct ProjectMetadataProjector {
+pub struct ProjectMetadataProjector {
     /// 投影仓库（id -> projection.
    projections: Arc<RwLock<HashMap<ProjectId, ProjectMetadataProjection>>>,
     /// 线程到项目的反向索引
@@ -203,7 +203,7 @@ impl ProjectMetadataProjector {
                 }
             }
             _ => {
-                debug!("忽略事件对元数据投影的影.?);
+                debug!("忽略事件对元数据投影的影响");
             }
         }
         Ok(())
@@ -224,7 +224,7 @@ impl ProjectMetadataProjector {
     }
 
     /// 清空所有投影（用于重建.
-   pub async fn clear(&self) {
+    pub async fn clear(&self) {
         self.projections.write().await.clear();
         self.thread_to_project.write().await.clear();
     }
@@ -234,7 +234,7 @@ impl ProjectMetadataProjector {
 mod tests {
     use super::*;
     use chrono::Utc;
-    use remi_core::events::{ProjectCreatedEvent, ProjectDeletedEvent};
+    use remi_core::events::{ProjectCreatedEvent, ProjectDeletedEvent, EventMetadata};
     use remi_core::models::{RuntimeMode, InteractionMode, EnvMode};
     use uuid::Uuid;
 
@@ -245,6 +245,7 @@ mod tests {
             sequence: 0,
             occurred_at: Utc::now(),
             command_id: None,
+            event_metadata: EventMetadata::new(),
             project_id: Uuid::new_v4(),
             title: "Hello".to_string(),
             workspace_root: "/tmp".to_string(),
@@ -264,6 +265,7 @@ mod tests {
                 sequence: 0,
                 occurred_at: Utc::now(),
                 command_id: None,
+                event_metadata: EventMetadata::new(),
                 project_id: pid,
                 title: "X".to_string(),
                 workspace_root: "/".to_string(),
@@ -295,6 +297,7 @@ mod tests {
                 sequence: 0,
                 occurred_at: Utc::now(),
                 command_id: None,
+                event_metadata: EventMetadata::new(),
                 project_id: pid,
                 title: "P".to_string(),
                 workspace_root: "/".to_string(),

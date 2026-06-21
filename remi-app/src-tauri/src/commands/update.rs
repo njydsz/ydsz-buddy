@@ -183,7 +183,7 @@ impl UpdateState {
     fn reset(&self) {
         if let Ok(mut info) = self.state.lock() {
             let checked_at = info.checked_at;
-            let disabled_reason = info.disabled_reason;
+            let disabled_reason = info.disabled_reason.clone();
             *info = UpdateInfo::default();
             info.checked_at = checked_at;
             info.disabled_reason = disabled_reason;

@@ -40,14 +40,27 @@ pub fn detect_editors() -> Vec<String> {
 
     candidates
         .iter()
-        .filter_map(|cmd| {
-            if which::which(cmd).is_ok() {
-                Some(cmd.to_string())
-            } else {
-                None
-            }
-        })
+        .filter(|cmd| is_command_available(cmd))
+        .map(|cmd| cmd.to_string())
         .collect()
+}
+
+/// 检查指定命令是否在系统 PATH 中可用
+fn is_command_available(cmd: &str) -> bool {
+    if cfg!(target_os = "windows") {
+        Command::new("where")
+            .arg(cmd)
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    } else {
+        Command::new("sh")
+            .arg("-c")
+            .arg(format!("command -v {} >/dev/null 2>&1", cmd))
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
 }
 
 /// 在指定编辑器中打开文件/目录
