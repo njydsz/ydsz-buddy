@@ -1,4 +1,4 @@
-import { type ThreadId } from "@peakcode/contracts";
+import { type ThreadId } from "@remicode/contracts";
 import { useEffect, useRef } from "react";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";

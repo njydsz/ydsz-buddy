@@ -24,7 +24,7 @@ import {
   ProviderStartOptions,
   RuntimeMode,
   ThreadId,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 import * as Schema from "effect/Schema";
 import * as Equal from "effect/Equal";
 import { DeepMutable } from "effect/Types";
@@ -33,7 +33,7 @@ import {
   normalizeModelSlug,
   resolveSelectableModel,
   resolveModelSlugForProvider,
-} from "@peakcode/shared/model";
+} from "@remicode/shared/model";
 import { useMemo } from "react";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { resolveAppModelSelection } from "./appSettings";
@@ -55,7 +55,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-export const COMPOSER_DRAFT_STORAGE_KEY = "peakcode:composer-drafts:v1";
+export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;

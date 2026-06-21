@@ -1,4 +1,4 @@
-// FILE: types.ts
+﻿// FILE: types.ts
 // Purpose: Shared web-app view models for threads, projects, terminal layout, and sidebar rows.
 // Exports: Runtime UI types consumed across store, routes, and components.
 
@@ -23,7 +23,7 @@ import type {
   ProjectKind,
   RuntimeMode,
   ThreadEnvironmentMode,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 
 export type SessionPhase = "disconnected" | "connecting" | "ready" | "running";
 export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";

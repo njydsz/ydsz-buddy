@@ -2,7 +2,7 @@
 // Purpose: Centralizes rate-limit parsing, normalization, formatting, and row derivation
 // for provider runtime events so UI components can stay presentation-only.
 
-import type { OrchestrationThread } from "@peakcode/contracts";
+import type { OrchestrationThread } from "@remicode/contracts";
 
 export interface RateLimitWindow {
   window: string;

@@ -1,9 +1,9 @@
-// FILE: shortcutsSheet.ts
+﻿// FILE: shortcutsSheet.ts
 // Purpose: Build the shortcut reference sections shown by the keyboard shortcuts sheet.
 // Layer: UI helper
 // Depends on: keybinding label resolution, project script command mapping, and platform helpers.
 
-import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@peakcode/contracts";
+import type { KeybindingCommand, ResolvedKeybindingsConfig } from "@remicode/contracts";
 import { isMacPlatform } from "./lib/utils";
 import { shortcutLabelForCommand } from "./keybindings";
 import { commandForProjectScript } from "./projectScripts";

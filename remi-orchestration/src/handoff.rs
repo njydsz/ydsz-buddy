@@ -279,7 +279,7 @@ pub fn build_prior_transcript_bootstrap_text(
     }
 
     let max_chars = max_chars.unwrap_or(HANDOFF_BOOTSTRAP_CHAR_BUDGET);
-    let intro = "This provider session may have been restarted without native conversation state. Use this prior Peak Code transcript as context for the latest user message.".to_string();
+    let intro = "This provider session may have been restarted without native conversation state. Use this prior Remi Code transcript as context for the latest user message.".to_string();
 
     build_imported_messages_bootstrap_text(thread, &prior_messages, &intro, max_chars)
 }

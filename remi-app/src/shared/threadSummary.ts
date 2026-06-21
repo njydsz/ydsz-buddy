@@ -3,7 +3,7 @@ import type {
   OrchestrationMessage,
   OrchestrationProposedPlan,
   OrchestrationThreadActivity,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 import type { ChatMessage } from "../types";
 
 export interface ThreadSummaryMetadata {

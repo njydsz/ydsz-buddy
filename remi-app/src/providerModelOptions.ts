@@ -1,4 +1,4 @@
-import { formatModelDisplayName, geminiModelOptionsFromEffortValue } from "@peakcode/shared/model";
+﻿import { formatModelDisplayName, geminiModelOptionsFromEffortValue } from "@remicode/shared/model";
 import type {
   ClaudeModelOptions,
   ClaudeModelSelection,
@@ -18,7 +18,7 @@ import type {
   PiModelSelection,
   ProviderKind,
   ProviderModelOptions,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 
 export type ProviderOptions = ProviderModelOptions[ProviderKind];
 

@@ -17,7 +17,7 @@ import {
   type WsPush,
   type WsPushChannel,
   type WsPushMessage,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from "effect";
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";
@@ -256,7 +256,7 @@ export class WsTransport {
       console.warn("[wsTransport] getClient: initial connection failed, retrying...", error);
       if (this.disposed) throw new Error("Transport disposed");
       // 等待一段时间后重试，给服务器更多启动时间
-      await new Promise((resolve) => window.setTimeout(resolve, 1000));
+      await new Promise((resolve) => window.setTimeout(resolve, 3000));
       return this.reconnect();
     }
   }

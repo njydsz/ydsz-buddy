@@ -3,8 +3,8 @@
 // Layer: Web chat presentation component
 // Exports: MessagesTimeline
 
-import { type MessageId, ThreadId, type TurnId } from "@peakcode/contracts";
-import { resolveLatestTailUserMessageEditTarget } from "@peakcode/shared/conversationEdit";
+import { type MessageId, ThreadId, type TurnId } from "@remicode/contracts";
+import { resolveLatestTailUserMessageEditTarget } from "@remicode/shared/conversationEdit";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import {
   memo,

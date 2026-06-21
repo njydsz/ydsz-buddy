@@ -22,16 +22,17 @@ import { tauriBridge } from "./lib/tauri-bridge";
 import { isTauri } from "./env";
 
 /**
- * 在挂载 React 之前预热嵌入式 WebSocket 服务器 URL。
+ * 在挂载 React 之前预热 WebSocket 服务器 URL。
  *
- * `WsTransport` / `wsHttpUrl` 等同步消费方依赖 `cachedServerWsUrl`。
- * 通过顶层 await 让 tauriBridge.getWsUrl() 在第一次渲染前完成，
- * 避免 fallback 到 `window.location` 引发 SocketOpenError。
+ * WsTransport 构造时会同步读取 tauriBridge.getCachedWsUrl()，
+ * 如果缓存未设置则 fallback 到 window.location（桌面端不可用），
+ * 导致 SocketOpenError: timeout waiting for "open"。
+ * 通过顶层 await 确保缓存已填充。
  */
 try {
   await tauriBridge.getWsUrl();
 } catch {
-  // 预热失败时 WsTransport 会回退到环境变量或 window.location。
+  // 预热失败时 WsTransport 会 fallback 到环境变量或 window.location
 }
 
 /**

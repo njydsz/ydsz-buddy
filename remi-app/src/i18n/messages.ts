@@ -385,7 +385,7 @@ export type Messages = {
     };
     groups: {
       app: string;
-      peakcode: string;
+      remicode: string;
     };
     general: {
       heading: string;
@@ -1164,9 +1164,9 @@ const en: Messages = {
     },
     update: {
       availableTitle: "Update available",
-      availableDescription: (version) => `Peak Code ${version} is available.`,
+      availableDescription: (version) => `Remi Code ${version} is available.`,
       upToDateTitle: "You're up to date",
-      upToDateDescription: (version) => `Peak Code ${version} is already the newest version.`,
+      upToDateDescription: (version) => `Remi Code ${version} is already the newest version.`,
       checkFailedTitle: "Could not check for updates",
       checkFailedDescription: "An unexpected error occurred.",
       downloadedTitle: "Update downloaded",
@@ -1361,7 +1361,7 @@ const en: Messages = {
   },
   skills: {
     title: "Skills",
-    subtitle: "Give Peak Code new superpowers.",
+    subtitle: "Give Remi Code new superpowers.",
     newSkill: "New skill",
     browseSkillSh: "Browse skill.sh",
     searchPlaceholder: "Search skills",
@@ -1369,7 +1369,7 @@ const en: Messages = {
     localCount: "{count} installed",
     localEmptyTitle: "No local skills found",
     localEmptyDescription:
-      "Peak Code scanned ~/.claude/skills, ~/.codex/skills, and ~/.agents/skills. Drop a skill folder containing a SKILL.md into one of those directories, then refresh.",
+      "Remi Code scanned ~/.claude/skills, ~/.codex/skills, and ~/.agents/skills. Drop a skill folder containing a SKILL.md into one of those directories, then refresh.",
     localEmptySearchTitle: "No local skills match this search",
     localEmptySearchDescription: "Try a different keyword or clear the search.",
     providerHeading: "Provided by model",
@@ -1416,7 +1416,7 @@ const en: Messages = {
       },
       worktrees: {
         label: "Worktrees",
-        description: "Review and clean up the worktrees created by Peak Code.",
+        description: "Review and clean up the worktrees created by Remi Code.",
       },
       archived: {
         label: "Archived",
@@ -1437,7 +1437,7 @@ const en: Messages = {
     },
     groups: {
       app: "App",
-      peakcode: "Peak Code",
+      remicode: "Remi Code",
     },
     general: {
       heading: "General",
@@ -1446,7 +1446,7 @@ const en: Messages = {
       sidebarOrganization: "Sidebar organization",
       language: {
         title: "Language",
-        description: "Choose the language used in the Peak Code interface.",
+        description: "Choose the language used in the Remi Code interface.",
         english: "English",
         chinese: "中文",
       },
@@ -1492,7 +1492,7 @@ const en: Messages = {
       timeAndReadingSection: "Time and reading",
       theme: {
         title: "Theme",
-        description: "Choose how Peak Code looks across the app.",
+        description: "Choose how Remi Code looks across the app.",
         system: "System",
         light: "Light",
         dark: "Dark",
@@ -1617,7 +1617,7 @@ const en: Messages = {
     },
     worktrees: {
       heading: "Worktrees",
-      description: "Review and clean up the worktrees created by Peak Code.",
+      description: "Review and clean up the worktrees created by Remi Code.",
       managedSection: "Managed worktrees",
       loading: "Loading managed worktrees...",
       loadFailedFallback: "Unable to load worktrees.",
@@ -1713,7 +1713,7 @@ const en: Messages = {
       },
       updates: {
         title: "Provider updates",
-        description: "Update installed provider tools that Peak Code can safely update.",
+        description: "Update installed provider tools that Remi Code can safely update.",
         statusNoUpdates: "No provider updates detected",
         statusAvailableOne: "1 update available",
         statusAvailableMany: (count) => `${count} updates available`,
@@ -1724,7 +1724,7 @@ const en: Messages = {
         commandLabel: "Command: ",
         runCommandTitle: (command) => `Run ${command}`,
         versionAdvisoryNoCommand:
-          "A newer version is available, but Peak Code could not identify a safe one-click update command for this installation.",
+          "A newer version is available, but Remi Code could not identify a safe one-click update command for this installation.",
       },
       tools: {
         title: "Installed CLIs",
@@ -1900,7 +1900,7 @@ const en: Messages = {
   },
   whatsNew: {
     title: "What's new",
-    popoutTitle: "What's new in Peak Code",
+    popoutTitle: "What's new in Remi Code",
     open: "Open",
     dismiss: "Dismiss",
     gotIt: "Got it",
@@ -2245,9 +2245,9 @@ const zh: Messages = {
     },
     update: {
       availableTitle: "有新版本可用",
-      availableDescription: (version) => `Peak Code ${version} 已可更新。`,
+      availableDescription: (version) => `Remi Code ${version} 已可更新。`,
       upToDateTitle: "已是最新版本",
-      upToDateDescription: (version) => `Peak Code ${version} 已是最新版本。`,
+      upToDateDescription: (version) => `Remi Code ${version} 已是最新版本。`,
       checkFailedTitle: "无法检查更新",
       checkFailedDescription: "发生意外错误。",
       downloadedTitle: "更新已下载",
@@ -2441,7 +2441,7 @@ const zh: Messages = {
   },
   skills: {
     title: "技能",
-    subtitle: "赋予 Peak Code 更强大的能力。",
+    subtitle: "赋予 Remi Code 更强大的能力。",
     newSkill: "新技能",
     browseSkillSh: "浏览 skill.sh",
     searchPlaceholder: "搜索技能",
@@ -2449,7 +2449,7 @@ const zh: Messages = {
     localCount: "{count} 个已安装",
     localEmptyTitle: "未发现本机技能",
     localEmptyDescription:
-      "Peak Code 已扫描 ~/.claude/skills、~/.codex/skills 与 ~/.agents/skills。把一个含 SKILL.md 的技能目录放进任一目录后刷新即可。",
+      "Remi Code 已扫描 ~/.claude/skills、~/.codex/skills 与 ~/.agents/skills。把一个含 SKILL.md 的技能目录放进任一目录后刷新即可。",
     localEmptySearchTitle: "没有匹配的本机技能",
     localEmptySearchDescription: "尝试其他关键词，或清空搜索。",
     providerHeading: "由模型提供",
@@ -2496,7 +2496,7 @@ const zh: Messages = {
       },
       worktrees: {
         label: "工作树",
-        description: "查看并清理由 Peak Code 创建的工作树。",
+        description: "查看并清理由 Remi Code 创建的工作树。",
       },
       archived: {
         label: "已归档",
@@ -2517,7 +2517,7 @@ const zh: Messages = {
     },
     groups: {
       app: "应用",
-      peakcode: "Peak Code",
+      remicode: "Remi Code",
     },
     general: {
       heading: "通用",
@@ -2526,7 +2526,7 @@ const zh: Messages = {
       sidebarOrganization: "侧边栏组织",
       language: {
         title: "语言",
-        description: "选择 Peak Code 界面所使用的语言。",
+        description: "选择 Remi Code 界面所使用的语言。",
         english: "English",
         chinese: "中文",
       },
@@ -2572,7 +2572,7 @@ const zh: Messages = {
       timeAndReadingSection: "时间与阅读",
       theme: {
         title: "主题",
-        description: "选择 Peak Code 在整个应用中的外观。",
+        description: "选择 Remi Code 在整个应用中的外观。",
         system: "跟随系统",
         light: "浅色",
         dark: "深色",
@@ -2690,7 +2690,7 @@ const zh: Messages = {
     },
     worktrees: {
       heading: "工作树",
-      description: "查看并清理由 Peak Code 创建的工作树。",
+      description: "查看并清理由 Remi Code 创建的工作树。",
       managedSection: "托管的工作树",
       loading: "正在加载托管的工作树…",
       loadFailedFallback: "无法加载工作树。",
@@ -2784,7 +2784,7 @@ const zh: Messages = {
       },
       updates: {
         title: "提供方更新",
-        description: "更新 Peak Code 可以安全更新的已安装提供方工具。",
+        description: "更新 Remi Code 可以安全更新的已安装提供方工具。",
         statusNoUpdates: "未检测到提供方更新",
         statusAvailableOne: "有 1 项可用更新",
         statusAvailableMany: (count) => `有 ${count} 项可用更新`,
@@ -2795,7 +2795,7 @@ const zh: Messages = {
         commandLabel: "命令：",
         runCommandTitle: (command) => `运行 ${command}`,
         versionAdvisoryNoCommand:
-          "检测到新版本，但 Peak Code 未能为该安装识别出安全的一键更新命令。",
+          "检测到新版本，但 Remi Code 未能为该安装识别出安全的一键更新命令。",
       },
       tools: {
         title: "已安装的 CLI",
@@ -2961,7 +2961,7 @@ const zh: Messages = {
   },
   whatsNew: {
     title: "新增内容",
-    popoutTitle: "Peak Code 更新内容",
+    popoutTitle: "Remi Code 更新内容",
     open: "打开",
     dismiss: "忽略",
     gotIt: "知道了",

@@ -4,7 +4,7 @@
 
 ### 1.1 整体进度评估
 
-| 模块类别 | PeakCode (原系统) | RemiCode (新系统) | 迁移完成度 | 状态 |
+| 模块类别 | RemiCode (原系统) | RemiCode (新系统) | 迁移完成度 | 状态 |
 |---------|------------------|------------------|-----------|------|
 | **后端核心架构** | TypeScript/Effect | Rust/Tokio | 90% | ✅ 基本完成 |
 | **Provider 系统** | 8个适配器 | 8个适配器 | 85% | ⚠️ 需完善 |
@@ -276,23 +276,23 @@
 
 **待完善项**：
 1. **事件日志记录**
-   - PeakCode 支持 native 和 canonical 两种事件流日志
+   - RemiCode 支持 native 和 canonical 两种事件流日志
    - RemiCode 需确认是否完整实现 EventNdjsonLogger
    
 2. **Provider 发现服务**
-   - PeakCode 有 ProviderDiscoveryService
+   - RemiCode 有 ProviderDiscoveryService
    - RemiCode 需确认是否完整实现自动发现逻辑
 
 3. **Provider 会话目录管理**
-   - PeakCode 有 ProviderSessionDirectory
+   - RemiCode 有 ProviderSessionDirectory
    - RemiCode 需确认会话目录清理逻辑
 
 4. **错误分类**
-   - PeakCode 有 codex_error_classification
+   - RemiCode 有 codex_error_classification
    - RemiCode 需确认各适配器的错误处理是否完整
 
 5. **图像处理**
-   - PeakCode 有 codex_generated_images
+   - RemiCode 有 codex_generated_images
    - RemiCode 需确认图像生成和处理流程
 
 #### 3.1.2 ACP 协议完善
@@ -300,19 +300,19 @@
 
 **待完善项**：
 1. **Cursor ACP CLI 探测**
-   - PeakCode 有 CursorAcpCliProbe
+   - RemiCode 有 CursorAcpCliProbe
    - RemiCode 需确认 CLI 探测逻辑
 
 2. **Cursor ACP 扩展**
-   - PeakCode 有 CursorAcpExtension
+   - RemiCode 有 CursorAcpExtension
    - RemiCode 需确认扩展机制
 
 3. **Gemini ACP 探测**
-   - PeakCode 有 geminiAcpProbe
+   - RemiCode 有 geminiAcpProbe
    - RemiCode 需确认探测逻辑
 
 4. **ACP 适配器支持检测**
-   - PeakCode 有 AcpAdapterSupport
+   - RemiCode 有 AcpAdapterSupport
    - RemiCode 需确认支持检测逻辑
 
 ### 3.2 Git 集成完善（优先级：高）
@@ -322,20 +322,20 @@
 
 **待完善项**：
 1. **Provider 文本生成**
-   - PeakCode 有 ProviderTextGeneration
+   - RemiCode 有 ProviderTextGeneration
    - 支持从 Provider 生成提交信息、PR 描述等
    - RemiCode 需确认是否实现
 
 2. **Codex 文本生成**
-   - PeakCode 有 CodexTextGeneration
+   - RemiCode 有 CodexTextGeneration
    - RemiCode 需确认特定适配器的文本生成
 
 3. **Cursor 文本生成**
-   - PeakCode 有 CursorTextGeneration
+   - RemiCode 有 CursorTextGeneration
    - RemiCode 需确认特定适配器的文本生成
 
 4. **OpenCode 文本生成**
-   - PeakCode 有 OpenCodeTextGeneration
+   - RemiCode 有 OpenCodeTextGeneration
    - RemiCode 需确认特定适配器的文本生成
 
 #### 3.2.2 Git 状态缓存
@@ -343,11 +343,11 @@
 
 **待完善项**：
 1. **状态缓存机制**
-   - PeakCode 有 gitStatusCache
+   - RemiCode 有 gitStatusCache
    - RemiCode 需确认缓存策略和失效机制
 
 2. **仓库检测**
-   - PeakCode 有 isRepo
+   - RemiCode 有 isRepo
    - RemiCode 需确认仓库检测逻辑
 
 ### 3.3 遥测系统完善（优先级：中）
@@ -369,7 +369,7 @@
    - 确认是否支持按 Provider/模型分布统计
 
 3. **Identify 功能**
-   - PeakCode 有 Identify.ts
+   - RemiCode 有 Identify.ts
    - RemiCode 需确认用户身份识别功能
 
 #### 3.3.2 指标采集完善
@@ -394,15 +394,15 @@
 
 **待完善项**：
 1. **REST API 端点**
-   - PeakCode 有 HTTP 端点（如 projectFaviconRoute）
+   - RemiCode 有 HTTP 端点（如 projectFaviconRoute）
    - RemiCode 需确认是否需要 HTTP REST API
    
 2. **静态文件服务**
-   - PeakCode 支持静态 Web 资源服务
+   - RemiCode 支持静态 Web 资源服务
    - RemiCode 需确认是否需要（桌面应用可能不需要）
 
 3. **本地图像路由**
-   - PeakCode 有 localImageRoute
+   - RemiCode 有 localImageRoute
    - RemiCode 需确认本地图像访问逻辑
 
 #### 3.4.2 服务器生命周期
@@ -410,15 +410,15 @@
 
 **待完善项**：
 1. **服务器生命周期事件**
-   - PeakCode 有 serverLifecycleEvents
+   - RemiCode 有 serverLifecycleEvents
    - RemiCode 需确认启动/关闭事件处理
 
 2. **运行时启动逻辑**
-   - PeakCode 有 serverRuntimeStartup
+   - RemiCode 有 serverRuntimeStartup
    - RemiCode 需确认启动顺序和依赖注入
 
 3. **运行时状态管理**
-   - PeakCode 有 serverRuntimeState
+   - RemiCode 有 serverRuntimeState
    - RemiCode 需确认状态管理逻辑
 
 #### 3.4.3 线程保留任务
@@ -426,7 +426,7 @@
 
 **待完善项**：
 1. **线程保留作业**
-   - PeakCode 有 startThreadRetentionJob
+   - RemiCode 有 startThreadRetentionJob
    - 定期清理过期线程
    - RemiCode 需确认是否实现
 
@@ -437,12 +437,12 @@
 
 **待完善项**：
 1. **条目分块处理**
-   - PeakCode 有 workspaceEntries.chunking
+   - RemiCode 有 workspaceEntries.chunking
    - 大目录的分块读取
    - RemiCode 需确认是否实现
 
 2. **工作空间条目管理**
-   - PeakCode 有 WorkspaceEntries
+   - RemiCode 有 WorkspaceEntries
    - RemiCode 需确认条目管理逻辑
 
 #### 3.5.2 工作树管理
@@ -450,7 +450,7 @@
 
 **待完善项**：
 1. **托管工作树**
-   - PeakCode 有 managedWorktree
+   - RemiCode 有 managedWorktree
    - RemiCode 需确认工作树生命周期管理
 
 ### 3.6 前端完善（优先级：中）
@@ -474,19 +474,19 @@
 #### 3.6.2 功能完善
 **待完善项**：
 1. **Provider 使用快照**
-   - PeakCode 有 providerUsageSnapshot
+   - RemiCode 有 providerUsageSnapshot
    - RemiCode 需确认前端展示逻辑
 
 2. **速率限制展示**
-   - PeakCode 有 RateLimitsPanel
+   - RemiCode 有 RateLimitsPanel
    - RemiCode 需确认速率限制展示
 
 3. **插件系统**
-   - PeakCode 有 PluginsView、PluginLibrary
+   - RemiCode 有 PluginsView、PluginLibrary
    - RemiCode 需确认插件管理界面
 
 4. **技能系统**
-   - PeakCode 有 SkillsView
+   - RemiCode 有 SkillsView
    - RemiCode 需确认技能管理界面
 
 ### 3.7 附件和媒体处理（优先级：中）
@@ -496,11 +496,11 @@
 
 **待完善项**：
 1. **附件存储管理**
-   - PeakCode 有 attachmentStore
+   - RemiCode 有 attachmentStore
    - RemiCode 需确认附件存储逻辑
 
 2. **附件路径处理**
-   - PeakCode 有 attachmentPaths
+   - RemiCode 有 attachmentPaths
    - RemiCode 需确认路径生成逻辑
 
 #### 3.7.2 图像处理
@@ -508,15 +508,15 @@
 
 **待完善项**：
 1. **本地图像文件**
-   - PeakCode 有 localImageFiles
+   - RemiCode 有 localImageFiles
    - RemiCode 需确认本地图像访问
 
 2. **图像 MIME 检测**
-   - PeakCode 有 imageMime
+   - RemiCode 有 imageMime
    - RemiCode 需确认 MIME 类型检测
 
 3. **本地图像 URL**
-   - PeakCode 有 localImageUrls
+   - RemiCode 有 localImageUrls
    - RemiCode 需确认 URL 生成逻辑
 
 #### 3.7.3 语音转写
@@ -524,7 +524,7 @@
 
 **待完善项**：
 1. **语音转写服务**
-   - PeakCode 有 voiceTranscription
+   - RemiCode 有 voiceTranscription
    - RemiCode 需确认后端转写逻辑
 
 ### 3.8 配置和兼容性（优先级：低）
@@ -534,7 +534,7 @@
 
 **待完善项**：
 1. **遗留主目录迁移**
-   - PeakCode 有 homeMigration
+   - RemiCode 有 homeMigration
    - RemiCode 需确认是否需要迁移旧版本数据
 
 #### 3.8.2 模型选择兼容性
@@ -542,11 +542,11 @@
 
 **待完善项**：
 1. **模型选择兼容性处理**
-   - PeakCode 有 modelSelectionCompatibility
+   - RemiCode 有 modelSelectionCompatibility
    - RemiCode 需确认旧模型选择的兼容处理
 
 2. **规范化模型选择**
-   - PeakCode 有 CanonicalizeModelSelections 迁移
+   - RemiCode 有 CanonicalizeModelSelections 迁移
    - RemiCode 需确认数据库迁移逻辑
 
 #### 3.8.3 按键绑定
@@ -554,7 +554,7 @@
 
 **待完善项**：
 1. **按键绑定服务**
-   - PeakCode 有 keybindings
+   - RemiCode 有 keybindings
    - RemiCode 需确认按键绑定配置和处理
 
 ### 3.9 项目功能完善（优先级：低）
@@ -564,11 +564,11 @@
 
 **待完善项**：
 1. **项目图标解析器**
-   - PeakCode 有 ProjectFaviconResolver
+   - RemiCode 有 ProjectFaviconResolver
    - RemiCode 需确认图标解析逻辑
 
 2. **项目图标路由**
-   - PeakCode 有 projectFaviconRoute
+   - RemiCode 有 projectFaviconRoute
    - RemiCode 需确认图标访问路由
 
 #### 3.9.2 项目脚本
@@ -576,11 +576,11 @@
 
 **待完善项**：
 1. **项目脚本执行**
-   - PeakCode 有 projectScripts
+   - RemiCode 有 projectScripts
    - RemiCode 需确认脚本执行逻辑
 
 2. **项目脚本控制**
-   - PeakCode 有 ProjectScriptsControl
+   - RemiCode 有 ProjectScriptsControl
    - RemiCode 需确认控制界面
 
 ### 3.10 环境配置（优先级：低）
@@ -590,11 +590,11 @@
 
 **待完善项**：
 1. **服务器环境服务**
-   - PeakCode 有 ServerEnvironment
+   - RemiCode 有 ServerEnvironment
    - RemiCode 需确认环境配置管理
 
 2. **环境标签**
-   - PeakCode 有 ServerEnvironmentLabel
+   - RemiCode 有 ServerEnvironmentLabel
    - RemiCode 需确认环境标识逻辑
 
 ---

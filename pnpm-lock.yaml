@@ -177,6 +177,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.0
         version: 6.0.2(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.7)(@babel/runtime@7.29.7)(rolldown@1.0.3)(vite@8.0.16(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)))(babel-plugin-react-compiler@19.0.0-beta-ebf51a3-20250411)(vite@8.0.16(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0))
+      '@vitest/browser':
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.21)(typescript@5.9.3)(vite@8.0.16(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0))(vitest@2.1.9)
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e552027-20250112
         version: 19.0.0-beta-ebf51a3-20250411

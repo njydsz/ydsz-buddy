@@ -9,10 +9,10 @@ import {
   type ServerProviderStatus,
   type ThreadId,
   DEFAULT_GIT_TEXT_GENERATION_MODEL,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getModelOptions, normalizeModelSlug } from "@peakcode/shared/model";
+import { getModelOptions, normalizeModelSlug } from "@remicode/shared/model";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,
@@ -173,7 +173,7 @@ const MODEL_CHANNELS: ReadonlyArray<ModelChannel> = [
   },
 ];
 
-const MODEL_CHANNELS_STORAGE_KEY = "peakcode:enabled-model-channels:v1";
+const MODEL_CHANNELS_STORAGE_KEY = "remicode:enabled-model-channels:v1";
 
 function readEnabledModelChannels(): ReadonlyArray<ModelChannelId> {
   try {
@@ -1229,7 +1229,7 @@ function SettingsRouteView() {
       return;
     }
 
-    const notification = new Notification(title, { body, tag: "peakcode:test-notification" });
+    const notification = new Notification(title, { body, tag: "remicode:test-notification" });
     notification.addEventListener("click", () => {
       window.focus();
     });

@@ -1,8 +1,8 @@
-// FILE: workspaceStore.ts
+﻿// FILE: workspaceStore.ts
 // Purpose: Persist terminal-only workspace pages plus their stable synthetic terminal scopes.
 // Layer: Workspace view-model state
 
-import { type ThreadId } from "@peakcode/contracts";
+import { type ThreadId } from "@remicode/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -31,7 +31,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-const WORKSPACE_STORE_STORAGE_KEY = "peakcode:workspace-pages:v2";
+const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
   if (typeof crypto.randomUUID === "function") {

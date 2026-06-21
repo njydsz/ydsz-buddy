@@ -1,11 +1,11 @@
-// FILE: localSkillsReactQuery.ts
+﻿// FILE: localSkillsReactQuery.ts
 // Purpose: TanStack Query bindings for the `skills.listLocal` WebSocket RPC. Used by the
 //          Skills view to show the user's home-directory skills independent of any
 //          provider session.
 // Layer: Web React Query binding
 // Exports: localSkillsQueryKey, localSkillsQueryOptions
 
-import type { ListLocalUserSkillsResult } from "@peakcode/contracts";
+import type { ListLocalUserSkillsResult } from "@remicode/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import { ensureNativeApi } from "~/nativeApi";
 

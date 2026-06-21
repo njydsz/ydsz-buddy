@@ -1,9 +1,9 @@
-// FILE: taskCompletion.tsx
+﻿// FILE: taskCompletion.tsx
 // Purpose: Bridges thread completion and attention-needed events to in-app toasts and OS notifications.
 // Layer: Notification runtime
 // Exports: TaskCompletionNotifications and browser permission helpers
 
-import { ThreadId } from "@peakcode/contracts";
+import { ThreadId } from "@remicode/contracts";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import { toastManager } from "../components/ui/toast";

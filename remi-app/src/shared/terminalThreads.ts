@@ -1,4 +1,4 @@
-// FILE: terminalThreads.ts
+﻿// FILE: terminalThreads.ts
 // Purpose: Shared terminal identity helpers for naming, provider attribution, and run state.
 // Layer: Shared terminal metadata utilities
 // Exports: command parsing plus resolved terminal presentation metadata for web/server consumers.
@@ -9,8 +9,8 @@ export type TerminalIconKey = "terminal" | "openai" | "claude";
 export type TerminalActivityState = "running" | "attention" | "review";
 export type TerminalVisualState = "idle" | TerminalActivityState;
 export type TerminalAgentHookEventType = "Start" | "Stop" | "PermissionRequest";
-export const PEAKCODE_TERMINAL_CLI_KIND_ENV_KEY = "PEAKCODE_TERMINAL_CLI_KIND";
-export const PEAKCODE_TERMINAL_HOOK_OSC_PREFIX = "633;PEAKCODE_AGENT_EVENT=";
+export const Remicode_TERMINAL_CLI_KIND_ENV_KEY = "Remicode_TERMINAL_CLI_KIND";
+export const Remicode_TERMINAL_HOOK_OSC_PREFIX = "633;Remicode_AGENT_EVENT=";
 export const MANAGED_TERMINAL_COMMAND_NAME_BY_CLI_KIND: Record<TerminalCliKind, string> = {
   codex: "codex",
   claude: "claude",

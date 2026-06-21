@@ -132,24 +132,36 @@ export const tauriBridge = {
       console.log("[tauri-bridge] getWsUrl: returning cached", cachedServerWsUrl);
       return cachedServerWsUrl;
     }
-    try {
-      console.log("[tauri-bridge] getWsUrl: invoking get_server_ws_url...");
-      const url = await invoke<string>("get_server_ws_url");
-      console.log("[tauri-bridge] getWsUrl: invoke returned", url);
-      if (url && url.length > 0) {
-        cachedServerWsUrl = url;
-        return url;
+
+    // 尝试通过 Tauri invoke 获取服务器地址，带重试机制
+    let lastError: unknown = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`[tauri-bridge] getWsUrl: attempt ${attempt}/3, invoking get_server_ws_url...`);
+        const url = await invoke<string>("get_server_ws_url");
+        console.log("[tauri-bridge] getWsUrl: invoke returned", url);
+        if (url && url.length > 0) {
+          cachedServerWsUrl = url;
+          return url;
+        }
+      } catch (error) {
+        lastError = error;
+        console.warn(`[tauri-bridge] getWsUrl: attempt ${attempt} failed`, error);
+        if (attempt < 3) {
+          await new Promise((resolve) => window.setTimeout(resolve, 1000 * attempt));
+        }
       }
-    } catch (error) {
-      console.warn("[tauri-bridge] getWsUrl: invoke failed", error);
     }
+
+    // invoke 全部失败，尝试环境变量
     const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
     console.log("[tauri-bridge] getWsUrl: envUrl =", envUrl);
     if (envUrl && envUrl.length > 0) {
       cachedServerWsUrl = envUrl;
       return envUrl;
     }
-    console.warn("[tauri-bridge] getWsUrl: no URL available, returning null");
+
+    console.warn("[tauri-bridge] getWsUrl: no URL available after all attempts, lastError =", lastError);
     return null;
   },
 

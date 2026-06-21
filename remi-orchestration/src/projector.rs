@@ -272,7 +272,7 @@ impl Projector {
     /// 应用单个事件到投影仓库
     ///
     /// 根据事件类型执行相应的投影操作，更新投影仓库中的项目和线程数据。
-    /// 对齐 PeakCode projector.ts 的 projectEvent 函数逻辑。
+    /// 对齐 RemiCode projector.ts 的 projectEvent 函数逻辑。
     ///
     /// # 参数
     ///

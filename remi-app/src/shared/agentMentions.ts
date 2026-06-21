@@ -1,9 +1,9 @@
-import {
+﻿import {
   resolveAgentAlias,
   type ClaudeSubagentAliasDefinition,
   type ProviderKind,
   type ResolvedAgentAlias,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 
 export interface ParsedAgentMentionInvocation {
   readonly alias: string;

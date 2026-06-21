@@ -1,4 +1,4 @@
-import { type ThreadId } from "@peakcode/contracts";
+﻿import { type ThreadId } from "@remicode/contracts";
 import { create } from "zustand";
 
 interface TemporaryThreadStoreState {

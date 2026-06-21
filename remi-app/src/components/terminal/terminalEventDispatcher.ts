@@ -38,7 +38,7 @@ class TerminalEventDispatcher {
     const api = readNativeApi();
     if (!api) return;
 
-    this.unsubscribeSharedListener = api.terminal.onEvent((event) => {
+    this.unsubscribeSharedListener = api.terminal.onEvent((event: TerminalEvent) => {
       const listeners = this.listenersByKey.get(terminalEventKey(event.threadId, event.terminalId));
       if (!listeners) return;
       for (const listener of listeners) {

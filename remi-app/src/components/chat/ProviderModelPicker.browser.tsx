@@ -1,5 +1,5 @@
 import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "~/contracts";
-import { page } from "vitest/browser";
+import { page } from "@vitest/browser/context";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 

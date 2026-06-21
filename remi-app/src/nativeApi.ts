@@ -1,4 +1,4 @@
-import type { NativeApi } from "@peakcode/contracts";
+﻿import type { NativeApi } from "@remicode/contracts";
 
 import { createWsNativeApi } from "./wsNativeApi";
 

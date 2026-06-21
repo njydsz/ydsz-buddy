@@ -31,7 +31,7 @@ export default function ShortcutsDialog(props: {
   projectScripts: ReadonlyArray<ProjectScript>;
   platform: string;
   context: ShortcutSheetContext;
-  isDesktop: boolean;
+  isElectron: boolean;
 }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,9 +59,9 @@ export default function ShortcutsDialog(props: {
         projectScripts: props.projectScripts,
         platform: props.platform,
         context: props.context,
-        isDesktop: props.isDesktop,
+        isElectron: props.isElectron,
       }),
-    [props.keybindings, props.projectScripts, props.platform, props.context, props.isDesktop],
+    [props.keybindings, props.projectScripts, props.platform, props.context, props.isElectron],
   );
 
   const filteredSections = useMemo(() => filterSections(sections, query), [sections, query]);

@@ -211,7 +211,7 @@ impl RuntimeReceiptBus {
 
     /// 获取收据流（返回接收端）
     ///
-    /// 这是 `subscribe` 的别名，用于保持与 PeakCode 的 API 一致性。
+    /// 这是 `subscribe` 的别名，用于保持与 RemiCode 的 API 一致性。
     ///
     /// # 返回值
     ///

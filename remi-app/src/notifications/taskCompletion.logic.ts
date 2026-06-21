@@ -1,4 +1,4 @@
-// FILE: taskCompletion.logic.ts
+﻿// FILE: taskCompletion.logic.ts
 // Purpose: Detects new thread lifecycle notifications and builds alert copy.
 // Layer: Notification logic
 // Exports: lifecycle detection helpers and notification copy helpers
@@ -7,7 +7,7 @@ import {
   defaultTerminalTitleForCliKind,
   type TerminalCliKind,
   type TerminalVisualState,
-} from "@peakcode/shared/terminalThreads";
+} from "@remicode/shared/terminalThreads";
 import type { Thread, ThreadSession } from "../types";
 import {
   derivePendingApprovals,

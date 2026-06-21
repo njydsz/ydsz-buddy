@@ -1,15 +1,18 @@
-{
+﻿{
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "baseUrl": ".",
+    "types": ["vite/client", "node", "@vitest/browser/matchers"],
     "paths": {
       "~/*": ["./src/*"],
       "@remi-code/contracts": ["./src/contracts/index.ts"],
-      "@peakcode/contracts": ["./src/contracts/index.ts"],
-      "@peakcode/shared/*": ["./src/shared/*"]
+      "@remicode/contracts": ["./src/contracts/index.ts"],
+      "@remicode/contracts": ["./src/contracts/index.ts"],
+      "@remicode/shared/*": ["./src/shared/*"],
+      "@remicode/shared/*": ["./src/shared/*"]
     },
     "plugins": [
       {

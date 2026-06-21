@@ -2,7 +2,7 @@
 // Purpose: Reuse one hidden home-scoped chat project as the backing container for chat rows.
 // Layer: Web orchestration helper
 
-import { type ProjectId } from "@peakcode/contracts";
+import { type ProjectId } from "@remicode/contracts";
 import type { Project } from "../types";
 import { readNativeApi } from "../nativeApi";
 import { useStore } from "../store";

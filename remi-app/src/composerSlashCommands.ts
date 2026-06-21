@@ -1,4 +1,4 @@
-import type { GitBranch, ProviderKind } from "@peakcode/contracts";
+import type { GitBranch, ProviderKind } from "@remicode/contracts";
 
 export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "clear",
@@ -376,7 +376,7 @@ export function getAvailableComposerSlashCommands(input: {
         ]
       : [
           // Claude owns most slash-command UX natively; sidechat remains app-level because it
-          // creates a Peak Code split/context clone before the provider sees the first turn.
+          // creates a Remi Code split/context clone before the provider sees the first turn.
           ...(input.canOfferSideCommand ? (["side"] as const) : []),
         ];
   return availableCommands.filter((command) => !collidingNativeCommandNames.has(command));

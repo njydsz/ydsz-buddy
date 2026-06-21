@@ -768,7 +768,7 @@ Remi Code 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 ### B. 相关链接
 
-- [原项目参考](https://github.com/PeakCode-AI/PeakCode)
+- [原项目参考](https://github.com/RemiCode-AI/RemiCode)
 - [Tauri 官方文档](https://tauri.app/)
 - [Rust 官方文档](https://www.rust-lang.org/)
 - [Effect-TS 文档](https://effect.website/)

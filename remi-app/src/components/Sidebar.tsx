@@ -5322,6 +5322,8 @@ export default function Sidebar() {
     </div>
   );
 
+  const sidebarBrand = <div className="flex min-w-0 px-4 pt-0 pb-2">{brandWordmark}</div>;
+
   const wordmark = (
     <div className="flex w-full items-center gap-1.5">
       <SidebarTrigger className="shrink-0 md:hidden" />
@@ -5340,7 +5342,6 @@ export default function Sidebar() {
               appSettings.sidebarSide === "left" && isMacPlatform(navigator.platform) && "pl-[90px]",
             )}
           >
-            {brandWordmark}
             {titlebarControls}
             <div className="min-w-0 flex-1" />
             <WindowCaptionButtons />
@@ -5455,6 +5456,7 @@ export default function Sidebar() {
           </SidebarGroup>
         ) : (
           <>
+            {isDesktop ? sidebarBrand : null}
             <SidebarSegmentedPicker
               activeView={isOnWorkspace ? "workspace" : "threads"}
               onSelectView={handleSidebarViewChange}

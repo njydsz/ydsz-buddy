@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { OrchestrationShellSnapshot, ThreadId } from "@peakcode/contracts";
-import { resolveWorktreeHandoffIntent } from "@peakcode/shared/worktreeHandoff";
+import type { OrchestrationShellSnapshot, ThreadId } from "@remicode/contracts";
+import { resolveWorktreeHandoffIntent } from "@remicode/shared/worktreeHandoff";
 import { useCallback, useState } from "react";
 import { gitHandoffThreadMutationOptions } from "~/lib/gitReactQuery";
 import { buildSuggestedWorktreeName } from "../components/ChatView.logic";

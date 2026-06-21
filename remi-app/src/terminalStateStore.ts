@@ -1,12 +1,12 @@
-/**
+﻿/**
  * Single Zustand store for terminal UI state keyed by threadId.
  *
  * Terminal transition helpers are intentionally private to keep the public
  * API constrained to store actions/selectors.
  */
 
-import { type TerminalActivityState, type TerminalCliKind } from "@peakcode/shared/terminalThreads";
-import type { ThreadId } from "@peakcode/contracts";
+import { type TerminalActivityState, type TerminalCliKind } from "@remicode/shared/terminalThreads";
+import type { ThreadId } from "@remicode/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -53,7 +53,7 @@ export interface ThreadTerminalState {
   activeTerminalGroupId: string;
 }
 
-const TERMINAL_STATE_STORAGE_KEY = "peakcode:terminal-state:v1";
+const TERMINAL_STATE_STORAGE_KEY = "remicode:terminal-state:v1";
 
 function normalizeTerminalIds(terminalIds: string[]): string[] {
   const ids = [...new Set(terminalIds.map((id) => id.trim()).filter((id) => id.length > 0))];

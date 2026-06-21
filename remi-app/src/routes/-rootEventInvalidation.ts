@@ -1,10 +1,10 @@
-// FILE: -rootEventInvalidation.ts
+﻿// FILE: -rootEventInvalidation.ts
 // Purpose: Classifies streamed orchestration events that should invalidate shared query caches.
 // Layer: Root route utility
 // Exports: Event invalidation predicates for provider/project and git query caches.
 
-import type { OrchestrationEvent, ThreadId } from "@peakcode/contracts";
-import { resolveThreadWorkspaceCwd } from "@peakcode/shared/threadEnvironment";
+import type { OrchestrationEvent, ThreadId } from "@remicode/contracts";
+import { resolveThreadWorkspaceCwd } from "@remicode/shared/threadEnvironment";
 
 import type { AppState } from "../store";
 import { getThreadFromState } from "../threadDerivation";

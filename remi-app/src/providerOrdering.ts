@@ -1,9 +1,9 @@
-// FILE: providerOrdering.ts
+﻿// FILE: providerOrdering.ts
 // Purpose: Keeps provider picker ordering stable across settings, search, and menus.
 // Layer: Web settings utility
 // Exports: default order, normalization, and order comparison helpers.
 
-import type { ProviderKind } from "@peakcode/contracts";
+import type { ProviderKind } from "@remicode/contracts";
 
 export const DEFAULT_PROVIDER_ORDER: readonly ProviderKind[] = [
   "codex",

@@ -471,7 +471,7 @@ function ChatRouteGlobalShortcuts() {
         terminalOpen,
         terminalWorkspaceOpen,
       }}
-      isDesktop={isDesktop}
+      isElectron={isDesktop}
     />
   );
 }

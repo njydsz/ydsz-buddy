@@ -5,7 +5,7 @@
 
 import "../../index.css";
 
-import { page } from "vitest/browser";
+import { page } from "@vitest/browser/context";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 

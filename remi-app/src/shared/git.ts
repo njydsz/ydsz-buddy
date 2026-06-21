@@ -2,7 +2,7 @@
  * Sanitize an arbitrary string into a valid, lowercase git branch fragment.
  * Strips quotes, collapses separators, limits to 64 chars.
  */
-export const WORKTREE_BRANCH_PREFIX = "peakcode";
+export const WORKTREE_BRANCH_PREFIX = "remicode";
 const TEMP_WORKTREE_BRANCH_PATTERN = new RegExp(`^${WORKTREE_BRANCH_PREFIX}\\/[0-9a-f]{8}$`);
 
 export function sanitizeBranchFragment(raw: string): string {
@@ -36,7 +36,7 @@ export function sanitizeFeatureBranchName(raw: string): string {
 }
 
 const AUTO_FEATURE_BRANCH_FALLBACK = "feature/update";
-const PEAKCODE_BRANCH_FALLBACK = "update";
+const REMICODE_BRANCH_FALLBACK = "update";
 
 /**
  * Resolve a unique `feature/…` branch name that doesn't collide with
@@ -64,18 +64,18 @@ export function resolveAutoFeatureBranchName(
   return `${resolvedBase}-${suffix}`;
 }
 
-export function buildPeakcodeBranchName(preferredBranch?: string | null): string {
-  const normalizedExisting = preferredBranch?.trim().replace(/^(codex|peakcode)\//i, "") ?? "";
+export function buildRemicodeBranchName(preferredBranch?: string | null): string {
+  const normalizedExisting = preferredBranch?.trim().replace(/^(codex|remicode)\//i, "") ?? "";
   return `${WORKTREE_BRANCH_PREFIX}/${sanitizeBranchFragment(
-    normalizedExisting || PEAKCODE_BRANCH_FALLBACK,
+    normalizedExisting || REMICODE_BRANCH_FALLBACK,
   )}`;
 }
 
-export function resolveUniquePeakcodeBranchName(
+export function resolveUniqueRemicodeBranchName(
   existingBranchNames: readonly string[],
   preferredBranch?: string | null,
 ): string {
-  const resolvedBase = buildPeakcodeBranchName(preferredBranch);
+  const resolvedBase = buildRemicodeBranchName(preferredBranch);
   const existingNames = new Set(existingBranchNames.map((branch) => branch.toLowerCase()));
 
   if (!existingNames.has(resolvedBase)) {
@@ -89,9 +89,6 @@ export function resolveUniquePeakcodeBranchName(
 
   return `${resolvedBase}-${suffix}`;
 }
-
-/** @deprecated Alias for remi-code compatibility */
-export const resolveUniqueRemicodeBranchName = resolveUniquePeakcodeBranchName;
 
 export function isTemporaryWorktreeBranch(branch: string): boolean {
   return TEMP_WORKTREE_BRANCH_PATTERN.test(branch.trim().toLowerCase());

@@ -1,4 +1,4 @@
-// FILE: store.ts
+﻿// FILE: store.ts
 // Purpose: Normalizes orchestration snapshots into stable client state for the web app.
 // Exports: Zustand store plus pure state transition helpers shared by runtime bootstrap flows.
 
@@ -14,10 +14,10 @@ import {
   type OrchestrationShellStreamEvent,
   type OrchestrationSessionStatus,
   type TurnId,
-} from "@peakcode/contracts";
-import { resolveThreadBranchRegressionGuard } from "@peakcode/shared/git";
-import { normalizeModelSlug } from "@peakcode/shared/model";
-import { normalizeWorkspaceRootForComparison } from "@peakcode/shared/threadWorkspace";
+} from "@remicode/contracts";
+import { resolveThreadBranchRegressionGuard } from "@remicode/shared/git";
+import { normalizeModelSlug } from "@remicode/shared/model";
+import { normalizeWorkspaceRootForComparison } from "@remicode/shared/threadWorkspace";
 import { create } from "zustand";
 import {
   type ChatAttachment,
@@ -32,7 +32,7 @@ import {
 } from "./types";
 import { Debouncer } from "@tanstack/react-pacer";
 import { hasLiveTurnTailWork } from "./session-logic";
-import { deriveThreadSummaryMetadata } from "@peakcode/shared/threadSummary";
+import { deriveThreadSummaryMetadata } from "@remicode/shared/threadSummary";
 import { getThreadFromState, getThreadsFromState } from "./threadDerivation";
 import { toAttachmentPreviewUrl } from "./lib/wsHttpUrl";
 
@@ -76,7 +76,7 @@ type ThreadUserInputResponseRequestedEvent = Extract<
   { type: "thread.user-input-response-requested" }
 >;
 
-const PERSISTED_STATE_KEY = "peakcode:renderer-state:v8";
+const PERSISTED_STATE_KEY = "remicode:renderer-state:v8";
 const LEGACY_PERSISTED_STATE_KEYS = [
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",

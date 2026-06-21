@@ -13,8 +13,8 @@ import {
   SquarePenIcon,
   SunIcon,
 } from "~/lib/icons";
-import { type FilesystemBrowseResult, type ProviderKind } from "@peakcode/contracts";
-import { isGenericChatThreadTitle } from "@peakcode/shared/chatThreads";
+import { type FilesystemBrowseResult, type ProviderKind } from "@remicode/contracts";
+import { isGenericChatThreadTitle } from "@remicode/shared/chatThreads";
 import { BsChat } from "react-icons/bs";
 import { HiOutlineFolderOpen } from "react-icons/hi2";
 import { LuArrowDownToLine, LuArrowLeft, LuCornerLeftUp, LuFolderPlus } from "react-icons/lu";

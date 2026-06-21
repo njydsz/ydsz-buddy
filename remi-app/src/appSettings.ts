@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Option, Schema } from "effect";
 import {
@@ -9,13 +9,13 @@ import {
   type ProviderStartOptions,
   type ServerSettings,
   type ServerSettingsPatch,
-} from "@peakcode/contracts";
+} from "@remicode/contracts";
 import {
   getDefaultModel,
   getModelOptions,
   normalizeModelSlug,
   resolveSelectableModel,
-} from "@peakcode/shared/model";
+} from "@remicode/shared/model";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { EnvMode } from "./components/BranchToolbar.logic";
 import { formatProviderModelOptionName, type ProviderModelOption } from "./providerModelOptions";
@@ -28,8 +28,8 @@ import { ensureNativeApi } from "./nativeApi";
 import { serverQueryKeys, serverSettingsQueryOptions } from "./lib/serverReactQuery";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "./i18n";
 
-const APP_SETTINGS_STORAGE_KEY = "peakcode:app-settings:v1";
-const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "peakcode:server-settings-migrated:v1";
+const APP_SETTINGS_STORAGE_KEY = "remicode:app-settings:v1";
+const SERVER_SETTINGS_MIGRATION_STORAGE_KEY = "remicode:server-settings-migrated:v1";
 const MAX_CUSTOM_MODEL_COUNT = 32;
 export const MAX_CUSTOM_MODEL_LENGTH = 256;
 export const MIN_CHAT_FONT_SIZE_PX = 11;

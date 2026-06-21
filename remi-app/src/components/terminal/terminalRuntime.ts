@@ -22,6 +22,7 @@ import { Terminal } from "@xterm/xterm";
 
 import { readNativeApi } from "~/nativeApi";
 import { suppressQueryResponses } from "~/lib/suppressQueryResponses";
+import type { TerminalSessionSnapshot } from "~/contracts";
 
 import { openInPreferredEditor } from "../../editorPreferences";
 import { isTerminalClearShortcut, terminalNavigationShortcutData } from "../../keybindings";
@@ -826,7 +827,7 @@ export function createRuntimeEntry(config: TerminalRuntimeConfig): TerminalRunti
               if (!api) return;
 
               if (match.kind === "url") {
-                void api.shell.openExternal(match.text).catch((error) => {
+                void api.shell.openExternal(match.text).catch((error: unknown) => {
                   writeSystemMessage(
                     terminal,
                     error instanceof Error ? error.message : "Unable to open link",
@@ -836,7 +837,7 @@ export function createRuntimeEntry(config: TerminalRuntimeConfig): TerminalRunti
               }
 
               const target = resolvePathLinkTarget(match.text, entry.cwd);
-              void openInPreferredEditor(api, target).catch((error) => {
+              void openInPreferredEditor(api, target).catch((error: unknown) => {
                 writeSystemMessage(
                   terminal,
                   error instanceof Error ? error.message : "Unable to open path",
@@ -864,7 +865,7 @@ export function createRuntimeEntry(config: TerminalRuntimeConfig): TerminalRunti
       if (!api) return;
       void api.terminal
         .write({ threadId: entry.threadId, terminalId: entry.terminalId, data })
-        .catch((error) =>
+        .catch((error: unknown) =>
           writeSystemMessage(
             terminal,
             error instanceof Error ? error.message : "Terminal write failed",
@@ -1004,7 +1005,7 @@ function openTerminal(entry: TerminalRuntimeEntry): void {
           }
           void api.terminal
             .open(openInput)
-            .then((nextSnapshot) => {
+            .then((nextSnapshot: TerminalSessionSnapshot) => {
               if (
                 entry.disposed ||
                 entry.outputEventVersion !== outputEventVersionAtOpen ||
@@ -1025,7 +1026,7 @@ function openTerminal(entry: TerminalRuntimeEntry): void {
         });
       }
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       if (entry.disposed) return;
       entry.opened = false;
       writeSystemMessage(

@@ -18,7 +18,7 @@ import {
 import { RouterProvider, createMemoryHistory } from "@tanstack/react-router";
 import { HttpResponse, http, ws } from "msw";
 import { setupWorker } from "msw/browser";
-import { page } from "vitest/browser";
+import { page } from "@vitest/browser/context";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
@@ -38,6 +38,7 @@ import { useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";
 import { useTerminalStateStore } from "../terminalStateStore";
+import { type Json } from "effect/Schema";
 import { estimateTimelineMessageHeight } from "./timelineHeight";
 
 const THREAD_ID = "thread-browser-test" as ThreadId;
@@ -592,7 +593,7 @@ function createSnapshotWithActiveInlinePlan(): OrchestrationReadModel {
                       status: "completed",
                     },
                   ],
-                },
+                } as Json,
               },
               {
                 id: EventId.makeUnsafe("activity-inline-background-task"),
@@ -604,7 +605,7 @@ function createSnapshotWithActiveInlinePlan(): OrchestrationReadModel {
                 payload: {
                   taskId: "task-inline-background-agent",
                   taskType: "subagent",
-                },
+                } as Json,
               },
             ],
             session: thread.session

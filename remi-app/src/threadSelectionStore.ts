@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Zustand store for sidebar thread multi-selection state.
  *
  * Supports Cmd/Ctrl+Click (toggle individual), Shift+Click (range select),
  * and bulk actions on the selected set.
  */
 
-import type { ThreadId } from "@peakcode/contracts";
+import type { ThreadId } from "@remicode/contracts";
 import { create } from "zustand";
 
 export interface ThreadSelectionState {

@@ -7,8 +7,8 @@ import {
   type OrchestrationThread,
   type ServerConfig,
   type ServerProviderStatus,
-} from "@peakcode/contracts";
-import { defaultTerminalTitleForCliKind } from "@peakcode/shared/terminalThreads";
+} from "@remicode/contracts";
+import { defaultTerminalTitleForCliKind } from "@remicode/shared/terminalThreads";
 import {
   Outlet,
   createRootRouteWithContext,

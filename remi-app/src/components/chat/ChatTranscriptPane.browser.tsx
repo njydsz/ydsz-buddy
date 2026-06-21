@@ -2,7 +2,7 @@ import "../../index.css";
 
 import { MessageId } from "~/contracts";
 import { type LegendListRef } from "@legendapp/list/react";
-import { page } from "vitest/browser";
+import { page } from "@vitest/browser/context";
 import { Profiler, useCallback, useRef, useState, type ProfilerOnRenderCallback } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
