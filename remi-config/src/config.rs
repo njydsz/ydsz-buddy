@@ -340,6 +340,31 @@ impl ServerConfig {
         })
     }
 
+    /// 使用新的基础目录重新派生所有路径
+    ///
+    /// 适用于在默认配置基础上覆盖数据根目录的场景（如桌面端使用用户主目录）。
+    ///
+    /// # 参数
+    ///
+    /// - `base_dir` — 新的基础目录路径
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Self)` — 路径重新派生后的配置
+    /// - `Err(ConfigError::PathError)` — 路径派生失败
+    pub fn with_base_dir(mut self, base_dir: PathBuf) -> ConfigResult<Self> {
+        let paths = Self::derive_paths(&base_dir)?;
+        self.base_dir = base_dir;
+        self.state_dir = paths.state_dir;
+        self.db_path = paths.db_path;
+        self.secrets_dir = paths.secrets_dir;
+        self.logs_dir = paths.logs_dir;
+        self.attachments_dir = paths.attachments_dir;
+        self.worktrees_dir = paths.worktrees_dir;
+        self.settings_path = paths.settings_path;
+        Ok(self)
+    }
+
     /// 校验配置的合法性
     ///
     /// 在服务器启动前调用，确保关键配置项满足业务约束。

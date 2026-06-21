@@ -326,8 +326,9 @@ pub async fn bootstrap_embedded(config: &ServerConfig) -> Result<BootstrapResult
 pub async fn start_server(
     addr: SocketAddr,
     rpc_router: Arc<RpcRouter>,
+    config: Arc<ServerConfig>,
 ) -> Result<()> {
-    let server = WebSocketServer::new(addr, rpc_router);
+    let server = WebSocketServer::new(addr, rpc_router, config);
     let (actual_addr, serve) = server.start().await?;
     info!("WebSocket 服务器已启动，监听地址: {}", actual_addr);
     serve.await.map_err(anyhow::Error::from)

@@ -175,6 +175,7 @@ pub async fn register_server_methods(
                     "mode": config.mode,
                     "port": config.port,
                     "host": config.host,
+                    "homeDir": config.base_dir,
                     "baseDir": config.base_dir,
                     "stateDir": config.state_dir,
                     "dbPath": config.db_path,

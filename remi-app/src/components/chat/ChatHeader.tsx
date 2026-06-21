@@ -26,6 +26,7 @@ import { Badge } from "../ui/badge";
 import { Menu, MenuItem, MenuPopup, MenuSeparator, MenuTrigger } from "../ui/menu";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { SidebarHeaderNavigationControls } from "../SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "../WindowCaptionButtons";
 import ProjectScriptsControl, { type NewProjectScriptInput } from "../ProjectScriptsControl";
 import { Toggle } from "../ui/toggle";
 import { useSidebar } from "../ui/sidebar";
@@ -532,6 +533,7 @@ export const ChatHeader = memo(function ChatHeader({
                   : "Toggle diff panel"}
           </TooltipPopup>
         </Tooltip>
+        <WindowCaptionButtons />
       </div>
     </div>
   );

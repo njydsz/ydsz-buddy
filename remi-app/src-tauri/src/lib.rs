@@ -144,13 +144,17 @@ pub fn run() {
 
     // 启动嵌入式 remi-server
     info!("启动嵌入式 remi-server...");
-    let config = ServerConfig::default();
+    let home_dir = dirs::home_dir().expect("Failed to get home directory");
+    let config = ServerConfig::default()
+        .with_base_dir(home_dir.join(".remi-code"))
+        .expect("Failed to derive server paths");
     let bootstrap_result = runtime.block_on(bootstrap_embedded(&config))
         .expect("Failed to bootstrap embedded server");
 
     // 在后台启动 WebSocket 服务器，并获取实际分配的监听地址
     let rpc_router = bootstrap_result.rpc_router.clone();
-    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router);
+    let server_config = std::sync::Arc::new(config.clone());
+    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router, server_config);
     let (server_addr, serve) = runtime.block_on(server.start())
         .expect("Failed to start embedded WebSocket server");
     info!("嵌入式服务器地址: {}", server_addr);

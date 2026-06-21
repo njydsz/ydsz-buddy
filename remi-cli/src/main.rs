@@ -70,7 +70,12 @@ async fn main() -> Result<()> {
 
     // 4. 启动 WebSocket 服务器
     // 此调用会阻塞当前线程，持续监听直到服务器被关闭
-    start_server(result.server_addr, result.rpc_router).await?;
+    start_server(
+        result.server_addr,
+        result.rpc_router,
+        std::sync::Arc::new(config.clone()),
+    )
+    .await?;
 
     Ok(())
 }

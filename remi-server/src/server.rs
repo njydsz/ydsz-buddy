@@ -31,12 +31,14 @@ use axum::{
     Router,
 };
 use futures_util::{SinkExt, StreamExt};
+use remi_config::ServerConfig;
+use serde_json::json;
 use tokio::sync::mpsc;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 use crate::error::{ServerError, ServerResult};
-use crate::rpc::RpcRouter;
+use crate::rpc::{JsonRpcNotification, RpcRouter};
 use crate::websocket::WebSocketManager;
 
 /// 服务器共享状态
@@ -48,6 +50,8 @@ pub struct ServerState {
     pub ws_manager: Arc<WebSocketManager>,
     /// RPC 路由器，负责 JSON-RPC 请求的方法查找和分发
     pub rpc_router: Arc<RpcRouter>,
+    /// 服务器配置，用于构造连接初始化推送（如 server.welcome）
+    pub config: Arc<ServerConfig>,
 }
 
 /// WebSocket 服务器
@@ -68,12 +72,14 @@ impl WebSocketServer {
     ///
     /// - `addr`: 服务器监听地址
     /// - `rpc_router`: RPC 路由器实例，用于处理客户端请求
-    pub fn new(addr: SocketAddr, rpc_router: Arc<RpcRouter>) -> Self {
+    /// - `config`: 服务器配置实例，用于向客户端暴露 homeDir 等运行时信息
+    pub fn new(addr: SocketAddr, rpc_router: Arc<RpcRouter>, config: Arc<ServerConfig>) -> Self {
         let ws_manager = Arc::new(WebSocketManager::new(rpc_router.clone()));
 
         let state = Arc::new(ServerState {
             ws_manager,
             rpc_router,
+            config,
         });
 
         Self { state, addr }
@@ -165,6 +171,26 @@ async fn handle_socket(socket: WebSocket, state: Arc<ServerState>) {
         .ws_manager
         .register_connection(connection_id.clone(), msg_tx)
         .await;
+
+    // 连接建立后立即推送 server.welcome，使前端能尽早拿到 homeDir 等初始化信息
+    let welcome_payload = json!({
+        "cwd": std::env::current_dir()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_else(|_| state.config.base_dir.to_string_lossy().to_string()),
+        "homeDir": state.config.base_dir,
+        "projectName": state.config.base_dir.file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(|| "Remi Code".to_string()),
+    });
+    let welcome_notification = JsonRpcNotification {
+        jsonrpc: "2.0".to_string(),
+        method: "server.welcome".to_string(),
+        params: Some(welcome_payload),
+    };
+    if let Err(e) = connection.send_notification(welcome_notification).await {
+        warn!("发送 server.welcome 失败: {}", e);
+    }
 
     // 发送消息任务
     let send_task = tokio::spawn(async move {

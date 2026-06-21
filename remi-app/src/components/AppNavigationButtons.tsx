@@ -6,7 +6,7 @@
 import { goBackInAppHistory, goForwardInAppHistory, useAppNavigationState } from "~/appNavigation";
 import { isDesktop } from "~/env";
 import { cn } from "~/lib/utils";
-import { IoIosArrowRoundBack, IoIosArrowRoundForward } from "react-icons/io";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
@@ -43,7 +43,7 @@ export function AppNavigationButtons({ className }: { className?: string }) {
             />
           }
         >
-          <IoIosArrowRoundBack className="size-6" />
+          <FiChevronLeft className="size-5" />
         </TooltipTrigger>
         <TooltipPopup side="bottom">Back ({backShortcutLabel})</TooltipPopup>
       </Tooltip>
@@ -61,7 +61,7 @@ export function AppNavigationButtons({ className }: { className?: string }) {
             />
           }
         >
-          <IoIosArrowRoundForward className="size-6" />
+          <FiChevronRight className="size-5" />
         </TooltipTrigger>
         <TooltipPopup side="bottom">Forward ({forwardShortcutLabel})</TooltipPopup>
       </Tooltip>

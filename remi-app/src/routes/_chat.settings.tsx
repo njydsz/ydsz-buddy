@@ -46,6 +46,7 @@ import {
 } from "../appSettings";
 import { APP_VERSION } from "../branding";
 import { SidebarHeaderNavigationControls } from "../components/SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "../components/WindowCaptionButtons";
 import { useDesktopTopBarTrafficLightGutterClassName } from "../hooks/useDesktopTopBarGutter";
 import {
   ClaudeAI,
@@ -3671,6 +3672,7 @@ function SettingsRouteView() {
                 <RotateCcwIcon className="size-3.5" />
                 {messages.settings.restoreDefaults}
               </Button>
+              <WindowCaptionButtons />
             </div>
           </div>
         ) : (

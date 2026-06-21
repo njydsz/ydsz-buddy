@@ -57,11 +57,6 @@ export function SidebarCommandGrid({ pathname }: { readonly pathname: string }) 
 
   return (
     <div className="px-1.5 pt-1 pb-1.5">
-      <div className="mb-1 flex items-center px-2">
-        <span className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">
-          {messages.sidebar.commandsHeading}
-        </span>
-      </div>
       <div className="grid grid-cols-3 gap-1.5">
         <CommandCard
           icon={BookIcon}

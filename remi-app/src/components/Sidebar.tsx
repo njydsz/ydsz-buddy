@@ -5459,33 +5459,23 @@ export default function Sidebar() {
               activeView={isOnWorkspace ? "workspace" : "threads"}
               onSelectView={handleSidebarViewChange}
             />
-            {/* Primary sidebar actions stay limited to features we currently ship. */}
+            {/* Primary sidebar actions: always show New chat + Search in both Work and Code modes. */}
             <SidebarGroup className="px-1.5 pt-1 pb-1.5">
               <SidebarMenu className="gap-0.5">
-                {isOnWorkspace ? (
-                  <SidebarPrimaryAction
-                    icon={TerminalIcon}
-                    label="New workspace"
-                    onClick={handleCreateWorkspace}
-                  />
-                ) : (
-                  <>
-                    <SidebarPrimaryAction
-                      icon={SquarePenIcon}
-                      label={messages.sidebar.newChat}
-                      onClick={handlePrimaryNewThread}
-                    />
-                    <SidebarPrimaryAction
-                      icon={SearchIcon}
-                      label={messages.sidebar.search}
-                      active={searchPaletteOpen}
-                      onClick={() => {
-                        setSearchPaletteOpen(true);
-                      }}
-                      shortcutLabel={searchShortcutLabel}
-                    />
-                  </>
-                )}
+                <SidebarPrimaryAction
+                  icon={SquarePenIcon}
+                  label={messages.sidebar.newChat}
+                  onClick={handlePrimaryNewThread}
+                />
+                <SidebarPrimaryAction
+                  icon={SearchIcon}
+                  label={messages.sidebar.search}
+                  active={searchPaletteOpen}
+                  onClick={() => {
+                    setSearchPaletteOpen(true);
+                  }}
+                  shortcutLabel={searchShortcutLabel}
+                />
               </SidebarMenu>
             </SidebarGroup>
 
