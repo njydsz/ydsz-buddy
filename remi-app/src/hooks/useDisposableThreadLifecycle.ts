@@ -1,3 +1,30 @@
+/**
+ * @file 临时线程生命周期 Hook
+ *
+ * 本 Hook 管理临时线程（disposable thread）的自动清理生命周期：
+ *
+ * - **路由切换清理**：用户切换路由时清理未使用的临时线程
+ * - **会话结束清理**：窗口关闭或会话结束时清理
+ * - **draft 关联**：与 ComposerDraftStore 联动，清理孤立 draft
+ *
+ * ## 核心导出
+ *
+ * - `useDisposableThreadLifecycle`：注册临时线程清理 effect
+ * - `useDisposableThreadGuard`：在路由级别添加清理守卫
+ *
+ * ## 使用场景
+ *
+ * - 路由切换时清理未发送的临时线程
+ * - 应用退出前清理
+ * - 用户主动放弃会话时清理
+ *
+ * ## 注意事项
+ *
+ * - 仅清理已发送第一条消息的临时线程
+ * - 草稿线程由 ComposerDraftStore 单独管理
+ * - 清理操作幂等，可重复调用
+ */
+
 import type { ThreadId } from "@remi-claw/contracts";
 import { useEffect, useRef } from "react";
 import { useComposerDraftStore } from "../composerDraftStore";

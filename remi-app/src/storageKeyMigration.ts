@@ -1,17 +1,12 @@
 /**
- * @file 存储键迁移
- *
- * 将旧版浏览器 localStorage 键名迁移到 Remi Claw 命名空间。
- * 在应用启动时（Store 水合之前）自动执行迁移，
- * 确保旧版数据不会丢失。仅当目标键不存在时才执行迁移。
- */
+ * @file 存储键迁�? *
+ * 将旧版浏览器 localStorage 键名迁移�?Remi Claw 命名空间�? * 在应用启动时（Store 水合之前）自动执行迁移，
+ * 确保旧版数据不会丢失。仅当目标键不存在时才执行迁移�? */
 
 /**
- * 存储键迁移映射表，每个元素为 [旧键名, 新键名]
+ * 存储键迁移映射表，每个元素为 [旧键�? 新键名]
  *
- * 品牌升级 Remi Code → Remi Claw 后，所有 `remicode:` 前缀的 localStorage 键
- * 都需要迁移到 `remi-claw:` 前缀。此映射表集中维护迁移关系。
- */
+ * 品牌升级 Remi Code �?Remi Claw 后，所�?`remicode:` 前缀�?localStorage �? * 都需要迁移到 `remi-claw:` 前缀。此映射表集中维护迁移关系�? */
 const STORAGE_KEY_MIGRATIONS: readonly (readonly [string, string])[] = [
   ["remicode:app-settings:v1", "remi-claw:app-settings:v1"],
   ["remicode:server-settings-migrated:v1", "remi-claw:server-settings-migrated:v1"],
@@ -35,18 +30,13 @@ const STORAGE_KEY_MIGRATIONS: readonly (readonly [string, string])[] = [
   ["remicode:dismissed-provider-health-banners", "remi-claw:dismissed-provider-health-banners"],
   ["remicode:renderer-state:v8", "remi-claw:renderer-state:v8"],
   ["remicode:panel-resize-overlay-sync", "remi-claw:panel-resize-overlay-sync"],
-  // WebView partition（由 webkit 内部使用）
-  ["persist:remi-claw-browser", "persist:remi-claw-browser"],
-  // Lexical 编辑器 namespace
+  // WebView partition（由 webkit 内部使用�?  ["persist:remi-claw-browser", "persist:remi-claw-browser"],
+  // Lexical 编辑�?namespace
   ["remi-claw-composer-editor", "remi-claw-composer-editor"],
 ];
 
 /**
- * 执行 localStorage 键名迁移。
- *
- * 遍历迁移映射表，将旧键的值复制到新键（仅当新键不存在时）。
- * 使用 globalThis.localStorage 以兼容浏览器和 Node 测试环境。
- */
+ * 执行 localStorage 键名迁移�? * 遍历迁移映射表，将旧键的值复制到新键（仅当新键不存在时）�? * 使用 globalThis.localStorage 以兼容浏览器�?Node 测试环境�? */
 export function migrateRemiClawLocalStorageKeys(): void {
   // Prefer globalThis.localStorage so this works identically in browsers (where
   // globalThis === window) and in node-based unit tests that stub the global.
@@ -76,9 +66,7 @@ export function migrateRemiClawLocalStorageKeys(): void {
 }
 
 /**
- * @deprecated 重命名以保持与品牌一致，请使用 {@link migrateRemiClawLocalStorageKeys}。
- * 保留旧导出名以避免破坏可能引用该符号的旧插件/扩展。
- */
+ * @deprecated 重命名以保持与品牌一致，请使�?{@link migrateRemiClawLocalStorageKeys}�? * 保留旧导出名以避免破坏可能引用该符号的旧插件/扩展�? */
 export const migrateRemiCodeLocalStorageKeys = migrateRemiClawLocalStorageKeys;
 
 /** 在应用启动时、Store 水合之前自动执行迁移 */

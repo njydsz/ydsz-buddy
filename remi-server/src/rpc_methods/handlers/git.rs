@@ -33,6 +33,7 @@ use remi_git::{GitAction, GitHubCli, GitRunStackedActionInput, MergeMethod};
 use serde_json::Value;
 use tracing::info;
 
+use crate::push_channels::channels;
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::registration::ServiceContainer;
 
@@ -1046,6 +1047,32 @@ pub async fn register_git_methods(
                 git_core.stash_and_checkout(cwd, branch).await?;
                 broadcaster.refresh_status(cwd).await?;
                 Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // git.subscribeActionProgress - 订阅 Git 操作进度事件
+    // 参数: { actionId?: string }
+    // 返回: { subscribed: string, status: string }
+    let push_manager = services.push_channel_manager.clone();
+    router
+        .register("git.subscribeActionProgress", move |params: Option<Value>| {
+            let push_manager = push_manager.clone();
+            async move {
+                // 订阅 Git 状态通道以接收操作进度
+                let _receiver = push_manager.subscribe(channels::GIT_STATUS).await;
+
+                // 如果提供了 actionId，记录日志用于关联
+                if let Some(params) = params {
+                    if let Some(action_id) = params.get("actionId").and_then(|v| v.as_str()) {
+                        info!("订阅 Git 操作进度: actionId={}", action_id);
+                    }
+                }
+
+                Ok(serde_json::json!({
+                    "subscribed": channels::GIT_STATUS,
+                    "status": "active"
+                }))
             }
         })
         .await;

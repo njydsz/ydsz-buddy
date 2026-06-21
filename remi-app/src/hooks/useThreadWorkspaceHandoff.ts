@@ -1,3 +1,30 @@
+/**
+ * @file 线程工作区切换 Hook
+ *
+ * 本 Hook 处理线程在工作区（worktree）之间的切换流程：
+ *
+ * - **意图解析**：根据用户输入解析 worktree 切换意图
+ * - **Git 操作**：调用 `gitHandoffThread` mutation 执行切换
+ * - **缓存失效**：切换后失效相关查询
+ * - **错误处理**：冲突时显示提示
+ *
+ * ## 核心导出
+ *
+ * - `useThreadWorkspaceHandoff`：返回切换处理器
+ *
+ * ## 使用场景
+ *
+ * - 线程详情页的"切换 worktree"按钮
+ * - Composer 中的 worktree 选择
+ * - 跨分支转移任务上下文
+ *
+ * ## 注意事项
+ *
+ * - 切换过程中线程会暂停
+ * - 切换后线程 ID 不变
+ * - 失败时线程保持原状态
+ */
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OrchestrationShellSnapshot, ThreadId } from "@remi-claw/contracts";
 import { resolveWorktreeHandoffIntent } from "@remi-claw/shared/worktreeHandoff";

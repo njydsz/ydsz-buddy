@@ -231,12 +231,70 @@ export const ProviderStartOptions = Schema.Struct({
 });
 export type ProviderStartOptions = typeof ProviderStartOptions.Type;
 
-export const RuntimeMode = Schema.Literals(["approval-required", "full-access"]);
+// Remi Claw 0.2.0+: RuntimeMode expanded to Work/Code dimensions.
+// 旧版字符串 "approval-required" / "full-access" 通过 Schema 的 filter
+// 兜底为 "code"，与后端 RuntimeMode::from_legacy 行为保持一致。
+const RUNTIME_MODE_VALUES = ["work", "code"] as const;
+export const RuntimeMode = Schema.Literals(RUNTIME_MODE_VALUES).pipe(
+  Schema.filter((value) => RUNTIME_MODE_VALUES.includes(value as (typeof RUNTIME_MODE_VALUES)[number]), {
+    message: () => `runtimeMode must be one of: ${RUNTIME_MODE_VALUES.join(", ")}`,
+  }),
+);
 export type RuntimeMode = typeof RuntimeMode.Type;
-export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";
-export const ProviderInteractionMode = Schema.Literals(["default", "plan"]);
+export const DEFAULT_RUNTIME_MODE: RuntimeMode = "code";
+// Remi Claw 0.2.0+: InteractionMode expanded to Chat/Plan/Agent/Review/Task.
+// 旧版 "default" / "plan" 通过 Schema 的 filter 兜底为 "agent"。
+const PROVIDER_INTERACTION_MODE_VALUES = ["chat", "plan", "agent", "review", "task"] as const;
+export const ProviderInteractionMode = Schema.Literals(PROVIDER_INTERACTION_MODE_VALUES).pipe(
+  Schema.filter(
+    (value) =>
+      PROVIDER_INTERACTION_MODE_VALUES.includes(
+        value as (typeof PROVIDER_INTERACTION_MODE_VALUES)[number],
+      ),
+    {
+      message: () =>
+        `interactionMode must be one of: ${PROVIDER_INTERACTION_MODE_VALUES.join(", ")}`,
+    },
+  ),
+);
 export type ProviderInteractionMode = typeof ProviderInteractionMode.Type;
-export const DEFAULT_PROVIDER_INTERACTION_MODE: ProviderInteractionMode = "default";
+export const DEFAULT_PROVIDER_INTERACTION_MODE: ProviderInteractionMode = "agent";
+
+/**
+ * 将历史/外部输入的 runtimeMode 字符串归一化为新枚举值，未知值兜底为 "code"。
+ */
+export function normalizeRuntimeModeValue(value: string | null | undefined): RuntimeMode {
+  if (!value) return DEFAULT_RUNTIME_MODE;
+  const lower = value.toLowerCase();
+  if (lower === "work") return "work";
+  if (lower === "code") return "code";
+  // 旧版 enum 字符串
+  if (lower === "agent" || lower === "ask" || lower === "plan") return "code";
+  if (lower === "approval-required" || lower === "full-access") return "code";
+  return DEFAULT_RUNTIME_MODE;
+}
+
+/**
+ * 将历史/外部输入的 interactionMode 字符串归一化为新枚举值，未知值兜底为 "agent"。
+ */
+export function normalizeProviderInteractionModeValue(
+  value: string | null | undefined,
+): ProviderInteractionMode {
+  if (!value) return DEFAULT_PROVIDER_INTERACTION_MODE;
+  const lower = value.toLowerCase();
+  if (
+    lower === "chat" ||
+    lower === "plan" ||
+    lower === "agent" ||
+    lower === "review" ||
+    lower === "task"
+  ) {
+    return lower as ProviderInteractionMode;
+  }
+  // 旧版 "default" -> "agent"
+  if (lower === "default") return "agent";
+  return DEFAULT_PROVIDER_INTERACTION_MODE;
+}
 const SidechatSourceThreadId = Schema.optional(Schema.NullOr(ThreadId)).pipe(
   Schema.withDecodingDefault(() => null),
 );

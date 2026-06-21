@@ -131,7 +131,7 @@ export interface QueuedComposerPlanFollowUp {
   createdAt: string;
   previewText: string;
   text: string;
-  interactionMode: "default" | "plan";
+  interactionMode: "chat" | "plan" | "agent" | "review" | "task";
   selectedProvider: ProviderKind;
   selectedModel: string | null;
   selectedPromptEffort: string | null;
@@ -1445,7 +1445,7 @@ function normalizePersistedQueuedTurns(
       ? candidate.providerOptionsForDispatch
       : undefined;
     const runtimeMode =
-      candidate.runtimeMode === "approval-required" || candidate.runtimeMode === "full-access"
+      candidate.runtimeMode === "work" || candidate.runtimeMode === "code"
         ? candidate.runtimeMode
         : null;
     if (
@@ -1608,13 +1608,16 @@ function normalizePersistedDraftThreads(
             ? createdAt
             : new Date().toISOString(),
         runtimeMode:
-          candidateDraftThread.runtimeMode === "approval-required" ||
-          candidateDraftThread.runtimeMode === "full-access"
+          candidateDraftThread.runtimeMode === "work" ||
+          candidateDraftThread.runtimeMode === "code"
             ? candidateDraftThread.runtimeMode
             : DEFAULT_RUNTIME_MODE,
         interactionMode:
           candidateDraftThread.interactionMode === "plan" ||
-          candidateDraftThread.interactionMode === "default"
+          candidateDraftThread.interactionMode === "agent" ||
+          candidateDraftThread.interactionMode === "chat" ||
+          candidateDraftThread.interactionMode === "review" ||
+          candidateDraftThread.interactionMode === "task"
             ? candidateDraftThread.interactionMode
             : DEFAULT_INTERACTION_MODE,
         entryPoint: normalizeDraftThreadEntryPoint(candidateDraftThread.entryPoint),
@@ -1706,12 +1709,15 @@ function normalizePersistedDraftsByThreadId(
       : [];
     const queuedTurns = normalizePersistedQueuedTurns(draftCandidate.queuedTurns);
     const runtimeMode =
-      draftCandidate.runtimeMode === "approval-required" ||
-      draftCandidate.runtimeMode === "full-access"
+      draftCandidate.runtimeMode === "work" || draftCandidate.runtimeMode === "code"
         ? draftCandidate.runtimeMode
         : null;
     const interactionMode =
-      draftCandidate.interactionMode === "plan" || draftCandidate.interactionMode === "default"
+      draftCandidate.interactionMode === "plan" ||
+      draftCandidate.interactionMode === "agent" ||
+      draftCandidate.interactionMode === "chat" ||
+      draftCandidate.interactionMode === "review" ||
+      draftCandidate.interactionMode === "task"
         ? draftCandidate.interactionMode
         : null;
     const prompt = ensureInlineTerminalContextPlaceholders(
@@ -2709,10 +2715,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided â†?use them
+              // Explicit options provided ï¿½?use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection â†?preserve existing options, update provider+model
+              // No options in selection ï¿½?preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
@@ -2887,7 +2893,7 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           return;
         }
         const nextRuntimeMode =
-          runtimeMode === "approval-required" || runtimeMode === "full-access" ? runtimeMode : null;
+          runtimeMode === "work" || runtimeMode === "code" ? runtimeMode : null;
         set((state) => {
           const existing = state.draftsByThreadId[threadId];
           if (!existing && nextRuntimeMode === null) {

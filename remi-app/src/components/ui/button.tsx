@@ -1,3 +1,32 @@
+/**
+ * @file Button UI 原子组件
+ *
+ * 本文件定义 Button 组件，基于 `@base-ui/react` 与 `class-variance-authority` 实现：
+ *
+ * - **多 variant**：primary / secondary / ghost / destructive / outline / link
+ * - **多 size**：sm / md / lg / icon
+ * - **状态**：default / hover / active / focus / disabled / loading
+ * - **a11y**：自动处理 aria 属性、键盘焦点
+ *
+ * ## 核心导出
+ *
+ * - `Button`：基础按钮组件
+ * - `buttonVariants`：cva 变体定义（用于将按钮样式应用到其他元素）
+ *
+ * ## 使用示例
+ *
+ * ```tsx
+ * <Button variant="primary" size="md" onClick={...}>保存</Button>
+ * <Button variant="ghost" size="icon"><Icon /></Button>
+ * ```
+ *
+ * ## 注意事项
+ *
+ * - 通过 `mergeProps` 合并 props，避免覆盖 a11y 属性
+ * - 加载态使用 `aria-busy` 而非禁用按钮（除非显式 `disabled`）
+ * - 内部使用 `forwardRef` 兼容 ref 转发
+ */
+
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";

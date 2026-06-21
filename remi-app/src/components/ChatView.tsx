@@ -6022,7 +6022,7 @@ export default function ChatView({
     queuedTurn,
   }: {
     text: string;
-    interactionMode: "default" | "plan";
+    interactionMode: "chat" | "plan" | "agent" | "review" | "task";
     dispatchMode: "queue" | "steer";
     queuedTurn?: QueuedComposerPlanFollowUp;
   }): Promise<boolean> {
@@ -6406,7 +6406,7 @@ export default function ChatView({
           assistantDeliveryMode: settings.enableAssistantStreaming ? "streaming" : "buffered",
           dispatchMode: "queue",
           runtimeMode,
-          interactionMode: "default",
+          interactionMode: "agent",
           createdAt,
         });
       })

@@ -1,3 +1,29 @@
+/**
+ * @file 轮次差异树构建模块
+ *
+ * 本模块负责将 TurnDiffFileChange 列表构建为层级化的目录树结构，
+ * 用于在 UI 中以树形结构展示文件变更。
+ *
+ * ## 核心导出
+ *
+ * - `TurnDiffStat`：单个文件变更的统计信息（添加/删除行数）
+ * - `TurnDiffTreeNode`：目录树节点（文件或目录）
+ * - `buildTurnDiffTree`：将扁平的变更列表构建为目录树
+ * - `flattenTurnDiffTree`：将目录树展平为列表（用于按字母序排序）
+ *
+ * ## 使用场景
+ *
+ * - ChangedFilesTree 组件的目录树渲染
+ * - 按目录分组展示变更
+ * - 递归展开/折叠目录节点
+ *
+ * ## 注意事项
+ *
+ * - 目录按字典序排序，文件在目录后
+ * - 隐藏文件（以 `.` 开头）排在普通文件后
+ * - 节点状态：`unchanged` / `added` / `modified` / `deleted`
+ */
+
 import type { TurnDiffFileChange } from "../types";
 
 export interface TurnDiffStat {

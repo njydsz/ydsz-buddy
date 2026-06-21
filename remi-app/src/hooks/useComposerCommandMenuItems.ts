@@ -1,3 +1,36 @@
+/**
+ * @file Composer 命令菜单项 Hook
+ *
+ * 本 Hook 为 Composer 中输入 `/` 或 `@` 触发的命令菜单提供数据源，
+ * 合并 Agent 提及、Provider 技能、命令、插件、本地文件夹等多源数据。
+ *
+ * ## 核心导出
+ *
+ * - `useComposerCommandMenuItems`：返回分组后的菜单项列表
+ * - `useComposerCommandSearch`：根据输入文本过滤菜单项
+ *
+ * ## 数据源
+ *
+ * - Agent 提及（@alias）
+ * - Provider 技能（/skill）
+ * - Provider 命令（/command）
+ * - Provider 插件
+ * - 本地文件夹提及（@folder）
+ * - 文件提及（@file）
+ *
+ * ## 使用场景
+ *
+ * - Composer 菜单渲染
+ * - 模糊搜索与排序
+ * - 跨 Provider 的统一菜单项
+ *
+ * ## 注意事项
+ *
+ * - 菜单项按优先级排序（最近使用 > 收藏 > 字母序）
+ * - 搜索使用简单的子串匹配，性能良好
+ * - 插件与技能需要先安装才显示
+ */
+
 import type {
   ProjectEntry,
   ProviderNativeCommandDescriptor,

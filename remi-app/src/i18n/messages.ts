@@ -2436,7 +2436,7 @@ const zh: Messages = {
   },
   skills: {
     title: "技�?,
-    subtitle: "赋予 Remi Code 更强大的能力�?,
+    subtitle: "赋予 Remi Claw 更强大的能力�?,
     newSkill: "新技�?,
     browseSkillSh: "浏览 skill.sh",
     searchPlaceholder: "搜索技�?,
@@ -2444,7 +2444,7 @@ const zh: Messages = {
     localCount: "{count} 个已安装",
     localEmptyTitle: "未发现本机技�?,
     localEmptyDescription:
-      "Remi Code 已扫�?~/.claude/skills、~/.codex/skills �?~/.agents/skills。把一个含 SKILL.md 的技能目录放进任一目录后刷新即可�?,
+      "Remi Claw 已扫�?~/.claude/skills、~/.codex/skills �?~/.agents/skills。把一个含 SKILL.md 的技能目录放进任一目录后刷新即可�?,
     localEmptySearchTitle: "没有匹配的本机技�?,
     localEmptySearchDescription: "尝试其他关键词，或清空搜索�?,
     providerHeading: "由模型提�?,
@@ -2491,7 +2491,7 @@ const zh: Messages = {
       },
       worktrees: {
         label: "工作�?,
-        description: "查看并清理由 Remi Code 创建的工作树�?,
+        description: "查看并清理由 Remi Claw 创建的工作树�?,
       },
       archived: {
         label: "已归�?,
@@ -2521,7 +2521,7 @@ const zh: Messages = {
       sidebarOrganization: "侧边栏组�?,
       language: {
         title: "语言",
-        description: "选择 Remi Code 界面所使用的语言�?,
+        description: "选择 Remi Claw 界面所使用的语言�?,
         english: "English",
         chinese: "中文",
       },
@@ -2567,7 +2567,7 @@ const zh: Messages = {
       timeAndReadingSection: "时间与阅�?,
       theme: {
         title: "主题",
-        description: "选择 Remi Code 在整个应用中的外观�?,
+        description: "选择 Remi Claw 在整个应用中的外观�?,
         system: "跟随系统",
         light: "浅色",
         dark: "深色",
@@ -2685,7 +2685,7 @@ const zh: Messages = {
     },
     worktrees: {
       heading: "工作�?,
-      description: "查看并清理由 Remi Code 创建的工作树�?,
+      description: "查看并清理由 Remi Claw 创建的工作树�?,
       managedSection: "托管的工作树",
       loading: "正在加载托管的工作树�?,
       loadFailedFallback: "无法加载工作树�?,
@@ -2779,7 +2779,7 @@ const zh: Messages = {
       },
       updates: {
         title: "提供方更�?,
-        description: "更新 Remi Code 可以安全更新的已安装提供方工具�?,
+        description: "更新 Remi Claw 可以安全更新的已安装提供方工具�?,
         statusNoUpdates: "未检测到提供方更�?,
         statusAvailableOne: "�?1 项可用更�?,
         statusAvailableMany: (count) => `�?${count} 项可用更新`,
@@ -2790,7 +2790,7 @@ const zh: Messages = {
         commandLabel: "命令�?,
         runCommandTitle: (command) => `运行 ${command}`,
         versionAdvisoryNoCommand:
-          "检测到新版本，�?Remi Code 未能为该安装识别出安全的一键更新命令�?,
+          "检测到新版本，�?Remi Claw 未能为该安装识别出安全的一键更新命令�?,
       },
       tools: {
         title: "已安装的 CLI",
@@ -2956,7 +2956,7 @@ const zh: Messages = {
   },
   whatsNew: {
     title: "新增内容",
-    popoutTitle: "Remi Code 更新内容",
+    popoutTitle: "Remi Claw 更新内容",
     open: "打开",
     dismiss: "忽略",
     gotIt: "知道�?,

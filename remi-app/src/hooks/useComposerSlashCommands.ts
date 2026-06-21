@@ -1,3 +1,35 @@
+/**
+ * @file Composer 斜杠命令 Hook
+ *
+ * 本 Hook 处理 Composer 中以 `/` 开头的斜杠命令（如 `/help`、`/review`、`/new`），
+ * 包括命令解析、提示词构造、线程创建等完整流程。
+ *
+ * ## 核心导出
+ *
+ * - `useComposerSlashCommands`：返回斜杠命令处理器
+ * - `useSlashCommandState`：斜杠命令状态（菜单可见性、当前命令等）
+ *
+ * ## 内置命令
+ *
+ * - `/new`：创建新线程
+ * - `/clear`：清空当前 Composer
+ * - `/review`：请求 AI 进行代码审查
+ * - `/compact`：压缩当前线程上下文
+ * - `/help`：显示帮助
+ *
+ * ## 使用场景
+ *
+ * - Composer 中输入 `/` 触发命令菜单
+ * - 自定义命令的注册与执行
+ * - Provider 特定命令的统一入口
+ *
+ * ## 注意事项
+ *
+ * - 命令执行可能涉及线程创建、状态变更等副作用
+ * - 部分命令需要 Provider 支持
+ * - 命令失败时显示 toast 提示
+ */
+
 import {
   type ModelSelection,
   type OrchestrationShellSnapshot,
@@ -322,8 +354,8 @@ export function useComposerSlashCommands(input: {
         projectId: activeProject.id,
         title: `Sidechat: ${titleSeed}`,
         modelSelection: selectedModelSelection,
-        runtimeMode: "approval-required",
-        interactionMode: "default",
+        runtimeMode: "work",
+        interactionMode: "agent",
         envMode: activeThread.envMode ?? (activeThread.worktreePath ? "worktree" : "local"),
         branch: activeThread.branch,
         worktreePath: activeThread.worktreePath,
@@ -347,7 +379,7 @@ export function useComposerSlashCommands(input: {
           },
           modelSelection: selectedModelSelection,
           runtimeMode: "approval-required",
-          interactionMode: "default",
+          interactionMode: "agent",
           createdAt: new Date().toISOString(),
         });
       }
@@ -423,7 +455,7 @@ export function useComposerSlashCommands(input: {
           title: nextThreadTitle,
           modelSelection: selectedModelSelection,
           runtimeMode,
-          interactionMode: "default",
+          interactionMode: "agent",
           envMode: activeThread.envMode ?? (activeThread.worktreePath ? "worktree" : "local"),
           branch: activeThread.branch,
           worktreePath: activeThread.worktreePath,
@@ -453,7 +485,7 @@ export function useComposerSlashCommands(input: {
                 },
           dispatchMode: "queue",
           runtimeMode,
-          interactionMode: "default",
+          interactionMode: "agent",
           createdAt,
         });
         const snapshot = await api.orchestration.getShellSnapshot();

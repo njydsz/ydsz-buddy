@@ -1,3 +1,30 @@
+/**
+ * @file 图标聚合模块
+ *
+ * 本模块将 Remi 应用中分散在多个图标库（react-icons）的图标统一聚合导出，
+ * 便于组件按需引用，避免在每个文件中重复 import 多个图标库。
+ *
+ * ## 核心导出
+ *
+ * - `PiSquareSplitHorizontal/Vertical`：Phosphor 图标 - 分屏布局
+ * - `PiGitCommit`：Phosphor 图标 - Git 提交
+ * - `RiApps2Line`：RemixIcon 图标 - 应用网格
+ * - `SiGithub`：Simple Icons - GitHub 品牌
+ * - `VscMcp`：VSCode Icons - MCP 协议
+ * - `CustomIcons`：自定义 SVG 图标（Logo 等）
+ *
+ * ## 使用场景
+ *
+ * - 各 UI 组件按需引用图标
+ * - 跨平台一致的图标体验
+ *
+ * ## 注意事项
+ *
+ * - 图标均接受 `SVGProps`，可在使用处覆盖 size / color
+ * - 避免引入未使用的图标库以减小 bundle 体积
+ * - 自定义图标使用 `FC<SVGProps>` 类型签名
+ */
+
 import { type FC, type SVGProps } from "react";
 import { PiGitCommit, PiSquareSplitHorizontal, PiSquareSplitVertical } from "react-icons/pi";
 import { RiApps2Line } from "react-icons/ri";

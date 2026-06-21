@@ -1,3 +1,38 @@
+/**
+ * @file æ¨¡åž‹æŸ¥è¯¢ä¸Žé€‰æ‹©å·¥å…·æ¨¡å—
+ *
+ * æœ¬æ¨¡å—åŸºäºŽ `contracts/model` ä¸­å®šä¹‰çš„æ¨¡åž‹å…ƒæ•°æ®ï¼Œæä¾›å‰ç«¯æ‰€éœ€çš„æ¨¡åž‹æŸ¥è¯¢ä¸Žé€‰æ‹©å·¥å…·ï¼š
+ *
+ * - **æ¨¡åž‹èƒ½åŠ›æŸ¥è¯¢**ï¼šé€šè¿‡ `getModelCapabilities` å¿«é€ŸèŽ·å–æ¨¡åž‹èƒ½åŠ›
+ * - **æ¨¡åž‹é€‰é¡¹èŽ·å–**ï¼šé€šè¿‡ `getModelOptions` èŽ·å– Provider ç‰¹å®šé€‰é¡¹
+ * - **é»˜è®¤æ¨¡åž‹è§£æž**ï¼šé€šè¿‡ `resolveDefaultModelSlug` èŽ·å– Provider é»˜è®¤æ¨¡åž‹
+ * - **æ¨¡åž‹åˆ«åè§£æž**ï¼šé€šè¿‡ `resolveModelSlug` æ”¯æŒç”¨æˆ·å‹å¥½çš„åˆ«åè¾“å…¥
+ * - **Provider èƒ½åŠ›æ£€æŸ¥**ï¼šé€šè¿‡ `providerSupportsTools` ç­‰å‡½æ•°åˆ¤æ–­èƒ½åŠ›
+ *
+ * ## æ ¸å¿ƒå¯¼å‡º
+ *
+ * - `getModelCapabilities`ï¼šèŽ·å–æ¨¡åž‹èƒ½åŠ›
+ * - `getModelOptions`ï¼šèŽ·å–æ¨¡åž‹é€‰é¡¹
+ * - `resolveDefaultModelSlug`ï¼šè§£æžé»˜è®¤æ¨¡åž‹ slug
+ * - `resolveModelSlug`ï¼šè§£æžç”¨æˆ·è¾“å…¥çš„æ¨¡åž‹åˆ«å
+ * - `providerSupportsTools`ï¼šåˆ¤æ–­ Provider æ˜¯å¦æ”¯æŒå·¥å…·è°ƒç”¨
+ * - `providerSupportsVision`ï¼šåˆ¤æ–­ Provider æ˜¯å¦æ”¯æŒè§†è§‰
+ * - `providerSupportsReasoningEffort`ï¼šåˆ¤æ–­ Provider æ˜¯å¦æ”¯æŒæŽ¨ç†å¼ºåº¦
+ * - `pickProviderOption`ï¼šä»Žé€‰é¡¹æè¿°ç¬¦ä¸­æŒ‘é€‰å½“å‰é€‰é¡¹
+ *
+ * ## ä½¿ç”¨åœºæ™¯
+ *
+ * - æ¨¡åž‹é€‰æ‹©å™¨å±•ç¤ºå¯ç”¨æ¨¡åž‹
+ * - å¯åŠ¨ Provider æ—¶æ ¡éªŒæ¨¡åž‹å¯ç”¨æ€§
+ * - å·¥å…·è°ƒç”¨å‰çš„èƒ½åŠ›æ£€æŸ¥
+ *
+ * ## æ³¨æ„äº‹é¡¹
+ *
+ * - æ‰€æœ‰æŸ¥è¯¢å‡ä¸ºåŒæ­¥çº¯å‡½æ•°ï¼Œæ€§èƒ½è‰¯å¥½
+ * - æ¨¡åž‹æ•°æ®æ¥æºäºŽ `MODEL_*_INDEX` ç´¢å¼•ï¼Œå¯åŠ¨æ—¶æž„å»º
+ * - ç”¨æˆ·è¾“å…¥çš„æ¨¡åž‹åˆ«åä¼šè‡ªåŠ¨è§„èŒƒåŒ–ä¸ºæ ‡å‡† slug
+ */
+
 import {
   DEFAULT_MODEL_BY_PROVIDER,
   MODEL_CAPABILITIES_INDEX,
@@ -253,7 +288,7 @@ export function resolveGeminiApiModelId(
   return getGeminiThinkingModelAlias(model, modelOptions) ?? model;
 }
 
-// ©¤©¤ Effort helpers ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+// ï¿½ï¿½ï¿½ï¿½ Effort helpers ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 /** Check whether a capabilities object includes a given effort value. */
 export function hasEffortLevel(caps: ModelCapabilities, value: string): boolean {
@@ -537,7 +572,7 @@ export function buildProviderOptionSelectionsFromDescriptors(
   return selections.length > 0 ? selections : undefined;
 }
 
-// ©¤©¤ Data-driven capability resolver ©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤
+// ï¿½ï¿½ï¿½ï¿½ Data-driven capability resolver ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 export function getModelCapabilities(
   provider: ProviderKind,

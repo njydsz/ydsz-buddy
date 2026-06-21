@@ -171,7 +171,7 @@ Remi Claw 由原 Remi Code 完成品牌与产品形态升级，目标是：
 
 ### 3.4 技术栈对比
 
-| 层次 | 原方案 | Remi Code | 改进点 |
+| 层次 | 原方案 | Remi Claw | 改进点 |
 |------|-----------|-----------|--------|
 | **运行时** | Node.js (单线程) | Rust (多线程) | 性能提升 80%+ |
 | **框架** | Effect-TS | Axum + Tokio | 学习曲线降低 |
@@ -187,7 +187,7 @@ Remi Claw 由原 Remi Code 完成品牌与产品形态升级，目标是：
 ### 4.1 目录结构
 
 ```
-remi-code/
+remi-claw/
 ├── Cargo.toml                    # Rust Workspace 配置
 ├── package.json                  # Node.js Workspace 配置
 ├── tsconfig.base.json            # TypeScript 基础配置
@@ -636,7 +636,7 @@ cargo test --test '*'
 pnpm test
 
 # 运行特定包测试
-pnpm --filter @remi-code/desktop test
+pnpm --filter @remi-claw/desktop test
 
 # 生成覆盖率报告
 pnpm test -- --coverage
@@ -661,7 +661,7 @@ cargo doc -p remi-orchestration --open
 品牌从 **Remi Code** 升级为 **Remi Claw**，并新增 **Work 模式**。迁移包含：
 
 - ✅ 文档、Logo、命名空间全部刷新为 Remi Claw
-- ⏳ `branding.ts` 中 `APP_BASE_NAME` 同步为 `Remi Claw`（待代码层落地）
+- ✅ `branding.ts` 中 `APP_BASE_NAME` 同步为 `Remi Claw`
 - ⏳ Thread 模型新增 `runtime-mode ∈ {work, code}`、`interaction-mode ∈ {chat, plan, agent, review}`
 - ⏳ Sidebar / ChatHeader 增加模式切换器与模式徽标
 - ⏳ Composer 命令菜单按模式分别提供 Work / Code 专属 Slash 命令
@@ -708,7 +708,7 @@ Remi Claw 的后端迁移分为 10 个阶段，按模块逐步推进：
 
 ### 9.1 目标性能
 
-| 指标 | 原方案 (Node.js) | Remi Code (Rust) 目标 | 提升幅度 |
+| 指标 | 原方案 (Node.js) | Remi Claw (Rust) 目标 | 提升幅度 |
 |------|---------------------|----------------------|----------|
 | 启动时间 | ~5s | ~1s | 80% |
 | 内存占用 | ~300MB | ~50MB | 83% |
@@ -841,7 +841,7 @@ Remi Claw 的核心定位是 **"一个桌面，两种脑回路"**：
 
 ### 11.4 模式切换与共存
 
-- **全局默认**：应用首启时默认进入 **Code 模式**（沿袭 Remi Code 习惯）；用户可在 Settings 切换默认。
+- **全局默认**：应用首启时默认进入 **Code 模式**（沿袭 Remi Claw 习惯）；用户可在 Settings 切换默认。
 - **Thread 级模式**：每个 Thread 持久化自己的 `runtime-mode`，切换 Thread 时自动恢复。
 - **运行时切换**：在 ChatHeader 通过下拉切换模式，模式变更不中断 Turn（已开始的 Turn 沿用旧模式至结束）。
 - **混合 Thread**：允许同一 Thread 内不同 Turn 处于不同模式（向后兼容，单条 Turn 的 `runtime-mode` 是权威）。
@@ -849,7 +849,7 @@ Remi Claw 的核心定位是 **"一个桌面，两种脑回路"**：
 
 ### 11.5 命令协议层（已有体系）
 
-Remi Code 已具备的编排命令可直接支撑双模式，差异在 `runtime-mode` / `interaction-mode` 字段值：
+Remi Claw 已具备的编排命令可直接支撑双模式，差异在 `runtime-mode` / `interaction-mode` 字段值：
 
 | 命令 | 双模式语义 |
 |------|-----------|

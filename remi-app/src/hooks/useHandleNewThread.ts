@@ -1,3 +1,30 @@
+/**
+ * @file 新建线程 Hook
+ *
+ * 本 Hook 处理用户点击"新建线程"按钮时的完整流程：
+ *
+ * - **路由跳转**：使用 `useNavigate` 跳转到新线程路由
+ * - **模型选择**：根据用户设置选择默认模型
+ * - **临时线程创建**：必要时创建 disposable thread
+ * - **焦点切换**：将焦点切换到 Composer
+ *
+ * ## 核心导出
+ *
+ * - `useHandleNewThread`：返回新建线程的处理器
+ *
+ * ## 使用场景
+ *
+ * - 顶栏"新建线程"按钮
+ * - 侧边栏"+"按钮
+ * - 快捷键 Cmd+N
+ *
+ * ## 注意事项
+ *
+ * - 路由跳转前会清理上一次未发送的临时线程
+ * - 默认模型来自 `getDefaultModel`（用户设置覆盖）
+ * - 新建线程后自动获得焦点
+ */
+
 import { type ProjectId, ThreadId } from "@remi-claw/contracts";
 import { getDefaultModel } from "@remi-claw/shared/model";
 import { useNavigate } from "@tanstack/react-router";

@@ -456,7 +456,7 @@ function ThreadMetaChipStack({ chips }: { chips: ThreadMetaChip[] }) {
       </Tooltip>
     );
   }
-  const tooltipText = chips.map((chip) => chip.tooltip).join(" è·?");
+  const tooltipText = chips.map((chip) => chip.tooltip).join(" ï¿½?");
   const chipSize = 14;
   const step = 8;
   const width = chipSize + step * (chips.length - 1);
@@ -2086,8 +2086,8 @@ export default function Sidebar() {
           projectId: activeProject.id,
           title,
           modelSelection,
-          runtimeMode: "full-access",
-          interactionMode: "default",
+          runtimeMode: "code",
+          interactionMode: "agent",
           envMode: resolveSidebarNewThreadEnvMode({
             defaultEnvMode: appSettings.defaultThreadEnvMode,
           }),

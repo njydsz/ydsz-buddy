@@ -1,6 +1,29 @@
 /**
- * @file openUsageRateLimits.ts
- * @description 灏?OpenUsage 鏈湴 HTTP 蹇収褰掍竴鍖栦负鏈湴宸ュ叿鏍忓脊绐楁墍浣跨敤鐨勫叡浜€熺巼闄愬埗妯″瀷銆? * 鍖呭惈杩涘害琛屼笌鏂囨湰琛岀殑瑙ｆ瀽銆丳roviderKind 鏄犲皠浠ュ強鐢ㄩ噺鐧惧垎姣旇绠楃瓑閫昏緫銆? */
+ * @file OpenUsage 速率限制模块
+ *
+ * 本模块将 OpenUsage 的本地 HTTP 快照统一为前端速率限制组件所使用的共享速率限制模型，
+ * 包含进度条与文本行的解析、ProviderKind 映射以及用量百分比计算等逻辑。
+ *
+ * ## 核心导出
+ *
+ * - `RateLimit`：速率限制条目（窗口、重置时间、剩余量、进度）
+ * - `RateLimitsSnapshot`：速率限制快照
+ * - `parseRateLimits`：从 OpenUsage 响应解析为统一模型
+ * - `mapProviderKind`：将 OpenUsage Provider 映射到 Remi ProviderKind
+ * - `computeUsagePercent`：计算用量百分比
+ *
+ * ## 使用场景
+ *
+ * - RateLimitBanner 横幅展示
+ * - RateLimitsPanel 完整面板
+ * - ProviderUsagePanelContent 详细用量
+ *
+ * ## 注意事项
+ *
+ * - 不同 Provider 的速率限制字段不同，需要规范化
+ * - 时间字段统一转换为 UTC
+ * - 进度条使用 `usagePercent` 字段（0-100）
+ */
 
 import type { ProviderKind } from "~/contracts";
 

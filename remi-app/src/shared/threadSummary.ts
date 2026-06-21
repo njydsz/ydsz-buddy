@@ -1,3 +1,34 @@
+/**
+ * @file 线程摘要与状态汇总模块
+ *
+ * 本模块提供对线程（Thread）状态进行摘要和汇总的工具：
+ *
+ * - **线程摘要元数据**：从消息流中提取最新用户消息、待审批数量等
+ * - **活动状态**：判断线程是否处于活跃、等待输入、等待审批等状态
+ * - **计划追踪**：识别可操作的提议计划
+ * - **Payload 校验**：解析事件 payload 为强类型
+ *
+ * ## 核心导出
+ *
+ * - `ThreadSummaryMetadata`：线程摘要元数据
+ * - `ThreadSummaryState`：线程摘要完整状态
+ * - `summarizeThread`：从消息流生成摘要
+ * - `ApprovalRequestedPayload`：审批请求 payload 类型
+ * - `UserInputRequestedPayload`：用户输入请求 payload 类型
+ * - `PlanProposedPayload`：提议计划 payload 类型
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏线程列表展示摘要
+ * - 排序线程（按最近活动、待审批数等）
+ * - 通知中心：仅对有待审批的线程发通知
+ *
+ * ## 注意事项
+ *
+ * - 摘要计算为同步纯函数，性能良好
+ * - 大型线程（> 1000 条消息）建议使用增量摘要
+ */
+
 import type {
   OrchestrationLatestTurn,
   OrchestrationMessage,

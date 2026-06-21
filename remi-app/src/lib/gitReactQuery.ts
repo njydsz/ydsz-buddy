@@ -1,6 +1,31 @@
 /**
- * @file Git React Query 闂嗗棙鍨氬Ο鈥虫健
- * @description 閹绘劒绶?Git 閹垮秳缍旈惃?React Query 閺屻儴顕楅崪灞藉綁閺囨挳鍘ょ純顔衡偓? *              閸栧懎鎯堥悩鑸碘偓浣圭叀鐠団偓鈧礁鍨庨弨顖氬灙鐞涖劊鈧礁浼愭担婊勭埐瀹割喖绱撻妴浣瑰絹娴溿倖鎼锋担婊呯搼閵? */
+ * @file Git React Query 集成模块
+ *
+ * 本模块为 Git 操作（状态、提交、推送、PR、Worktree）提供 React Query 封装，
+ * 统一前端对 Git 子系统的数据获取、缓存与失效管理。
+ *
+ * ## 核心导出
+ *
+ * - `useGitStatus`：订阅 Git 仓库状态
+ * - `useGitBranches`：获取分支列表
+ * - `useGitCommit`：提交变更（mutation）
+ * - `useGitPush`：推送到远程
+ * - `useGitCreatePullRequest`：创建 PR
+ * - `useGitWorktreeCreate`：创建 worktree
+ * - `useGitTextGeneration`：AI 生成提交信息 / PR 描述
+ *
+ * ## 使用场景
+ *
+ * - 侧边栏 Git 状态展示
+ * - 工具栏的提交/推送按钮
+ * - Worktree 切换对话框
+ *
+ * ## 注意事项
+ *
+ * - 状态变更会自动失效（`invalidateQueries(['git', 'status'])`）
+ * - 错误通过 `QueryClient` 的默认错误处理机制展示
+ * - 长时间操作使用 mutation 的 `isPending` 状态
+ */
 
 import type {
   GitReadWorkingTreeDiffInput,

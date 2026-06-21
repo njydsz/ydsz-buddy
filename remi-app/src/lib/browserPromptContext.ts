@@ -1,3 +1,32 @@
+/**
+ * @file 浏览器内提示词上下文模块
+ *
+ * 本模块用于在浏览器（Tauri 内的 WebView）中捕获和准备提示词上下文：
+ *
+ * - **截图捕获**：通过 `BrowserCaptureScreenshot` 捕获当前页面
+ * - **图像附件**：将截图作为附件注入到 Composer
+ * - **DOM 序列化**：将选中的 DOM 节点序列化为可读文本
+ * - **大小限制**：遵守 `PROVIDER_SEND_TURN_MAX_IMAGE_BYTES` 上限
+ *
+ * ## 核心导出
+ *
+ * - `captureBrowserContext`：捕获当前浏览器上下文（截图 + URL + title）
+ * - `buildBrowserContextAttachment`：构造附件对象
+ * - `serializeSelection`：将选中的 DOM 节点转为纯文本
+ *
+ * ## 使用场景
+ *
+ * - Composer 中点击"添加浏览器上下文"按钮
+ * - AI 需要基于当前页面回答问题
+ * - 设计稿 → 代码场景
+ *
+ * ## 注意事项
+ *
+ * - 截图超过 20MB 时会自动压缩
+ * - 截图格式默认为 PNG，可配置 JPEG
+ * - DOM 序列化会去除样式和事件，仅保留结构
+ */
+
 import {
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
   type BrowserCaptureScreenshotResult,

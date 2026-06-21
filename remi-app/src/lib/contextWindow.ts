@@ -1,3 +1,32 @@
+/**
+ * @file 上下文窗口监控模块
+ *
+ * 本模块提供对模型上下文窗口（Context Window）使用情况的监控与计算：
+ *
+ * - **使用率计算**：基于 token 用量与模型上下文窗口计算百分比
+ * - **状态分类**：根据使用率分为"低/中/高/超限"等状态
+ * - **跨 Provider 兼容**：适配不同 Provider 的 token 计量方式
+ *
+ * ## 核心导出
+ *
+ * - `ContextWindowStatus`：上下文窗口状态枚举（low / medium / high / exceeded）
+ * - `getContextWindowStatus`：根据用量与上限计算状态
+ * - `formatTokenCount`：格式化 token 数字（1.2k / 1.5M）
+ * - `resolveContextWindowLimit`：从模型配置解析上下文窗口上限
+ *
+ * ## 使用场景
+ *
+ * - UI 中展示上下文窗口使用进度条
+ * - 超出限制时发出警告
+ * - 自动压缩对话的触发判断
+ *
+ * ## 注意事项
+ *
+ * - 输入 token 和输出 token 共享同一上下文窗口
+ * - 不同模型的窗口上限差异巨大（8k ~ 1M）
+ * - "超限"状态触发自动摘要压缩
+ */
+
 import type { OrchestrationThreadActivity, ThreadTokenUsageSnapshot } from "@remi-claw/contracts";
 
 function asRecord(value: unknown): Record<string, unknown> | null {

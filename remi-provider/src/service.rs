@@ -609,6 +609,196 @@ impl ProviderService {
         Ok(agents)
     }
 
+    /// 获取 Provider 更新命令
+    ///
+    /// 返回指定 Provider 的更新命令和参数。如果 Provider 不支持更新，返回 None。
+    ///
+    /// # 参数
+    ///
+    /// - `provider_name`: Provider 名称（如 "codex", "claude" 等）
+    ///
+    /// # 返回值
+    ///
+    /// - `Some((cmd, args))`: 更新命令和参数
+    /// - `None`: Provider 不支持更新
+    pub async fn get_provider_update_command(
+        &self,
+        provider_name: &str,
+    ) -> Option<(String, Vec<String>)> {
+        match provider_name {
+            "codex" => Some((
+                "npm".to_string(),
+                vec![
+                    "install".to_string(),
+                    "-g".to_string(),
+                    "@openai/codex@latest".to_string(),
+                ],
+            )),
+            "claude" | "claudeAgent" => {
+                if cfg!(target_os = "macos") {
+                    Some((
+                        "brew".to_string(),
+                        vec!["upgrade".to_string(), "claude-code".to_string()],
+                    ))
+                } else {
+                    Some((
+                        "npm".to_string(),
+                        vec![
+                            "install".to_string(),
+                            "-g".to_string(),
+                            "@anthropic-ai/claude-code@latest".to_string(),
+                        ],
+                    ))
+                }
+            }
+            "gemini" => Some((
+                "npm".to_string(),
+                vec![
+                    "install".to_string(),
+                    "-g".to_string(),
+                    "@anthropic-ai/claude-code@latest".to_string(),
+                ],
+            )),
+            _ => None,
+        }
+    }
+
+    /// 获取 Provider 使用统计
+    ///
+    /// 查询指定 Provider 的 token 使用量统计信息。
+    ///
+    /// # 参数
+    ///
+    /// - `provider_name`: Provider 名称
+    ///
+    /// # 返回值
+    ///
+    /// - `Some(UsageSnapshot)`: 使用统计快照
+    /// - `None`: Provider 不支持使用统计或无数据
+    pub async fn get_usage_snapshot(&self, provider_name: &str) -> Option<Value> {
+        // 获取用户的 home 目录
+        let home_dir = dirs::home_dir()?;
+
+        match provider_name {
+            "codex" => {
+                let sessions_dir = home_dir.join(".codex").join("sessions");
+                if !sessions_dir.exists() {
+                    return None;
+                }
+                // 扫描最近的 session 文件统计 token 使用量
+                self.scan_codex_usage(&sessions_dir).await
+            }
+            "claude" | "claudeAgent" => {
+                let projects_dir = home_dir.join(".claude").join("projects");
+                if !projects_dir.exists() {
+                    return None;
+                }
+                // 扫描 Claude 项目目录统计 token 使用量
+                self.scan_claude_usage(&projects_dir).await
+            }
+            _ => None,
+        }
+    }
+
+    /// 扫描 Codex session 目录统计使用量
+    async fn scan_codex_usage(&self, sessions_dir: &std::path::Path) -> Option<Value> {
+        use tokio::fs;
+        use chrono::{Utc, Duration};
+
+        let now = Utc::now();
+        let _30_days_ago = now - Duration::days(30);
+
+        let mut total_tokens: u64 = 0;
+        let mut session_count: u64 = 0;
+
+        // 遍历最近的 session 文件
+        if let Ok(mut entries) = fs::read_dir(sessions_dir).await {
+            while let Ok(Some(entry)) = entries.next_entry().await {
+                let path = entry.path();
+                if path.extension().map(|e| e == "jsonl").unwrap_or(false) {
+                    session_count += 1;
+                    // 读取 JSONL 文件统计 token
+                    if let Ok(content) = fs::read_to_string(&path).await {
+                        for line in content.lines() {
+                            if let Ok(json) = serde_json::from_str::<Value>(line) {
+                                if let Some(tokens) = json
+                                    .pointer("/payload/info/total_token_usage/total_tokens")
+                                    .and_then(|v| v.as_u64())
+                                {
+                                    total_tokens += tokens;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Some(serde_json::json!({
+            "provider": "codex",
+            "updatedAt": now.to_rfc3339(),
+            "totalTokens": total_tokens,
+            "sessionCount": session_count,
+            "source": "codex-session-archive"
+        }))
+    }
+
+    /// 扫描 Claude 项目目录统计使用量
+    async fn scan_claude_usage(&self, projects_dir: &std::path::Path) -> Option<Value> {
+        use tokio::fs;
+        use chrono::{Utc, Duration};
+
+        let now = Utc::now();
+        let _30_days_ago = now - Duration::days(30);
+
+        let mut total_tokens: u64 = 0;
+        let mut session_count: u64 = 0;
+
+        // 遍历项目目录
+        if let Ok(mut projects) = fs::read_dir(projects_dir).await {
+            while let Ok(Some(project)) = projects.next_entry().await {
+                let project_path = project.path();
+                if project_path.is_dir() {
+                    // 遍历项目内的 JSONL 文件
+                    if let Ok(mut files) = fs::read_dir(&project_path).await {
+                        while let Ok(Some(file)) = files.next_entry().await {
+                            let file_path = file.path();
+                            if file_path.extension().map(|e| e == "jsonl").unwrap_or(false) {
+                                session_count += 1;
+                                if let Ok(content) = fs::read_to_string(&file_path).await {
+                                    for line in content.lines() {
+                                        if let Ok(json) = serde_json::from_str::<Value>(line) {
+                                            // 统计 token 使用量
+                                            if let Some(usage) = json.get("usage") {
+                                                let input = usage
+                                                    .get("input_tokens")
+                                                    .and_then(|v| v.as_u64())
+                                                    .unwrap_or(0);
+                                                let output = usage
+                                                    .get("output_tokens")
+                                                    .and_then(|v| v.as_u64())
+                                                    .unwrap_or(0);
+                                                total_tokens += input + output;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Some(serde_json::json!({
+            "provider": "claudeAgent",
+            "updatedAt": now.to_rfc3339(),
+            "totalTokens": total_tokens,
+            "sessionCount": session_count,
+            "source": "claude-project-transcripts"
+        }))
+    }
+
     /// 刷新所有 Provider 的状态
     ///
     /// 对所有已注册的 Provider 执行健康检查并更新缓存。

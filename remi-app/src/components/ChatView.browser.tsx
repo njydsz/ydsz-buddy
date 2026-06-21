@@ -292,8 +292,8 @@ function createSnapshotForTargetUser(options: {
           provider: "codex",
           model: "gpt-5",
         },
-        interactionMode: "default",
-        runtimeMode: "full-access",
+        interactionMode: "agent",
+        runtimeMode: "code",
         envMode: "local",
         branch: "main",
         worktreePath: null,
@@ -310,7 +310,7 @@ function createSnapshotForTargetUser(options: {
           threadId: THREAD_ID,
           status: options.sessionStatus ?? "ready",
           providerName: "codex",
-          runtimeMode: "full-access",
+          runtimeMode: "code",
           activeTurnId: null,
           lastError: null,
           updatedAt: NOW_ISO,
@@ -440,8 +440,8 @@ function addThreadToSnapshot(
           provider: "codex",
           model: "gpt-5",
         },
-        interactionMode: "default",
-        runtimeMode: "full-access",
+        interactionMode: "agent",
+        runtimeMode: "code",
         envMode: "local",
         branch: "main",
         worktreePath: null,
@@ -458,7 +458,7 @@ function addThreadToSnapshot(
           threadId,
           status: "ready",
           providerName: "codex",
-          runtimeMode: "full-access",
+          runtimeMode: "code",
           activeTurnId: null,
           lastError: null,
           updatedAt: NOW_ISO,
@@ -1599,8 +1599,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
         [THREAD_ID]: {
           projectId: PROJECT_ID,
           createdAt: NOW_ISO,
-          runtimeMode: "full-access",
-          interactionMode: "default",
+          runtimeMode: "code",
+          interactionMode: "agent",
           entryPoint: "chat",
           branch: null,
           worktreePath: null,
@@ -1669,8 +1669,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
         [THREAD_ID]: {
           projectId: PROJECT_ID,
           createdAt: NOW_ISO,
-          runtimeMode: "full-access",
-          interactionMode: "default",
+          runtimeMode: "code",
+          interactionMode: "agent",
           entryPoint: "chat",
           branch: null,
           worktreePath: null,
@@ -1746,8 +1746,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
         [THREAD_ID]: {
           projectId: PROJECT_ID,
           createdAt: NOW_ISO,
-          runtimeMode: "full-access",
-          interactionMode: "default",
+          runtimeMode: "code",
+          interactionMode: "agent",
           entryPoint: "chat",
           branch: "feature/draft",
           worktreePath: "/repo/worktrees/feature-draft",
@@ -1815,8 +1815,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
 
     try {
       const readInteractionMode = () =>
-        useComposerDraftStore.getState().draftsByThreadId[THREAD_ID]?.interactionMode ?? "default";
-      expect(readInteractionMode()).toBe("default");
+        useComposerDraftStore.getState().draftsByThreadId[THREAD_ID]?.interactionMode ?? "agent";
+      expect(readInteractionMode()).toBe("agent");
 
       window.dispatchEvent(
         new KeyboardEvent("keydown", {
@@ -2241,8 +2241,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
           provider: "codex",
           model: "gpt-5",
         },
-        runtimeMode: "full-access",
-        interactionMode: "default",
+        runtimeMode: "code",
+        interactionMode: "agent",
         envMode: "local",
       });
       useComposerDraftStore.getState().enqueueQueuedTurn(THREAD_ID, {
@@ -2263,8 +2263,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
           provider: "codex",
           model: "gpt-5",
         },
-        runtimeMode: "full-access",
-        interactionMode: "default",
+        runtimeMode: "code",
+        interactionMode: "agent",
         envMode: "local",
       });
 
@@ -2863,8 +2863,8 @@ describe("ChatView timeline estimator parity (full app)", () => {
         [draftThreadId]: {
           projectId: PROJECT_ID,
           createdAt: NOW_ISO,
-          runtimeMode: "approval-required",
-          interactionMode: "default",
+          runtimeMode: "work",
+          interactionMode: "agent",
           entryPoint: "terminal",
           branch: "feature/terminal-title",
           worktreePath: "/repo/project/.worktrees/terminal-title",
@@ -2938,7 +2938,7 @@ describe("ChatView timeline estimator parity (full app)", () => {
           expect(createRequest?.command).toMatchObject({
             branch: "feature/terminal-title",
             worktreePath: "/repo/project/.worktrees/terminal-title",
-            runtimeMode: "approval-required",
+            runtimeMode: "work",
             modelSelection: {
               provider: "claudeAgent",
               model: "claude-opus-4-6",

@@ -235,7 +235,7 @@ export function canOfferForkSlashCommand(input: {
   terminalContextCount: number;
   selectedSkillCount: number;
   selectedMentionCount: number;
-  interactionMode: "default" | "plan";
+  interactionMode: "chat" | "plan" | "agent" | "review" | "task";
 }): boolean {
   return (
     !hasMeaningfulComposerText(input.prompt) &&
@@ -243,7 +243,7 @@ export function canOfferForkSlashCommand(input: {
     input.terminalContextCount === 0 &&
     input.selectedSkillCount === 0 &&
     input.selectedMentionCount === 0 &&
-    input.interactionMode === "default"
+    input.interactionMode === "agent"
   );
 }
 
@@ -253,7 +253,7 @@ export function canOfferSideSlashCommand(input: {
   terminalContextCount: number;
   selectedSkillCount: number;
   selectedMentionCount: number;
-  interactionMode: "default" | "plan";
+  interactionMode: "chat" | "plan" | "agent" | "review" | "task";
   isSidechat: boolean;
 }): boolean {
   return (
@@ -262,7 +262,7 @@ export function canOfferSideSlashCommand(input: {
     input.terminalContextCount === 0 &&
     input.selectedSkillCount === 0 &&
     input.selectedMentionCount === 0 &&
-    input.interactionMode === "default" &&
+    input.interactionMode === "agent" &&
     !input.isSidechat
   );
 }
@@ -376,7 +376,7 @@ export function getAvailableComposerSlashCommands(input: {
         ]
       : [
           // Claude owns most slash-command UX natively; sidechat remains app-level because it
-          // creates a Remi Code split/context clone before the provider sees the first turn.
+          // creates a Remi Claw split/context clone before the provider sees the first turn.
           ...(input.canOfferSideCommand ? (["side"] as const) : []),
         ];
   return availableCommands.filter((command) => !collidingNativeCommandNames.has(command));

@@ -1,6 +1,27 @@
 /**
- * @file projectCreateRecovery.ts
- * @description 闂嗗棔鑵戞径鍕倞 project.create 闁插秴顦查柨娆掝嚖閻ㄥ嫯袙閺嬫劒绗岄幁銏狀槻闁槒绶妴? * 閹绘劒绶甸柌宥咁槻閸掓稑缂撻柨娆掝嚖濡偓濞村鈧線銆嶉惄?ID 閹绘劕褰囬妴浣告彥閻撗冨爱闁板秴寮烽柌宥堢槸缁涘绶熺粵澶嬩划婢跺秴浼愰崗宄板毐閺佽埇鈧? */
+ * @file 项目创建恢复模块
+ *
+ * 本模块处理 `project.create` 命令的失败恢复逻辑：项目数据已写入数据库但编排响应失败时，
+ * 通过"孤儿子线程 ID"识别这些项目，并在前端 store 中补全项目 ID 引用。
+ *
+ * ## 核心导出
+ *
+ * - `recoverCreatedProjectsFromOrphanThreads`：从孤儿子线程中恢复已创建的项目
+ * - `getOrphanCreatedProjectIds`：获取孤儿子线程关联的项目 ID 列表
+ * - `linkOrphanProjectsToProjectIds`：将项目 ID 关联到 store
+ *
+ * ## 使用场景
+ *
+ * - 应用启动时扫描数据库中的孤儿项目
+ * - 解决网络异常导致的部分写入
+ * - 数据迁移/备份恢复
+ *
+ * ## 注意事项
+ *
+ * - 孤儿项目可能重复出现，按 createdAt 去重
+ * - 仅在数据校验通过后展示给用户
+ * - 恢复操作幂等，可重复执行
+ */
 
 import type { OrchestrationReadModel } from "~/contracts";
 import { workspaceRootsEqual } from "~/shared/threadWorkspace";

@@ -1,3 +1,32 @@
+/**
+ * @file 首次发送消息模块
+ *
+ * 本模块提供线程（Thread）首次发送消息时的处理工具：
+ *
+ * - **默认模型解析**：根据 Provider 选择合适的默认模型
+ * - **工作区根比较**：判断是否需要切换工作区
+ * - **环境模式确认**：决定使用 local 还是 worktree 模式
+ * - **线程创建**：必要时创建新线程
+ *
+ * ## 核心导出
+ *
+ * - `prepareFirstSend`：准备首次发送所需的全部参数
+ * - `resolveInitialModelSelection`：解析初始模型选择
+ * - `shouldSwitchWorkspaceForFirstSend`：判断首次发送是否需要切换工作区
+ *
+ * ## 使用场景
+ *
+ * - 用户在空线程中发送第一条消息
+ * - 切换项目后第一次发送
+ * - 从模板创建线程
+ *
+ * ## 注意事项
+ *
+ * - 首次发送时如果线程未创建，会触发创建流程
+ * - 默认模型来自 `DEFAULT_MODEL_BY_PROVIDER` 全局配置
+ * - 工作区模式继承自用户设置
+ */
+
 import { DEFAULT_MODEL_BY_PROVIDER, type ModelSelection } from "@remi-claw/contracts";
 import { workspaceRootsEqual } from "@remi-claw/shared/threadWorkspace";
 

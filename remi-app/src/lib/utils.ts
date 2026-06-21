@@ -1,3 +1,31 @@
+/**
+ * @file 通用工具函数模块
+ *
+ * 本模块提供 Remi 前端最常用的工具函数：
+ *
+ * - **样式合并**：`cn` 合并 className，支持 Tailwind 冲突解决
+ * - **ID 工厂**：构造各种品牌的实体 ID（ProjectId、ThreadId、MessageId 等）
+ *
+ * ## 核心导出
+ *
+ * - `cn(...inputs)`：合并 className（基于 `class-variance-authority` + `tailwind-merge`）
+ * - `makeProjectId(name)`：构造 ProjectId
+ * - `makeThreadId(name)`：构造 ThreadId
+ * - `makeMessageId(name)`：构造 MessageId
+ * - `makeCommandId(name)`：构造 CommandId
+ *
+ * ## 使用场景
+ *
+ * - 组件 className 合并
+ * - 单元测试中构造测试数据
+ * - Mock 后端响应时构造合法 ID
+ *
+ * ## 注意事项
+ *
+ * - `cn` 内部会先按 cva 合并变体，再通过 `twMerge` 解决 Tailwind 冲突
+ * - ID 工厂函数仅用于前端，不会与后端 ID 校验
+ */
+
 import { CommandId, MessageId, ProjectId, ThreadId } from "~/contracts";
 import { type CxOptions, cx } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";

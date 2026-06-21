@@ -1,3 +1,29 @@
+/**
+ * @file 终端上下文模块
+ *
+ * 本模块提供将线程消息中的终端命令上下文提取为可独立引用的数据结构。
+ * 主要用于 Composer 中展示"@ Terminal Context"提及。
+ *
+ * ## 核心导出
+ *
+ * - `TerminalContextRef`：终端上下文引用
+ * - `extractTerminalContexts`：从消息中提取终端上下文
+ * - `buildTerminalContextAttachment`：构造附件
+ * - `findPendingTerminalContexts`：查找待处理的终端上下文
+ *
+ * ## 使用场景
+ *
+ * - Composer 中显示"@ 上一条命令"提及
+ * - 让 AI 引用之前的命令输出
+ * - 命令复用与调试
+ *
+ * ## 注意事项
+ *
+ * - 仅提取最近 10 条消息中的终端上下文
+ * - 上下文必须包含命令文本与输出
+ * - 命令被截断时会显示省略号
+ */
+
 import { type ThreadId } from "~/contracts";
 import {
   extractTrailingAssistantSelections,

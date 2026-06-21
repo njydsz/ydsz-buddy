@@ -1,7 +1,0 @@
-packages:
-  - "remi-app"
-  - "apps/marketing"
-allowBuilds:
-  esbuild: true
-  msgpackr-extract: true
-  msw: true

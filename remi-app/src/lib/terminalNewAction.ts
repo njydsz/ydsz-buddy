@@ -1,3 +1,25 @@
+/**
+ * @file 终端新建操作解析模块
+ *
+ * 本模块提供对"新建终端"操作的目标终端 ID 解析工具，根据当前布局和已有终端决定新终端的位置。
+ *
+ * ## 核心导出
+ *
+ * - `ResolveTerminalNewActionInput`：解析输入
+ * - `resolveTerminalNewAction`：解析新终端应该在哪里创建
+ *
+ * ## 使用场景
+ *
+ * - 用户点击"+ 新建终端"按钮
+ * - 工作区中创建新终端
+ * - 拆分/合并终端时的目标推断
+ *
+ * ## 注意事项
+ *
+ * - 如果当前布局已有终端，则在同位置替换
+ * - 如果没有终端，则使用默认 ID
+ */
+
 import { collectTerminalIdsFromLayout } from "../terminalPaneLayout";
 import type { ThreadTerminalGroup } from "../types";
 
