@@ -183,6 +183,29 @@ pub fn run() {
         .manage(UpdateState::new())          // 自动更新状态（版本检查、下载进度）
         .manage(ServerState::new(server_addr, bootstrap_result)) // 嵌入式服务器状态
 
+        // ========== 无边框窗口初始化 ==========
+        // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
+        //   （tauri.conf.json 的 decorations 为全局开关，会同时影响 macOS 交通灯按钮，
+        //    因此在运行时按平台分别处理）
+        // macOS：保留 decorations，配合 titleBarStyle = "Overlay" 绘制交通灯按钮
+        .setup(|app| {
+            #[cfg(not(target_os = "macos"))]
+            {
+                use tauri::Manager;
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.set_decorations(false);
+                }
+            }
+            #[cfg(target_os = "macos")]
+            {
+                use tauri::Manager;
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.set_decorations(true);
+                }
+            }
+            let _ = app;
+            Ok(())
+        })
         // ========== 命令注册 ==========
         // 将 Rust 函数注册为前端可通过 `invoke()` 调用的 IPC 命令
         .invoke_handler(tauri::generate_handler![

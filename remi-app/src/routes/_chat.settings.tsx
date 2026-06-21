@@ -46,6 +46,7 @@ import {
 } from "../appSettings";
 import { APP_VERSION } from "../branding";
 import { SidebarHeaderNavigationControls } from "../components/SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "../components/WindowCaptionButtons";
 import { useDesktopTopBarTrafficLightGutterClassName } from "../hooks/useDesktopTopBarGutter";
 import {
   ClaudeAI,
@@ -74,7 +75,7 @@ import { ThemePackEditor } from "../components/ThemePackEditor";
 import { SidebarHeaderTrigger, SidebarInset } from "../components/ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../components/ui/tooltip";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { isElectron } from "../env";
+import { isDesktop, isElectron } from "../env";
 import { useTheme } from "../hooks/useTheme";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
 import {
@@ -3650,10 +3651,10 @@ function SettingsRouteView() {
     <SidebarInset className="h-dvh min-h-0 overflow-hidden overscroll-y-none text-foreground">
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
         {/* Header */}
-        {isElectron ? (
+        {isDesktop ? (
           <div
             className={cn(
-              "drag-region flex h-[52px] shrink-0 items-center border-b border-border/70 px-5",
+              "drag-region flex h-[44px] shrink-0 items-center border-b border-border/70 px-5",
               desktopTopBarTrafficLightGutterClassName,
             )}
           >
@@ -3661,7 +3662,7 @@ function SettingsRouteView() {
             <span className="text-xs font-medium tracking-wide text-muted-foreground/70">
               {messages.settings.title}
             </span>
-            <div className="ms-auto flex items-center gap-2">
+            <div className="ms-auto flex items-center gap-2 [-webkit-app-region:no-drag]">
               <Button
                 size="xs"
                 variant="outline"
@@ -3671,6 +3672,7 @@ function SettingsRouteView() {
                 <RotateCcwIcon className="size-3.5" />
                 {messages.settings.restoreDefaults}
               </Button>
+              <WindowCaptionButtons className="-me-5" />
             </div>
           </div>
         ) : (

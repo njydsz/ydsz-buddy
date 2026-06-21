@@ -1,9 +1,8 @@
-/**
- * @file workspaceStore.ts
- * @description 閹镐椒绠欓崠鏍畱缂佸牏顏銉ょ稊閸栨椽銆夐棃銏㈠Ц閹胶顓搁悶?Store閵? *
- * 缁狅紕鎮婄紒鍫㈩伂娑撴挸鐫橀惃鍕紣娴ｆ粌灏い鐢告桨閿涘本鐦℃稉顏勪紣娴ｆ粌灏い鐢告桨閹枫儲婀侀悪顒傜彌閻ㄥ嫮绮撶粩顖氱鐏炩偓妫板嫯顔曢妴? * 閸氬本妞傜紒瀛樺Б閻劍鍩涙稉鑽ゆ窗瑜版洝鐭惧鍕剁礉娓氭稓绮撶粩顖濈熅瀵板嫯袙閺嬫劒濞囬悽銊ｂ偓? * 閻樿埖鈧線鈧俺绻?localStorage 閹镐椒绠欓崠鏍モ偓? */
+// FILE: workspaceStore.ts
+// Purpose: Persist terminal-only workspace pages plus their stable synthetic terminal scopes.
+// Layer: Workspace view-model state
 
-import { type ThreadId } from "~/contracts";
+import { type ThreadId } from "@peakcode/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -12,18 +11,11 @@ import {
   type WorkspaceLayoutPresetId,
 } from "./workspaceTerminalLayoutPresets";
 
-/**
- * 瀹搞儰缍旈崠娲€夐棃銏℃殶閹诡噯绱濋崠鍛儓 ID閵嗕焦鐖ｆ０妯糕偓浣哥鐏炩偓妫板嫯顔曢崪灞炬闂傚瓨鍩戦妴? */
 interface WorkspacePage {
-  /** 瀹搞儰缍旈崠鍝勬暜娑撯偓閺嶅洩鐦?*/
   id: string;
-  /** 瀹搞儰缍旈崠鐑樻▔缁€鐑樼垼妫?*/
   title: string;
-  /** 缂佸牏顏敮鍐ㄧ湰妫板嫯顔?ID */
   layoutPresetId: WorkspaceLayoutPresetId;
-  /** 閸掓稑缂撻弮鍫曟？閿涘湜SO 閺嶇厧绱￠敍?*/
   createdAt: string;
-  /** 閺堚偓閸氬孩娲块弬鐗堟闂傝揪绱橧SO 閺嶇厧绱￠敍?*/
   updatedAt: string;
 }
 
@@ -39,8 +31,7 @@ interface WorkspaceStoreState {
   reorderWorkspace: (workspaceId: string, nextIndex: number) => void;
 }
 
-/** localStorage 閹镐椒绠欓崠鏍暛閸?*/
-const WORKSPACE_STORE_STORAGE_KEY = "remicode:workspace-pages:v2";
+const WORKSPACE_STORE_STORAGE_KEY = "peakcode:workspace-pages:v2";
 
 function randomWorkspaceId(): string {
   if (typeof crypto.randomUUID === "function") {
@@ -135,27 +126,10 @@ function reorderAtIndex<T>(items: readonly T[], fromIndex: number, toIndex: numb
   return next;
 }
 
-/**
- * 鐏忓棗浼愭担婊冨隘 ID 鏉烆剚宕叉稉鍝勬値閹存劗娈戠痪璺ㄢ柤 ID閵? * 瀹搞儰缍旈崠娲€夐棃顫▏閻劌鎮庨幋鎰畱缁捐法鈻?ID 娑撳海绮撶粩顖滃Ц閹?Store 閸忓疇浠堥敍? * 娴ｅ灝绶卞銉ょ稊閸栨椽銆夐棃銏犲讲娴犮儱顦查悽銊у殠缁嬪楠囬崚顐ゆ畱缂佸牏顏悩鑸碘偓浣侯吀閻炲棎鈧? *
- * @param workspaceId - 瀹搞儰缍旈崠?ID
- * @returns 閸氬牊鍨氶惃鍕殠缁?ID閿涘本鐗稿蹇庤礋 "workspace:{workspaceId}"
- *
- * @example
- * ```ts
- * workspaceThreadId("abc-123"); // => "workspace:abc-123"
- * ```
- */
 export function workspaceThreadId(workspaceId: string): ThreadId {
   return `workspace:${workspaceId}` as ThreadId;
 }
 
-/**
- * 瀹搞儰缍旈崠娲€夐棃銏㈠Ц閹?Zustand Store閵? * 缁狅紕鎮婂銉ょ稊閸栨椽銆夐棃銏㈡畱婢х偛鍨归弨瑙勭叀閵嗕線鍣搁崨钘夋倳閵嗕焦甯撴惔蹇撴嫲鐢啫鐪０鍕啎閸掑洦宕查妴? * 闁俺绻?persist 娑擃參妫挎禒璺虹殺閻樿埖鈧焦瀵旀稊鍛閸?localStorage閵? *
- * @example
- * ```tsx
- * const { workspacePages, createWorkspace, deleteWorkspace } = useWorkspaceStore();
- * ```
- */
 export const useWorkspaceStore = create<WorkspaceStoreState>()(
   persist(
     (set) => ({

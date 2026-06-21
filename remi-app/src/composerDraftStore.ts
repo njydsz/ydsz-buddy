@@ -1,9 +1,8 @@
-// @ts-nocheck
 // FILE: composerDraftStore.ts
 // Purpose: Stores composer drafts, model selections, queued turns, and sticky provider choices.
 // Layer: Web state store
 // Depends on: contracts schemas, app model resolution helpers, and zustand persistence.
-// TODO: 鏉╀胶些閺堢喖妫挎稉瀛樻鐠哄疇绻冪猾璇茬€峰Λ鈧弻銉ｂ偓鍌氱秼閸撳秳绮涙担璺ㄦ暏閺冄呭 Effect Schema API閿?// 闂団偓閸氬海鐢婚弨鐟板晸娑?zod 閹存牗鏌婇悧?Effect Schema閵?
+
 import {
   type ClaudeCodeEffort,
   type CodexReasoningEffort,
@@ -25,7 +24,7 @@ import {
   ProviderStartOptions,
   RuntimeMode,
   ThreadId,
-} from "~/contracts";
+} from "@peakcode/contracts";
 import * as Schema from "effect/Schema";
 import * as Equal from "effect/Equal";
 import { DeepMutable } from "effect/Types";
@@ -34,7 +33,7 @@ import {
   normalizeModelSlug,
   resolveSelectableModel,
   resolveModelSlugForProvider,
-} from "~/shared/model";
+} from "@peakcode/shared/model";
 import { useMemo } from "react";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { resolveAppModelSelection } from "./appSettings";
@@ -56,11 +55,9 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createDebouncedStorage, createMemoryStorage } from "./lib/storage";
 
-/** Composer 閼藉枪閹镐椒绠欓崠鏍х摠閸屻劎娈?localStorage 闁款喖鎮?*/
-export const COMPOSER_DRAFT_STORAGE_KEY = "remicode:composer-drafts:v1";
+export const COMPOSER_DRAFT_STORAGE_KEY = "peakcode:composer-drafts:v1";
 const COMPOSER_DRAFT_STORAGE_VERSION = 4;
 const DraftThreadEnvModeSchema = Schema.Literals(["local", "worktree"]);
-/** 閼藉枪缁捐法鈻奸惃鍕箚婢у啯膩瀵骏绱癭"local"` 娑撶儤婀伴崷鎵箚婢у喛绱漙"worktree"` 娑?worktree 閻滎垰顣?*/
 export type DraftThreadEnvMode = typeof DraftThreadEnvModeSchema.Type;
 const DraftThreadEntryPointSchema = Schema.Literals(["chat", "terminal"]);
 const COMPOSER_PROVIDER_KINDS = [
@@ -91,7 +88,6 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** 閹镐椒绠欓崠鏍畱閸ュ墽澧栭梽鍕 Schema閿涘瞼鏁ゆ禍?localStorage 鎼村繐鍨崠?*/
 export const PersistedComposerImageAttachment = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
@@ -99,21 +95,15 @@ export const PersistedComposerImageAttachment = Schema.Struct({
   sizeBytes: Schema.Number,
   dataUrl: Schema.String,
 });
-/** 閹镐椒绠欓崠鏍ф禈閻楀洭妾禒鍓佹畱缁鐎烽敍灞肩矤 Schema 閹恒劌顕?*/
 export type PersistedComposerImageAttachment = typeof PersistedComposerImageAttachment.Type;
 
-/**
- * Composer 閸ュ墽澧栭梽鍕閿涘苯瀵橀崥顐ョ箥鐞涘本妞傛穱鈩冧紖閿涘湗ile 鐎电钖勯崪宀勵暕鐟?URL閿涘鈧? * 娑?PersistedComposerImageAttachment 娑撳秴鎮撻敍灞绢劃缁鐎烽崠鍛儓娑撳秴褰叉惔蹇撳灙閸栨牜娈?File 鐎电钖勯妴? */
 export interface ComposerImageAttachment extends Omit<ChatImageAttachment, "previewUrl"> {
   previewUrl: string;
   file: File;
 }
 
-/** Composer 閸斺晜澧滈柅澶嬪闂勫嫪娆㈢猾璇茬€烽敍灞肩瑢 ChatAssistantSelectionAttachment 娑撯偓閼?*/
 export type ComposerAssistantSelectionAttachment = ChatAssistantSelectionAttachment;
 
-/**
- * 閹烘帡妲︽稉顓犳畱 Composer 閼卞﹤銇夋潪顔筋偧閵? * 瑜版挾鏁ら幋宄版躬瑜版挸澧犳潪顔筋偧閺堫亜鐣幋鎰閸欐垿鈧焦鏌婂☉鍫熶紖閿涘本绉烽幁顖欑窗鐞氼偅鏂侀崗銉╂Е閸掓鐡戝鍛槱閻炲棎鈧? */
 export interface QueuedComposerChatTurn {
   id: string;
   kind: "chat";
@@ -135,7 +125,6 @@ export interface QueuedComposerChatTurn {
   envMode: DraftThreadEnvMode;
 }
 
-/** 閹烘帡妲︽稉顓犳畱鐠佲€冲灊鐠虹喕绻樻潪顔筋偧閿涘瞼鏁ゆ禍?plan 濡€崇础娑撳娈戦崥搴ｇ敾閹垮秳缍?*/
 export interface QueuedComposerPlanFollowUp {
   id: string;
   kind: "plan-follow-up";
@@ -151,7 +140,6 @@ export interface QueuedComposerPlanFollowUp {
   runtimeMode: RuntimeMode;
 }
 
-/** 閹烘帡妲︽稉顓犳畱 Composer 鏉烆喗顐奸懕鏂挎値缁鐎烽敍鍫ｄ喊婢垛晞鐤嗗▎鈩冨灗鐠佲€冲灊鐠虹喕绻樻潪顔筋偧閿?*/
 export type QueuedComposerTurn = QueuedComposerChatTurn | QueuedComposerPlanFollowUp;
 
 const PersistedTerminalContextDraft = Schema.Struct({
@@ -323,8 +311,6 @@ const PersistedComposerDraftStoreStorage = Schema.Struct({
   state: PersistedComposerDraftStoreState,
 });
 
-/**
- * Composer 缁捐法鈻奸懡澶屒归悩鑸碘偓渚婄礉閸栧懎鎯堢紓鏍帆閸ｃ劌鍞寸€瑰箍鈧線妾禒韬测偓浣鼓侀崹瀣偓澶嬪缁涘绻嶇悰灞炬娣団剝浼呴妴? * 濮ｅ繋閲滅痪璺ㄢ柤鐎电懓绨叉稉鈧稉顏囧磸缁嬭法濮搁幀渚婄礉閻劋绨崷銊ф暏閹村嘲鍨忛幑銏㈠殠缁嬪妞傛穱婵堟殌閺堫亜褰傞柅浣烘畱閸愬懎顔愰妴? */
 export interface ComposerThreadDraftState {
   prompt: string;
   images: ComposerImageAttachment[];
@@ -339,8 +325,6 @@ export interface ComposerThreadDraftState {
   interactionMode: ProviderInteractionMode | null;
 }
 
-/**
- * 閼藉枪缁捐法鈻奸悩鑸碘偓渚婄礉鐠佹澘缍嶇痪璺ㄢ柤閻ㄥ嫰銆嶉惄顔肩秺鐏炵偑鈧礁鍨庨弨顖樷偓浣哄箚婢у啯膩瀵繒鐡戦崗鍐т繆閹垬鈧? * 娑?ComposerThreadDraftState 娑撳秴鎮撻敍灞绢劃閹恒儱褰涢崗铏暈缁捐法鈻奸惃鍕瑐娑撳鏋冩穱鈩冧紖閼板矂娼紓鏍帆閸ｃ劌鍞寸€瑰箍鈧? */
 export interface DraftThreadState {
   projectId: ProjectId;
   createdAt: string;
@@ -359,8 +343,6 @@ interface ProjectDraftThread extends DraftThreadState {
   threadId: ThreadId;
 }
 
-/**
- * Composer 閼藉枪鐎涙ê鍋嶉惃鍕暚閺佸濮搁幀浣瑰复閸欙絻鈧? * 缁狅紕鎮婇幍鈧張澶屽殠缁嬪娈戦懡澶屒归崘鍛啇閵嗕浇宕忕粙璺ㄥ殠缁嬪鍘撴穱鈩冧紖閵嗕線銆嶉惄顔芥Ё鐏忓嫪浜掗崣濠勭煒閹勀侀崹瀣偓澶嬪閵? */
 export interface ComposerDraftStoreState {
   draftsByThreadId: Record<ThreadId, ComposerThreadDraftState>;
   draftThreadsByThreadId: Record<ThreadId, DraftThreadState>;
@@ -465,8 +447,6 @@ export interface ComposerDraftStoreState {
   clearComposerContent: (threadId: ThreadId) => void;
 }
 
-/**
- * 閺堝鏅ラ惃?Composer 濡€崇€烽悩鑸碘偓渚婄礉閸栧懎鎯堣ぐ鎾冲闁鑵戦惃鍕侀崹瀣嫲濡€崇€烽柅澶愩€嶉妴? * 閻?deriveEffectiveComposerModelState 鐠侊紕鐣诲妤€鍤妴? */
 export interface EffectiveComposerModelState {
   selectedModel: ModelSlug;
   modelOptions: ProviderModelOptions | null;
@@ -1085,7 +1065,7 @@ function normalizeModelSelection(
   return makeModelSelection(provider, model, options);
 }
 
-// 閳光偓閳光偓 Legacy sync helpers (used only during migration from v2 storage) 閳光偓閳光偓
+// ── Legacy sync helpers (used only during migration from v2 storage) ──
 
 function legacySyncModelSelectionOptions(
   modelSelection: ModelSelection | null,
@@ -1130,7 +1110,7 @@ function legacyReplaceProviderModelOptions(
   });
 }
 
-// 閳光偓閳光偓 New helpers for the consolidated representation 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+// ── New helpers for the consolidated representation ────────────────────
 
 function legacyToModelSelectionByProvider(
   modelSelection: ModelSelection | null,
@@ -1157,13 +1137,6 @@ function legacyToModelSelectionByProvider(
   return result;
 }
 
-/**
- * 閹恒劌顕遍張澶嬫櫏閻?Composer 濡€崇€烽悩鑸碘偓浣碘偓? *
- * 閹稿绱崗鍫㈤獓閸氬牆鑻熸径姘嚋閺夈儲绨惃鍕侀崹瀣偓澶嬪閿涙俺宕忕粙?> 缁捐法鈻?> 妞ゅ湱娲?> 姒涙顓婚崐绗衡偓? * 閸氬本妞傞懓鍐閸欘垳鏁ゅΟ鈥崇€烽崚妤勩€冮敍宀€鈥樻穱婵囨付缂佸牓鈧鑵戦惃鍕侀崹瀣Ц閸欘垳鏁ら惃鍕┾偓? *
- * @param input.draft - 閼藉枪閻樿埖鈧椒鑵戦惃鍕侀崹瀣偓澶嬪娣団剝浼? * @param input.selectedProvider - 瑜版挸澧犻柅澶夎厬閻?Provider
- * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.customModelsByProvider - 閸?Provider 閻ㄥ嫯鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€? * @param input.availableModelOptionsByProvider - 閸?Provider 閻ㄥ嫬褰查悽銊δ侀崹瀣偓澶愩€? * @returns 閺堝鏅ラ惃鍕侀崹瀣Ц閹? */
 export function deriveEffectiveComposerModelState(input: {
   draft:
     | Pick<ComposerThreadDraftState, "modelSelectionByProvider" | "activeProvider">
@@ -1241,13 +1214,8 @@ export function deriveEffectiveComposerModelState(input: {
   };
 }
 
-/**
- * 鐟欙絾鐎芥＃鏍偓澶屾畱 Composer 濡€崇€烽柅澶嬪閿涘瞼鏁ゆ禍搴ゅ磸缁嬭法鍤庣粙瀣絹閸楀洣璐熷锝呯础缁捐法鈻奸弮鍓佹畱濡€崇€烽幐浣风畽閸栨牓鈧? * 娣囨繃瀵旂紒鍫㈩伂娴兼ê鍘涢惃鍕殠缁嬪鍨卞杞扮瑢 Composer 閻ㄥ嫪绱崗鍫㈤獓娑撯偓閼锋番鈧? *
- * @param input.draft - 閼藉枪閻樿埖鈧? * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.defaultProvider - 姒涙顓?Provider
- * @returns 妫ｆ牠鈧娈戝Ο鈥崇€烽柅澶嬪
- */
+// Resolve the model we should persist for a draft-backed thread promotion.
+// This keeps terminal-first thread creation aligned with the composer precedence.
 export function resolvePreferredComposerModelSelection(input: {
   draft:
     | Pick<ComposerThreadDraftState, "modelSelectionByProvider" | "activeProvider">
@@ -2234,7 +2202,6 @@ function toHydratedThreadDraft(
   };
 }
 
-/** Composer 閼藉枪鐎涙ê鍋嶉惃?Zustand hook閿涘苯鐔€娴?persist 娑擃參妫挎禒璺虹杽閻?localStorage 閹镐椒绠欓崠?*/
 export const useComposerDraftStore = create<ComposerDraftStoreState>()(
   persist(
     (set, get) => ({
@@ -2743,10 +2710,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
           if (normalized) {
             const current = nextMap[normalized.provider];
             if (normalized.options !== undefined) {
-              // Explicit options provided 鈥攗se them
+              // Explicit options provided → use them
               nextMap[normalized.provider] = normalized;
             } else {
-              // No options in selection 鈥攑reserve existing options, update provider+model
+              // No options in selection → preserve existing options, update provider+model
               nextMap[normalized.provider] = makeModelSelection(
                 normalized.provider,
                 normalized.model,
@@ -3453,21 +3420,10 @@ export const useComposerDraftStore = create<ComposerDraftStoreState>()(
   ),
 );
 
-/**
- * 閼惧嘲褰囬幐鍥х暰缁捐法鈻奸惃鍕磸缁嬭法濮搁幀浣碘偓? * 婵″倹鐏夌痪璺ㄢ柤濞屸剝婀侀懡澶屒归敍宀冪箲閸ョ偟鈹栭懡澶屒归悩鑸碘偓渚婄礄EMPTY_THREAD_DRAFT閿涘鈧? *
- * @param threadId - 缁捐法鈻?ID
- * @returns 缁捐法鈻奸懡澶屒归悩鑸碘偓? */
 export function useComposerThreadDraft(threadId: ThreadId): ComposerThreadDraftState {
   return useComposerDraftStore((state) => state.draftsByThreadId[threadId] ?? EMPTY_THREAD_DRAFT);
 }
 
-/**
- * React hook閿涙俺骞忛崣鏍ㄥ瘹鐎规氨鍤庣粙瀣畱閺堝鏅ュΟ鈥崇€烽悩鑸碘偓浣碘偓? * 閸愬懘鍎存担璺ㄦ暏 useMemo 缂傛挸鐡ㄧ拋锛勭暬缂佹挻鐏夐敍宀勪缉閸忓秳绗夎箛鍛邦洣閻ㄥ嫰鍣稿〒鍙夌厠閵? *
- * @param input.threadId - 缁捐法鈻?ID
- * @param input.selectedProvider - 瑜版挸澧犻柅澶夎厬閻?Provider
- * @param input.threadModelSelection - 缁捐法鈻肩痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.projectModelSelection - 妞ゅ湱娲扮痪褍鍩嗛惃鍕侀崹瀣偓澶嬪
- * @param input.customModelsByProvider - 閸?Provider 閻ㄥ嫯鍤滅€规矮绠熷Ο鈥崇€烽崚妤勩€? * @param input.availableModelOptionsByProvider - 閸?Provider 閻ㄥ嫬褰查悽銊δ侀崹瀣偓澶愩€? * @returns 閺堝鏅ラ惃鍕侀崹瀣Ц閹? */
 export function useEffectiveComposerModelState(input: {
   threadId: ThreadId;
   selectedProvider: ProviderKind;
@@ -3503,9 +3459,7 @@ export function useEffectiveComposerModelState(input: {
   );
 }
 
-/**
- * 鐏忓棗鍑￠幓鎰磳娑撶儤婀囬崝锛勵伂缁捐法鈻奸惃鍕磸缁嬫寧鐖ｇ拋棰佽礋"濮濓絽婀幓鎰磳"閻樿埖鈧降鈧? * 閸忓牊鐖ｇ拋鏉垮晙閻㈣精鐭鹃悽?Composer 閸︺劍婀囬崝锛勵伂缁捐法鈻奸崥顖氬З閸氬孩澧界悰灞剧閻炲棎鈧? *
- * @param serverThreadIds - 瀹稿弶褰侀崡鍥╂畱閺堝秴濮熺粩顖滃殠缁?ID 闂嗗棗鎮? */
+// Mark drafts as promoted first; route/composer cleanup happens after the server thread starts.
 export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
   const draftThreadIds = Object.keys(store.draftThreadsByThreadId) as ThreadId[];
@@ -3516,9 +3470,6 @@ export function markPromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>)
   }
 }
 
-/**
- * 鐎瑰本鍨氬鍙夊絹閸楀洩宕忕粙璺ㄥ殠缁嬪娈戝〒鍛倞瀹搞儰缍旈敍灞藉灩闂勩倕顕惔鏃傛畱閼藉枪閺佺増宓侀妴? *
- * @param serverThreadIds - 瀹稿弶褰侀崡鍥╂畱閺堝秴濮熺粩顖滃殠缁?ID 闂嗗棗鎮? */
 export function finalizePromotedDraftThreads(serverThreadIds: ReadonlySet<ThreadId>): void {
   const store = useComposerDraftStore.getState();
   for (const threadId of serverThreadIds) {

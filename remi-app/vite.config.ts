@@ -16,8 +16,6 @@ const buildSourcemap =
       ? "hidden"
       : true;
 
-const effectDir = path.resolve(require.resolve("effect"), "..");
-
 export default defineConfig({
   plugins: [
     tanstackRouter(),
@@ -34,7 +32,6 @@ export default defineConfig({
       "@pierre/diffs/react",
       "@pierre/diffs/worker/worker.js",
       "react-icons/gr",
-      "effect",
     ],
   },
   define: {
@@ -44,25 +41,32 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     conditions: ["module", "browser", "development", "import", "default"],
-    alias: {
-      "effect/Schema": path.join(effectDir, "dist/esm/index.js"),
-      "effect/unstable/rpc": path.join(effectDir, "dist/esm/index.js"),
-      "effect/unstable/socket": path.join(effectDir, "dist/esm/index.js"),
-      "effect/unstable/socket/Socket": path.join(effectDir, "dist/esm/index.js"),
+    alias: [
       // @peakcode workspace packages → local src/shared/ files
-      "@peakcode/contracts": path.resolve(__dirname, "src/contracts.ts"),
-      "@peakcode/shared/model": path.resolve(__dirname, "src/shared/model.ts"),
-      "@peakcode/shared/threadSummary": path.resolve(__dirname, "src/shared/threadSummary.ts"),
-      "@peakcode/shared/threadWorkspace": path.resolve(__dirname, "src/shared/threadWorkspace.ts"),
-      "@peakcode/shared/git": path.resolve(__dirname, "src/shared/git.ts"),
-      "@peakcode/shared/chatThreads": path.resolve(__dirname, "src/shared/chatThreads.ts"),
-      "@peakcode/shared/threadEnvironment": path.resolve(__dirname, "src/shared/threadEnvironment.ts"),
-      "@peakcode/shared/worktreeHandoff": path.resolve(__dirname, "src/shared/worktreeHandoff.ts"),
-      "@peakcode/shared/path": path.resolve(__dirname, "src/shared/path.ts"),
-      "@peakcode/shared/localImage": path.resolve(__dirname, "src/shared/localImage.ts"),
-      "@peakcode/shared/conversationEdit": path.resolve(__dirname, "src/shared/conversationEdit.ts"),
-      "@peakcode/shared/terminalThreads": path.resolve(__dirname, "src/shared/terminalThreads.ts"),
-    },
+      { find: "@peakcode/contracts", replacement: path.resolve(__dirname, "src/contracts/index.ts") },
+      { find: "@peakcode/shared/model", replacement: path.resolve(__dirname, "src/shared/model.ts") },
+      { find: "@peakcode/shared/threadSummary", replacement: path.resolve(__dirname, "src/shared/threadSummary.ts") },
+      { find: "@peakcode/shared/threadWorkspace", replacement: path.resolve(__dirname, "src/shared/threadWorkspace.ts") },
+      { find: "@peakcode/shared/git", replacement: path.resolve(__dirname, "src/shared/git.ts") },
+      { find: "@peakcode/shared/chatThreads", replacement: path.resolve(__dirname, "src/shared/chatThreads.ts") },
+      { find: "@peakcode/shared/threadEnvironment", replacement: path.resolve(__dirname, "src/shared/threadEnvironment.ts") },
+      { find: "@peakcode/shared/worktreeHandoff", replacement: path.resolve(__dirname, "src/shared/worktreeHandoff.ts") },
+      { find: "@peakcode/shared/path", replacement: path.resolve(__dirname, "src/shared/path.ts") },
+      { find: "@peakcode/shared/localImage", replacement: path.resolve(__dirname, "src/shared/localImage.ts") },
+      { find: "@peakcode/shared/conversationEdit", replacement: path.resolve(__dirname, "src/shared/conversationEdit.ts") },
+      { find: "@peakcode/shared/terminalThreads", replacement: path.resolve(__dirname, "src/shared/terminalThreads.ts") },
+      { find: "@peakcode/shared/subagents", replacement: path.resolve(__dirname, "src/shared/subagents.ts") },
+      { find: "@peakcode/shared/toolOutputSummary", replacement: path.resolve(__dirname, "src/shared/toolOutputSummary.ts") },
+      { find: "@peakcode/shared/agentMentions", replacement: path.resolve(__dirname, "src/shared/agentMentions.ts") },
+      { find: "@peakcode/shared/serverSettings", replacement: path.resolve(__dirname, "src/shared/serverSettings.ts") },
+      { find: "@peakcode/shared/Net", replacement: path.resolve(__dirname, "src/shared/Net.ts") },
+      { find: "@peakcode/shared/shell", replacement: path.resolve(__dirname, "src/shared/shell.ts") },
+      { find: "@peakcode/shared/schemaJson", replacement: path.resolve(__dirname, "src/shared/schemaJson.ts") },
+      { find: "@peakcode/shared/logging", replacement: path.resolve(__dirname, "src/shared/logging.ts") },
+      { find: "@peakcode/shared/Struct", replacement: path.resolve(__dirname, "src/shared/Struct.ts") },
+      { find: "@peakcode/shared/DrainableWorker", replacement: path.resolve(__dirname, "src/shared/DrainableWorker.ts") },
+      { find: "@peakcode/shared/codexConfig", replacement: path.resolve(__dirname, "src/shared/codexConfig.ts") },
+    ],
   },
   // Tauri 配置
   clearScreen: false,

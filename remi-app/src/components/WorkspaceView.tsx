@@ -13,6 +13,7 @@ import { useAppSettings } from "~/appSettings";
 import { Button } from "~/components/ui/button";
 import { SidebarInset } from "~/components/ui/sidebar";
 import { SidebarHeaderNavigationControls } from "~/components/SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "~/components/WindowCaptionButtons";
 import { useDesktopTopBarTrafficLightGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 import { cn } from "~/lib/utils";
 import {
@@ -404,7 +405,7 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
             desktopTopBarTrafficLightGutterClassName,
           )}
         >
-          <div className="flex h-[52px] items-center gap-2 sm:gap-3">
+          <div className="drag-region flex h-[44px] items-center gap-2 sm:gap-3">
             <SidebarHeaderNavigationControls />
             <div className="flex min-w-0 flex-1 items-center gap-2">
               {renaming ? (
@@ -454,6 +455,7 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
               >
                 <SettingsIcon className="size-3" />
               </Button>
+              <WindowCaptionButtons className="ms-1.5 -me-3 sm:-me-5" />
             </div>
           </div>
         </header>

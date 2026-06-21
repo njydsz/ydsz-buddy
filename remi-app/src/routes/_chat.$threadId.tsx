@@ -32,6 +32,7 @@ import BrowserPanel from "../components/BrowserPanel";
 import { ProviderIcon } from "../components/ProviderIcon";
 import { ChatPaneDropOverlay } from "../components/chat-drop-overlay/ChatPaneDropOverlay";
 import { DiffWorkerPoolProvider } from "../components/DiffWorkerPoolProvider";
+import { WindowCaptionButtons } from "../components/WindowCaptionButtons";
 import {
   DiffPanelHeaderSkeleton,
   DiffPanelLoadingState,
@@ -871,7 +872,7 @@ function ChatMountSkeleton() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background text-foreground contain-[layout_style_paint]">
       {/* Mirrors the real chat shell so route changes paint immediately while ChatView mounts
           on the next frames. */}
-      <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-(--color-border-light) px-4">
+      <div className="drag-region flex h-[44px] shrink-0 items-center gap-3 border-b border-(--color-border-light) px-4">
         <div className="size-5 rounded-full bg-muted" />
         <div className="min-w-0 flex-1 space-y-1.5">
           <div className="h-3.5 w-44 max-w-[48%] rounded-full bg-muted" />
@@ -881,6 +882,7 @@ function ChatMountSkeleton() {
           <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
           <div className="size-7 rounded-md border border-(--color-border-light) bg-muted/35" />
         </div>
+        <WindowCaptionButtons className="ms-auto -me-4" />
       </div>
       <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 py-4">
         <div className="max-w-[82%] space-y-2 rounded-2xl border border-(--color-border-light) bg-muted/22 p-3">

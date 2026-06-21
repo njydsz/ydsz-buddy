@@ -1,28 +1,13 @@
-/**
- * @file 閸欐娊鏁懣婊冨礋閸ョ偤鈧偓鐎圭偟骞? *
- * 閹绘劒绶甸崨鎴掓姢瀵繒娈?DOM 閸欐娊鏁懣婊冨礋閿涘苯灏柊宥呯安閻劎娈?Base UI 閼挎粌宕熼弽宄扮础閵? * 閸?Web 閻滎垰顣ㄦ稉顓炵秼閸樼喓鏁撻懣婊冨礋娑撳秴褰查悽銊︽娴ｆ粈璐熼崶鐐衡偓鈧弬瑙勵攳閿? * 閺勫墽銇氱€规矮缍呮稉瀣閼挎粌宕熼獮鎯扮箲閸ョ偟鏁ら幋椋庡仯閸戣崵娈戦柅澶愩€?ID閵? */
+import type { ContextMenuItem } from "@peakcode/contracts";
 
-import type { ContextMenuItem } from "~/contracts";
-
-/**
- * 鐢箑娴橀弽鍥ㄥ⒖鐏炴洜娈戦崣鎶芥暛閼挎粌宕熸い骞库偓? * 閸︺劌鐔€绾偓 ContextMenuItem 娑撳﹤顤冮崝?SVG 閸ョ偓鐖ｇ€涙顑佹稉鍙夋暜閹镐降鈧? */
 export interface ContextMenuItemWithIcon<T extends string = string> extends ContextMenuItem<T> {
-  /** SVG 閸ョ偓鐖ｇ€涙顑佹稉?*/
-  icon?: string;
+  icon?: string; // SVG string
 }
 
 /**
- * 閺勫墽銇氶崨鎴掓姢瀵繒娈戦崣鎶芥暛閼挎粌宕熼妴? * 閸︺劍瀵氱€规矮缍呯純顔芥▔缁€杞扮瑓閹峰褰嶉崡鏇礉閺€顖涘瘮闁款喚娲忕€佃壈鍩呴敍鍫滅瑐娑撳顔勬径娣偓涓抧ter閵嗕笒scape閿涘鈧? * 閼挎粌宕熷┃銏犲毉鐟欏棗褰涢弮鎯板殰閸斻劏鐨熼弫缈犵秴缂冾喓鈧? *
- * @param items - 閼挎粌宕熸い鐟板灙鐞? * @param position - 閼挎粌宕熼弰鍓с仛娴ｅ秶鐤嗛敍宀勭帛鐠併倓璐?(0, 0)
- * @returns Promise閿涘瞼鍋ｉ崙鏄忓綅閸楁洟銆嶆潻鏂挎礀閸?ID閿涘苯鍙ч梻顓＄箲閸?null
- *
- * @example
- * ```ts
- * const result = await showContextMenuFallback(
- *   [{ id: "copy", label: "Copy" }, { id: "delete", label: "Delete", destructive: true }],
- *   { x: 100, y: 200 }
- * );
- * ```
+ * Imperative DOM-based context menu that matches the app's Base UI menu styling.
+ * Shows a positioned dropdown and returns a promise that resolves
+ * with the clicked item id, or null if dismissed.
  */
 export function showContextMenuFallback<T extends string>(
   items: readonly ContextMenuItemWithIcon<T>[],

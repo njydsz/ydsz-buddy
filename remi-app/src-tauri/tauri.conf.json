@@ -18,7 +18,8 @@
         "fullscreen": false,
         "decorations": true,
         "transparent": false,
-        "dragDropEnabled": true
+        "dragDropEnabled": true,
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {

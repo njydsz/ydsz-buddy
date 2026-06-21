@@ -291,6 +291,7 @@ import { ComposerPromptEditor, type ComposerPromptEditorHandle } from "./Compose
 import { PullRequestThreadDialog } from "./PullRequestThreadDialog";
 import { ChatHeader } from "./chat/ChatHeader";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
 import { SidebarHeaderTrigger } from "./ui/sidebar";
 import { useDesktopTopBarTrafficLightGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 import { ChatTranscriptPane } from "./chat/ChatTranscriptPane";
@@ -7363,12 +7364,13 @@ export default function ChatView({
         {isDesktop && (
           <div
             className={cn(
-              "drag-region flex h-[52px] shrink-0 items-center border-b border-(--color-border-light) px-5",
+              "drag-region flex h-[44px] shrink-0 items-center border-b border-(--color-border-light) px-5",
               desktopTopBarTrafficLightGutterClassName,
             )}
           >
             <SidebarHeaderNavigationControls />
             <span className="text-xs text-muted-foreground/50">No active thread</span>
+            <WindowCaptionButtons className="ms-auto -me-5" />
           </div>
         )}
         <div className="flex flex-1 items-center justify-center">
@@ -7995,7 +7997,7 @@ export default function ChatView({
       <header
         className={cn(
           "border-b border-(--color-border-light) px-3 sm:px-5",
-          isDesktop ? "drag-region flex h-[52px] items-center" : "py-2 sm:py-3",
+          isDesktop ? "drag-region flex h-[44px] items-center" : "py-2 sm:py-3",
           desktopTopBarTrafficLightGutterClassName,
         )}
       >
@@ -8071,6 +8073,7 @@ export default function ChatView({
           onRenameThread={() => setRenameDialogOpen(true)}
           {...(onCloseThreadPane ? { onCloseThreadPane } : {})}
         />
+        {isDesktop ? <WindowCaptionButtons className="ms-auto -me-3 sm:-me-5" /> : null}
       </header>
 
       <RenameThreadDialog

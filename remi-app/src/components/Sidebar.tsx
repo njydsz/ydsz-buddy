@@ -5322,7 +5322,7 @@ export default function Sidebar() {
         <>
           <SidebarHeader
             className={cn(
-              "drag-region h-[48px] flex-row items-center gap-2 px-4 py-0 font-system-ui",
+              "drag-region h-[44px] flex-row items-center gap-2 px-4 py-0 font-system-ui",
               appSettings.sidebarSide === "left" && "pl-[90px]",
             )}
           >

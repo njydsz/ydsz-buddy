@@ -1,13 +1,12 @@
 /**
- * @file terminalStateStore.ts
- * @description 閹?threadId 缁便垹绱╅惃鍕矒缁?UI 閻樿埖鈧胶娈?Zustand Store閵? *
- * 缁狅紕鎮婂В蹇庨嚋缁捐法鈻奸惃鍕矒缁旑垶娼伴弶璺ㄥЦ閹緤绱濋崠鍛閿? * - 缂佸牏顏惃鍕ⅵ瀵偓/閸忔娊妫撮妴浣哥潔缁€鐑樐佸蹇ョ礄閹惰棄鐪?瀹搞儰缍旈崠鐚寸礆
- * - 缂佸牏顏弽鍥╊劮妞ょ數娈戦崚娑樼紦閵嗕礁鍙ч梻顓溾偓浣稿瀻閸撳眰鈧礁鍨忛幑? * - 缂佸牏顏崗鍐╂殶閹诡噯绱欓弽鍥╊劮閵嗕竼LI 缁鐎烽妴浣圭垼妫版顩惄鏍电礆
- * - 缂佸牏顏ú璇插З閻樿埖鈧緤绱欐潻鎰攽娑擃厼鐡欐潻娑氣柤閵嗕竸gent 濞夈劍鍓伴崝娑氬Ц閹緤绱? * - 瀹搞儰缍旈崠鍝勭鐏炩偓閿涘牆寮婚弽?娴犲懐绮撶粩顖滅搼閿? *
- * 閻樿埖鈧線鈧俺绻?localStorage 閹镐椒绠欓崠鏍电礉閸氼垰濮╅弮鎯板殰閸斻劍浠径宥冣偓? * 缂佸牏顏潻鍥ㄦ诞鏉堝懎濮崙鑺ユ殶娣囨繃瀵旂粔浣规箒閿涘奔浜掔痪锔芥将閸忣剙鍙?API 娴犲懏姣氶棁?store actions/selectors閵? */
+ * Single Zustand store for terminal UI state keyed by threadId.
+ *
+ * Terminal transition helpers are intentionally private to keep the public
+ * API constrained to store actions/selectors.
+ */
 
-import { type TerminalActivityState, type TerminalCliKind } from "~/shared/terminalThreads";
-import type { ThreadId } from "~/contracts";
+import { type TerminalActivityState, type TerminalCliKind } from "@peakcode/shared/terminalThreads";
+import type { ThreadId } from "@peakcode/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {
@@ -36,43 +35,25 @@ import {
   type WorkspaceLayoutPresetId,
 } from "./workspaceTerminalLayoutPresets";
 
-/**
- * 閸楁洑閲滅痪璺ㄢ柤閻ㄥ嫮绮撶粩?UI 閻樿埖鈧降鈧? * 閸栧懎鎯堢紒鍫㈩伂闂堛垺婢橀惃鍕潔缁€鐑樻煙瀵繈鈧礁绔风仦鈧妴浣圭垼缁涢箖銆夐崚妤勩€冮崪宀冪箥鐞涘本妞傚ú璇插З娣団剝浼呴妴? */
 export interface ThreadTerminalState {
-  /** 缂佸牏顏崗銉ュ經闂堫澁绱版禒搴や喊婢垛晠銆夋潻娑樺弳鏉╂ɑ妲哥紒鍫㈩伂妞や絻绻橀崗?*/
   entryPoint: ThreadPrimarySurface;
-  /** 缂佸牏顏棃銏℃緲閺勵垰鎯侀幍鎾崇磻 */
   terminalOpen: boolean;
-  /** 鐏炴洜銇氬Ο鈥崇础閿涙碍濞婄仦澶嬆佸蹇斿灗瀹搞儰缍旈崠鐑樐佸?*/
   presentationMode: ThreadTerminalPresentationMode;
-  /** 瀹搞儰缍旈崠鍝勭鐏炩偓閿涙艾寮婚弽蹇ョ礄閼卞﹤銇?缂佸牏顏敍澶嬪灗娴犲懐绮撶粩?*/
   workspaceLayout: ThreadTerminalWorkspaceLayout;
-  /** 瀹搞儰缍旈崠鍝勭秼閸撳秵绺哄ú鑽ゆ畱閺嶅洨顒锋い?*/
   workspaceActiveTab: ThreadTerminalWorkspaceTab;
-  /** 缂佸牏顏棃銏℃緲妤傛ê瀹抽敍鍫熷▕鐏炲膩瀵繋绗呮担璺ㄦ暏閿?*/
   terminalHeight: number;
-  /** 瑜版挸澧犵痪璺ㄢ柤閹枫儲婀侀惃鍕閺堝绮撶粩?ID 閸掓銆?*/
   terminalIds: string[];
-  /** 缂佸牏顏?ID 閸掔増妯夌粈鐑樼垼缁涘墽娈戦弰鐘茬殸 */
   terminalLabelsById: Record<string, string>;
-  /** 缂佸牏顏?ID 閸掓壆鏁ら幋鐤殰鐎规矮绠熼弽鍥暯鐟曞棛娲婇惃鍕Ё鐏?*/
   terminalTitleOverridesById: Record<string, string>;
-  /** 缂佸牏顏?ID 閸?CLI 缁鐎烽敍鍧坥dex/claude閿涘娈戦弰鐘茬殸 */
   terminalCliKindsById: Record<string, TerminalCliKind>;
-  /** 缂佸牏顏?ID 閸掔増鏁為幇蹇撳閻樿埖鈧緤绱檃ttention/review閿涘娈戦弰鐘茬殸 */
   terminalAttentionStatesById: Record<string, "attention" | "review">;
-  /** 瑜版挸澧犻張澶婄摍鏉╂稓鈻煎锝呮躬鏉╂劘顢戦惃鍕矒缁?ID 閸掓銆?*/
   runningTerminalIds: string[];
-  /** 瑜版挸澧犲┑鈧ú鑽ゆ畱缂佸牏顏?ID */
   activeTerminalId: string;
-  /** 缂佸牏顏棃銏℃緲缂佸嫬鍨悰顭掔礄濮ｅ繋閲滅紒鍕瘶閸氼偂绔存稉顏勭鐏炩偓閺嶆埊绱?*/
   terminalGroups: ThreadTerminalGroup[];
-  /** 瑜版挸澧犲┑鈧ú鑽ゆ畱闂堛垺婢樼紒?ID */
   activeTerminalGroupId: string;
 }
 
-/** localStorage 閹镐椒绠欓崠鏍暛閸?*/
-const TERMINAL_STATE_STORAGE_KEY = "remicode:terminal-state:v1";
+const TERMINAL_STATE_STORAGE_KEY = "peakcode:terminal-state:v1";
 
 function normalizeTerminalIds(terminalIds: string[]): string[] {
   const ids = [...new Set(terminalIds.map((id) => id.trim()).filter((id) => id.length > 0))];
@@ -490,10 +471,6 @@ function stripVolatileTerminalRuntimeState(state: ThreadTerminalState): ThreadTe
   };
 }
 
-/**
- * 濞撳懐鎮婇獮璺虹秺娑撯偓閸栨牗瀵旀稊鍛閻ㄥ嫮绮撶粩顖滃Ц閹焦妲х亸鍕€冮妴? * 缁夊娅庢潻鎰攽閺冩湹澶嶉弮鍓佸Ц閹緤绱欏▔銊﹀壈閸旀稓濮搁幀浣碘偓浣界箥鐞涘奔鑵戠紒鍫㈩伂閸掓銆冮敍澶涚礉
- * 楠炶泛鍨归梽銈勭瑢姒涙顓婚悩鑸碘偓浣烘祲閸氬瞼娈戦弶锛勬窗娴犮儱鍣虹亸鎴濈摠閸屻劋缍嬬粔顖樷偓? *
- * @param terminalStateByThreadId - 閹镐椒绠欓崠鏍畱缁捐法鈻肩紒鍫㈩伂閻樿埖鈧焦妲х亸鍕€? * @returns 濞撳懐鎮婇崥搴ｆ畱閺勭姴鐨犵悰? */
 export function sanitizePersistedTerminalStateByThreadId(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState> | null | undefined,
 ): Record<ThreadId, ThreadTerminalState> {
@@ -1215,10 +1192,6 @@ function applyThreadWorkspaceLayoutPreset(
   });
 }
 
-/**
- * 娴犲海绮撶粩顖滃Ц閹焦妲х亸鍕€冩稉顓⑩偓澶婂絿閹稿洤鐣剧痪璺ㄢ柤閻ㄥ嫮绮撶粩顖滃Ц閹降鈧? * 閼汇儳鍤庣粙?ID 娑撹櫣鈹栭幋鏍︾瑝鐎涙ê婀€电懓绨查悩鑸碘偓渚婄礉鏉╂柨娲栨妯款吇缂佸牏顏悩鑸碘偓浣碘偓? *
- * @param terminalStateByThreadId - 缁捐法鈻肩紒鍫㈩伂閻樿埖鈧焦妲х亸鍕€? * @param threadId - 閻╊喗鐖ｇ痪璺ㄢ柤 ID
- * @returns 鐠囥儳鍤庣粙瀣畱缂佸牏顏悩鑸碘偓渚婄礄娣囨繆鐦夋稉宥勮礋 null閿? */
 export function selectThreadTerminalState(
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>,
   threadId: ThreadId,
@@ -1258,8 +1231,6 @@ function updateTerminalStateByThreadId(
   };
 }
 
-/**
- * 缂佸牏顏悩鑸碘偓?Store 閻ㄥ嫬鐣弫瀛樺复閸欙綇绱濋崠鍛儓閻樿埖鈧礁鎷伴幍鈧張澶嬫惙娴ｆ粍鏌熷▔鏇樷偓? */
 interface TerminalStateStoreState {
   terminalStateByThreadId: Record<ThreadId, ThreadTerminalState>;
   openChatThreadPage: (threadId: ThreadId) => void;
@@ -1316,13 +1287,6 @@ interface TerminalStateStoreState {
   removeOrphanedTerminalStates: (activeThreadIds: Set<ThreadId>) => void;
 }
 
-/**
- * 缂佸牏顏悩鑸碘偓?Zustand Store閿涘本瀵?threadId 缁狅紕鎮婄紒鍫㈩伂 UI 閻樿埖鈧降鈧? * 闁俺绻?persist 娑擃參妫挎禒璺虹殺閻樿埖鈧焦瀵旀稊鍛閸?localStorage閵? *
- * @example
- * ```tsx
- * const { activeTerminalId, splitTerminal, closeTerminal } = useTerminalStateStore();
- * ```
- */
 export const useTerminalStateStore = create<TerminalStateStoreState>()(
   persist(
     (set) => {

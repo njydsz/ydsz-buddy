@@ -1,10 +1,7 @@
-/**
- * @file 閸╄桨绨?WebSocket 閻?NativeApi 鐎圭偟骞? * @description 闁俺绻?WsTransport 鐎圭偟骞?NativeApi 閹恒儱褰涢敍灞界殺閹碘偓閺堝甯悽鐔诲厴閸旀稖鐨熼悽? *              鏉烆剚宕叉稉?WebSocket RPC 鐠囬攱鐪伴妴鍌氭倱閺冭埖褰佹笟娑欐箛閸斺€虫珤閹恒劑鈧椒绨ㄦ禒鍓佹畱鐠併垽妲勯張鍝勫煑閿? *              娴犮儱寮峰ù蹇氼潔閸ｃ劎濮搁幀浣烘畱閸氬骸顦敍鍧抋llback閿涘顓搁悶鍡愨偓? *              瑜?Tauri 閸樼喓鏁撳銉﹀复娑撳秴褰查悽銊︽閿涘奔缍旀稉?Web 缁旑垳娈戞妯款吇鐎圭偟骞囬妴? */
-
 import {
+  type AuthBearerBootstrapResult,
   type AuthBootstrapInput,
   type AuthBootstrapResult,
-  type AuthBearerBootstrapResult,
   type AuthClientSession,
   type AuthCreatePairingCredentialInput,
   type AuthPairingCredentialResult,
@@ -25,42 +22,31 @@ import {
   type TerminalEvent,
   ORCHESTRATION_WS_CHANNELS,
   ORCHESTRATION_WS_METHODS,
-  type ClientOrchestrationCommand,
   type ContextMenuItem,
   type NativeApi,
   ServerConfigUpdatedPayload,
   WS_CHANNELS,
   WS_METHODS,
   type WsWelcomePayload,
-} from "~/contracts";
+} from "@peakcode/contracts";
 
 import { showConfirmDialogFallback } from "./confirmDialogFallback";
 import { showContextMenuFallback } from "./contextMenuFallback";
 import { WsTransport } from "./wsTransport";
-import { tauriBridge } from "./lib/tauri-bridge";
 
-/** 閸楁洑绶ョ€圭偘绶ラ敍宀€绱︾€涙ê鍑￠崚娑樼紦閻?NativeApi 閸?WsTransport */
 let instance: { api: NativeApi; transport: WsTransport } | null = null;
-/** 閺堝秴濮熼崳銊︻偨鏉╁孩绉烽幁顖滄磧閸氼剙娅掗梿鍡楁値 */
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
-/** 閺堝秴濮熼崳銊╁帳缂冾喗娲块弬鎵磧閸氼剙娅掗梿鍡楁値 */
 const serverConfigUpdatedListeners = new Set<(payload: ServerConfigUpdatedPayload) => void>();
-/** 閺堝秴濮熼崳?Provider 閻樿埖鈧焦娲块弬鎵磧閸氼剙娅掗梿鍡楁値 */
 const serverProviderStatusesUpdatedListeners = new Set<
   (payload: ServerProviderStatusesUpdatedPayload) => void
 >();
-/** 閺堝秴濮熼崳銊ф樊閹躲倗濮搁幀浣规纯閺傛壆娲冮崥顒€娅掗梿鍡楁値 */
 const serverMaintenanceUpdatedListeners = new Set<(payload: ServerLifecycleStreamEvent) => void>();
-/** 閺堝秴濮熼崳銊啎缂冾喗娲块弬鎵磧閸氼剙娅掗梿鍡楁値 */
 const serverSettingsUpdatedListeners = new Set<(payload: ServerSettingsUpdatedPayload) => void>();
-/** Git 閹垮秳缍旀潻娑樺閻╂垵鎯夐崳銊╂肠閸?*/
 const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => void>();
 
-/**
- * 鏉╁洦鎶ら悽銊﹀煕鏉堟挸鍙嗘惔鏃傜摕娑擃厾娈?null/undefined 閸? * 娴犲懎顕?thread.user-input.respond 缁鐎烽惃鍕嚒娴犮倗鏁撻弫鍫礉缁夊娅?answers 娑擃厽妫ら弫鍫㈡畱缁屽搫鈧吋娼惄? * @param command - 缂傛牗甯撶拫鍐ㄥ閸涙垝鎶? * @returns 鏉╁洦鎶ら崥搴ｆ畱閸涙垝鎶? */
 function omitNullUserInputAnswers(
-  command: ClientOrchestrationCommand,
-): ClientOrchestrationCommand {
+  command: Parameters<NativeApi["orchestration"]["dispatchCommand"]>[0],
+) {
   if (command.type !== "thread.user-input.respond") {
     return command;
   }
@@ -74,24 +60,15 @@ function omitNullUserInputAnswers(
     ),
   };
 }
-/** 缂佸牏顏禍瀣╂閻╂垵鎯夐崳銊╂肠閸?*/
 const terminalEventListeners = new Set<(payload: TerminalEvent) => void>();
-/** 缂傛牗甯撴０鍡楃厵娴滃娆㈤惄鎴濇儔閸ｃ劑娉﹂崥?*/
 const orchestrationDomainEventListeners = new Set<(payload: OrchestrationEvent) => void>();
-/** 缂傛牗甯?Shell 娴滃娆㈤惄鎴濇儔閸ｃ劑娉﹂崥?*/
 const orchestrationShellEventListeners = new Set<(payload: OrchestrationShellStreamItem) => void>();
-/** 缂傛牗甯撶痪璺ㄢ柤娴滃娆㈤惄鎴濇儔閸ｃ劑娉﹂崥?*/
 const orchestrationThreadEventListeners = new Set<
   (payload: OrchestrationThreadStreamItem) => void
 >();
-/** 閸氬骸顦ù蹇氼潔閸ｃ劎濮搁幀浣烘磧閸氼剙娅掗梿鍡楁値 */
 const fallbackBrowserStateListeners = new Set<(state: ThreadBrowserState) => void>();
-/** 閸氬骸顦ù蹇氼潔閸ｃ劎濮搁幀浣虹处鐎涙﹫绱漦ey 娑?threadId */
 const fallbackBrowserStates = new Map<ThreadId, ThreadBrowserState>();
 
-/**
- * 閸掓稑缂撴妯款吇閻ㄥ嫭绁荤憴鍫濇珤閻樿埖鈧? * @param threadId - 缁捐法鈻?ID
- * @returns 閸掓繂顫愬ù蹇氼潔閸ｃ劎濮搁幀渚婄礉閻楀牊婀版稉?0閿涘本婀幍鎾崇磻閿涘本妫ら弽鍥╊劮妞? */
 function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   return {
     threadId,
@@ -103,10 +80,6 @@ function defaultBrowserState(threadId: ThreadId): ThreadBrowserState {
   };
 }
 
-/**
- * 閺嶈宓?URL 閻㈢喐鍨氭妯款吇閻ㄥ嫭绁荤憴鍫濇珤閺嶅洨顒锋い鍨垼妫? * @param url - 閺嶅洨顒锋い?URL
- * @returns 閺嶅洨顒锋い鍨垼妫版﹫绱濈粚铏规妞や絻绻戦崶?"New tab"閿涘苯鎯侀崚娆掔箲閸ョ偛鐓欓崥宥嗗灗閸樼喎顫?URL
- */
 function defaultBrowserTitle(url: string): string {
   if (url === "about:blank") {
     return "New tab";
@@ -118,9 +91,6 @@ function defaultBrowserTitle(url: string): string {
   }
 }
 
-/**
- * 閸欐垿鈧礁鐢拋銈堢槈閻?HTTP JSON 鐠囬攱鐪? * @param path - 鐠囬攱鐪扮捄顖氱窞
- * @param options - 鐠囬攱鐪伴柅澶愩€嶉敍灞藉瘶閹奉剚鏌熷▔鏇炴嫲鐠囬攱鐪版担? * @returns 鐟欙絾鐎介崥搴ｆ畱 JSON 閸濆秴绨? * @throws 瑜版挸鎼锋惔鏃傚Ц閹胶鐖滈棃?2xx 閺冭埖濮忛崙娲晩鐠? */
 async function requestAuthJson<T>(
   path: string,
   options: {
@@ -153,9 +123,6 @@ async function requestAuthJson<T>(
   return payload as T;
 }
 
-/**
- * 閸掓稑缂撻崥搴☆槵濞村繗顫嶉崳銊︾垼缁涢箖銆? * @param url - 閸掓繂顫?URL閿涘矂绮拋銈勮礋 about:blank
- * @returns 閺傛澘缂撻惃鍕垼缁涢箖銆夌€电钖? */
 function createFallbackTab(url = "about:blank") {
   return {
     id: crypto.randomUUID(),
@@ -171,9 +138,6 @@ function createFallbackTab(url = "about:blank") {
   };
 }
 
-/**
- * 濞ｈ鲸瀚圭拹婵囩セ鐟欏牆娅掗悩鑸碘偓渚婄礄閸栧懏瀚弽鍥╊劮妞ら潧鍨悰顭掔礆
- * @param state - 閸樼喎顫愬ù蹇氼潔閸ｃ劎濮搁幀? * @returns 濞ｈ鲸瀚圭拹婵嗘倵閻ㄥ嫭绁荤憴鍫濇珤閻樿埖鈧? */
 function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   return {
     ...state,
@@ -181,9 +145,6 @@ function cloneBrowserState(state: ThreadBrowserState): ThreadBrowserState {
   };
 }
 
-/**
- * 閼惧嘲褰囬幐鍥х暰缁捐法鈻奸惃鍕倵婢跺洦绁荤憴鍫濇珤閻樿埖鈧緤绱濇稉宥呯摠閸︺劌鍨崚娑樼紦姒涙顓婚悩鑸碘偓? * @param threadId - 缁捐法鈻?ID
- * @returns 濞村繗顫嶉崳銊уЦ閹? */
 function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const existing = fallbackBrowserStates.get(threadId);
   if (existing) {
@@ -194,9 +155,6 @@ function getFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return initial;
 }
 
-/**
- * 闁氨鐓￠幍鈧張澶婃倵婢跺洦绁荤憴鍫濇珤閻樿埖鈧胶娲冮崥顒€娅掗悩鑸碘偓浣稿嚒閺囧瓨鏌? * @param threadId - 缁捐法鈻?ID
- * @returns 閺囧瓨鏌婇崥搴ｆ畱濞村繗顫嶉崳銊уЦ閹礁澹囬張? */
 function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   const state = cloneBrowserState(getFallbackBrowserState(threadId));
   for (const listener of fallbackBrowserStateListeners) {
@@ -205,14 +163,10 @@ function emitFallbackBrowserState(threadId: ThreadId): ThreadBrowserState {
   return state;
 }
 
-/** 閺嶅洩顔囬崥搴☆槵濞村繗顫嶉崳銊уЦ閹礁鍑￠崣妯绘纯閿涘矂鈧帒顤冮悧鍫熸拱閸?*/
 function markFallbackBrowserStateChanged(state: ThreadBrowserState): void {
   state.version += 1;
 }
 
-/**
- * 绾喕绻氶幐鍥х暰缁捐法鈻奸惃鍕倵婢跺洦绁荤憴鍫濇珤瀹搞儰缍旈崠鍝勫嚒閸掓繂顫愰崠? * 婵″倹鐏夊▽鈩冩箒閺嶅洨顒锋い闈涘灟閸掓稑缂撴稉鈧稉顏堢帛鐠併倖鐖ｇ粵楣冦€夐敍灞借嫙閺嶅洩顔囨稉鍝勫嚒閹垫挸绱? * @param threadId - 缁捐法鈻?ID
- * @returns 閸掓繂顫愰崠鏍ф倵閻ㄥ嫭绁荤憴鍫濇珤閻樿埖鈧? */
 function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState {
   const state = getFallbackBrowserState(threadId);
   if (state.tabs.length === 0) {
@@ -224,9 +178,6 @@ function ensureFallbackBrowserWorkspace(threadId: ThreadId): ThreadBrowserState 
   return state;
 }
 
-/**
- * 鐟欙絾鐎介崥搴☆槵濞村繗顫嶉崳銊よ厬閻ㄥ嫮娲伴弽鍥ㄧ垼缁涢箖銆? * 娴兼ê鍘涢崠褰掑帳閹稿洤鐣?tabId閿涘苯鍙惧▎鈥冲爱闁板秴缍嬮崜宥嗘た鐠哄啯鐖ｇ粵楣冦€夐敍灞炬付閸氬簼濞囬悽銊ь儑娑撯偓娑擃亝鐖ｇ粵楣冦€? * 閼汇儱娼庢稉宥呯摠閸︺劌鍨崚娑樼紦閺傜増鐖ｇ粵楣冦€? * @param state - 濞村繗顫嶉崳銊уЦ閹? * @param tabId - 閸欘垶鈧娈戦惄顔界垼閺嶅洨顒锋い?ID
- * @returns 閸栧綊鍘ら崚鎵畱閺嶅洨顒锋い? */
 function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
   const existing =
     (tabId ? state.tabs.find((tab) => tab.id === tabId) : undefined) ??
@@ -243,8 +194,10 @@ function resolveFallbackBrowserTab(state: ThreadBrowserState, tabId?: string) {
 }
 
 /**
- * 鐠併垽妲勯張宥呭閸ｃ劍顐芥潻搴㈢Х閹? * 婵″倹鐏夐崷銊ㄧ殶閻劋绠ｉ崜宥呭嚒閺€璺哄煂濞嗐垼绻嬪☉鍫熶紖閿涘瞼娲冮崥顒€娅掓导姘倱濮濄儴袝閸欐垵鑻熸导鐘插弳缂傛挸鐡ㄩ惃鍕Х閹垽绱? * 闁灝鍘?WebSocket 鏉╃偞甯存稉?React effect 濞夈劌鍞芥稊瀣？閻ㄥ嫮鐝甸幀浣规蒋娴? * @param listener - 濞嗐垼绻嬪☉鍫熶紖閸ョ偠鐨熼崙鑺ユ殶
- * @returns 閸欐牗绉风拋銏ゆ閻ㄥ嫬鍤遍弫? */
+ * Subscribe to the server welcome message. If a welcome was already received
+ * before this call, the listener fires synchronously with the cached payload.
+ * This avoids the race between WebSocket connect and React effect registration.
+ */
 export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): () => void {
   welcomeListeners.add(listener);
 
@@ -263,8 +216,9 @@ export function onServerWelcome(listener: (payload: WsWelcomePayload) => void): 
 }
 
 /**
- * 鐠併垽妲勯張宥呭閸ｃ劑鍘ょ純顔芥纯閺傞绨ㄦ禒? * 鐎电绻滃▔銊ュ斀閻ㄥ嫯顓归梼鍛扳偓鍛礀閺€鐐付閺傛壆娈戦弴瀛樻煀閿涘矂浼╅崗宥夋晩鏉╁洭鍘ょ純顔界墡妤犲苯寮芥＃? * @param listener - 闁板秶鐤嗛弴瀛樻煀閸ョ偠鐨熼崙鑺ユ殶
- * @returns 閸欐牗绉风拋銏ゆ閻ㄥ嫬鍤遍弫? */
+ * Subscribe to server config update events. Replays the latest update for
+ * late subscribers to avoid missing config validation feedback.
+ */
 export function onServerConfigUpdated(
   listener: (payload: ServerConfigUpdatedPayload) => void,
 ): () => void {
@@ -286,7 +240,8 @@ export function onServerConfigUpdated(
 }
 
 /**
- * 鐠併垽妲?Provider 閻樿埖鈧焦娲块弬棰佺皑娴犺绱濋弮鐘绘付瀵搫鍩楃€瑰本鏆ｉ柊宥囩枂闁插秷娴? * @param listener - Provider 閻樿埖鈧焦娲块弬鏉挎礀鐠嬪啫鍤遍弫? * @returns 閸欐牗绉风拋銏ゆ閻ㄥ嫬鍤遍弫? */
+ * Subscribe to provider status updates without forcing a full config reload.
+ */
 export function onServerProviderStatusesUpdated(
   listener: (payload: ServerProviderStatusesUpdatedPayload) => void,
 ): () => void {
@@ -307,8 +262,6 @@ export function onServerProviderStatusesUpdated(
   };
 }
 
-/**
- * 鐠併垽妲勯張宥呭閸ｃ劎娣幎銈囧Ц閹焦娲块弬棰佺皑娴? * @param listener - 缂佸瓨濮㈤悩鑸碘偓浣规纯閺傛澘娲栫拫鍐ㄥ毐閺? * @returns 閸欐牗绉风拋銏ゆ閻ㄥ嫬鍤遍弫? */
 export function onServerMaintenanceUpdated(
   listener: (payload: ServerLifecycleStreamEvent) => void,
 ): () => void {
@@ -329,9 +282,6 @@ export function onServerMaintenanceUpdated(
   };
 }
 
-/**
- * 鐠併垽妲勯張宥呭閸ｃ劏顔曠純顔芥纯閺傞绨ㄦ禒? * @param listener - 鐠佸墽鐤嗛弴瀛樻煀閸ョ偠鐨熼崙鑺ユ殶
- * @returns 閸欐牗绉风拋銏ゆ閻ㄥ嫬鍤遍弫? */
 export function onServerSettingsUpdated(
   listener: (payload: ServerSettingsUpdatedPayload) => void,
 ): () => void {
@@ -352,8 +302,6 @@ export function onServerSettingsUpdated(
   };
 }
 
-/**
- * 閸掓稑缂撻崺杞扮艾 WebSocket 閻?NativeApi 鐎圭偘绶ラ敍鍫濆礋娓氬膩瀵骏绱? * 婵″倹鐏夊鍙夋箒閺堫亪鏀㈠В浣烘畱鐎圭偘绶ラ崚娆戞纯閹恒儴绻戦崶鐑囩礉閸氾箑鍨崚娑樼紦閺傛壆娈?WsTransport 楠炶埖鏁為崘灞惧閺堝甯归柅渚€顣堕柆鎾舵磧閸氼剙娅? * @returns NativeApi 鐎圭偘绶? */
 export function createWsNativeApi(): NativeApi {
   if (instance) {
     if (instance.transport.getState() !== "disposed") {
@@ -467,11 +415,12 @@ export function createWsNativeApi(): NativeApi {
   const api: NativeApi = {
     dialogs: {
       pickFolder: async () => {
-        return tauriBridge.pickFolder();
+        if (!window.desktopBridge) return null;
+        return window.desktopBridge.pickFolder();
       },
       saveFile: async (input) => {
-        if (tauriBridge.saveFile) {
-          return tauriBridge.saveFile(input);
+        if (window.desktopBridge?.saveFile) {
+          return window.desktopBridge.saveFile(input);
         }
         const blob = new Blob([input.contents], { type: "text/markdown;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -517,13 +466,23 @@ export function createWsNativeApi(): NativeApi {
       openInEditor: (cwd, editor) =>
         transport.request(WS_METHODS.shellOpenInEditor, { cwd, editor }),
       openExternal: async (url) => {
-        const opened = await tauriBridge.openExternal(url);
-        if (!opened) {
-          throw new Error("Unable to open link.");
+        if (window.desktopBridge) {
+          const opened = await window.desktopBridge.openExternal(url);
+          if (!opened) {
+            throw new Error("Unable to open link.");
+          }
+          return;
         }
+
+        // Some mobile browsers can return null here even when the tab opens.
+        // Avoid false negatives and let the browser handle popup policy.
+        window.open(url, "_blank", "noopener,noreferrer");
       },
       showInFolder: async (path) => {
-        await tauriBridge.showInFolder(path);
+        if (window.desktopBridge) {
+          await window.desktopBridge.showInFolder(path);
+        }
+        // No-op in browser - this is a desktop-only feature
       },
     },
     git: {
@@ -566,7 +525,10 @@ export function createWsNativeApi(): NativeApi {
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
       ): Promise<T | null> => {
-        return tauriBridge.showContextMenu(items, position);
+        if (window.desktopBridge) {
+          return window.desktopBridge.showContextMenu(items, position);
+        }
+        return showContextMenuFallback(items, position);
       },
     },
     server: {
@@ -616,7 +578,10 @@ export function createWsNativeApi(): NativeApi {
         transport.request(WS_METHODS.serverGetProviderUsageSnapshot, input),
       getDiagnostics: () => transport.request(WS_METHODS.serverGetDiagnostics),
       transcribeVoice: (input) => {
-        return tauriBridge.server?.transcribeVoice(input) ?? Promise.reject(new Error("Not available"));
+        if (window.desktopBridge?.server?.transcribeVoice) {
+          return window.desktopBridge.server.transcribeVoice(input);
+        }
+        return transport.request(WS_METHODS.serverTranscribeVoice, input);
       },
       upsertKeybinding: (input) => transport.request(WS_METHODS.serverUpsertKeybinding, input),
     },
@@ -679,58 +644,157 @@ export function createWsNativeApi(): NativeApi {
     },
     browser: {
       open: async (input) => {
-        return tauriBridge.browser.open(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.open(input);
+        }
+        const state = ensureFallbackBrowserWorkspace(input.threadId);
+        if (input.initialUrl && state.tabs.length > 0) {
+          const activeTab = resolveFallbackBrowserTab(state);
+          activeTab.url = input.initialUrl;
+          activeTab.title = defaultBrowserTitle(input.initialUrl);
+          activeTab.lastCommittedUrl = input.initialUrl;
+        }
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       close: async (input) => {
-        return tauriBridge.browser.close(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.close(input);
+        }
+        const state = getFallbackBrowserState(input.threadId);
+        state.open = false;
+        state.activeTabId = null;
+        state.tabs = [];
+        state.lastError = null;
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       hide: async (input) => {
-        await tauriBridge.browser.hide(input);
+        if (window.desktopBridge) {
+          await window.desktopBridge.browser.hide(input);
+        }
       },
       getState: async (input) => {
-        return tauriBridge.browser.getState(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.getState(input);
+        }
+        return cloneBrowserState(getFallbackBrowserState(input.threadId));
       },
       setPanelBounds: async (input) => {
-        await tauriBridge.browser.setPanelBounds(input);
+        if (window.desktopBridge) {
+          await window.desktopBridge.browser.setPanelBounds(input);
+          return;
+        }
       },
       attachWebview: async (input) => {
-        return tauriBridge.browser.attachWebview(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.attachWebview(input);
+        }
+        return cloneBrowserState(getFallbackBrowserState(input.threadId));
       },
       copyScreenshotToClipboard: async (input) => {
-        await tauriBridge.browser.copyScreenshotToClipboard(input);
+        if (window.desktopBridge) {
+          await window.desktopBridge.browser.copyScreenshotToClipboard(input);
+          return;
+        }
+        throw new Error("Browser screenshots require the desktop app.");
       },
       captureScreenshot: async (input) => {
-        return tauriBridge.browser.captureScreenshot(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.captureScreenshot(input);
+        }
+        throw new Error("Browser screenshots require the desktop app.");
       },
       executeCdp: async (input) => {
-        return tauriBridge.browser.executeCdp(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.executeCdp(input);
+        }
+        throw new Error("Browser automation requires the desktop app.");
       },
       navigate: async (input) => {
-        return tauriBridge.browser.navigate(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.navigate(input);
+        }
+        const state = ensureFallbackBrowserWorkspace(input.threadId);
+        const tab = resolveFallbackBrowserTab(state, input.tabId);
+        tab.url = input.url;
+        tab.title = defaultBrowserTitle(input.url);
+        tab.lastCommittedUrl = input.url;
+        tab.lastError = null;
+        tab.status = "live";
+        state.activeTabId = tab.id;
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       reload: async (input) => {
-        return tauriBridge.browser.reload(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.reload(input);
+        }
+        return cloneBrowserState(getFallbackBrowserState(input.threadId));
       },
       goBack: async (input) => {
-        return tauriBridge.browser.goBack(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.goBack(input);
+        }
+        return cloneBrowserState(getFallbackBrowserState(input.threadId));
       },
       goForward: async (input) => {
-        return tauriBridge.browser.goForward(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.goForward(input);
+        }
+        return cloneBrowserState(getFallbackBrowserState(input.threadId));
       },
       newTab: async (input) => {
-        return tauriBridge.browser.newTab(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.newTab(input);
+        }
+        const state = ensureFallbackBrowserWorkspace(input.threadId);
+        const tab = createFallbackTab(input.url);
+        state.tabs = [...state.tabs, tab];
+        if (input.activate !== false || !state.activeTabId) {
+          state.activeTabId = tab.id;
+        }
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       closeTab: async (input) => {
-        return tauriBridge.browser.closeTab(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.closeTab(input);
+        }
+        const state = getFallbackBrowserState(input.threadId);
+        state.tabs = state.tabs.filter((tab) => tab.id !== input.tabId);
+        if (state.tabs.length === 0) {
+          state.open = false;
+          state.activeTabId = null;
+        } else if (!state.tabs.some((tab) => tab.id === state.activeTabId)) {
+          state.activeTabId = state.tabs[0]?.id ?? null;
+        }
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       selectTab: async (input) => {
-        return tauriBridge.browser.selectTab(input);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.selectTab(input);
+        }
+        const state = ensureFallbackBrowserWorkspace(input.threadId);
+        const tab = resolveFallbackBrowserTab(state, input.tabId);
+        state.activeTabId = tab.id;
+        markFallbackBrowserStateChanged(state);
+        return emitFallbackBrowserState(input.threadId);
       },
       openDevTools: async (input) => {
-        await tauriBridge.browser.openDevTools(input);
+        if (window.desktopBridge) {
+          await window.desktopBridge.browser.openDevTools(input);
+        }
       },
       onState: (callback) => {
-        return tauriBridge.browser.onState(callback);
+        if (window.desktopBridge) {
+          return window.desktopBridge.browser.onState(callback);
+        }
+        fallbackBrowserStateListeners.add(callback);
+        return () => {
+          fallbackBrowserStateListeners.delete(callback);
+        };
       },
     },
   };
@@ -739,7 +803,6 @@ export function createWsNativeApi(): NativeApi {
   return api;
 }
 
-/** Vite HMR 閻戭厽娲块弬鐗堟濞撳懐鎮婇幍鈧張澶庣カ濠?*/
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     instance?.transport.dispose();

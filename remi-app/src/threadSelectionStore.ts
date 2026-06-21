@@ -1,14 +1,11 @@
 /**
- * @file threadSelectionStore.ts
- * @description 娓氀嗙珶閺嶅繒鍤庣粙瀣樋闁濮搁幀浣烘畱 Zustand Store閵? *
- * 閺€顖涘瘮娑撳顫掗柅澶嬪濡€崇础閿? * - Cmd/Ctrl+Click閿涙艾鍨忛幑銏犲礋娑擃亞鍤庣粙瀣畱闁鑵戦悩鑸碘偓? * - Shift+Click閿涙俺瀵栭崶鎾偓澶嬪閿涘牅绮犻柨姘卞仯缁捐法鈻奸崚鎵窗閺嶅洨鍤庣粙瀣╃闂傚娈戦幍鈧張澶屽殠缁嬪绱? * - 閹靛綊鍣洪幙宥勭稊閿涙艾顕鏌モ偓澶夎厬閻ㄥ嫮鍤庣粙瀣肠閸氬牊澧界悰灞惧闁插繑鎼锋担? *
- * @example
- * ```tsx
- * const { selectedThreadIds, toggleThread, rangeSelectTo, clearSelection } = useThreadSelectionStore();
- * ```
+ * Zustand store for sidebar thread multi-selection state.
+ *
+ * Supports Cmd/Ctrl+Click (toggle individual), Shift+Click (range select),
+ * and bulk actions on the selected set.
  */
 
-import type { ThreadId } from "~/contracts";
+import type { ThreadId } from "@peakcode/contracts";
 import { create } from "zustand";
 
 export interface ThreadSelectionState {
@@ -37,20 +34,8 @@ interface ThreadSelectionStore extends ThreadSelectionState {
   hasSelection: () => boolean;
 }
 
-/** 缁屾椽娉﹂崥鍫濈埗闁插骏绱濋悽銊ょ艾 clearSelection 閺冨爼浼╅崗宥呭灡瀵ょ儤鏌婇惃?Set 鐎圭偘绶?*/
 const EMPTY_SET = new Set<ThreadId>();
 
-/**
- * 缁捐法鈻兼径姘垛偓澶屽Ц閹?Store閿涘本褰佹笟娑⑩偓澶嬪閵嗕礁褰囧☉鍫モ偓澶嬪閵嗕浇瀵栭崶鎾偓澶嬪缁涘鎼锋担婧库偓? *
- * @example
- * ```tsx
- * function Sidebar() {
- *   const selectedIds = useThreadSelectionStore((s) => s.selectedThreadIds);
- *   const toggleThread = useThreadSelectionStore((s) => s.toggleThread);
- *   const hasSelection = useThreadSelectionStore((s) => s.hasSelection);
- * }
- * ```
- */
 export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) => ({
   selectedThreadIds: EMPTY_SET,
   anchorThreadId: null,
@@ -74,7 +59,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
     set((state) => {
       const anchor = state.anchorThreadId;
       if (anchor === null) {
-        // No anchor yet 鈥攖reat as a single toggle
+        // No anchor yet — treat as a single toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };
@@ -83,7 +68,7 @@ export const useThreadSelectionStore = create<ThreadSelectionStore>((set, get) =
       const anchorIndex = orderedThreadIds.indexOf(anchor);
       const targetIndex = orderedThreadIds.indexOf(threadId);
       if (anchorIndex === -1 || targetIndex === -1) {
-        // Anchor or target not in this list (different project?) 鈥攆allback to toggle
+        // Anchor or target not in this list (different project?) — fallback to toggle
         const next = new Set(state.selectedThreadIds);
         next.add(threadId);
         return { selectedThreadIds: next, anchorThreadId: threadId };

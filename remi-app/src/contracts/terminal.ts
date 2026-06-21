@@ -1,163 +1,159 @@
-/**
- * @file terminal.ts
- * @description 终端操作相关的共享契约。定义了终端会话的输入参数、状态快照和事件类型的 Schema。
- * 支持终端的打开、写入、调整大小、清屏、重启、关闭等操作，以及终端事件的推送（启动、输出、退出、错误、清屏、重启、活动状态）。
- * 客户端和服务端共享使用，用于统一终端相关的类型定义和校验规则。
- */
+import { Schema } from "effect";
+import { TrimmedNonEmptyString } from "./baseSchemas";
 
-import type { TrimmedNonEmptyString } from "./baseSchemas";
-
-/** 默认终端 ID，当未指定终端时使用此值 */
 export const DEFAULT_TERMINAL_ID = "default";
 
-/** 终端会话输入的基础参数，仅需 threadId */
-export interface TerminalThreadInput {
-  /** 会话线程 ID */
-  threadId: string;
-}
+const TrimmedNonEmptyStringSchema = TrimmedNonEmptyString;
+const TerminalColsSchema = Schema.Int.check(Schema.isGreaterThanOrEqualTo(20)).check(
+  Schema.isLessThanOrEqualTo(400),
+);
+const TerminalRowsSchema = Schema.Int.check(Schema.isGreaterThanOrEqualTo(5)).check(
+  Schema.isLessThanOrEqualTo(200),
+);
+const TerminalIdSchema = TrimmedNonEmptyStringSchema.check(Schema.isMaxLength(128));
+const TerminalEnvKeySchema = Schema.String.check(
+  Schema.isPattern(/^[A-Za-z_][A-Za-z0-9_]*$/),
+).check(Schema.isMaxLength(128));
+const TerminalEnvValueSchema = Schema.String.check(Schema.isMaxLength(8_192));
+const TerminalEnvSchema = Schema.Record(TerminalEnvKeySchema, TerminalEnvValueSchema).check(
+  Schema.isMaxProperties(128),
+);
 
-/** 终端会话输入参数，包含 threadId 和 terminalId（可选，默认使用 DEFAULT_TERMINAL_ID） */
-export interface TerminalSessionInput extends TerminalThreadInput {
-  /** 终端 ID，未指定时使用默认值 */
-  terminalId: string;
-}
+const TerminalIdWithDefaultSchema = TerminalIdSchema.pipe(
+  Schema.withDecodingDefault(() => DEFAULT_TERMINAL_ID),
+);
 
-/** 打开终端的输入参数，包含工作目录、可选的列数、行数和环境变量 */
-export interface TerminalOpenInput extends TerminalSessionInput {
-  /** 终端的工作目录（绝对路径） */
-  cwd: string;
-  /** 终端列数（可选） */
-  cols?: number;
-  /** 终端行数（可选） */
-  rows?: number;
-  /** 终端环境变量（可选） */
-  env?: Record<string, string>;
-}
+export const TerminalThreadInput = Schema.Struct({
+  threadId: TrimmedNonEmptyStringSchema,
+});
+export type TerminalThreadInput = Schema.Codec.Encoded<typeof TerminalThreadInput>;
 
-/** 向终端写入数据的输入参数，data 不能为空且最大长度 65536 */
-export interface TerminalWriteInput extends TerminalSessionInput {
-  /** 要写入终端的数据 */
-  data: string;
-}
+const TerminalSessionInput = Schema.Struct({
+  ...TerminalThreadInput.fields,
+  terminalId: TerminalIdWithDefaultSchema,
+});
+export type TerminalSessionInput = Schema.Codec.Encoded<typeof TerminalSessionInput>;
 
-/** 调整终端大小的输入参数，指定新的列数和行数 */
-export interface TerminalResizeInput extends TerminalSessionInput {
-  /** 新的终端列数 */
-  cols: number;
-  /** 新的终端行数 */
-  rows: number;
-}
+export const TerminalOpenInput = Schema.Struct({
+  ...TerminalSessionInput.fields,
+  cwd: TrimmedNonEmptyStringSchema,
+  cols: Schema.optional(TerminalColsSchema),
+  rows: Schema.optional(TerminalRowsSchema),
+  env: Schema.optional(TerminalEnvSchema),
+});
+export type TerminalOpenInput = Schema.Codec.Encoded<typeof TerminalOpenInput>;
 
-/** 清屏终端的输入参数，复用 TerminalSessionInput */
-export type TerminalClearInput = TerminalSessionInput;
+export const TerminalWriteInput = Schema.Struct({
+  ...TerminalSessionInput.fields,
+  data: Schema.String.check(Schema.isNonEmpty()).check(Schema.isMaxLength(65_536)),
+});
+export type TerminalWriteInput = Schema.Codec.Encoded<typeof TerminalWriteInput>;
 
-/** 重启终端的输入参数，包含工作目录、列数、行数和可选的环境变量 */
-export interface TerminalRestartInput extends TerminalSessionInput {
-  /** 重启后的工作目录 */
-  cwd: string;
-  /** 终端列数 */
-  cols: number;
-  /** 终端行数 */
-  rows: number;
-  /** 终端环境变量（可选） */
-  env?: Record<string, string>;
-}
+export const TerminalResizeInput = Schema.Struct({
+  ...TerminalSessionInput.fields,
+  cols: TerminalColsSchema,
+  rows: TerminalRowsSchema,
+});
+export type TerminalResizeInput = Schema.Codec.Encoded<typeof TerminalResizeInput>;
 
-/** 关闭终端的输入参数，terminalId 和 deleteHistory 均可选 */
-export interface TerminalCloseInput extends TerminalThreadInput {
-  /** 要关闭的终端 ID（可选，不指定则关闭该线程下所有终端） */
-  terminalId?: string;
-  /** 是否同时删除终端历史记录 */
-  deleteHistory?: boolean;
-}
+export const TerminalClearInput = TerminalSessionInput;
+export type TerminalClearInput = Schema.Codec.Encoded<typeof TerminalClearInput>;
 
-/** 终端会话状态枚举：starting（启动中）、running（运行中）、exited（已退出）、error（错误） */
-export type TerminalSessionStatus = "starting" | "running" | "exited" | "error";
+export const TerminalRestartInput = Schema.Struct({
+  ...TerminalSessionInput.fields,
+  cwd: TrimmedNonEmptyStringSchema,
+  cols: TerminalColsSchema,
+  rows: TerminalRowsSchema,
+  env: Schema.optional(TerminalEnvSchema),
+});
+export type TerminalRestartInput = Schema.Codec.Encoded<typeof TerminalRestartInput>;
 
-/** 终端会话快照，记录终端当前的完整状态信息 */
-export interface TerminalSessionSnapshot {
-  /** 会话线程 ID */
-  threadId: string;
-  /** 终端 ID */
-  terminalId: string;
-  /** 工作目录 */
-  cwd: string;
-  /** 终端状态 */
-  status: TerminalSessionStatus;
-  /** 终端进程 PID，未启动时为 null */
-  pid: number | null;
-  /** 终端历史输出内容 */
-  history: string;
-  /** 进程退出码，未退出时为 null */
-  exitCode: number | null;
-  /** 进程退出信号，未退出时为 null */
-  exitSignal: number | null;
-  /** 状态更新时间戳 */
-  updatedAt: string;
-}
+export const TerminalCloseInput = Schema.Struct({
+  ...TerminalThreadInput.fields,
+  terminalId: Schema.optional(TerminalIdSchema),
+  deleteHistory: Schema.optional(Schema.Boolean),
+});
+export type TerminalCloseInput = Schema.Codec.Encoded<typeof TerminalCloseInput>;
 
-interface TerminalEventBase {
-  /** 会话线程 ID */
-  threadId: string;
-  /** 终端 ID */
-  terminalId: string;
-  /** 事件创建时间戳 */
-  createdAt: string;
-}
+export const TerminalSessionStatus = Schema.Literals(["starting", "running", "exited", "error"]);
+export type TerminalSessionStatus = typeof TerminalSessionStatus.Type;
 
-/** 终端启动事件，携带启动后的会话快照 */
-interface TerminalStartedEvent extends TerminalEventBase {
-  type: "started";
-  snapshot: TerminalSessionSnapshot;
-}
+export const TerminalSessionSnapshot = Schema.Struct({
+  threadId: Schema.String.check(Schema.isNonEmpty()),
+  terminalId: Schema.String.check(Schema.isNonEmpty()),
+  cwd: Schema.String.check(Schema.isNonEmpty()),
+  status: TerminalSessionStatus,
+  pid: Schema.NullOr(Schema.Int.check(Schema.isGreaterThan(0))),
+  history: Schema.String,
+  exitCode: Schema.NullOr(Schema.Int),
+  exitSignal: Schema.NullOr(Schema.Int),
+  updatedAt: Schema.String,
+});
+export type TerminalSessionSnapshot = typeof TerminalSessionSnapshot.Type;
 
-/** 终端输出事件，携带输出的文本数据 */
-interface TerminalOutputEvent extends TerminalEventBase {
-  type: "output";
-  data: string;
-}
+const TerminalEventBaseSchema = Schema.Struct({
+  threadId: Schema.String.check(Schema.isNonEmpty()),
+  terminalId: Schema.String.check(Schema.isNonEmpty()),
+  createdAt: Schema.String,
+});
 
-/** 终端退出事件，携带退出码和退出信号 */
-interface TerminalExitedEvent extends TerminalEventBase {
-  type: "exited";
-  exitCode: number | null;
-  exitSignal: number | null;
-}
+const TerminalStartedEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("started"),
+  snapshot: TerminalSessionSnapshot,
+});
 
-/** 终端错误事件，携带错误信息 */
-interface TerminalErrorEvent extends TerminalEventBase {
-  type: "error";
-  message: string;
-}
+const TerminalOutputEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("output"),
+  data: Schema.String,
+});
 
-/** 终端清屏事件 */
-interface TerminalClearedEvent extends TerminalEventBase {
-  type: "cleared";
-}
+const TerminalExitedEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("exited"),
+  exitCode: Schema.NullOr(Schema.Int),
+  exitSignal: Schema.NullOr(Schema.Int),
+});
 
-/** 终端重启事件，携带重启后的会话快照 */
-interface TerminalRestartedEvent extends TerminalEventBase {
-  type: "restarted";
-  snapshot: TerminalSessionSnapshot;
-}
+const TerminalErrorEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("error"),
+  message: Schema.String.check(Schema.isNonEmpty()),
+});
 
-/** 终端活动状态事件，用于上报终端内子进程和 AI Agent 的运行状态 */
-interface TerminalActivityEvent extends TerminalEventBase {
-  type: "activity";
-  /** 是否有正在运行的子进程 */
-  hasRunningSubprocess: boolean;
-  /** CLI 工具类型：codex 或 claude，无则为 null */
-  cliKind: "codex" | "claude" | null;
-  /** Agent 状态：running（运行中）、attention（需要关注）、review（待审核），无则为 null */
-  agentState: "running" | "attention" | "review" | null;
-}
+const TerminalClearedEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("cleared"),
+});
 
-/** 终端事件联合类型，包含所有可能的终端事件类型 */
-export type TerminalEvent =
-  | TerminalStartedEvent
-  | TerminalOutputEvent
-  | TerminalExitedEvent
-  | TerminalErrorEvent
-  | TerminalClearedEvent
-  | TerminalRestartedEvent
-  | TerminalActivityEvent;
+const TerminalRestartedEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("restarted"),
+  snapshot: TerminalSessionSnapshot,
+});
+
+const TerminalActivityEvent = Schema.Struct({
+  ...TerminalEventBaseSchema.fields,
+  type: Schema.Literal("activity"),
+  hasRunningSubprocess: Schema.Boolean,
+  cliKind: Schema.NullOr(Schema.Union([Schema.Literal("codex"), Schema.Literal("claude")])),
+  agentState: Schema.NullOr(
+    Schema.Union([
+      Schema.Literal("running"),
+      Schema.Literal("attention"),
+      Schema.Literal("review"),
+    ]),
+  ),
+});
+
+export const TerminalEvent = Schema.Union([
+  TerminalStartedEvent,
+  TerminalOutputEvent,
+  TerminalExitedEvent,
+  TerminalErrorEvent,
+  TerminalClearedEvent,
+  TerminalRestartedEvent,
+  TerminalActivityEvent,
+]);
+export type TerminalEvent = typeof TerminalEvent.Type;

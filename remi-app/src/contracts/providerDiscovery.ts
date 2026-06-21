@@ -1,488 +1,319 @@
-/**
- * @file providerDiscovery.ts
- * @description Provider 发现与能力查询契约。定义 Provider 能力发现相关的数据结构，包括：
- * - 技能（Skills）的发现与描述
- * - 命令（Commands）的列表
- * - 插件（Plugins）的市场与详情
- * - 模型（Models）的列表与配置
- * - 代理（Agents）的列表
- *
- * 这些类型用于查询 Provider 支持的功能和可用资源。
- */
+// FILE: providerDiscovery.ts
+// Purpose: Defines provider discovery request/response contracts shared across web and server.
+// Layer: Shared contracts
+// Exports: provider discovery schemas and inferred types used by the WS/native API.
 
-import type { TrimmedNonEmptyString } from "./baseSchemas";
-import type { ProviderOptionDescriptor } from "./model";
+import { Schema } from "effect";
+import { TrimmedNonEmptyString } from "./baseSchemas";
+import { ProviderOptionDescriptor } from "./model";
 
-/** Provider 发现类型枚举，标识不同的 Provider 来源 */
-type ProviderDiscoveryKind =
-  | "codex"
-  | "claudeAgent"
-  | "cursor"
-  | "gemini"
-  | "grok"
-  | "kilo"
-  | "opencode"
-  | "pi";
+const ProviderDiscoveryKind = Schema.Literals([
+  "codex",
+  "claudeAgent",
+  "cursor",
+  "gemini",
+  "grok",
+  "kilo",
+  "opencode",
+  "pi",
+]);
 
-/** 技能接口描述，包含显示名称和简短描述 */
-export interface ProviderSkillInterface {
-  /** 显示名称 */
-  displayName?: TrimmedNonEmptyString;
-  /** 简短描述 */
-  shortDescription?: TrimmedNonEmptyString;
-}
+export const ProviderSkillInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+  shortDescription: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderSkillInterface = typeof ProviderSkillInterface.Type;
 
-/**
- * 技能描述符
- *
- * 描述一个可用的技能，包含名称、描述、路径、启用状态等信息。
- * 技能是 Provider 提供的特定功能模块。
- */
-export interface ProviderSkillDescriptor {
-  /** 技能名称 */
-  name: TrimmedNonEmptyString;
-  /** 技能描述 */
-  description?: TrimmedNonEmptyString;
-  /** 技能路径 */
-  path: TrimmedNonEmptyString;
-  /** 是否启用 */
-  enabled: boolean;
-  /** 作用域 */
-  scope?: TrimmedNonEmptyString;
-  /** 接口信息 */
-  interface?: ProviderSkillInterface;
-  /** 依赖项 */
-  dependencies?: unknown;
-}
+export const ProviderSkillDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  path: TrimmedNonEmptyString,
+  enabled: Schema.Boolean,
+  scope: Schema.optional(TrimmedNonEmptyString),
+  interface: Schema.optional(ProviderSkillInterface),
+  dependencies: Schema.optional(Schema.Unknown),
+});
+export type ProviderSkillDescriptor = typeof ProviderSkillDescriptor.Type;
 
-/** 技能引用，用于在消息中引用特定技能 */
-export interface ProviderSkillReference {
-  /** 技能名称 */
-  name: TrimmedNonEmptyString;
-  /** 技能路径 */
-  path: TrimmedNonEmptyString;
-}
+export const ProviderSkillReference = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+});
+export type ProviderSkillReference = typeof ProviderSkillReference.Type;
 
-/** @提及引用，用于在消息中 @提及特定资源 */
-export interface ProviderMentionReference {
-  /** 提及名称 */
-  name: TrimmedNonEmptyString;
-  /** 资源路径 */
-  path: TrimmedNonEmptyString;
-}
+export const ProviderMentionReference = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+});
+export type ProviderMentionReference = typeof ProviderMentionReference.Type;
 
-/**
- * Provider 编辑器能力
- *
- * 描述 Provider 在编辑器中支持的功能特性，
- * 如技能提及、插件发现、模型列表等。
- */
-export interface ProviderComposerCapabilities {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 是否支持技能提及 */
-  supportsSkillMentions: boolean;
-  /** 是否支持技能发现 */
-  supportsSkillDiscovery: boolean;
-  /** 是否支持原生命令发现 */
-  supportsNativeSlashCommandDiscovery: boolean;
-  /** 是否支持插件提及 */
-  supportsPluginMentions: boolean;
-  /** 是否支持插件发现 */
-  supportsPluginDiscovery: boolean;
-  /** 是否支持运行时模型列表 */
-  supportsRuntimeModelList: boolean;
-  /** 是否支持线程压缩 */
-  supportsThreadCompaction?: boolean;
-  /** 是否支持线程导入 */
-  supportsThreadImport?: boolean;
-}
+export const ProviderComposerCapabilities = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  supportsSkillMentions: Schema.Boolean,
+  supportsSkillDiscovery: Schema.Boolean,
+  supportsNativeSlashCommandDiscovery: Schema.Boolean,
+  supportsPluginMentions: Schema.Boolean,
+  supportsPluginDiscovery: Schema.Boolean,
+  supportsRuntimeModelList: Schema.Boolean,
+  supportsThreadCompaction: Schema.optional(Schema.Boolean),
+  supportsThreadImport: Schema.optional(Schema.Boolean),
+});
+export type ProviderComposerCapabilities = typeof ProviderComposerCapabilities.Type;
 
-/** 获取 Provider 编辑器能力的输入参数 */
-export interface ProviderGetComposerCapabilitiesInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-}
+export const ProviderGetComposerCapabilitiesInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+});
+export type ProviderGetComposerCapabilitiesInput = typeof ProviderGetComposerCapabilitiesInput.Type;
 
-/** 列出技能的输入参数 */
-export interface ProviderListSkillsInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 工作目录 */
-  cwd: TrimmedNonEmptyString;
-  /** 线程 ID */
-  threadId?: TrimmedNonEmptyString;
-  /** 代理目录 */
-  agentDir?: TrimmedNonEmptyString;
-  /** 是否强制重新加载 */
-  forceReload?: boolean;
-}
+export const ProviderListSkillsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: TrimmedNonEmptyString,
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  agentDir: Schema.optional(TrimmedNonEmptyString),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListSkillsInput = typeof ProviderListSkillsInput.Type;
 
-/** 列出技能的结果 */
-export interface ProviderListSkillsResult {
-  /** 技能列表 */
-  skills: ProviderSkillDescriptor[];
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderListSkillsResult = Schema.Struct({
+  skills: Schema.Array(ProviderSkillDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListSkillsResult = typeof ProviderListSkillsResult.Type;
 
-/** 本地用户技能来源枚举 */
-export type LocalUserSkillSource = "claude" | "codex" | "agents" | "openclaw" | "unknown";
+export const LocalUserSkillSource = Schema.Literals([
+  "claude",
+  "codex",
+  "agents",
+  "openclaw",
+  "unknown",
+]);
+export type LocalUserSkillSource = typeof LocalUserSkillSource.Type;
 
-/** 本地用户技能描述符 */
-export interface LocalUserSkillDescriptor {
-  /** 技能名称 */
-  name: TrimmedNonEmptyString;
-  /** 技能描述 */
-  description?: TrimmedNonEmptyString;
-  /** 版本号 */
-  version?: TrimmedNonEmptyString;
-  /** 主页链接 */
-  homepage?: TrimmedNonEmptyString;
-  /** 技能路径 */
-  path: TrimmedNonEmptyString;
-  /** 来源类型 */
-  source: LocalUserSkillSource;
-  /** 来源目录 */
-  sourceDir: TrimmedNonEmptyString;
-  /** 是否启用 */
-  enabled: boolean;
-}
+export const LocalUserSkillDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  version: Schema.optional(TrimmedNonEmptyString),
+  homepage: Schema.optional(TrimmedNonEmptyString),
+  path: TrimmedNonEmptyString,
+  source: LocalUserSkillSource,
+  sourceDir: TrimmedNonEmptyString,
+  enabled: Schema.Boolean,
+});
+export type LocalUserSkillDescriptor = typeof LocalUserSkillDescriptor.Type;
 
-/** 列出本地用户技能的结果 */
-export interface ListLocalUserSkillsResult {
-  /** 技能列表 */
-  skills: LocalUserSkillDescriptor[];
-  /** 搜索的目录列表 */
-  searchedDirs: TrimmedNonEmptyString[];
-}
+export const ListLocalUserSkillsResult = Schema.Struct({
+  skills: Schema.Array(LocalUserSkillDescriptor),
+  searchedDirs: Schema.Array(TrimmedNonEmptyString),
+});
+export type ListLocalUserSkillsResult = typeof ListLocalUserSkillsResult.Type;
 
-/** 列出本地用户技能的输入参数 */
-export interface ListLocalUserSkillsInput {}
+export const ListLocalUserSkillsInput = Schema.Struct({});
+export type ListLocalUserSkillsInput = typeof ListLocalUserSkillsInput.Type;
 
-/** Provider 原生命令描述符 */
-export interface ProviderNativeCommandDescriptor {
-  /** 命令名称 */
-  name: TrimmedNonEmptyString;
-  /** 命令描述 */
-  description?: TrimmedNonEmptyString;
-}
+export const ProviderNativeCommandDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderNativeCommandDescriptor = typeof ProviderNativeCommandDescriptor.Type;
 
-/** 列出命令的输入参数 */
-export interface ProviderListCommandsInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 工作目录 */
-  cwd: TrimmedNonEmptyString;
-  /** 线程 ID */
-  threadId?: TrimmedNonEmptyString;
-  /** 代理目录 */
-  agentDir?: TrimmedNonEmptyString;
-  /** 是否强制重新加载 */
-  forceReload?: boolean;
-}
+export const ProviderListCommandsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: TrimmedNonEmptyString,
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  agentDir: Schema.optional(TrimmedNonEmptyString),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListCommandsInput = typeof ProviderListCommandsInput.Type;
 
-/** 列出命令的结果 */
-export interface ProviderListCommandsResult {
-  /** 命令列表 */
-  commands: ProviderNativeCommandDescriptor[];
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderListCommandsResult = Schema.Struct({
+  commands: Schema.Array(ProviderNativeCommandDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListCommandsResult = typeof ProviderListCommandsResult.Type;
 
 // Plugin discovery mirrors Codex app-server's marketplace + plugin summary surface.
-/** 插件市场接口描述 */
-export interface ProviderPluginMarketplaceInterface {
-  /** 显示名称 */
-  displayName?: TrimmedNonEmptyString;
-}
+export const ProviderPluginMarketplaceInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderPluginMarketplaceInterface = typeof ProviderPluginMarketplaceInterface.Type;
 
-/** 插件安装策略枚举 */
-export type ProviderPluginInstallPolicy = "NOT_AVAILABLE" | "AVAILABLE" | "INSTALLED_BY_DEFAULT";
+export const ProviderPluginInstallPolicy = Schema.Literals([
+  "NOT_AVAILABLE",
+  "AVAILABLE",
+  "INSTALLED_BY_DEFAULT",
+]);
+export type ProviderPluginInstallPolicy = typeof ProviderPluginInstallPolicy.Type;
 
-/** 插件认证策略枚举 */
-export type ProviderPluginAuthPolicy = "ON_INSTALL" | "ON_USE";
+export const ProviderPluginAuthPolicy = Schema.Literals(["ON_INSTALL", "ON_USE"]);
+export type ProviderPluginAuthPolicy = typeof ProviderPluginAuthPolicy.Type;
 
-/** 插件来源描述 */
-export interface ProviderPluginSource {
-  /** 来源类型，目前仅支持本地 */
-  type: "local";
-  /** 本地路径 */
-  path: TrimmedNonEmptyString;
-}
+export const ProviderPluginSource = Schema.Struct({
+  type: Schema.Literal("local"),
+  path: TrimmedNonEmptyString,
+});
+export type ProviderPluginSource = typeof ProviderPluginSource.Type;
 
-/**
- * 插件接口描述
- *
- * 包含插件的详细信息，如名称、描述、开发者、分类、能力等。
- */
-export interface ProviderPluginInterface {
-  /** 显示名称 */
-  displayName?: TrimmedNonEmptyString;
-  /** 简短描述 */
-  shortDescription?: TrimmedNonEmptyString;
-  /** 详细描述 */
-  longDescription?: TrimmedNonEmptyString;
-  /** 开发者名称 */
-  developerName?: TrimmedNonEmptyString;
-  /** 分类 */
-  category?: TrimmedNonEmptyString;
-  /** 能力列表 */
-  capabilities?: TrimmedNonEmptyString[];
-  /** 网站链接 */
-  websiteUrl?: TrimmedNonEmptyString;
-  /** 隐私政策链接 */
-  privacyPolicyUrl?: TrimmedNonEmptyString;
-  /** 服务条款链接 */
-  termsOfServiceUrl?: TrimmedNonEmptyString;
-  /** 默认提示词 */
-  defaultPrompt?: TrimmedNonEmptyString[];
-  /** 品牌颜色 */
-  brandColor?: TrimmedNonEmptyString;
-  /** 编辑器图标 */
-  composerIcon?: TrimmedNonEmptyString;
-  /** Logo */
-  logo?: TrimmedNonEmptyString;
-  /** 截图列表 */
-  screenshots?: TrimmedNonEmptyString[];
-}
+export const ProviderPluginInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+  shortDescription: Schema.optional(TrimmedNonEmptyString),
+  longDescription: Schema.optional(TrimmedNonEmptyString),
+  developerName: Schema.optional(TrimmedNonEmptyString),
+  category: Schema.optional(TrimmedNonEmptyString),
+  capabilities: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+  websiteUrl: Schema.optional(TrimmedNonEmptyString),
+  privacyPolicyUrl: Schema.optional(TrimmedNonEmptyString),
+  termsOfServiceUrl: Schema.optional(TrimmedNonEmptyString),
+  defaultPrompt: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+  brandColor: Schema.optional(TrimmedNonEmptyString),
+  composerIcon: Schema.optional(TrimmedNonEmptyString),
+  logo: Schema.optional(TrimmedNonEmptyString),
+  screenshots: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+});
+export type ProviderPluginInterface = typeof ProviderPluginInterface.Type;
 
-/**
- * 插件描述符
- *
- * 描述一个插件的基本信息，包括 ID、名称、来源、安装状态等。
- */
-export interface ProviderPluginDescriptor {
-  /** 插件 ID */
-  id: TrimmedNonEmptyString;
-  /** 插件名称 */
-  name: TrimmedNonEmptyString;
-  /** 来源信息 */
-  source: ProviderPluginSource;
-  /** 是否已安装 */
-  installed: boolean;
-  /** 是否已启用 */
-  enabled: boolean;
-  /** 安装策略 */
-  installPolicy: ProviderPluginInstallPolicy;
-  /** 认证策略 */
-  authPolicy: ProviderPluginAuthPolicy;
-  /** 接口信息 */
-  interface?: ProviderPluginInterface;
-}
+export const ProviderPluginDescriptor = Schema.Struct({
+  id: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  source: ProviderPluginSource,
+  installed: Schema.Boolean,
+  enabled: Schema.Boolean,
+  installPolicy: ProviderPluginInstallPolicy,
+  authPolicy: ProviderPluginAuthPolicy,
+  interface: Schema.optional(ProviderPluginInterface),
+});
+export type ProviderPluginDescriptor = typeof ProviderPluginDescriptor.Type;
 
-/** 插件市场加载错误描述 */
-export interface ProviderPluginMarketplaceLoadError {
-  /** 市场路径 */
-  marketplacePath: TrimmedNonEmptyString;
-  /** 错误信息 */
-  message: TrimmedNonEmptyString;
-}
+export const ProviderPluginMarketplaceLoadError = Schema.Struct({
+  marketplacePath: TrimmedNonEmptyString,
+  message: TrimmedNonEmptyString,
+});
+export type ProviderPluginMarketplaceLoadError = typeof ProviderPluginMarketplaceLoadError.Type;
 
-/**
- * 插件市场描述符
- *
- * 描述一个插件市场，包含市场名称、路径和其中的插件列表。
- */
-export interface ProviderPluginMarketplaceDescriptor {
-  /** 市场名称 */
-  name: TrimmedNonEmptyString;
-  /** 市场路径 */
-  path: TrimmedNonEmptyString;
-  /** 接口信息 */
-  interface?: ProviderPluginMarketplaceInterface;
-  /** 插件列表 */
-  plugins: ProviderPluginDescriptor[];
-}
+export const ProviderPluginMarketplaceDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+  interface: Schema.optional(ProviderPluginMarketplaceInterface),
+  plugins: Schema.Array(ProviderPluginDescriptor),
+});
+export type ProviderPluginMarketplaceDescriptor = typeof ProviderPluginMarketplaceDescriptor.Type;
 
-/** 插件应用摘要 */
-export interface ProviderPluginAppSummary {
-  /** 应用 ID */
-  id: TrimmedNonEmptyString;
-  /** 应用名称 */
-  name: TrimmedNonEmptyString;
-  /** 应用描述 */
-  description?: TrimmedNonEmptyString;
-  /** 安装链接 */
-  installUrl?: TrimmedNonEmptyString;
-  /** 是否需要认证 */
-  needsAuth: boolean;
-}
+export const ProviderPluginAppSummary = Schema.Struct({
+  id: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  installUrl: Schema.optional(TrimmedNonEmptyString),
+  needsAuth: Schema.Boolean,
+});
+export type ProviderPluginAppSummary = typeof ProviderPluginAppSummary.Type;
 
-/** 列出插件的输入参数 */
-export interface ProviderListPluginsInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 工作目录 */
-  cwd?: TrimmedNonEmptyString;
-  /** 线程 ID */
-  threadId?: TrimmedNonEmptyString;
-  /** 是否强制远程同步 */
-  forceRemoteSync?: boolean;
-  /** 是否强制重新加载 */
-  forceReload?: boolean;
-}
+export const ProviderListPluginsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: Schema.optional(TrimmedNonEmptyString),
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  forceRemoteSync: Schema.optional(Schema.Boolean),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListPluginsInput = typeof ProviderListPluginsInput.Type;
 
-/** 列出插件的结果 */
-export interface ProviderListPluginsResult {
-  /** 市场列表 */
-  marketplaces: ProviderPluginMarketplaceDescriptor[];
-  /** 市场加载错误列表 */
-  marketplaceLoadErrors: ProviderPluginMarketplaceLoadError[];
-  /** 远程同步错误 */
-  remoteSyncError: TrimmedNonEmptyString | null;
-  /** 推荐插件 ID 列表 */
-  featuredPluginIds: TrimmedNonEmptyString[];
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderListPluginsResult = Schema.Struct({
+  marketplaces: Schema.Array(ProviderPluginMarketplaceDescriptor),
+  marketplaceLoadErrors: Schema.Array(ProviderPluginMarketplaceLoadError),
+  remoteSyncError: Schema.NullOr(TrimmedNonEmptyString),
+  featuredPluginIds: Schema.Array(TrimmedNonEmptyString),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListPluginsResult = typeof ProviderListPluginsResult.Type;
 
-/** 读取插件详情的输入参数 */
-export interface ProviderReadPluginInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 市场路径 */
-  marketplacePath: TrimmedNonEmptyString;
-  /** 插件名称 */
-  pluginName: TrimmedNonEmptyString;
-}
+export const ProviderReadPluginInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  marketplacePath: TrimmedNonEmptyString,
+  pluginName: TrimmedNonEmptyString,
+});
+export type ProviderReadPluginInput = typeof ProviderReadPluginInput.Type;
 
-/**
- * 插件详情
- *
- * 包含插件的完整信息，包括市场信息、描述、技能列表、应用列表等。
- */
-export interface ProviderPluginDetail {
-  /** 市场名称 */
-  marketplaceName: TrimmedNonEmptyString;
-  /** 市场路径 */
-  marketplacePath: TrimmedNonEmptyString;
-  /** 插件摘要信息 */
-  summary: ProviderPluginDescriptor;
-  /** 插件描述 */
-  description?: TrimmedNonEmptyString;
-  /** 技能列表 */
-  skills: ProviderSkillDescriptor[];
-  /** 应用列表 */
-  apps: ProviderPluginAppSummary[];
-  /** MCP 服务器列表 */
-  mcpServers: TrimmedNonEmptyString[];
-}
+export const ProviderPluginDetail = Schema.Struct({
+  marketplaceName: TrimmedNonEmptyString,
+  marketplacePath: TrimmedNonEmptyString,
+  summary: ProviderPluginDescriptor,
+  description: Schema.optional(TrimmedNonEmptyString),
+  skills: Schema.Array(ProviderSkillDescriptor),
+  apps: Schema.Array(ProviderPluginAppSummary),
+  mcpServers: Schema.Array(TrimmedNonEmptyString),
+});
+export type ProviderPluginDetail = typeof ProviderPluginDetail.Type;
 
-/** 读取插件详情的结果 */
-export interface ProviderReadPluginResult {
-  /** 插件详情 */
-  plugin: ProviderPluginDetail;
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderReadPluginResult = Schema.Struct({
+  plugin: ProviderPluginDetail,
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderReadPluginResult = typeof ProviderReadPluginResult.Type;
 
-/** 列出模型的输入参数 */
-export interface ProviderListModelsInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-  /** 二进制文件路径 */
-  binaryPath?: TrimmedNonEmptyString;
-  /** API 端点 */
-  apiEndpoint?: TrimmedNonEmptyString;
-  /** 代理目录 */
-  agentDir?: TrimmedNonEmptyString;
-}
+export const ProviderListModelsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  binaryPath: Schema.optional(TrimmedNonEmptyString),
+  apiEndpoint: Schema.optional(TrimmedNonEmptyString),
+  agentDir: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderListModelsInput = typeof ProviderListModelsInput.Type;
 
-/** 推理努力程度描述符 */
-export interface ProviderReasoningEffortDescriptor {
-  /** 值 */
-  value: TrimmedNonEmptyString;
-  /** 显示标签 */
-  label?: TrimmedNonEmptyString;
-  /** 描述 */
-  description?: TrimmedNonEmptyString;
-}
+export const ProviderReasoningEffortDescriptor = Schema.Struct({
+  value: TrimmedNonEmptyString,
+  label: Schema.optional(TrimmedNonEmptyString),
+  description: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderReasoningEffortDescriptor = typeof ProviderReasoningEffortDescriptor.Type;
 
-/** 上下文窗口选项描述符 */
-export interface ProviderContextWindowDescriptor {
-  /** 值 */
-  value: TrimmedNonEmptyString;
-  /** 显示标签 */
-  label: TrimmedNonEmptyString;
-  /** 是否为默认选项 */
-  isDefault?: true;
-}
+export const ProviderContextWindowDescriptor = Schema.Struct({
+  value: TrimmedNonEmptyString,
+  label: TrimmedNonEmptyString,
+  isDefault: Schema.optional(Schema.Literal(true)),
+});
+export type ProviderContextWindowDescriptor = typeof ProviderContextWindowDescriptor.Type;
 
-/**
- * 模型描述符
- *
- * 描述一个可用的 AI 模型，包含名称、提供者、推理能力、上下文窗口等信息。
- */
-export interface ProviderModelDescriptor {
-  /** 模型标识 */
-  slug: TrimmedNonEmptyString;
-  /** 模型名称 */
-  name: TrimmedNonEmptyString;
-  /** 上游提供者 ID */
-  upstreamProviderId?: TrimmedNonEmptyString;
-  /** 上游提供者名称 */
-  upstreamProviderName?: TrimmedNonEmptyString;
-  /** 选项描述符列表 */
-  optionDescriptors?: ProviderOptionDescriptor[];
+export const ProviderModelDescriptor = Schema.Struct({
+  slug: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  upstreamProviderId: Schema.optional(TrimmedNonEmptyString),
+  upstreamProviderName: Schema.optional(TrimmedNonEmptyString),
+  optionDescriptors: Schema.optional(Schema.Array(ProviderOptionDescriptor)),
   // Codex model/list results are normalized here so the web app can consume both
   // the legacy string array and Remodex-style reasoning objects uniformly.
-  /** 支持的推理努力程度 */
-  supportedReasoningEfforts?: ProviderReasoningEffortDescriptor[];
-  /** 默认推理努力程度 */
-  defaultReasoningEffort?: TrimmedNonEmptyString;
-  /** 是否支持快速模式 */
-  supportsFastMode?: boolean;
-  /** 是否支持思考切换 */
-  supportsThinkingToggle?: boolean;
-  /** 上下文窗口选项 */
-  contextWindowOptions?: ProviderContextWindowDescriptor[];
-  /** 默认上下文窗口 */
-  defaultContextWindow?: TrimmedNonEmptyString;
-}
+  supportedReasoningEfforts: Schema.optional(Schema.Array(ProviderReasoningEffortDescriptor)),
+  defaultReasoningEffort: Schema.optional(TrimmedNonEmptyString),
+  supportsFastMode: Schema.optional(Schema.Boolean),
+  supportsThinkingToggle: Schema.optional(Schema.Boolean),
+  contextWindowOptions: Schema.optional(Schema.Array(ProviderContextWindowDescriptor)),
+  defaultContextWindow: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderModelDescriptor = typeof ProviderModelDescriptor.Type;
 
-/** 列出模型的结果 */
-export interface ProviderListModelsResult {
-  /** 模型列表 */
-  models: ProviderModelDescriptor[];
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderListModelsResult = Schema.Struct({
+  models: Schema.Array(ProviderModelDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListModelsResult = typeof ProviderListModelsResult.Type;
 
-/** 列出代理的输入参数 */
-export interface ProviderListAgentsInput {
-  /** Provider 类型 */
-  provider: ProviderDiscoveryKind;
-}
+export const ProviderListAgentsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+});
+export type ProviderListAgentsInput = typeof ProviderListAgentsInput.Type;
 
-/** 代理描述符 */
-export interface ProviderAgentDescriptor {
-  /** 代理名称 */
-  name: TrimmedNonEmptyString;
-  /** 显示名称 */
-  displayName: TrimmedNonEmptyString;
-  /** 代理描述 */
-  description?: TrimmedNonEmptyString;
-  /** 使用的模型 */
-  model?: TrimmedNonEmptyString;
-}
+export const ProviderAgentDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  displayName: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  model: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderAgentDescriptor = typeof ProviderAgentDescriptor.Type;
 
-/** 列出代理的结果 */
-export interface ProviderListAgentsResult {
-  /** 代理列表 */
-  agents: ProviderAgentDescriptor[];
-  /** 数据来源 */
-  source?: TrimmedNonEmptyString;
-  /** 是否来自缓存 */
-  cached?: boolean;
-}
+export const ProviderListAgentsResult = Schema.Struct({
+  agents: Schema.Array(ProviderAgentDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListAgentsResult = typeof ProviderListAgentsResult.Type;
