@@ -399,5 +399,56 @@ pub async fn register_provider_methods(
         })
         .await;
 
+    // provider.setApiKey - 设置 Provider 的 API Key
+    // 参数: { provider: string, key: string }
+    // 返回: null
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.setApiKey", move |params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let provider_str = params
+                    .get("provider")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing provider".to_string())
+                    })?;
+
+                let provider: ProviderKind = serde_json::from_str(provider_str)
+                    .map_err(|e| crate::error::ServerError::InvalidParams(e.to_string()))?;
+
+                let key = params
+                    .get("key")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing key".to_string())
+                    })?
+                    .to_string();
+
+                provider_service.set_api_key(provider, key).await;
+                Ok(Value::Null)
+            }
+        })
+        .await;
+
+    // provider.getProviderStatus - 获取所有 Provider 的运行时状态
+    // 参数: 无
+    // 返回: Record<string, ServerProviderStatus>
+    let provider_service = services.provider_service.clone();
+    router
+        .register("provider.getProviderStatus", move |_params: Option<Value>| {
+            let provider_service = provider_service.clone();
+            async move {
+                let statuses = provider_service.get_provider_status().await?;
+                serde_json::to_value(statuses)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
+            }
+        })
+        .await;
+
     info!("Provider RPC 方法注册完成");
 }

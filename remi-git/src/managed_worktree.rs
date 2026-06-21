@@ -90,7 +90,15 @@ impl ManagedWorktreeService {
         branch_name: &str,
         thread_id: Option<&str>,
     ) -> Result<PathBuf, GitError> {
-        let worktree_path = self.git_core.create_worktree(repo_path, branch_name).await?;
+        let worktree_path = compute_worktree_path(repo_path, branch_name);
+        self.git_core
+            .create_worktree(
+                repo_path,
+                worktree_path.to_string_lossy().as_ref(),
+                branch_name,
+                None,
+            )
+            .await?;
 
         let now = Utc::now();
         let record = ManagedWorktree {
@@ -120,7 +128,15 @@ impl ManagedWorktreeService {
         repo_path: &str,
         thread_id: Option<&str>,
     ) -> Result<PathBuf, GitError> {
-        let worktree_path = self.git_core.create_detached_worktree(repo_path).await?;
+        let branch_name = format!("detached-{}", &Utc::now().timestamp_millis().to_string());
+        let worktree_path = compute_worktree_path(repo_path, &branch_name);
+        self.git_core
+            .create_detached_worktree(
+                repo_path,
+                worktree_path.to_string_lossy().as_ref(),
+                "HEAD",
+            )
+            .await?;
 
         let now = Utc::now();
         let record = ManagedWorktree {
@@ -144,8 +160,14 @@ impl ManagedWorktreeService {
     }
 
     /// 移除一个 Worktree 并清理注册表
-    pub async fn remove_worktree(&self, worktree_path: &str) -> Result<(), GitError> {
-        self.git_core.remove_worktree(worktree_path).await?;
+    pub async fn remove_worktree(
+        &self,
+        repo_path: &str,
+        worktree_path: &str,
+    ) -> Result<(), GitError> {
+        self.git_core
+            .remove_worktree(repo_path, worktree_path)
+            .await?;
 
         let path = PathBuf::from(worktree_path);
         self.worktrees.write().await.remove(&path);
@@ -198,7 +220,18 @@ impl ManagedWorktreeService {
 
         let mut cleaned = Vec::new();
         for record in &expired {
-            match self.git_core.remove_worktree(&record.path.display().to_string()).await {
+            // 推断所属仓库：取 worktree_path 父目录的父目录（`.remi/worktrees/<branch>` 形式）
+            let repo_path = record
+                .path
+                .parent()
+                .and_then(|p| p.parent())
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_default();
+            match self
+                .git_core
+                .remove_worktree(&repo_path, &record.path.to_string_lossy())
+                .await
+            {
                 Ok(()) => {
                     self.worktrees.write().await.remove(&record.path);
                     cleaned.push(record.path.clone());
@@ -235,5 +268,41 @@ impl ManagedWorktreeService {
     /// 获取 Worktree 数量
     pub async fn count(&self) -> usize {
         self.worktrees.read().await.len()
+    }
+}
+
+/// 计算 worktree 路径：`<repo_parent>/.remi-worktrees/<branch>`
+fn compute_worktree_path(repo_path: &str, branch_name: &str) -> PathBuf {
+    let repo = Path::new(repo_path);
+    let parent = repo.parent().unwrap_or(Path::new("."));
+    let safe_branch = sanitize_branch_name(branch_name);
+    parent.join(".remi-worktrees").join(safe_branch)
+}
+
+/// 清理分支名中的不安全字符
+fn sanitize_branch_name(name: &str) -> String {
+    name.chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            _ => c,
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sanitize_replaces_slashes() {
+        assert_eq!(sanitize_branch_name("feature/foo"), "feature_foo");
+        assert_eq!(sanitize_branch_name("a:b"), "a_b");
+    }
+
+    #[test]
+    fn compute_worktree_path_layout() {
+        let p = compute_worktree_path("/tmp/repo", "feature-1");
+        assert!(p.to_string_lossy().contains(".remi-worktrees"));
+        assert!(p.to_string_lossy().ends_with("feature-1"));
     }
 }

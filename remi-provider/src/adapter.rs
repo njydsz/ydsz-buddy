@@ -79,7 +79,9 @@
 
 use async_trait::async_trait;
 use remi_core::provider::{
-    ProviderKind, ProviderRuntimeEvent, ProviderSession, ProviderSessionStartInput,
+    ProviderForkThreadInput, ProviderForkThreadResult, ProviderKind, ProviderRespondToRequestInput,
+    ProviderRespondToUserInputInput, ProviderRuntimeEvent, ProviderSession,
+    ProviderSessionStartInput, ProviderStartReviewInput, ProviderThreadSnapshot,
     ProviderTurnStartResult, TurnInput,
 };
 use serde::{Deserialize, Serialize};
@@ -437,20 +439,20 @@ pub trait ProviderAdapter: Send + Sync {
     }
 
     /// 列出模型
+    ///
+    /// 默认实现返回内置静态模型目录，支持动态发现的适配器可覆盖此方法。
     async fn list_models(
         &self,
         _input: remi_core::provider::ProviderListModelsInput,
     ) -> ProviderResult<remi_core::provider::ProviderListModelsResult> {
-        Err(crate::error::ProviderError::UnsupportedOperation(
-            "list_models not supported".to_string(),
-        ))
+        Ok(crate::catalog::default_models_for(self.provider_kind()))
     }
 
     /// 列出 Agent
+    ///
+    /// 默认实现返回内置静态 Agent 目录，支持动态发现的适配器可覆盖此方法。
     async fn list_agents(&self) -> ProviderResult<remi_core::provider::ProviderListAgentsResult> {
-        Err(crate::error::ProviderError::UnsupportedOperation(
-            "list_agents not supported".to_string(),
-        ))
+        Ok(crate::catalog::default_agents_for(self.provider_kind()))
     }
 
     /// 列出插件
@@ -476,5 +478,98 @@ pub trait ProviderAdapter: Send + Sync {
     /// 获取 Composer 能力
     async fn get_composer_capabilities(&self) -> ProviderResult<ProviderCapabilities> {
         Ok(self.capabilities())
+    }
+
+    /// 启动代码审查
+    ///
+    /// 对指定的 Git 分支、提交或差异范围启动 Provider 原生审查流程。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn start_review(
+        &self,
+        _input: ProviderStartReviewInput,
+    ) -> ProviderResult<ProviderTurnStartResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "start_review not supported".to_string(),
+        ))
+    }
+
+    /// 响应审批请求
+    ///
+    /// 用户对 Provider 弹出的审批请求做出批准/拒绝决策。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn respond_to_request(&self, _input: ProviderRespondToRequestInput) -> ProviderResult<()> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "respond_to_request not supported".to_string(),
+        ))
+    }
+
+    /// 响应用户输入请求
+    ///
+    /// 用户对 Provider 弹出的结构化输入表单提交答案。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn respond_to_user_input(
+        &self,
+        _input: ProviderRespondToUserInputInput,
+    ) -> ProviderResult<()> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "respond_to_user_input not supported".to_string(),
+        ))
+    }
+
+    /// 读取线程快照
+    ///
+    /// 获取 Provider 线程当前状态快照，包括所有 Turn 信息。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn read_thread(&self, _thread_id: &str) -> ProviderResult<ProviderThreadSnapshot> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "read_thread not supported".to_string(),
+        ))
+    }
+
+    /// 分叉线程
+    ///
+    /// 从现有 Provider 线程创建一个新线程，可能携带恢复游标。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn fork_thread(
+        &self,
+        _input: ProviderForkThreadInput,
+    ) -> ProviderResult<ProviderForkThreadResult> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "fork_thread not supported".to_string(),
+        ))
+    }
+
+    /// 停止运行时会话
+    ///
+    /// 停止 Provider 底层运行时进程（如 Codex App Server）。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn stop_runtime_session(&self) -> ProviderResult<()> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "stop_runtime_session not supported".to_string(),
+        ))
+    }
+
+    /// 清除会话恢复游标
+    ///
+    /// 清除指定线程在 Provider 侧的恢复游标，通常在会话重置时使用。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn clear_session_resume_cursor(&self, _thread_id: &str) -> ProviderResult<()> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "clear_session_resume_cursor not supported".to_string(),
+        ))
+    }
+
+    /// 语音转文字
+    ///
+    /// 将音频数据转录为文本，Provider 支持时可用。
+    /// 这是一个可选方法，默认返回不支持错误。
+    async fn transcribe_voice(
+        &self,
+        _audio_bytes: Vec<u8>,
+        _mime_type: Option<String>,
+    ) -> ProviderResult<String> {
+        Err(crate::error::ProviderError::UnsupportedOperation(
+            "transcribe_voice not supported".to_string(),
+        ))
     }
 }

@@ -8,11 +8,11 @@ use std::sync::Arc;
 use remi_auth::AuthService;
 use remi_checkpoint::CheckpointStore;
 use remi_config::ServerConfig;
-use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService};
+use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService, ManagedWorktreeService};
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
-use remi_provider::{ProviderDiscoveryService, ProviderService};
-use remi_telemetry::{AnalyticsService, MetricsCollector};
-use remi_terminal::TerminalManager;
+use remi_provider::{ProviderDiscoveryService, ProviderService, SessionReaper};
+use remi_telemetry::{AnalyticsService, HeartbeatService, MetricsCollector};
+use remi_terminal::{TerminalManager, TerminalTitleTracker};
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 use tracing::info;
 
@@ -41,6 +41,8 @@ pub struct ServiceContainer {
     pub provider_service: Arc<ProviderService>,
     /// Provider 发现服务
     pub provider_discovery_service: Arc<ProviderDiscoveryService>,
+    /// Provider 会话清理服务
+    pub session_reaper: Arc<SessionReaper>,
     /// Git 核心
     pub git_core: Arc<GitCore>,
     /// Git 管理器
@@ -53,6 +55,8 @@ pub struct ServiceContainer {
     pub managed_worktree: Arc<ManagedWorktreeService>,
     /// 终端管理器
     pub terminal_manager: Arc<TerminalManager>,
+    /// 终端标题追踪器
+    pub terminal_title_tracker: Arc<TerminalTitleTracker>,
     /// 工作空间文件系统
     pub workspace_filesystem: Arc<WorkspaceFileSystem>,
     /// 工作空间条目
@@ -65,6 +69,8 @@ pub struct ServiceContainer {
     pub analytics_service: Arc<AnalyticsService>,
     /// 指标收集器
     pub metrics_collector: Arc<MetricsCollector>,
+    /// 心跳服务
+    pub heartbeat_service: Arc<HeartbeatService>,
     /// 推送通道管理器
     pub push_channel_manager: Arc<PushChannelManager>,
     /// HTTP 辅助路由状态（附件存储、本地图片、favicon）

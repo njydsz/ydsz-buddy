@@ -121,6 +121,12 @@ pub enum AnalyticsEventType {
     ///
     /// 当用户会话结束（主动退出或超时断开）时触发。
     SessionStopped,
+    /// 服务器心跳事件。
+    ///
+    /// 由 [`HeartbeatService`](crate::heartbeat::HeartbeatService) 定期触发，
+    /// 用于上报服务器运行状态（线程数、项目数、运行时长、内存使用等）。
+    /// 仅存储事件，不更新使用统计。
+    ServerHeartbeat,
 }
 
 /// # 分析事件数据结构

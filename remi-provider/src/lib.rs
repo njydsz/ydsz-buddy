@@ -59,6 +59,11 @@
 /// 定义了所有 Provider 适配器必须实现的标准接口，包括会话管理、消息发送、事件流等核心功能。
 pub mod adapter;
 
+/// Provider 静态能力目录
+///
+/// 提供各 Provider 默认的模型、Agent 等能力目录。
+pub mod catalog;
+
 /// Provider 适配器实现模块
 ///
 /// 包含各种 AI Provider 的具体适配器实现，如 Claude、Codex、Cursor、Gemini、Grok、Kilo、OpenCode、Pi 等。
@@ -109,6 +114,32 @@ pub mod discovery;
 /// 提供 Provider 会话的持久化存储管理功能。
 pub mod session_directory;
 
+/// === Sprint 2-A Provider 深度 ===
+
+/// Provider 状态缓存层（带 TTL）
+pub mod status_cache;
+
+/// Provider 周期性巡检（health + status_cache 刷新）
+pub mod provider_maintenance;
+
+/// Codex CLI 版本探测
+pub mod codex_cli_version;
+
+/// Gemini ACP 协议能力探测
+pub mod gemini_acp_probe;
+
+/// OpenCode 运行时进程包装
+pub mod opencode_runtime;
+
+/// Pi Turn 失败分类器
+pub mod pi_turn_failure;
+
+/// Plan Mode 状态机
+pub mod plan_mode;
+
+/// 提示附件（文件/目录/图片/URL/AGENTS.md）
+pub mod prompt_attachments;
+
 // 重新导出所有公共 API，方便外部使用
 pub use adapter::*;
 pub use error::*;
@@ -120,3 +151,12 @@ pub use acp::*;
 pub use event_logger::*;
 pub use discovery::*;
 pub use session_directory::*;
+pub use status_cache::*;
+pub use provider_maintenance::*;
+pub use codex_cli_version::*;
+pub use gemini_acp_probe::*;
+pub use opencode_runtime::*;
+pub use pi_turn_failure::*;
+pub use plan_mode::*;
+pub use prompt_attachments::*;
+pub use catalog::*;

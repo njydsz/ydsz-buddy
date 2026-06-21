@@ -91,7 +91,8 @@ use remi_core::provider::{
     ProviderTurnStartResult, ServerProviderAuthStatus, ServerProviderStatus,
     ServerProviderStatusState, TurnInput,
 };
-use serde_json::{json, Value};
+use chrono::Utc;
+use serde_json::Value;
 use tokio::sync::{broadcast, RwLock};
 use tracing::{info, warn};
 
@@ -443,6 +444,89 @@ impl ProviderService {
         adapter.compact_thread(thread_id).await
     }
 
+    /// 设置 Provider 的 API Key
+    ///
+    /// 将 API Key 保存在服务内存中，供对应 Provider 的适配器启动会话时使用。
+    /// 当前为内存存储，后续可接入持久化 Secret 存储。
+    ///
+    /// # 参数
+    ///
+    /// - `provider`: Provider 类型
+    /// - `key`: API Key 字符串
+    pub async fn set_api_key(&self, provider: ProviderKind, key: String) {
+        let mut keys = self.api_keys.write().await;
+        keys.insert(provider, key);
+        info!("已设置 Provider API Key: {:?}", provider);
+    }
+
+    /// 获取所有已注册 Provider 的运行时状态
+    ///
+    /// 返回以 ProviderKind 为键的状态映射，包含可用性、认证状态、版本等。
+    /// 该结构与前端 `ServerProviderStatus` 对齐。
+    pub async fn get_provider_status(&self) -> ProviderResult<HashMap<ProviderKind, ServerProviderStatus>> {
+        let adapters = self.adapters.read().await;
+        let mut kinds: Vec<ProviderKind> = adapters.keys().copied().collect();
+        kinds.sort_by_key(|k| format!("{}", k));
+        drop(adapters);
+
+        let keys = self.api_keys.read().await;
+        let mut result = HashMap::with_capacity(kinds.len());
+
+        for kind in kinds {
+            let health = if let Some(cached) = self.health.get_cached_status(kind).await {
+                cached
+            } else {
+                match self.health.check_health(kind).await {
+                    Ok(status) => status,
+                    Err(e) => {
+                        warn!("健康检查失败 {:?}: {}", kind, e);
+                        crate::health::ProviderHealthStatus {
+                            provider: kind,
+                            available: false,
+                            last_checked: Utc::now(),
+                            message: Some(e.to_string()),
+                        }
+                    }
+                }
+            };
+
+            let has_key = keys.contains_key(&kind);
+            let auth_status = if has_key {
+                ServerProviderAuthStatus::Authenticated
+            } else {
+                ServerProviderAuthStatus::Unauthenticated
+            };
+
+            let checked_at = health.last_checked.to_rfc3339();
+            result.insert(
+                kind,
+                ServerProviderStatus {
+                    provider: kind,
+                    status: if health.available {
+                        ServerProviderStatusState::Ready
+                    } else {
+                        ServerProviderStatusState::Error
+                    },
+                    available: health.available && has_key,
+                    auth_status,
+                    auth_type: Some("apiKey".to_string()),
+                    auth_label: if has_key {
+                        Some("已配置".to_string())
+                    } else {
+                        Some("未配置".to_string())
+                    },
+                    voice_transcription_available: None,
+                    version: None,
+                    checked_at,
+                    message: health.message,
+                    version_advisory: None,
+                    update_state: None,
+                },
+            );
+        }
+        Ok(result)
+    }
+
     /// 列出所有已知的 Provider 状态
     ///
     /// 遍历所有已注册的 Provider 类型，返回它们的状态快照。
@@ -474,8 +558,8 @@ impl ProviderService {
 
     /// 列出指定 Provider 支持的模型
     ///
-    /// 返回指定 Provider 支持的模型静态目录。
-    /// 当前实现基于内置目录，后续可扩展为通过适配器动态查询。
+    /// 通过对应适配器查询模型列表；适配器未实现动态发现时，
+    /// 返回内置静态模型目录作为降级。
     ///
     /// # 参数
     ///
@@ -486,13 +570,25 @@ impl ProviderService {
     /// - `Ok(Vec<serde_json::Value>)`: 模型列表
     /// - `Err(ProviderError)`: 查询失败
     pub async fn list_models(&self, provider: ProviderKind) -> ProviderResult<Vec<Value>> {
-        Ok(static_models_for(provider))
+        let adapter = self.get_adapter(provider).await?;
+        let input = remi_core::provider::ProviderListModelsInput {
+            provider,
+            binary_path: None,
+            api_endpoint: None,
+        };
+        let result = adapter.list_models(input).await?;
+        let models = result
+            .models
+            .into_iter()
+            .map(|m| serde_json::to_value(m).unwrap_or(Value::Null))
+            .collect();
+        Ok(models)
     }
 
     /// 列出指定 Provider 支持的 Agent
     ///
-    /// 返回指定 Provider 支持的 Agent 静态目录。
-    /// 当前实现基于内置目录，后续可扩展为通过适配器动态查询。
+    /// 通过对应适配器查询 Agent 列表；适配器未实现动态发现时，
+    /// 返回内置静态 Agent 目录作为降级。
     ///
     /// # 参数
     ///
@@ -503,7 +599,14 @@ impl ProviderService {
     /// - `Ok(Vec<serde_json::Value>)`: Agent 列表
     /// - `Err(ProviderError)`: 查询失败
     pub async fn list_agents(&self, provider: ProviderKind) -> ProviderResult<Vec<Value>> {
-        Ok(static_agents_for(provider))
+        let adapter = self.get_adapter(provider).await?;
+        let result = adapter.list_agents().await?;
+        let agents = result
+            .agents
+            .into_iter()
+            .map(|a| serde_json::to_value(a).unwrap_or(Value::Null))
+            .collect();
+        Ok(agents)
     }
 
     /// 刷新所有 Provider 的状态
@@ -584,193 +687,5 @@ impl Default for ProviderService {
     }
 }
 
-/// 返回指定 Provider 的静态模型目录
-///
-/// 基于 ProviderKind 返回该 Provider 常用的模型列表。
-/// 此目录为内置静态数据，不依赖运行时查询，适用于：
-/// - 前端模型选择器初始化
-/// - 未启动会话时的模型预览
-/// - 适配器未注册时的降级展示
-fn static_models_for(provider: ProviderKind) -> Vec<Value> {
-    match provider {
-        ProviderKind::ClaudeAgent => vec![
-            json!({
-                "id": "claude-sonnet-4-5",
-                "name": "Claude Sonnet 4.5",
-                "provider": "claudeAgent",
-                "contextWindow": 200_000,
-                "description": "Anthropic 旗舰模型，擅长代码生成与复杂推理"
-            }),
-            json!({
-                "id": "claude-opus-4-1",
-                "name": "Claude Opus 4.1",
-                "provider": "claudeAgent",
-                "contextWindow": 200_000,
-                "description": "Anthropic 高端模型，适合长上下文与高精度任务"
-            }),
-            json!({
-                "id": "claude-haiku-4",
-                "name": "Claude Haiku 4",
-                "provider": "claudeAgent",
-                "contextWindow": 200_000,
-                "description": "Anthropic 轻量模型，响应快速、成本更低"
-            }),
-        ],
-        ProviderKind::Codex => vec![
-            json!({
-                "id": "gpt-5",
-                "name": "GPT-5",
-                "provider": "codex",
-                "contextWindow": 200_000,
-                "description": "OpenAI 旗舰模型，多模态能力强"
-            }),
-            json!({
-                "id": "gpt-5-mini",
-                "name": "GPT-5 Mini",
-                "provider": "codex",
-                "contextWindow": 128_000,
-                "description": "OpenAI 轻量模型，适合常规任务"
-            }),
-            json!({
-                "id": "o3",
-                "name": "o3",
-                "provider": "codex",
-                "contextWindow": 200_000,
-                "description": "OpenAI 推理增强模型，适合复杂逻辑任务"
-            }),
-        ],
-        ProviderKind::Cursor => vec![
-            json!({
-                "id": "cursor-default",
-                "name": "Cursor Default",
-                "provider": "cursor",
-                "contextWindow": 128_000,
-                "description": "Cursor 默认模型"
-            }),
-            json!({
-                "id": "cursor-small",
-                "name": "Cursor Small",
-                "provider": "cursor",
-                "contextWindow": 128_000,
-                "description": "Cursor 轻量模型"
-            }),
-        ],
-        ProviderKind::Gemini => vec![
-            json!({
-                "id": "gemini-2-5-pro",
-                "name": "Gemini 2.5 Pro",
-                "provider": "gemini",
-                "contextWindow": 2_000_000,
-                "description": "Google 旗舰模型，超长上下文"
-            }),
-            json!({
-                "id": "gemini-2-5-flash",
-                "name": "Gemini 2.5 Flash",
-                "provider": "gemini",
-                "contextWindow": 1_000_000,
-                "description": "Google 轻量模型，响应快速"
-            }),
-        ],
-        ProviderKind::Grok => vec![
-            json!({
-                "id": "grok-4",
-                "name": "Grok 4",
-                "provider": "grok",
-                "contextWindow": 256_000,
-                "description": "xAI 旗舰模型"
-            }),
-            json!({
-                "id": "grok-4-fast",
-                "name": "Grok 4 Fast",
-                "provider": "grok",
-                "contextWindow": 128_000,
-                "description": "xAI 快速响应模型"
-            }),
-        ],
-        ProviderKind::Kilo => vec![
-            json!({
-                "id": "kilo-code",
-                "name": "Kilo Code",
-                "provider": "kilo",
-                "contextWindow": 128_000,
-                "description": "Kilo AI 代码模型"
-            }),
-        ],
-        ProviderKind::OpenCode => vec![
-            json!({
-                "id": "opencode-default",
-                "name": "OpenCode Default",
-                "provider": "opencode",
-                "contextWindow": 128_000,
-                "description": "OpenCode 默认模型"
-            }),
-        ],
-        ProviderKind::Pi => vec![
-            json!({
-                "id": "pi-default",
-                "name": "Pi Default",
-                "provider": "pi",
-                "contextWindow": 32_000,
-                "description": "Inflection Pi 对话模型"
-            }),
-        ],
-    }
-}
-
-/// 返回指定 Provider 的静态 Agent 目录
-///
-/// 基于 ProviderKind 返回该 Provider 支持的 Agent 列表。
-/// Agent 是 Provider 提供的预设角色，包含特定的系统提示词和工具配置。
-fn static_agents_for(provider: ProviderKind) -> Vec<Value> {
-    match provider {
-        ProviderKind::ClaudeAgent => vec![
-            json!({
-                "id": "claude-software-engineer",
-                "name": "Software Engineer",
-                "provider": "claudeAgent",
-                "description": "通用软件工程 Agent，擅长代码编写、调试、重构"
-            }),
-            json!({
-                "id": "claude-code-reviewer",
-                "name": "Code Reviewer",
-                "provider": "claudeAgent",
-                "description": "代码审查 Agent，专注代码质量与最佳实践"
-            }),
-        ],
-        ProviderKind::Codex => vec![
-            json!({
-                "id": "codex-assistant",
-                "name": "Codex Assistant",
-                "provider": "codex",
-                "description": "OpenAI Codex 通用助手"
-            }),
-        ],
-        ProviderKind::Cursor => vec![
-            json!({
-                "id": "cursor-assistant",
-                "name": "Cursor Assistant",
-                "provider": "cursor",
-                "description": "Cursor 内置助手"
-            }),
-        ],
-        ProviderKind::Gemini => vec![
-            json!({
-                "id": "gemini-assistant",
-                "name": "Gemini Assistant",
-                "provider": "gemini",
-                "description": "Gemini 通用助手"
-            }),
-        ],
-        ProviderKind::Grok => vec![
-            json!({
-                "id": "grok-assistant",
-                "name": "Grok Assistant",
-                "provider": "grok",
-                "description": "Grok 通用助手"
-            }),
-        ],
-        ProviderKind::Kilo => vec![],
-        ProviderKind::OpenCode => vec![],
-        ProviderKind::Pi => vec![],
-    }
-}
+// 旧的 static_models_for / static_agents_for 已迁移到 `crate::catalog`，
+// 由 `ProviderAdapter` 默认实现统一提供，避免在 ProviderService 中重复维护。

@@ -557,6 +557,32 @@ pub struct ProviderUserInputAnswers {
     pub answers: std::collections::HashMap<String, String>,
 }
 
+/// # Provider 响应审批请求输入
+///
+/// 用户对 Provider 审批请求做出决策时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderRespondToRequestInput {
+    /// 关联的线程 ID
+    pub thread_id: String,
+    /// 审批请求 ID
+    pub request_id: String,
+    /// 用户决策
+    pub decision: ProviderApprovalDecision,
+}
+
+/// # Provider 响应用户输入请求输入
+///
+/// 用户对 Provider 结构化输入请求做出回答时需要的输入参数。
+#[derive(Debug, Clone)]
+pub struct ProviderRespondToUserInputInput {
+    /// 关联的线程 ID
+    pub thread_id: String,
+    /// 输入请求 ID
+    pub request_id: String,
+    /// 用户答案
+    pub answers: ProviderUserInputAnswers,
+}
+
 /// # Provider 线程快照
 ///
 /// Provider 线程的当前状态快照，包含所有 Turn 的信息。

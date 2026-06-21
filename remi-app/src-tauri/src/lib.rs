@@ -40,12 +40,12 @@ mod commands;
 // 从各命令子模块中通配导入所有公开项（struct、fn、enum 等）
 // 这些项在下方 `tauri::generate_handler!` 宏中被注册为前端可调用的命令
 use commands::{
+    context_menu::*,   // 右键上下文菜单命令
     dialog::*,         // 文件对话框、消息对话框相关命令
     terminal::*,       // 终端会话管理命令
     browser::*,        // 内嵌浏览器面板命令
     update::*,         // 应用自动更新命令
     window::*,         // 窗口主题、系统交互命令
-    context_menu::*,   // 右键上下文菜单命令
     voice::*,          // 语音识别命令
 };
 
@@ -104,6 +104,97 @@ fn get_server_ws_url(state: tauri::State<ServerState>) -> String {
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+// ==================== Sprint 1-D 桌面补齐 Tauri 命令 ====================
+
+/// 获取当前运行时架构信息（CPU 架构 / OS / 平台位数）
+#[tauri::command]
+fn get_runtime_arch() -> commands::runtime_arch::RuntimeArch {
+    commands::runtime_arch::detect()
+}
+
+/// 查询所有媒体权限状态（麦克风 / 摄像头 / 屏幕 / 通知）
+#[tauri::command]
+fn get_media_permissions() -> Vec<commands::media_permissions::MediaPermission> {
+    commands::media_permissions::query_all()
+}
+
+/// 查询单个媒体权限状态
+#[tauri::command]
+fn get_media_permission(
+    kind: commands::media_permissions::MediaKind,
+) -> commands::media_permissions::MediaPermissionStatus {
+    commands::media_permissions::query(kind)
+}
+
+/// 请求单个媒体权限（当前为占位实现，返回 NotDetermined 让前端走浏览器流）
+#[tauri::command]
+fn request_media_permission(
+    kind: commands::media_permissions::MediaKind,
+) -> commands::media_permissions::MediaPermissionStatus {
+    commands::media_permissions::request(kind)
+}
+
+/// 获取默认菜单定义（File / Edit / View / Help）
+#[tauri::command]
+fn get_default_menu() -> Vec<commands::menu_shortcuts::MenuGroup> {
+    commands::menu_shortcuts::default_menu()
+}
+
+/// 单次探测嵌入式后端端口是否可达
+#[tauri::command]
+fn probe_backend_port(addr: String) -> bool {
+    if let Ok(a) = addr.parse() {
+        commands::server_listening_detector::probe_once(a)
+    } else {
+        false
+    }
+}
+
+/// 阻塞等待嵌入式后端端口可达（带超时，毫秒）
+#[tauri::command]
+fn wait_backend_ready(addr: String, timeout_ms: u64) -> bool {
+    if let Ok(a) = addr.parse() {
+        commands::server_listening_detector::wait_until_ready(
+            a,
+            std::time::Duration::from_millis(timeout_ms),
+        )
+    } else {
+        false
+    }
+}
+
+/// 同步 shell 环境变量到当前进程（解决跨平台 PATH 不一致）
+#[tauri::command]
+fn sync_shell_env(
+    shell: Option<commands::sync_shell_environment::ShellFlavor>,
+) -> commands::sync_shell_environment::ShellEnvSync {
+    commands::sync_shell_environment::sync(shell.unwrap_or_default())
+}
+
+/// 获取启动后窗口打开策略（供前端决定是否显示 splash）
+#[tauri::command]
+fn get_window_open_strategy() -> commands::initial_backend_window_open::InitialWindowOpen {
+    let args: Vec<String> = std::env::args().collect();
+    commands::initial_backend_window_open::InitialWindowOpen::from_cli_args(&args)
+}
+
+/// 加载或初始化桌面端用户画像（指定 base_dir）
+#[tauri::command]
+fn load_user_profile(base_dir: String) -> Result<commands::desktop_user_data_profile::DesktopUserProfile, String> {
+    let p = std::path::PathBuf::from(base_dir).join("profile.json");
+    Ok(commands::desktop_user_data_profile::DesktopUserProfile::load_or_init(&p))
+}
+
+/// 保存桌面端用户画像
+#[tauri::command]
+fn save_user_profile(
+    base_dir: String,
+    profile: commands::desktop_user_data_profile::DesktopUserProfile,
+) -> Result<(), String> {
+    let p = std::path::PathBuf::from(base_dir).join("profile.json");
+    profile.save(&p).map_err(|e| e.to_string())
 }
 
 /// 启动 Remi Code Tauri 桌面应用
@@ -286,6 +377,19 @@ pub fn run() {
 
             // 语音命令
             transcribe_voice,                // 语音转文字
+
+            // === Sprint 1-D 桌面补齐命令 ===
+            get_runtime_arch,                // 获取运行时 CPU/OS 信息
+            get_media_permissions,           // 查询所有媒体权限
+            get_media_permission,            // 查询单个媒体权限
+            request_media_permission,        // 请求媒体权限
+            get_default_menu,                // 获取默认菜单定义
+            probe_backend_port,              // 探测后端端口
+            wait_backend_ready,              // 等待后端就绪
+            sync_shell_env,                  // 同步 shell 环境变量
+            get_window_open_strategy,        // 获取窗口打开策略
+            load_user_profile,               // 加载用户画像
+            save_user_profile,               // 保存用户画像
         ])
         // 生成 Tauri 上下文并启动事件循环
         .run(tauri::generate_context!())

@@ -39,10 +39,10 @@ use remi_provider::{
         ClaudeAdapter, CodexAdapter, CursorAdapter, GeminiAdapter, GrokAdapter, KiloAdapter,
         OpenCodeAdapter, PiAdapter,
     },
-    ProviderDiscoveryService, ProviderService,
+    ProviderDiscoveryService, ProviderService, SessionReaper,
 };
-use remi_telemetry::{AnalyticsService, MetricsCollector};
-use remi_terminal::TerminalManager;
+use remi_telemetry::{AnalyticsService, HeartbeatService, MetricsCollector};
+use remi_terminal::{TerminalManager, TerminalTitleTracker};
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 
 use crate::attachment_store::{AttachmentStore, AttachmentStoreConfig};
@@ -65,6 +65,10 @@ pub struct ReactorHandles {
     pub thread_deletion_reactor: tokio::task::JoinHandle<OrchestrationResult<()>>,
     /// 线程保留作业句柄
     pub retention_job: Arc<ThreadRetentionJob>,
+    /// 会话清理服务
+    pub session_reaper: Arc<SessionReaper>,
+    /// 心跳服务
+    pub heartbeat_service: Arc<HeartbeatService>,
     /// 关闭信号发送端
     pub shutdown_tx: broadcast::Sender<()>,
 }
@@ -131,6 +135,15 @@ async fn build_service_container(
 
     info!("已注册 8 个 Provider 适配器");
 
+    // ===== Provider 会话清理 =====
+    let session_reaper = Arc::new(SessionReaper::new(
+        provider_service.clone(),
+        Duration::from_secs(86400),
+        Duration::from_secs(1800),
+    ));
+    session_reaper.start();
+    info!("Provider 会话清理服务已启动");
+
     // ===== Git 层 =====
     let git_core = Arc::new(GitCore::new());
     let git_manager = Arc::new(GitManager::new(git_core.clone()));
@@ -150,6 +163,7 @@ async fn build_service_container(
 
     // ===== 终端层 =====
     let terminal_manager = Arc::new(TerminalManager::new());
+    let terminal_title_tracker = Arc::new(TerminalTitleTracker::new());
 
     // ===== 工作空间层 =====
     let workspace_entries = Arc::new(WorkspaceEntries::new());
@@ -176,6 +190,13 @@ async fn build_service_container(
     let analytics_service = Arc::new(AnalyticsService::new());
     let metrics_collector = Arc::new(MetricsCollector::new());
 
+    // ===== 心跳服务 =====
+    let heartbeat_service = Arc::new(HeartbeatService::new(
+        analytics_service.clone(),
+        Duration::from_secs(3600),
+    ));
+    heartbeat_service.start();
+
     // ===== HTTP 辅助路由状态 =====
     let attachment_store = Arc::new(AttachmentStore::new(AttachmentStoreConfig {
         root: config.attachments_dir.clone(),
@@ -199,18 +220,21 @@ async fn build_service_container(
         projection_query,
         provider_service,
         provider_discovery_service,
+        session_reaper,
         git_core,
         git_manager,
         git_status_broadcaster,
         git_text_generation,
         managed_worktree,
         terminal_manager,
+        terminal_title_tracker,
         workspace_filesystem,
         workspace_entries,
         auth_service,
         checkpoint_store,
         analytics_service,
         metrics_collector,
+        heartbeat_service,
         push_channel_manager,
         http_state,
         config: services_config,
@@ -283,6 +307,8 @@ fn start_reactors(
         checkpoint_reactor: checkpoint_handle,
         thread_deletion_reactor: deletion_handle,
         retention_job,
+        session_reaper: services.session_reaper.clone(),
+        heartbeat_service: services.heartbeat_service.clone(),
         shutdown_tx,
     }
 }
@@ -417,6 +443,14 @@ pub async fn start_server(
 /// 同时停止线程保留作业。
 pub async fn shutdown_reactors(handles: ReactorHandles) {
     info!("开始关闭 Reactor...");
+
+    // 停止 Provider 会话清理服务
+    handles.session_reaper.stop();
+    info!("Provider 会话清理服务已停止");
+
+    // 停止心跳服务
+    handles.heartbeat_service.stop();
+    info!("心跳服务已停止");
 
     // 停止线程保留作业
     if let Err(e) = handles.retention_job.stop().await {

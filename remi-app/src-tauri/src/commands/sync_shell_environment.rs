@@ -30,6 +30,12 @@ pub enum ShellFlavor {
     Unknown,
 }
 
+impl Default for ShellFlavor {
+    fn default() -> Self {
+        Self::Unknown
+    }
+}
+
 impl ShellFlavor {
     pub fn from_program(p: &str) -> Self {
         let p = p.to_ascii_lowercase();

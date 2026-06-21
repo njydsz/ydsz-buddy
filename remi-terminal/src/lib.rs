@@ -34,6 +34,7 @@
 pub mod error;
 pub mod manager;
 pub mod pty;
+pub mod terminal_title_tracker;
 
 /// 重导出错误类型，方便外部直接使用
 pub use error::*;
@@ -41,3 +42,5 @@ pub use error::*;
 pub use manager::*;
 /// 重导出 PTY 相关类型，包括 PTY 进程和大小配置
 pub use pty::*;
+/// 重导出终端标题追踪器，用于追踪和管理终端会话标题
+pub use terminal_title_tracker::*;

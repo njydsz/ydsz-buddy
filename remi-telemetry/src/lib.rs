@@ -50,8 +50,12 @@ pub mod error;
 /// 性能指标采集 —— 支持 Counter/Gauge/Histogram 三种指标类型的记录与查询。
 pub mod metrics;
 
+/// 心跳服务 —— 定期上报服务器运行状态（运行时长、内存使用等）。
+pub mod heartbeat;
+
 // 重导出所有子模块的公共 API，方便调用方通过 `remi_telemetry::*` 直接引用，
 // 避免调用方需要逐层写全路径（如 `remi_telemetry::analytics::AnalyticsService`）。
 pub use analytics::*;
 pub use error::*;
 pub use metrics::*;
+pub use heartbeat::*;

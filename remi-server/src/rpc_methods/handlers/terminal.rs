@@ -350,4 +350,72 @@ pub async fn register_terminal_methods(
         .await;
 
     info!("终端 RPC 方法注册完成");
+
+    // terminal.getTitle - 获取终端会话标题
+    // 参数: { sessionId: string }
+    // 返回: { title: string | null }
+    let terminal_title_tracker = services.terminal_title_tracker.clone();
+    router
+        .register("terminal.getTitle", move |params: Option<Value>| {
+            let terminal_title_tracker = terminal_title_tracker.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let session_id = params
+                    .get("sessionId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams(
+                            "Missing sessionId".to_string(),
+                        )
+                    })?
+                    .to_string();
+
+                let title = terminal_title_tracker.get_title(&session_id);
+                let result = serde_json::json!({ "title": title });
+                Ok(result)
+            }
+        })
+        .await;
+
+    // terminal.setTitle - 设置终端会话标题
+    // 参数: { sessionId: string, title: string }
+    // 返回: { success: true }
+    let terminal_title_tracker = services.terminal_title_tracker.clone();
+    router
+        .register("terminal.setTitle", move |params: Option<Value>| {
+            let terminal_title_tracker = terminal_title_tracker.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+
+                let session_id = params
+                    .get("sessionId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams(
+                            "Missing sessionId".to_string(),
+                        )
+                    })?
+                    .to_string();
+
+                let title = params
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams(
+                            "Missing title".to_string(),
+                        )
+                    })?
+                    .to_string();
+
+                terminal_title_tracker.update_title(&session_id, &title);
+                let result = serde_json::json!({ "success": true });
+                Ok(result)
+            }
+        })
+        .await;
 }

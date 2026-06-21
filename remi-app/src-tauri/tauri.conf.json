@@ -14,13 +14,16 @@
         "title": "Remi Code",
         "width": 1200,
         "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
         "resizable": true,
         "fullscreen": false,
         "decorations": false,
         "transparent": false,
         "dragDropEnabled": true,
         "titleBarStyle": "Overlay",
-        "center": true
+        "center": true,
+        "visible": true
       }
     ],
     "security": {
@@ -37,11 +40,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "updater": {
-      "endpoints": [],
-      "pubkey": ""
-    }
   }
 }

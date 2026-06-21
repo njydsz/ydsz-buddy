@@ -9,7 +9,7 @@
 //!
 //! - `probe_once`：单次探测
 //! - `wait_until_ready`：阻塞等待端口可达（带超时）
-//! - `spawn_poller`：后台轮询任务
+//! - `poll_loop`：异步轮询任务，配合 `tokio::sync::Notify` 优雅退出
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -39,7 +39,8 @@ pub fn wait_until_ready(addr: SocketAddr, timeout: Duration) -> bool {
     false
 }
 
-/// 后台轮询任务参数
+/// 异步轮询任务参数
+#[derive(Clone)]
 pub struct PollerConfig {
     pub addr: SocketAddr,
     pub readiness: Readiness,
@@ -47,25 +48,11 @@ pub struct PollerConfig {
     pub stop: Arc<Notify>,
 }
 
-/// 启动后台轮询任务（同步版本，使用 `std::thread`）
-pub fn spawn_poller(cfg: PollerConfig) -> std::thread::JoinHandle<()> {
-    std::thread::spawn(move || loop {
-        if probe_once(cfg.addr) {
-            cfg.readiness.mark_port_reachable();
-        }
-        // 用 try_wait 风格：每 200ms 探测一次，或被 stop 唤醒
-        if cfg
-            .stop
-            .notified()
-            .timeout(cfg.interval)
-            .is_some_and(|x| x.is_err())
-        {
-            // timeout 触发，继续循环
-        }
-    })
-}
-
-/// 异步版本的轮询（推荐）：使用 `tokio::select!` 优雅退出
+/// 异步轮询任务：使用 `tokio::select!` 优雅退出
+///
+/// - 每 `interval` 探测一次端口
+/// - 一旦可达就 `mark_port_reachable()` 并 return
+/// - `stop.notify_one()` 可让循环提前退出
 pub async fn poll_loop(cfg: PollerConfig) {
     loop {
         if probe_once(cfg.addr) {
