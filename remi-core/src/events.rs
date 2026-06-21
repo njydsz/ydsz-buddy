@@ -337,6 +337,9 @@ pub struct ProjectCreatedEvent {
     pub occurred_at: DateTime<Utc>,
     /// 触发命令 ID
     pub command_id: Option<String>,
+    /// 事件元数据
+    #[serde(flatten)]
+    pub event_metadata: EventMetadata,
     /// 新项目 ID
     pub project_id: ProjectId,
     /// 项目标题
