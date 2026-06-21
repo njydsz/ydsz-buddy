@@ -43,6 +43,10 @@ mod subscription;
 mod shell;
 /// 语音转文字 RPC 方法
 mod voice;
+/// Projects RPC 方法（前端兼容层）
+mod projects;
+/// 本地 Skills RPC 方法
+mod skills;
 
 pub use orchestration::*;
 pub use provider::*;
@@ -56,3 +60,5 @@ pub use telemetry::*;
 pub use subscription::*;
 pub use shell::*;
 pub use voice::*;
+pub use projects::*;
+pub use skills::*;

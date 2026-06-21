@@ -352,10 +352,11 @@ mod tests {
     fn idempotent_rerun() {
         let tmp = env::temp_dir().join(format!("remi-home-mig-{}", uuid::Uuid::new_v4()));
         let m = HomeMigrator::new(&tmp).unwrap();
-        let r1 = m.migrate_all().unwrap();
+        let _r1 = m.migrate_all().unwrap();
         let r2 = m.migrate_all().unwrap();
-        // 第二次运行文件数应该为 0
-        assert_eq!(r2.copied_files, r1.copied_files);
+        // 第二次运行不应再复制任何文件（幂等）
+        assert_eq!(r2.copied_files, 0);
+        assert_eq!(r2.copied_bytes, 0);
     }
 
     #[test]

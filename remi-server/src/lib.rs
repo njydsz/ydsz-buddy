@@ -67,6 +67,14 @@ pub mod local_image_files;
 pub mod project_favicon_route;
 /// HTTP 路由注册器，把 attachment / local-image / favicon / health 等路由挂到 axum
 pub mod http_routes;
+/// 进程运行器，跨平台子进程执行 + 流式输出 + 超时
+pub mod process_runner;
+/// OS 卡顿监控（loadavg / 内存 / 心跳）
+pub mod os_jank;
+/// Shell 命令分类（git/package/test/danger/interactive …）
+pub mod shell_command_detection;
+/// Bun WebSocket 兼容垫片（消息归一化 / 心跳 / close code）
+pub mod bun_websocket_compat;
 
 pub use error::*;
 pub use push_channels::*;
@@ -82,3 +90,7 @@ pub use attachment_store::*;
 pub use local_image_files::*;
 pub use project_favicon_route::*;
 pub use http_routes::*;
+pub use process_runner::*;
+pub use os_jank::*;
+pub use shell_command_detection::*;
+pub use bun_websocket_compat::*;

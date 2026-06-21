@@ -45,6 +45,10 @@ use remi_telemetry::{AnalyticsService, MetricsCollector};
 use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 
+use crate::attachment_store::{AttachmentStore, AttachmentStoreConfig};
+use crate::http_routes::HttpState;
+use crate::local_image_files::{LocalImageConfig, LocalImageResolver};
+use crate::project_favicon_route::{FaviconConfig, FaviconLookup};
 use crate::push_channels::PushChannelManager;
 use crate::retention::{RetentionConfig, ThreadRetentionJob};
 use crate::rpc::RpcRouter;
@@ -166,6 +170,19 @@ async fn build_service_container(
     let analytics_service = Arc::new(AnalyticsService::new());
     let metrics_collector = Arc::new(MetricsCollector::new());
 
+    // ===== HTTP 辅助路由状态 =====
+    let attachment_store = Arc::new(AttachmentStore::new(AttachmentStoreConfig {
+        root: config.attachments_dir.clone(),
+        ..Default::default()
+    })?);
+    let local_image_resolver = Arc::new(LocalImageResolver::new(LocalImageConfig::default()));
+    let favicon_lookup = Arc::new(FaviconLookup::new(FaviconConfig::default()));
+    let http_state = Arc::new(HttpState::new(
+        attachment_store,
+        local_image_resolver,
+        favicon_lookup,
+    ));
+
     info!("服务容器初始化完成");
 
     // 共享 ServerConfig 供 ServiceContainer 的 config 字段使用
@@ -188,6 +205,7 @@ async fn build_service_container(
         analytics_service,
         metrics_collector,
         push_channel_manager,
+        http_state,
         config: services_config,
     })
 }

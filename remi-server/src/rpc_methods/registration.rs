@@ -16,6 +16,7 @@ use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 use tracing::info;
 
+use crate::http_routes::HttpState;
 use crate::push_channels::PushChannelManager;
 use crate::rpc::RpcRouter;
 use super::handlers::{
@@ -23,6 +24,7 @@ use super::handlers::{
     register_terminal_methods, register_workspace_methods, register_auth_methods,
     register_checkpoint_methods, register_server_methods, register_telemetry_methods,
     register_subscription_methods, register_shell_methods, register_voice_methods,
+    register_projects_methods, register_skills_methods,
 };
 
 /// 服务容器
@@ -63,6 +65,8 @@ pub struct ServiceContainer {
     pub metrics_collector: Arc<MetricsCollector>,
     /// 推送通道管理器
     pub push_channel_manager: Arc<PushChannelManager>,
+    /// HTTP 辅助路由状态（附件存储、本地图片、favicon）
+    pub http_state: Arc<HttpState>,
     /// 服务器配置
     pub config: Arc<ServerConfig>,
 }
@@ -96,6 +100,12 @@ pub async fn register_all_methods(
 
     // 工作空间方法
     register_workspace_methods(router.clone(), services.clone()).await;
+
+    // Projects 方法（前端兼容层）
+    register_projects_methods(router.clone(), services.clone()).await;
+
+    // 本地 Skills 方法
+    register_skills_methods(router.clone()).await;
 
     // 认证方法
     register_auth_methods(router.clone(), services.clone()).await;

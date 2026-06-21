@@ -362,7 +362,10 @@ function SidebarHeaderTrigger({
   return (
     <SidebarTrigger
       className={cn(
-        isDesktop && !isMobile && settings.sidebarSide === "left" && "ml-[76px]",
+        isDesktop &&
+          !isMobile &&
+          settings.sidebarSide === "left" &&
+          (open ? "ml-[76px]" : "ml-0"),
         className,
       )}
       onClick={onClick}
