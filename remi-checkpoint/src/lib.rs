@@ -43,10 +43,18 @@
 //! - [`thiserror`]：错误类型派生。
 
 /// 检查点错误类型定义模块
+///
+/// 导出 [`CheckpointError`] 和 [`CheckpointResult`] 类型。
 pub mod error;
+
 /// 检查点存储服务模块
+///
+/// 导出 [`CheckpointStore`] 类型，负责检查点的创建、查询、删除和回滚。
 pub mod store;
+
 /// 检查点 Diff 查询服务模块
+///
+/// 导出 [`CheckpointDiffQuery`] 及相关数据结构，用于计算检查点之间的代码差异。
 pub mod query;
 
 // 重新导出子模块的所有公开类型，方便外部通过 `remi_checkpoint::*` 直接访问

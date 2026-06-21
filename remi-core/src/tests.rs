@@ -1,14 +1,14 @@
 //! # Remi Core 单元测试
 //!
-//! 本模块为 remi-core 提供跨子模块的集成测试.
+//! 本模块为 remi-core 提供跨子模块的集成测试。
 //!
 //! ## 测试范围
 //!
 //! - 模型序列化与反序列化
-//! - 事件序列.
-//! - 命令序列.
-//! - ID 类型（UUID）生成与一致.
-//! - 关键枚举.?
+//! - 事件序列化
+//! - 命令序列化
+//! - ID 类型（UUID）生成与一致性
+//! - 关键枚举的序列化格式
 #[cfg(test)]
 mod test {
     use crate::events::{
@@ -31,24 +31,28 @@ mod test {
 
     #[test]
     fn project_id_is_uuid() {
+        // 验证 ProjectId 是有效的 UUID
         let id: ProjectId = Uuid::new_v4();
         assert_ne!(id, Uuid::nil());
     }
 
     #[test]
     fn thread_id_is_uuid() {
+        // 验证 ThreadId 是有效的 UUID
         let id: ThreadId = Uuid::new_v4();
         assert_ne!(id, Uuid::nil());
     }
 
     #[test]
     fn message_id_is_uuid() {
+        // 验证 MessageId 是有效的 UUID
         let id: MessageId = Uuid::new_v4();
         assert_ne!(id, Uuid::nil());
     }
 
     #[test]
     fn dispatch_mode_serialization_uses_lowercase() {
+        // 验证 DispatchMode 枚举序列化为小写字符串
         for (mode, expected) in [
             (DispatchMode::Normal, "\"normal\""),
             (DispatchMode::Review, "\"review\""),
@@ -62,6 +66,7 @@ mod test {
 
     #[test]
     fn runtime_mode_serialization_uses_lowercase() {
+        // 验证 RuntimeMode 枚举序列化为小写字符串
         let m = RuntimeMode::Code;
         let s = serde_json::to_string(&m).unwrap();
         assert_eq!(s, "\"agent\"");
@@ -73,6 +78,7 @@ mod test {
 
     #[test]
     fn env_mode_serialization_uses_lowercase() {
+        // 验证 EnvMode 枚举序列化为小写字符串
         let m = EnvMode::Local;
         let s = serde_json::to_string(&m).unwrap();
         assert_eq!(s, "\"local\"");
@@ -84,6 +90,7 @@ mod test {
 
     #[test]
     fn project_serialization_roundtrip() {
+        // 验证 Project 实体的序列化/反序列化往返一致性
         let p = Project {
             id: Uuid::new_v4(),
             kind: ProjectKind::Local,
@@ -109,6 +116,7 @@ mod test {
 
     #[test]
     fn thread_serialization_uses_camel_case() {
+        // 验证 Thread 实体序列化为 camelCase 字段名
         let t = Thread {
             id: Uuid::new_v4(),
             project_id: Uuid::new_v4(),
@@ -162,6 +170,7 @@ mod test {
 
     #[test]
     fn message_serialization_roundtrip() {
+        // 验证 Message 实体的序列化/反序列化往返一致性
         let m = Message {
             id: Uuid::new_v4(),
             role: MessageRole::User,
@@ -184,6 +193,7 @@ mod test {
 
     #[test]
     fn project_create_event_serialization() {
+        // 验证 ProjectCreatedEvent 序列化为正确的事件标签和字段格式
         let e = ProjectCreatedEvent {
             sequence: 1,
             occurred_at: Utc::now(),

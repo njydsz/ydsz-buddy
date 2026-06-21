@@ -247,6 +247,31 @@ impl GitHubCli {
     }
 
     /// 获取 PR diff（统一格式）
+    ///
+    /// 通过 `gh pr diff` 命令获取指定 PR 的文件差异，输出为统一的 diff 格式。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录的绝对路径
+    /// - `pr_number`: PR 编号
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: PR 的完整 diff 内容（统一格式）
+    /// - `Err(GitError::CommandError)`: 获取失败（PR 不存在等）
+    ///
+    /// # 使用场景
+    ///
+    /// - 代码审查时查看 PR 包含的所有更改
+    /// - 分析 PR 的代码变更范围
+    /// - 为 AI Agent 提供 PR 的差异上下文
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// let diff = client.diff_pull_request("/path/to/repo", 123).await?;
+    /// println!("Diff:\n{}", diff);
+    /// ```
     pub async fn diff_pull_request(&self, cwd: &str, pr_number: u64) -> GitResult<String> {
         info!("gh: diff PR #{}", pr_number);
         let mut cmd = Command::new("gh");
@@ -259,6 +284,29 @@ impl GitHubCli {
     }
 
     /// 关闭 PR（不合并）
+    ///
+    /// 通过 `gh pr close` 命令关闭指定的 Pull Request，但不执行合并操作。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录的绝对路径
+    /// - `pr_number`: PR 编号（必须是已开放的 PR）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 关闭成功
+    /// - `Err(GitError::CommandError)`: 关闭失败（PR 不存在、已关闭等）
+    ///
+    /// # 注意事项
+    ///
+    /// - 关闭后的 PR 可以通过 `reopen_pull_request` 重新打开
+    /// - 关闭操作不会删除分支，仅标记 PR 为已关闭状态
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// client.close_pull_request("/path/to/repo", 123).await?;
+    /// ```
     pub async fn close_pull_request(&self, cwd: &str, pr_number: u64) -> GitResult<()> {
         info!("gh: close PR #{}", pr_number);
         let mut cmd = Command::new("gh");
@@ -272,6 +320,24 @@ impl GitHubCli {
     }
 
     /// 重新打开已关闭 PR
+    ///
+    /// 通过 `gh pr reopen` 命令重新打开之前关闭的 Pull Request。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录的绝对路径
+    /// - `pr_number`: PR 编号（必须是已关闭的 PR）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(())`: 重新打开成功
+    /// - `Err(GitError::CommandError)`: 操作失败（PR 不存在、已经是开放状态等）
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// client.reopen_pull_request("/path/to/repo", 123).await?;
+    /// ```
     pub async fn reopen_pull_request(&self, cwd: &str, pr_number: u64) -> GitResult<()> {
         info!("gh: reopen PR #{}", pr_number);
         let mut cmd = Command::new("gh");
@@ -285,6 +351,31 @@ impl GitHubCli {
     }
 
     /// 查看当前 gh 认证状态
+    ///
+    /// 通过 `gh auth status` 命令检查 GitHub CLI 的认证状态，包括是否已登录、
+    /// 登录账号和使用的认证协议。
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(GitHubAuthStatus)`: 认证状态信息
+    /// - `Err(GitError::CommandError)`: 命令执行失败（`gh` 未安装等）
+    ///
+    /// # 使用场景
+    ///
+    /// - 在执行 PR 操作前检查认证状态
+    /// - 诊断 `gh` CLI 的认证问题
+    /// - 获取当前登录的账号信息
+    ///
+    /// # 使用示例
+    ///
+    /// ```rust,ignore
+    /// let status = client.auth_status().await?;
+    /// if status.logged_in {
+    ///     println!("已登录: {:?}", status.account);
+    /// } else {
+    ///     println!("未登录，请执行 gh auth login");
+    /// }
+    /// ```
     pub async fn auth_status(&self) -> GitResult<GitHubAuthStatus> {
         debug!("gh: auth status");
         let mut cmd = Command::new("gh");
@@ -313,9 +404,27 @@ impl GitHubCli {
 }
 
 /// gh 认证状态
+///
+/// 封装 GitHub CLI 的认证信息，用于检查是否已登录以及登录的账号详情。
+///
+/// # 字段说明
+///
+/// - `logged_in`: 是否已成功登录 GitHub CLI
+/// - `account`: 登录的 GitHub 用户名（如 'octocat'），未登录时为 None
+/// - `protocol`: 使用的认证协议（'HTTPS' 或 'SSH'），未登录时为 None
+///
+/// # 数据来源
+///
+/// 通过 `gh auth status` 命令获取，由 `auth_status` 方法解析。
+///
+/// # 使用场景
+///
+/// - 在执行 PR 操作前验证认证状态
+/// - 显示当前登录的账号信息
+/// - 诊断认证相关问题
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubAuthStatus {
-    /// 是否已登录
+    /// 是否已登录 GitHub CLI
     pub logged_in: bool,
     /// 登录账号（如 'octocat'）
     pub account: Option<String>,
@@ -323,6 +432,19 @@ pub struct GitHubAuthStatus {
     pub protocol: Option<String>,
 }
 
+/// 从 `gh auth status` 的输出中提取已登录的账号名称
+///
+/// 解析 stdout 和 stderr 中形如 `'Logged in to github.com account octocat (oauth_token)'` 的行，
+/// 提取出账号名称。
+///
+/// # 参数
+///
+/// - `stdout`: 命令的标准输出
+/// - `stderr`: 命令的标准错误输出
+///
+/// # 返回值
+///
+/// 返回 `Some(账号名)` 如果找到匹配行，否则返回 `None`。
 fn extract_account(stdout: &str, stderr: &str) -> Option<String> {
     for line in format!("{stdout}\n{stderr}").lines() {
         if let Some(rest) = line.strip_prefix("Logged in to github.com account ") {
@@ -334,6 +456,19 @@ fn extract_account(stdout: &str, stderr: &str) -> Option<String> {
     None
 }
 
+/// 从 `gh auth status` 的输出中提取认证协议
+///
+/// 解析 stdout 和 stderr 中形如 `'Git operations for ... (HTTPS)'` 的行，
+/// 提取出括号中的协议名称。
+///
+/// # 参数
+///
+/// - `stdout`: 命令的标准输出
+/// - `stderr`: 命令的标准错误输出
+///
+/// # 返回值
+///
+/// 返回 `Some(协议名)` 如果找到匹配行，否则返回 `None`。
 fn extract_protocol(stdout: &str, stderr: &str) -> Option<String> {
     for line in format!("{stdout}\n{stderr}").lines() {
         if let Some(rest) = line.strip_prefix("Git operations for ") {
@@ -345,6 +480,24 @@ fn extract_protocol(stdout: &str, stderr: &str) -> Option<String> {
     None
 }
 
+/// 执行 `gh` CLI 命令并返回标准输出
+///
+/// 统一的 `gh` 命令执行入口，处理进程创建、输出捕获和错误转换。
+///
+/// # 参数
+///
+/// - `cmd`: 已配置好的 `Command` 实例（已设置工作目录和参数）
+/// - `op_desc`: 操作描述，用于错误消息中（如 `'gh pr list'`）
+///
+/// # 返回值
+///
+/// - `Ok(String)`: 命令的标准输出内容
+/// - `Err(GitError::CommandError)`: 命令执行失败或 `gh` 未安装
+///
+/// # 错误处理
+///
+/// - 如果 `gh` 可执行文件不存在，返回包含安装提示的错误
+/// - 如果命令返回非零退出码，返回包含 stderr 内容的错误
 async fn run_gh(mut cmd: Command, op_desc: &str) -> GitResult<String> {
     let output = cmd.output().await.map_err(|e| {
         if e.kind() == std::io::ErrorKind::NotFound {

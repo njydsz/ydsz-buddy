@@ -31,7 +31,7 @@ use thiserror::Error;
 /// 枚举了检查点子系统中所有可能的错误场景。每个变体携带一个 `String` 类型的
 /// 上下文信息，用于描述具体的错误原因。
 ///
-/// ## 变体说明
+/// # Variants
 ///
 /// | 变体 | 触发场景 |
 /// |------|----------|
@@ -40,6 +40,16 @@ use thiserror::Error;
 /// | [`SerializationFailed`](CheckpointError::SerializationFailed) | 检查点数据的序列化或反序列化失败 |
 /// | [`DatabaseError`](CheckpointError::DatabaseError) | 数据库读写操作失败（如持久化、查询） |
 /// | [`IoError`](CheckpointError::IoError) | 底层文件系统 IO 错误（自动从 [`std::io::Error`] 转换） |
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// use remi_checkpoint::error::CheckpointError;
+///
+/// // 检查点不存在
+/// let err = CheckpointError::NotFound("checkpoint-123".to_string());
+/// println!("{}", err); // 输出: 检查点不存在: checkpoint-123
+/// ```
 #[derive(Error, Debug)]
 pub enum CheckpointError {
     /// 检查点不存在

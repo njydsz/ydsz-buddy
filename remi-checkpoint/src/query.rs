@@ -210,7 +210,12 @@ impl CheckpointDiffQuery {
     ///
     /// - `Ok(Some(TurnDiff))`：成功获取到该轮次的 Diff 信息。
     /// - `Ok(None)`：该轮次尚无关联的检查点或无代码变更。
-    /// - `Err(CheckpointError)`：查询过程中发生错误（如检查点不存在、Git 操作失败）。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::NotFound`]：目标 `turn_id` 在线程中不存在对应的检查点。
+    /// - [`CheckpointError::DatabaseError`]：查询检查点列表时数据库操作失败。
+    /// - [`CheckpointError::GitOperationFailed`]：Git Diff 命令执行失败。
     pub async fn get_turn_diff(
         &self,
         thread_id: ThreadId,
@@ -343,15 +348,12 @@ impl CheckpointDiffQuery {
     /// ## 返回值
     ///
     /// - `Ok(String)`：成功时返回 Unified Diff 格式的文本。
-    /// - `Err(CheckpointError::NotFound)`：起始或目标检查点不存在。
-    /// - `Err(CheckpointError::GitOperationFailed)`：Git Diff 命令执行失败。
     ///
-    /// ## 错误处理
+    /// # Errors
     ///
-    /// 1. 先通过 [`CheckpointStore::get_checkpoint`] 查询两个检查点的元数据。
-    /// 2. 若任一检查点不存在，返回 [`CheckpointError::NotFound`]。
-    /// 3. 调用 [`GitCore::diff_between_commits`] 计算两个 Git Commit 之间的 Diff。
-    /// 4. 若 Git 操作失败，将错误映射为 [`CheckpointError::GitOperationFailed`]。
+    /// - [`CheckpointError::NotFound`]：起始或目标检查点不存在。
+    /// - [`CheckpointError::DatabaseError`]：查询检查点元数据时数据库操作失败。
+    /// - [`CheckpointError::GitOperationFailed`]：Git Diff 命令执行失败。
     pub async fn get_diff_between_checkpoints(
         &self,
         from_checkpoint: String,

@@ -9,8 +9,8 @@ export type TerminalIconKey = "terminal" | "openai" | "claude";
 export type TerminalActivityState = "running" | "attention" | "review";
 export type TerminalVisualState = "idle" | TerminalActivityState;
 export type TerminalAgentHookEventType = "Start" | "Stop" | "PermissionRequest";
-export const REMI_CLAW_TERMINAL_CLI_KIND_ENV_KEY = "Remicode_TERMINAL_CLI_KIND";
-export const REMI_CLAW_TERMINAL_HOOK_OSC_PREFIX = "633;Remicode_AGENT_EVENT=";
+export const REMI_CLAW_TERMINAL_CLI_KIND_ENV_KEY = "RemiClaw_TERMINAL_CLI_KIND";
+export const REMI_CLAW_TERMINAL_HOOK_OSC_PREFIX = "633;RemiClaw_AGENT_EVENT=";
 export const MANAGED_TERMINAL_COMMAND_NAME_BY_CLI_KIND: Record<TerminalCliKind, string> = {
   codex: "codex",
   claude: "claude",

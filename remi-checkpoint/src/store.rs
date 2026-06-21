@@ -126,7 +126,10 @@ impl CheckpointStore {
     /// ## 返回值
     ///
     /// - `Ok(Checkpoint)`：成功创建并返回完整的检查点对象。
-    /// - `Err(CheckpointError)`：创建过程中发生错误。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::DatabaseError`]：检查点持久化到数据库时失败。
     ///
     /// ## 检查点字段说明
     ///
@@ -185,7 +188,10 @@ impl CheckpointStore {
     ///
     /// - `Ok(Some(Checkpoint))`：找到匹配的检查点。
     /// - `Ok(None)`：未找到匹配的检查点。
-    /// - `Err(CheckpointError)`：查询过程中发生数据库错误。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::DatabaseError`]：从数据库查询检查点时失败。
     ///
     /// ## 实现状态
     ///
@@ -212,7 +218,10 @@ impl CheckpointStore {
     ///
     /// - `Ok(Vec<Checkpoint>)`：该线程下所有检查点的列表（按创建时间升序排列）。
     ///   若无检查点则返回空列表。
-    /// - `Err(CheckpointError)`：查询过程中发生数据库错误。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::DatabaseError`]：从数据库查询检查点列表时失败。
     ///
     /// ## 使用场景
     ///
@@ -243,7 +252,10 @@ impl CheckpointStore {
     /// ## 返回值
     ///
     /// - `Ok(())`：删除成功（即使检查点原本不存在也视为成功）。
-    /// - `Err(CheckpointError)`：删除过程中发生数据库错误。
+    ///
+    /// # Errors
+    ///
+    /// - [`CheckpointError::DatabaseError`]：从数据库删除检查点记录时失败。
     ///
     /// ## 注意事项
     ///
@@ -270,6 +282,7 @@ impl CheckpointStore {
     ///
     /// | 参数 | 类型 | 说明 |
     /// |------|------|------|
+    /// | `cwd` | `&str` | 工作目录路径，用于定位 Git 仓库位置 |
     /// | `thread_id` | [`ThreadId`] | 对话线程 ID（用于日志记录和上下文关联） |
     /// | `checkpoint_id` | `String` | 目标检查点的唯一 ID |
     ///

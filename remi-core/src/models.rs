@@ -731,6 +731,14 @@ impl Default for RuntimeMode {
 impl RuntimeMode {
     /// 从旧版 `agent/ask/plan` 字符串映射到新版 `work/code` 维度。
     /// 未知值默认映射为 `Code`。
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - 旧版运行时模式字符串
+    ///
+    /// # Returns
+    ///
+    /// 返回对应的 `RuntimeMode` 枚举值
     pub fn from_legacy(value: &str) -> Self {
         match value.to_ascii_lowercase().as_str() {
             "work" => Self::Work,
@@ -740,10 +748,20 @@ impl RuntimeMode {
         }
     }
 
+    /// 判断是否为工作模式
+    ///
+    /// # Returns
+    ///
+    /// 如果是 `Work` 模式返回 `true`，否则返回 `false`
     pub fn is_work(&self) -> bool {
         matches!(self, Self::Work)
     }
 
+    /// 判断是否为代码模式
+    ///
+    /// # Returns
+    ///
+    /// 如果是 `Code` 模式返回 `true`，否则返回 `false`
     pub fn is_code(&self) -> bool {
         matches!(self, Self::Code)
     }
@@ -794,6 +812,14 @@ impl Default for InteractionMode {
 impl InteractionMode {
     /// 从旧版 `chat/review` 字符串映射到新版 5 态。
     /// 未知值默认映射为 `Agent`。
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - 旧版交互模式字符串
+    ///
+    /// # Returns
+    ///
+    /// 返回对应的 `InteractionMode` 枚举值
     pub fn from_legacy(value: &str) -> Self {
         match value.to_ascii_lowercase().as_str() {
             "chat" => Self::Chat,
@@ -806,6 +832,10 @@ impl InteractionMode {
     }
 
     /// 是否需要进入'会签'流程（Plan/Review 需要用户确认）
+    ///
+    /// # Returns
+    ///
+    /// 如果是 `Plan` 或 `Review` 模式返回 `true`，否则返回 `false`
     pub fn requires_approval(&self) -> bool {
         matches!(self, Self::Plan | Self::Review)
     }

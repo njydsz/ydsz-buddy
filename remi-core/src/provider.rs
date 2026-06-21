@@ -6,8 +6,7 @@
 //! ## 核心概念
 //!
 //! - **Provider**: AI 服务提供商，如 OpenAI Codex、Anthropic Claude 等
-//! - **Mod
-elSelection**: 模型选择配置，指定使用哪个 Provider 和模型
+//! - **ModelSelection**: 模型选择配置，指定使用哪个 Provider 和模型
 //! - **ProviderSession**: 与 Provider 的运行时会话连接
 //! - **ProviderRuntimeEvent**: Provider 运行时产生的事件（会话启动、Turn 开始、流式输出等）
 
@@ -179,68 +178,156 @@ pub struct ProviderCapabilities {
 }
 
 /// Provider 在线状态
+///
+/// 表示 Provider 的可用性状态：
+/// - [`Ready`](ServerProviderStatusState::Ready) - 可用且正常
+/// - [`Warning`](ServerProviderStatusState::Warning) - 可用但存在问题
+/// - [`Error`](ServerProviderStatusState::Error) - 不可用或发生错误
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ServerProviderStatusState {
+    /// 可用且正常
     Ready,
+    /// 可用但存在问题
     Warning,
+    /// 不可用或发生错误
     Error,
 }
 
 /// Provider 认证状态
+///
+/// 表示用户的认证状态：
+/// - [`Authenticated`](ServerProviderAuthStatus::Authenticated) - 已认证
+/// - [`Unauthenticated`](ServerProviderAuthStatus::Unauthenticated) - 未认证
+/// - [`Unknown`](ServerProviderAuthStatus::Unknown) - 未知状态
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ServerProviderAuthStatus {
+    /// 已认证
     Authenticated,
+    /// 未认证
     Unauthenticated,
+    /// 未知状态
     Unknown,
 }
 
 /// Provider 版本建议
+///
+/// 描述 Provider 的版本信息和更新建议。
+///
+/// ## 字段说明
+///
+/// - `status`: 版本状态（如 'up-to-date'、'outdated' 等）
+/// - `current_version`: 当前版本号（可选）
+/// - `latest_version`: 最新版本号（可选）
+/// - `update_command`: 更新命令（可选）
+/// - `can_update`: 是否可以更新
+/// - `checked_at`: 检查时间（可选）
+/// - `message`: 附加消息（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerProviderVersionAdvisory {
+    /// 版本状态
     pub status: String,
+    /// 当前版本号
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current_version: Option<String>,
+    /// 最新版本号
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub latest_version: Option<String>,
+    /// 更新命令
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub update_command: Option<String>,
+    /// 是否可以更新
     pub can_update: bool,
+    /// 检查时间
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub checked_at: Option<String>,
+    /// 附加消息
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
 /// Provider 更新状态
+///
+/// 描述 Provider 更新操作的进度和结果。
+///
+/// ## 字段说明
+///
+/// - `status`: 更新状态（如 'pending'、'running'、'completed'、'failed'）
+/// - `started_at`: 更新开始时间（可选）
+/// - `finished_at`: 更新完成时间（可选）
+/// - `message`: 状态消息（可选）
+/// - `output`: 更新输出日志（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerProviderUpdateState {
+    /// 更新状态
     pub status: String,
+    /// 更新开始时间
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub started_at: Option<String>,
+    /// 更新完成时间
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub finished_at: Option<String>,
+    /// 状态消息
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
+    /// 更新输出日志
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub output: Option<String>,
 }
 
 /// 单个 Provider 的运行时状态
+///
+/// 描述 Provider 的完整运行时信息，包括可用性、认证状态、版本信息等。
+///
+/// ## 字段说明
+///
+/// - `provider`: Provider 类型
+/// - `status`: 在线状态
+/// - `available`: 是否可用
+/// - `auth_status`: 认证状态
+/// - `auth_type`: 认证类型（可选）
+/// - `auth_label`: 认证标签（可选）
+/// - `voice_transcription_available`: 是否支持语音转录（可选）
+/// - `version`: Provider 版本号（可选）
+/// - `checked_at`: 状态检查时间
+/// - `message`: 状态消息（可选）
+/// - `version_advisory`: 版本建议（可选）
+/// - `update_state`: 更新状态（可选）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerProviderStatus {
+    /// Provider 类型
     pub provider: ProviderKind,
+    /// 在线状态
     pub status: ServerProviderStatusState,
+    /// 是否可用
     pub available: bool,
+    /// 认证状态
     pub auth_status: ServerProviderAuthStatus,
+    /// 认证类型
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auth_type: Option<String>,
+    /// 认证标签
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auth_label: Option<String>,
+    /// 是否支持语音转录
     #[serde(skip_serializing_if = "Option::is_none")]
     pub voice_transcription_available: Option<bool>,
+    /// Provider 版本号
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+    /// 状态检查时间
     pub checked_at: String,
+    /// 状态消息
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
+    /// 版本建议
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version_advisory: Option<ServerProviderVersionAdvisory>,
+    /// 更新状态
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_state: Option<ServerProviderUpdateState>,
 }

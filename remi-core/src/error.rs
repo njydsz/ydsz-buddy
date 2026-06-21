@@ -120,8 +120,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::InternalError('数据库连接超时'.to_string());
-    /// assert_eq!(err.to_string(), '内部错误: 数据库连接超时');
+    /// let err = CoreError::InternalError("数据库连接超时".to_string());
+    /// assert_eq!(err.to_string(), "内部错误: 数据库连接超时");
     /// ```
     #[error("内部错误: {0}")]
     InternalError(String),
@@ -142,8 +142,7 @@ pub enum CoreError {
 /// use remi_core::CoreResult;
 ///
 /// fn do_something() -> CoreResult<String> {
-///
-Ok('成功'.to_string())
+///     Ok("成功".to_string())
 /// }
 /// ```
 pub type CoreResult<T> = Result<T, CoreError>;

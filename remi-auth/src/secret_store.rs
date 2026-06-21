@@ -106,7 +106,7 @@ impl SecretStore {
     ///     println!('密钥长度: {}', key.len());
     /// }
     /// # }
-    /// }
+    /// ```
     pub async fn get(&self, name: &str) -> AuthResult<Option<Vec<u8>>> {
         let secrets = self.secrets.read().await;
         Ok(secrets.get(name).cloned())
