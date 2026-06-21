@@ -381,15 +381,15 @@ impl SessionCredentialService {
     /// // 自定义参数颁发会话
     /// let issued = service.issue(
     ///
-Some(24),                                    // 24 小时有效期
+    ///     Some(24),                                    // 24 小时有效期
     ///
-Some('user_123'.to_string()),                // 用户 ID
+    ///     Some('user_123'.to_string()),                // 用户 ID
     ///
-Some(SessionMethod::Bearer),                 // Bearer 认证
+    ///     Some(SessionMethod::Bearer),                 // Bearer 认证
     ///
-Some(SessionRole::Client),                   // 客户端角色
+    ///     Some(SessionRole::Client),                   // 客户端角色
     ///
-Some(ClientMetadata {                        // 客户端信息
+    ///     Some(ClientMetadata {                        // 客户端信息
     ///         name: 'MyApp'.to_string(),
     ///         version: Some('1.0.0'.to_string()),
     ///         platform: Some('Windows'.to_string()),
@@ -666,22 +666,16 @@ Err(e) => {
     /// 
     /// // 在异步任务中监听事件
     /// tokio::spawn(async move {
-    ///
-while let Ok(event) = rx.recv().await {
-    ///
-match event {
+    ///     while let Ok(event) = rx.recv().await {
+    ///         match event {
     ///             SessionCredentialChange::ClientUpserted(session) => {
-    ///                 println!('会话创建/更新: {}', session.session_id);
-    ///
-}
+    ///                 println!("会话创建/更新: {}", session.session_id);
+    ///             }
     ///             SessionCredentialChange::ClientRemoved(session_id) => {
-    ///                 println!('会话移除: {}', session_id);
-    ///
-}
-    ///
-}
-    ///
-}
+    ///                 println!("会话移除: {}", session_id);
+    ///             }
+    ///         }
+    ///     }
     /// });
     /// }
     pub fn stream_changes(&self) -> broadcast::Receiver<SessionCredentialChange> {

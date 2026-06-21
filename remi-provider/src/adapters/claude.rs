@@ -803,5 +803,71 @@ impl ProviderAdapter for ClaudeAdapter {
             cached: Some(false),
         })
     }
-}
 
+
+    /// 响应审批请求
+    async fn respond_to_request(
+        &self,
+        input: remi_core::provider::ProviderRespondToRequestInput,
+    ) -> ProviderResult<()> {
+        info!("ClaudeAdapter: 响应审批请求 request_id={}, decision={:?}", input.request_id, input.decision);
+        let pending = {
+            let mut approvals = self.pending_approvals.write().await;
+            approvals.remove(&input.request_id)
+        };
+        match pending {
+            Some(pending) => {
+                let decision = match input.decision.as_str() {
+                    "accept" => ApprovalDecision::Accept,
+                    "acceptForSession" => ApprovalDecision::AcceptForSession,
+                    "decline" => ApprovalDecision::Decline,
+                    "cancel" => ApprovalDecision::Cancel,
+                    _ => ApprovalDecision::Decline,
+                };
+                let _ = pending.response_tx.send(decision);
+                Ok(())
+            }
+            None => {
+                debug!("审批请求不存在: {}", input.request_id);
+                Err(ProviderError::AdapterError(format!("审批请求不存在: {}", input.request_id)))
+            }
+        }
+    }
+
+    /// 响应用户输入请求
+    async fn respond_to_user_input(
+        &self,
+        input: remi_core::provider::ProviderRespondToUserInputInput,
+    ) -> ProviderResult<()> {
+        info!("ClaudeAdapter: 响应用户输入请求 request_id={}", input.request_id);
+        let pending = {
+            let mut approvals = self.pending_approvals.write().await;
+            approvals.remove(&input.request_id)
+        };
+        match pending {
+            Some(pending) => {
+                let _ = pending.response_tx.send(ApprovalDecision::Accept);
+                Ok(())
+            }
+            None => {
+                debug!("用户输入请求不存在: {}", input.request_id);
+                Err(ProviderError::AdapterError(format!("用户输入请求不存在: {}", input.request_id)))
+            }
+        }
+    }
+
+    /// 压缩对话上下文
+    async fn compact_thread(&self, thread_id: &str) -> ProviderResult<()> {
+        info!("ClaudeAdapter: 压缩线程上下文 thread_id={}", thread_id);
+        let sessions = self.sessions.read().await;
+        if let Some(client) = sessions.get(thread_id) {
+            let result = client.request("thread.compact", Some(json!({"threadId": thread_id}))).await?;
+            if let Some(error) = result.error {
+                return Err(ProviderError::AdapterError(format!("压缩线程失败: {}", error.message)));
+            }
+            Ok(())
+        } else {
+            Err(ProviderError::SessionNotFound(thread_id.to_string()))
+        }
+    }
+}

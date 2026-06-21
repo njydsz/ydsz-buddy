@@ -167,12 +167,17 @@ impl CheckpointStore for SqliteCheckpointStore {
             turn_id: turn_id.clone(),
             git_ref: git_ref.clone(),
             description: description.clone(),
+            status: remi_core::models::CheckpointStatus::Ready,
+            checkpoint_turn_count: 0,
+            files: vec![],
+            assistant_message_id: None,
             created_at: created_at_str.parse().map_err(|e| {
                 crate::error::PersistenceError::SerializationError(format!(
                     "日期解析错误: {}",
                     e
                 ))
             })?,
+            completed_at: None,
         };
 
         Ok(Some(checkpoint))
@@ -206,9 +211,14 @@ impl CheckpointStore for SqliteCheckpointStore {
                     turn_id,
                     git_ref,
                     description,
+                    status: remi_core::models::CheckpointStatus::Ready,
+                    checkpoint_turn_count: 0,
+                    files: vec![],
+                    assistant_message_id: None,
                     created_at: created_at_str.parse().map_err(|_| {
                         rusqlite::Error::InvalidColumnIndex(0)
                     })?,
+                    completed_at: None,
                 })
             },
         )?;

@@ -131,8 +131,7 @@ pub enum ProviderError {
 ///
 /// ```rust,ignore
 /// fn my_function() -> ProviderResult<String> {
-///
-Ok('success'.to_string())
+///     Ok("success".to_string())
 /// }
 /// ```
 pub type ProviderResult<T> = Result<T, ProviderError>;

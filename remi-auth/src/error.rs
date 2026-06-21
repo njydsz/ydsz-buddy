@@ -114,8 +114,7 @@ pub enum AuthError {
 /// use remi_auth::AuthResult;
 ///
 /// fn authenticate_user() -> AuthResult<String> {
-///
-Ok('session_token'.to_string())
+///     Ok("session_token".to_string())
 /// }
 /// ```
 pub type AuthResult<T> = Result<T, AuthError>;

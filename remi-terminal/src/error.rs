@@ -20,14 +20,10 @@ use thiserror::Error;
 ///
 /// ```ignore
 /// match terminal_manager.open(input).await {
-///
-Ok(snapshot) => { /* 处理成功 */ },
-///
-Err(TerminalError::TerminalNotFound(id)) => { /* 会话不存在 */ },
-///
-Err(TerminalError::TerminalAlreadyExists(id)) => { /* 会话已存在 */ },
-///
-Err(e) => { /* 其他错误 */ },
+///     Ok(snapshot) => { /* 处理成功 */ },
+///     Err(TerminalError::TerminalNotFound(id)) => { /* 会话不存在 */ },
+///     Err(TerminalError::TerminalAlreadyExists(id)) => { /* 会话已存在 */ },
+///     Err(e) => { /* 其他错误 */ },
 /// }
 /// ```
 #[derive(Error, Debug)]

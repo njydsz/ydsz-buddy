@@ -44,7 +44,7 @@ let event = serde_json::from_str::<Event>(json_str)?;
 //!
 if !valid {
 //!
-return Err(OrchestrationError::CommandError('参数不合法'.into()));
+return Err(OrchestrationError::CommandError("参数不合法".into()));
 //!
 }
 //!     
@@ -122,8 +122,7 @@ pub enum OrchestrationError {
 ///
 /// ```ignore
 /// fn do_something() -> OrchestrationResult<String> {
-///
-Ok('success'.to_string())
+///     Ok("success".to_string())
 /// }
 /// ```
 pub type OrchestrationResult<T> = Result<T, OrchestrationError>;

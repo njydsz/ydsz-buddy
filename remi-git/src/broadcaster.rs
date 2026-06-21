@@ -334,11 +334,9 @@ impl GitStatusBroadcaster {
     /// async fn main() {
     /// let mut receiver = broadcaster.stream_status();
     /// tokio::spawn(async move {
-    ///
-while let Ok(event) = receiver.recv().await {
-    ///         println!('状态更新: {:?}', event.status.current_branch);
-    ///
-}
+    ///     while let Ok(event) = receiver.recv().await {
+    ///         println!("状态更新: {:?}", event.status.current_branch);
+    ///     }
     /// });
     /// }
     ///

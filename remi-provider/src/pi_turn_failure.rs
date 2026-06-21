@@ -89,7 +89,7 @@ pub struct PiTurnFailureClassifier {
 }
 
 struct FailureRule {
-    keywords: &'static [&'static str],
+    keywords: &"static [&"static str],
     kind: PiFailureKind,
     retryable: bool,
     action: &'static str,

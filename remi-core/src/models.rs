@@ -292,7 +292,13 @@ pub struct LatestTurn {
     /// Turn 的当前状态
     pub status: TurnStatus,
     /// Turn 开始时间（UTC）
-    pub started_at: DateTime<Utc>,
+    pub requested_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assistant_message_id: Option<String>,
 }
 
 /// # Turn 状态枚举
@@ -623,8 +629,47 @@ pub struct Checkpoint {
     pub git_ref: String,
     /// 检查点描述
     pub description: String,
+    /// 检查点状态
+    pub status: CheckpointStatus,
+    /// 检查点对应的 Turn 数量
+    pub checkpoint_turn_count: usize,
+    /// 文件变更列表
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub files: Vec<CheckpointFile>,
+    /// 关联的助手消息 ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assistant_message_id: Option<String>,
     /// 检查点创建时间（UTC）
     pub created_at: DateTime<Utc>,
+    /// 检查点完成时间（UTC）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<DateTime<Utc>>,
+}
+
+/// 检查点状态枚举
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CheckpointStatus {
+    /// 已就绪
+    Ready,
+    /// 缺失
+    Missing,
+    /// 错误
+    Error,
+}
+
+/// 检查点文件变更
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckpointFile {
+    /// 文件路径
+    pub path: String,
+    /// 变更状态
+    pub status: String,
+    /// 新增行数
+    pub additions: usize,
+    /// 删除行数
+    pub deletions: usize,
 }
 
 /// # 会话

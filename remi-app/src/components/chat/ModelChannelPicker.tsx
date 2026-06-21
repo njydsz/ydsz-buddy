@@ -47,7 +47,7 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "deepseek",
     name: "DeepSeek",
     nameEn: "DeepSeek",
-    subtitle: "æ·±åº¦æ±‚ç´�?Â· DeepSeek",
+    subtitle: "æ·±åº¦æ±‚ç´�?Â· DeepSeek",
     subtitleEn: "DeepSeek",
     balance: "Â¥177.52",
     icon: (
@@ -59,9 +59,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "siliconflow",
-    name: "ç¡…åŸºæµåŠ�?,
+    name: "ç¡…åŸºæµåŠ�?,
     nameEn: "SiliconFlow",
-    subtitle: "ç¡…åŸºæµåŠ�?Â· SiliconFlow",
+    subtitle: "ç¡…åŸºæµåŠ�?Â· SiliconFlow",
     subtitleEn: "SiliconFlow",
     balance: "Â¥110.87",
     icon: (
@@ -73,9 +73,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "volcano",
-    name: "ç«å±±æ–¹èˆ�?,
+    name: "ç«å±±æ–¹èˆ�?,
     nameEn: "Volcano Ark",
-    subtitle: "å­—èŠ‚è·³åŠ�?Â· ç«å±±æ–¹èˆ�?,
+    subtitle: "å­—èŠ‚è·³åŠ�?Â· ç«å±±æ–¹èˆ�?,
     subtitleEn: "ByteDance Volcano Ark",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -86,9 +86,9 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
   },
   {
     id: "tongyi",
-    name: "é€šä¹‰åƒé—�?,
+    name: "é€šä¹‰åƒé—�?,
     nameEn: "Tongyi Qianwen",
-    subtitle: "é˜é‡Œï�?Â· ç™¾ç‚¼å¹³å�?,
+    subtitle: "é˜é‡Œï�?Â· ç™¾ç‚¼å¹³å�?,
     subtitleEn: "Alibaba Cloud BaiLian",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -101,7 +101,7 @@ const CHANNELS: ReadonlyArray<ModelChannel> = [
     id: "kimi",
     name: "Kimi",
     nameEn: "Kimi",
-    subtitle: "æœˆä¹‹æš—é�?Â· Kimi",
+    subtitle: "æœˆä¹‹æš—é�?Â· Kimi",
     subtitleEn: "Moonshot AI",
     balance: "Â¥13.96",
     icon: (
@@ -185,7 +185,7 @@ function ChannelListItem({
           {channel.name}
           {channel.balance ? (
             <span className="text-xs font-normal text-emerald-500">
-              ä½™é¢�?{channel.balance}
+              ä½™é¢�?{channel.balance}
             </span>
           ) : null}
         </span>
@@ -230,7 +230,7 @@ export const ModelChannelSection = memo(function ModelChannelSection() {
       <MenuGroup>
         <MenuGroupLabel className="flex items-center justify-between px-2 py-1.5">
           <span className="font-medium text-muted-foreground text-xs">
-            æœåŠ¡æ¸ é�?          </span>
+            æœåŠ¡æ¸ é��?          </span>
           <span className="text-[11px] text-muted-foreground/70">
             ({enabledCount}/{totalCount} å·²å¯ï½?
           </span>
@@ -290,7 +290,7 @@ export const ModelChannelPicker = memo(function ModelChannelPicker({
             isOpen && "rotate-90"
           )}
         />
-        <span className="flex-1">æœåŠ¡æ¸ é�?/span>
+        <span className="flex-1">æœåŠ¡æ¸ é��?/span>
         <span className="text-[11px] text-muted-foreground/70">
           ({enabledIds.length}/{CHANNELS.length} å·²å¯ï½?
         </span>

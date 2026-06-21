@@ -1,8 +1,8 @@
 /**
  * @file useTheme.ts
- * @description 主题管理 Hook - 持久化主题状态并将活动主题包投影�?DOM CSS 变量
+ * @description 主题管理 Hook - 持久化主题状态并将活动主题包投影��?DOM CSS 变量
  * @module hooks/useTheme
- * @layer Web 外观状�?Hook
+ * @layer Web 外观状��?Hook
  */
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
@@ -37,14 +37,14 @@ type ThemeSnapshot = {
   systemDark: boolean;
 };
 
-/** localStorage 存储�?*/
+/** localStorage 存储��?*/
 const STORAGE_KEY = "remi-claw:theme";
 /** 系统深色模式媒体查询 */
 const MEDIA_QUERY = "(prefers-color-scheme: dark)";
 
-/** 监听器列�?*/
+/** 监听器列��?*/
 let listeners: Array<() => void> = [];
-/** 上一次快照缓�?*/
+/** 上一次快照缓��?*/
 let lastSnapshot: ThemeSnapshot | null = null;
 /** 上一次快照键（用于缓存比对） */
 let lastSnapshotKey = "";
@@ -63,19 +63,19 @@ function emitChange() {
 }
 
 /**
- * 检查是否支持主题存�? */
+ * 检查是否支持主题存��? */
 function hasThemeStorage(): boolean {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
 }
 
 /**
- * 获取系统是否为深色模�? */
+ * 获取系统是否为深色模��? */
 function getSystemDark(): boolean {
   return typeof window !== "undefined" && window.matchMedia(MEDIA_QUERY).matches;
 }
 
 /**
- * �?localStorage 读取主题状�? * 如果读取失败或不存在，返回默认主题状�? */
+ * ��?localStorage 读取主题状��? * 如果读取失败或不存在，返回默认主题状��? */
 function readStoredThemeState(): ThemeState {
   if (!hasThemeStorage()) {
     return DEFAULT_THEME_STATE;
@@ -89,7 +89,7 @@ function readStoredThemeState(): ThemeState {
 }
 
 /**
- * 将主题状态写�?localStorage
+ * 将主题状态写��?localStorage
  */
 function writeStoredThemeState(state: ThemeState) {
   if (!hasThemeStorage()) {
@@ -100,7 +100,7 @@ function writeStoredThemeState(state: ThemeState) {
 }
 
 /**
- * 获取当前主题快照（用�?useSyncExternalStore�? * 使用缓存机制避免不必要的重新计算
+ * 获取当前主题快照（用��?useSyncExternalStore��? * 使用缓存机制避免不必要的重新计算
  */
 function getSnapshot(): ThemeSnapshot {
   const state = readStoredThemeState();
@@ -118,7 +118,7 @@ function getSnapshot(): ThemeSnapshot {
 }
 
 /**
- * 更新存储的主题状�? * 更新后会应用�?DOM 并通知所有监听器
+ * 更新存储的主题状��? * 更新后会应用��?DOM 并通知所有监听器
  */
 function updateStoredThemeState(update: (state: ThemeState) => ThemeState) {
   const nextState = update(readStoredThemeState());
@@ -128,7 +128,7 @@ function updateStoredThemeState(update: (state: ThemeState) => ThemeState) {
 }
 
 /**
- * 订阅主题变化（用�?useSyncExternalStore�? * 监听系统深色模式变化和跨标签页的存储变化
+ * 订阅主题变化（用��?useSyncExternalStore��? * 监听系统深色模式变化和跨标签页的存储变化
  */
 function subscribe(listener: () => void): () => void {
   if (typeof window === "undefined") {
@@ -147,7 +147,7 @@ function subscribe(listener: () => void): () => void {
     emitChange();
   };
   
-  // 监听跨标签页的存储变�?  const handleStorage = (event: StorageEvent) => {
+  // 监听跨标签页的存储变��?  const handleStorage = (event: StorageEvent) => {
     if (event.key !== STORAGE_KEY) {
       return;
     }
@@ -172,7 +172,7 @@ function subscribe(listener: () => void): () => void {
  * 将主题状态应用到 DOM
  * 设置 CSS 变量、data 属性和 class
  * 
- * @param state - 主题状�? * @param suppressTransitions - 是否抑制过渡动画（用于初始加载）
+ * @param state - 主题状��? * @param suppressTransitions - 是否抑制过渡动画（用于初始加载）
  */
 function applyThemeState(state: ThemeState, suppressTransitions = false) {
   if (typeof document === "undefined" || typeof window === "undefined") {
@@ -190,11 +190,11 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
     return;
   }
 
-  // 抑制过渡动画，避免初始加载时的闪�?  if (suppressTransitions) {
+  // 抑制过渡动画，避免初始加载时的闪��?  if (suppressTransitions) {
     root.classList.add("no-transitions");
   }
 
-  // 解析当前主题变体（light/dark�?  const variant = resolveThemeVariant(state.mode, getSystemDark());
+  // 解析当前主题变体（light/dark��?  const variant = resolveThemeVariant(state.mode, getSystemDark());
   const activeTheme = resolveThemePack(state, variant);
   
   // 构建 CSS 变量
@@ -205,12 +205,12 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
   // 设置深色模式 class
   root.classList.toggle("dark", variant === "dark");
   
-  // 设置 data 属�?  root.setAttribute("data-code-theme-id", activeTheme.codeThemeId);
+  // 设置 data 属��?  root.setAttribute("data-code-theme-id", activeTheme.codeThemeId);
   root.setAttribute("data-theme-mode", state.mode);
   root.setAttribute("data-theme-variant", variant);
   root.setAttribute("data-window-material", cssVariableBuild.material);
 
-  // 应用所�?CSS 变量
+  // 应用所��?CSS 变量
   for (const [name, value] of Object.entries(cssVariableBuild.variables)) {
     if (value.trim().length === 0) {
       root.style.removeProperty(name);
@@ -219,11 +219,11 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
     root.style.setProperty(name, value);
   }
 
-  // 同步到桌面端（Tauri�?  syncDesktopTheme(state.mode);
+  // 同步到桌面端（Tauri��?  syncDesktopTheme(state.mode);
 
   // 恢复过渡动画
   if (suppressTransitions) {
-    // 强制重排，确�?no-transitions class 生效后再移除
+    // 强制重排，确��?no-transitions class 生效后再移除
     // oxlint-disable-next-line no-unused-expressions
     root.offsetHeight;
     requestAnimationFrame(() => {
@@ -233,7 +233,7 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
 }
 
 /**
- * 同步主题到桌面端（Tauri�? * 通过 Tauri bridge 设置原生窗口主题
+ * 同步主题到桌面端（Tauri��? * 通过 Tauri bridge 设置原生窗口主题
  */
 function syncDesktopTheme(theme: ThemeMode) {
   if (typeof window === "undefined") {
@@ -247,7 +247,7 @@ function syncDesktopTheme(theme: ThemeMode) {
 
   lastDesktopTheme = theme;
   void bridge.setTheme(theme).catch(() => {
-    // 如果设置失败，重置缓存以便下次重�?    if (lastDesktopTheme === theme) {
+    // 如果设置失败，重置缓存以便下次重��?    if (lastDesktopTheme === theme) {
       lastDesktopTheme = null;
     }
   });
@@ -264,9 +264,9 @@ if (typeof document !== "undefined") {
  * 主题管理 Hook
  * 
  * @description
- * 提供完整的主题管理功能，包括�? * - 主题模式切换（light/dark/system�? * - 主题包导�?导出
+ * 提供完整的主题管理功能，包括��? * - 主题模式切换（light/dark/system��? * - 主题包导��?导出
  * - 主题重置
- * - 主题字体和代码主题配�? * - 自动同步�?DOM 和桌面端
+ * - 主题字体和代码主题配��? * - 自动同步��?DOM 和桌面端
  * 
  * @returns 主题状态和操作方法
  * 
@@ -280,14 +280,14 @@ if (typeof document !== "undefined") {
  *   resetAllThemes,
  * } = useTheme();
  * 
- * // 切换到深色模�? * setTheme('dark');
+ * // 切换到深色模��? * setTheme('dark');
  * 
  * // 导出当前主题
  * const themeString = exportThemeString();
  * ```
  */
 export function useTheme() {
-  // 使用 useSyncExternalStore 订阅主题状�?  const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => ({
+  // 使用 useSyncExternalStore 订阅主题状��?  const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => ({
     state: DEFAULT_THEME_STATE,
     systemDark: false,
   }));
@@ -353,13 +353,13 @@ export function useTheme() {
   }, []);
 
   /**
-   * 重置所有主题到默认状�?   */
+   * 重置所有主题到默认状��?   */
   const resetAllThemes = useCallback(() => {
     updateStoredThemeState(() => DEFAULT_THEME_STATE);
   }, []);
 
   /**
-   * 更新主题包（颜色配置�?   */
+   * 更新主题包（颜色配置��?   */
   const updateThemePack = useCallback((variant: ThemeVariant, patch: Partial<ChromeTheme>) => {
     updateStoredThemeState((state) => updateChromeTheme(state, variant, patch));
   }, []);
@@ -379,7 +379,7 @@ export function useTheme() {
   }, []);
 
   /**
-   * 检查指定主题变体是否为默认主题�?   */
+   * 检查指定主题变体是否为默认主题��?   */
   const isDefaultThemePack = useCallback(
     (variant: ThemeVariant) =>
       areThemePacksEqual(
@@ -389,7 +389,7 @@ export function useTheme() {
     [snapshot.state],
   );
 
-  // 保持 DOM 同步（如果某些操作绕过了模块加载时的立即应用�?  useEffect(() => {
+  // 保持 DOM 同步（如果某些操作绕过了模块加载时的立即应用��?  useEffect(() => {
     applyThemeState(snapshot.state);
   }, [snapshot.state]);
 

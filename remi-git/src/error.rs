@@ -133,8 +133,7 @@ pub enum GitError {
 /// use remi_git::GitResult;
 ///
 /// fn get_status() -> GitResult<String> {
-///
-Ok('on branch main'.to_string())
+///     Ok("on branch main".to_string())
 /// }
 /// ```
 pub type GitResult<T> = Result<T, GitError>;

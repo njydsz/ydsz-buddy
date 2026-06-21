@@ -208,6 +208,7 @@ impl ProviderDiscoveryService {
             provider,
             cwd: String::new(),
             thread_id: None,
+            agent_dir: None,
             force_reload: None,
         };
         match adapter.list_skills(input).await {
@@ -250,6 +251,7 @@ impl ProviderDiscoveryService {
             provider,
             cwd: String::new(),
             thread_id: None,
+            agent_dir: None,
             force_reload: None,
         };
         match adapter.list_commands(input).await {
