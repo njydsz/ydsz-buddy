@@ -7,9 +7,24 @@
 // Depends on: tauriBridge window actions, isDesktop / isMacPlatform helpers
 
 import { tauriBridge } from "~/lib/tauri-bridge";
-import { isDesktop } from "~/env";
 import { cn, isMacPlatform } from "~/lib/utils";
 import { LuMinus, LuSquare, LuX } from "react-icons/lu";
+
+/**
+ * 运行时检测 Tauri 上下文。Tauri 2 在 WebView 加载早期只注入
+ * `__TAURI_INTERNALS__`，旧的 `__TAURI__` 会在脚本执行后才挂上；
+ * 模块加载期用 `isDesktop` 判断会误判为 false，因此改为运行时检测。
+ */
+function isTauriContext(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    "__TAURI_INTERNALS__" in window ||
+    "__TAURI__" in window ||
+    // tauri-plugin-shell 等会暴露 invoke 桥
+    // @ts-expect-error - 动态探测
+    typeof window.__TAURI_INTERNALS__?.invoke === "function"
+  );
+}
 
 /**
  * 窗口标题栏控制按钮（min / max / close）
@@ -18,7 +33,7 @@ import { LuMinus, LuSquare, LuX } from "react-icons/lu";
  * 容器标记为 `no-drag`，确保在可拖拽的顶栏内仍可点击。
  */
 export function WindowCaptionButtons({ className }: { className?: string }) {
-  if (!isDesktop || isMacPlatform(navigator.platform)) {
+  if (!isTauriContext() || isMacPlatform(navigator.platform)) {
     return null;
   }
 

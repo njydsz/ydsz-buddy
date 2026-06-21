@@ -43,6 +43,8 @@ use crate::error::ServerResult;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcRequest {
     /// JSON-RPC 协议版本，固定为 "2.0"
+    /// 使用 Option 和默认值以兼容 Effect RPC 协议（不发送此字段）
+    #[serde(default = "default_jsonrpc_version")]
     pub jsonrpc: String,
     /// 请求标识符，由客户端指定，用于匹配响应。通知消息无此字段
     pub id: Option<Value>,
@@ -50,6 +52,11 @@ pub struct JsonRpcRequest {
     pub method: String,
     /// 方法调用参数，具体结构由各方法定义
     pub params: Option<Value>,
+}
+
+/// 默认的 JSON-RPC 版本号
+fn default_jsonrpc_version() -> String {
+    "2.0".to_string()
 }
 
 /// JSON-RPC 2.0 响应

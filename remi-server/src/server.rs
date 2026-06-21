@@ -9,6 +9,12 @@
 //! |------|------|------|
 //! | `/ws` | GET | WebSocket 升级端点，客户端通过此端点建立 WebSocket 连接 |
 //! | `/health` | GET | 健康检查端点，返回 "OK" 表示服务正常 |
+//! | `/api/auth/session` | GET | 获取当前认证会话状态 |
+//! | `/api/auth/bootstrap` | POST | 交换引导凭证 |
+//! | `/api/auth/ws-token` | POST | 获取 WebSocket 认证令牌 |
+//! | `/api/attachments/{id}` | GET | 获取附件文件 |
+//! | `/api/local-images/{path}` | GET | 获取本地图片文件 |
+//! | `/static/*` | GET | 静态文件服务 |
 //!
 //! ## 连接处理流程
 //!
@@ -38,6 +44,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tracing::{error, info, warn};
 
 use crate::error::{ServerError, ServerResult};
+use crate::http_routes::{build_http_router, HttpState};
 use crate::rpc::{JsonRpcNotification, RpcRouter};
 use crate::websocket::WebSocketManager;
 
@@ -52,6 +59,8 @@ pub struct ServerState {
     pub rpc_router: Arc<RpcRouter>,
     /// 服务器配置，用于构造连接初始化推送（如 server.welcome）
     pub config: Arc<ServerConfig>,
+    /// HTTP 辅助路由状态（附件 / 本地图片 / favicon）
+    pub http_state: Option<Arc<HttpState>>,
 }
 
 /// WebSocket 服务器
@@ -80,9 +89,22 @@ impl WebSocketServer {
             ws_manager,
             rpc_router,
             config,
+            http_state: None,
         });
 
         Self { state, addr }
+    }
+
+    /// 注入 HTTP 辅助路由状态
+    pub fn with_http_state(mut self, http_state: Arc<HttpState>) -> Self {
+        let new_state = Arc::new(ServerState {
+            ws_manager: self.state.ws_manager.clone(),
+            rpc_router: self.state.rpc_router.clone(),
+            config: self.state.config.clone(),
+            http_state: Some(http_state),
+        });
+        self.state = new_state;
+        self
     }
 
     /// 启动服务器
@@ -106,11 +128,18 @@ impl WebSocketServer {
             .allow_methods(Any)
             .allow_headers(Any);
 
-        let app = Router::new()
+        let mut app: Router<Arc<ServerState>> = Router::new()
             .route("/ws", get(ws_handler))
             .route("/health", get(health_handler))
-            .layer(cors)
-            .with_state(self.state.clone());
+            .layer(cors);
+
+        // HTTP 辅助路由（附件 / 本地图片 / favicon）
+        if self.state.http_state.is_some() {
+            let http_router = build_http_router();
+            app = app.merge(http_router);
+        }
+
+        let app = app.with_state(self.state.clone());
 
         let listener = tokio::net::TcpListener::bind(self.addr)
             .await

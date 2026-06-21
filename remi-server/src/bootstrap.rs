@@ -25,7 +25,7 @@ use tracing::{info, warn};
 use remi_auth::{AuthService, SecretStore, SessionCredentialService};
 use remi_checkpoint::CheckpointStore;
 use remi_config::ServerConfig;
-use remi_git::{GitCore, GitManager, GitStatusBroadcaster};
+use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService};
 use remi_orchestration::{
     CheckpointReactor, OrchestrationEngine, OrchestrationResult,
     ProjectionSnapshotQuery, ProviderCommandReactor, ThreadDeletionReactor,
@@ -34,12 +34,19 @@ use remi_persistence::{
     run_migrations, SqliteCheckpointStore, SqliteClient, SqliteEventStore,
     SqlitePairingLinkStore, SqliteProjectionRepository,
 };
-use remi_provider::ProviderService;
+use remi_provider::{
+    adapters::{
+        ClaudeAdapter, CodexAdapter, CursorAdapter, GeminiAdapter, GrokAdapter, KiloAdapter,
+        OpenCodeAdapter, PiAdapter,
+    },
+    ProviderDiscoveryService, ProviderService,
+};
 use remi_telemetry::{AnalyticsService, MetricsCollector};
 use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
 
 use crate::push_channels::PushChannelManager;
+use crate::retention::{RetentionConfig, ThreadRetentionJob};
 use crate::rpc::RpcRouter;
 use crate::rpc_methods::{register_all_methods, ServiceContainer};
 use crate::server::WebSocketServer;
@@ -52,6 +59,8 @@ pub struct ReactorHandles {
     pub checkpoint_reactor: tokio::task::JoinHandle<OrchestrationResult<()>>,
     /// 线程删除反应器句柄
     pub thread_deletion_reactor: tokio::task::JoinHandle<OrchestrationResult<()>>,
+    /// 线程保留作业句柄
+    pub retention_job: Arc<ThreadRetentionJob>,
     /// 关闭信号发送端
     pub shutdown_tx: broadcast::Sender<()>,
 }
@@ -98,6 +107,25 @@ async fn build_service_container(
 
     // ===== Provider 层 =====
     let provider_service = Arc::new(ProviderService::new());
+    let provider_discovery_service = Arc::new(ProviderDiscoveryService::new());
+
+    // 注册所有 Provider 适配器
+    let adapters: Vec<Arc<dyn remi_provider::adapter::ProviderAdapter>> = vec![
+        Arc::new(ClaudeAdapter::new()),
+        Arc::new(CodexAdapter::new()),
+        Arc::new(CursorAdapter::new()),
+        Arc::new(GeminiAdapter::new()),
+        Arc::new(GrokAdapter::new()),
+        Arc::new(KiloAdapter::new()),
+        Arc::new(OpenCodeAdapter::new()),
+        Arc::new(PiAdapter::new()),
+    ];
+    for adapter in adapters {
+        provider_service.register_adapter(adapter.clone()).await;
+        provider_discovery_service.register_adapter(adapter).await;
+    }
+
+    info!("已注册 8 个 Provider 适配器");
 
     // ===== Git 层 =====
     let git_core = Arc::new(GitCore::new());
@@ -106,6 +134,9 @@ async fn build_service_container(
         git_core.clone(),
         Duration::from_secs(30),
     ));
+    let git_text_generation = Arc::new(
+        GitTextGenerationService::with_provider(git_core.clone(), provider_service.clone()),
+    );
 
     // ===== 终端层 =====
     let terminal_manager = Arc::new(TerminalManager::new());
@@ -144,9 +175,11 @@ async fn build_service_container(
         orchestration_engine,
         projection_query,
         provider_service,
+        provider_discovery_service,
         git_core,
         git_manager,
         git_status_broadcaster,
+        git_text_generation,
         terminal_manager,
         workspace_filesystem,
         workspace_entries,
@@ -165,6 +198,7 @@ async fn build_service_container(
 /// - ProviderCommandReactor：监听 Turn 启动/中断事件，调用 Provider
 /// - CheckpointReactor：监听检查点回滚请求，创建检查点
 /// - ThreadDeletionReactor：监听线程删除事件，清理资源
+/// - ThreadRetentionJob：定期清理过期/不活跃线程
 fn start_reactors(
     services: Arc<ServiceContainer>,
     shutdown_tx: broadcast::Sender<()>,
@@ -204,12 +238,26 @@ fn start_reactors(
         thread_deletion_reactor.run(deletion_shutdown).await
     });
 
+    // 启动 ThreadRetentionJob
+    let retention_config = RetentionConfig::default();
+    let retention_job = Arc::new(ThreadRetentionJob::new(
+        retention_config,
+        services.orchestration_engine.clone(),
+    ));
+    let retention_job_clone = retention_job.clone();
+    tokio::spawn(async move {
+        if let Err(e) = retention_job_clone.start().await {
+            warn!("线程保留作业启动失败: {}", e);
+        }
+    });
+
     info!("Reactor 启动完成");
 
     ReactorHandles {
         provider_reactor: provider_handle,
         checkpoint_reactor: checkpoint_handle,
         thread_deletion_reactor: deletion_handle,
+        retention_job,
         shutdown_tx,
     }
 }
@@ -336,9 +384,15 @@ pub async fn start_server(
 
 /// 关闭所有 Reactor
 ///
-/// 发送关闭信号并等待所有 Reactor 任务完成
+/// 发送关闭信号并等待所有 Reactor 任务完成。
+/// 同时停止线程保留作业。
 pub async fn shutdown_reactors(handles: ReactorHandles) {
     info!("开始关闭 Reactor...");
+
+    // 停止线程保留作业
+    if let Err(e) = handles.retention_job.stop().await {
+        warn!("线程保留作业停止失败: {}", e);
+    }
 
     // 发送关闭信号
     let _ = handles.shutdown_tx.send(());

@@ -8,9 +8,9 @@ use std::sync::Arc;
 use remi_auth::AuthService;
 use remi_checkpoint::CheckpointStore;
 use remi_config::ServerConfig;
-use remi_git::{GitCore, GitManager, GitStatusBroadcaster};
+use remi_git::{GitCore, GitManager, GitStatusBroadcaster, GitTextGenerationService};
 use remi_orchestration::{OrchestrationEngine, ProjectionSnapshotQuery};
-use remi_provider::ProviderService;
+use remi_provider::{ProviderDiscoveryService, ProviderService};
 use remi_telemetry::{AnalyticsService, MetricsCollector};
 use remi_terminal::TerminalManager;
 use remi_workspace::{WorkspaceEntries, WorkspaceFileSystem};
@@ -37,12 +37,16 @@ pub struct ServiceContainer {
     pub projection_query: Arc<ProjectionSnapshotQuery>,
     /// Provider 服务
     pub provider_service: Arc<ProviderService>,
+    /// Provider 发现服务
+    pub provider_discovery_service: Arc<ProviderDiscoveryService>,
     /// Git 核心
     pub git_core: Arc<GitCore>,
     /// Git 管理器
     pub git_manager: Arc<GitManager>,
     /// Git 状态广播器
     pub git_status_broadcaster: Arc<GitStatusBroadcaster>,
+    /// Git 文本生成服务（AI 辅助生成 commit message / PR 标题和描述）
+    pub git_text_generation: Arc<GitTextGenerationService>,
     /// 终端管理器
     pub terminal_manager: Arc<TerminalManager>,
     /// 工作空间文件系统

@@ -143,6 +143,18 @@ pub struct Thread {
     /// 关联的 Worktree 详细信息
     #[serde(skip_serializing_if = "Option::is_none")]
     pub associated_worktree: Option<AssociatedWorktree>,
+    /// 关联 Worktree 当前检出的分支名（冗余列便于索引查询）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree 对应的 Git 完整 ref（如 `refs/heads/feature-xxx`）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 轻量终端标题摘要（用于 Sidebar 列表快速展示）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shell_summary: Option<String>,
+    /// 是否已完成"创建分支并打开线程"流程
+    /// 用于隐藏首次创建引导横幅
+    pub create_branch_flow_completed: bool,
     /// 是否置顶该线程
     pub is_pinned: bool,
     /// 父线程 ID，用于支持线程层级关系（如子代理线程）

@@ -80,6 +80,7 @@ interface ChatHeaderProps {
   diffDisabledReason?: string | null;
   surfaceMode?: "single" | "split";
   isSidechat?: boolean;
+  showWindowControls?: boolean;
   chatLayoutAction?: {
     kind: "split" | "maximize";
     label: string;
@@ -148,6 +149,7 @@ export const ChatHeader = memo(function ChatHeader({
   diffDisabledReason = null,
   surfaceMode = "single",
   isSidechat = false,
+  showWindowControls = true,
   chatLayoutAction = null,
   changeThreadAction = null,
   onRunProjectScript,
@@ -533,7 +535,7 @@ export const ChatHeader = memo(function ChatHeader({
                   : "Toggle diff panel"}
           </TooltipPopup>
         </Tooltip>
-        <WindowCaptionButtons />
+        {showWindowControls ? <WindowCaptionButtons /> : null}
       </div>
     </div>
   );

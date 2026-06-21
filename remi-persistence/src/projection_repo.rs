@@ -396,7 +396,9 @@ impl ProjectionRepository for SqliteProjectionRepository {
     fn get_thread(&self, id: ThreadId) -> PersistenceResult<Option<Thread>> {
         let rows = self.client.query_map(
             "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
-                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    branch, worktree_path, associated_worktree, associated_worktree_branch, associated_worktree_ref,
+                    shell_summary, create_branch_flow_completed,
+                    is_pinned, parent_thread_id, subagent,
                     fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
                     latest_user_message_at, has_pending_approvals, has_pending_user_input,
                     has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
@@ -466,7 +468,9 @@ impl ProjectionRepository for SqliteProjectionRepository {
     fn list_threads(&self) -> PersistenceResult<Vec<Thread>> {
         let rows = self.client.query_map(
             "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
-                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    branch, worktree_path, associated_worktree, associated_worktree_branch, associated_worktree_ref,
+                    shell_summary, create_branch_flow_completed,
+                    is_pinned, parent_thread_id, subagent,
                     fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
                     latest_user_message_at, has_pending_approvals, has_pending_user_input,
                     has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
@@ -487,7 +491,9 @@ impl ProjectionRepository for SqliteProjectionRepository {
     fn list_threads_by_project(&self, project_id: ProjectId) -> PersistenceResult<Vec<Thread>> {
         let rows = self.client.query_map(
             "SELECT thread_id, project_id, title, model_selection, runtime_mode, interaction_mode, env_mode,
-                    branch, worktree_path, associated_worktree, is_pinned, parent_thread_id, subagent,
+                    branch, worktree_path, associated_worktree, associated_worktree_branch, associated_worktree_ref,
+                    shell_summary, create_branch_flow_completed,
+                    is_pinned, parent_thread_id, subagent,
                     fork_source_thread_id, sidechat_source_thread_id, last_known_pr, latest_turn,
                     latest_user_message_at, has_pending_approvals, has_pending_user_input,
                     has_actionable_proposed_plan, messages, proposed_plans, activities, checkpoints,
@@ -562,18 +568,20 @@ impl ProjectionRepository for SqliteProjectionRepository {
 /// 将数据库行映射为 Thread 对象
 ///
 /// 此函数查询结果的列顺序必须与 `save_thread` 中的 INSERT 语句字段顺序一致，
-/// 共 31 个字段。所有 JSON 字段都会被反序列化为对应的 Rust 类型。
+/// 共 35 个字段。所有 JSON 字段都会被反序列化为对应的 Rust 类型。
 ///
 /// # 列顺序
 ///
 /// 0. thread_id, 1. project_id, 2. title, 3. model_selection, 4. runtime_mode,
 /// 5. interaction_mode, 6. env_mode, 7. branch, 8. worktree_path,
-/// 9. associated_worktree, 10. is_pinned, 11. parent_thread_id, 12. subagent,
-/// 13. fork_source_thread_id, 14. sidechat_source_thread_id, 15. last_known_pr,
-/// 16. latest_turn, 17. latest_user_message_at, 18. has_pending_approvals,
-/// 19. has_pending_user_input, 20. has_actionable_proposed_plan, 21. messages,
-/// 22. proposed_plans, 23. activities, 24. checkpoints, 25. session,
-/// 26. created_at, 27. updated_at, 28. archived_at, 29. deleted_at, 30. handoff
+/// 9. associated_worktree, 10. associated_worktree_branch, 11. associated_worktree_ref,
+/// 12. shell_summary, 13. create_branch_flow_completed,
+/// 14. is_pinned, 15. parent_thread_id, 16. subagent,
+/// 17. fork_source_thread_id, 18. sidechat_source_thread_id, 19. last_known_pr,
+/// 20. latest_turn, 21. latest_user_message_at, 22. has_pending_approvals,
+/// 23. has_pending_user_input, 24. has_actionable_proposed_plan, 25. messages,
+/// 26. proposed_plans, 27. activities, 28. checkpoints, 29. session,
+/// 30. created_at, 31. updated_at, 32. archived_at, 33. deleted_at, 34. handoff
 fn row_to_thread(row: &rusqlite::Row<'_>) -> rusqlite::Result<Thread> {
     // 提取所有基础字段
     let id_str: String = row.get(0)?;
@@ -586,27 +594,31 @@ fn row_to_thread(row: &rusqlite::Row<'_>) -> rusqlite::Result<Thread> {
     let branch: Option<String> = row.get(7)?;
     let worktree_path: Option<String> = row.get(8)?;
     let worktree_json: Option<String> = row.get(9)?;
-    let is_pinned: i32 = row.get(10)?;
-    let parent_thread_id_str: Option<String> = row.get(11)?;
-    let subagent_json: Option<String> = row.get(12)?;
-    let fork_source_thread_id_str: Option<String> = row.get(13)?;
-    let sidechat_source_thread_id_str: Option<String> = row.get(14)?;
-    let pr_json: Option<String> = row.get(15)?;
-    let turn_json: Option<String> = row.get(16)?;
-    let latest_user_message_at_str: Option<String> = row.get(17)?;
-    let has_pending_approvals: i32 = row.get(18)?;
-    let has_pending_user_input: i32 = row.get(19)?;
-    let has_actionable_proposed_plan: i32 = row.get(20)?;
-    let messages_json: String = row.get(21)?;
-    let plans_json: String = row.get(22)?;
-    let activities_json: String = row.get(23)?;
-    let checkpoints_json: String = row.get(24)?;
-    let session_json: Option<String> = row.get(25)?;
-    let created_at_str: String = row.get(26)?;
-    let updated_at_str: String = row.get(27)?;
-    let archived_at_str: Option<String> = row.get(28)?;
-    let deleted_at_str: Option<String> = row.get(29)?;
-    let handoff_json: Option<String> = row.get(30)?;
+    let associated_worktree_branch: Option<String> = row.get(10)?;
+    let associated_worktree_ref: Option<String> = row.get(11)?;
+    let shell_summary: Option<String> = row.get(12)?;
+    let create_branch_flow_completed: i32 = row.get(13)?;
+    let is_pinned: i32 = row.get(14)?;
+    let parent_thread_id_str: Option<String> = row.get(15)?;
+    let subagent_json: Option<String> = row.get(16)?;
+    let fork_source_thread_id_str: Option<String> = row.get(17)?;
+    let sidechat_source_thread_id_str: Option<String> = row.get(18)?;
+    let pr_json: Option<String> = row.get(19)?;
+    let turn_json: Option<String> = row.get(20)?;
+    let latest_user_message_at_str: Option<String> = row.get(21)?;
+    let has_pending_approvals: i32 = row.get(22)?;
+    let has_pending_user_input: i32 = row.get(23)?;
+    let has_actionable_proposed_plan: i32 = row.get(24)?;
+    let messages_json: String = row.get(25)?;
+    let plans_json: String = row.get(26)?;
+    let activities_json: String = row.get(27)?;
+    let checkpoints_json: String = row.get(28)?;
+    let session_json: Option<String> = row.get(29)?;
+    let created_at_str: String = row.get(30)?;
+    let updated_at_str: String = row.get(31)?;
+    let archived_at_str: Option<String> = row.get(32)?;
+    let deleted_at_str: Option<String> = row.get(33)?;
+    let handoff_json: Option<String> = row.get(34)?;
 
     // 辅助闭包：将 serde_json::Error 转换为 rusqlite::Error
     let json_err = |e: serde_json::Error| {
@@ -716,6 +728,10 @@ fn row_to_thread(row: &rusqlite::Row<'_>) -> rusqlite::Result<Thread> {
         branch,
         worktree_path,
         associated_worktree,
+        associated_worktree_branch,
+        associated_worktree_ref,
+        shell_summary,
+        create_branch_flow_completed: create_branch_flow_completed != 0,
         is_pinned: is_pinned != 0,
         parent_thread_id,
         subagent,

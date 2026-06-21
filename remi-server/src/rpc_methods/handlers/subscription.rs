@@ -191,5 +191,51 @@ pub async fn register_subscription_methods(
         })
         .await;
 
+    // 前端使用的命名空间订阅别名
+    // 当前实现仅保证连接稳定，事件通过对应推送通道下发
+    register_subscription_alias(router.clone(), "server.subscribeLifecycle", channels::SERVER_EVENTS).await;
+    register_subscription_alias(router.clone(), "server.subscribeConfig", channels::SERVER_EVENTS).await;
+    register_subscription_alias(router.clone(), "server.subscribeProviderStatuses", channels::PROVIDER_STATUS).await;
+    register_subscription_alias(router.clone(), "server.subscribeSettings", channels::SERVER_EVENTS).await;
+    register_subscription_alias(router.clone(), "terminal.subscribeEvents", channels::TERMINAL_EVENTS).await;
+    register_subscription_alias(router.clone(), "orchestration.subscribeDomainEvents", channels::ORCHESTRATION_EVENTS).await;
+    register_subscription_alias(router.clone(), "orchestration.subscribeShell", channels::ORCHESTRATION_EVENTS).await;
+
+    // 取消订阅别名（无状态操作，直接返回成功）
+    register_unsubscribe_alias(router.clone(), "orchestration.unsubscribeShell").await;
+    register_unsubscribe_alias(router.clone(), "orchestration.unsubscribeThread").await;
+
+    // orchestration.subscribeThread / unsubscribeThread 需要线程 ID 参数，
+    // 当前简化为订阅编排事件通道并返回成功，保证前端流式调用不触发重连
+    register_subscription_alias(router.clone(), "orchestration.subscribeThread", channels::ORCHESTRATION_EVENTS).await;
+    register_subscription_alias(router.clone(), "orchestration.unsubscribeThread", channels::ORCHESTRATION_EVENTS).await;
+
     info!("推送通道订阅 RPC 方法注册完成");
+}
+
+async fn register_subscription_alias(router: Arc<RpcRouter>, method: &str, channel: &str) {
+    let channel = channel.to_string();
+    router
+        .register(method, move |_params: Option<Value>| {
+            let channel = channel.clone();
+            async move {
+                Ok(serde_json::json!({
+                    "subscribed": channel,
+                    "status": "active"
+                }))
+            }
+        })
+        .await;
+}
+
+async fn register_unsubscribe_alias(router: Arc<RpcRouter>, method: &str) {
+    router
+        .register(method, move |_params: Option<Value>| {
+            async move {
+                Ok(serde_json::json!({
+                    "status": "inactive"
+                }))
+            }
+        })
+        .await;
 }

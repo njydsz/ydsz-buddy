@@ -5294,7 +5294,6 @@ export default function Sidebar() {
           <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui">
             <div className="flex min-w-0 items-center gap-1">
               <RemiCodeWordmark />
-              <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
             </div>
           </div>
         }
@@ -5345,6 +5344,7 @@ export default function Sidebar() {
               appSettings.sidebarSide === "left" && "pl-[90px]",
             )}
           >
+            {brandWordmark}
             {titlebarControls}
           </SidebarHeader>
         </>

@@ -291,6 +291,7 @@ import { ComposerPromptEditor, type ComposerPromptEditorHandle } from "./Compose
 import { PullRequestThreadDialog } from "./PullRequestThreadDialog";
 import { ChatHeader } from "./chat/ChatHeader";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
 import { SidebarHeaderTrigger } from "./ui/sidebar";
 import { useDesktopTopBarTrafficLightGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 import { ChatTranscriptPane } from "./chat/ChatTranscriptPane";
@@ -7351,26 +7352,17 @@ export default function ChatView({
   if (!activeThread) {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-(--color-background-surface) text-(--color-text-foreground-secondary)">
-        {!isDesktop && (
-          <header className="border-b border-(--color-border-light) px-3 py-2 md:hidden">
-            <div className="flex items-center gap-2">
-              <SidebarHeaderTrigger className="size-7 shrink-0" />
-              <span className="text-sm font-medium text-(--color-text-foreground)">
-                Threads
-              </span>
-            </div>
-          </header>
-        )}
-        {isDesktop && (
-          <div
-            className={cn(
-              "drag-region flex h-[44px] shrink-0 items-center border-b border-(--color-border-light) px-5",
-              desktopTopBarTrafficLightGutterClassName,
-            )}
-          >
-            <SidebarHeaderNavigationControls />
+        <div
+          className={cn(
+            "drag-region flex h-[44px] shrink-0 items-center border-b border-(--color-border-light) px-5",
+            desktopTopBarTrafficLightGutterClassName,
+          )}
+        >
+          <SidebarHeaderNavigationControls />
+          <div className="ms-auto flex items-center" data-no-drag>
+            <WindowCaptionButtons />
           </div>
-        )}
+        </div>
         <ChatLandingPage
           mode="work"
           composerSection={null}
@@ -8006,6 +7998,7 @@ export default function ChatView({
           activeProjectName={activeProjectDisplayName}
           threadBreadcrumbs={threadBreadcrumbs}
           isSidechat={Boolean(activeThread.sidechatSourceThreadId)}
+          showWindowControls={isFocusedPane}
           hideHandoffControls={terminalWorkspaceTerminalTabActive}
           isGitRepo={isGitRepo}
           openInCwd={threadWorkspaceCwd}

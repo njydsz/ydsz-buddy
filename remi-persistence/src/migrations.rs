@@ -422,6 +422,104 @@ pub const MIGRATIONS: &[Migration] = &[
             CREATE INDEX IF NOT EXISTS idx_checkpoints_created_at ON checkpoints(created_at);
         "#,
     },
+    // ── 016: 线程级额外列（对齐 RemiCode 021/022/023/026/031）
+    //   - associated_worktree_branch / associated_worktree_ref：worktree 详情
+    //   - shell_summary：项目根终端标题的轻量缓存
+    //   - create_branch_flow_completed：分支创建流程完成标志
+    //   - archived_at：线程归档时间（projection_threads 上原本已有 archived_at，
+    //     此处通过 ALTER 兜底老库，确保 NULL 语义统一）
+    Migration {
+        version: 16,
+        name: "016_projection_threads_extras",
+        sql: r#"
+            ALTER TABLE projection_threads
+                ADD COLUMN IF NOT EXISTS associated_worktree_branch TEXT;
+            ALTER TABLE projection_threads
+                ADD COLUMN IF NOT EXISTS associated_worktree_ref TEXT;
+            ALTER TABLE projection_threads
+                ADD COLUMN IF NOT EXISTS shell_summary TEXT;
+            ALTER TABLE projection_threads
+                ADD COLUMN IF NOT EXISTS create_branch_flow_completed INTEGER NOT NULL DEFAULT 0;
+        "#,
+    },
+    // ── 017: 性能索引（对齐 RemiCode 037 ProjectionSnapshotCapIndexes）
+    //   - 列表页频繁按 updated_at / created_at 排序，需要降序索引
+    //   - 快照读路径按 (project_id, updated_at DESC) 走索引
+    Migration {
+        version: 17,
+        name: "017_projection_snapshot_indexes",
+        sql: r#"
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_project_updated_desc
+                ON projection_threads(project_id, updated_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_project_created_desc
+                ON projection_threads(project_id, created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_projection_projects_workspace_root
+                ON projection_projects(workspace_root);
+        "#,
+    },
+    // ── 018: 线程筛选索引（archived / pinned / subagent）
+    //   - Sidebar 频繁过滤 archived=NULL and deleted_at=NULL
+    //   - Pinned 列表 / Subagent 树需要按列快速定位
+    Migration {
+        version: 18,
+        name: "018_projection_threads_filter_indexes",
+        sql: r#"
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_archived_at
+                ON projection_threads(archived_at);
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_pinned
+                ON projection_threads(is_pinned);
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_subagent
+                ON projection_threads(subagent);
+            CREATE INDEX IF NOT EXISTS idx_projection_threads_last_known_pr
+                ON projection_threads(last_known_pr);
+        "#,
+    },
+    // ── 019: 消息查询增强索引（dispatch_mode / mentions / attachments）
+    //   - Prompt 渲染时按 dispatch_mode 过滤
+    //   - Mentions 反查（@提及跳转）
+    Migration {
+        version: 19,
+        name: "019_projection_thread_messages_indexes",
+        sql: r#"
+            CREATE INDEX IF NOT EXISTS idx_projection_thread_messages_dispatch_mode
+                ON projection_thread_messages(thread_id, dispatch_mode);
+            CREATE INDEX IF NOT EXISTS idx_projection_thread_messages_turn_id
+                ON projection_thread_messages(turn_id);
+        "#,
+    },
+    // ── 020: Shell 摘要回填（对齐 RemiCode 027 BackfillProjectionThreadShellSummary）
+    //   - 已有线程没有 shell_summary 字段时统一回填 NULL，由 runtime 层异步计算
+    //   - 使用 UPDATE 而非默认值，避免空串与 NULL 混淆
+    Migration {
+        version: 20,
+        name: "020_backfill_projection_thread_shell_summary",
+        sql: r#"
+            UPDATE projection_threads
+               SET shell_summary = NULL
+             WHERE shell_summary IS NULL;
+        "#,
+    },
+    // ── 021: 命令收据索引（编排对账 / 调试用）
+    //   - command_id 主键已存在，再加 aggregate + sequence 联合索引便于对账
+    Migration {
+        version: 21,
+        name: "021_orchestration_receipt_indexes",
+        sql: r#"
+            CREATE INDEX IF NOT EXISTS idx_orch_command_receipts_status
+                ON orchestration_command_receipts(status, result_sequence);
+        "#,
+    },
+    // ── 022: 会话恢复索引（Provider 重新挂载时按 provider_session_id / provider_thread_id 查找）
+    Migration {
+        version: 22,
+        name: "022_projection_thread_sessions_recovery",
+        sql: r#"
+            CREATE INDEX IF NOT EXISTS idx_projection_thread_sessions_provider_thread
+                ON projection_thread_sessions(provider_thread_id);
+            CREATE INDEX IF NOT EXISTS idx_projection_thread_sessions_status
+                ON projection_thread_sessions(status);
+        "#,
+    },
 ];
 
 /// 运行所有未应用的数据库迁移
@@ -469,12 +567,23 @@ pub fn run_migrations(client: &SqliteClient) -> PersistenceResult<()> {
         if !applied {
             tracing::info!(version = migration.version, name = migration.name, "应用迁移");
 
-            client.execute_batch(migration.sql).map_err(|e| {
-                PersistenceError::MigrationError(format!(
-                    "迁移 {} ({}) 失败: {}",
-                    migration.version, migration.name, e
-                ))
-            })?;
+            if let Err(e) = client.execute_batch(migration.sql) {
+                let err_msg = e.to_string();
+                // 对于重复列错误，视为幂等：列已存在则无需再次添加，继续记录迁移版本
+                if err_msg.contains("duplicate column name") {
+                    tracing::warn!(
+                        version = migration.version,
+                        name = migration.name,
+                        error = %err_msg,
+                        "迁移中的列已存在，跳过该迁移"
+                    );
+                } else {
+                    return Err(PersistenceError::MigrationError(format!(
+                        "迁移 {} ({}) 失败: {}",
+                        migration.version, migration.name, e
+                    )));
+                }
+            }
 
             client.execute(
                 "INSERT INTO _migrations (version, name) VALUES (?1, ?2)",

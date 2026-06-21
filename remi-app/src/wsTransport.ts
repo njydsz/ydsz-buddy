@@ -69,7 +69,7 @@ function makeProtocolLayer(url: string) {
     Layer.provide(Socket.layerWebSocketConstructorGlobal),
   );
   return RpcClient.layerProtocolSocket().pipe(
-    Layer.provide(Layer.mergeAll(socketLayer, RpcSerialization.layerJson)),
+    Layer.provide(Layer.mergeAll(socketLayer, RpcSerialization.layerJsonRpc())),
   );
 }
 

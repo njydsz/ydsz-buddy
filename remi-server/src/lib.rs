@@ -57,6 +57,16 @@ pub mod bootstrap;
 pub mod ipc;
 /// 线程保留作业模块，定期清理过期/不活跃线程
 pub mod retention;
+/// Home 目录迁移模块，把已知来源（Peak/Codex/Claude/OpenCode）数据导入到 Remi home
+pub mod home_migration;
+/// 附件存储模块，聊天图片/语音/截图等的落盘与查询
+pub mod attachment_store;
+/// 本地图片文件服务模块，约束后端对前端 markdown 引用本地图片的访问范围
+pub mod local_image_files;
+/// 项目 favicon 路由模块，提供 /api/project-favicon?path=... 接口
+pub mod project_favicon_route;
+/// HTTP 路由注册器，把 attachment / local-image / favicon / health 等路由挂到 axum
+pub mod http_routes;
 
 pub use error::*;
 pub use push_channels::*;
@@ -67,3 +77,8 @@ pub use websocket::*;
 pub use bootstrap::*;
 pub use ipc::*;
 pub use retention::*;
+pub use home_migration::*;
+pub use attachment_store::*;
+pub use local_image_files::*;
+pub use project_favicon_route::*;
+pub use http_routes::*;

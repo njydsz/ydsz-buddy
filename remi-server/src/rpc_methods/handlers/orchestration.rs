@@ -212,5 +212,37 @@ pub async fn register_orchestration_methods(
         })
         .await;
 
+    // orchestration.getProposedPlan - 获取线程的提议计划
+    // 参数: { threadId: string }
+    // 返回: ProposedPlan | null
+    let query = services.projection_query.clone();
+    router
+        .register("orchestration.getProposedPlan", move |params: Option<Value>| {
+            let query = query.clone();
+            async move {
+                let params = params.ok_or_else(|| {
+                    crate::error::ServerError::InvalidParams("Missing params".to_string())
+                })?;
+                let thread_id_str = params
+                    .get("threadId")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        crate::error::ServerError::InvalidParams("Missing threadId".to_string())
+                    })?;
+                let thread_id: ThreadId = thread_id_str
+                    .parse()
+                    .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
+                let thread = query.get_thread_detail(thread_id).await?;
+                let plan = thread
+                    .and_then(|t| t.proposed_plans.into_iter().next());
+                match plan {
+                    Some(p) => serde_json::to_value(p)
+                        .map_err(|e| crate::error::ServerError::InternalError(e.to_string())),
+                    None => Ok(Value::Null),
+                }
+            }
+        })
+        .await;
+
     info!("编排引擎 RPC 方法注册完成");
 }

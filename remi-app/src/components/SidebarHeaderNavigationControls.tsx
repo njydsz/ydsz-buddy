@@ -20,18 +20,12 @@ function RemiCodeWordmark() {
 
 export function SidebarHeaderNavigationControls() {
   const { isMobile, open } = useSidebar();
-  const triggerVisible = isMobile || !open;
-
-  if (!triggerVisible) {
-    return null;
-  }
 
   return (
     <div className="flex shrink-0 items-center gap-2">
       {isDesktop && !open && (
         <div className="flex min-w-0 items-center gap-1">
           <RemiCodeWordmark />
-          <span className="truncate text-[14px] font-semibold text-foreground/89">Remi Soft</span>
         </div>
       )}
       <AppNavigationButtons className="ms-0" />
