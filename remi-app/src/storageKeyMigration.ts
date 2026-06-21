@@ -65,9 +65,5 @@ export function migrateRemiClawLocalStorageKeys(): void {
   }
 }
 
-/**
- * @deprecated 重命名以保持与品牌一致，请使�?{@link migrateRemiClawLocalStorageKeys}�? * 保留旧导出名以避免破坏可能引用该符号的旧插件/扩展�? */
-export const migrateRemiCodeLocalStorageKeys = migrateRemiClawLocalStorageKeys;
-
 /** 在应用启动时、Store 水合之前自动执行迁移 */
 migrateRemiClawLocalStorageKeys();

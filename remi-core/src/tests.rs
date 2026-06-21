@@ -67,13 +67,13 @@ mod test {
     #[test]
     fn runtime_mode_serialization_uses_lowercase() {
         // 验证 RuntimeMode 枚举序列化为小写字符串
-        let m = RuntimeMode::Code;
+        let m = RuntimeMode::Work;
         let s = serde_json::to_string(&m).unwrap();
-        assert_eq!(s, "\"agent\"");
+        assert_eq!(s, "\"work\"");
 
         let m = RuntimeMode::Code;
         let s = serde_json::to_string(&m).unwrap();
-        assert_eq!(s, "\"plan\"");
+        assert_eq!(s, "\"code\"");
     }
 
     #[test]
@@ -205,13 +205,14 @@ mod test {
         let v: Value = serde_json::to_value(OrchestrationEvent::ProjectCreated(e)).unwrap();
         // 事件 tag 形如 'project.created'
         assert_eq!(v["_tag"], "project.created");
-        // payload 字段.?camelCase
+        // payload 字段为 camelCase
         assert!(v.get("projectId").is_some());
         assert!(v.get("workspaceRoot").is_some());
     }
 
     #[test]
     fn project_meta_updated_event_serialization() {
+        // 验证 ProjectMetaUpdatedEvent 序列化为正确的事件标签 'project.meta-updated'
         let e = ProjectMetaUpdatedEvent {
             sequence: 2,
             occurred_at: Utc::now(),
@@ -295,6 +296,7 @@ mod test {
 
     #[test]
     fn project_create_command_serialization() {
+        // 验证 ProjectCreateCommand 序列化为正确的命令标签
         let cmd = ProjectCreateCommand {
             command_id: Some("c-1".to_string()),
             project_id: Uuid::new_v4(),
@@ -307,6 +309,7 @@ mod test {
 
     #[test]
     fn thread_create_command_serialization() {
+        // 验证 ThreadCreateCommand 序列化为正确的命令标签
         let cmd = ThreadCreateCommand {
             command_id: Some("c-1".to_string()),
             thread_id: Uuid::new_v4(),
@@ -342,6 +345,7 @@ mod test {
 
     #[test]
     fn thread_turn_start_command_serialization() {
+        // 验证 ThreadTurnStartCommand 序列化为正确的命令标签
         let cmd = ThreadTurnStartCommand {
             command_id: Some("c-1".to_string()),
             thread_id: Uuid::new_v4(),
@@ -364,6 +368,7 @@ mod test {
 
     #[test]
     fn provider_kind_display() {
+        // 验证 ProviderKind 的 Display 实现输出正确的字符串
         assert_eq!(ProviderKind::Codex.to_string(), "codex");
         assert_eq!(ProviderKind::ClaudeAgent.to_string(), "claudeAgent");
         assert_eq!(ProviderKind::Cursor.to_string(), "cursor");
@@ -371,6 +376,7 @@ mod test {
 
     #[test]
     fn model_selection_serialization() {
+        // 验证 ModelSelection 的序列化字段名和值
         let m = ModelSelection {
             provider: ProviderKind::ClaudeAgent,
             model: "claude-3-opus".to_string(),
@@ -384,7 +390,7 @@ mod test {
 
     #[test]
     fn json_helper_in_message() {
-        // 简单确.?json! 宏工.?
+        // 验证 serde_json 的 json! 宏工具正常工作
         let v = json!({
             "user": "alice",
             "age": 30

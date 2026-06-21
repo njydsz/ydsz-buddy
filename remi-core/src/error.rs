@@ -21,8 +21,7 @@
 //!
 //! fn lookup_id(id: &str) -> CoreResult<String> {
 //!     // 查找资源...
-//!
-Err(CoreError::NotFoundError(format!('资源 {} 不存在', id)))
+//!     Err(CoreError::NotFoundError(format!("资源 {} 不存在", id)))
 //! }
 //! ```
 
@@ -56,8 +55,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::ValidationError('项目标题不能为空'.to_string());
-    /// assert_eq!(err.to_string(), '验证错误: 项目标题不能为空');
+    /// let err = CoreError::ValidationError("项目标题不能为空".to_string());
+    /// assert_eq!(err.to_string(), "验证错误: 项目标题不能为空");
     /// ```
     #[error("验证错误: {0}")]
     ValidationError(String),
@@ -72,8 +71,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::NotFoundError('线程不存在'.to_string());
-    /// assert_eq!(err.to_string(), '未找到: 线程不存在');
+    /// let err = CoreError::NotFoundError("线程不存在".to_string());
+    /// assert_eq!(err.to_string(), "未找到: 线程不存在");
     /// ```
     #[error("未找到: {0}")]
     NotFoundError(String),
@@ -88,8 +87,8 @@ pub enum CoreError {
     /// ```rust
     /// use remi_core::CoreError;
     ///
-    /// let err = CoreError::SerializationError('JSON 解析失败: 缺少字段 'id''.to_string());
-    /// assert_eq!(err.to_string(), '序列化错误: JSON 解析失败: 缺少字段 'id'');
+    /// let err = CoreError::SerializationError("JSON 解析失败: 缺少字段 'id'".to_string());
+    /// assert_eq!(err.to_string(), "序列化错误: JSON 解析失败: 缺少字段 'id'");
     /// ```
     #[error("序列化错误: {0}")]
     SerializationError(String),
