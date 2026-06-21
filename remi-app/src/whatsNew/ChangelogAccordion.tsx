@@ -55,27 +55,27 @@ export function ChangelogAccordion({
 }
 
 /**
- * æ›´æ–°æ—¥å—æ‰‹é£Žç´è¡Œç»„ä»¶
- * @description æ¸²æŸ“å•ä¸ªç‰ˆæœ¬çš„å¯æŠ˜å è¡Œ,åŒ…å«ç‰ˆæœ¬ä¡æ¯å’ŒåŠŸèƒ½åˆ—è¡¨
- * @param props - ç»„ä»¶å±žæ€§
- * @returns æ‰‹é£Žç´è¡Œç»„ä»¶
+ * 更新日志手风琴行组件
+ * @description 渲染单个版本的可折叠行,包含版本信息和功能列表
+ * @param props - 组件属性
+ * @returns 手风琴行组件
  */
 function ChangelogAccordionRow({
   entry,
   defaultOpen,
   isLast,
 }: {
-  /** ç‰ˆæœ¬æ¡ç›® */
+  /** 版本条目 */
   readonly entry: WhatsNewEntry;
-  /** æ˜¯å¦é»˜è®¤å±•å¼€ */
+  /** 是否默认展开 */
   readonly defaultOpen: boolean;
-  /** æ˜¯å¦ä¸ºæœ€åŽä¸€è¡Œ */
+  /** 是否为最后一行 */
   readonly isLast: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   const featureCount = entry.features.length;
-  const featureLabel = featureCount === 1 ? "1 ä¸ªæ›´æ–°" : `${featureCount} ä¸ªæ›´æ–°`;
+  const featureLabel = featureCount === 1 ? "1 个更新" : `${featureCount} 个更新`;
 
   return (
     <li className={cn(!isLast && "border-b border-border/40")}>
@@ -84,7 +84,7 @@ function ChangelogAccordionRow({
           <DisclosureChevron open={open} />
           <span className="flex flex-1 items-baseline gap-2">
             <span className="text-xs text-muted-foreground">{entry.date}</span>
-            <span className="text-sm font-semibold text-foreground">ç‰ˆæœ¬ {entry.version}</span>
+            <span className="text-sm font-semibold text-foreground">版本 {entry.version}</span>
             <span className="text-xs text-muted-foreground/70">({featureLabel})</span>
           </span>
         </CollapsibleTrigger>

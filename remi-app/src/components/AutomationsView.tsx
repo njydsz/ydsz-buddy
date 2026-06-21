@@ -1,6 +1,7 @@
 import { BookIcon, CalendarIcon, ClockIcon, RocketIcon, SparklesIcon } from "../lib/icons";
 import { SidebarInset } from "./ui/sidebar";
 import { useMessages } from "../i18n/I18nContext";
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
 
 type AutomationTemplate = {
   readonly id: string;
@@ -55,6 +56,7 @@ export function AutomationsView() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <WindowCaptionButtons className="-me-3 sm:-me-5" />
             <button
               type="button"
               disabled

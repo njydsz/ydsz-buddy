@@ -1733,6 +1733,16 @@ export default function Sidebar() {
         return;
       }
 
+      // homeDir may not be available yet when switching back from workspace mode
+      if (!homeDir) {
+        toastManager.add({
+          type: "warning",
+          title: "Home folder not ready",
+          description: "Please wait for the home directory to be resolved.",
+        });
+        return;
+      }
+
       const result = await handleNewChat({ fresh: true });
       if (!result.ok) {
         toastManager.add({
@@ -1744,6 +1754,7 @@ export default function Sidebar() {
     },
     [
       handleNewChat,
+      homeDir,
       lastThreadRoute,
       navigate,
       navigateToWorkspace,

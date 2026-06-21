@@ -12,7 +12,7 @@ import { open, save, message as showMessage, confirm } from '@tauri-apps/plugin-
 import { writeTextFile, readTextFile, mkdir, readDir } from '@tauri-apps/plugin-fs';
 import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
 import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
-import type { 
+import type {
   DesktopTheme,
   DesktopUpdateState,
   DesktopUpdateActionResult,
@@ -29,20 +29,12 @@ import type {
   BrowserExecuteCdpInput,
   BrowserNavigateInput,
   BrowserNewTabInput,
-  ThreadBrowserState
+  ThreadBrowserState,
+  OrchestrationThread,
+  OrchestrationMessage,
+  ModelSelection,
 } from '~/contracts';
 import { WsTransport } from '../wsTransport';
-
-/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
-type Thread = unknown;
-/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
-type Message = unknown;
-/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
-type Model = unknown;
-/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
-type CreateThreadParams = unknown;
-/** TODO: 迁移完成后替换为 contracts 中的正式类型 */
-type SendMessageParams = unknown;
 
 /** 全局 WebSocket 传输实例 */
 let wsTransport: WsTransport | null = null;
@@ -551,9 +543,9 @@ export const tauriBridge = {
    * AI 提供商相关命令 - 通过 WebSocket 调用
    */
   provider: {
-    listModels: async (provider?: string): Promise<Model[]> => {
+    listModels: async (provider?: string): Promise<ModelSelection[]> => {
       const transport = await getWsTransport();
-      return await transport.request<Model[]>('provider.listModels', { provider });
+      return await transport.request<ModelSelection[]>('provider.listModels', { provider });
     },
 
     setApiKey: async (provider: string, key: string): Promise<void> => {

@@ -25,6 +25,7 @@ import { Throttler } from "@tanstack/react-pacer";
 import { APP_DISPLAY_NAME } from "../branding";
 import ShortcutsDialog from "../components/ShortcutsDialog";
 import WhatsNewDialog from "../components/WhatsNewDialog";
+import { WindowCaptionButtons } from "../components/WindowCaptionButtons";
 import { useWhatsNew } from "../whatsNew/useWhatsNew";
 import { WhatsNewPopoutCard } from "../whatsNew/WhatsNewPopoutCard";
 import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
@@ -132,7 +133,8 @@ function RootRouteView() {
 
   if (!readNativeApi()) {
     return (
-      <div className="flex h-screen flex-col bg-background text-foreground">
+      <div className="relative flex h-screen flex-col bg-background text-foreground">
+        <WindowCaptionButtons className="absolute top-0 right-0" />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-sm text-muted-foreground">
             Connecting to {APP_DISPLAY_NAME} server...
@@ -445,6 +447,7 @@ function RootRouteErrorView({ error, reset }: ErrorComponentProps) {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10 text-foreground sm:px-6">
+      <WindowCaptionButtons className="absolute top-0 right-0" />
       <div className="pointer-events-none absolute inset-0 opacity-80">
         <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(44rem_16rem_at_top,color-mix(in_srgb,var(--color-red-500)_16%,transparent),transparent)]" />
         <div className="absolute inset-0 bg-[linear-gradient(145deg,color-mix(in_srgb,var(--background)_90%,var(--color-black))_0%,var(--background)_55%)]" />

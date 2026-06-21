@@ -9,6 +9,7 @@ import { useDeferredValue } from "react";
 import { SearchIcon } from "~/lib/icons";
 import { SidebarInset } from "./ui/sidebar";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "./ui/input-group";
 import { Skeleton } from "./ui/skeleton";
 import {
@@ -40,6 +41,7 @@ export function PluginsView() {
             onRequestTabSwitch={undefined}
             activeTab="plugins"
           />
+          <WindowCaptionButtons className="-me-3 sm:-me-5" />
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">

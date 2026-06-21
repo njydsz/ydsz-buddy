@@ -2,6 +2,8 @@
 // Purpose: Render the branded startup face while the app is still booting a route or session.
 // Layer: Shared app loading presentation
 
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
+
 export function SplashScreen({
   errorMessage,
   onRetry,
@@ -12,7 +14,8 @@ export function SplashScreen({
   const showRetry = Boolean(errorMessage && onRetry);
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 items-center justify-center bg-background">
+    <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center bg-background">
+      <WindowCaptionButtons className="absolute top-0 right-0" />
       <div className="flex flex-col items-center gap-5 select-none">
         <img
           alt="Remi Code"
