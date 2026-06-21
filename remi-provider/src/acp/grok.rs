@@ -163,15 +163,12 @@ pub fn build_grok_acp_spawn_input(
         .unwrap_or_else(|| DEFAULT_GROK_AGENT_BINARY.to_string());
 
     // 构建命令行参数
-    let mut args = vec![];
-
-    // 设置模型
-    args.push("--model".to_string());
-    args.push(input.settings.model_id.clone());
-
-    // 设置工作目录
-    args.push("--cwd".to_string());
-    args.push(input.cwd.clone());
+    let args = vec![
+        "--model".to_string(),
+        input.settings.model_id.clone(),
+        "--cwd".to_string(),
+        input.cwd.clone(),
+    ];
 
     // 构建环境变量
     let mut env = HashMap::new();

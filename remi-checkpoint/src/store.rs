@@ -119,6 +119,7 @@ impl CheckpointStore {
     /// | 参数 | 类型 | 说明 |
     /// |------|------|------|
     /// | `thread_id` | [`ThreadId`] | 检查点所属的对话线程 ID |
+    /// | `turn_id` | `String` | 当前轮次 ID，用于关联检查点与具体的交互轮次 |
     /// | `commit_sha` | `String` | 检查点对应的 Git Commit SHA（即 `git_ref`） |
     /// | `message` | `String` | 检查点的描述信息，用于人类可读的标识 |
     ///
@@ -134,7 +135,7 @@ impl CheckpointStore {
     /// | 字段 | 来源 | 说明 |
     /// |------|------|------|
     /// | `id` | 自动生成 | UUID v4 格式的唯一标识符 |
-    /// | `turn_id` | 空字符串 | ⚠️ TODO：应从上下文获取当前轮次 ID |
+    /// | `turn_id` | `turn_id` 参数 | 所属轮次 ID |
     /// | `git_ref` | `commit_sha` 参数 | Git Commit SHA 引用 |
     /// | `description` | `message` 参数 | 检查点描述信息 |
     /// | `created_at` | 当前时间 | 检查点创建时间戳（UTC） |
@@ -145,16 +146,17 @@ impl CheckpointStore {
     pub async fn create_checkpoint(
         &self,
         thread_id: ThreadId,
+        turn_id: String,
         commit_sha: String,
         message: String,
     ) -> CheckpointResult<Checkpoint> {
-        info!("创建检查点: thread_id={}, commit={}", thread_id, commit_sha);
+        info!("创建检查点: thread_id={}, turn_id={}, commit={}", thread_id, turn_id, commit_sha);
 
         // 构造检查点对象
         let checkpoint = Checkpoint {
             id: uuid::Uuid::new_v4().to_string(),
             thread_id,
-            turn_id: String::new(), // TODO: 从上下文获取当前轮次 ID
+            turn_id,
             git_ref: commit_sha,
             description: message,
             created_at: Utc::now(),
@@ -290,6 +292,7 @@ impl CheckpointStore {
     /// > 调用前应确保用户已确认回滚意图，必要时先创建新的检查点以保存当前状态。
     pub async fn revert_to_checkpoint(
         &self,
+        cwd: &str,
         thread_id: ThreadId,
         checkpoint_id: String,
     ) -> CheckpointResult<String> {
@@ -303,7 +306,7 @@ impl CheckpointStore {
 
         // 调用 Git 核心服务执行回滚操作
         self.git_core
-            .revert_to_commit(&checkpoint.git_ref)
+            .revert_to_commit(cwd, &checkpoint.git_ref)
             .await
             .map_err(|e| CheckpointError::GitOperationFailed(e.to_string()))?;
 

@@ -167,7 +167,7 @@ pub async fn register_git_methods(
                     "commitPushPr" => GitAction::CommitPushPr,
                     _ => return Err(crate::error::ServerError::InvalidParams(
                         format!("Unknown action: {}", action_str),
-                    ).into()),
+                    )),
                 };
 
                 let message = params
@@ -722,8 +722,8 @@ pub async fn register_git_methods(
                         crate::error::ServerError::InvalidParams("Missing prRef".to_string())
                     })?;
                 let info = git_manager.resolve_pull_request(cwd, pr_ref).await?;
-                Ok(serde_json::to_value(info)
-                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?)
+                serde_json::to_value(info)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;
@@ -834,8 +834,8 @@ pub async fn register_git_methods(
                 let state = p.get("state").and_then(|v| v.as_str());
                 let limit = p.get("limit").and_then(|v| v.as_u64()).map(|n| n as u32);
                 let list = gh.list_pull_requests(cwd, state, limit).await?;
-                Ok(serde_json::to_value(list)
-                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?)
+                serde_json::to_value(list)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;
@@ -858,8 +858,8 @@ pub async fn register_git_methods(
                     crate::error::ServerError::InvalidParams("Missing prNumber".to_string())
                 })?;
                 let detail = gh.view_pull_request(cwd, n).await?;
-                Ok(serde_json::to_value(detail)
-                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?)
+                serde_json::to_value(detail)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;
@@ -894,8 +894,7 @@ pub async fn register_git_methods(
                     _ => {
                         return Err(crate::error::ServerError::InvalidParams(format!(
                             "Unknown merge method: {method_str}"
-                        ))
-                        .into());
+                        )));
                     }
                 };
                 let delete = p
@@ -1009,8 +1008,8 @@ pub async fn register_git_methods(
             let gh = gh_auth.clone();
             async move {
                 let status = gh.auth_status().await?;
-                Ok(serde_json::to_value(status)
-                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))?)
+                serde_json::to_value(status)
+                    .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
         })
         .await;

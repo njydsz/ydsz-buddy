@@ -470,7 +470,7 @@ impl GitCore {
                 .await?;
 
             if count_result.code == 0 {
-                let parts: Vec<&str> = count_result.stdout.trim().split_whitespace().collect();
+                let parts: Vec<&str> = count_result.stdout.split_whitespace().collect();
                 if parts.len() == 2 {
                     let ahead = parts[0].parse::<u32>().unwrap_or(0);
                     let behind = parts[1].parse::<u32>().unwrap_or(0);
@@ -1042,6 +1042,7 @@ impl GitCore {
     ///
     /// # 参数
     ///
+    /// - `cwd`: 仓库工作目录
     /// - `commit_sha`: 目标 commit 的 SHA（可以是完整 SHA 或短 SHA）
     ///
     /// # 返回值
@@ -1059,11 +1060,10 @@ impl GitCore {
     /// 调用前请确保：
     /// - 已经备份重要更改
     /// - 确认目标 commit 是正确的
-    pub async fn revert_to_commit(&self, commit_sha: &str) -> GitResult<()> {
-        // TODO: cwd 硬编码为 "."，应改为接受参数以支持指定工作目录
+    pub async fn revert_to_commit(&self, cwd: &str, commit_sha: &str) -> GitResult<()> {
         self.execute(ExecuteGitInput {
             operation: "reset --hard".to_string(),
-            cwd: ".".to_string(),
+            cwd: cwd.to_string(),
             args: vec!["reset".to_string(), "--hard".to_string(), commit_sha.to_string()],
             env: vec![],
             allow_non_zero_exit: false,
@@ -1600,7 +1600,7 @@ impl GitCore {
                 .await?;
 
             if count_result.code == 0 {
-                let parts: Vec<&str> = count_result.stdout.trim().split_whitespace().collect();
+                let parts: Vec<&str> = count_result.stdout.split_whitespace().collect();
                 if parts.len() == 2 {
                     let ahead = parts[0].parse::<u32>().unwrap_or(0);
                     let behind = parts[1].parse::<u32>().unwrap_or(0);

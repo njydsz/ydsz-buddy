@@ -214,7 +214,7 @@ pub fn require_workspace_root_available(
     let projects = projection_repo.list_projects()?;
     let conflicting = projects.iter().find(|p| {
         p.workspace_root == workspace_root
-            && exclude_project_id.map_or(true, |exclude_id| p.id != exclude_id)
+            && exclude_project_id != Some(p.id)
             && p.deleted_at.is_none()
     });
 

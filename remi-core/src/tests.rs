@@ -11,7 +11,7 @@
 //! - 关键枚举值
 
 #[cfg(test)]
-mod tests {
+mod test {
     use crate::events::{
         OrchestrationEvent, ProjectCreatedEvent, ProjectMetaUpdatedEvent, ProjectDeletedEvent,
         ThreadCreatedEvent, ThreadMessageSentEvent,
@@ -250,7 +250,7 @@ mod tests {
             last_known_pr: None,
             handoff: None,
         };
-        let v: Value = serde_json::to_value(OrchestrationEvent::ThreadCreated(e)).unwrap();
+        let v: Value = serde_json::to_value(OrchestrationEvent::ThreadCreated(Box::new(e))).unwrap();
         assert_eq!(v["_tag"], "thread.created");
     }
 

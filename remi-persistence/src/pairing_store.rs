@@ -156,6 +156,7 @@ impl SqlitePairingLinkStore {
     /// # 返回值
     ///
     /// 成功时返回 `PairingLink`，时间戳解析失败时返回 `PersistenceError::SerializationError`
+    #[allow(clippy::too_many_arguments)]
     fn build_pairing_link_from_row(
         id: String,
         credential: String,
@@ -331,6 +332,7 @@ impl PairingLinkStore for SqlitePairingLinkStore {
     /// 1. 获取当前时间作为过期判断基准
     /// 2. 执行 SELECT 查询，附加三个过滤条件
     /// 3. 逐行通过 `build_pairing_link_from_row` 构造 PairingLink 对象
+    #[allow(clippy::type_complexity)]
     fn list_active_pairing_links(&self) -> PersistenceResult<Vec<PairingLink>> {
         let now = Utc::now().to_rfc3339();
         let rows: Vec<(String, String, String, String, String, Option<String>, String, String, Option<String>, Option<String>)> = self.client.query_map(

@@ -338,8 +338,8 @@ pub async fn register_workspace_methods(
                 // 从路径中提取项目名
                 let title = path
                     .split('\\')
-                    .last()
-                    .or_else(|| path.split('/').last())
+                    .next_back()
+                    .or_else(|| path.split('/').next_back())
                     .unwrap_or(&path)
                     .to_string();
 

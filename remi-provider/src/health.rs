@@ -172,7 +172,7 @@ impl ProviderHealth {
         info!("检查 Provider 健康状态: {:?}", provider);
 
         let binary = provider_cli_binary(provider);
-        let status = probe_provider_cli(&binary, provider).await;
+        let status = probe_provider_cli(binary, provider).await;
 
         // 将检查结果写入缓存，使用写锁保证并发安全
         let mut cache = self.status_cache.write().await;

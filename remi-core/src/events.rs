@@ -59,7 +59,7 @@ pub enum OrchestrationEvent {
 
     /// 线程已创建
     #[serde(rename = "thread.created")]
-    ThreadCreated(ThreadCreatedEvent),
+    ThreadCreated(Box<ThreadCreatedEvent>),
     /// 线程已删除
     #[serde(rename = "thread.deleted")]
     ThreadDeleted(ThreadDeletedEvent),

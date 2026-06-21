@@ -642,7 +642,7 @@ impl WorkspaceEntries {
 
     /// 使缓存失效
     ///
-    /// 清除指定工作目录的缓存数据（预留接口，当前未实现）。
+    /// 清除指定工作目录的缓存数据。
     ///
     /// ## 参数
     ///
@@ -659,12 +659,14 @@ impl WorkspaceEntries {
     /// #[tokio::main]
     /// async fn main() {
     /// use remi_workspace::entries::WorkspaceEntries;
-    /// 
+    ///
     /// let service = WorkspaceEntries::new();
     /// service.invalidate("/project").await;
     /// }
     pub async fn invalidate(&self, _cwd: &str) {
         // TODO: 实现缓存失效逻辑
+        // 当前 WorkspaceEntries 是无状态的，每次调用都直接读取文件系统
+        // 如果未来添加缓存机制，应在此处清除指定 cwd 的缓存条目
         debug!("缓存失效: {}", _cwd);
     }
 }

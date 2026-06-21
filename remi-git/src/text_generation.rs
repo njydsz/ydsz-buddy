@@ -369,6 +369,7 @@ impl GitTextGenerationService {
         loop {
             match tokio::time::timeout(timeout_duration, event_rx.recv()).await {
                 Ok(Ok(event)) => {
+                    #[allow(clippy::collapsible_match)]
                     match &event {
                         ProviderRuntimeEvent::TurnDelta {
                             session_id,

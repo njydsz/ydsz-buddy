@@ -203,9 +203,33 @@ impl ProviderDiscoveryService {
             return Ok(vec![]);
         }
 
-        // TODO: 从适配器获取技能列表
-        // 当前返回空列表，后续需要扩展 ProviderAdapter trait
-        Ok(vec![])
+        // 从适配器获取技能列表
+        let input = remi_core::provider::ProviderListSkillsInput {
+            provider,
+            cwd: String::new(),
+            thread_id: None,
+            force_reload: None,
+        };
+        match adapter.list_skills(input).await {
+            Ok(result) => {
+                let source = result.source.unwrap_or_else(|| "adapter".to_string());
+                let skills = result
+                    .skills
+                    .into_iter()
+                    .map(|s| SkillInfo {
+                        id: s.path.clone(),
+                        name: s.name,
+                        description: s.description,
+                        source: source.clone(),
+                    })
+                    .collect();
+                Ok(skills)
+            }
+            Err(e) => {
+                debug!("从适配器获取技能列表失败: {:?}", e);
+                Ok(vec![])
+            }
+        }
     }
 
     /// 列出命令
@@ -221,8 +245,33 @@ impl ProviderDiscoveryService {
             return Ok(vec![]);
         }
 
-        // TODO: 从适配器获取命令列表
-        Ok(vec![])
+        // 从适配器获取命令列表
+        let input = remi_core::provider::ProviderListCommandsInput {
+            provider,
+            cwd: String::new(),
+            thread_id: None,
+            force_reload: None,
+        };
+        match adapter.list_commands(input).await {
+            Ok(result) => {
+                let source = result.source.unwrap_or_else(|| "adapter".to_string());
+                let commands = result
+                    .commands
+                    .into_iter()
+                    .map(|c| CommandInfo {
+                        id: c.name.clone(),
+                        name: c.name,
+                        description: c.description,
+                        source: source.clone(),
+                    })
+                    .collect();
+                Ok(commands)
+            }
+            Err(e) => {
+                debug!("从适配器获取命令列表失败: {:?}", e);
+                Ok(vec![])
+            }
+        }
     }
 
     /// 列出插件
@@ -235,7 +284,7 @@ impl ProviderDiscoveryService {
         let _caps = adapter.capabilities();
         // 插件发现功能暂不支持，返回空列表
         debug!("Provider {:?} 的插件发现功能暂未实现", provider);
-        return Ok(vec![]);
+        Ok(vec![])
     }
 
     /// 列出模型
@@ -251,19 +300,62 @@ impl ProviderDiscoveryService {
             return Ok(vec![]);
         }
 
-        // TODO: 从适配器获取模型列表
-        Ok(vec![])
+        // 从适配器获取模型列表
+        let input = remi_core::provider::ProviderListModelsInput {
+            provider,
+            binary_path: None,
+            api_endpoint: None,
+        };
+        match adapter.list_models(input).await {
+            Ok(result) => {
+                let models = result
+                    .models
+                    .into_iter()
+                    .map(|m| ModelInfo {
+                        id: m.slug.clone(),
+                        name: m.name,
+                        context_window: m
+                            .default_context_window
+                            .and_then(|w| w.parse::<u32>().ok())
+                            .unwrap_or(0),
+                        description: m.upstream_provider_name,
+                    })
+                    .collect();
+                Ok(models)
+            }
+            Err(e) => {
+                debug!("从适配器获取模型列表失败: {:?}", e);
+                Ok(vec![])
+            }
+        }
     }
 
     /// 列出 Agent
     pub async fn list_agents(&self, provider: ProviderKind) -> ProviderResult<Vec<AgentInfo>> {
         let adapters = self.adapters.read().await;
-        let _adapter = adapters
+        let adapter = adapters
             .get(&provider)
             .ok_or_else(|| ProviderError::ProviderNotFound(format!("{:?}", provider)))?;
 
-        // TODO: 从适配器获取 Agent 列表
-        Ok(vec![])
+        // 从适配器获取 Agent 列表
+        match adapter.list_agents().await {
+            Ok(result) => {
+                let agents = result
+                    .agents
+                    .into_iter()
+                    .map(|a| AgentInfo {
+                        id: a.name.clone(),
+                        name: a.display_name,
+                        description: a.description,
+                    })
+                    .collect();
+                Ok(agents)
+            }
+            Err(e) => {
+                debug!("从适配器获取 Agent 列表失败: {:?}", e);
+                Ok(vec![])
+            }
+        }
     }
 
     /// 清除能力缓存

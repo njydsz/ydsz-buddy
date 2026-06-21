@@ -309,7 +309,7 @@ mod tests {
             .unwrap();
         // 2. 创建线程
         projector
-            .apply(&OrchestrationEvent::ThreadCreated(ThreadCreatedEvent {
+            .apply(&OrchestrationEvent::ThreadCreated(Box::new(ThreadCreatedEvent {
                 sequence: 0,
                 occurred_at: Utc::now(),
                 command_id: None,
@@ -334,7 +334,7 @@ mod tests {
                 sidechat_source_thread_id: None,
                 last_known_pr: None,
                 handoff: None,
-            }))
+            })))
             .await
             .unwrap();
         // 3. 验证

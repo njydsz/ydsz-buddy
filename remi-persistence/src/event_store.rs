@@ -430,7 +430,7 @@ mod tests {
         let project_id = ProjectId::new_v4();
         let thread_id = remi_core::models::ThreadId::new_v4();
 
-        let ev = OrchestrationEvent::ThreadCreated(ThreadCreatedEvent {
+        let ev = OrchestrationEvent::ThreadCreated(Box::new(ThreadCreatedEvent {
             sequence: 0,
             occurred_at: Utc::now(),
             command_id: Some("cmd-x".to_string()),
@@ -455,7 +455,7 @@ mod tests {
             sidechat_source_thread_id: None,
             last_known_pr: None,
             handoff: None,
-        });
+        }));
         let seq = store.append_event(&ev).unwrap();
 
         let stored = store.read_events(0, 10).unwrap();

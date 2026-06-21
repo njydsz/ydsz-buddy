@@ -134,8 +134,93 @@ impl SecretStore {
         let mut secrets = self.secrets.write().await;
         secrets.insert(name.to_string(), value.to_vec());
 
-        // TODO: 持久化到磁盘（加密存储）
+        // 持久化到磁盘（使用 base64 编码的 JSON 格式）
+        // TODO: 后续可替换为 AES 等更强的加密算法
+        if let Some(ref path) = self.storage_path {
+            if let Err(e) = Self::persist_to_disk(&secrets, path).await {
+                tracing::warn!("持久化密钥到磁盘失败: {}", e);
+            }
+        }
 
+        Ok(())
+    }
+
+    /// 将密钥持久化到磁盘
+    ///
+    /// 使用 base64 编码的 JSON 格式存储密钥，提供基本的混淆保护。
+    async fn persist_to_disk(
+        secrets: &HashMap<String, Vec<u8>>,
+        path: &std::path::Path,
+    ) -> AuthResult<()> {
+        use base64::{engine::general_purpose::STANDARD, Engine};
+
+        // 将密钥转换为可序列化的格式（base64 编码）
+        let encoded: HashMap<&String, String> = secrets
+            .iter()
+            .map(|(k, v)| (k, STANDARD.encode(v)))
+            .collect();
+
+        // 序列化为 JSON
+        let json = serde_json::to_string(&encoded).map_err(|e| {
+            crate::error::AuthError::InternalError(format!("序列化密钥失败: {}", e))
+        })?;
+
+        // 确保父目录存在
+        if let Some(parent) = path.parent() {
+            tokio::fs::create_dir_all(parent).await.map_err(|e| {
+                crate::error::AuthError::InternalError(format!("创建目录失败: {}", e))
+            })?;
+        }
+
+        // 写入文件
+        tokio::fs::write(path, json).await.map_err(|e| {
+            crate::error::AuthError::InternalError(format!("写入文件失败: {}", e))
+        })?;
+
+        debug!("密钥已持久化到: {:?}", path);
+        Ok(())
+    }
+
+    /// 从磁盘加载密钥
+    ///
+    /// 从持久化存储中加载密钥到内存。
+    pub async fn load_from_disk(&self) -> AuthResult<()> {
+        use base64::{engine::general_purpose::STANDARD, Engine};
+
+        let path = match &self.storage_path {
+            Some(p) => p,
+            None => return Ok(()),
+        };
+
+        if !path.exists() {
+            debug!("密钥文件不存在，跳过加载: {:?}", path);
+            return Ok(());
+        }
+
+        // 读取文件
+        let json = tokio::fs::read_to_string(path).await.map_err(|e| {
+            crate::error::AuthError::InternalError(format!("读取文件失败: {}", e))
+        })?;
+
+        // 反序列化
+        let encoded: HashMap<String, String> = serde_json::from_str(&json).map_err(|e| {
+            crate::error::AuthError::InternalError(format!("反序列化密钥失败: {}", e))
+        })?;
+
+        // 解码并加载到内存
+        let mut secrets = self.secrets.write().await;
+        for (k, v) in encoded {
+            match STANDARD.decode(&v) {
+                Ok(decoded) => {
+                    secrets.insert(k, decoded);
+                }
+                Err(e) => {
+                    tracing::warn!("解码密钥失败 {}: {}", k, e);
+                }
+            }
+        }
+
+        info!("已从磁盘加载 {} 个密钥", secrets.len());
         Ok(())
     }
 

@@ -60,6 +60,12 @@ pub async fn register_checkpoint_methods(
                     .unwrap_or("")
                     .to_string();
 
+                let turn_id = params
+                    .get("turnId")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+
                 let message = params
                     .get("message")
                     .and_then(|v| v.as_str())
@@ -70,7 +76,7 @@ pub async fn register_checkpoint_methods(
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
 
-                let checkpoint = checkpoint_store.create_checkpoint(thread_id, commit_sha, message).await?;
+                let checkpoint = checkpoint_store.create_checkpoint(thread_id, turn_id, commit_sha, message).await?;
                 serde_json::to_value(checkpoint)
                     .map_err(|e| crate::error::ServerError::InternalError(e.to_string()))
             }
@@ -191,8 +197,13 @@ pub async fn register_checkpoint_methods(
                     .parse()
                     .map_err(|e| crate::error::ServerError::InvalidParams(format!("Invalid threadId: {}", e)))?;
 
+                let cwd = params
+                    .get("cwd")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or(".");
+
                 let git_ref = checkpoint_store
-                    .revert_to_checkpoint(thread_id, checkpoint_id.to_string())
+                    .revert_to_checkpoint(cwd, thread_id, checkpoint_id.to_string())
                     .await?;
                 Ok(serde_json::json!({ "gitRef": git_ref }))
             }

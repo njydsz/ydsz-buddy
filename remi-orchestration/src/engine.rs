@@ -583,7 +583,7 @@ impl OrchestrationEngine {
 
             // ==================== 线程命令 ====================
             OrchestrationCommand::ThreadCreate(c) => {
-                Ok(vec![OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                Ok(vec![OrchestrationEvent::ThreadCreated(Box::new(remi_core::events::ThreadCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id,
@@ -617,7 +617,7 @@ impl OrchestrationEngine {
                     sidechat_source_thread_id: c.sidechat_source_thread_id,
                     last_known_pr: c.last_known_pr,
                     handoff: c.handoff,
-                })])
+                }))])
             }
             OrchestrationCommand::ThreadDelete(c) => {
                 Ok(vec![OrchestrationEvent::ThreadDeleted(remi_core::events::ThreadDeletedEvent {
@@ -677,7 +677,7 @@ impl OrchestrationEngine {
                 let mut events = Vec::new();
                 
                 // 1. 创建线程事件（带 handoff 信息）
-                let created_event = OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                let created_event = OrchestrationEvent::ThreadCreated(Box::new(remi_core::events::ThreadCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id: command_id.clone(),
@@ -708,7 +708,7 @@ impl OrchestrationEngine {
                         target_branch: c.branch.clone().unwrap_or_default(),
                         created_at: now,
                     }),
-                });
+                }));
                 events.push(created_event);
                 
                 // 2. 为每条导入的消息生成 message-sent 事件
@@ -730,7 +730,7 @@ impl OrchestrationEngine {
                 let mut events = Vec::new();
                 
                 // 1. 创建线程事件（带 fork_source_thread_id）
-                let created_event = OrchestrationEvent::ThreadCreated(remi_core::events::ThreadCreatedEvent {
+                let created_event = OrchestrationEvent::ThreadCreated(Box::new(remi_core::events::ThreadCreatedEvent {
                     sequence: 0,
                     occurred_at: now,
                     command_id: command_id.clone(),
@@ -757,7 +757,7 @@ impl OrchestrationEngine {
                     sidechat_source_thread_id: c.sidechat_source_thread_id,
                     last_known_pr: None,
                     handoff: None,
-                });
+                }));
                 events.push(created_event);
                 
                 // 2. 为每条导入的消息生成 message-sent 事件
@@ -780,7 +780,7 @@ impl OrchestrationEngine {
                 // 1. 查询线程状态，判断是否需要排队
                 let thread = self.projection_repo.get_thread(c.thread_id)?;
                 let (should_queue, active_turn_id) = if let Some(ref t) = thread {
-                    let is_running = t.latest_turn.as_ref().map_or(false, |turn| {
+                    let is_running = t.latest_turn.as_ref().is_some_and(|turn| {
                         turn.status == remi_core::models::TurnStatus::Running
                     });
                     let active_id = t.latest_turn.as_ref().and_then(|turn| {

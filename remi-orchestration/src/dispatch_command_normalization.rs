@@ -75,11 +75,9 @@ impl DispatchCommandNormalizer {
         let mut applied = Vec::new();
 
         // 1. 强制 Normal 模式（如设置）
-        if opts.force_normal_dispatch {
-            if cmd.dispatch_mode != DispatchMode::Normal {
-                applied.push("force_normal_dispatch".to_string());
-                cmd.dispatch_mode = DispatchMode::Normal;
-            }
+        if opts.force_normal_dispatch && cmd.dispatch_mode != DispatchMode::Normal {
+            applied.push("force_normal_dispatch".to_string());
+            cmd.dispatch_mode = DispatchMode::Normal;
         }
 
         // 2. 消息长度校验
@@ -170,8 +168,10 @@ mod tests {
     fn force_normal_overrides_steer() {
         let n = DispatchCommandNormalizer::new();
         let cmd = make_cmd();
-        let mut opts = NormalizationOptions::default();
-        opts.force_normal_dispatch = true;
+        let opts = NormalizationOptions {
+            force_normal_dispatch: true,
+            ..Default::default()
+        };
         let result = n.normalize(cmd, &opts).unwrap();
         assert_eq!(result.command.dispatch_mode, DispatchMode::Normal);
     }
@@ -181,8 +181,10 @@ mod tests {
         let n = DispatchCommandNormalizer::new();
         let mut cmd = make_cmd();
         cmd.message_text = "a".repeat(200_000);
-        let mut opts = NormalizationOptions::default();
-        opts.max_message_length = 1000;
+        let opts = NormalizationOptions {
+            max_message_length: 1000,
+            ..Default::default()
+        };
         let result = n.normalize(cmd, &opts);
         assert!(result.is_err());
     }

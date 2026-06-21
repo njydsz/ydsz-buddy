@@ -177,14 +177,21 @@ impl ProviderCommandReactor {
                     let provider = thread.model_selection.provider;
                     let thread_id_str = e.thread_id.to_string();
 
+                    // 从线程消息中获取最近的用户消息
+                    let message = thread
+                        .messages
+                        .iter()
+                        .rev()
+                        .find(|m| m.role == remi_core::models::MessageRole::User)
+                        .map(|m| m.text.clone())
+                        .unwrap_or_default();
+
                     // 构建 TurnInput 并调用 Provider
-                    // 注意：事件中不包含用户消息内容，需要从事件存储获取最近的消息
-                    // 当前实现使用空消息占位，后续需要完善事件结构或从事件存储查询
                     let input = TurnInput {
                         thread_id: thread_id_str,
                         turn_id: e.turn_id,
                         provider,
-                        message: String::new(), // TODO: 从事件存储获取最近用户消息
+                        message,
                     };
 
                     match self.provider_service.send_turn(input).await {
@@ -358,7 +365,7 @@ impl CheckpointReactor {
 
                 match self
                     .checkpoint_store
-                    .revert_to_checkpoint(e.thread_id, e.checkpoint_id)
+                    .revert_to_checkpoint(".", e.thread_id, e.checkpoint_id)
                     .await
                 {
                     Ok(commit_sha) => {

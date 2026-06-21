@@ -149,7 +149,7 @@ impl ThreadRetentionJob {
 
         // 检查每个线程的活跃状态
         for thread in &snapshot.threads {
-            let thread_id = thread.id.clone();
+            let thread_id = thread.id;
             
             // 获取线程的最后活跃时间
             let last_active = thread.latest_user_message_at.unwrap_or(now);
@@ -169,7 +169,7 @@ impl ThreadRetentionJob {
                     // 删除线程
                     let delete_cmd = OrchestrationCommand::ThreadDelete(ThreadDeleteCommand {
                         command_id: None,
-                        thread_id: thread_id.clone(),
+                        thread_id,
                     });
                     
                     if let Err(e) = orchestration.dispatch(delete_cmd).await {
@@ -197,7 +197,30 @@ impl ThreadRetentionJob {
             );
             
             // 按最后活跃时间排序,清理最旧的线程
-            // TODO: 实现按活跃时间排序并清理
+            let mut threads_sorted = snapshot.threads.clone();
+            threads_sorted.sort_by(|a, b| {
+                let a_time = a.latest_user_message_at.unwrap_or(now);
+                let b_time = b.latest_user_message_at.unwrap_or(now);
+                a_time.cmp(&b_time)
+            });
+            
+            // 清理最旧的 excess 个线程
+            for thread in threads_sorted.iter().take(excess) {
+                if config.auto_cleanup {
+                    info!("清理超龄线程: {} (超出数量限制)", thread.id);
+                    
+                    let delete_cmd = OrchestrationCommand::ThreadDelete(ThreadDeleteCommand {
+                        command_id: None,
+                        thread_id: thread.id,
+                    });
+                    
+                    if let Err(e) = orchestration.dispatch(delete_cmd).await {
+                        warn!("删除线程 {} 失败: {}", thread.id, e);
+                    } else {
+                        cleaned_count += 1;
+                    }
+                }
+            }
         }
 
         if cleaned_count > 0 {
