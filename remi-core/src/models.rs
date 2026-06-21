@@ -833,10 +833,12 @@ pub enum SessionStatus {
 /// [`RuntimeMode::from_legacy`] 映射到新的 Work/Code 维度。
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum RuntimeMode {
     /// 工作模式：Office / 批量 / 调度 / 浏览器自动化
     Work,
     /// 代码模式：Provider / 终端 / Git（默认）
+    #[default]
     Code,
 }
 
@@ -851,11 +853,6 @@ impl<'de> Deserialize<'de> for RuntimeMode {
     }
 }
 
-impl Default for RuntimeMode {
-    fn default() -> Self {
-        Self::Code
-    }
-}
 
 impl RuntimeMode {
     /// 从旧版 `agent/ask/plan` 字符串映射到新版 `work/code` 维度。
@@ -908,12 +905,14 @@ impl RuntimeMode {
 /// - [`Task`](InteractionMode::Task) - 一次性任务模式，类似 Work 域的 Skill 执行
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum InteractionMode {
     /// 普通对话模式
     Chat,
     /// 规划模式
     Plan,
     /// 自主执行模式（默认）
+    #[default]
     Agent,
     /// 代码审查模式
     Review,
@@ -932,11 +931,6 @@ impl<'de> Deserialize<'de> for InteractionMode {
     }
 }
 
-impl Default for InteractionMode {
-    fn default() -> Self {
-        Self::Agent
-    }
-}
 
 impl InteractionMode {
     /// 从旧版 `chat/review` 字符串映射到新版 5 态。

@@ -148,10 +148,12 @@ pub struct AcpJsonRpcConnection {
     pending: Arc<Mutex<HashMap<u64, oneshot::Sender<AcpJsonRpcResponse>>>>,
     state: Arc<Mutex<ConnectionState>>,
     /// 收到通知时回调（外部用）
-    notification_handler: Arc<Mutex<Option<Box<dyn Fn(AcpJsonRpcNotification) + Send + Sync>>>>,
+    notification_handler: Arc<Mutex<NotificationHandler>>,
     /// 退出通知
     closed_notify: Arc<Notify>,
 }
+
+type NotificationHandler = Option<Box<dyn Fn(AcpJsonRpcNotification) + Send + Sync>>;
 
 impl AcpJsonRpcConnection {
     pub fn new(config: AcpConnectionConfig) -> Self {

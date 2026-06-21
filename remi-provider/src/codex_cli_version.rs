@@ -90,7 +90,7 @@ pub fn parse(raw: &str) -> CodexVersion {
     let mut major = None;
     let mut minor = None;
     let mut patch = None;
-    let pre_release;
+    
     let mut build = None;
 
     // 提取第一段版本号：`v?MAJOR(.MINOR(.PATCH)?)?(-PRERELEASE)?`
@@ -125,7 +125,7 @@ pub fn parse(raw: &str) -> CodexVersion {
         patch = p.parse().ok();
     }
 
-    pre_release = pre_part;
+    let pre_release = pre_part;
 
     // 提取 build 号：`(commit abc)` 或 `(abc1234)`
     if let Some(start) = first_line.find('(') {

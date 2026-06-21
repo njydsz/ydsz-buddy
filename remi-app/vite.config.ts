@@ -1,6 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
-import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import babel from "@rolldown/plugin-babel";
+import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 import pkg from "./package.json" with { type: "json" };
@@ -20,10 +19,6 @@ export default defineConfig({
   plugins: [
     tanstackRouter(),
     react(),
-    babel({
-      parserOpts: { plugins: ["typescript", "jsx"] },
-      presets: [reactCompilerPreset()],
-    }),
     tailwindcss(),
   ],
   optimizeDeps: {
@@ -41,8 +36,8 @@ export default defineConfig({
   resolve: {
     conditions: ["module", "browser", "development", "import", "default"],
     alias: [
-      // Project root alias used by source files (string form works in all Vite versions)
-      { find: "~", replacement: path.resolve(__dirname, "src") },
+      // Project root alias used by source files
+      { find: /^~\/(.*)$/, replacement: path.resolve(__dirname, "src").replace(/\\/g, "/") + "/$1" },
       // @remi-claw workspace packages → local src/shared/ files
       { find: "@remi-claw/contracts", replacement: path.resolve(__dirname, "src/contracts/index.ts") },
       { find: "@remi-claw/shared/model", replacement: path.resolve(__dirname, "src/shared/model.ts") },

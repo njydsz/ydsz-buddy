@@ -114,8 +114,6 @@ pub mod discovery;
 /// 提供 Provider 会话的持久化存储管理功能。
 pub mod session_directory;
 
-/// === Sprint 2-A Provider 深度 ===
-
 /// Provider 状态缓存层（带 TTL）
 pub mod status_cache;
 

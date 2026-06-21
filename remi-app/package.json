@@ -60,6 +60,9 @@
     "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.11"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "msgpackr-extract", "msw"]
+  },
   "devDependencies": {
     "@rolldown/plugin-babel": "^0.2.0",
     "@tailwindcss/vite": "^4.0.0",

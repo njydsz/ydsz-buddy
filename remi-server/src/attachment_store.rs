@@ -174,6 +174,7 @@ impl AttachmentStore {
     /// - `thread_id`: 可选 thread_id
     /// - `message_id`: 可选 message_id
     /// - `user_id`: 可选 user_id
+    #[allow(clippy::too_many_arguments)]
     pub fn write(
         &self,
         original_name: &str,

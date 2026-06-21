@@ -82,8 +82,10 @@ pub async fn run_round(
     cache: &StatusCache<CachedProviderStatus>,
     providers: &[ProviderKind],
 ) -> MaintenanceReport {
-    let mut report = MaintenanceReport::default();
-    report.checked = providers.len();
+    let mut report = MaintenanceReport {
+        checked: providers.len(),
+        ..Default::default()
+    };
 
     for provider in providers {
         match health.check_health(*provider).await {

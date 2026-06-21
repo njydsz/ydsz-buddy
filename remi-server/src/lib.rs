@@ -85,6 +85,7 @@ pub mod atomic_write;
 pub mod provider_usage_snapshot;
 /// 浏览器/编辑器启动服务模块
 pub mod open;
+/// 协议兼容转换模块
 
 pub use error::*;
 pub use push_channels::*;

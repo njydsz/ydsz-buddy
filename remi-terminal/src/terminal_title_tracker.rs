@@ -1,4 +1,4 @@
-﻿//! 终端标题追踪模块
+//! 终端标题追踪模块
 //!
 //! 本模块提供终端会话标题/描述的追踪功能，支持从终端输出内容中
 //! 自动推断标题（如识别运行中的命令），也支持手动设置标题。
@@ -161,9 +161,9 @@ impl TerminalTitleTracker {
             }
 
             for (prefix, title) in patterns {
-                if trimmed.starts_with(prefix) {
+                if let Some(rest) = trimmed.strip_prefix(prefix) {
                     // 尝试提取更多上下文：命令后的参数
-                    let rest = trimmed[prefix.len()..].trim();
+                    let rest = rest.trim();
                     if rest.is_empty() {
                         return Some(title.to_string());
                     }

@@ -438,7 +438,7 @@ mod test {
     #[test]
     fn activity_payload_serialization() {
         // 验证 ActivityPayload 判别联合序列化
-        use crate::models::{ActivityPayload, FileChangeEntry};
+        use crate::models::ActivityPayload;
         
         let payload = ActivityPayload::ToolCall {
             tool_name: "read_file".to_string(),

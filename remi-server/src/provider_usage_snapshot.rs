@@ -208,7 +208,7 @@ fn list_recent_files(paths: Vec<PathBuf>) -> Vec<PathBuf> {
         })
         .collect();
 
-    files_with_mtime.sort_by(|a, b| b.1.cmp(&a.1));
+    files_with_mtime.sort_by_key(|(_, mtime)| std::cmp::Reverse(*mtime));
     files_with_mtime.truncate(MAX_RECENT_USAGE_FILES);
 
     files_with_mtime.into_iter().map(|(p, _)| p).collect()

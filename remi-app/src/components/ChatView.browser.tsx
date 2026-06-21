@@ -42,6 +42,7 @@ import { setupWorker } from "msw/browser";
 import { page } from "@vitest/browser/context";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
+import "@vitest/browser/matchers";
 
 import { type ComposerImageAttachment, useComposerDraftStore } from "../composerDraftStore";
 import {

@@ -22,6 +22,7 @@ import { type ModelSlug, type ProviderKind, type ServerProviderStatus } from "~/
 import { page } from "@vitest/browser/context";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
+import "@vitest/browser/matchers";
 
 import { ProviderModelPicker } from "./ProviderModelPicker";
 import type { ProviderModelOption } from "../../providerModelOptions";
