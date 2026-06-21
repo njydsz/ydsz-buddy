@@ -43,9 +43,11 @@ pub mod core;
 pub mod error;
 pub mod github_cli;
 pub mod manager;
+pub mod text_generation;
 
 pub use broadcaster::*;
 pub use core::*;
 pub use error::*;
 pub use github_cli::*;
 pub use manager::*;
+pub use text_generation::*;

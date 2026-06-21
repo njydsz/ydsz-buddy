@@ -76,6 +76,7 @@ import { isDesktop } from "../env";
 import { APP_VERSION } from "../branding";
 import { showConfirmDialogFallback } from "../confirmDialogFallback";
 import { isMacPlatform, newCommandId, newProjectId, newThreadId, randomUUID } from "../lib/utils";
+import { WindowCaptionButtons } from "./WindowCaptionButtons";
 import { persistAppStateNow, useStore } from "../store";
 import { getThreadFromState, getThreadsFromState } from "../threadDerivation";
 import {
@@ -1733,13 +1734,10 @@ export default function Sidebar() {
         return;
       }
 
-      // homeDir may not be available yet when switching back from workspace mode
+      // homeDir may not be available yet when switching back from workspace mode.
+      // Navigate to the chat index so it can wait for homeDir and bootstrap a chat.
       if (!homeDir) {
-        toastManager.add({
-          type: "warning",
-          title: "Home folder not ready",
-          description: "Please wait for the home directory to be resolved.",
-        });
+        void navigate({ to: "/" });
         return;
       }
 
@@ -5290,13 +5288,13 @@ export default function Sidebar() {
     <Tooltip>
       <TooltipTrigger
         render={
-          <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui">
-            <div className="flex min-w-0 items-center gap-1">
-              <RemiCodeWordmark />
-              <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
+            <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 font-system-ui [-webkit-app-region:no-drag]">
+              <div className="flex min-w-0 items-center gap-1">
+                <RemiCodeWordmark />
+                <span className="truncate text-[14px] font-semibold text-foreground/89">Code</span>
+              </div>
             </div>
-          </div>
-        }
+          }
       />
       <TooltipPopup side="bottom" sideOffset={2}>
         Version {APP_VERSION}
@@ -5332,8 +5330,6 @@ export default function Sidebar() {
     </div>
   );
 
-  const sidebarBrand = <div className="flex min-w-0 px-4 pt-0 pb-2">{brandWordmark}</div>;
-
   return (
     <>
       {isDesktop ? (
@@ -5341,10 +5337,13 @@ export default function Sidebar() {
           <SidebarHeader
             className={cn(
               "drag-region h-[44px] flex-row items-center gap-2 px-4 py-0 font-system-ui",
-              appSettings.sidebarSide === "left" && "pl-[90px]",
+              appSettings.sidebarSide === "left" && isMacPlatform(navigator.platform) && "pl-[90px]",
             )}
           >
+            {brandWordmark}
             {titlebarControls}
+            <div className="min-w-0 flex-1" />
+            <WindowCaptionButtons />
           </SidebarHeader>
         </>
       ) : (
@@ -5386,7 +5385,7 @@ export default function Sidebar() {
                 <SidebarMenuButton
                   size="default"
                   className="h-8 gap-2.5 rounded-lg px-2 text-(length:--app-font-size-ui,12px) font-normal text-muted-foreground/79 hover:bg-(--sidebar-accent) hover:text-foreground"
-                  onClick={() => handleSidebarViewChange("threads")}
+                  onClick={() => navigate({ to: "/" })}
                 >
                   <ArrowLeftIcon className="size-[15px]" />
                   <span>{messages.settings.backToApp}</span>
@@ -5456,7 +5455,6 @@ export default function Sidebar() {
           </SidebarGroup>
         ) : (
           <>
-            {isDesktop ? sidebarBrand : null}
             <SidebarSegmentedPicker
               activeView={isOnWorkspace ? "workspace" : "threads"}
               onSelectView={handleSidebarViewChange}

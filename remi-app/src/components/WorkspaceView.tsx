@@ -192,6 +192,9 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
   );
 
   const createWorkspaceTerminal = useCallback(() => {
+    if (!homeDir) {
+      return;
+    }
     if (!terminalState.terminalOpen) {
       restoreTerminalWorkspace();
       return;
@@ -199,7 +202,7 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
     const terminalId = randomTerminalId();
     newTerminal(threadId, terminalId);
     setFocusRequestId((value) => value + 1);
-  }, [newTerminal, restoreTerminalWorkspace, terminalState.terminalOpen, threadId]);
+  }, [homeDir, newTerminal, restoreTerminalWorkspace, terminalState.terminalOpen, threadId]);
 
   const splitWorkspaceTerminalRight = useCallback(() => {
     const terminalId = randomTerminalId();
@@ -443,6 +446,8 @@ export default function WorkspaceView({ workspaceId }: { workspaceId: string }) 
                 variant="outline"
                 className="gap-1.5"
                 onClick={createWorkspaceTerminal}
+                disabled={!homeDir}
+                title={homeDir ? "New terminal" : "Waiting for home directory"}
               >
                 <Plus className="size-3" />
                 <span className="hidden sm:inline">Terminal</span>

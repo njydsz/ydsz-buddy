@@ -7,6 +7,8 @@
 
 import { useDeferredValue } from "react";
 import { SearchIcon } from "~/lib/icons";
+import { cn } from "~/lib/utils";
+import { isDesktop } from "~/env";
 import { SidebarInset } from "./ui/sidebar";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
 import { WindowCaptionButtons } from "./WindowCaptionButtons";
@@ -30,7 +32,12 @@ export function PluginsView() {
   return (
     <SidebarInset className="h-dvh min-h-0 overflow-hidden isolate">
       <div className="flex h-full flex-col">
-        <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 sm:px-6">
+        <div
+          className={cn(
+            "flex shrink-0 items-center gap-3 border-b border-border px-4 sm:px-6",
+            isDesktop && "h-[44px]",
+          )}
+        >
           <SidebarHeaderNavigationControls />
           <div className="flex-1" />
           <ProviderDiscoveryToolbar

@@ -35,9 +35,13 @@ import type {
   ModelSelection,
 } from '~/contracts';
 import { WsTransport } from '../wsTransport';
+import { isTauri } from '~/env';
 
 /** 全局 WebSocket 传输实例 */
 let wsTransport: WsTransport | null = null;
+
+/** 已解析的嵌入式 WebSocket 服务器 URL（仅用于同步消费方） */
+let cachedServerWsUrl: string | null = null;
 
 /**
  * 获取或创建 WebSocket 传输实例
@@ -69,6 +73,10 @@ async function getWsTransport(): Promise<WsTransport> {
  * @returns 同步取消监听函数
  */
 function syncListen<T>(event: string, handler: (event: { payload: T }) => void): () => void {
+  if (!isTauri) {
+    return () => {};
+  }
+
   let unlisten: UnlistenFn | null = null;
   const unlistenPromise = listen<T>(event, handler).then((fn) => {
     unlisten = fn;
@@ -110,13 +118,41 @@ function syncListen<T>(event: string, handler: (event: { payload: T }) => void):
  */
 export const tauriBridge = {
   /**
-   * 获取 WebSocket 服务器 URL
+   * 获取 WebSocket 服务器 URL（异步）
    *
-   * @returns WS URL 字符串，如果未配置则返回 null
+   * 在 Tauri 桌面模式下通过 `invoke('get_server_ws_url')` 拿到嵌入式 remi-server
+   * 的真实监听地址（含操作系统分配的随机端口）。非 Tauri 环境下回退到
+   * `VITE_WS_URL` 环境变量。
+   *
+   * 调用成功后会将结果缓存到 `cachedServerWsUrl`，以便同步消费方
+   * （如 `resolveServerHttpOrigin` / `resolveWsHttpUrl`）读取。
    */
-  getWsUrl: () => {
-    return import.meta.env.VITE_WS_URL || null;
+  getWsUrl: async (): Promise<string | null> => {
+    if (cachedServerWsUrl) return cachedServerWsUrl;
+    try {
+      const url = await invoke<string>("get_server_ws_url");
+      if (url && url.length > 0) {
+        cachedServerWsUrl = url;
+        return url;
+      }
+    } catch (error) {
+      console.warn("Failed to resolve embedded WebSocket URL from Tauri", error);
+    }
+    const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
+    if (envUrl && envUrl.length > 0) {
+      cachedServerWsUrl = envUrl;
+      return envUrl;
+    }
+    return null;
   },
+
+  /**
+   * 获取已缓存的 WebSocket 服务器 URL（同步）
+   *
+   * 仅返回已经通过 {@link tauriBridge.getWsUrl} 异步解析过的值。
+   * 应用启动时应先调用 `getWsUrl()` 完成预热，使同步消费方拿到正确地址。
+   */
+  getCachedWsUrl: (): string | null => cachedServerWsUrl,
 
   /**
    * 打开文件夹选择对话框
@@ -817,8 +853,8 @@ export const tauriBridge = {
    * 事件监听
    */
   events: {
-    onThreadUpdated: (callback: (thread: Thread) => void) => {
-      return syncListen<Thread>('thread-updated', (event) => {
+    onThreadUpdated: (callback: (thread: OrchestrationThread) => void) => {
+      return syncListen<OrchestrationThread>('thread-updated', (event) => {
         callback(event.payload);
       });
     },
@@ -829,8 +865,8 @@ export const tauriBridge = {
       });
     },
 
-    onMessage: (callback: (message: Message) => void) => {
-      return syncListen<Message>('message-received', (event) => {
+    onMessage: (callback: (message: OrchestrationMessage) => void) => {
+      return syncListen<OrchestrationMessage>('message-received', (event) => {
         callback(event.payload);
       });
     },

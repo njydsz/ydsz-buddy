@@ -21,6 +21,7 @@ import {
 import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from "effect";
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";
+import { tauriBridge } from "./lib/tauri-bridge";
 
 type PushListener<C extends WsPushChannel> = (message: WsPushMessage<C>) => void;
 
@@ -45,7 +46,7 @@ function resolveRpcUrl(rawUrl: string): string {
 
 function makeSocketUrl(explicitUrl: string | null): string {
   if (explicitUrl) return resolveRpcUrl(explicitUrl);
-  const bridgeUrl = window.desktopBridge?.getWsUrl();
+  const bridgeUrl = window.desktopBridge?.getWsUrl() ?? tauriBridge.getCachedWsUrl?.();
   const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const rawUrl =
     bridgeUrl && bridgeUrl.length > 0

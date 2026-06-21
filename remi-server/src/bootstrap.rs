@@ -322,15 +322,15 @@ pub async fn bootstrap_embedded(config: &ServerConfig) -> Result<BootstrapResult
 
 /// 启动 WebSocket 服务器
 ///
-/// 阻塞直到服务器关闭
+/// 阻塞直到服务器关闭。当 `addr` 端口为 `0` 时，会使用操作系统分配的随机端口。
 pub async fn start_server(
     addr: SocketAddr,
     rpc_router: Arc<RpcRouter>,
 ) -> Result<()> {
     let server = WebSocketServer::new(addr, rpc_router);
-    info!("WebSocket 服务器启动中: {}", addr);
-    server.start().await?;
-    Ok(())
+    let (actual_addr, serve) = server.start().await?;
+    info!("WebSocket 服务器已启动，监听地址: {}", actual_addr);
+    serve.await.map_err(anyhow::Error::from)
 }
 
 /// 关闭所有 Reactor

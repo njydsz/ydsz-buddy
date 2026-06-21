@@ -52,7 +52,7 @@ use commands::{
 use std::net::SocketAddr;
 use std::sync::Arc;
 use remi_config::ServerConfig;
-use remi_server::{bootstrap_embedded, start_server, BootstrapResult};
+use remi_server::{bootstrap_embedded, BootstrapResult, WebSocketServer};
 use tracing::{info, error};
 use tauri::Emitter;
 
@@ -148,13 +148,15 @@ pub fn run() {
     let bootstrap_result = runtime.block_on(bootstrap_embedded(&config))
         .expect("Failed to bootstrap embedded server");
 
-    let server_addr = bootstrap_result.server_addr;
+    // 在后台启动 WebSocket 服务器，并获取实际分配的监听地址
+    let rpc_router = bootstrap_result.rpc_router.clone();
+    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router);
+    let (server_addr, serve) = runtime.block_on(server.start())
+        .expect("Failed to start embedded WebSocket server");
     info!("嵌入式服务器地址: {}", server_addr);
 
-    // 在后台启动 WebSocket 服务器
-    let rpc_router = bootstrap_result.rpc_router.clone();
     runtime.spawn(async move {
-        if let Err(e) = start_server(server_addr, rpc_router).await {
+        if let Err(e) = serve.await {
             error!("WebSocket 服务器错误: {}", e);
         }
     });

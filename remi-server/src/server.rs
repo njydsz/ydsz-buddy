@@ -17,6 +17,7 @@
 //! 3. 启动发送和接收两个异步任务，分别处理出站和入站消息
 //! 4. 任一任务结束时，移除连接并清理资源
 
+use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -83,10 +84,15 @@ impl WebSocketServer {
     /// 绑定 TCP 监听器并启动 Axum HTTP 服务器，阻塞直到服务器关闭。
     /// 配置了 CORS 中间件允许所有来源的跨域请求。
     ///
+    /// 当传入地址的端口为 `0` 时，会由操作系统分配随机端口，返回值中的
+    /// `SocketAddr` 为实际监听的地址（包含真实端口）。
+    ///
     /// # 错误
     ///
     /// 当 TCP 绑定或服务器运行发生 IO 错误时返回 [`ServerError::IoError`]
-    pub async fn start(&self) -> ServerResult<()> {
+    pub async fn start(
+        &self,
+    ) -> ServerResult<(SocketAddr, impl Future<Output = ServerResult<()>> + Send + 'static)> {
         info!("启动 WebSocket 服务器: {}", self.addr);
 
         let cors = CorsLayer::new()
@@ -104,13 +110,15 @@ impl WebSocketServer {
             .await
             .map_err(ServerError::IoError)?;
 
-        info!("WebSocket 服务器已启动，监听地址: {}", self.addr);
+        let actual_addr = listener.local_addr().map_err(ServerError::IoError)?;
 
-        axum::serve(listener, app)
-            .await
-            .map_err(ServerError::IoError)?;
+        let serve = async move {
+            axum::serve(listener, app)
+                .await
+                .map_err(ServerError::IoError)
+        };
 
-        Ok(())
+        Ok((actual_addr, serve))
     }
 
     /// 获取 WebSocket 管理器引用

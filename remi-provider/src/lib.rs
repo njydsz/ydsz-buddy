@@ -94,6 +94,21 @@ pub mod service;
 /// 提供与 ACP 协议兼容的 Provider 集成能力，支持 Cursor、Grok 等 ACP 客户端。
 pub mod acp;
 
+/// Provider 事件日志模块
+///
+/// 提供 Provider 会话事件的持久化日志功能，将事件记录为 NDJSON 格式。
+pub mod event_logger;
+
+/// Provider 发现服务模块
+///
+/// 提供 Provider 能力发现功能，允许动态查询 Provider 支持的功能特性。
+pub mod discovery;
+
+/// Provider 会话目录模块
+///
+/// 提供 Provider 会话的持久化存储管理功能。
+pub mod session_directory;
+
 // 重新导出所有公共 API，方便外部使用
 pub use adapter::*;
 pub use error::*;
@@ -102,3 +117,6 @@ pub use jsonrpc_client::*;
 pub use reaper::*;
 pub use service::*;
 pub use acp::*;
+pub use event_logger::*;
+pub use discovery::*;
+pub use session_directory::*;

@@ -2229,6 +2229,145 @@ impl GitCore {
             branch
         )))
     }
+
+    /// 检测目录是否为 Git 仓库
+    ///
+    /// 通过尝试执行 `git rev-parse --git-dir` 来判断指定目录是否为有效的 Git 仓库。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 要检测的目录路径
+    ///
+    /// # 返回值
+    ///
+    /// - `true`: 目录是 Git 仓库
+    /// - `false`: 目录不是 Git 仓库或命令执行失败
+    pub async fn is_repo(&self, cwd: &str) -> bool {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --git-dir".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "rev-parse".to_string(),
+                    "--git-dir".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await;
+
+        match result {
+            Ok(output) => output.code == 0,
+            Err(_) => false,
+        }
+    }
+
+    /// 获取仓库根目录
+    ///
+    /// 返回当前仓库的顶级目录（即 `.git` 所在目录）。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库内任意目录路径
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(String)`: 仓库根目录的绝对路径
+    /// - `Err(GitError)`: 不是 Git 仓库或命令失败
+    pub async fn get_repo_root(&self, cwd: &str) -> GitResult<String> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --show-toplevel".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "rev-parse".to_string(),
+                    "--show-toplevel".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: false,
+                timeout_ms: None,
+            })
+            .await?;
+
+        Ok(result.stdout.trim().to_string())
+    }
+
+    /// 检查是否为子模块
+    ///
+    /// 检测当前仓库是否为另一个仓库的子模块。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    ///
+    /// # 返回值
+    ///
+    /// - `true`: 是子模块
+    /// - `false`: 不是子模块
+    pub async fn is_submodule(&self, cwd: &str) -> bool {
+        // 检查是否存在 .git 文件（子模块使用 .git 文件而非目录）
+        let git_file = std::path::Path::new(cwd).join(".git");
+        if git_file.is_file() {
+            return true;
+        }
+
+        // 备选方案：尝试获取 superproject 信息
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "rev-parse --show-superproject-working-tree".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "rev-parse".to_string(),
+                    "--show-superproject-working-tree".to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await;
+
+        match result {
+            Ok(output) => !output.stdout.trim().is_empty(),
+            Err(_) => false,
+        }
+    }
+
+    /// 获取远程 URL
+    ///
+    /// 获取指定远程仓库的 URL。
+    ///
+    /// # 参数
+    ///
+    /// - `cwd`: 仓库工作目录
+    /// - `remote_name`: 远程仓库名称（如 "origin"）
+    ///
+    /// # 返回值
+    ///
+    /// - `Ok(Option<String>)`: 远程 URL，如果远程不存在则返回 None
+    /// - `Err(GitError)`: 命令执行失败
+    pub async fn get_remote_url(&self, cwd: &str, remote_name: &str) -> GitResult<Option<String>> {
+        let result = self
+            .execute(ExecuteGitInput {
+                operation: "remote get-url".to_string(),
+                cwd: cwd.to_string(),
+                args: vec![
+                    "remote".to_string(),
+                    "get-url".to_string(),
+                    remote_name.to_string(),
+                ],
+                env: vec![],
+                allow_non_zero_exit: true,
+                timeout_ms: None,
+            })
+            .await?;
+
+        if result.code == 0 && !result.stdout.trim().is_empty() {
+            Ok(Some(result.stdout.trim().to_string()))
+        } else {
+            Ok(None)
+        }
+    }
 }
 
 impl Default for GitCore {

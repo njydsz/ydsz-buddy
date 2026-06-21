@@ -343,18 +343,10 @@ input {
   font-family: var(--font-mono-family);
 }
 
-/* Window drag region (frameless titlebar) */
-.drag-region {
-  -webkit-app-region: drag;
-}
-
-.drag-region button,
-.drag-region input,
-.drag-region textarea,
-.drag-region select,
-.drag-region a {
-  -webkit-app-region: no-drag;
-}
+/* Window drag region (frameless titlebar)
+   Dragging and double-click-to-maximize are now handled programmatically
+   in main.tsx so we can distinguish single clicks (drag) from double
+   clicks (toggle maximize) on the custom titlebar. */
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {

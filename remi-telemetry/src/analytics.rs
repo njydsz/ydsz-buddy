@@ -32,15 +32,17 @@
 //! 读写操作通过读写锁互斥，保证数据一致性。
 
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use remi_core::models::ThreadId;
 use serde::{Deserialize, Serialize};
+use tokio::fs;
 use tokio::sync::RwLock;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
-use crate::error::TelemetryResult;
+use crate::error::{TelemetryError, TelemetryResult};
 
 /// # 事件类型枚举
 ///
@@ -251,6 +253,8 @@ pub struct AnalyticsService {
     /// 使用统计快照，根据事件类型自动增量更新。
     /// 通过 `Arc<RwLock<_>>` 保护，支持异步并发安全访问。
     stats: Arc<RwLock<UsageStats>>,
+    /// 事件持久化文件路径（NDJSON 格式）。为 `None` 时仅在内存中存储。
+    persistence_path: Option<PathBuf>,
 }
 
 impl AnalyticsService {
@@ -271,6 +275,115 @@ impl AnalyticsService {
         Self {
             events: Arc::new(RwLock::new(Vec::new())),
             stats: Arc::new(RwLock::new(UsageStats::default())),
+            persistence_path: None,
+        }
+    }
+
+    /// # 创建带持久化的分析服务实例
+    ///
+    /// 初始化一个 [`AnalyticsService`]，事件将同时持久化到指定的 NDJSON 文件。
+    ///
+    /// ## 参数
+    ///
+    /// - `path`: `impl AsRef<Path>` —— 事件持久化文件路径。
+    ///
+    /// ## 返回值
+    ///
+    /// - `Ok(Self)`：服务实例创建成功。
+    /// - `Err(TelemetryError)`：文件路径无效或无法访问。
+    pub async fn with_persistence(path: impl AsRef<Path>) -> TelemetryResult<Self> {
+        let path = path.as_ref().to_path_buf();
+        
+        // 确保父目录存在
+        if let Some(parent) = path.parent() {
+            if !parent.as_os_str().is_empty() {
+                fs::create_dir_all(parent).await.map_err(|e| {
+                    TelemetryError::IoError(std::io::Error::new(
+                        e.kind(),
+                        format!("创建持久化目录失败: {}", e),
+                    ))
+                })?;
+            }
+        }
+
+        let service = Self {
+            events: Arc::new(RwLock::new(Vec::new())),
+            stats: Arc::new(RwLock::new(UsageStats::default())),
+            persistence_path: Some(path),
+        };
+
+        // 从文件加载已存在的事件
+        service.load_events_from_file().await?;
+
+        Ok(service)
+    }
+
+    /// # 从持久化文件加载事件
+    ///
+    /// 从 NDJSON 文件中读取已持久化的事件，恢复到内存中。
+    async fn load_events_from_file(&self) -> TelemetryResult<()> {
+        let path = match &self.persistence_path {
+            Some(p) => p,
+            None => return Ok(()),
+        };
+
+        if !path.exists() {
+            return Ok(());
+        }
+
+        let content = fs::read_to_string(path).await.map_err(|e| {
+            TelemetryError::IoError(std::io::Error::new(
+                e.kind(),
+                format!("读取持久化文件失败: {}", e),
+            ))
+        })?;
+
+        let mut events = self.events.write().await;
+        let mut stats = self.stats.write().await;
+
+        for line in content.lines() {
+            if line.trim().is_empty() {
+                continue;
+            }
+
+            match serde_json::from_str::<AnalyticsEvent>(line) {
+                Ok(event) => {
+                    // 更新统计
+                    Self::update_stats_for_event(&mut stats, &event);
+                    events.push(event);
+                }
+                Err(e) => {
+                    warn!("解析持久化事件失败: {}", e);
+                }
+            }
+        }
+
+        info!("从持久化文件加载了 {} 个事件", events.len());
+        Ok(())
+    }
+
+    /// # 更新事件统计
+    fn update_stats_for_event(stats: &mut UsageStats, event: &AnalyticsEvent) {
+        match event.event_type {
+            AnalyticsEventType::ThreadCreated => {
+                stats.total_threads += 1;
+            }
+            AnalyticsEventType::TurnStarted | AnalyticsEventType::TurnCompleted => {
+                stats.total_turns += 1;
+            }
+            AnalyticsEventType::ProviderInvoked => {
+                stats.total_provider_calls += 1;
+                if let Some(provider) = &event.provider {
+                    *stats.by_provider.entry(provider.clone()).or_insert(0) += 1;
+                }
+                if let Some(model) = &event.model {
+                    *stats.by_model.entry(model.clone()).or_insert(0) += 1;
+                }
+            }
+            AnalyticsEventType::CheckpointCreated => {
+                stats.total_checkpoints += 1;
+            }
+            _ => {}
         }
     }
 
@@ -346,6 +459,50 @@ impl AnalyticsService {
                 _ => {}
             }
         }
+
+        // 持久化到 NDJSON 文件
+        if let Some(path) = &self.persistence_path {
+            if let Err(e) = self.persist_event_to_file(path, &event).await {
+                warn!("持久化事件失败: {}", e);
+            }
+        }
+
+        Ok(())
+    }
+
+    /// # 持久化单个事件到文件
+    ///
+    /// 将事件以 NDJSON 格式追加写入到持久化文件。
+    async fn persist_event_to_file(&self, path: &Path, event: &AnalyticsEvent) -> TelemetryResult<()> {
+        let json_line = serde_json::to_string(event).map_err(|e| {
+            TelemetryError::SerializationError(format!("序列化事件失败: {}", e))
+        })?;
+
+        let mut file = tokio::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .await
+            .map_err(|e| {
+                TelemetryError::IoError(std::io::Error::new(
+                    e.kind(),
+                    format!("打开持久化文件失败: {}", e),
+                ))
+            })?;
+
+        use tokio::io::AsyncWriteExt;
+        file.write_all(json_line.as_bytes()).await.map_err(|e| {
+            TelemetryError::IoError(std::io::Error::new(
+                e.kind(),
+                format!("写入持久化文件失败: {}", e),
+            ))
+        })?;
+        file.write_all(b"\n").await.map_err(|e| {
+            TelemetryError::IoError(std::io::Error::new(
+                e.kind(),
+                format!("写入换行符失败: {}", e),
+            ))
+        })?;
 
         Ok(())
     }

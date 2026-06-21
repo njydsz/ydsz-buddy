@@ -12,6 +12,7 @@ import { resolveRestorableThreadRoute } from "../chatRouteRestore";
 import { useHandleNewChat } from "../hooks/useHandleNewChat";
 import { useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
+import { useWorkspaceStore } from "../workspaceStore";
 
 /**
  * 閼卞﹤銇夌槐銏犵穿鐠侯垳鏁辩憴鍡楁禈缂佸嫪娆? * @description 鎼存梻鏁ら崥顖氬З閺冨墎娈戦崗銉ュ經鐠侯垳鏁遍敍宀冪鐠愶絾浠径宥勭瑐濞嗭紕娈戦懕濠傘亯娴兼俺鐦介幋鏍у灡瀵ょ儤鏌婃导姘崇樈
@@ -24,6 +25,8 @@ function ChatIndexRouteView() {
   const threadsHydrated = useStore((store) => store.threadsHydrated);
   /** 閹碘偓閺堝褰查悽銊ф畱缁捐法鈻?ID 閸掓銆?*/
   const threadIds = useStore((state) => state.threadIds ?? []);
+  /** Whether the home directory has been resolved. */
+  const homeDir = useWorkspaceStore((state) => state.homeDir);
   /** 閸掑棗澹婄憴鍡楁禈閺佺増宓侀弰顖氭儊瀹稿弶鎸夐崥?*/
   const splitViewsHydrated = useSplitViewStore((state) => state.hasHydrated);
   /** 閹碘偓閺堝鍨庨崜鑼额潒閸ュ墽娈戦弰鐘茬殸鐞?*/
@@ -69,7 +72,12 @@ function ChatIndexRouteView() {
         return;
       }
 
-      // 閺冪姵纭堕幁銏狀槻閺冭绱濋崚娑樼紦閺傛壆娈戦懕濠傘亯娴兼俺鐦?      const result = await handleNewChat({ fresh: true });
+      // 閺冪姵纭堕幁銏狀槻閺冭绱濋崚娑樼紦閺傛壆娈戦懕濠傘亯娴兼俺鐦?
+      // Wait for the home directory before attempting to create a fresh chat.
+      if (!homeDir) {
+        return;
+      }
+      const result = await handleNewChat({ fresh: true });
       if (cancelled || result.ok) {
         return;
       }
@@ -82,6 +90,7 @@ function ChatIndexRouteView() {
   }, [
     attempt,
     handleNewChat,
+    homeDir,
     navigate,
     splitViewIds,
     splitViewsHydrated,

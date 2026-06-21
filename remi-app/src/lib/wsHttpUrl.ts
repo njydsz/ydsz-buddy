@@ -13,7 +13,7 @@ import { tauriBridge } from "./tauri-bridge";
 
 export function resolveWsHttpUrl(rawPath: string): string {
   if (typeof window === "undefined") return rawPath;
-  const bridgeWsUrl = tauriBridge.getWsUrl?.();
+  const bridgeWsUrl = tauriBridge.getCachedWsUrl?.() ?? null;
   const envWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
   const wsCandidate =
     typeof bridgeWsUrl === "string" && bridgeWsUrl.length > 0

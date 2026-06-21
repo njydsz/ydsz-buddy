@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { BookIcon, CheckIcon, CircleAlertIcon, ExternalLinkIcon, SearchIcon } from "~/lib/icons";
 import { localSkillsQueryOptions } from "~/localSkillsReactQuery";
 import { useMessages } from "~/i18n/I18nContext";
+import { cn } from "~/lib/utils";
+import { isDesktop } from "~/env";
 import { SidebarInset } from "./ui/sidebar";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
 import { WindowCaptionButtons } from "./WindowCaptionButtons";
@@ -47,7 +49,12 @@ export function SkillsView() {
   return (
     <SidebarInset className="h-dvh min-h-0 overflow-hidden isolate">
       <div className="flex h-full min-h-0 flex-col bg-background">
-        <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 sm:px-6">
+        <div
+          className={cn(
+            "flex shrink-0 items-center gap-3 border-b border-border px-4 sm:px-6",
+            isDesktop && "h-[44px]",
+          )}
+        >
           <SidebarHeaderNavigationControls />
           <div className="flex-1" />
           <ProviderDiscoveryToolbar

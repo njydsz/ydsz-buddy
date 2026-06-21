@@ -16,10 +16,11 @@
         "height": 800,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true,
+        "decorations": false,
         "transparent": false,
         "dragDropEnabled": true,
-        "titleBarStyle": "Overlay"
+        "titleBarStyle": "Overlay",
+        "center": true
       }
     ],
     "security": {
