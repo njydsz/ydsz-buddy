@@ -140,7 +140,7 @@ export default defineConfig({
       // import; the two process probes are mapped by `define` below.
       { find: /^node:module$/, replacement: src('./src/node-module-stub.ts') },
       // Rename-era shim: the vendored cordis-family and schemastery packages
-      // are still imported by their old @deepseek-ai/* names throughout
+      // are still imported by their old @njydsz/* names throughout
       // client source; map them to the workspace-resolved vendor sources.
       { find: /^@deepseek-ai\/cordis$/, replacement: fileURLToPath(new URL('../../vendor/cordis/src/index.ts', import.meta.url)) },
       { find: /^@deepseek-ai\/cordis-plugin-loader$/, replacement: fileURLToPath(new URL('../../vendor/loader/src/index.ts', import.meta.url)) },

@@ -129,7 +129,7 @@ Copy these disabled templates from a shipped full preset and remove `disabled` o
 
 ```yaml
 - id: tool-subagent-codex
-  name: '@deepseek-ai/dsh-tool-subagent'
+  name: '@njydsz/ydb-tool-subagent'
   disabled: true
   config:
     provider: codex
@@ -138,7 +138,7 @@ Copy these disabled templates from a shipped full preset and remove `disabled` o
     maxDepth: provider-managed
 
 - id: tool-subagent-claude-code
-  name: '@deepseek-ai/dsh-tool-subagent'
+  name: '@njydsz/ydb-tool-subagent'
   disabled: true
   config:
     provider: claude-code

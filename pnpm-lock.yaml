@@ -5,15 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@deepseek-ai/cosmokit': link:vendor/cosmokit
-  '@deepseek-ai/schemastery': link:vendor/schemastery
-  '@deepseek-ai/cordis': link:vendor/cordis
-  '@deepseek-ai/cordis-plugin-loader': link:vendor/loader
-  '@deepseek-ai/cordis-plugin-include': link:vendor/include
-  '@deepseek-ai/cordis-plugin-group': link:vendor/group
-  '@deepseek-ai/cordis-plugin-timer': link:vendor/timer
-  '@deepseek-ai/cordis-plugin-hmr': link:vendor/hmr
-  '@deepseek-ai/cordis-plugin-logger-console': link:vendor/logger-console
+  '@njydsz/cosmokit': link:vendor/cosmokit
+  '@njydsz/schemastery': link:vendor/schemastery
+  '@njydsz/cordis': link:vendor/cordis
+  '@njydsz/cordis-plugin-loader': link:vendor/loader
+  '@njydsz/cordis-plugin-include': link:vendor/include
+  '@njydsz/cordis-plugin-group': link:vendor/group
+  '@njydsz/cordis-plugin-timer': link:vendor/timer
+  '@njydsz/cordis-plugin-hmr': link:vendor/hmr
+  '@njydsz/cordis-plugin-logger-console': link:vendor/logger-console
 
 patchedDependencies:
   node-pty@1.1.0: 7a0c04f1f49d798a9ffe2f7f414c01064a44ca2489772d0c3e1235ab336755e6
@@ -134,19 +134,19 @@ importers:
   apps/cli:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../vendor/cordis
         version: link:../../vendor/cordis
       '@njydsz/cordis-plugin-hmr':
-        specifier: workspace:^
+        specifier: link:../../vendor/hmr
         version: link:../../vendor/hmr
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../vendor/include
         version: link:../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../vendor/loader
         version: link:../../vendor/loader
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../vendor/timer
         version: link:../../vendor/timer
       '@njydsz/ydb-agent-instructions':
         specifier: workspace:^
@@ -363,10 +363,10 @@ importers:
   apps/gui:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:*
+        specifier: link:../../vendor/cordis
         version: link:../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:*
+        specifier: link:../../vendor/include
         version: link:../../vendor/include
       '@njydsz/ydb-app-boot':
         specifier: workspace:*
@@ -376,7 +376,7 @@ importers:
         version: 33.4.11
     devDependencies:
       '@njydsz/schemastery':
-        specifier: workspace:*
+        specifier: link:../../vendor/schemastery
         version: link:../../vendor/schemastery
       '@types/node':
         specifier: ^22.10.0
@@ -407,7 +407,7 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@njydsz/cordis-plugin-group':
-        specifier: workspace:^
+        specifier: link:../../vendor/group
         version: link:../../vendor/group
       '@njydsz/ydb-client-modules':
         specifier: workspace:^
@@ -458,16 +458,16 @@ importers:
   examples:
     dependencies:
       '@njydsz/cordis-plugin-hmr':
-        specifier: workspace:*
+        specifier: link:../vendor/hmr
         version: link:../vendor/hmr
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:*
+        specifier: link:../vendor/include
         version: link:../vendor/include
       '@njydsz/cordis-plugin-logger-console':
-        specifier: workspace:*
+        specifier: link:../vendor/logger-console
         version: link:../vendor/logger-console
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:*
+        specifier: link:../vendor/timer
         version: link:../vendor/timer
       '@njydsz/ydb-acp-demo':
         specifier: workspace:*
@@ -815,13 +815,13 @@ importers:
       '@agentclientprotocol/sdk':
         specifier: 0.25.1
         version: 0.25.1(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -849,13 +849,13 @@ importers:
 
   packages/api/gateway:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-typert-protocol':
         specifier: workspace:^
         version: link:../../typert/protocol
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
         version: link:../../client/connection
@@ -874,13 +874,13 @@ importers:
 
   packages/api/remotes:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-typert-protocol':
         specifier: workspace:^
         version: link:../../typert/protocol
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -928,10 +928,11 @@ importers:
         version: link:../../typert/registry
 
   packages/attachment/attachment:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -941,16 +942,16 @@ importers:
 
   packages/attachment/attachment-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       sharp:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@22.20.0)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-attachment':
         specifier: workspace:^
         version: link:../attachment
@@ -963,27 +964,27 @@ importers:
 
   packages/boot/app-boot:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-group':
+        specifier: link:../../../vendor/group
+        version: link:../../../vendor/group
+      '@njydsz/cordis-plugin-hmr':
+        specifier: link:../../../vendor/hmr
+        version: link:../../../vendor/hmr
+      '@njydsz/cordis-plugin-include':
+        specifier: link:../../../vendor/include
+        version: link:../../../vendor/include
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       js-yaml:
         specifier: ^4.2.0
         version: 4.2.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-group':
-        specifier: workspace:^
-        version: link:../../../vendor/group
-      '@njydsz/cordis-plugin-hmr':
-        specifier: workspace:^
-        version: link:../../../vendor/hmr
-      '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
-        version: link:../../../vendor/include
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../../vendor/timer
         version: link:../../../vendor/timer
       '@njydsz/ydb-home-paths':
         specifier: workspace:^
@@ -1002,16 +1003,17 @@ importers:
         version: 4.0.9
 
   packages/boot/cmdline:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
-        version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
+    devDependencies:
+      '@njydsz/cordis-plugin-include':
+        specifier: link:../../../vendor/include
+        version: link:../../../vendor/include
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -1021,11 +1023,14 @@ importers:
 
   packages/bundle/base:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-hmr':
-        specifier: workspace:^
+        specifier: link:../../../vendor/hmr
         version: link:../../../vendor/hmr
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../../vendor/timer
         version: link:../../../vendor/timer
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -1253,17 +1258,20 @@ importers:
         specifier: workspace:^
         version: link:../../workflow/workflow-worker-thread
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/bundle/headless:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-cmdline':
         specifier: workspace:^
@@ -1275,12 +1283,6 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -1299,8 +1301,14 @@ importers:
 
   packages/bundle/web-app:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-agent-presets':
         specifier: workspace:^
@@ -1477,12 +1485,6 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -1495,8 +1497,11 @@ importers:
 
   packages/client/connection:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-attachment':
         specifier: workspace:^
@@ -1520,9 +1525,6 @@ importers:
         specifier: ^8.21.0
         version: 8.21.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-host-webserver':
         specifier: workspace:^
         version: link:../../host/webserver
@@ -1535,16 +1537,16 @@ importers:
 
   packages/client/hmr:
     dependencies:
-      '@njydsz/schemastery':
-        specifier: workspace:^
-        version: link:../../../vendor/schemastery
-    devDependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
+      '@njydsz/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
+    devDependencies:
       '@njydsz/ydb-client-modules':
         specifier: workspace:^
         version: link:../modules
@@ -1557,8 +1559,11 @@ importers:
 
   packages/client/locale:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
@@ -1567,9 +1572,6 @@ importers:
         specifier: workspace:^
         version: link:../../settings/settings
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -1596,12 +1598,13 @@ importers:
         version: 18.3.1
 
   packages/client/modules:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-host-webserver':
         specifier: workspace:^
@@ -1612,6 +1615,9 @@ importers:
 
   packages/client/runtime:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -1658,9 +1664,6 @@ importers:
         specifier: ~4.4.7
         version: 4.4.7(@types/react@18.3.31)(immer@10.2.0)(react@18.3.1)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -1682,22 +1685,23 @@ importers:
 
   packages/client/schema-form:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/client/ui-agent-preset:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -1740,6 +1744,9 @@ importers:
 
   packages/client/ui-attachment:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-attachment':
         specifier: workspace:^
         version: link:../../attachment/attachment
@@ -1756,9 +1763,6 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -1771,13 +1775,13 @@ importers:
 
   packages/client/ui-commands:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -1820,8 +1824,11 @@ importers:
 
   packages/client/ui-conversation:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-settings':
         specifier: workspace:^
@@ -1830,9 +1837,6 @@ importers:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -1920,13 +1924,13 @@ importers:
 
   packages/client/ui-deliverables:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       react:
         specifier: ^18.2.0
         version: 18.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
         version: link:../connection
@@ -1957,13 +1961,13 @@ importers:
 
   packages/client/ui-directory-picker-browse:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -1999,10 +2003,11 @@ importers:
         version: 18.3.1(react@18.3.1)
 
   packages/client/ui-directory-picker-native:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-client-runtime':
         specifier: workspace:^
         version: link:../runtime
@@ -2029,10 +2034,11 @@ importers:
         version: 18.3.1(react@18.3.1)
 
   packages/client/ui-goal:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2078,13 +2084,13 @@ importers:
 
   packages/client/ui-input-trigger:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -2112,13 +2118,13 @@ importers:
 
   packages/client/ui-jobs:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       react:
         specifier: ^18.2.0
         version: 18.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -2145,10 +2151,11 @@ importers:
         version: 18.3.31
 
   packages/client/ui-layout:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -2172,10 +2179,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-message-feedback:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2223,10 +2231,11 @@ importers:
         version: 18.3.1(react@18.3.1)
 
   packages/client/ui-model-selection:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2271,10 +2280,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-permission-presets:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2325,10 +2335,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-plan:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2368,6 +2379,9 @@ importers:
 
   packages/client/ui-primitives:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@shikijs/langs':
         specifier: ^4.3.1
         version: 4.3.1
@@ -2429,9 +2443,6 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -2444,13 +2455,13 @@ importers:
 
   packages/client/ui-settings:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
         version: link:../connection
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2481,8 +2492,11 @@ importers:
 
   packages/client/ui-settings-general:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-settings':
         specifier: workspace:^
@@ -2491,9 +2505,6 @@ importers:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2535,10 +2546,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-settings-models:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2580,10 +2592,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-settings-plugin-inventory:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2623,13 +2636,13 @@ importers:
 
   packages/client/ui-settings-plugins:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2669,13 +2682,13 @@ importers:
 
   packages/client/ui-sidebar:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -2705,10 +2718,11 @@ importers:
         version: 18.3.1
 
   packages/client/ui-skill:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2753,10 +2767,11 @@ importers:
         version: 18.3.1(react@18.3.1)
 
   packages/client/ui-slots:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -2766,13 +2781,13 @@ importers:
 
   packages/client/ui-subagent:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       react:
         specifier: ^18.2.0
         version: 18.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -2809,8 +2824,11 @@ importers:
 
   packages/client/ui-theme:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
@@ -2822,9 +2840,6 @@ importers:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2861,13 +2876,13 @@ importers:
 
   packages/client/ui-tool:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -2913,6 +2928,9 @@ importers:
 
   packages/client/ui-trajectory:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@tanstack/react-virtual':
         specifier: ^3.14.9
         version: 3.14.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2920,9 +2938,6 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -2968,6 +2983,9 @@ importers:
 
   packages/client/ui-user-questions:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-connection':
         specifier: workspace:^
         version: link:../connection
@@ -2990,9 +3008,6 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -3020,13 +3035,13 @@ importers:
 
   packages/client/ui-workflow-run:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       react:
         specifier: ^18.2.0
         version: 18.3.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -3063,13 +3078,13 @@ importers:
 
   packages/client/ui-workspace:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-locale':
         specifier: workspace:^
         version: link:../locale
@@ -3103,6 +3118,12 @@ importers:
 
   packages/client/web:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       '@njydsz/ydb-client-modules':
         specifier: workspace:^
         version: link:../modules
@@ -3131,12 +3152,6 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/ydb-client-runtime':
         specifier: workspace:^
         version: link:../runtime
@@ -3158,6 +3173,9 @@ importers:
 
   packages/client/web-react:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-ui-slots':
         specifier: workspace:^
         version: link:../ui-slots
@@ -3168,9 +3186,6 @@ importers:
         specifier: 1.2.0
         version: 1.2.0(react@18.3.1)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -3179,23 +3194,24 @@ importers:
         version: 18.3.31
 
   packages/code-runtime/code-runtime:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/code-runtime/code-runtime-worker-thread:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-code-runtime':
         specifier: workspace:^
         version: link:../code-runtime
@@ -3210,15 +3226,16 @@ importers:
         version: link:../../util/timeout
 
   packages/compaction/command-compact:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -3240,10 +3257,11 @@ importers:
         version: link:../../core/session
 
   packages/compaction/compaction:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -3262,18 +3280,18 @@ importers:
 
   packages/compaction/compaction-basic:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -3314,18 +3332,18 @@ importers:
 
   packages/compaction/compaction-tool-result-pruner:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-compaction':
         specifier: workspace:^
@@ -3345,15 +3363,15 @@ importers:
 
   packages/context/agent-instructions:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -3394,13 +3412,13 @@ importers:
 
   packages/context/session-reference:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -3425,13 +3443,13 @@ importers:
 
   packages/context/time-context:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -3462,13 +3480,13 @@ importers:
 
   packages/context/tmux-context:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -3489,10 +3507,11 @@ importers:
         version: link:../../core/system-prompt
 
   packages/core/agent:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -3517,13 +3536,13 @@ importers:
 
   packages/core/agent-default-model:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../agent
@@ -3539,13 +3558,13 @@ importers:
 
   packages/core/agent-loop:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../agent
@@ -3579,13 +3598,13 @@ importers:
 
   packages/core/agent-tool-presentation:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../agent
@@ -3609,19 +3628,21 @@ importers:
         version: link:../tools
 
   packages/core/scope:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/core/session:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -3643,13 +3664,13 @@ importers:
 
   packages/core/system-prompt:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -3662,13 +3683,13 @@ importers:
 
   packages/core/tools:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../agent
@@ -3695,10 +3716,11 @@ importers:
         version: link:../../interaction/user-approval
 
   packages/credentials/credentials:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -3708,8 +3730,11 @@ importers:
 
   packages/credentials/credentials-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       chokidar:
         specifier: ^4.0.3
@@ -3718,9 +3743,6 @@ importers:
         specifier: ^2.9.0
         version: 2.9.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-atomic-write':
         specifier: workspace:^
         version: link:../../util/atomic-write
@@ -3739,16 +3761,16 @@ importers:
 
   packages/e2b/e2b:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       e2b:
         specifier: 2.29.1
         version: 2.29.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -3760,10 +3782,11 @@ importers:
         version: link:../../sandbox/sandbox-policy
 
   packages/e2b/fs-e2b:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-e2b':
         specifier: workspace:^
         version: link:../e2b
@@ -3776,13 +3799,13 @@ importers:
 
   packages/e2b/subprocess-e2b:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-e2b':
         specifier: workspace:^
         version: link:../e2b
@@ -3797,19 +3820,20 @@ importers:
         version: link:../../util/timeout
 
   packages/examples/acp-demo:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
+    devDependencies:
       '@njydsz/ydb-acp':
         specifier: workspace:^
         version: link:../../acp/acp
@@ -3849,16 +3873,16 @@ importers:
 
   packages/examples/agent-spine-demo:
     dependencies:
-      '@njydsz/schemastery':
-        specifier: workspace:^
-        version: link:../../../vendor/schemastery
-    devDependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../../vendor/timer
         version: link:../../../vendor/timer
+      '@njydsz/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
+    devDependencies:
       '@njydsz/node-addon-landlock-run':
         specifier: workspace:^
         version: link:../../../native/landlock-run/packages/entry
@@ -3961,25 +3985,26 @@ importers:
 
   packages/examples/jsonrpc-demo:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-app-boot':
         specifier: workspace:^
         version: link:../../boot/app-boot
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/extensions/cordis-client-runner:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -4010,18 +4035,18 @@ importers:
 
   packages/extensions/cordis-host-runner:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../../vendor/timer
         version: link:../../../vendor/timer
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4049,12 +4074,13 @@ importers:
         version: link:../../typert/protocol
 
   packages/extensions/tool-cordis:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4082,10 +4108,11 @@ importers:
         version: link:../../core/tools
 
   packages/extensions/ui-cordis:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-api-remotes':
         specifier: workspace:^
         version: link:../../api/remotes
@@ -4127,15 +4154,16 @@ importers:
         version: 18.3.1
 
   packages/feedback/command-feedback:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4161,21 +4189,21 @@ importers:
 
   packages/feedback/message-feedback:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-brand':
         specifier: workspace:^
@@ -4209,10 +4237,11 @@ importers:
         version: link:../../typert/protocol
 
   packages/fs/fs:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -4228,16 +4257,16 @@ importers:
 
   packages/fs/fs-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       koffi:
         specifier: ^3.1.0
         version: 3.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-fs':
         specifier: workspace:^
         version: link:../fs
@@ -4249,10 +4278,11 @@ importers:
         version: link:../../llm/llm
 
   packages/fs/fs-observation-policy:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-fs':
         specifier: workspace:^
         version: link:../fs
@@ -4264,10 +4294,11 @@ importers:
         version: link:../../llm/llm
 
   packages/fs/fs-sandbox:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-fs':
         specifier: workspace:^
         version: link:../fs
@@ -4286,16 +4317,16 @@ importers:
 
   packages/fs/tool-fs:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       diff:
         specifier: ^9.0.0
         version: 9.0.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4347,16 +4378,16 @@ importers:
 
   packages/fs/tool-fs-search:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@vscode/ripgrep':
         specifier: ^1.18.0
         version: 1.18.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4393,13 +4424,13 @@ importers:
 
   packages/fs/tool-str-replace-editor:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4438,12 +4469,13 @@ importers:
         version: link:../../core/tools
 
   packages/goal/command-goal:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4466,16 +4498,16 @@ importers:
 
   packages/goal/goal:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4505,10 +4537,11 @@ importers:
         version: link:../../typert/protocol
 
   packages/goal/goal-round-driver:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4539,15 +4572,15 @@ importers:
 
   packages/goal/tool-goal:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4573,13 +4606,13 @@ importers:
 
   packages/guard/repeat-tool-reminder:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4603,10 +4636,11 @@ importers:
         version: link:../../core/tools
 
   packages/guard/timeout-policy:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -4621,10 +4655,11 @@ importers:
         version: link:../../core/tools
 
   packages/hooks/hook-protocol:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -4637,13 +4672,13 @@ importers:
 
   packages/hooks/hooks-claude-code:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4689,13 +4724,13 @@ importers:
 
   packages/hooks/hooks-codex:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -4738,8 +4773,11 @@ importers:
 
   packages/host/apiproxy:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -4823,9 +4861,6 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent-presets':
         specifier: workspace:^
         version: link:../../preset/agent-presets
@@ -4849,25 +4884,27 @@ importers:
         version: link:../../typert/registry
 
   packages/host/directory-picker:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/host/directory-picker-auto:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
-        version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
+    devDependencies:
+      '@njydsz/cordis-plugin-include':
+        specifier: link:../../../vendor/include
+        version: link:../../../vendor/include
       '@njydsz/ydb-client-ui-directory-picker-browse':
         specifier: workspace:^
         version: link:../../client/ui-directory-picker-browse
@@ -4892,22 +4929,25 @@ importers:
 
   packages/host/directory-picker-browse:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-host-directory-picker':
         specifier: workspace:^
         version: link:../directory-picker
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/host/directory-picker-native:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-host-directory-picker':
         specifier: workspace:^
         version: link:../directory-picker
@@ -4918,9 +4958,6 @@ importers:
         specifier: ^3.1.0
         version: 3.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -4930,15 +4967,15 @@ importers:
 
   packages/host/frontend-static:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-host-webserver':
         specifier: workspace:^
@@ -4949,16 +4986,16 @@ importers:
 
   packages/host/plugin-inventory:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -4971,22 +5008,23 @@ importers:
 
   packages/host/webserver:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/identity/anonymous-user-id:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -4999,13 +5037,13 @@ importers:
 
   packages/interaction/commands:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5027,16 +5065,16 @@ importers:
 
   packages/interaction/permission-presets:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-commands':
         specifier: workspace:^
         version: link:../commands
@@ -5066,10 +5104,11 @@ importers:
         version: link:../user-approval
 
   packages/interaction/tool-ask-user:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5091,13 +5130,13 @@ importers:
 
   packages/interaction/user-approval:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5121,10 +5160,11 @@ importers:
         version: link:../../core/system-prompt
 
   packages/interaction/user-questions:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5136,10 +5176,11 @@ importers:
         version: link:../../llm/llm
 
   packages/jobs/jobs:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5155,18 +5196,18 @@ importers:
 
   packages/jobs/jobs-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -5192,13 +5233,13 @@ importers:
 
   packages/jobs/tool-jobs:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5229,13 +5270,13 @@ importers:
 
   packages/llm/llm:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-attachment':
         specifier: workspace:^
         version: link:../../attachment/attachment
@@ -5251,16 +5292,16 @@ importers:
 
   packages/llm/llm-deepseek:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       eventsource-parser:
         specifier: ^3.1.0
         version: 3.1.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-anonymous-user-id':
         specifier: workspace:^
         version: link:../../identity/anonymous-user-id
@@ -5288,13 +5329,13 @@ importers:
       '@earendil-works/pi-ai':
         specifier: ^0.82.1
         version: 0.82.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(ws@8.21.0)(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-attachment':
         specifier: workspace:^
         version: link:../../attachment/attachment
@@ -5322,18 +5363,18 @@ importers:
 
   packages/llm/llm-retry:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -5380,16 +5421,16 @@ importers:
 
   packages/llm/token-meter:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-compaction':
         specifier: workspace:^
         version: link:../../compaction/compaction
@@ -5407,10 +5448,11 @@ importers:
         version: link:../../session/session-projection
 
   packages/lsp/lsp:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -5423,13 +5465,13 @@ importers:
 
   packages/lsp/lsp-stdio:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -5466,13 +5508,13 @@ importers:
 
   packages/lsp/tool-lsp:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5515,8 +5557,11 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
         version: 1.29.0(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
@@ -5528,9 +5573,6 @@ importers:
       '@modelcontextprotocol/server-filesystem':
         specifier: ^2026.7.4
         version: 2026.7.10(zod@4.4.3)
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5549,13 +5591,13 @@ importers:
 
   packages/plan/plan-mode:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5592,22 +5634,22 @@ importers:
 
   packages/preset/agent-presets:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
+      '@njydsz/cordis-plugin-include':
+        specifier: link:../../../vendor/include
+        version: link:../../../vendor/include
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../../vendor/loader
+        version: link:../../../vendor/loader
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       js-yaml:
         specifier: ^4.1.0
         version: 4.2.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
-      '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
-        version: link:../../../vendor/include
-      '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
-        version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5647,13 +5689,13 @@ importers:
 
   packages/preset/persona:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5666,19 +5708,19 @@ importers:
 
   packages/runtime-diagnostics/invariants:
     dependencies:
-      '@njydsz/schemastery':
-        specifier: workspace:^
-        version: link:../../../vendor/schemastery
-    devDependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+      '@njydsz/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
 
   packages/sandbox/sandbox:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5691,19 +5733,19 @@ importers:
 
   packages/sandbox/sandbox-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/node-addon-landlock-run':
         specifier: workspace:^
         version: link:../../../native/landlock-run/packages/entry
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@njydsz/ydb-sandbox-windows-acl':
         specifier: workspace:^
         version: link:../sandbox-windows-acl
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5719,13 +5761,13 @@ importers:
 
   packages/sandbox/sandbox-policy:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -5744,13 +5786,13 @@ importers:
 
   packages/sandbox/sandbox-windows-acl:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       koffi:
         specifier: ^3.1.0
         version: 3.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5762,12 +5804,13 @@ importers:
         version: link:../sandbox-local
 
   packages/schedule/schedule:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -5804,10 +5847,11 @@ importers:
         version: link:../../core/tools
 
   packages/sdk/client:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5822,10 +5866,11 @@ importers:
         version: link:../../core/session
 
   packages/sdk/protocol:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -5841,15 +5886,15 @@ importers:
 
   packages/sdk/server:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -5883,12 +5928,13 @@ importers:
         version: link:../../subagent/subagent
 
   packages/session-query/session-log-export:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -5928,10 +5974,11 @@ importers:
         version: 18.3.1
 
   packages/session-query/session-query:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -5953,15 +6000,15 @@ importers:
 
   packages/session-query/session-query-sqlite:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-invariants':
         specifier: workspace:^
@@ -5981,13 +6028,13 @@ importers:
 
   packages/session-query/tool-session-query:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6029,12 +6076,13 @@ importers:
         version: link:../../core/tools
 
   packages/session/session-checkpoint-policy:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -6068,10 +6116,11 @@ importers:
         version: link:../../core/tools
 
   packages/session/session-persistence:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -6090,16 +6139,16 @@ importers:
 
   packages/session/session-persistence-jsonl:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       koffi:
         specifier: ^3.1.0
         version: 3.1.1
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6112,13 +6161,13 @@ importers:
 
   packages/session/session-persistence-sqlite:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6131,13 +6180,13 @@ importers:
 
   packages/session/session-projection:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6147,16 +6196,16 @@ importers:
 
   packages/session/session-projection-cache:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6178,18 +6227,18 @@ importers:
 
   packages/session/session-stats:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-invariants':
         specifier: workspace:^
@@ -6205,10 +6254,11 @@ importers:
         version: link:../session-projection
 
   packages/session/session-telemetry:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6221,8 +6271,11 @@ importers:
 
   packages/session/session-telemetry-otel:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       '@opentelemetry/api':
         specifier: ^1.9.1
@@ -6243,11 +6296,8 @@ importers:
         specifier: ^0.220.0
         version: 0.220.0(@opentelemetry/api@1.9.1)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-anonymous-user-id':
         specifier: workspace:^
@@ -6270,16 +6320,16 @@ importers:
 
   packages/session/session-title:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -6304,13 +6354,13 @@ importers:
 
   packages/session/session-title-all-prompts-llm:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6329,18 +6379,18 @@ importers:
 
   packages/session/session-title-first-prompt-llm:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-invariants':
         specifier: workspace:^
@@ -6363,13 +6413,13 @@ importers:
 
   packages/session/session-title-llm:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6387,13 +6437,14 @@ importers:
         version: link:../../util/timeout
 
   packages/settings/settings:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -6403,8 +6454,11 @@ importers:
 
   packages/settings/settings-file:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       chokidar:
         specifier: ^4.0.3
@@ -6413,9 +6467,6 @@ importers:
         specifier: ^2.9.0
         version: 2.9.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-atomic-write':
         specifier: workspace:^
         version: link:../../util/atomic-write
@@ -6431,13 +6482,13 @@ importers:
 
   packages/shell/bash-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6458,10 +6509,11 @@ importers:
         version: link:../../util/timeout
 
   packages/shell/bash-sandbox:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/node-addon-landlock-run':
         specifier: workspace:^
         version: link:../../../native/landlock-run/packages/entry
@@ -6489,13 +6541,13 @@ importers:
 
   packages/shell/pwsh-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6516,10 +6568,11 @@ importers:
         version: link:../../util/timeout
 
   packages/shell/pwsh-sandbox:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6543,10 +6596,11 @@ importers:
         version: link:../../subprocess/subprocess-local
 
   packages/shell/shell:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6562,13 +6616,13 @@ importers:
 
   packages/shell/shell-env:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6593,13 +6647,13 @@ importers:
 
   packages/shell/tool-bash:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6660,18 +6714,18 @@ importers:
 
   packages/shell/tool-bash-persistent:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -6712,13 +6766,13 @@ importers:
 
   packages/shell/tool-pwsh:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6770,13 +6824,13 @@ importers:
 
   packages/skill/skill:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6788,10 +6842,11 @@ importers:
         version: link:../../core/scope
 
   packages/skill/skill-badge:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6801,8 +6856,11 @@ importers:
 
   packages/skill/skill-filesystem:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       chokidar:
         specifier: ^5.0.0
@@ -6811,9 +6869,6 @@ importers:
         specifier: ^2.4.2
         version: 2.9.0
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-fs':
         specifier: workspace:^
         version: link:../../fs/fs
@@ -6829,13 +6884,13 @@ importers:
 
   packages/skill/tool-skill:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6862,10 +6917,11 @@ importers:
         version: link:../../core/tools
 
   packages/spill/spill:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -6881,13 +6937,13 @@ importers:
 
   packages/spill/spill-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -6906,13 +6962,13 @@ importers:
 
   packages/spill/spill-policy:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -6939,26 +6995,27 @@ importers:
         version: link:../../core/tools
 
   packages/storage/storage:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/storage/storage-domain:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6968,13 +7025,13 @@ importers:
 
   packages/storage/storage-json:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -6984,13 +7041,13 @@ importers:
 
   packages/storage/storage-sqlite:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -7000,13 +7057,13 @@ importers:
 
   packages/subagent/subagent:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7064,15 +7121,15 @@ importers:
       '@agentclientprotocol/sdk':
         specifier: 0.25.1
         version: 0.25.1(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7110,13 +7167,13 @@ importers:
       '@anthropic-ai/sdk':
         specifier: 0.93.0
         version: 0.93.0(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7147,15 +7204,15 @@ importers:
 
   packages/subagent/subagent-codex:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7193,15 +7250,15 @@ importers:
 
   packages/subagent/subagent-dsh-sdk:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7233,15 +7290,15 @@ importers:
 
   packages/subagent/subagent-fork-in-process:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7272,15 +7329,16 @@ importers:
         version: link:../subagent-spawn-in-process
 
   packages/subagent/subagent-in-process-driver:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7327,15 +7385,15 @@ importers:
 
   packages/subagent/subagent-spawn-in-process:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7379,15 +7437,15 @@ importers:
 
   packages/subagent/tool-subagent:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7430,10 +7488,11 @@ importers:
         version: link:../../core/tools
 
   packages/subagent/tool-subagent-control:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7473,13 +7532,13 @@ importers:
 
   packages/subagent/tool-subagent-report:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7521,23 +7580,24 @@ importers:
         version: link:../../core/tools
 
   packages/subprocess/subprocess:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/subprocess/subprocess-local:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       node-pty:
         specifier: ^1.1.0
         version: 1.1.0(patch_hash=7a0c04f1f49d798a9ffe2f7f414c01064a44ca2489772d0c3e1235ab336755e6)
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -7552,10 +7612,11 @@ importers:
         version: link:../../util/timeout
 
   packages/terminal/terminal:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7571,13 +7632,13 @@ importers:
 
   packages/terminal/terminal-bash:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7605,18 +7666,18 @@ importers:
 
   packages/terminal/tool-terminal:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7669,6 +7730,9 @@ importers:
       '@agentclientprotocol/sdk':
         specifier: 0.25.1
         version: 0.25.1(zod@4.4.3)
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-loader-smoke':
         specifier: workspace:*
         version: link:../loader-smoke
@@ -7676,9 +7740,6 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8(@opentelemetry/api@1.9.0)(@types/node@26.1.2)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1)(vite@8.0.16(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -7687,10 +7748,11 @@ importers:
         version: link:../../core/session
 
   packages/test-support/agent-loop-testkit:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7715,6 +7777,9 @@ importers:
 
   packages/test-support/client-runtime:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -7725,9 +7790,6 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8(@opentelemetry/api@1.9.1)(@types/node@26.1.2)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1)(vite@8.0.16(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-client-runtime':
         specifier: workspace:^
         version: link:../../client/runtime
@@ -7757,19 +7819,21 @@ importers:
         version: 18.3.1(react@18.3.1)
 
   packages/test-support/llm-mock-server:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/test-support/llm-replay:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-compaction':
         specifier: workspace:^
         version: link:../../compaction/compaction
@@ -7785,6 +7849,9 @@ importers:
 
   packages/test-support/loader-smoke:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       execa:
         specifier: ^10.0.0
         version: 10.0.0
@@ -7792,9 +7859,6 @@ importers:
         specifier: ^4.22.4
         version: 4.22.4
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -7810,21 +7874,21 @@ importers:
 
   packages/todo/tool-todo:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../../vendor/include
         version: link:../../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -7865,13 +7929,13 @@ importers:
       '@jridgewell/gen-mapping':
         specifier: ^0.3.13
         version: 0.3.13
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -7887,16 +7951,16 @@ importers:
 
   packages/typert/loader:
     dependencies:
-      '@njydsz/schemastery':
-        specifier: workspace:^
-        version: link:../../../vendor/schemastery
-    devDependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
+      '@njydsz/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -7908,16 +7972,20 @@ importers:
         version: 4.4.3
 
   packages/typert/protocol:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/typert/registry:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/ydb-typert-protocol':
         specifier: workspace:^
         version: link:../protocol
@@ -7925,72 +7993,76 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/atomic-write:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/brand:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/home-paths:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/launch-environment:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/native-command:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/output-retention:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
 
   packages/util/timeout:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -8000,16 +8072,16 @@ importers:
       '@joplin/turndown-plugin-gfm':
         specifier: ^1.0.67
         version: 1.0.67
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
       turndown:
         specifier: ^7.2.4
         version: 7.2.4
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -8052,13 +8124,13 @@ importers:
 
   packages/web/web:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -8068,13 +8140,13 @@ importers:
 
   packages/web/web-fetch-http:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -8087,13 +8159,13 @@ importers:
 
   packages/web/web-search-deepseek:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -8121,13 +8193,13 @@ importers:
 
   packages/web/web-search-exa:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -8140,13 +8212,13 @@ importers:
 
   packages/web/web-search-perplexity:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-invariants':
         specifier: workspace:^
         version: link:../../runtime-diagnostics/invariants
@@ -8159,15 +8231,15 @@ importers:
 
   packages/workflow/tool-ralph:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../../vendor/loader
         version: link:../../../vendor/loader
       '@njydsz/ydb-agent':
         specifier: workspace:^
@@ -8211,13 +8283,13 @@ importers:
 
   packages/workflow/tool-workflow:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -8247,10 +8319,11 @@ importers:
         version: link:../workflow-worker-thread
 
   packages/workflow/workflow:
-    devDependencies:
+    dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../../vendor/cordis
         version: link:../../../vendor/cordis
+    devDependencies:
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -8269,13 +8342,13 @@ importers:
 
   packages/workflow/workflow-worker-thread:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-agent':
         specifier: workspace:^
         version: link:../../core/agent
@@ -8318,13 +8391,13 @@ importers:
 
   packages/workspace/workspace:
     dependencies:
+      '@njydsz/cordis':
+        specifier: link:../../../vendor/cordis
+        version: link:../../../vendor/cordis
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@njydsz/cordis':
-        specifier: workspace:^
-        version: link:../../../vendor/cordis
       '@njydsz/ydb-brand':
         specifier: workspace:^
         version: link:../../util/brand
@@ -8347,25 +8420,25 @@ importers:
   python/sdk-runtime:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../../vendor/cordis
         version: link:../../vendor/cordis
       '@njydsz/cordis-plugin-group':
-        specifier: workspace:^
+        specifier: link:../../vendor/group
         version: link:../../vendor/group
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../../vendor/include
         version: link:../../vendor/include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../../vendor/loader
         version: link:../../vendor/loader
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../../vendor/timer
         version: link:../../vendor/timer
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../../vendor/cosmokit
         version: link:../../vendor/cosmokit
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../../vendor/schemastery
         version: link:../../vendor/schemastery
       '@njydsz/ydb-acp':
         specifier: workspace:^
@@ -8674,13 +8747,13 @@ importers:
   vendor/cordis:
     dependencies:
       '@njydsz/cordis-plugin-include':
-        specifier: workspace:^
+        specifier: link:../include
         version: link:../include
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../loader
         version: link:../loader
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       '@standard-schema/spec':
         specifier: ^1.1.0
@@ -8691,10 +8764,10 @@ importers:
   vendor/group:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../loader
         version: link:../loader
 
   vendor/hmr:
@@ -8703,16 +8776,16 @@ importers:
         specifier: ^7.29.0
         version: 7.29.7
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cordis-plugin-timer':
-        specifier: workspace:^
+        specifier: link:../timer
         version: link:../timer
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../schemastery
         version: link:../schemastery
       chokidar:
         specifier: ^4.0.3
@@ -8734,13 +8807,13 @@ importers:
   vendor/include:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cordis-plugin-loader':
-        specifier: workspace:^
+        specifier: link:../loader
         version: link:../loader
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       js-yaml:
         specifier: ^4.1.0
@@ -8749,10 +8822,10 @@ importers:
   vendor/loader:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       node-addon-require-builtin:
         specifier: ^0.1.4
@@ -8761,13 +8834,13 @@ importers:
   vendor/logger-console:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       '@njydsz/schemastery':
-        specifier: workspace:^
+        specifier: link:../schemastery
         version: link:../schemastery
       supports-color:
         specifier: ^9.4.0
@@ -8776,7 +8849,7 @@ importers:
   vendor/schemastery:
     dependencies:
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
       '@standard-schema/spec':
         specifier: ^1.1.0
@@ -8785,10 +8858,10 @@ importers:
   vendor/timer:
     dependencies:
       '@njydsz/cordis':
-        specifier: workspace:^
+        specifier: link:../cordis
         version: link:../cordis
       '@njydsz/cosmokit':
-        specifier: workspace:^
+        specifier: link:../cosmokit
         version: link:../cosmokit
 
   website:

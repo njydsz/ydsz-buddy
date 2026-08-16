@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rename @module @deepseek-ai/dsh-* → @njydsz/ydb-* tags in TypeScript sources.
+ * Rename @module @njydsz/ydb-* → @njydsz/ydb-* tags in TypeScript sources.
  * Also fixes @deepseek-ai/ scope in JSDoc @module tags.
  * Run with: node scripts/rename-module-jsdoc.mjs [--commit]
  */
@@ -12,8 +12,8 @@ const DRY_RUN = !process.argv.includes('--commit')
 const ROOT = process.cwd()
 
 const RULES = [
-  // @module tags with @deepseek-ai/dsh-* → @njydsz/ydb-*
-  { from: /@module @deepseek-ai\/dsh-/g, to: '@module @njydsz/ydb-', desc: '@module @deepseek-ai/dsh-* → @njydsz/ydb-*' },
+  // @module tags with @njydsz/ydb-* → @njydsz/ydb-*
+  { from: /@module @deepseek-ai\/dsh-/g, to: '@module @njydsz/ydb-', desc: '@module @njydsz/ydb-* → @njydsz/ydb-*' },
   // cordis imports (keep as-is since cordis is vendored)
   // catch any remaining @deepseek-ai/ scope references in comments
   { from: /@deepseek-ai\/dsh\b/g, to: '@njydsz/ydb', desc: '@deepseek-ai/dsh → @njydsz/ydb' },
