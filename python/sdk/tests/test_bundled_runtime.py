@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from deepseek_harness import DeepSeekHarness, HarnessClient, HarnessConfig
+from deepseek_harness import YdszBuddy, YdbClient, YdbConfig
 from deepseek_harness.errors import TransportClosedError
 from deepseek_harness_runtime import resolve_bundled_launch_args
 
@@ -52,9 +52,9 @@ def _launch_args(mode: str) -> tuple[str, ...]:
         pytest.skip(f"bundled {mode}-mode runtime unavailable on this machine: {exc}")
 
 
-def _client(tmp_path: Path, launch_args: tuple[str, ...]) -> HarnessClient:
-    return HarnessClient(
-        HarnessConfig(
+def _client(tmp_path: Path, launch_args: tuple[str, ...]) -> YdbClient:
+    return YdbClient(
+        YdbConfig(
             launch_args_override=launch_args,
             cwd=str(tmp_path),
             env={
@@ -86,7 +86,7 @@ def test_bundled_runtime_boots_a_cordis_config(tmp_path: Path, mode: str) -> Non
 def test_python_sdk_boots_minimal_jsonrpc_config(tmp_path: Path, mode: str) -> None:
     launch_args = _launch_args(mode)
     model = "minimal-environment-model"
-    harness = DeepSeekHarness(
+    harness = YdszBuddy(
         model=model,
         cwd=str(tmp_path),
         session_root=str(tmp_path / "sessions"),
@@ -136,7 +136,7 @@ def test_zero_config_run_injects_bundled_default_cordis_config(
     else:
         monkeypatch.setenv("DSH_CORDIS_CONFIG", ambient_config)
 
-    harness = DeepSeekHarness(
+    harness = YdszBuddy(
         model="deepseek-v4-pro",
         cwd=str(tmp_path),
         session_root=str(tmp_path / "sessions"),

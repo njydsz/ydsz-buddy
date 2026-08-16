@@ -22,7 +22,7 @@ NotificationFilter: TypeAlias = Callable[[Notification], bool]
 
 
 @dataclass(slots=True)
-class HarnessConfig:
+class YdbConfig:
     """Configuration for launching the local DeepSeek Harness SDK runtime."""
 
     runtime_bin: str | None = None
@@ -34,11 +34,11 @@ class HarnessConfig:
     shutdown_timeout_seconds: float | None = 1.0
 
 
-class HarnessClient:
+class YdbClient:
     """Synchronous JSON-RPC client for the DeepSeek Harness SDK runtime over stdio."""
 
-    def __init__(self, config: HarnessConfig | None = None) -> None:
-        self.config = config or HarnessConfig()
+    def __init__(self, config: YdbConfig | None = None) -> None:
+        self.config = config or YdbConfig()
         self._proc: subprocess.Popen[str] | None = None
         self._lock = threading.Lock()
         self._write_lock = threading.Lock()
@@ -53,7 +53,7 @@ class HarnessClient:
         self._reader_thread: threading.Thread | None = None
         self._stderr_thread: threading.Thread | None = None
 
-    def __enter__(self) -> "HarnessClient":
+    def __enter__(self) -> "YdbClient":
         self.start()
         return self
 
@@ -431,7 +431,7 @@ class HarnessClient:
         except ImportError as exc:
             raise FileNotFoundError(
                 "Unable to locate the bundled DeepSeek Harness SDK runtime. "
-                "Install deepseek-harness-runtime-bin or set HarnessConfig.runtime_bin."
+                "Install deepseek-harness-runtime-bin or set YdbConfig.runtime_bin."
             ) from exc
         return resolve_bundled_launch_args()
 
@@ -507,7 +507,7 @@ class HarnessClient:
 class NotificationSubscription:
     def __init__(
         self,
-        client: HarnessClient,
+        client: YdbClient,
         subscription_id: str,
         notifications: queue.Queue[Notification | BaseException],
     ) -> None:

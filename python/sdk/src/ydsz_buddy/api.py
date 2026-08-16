@@ -5,13 +5,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from .client import HarnessClient, HarnessConfig
+from .client import YdbClient, YdbConfig
 from .errors import SdkProtocolError
 from .models import JsonObject, Notification
 
 
 @dataclass(slots=True)
-class DeepSeekHarnessConfig:
+class YdszBuddyConfig:
     """Configuration for launching the local DeepSeek Harness SDK runtime.
 
     The runtime inherits the caller's environment by default, so existing
@@ -45,7 +45,7 @@ class RunResult:
     session_root: str | None = None
 
 
-class DeepSeekHarness:
+class YdszBuddy:
     """Reusable synchronous SDK for running DeepSeek Harness agent turns.
 
     The runtime subprocess starts lazily and remains owned by this instance
@@ -53,10 +53,10 @@ class DeepSeekHarness:
     :meth:`close` explicitly when finished, so the subprocess is always reaped.
     """
 
-    def __init__(self, config: DeepSeekHarnessConfig | None = None, **kwargs: object) -> None:
+    def __init__(self, config: YdszBuddyConfig | None = None, **kwargs: object) -> None:
         if config is not None and kwargs:
-            raise TypeError("pass either DeepSeekHarnessConfig or keyword options, not both")
-        self.config = config or DeepSeekHarnessConfig(**kwargs)
+            raise TypeError("pass either YdszBuddyConfig or keyword options, not both")
+        self.config = config or YdszBuddyConfig(**kwargs)
         cwd = str(Path(self.config.cwd or Path.cwd()).resolve())
         runtime_cwd = str(Path(self.config.runtime_cwd).resolve()) if self.config.runtime_cwd is not None else cwd
         self._cwd = cwd
@@ -71,8 +71,8 @@ class DeepSeekHarness:
         if self.config.api_key is not None:
             env["DEEPSEEK_API_KEY"] = self.config.api_key
 
-        self._client = HarnessClient(
-            HarnessConfig(
+        self._client = YdbClient(
+            YdbConfig(
                 runtime_bin=self.config.runtime_bin,
                 launch_args_override=self.config.launch_args_override,
                 cwd=runtime_cwd,
@@ -83,7 +83,7 @@ class DeepSeekHarness:
         )
         self._initialized = False
 
-    def __enter__(self) -> "DeepSeekHarness":
+    def __enter__(self) -> "YdszBuddy":
         self.start()
         return self
 
@@ -91,7 +91,7 @@ class DeepSeekHarness:
         self.close()
 
     @property
-    def client(self) -> HarnessClient:
+    def client(self) -> YdbClient:
         return self._client
 
     def start(self) -> None:
@@ -125,7 +125,7 @@ class DeepSeekHarness:
 
 
 class Session:
-    def __init__(self, harness: DeepSeekHarness, session_id: str) -> None:
+    def __init__(self, harness: YdszBuddy, session_id: str) -> None:
         self.harness = harness
         self.id = session_id
 

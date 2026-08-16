@@ -1,15 +1,15 @@
-from .api import DeepSeekHarness, DeepSeekHarnessConfig, RunResult, Session
-from .client import HarnessClient, HarnessConfig
+from .api import YdszBuddy, YdszBuddyConfig, RunResult, Session
+from .client import YdbClient, YdbConfig
 from .errors import SdkProtocolError
 from .models import IncomingRequest, InitializeResponse, JsonObject, Notification, ServerInfo
 
 __all__ = [
-    "DeepSeekHarness",
-    "DeepSeekHarnessConfig",
+    "YdszBuddy",
+    "YdszBuddyConfig",
     "Session",
     "RunResult",
-    "HarnessClient",
-    "HarnessConfig",
+    "YdbClient",
+    "YdbConfig",
     "SdkProtocolError",
     "IncomingRequest",
     "InitializeResponse",

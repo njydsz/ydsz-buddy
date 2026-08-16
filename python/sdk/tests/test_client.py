@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from deepseek_harness import DeepSeekHarness, HarnessClient, HarnessConfig, Notification, SdkProtocolError
+from deepseek_harness import YdszBuddy, YdbClient, YdbConfig, Notification, SdkProtocolError
 
 
 def test_high_level_sdk_runs_turn_and_collects_final_response(tmp_path: Path) -> None:
@@ -91,7 +91,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(
+    with YdszBuddy(
         model="deepseek-v4-flash",
         max_tokens=4096,
         cwd=str(tmp_path),
@@ -149,7 +149,7 @@ for line in sys.stdin:
     )
 
     seen: list[str] = []
-    with DeepSeekHarness(
+    with YdszBuddy(
         launch_args_override=(sys.executable, str(script)),
         cwd=str(tmp_path),
     ) as harness:
@@ -187,7 +187,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(
+    with YdszBuddy(
         launch_args_override=(sys.executable, str(script)),
         cwd=str(tmp_path),
     ) as harness:
@@ -221,7 +221,7 @@ for line in sys.stdin:
     )
     monkeypatch.chdir(tmp_path)
 
-    with DeepSeekHarness(
+    with YdszBuddy(
         cwd=".",
         runtime_cwd=".",
         launch_args_override=(sys.executable, str(script)),
@@ -262,7 +262,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(
+    with YdszBuddy(
         launch_args_override=(sys.executable, str(script)),
         cwd=str(tmp_path),
     ) as harness:
@@ -311,7 +311,7 @@ for line in sys.stdin:
     )
 
     seen: list[str] = []
-    with DeepSeekHarness(
+    with YdszBuddy(
         launch_args_override=(sys.executable, str(script)),
         cwd=str(tmp_path),
     ) as harness:
@@ -366,7 +366,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(
+    with YdszBuddy(
         launch_args_override=(sys.executable, str(script)),
         cwd=str(tmp_path),
     ) as harness:
@@ -401,7 +401,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(launch_args_override=(sys.executable, str(script)), cwd=str(tmp_path)) as harness:
+    with YdszBuddy(launch_args_override=(sys.executable, str(script)), cwd=str(tmp_path)) as harness:
         result = harness.run("one turn", session_id="main")
         assert harness.client._notifications.qsize() == 0
 
@@ -441,7 +441,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with DeepSeekHarness(launch_args_override=(sys.executable, str(script)), cwd=str(tmp_path)) as harness:
+    with YdszBuddy(launch_args_override=(sys.executable, str(script)), cwd=str(tmp_path)) as harness:
         first = harness.run("first turn", session_id="main")
         second = harness.run("second turn", session_id="main")
 
@@ -472,8 +472,8 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(launch_args_override=(sys.executable, str(script)))
+    with YdbClient(
+        YdbConfig(launch_args_override=(sys.executable, str(script)))
     ) as client:
         init = client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
         assert init.serverInfo.name == "fake-dsh"
@@ -486,7 +486,7 @@ for line in sys.stdin:
 
 
 def test_client_keeps_unmatched_notifications_available_globally_while_subscribed() -> None:
-    client = HarnessClient()
+    client = YdbClient()
     with client.subscribe_session_notifications("main"):
         client._handle_message({
             "jsonrpc": "2.0",
@@ -502,7 +502,7 @@ def test_client_keeps_unmatched_notifications_available_globally_while_subscribe
 
 
 def test_session_subscription_keeps_descendant_relationships_across_subscriptions() -> None:
-    client = HarnessClient()
+    client = YdbClient()
     with client.subscribe_session_notifications("main") as first:
         client._handle_message({
             "jsonrpc": "2.0",
@@ -529,7 +529,7 @@ def test_session_subscription_keeps_descendant_relationships_across_subscription
 
 
 def test_session_subscription_preserves_reused_child_ancestry_after_late_finish() -> None:
-    client = HarnessClient()
+    client = YdbClient()
     old_seen: list[Notification] = []
     new_seen: list[Notification] = []
     with (
@@ -612,7 +612,7 @@ for line in sys.stdin:
     def broken_filter(_notification: object) -> bool:
         raise RuntimeError("bad notification filter")
 
-    with HarnessClient(HarnessConfig(launch_args_override=(sys.executable, str(script)))) as client:
+    with YdbClient(YdbConfig(launch_args_override=(sys.executable, str(script)))) as client:
         client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
         with (
             client.subscribe_notifications(broken_filter) as broken,
@@ -649,7 +649,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with HarnessClient(HarnessConfig(launch_args_override=(sys.executable, str(script)))) as client:
+    with YdbClient(YdbConfig(launch_args_override=(sys.executable, str(script)))) as client:
         client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
         with pytest.raises(ValueError):
             client.session_prompt("main", [{"type": "text", "text": "fix it"}])
@@ -676,8 +676,8 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(launch_args_override=(sys.executable, str(script)))
+    with YdbClient(
+        YdbConfig(launch_args_override=(sys.executable, str(script)))
     ) as client:
         client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
 
@@ -710,8 +710,8 @@ for line in sys.stdin:
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(launch_args_override=(sys.executable, str(script)))
+    with YdbClient(
+        YdbConfig(launch_args_override=(sys.executable, str(script)))
     ) as client:
         init = client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
         assert init.serverInfo.name == "fake-dsh"
@@ -729,8 +729,8 @@ time.sleep(60)
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(
+    with YdbClient(
+        YdbConfig(
             launch_args_override=(sys.executable, str(script)),
             request_timeout_seconds=0.1,
         )
@@ -765,8 +765,8 @@ for line in sys.stdin:
 """.strip()
     )
 
-    client = HarnessClient(
-        HarnessConfig(
+    client = YdbClient(
+        YdbConfig(
             launch_args_override=(sys.executable, str(script)),
             shutdown_timeout_seconds=0.1,
         )
@@ -799,7 +799,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    client = HarnessClient(HarnessConfig(launch_args_override=(sys.executable, str(script))))
+    client = YdbClient(YdbConfig(launch_args_override=(sys.executable, str(script))))
     client.start()
     proc = client._proc
     assert proc is not None
@@ -812,22 +812,22 @@ for line in sys.stdin:
 
 
 def test_public_signatures_omit_unsupported_wire_parameters() -> None:
-    from deepseek_harness import DeepSeekHarnessConfig, Session
+    from deepseek_harness import YdszBuddyConfig, Session
 
-    assert "session_root" not in inspect.signature(HarnessClient.initialize).parameters
-    assert "system_prompt" not in inspect.signature(HarnessClient.initialize).parameters
-    assert "profile" not in inspect.signature(HarnessClient.session_prompt).parameters
-    assert "profile" not in inspect.signature(DeepSeekHarness.run).parameters
+    assert "session_root" not in inspect.signature(YdbClient.initialize).parameters
+    assert "system_prompt" not in inspect.signature(YdbClient.initialize).parameters
+    assert "profile" not in inspect.signature(YdbClient.session_prompt).parameters
+    assert "profile" not in inspect.signature(YdszBuddy.run).parameters
     assert "profile" not in inspect.signature(Session.run).parameters
-    assert "system_prompt" not in DeepSeekHarnessConfig.__dataclass_fields__
-    assert "max_tokens" in DeepSeekHarnessConfig.__dataclass_fields__
-    assert "max_tokens" in inspect.signature(HarnessClient.initialize).parameters
-    assert "client_name" not in HarnessConfig.__dataclass_fields__
-    assert "client_version" not in HarnessConfig.__dataclass_fields__
+    assert "system_prompt" not in YdszBuddyConfig.__dataclass_fields__
+    assert "max_tokens" in YdszBuddyConfig.__dataclass_fields__
+    assert "max_tokens" in inspect.signature(YdbClient.initialize).parameters
+    assert "client_name" not in YdbConfig.__dataclass_fields__
+    assert "client_version" not in YdbConfig.__dataclass_fields__
 
 
 def test_client_close_is_idempotent_before_and_after_start(tmp_path: Path) -> None:
-    HarnessClient().close()
+    YdbClient().close()
 
     script = tmp_path / "fake_bridge.py"
     script.write_text(
@@ -845,7 +845,7 @@ for line in sys.stdin:
 """.strip()
     )
 
-    client = HarnessClient(HarnessConfig(launch_args_override=(sys.executable, str(script))))
+    client = YdbClient(YdbConfig(launch_args_override=(sys.executable, str(script))))
     client.start()
     client.initialize(provider="deepseek-official", cwd="/workspace", model="dsagent")
     client.close()
@@ -863,8 +863,8 @@ sys.exit(42)
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(
+    with YdbClient(
+        YdbConfig(
             launch_args_override=(sys.executable, str(script)),
             request_timeout_seconds=2,
         )
@@ -895,8 +895,8 @@ with open(os.environ["SEEN"], "w") as seen:
 """.strip()
     )
 
-    with HarnessClient(
-        HarnessConfig(
+    with YdbClient(
+        YdbConfig(
             launch_args_override=(sys.executable, str(script)),
             env={"SEEN": str(output)},
         )
@@ -971,7 +971,7 @@ def test_client_default_launch_uses_bundled_runtime_and_injects_default_config(
     else:
         monkeypatch.setenv("DSH_CORDIS_CONFIG", ambient_config)
 
-    with HarnessClient(HarnessConfig(env={"ENV_DUMP": str(env_dump)})) as client:
+    with YdbClient(YdbConfig(env={"ENV_DUMP": str(env_dump)})) as client:
         init = client.initialize(provider="deepseek-official", cwd="/workspace", model="deepseek-v4-pro")
 
     assert init.serverInfo.name == "bundled-runtime"
@@ -985,8 +985,8 @@ def test_client_respects_explicit_config_over_bundled_default(
     _install_fake_bundled_runtime(tmp_path, monkeypatch)
     monkeypatch.delenv("DSH_CORDIS_CONFIG", raising=False)
 
-    with HarnessClient(
-        HarnessConfig(env={"ENV_DUMP": str(env_dump), "DSH_CORDIS_CONFIG": "./explicit.yml"})
+    with YdbClient(
+        YdbConfig(env={"ENV_DUMP": str(env_dump), "DSH_CORDIS_CONFIG": "./explicit.yml"})
     ) as client:
         client.initialize(provider="deepseek-official", cwd="/workspace", model="deepseek-v4-pro")
 
@@ -998,4 +998,4 @@ def test_client_reports_missing_bundled_runtime_dependency(monkeypatch: pytest.M
     monkeypatch.setattr(sys, "path", [])
 
     with pytest.raises(FileNotFoundError, match="Install deepseek-harness-runtime-bin"):
-        HarnessClient().start()
+        YdbClient().start()
