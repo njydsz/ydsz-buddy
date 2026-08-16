@@ -9,7 +9,7 @@
  * The composition overlay disables the CLI `web-startup` and `web-runtime`
  * rows and enables this plugin in their place; nothing else in the web
  * composition changes.
- * @module @njydsz/ydb-electron/runtime
+ * @module @njydsz/ydb-gui/runtime
  */
 
 import type { Context } from '@njydsz/cordis'

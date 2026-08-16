@@ -6,7 +6,7 @@
  * WebApiClient (WebSocket + fetch); on the desktop it is satisfied by
  * IpcApiClient (IPC). Everything downstream — SessionManager, projections,
  * the UI — is unchanged.
- * @module @njydsz/ydb-electron/ipc-connection-controller
+ * @module @njydsz/ydb-gui/ipc-connection-controller
  */
 
 import { ConnectionController, type ConnectionConfig, type ConnectionSinks } from '@njydsz/ydb-client-connection/client/connection'

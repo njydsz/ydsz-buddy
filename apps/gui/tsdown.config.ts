@@ -7,7 +7,7 @@ export default defineConfig({
     // host-runtime) are bundled as part of this entry automatically.
     main: 'src/main.ts',
     // electron-runtime is the overlay Cordis plugin the Loader imports by its
-    // bare module specifier (@njydsz/ydb-electron/runtime); it must be a
+    // bare module specifier (@njydsz/ydb-gui/runtime); it must be a
     // standalone entry so the exports map's ./runtime resolves to lib/.
     'electron-runtime': 'src/electron-runtime.ts',
     // Stage 2 IPC carrier: enable these when the IPC transport replaces HTTP.

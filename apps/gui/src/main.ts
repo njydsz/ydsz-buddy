@@ -9,7 +9,7 @@
  * The host runtime boot is async (the Loader tree resolves fibers in
  * dependency order). We create the window hidden, show it only after the
  * server URL resolves so the user never sees a blank frame.
- * @module @deepseek-ai/dsh-electron/main
+ * @module @njydsz/ydb-gui/main
  */
 
 import { app, BrowserWindow } from 'electron'

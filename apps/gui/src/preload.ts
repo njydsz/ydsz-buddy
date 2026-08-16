@@ -11,7 +11,7 @@
  * - `dsh:stream:abort` (send): abort an open stream.
  * - `dsh:stream:frame:<id>` (on): one SSE frame pushed per stream.
  * - `dsh:stream:end:<id>` (on): stream termination signal.
- * @module @njydsz/ydb-electron/preload
+ * @module @njydsz/ydb-gui/preload
  */
 
 import { contextBridge, ipcRenderer } from 'electron'

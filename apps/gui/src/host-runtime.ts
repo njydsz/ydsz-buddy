@@ -23,7 +23,7 @@
  * preload bridge) to remove the HTTP dependency for unary/streaming RPC.
  * The work here is structured so stage 2 swaps the carrier without touching
  * the host composition.
- * @module @deepseek-ai/dsh-electron/host-runtime
+ * @module @njydsz/ydb-gui/host-runtime
  */
 
 import { fileURLToPath } from 'node:url'
@@ -43,7 +43,7 @@ const BIN_NAME = 'dsh'
 /** Stable Cordis plugin name for the Electron marker overlay. */
 export const name = 'electron-host-runtime'
 
-/** Package directory anchor — tracks this apps/electron install for profile load. */
+/** Package directory anchor — tracks this apps/gui install for profile load. */
 export const INSTALL_ANCHOR = fileURLToPath(new URL('../package.json', import.meta.url))
 
 /** Empty root config — the whole composition is patch layers (mirrors cli/profile-boot). */
@@ -83,7 +83,7 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
     { id: 'web-startup', disabled: true },
     { id: 'web-runtime', disabled: true },
     // Provide the webStartup/webRuntime services the composition expects.
-    { insert: [{ id: 'electron-runtime', name: '@njydsz/ydb-electron/runtime' }] },
+    { insert: [{ id: 'electron-runtime', name: '@njydsz/ydb-gui/runtime' }] },
     // Drop the webserver's flag-provider dependency; use static values so the
     // row resolves without waiting for the CLI's web-startup provider.
     { id: 'webserver', inject: [], config: { host: '127.0.0.1', port: 0 } },

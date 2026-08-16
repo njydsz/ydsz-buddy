@@ -8,7 +8,7 @@
  * The preload script exposes `window.__dshIpc` (see preload.ts). This module
  * never touches node: or electron: imports directly — it consumes only the
  * window bridge, keeping it import-browser-safe (no host runtime bleed).
- * @module @njydsz/ydb-electron/ipc-api-client
+ * @module @njydsz/ydb-gui/ipc-api-client
  */
 
 import type { ApiProxy, HostFrame, MuxFrame, RpcRequest, ServerRequest } from '@njydsz/ydb-host-apiproxy/api'
