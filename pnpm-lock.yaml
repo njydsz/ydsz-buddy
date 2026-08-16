@@ -25,6 +25,9 @@ importers:
       '@agentclientprotocol/sdk':
         specifier: 0.25.1
         version: 0.25.1(zod@4.4.3)
+      '@njydsz/ydb-gui':
+        specifier: workspace:^
+        version: link:apps/gui
       '@njydsz/ydb-tool-session-query':
         specifier: workspace:^
         version: link:packages/session-query/tool-session-query
@@ -365,12 +368,450 @@ importers:
       '@njydsz/cordis':
         specifier: link:../../vendor/cordis
         version: link:../../vendor/cordis
+      '@njydsz/cordis-plugin-hmr':
+        specifier: link:../../vendor/hmr
+        version: link:../../vendor/hmr
       '@njydsz/cordis-plugin-include':
         specifier: link:../../vendor/include
         version: link:../../vendor/include
+      '@njydsz/cordis-plugin-loader':
+        specifier: link:../../vendor/loader
+        version: link:../../vendor/loader
+      '@njydsz/cordis-plugin-timer':
+        specifier: link:../../vendor/timer
+        version: link:../../vendor/timer
+      '@njydsz/ydb-agent':
+        specifier: workspace:*
+        version: link:../../packages/core/agent
+      '@njydsz/ydb-agent-default-model':
+        specifier: workspace:*
+        version: link:../../packages/core/agent-default-model
+      '@njydsz/ydb-agent-instructions':
+        specifier: workspace:^
+        version: link:../../packages/context/agent-instructions
+      '@njydsz/ydb-agent-loop':
+        specifier: workspace:*
+        version: link:../../packages/core/agent-loop
+      '@njydsz/ydb-agent-presets':
+        specifier: workspace:*
+        version: link:../../packages/preset/agent-presets
+      '@njydsz/ydb-agent-tool-presentation':
+        specifier: workspace:^
+        version: link:../../packages/core/agent-tool-presentation
+      '@njydsz/ydb-api-gateway':
+        specifier: workspace:*
+        version: link:../../packages/api/gateway
+      '@njydsz/ydb-api-remotes':
+        specifier: workspace:*
+        version: link:../../packages/api/remotes
       '@njydsz/ydb-app-boot':
         specifier: workspace:*
         version: link:../../packages/boot/app-boot
+      '@njydsz/ydb-attachment-local':
+        specifier: workspace:*
+        version: link:../../packages/attachment/attachment-local
+      '@njydsz/ydb-base':
+        specifier: workspace:*
+        version: link:../../packages/bundle/base
+      '@njydsz/ydb-bash-sandbox':
+        specifier: workspace:*
+        version: link:../../packages/shell/bash-sandbox
+      '@njydsz/ydb-client-connection':
+        specifier: workspace:*
+        version: link:../../packages/client/connection
+      '@njydsz/ydb-client-hmr':
+        specifier: workspace:*
+        version: link:../../packages/client/hmr
+      '@njydsz/ydb-client-locale':
+        specifier: workspace:*
+        version: link:../../packages/client/locale
+      '@njydsz/ydb-client-modules':
+        specifier: workspace:*
+        version: link:../../packages/client/modules
+      '@njydsz/ydb-client-runtime':
+        specifier: workspace:*
+        version: link:../../packages/client/runtime
+      '@njydsz/ydb-client-ui-agent-preset':
+        specifier: workspace:^
+        version: link:../../packages/client/ui-agent-preset
+      '@njydsz/ydb-client-ui-commands':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-commands
+      '@njydsz/ydb-client-ui-conversation':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-conversation
+      '@njydsz/ydb-client-ui-cordis':
+        specifier: workspace:^
+        version: link:../../packages/extensions/ui-cordis
+      '@njydsz/ydb-client-ui-deliverables':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-deliverables
+      '@njydsz/ydb-client-ui-goal':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-goal
+      '@njydsz/ydb-client-ui-input-trigger':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-input-trigger
+      '@njydsz/ydb-client-ui-jobs':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-jobs
+      '@njydsz/ydb-client-ui-layout':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-layout
+      '@njydsz/ydb-client-ui-message-feedback':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-message-feedback
+      '@njydsz/ydb-client-ui-model-selection':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-model-selection
+      '@njydsz/ydb-client-ui-permission-presets':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-permission-presets
+      '@njydsz/ydb-client-ui-plan':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-plan
+      '@njydsz/ydb-client-ui-settings':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-settings
+      '@njydsz/ydb-client-ui-settings-general':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-settings-general
+      '@njydsz/ydb-client-ui-settings-models':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-settings-models
+      '@njydsz/ydb-client-ui-settings-plugin-inventory':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-settings-plugin-inventory
+      '@njydsz/ydb-client-ui-settings-plugins':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-settings-plugins
+      '@njydsz/ydb-client-ui-sidebar':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-sidebar
+      '@njydsz/ydb-client-ui-skill':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-skill
+      '@njydsz/ydb-client-ui-subagent':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-subagent
+      '@njydsz/ydb-client-ui-theme':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-theme
+      '@njydsz/ydb-client-ui-tool':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-tool
+      '@njydsz/ydb-client-ui-trajectory':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-trajectory
+      '@njydsz/ydb-client-ui-user-questions':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-user-questions
+      '@njydsz/ydb-client-ui-workflow-run':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-workflow-run
+      '@njydsz/ydb-client-ui-workspace':
+        specifier: workspace:*
+        version: link:../../packages/client/ui-workspace
+      '@njydsz/ydb-cmdline':
+        specifier: workspace:^
+        version: link:../../packages/boot/cmdline
+      '@njydsz/ydb-code-runtime-worker-thread':
+        specifier: workspace:*
+        version: link:../../packages/code-runtime/code-runtime-worker-thread
+      '@njydsz/ydb-command-compact':
+        specifier: workspace:^
+        version: link:../../packages/compaction/command-compact
+      '@njydsz/ydb-command-feedback':
+        specifier: workspace:*
+        version: link:../../packages/feedback/command-feedback
+      '@njydsz/ydb-command-goal':
+        specifier: workspace:^
+        version: link:../../packages/goal/command-goal
+      '@njydsz/ydb-commands':
+        specifier: workspace:*
+        version: link:../../packages/interaction/commands
+      '@njydsz/ydb-compaction-basic':
+        specifier: workspace:^
+        version: link:../../packages/compaction/compaction-basic
+      '@njydsz/ydb-compaction-tool-result-pruner':
+        specifier: workspace:^
+        version: link:../../packages/compaction/compaction-tool-result-pruner
+      '@njydsz/ydb-cordis-client-runner':
+        specifier: workspace:^
+        version: link:../../packages/extensions/cordis-client-runner
+      '@njydsz/ydb-cordis-host-runner':
+        specifier: workspace:*
+        version: link:../../packages/extensions/cordis-host-runner
+      '@njydsz/ydb-credentials-local':
+        specifier: workspace:*
+        version: link:../../packages/credentials/credentials-local
+      '@njydsz/ydb-fs-local':
+        specifier: workspace:^
+        version: link:../../packages/fs/fs-local
+      '@njydsz/ydb-fs-observation-policy':
+        specifier: workspace:*
+        version: link:../../packages/fs/fs-observation-policy
+      '@njydsz/ydb-fs-sandbox':
+        specifier: workspace:*
+        version: link:../../packages/fs/fs-sandbox
+      '@njydsz/ydb-goal':
+        specifier: workspace:^
+        version: link:../../packages/goal/goal
+      '@njydsz/ydb-goal-round-driver':
+        specifier: workspace:^
+        version: link:../../packages/goal/goal-round-driver
+      '@njydsz/ydb-headless':
+        specifier: workspace:^
+        version: link:../../packages/bundle/headless
+      '@njydsz/ydb-home-paths':
+        specifier: workspace:^
+        version: link:../../packages/util/home-paths
+      '@njydsz/ydb-host-apiproxy':
+        specifier: workspace:*
+        version: link:../../packages/host/apiproxy
+      '@njydsz/ydb-host-directory-picker-auto':
+        specifier: workspace:*
+        version: link:../../packages/host/directory-picker-auto
+      '@njydsz/ydb-host-plugin-inventory':
+        specifier: workspace:*
+        version: link:../../packages/host/plugin-inventory
+      '@njydsz/ydb-host-webserver':
+        specifier: workspace:*
+        version: link:../../packages/host/webserver
+      '@njydsz/ydb-jobs-local':
+        specifier: workspace:^
+        version: link:../../packages/jobs/jobs-local
+      '@njydsz/ydb-launch-environment':
+        specifier: workspace:^
+        version: link:../../packages/util/launch-environment
+      '@njydsz/ydb-llm':
+        specifier: workspace:*
+        version: link:../../packages/llm/llm
+      '@njydsz/ydb-llm-deepseek':
+        specifier: workspace:*
+        version: link:../../packages/llm/llm-deepseek
+      '@njydsz/ydb-llm-pi-ai':
+        specifier: workspace:*
+        version: link:../../packages/llm/llm-pi-ai
+      '@njydsz/ydb-llm-retry':
+        specifier: workspace:*
+        version: link:../../packages/llm/llm-retry
+      '@njydsz/ydb-mcp-client':
+        specifier: workspace:^
+        version: link:../../packages/mcp/mcp-client
+      '@njydsz/ydb-message-feedback':
+        specifier: workspace:*
+        version: link:../../packages/feedback/message-feedback
+      '@njydsz/ydb-permission-presets':
+        specifier: workspace:*
+        version: link:../../packages/interaction/permission-presets
+      '@njydsz/ydb-persona':
+        specifier: workspace:^
+        version: link:../../packages/preset/persona
+      '@njydsz/ydb-plan-mode':
+        specifier: workspace:^
+        version: link:../../packages/plan/plan-mode
+      '@njydsz/ydb-pwsh-local':
+        specifier: workspace:^
+        version: link:../../packages/shell/pwsh-local
+      '@njydsz/ydb-pwsh-sandbox':
+        specifier: workspace:^
+        version: link:../../packages/shell/pwsh-sandbox
+      '@njydsz/ydb-repeat-tool-reminder':
+        specifier: workspace:*
+        version: link:../../packages/guard/repeat-tool-reminder
+      '@njydsz/ydb-sandbox-local':
+        specifier: workspace:*
+        version: link:../../packages/sandbox/sandbox-local
+      '@njydsz/ydb-sandbox-policy':
+        specifier: workspace:*
+        version: link:../../packages/sandbox/sandbox-policy
+      '@njydsz/ydb-schedule':
+        specifier: workspace:^
+        version: link:../../packages/schedule/schedule
+      '@njydsz/ydb-session':
+        specifier: workspace:*
+        version: link:../../packages/core/session
+      '@njydsz/ydb-session-checkpoint-policy':
+        specifier: workspace:*
+        version: link:../../packages/session/session-checkpoint-policy
+      '@njydsz/ydb-session-log-export':
+        specifier: workspace:*
+        version: link:../../packages/session-query/session-log-export
+      '@njydsz/ydb-session-persistence-jsonl':
+        specifier: workspace:*
+        version: link:../../packages/session/session-persistence-jsonl
+      '@njydsz/ydb-session-projection':
+        specifier: workspace:^
+        version: link:../../packages/session/session-projection
+      '@njydsz/ydb-session-projection-cache':
+        specifier: workspace:*
+        version: link:../../packages/session/session-projection-cache
+      '@njydsz/ydb-session-query-sqlite':
+        specifier: workspace:*
+        version: link:../../packages/session-query/session-query-sqlite
+      '@njydsz/ydb-session-reference':
+        specifier: workspace:^
+        version: link:../../packages/context/session-reference
+      '@njydsz/ydb-session-stats':
+        specifier: workspace:*
+        version: link:../../packages/session/session-stats
+      '@njydsz/ydb-session-telemetry-otel':
+        specifier: workspace:*
+        version: link:../../packages/session/session-telemetry-otel
+      '@njydsz/ydb-session-title':
+        specifier: workspace:*
+        version: link:../../packages/session/session-title
+      '@njydsz/ydb-session-title-first-prompt-llm':
+        specifier: workspace:*
+        version: link:../../packages/session/session-title-first-prompt-llm
+      '@njydsz/ydb-settings-file':
+        specifier: workspace:*
+        version: link:../../packages/settings/settings-file
+      '@njydsz/ydb-shell-env':
+        specifier: workspace:*
+        version: link:../../packages/shell/shell-env
+      '@njydsz/ydb-skill':
+        specifier: workspace:^
+        version: link:../../packages/skill/skill
+      '@njydsz/ydb-skill-badge':
+        specifier: workspace:*
+        version: link:../../packages/skill/skill-badge
+      '@njydsz/ydb-skill-filesystem':
+        specifier: workspace:^
+        version: link:../../packages/skill/skill-filesystem
+      '@njydsz/ydb-spill-local':
+        specifier: workspace:*
+        version: link:../../packages/spill/spill-local
+      '@njydsz/ydb-spill-policy':
+        specifier: workspace:*
+        version: link:../../packages/spill/spill-policy
+      '@njydsz/ydb-storage':
+        specifier: workspace:*
+        version: link:../../packages/storage/storage
+      '@njydsz/ydb-storage-domain':
+        specifier: workspace:*
+        version: link:../../packages/storage/storage-domain
+      '@njydsz/ydb-storage-json':
+        specifier: workspace:*
+        version: link:../../packages/storage/storage-json
+      '@njydsz/ydb-subagent':
+        specifier: workspace:*
+        version: link:../../packages/subagent/subagent
+      '@njydsz/ydb-subagent-fork-in-process':
+        specifier: workspace:*
+        version: link:../../packages/subagent/subagent-fork-in-process
+      '@njydsz/ydb-subagent-spawn-in-process':
+        specifier: workspace:*
+        version: link:../../packages/subagent/subagent-spawn-in-process
+      '@njydsz/ydb-subprocess-local':
+        specifier: workspace:*
+        version: link:../../packages/subprocess/subprocess-local
+      '@njydsz/ydb-system-prompt':
+        specifier: workspace:*
+        version: link:../../packages/core/system-prompt
+      '@njydsz/ydb-terminal':
+        specifier: workspace:^
+        version: link:../../packages/terminal/terminal
+      '@njydsz/ydb-terminal-bash':
+        specifier: workspace:^
+        version: link:../../packages/terminal/terminal-bash
+      '@njydsz/ydb-time-context':
+        specifier: workspace:^
+        version: link:../../packages/context/time-context
+      '@njydsz/ydb-tmux-context':
+        specifier: workspace:^
+        version: link:../../packages/context/tmux-context
+      '@njydsz/ydb-token-meter':
+        specifier: workspace:^
+        version: link:../../packages/llm/token-meter
+      '@njydsz/ydb-tool-ask-user':
+        specifier: workspace:^
+        version: link:../../packages/interaction/tool-ask-user
+      '@njydsz/ydb-tool-bash':
+        specifier: workspace:^
+        version: link:../../packages/shell/tool-bash
+      '@njydsz/ydb-tool-bash-persistent':
+        specifier: workspace:^
+        version: link:../../packages/shell/tool-bash-persistent
+      '@njydsz/ydb-tool-call-timeout-policy':
+        specifier: workspace:*
+        version: link:../../packages/guard/timeout-policy
+      '@njydsz/ydb-tool-cordis':
+        specifier: workspace:^
+        version: link:../../packages/extensions/tool-cordis
+      '@njydsz/ydb-tool-fs':
+        specifier: workspace:^
+        version: link:../../packages/fs/tool-fs
+      '@njydsz/ydb-tool-fs-search':
+        specifier: workspace:^
+        version: link:../../packages/fs/tool-fs-search
+      '@njydsz/ydb-tool-goal':
+        specifier: workspace:^
+        version: link:../../packages/goal/tool-goal
+      '@njydsz/ydb-tool-jobs':
+        specifier: workspace:^
+        version: link:../../packages/jobs/tool-jobs
+      '@njydsz/ydb-tool-pwsh':
+        specifier: workspace:^
+        version: link:../../packages/shell/tool-pwsh
+      '@njydsz/ydb-tool-ralph':
+        specifier: workspace:^
+        version: link:../../packages/workflow/tool-ralph
+      '@njydsz/ydb-tool-skill':
+        specifier: workspace:^
+        version: link:../../packages/skill/tool-skill
+      '@njydsz/ydb-tool-str-replace-editor':
+        specifier: workspace:^
+        version: link:../../packages/fs/tool-str-replace-editor
+      '@njydsz/ydb-tool-subagent':
+        specifier: workspace:^
+        version: link:../../packages/subagent/tool-subagent
+      '@njydsz/ydb-tool-subagent-control':
+        specifier: workspace:^
+        version: link:../../packages/subagent/tool-subagent-control
+      '@njydsz/ydb-tool-subagent-report':
+        specifier: workspace:*
+        version: link:../../packages/subagent/tool-subagent-report
+      '@njydsz/ydb-tool-todo':
+        specifier: workspace:^
+        version: link:../../packages/todo/tool-todo
+      '@njydsz/ydb-tool-web':
+        specifier: workspace:^
+        version: link:../../packages/web/tool-web
+      '@njydsz/ydb-tool-workflow':
+        specifier: workspace:^
+        version: link:../../packages/workflow/tool-workflow
+      '@njydsz/ydb-tools':
+        specifier: workspace:*
+        version: link:../../packages/core/tools
+      '@njydsz/ydb-typert-loader':
+        specifier: workspace:*
+        version: link:../../packages/typert/loader
+      '@njydsz/ydb-typert-registry':
+        specifier: workspace:*
+        version: link:../../packages/typert/registry
+      '@njydsz/ydb-user-approval':
+        specifier: workspace:*
+        version: link:../../packages/interaction/user-approval
+      '@njydsz/ydb-user-questions':
+        specifier: workspace:*
+        version: link:../../packages/interaction/user-questions
+      '@njydsz/ydb-web':
+        specifier: workspace:*
+        version: link:../../packages/web/web
+      '@njydsz/ydb-web-app':
+        specifier: workspace:*
+        version: link:../../packages/bundle/web-app
+      '@njydsz/ydb-web-search-deepseek':
+        specifier: workspace:*
+        version: link:../../packages/web/web-search-deepseek
+      '@njydsz/ydb-workflow-worker-thread':
+        specifier: workspace:^
+        version: link:../../packages/workflow/workflow-worker-thread
+      '@njydsz/ydb-workspace':
+        specifier: workspace:*
+        version: link:../../packages/workspace/workspace
       electron:
         specifier: ^33.0.0
         version: 33.4.11

@@ -26,7 +26,7 @@
  * @module @njydsz/ydb-gui/host-runtime
  */
 
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Context } from '@njydsz/cordis'
 import type { PatchOptions } from '@njydsz/cordis-plugin-include'
 import {
@@ -99,10 +99,52 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
   // boot() writes baseUrl from the config path, mounts the Loader, applies the
   // patches over the empty root, and settles the tree. installFailLoud makes
   // any unhandled rejection fatal (no silent dead app).
+  //
+  // bareModuleBaseUrl (5th arg) redirects the Loader's bare-plugin resolution
+  // from the config file's directory (the profile dir, which has no
+  // node_modules) to the GUI package directory — where pnpm linked every
+  // @njydsz/ydb-* plugin the web profile patches reference. Without this, the
+  // Loader (which lives at vendor/loader/lib/) would resolve from its own
+  // location and miss the packages that only apps/gui/node_modules hosts.
   const rootConfig = join(profile.dir, 'cordis.yml')
-  const ctx = await boot(BIN_NAME, rootConfig, allPatches)
+  const bareModuleBaseUrl = pathToFileURL(join(INSTALL_ANCHOR, '..')).href + '/'
+  console.error('[electron] bareModuleBaseUrl:', bareModuleBaseUrl)
+  console.error('[electron] INSTALL_ANCHOR:', INSTALL_ANCHOR)
+  let ctx: Context
+  try {
+    ctx = await boot(BIN_NAME, rootConfig, allPatches, undefined, bareModuleBaseUrl)
+  } catch (bootError) {
+    console.error('[electron] boot error type:', typeof bootError, bootError?.constructor?.name)
+    console.error('[electron] boot error keys:', bootError ? Object.keys(bootError) : 'null')
+    // Deep-walk the cause chain looking for errors array
+    const seen = new Set<any>()
+    let err: any = bootError
+    while (err && !seen.has(err)) {
+      seen.add(err)
+      console.error('[electron] walking:', err?.constructor?.name, err?.message?.substring(0, 80))
+      if (Array.isArray(err?.errors)) {
+        console.error('[electron] FOUND AggregateError with', err.errors.length, 'errors:')
+        for (const e of err.errors.slice(0, 10)) {
+          console.error('[electron]  - ', e?.message ?? String(e))
+          if (e?.cause) console.error('[electron]    cause:', e.cause?.message?.substring(0, 120) ?? String(e.cause))
+        }
+        break
+      }
+      err = err?.cause
+    }
+    throw bootError
+  }
   installFailLoud(BIN_NAME)
 
+  // DIAGNOSTIC: dump profile structure
+  console.error('[electron] profile name:', profile.name)
+  console.error('[electron] profile dir:', profile.dir)
+  console.error('[electron] layers count:', profile.layers.length)
+  for (const layer of profile.layers) {
+    console.error(`[electron] layer: ${layer.packageName} patches=${layer.patchPath}`)
+  }
+  console.error('[electron] profile patches:', profile.patches.length)
+  console.error('[electron] profile patchPath:', profile.patchPath)
   const webServer = ctx.get('webServer') as { host: string, port: number } | undefined
   if (webServer === undefined) throw new Error('electron-host: webServer service missing after composition')
 

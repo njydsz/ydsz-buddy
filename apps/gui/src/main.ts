@@ -12,8 +12,15 @@
  * @module @njydsz/ydb-gui/main
  */
 
-import { app, BrowserWindow } from 'electron'
+// Electron is CJS — Node's ESM loader can't statically analyze its named
+// exports, so createRequire is the reliable interop path: it hands the
+// require call straight to Node's CJS machinery, bypassing the ESM named
+// export analysis that breaks on pure-CJS packages.
+import { createRequire } from 'node:module'
 import { bootHostRuntime } from './host-runtime.ts'
+
+const require = createRequire(import.meta.url)
+const { app, BrowserWindow } = require('electron') as typeof import('electron')
 
 /** Single-instance guard: Electron apps quit on second-instance. */
 const gotLock = app.requestSingleInstanceLock()
