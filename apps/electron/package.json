@@ -1,0 +1,27 @@
+{
+  "name": "@deepseek-ai/dsh-electron",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DeepSeek Harness Electron desktop shell — IPC carrier replacement for the webserver transport.",
+  "main": "lib/main.js",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "workspace:*",
+    "@deepseek-ai/dsh-host-apiproxy": "workspace:*",
+    "@deepseek-ai/dsh-client-connection": "workspace:*",
+    "electron": "^33.0.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "workspace:*",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "tsdown": "^0.10.0",
+    "typescript": "^5.7.0"
+  }
+}
