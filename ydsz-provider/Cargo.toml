@@ -1,0 +1,39 @@
+[package]
+name = "ydsz-provider"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# 基础设施
+ydsz-core = { workspace = true }
+ydsz-shared = { workspace = true }
+
+# 异步
+tokio = { workspace = true }
+
+# 序列化
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# 错误
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# 工具
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+
+# HTTP 客户端（LLM 调用）
+reqwest = { workspace = true }
+futures-util = { workspace = true }
+
+# Specta
+specta = { workspace = true }
+specta-serde = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
