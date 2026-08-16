@@ -89,11 +89,11 @@ When a preset genuinely owns a service, wrap the provider **and every consumer t
     workflows: true
   config:
     - id: workflow-worker-thread
-      name: '@deepseek-ai/dsh-workflow-worker-thread'
+      name: '@njydsz/ydb-workflow-worker-thread'
       config:
         provider: spawn
     - id: tool-workflow
-      name: '@deepseek-ai/dsh-tool-workflow'
+      name: '@njydsz/ydb-tool-workflow'
 ```
 
 `true` means a realm private to each mounting session. A string label instead joins subtrees into one shared realm; `provide()` still throws on the second registration under that symbol, so a label does not pool instances and is not what a preset needs.

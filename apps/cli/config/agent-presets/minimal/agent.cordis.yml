@@ -6,7 +6,7 @@
 # persistent `bash` and `str_replace_editor`. Context compaction is absent.
 
 - id: persona
-  name: '@deepseek-ai/dsh-persona'
+  name: '@njydsz/ydb-persona'
   config:
     text: You are a helpful software engineer assistant.
     complete: true
