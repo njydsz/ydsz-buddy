@@ -2,18 +2,19 @@ import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entry: {
+    // Stage 1 Electron main-process entry. tsdown follows the import graph, so
+    // host-runtime.ts (imported here) and electron-runtime.ts (imported by
+    // host-runtime) are bundled as part of this entry automatically.
     main: 'src/main.ts',
-    preload: 'src/preload.ts',
-    // Overlay-referenced plugins: the Cordis Loader imports these by their
-    // bare module specifier (@njydsz/dsh-electron/<name>), so each must be
-    // a standalone entry producing lib/<name>.js that the exports map resolves.
+    // electron-runtime is the overlay Cordis plugin the Loader imports by its
+    // bare module specifier (@njydsz/ydb-electron/runtime); it must be a
+    // standalone entry so the exports map's ./runtime resolves to lib/.
     'electron-runtime': 'src/electron-runtime.ts',
-    'host-runtime': 'src/host-runtime.ts',
-    // Stage 2 IPC carrier (renderer half): imported by the renderer-half of
-    // the connection plugin when the Electron carrier is selected.
-    'ipc-api-client': 'src/ipc-api-client.ts',
-    'ipc-connection-controller': 'src/ipc-connection-controller.ts',
-    'ipc-protocol': 'src/ipc-protocol.ts',
+    // Stage 2 IPC carrier: enable these when the IPC transport replaces HTTP.
+    // preload: 'src/preload.ts',
+    // 'ipc-api-client': 'src/ipc-api-client.ts',
+    // 'ipc-connection-controller': 'src/ipc-connection-controller.ts',
+    // 'ipc-protocol': 'src/ipc-protocol.ts',
   },
   format: 'esm',
   target: 'node22',

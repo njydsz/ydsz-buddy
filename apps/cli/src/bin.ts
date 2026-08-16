@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * dsh — command-line entry. Dynamic imports per mode keep unrelated modes out
+ * ydb — command-line entry. Dynamic imports per mode keep unrelated modes out
  * of each dispatch path; the adapter prints and exits for
  * `--help`/`--version`/a parse error, so only a valid mode reaches the switch.
  * @module @njydsz/ydb/bin
@@ -30,7 +30,7 @@ switch (invocation.mode) {
   case 'profile': {
     const { runProfile } = await import('./profile-boot.ts')
     await runProfile({
-      environment: loadLayeredEnv('dsh'),
+      environment: loadLayeredEnv('ydb'),
       profile: invocation.profile,
       patchFiles: invocation.patches,
       args: invocation.args,
@@ -49,5 +49,5 @@ switch (invocation.mode) {
   }
   default:
     invocation satisfies never
-    throw new Error(`dsh: unhandled invocation mode ${JSON.stringify(invocation)}`)
+    throw new Error(`ydb: unhandled invocation mode ${JSON.stringify(invocation)}`)
 }

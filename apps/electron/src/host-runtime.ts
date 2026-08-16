@@ -27,15 +27,18 @@
  */
 
 import { fileURLToPath } from 'node:url'
-import type { Context } from '@njydsz/cordis'
+import { Context } from '@njydsz/cordis'
 import type { PatchOptions } from '@njydsz/cordis-plugin-include'
 import {
-  boot, composeEntries, healProfilesModuleFallback, installFailLoud,
-  loadOptionalPatches, loadProfile,
+  boot, healProfilesModuleFallback, installFailLoud,
+  loadOptionalPatches, loadProfile, PROFILE_PATCH_FILENAME,
 } from '@njydsz/ydb-app-boot'
 import type { Profile } from '@njydsz/ydb-app-boot'
 import { join } from 'node:path'
 import { writeFileSync } from 'node:fs'
+
+/** Diagnostic prefix for load-failure errors (mirrors the CLI's 'dsh'). */
+const BIN_NAME = 'dsh'
 
 /** Stable Cordis plugin name for the Electron marker overlay. */
 export const name = 'electron-host-runtime'
@@ -68,8 +71,12 @@ export interface ElectronHost {
  */
 export async function bootHostRuntime(): Promise<ElectronHost> {
   const profile = prepareProfile('web')
-  const homePatches = loadOptionalPatches('dsh', homePatchPath()) ?? []
+  const homePatches = loadOptionalPatches(BIN_NAME, homePatchPath()) ?? []
 
+  // Patches are applied in array order; each PatchOptions[] is one layer. The
+  // web composition's own layers (bundles, profile's cordis.patch.yml, home
+  // layer) are already in profile.layers and profile.patches. Our overlay is
+  // the final layer, so it outranks every earlier row that it targets.
   const overlay: PatchOptions[] = [
     // web-startup provides webStartup via CLI flag parsing (cmdlineArgs);
     // web-runtime reads LAN trust. Both are replaced by electron-runtime.
@@ -77,7 +84,8 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
     { id: 'web-runtime', disabled: true },
     // Provide the webStartup/webRuntime services the composition expects.
     { insert: [{ id: 'electron-runtime', name: '@njydsz/ydb-electron/runtime' }] },
-    // Drop the webserver's flag-provider dependency; use static values.
+    // Drop the webserver's flag-provider dependency; use static values so the
+    // row resolves without waiting for the CLI's web-startup provider.
     { id: 'webserver', inject: [], config: { host: '127.0.0.1', port: 0 } },
   ]
 
@@ -87,11 +95,13 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
     ...homePatches,
     ...overlay,
   ]
-  const entries = composeEntries(allPatches)
 
-  const ctx = new Context()
-  await boot(ctx, entries, { baseUrl: profile.dir })
-  installFailLoud(ctx)
+  // boot() writes baseUrl from the config path, mounts the Loader, applies the
+  // patches over the empty root, and settles the tree. installFailLoud makes
+  // any unhandled rejection fatal (no silent dead app).
+  const rootConfig = join(profile.dir, 'cordis.yml')
+  const ctx = await boot(BIN_NAME, rootConfig, allPatches)
+  installFailLoud(BIN_NAME)
 
   const webServer = ctx.get('webServer') as { host: string, port: number } | undefined
   if (webServer === undefined) throw new Error('electron-host: webServer service missing after composition')
@@ -110,7 +120,7 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
  */
 function prepareProfile(profileName: string): Profile {
   healProfilesModuleFallback(INSTALL_ANCHOR)
-  const profile = loadProfile('dsh', profileName, INSTALL_ANCHOR, undefined, { userLayer: true })
+  const profile = loadProfile(BIN_NAME, profileName, INSTALL_ANCHOR, undefined, { userLayer: true })
   writeFileSync(join(profile.dir, 'cordis.yml'), PROFILE_ROOT_CONFIG)
   return profile
 }
@@ -120,7 +130,7 @@ function prepareProfile(profileName: string): Profile {
  * @returns the absolute patch-file path.
  */
 function homePatchPath(): string {
-  return join(homeDir(), 'cordis.patch.yml')
+  return join(homeDir(), PROFILE_PATCH_FILENAME)
 }
 
 /** Resolve $YDB_HOME (the electron app shares the same home as `dsh`). */

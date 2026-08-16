@@ -8,14 +8,14 @@
   name: './mock-delegating-llm.ts'
 
 - id: subagent
-  name: '@deepseek-ai/dsh-subagent'
+  name: '@njydsz/ydb-subagent'
 
 # The out-of-process ACP backend spawns its child through the subprocess seam.
 - id: subprocess
-  name: '@deepseek-ai/dsh-subprocess-local'
+  name: '@njydsz/ydb-subprocess-local'
 
 - id: subagent-acp
-  name: '@deepseek-ai/dsh-subagent-acp'
+  name: '@njydsz/ydb-subagent-acp'
   config:
     providerName: acp
     command: !!js process.execPath
@@ -26,7 +26,7 @@
       MOCK_ECHO_CWD: '1'
 
 - id: tool-subagent
-  name: '@deepseek-ai/dsh-tool-subagent'
+  name: '@njydsz/ydb-tool-subagent'
   config:
     provider: acp
     toolName: subagent
@@ -35,7 +35,7 @@
     maxDepth: 'provider-managed'
 
 - id: agent-spine
-  name: '@deepseek-ai/dsh-agent-spine-demo'
+  name: '@njydsz/ydb-agent-spine-demo'
   config:
     agents:
       - id: main
@@ -46,10 +46,10 @@
     workspaceContext: false
 
 - id: persistence
-  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  name: '@njydsz/ydb-session-persistence-jsonl'
   config:
     root: './.sessions'
     compression: 'none'
 
 - id: checkpoint-policy
-  name: '@deepseek-ai/dsh-session-checkpoint-policy'
+  name: '@njydsz/ydb-session-checkpoint-policy'

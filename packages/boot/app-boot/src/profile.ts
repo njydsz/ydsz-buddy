@@ -19,7 +19,7 @@
  * flat fallback directory `$YDB_HOME/profiles/node_modules` (one symlink per
  * package the installation's app and bundles depend on) makes every in-box
  * plugin Node-resolvable from any profile through the ordinary parent-walk.
- * @module @njydsz/dsh-app-boot/profile
+ * @module @njydsz/ydb-app-boot/profile
  */
 
 import { createRequire } from 'node:module'

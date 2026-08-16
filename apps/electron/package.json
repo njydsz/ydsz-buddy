@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "DeepSeek Harness Electron desktop shell — reuses the web composition with an HTTP-carriage host runtime, with a Stage 2 IPC carrier planned.",
+  "description": "DeepSeek Harness Electron desktop shell — Stage 1 HTTP-carriage host runtime reusing the web composition verbatim; Stage 2 IPC carrier planned.",
   "main": "lib/main.js",
   "exports": {
     ".": {
@@ -13,26 +13,6 @@
     "./runtime": {
       "types": "./lib/types/electron-runtime.d.ts",
       "default": "./lib/electron-runtime.js"
-    },
-    "./host-runtime": {
-      "types": "./lib/types/host-runtime.d.ts",
-      "default": "./lib/host-runtime.js"
-    },
-    "./preload": {
-      "types": "./lib/types/preload.d.ts",
-      "default": "./lib/preload.js"
-    },
-    "./ipc-api-client": {
-      "types": "./lib/types/ipc-api-client.d.ts",
-      "default": "./lib/ipc-api-client.js"
-    },
-    "./ipc-connection-controller": {
-      "types": "./lib/types/ipc-connection-controller.d.ts",
-      "default": "./lib/ipc-connection-controller.js"
-    },
-    "./ipc-protocol": {
-      "types": "./lib/types/ipc-protocol.d.ts",
-      "default": "./lib/ipc-protocol.js"
     }
   },
   "scripts": {
@@ -48,9 +28,6 @@
     "@njydsz/cordis": "workspace:*",
     "@njydsz/cordis-plugin-include": "workspace:*",
     "@njydsz/ydb-app-boot": "workspace:*",
-    "@njydsz/ydb-host-apiproxy": "workspace:*",
-    "@njydsz/ydb-client-connection": "workspace:*",
-    "@njydsz/ydb-web-app": "workspace:*",
     "electron": "^33.0.0"
   },
   "devDependencies": {

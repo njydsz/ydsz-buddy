@@ -16,9 +16,13 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "declaration": false,
-    "sourceMap": true,
-    "outDir": "lib"
+    "sourceMap": true
   },
-  "include": ["src/**/*.ts"]
+  // Stage 1 files only. Stage 2 IPC carrier (preload.ts, ipc-*.ts) is out of
+  // scope for the HTTP-carriage shell and is typechecked separately when
+  // that stage is enabled.
+  "include": ["src/main.ts", "src/host-runtime.ts", "src/electron-runtime.ts"]
 }

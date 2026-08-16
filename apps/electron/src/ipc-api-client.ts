@@ -15,7 +15,7 @@ import type { ApiProxy, HostFrame, MuxFrame, RpcRequest, ServerRequest } from '@
 import { AbstractApiClient } from '@njydsz/ydb-host-apiproxy/client'
 import { hostFrameSchema, muxFrameSchema } from '@njydsz/ydb-host-apiproxy/api/events.schema'
 import { serverRequestSchema } from '@njydsz/ydb-host-apiproxy/api/rpc.schema'
-import { HOST_EVENTS_PATH, MUX_EVENTS_PATH } from '@njydsz/ydb-client-connection/api-path'
+import { HOST_EVENTS_PATH, MUX_EVENTS_PATH } from '@njydsz/ydb-client-connection'
 import type {
   IpcApiRequest, IpcApiResponse, IpcResponse, IpcStreamEnd, IpcStreamFrame, IpcStreamRequest,
 } from './ipc-protocol.ts'

@@ -1,5 +1,5 @@
 /**
- * Shared profile boot for every `dsh` surface: resolve the profile, stack its
+ * Shared profile boot for every `ydb` surface: resolve the profile, stack its
  * patch layers (bundle layers in `ydb.profile.bundles` order, the profile's
  * own `cordis.patch.yml`, `--patch` overlays, the telemetry switch), mount the
  * tree over the profile's empty root config, keep the profile patch layer
@@ -14,9 +14,9 @@
 import { writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { FiberState, type Context } from '@deepseek-ai/cordis'
-import type { PatchOptions } from '@deepseek-ai/cordis-plugin-include'
-import type { EntryOptions } from '@deepseek-ai/cordis-plugin-loader'
+import { FiberState, type Context } from '@njydsz/cordis'
+import type { PatchOptions } from '@njydsz/cordis-plugin-include'
+import type { EntryOptions } from '@njydsz/cordis-plugin-loader'
 import {
   boot,
   composeEntries,
@@ -38,7 +38,7 @@ import { YDB_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentSnapshot } from '@njy
 import { provideCmdline } from '@njydsz/ydb-cmdline'
 import { createProcessShutdown, type ProcessShutdown } from './process-shutdown.ts'
 
-const NAME = 'dsh'
+const NAME = 'ydb'
 
 /**
  * The home-level user patch layer (`$YDB_HOME/cordis.patch.yml`), applied
@@ -50,14 +50,14 @@ export function homePatchPath(): string {
   return join(resolveDshHome(), PROFILE_PATCH_FILENAME)
 }
 
-/** Absolute path of this dsh installation's package.json (both anchors: src/ and lib/ sit one level under apps/cli). */
+/** Absolute path of this ydb installation's package.json (both anchors: src/ and lib/ sit one level under apps/cli). */
 export const INSTALL_ANCHOR = fileURLToPath(new URL('../package.json', import.meta.url))
 
 /** The session-telemetry row id the YDB_TELEMETRY_DISABLED switch targets. */
 const TELEMETRY_ROW_ID = 'session-telemetry-otel'
 
 /** The empty root entry list every profile tree patches over. */
-const PROFILE_ROOT_CONFIG = `# dsh profile root — an empty entry list. The tree is composed as patches:
+const PROFILE_ROOT_CONFIG = `# ydb profile root — an empty entry list. The tree is composed as patches:
 # each bundle in package.json's ydb.profile.bundles, then cordis.patch.yml, then any
 # --patch overlays. Edit cordis.patch.yml, not this file.
 []
@@ -154,7 +154,7 @@ function composeProfile(
   const composedOverlays = [...overlays]
   // The SHIPPED root is the part of the roster only this app can resolve: it
   // sits beside this app's own config, in both the source and built layouts.
-  // The writable root the roster appends is `dsh-agent-presets`' own, so a
+  // The writable root the roster appends is `ydb-agent-presets`' own, so a
   // launcher that never reaches this patch still finds a person's presets.
   if (rows.has('agent-presets')) {
     composedOverlays.push({
@@ -278,9 +278,9 @@ export async function runProfile(options: RunProfileOptions): Promise<{ ctx: Con
       // bare custom profile may not mount either.
       if (ctx.get('hmr') === undefined) {
         if (ctx.get('timer') === undefined) {
-          await ctx.loader.create({ name: '@deepseek-ai/cordis-plugin-timer' })
+          await ctx.loader.create({ name: '@njydsz/cordis-plugin-timer' })
         }
-        await ctx.loader.create({ name: '@deepseek-ai/cordis-plugin-hmr', config: { root: [] } })
+        await ctx.loader.create({ name: '@njydsz/cordis-plugin-hmr', config: { root: [] } })
       }
       await watchUserPatches(ctx, {
         binName: NAME,
