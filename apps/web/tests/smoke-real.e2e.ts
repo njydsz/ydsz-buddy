@@ -387,7 +387,7 @@ describe('dsh web keyless CLI smoke', () => {
     }
   }, 30_000)
 
-  it('DSH_TOOLS_MODE=code collapses the provider wire tools to run_code with the SDK prompt section', async () => {
+  it('YDB_TOOLS_MODE=code collapses the provider wire tools to run_code with the SDK prompt section', async () => {
     requireDist()
     const workspace = mkdtempSync(join(tmpdir(), 'dsh-web-code-mode-'))
 
@@ -428,7 +428,7 @@ describe('dsh web keyless CLI smoke', () => {
           ...process.env,
           DEEPSEEK_API_KEY: 'keyless-web-code-mode',
           DEEPSEEK_BASE_URL: `http://127.0.0.1:${address.port}`,
-          DSH_TOOLS_MODE: 'code',
+          YDB_TOOLS_MODE: 'code',
           YDB_HOME: join(workspace, '.dsh'),
           DSH_AGENTS_HOME: join(workspace, '.agents'),
           TSX_TSCONFIG_PATH: join(REPO_ROOT, 'tsconfig.json'),

@@ -1,7 +1,7 @@
 /** Public session-reference request, candidate, and preparation records. */
 
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { SessionId, UserMessage } from '@deepseek-ai/dsh-session'
+import type { ContentBlock } from '@njydsz/ydb-llm'
+import type { SessionId, UserMessage } from '@njydsz/ydb-session'
 
 /** Durable source session, cited event seqs, and snapshot facts for prepared cross-session context. */
 export interface SessionReferenceSource {
@@ -23,7 +23,7 @@ export interface SessionReferenceSource {
   }[]
 }
 
-declare module '@deepseek-ai/dsh-llm' {
+declare module '@njydsz/ydb-llm' {
   interface MessageSourceMap {
     'session-reference': SessionReferenceSource
   }

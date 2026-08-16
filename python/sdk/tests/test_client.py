@@ -26,9 +26,9 @@ env_dump = os.environ["ENV_DUMP"]
 json.dump({
     "DEEPSEEK_API_KEY": os.environ.get("DEEPSEEK_API_KEY"),
     "DEEPSEEK_BASE_URL": os.environ.get("DEEPSEEK_BASE_URL"),
-    "DSH_CWD": os.environ.get("DSH_CWD"),
-    "DSH_SESSION_ROOT": os.environ.get("DSH_SESSION_ROOT"),
-    "DSH_CORDIS_CONFIG": os.environ.get("DSH_CORDIS_CONFIG"),
+    "YDB_CWD": os.environ.get("YDB_CWD"),
+    "YDB_SESSION_ROOT": os.environ.get("YDB_SESSION_ROOT"),
+    "YDB_CORDIS_CONFIG": os.environ.get("YDB_CORDIS_CONFIG"),
 }, open(env_dump, "w"))
 
 for line in sys.stdin:
@@ -113,9 +113,9 @@ for line in sys.stdin:
     dumped_env = json.loads(env_dump.read_text())
     assert dumped_env["DEEPSEEK_API_KEY"] == "env-key"
     assert dumped_env["DEEPSEEK_BASE_URL"] == "http://127.0.0.1:4321"
-    assert dumped_env["DSH_CWD"] == str(tmp_path)
-    assert dumped_env["DSH_SESSION_ROOT"] == str(tmp_path / "sessions")
-    assert dumped_env["DSH_CORDIS_CONFIG"] == str(tmp_path / "cordis.yml")
+    assert dumped_env["YDB_CWD"] == str(tmp_path)
+    assert dumped_env["YDB_SESSION_ROOT"] == str(tmp_path / "sessions")
+    assert dumped_env["YDB_CORDIS_CONFIG"] == str(tmp_path / "cordis.yml")
     assert json.loads(init_dump.read_text()) == {
         "cwd": str(tmp_path),
         "provider": "deepseek-official",
@@ -212,7 +212,7 @@ import sys
 for line in sys.stdin:
     msg = json.loads(line)
     if msg.get("method") == "initialize":
-        json.dump({"process": os.getcwd(), "environment": os.environ.get("DSH_CWD"), "wire": msg["params"]["cwd"]}, open(os.environ["CAPTURE"], "w"))
+        json.dump({"process": os.getcwd(), "environment": os.environ.get("YDB_CWD"), "wire": msg["params"]["cwd"]}, open(os.environ["CAPTURE"], "w"))
         print(json.dumps({"jsonrpc": "2.0", "id": msg["id"], "result": {"serverInfo": {"name": "fake-runtime"}}}), flush=True)
     elif msg.get("method") == "shutdown":
         print(json.dumps({"jsonrpc": "2.0", "id": msg["id"], "result": {}}), flush=True)
@@ -929,7 +929,7 @@ import json
 import os
 import sys
 
-json.dump({"DSH_CORDIS_CONFIG": os.environ.get("DSH_CORDIS_CONFIG")}, open(os.environ["ENV_DUMP"], "w"))
+json.dump({"YDB_CORDIS_CONFIG": os.environ.get("YDB_CORDIS_CONFIG")}, open(os.environ["ENV_DUMP"], "w"))
 for line in sys.stdin:
     msg = json.loads(line)
     if msg.get("method") == "initialize":
@@ -967,15 +967,15 @@ def test_client_default_launch_uses_bundled_runtime_and_injects_default_config(
     env_dump = tmp_path / "env.json"
     default_config = _install_fake_bundled_runtime(tmp_path, monkeypatch)
     if ambient_config is None:
-        monkeypatch.delenv("DSH_CORDIS_CONFIG", raising=False)
+        monkeypatch.delenv("YDB_CORDIS_CONFIG", raising=False)
     else:
-        monkeypatch.setenv("DSH_CORDIS_CONFIG", ambient_config)
+        monkeypatch.setenv("YDB_CORDIS_CONFIG", ambient_config)
 
     with YdbClient(YdbConfig(env={"ENV_DUMP": str(env_dump)})) as client:
         init = client.initialize(provider="deepseek-official", cwd="/workspace", model="deepseek-v4-pro")
 
     assert init.serverInfo.name == "bundled-runtime"
-    assert json.loads(env_dump.read_text())["DSH_CORDIS_CONFIG"] == str(default_config)
+    assert json.loads(env_dump.read_text())["YDB_CORDIS_CONFIG"] == str(default_config)
 
 
 def test_client_respects_explicit_config_over_bundled_default(
@@ -983,14 +983,14 @@ def test_client_respects_explicit_config_over_bundled_default(
 ) -> None:
     env_dump = tmp_path / "env.json"
     _install_fake_bundled_runtime(tmp_path, monkeypatch)
-    monkeypatch.delenv("DSH_CORDIS_CONFIG", raising=False)
+    monkeypatch.delenv("YDB_CORDIS_CONFIG", raising=False)
 
     with YdbClient(
-        YdbConfig(env={"ENV_DUMP": str(env_dump), "DSH_CORDIS_CONFIG": "./explicit.yml"})
+        YdbConfig(env={"ENV_DUMP": str(env_dump), "YDB_CORDIS_CONFIG": "./explicit.yml"})
     ) as client:
         client.initialize(provider="deepseek-official", cwd="/workspace", model="deepseek-v4-pro")
 
-    assert json.loads(env_dump.read_text())["DSH_CORDIS_CONFIG"] == "./explicit.yml"
+    assert json.loads(env_dump.read_text())["YDB_CORDIS_CONFIG"] == "./explicit.yml"
 
 
 def test_client_reports_missing_bundled_runtime_dependency(monkeypatch: pytest.MonkeyPatch) -> None:

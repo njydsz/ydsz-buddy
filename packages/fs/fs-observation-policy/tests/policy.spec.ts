@@ -2,10 +2,10 @@
 
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { FsTargetKey, FsVersion } from '@deepseek-ai/dsh-fs'
-import type { FsObservation, FsTarget, FsWriteIntent } from '@deepseek-ai/dsh-fs'
-import * as FsPolicy from '@deepseek-ai/dsh-fs-observation-policy'
-import type { FsObservationActor } from '@deepseek-ai/dsh-fs-observation-policy'
+import { FsTargetKey, FsVersion } from '@njydsz/ydb-fs'
+import type { FsObservation, FsTarget, FsWriteIntent } from '@njydsz/ydb-fs'
+import * as FsPolicy from '@njydsz/ydb-fs-observation-policy'
+import type { FsObservationActor } from '@njydsz/ydb-fs-observation-policy'
 
 function target(path: string): FsTarget {
   return { targetKey: FsTargetKey(path), displayPath: path }

@@ -7,11 +7,11 @@
  * `cordis.snapshot.yml` so a stray key cannot trigger a model call. EOF disposes
  * and flushes snapshot runs; the calling automation owns process lifetime. Stdout is
  * reserved for JSON-RPC, so diagnostics go only to stderr.
- * @module @deepseek-ai/dsh-acp-demo/bin
+ * @module @njydsz/ydb-acp-demo/bin
  */
 
 import { parseArgs } from 'node:util'
-import { boot, installFailLoud, loadEnv, resolveConfigPath } from '@deepseek-ai/dsh-app-boot'
+import { boot, installFailLoud, loadEnv, resolveConfigPath } from '@njydsz/ydb-app-boot'
 
 const NAME = 'dsh-acp-demo'
 
@@ -19,7 +19,7 @@ const NAME = 'dsh-acp-demo'
    dsh-app-boot helpers; exercised end-to-end by the snapshot suite and the
    built-bin smoke */
 installFailLoud(NAME)
-const snapshotMode = process.env['DSH_SNAPSHOT']
+const snapshotMode = process.env['YDB_SNAPSHOT']
 if (snapshotMode !== 'replay') loadEnv(NAME)
 const { values } = parseArgs({
   args: process.argv.slice(2),

@@ -2,9 +2,9 @@ import { useState, type ReactNode } from 'react'
 import {
   DisclosureRow, IconChevronRightOutline14, StateDot,
   type DisclosureRowProps, type StateDotState,
-} from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { shallowEqual, type SessionId, type SessionListState } from '@deepseek-ai/dsh-client-runtime/client'
+} from '@njydsz/ydb-client-ui-primitives'
+import type { PropsLocale, PropsRuntime } from '@njydsz/ydb-client-ui-slots'
+import { shallowEqual, type SessionId, type SessionListState } from '@njydsz/ydb-client-runtime/client'
 import type { WorkflowRunKey } from './locales.ts'
 import type {
   WorkflowRunMemberData, WorkflowRunPhaseData, WorkflowRunStatus,

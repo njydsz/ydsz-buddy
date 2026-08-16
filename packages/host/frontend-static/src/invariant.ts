@@ -1,12 +1,12 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-host-frontend-static`.
- * @module @deepseek-ai/dsh-host-frontend-static/invariant
+ * Package-owned invariant companion for `@njydsz/ydb-host-frontend-static`.
+ * @module @njydsz/ydb-host-frontend-static/invariant
  */
 
 import type { Context } from '@deepseek-ai/cordis'
-import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-host-frontend-static'
+const PACKAGE_NAME = '@njydsz/ydb-host-frontend-static'
 
 /** Cordis companion plugin name. */
 export const name = 'host-frontend-static-invariant'

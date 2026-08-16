@@ -6,13 +6,13 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import LlmRuntime, { createUserMessage, LlmAdapter, LlmError, resolveRetryPolicy  } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, ResolvedRetryPolicy, StreamChunk } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
+import AgentRegistry from '@njydsz/ydb-agent'
+import AgentLoop from '@njydsz/ydb-agent-loop'
+import LlmRuntime, { createUserMessage, LlmAdapter, LlmError, resolveRetryPolicy  } from '@njydsz/ydb-llm'
+import type { GenerateOptions, ResolvedRetryPolicy, StreamChunk } from '@njydsz/ydb-llm'
+import SessionStore, { SessionId } from '@njydsz/ydb-session'
+import SystemPrompt from '@njydsz/ydb-system-prompt'
+import ToolRuntime from '@njydsz/ydb-tools'
 import * as retry from '../src/index.ts'
 
 let root: string | undefined
@@ -58,13 +58,13 @@ async function loadYaml(lines: readonly string[]): Promise<Context> {
   await context.plugin(Loader)
   context.loader.builtins.include = Include
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-llm', LlmRuntime],
-    ['@deepseek-ai/dsh-session', SessionStore],
-    ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-    ['@deepseek-ai/dsh-tools', ToolRuntime],
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-llm-retry', retry],
-    ['@deepseek-ai/dsh-agent-loop', AgentLoop],
+    ['@njydsz/ydb-llm', LlmRuntime],
+    ['@njydsz/ydb-session', SessionStore],
+    ['@njydsz/ydb-system-prompt', SystemPrompt],
+    ['@njydsz/ydb-tools', ToolRuntime],
+    ['@njydsz/ydb-agent', AgentRegistry],
+    ['@njydsz/ydb-llm-retry', retry],
+    ['@njydsz/ydb-agent-loop', AgentLoop],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -87,13 +87,13 @@ describe('real Loader composition', () => {
   // to trip the default 5s budget on cold caches.
   it('loads provider-supplied policy and records recovery through the shipping loop', { timeout: 60_000 }, async () => {
     const loaded = await loadYaml([
-      "- name: '@deepseek-ai/dsh-llm'",
-      "- name: '@deepseek-ai/dsh-session'",
-      "- name: '@deepseek-ai/dsh-system-prompt'",
-      "- name: '@deepseek-ai/dsh-tools'",
-      "- name: '@deepseek-ai/dsh-agent'",
-      "- name: '@deepseek-ai/dsh-llm-retry'",
-      "- name: '@deepseek-ai/dsh-agent-loop'",
+      "- name: '@njydsz/ydb-llm'",
+      "- name: '@njydsz/ydb-session'",
+      "- name: '@njydsz/ydb-system-prompt'",
+      "- name: '@njydsz/ydb-tools'",
+      "- name: '@njydsz/ydb-agent'",
+      "- name: '@njydsz/ydb-llm-retry'",
+      "- name: '@njydsz/ydb-agent-loop'",
     ])
 
     const unloaded = [...loaded.loader.entries()]

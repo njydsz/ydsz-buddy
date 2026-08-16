@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-sdk-jsonrpc-server`.
- * @module @deepseek-ai/dsh-sdk-jsonrpc-server/invariant
+ * Package-owned invariant companion for `@njydsz/ydb-sdk-jsonrpc-server`.
+ * @module @njydsz/ydb-sdk-jsonrpc-server/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
-import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-sdk-jsonrpc-server'
+const PACKAGE_NAME = '@njydsz/ydb-sdk-jsonrpc-server'
 
 /** Cordis companion plugin name. */
 export const name = 'sdk-jsonrpc-server-invariant'

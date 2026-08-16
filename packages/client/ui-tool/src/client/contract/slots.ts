@@ -1,10 +1,10 @@
 /** Tool UI slot declarations and their composed component props. */
-import type { PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ToolCallBlock } from '@deepseek-ai/dsh-client-runtime/client'
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type { PropsLocale, PropsRenderSlots, PropsRuntime } from '@njydsz/ydb-client-ui-slots'
+import type { ToolCallBlock } from '@njydsz/ydb-client-runtime/client'
+import type {} from '@njydsz/ydb-client-ui-conversation/client'
+import type {} from '@njydsz/ydb-client-locale/client'
 
-declare module '@deepseek-ai/dsh-client-ui-slots' {
+declare module '@njydsz/ydb-client-ui-slots' {
   interface SlotMap {
     /**
      * Keyed atomic Tool call view, dispatched by the wire Tool name. Register

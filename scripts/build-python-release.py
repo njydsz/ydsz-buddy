@@ -82,7 +82,7 @@ def main() -> None:
         else:
             platform_tag, executable_name = PLATFORMS[args.platform]
             stage_runtime(staging, wheel_version, args.runtime_exe.resolve(), executable_name)
-            environment = {"DSH_RUNTIME_PLATFORM_TAG": platform_tag}
+            environment = {"YDB_RUNTIME_PLATFORM_TAG": platform_tag}
             expected = output_dir / f"deepseek_harness_runtime_bin-{wheel_version}-py3-none-{platform_tag}.whl"
         command = ["uv", "build", "--wheel", "--out-dir", str(output_dir), str(staging)]
         subprocess.run(command, cwd=ROOT, env=None if environment is None else {**os.environ, **environment}, check=True)

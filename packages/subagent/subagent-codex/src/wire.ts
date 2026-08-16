@@ -4,13 +4,13 @@
  * product methods, current thread/turn association, unattended approval
  * responses, and terminal-answer selection.
  *
- * @module @deepseek-ai/dsh-subagent-codex/wire
+ * @module @njydsz/ydb-subagent-codex/wire
  */
 
 import type { Readable, Writable } from 'node:stream'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { SubagentResult } from '@deepseek-ai/dsh-subagent'
-import { JsonRpcLineTransport } from '@deepseek-ai/dsh-sdk-protocol'
+import type { ContentBlock } from '@njydsz/ydb-llm'
+import type { SubagentResult } from '@njydsz/ydb-subagent'
+import { JsonRpcLineTransport } from '@njydsz/ydb-sdk-protocol'
 
 type JsonObject = Record<string, unknown>
 

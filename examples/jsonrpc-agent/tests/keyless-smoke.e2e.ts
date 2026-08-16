@@ -81,8 +81,8 @@ describe('jsonrpc-agent keyless smoke', () => {
       env: {
         DEEPSEEK_API_KEY: 'keyless-smoke-no-call',
         DEEPSEEK_BASE_URL: `http://127.0.0.1:${address.port}`,
-        DSH_CWD: root,
-        DSH_SESSION_ROOT: join(root, '.sessions'),
+        YDB_CWD: root,
+        YDB_SESSION_ROOT: join(root, '.sessions'),
         ...(envValue === undefined ? {} : { DSH_MAX_TOKENS_AS_SUCCESS: envValue }),
       },
       timeout: 35_000,
@@ -196,7 +196,7 @@ describe('jsonrpc-agent keyless smoke', () => {
     expect(exitCode, stderr).toBe(1)
     expect(stdout).toBe('')
     expect(stderr).toContain('plugin tree failed to load')
-    expect(stderr).toContain('failed to apply loader entry sdk-jsonrpc-server (@deepseek-ai/dsh-sdk-jsonrpc-server)')
+    expect(stderr).toContain('failed to apply loader entry sdk-jsonrpc-server (@njydsz/ydb-sdk-jsonrpc-server)')
     expect(stderr).toContain('sometimes')
   }, 30_000)
 })

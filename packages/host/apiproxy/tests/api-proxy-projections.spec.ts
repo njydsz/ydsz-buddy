@@ -10,20 +10,20 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { z } from 'zod'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import type { Session } from '@deepseek-ai/dsh-session'
-import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
-import UserQuestionService from '@deepseek-ai/dsh-user-questions'
-import type { MuxFrame, RpcRequest } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { RpcId } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
-import { createApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
+import AgentRegistry, { Inbox } from '@njydsz/ydb-agent'
+import { AttachmentStore } from '@njydsz/ydb-attachment'
+import type { Agent } from '@njydsz/ydb-agent'
+import { createUserMessage } from '@njydsz/ydb-llm'
+import SessionStore, { SessionId } from '@njydsz/ydb-session'
+import type { Session } from '@njydsz/ydb-session'
+import SessionProjectionRegistry from '@njydsz/ydb-session-projection'
+import type { ProjectionDefinition } from '@njydsz/ydb-session-projection'
+import UserQuestionService from '@njydsz/ydb-user-questions'
+import type { MuxFrame, RpcRequest } from '@njydsz/ydb-host-apiproxy/api'
+import { RpcId } from '@njydsz/ydb-host-apiproxy/api/rpc'
+import { createApiProxy } from '@njydsz/ydb-host-apiproxy'
 
-declare module '@deepseek-ai/dsh-session-projection/types' {
+declare module '@njydsz/ydb-session-projection/types' {
   interface SessionProjectionMap {
     'test/last-user': { text: string } | null
   }

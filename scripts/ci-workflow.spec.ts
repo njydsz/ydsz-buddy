@@ -227,8 +227,8 @@ describe('E2B e2e workflow', () => {
     expect(e2b).toMatchObject({
       env: {
         E2B_API_KEY: '${{ secrets.E2B_API_KEY_EXTERNAL }}',
-        DSH_E2E_MAX_WORKERS: '1',
-        DSH_EXAMPLE_MODE: 'lib',
+        YDB_E2E_MAX_WORKERS: '1',
+        YDB_EXAMPLE_MODE: 'lib',
       },
     })
     expect(e2b?.run).toContain('packages/e2b/e2b/tests/composition.e2e.ts')
@@ -349,7 +349,7 @@ describe('Python release workflows', () => {
     expect(JSON.stringify(macosCheck)).toContain('scripts/check-macos-deployment-target.py')
     expect(JSON.stringify(macosCheck)).toContain('$EXE-spawn-helper')
     expect(manylinuxSmoke).toMatchObject({ if: "runner.os == 'Linux'" })
-    expect(JSON.stringify(manylinuxSmoke)).toContain('-e DSH_TELEMETRY_DISABLED')
+    expect(JSON.stringify(manylinuxSmoke)).toContain('-e YDB_TELEMETRY_DISABLED')
   })
 
   it('uses the shared macOS deployment-target check in GitLab', () => {

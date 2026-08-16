@@ -9,13 +9,13 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { CallId } from '@deepseek-ai/dsh-llm'
-import { Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import * as ToolTodo from '@deepseek-ai/dsh-tool-todo'
+import { CallId } from '@njydsz/ydb-llm'
+import { Session, SessionId } from '@njydsz/ydb-session'
+import AgentRegistry, { Inbox } from '@njydsz/ydb-agent'
+import type { Agent } from '@njydsz/ydb-agent'
+import SystemPrompt from '@njydsz/ydb-system-prompt'
+import ToolRuntime from '@njydsz/ydb-tools'
+import * as ToolTodo from '@njydsz/ydb-tool-todo'
 
 let root: string | undefined
 let context: Context | undefined
@@ -55,10 +55,10 @@ async function boot(configLines: readonly string[]): Promise<Context> {
   root = await mkdtemp(join(tmpdir(), 'dsh-todo-loader-'))
   const configPath = join(root, 'cordis.yml')
   await writeFile(configPath, [
-    "- name: '@deepseek-ai/dsh-agent'",
-    "- name: '@deepseek-ai/dsh-system-prompt'",
-    "- name: '@deepseek-ai/dsh-tools'",
-    "- name: '@deepseek-ai/dsh-tool-todo'",
+    "- name: '@njydsz/ydb-agent'",
+    "- name: '@njydsz/ydb-system-prompt'",
+    "- name: '@njydsz/ydb-tools'",
+    "- name: '@njydsz/ydb-tool-todo'",
     ...configLines.length > 0 ? ['  config:', ...configLines] : [],
     '',
   ].join('\n'))
@@ -69,10 +69,10 @@ async function boot(configLines: readonly string[]): Promise<Context> {
   await ctx.plugin(Loader)
   ctx.loader.builtins.include = Include
   const modules = new Map<string, unknown>([
-    ['@deepseek-ai/dsh-agent', AgentRegistry],
-    ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-    ['@deepseek-ai/dsh-tools', ToolRuntime],
-    ['@deepseek-ai/dsh-tool-todo', ToolTodo],
+    ['@njydsz/ydb-agent', AgentRegistry],
+    ['@njydsz/ydb-system-prompt', SystemPrompt],
+    ['@njydsz/ydb-tools', ToolRuntime],
+    ['@njydsz/ydb-tool-todo', ToolTodo],
   ])
   ctx.loader.internal = {
     version: 'v2',

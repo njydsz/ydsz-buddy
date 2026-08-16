@@ -12,7 +12,7 @@ import {
   launchAcpTestAgent,
   type AgentUnderTest,
   type LaunchedAcpTestAgent,
-} from '@deepseek-ai/dsh-acp-snapshot'
+} from '@njydsz/ydb-acp-snapshot'
 import { cleanupAcpExampleTest } from './cleanup.ts'
 
 /**
@@ -69,7 +69,7 @@ function launchExampleAcpAgent(
     // A dummy key lets the adapter boot keylessly; live tests carry the real key.
     env: {
       DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? 'sk-dummy-for-boot',
-      DSH_PERMISSION_MODE: sandboxMode,
+      YDB_PERMISSION_MODE: sandboxMode,
     },
     requestPermission(params) {
       permissionRequests.push(params)

@@ -5,9 +5,9 @@ import { mkdir, utimes, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { homedir } from 'node:os'
 import { expect, it } from 'vitest'
-import { defineAcpSnapshotSuite, type Scenario, type SnapshotSuiteOptions } from '@deepseek-ai/dsh-acp-snapshot'
-import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
-import { decodeStorageRecord } from '@deepseek-ai/dsh-session'
+import { defineAcpSnapshotSuite, type Scenario, type SnapshotSuiteOptions } from '@njydsz/ydb-acp-snapshot'
+import { resolvePwshPath } from '@njydsz/ydb-pwsh-local'
+import { decodeStorageRecord } from '@njydsz/ydb-session'
 
 /**
  * The acp-agent example's snapshot suite: the scenario table for
@@ -126,7 +126,7 @@ function snapshotModeFromEnv(value: string | undefined): SnapshotSuiteOptions['m
     case 'refresh':
       return 'refresh'
     default:
-      throw new Error(`unknown DSH_SNAPSHOT mode: ${value}`)
+      throw new Error(`unknown YDB_SNAPSHOT mode: ${value}`)
   }
 }
 
@@ -254,7 +254,7 @@ const SCENARIOS: Scenario[] = [
     recorded: false,
     headerClass: 'sandbox',
     configPath: PARTIAL_LANDLOCK_CONFIG,
-    env: { DSH_PERMISSION_MODE: 'read-only' },
+    env: { YDB_PERMISSION_MODE: 'read-only' },
     posixOnly: true,
   },
   // A valid cwd plus a missing provider executable exercises the assembled
@@ -266,7 +266,7 @@ const SCENARIOS: Scenario[] = [
     headerClass: 'sandbox',
     configPath: PARTIAL_LANDLOCK_CONFIG,
     env: {
-      DSH_PERMISSION_MODE: 'read-only',
+      YDB_PERMISSION_MODE: 'read-only',
       DSH_SNAPSHOT_MISSING_SANDBOX_RUNNER: '1',
     },
     posixOnly: true,
@@ -575,21 +575,21 @@ const SCENARIOS: Scenario[] = [
     headerClass: 'sandbox',
     systemPromptSource: 'text-turn',
     toolSchemasSource: 'text-turn',
-    env: { DSH_PERMISSION_MODE: 'workspace-write' },
+    env: { YDB_PERMISSION_MODE: 'workspace-write' },
   },
   {
     name: 'escalation-rejected',
     hasModelTurn: true,
     recorded: true,
     headerClass: 'sandbox',
-    env: { DSH_PERMISSION_MODE: 'workspace-write' },
+    env: { YDB_PERMISSION_MODE: 'workspace-write' },
   },
   {
     name: 'fs-escalation-approved',
     hasModelTurn: true,
     recorded: true,
     headerClass: 'sandbox',
-    env: { DSH_PERMISSION_MODE: 'workspace-write' },
+    env: { YDB_PERMISSION_MODE: 'workspace-write' },
   },
   // Unlike ordinary snapshots, this session cwd is outside the platform temp
   // roots that workspace-write always grants. The overlay points the
@@ -602,7 +602,7 @@ const SCENARIOS: Scenario[] = [
     overridden: true,
     headerClass: 'sandbox',
     configPath: SESSION_SANDBOX_ROOT_CONFIG,
-    env: { DSH_PERMISSION_MODE: 'workspace-write' },
+    env: { YDB_PERMISSION_MODE: 'workspace-write' },
     workspaceParent: homedir(),
   },
 ]
@@ -616,7 +616,7 @@ defineAcpSnapshotSuite({
   agent: AGENT,
   snapshotsDir: SNAPSHOTS_DIR,
   scenarios: SCENARIOS,
-  mode: snapshotModeFromEnv(process.env.DSH_SNAPSHOT),
+  mode: snapshotModeFromEnv(process.env.YDB_SNAPSHOT),
   hasPwsh,
 })
 

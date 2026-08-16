@@ -3,9 +3,9 @@ import { Context } from '@deepseek-ai/cordis'
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { credentialRef } from '@deepseek-ai/dsh-credentials'
-import { createLaunchEnvironmentSnapshot, DSH_LAUNCH_ENVIRONMENT_KEY } from '@deepseek-ai/dsh-launch-environment'
-import type { CredentialRef } from '@deepseek-ai/dsh-credentials'
+import { credentialRef } from '@njydsz/ydb-credentials'
+import { createLaunchEnvironmentSnapshot, YDB_LAUNCH_ENVIRONMENT_KEY } from '@njydsz/ydb-launch-environment'
+import type { CredentialRef } from '@njydsz/ydb-credentials'
 import { LocalCredentialProvider, resolveSpec } from '../src/index.ts'
 
 /** Credential documents are seeded owner-only, exactly as the provider creates them. */
@@ -114,7 +114,7 @@ describe('layer ladder', () => {
     layers: Parameters<typeof createLaunchEnvironmentSnapshot>[0],
   ): Promise<Context> {
     const ctx = new Context()
-    ctx.provide(DSH_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot(layers))
+    ctx.provide(YDB_LAUNCH_ENVIRONMENT_KEY, createLaunchEnvironmentSnapshot(layers))
     const fiber = ctx.plugin(LocalCredentialProvider, { path, watch: false })
     cleanups.push(async () => { await fiber.dispose() })
     await fiber

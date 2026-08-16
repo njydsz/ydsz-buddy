@@ -1,15 +1,15 @@
 /**
  * Instruction-file discovery and bounded, abort-aware provider reads.
  *
- * @module @deepseek-ai/dsh-agent-instructions/files
+ * @module @njydsz/ydb-agent-instructions/files
  */
 
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
-import type { FileSystem, FsInfo, FsTarget, FsVersion } from '@deepseek-ai/dsh-fs'
-import { assertNever } from '@deepseek-ai/dsh-llm'
-import { dshHomeDisplay } from '@deepseek-ai/dsh-home-paths'
+import type { FileSystem, FsInfo, FsTarget, FsVersion } from '@njydsz/ydb-fs'
+import { assertNever } from '@njydsz/ydb-llm'
+import { dshHomeDisplay } from '@njydsz/ydb-home-paths'
 import { resolveConfig, resolveDiscoveryConfig, type ResolvedConfig } from './config.ts'
 import { trimmedInstructionDigest } from './digest.ts'
 import {

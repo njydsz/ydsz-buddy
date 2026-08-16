@@ -4,11 +4,11 @@
  */
 import type { ReactNode } from 'react'
 import type { Context } from '@deepseek-ai/cordis'
-import { createSlotRenderer } from '@deepseek-ai/dsh-client-web-react'
+import { createSlotRenderer } from '@njydsz/ydb-client-web-react'
 import { buildRenderApp } from './app.tsx'
 
 /** Shell-owned pseudo entry id under which the host graph mounts this plugin. */
-export const APP_SHELL_ID = '@deepseek-ai/dsh-client-app-shell'
+export const APP_SHELL_ID = '@njydsz/ydb-client-app-shell'
 
 /** The assembled-UI face AppRoot renders once the boot settles. */
 export interface AppShellService {

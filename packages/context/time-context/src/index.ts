@@ -2,14 +2,14 @@
  * Opt-in request clock context. Eligible steps add durable,
  * source-attributed time readings to the request history.
  *
- * @module @deepseek-ai/dsh-time-context
+ * @module @njydsz/ydb-time-context
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import type { Agent, PreStepDecision } from '@deepseek-ai/dsh-agent'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { UserMessage } from '@deepseek-ai/dsh-llm'
+import type { Agent, PreStepDecision } from '@njydsz/ydb-agent'
+import { createUserMessage } from '@njydsz/ydb-llm'
+import type { UserMessage } from '@njydsz/ydb-llm'
 import {
   deriveBrowserTimeZoneContext,
   renderBrowserTimeZoneContext,

@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-sdk-protocol`.
- * @module @deepseek-ai/dsh-sdk-protocol/invariant
+ * Package-owned invariant companion for `@njydsz/ydb-sdk-protocol`.
+ * @module @njydsz/ydb-sdk-protocol/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
-import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-sdk-protocol'
+const PACKAGE_NAME = '@njydsz/ydb-sdk-protocol'
 
 /** Cordis companion plugin name. */
 export const name = 'sdk-protocol-invariant'

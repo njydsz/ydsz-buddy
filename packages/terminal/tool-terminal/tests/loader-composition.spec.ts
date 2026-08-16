@@ -6,19 +6,19 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { CallId } from '@deepseek-ai/dsh-llm'
-import { Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import TerminalSessionService from '@deepseek-ai/dsh-terminal'
-import SandboxProvider from '@deepseek-ai/dsh-sandbox'
-import type { ConfinedArgv, SandboxPolicy } from '@deepseek-ai/dsh-sandbox'
-import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
-import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
-import * as TerminalLocal from '@deepseek-ai/dsh-terminal-bash'
-import * as ToolPty from '@deepseek-ai/dsh-tool-terminal'
+import { CallId } from '@njydsz/ydb-llm'
+import { Session, SessionId } from '@njydsz/ydb-session'
+import AgentRegistry, { Inbox } from '@njydsz/ydb-agent'
+import type { Agent } from '@njydsz/ydb-agent'
+import SystemPrompt from '@njydsz/ydb-system-prompt'
+import ToolRuntime from '@njydsz/ydb-tools'
+import TerminalSessionService from '@njydsz/ydb-terminal'
+import SandboxProvider from '@njydsz/ydb-sandbox'
+import type { ConfinedArgv, SandboxPolicy } from '@njydsz/ydb-sandbox'
+import SandboxPolicyService from '@njydsz/ydb-sandbox-policy'
+import LocalSubprocessRuntime from '@njydsz/ydb-subprocess-local'
+import * as TerminalLocal from '@njydsz/ydb-terminal-bash'
+import * as ToolPty from '@njydsz/ydb-tool-terminal'
 
 let root: string | undefined
 let context: Context | undefined
@@ -64,17 +64,17 @@ suite('terminal real Loader composition through cordis.yml', () => {
     root = await mkdtemp(join(tmpdir(), 'dsh-pty-loader-'))
     const configPath = join(root, 'cordis.yml')
     await writeFile(configPath, [
-      "- name: '@deepseek-ai/dsh-agent'",
-      "- name: '@deepseek-ai/dsh-system-prompt'",
-      "- name: '@deepseek-ai/dsh-tools'",
-      "- name: '@deepseek-ai/dsh-terminal'",
-      "- name: '@deepseek-ai/dsh-test-sandbox'",
-      "- name: '@deepseek-ai/dsh-sandbox-policy'",
+      "- name: '@njydsz/ydb-agent'",
+      "- name: '@njydsz/ydb-system-prompt'",
+      "- name: '@njydsz/ydb-tools'",
+      "- name: '@njydsz/ydb-terminal'",
+      "- name: '@njydsz/ydb-test-sandbox'",
+      "- name: '@njydsz/ydb-sandbox-policy'",
       '  config:',
       '    mode: danger-full-access',
       `    workspaceRoot: ${JSON.stringify(root)}`,
-      "- name: '@deepseek-ai/dsh-subprocess-local'",
-      "- name: '@deepseek-ai/dsh-terminal-bash'",
+      "- name: '@njydsz/ydb-subprocess-local'",
+      "- name: '@njydsz/ydb-terminal-bash'",
       '  config:',
       '    pollIntervalMs: 10',
       '    exactProbeAfterMs: 20',
@@ -82,7 +82,7 @@ suite('terminal real Loader composition through cordis.yml', () => {
       '    handoffGraceMs: 250',
       '    timeoutMs: 2000',
       '    disposeGraceMs: 500',
-      "- name: '@deepseek-ai/dsh-tool-terminal'",
+      "- name: '@njydsz/ydb-tool-terminal'",
       '',
     ].join('\n'))
 
@@ -91,15 +91,15 @@ suite('terminal real Loader composition through cordis.yml', () => {
     await context.plugin(Loader)
     context.loader.builtins.include = Include
     const modules = new Map<string, unknown>([
-      ['@deepseek-ai/dsh-agent', AgentRegistry],
-      ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
-      ['@deepseek-ai/dsh-tools', ToolRuntime],
-      ['@deepseek-ai/dsh-terminal', TerminalSessionService],
-      ['@deepseek-ai/dsh-test-sandbox', PassthroughSandbox],
-      ['@deepseek-ai/dsh-sandbox-policy', SandboxPolicyService],
-      ['@deepseek-ai/dsh-subprocess-local', LocalSubprocessRuntime],
-      ['@deepseek-ai/dsh-terminal-bash', TerminalLocal],
-      ['@deepseek-ai/dsh-tool-terminal', ToolPty],
+      ['@njydsz/ydb-agent', AgentRegistry],
+      ['@njydsz/ydb-system-prompt', SystemPrompt],
+      ['@njydsz/ydb-tools', ToolRuntime],
+      ['@njydsz/ydb-terminal', TerminalSessionService],
+      ['@njydsz/ydb-test-sandbox', PassthroughSandbox],
+      ['@njydsz/ydb-sandbox-policy', SandboxPolicyService],
+      ['@njydsz/ydb-subprocess-local', LocalSubprocessRuntime],
+      ['@njydsz/ydb-terminal-bash', TerminalLocal],
+      ['@njydsz/ydb-tool-terminal', ToolPty],
     ])
     context.loader.internal = {
       version: 'v2',

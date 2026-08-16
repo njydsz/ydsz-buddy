@@ -6,12 +6,12 @@
  */
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
-import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
-import { createScope, scopeOf, SlotRegistry } from '@deepseek-ai/dsh-client-runtime/client'
-import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
-import { apply, inject, InputTriggerService } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
-import type { MenuViewInjected } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
+import { LocaleRuntime } from '@njydsz/ydb-client-locale/client'
+import { usePinnedBrowserLanguages } from '@njydsz/ydb-client-test-runtime'
+import { createScope, scopeOf, SlotRegistry } from '@njydsz/ydb-client-runtime/client'
+import type { SessionId } from '@njydsz/ydb-client-runtime/client'
+import { apply, inject, InputTriggerService } from '@njydsz/ydb-client-ui-input-trigger/client'
+import type { MenuViewInjected } from '@njydsz/ydb-client-ui-input-trigger/client'
 
 // The service reads its initial locale from the browser; these specs assert
 // the shipped Chinese copy, so they state the browser they assume.

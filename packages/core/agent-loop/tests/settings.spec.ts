@@ -3,14 +3,14 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import type { Fiber } from '@deepseek-ai/cordis'
-import LlmRuntime from '@deepseek-ai/dsh-llm'
-import SessionStore from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import { SettingsProvider } from '@deepseek-ai/dsh-settings'
-import type { SettingsNamespace } from '@deepseek-ai/dsh-settings'
-import AgentLoop, { AGENT_LOOP_SETTINGS_NAMESPACE } from '@deepseek-ai/dsh-agent-loop'
+import LlmRuntime from '@njydsz/ydb-llm'
+import SessionStore from '@njydsz/ydb-session'
+import SystemPrompt from '@njydsz/ydb-system-prompt'
+import ToolRuntime from '@njydsz/ydb-tools'
+import AgentRegistry from '@njydsz/ydb-agent'
+import { SettingsProvider } from '@njydsz/ydb-settings'
+import type { SettingsNamespace } from '@njydsz/ydb-settings'
+import AgentLoop, { AGENT_LOOP_SETTINGS_NAMESPACE } from '@njydsz/ydb-agent-loop'
 
 /** The smallest real provider: one in-memory document, always writable. */
 class MemorySettings extends SettingsProvider {

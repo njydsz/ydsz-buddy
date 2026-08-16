@@ -413,8 +413,8 @@ function ciConsumerGates(): Gate[] {
 function webSnapshotGate(needs: string[]): Gate {
   return pnpmScript('web-snapshot', 'test:web:built', {
     label: 'web browser snapshot',
-    displayCommand: 'DSH_SNAPSHOT=replay pnpm run test:web:built',
-    env: { DSH_SNAPSHOT: 'replay' },
+    displayCommand: 'YDB_SNAPSHOT=replay pnpm run test:web:built',
+    env: { YDB_SNAPSHOT: 'replay' },
     needs,
   })
 }
@@ -522,7 +522,7 @@ function coverageGates(): Gate[] {
 // Callers wait either on `build` or on a validation gate that transitively owns that build.
 function snapshotGate(needs: string[] = ['build']): Gate {
   return pnpmScript('snapshot', 'test:snapshot', {
-    env: { DSH_EXAMPLE_MODE: 'lib' },
+    env: { YDB_EXAMPLE_MODE: 'lib' },
     needs,
   })
 }
@@ -638,7 +638,7 @@ function builtBinSmokeGate(needs: string[] = ['build']): Gate {
   ], {
     label: 'built-bin smoke',
     needs,
-    env: { DSH_EXAMPLE_MODE: 'lib' },
+    env: { YDB_EXAMPLE_MODE: 'lib' },
   })
 }
 

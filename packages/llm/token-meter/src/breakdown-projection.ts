@@ -6,8 +6,8 @@
  */
 
 import { z } from 'zod'
-import { canonicalHeader } from '@deepseek-ai/dsh-session'
-import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { canonicalHeader } from '@njydsz/ydb-session'
+import type { ProjectionDefinition } from '@njydsz/ydb-session-projection'
 import { estimateSystemTokens, estimateToolsTokens } from './estimate.ts'
 import { foldSurfaceProjection } from './surface-projection.ts'
 import type { ShadowPriceClaim } from './surface-projection.ts'

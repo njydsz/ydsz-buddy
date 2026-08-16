@@ -104,7 +104,7 @@ describe('runScenario', () => {
       cwd: dir,
       configPath: AGENT.configPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: fixtureFile,
         DSH_SNAPSHOT_SESSIONS_ROOT: sessionsRoot,
       },
@@ -361,7 +361,7 @@ describe('runScenario', () => {
 
   it('preserves launch-resolution errors when no child process exists', async () => {
     const { dir, fixtureFile } = await scenario({})
-    vi.stubEnv('DSH_EXAMPLE_MODE', 'lib')
+    vi.stubEnv('YDB_EXAMPLE_MODE', 'lib')
     try {
       await expect(runScenario(
         { steps: [] },

@@ -3,12 +3,12 @@ import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
-import Storage from '@deepseek-ai/dsh-storage'
-import type { StorageBackend } from '@deepseek-ai/dsh-storage'
-import { DomainFacility } from '@deepseek-ai/dsh-storage-domain'
-import type { DomainChanged } from '@deepseek-ai/dsh-storage-domain'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import type { SessionHeader } from '@deepseek-ai/dsh-session'
+import Storage from '@njydsz/ydb-storage'
+import type { StorageBackend } from '@njydsz/ydb-storage'
+import { DomainFacility } from '@njydsz/ydb-storage-domain'
+import type { DomainChanged } from '@njydsz/ydb-storage-domain'
+import SessionStore, { SessionId } from '@njydsz/ydb-session'
+import type { SessionHeader } from '@njydsz/ydb-session'
 import { MemoryMediaPool, MemoryStorageBackend } from '../../../storage/storage-domain/tests/helpers/memory-backend.ts'
 import WorkspaceRegistry, {
   WorkspaceId,

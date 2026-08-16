@@ -2,11 +2,11 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Context } from '@deepseek-ai/cordis'
-import { normalizeSessionLog, scrubRequestHeaders, type NormalizeContext } from '@deepseek-ai/dsh-acp-snapshot'
-import { LOADER_SMOKE_TEST_TIMEOUT_MS, runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
-import { createUserMessage, CallId , createMessage } from '@deepseek-ai/dsh-llm'
-import SessionStore, { SESSION_FORMAT_VERSION, SessionId, type SessionEvent, type SessionHeader } from '@deepseek-ai/dsh-session'
-import JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
+import { normalizeSessionLog, scrubRequestHeaders, type NormalizeContext } from '@njydsz/ydb-acp-snapshot'
+import { LOADER_SMOKE_TEST_TIMEOUT_MS, runLoaderSmoke } from '@njydsz/ydb-loader-smoke'
+import { createUserMessage, CallId , createMessage } from '@njydsz/ydb-llm'
+import SessionStore, { SESSION_FORMAT_VERSION, SessionId, type SessionEvent, type SessionHeader } from '@njydsz/ydb-session'
+import JsonlSessionPersistence from '@njydsz/ydb-session-persistence-jsonl'
 import { describe, expect, it } from 'vitest'
 
 const fixtureDir = join(dirname(fileURLToPath(import.meta.url)), 'semantic-checkpoint-snapshots/tool-outcome-unknown')
@@ -17,7 +17,7 @@ const configPath = fileURLToPath(new URL('../semantic-checkpoint.cordis.snapshot
 const binScript = fileURLToPath(new URL('./fixtures/headless-driver.ts', import.meta.url))
 const tsconfigPath = fileURLToPath(new URL('../../../tsconfig.json', import.meta.url))
 const sessionId = SessionId('semantic-checkpoint-unknown-outcome')
-const refreshing = process.env.DSH_SNAPSHOT === 'refresh'
+const refreshing = process.env.YDB_SNAPSHOT === 'refresh'
 const task = 'Continue safely from the interrupted operation.'
 
 async function seedInterruptedSession(root: string, cwd: string): Promise<string> {

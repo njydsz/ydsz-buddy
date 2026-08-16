@@ -1,11 +1,11 @@
 /**
  * Types shared by job producers, the registry, and controllers. The
  * service implementation lives in `./index.ts`.
- * @module @deepseek-ai/dsh-jobs/types
+ * @module @njydsz/ydb-jobs/types
  */
 
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { SessionId } from '@deepseek-ai/dsh-session'
+import type { Agent } from '@njydsz/ydb-agent'
+import type { SessionId } from '@njydsz/ydb-session'
 import type { JobId } from './brand.ts'
 
 export { JobId } from './brand.ts'

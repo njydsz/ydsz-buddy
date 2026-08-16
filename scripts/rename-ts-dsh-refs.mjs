@@ -47,7 +47,7 @@ const RULES = [
   { from: /\bparseDshArgs\b/g, to: 'parseYdbArgs', desc: 'parseDshArgs → parseYdbArgs' },
 
   // HOME env var
-  { from: /\bDSH_HOME\b/g, to: 'YDB_HOME', desc: 'DSH_HOME → YDB_HOME' },
+  { from: /\bDSH_HOME\b/g, to: 'YDB_HOME', desc: 'YDB_HOME → YDB_HOME' },
 
   // Other dsh.* manifest field references
   { from: /dsh\.manifest/g, to: 'ydb.manifest', desc: 'dsh.manifest → ydb.manifest' },

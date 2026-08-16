@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-session-query`.
- * @module @deepseek-ai/dsh-session-query/invariant
+ * Package-owned invariant companion for `@njydsz/ydb-session-query`.
+ * @module @njydsz/ydb-session-query/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
-import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-session-query'
+const PACKAGE_NAME = '@njydsz/ydb-session-query'
 
 /** Cordis companion plugin name. */
 export const name = 'session-query-invariant'

@@ -12,8 +12,8 @@
 // model-facing text through ToolRow's Output section instead.
 
 import type { Context } from '@deepseek-ai/cordis'
-import { IconSearchOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import { IconSearchOutline16 } from '@njydsz/ydb-client-ui-primitives'
+import type { PropsLocale } from '@njydsz/ydb-client-ui-slots'
 import type { ToolCallViewProps } from '../../contract/slots.ts'
 import { searchCardModel } from '../models/search-card-model.ts'
 import { toolRowModel } from '../models/tool-call-model.ts'

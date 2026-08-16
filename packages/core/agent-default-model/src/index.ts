@@ -1,14 +1,14 @@
 /**
  * Default model selection for an Agent without a session-specific selection.
  *
- * @module @deepseek-ai/dsh-agent-default-model
+ * @module @njydsz/ydb-agent-default-model
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import type { ModelSelection } from '@deepseek-ai/dsh-agent'
-import { ReasoningEffortId } from '@deepseek-ai/dsh-llm'
-import { installSettingsSection, settingsNamespace } from '@deepseek-ai/dsh-settings'
+import type { ModelSelection } from '@njydsz/ydb-agent'
+import { ReasoningEffortId } from '@njydsz/ydb-llm'
+import { installSettingsSection, settingsNamespace } from '@njydsz/ydb-settings'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {

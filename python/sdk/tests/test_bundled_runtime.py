@@ -58,9 +58,9 @@ def _client(tmp_path: Path, launch_args: tuple[str, ...]) -> YdbClient:
             launch_args_override=launch_args,
             cwd=str(tmp_path),
             env={
-                "DSH_CORDIS_CONFIG": "./cordis.yml",
-                "DSH_SESSION_ROOT": str(tmp_path / "sessions"),
-                "DSH_CWD": str(tmp_path),
+                "YDB_CORDIS_CONFIG": "./cordis.yml",
+                "YDB_SESSION_ROOT": str(tmp_path / "sessions"),
+                "YDB_CWD": str(tmp_path),
                 # The lazily mounted adapter requires a key even without a model call.
                 "DEEPSEEK_API_KEY": "sk-dummy-for-boot",
                 "DEEPSEEK_BASE_URL": "http://127.0.0.1:9",
@@ -130,11 +130,11 @@ def test_zero_config_run_injects_bundled_default_cordis_config(
     tmp_path: Path, mode: str, ambient_config: str | None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _launch_args(mode)  # skip early when this carrier is unavailable
-    monkeypatch.setenv("DSH_RUNTIME_MODE", mode)
+    monkeypatch.setenv("YDB_RUNTIME_MODE", mode)
     if ambient_config is None:
-        monkeypatch.delenv("DSH_CORDIS_CONFIG", raising=False)
+        monkeypatch.delenv("YDB_CORDIS_CONFIG", raising=False)
     else:
-        monkeypatch.setenv("DSH_CORDIS_CONFIG", ambient_config)
+        monkeypatch.setenv("YDB_CORDIS_CONFIG", ambient_config)
 
     harness = YdszBuddy(
         model="deepseek-v4-pro",

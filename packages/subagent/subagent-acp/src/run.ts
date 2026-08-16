@@ -5,7 +5,7 @@
  * TODO(acp-subagent-replay): add snapshot-tier coverage with a separate replay fixture and
  * sessions root inside each child process. Current keyless coverage uses a scripted ACP child;
  * with-key coverage drives the real ACP example.
- * @module @deepseek-ai/dsh-subagent-acp/run
+ * @module @njydsz/ydb-subagent-acp/run
  */
 
 import { randomUUID } from 'node:crypto'
@@ -22,11 +22,11 @@ import {
   type SessionNotification,
   type StopReason,
 } from '@agentclientprotocol/sdk'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import { AssistantOutputFold } from '@deepseek-ai/dsh-subagent'
-import type { SubagentResult, SubagentRun, SubagentStartRequest, SubagentStopReason } from '@deepseek-ai/dsh-subagent'
-import type { SubprocessHandle, SubprocessSpawnSpec } from '@deepseek-ai/dsh-subprocess'
+import type { ContentBlock } from '@njydsz/ydb-llm'
+import { SessionId } from '@njydsz/ydb-session'
+import { AssistantOutputFold } from '@njydsz/ydb-subagent'
+import type { SubagentResult, SubagentRun, SubagentStartRequest, SubagentStopReason } from '@njydsz/ydb-subagent'
+import type { SubprocessHandle, SubprocessSpawnSpec } from '@njydsz/ydb-subprocess'
 
 /** Fixed response to child permission requests: reject by default, or select the first allow option. */
 export type PermissionPolicy = 'allow' | 'reject'
@@ -51,7 +51,7 @@ export interface AcpRunSpec {
    * parent env. A value here is forwarded even if its name matches the
    * credential-scrub pattern (an explicit opt-in for the child's own creds).
    * Explicit `DSH_*` entries are deployment-owned facts for the child harness
-   * (e.g. `DSH_PERMISSION_MODE`); they simply merge after the scrub that
+   * (e.g. `YDB_PERMISSION_MODE`); they simply merge after the scrub that
    * dropped their stale ambient namesakes.
    */
   env: Record<string, string>

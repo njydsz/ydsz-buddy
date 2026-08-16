@@ -9,9 +9,9 @@
 import { writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
-import { boot, resolveConfigPath } from '@deepseek-ai/dsh-app-boot'
-import { recordFeedback } from '@deepseek-ai/dsh-command-feedback'
-import { runFixtureTurn } from '@deepseek-ai/dsh-loader-smoke'
+import { boot, resolveConfigPath } from '@njydsz/ydb-app-boot'
+import { recordFeedback } from '@njydsz/ydb-command-feedback'
+import { runFixtureTurn } from '@njydsz/ydb-loader-smoke'
 
 const configPath = process.argv[2]
 if (configPath === undefined) throw new Error('session-telemetry-otel driver requires a config path')

@@ -1,4 +1,4 @@
-import type { CallId } from '@deepseek-ai/dsh-llm'
+import type { CallId } from '@njydsz/ydb-llm'
 
 /** Character-budget policy for deterministic tool-result pruning. */
 export interface ToolResultPruneConfig {

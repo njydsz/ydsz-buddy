@@ -6,10 +6,10 @@
  * WebApiClient (WebSocket + fetch); on the desktop it is satisfied by
  * IpcApiClient (IPC). Everything downstream — SessionManager, projections,
  * the UI — is unchanged.
- * @module @deepseek-ai/dsh-electron/ipc-connection-controller
+ * @module @njydsz/ydb-electron/ipc-connection-controller
  */
 
-import { ConnectionController, type ConnectionConfig, type ConnectionSinks } from '@deepseek-ai/dsh-client-connection/client/connection'
+import { ConnectionController, type ConnectionConfig, type ConnectionSinks } from '@njydsz/ydb-client-connection/client/connection'
 import { IpcApiClient } from './ipc-api-client.ts'
 import type { DshIpcBridge } from './ipc-api-client.ts'
 

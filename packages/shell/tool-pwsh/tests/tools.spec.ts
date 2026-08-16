@@ -15,22 +15,22 @@ import { Context } from '@deepseek-ai/cordis'
 import { mkdtempSync, realpathSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve as resolvePath } from 'node:path'
-import { CallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime, { TOOL_ABORTED, TOOL_ABORTED_BEFORE_DISPATCH } from '@deepseek-ai/dsh-tools'
-import LocalJobRegistry from '@deepseek-ai/dsh-jobs-local'
-import * as ToolTasks from '@deepseek-ai/dsh-tool-jobs'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import { SessionId } from '@deepseek-ai/dsh-session'
-import ApprovalService from '@deepseek-ai/dsh-user-approval'
-import type { ApprovalOutcome } from '@deepseek-ai/dsh-user-approval'
-import { ShellExecutor } from '@deepseek-ai/dsh-shell'
-import type { ShellExecRequest, ShellExecSpec, ShellProcess, ShellRunResult } from '@deepseek-ai/dsh-shell'
-import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
-import * as ToolPwsh from '@deepseek-ai/dsh-tool-pwsh'
-import * as BashEnvPlugin from '@deepseek-ai/dsh-shell-env'
-import type { ShellProcessRead } from '@deepseek-ai/dsh-shell'
+import { CallId } from '@njydsz/ydb-llm'
+import SystemPrompt, { renderPrompt } from '@njydsz/ydb-system-prompt'
+import ToolRuntime, { TOOL_ABORTED, TOOL_ABORTED_BEFORE_DISPATCH } from '@njydsz/ydb-tools'
+import LocalJobRegistry from '@njydsz/ydb-jobs-local'
+import * as ToolTasks from '@njydsz/ydb-tool-jobs'
+import AgentRegistry from '@njydsz/ydb-agent'
+import type { Agent } from '@njydsz/ydb-agent'
+import { SessionId } from '@njydsz/ydb-session'
+import ApprovalService from '@njydsz/ydb-user-approval'
+import type { ApprovalOutcome } from '@njydsz/ydb-user-approval'
+import { ShellExecutor } from '@njydsz/ydb-shell'
+import type { ShellExecRequest, ShellExecSpec, ShellProcess, ShellRunResult } from '@njydsz/ydb-shell'
+import SandboxPolicyService from '@njydsz/ydb-sandbox-policy'
+import * as ToolPwsh from '@njydsz/ydb-tool-pwsh'
+import * as BashEnvPlugin from '@njydsz/ydb-shell-env'
+import type { ShellProcessRead } from '@njydsz/ydb-shell'
 import { processOutcome } from '../src/background.ts'
 import { renderPwshProcessRead, renderPwshResult } from '../src/render.ts'
 
@@ -744,7 +744,7 @@ describe('background execution through the job runtime', () => {
     const { ctx } = await setup() // no LocalJobRegistry / ToolTasks
     const result = await call(ctx, 'pwsh', { command: 'Start-Sleep -Seconds 60', description: 'test command', run_in_background: true })
     expect(result.isError).toBe(true)
-    expect(text(result)).toContain('background jobs unavailable: load @deepseek-ai/dsh-jobs and @deepseek-ai/dsh-tool-jobs')
+    expect(text(result)).toContain('background jobs unavailable: load @njydsz/ydb-jobs and @njydsz/ydb-tool-jobs')
   })
 
   it('a pre-aborted call is skipped before the process starts', async () => {

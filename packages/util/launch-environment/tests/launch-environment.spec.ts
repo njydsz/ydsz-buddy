@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import {
-  createLaunchEnvironmentSnapshot, DSH_LAUNCH_ENVIRONMENT_KEY, launchEnvironmentOf,
+  createLaunchEnvironmentSnapshot, YDB_LAUNCH_ENVIRONMENT_KEY, launchEnvironmentOf,
 } from '../src/index.ts'
 
 const layered = createLaunchEnvironmentSnapshot([
@@ -53,7 +53,7 @@ describe('createLaunchEnvironmentSnapshot', () => {
 describe('launchEnvironmentOf', () => {
   it('returns the launcher snapshot when the product CLI provided one', () => {
     const ctx = new Context()
-    ctx.provide(DSH_LAUNCH_ENVIRONMENT_KEY, layered)
+    ctx.provide(YDB_LAUNCH_ENVIRONMENT_KEY, layered)
     expect(launchEnvironmentOf(ctx)).toBe(layered)
   })
 

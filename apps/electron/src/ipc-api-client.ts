@@ -8,14 +8,14 @@
  * The preload script exposes `window.__dshIpc` (see preload.ts). This module
  * never touches node: or electron: imports directly — it consumes only the
  * window bridge, keeping it import-browser-safe (no host runtime bleed).
- * @module @deepseek-ai/dsh-electron/ipc-api-client
+ * @module @njydsz/ydb-electron/ipc-api-client
  */
 
-import type { ApiProxy, HostFrame, MuxFrame, RpcRequest, ServerRequest } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { AbstractApiClient } from '@deepseek-ai/dsh-host-apiproxy/client'
-import { hostFrameSchema, muxFrameSchema } from '@deepseek-ai/dsh-host-apiproxy/api/events.schema'
-import { serverRequestSchema } from '@deepseek-ai/dsh-host-apiproxy/api/rpc.schema'
-import { HOST_EVENTS_PATH, MUX_EVENTS_PATH } from '@deepseek-ai/dsh-client-connection/api-path'
+import type { ApiProxy, HostFrame, MuxFrame, RpcRequest, ServerRequest } from '@njydsz/ydb-host-apiproxy/api'
+import { AbstractApiClient } from '@njydsz/ydb-host-apiproxy/client'
+import { hostFrameSchema, muxFrameSchema } from '@njydsz/ydb-host-apiproxy/api/events.schema'
+import { serverRequestSchema } from '@njydsz/ydb-host-apiproxy/api/rpc.schema'
+import { HOST_EVENTS_PATH, MUX_EVENTS_PATH } from '@njydsz/ydb-client-connection/api-path'
 import type {
   IpcApiRequest, IpcApiResponse, IpcResponse, IpcStreamEnd, IpcStreamFrame, IpcStreamRequest,
 } from './ipc-protocol.ts'

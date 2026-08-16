@@ -32,7 +32,7 @@
  * as the user's environment layer; a store that doubled as the environment
  * layer would shadow non-secret entries behind its precedence, making them
  * silently unreachable.
- * @module @deepseek-ai/dsh-credentials-local
+ * @module @njydsz/ydb-credentials-local
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'
@@ -41,12 +41,12 @@ import { watch as chokidarWatch } from 'chokidar'
 import { mkdir, readFile, stat } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { Document, parseDocument, type YAMLError } from 'yaml'
-import { withFileLock, writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
-import { canonicalizeWatchPath, resolveDshHome } from '@deepseek-ai/dsh-home-paths'
-import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
-import { CredentialProvider, credentialRef } from '@deepseek-ai/dsh-credentials'
-import type { CredentialInfo, CredentialRef, ResolvedCredential } from '@deepseek-ai/dsh-credentials'
-import type { LaunchEnvironmentEntry } from '@deepseek-ai/dsh-launch-environment'
+import { withFileLock, writeFileAtomic } from '@njydsz/ydb-atomic-write'
+import { canonicalizeWatchPath, resolveDshHome } from '@njydsz/ydb-home-paths'
+import { launchEnvironmentOf } from '@njydsz/ydb-launch-environment'
+import { CredentialProvider, credentialRef } from '@njydsz/ydb-credentials'
+import type { CredentialInfo, CredentialRef, ResolvedCredential } from '@njydsz/ydb-credentials'
+import type { LaunchEnvironmentEntry } from '@njydsz/ydb-launch-environment'
 
 /** Basename of the credentials document inside the harness home. */
 export const CREDENTIALS_FILENAME = '.credentials.yaml'

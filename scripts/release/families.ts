@@ -17,7 +17,7 @@ import { validateTarballPayload } from '../publication-payload.ts'
 const ORDER_SECTIONS = ['dependencies', 'optionalDependencies'] as const
 
 /** The workspace root manifest, which is never a release member. */
-const WORKSPACE_ROOT_PACKAGE = '@deepseek-ai/dsh-root'
+const WORKSPACE_ROOT_PACKAGE = '@njydsz/ydb-root'
 
 /** One publishable package of a release family. */
 export interface ReleaseMember {
@@ -228,7 +228,7 @@ class DshFamily extends ReleaseFamily {
     validateTarballPayload(files, member.name)
   }
 
-  readonly installedEntry = { packageName: '@deepseek-ai/dsh', binPath: 'lib/bin.js' }
+  readonly installedEntry = { packageName: '@njydsz/ydb', binPath: 'lib/bin.js' }
 }
 
 /** `vendor/*`: every package keeps its own version line, so every package has its own tag. */

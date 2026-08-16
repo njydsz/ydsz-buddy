@@ -8,16 +8,16 @@ import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import AgentLoop from '@deepseek-ai/dsh-agent-loop'
-import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import SandboxedFileSystem from '@deepseek-ai/dsh-fs-sandbox'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import SandboxPolicyService, { setSandboxMode } from '@deepseek-ai/dsh-sandbox-policy'
-import { SessionId, type SessionEvent } from '@deepseek-ai/dsh-session'
-import * as ToolFs from '@deepseek-ai/dsh-tool-fs'
-import ApprovalService from '@deepseek-ai/dsh-user-approval'
-import { snapshotSubagentDescriptor } from '@deepseek-ai/dsh-subagent'
+import type { Agent } from '@njydsz/ydb-agent'
+import AgentLoop from '@njydsz/ydb-agent-loop'
+import { mountAgentLoopTestDependencies } from '@njydsz/ydb-agent-loop-testkit'
+import SandboxedFileSystem from '@njydsz/ydb-fs-sandbox'
+import type { ContentBlock } from '@njydsz/ydb-llm'
+import SandboxPolicyService, { setSandboxMode } from '@njydsz/ydb-sandbox-policy'
+import { SessionId, type SessionEvent } from '@njydsz/ydb-session'
+import * as ToolFs from '@njydsz/ydb-tool-fs'
+import ApprovalService from '@njydsz/ydb-user-approval'
+import { snapshotSubagentDescriptor } from '@njydsz/ydb-subagent'
 import { MockAdapter, textResponse, toolCallResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import { startInProcessRun } from '../src/index.ts'
 
@@ -114,7 +114,7 @@ describe('in-process policy inheritance', () => {
       const runtimeContext = child.session.events.find(
         (event): event is SessionEvent<'user/message'> => event.type === 'user/message'
           && event.data.source.kind === 'plugin'
-          && event.data.source.plugin === '@deepseek-ai/dsh-system-prompt',
+          && event.data.source.plugin === '@njydsz/ydb-system-prompt',
       )
       if (request === undefined || runtimeContext === undefined) throw new Error('child request lacks its runtime policy context')
       expect(runtimeContext.seq).toBeLessThan(request.seq)

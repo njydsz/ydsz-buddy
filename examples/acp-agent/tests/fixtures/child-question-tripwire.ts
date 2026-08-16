@@ -1,5 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis'
-import '@deepseek-ai/dsh-user-questions'
+import '@njydsz/ydb-user-questions'
 
 /** Snapshot-only provider whose invocation means the child guard failed. */
 export const name = 'child-question-tripwire'

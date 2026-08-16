@@ -446,12 +446,12 @@ class YdbClient:
             and self.config.runtime_bin is None
             and self.config.bridge_bin is None
         )
-        if not uses_bundled_runtime or env.get("DSH_CORDIS_CONFIG"):
+        if not uses_bundled_runtime or env.get("YDB_CORDIS_CONFIG"):
             return
         # _default_launch_args already imported the package or raised its install error.
         from deepseek_harness_runtime import bundled_default_config_path
 
-        env["DSH_CORDIS_CONFIG"] = str(bundled_default_config_path())
+        env["YDB_CORDIS_CONFIG"] = str(bundled_default_config_path())
 
     def _unsubscribe_notifications(self, subscription_id: str) -> None:
         with self._lock:

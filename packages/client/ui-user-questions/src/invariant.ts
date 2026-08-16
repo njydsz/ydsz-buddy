@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-client-ui-user-questions`.
- * @module @deepseek-ai/dsh-client-ui-user-questions/invariant
+ * Package-owned invariant companion for `@njydsz/ydb-client-ui-user-questions`.
+ * @module @njydsz/ydb-client-ui-user-questions/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
-import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
+import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-user-questions'
+const PACKAGE_NAME = '@njydsz/ydb-client-ui-user-questions'
 
 /** Cordis companion plugin name. */
 export const name = 'client-ui-user-questions-invariant'

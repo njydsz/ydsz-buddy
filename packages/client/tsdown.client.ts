@@ -59,7 +59,7 @@ const SKIP_WORKSPACE_BUILD: UserConfig = { entry: '' }
  * dependent bundle materializes. TODO(webload/store-rehome): remove with the
  * store-engine relocation follow-up.
  */
-const RUNTIME_STORE_EXEMPTION = '@deepseek-ai/dsh-client-runtime/client'
+const RUNTIME_STORE_EXEMPTION = '@njydsz/ydb-client-runtime/client'
 
 /** Externals resolved from the loader module table: the platform seed entries plus the documented runtime exemption. */
 export const CLIENT_EXTERNALS: readonly string[] = [...PLATFORM_MODULES, RUNTIME_STORE_EXEMPTION]
@@ -97,7 +97,7 @@ export function clientBundle(
 ): BuildFaceConfig {
   const lib = clientLibraryConfig(id, libEntry, options.lib)
   return ({ env }) => {
-    const face = buildFace(env?.DSH_BUILD_FACE)
+    const face = buildFace(env?.YDB_BUILD_FACE)
     const client = clientConfig(id, face === undefined
       ? 'src/client/index.ts'
       : 'lib/types/client/index.js')
@@ -125,7 +125,7 @@ export function clientLibrary(id: string, libEntry: readonly string[]): BuildFac
  * @returns ENV-selected tsdown config for the Client build face.
  */
 export function clientOnly(configs: readonly UserConfig[]): BuildFaceConfig {
-  return ({ env }) => buildFace(env?.DSH_BUILD_FACE) === 'host'
+  return ({ env }) => buildFace(env?.YDB_BUILD_FACE) === 'host'
     ? [SKIP_WORKSPACE_BUILD]
     : [...configs]
 }
@@ -145,7 +145,7 @@ type BuildFaceConfig = (inlineConfig: Pick<UserConfig, 'env'>) => UserConfig[]
 
 function buildFace(value: unknown): BuildFace {
   if (value === undefined || value === 'host' || value === 'client') return value
-  throw new Error(`tsdown: --env.DSH_BUILD_FACE must be host or client, received ${String(value)}`)
+  throw new Error(`tsdown: --env.YDB_BUILD_FACE must be host or client, received ${String(value)}`)
 }
 
 function clientLibraryConfig(

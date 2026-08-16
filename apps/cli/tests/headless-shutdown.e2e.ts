@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { execa } from 'execa'
 import { describe, expect, it } from 'vitest'
-import { LOADER_SMOKE_TEST_TIMEOUT_MS, resolveExampleLaunch } from '@deepseek-ai/dsh-loader-smoke'
+import { LOADER_SMOKE_TEST_TIMEOUT_MS, resolveExampleLaunch } from '@njydsz/ydb-loader-smoke'
 
 const dshBinScript = fileURLToPath(new URL('../src/bin.ts', import.meta.url))
 const tsconfigPath = fileURLToPath(new URL('../../../tsconfig.json', import.meta.url))
@@ -73,7 +73,7 @@ async function runHeadlessPtySmoke(): Promise<string> {
       name: 'dsh-profile-headless',
       private: true,
       dependencies: {},
-      dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-headless'] } },
+      dsh: { profile: { bundles: ['@njydsz/ydb-base', '@njydsz/ydb-headless'] } },
     }, undefined, 2))
     await writeFile(join(profileDir, 'cordis.patch.yml'), [
       '- insert:',
@@ -87,10 +87,10 @@ async function runHeadlessPtySmoke(): Promise<string> {
       tsconfigPath,
       env: {
         YDB_HOME: home,
-        DSH_AGENTS_HOME: join(cwd, '.agents'),
+        YDB_AGENTS_HOME: join(cwd, '.agents'),
         DEEPSEEK_API_KEY: 'keyless-shutdown-no-call',
-        DSH_TELEMETRY_DISABLED: '1',
-        DSH_TEST_SHUTDOWN_ARM_FILE: join(cwd, 'shutdown-armed'),
+        YDB_TELEMETRY_DISABLED: '1',
+        YDB_TEST_SHUTDOWN_ARM_FILE: join(cwd, 'shutdown-armed'),
       },
     })
     const timeoutMs = 15_000

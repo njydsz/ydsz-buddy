@@ -11,7 +11,7 @@
  * - `dsh:stream:abort` (send): abort an open stream.
  * - `dsh:stream:frame:<id>` (on): one SSE frame pushed per stream.
  * - `dsh:stream:end:<id>` (on): stream termination signal.
- * @module @deepseek-ai/dsh-electron/preload
+ * @module @njydsz/ydb-electron/preload
  */
 
 import { contextBridge, ipcRenderer } from 'electron'

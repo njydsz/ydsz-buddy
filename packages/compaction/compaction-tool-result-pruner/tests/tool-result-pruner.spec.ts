@@ -1,22 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { CallId , createMessage, createToolResultMessage } from '@deepseek-ai/dsh-llm'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
+import { CallId , createMessage, createToolResultMessage } from '@njydsz/ydb-llm'
+import type { ContentBlock } from '@njydsz/ydb-llm'
 import SessionStore, {
   Session,
   SessionId,
-} from '@deepseek-ai/dsh-session'
-import type { SurfaceEvent } from '@deepseek-ai/dsh-session'
-import * as SessionInvariant from '@deepseek-ai/dsh-session/invariant'
-import InvariantRegistry from '@deepseek-ai/dsh-invariants'
-import TokenMeter from '@deepseek-ai/dsh-token-meter'
+} from '@njydsz/ydb-session'
+import type { SurfaceEvent } from '@njydsz/ydb-session'
+import * as SessionInvariant from '@njydsz/ydb-session/invariant'
+import InvariantRegistry from '@njydsz/ydb-invariants'
+import TokenMeter from '@njydsz/ydb-token-meter'
 import ToolResultPruner, {
   codePointLength,
   DEFAULTS,
   PRUNE_MARKER,
   resolveConfig,
-} from '@deepseek-ai/dsh-compaction-tool-result-pruner'
-import type { ToolResultPruneConfig } from '@deepseek-ai/dsh-compaction-tool-result-pruner'
+} from '@njydsz/ydb-compaction-tool-result-pruner'
+import type { ToolResultPruneConfig } from '@njydsz/ydb-compaction-tool-result-pruner'
 
 const MODEL = 'test-model'
 const SMALL: ToolResultPruneConfig = {

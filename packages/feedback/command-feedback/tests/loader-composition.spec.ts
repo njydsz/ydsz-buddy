@@ -6,12 +6,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent, AgentStatus } from '@deepseek-ai/dsh-agent'
-import CommandRuntime from '@deepseek-ai/dsh-commands'
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
-import * as CommandFeedback from '@deepseek-ai/dsh-command-feedback'
-import { getOrCreateAnonymousUserId } from '@deepseek-ai/dsh-anonymous-user-id'
+import AgentRegistry, { Inbox } from '@njydsz/ydb-agent'
+import type { Agent, AgentStatus } from '@njydsz/ydb-agent'
+import CommandRuntime from '@njydsz/ydb-commands'
+import SessionStore, { SessionId } from '@njydsz/ydb-session'
+import * as CommandFeedback from '@njydsz/ydb-command-feedback'
+import { getOrCreateAnonymousUserId } from '@njydsz/ydb-anonymous-user-id'
 
 let root: string | undefined
 let context: Context | undefined
@@ -56,10 +56,10 @@ describe('/feedback real Loader composition through cordis.yml', () => {
     vi.stubEnv('YDB_HOME', root)
     const configPath = join(root, 'cordis.yml')
     await writeFile(configPath, [
-      "- name: '@deepseek-ai/dsh-agent'",
-      "- name: '@deepseek-ai/dsh-session'",
-      "- name: '@deepseek-ai/dsh-commands'",
-      "- name: '@deepseek-ai/dsh-command-feedback'",
+      "- name: '@njydsz/ydb-agent'",
+      "- name: '@njydsz/ydb-session'",
+      "- name: '@njydsz/ydb-commands'",
+      "- name: '@njydsz/ydb-command-feedback'",
       '',
     ].join('\n'))
 
@@ -68,10 +68,10 @@ describe('/feedback real Loader composition through cordis.yml', () => {
     await context.plugin(Loader)
     context.loader.builtins.include = Include
     const modules = new Map<string, unknown>([
-      ['@deepseek-ai/dsh-agent', AgentRegistry],
-      ['@deepseek-ai/dsh-session', SessionStore],
-      ['@deepseek-ai/dsh-commands', CommandRuntime],
-      ['@deepseek-ai/dsh-command-feedback', CommandFeedback],
+      ['@njydsz/ydb-agent', AgentRegistry],
+      ['@njydsz/ydb-session', SessionStore],
+      ['@njydsz/ydb-commands', CommandRuntime],
+      ['@njydsz/ydb-command-feedback', CommandFeedback],
     ])
     context.loader.internal = {
       version: 'v2',

@@ -12,12 +12,12 @@ import {
   tokenizeSessionFixtureCwd,
   type HarvestedLog,
   type NormalizeContext,
-} from '@deepseek-ai/dsh-acp-snapshot'
-import { LOADER_SMOKE_TEST_TIMEOUT_MS, runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
+} from '@njydsz/ydb-acp-snapshot'
+import { LOADER_SMOKE_TEST_TIMEOUT_MS, runLoaderSmoke } from '@njydsz/ydb-loader-smoke'
 import {
   decompressZstdFrame,
   scanZstdFrames,
-} from '@deepseek-ai/dsh-session-persistence-jsonl/src/zstd.ts'
+} from '@njydsz/ydb-session-persistence-jsonl/src/zstd.ts'
 import { describe, expect, it } from 'vitest'
 
 const snapshotsDir = join(dirname(fileURLToPath(import.meta.url)), 'snapshots')
@@ -58,7 +58,7 @@ const headlessOverlayPath = fileURLToPath(new URL('./fixtures/headless-profile.c
 const headlessSessionExpected = join(snapshotsDir, 'headless-profile', 'session.expected.jsonl')
 const headlessFailureExpected = join(snapshotsDir, 'headless-profile', 'stderr.expected.txt')
 const cliMockLlmPluginPath = fileURLToPath(new URL('./fixtures/cli-mock-llm.ts', import.meta.url))
-const refreshing = process.env.DSH_SNAPSHOT === 'refresh'
+const refreshing = process.env.YDB_SNAPSHOT === 'refresh'
 
 interface JsonObject {
   [key: string]: unknown
@@ -229,8 +229,8 @@ describe('headless stream-json snapshots', () => {
       binArgs: ['--profile', 'headless', '--patch', headlessOverlayPath, task],
       tsconfigPath,
       env: {
-        DSH_PERMISSION_MODE: 'danger-full-access',
-        DSH_TELEMETRY_DISABLED: '1',
+        YDB_PERMISSION_MODE: 'danger-full-access',
+        YDB_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: prepareCliMockFixture,
@@ -263,7 +263,7 @@ describe('headless stream-json snapshots', () => {
       expectedExitCode: 1,
       env: {
         DSH_CLI_MOCK_FAILURE: '1',
-        DSH_TELEMETRY_DISABLED: '1',
+        YDB_TELEMETRY_DISABLED: '1',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: prepareCliMockFixture,
@@ -301,7 +301,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [retryConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
       prepare: (cwd) => { runCwd = cwd },
@@ -342,7 +342,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [compactionConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: compactionSessionFixture,
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },
@@ -585,7 +585,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [advancedConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: advancedSessionFixture,
         DSH_SNAPSHOT_CHILD_FILES: [
           join(advancedScenarioDir, 'session.1.jsonl'),
@@ -657,7 +657,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [goalConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: join(goalScenarioDir, 'session.jsonl'),
         DSH_SNAPSHOT_OVERRIDE: join(goalScenarioDir, 'replay.override.json'),
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
@@ -714,7 +714,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [ralphConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: join(ralphScenarioDir, 'session.jsonl'),
         DSH_SNAPSHOT_OVERRIDE: join(ralphScenarioDir, 'replay.override.json'),
         DSH_SNAPSHOT_CHILD_FILES: [
@@ -867,7 +867,7 @@ describe('headless stream-json snapshots', () => {
       binArgs: [ptyConfigPath, prompt],
       tsconfigPath,
       env: {
-        DSH_SNAPSHOT: 'replay',
+        YDB_SNAPSHOT: 'replay',
         DSH_SNAPSHOT_FILE: ptySessionFixture,
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
       },

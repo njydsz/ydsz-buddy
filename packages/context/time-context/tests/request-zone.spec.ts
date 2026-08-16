@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { UserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage } from '@njydsz/ydb-llm'
+import type { UserMessage } from '@njydsz/ydb-llm'
 import {
   deriveBrowserTimeZoneContext,
   renderBrowserTimeZoneContext,

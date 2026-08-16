@@ -4,19 +4,19 @@
  * producers. It also delivers unreported completions to the owning agent:
  * injected into a busy owner's next step, or opening a turn on an idle one
  * under the default `wakeup` delivery, bounded per owner.
- * @module @deepseek-ai/dsh-tool-jobs
+ * @module @njydsz/ydb-tool-jobs
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { boundContextSummary, createUserMessage, type ContentBlock } from '@deepseek-ai/dsh-llm'
-import { TextRetainer } from '@deepseek-ai/dsh-output-retention'
-import { defineTool } from '@deepseek-ai/dsh-tools'
-import type { GenericCallView, ToolDefinition, ToolExecution } from '@deepseek-ai/dsh-tools'
-import { JobId } from '@deepseek-ai/dsh-jobs'
-import type { JobSnapshot } from '@deepseek-ai/dsh-jobs'
-import type {} from '@deepseek-ai/dsh-system-prompt'
-import type { Agent } from '@deepseek-ai/dsh-agent'
+import { boundContextSummary, createUserMessage, type ContentBlock } from '@njydsz/ydb-llm'
+import { TextRetainer } from '@njydsz/ydb-output-retention'
+import { defineTool } from '@njydsz/ydb-tools'
+import type { GenericCallView, ToolDefinition, ToolExecution } from '@njydsz/ydb-tools'
+import { JobId } from '@njydsz/ydb-jobs'
+import type { JobSnapshot } from '@njydsz/ydb-jobs'
+import type {} from '@njydsz/ydb-system-prompt'
+import type { Agent } from '@njydsz/ydb-agent'
 
 export const name = 'tool-jobs'
 export const inject = ['tools', 'jobs', 'systemPrompt']

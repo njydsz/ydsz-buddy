@@ -16,9 +16,9 @@ interface CssPlugin {
 
 function cssPlugin(): CssPlugin {
   const configs = clientBundle(
-    '@deepseek-ai/dsh-client-test',
+    '@njydsz/ydb-client-test',
     ['lib/types/index.js', 'lib/types/invariant.js'],
-  )({ env: { DSH_BUILD_FACE: 'client' } })
+  )({ env: { YDB_BUILD_FACE: 'client' } })
   const client = configs.find(config => config.platform === 'browser')
   if (client === undefined) throw new Error('client config missing')
   const plugins = (client as { plugins: CssPlugin[] }).plugins

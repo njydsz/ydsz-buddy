@@ -10,7 +10,7 @@
  * envelope parsing, stream framing). This carrier only replaces the transport
  * aspect — doFetch/openMux/openHost — over IPC, so no protocol logic is
  * duplicated.
- * @module @deepseek-ai/dsh-electron/ipc-protocol
+ * @module @njydsz/ydb-electron/ipc-protocol
  */
 
 /** IPC channel for unary RPC round-trips. */

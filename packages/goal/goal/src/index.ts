@@ -1,7 +1,7 @@
 /**
  * Same-session goal domain: event-sourced state, compare-and-set mutations,
  * and process-local continuation activation.
- * @module @deepseek-ai/dsh-goal
+ * @module @njydsz/ydb-goal
  */
 
 import { randomUUID } from 'node:crypto'
@@ -9,12 +9,12 @@ import { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { z as zod } from 'zod'
 import type { ZodType } from 'zod'
-import { agentEvents } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import type { Session, SessionEvent } from '@deepseek-ai/dsh-session'
-import { TypertRemoteService, Remote } from '@deepseek-ai/dsh-typert-protocol'
+import { agentEvents } from '@njydsz/ydb-agent'
+import type { Agent } from '@njydsz/ydb-agent'
+import type { Session, SessionEvent } from '@njydsz/ydb-session'
+import { TypertRemoteService, Remote } from '@njydsz/ydb-typert-protocol'
 // Type-only: resolves ctx.sessionProjections for the optional unit child.
-import type {} from '@deepseek-ai/dsh-session-projection'
+import type {} from '@njydsz/ydb-session-projection'
 import {
   applyGoalEvent,
   decodeGoalChange,

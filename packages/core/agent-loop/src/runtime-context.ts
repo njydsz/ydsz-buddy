@@ -1,15 +1,15 @@
 /**
  * Durable projection state for dynamic runtime context.
- * @module @deepseek-ai/dsh-agent-loop/runtime-context
+ * @module @njydsz/ydb-agent-loop/runtime-context
  */
 
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import type { ContextSnapshotSection } from '@deepseek-ai/dsh-llm'
-import type { Session, UserMessage } from '@deepseek-ai/dsh-session'
-import { isReplacementSurfaceEvent } from '@deepseek-ai/dsh-session'
+import { createUserMessage } from '@njydsz/ydb-llm'
+import type { ContextSnapshotSection } from '@njydsz/ydb-llm'
+import type { Session, UserMessage } from '@njydsz/ydb-session'
+import { isReplacementSurfaceEvent } from '@njydsz/ydb-session'
 import type { Context } from '@deepseek-ai/cordis'
 
-const SOURCE = '@deepseek-ai/dsh-system-prompt'
+const SOURCE = '@njydsz/ydb-system-prompt'
 const CLEARED = 'Current runtime context: none. Earlier runtime-context snapshots no longer apply.'
 
 function isOwned(message: UserMessage): boolean {

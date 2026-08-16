@@ -4,7 +4,7 @@ import { join, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
+import SystemPrompt, { renderPrompt } from '@njydsz/ydb-system-prompt'
 import {
   addHarnessSourceSection, assertEntriesActivated, assertEntriesLoaded, boot,
   FAIL_LOUD_RELEASE_TIMEOUT_MS, HARNESS_SOURCE_SECTION,
@@ -127,7 +127,7 @@ describe('loadLayeredEnv', () => {
   })
 
   it.each([
-    ['a harness switch', 'DSH_PERMISSION_MODE=danger-full-access\n'],
+    ['a harness switch', 'YDB_PERMISSION_MODE=danger-full-access\n'],
     ['the executable search path', 'PATH=/tmp/evil\n'],
     ['a module preload', 'NODE_OPTIONS=--require /tmp/evil.js\n'],
     ['a skill root', 'DSH_AGENTS_HOME=/tmp/injected\n'],
@@ -567,7 +567,7 @@ describe('boot', () => {
     mkdirSync(shadow, { recursive: true })
     mkdirSync(harnessPlugin, { recursive: true })
     writeFileSync(join(shadow, 'package.json'), JSON.stringify({
-      name: '@deepseek-ai/dsh-system-prompt',
+      name: '@njydsz/ydb-system-prompt',
       type: 'module',
       exports: './index.mjs',
     }))
@@ -578,7 +578,7 @@ describe('boot', () => {
       '',
     ].join('\n'))
     writeFileSync(join(harnessPlugin, 'package.json'), JSON.stringify({
-      name: '@deepseek-ai/dsh-system-prompt',
+      name: '@njydsz/ydb-system-prompt',
       type: 'module',
       exports: './index.mjs',
     }))
@@ -592,7 +592,7 @@ describe('boot', () => {
     writeFileSync(absolutePlugin, 'export function apply(ctx) { ctx.provide("absolutePluginLoaded", true) }\n')
     const entries = [
       '- id: prompt',
-      "  name: '@deepseek-ai/dsh-system-prompt'",
+      "  name: '@njydsz/ydb-system-prompt'",
       '- id: relative',
       "  name: './relative.mjs'",
     ]

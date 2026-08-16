@@ -8,7 +8,7 @@ import {
   type Scope,
   type ScopeKey,
   type ScopeLayer,
-} from '@deepseek-ai/dsh-scope'
+} from '@njydsz/ydb-scope'
 
 class TestLayer implements ScopeLayer {
   readonly named: NamedEntries<number>

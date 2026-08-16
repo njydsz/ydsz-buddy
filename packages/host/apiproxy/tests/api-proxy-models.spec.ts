@@ -7,20 +7,20 @@
 
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry, { agentEvents } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
-import LlmRuntime, { LlmAdapter, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
+import AgentRegistry, { agentEvents } from '@njydsz/ydb-agent'
+import type { Agent } from '@njydsz/ydb-agent'
+import LlmRuntime, { LlmAdapter, ReasoningEffortId } from '@njydsz/ydb-llm'
 import type {
   GenerateOptions, LlmCallConfig, LlmModelInfo, LlmModelReasoningInfo, LlmProviderInfo,
   LlmResolvedModelInfo, StreamChunk,
   UserMessage,
-} from '@deepseek-ai/dsh-llm'
-import SessionStore from '@deepseek-ai/dsh-session'
-import type { SessionId } from '@deepseek-ai/dsh-session'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import UserQuestionService from '@deepseek-ai/dsh-user-questions'
-import type { RpcRequest } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
-import { RpcId } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
+} from '@njydsz/ydb-llm'
+import SessionStore from '@njydsz/ydb-session'
+import type { SessionId } from '@njydsz/ydb-session'
+import SystemPrompt from '@njydsz/ydb-system-prompt'
+import UserQuestionService from '@njydsz/ydb-user-questions'
+import type { RpcRequest } from '@njydsz/ydb-host-apiproxy/api/rpc'
+import { RpcId } from '@njydsz/ydb-host-apiproxy/api/rpc'
 import { createApiProxy } from '../src/api-proxy.ts'
 
 let nextRpc = 1

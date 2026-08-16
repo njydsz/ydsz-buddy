@@ -11,40 +11,40 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { act, cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
-import type { WebBootEntry } from '@deepseek-ai/dsh-client-modules/client'
-import { AppWebEntry } from '@deepseek-ai/dsh-client-web'
+import type { WebBootEntry } from '@njydsz/ydb-client-modules/client'
+import { AppWebEntry } from '@njydsz/ydb-client-web'
 
 /** Boot entries for the minimal assembled graph, each carrying the workspace bundle it loads. */
 const PLUGINS: readonly (WebBootEntry & { bundlePath: string })[] = [
-  { id: '@deepseek-ai/dsh-typert-registry', bundlePath: 'packages/typert/registry/lib/client.js', url: '/plugins/typert-registry.js', rev: 'fx', inject: [], immediately: true },
-  { id: '@deepseek-ai/dsh-client-connection', bundlePath: 'packages/client/connection/lib/client.js', url: '/plugins/connection.js', rev: 'fx', inject: [], immediately: true },
-  { id: '@deepseek-ai/dsh-api-gateway', bundlePath: 'packages/api/gateway/lib/client.js', url: '/plugins/api-gateway.js', rev: 'fx', inject: ['@deepseek-ai/dsh-typert-registry', '@deepseek-ai/dsh-client-connection'], immediately: true },
-  { id: '@deepseek-ai/dsh-api-remotes', bundlePath: 'packages/api/remotes/lib/client.js', url: '/plugins/api-remotes.js', rev: 'fx', inject: ['@deepseek-ai/dsh-api-gateway'], immediately: true },
+  { id: '@njydsz/ydb-typert-registry', bundlePath: 'packages/typert/registry/lib/client.js', url: '/plugins/typert-registry.js', rev: 'fx', inject: [], immediately: true },
+  { id: '@njydsz/ydb-client-connection', bundlePath: 'packages/client/connection/lib/client.js', url: '/plugins/connection.js', rev: 'fx', inject: [], immediately: true },
+  { id: '@njydsz/ydb-api-gateway', bundlePath: 'packages/api/gateway/lib/client.js', url: '/plugins/api-gateway.js', rev: 'fx', inject: ['@njydsz/ydb-typert-registry', '@njydsz/ydb-client-connection'], immediately: true },
+  { id: '@njydsz/ydb-api-remotes', bundlePath: 'packages/api/remotes/lib/client.js', url: '/plugins/api-remotes.js', rev: 'fx', inject: ['@njydsz/ydb-api-gateway'], immediately: true },
   // The settings domain base: the only provider of ctx.settingsScope, which the
   // locale and ui-theme rows below inject for their preference rows. Without it
   // both stay pending and ui-layout never activates, so nothing renders.
-  { id: '@deepseek-ai/dsh-client-ui-settings', bundlePath: 'packages/client/ui-settings/lib/client.js', url: '/plugins/ui-settings.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-connection', '@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-api-remotes'], immediately: true },
-  { id: '@deepseek-ai/dsh-client-runtime', bundlePath: 'packages/client/runtime/lib/client.js', url: '/plugins/runtime.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-connection', '@deepseek-ai/dsh-typert-registry', '@deepseek-ai/dsh-api-gateway'], immediately: true },
-  { id: '@deepseek-ai/dsh-client-ui-theme', bundlePath: 'packages/client/ui-theme/lib/client.js', url: '/plugins/ui-theme.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-connection', '@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-locale', '@deepseek-ai/dsh-client-ui-settings', '@deepseek-ai/dsh-api-remotes'], immediately: true },
-  { id: '@deepseek-ai/dsh-client-locale', bundlePath: 'packages/client/locale/lib/client.js', url: '/plugins/locale.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-connection', '@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-ui-settings', '@deepseek-ai/dsh-api-remotes'], immediately: true },
-  { id: '@deepseek-ai/dsh-client-ui-layout', bundlePath: 'packages/client/ui-layout/lib/client.js', url: '/plugins/ui-layout.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-runtime'] },
-  { id: '@deepseek-ai/dsh-client-ui-sidebar', bundlePath: 'packages/client/ui-sidebar/lib/client.js', url: '/plugins/ui-sidebar.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-layout'] },
-  { id: '@deepseek-ai/dsh-client-ui-conversation', bundlePath: 'packages/client/ui-conversation/lib/client.js', url: '/plugins/ui-conversation.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-layout'] },
-  { id: '@deepseek-ai/dsh-client-ui-tool', bundlePath: 'packages/client/ui-tool/lib/client.js', url: '/plugins/ui-tool.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-locale', '@deepseek-ai/dsh-client-ui-conversation'] },
-  { id: '@deepseek-ai/dsh-client-ui-workflow-run', bundlePath: 'packages/client/ui-workflow-run/lib/client.js', url: '/plugins/ui-workflow-run.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-locale', '@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-ui-conversation'] },
+  { id: '@njydsz/ydb-client-ui-settings', bundlePath: 'packages/client/ui-settings/lib/client.js', url: '/plugins/ui-settings.js', rev: 'fx', inject: ['@njydsz/ydb-client-connection', '@njydsz/ydb-client-runtime', '@njydsz/ydb-api-remotes'], immediately: true },
+  { id: '@njydsz/ydb-client-runtime', bundlePath: 'packages/client/runtime/lib/client.js', url: '/plugins/runtime.js', rev: 'fx', inject: ['@njydsz/ydb-client-connection', '@njydsz/ydb-typert-registry', '@njydsz/ydb-api-gateway'], immediately: true },
+  { id: '@njydsz/ydb-client-ui-theme', bundlePath: 'packages/client/ui-theme/lib/client.js', url: '/plugins/ui-theme.js', rev: 'fx', inject: ['@njydsz/ydb-client-connection', '@njydsz/ydb-client-runtime', '@njydsz/ydb-client-locale', '@njydsz/ydb-client-ui-settings', '@njydsz/ydb-api-remotes'], immediately: true },
+  { id: '@njydsz/ydb-client-locale', bundlePath: 'packages/client/locale/lib/client.js', url: '/plugins/locale.js', rev: 'fx', inject: ['@njydsz/ydb-client-connection', '@njydsz/ydb-client-runtime', '@njydsz/ydb-client-ui-settings', '@njydsz/ydb-api-remotes'], immediately: true },
+  { id: '@njydsz/ydb-client-ui-layout', bundlePath: 'packages/client/ui-layout/lib/client.js', url: '/plugins/ui-layout.js', rev: 'fx', inject: ['@njydsz/ydb-client-runtime'] },
+  { id: '@njydsz/ydb-client-ui-sidebar', bundlePath: 'packages/client/ui-sidebar/lib/client.js', url: '/plugins/ui-sidebar.js', rev: 'fx', inject: ['@njydsz/ydb-client-ui-layout'] },
+  { id: '@njydsz/ydb-client-ui-conversation', bundlePath: 'packages/client/ui-conversation/lib/client.js', url: '/plugins/ui-conversation.js', rev: 'fx', inject: ['@njydsz/ydb-client-ui-layout'] },
+  { id: '@njydsz/ydb-client-ui-tool', bundlePath: 'packages/client/ui-tool/lib/client.js', url: '/plugins/ui-tool.js', rev: 'fx', inject: ['@njydsz/ydb-client-runtime', '@njydsz/ydb-client-locale', '@njydsz/ydb-client-ui-conversation'] },
+  { id: '@njydsz/ydb-client-ui-workflow-run', bundlePath: 'packages/client/ui-workflow-run/lib/client.js', url: '/plugins/ui-workflow-run.js', rev: 'fx', inject: ['@njydsz/ydb-client-locale', '@njydsz/ydb-client-runtime', '@njydsz/ydb-client-ui-conversation'] },
   {
-    id: '@deepseek-ai/dsh-client-ui-workspace',
+    id: '@njydsz/ydb-client-ui-workspace',
     bundlePath: 'packages/client/ui-workspace/lib/client.js',
     url: '/plugins/ui-workspace.js',
     rev: 'fx',
     inject: [
-      '@deepseek-ai/dsh-client-runtime',
-      '@deepseek-ai/dsh-client-ui-conversation',
-      '@deepseek-ai/dsh-client-ui-sidebar',
+      '@njydsz/ydb-client-runtime',
+      '@njydsz/ydb-client-ui-conversation',
+      '@njydsz/ydb-client-ui-sidebar',
     ],
   },
-  { id: '@deepseek-ai/dsh-session-log-export', bundlePath: 'packages/session-query/session-log-export/lib/client.js', url: '/plugins/session-log-download.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-commands', '@deepseek-ai/dsh-client-ui-conversation'] },
-  { id: '@deepseek-ai/dsh-client-ui-trajectory', bundlePath: 'packages/client/ui-trajectory/lib/client.js', url: '/plugins/ui-trajectory.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-conversation'] },
+  { id: '@njydsz/ydb-session-log-export', bundlePath: 'packages/session-query/session-log-export/lib/client.js', url: '/plugins/session-log-download.js', rev: 'fx', inject: ['@njydsz/ydb-client-ui-commands', '@njydsz/ydb-client-ui-conversation'] },
+  { id: '@njydsz/ydb-client-ui-trajectory', bundlePath: 'packages/client/ui-trajectory/lib/client.js', url: '/plugins/ui-trajectory.js', rev: 'fx', inject: ['@njydsz/ydb-client-ui-conversation'] },
 ]
 
 const bundles = new Map(PLUGINS.map(plugin => [
@@ -147,7 +147,7 @@ export function hasClass(el: Element, name: string): boolean {
 
 /**
  * Whether this run rewrites its golden instead of comparing against it, set by
- * the snapshot gate's `DSH_SNAPSHOT` mode (`record` re-runs the scenarios from
+ * the snapshot gate's `YDB_SNAPSHOT` mode (`record` re-runs the scenarios from
  * scratch, `refresh` re-derives the expected text from the existing ones).
  */
-export const REFRESHING_GOLDEN = process.env.DSH_SNAPSHOT === 'record' || process.env.DSH_SNAPSHOT === 'refresh'
+export const REFRESHING_GOLDEN = process.env.YDB_SNAPSHOT === 'record' || process.env.YDB_SNAPSHOT === 'refresh'
