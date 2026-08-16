@@ -7,6 +7,13 @@ settings:
 overrides:
   '@deepseek-ai/cosmokit': link:vendor/cosmokit
   '@deepseek-ai/schemastery': link:vendor/schemastery
+  '@deepseek-ai/cordis': link:vendor/cordis
+  '@deepseek-ai/cordis-plugin-loader': link:vendor/loader
+  '@deepseek-ai/cordis-plugin-include': link:vendor/include
+  '@deepseek-ai/cordis-plugin-group': link:vendor/group
+  '@deepseek-ai/cordis-plugin-timer': link:vendor/timer
+  '@deepseek-ai/cordis-plugin-hmr': link:vendor/hmr
+  '@deepseek-ai/cordis-plugin-logger-console': link:vendor/logger-console
 
 patchedDependencies:
   node-pty@1.1.0: 7a0c04f1f49d798a9ffe2f7f414c01064a44ca2489772d0c3e1235ab336755e6

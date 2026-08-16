@@ -27,6 +27,17 @@ linkWorkspacePackages: true
 overrides:
   '@deepseek-ai/cosmokit': 'link:vendor/cosmokit'
   '@deepseek-ai/schemastery': 'link:vendor/schemastery'
+  # Rename-era shim: pre-built lib/ artifacts throughout the repo still
+  # import these by their old @deepseek-ai/cordis* names. Map them to the
+  # workspace-resolved vendor sources so Node resolves them without a
+  # rebuild. Remove once every lib/ is regenerated from current sources.
+  '@deepseek-ai/cordis': 'link:vendor/cordis'
+  '@deepseek-ai/cordis-plugin-loader': 'link:vendor/loader'
+  '@deepseek-ai/cordis-plugin-include': 'link:vendor/include'
+  '@deepseek-ai/cordis-plugin-group': 'link:vendor/group'
+  '@deepseek-ai/cordis-plugin-timer': 'link:vendor/timer'
+  '@deepseek-ai/cordis-plugin-hmr': 'link:vendor/hmr'
+  '@deepseek-ai/cordis-plugin-logger-console': 'link:vendor/logger-console'
 
 peerDependencyRules:
   allowedVersions:

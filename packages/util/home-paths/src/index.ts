@@ -1,5 +1,5 @@
 /**
- * Shared filesystem path helpers for DeepSeek Harness user data.
+ * Shared filesystem path helpers for Ydsz Buddy user data.
  *
  * @module @njydsz/ydb-home-paths
  */
@@ -8,14 +8,14 @@ import { opendir, realpath } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 
-/** Directory name for the default DeepSeek Harness home under the OS home. */
-export const DSH_HOME_DIR_NAME = '.dsh'
+/** Directory name for the default Ydsz Buddy home under the OS home. */
+export const YDB_HOME_DIR_NAME = '.ydb'
 
-/** Stable user-facing display form for the default DeepSeek Harness home. */
-export const DEFAULT_DSH_HOME_DISPLAY = `~/${DSH_HOME_DIR_NAME}`
+/** Stable user-facing display form for the default Ydsz Buddy home. */
+export const DEFAULT_YDB_HOME_DISPLAY = `~/${YDB_HOME_DIR_NAME}`
 
-/** Environment variable that overrides the default DeepSeek Harness home. */
-export const DSH_HOME_ENV = 'YDB_HOME'
+/** Environment variable that overrides the default Ydsz Buddy home. */
+export const YDB_HOME_ENV = 'YDB_HOME'
 
 /**
  * Give a native filesystem watcher one canonical spelling of a path, even
@@ -55,11 +55,11 @@ export async function canonicalizeWatchPath(path: string): Promise<string> {
 }
 
 /**
- * Resolve the default DeepSeek Harness home using Node's platform path rules.
+ * Resolve the default Ydsz Buddy home using Node's platform path rules.
  * @returns the absolute default harness home path.
  */
-export function defaultDshHome(): string {
-  return join(homedir(), DSH_HOME_DIR_NAME)
+export function defaultYdbHome(): string {
+  return join(homedir(), YDB_HOME_DIR_NAME)
 }
 
 /**
@@ -74,39 +74,39 @@ export function expandHomePath(path: string): string {
 }
 
 /**
- * Resolve the single-root DeepSeek Harness home.
+ * Resolve the single-root Ydsz Buddy home.
  *
  * Precedence, highest first: an explicit configured path, `$YDB_HOME`, then
- * `~/.dsh`. The harness keeps all user data under one root. An empty or
+ * `~/.ydb`. The harness keeps all user data under one root. An empty or
  * whitespace-only `$YDB_HOME` is treated as unset, so a blank override never
  * resolves the home to the current working directory.
  * @param configured - explicit harness-home override, which has highest precedence.
  * @param env - environment mapping used to read `YDB_HOME`.
  * @returns the normalized absolute harness home path.
  */
-export function resolveDshHome(configured?: string, env: Record<string, string | undefined> = process.env): string {
-  const fromEnv = env[DSH_HOME_ENV]
-  const selected = configured ?? (fromEnv !== undefined && fromEnv.trim().length > 0 ? fromEnv : defaultDshHome())
+export function resolveYdbHome(configured?: string, env: Record<string, string | undefined> = process.env): string {
+  const fromEnv = env[YDB_HOME_ENV]
+  const selected = configured ?? (fromEnv !== undefined && fromEnv.trim().length > 0 ? fromEnv : defaultYdbHome())
   return resolve(expandHomePath(selected))
 }
 
 /**
- * Join path segments onto the resolved DeepSeek Harness home.
+ * Join path segments onto the resolved Ydsz Buddy home.
  * @param segments - path segments appended to the Harness home; an empty list returns the home itself.
  * @returns the normalized absolute joined path.
  */
-export function dshHomePath(...segments: string[]): string {
-  return join(resolveDshHome(), ...segments)
+export function ydbHomePath(...segments: string[]): string {
+  return join(resolveYdbHome(), ...segments)
 }
 
 /**
  * Describe a resolved harness home symbolically for user-facing display.
  *
  * It never returns an absolute machine path: the default home is labelled
- * `~/.dsh`, and any configured home is labelled `$YDB_HOME`.
- * @param resolvedHome - the absolute path returned by {@link resolveDshHome}.
- * @returns `~/.dsh` for the default home, otherwise `$YDB_HOME`.
+ * `~/.ydb`, and any configured home is labelled `$YDB_HOME`.
+ * @param resolvedHome - the absolute path returned by {@link resolveYdbHome}.
+ * @returns `~/.ydb` for the default home, otherwise `$YDB_HOME`.
  */
-export function dshHomeDisplay(resolvedHome: string): string {
-  return resolvedHome === resolve(defaultDshHome()) ? DEFAULT_DSH_HOME_DISPLAY : `$${DSH_HOME_ENV}`
+export function ydbHomeDisplay(resolvedHome: string): string {
+  return resolvedHome === resolve(defaultYdbHome()) ? DEFAULT_YDB_HOME_DISPLAY : `$${YDB_HOME_ENV}`
 }
