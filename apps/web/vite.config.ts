@@ -94,6 +94,7 @@ export default defineConfig({
   plugins: [rejectStandaloneServe(), commonjs({
     ignoreDynamicRequires: true,
     requireReturnsDefault: 'preferred',
+    transformMixedEsModules: true,
   }), react()],
   build: {
     sourcemap: true,
@@ -144,8 +145,10 @@ export default defineConfig({
       // import; the two process probes are mapped by `define` below.
       { find: /^node:module$/, replacement: src('./src/node-module-stub.ts') },
       // Rename-era shim: the vendored cordis-family and schemastery packages
-      // are still imported by their old @njydsz/* names throughout
-      // client source; map them to the workspace-resolved vendor sources.
+      // are still imported by their old @deepseek-ai/* names throughout
+      // client source; map them to the workspace-resolved vendor sources。
+      // 同时添加 @njydsz/ydb-client-* 别名，指向源码而非预构建输出，
+      // 避免 Rollup 对预构建文件中 CJS 导入的静态分析失败。
       { find: /^@deepseek-ai\/cordis$/, replacement: fileURLToPath(new URL('../../vendor/cordis/src/index.ts', import.meta.url)) },
       { find: /^@deepseek-ai\/cordis-plugin-loader$/, replacement: fileURLToPath(new URL('../../vendor/loader/src/index.ts', import.meta.url)) },
       { find: /^@deepseek-ai\/schemastery$/, replacement: fileURLToPath(new URL('../../vendor/schemastery/src/index.ts', import.meta.url)) },
@@ -157,6 +160,23 @@ export default defineConfig({
       { find: /^@deepseek-ai\/dsh-client-ui-attachment$/, replacement: src('../../packages/client/ui-attachment/src/index.ts') },
       { find: /^@deepseek-ai\/dsh-client-schema-form$/, replacement: src('../../packages/client/schema-form/src/index.ts') },
       { find: /^@deepseek-ai\/dsh-client-modules\/client$/, replacement: src('../../packages/client/modules/src/client/index.ts') },
+      // ui-theme CSS imports still use the old @deepseek-ai specifier with
+      // /styles/* subpaths: alias each sheet to its source file so CSS
+      // resolves through Vite without routing through the lib build.
+      { find: /^@deepseek-ai\/dsh-client-ui-theme\/styles\/base\.css$/, replacement: src('../../packages/client/ui-theme/src/styles/base.css') },
+      { find: /^@deepseek-ai\/dsh-client-ui-theme\/styles\/design-platform\.css$/, replacement: src('../../packages/client/ui-theme/src/styles/design-platform.css') },
+      { find: /^@deepseek-ai\/dsh-client-ui-theme\/styles\/scrollbar\.css$/, replacement: src('../../packages/client/ui-theme/src/styles/scrollbar.css') },
+      { find: /^@deepseek-ai\/dsh-client-ui-theme\/styles\/gradient-shadow-text\.css$/, replacement: src('../../packages/client/ui-theme/src/styles/gradient-shadow-text.css') },
+      { find: /^@deepseek-ai\/dsh-client-ui-theme\/styles\/shiki\.css$/, replacement: src('../../packages/client/ui-theme/src/styles/shiki.css') },
+      // 命名空间迁移后的新名称别名
+      { find: /^@njydsz\/ydb-client-web$/, replacement: src('../../packages/client/web/src/boot.tsx') },
+      { find: /^@njydsz\/ydb-client-web-react$/, replacement: src('../../packages/client/web-react/src/index.ts') },
+      { find: /^@njydsz\/ydb-client-ui-slots$/, replacement: src('../../packages/client/ui-slots/src/index.ts') },
+      { find: /^@njydsz\/ydb-client-ui-primitives$/, replacement: src('../../packages/client/ui-primitives/src/index.ts') },
+      { find: /^@njydsz\/ydb-client-ui-attachment$/, replacement: src('../../packages/client/ui-attachment/src/index.ts') },
+      { find: /^@njydsz\/ydb-client-schema-form$/, replacement: src('../../packages/client/schema-form/src/index.ts') },
+      { find: /^@njydsz\/ydb-client-modules\/client$/, replacement: src('../../packages/client/modules/src/client/index.ts') },
+      { find: /^@njydsz\/ydb-client-ui-theme$/, replacement: src('../../packages/client/ui-theme/src/index.ts') },
     ],
   },
   define: {

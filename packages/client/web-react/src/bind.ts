@@ -3,10 +3,8 @@
  * selector hook. Client-side-rendered only, so no server snapshot is wired.
  * This is the ONE hook constructor in the client stack — engines and hosts
  * traffic in bare sources; binding happens on the React side.
- * 直接导入 CJS 开发版本的命名导出；shim 入口使用动态 require 模式，
- * Rollup 无法静态分析其导出。
  */
-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/cjs/use-sync-external-store-shim/with-selector.development.js'
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector.js'
 import type { HostObservable, SnapshotSelectorHook } from '@njydsz/ydb-client-ui-slots'
 
 /**
