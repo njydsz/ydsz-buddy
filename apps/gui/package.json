@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "dev": "tsx src/main.ts",
+    "dev": "tsdown && electron .",
     "build": "tsdown",
     "build:watch": "tsdown --watch",
     "typecheck": "tsc --noEmit",
