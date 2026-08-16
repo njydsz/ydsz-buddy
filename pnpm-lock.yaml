@@ -353,7 +353,7 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
 
-  apps/electron:
+  apps/gui:
     dependencies:
       '@njydsz/cordis':
         specifier: workspace:*
