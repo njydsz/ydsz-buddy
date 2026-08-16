@@ -1,13 +1,13 @@
 {
-  "name": "@deepseek-ai/dsh-spill",
-  "description": "Abstract spill storage seam (ctx.spillStore) for the DeepSeek Harness — save oversized tool text and return a retrieval locator",
+  "name": "@njydsz/dsh-spill",
+  "description": "Abstract spill storage seam (ctx.spillStore) for the Ydsz Buddy — save oversized tool text and return a retrieval locator",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/spill/spill"
   },
   "type": "module",
@@ -32,17 +32,17 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-brand": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-brand": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   }
 }

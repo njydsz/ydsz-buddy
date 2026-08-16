@@ -1,13 +1,13 @@
 {
-  "name": "@deepseek-ai/dsh-session-title-first-prompt-llm",
-  "description": "First-message LLM provider plugin for DeepSeek Harness session titles",
+  "name": "@njydsz/dsh-session-title-first-prompt-llm",
+  "description": "First-message LLM provider plugin for Ydsz Buddy session titles",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/session/session-title-first-prompt-llm"
   },
   "type": "module",
@@ -27,25 +27,25 @@
   "files": ["lib/index.js", "lib/invariant.js", "lib/types/**/*.d.ts"],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-session-title": "workspace:^",
-    "@deepseek-ai/dsh-session-title-llm": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-session-title": "workspace:^",
+    "@njydsz/dsh-session-title-llm": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:^"
+    "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis-plugin-include": "workspace:^",
-    "@deepseek-ai/cordis-plugin-loader": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-llm-deepseek": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-session-title": "workspace:^",
-    "@deepseek-ai/dsh-session-title-llm": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/cordis-plugin-include": "workspace:^",
+    "@njydsz/cordis-plugin-loader": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-llm-deepseek": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-session-title": "workspace:^",
+    "@njydsz/dsh-session-title-llm": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   }
 }

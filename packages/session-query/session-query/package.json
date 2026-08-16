@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-session-query",
+  "name": "@njydsz/dsh-session-query",
   "description": "Combined session query service contract with concrete reads, traces, and filters",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/session-query/session-query"
   },
   "type": "module",
@@ -32,26 +32,26 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-session-title": "workspace:^",
-    "@deepseek-ai/dsh-session-persistence": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-brand": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-session-title": "workspace:^",
+    "@njydsz/dsh-session-persistence": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   },
   "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-session-persistence": {
+    "@njydsz/dsh-session-persistence": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-brand": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-llm": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-session-title": "workspace:^",
-    "@deepseek-ai/dsh-session-persistence": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-brand": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-session-title": "workspace:^",
+    "@njydsz/dsh-session-persistence": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   }
 }

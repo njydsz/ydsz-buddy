@@ -1,13 +1,13 @@
 {
-  "name": "@deepseek-ai/dsh-web-search-deepseek",
-  "description": "DeepSeek-backed search provider (native web_search via the Anthropic-compatible API) for the DeepSeek Harness web capability seam (ctx.web)",
+  "name": "@njydsz/dsh-web-search-deepseek",
+  "description": "DeepSeek-backed search provider (native web_search via the Anthropic-compatible API) for the Ydsz Buddy web capability seam (ctx.web)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/web/web-search-deepseek"
   },
   "type": "module",
@@ -32,27 +32,27 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:^",
-    "@deepseek-ai/dsh-credentials": "workspace:^",
-    "@deepseek-ai/dsh-launch-environment": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-web": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-settings": "workspace:^"
+    "@njydsz/dsh-agent": "workspace:^",
+    "@njydsz/dsh-credentials": "workspace:^",
+    "@njydsz/dsh-launch-environment": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-web": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
+    "@njydsz/dsh-settings": "workspace:^"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "workspace:^"
+    "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-agent": "workspace:^",
-    "@deepseek-ai/dsh-credentials": "workspace:^",
-    "@deepseek-ai/dsh-credentials-local": "workspace:^",
-    "@deepseek-ai/dsh-launch-environment": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-session": "workspace:^",
-    "@deepseek-ai/dsh-web": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-settings": "workspace:^"
+    "@njydsz/dsh-agent": "workspace:^",
+    "@njydsz/dsh-credentials": "workspace:^",
+    "@njydsz/dsh-credentials-local": "workspace:^",
+    "@njydsz/dsh-launch-environment": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/dsh-web": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
+    "@njydsz/dsh-settings": "workspace:^"
   }
 }

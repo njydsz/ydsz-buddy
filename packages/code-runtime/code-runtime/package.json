@@ -1,13 +1,13 @@
 {
-  "name": "@deepseek-ai/dsh-code-runtime",
-  "description": "Abstract code-execution seam (ctx.codeRuntime) for the DeepSeek Harness",
+  "name": "@njydsz/dsh-code-runtime",
+  "description": "Abstract code-execution seam (ctx.codeRuntime) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/code-runtime/code-runtime"
   },
   "type": "module",
@@ -32,11 +32,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   }
 }

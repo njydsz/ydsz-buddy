@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-message-feedback",
+  "name": "@njydsz/dsh-client-ui-message-feedback",
   "description": "Per-message feedback controls contributed to the assistant-message action strip, backed by the messageFeedback Host Remote",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/client/ui-message-feedback"
   },
   "type": "module",
@@ -32,10 +32,10 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-api-remotes",
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-conversation"
+        "@njydsz/dsh-client-runtime",
+        "@njydsz/dsh-api-remotes",
+        "@njydsz/dsh-client-locale",
+        "@njydsz/dsh-client-ui-conversation"
       ],
       "platform": "web"
     }
@@ -46,32 +46,32 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-connection": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-message-feedback": "workspace:^",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-connection": "workspace:^",
+    "@njydsz/dsh-client-locale": "workspace:^",
+    "@njydsz/dsh-client-runtime": "workspace:^",
+    "@njydsz/dsh-client-ui-conversation": "workspace:^",
+    "@njydsz/dsh-client-ui-primitives": "workspace:^",
+    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-message-feedback": "workspace:^",
+    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-connection": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-message-feedback": "workspace:^",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-connection": "workspace:^",
+    "@njydsz/dsh-client-locale": "workspace:^",
+    "@njydsz/dsh-client-runtime": "workspace:^",
+    "@njydsz/dsh-client-test-runtime": "workspace:^",
+    "@njydsz/dsh-client-ui-conversation": "workspace:^",
+    "@njydsz/dsh-client-ui-primitives": "workspace:^",
+    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-message-feedback": "workspace:^",
+    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
     "@testing-library/react": "^16.1.0",
     "@types/react": "~18.3.1",
     "react": "^18.2.0",

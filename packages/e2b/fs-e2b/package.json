@@ -1,13 +1,13 @@
 {
-  "name": "@deepseek-ai/dsh-fs-e2b",
-  "description": "E2B filesystem implementation for DeepSeek Harness",
+  "name": "@njydsz/dsh-fs-e2b",
+  "description": "E2B filesystem implementation for Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/e2b/fs-e2b"
   },
   "type": "module",
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/dsh-e2b": "workspace:^",
-    "@deepseek-ai/dsh-fs": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-e2b": "workspace:^",
+    "@njydsz/dsh-fs": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-e2b": "workspace:^",
-    "@deepseek-ai/dsh-fs": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^"
+    "@njydsz/dsh-e2b": "workspace:^",
+    "@njydsz/dsh-fs": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/cordis": "workspace:^"
   }
 }

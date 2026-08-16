@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-user-questions",
+  "name": "@njydsz/dsh-client-ui-user-questions",
   "description": "Web ask_user_question feature: host tool mount plus composer-takeover question UI",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/client/ui-user-questions"
   },
   "type": "module",
@@ -32,8 +32,8 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-conversation"
+        "@njydsz/dsh-client-locale",
+        "@njydsz/dsh-client-ui-conversation"
       ],
       "platform": "web"
     }
@@ -44,29 +44,29 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-client-connection": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/dsh-client-connection": "workspace:^",
+    "@njydsz/dsh-client-runtime": "workspace:^",
+    "@njydsz/dsh-client-ui-conversation": "workspace:^",
+    "@njydsz/dsh-client-ui-primitives": "workspace:^",
+    "@njydsz/dsh-client-ui-slots": "workspace:^",
     "clsx": "^2.0.0",
     "react": "^18.2.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^"
+    "@njydsz/cordis": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-locale": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-agent": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-system-prompt": "workspace:^",
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-user-questions": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
+    "@njydsz/dsh-agent": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-locale": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/dsh-system-prompt": "workspace:^",
+    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/dsh-user-questions": "workspace:^",
     "@types/react": "~18.3.1"
   },
   "files": [

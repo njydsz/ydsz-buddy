@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-cordis-client-runner",
+  "name": "@njydsz/dsh-cordis-client-runner",
   "description": "Browser half of dynamic dual-half plugin packages: event subscription, closure evaluation, guard facade, and loader entries",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
     "directory": "packages/extensions/cordis-client-runner"
   },
   "type": "module",
@@ -32,10 +32,10 @@
   "dsh": {
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-api-remotes",
-        "@deepseek-ai/dsh-client-modules",
-        "@deepseek-ai/dsh-client-ui-theme"
+        "@njydsz/dsh-client-runtime",
+        "@njydsz/dsh-api-remotes",
+        "@njydsz/dsh-client-modules",
+        "@njydsz/dsh-client-ui-theme"
       ],
       "platform": "web"
     }
@@ -46,28 +46,28 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-connection": "workspace:^",
-    "@deepseek-ai/dsh-client-modules": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-theme": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
+    "@njydsz/cordis-plugin-loader": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-connection": "workspace:^",
+    "@njydsz/dsh-client-modules": "workspace:^",
+    "@njydsz/dsh-client-runtime": "workspace:^",
+    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/dsh-client-ui-theme": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis-plugin-loader": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-connection": "workspace:^",
-    "@deepseek-ai/dsh-client-modules": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-theme": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
+    "@njydsz/cordis-plugin-loader": "workspace:^",
+    "@njydsz/dsh-api-remotes": "workspace:^",
+    "@njydsz/dsh-client-connection": "workspace:^",
+    "@njydsz/dsh-client-modules": "workspace:^",
+    "@njydsz/dsh-client-runtime": "workspace:^",
+    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/dsh-client-ui-theme": "workspace:^",
+    "@njydsz/dsh-invariants": "workspace:^",
     "@types/react": "~18.3.1",
-    "@deepseek-ai/cordis": "workspace:^",
+    "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "files": [
