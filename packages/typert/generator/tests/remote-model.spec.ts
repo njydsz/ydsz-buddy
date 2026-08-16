@@ -361,7 +361,7 @@ export interface RemainingSchema {
     const root = copyFixture()
     const manifestPath = join(root, 'packages/remote/package.json')
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-      dsh?: { client?: object }
+      ydb?: { client?: object }
       exports: Record<string, unknown>
       files: string[]
     }

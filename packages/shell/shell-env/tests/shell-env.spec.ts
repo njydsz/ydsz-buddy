@@ -11,6 +11,8 @@ import { Context } from '@deepseek-ai/cordis'
 import { CallId } from '@njydsz/ydb-llm'
 import type { Agent } from '@njydsz/ydb-agent'
 import type { ToolExecution } from '@njydsz/ydb-tools'
+import type { DshEnvironmentKey } from '@njydsz/ydb-shell'
+import type { BashEnvVariable } from '@njydsz/ydb-shell-env'
 import { ShellEnvRegistry } from '@njydsz/ydb-shell-env'
 import * as BashEnvPlugin from '@njydsz/ydb-shell-env'
 
@@ -134,7 +136,7 @@ describe('ShellEnvRegistry', () => {
     })).toThrow(/invalid key/)
     expect(() => registry.register({
       name: 'reserved-key',
-      variables: { YDB_HOME: { description: 'Reserved key.' } },
+      variables: { YDB_HOME: { description: 'Reserved key.' } } as Record<DshEnvironmentKey, BashEnvVariable>,
       resolve: () => ({}),
     })).toThrow(/reserved key/)
     expect(() => registry.register({

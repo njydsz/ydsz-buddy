@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import commonjs from '@rollup/plugin-commonjs'
 
 const src = (rel: string): string => fileURLToPath(new URL(rel, import.meta.url))
 const STANDALONE_ERROR = 'apps/web is not a standalone application: bare Vite cannot inject window.__DSH_BOOT__. '
@@ -90,7 +91,10 @@ function npmPackageOf(id: string): string | undefined {
 }
 
 export default defineConfig({
-  plugins: [rejectStandaloneServe(), react()],
+  plugins: [rejectStandaloneServe(), commonjs({
+    ignoreDynamicRequires: true,
+    requireReturnsDefault: 'preferred',
+  }), react()],
   build: {
     sourcemap: true,
     rollupOptions: {
@@ -163,5 +167,8 @@ export default defineConfig({
     'process.execArgv': '[]',
     // vendored loader index.ts: envData falls to its default branch.
     'process.env.CORDIS_SHARED': 'undefined',
+    // 不定义 process.env.NODE_ENV：use-sync-external-store 的 shim 和
+    // 其 development 构建使用条件导出（仅当 NODE_ENV !== "production" 时
+    // 导出 useSyncExternalStoreWithSelector），定义该变量会导致导出丢失。
   },
 })

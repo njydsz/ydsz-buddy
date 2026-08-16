@@ -18,7 +18,7 @@ describe('dsh-base bundle', () => {
       readFileSync(resolve(root, 'package.json'), 'utf8'),
     ) as {
       dependencies?: Record<string, string>
-      dsh?: { bundle?: { patch?: string } }
+      ydb?: { bundle?: { patch?: string } }
     }
     expect(manifest.ydb?.bundle?.patch).toBe('./cordis.patch.yml')
     const parsed = yaml.load(

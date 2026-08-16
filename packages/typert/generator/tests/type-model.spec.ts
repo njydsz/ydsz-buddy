@@ -1227,7 +1227,7 @@ function configureDualRuntimeClient(root: string, splitProjects: boolean): void 
   const packageRoot = join(root, 'packages/client')
   const manifestPath = join(packageRoot, 'package.json')
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-    dsh?: { client?: object }
+    ydb?: { client?: object }
     exports: Record<string, unknown>
   }
   manifest.ydb = { client: {} }

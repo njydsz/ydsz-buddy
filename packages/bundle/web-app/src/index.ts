@@ -21,6 +21,7 @@ import type {} from '@deepseek-ai/cordis-plugin-loader'
 import type {} from '@njydsz/ydb-host-webserver'
 import type {} from '@njydsz/ydb-system-prompt'
 import type {} from '@njydsz/ydb-shell-env'
+import type { DshEnvironmentKey } from '@njydsz/ydb-shell'
 
 /** Stable Cordis plugin name. */
 export const name = 'web-app'
@@ -150,9 +151,9 @@ export function apply(ctx: Context, config: Config): void {
       runtimeCtx.shellEnv.register({
         name: 'web-runtime',
         variables: {
-          [YDB_WEB_URL]: { description: 'Canonical local URL of the DeepSeek Harness Web GUI serving this session.' },
+          [YDB_WEB_URL as DshEnvironmentKey]: { description: 'Canonical local URL of the DeepSeek Harness Web GUI serving this session.' },
         },
-        resolve: () => ({ [YDB_WEB_URL]: localWebUrl(runtimeCtx) }),
+        resolve: () => ({ [YDB_WEB_URL as DshEnvironmentKey]: localWebUrl(runtimeCtx) }),
       })
     })
   }

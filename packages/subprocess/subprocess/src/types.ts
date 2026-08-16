@@ -15,8 +15,11 @@ export const DSH_ENV_PREFIX = 'DSH_' as const
 /** One environment key inside the managed {@link DSH_ENV_PREFIX} namespace. */
 export type DshEnvironmentKey = `${typeof DSH_ENV_PREFIX}${string}`
 
-/** Trusted DeepSeek Harness variables for one child-process execution. */
-export type DshEnvironment = Readonly<Record<DshEnvironmentKey, string>>
+/** Trusted DeepSeek Harness variables for one child-process execution.
+ *  Includes the managed `DSH_*` namespace plus a small set of non-`DSH_`
+ *  home-directory-style keys (`YDB_HOME`) the harness manages alongside
+ *  the `DSH_*` family. */
+export type DshEnvironment = Readonly<Record<DshEnvironmentKey, string>> & { readonly YDB_HOME?: string; readonly YDB_WEB_URL?: string }
 
 /** One captured stream: the (possibly truncated) text plus recovery info. */
 export interface CollectedOutput {

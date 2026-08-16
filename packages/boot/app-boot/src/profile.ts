@@ -157,7 +157,7 @@ export function initProfile(dir: string, bundles: readonly string[]): void {
       name: `dsh-profile-${basename(dir)}`,
       private: true,
       dependencies: {},
-      dsh: { profile: { bundles: [...bundles] } },
+      ydb: { profile: { bundles: [...bundles] } },
     }
     writeFileSync(manifestPath, JSON.stringify(manifest, undefined, 2) + '\n')
   }
@@ -302,7 +302,7 @@ function normalizeShippedProfile(name: string, dir: string, manifest: ProfileMan
     || !sameBundles(bundles, installationOwned)) return manifest
   const normalized: ProfileManifest = {
     ...manifest,
-    dsh: {
+    ydb: {
       ...manifest.ydb,
       profile: { ...manifest.ydb?.profile, bundles: [...current] },
     },
@@ -388,7 +388,7 @@ export function loadProfile(
   const layers = bundles.map((packageName): ProfileLayer => {
     const packageDir = resolveBundleDir(binName, packageName, installAnchor, dir)
     const bundleManifest = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8')) as ProfileManifest
-    const declared = bundleManifest.dsh?.bundle?.patch
+    const declared = bundleManifest.ydb?.bundle?.patch
     if (declared === undefined) {
       throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no ydb.bundle in its package.json`)
     }

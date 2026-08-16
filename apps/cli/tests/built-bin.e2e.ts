@@ -646,7 +646,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       expect(result.exitCode).toBe(0)
       const manifest = JSON.parse(readFileSync(join(home, 'profiles', 'anchor', 'package.json'), 'utf8')) as {
         dependencies: Record<string, string>
-        dsh: { profile: { bundles: string[] } }
+        ydb: { profile: { bundles: string[] } }
       }
       expect(Object.keys(manifest.dependencies)).toEqual(['anchored-bundle'])
       expect(manifest.ydb.profile.bundles).toContain('anchored-bundle')
@@ -677,7 +677,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       writeFileSync(join(installed, 'package.json'), JSON.stringify({ name: 'late-bundle', version: '1.0.0' }))
       const first = await runBuiltBin(['plugin', '--profile', 'up', 'root'], { YDB_HOME: home })
       expect(first.code).toBe(0)
-      let manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { dsh: { profile: { bundles: string[] } } }
+      let manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { ydb: { profile: { bundles: string[] } } }
       expect(manifest.ydb.profile.bundles).toEqual(['@njydsz/ydb-base'])
       // v2: the installed package now declares ydb.bundle (an update landed).
       writeFileSync(join(installed, 'package.json'), JSON.stringify({
@@ -686,7 +686,7 @@ describe.skipIf(!existsSync(dshBin))('dsh BUILT bin (node lib/bin.js, no tsx)', 
       writeFileSync(join(installed, 'cordis.patch.yml'), '[]\n')
       const second = await runBuiltBin(['plugin', '--profile', 'up', 'root'], { YDB_HOME: home })
       expect(second.code).toBe(0)
-      manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { dsh: { profile: { bundles: string[] } } }
+      manifest = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { ydb: { profile: { bundles: string[] } } }
       expect(manifest.ydb.profile.bundles).toEqual(['@njydsz/ydb-base', 'late-bundle'])
     } finally {
       rmSync(home, { recursive: true, force: true })

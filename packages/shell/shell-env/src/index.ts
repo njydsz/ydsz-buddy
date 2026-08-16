@@ -72,7 +72,7 @@ const DSH_SHELL_KEY = `${DSH_ENV_PREFIX}SHELL` as const
 const DSH_SESSION_ID_KEY = `${DSH_ENV_PREFIX}SESSION_ID` as const
 const DSH_SESSION_JSONL_KEY = `${DSH_ENV_PREFIX}SESSION_JSONL` as const
 const RESERVED_BASH_ENV_KEYS = new Set<DshEnvironmentKey>([
-  YDB_HOME_ENV,
+  YDB_HOME_ENV as DshEnvironmentKey,
   DSH_SHELL_KEY,
   DSH_SESSION_ID_KEY,
 ])
@@ -151,7 +151,7 @@ export class ShellEnvRegistry extends Service {
    */
   collect(execution: ToolExecution): DshEnvironment {
     const values: Record<DshEnvironmentKey, string> = {
-      [YDB_HOME_ENV]: this.dshHome,
+      [YDB_HOME_ENV as DshEnvironmentKey]: this.dshHome,
       [DSH_SHELL_KEY]: '1',
     }
     if (execution.agent !== undefined) {

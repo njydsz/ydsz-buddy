@@ -37,7 +37,7 @@ function stageInstallation(bundles: Record<string, { patch?: string; deps?: Reco
       name,
       version: '0.0.0',
       dependencies: spec.deps ?? {},
-      ...spec.patch === undefined ? {} : { dsh: { bundle: { patch: './cordis.patch.yml' } } },
+      ...spec.patch === undefined ? {} : { ydb: { bundle: { patch: './cordis.patch.yml' } } },
     }))
     if (spec.patch !== undefined) writeFileSync(join(dir, 'cordis.patch.yml'), spec.patch)
   }
@@ -67,7 +67,7 @@ describe('initProfile', () => {
     // Re-init keeps user edits.
     writeFileSync(join(dir, PROFILE_PATCH_FILENAME), '- id: x\n  config: {}\n')
     initProfile(dir, ['other'])
-    expect(readProfileManifest\([^)]*\)\.ydb?.profile?.bundles).toEqual(['@njydsz/ydb-base'])
+    expect(readProfileManifest('t', dir).ydb?.profile?.bundles).toEqual(['@njydsz/ydb-base'])
     expect(readFileSync(join(dir, PROFILE_PATCH_FILENAME), 'utf8')).toContain('- id: x')
   })
 })
@@ -75,8 +75,8 @@ describe('initProfile', () => {
 describe('manifest round-trip', () => {
   it('writes and reads back, and fails loud on a broken manifest', () => {
     const dir = tmp()
-    writeProfileManifest(dir, { name: 'p', dsh: { profile: { bundles: ['a'] } } })
-    expect(readProfileManifest\([^)]*\)\.ydb?.profile?.bundles).toEqual(['a'])
+    writeProfileManifest(dir, { name: 'p', ydb: { profile: { bundles: ['a'] } } })
+    expect(readProfileManifest('t', dir).ydb?.profile?.bundles).toEqual(['a'])
     writeFileSync(join(dir, 'package.json'), '[]')
     expect(() => readProfileManifest('t', dir)).toThrow('must hold a JSON object')
     expect(() => readProfileManifest('t', join(dir, 'nope'))).toThrow('failed to read profile manifest')
@@ -157,7 +157,7 @@ describe('loadProfile', () => {
     } catch {
       // Resolution failure is the plain-Node outcome for this empty anchor.
     }
-    expect(readProfileManifest('t', resolveProfileDir('web', home)).dsh?.profile?.bundles)
+    expect(readProfileManifest('t', resolveProfileDir('web', home)).ydb?.profile?.bundles)
       .toEqual([...PROFILE_TEMPLATES.web ?? []])
   })
 
@@ -174,7 +174,7 @@ describe('loadProfile', () => {
       '@njydsz/ydb-base', '@njydsz/ydb-web-app', '@njydsz/ydb-headless',
     ])
     loadProfile('t', 'headless', anchor, home)
-    expect(readProfileManifest\([^)]*\)\.ydb?.profile?.bundles)
+    expect(readProfileManifest('t', stock).ydb?.profile?.bundles)
       .toEqual(['@njydsz/ydb-base', '@njydsz/ydb-headless'])
 
     const customHome = tmp()
@@ -183,7 +183,7 @@ describe('loadProfile', () => {
       '@njydsz/ydb-base', '@njydsz/ydb-web-app', '@njydsz/ydb-headless', 'custom-bundle',
     ])
     loadProfile('t', 'headless', anchor, customHome)
-    expect(readProfileManifest\([^)]*\)\.ydb?.profile?.bundles).toEqual([
+    expect(readProfileManifest('t', custom).ydb?.profile?.bundles).toEqual([
       '@njydsz/ydb-base', '@njydsz/ydb-web-app', '@njydsz/ydb-headless', 'custom-bundle',
     ])
   })
