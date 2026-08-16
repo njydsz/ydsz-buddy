@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-subprocess-local",
+  "name": "@njydsz/ydb-subprocess-local",
   "description": "Local-subprocess implementation of the Ydsz Buddy subprocess seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -36,19 +36,19 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "node-pty": "^1.1.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-loader-smoke": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-loader-smoke": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

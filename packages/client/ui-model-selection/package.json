@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-model-selection",
+  "name": "@njydsz/ydb-client-ui-model-selection",
   "description": "Model selection: the /model popupSelect over session.models / session.selectModel",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,10 +32,10 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-commands",
-        "@njydsz/dsh-api-remotes"
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-commands",
+        "@njydsz/ydb-api-remotes"
       ],
       "platform": "web"
     }
@@ -46,32 +46,32 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-commands": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-input-trigger": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-commands": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-input-trigger": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "clsx": "^2.1.1",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-commands": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-input-trigger": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-commands": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-input-trigger": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "clsx": "^2.1.1",
     "@njydsz/cordis": "workspace:^",

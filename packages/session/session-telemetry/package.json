@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-session-telemetry",
+  "name": "@njydsz/ydb-session-telemetry",
   "description": "SessionTelemetryBackend seam for the Ydsz Buddy: session-event capture, projection, redaction, and handoff to a reporting backend",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

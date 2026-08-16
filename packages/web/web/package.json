@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-web",
+  "name": "@njydsz/ydb-web",
   "description": "Abstract web access capability seam (ctx.web) for the Ydsz Buddy — search/fetch provider registry, registration-order-independent selection, request/result vocabulary, and the WebError taxonomy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,16 +32,16 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

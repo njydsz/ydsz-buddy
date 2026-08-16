@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-settings-file",
+  "name": "@njydsz/ydb-settings-file",
   "description": "File-backed settings provider (settings.yaml) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,10 +32,10 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-atomic-write": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
+    "@njydsz/ydb-atomic-write": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -44,10 +44,10 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-atomic-write": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
+    "@njydsz/ydb-atomic-write": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

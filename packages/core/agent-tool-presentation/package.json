@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-agent-tool-presentation",
+  "name": "@njydsz/ydb-agent-tool-presentation",
   "description": "Agent-plane presentation selector: composes one agent's tools as Code Mode, native, or both",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -35,18 +35,18 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-code-runtime": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-code-runtime": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

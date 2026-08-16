@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-terminal-bash",
+  "name": "@njydsz/ydb-terminal-bash",
   "description": "Persistent shell PTY backend over the Ydsz Buddy subprocess terminal primitive",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,27 +32,27 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-terminal": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-terminal": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-terminal": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-terminal": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

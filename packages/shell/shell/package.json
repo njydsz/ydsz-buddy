@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-shell",
+  "name": "@njydsz/ydb-shell",
   "description": "Abstract bash executor seam (ctx.shell) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,17 +32,17 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   }
 }

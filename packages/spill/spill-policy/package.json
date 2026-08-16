@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-spill-policy",
+  "name": "@njydsz/ydb-spill-policy",
   "description": "Tool-result spill policy for the Ydsz Buddy — replaces oversized plain-text tool results with a retained preview plus a spill-file path (no service API)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,26 +32,26 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-output-retention": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-spill": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-output-retention": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-spill": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-code-runtime-worker-thread": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-output-retention": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-spill": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-code-runtime-worker-thread": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-output-retention": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-spill": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

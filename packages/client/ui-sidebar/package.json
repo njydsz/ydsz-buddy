@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-sidebar",
+  "name": "@njydsz/ydb-client-ui-sidebar",
   "description": "Sidebar plugin: session multi-level tree, search, grouping, state dots",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,9 +32,9 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-layout",
-        "@njydsz/dsh-client-locale"
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-layout",
+        "@njydsz/ydb-client-locale"
       ],
       "platform": "web"
     }
@@ -48,22 +48,22 @@
     "clsx": "^2.0.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-layout": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-layout": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"

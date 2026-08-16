@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-lsp",
+  "name": "@njydsz/ydb-lsp",
   "description": "Abstract LSP capability seam (ctx.lsp) for the Ydsz Buddy — language-server provider registry keyed by branded id and extension mapping, order-independent per-query selection, normalized definition/references/implementation/hover requests and results, and the LspError taxonomy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

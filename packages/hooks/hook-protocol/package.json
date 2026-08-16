@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-hook-protocol",
+  "name": "@njydsz/ydb-hook-protocol",
   "description": "Shared Claude Code / Codex hook wire protocol: matcher engine, stdin/exit-code/stdout codec, multi-hook merge, and hook/* session events",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

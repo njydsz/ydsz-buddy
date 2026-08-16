@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-layout",
+  "name": "@njydsz/ydb-client-ui-layout",
   "description": "Shell plugin: three-column AppFrame with drag handles, ctx.layout viewing-state service (navigation + panels)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,8 +32,8 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-theme"
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-theme"
       ],
       "platform": "web"
     }
@@ -44,19 +44,19 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-theme": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-theme": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-theme": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-theme": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"

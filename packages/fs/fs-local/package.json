@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-fs-local",
+  "name": "@njydsz/ydb-fs-local",
   "description": "Local-filesystem implementation of the Ydsz Buddy filesystem seam (ctx.fs)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,8 +32,8 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -41,9 +41,9 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-workspace",
+  "name": "@njydsz/ydb-client-ui-workspace",
   "description": "Workspace picker plugin: one WorkspacePicker registered into the sidebar and empty-state workspace slots",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,10 +32,10 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-conversation",
-        "@njydsz/dsh-client-ui-sidebar"
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-conversation",
+        "@njydsz/ydb-client-ui-sidebar"
       ],
       "platform": "web"
     }
@@ -49,23 +49,23 @@
     "clsx": "^2.0.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-sidebar": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-sidebar": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"

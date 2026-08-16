@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-native-command",
+  "name": "@njydsz/ydb-native-command",
   "description": "Zero-dependency no-shell execFile runner for host-native OS integrations: utf8 stdio capture, abort propagation, Windows hide",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,11 +32,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

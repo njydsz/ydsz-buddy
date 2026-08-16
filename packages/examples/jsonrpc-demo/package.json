@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-sdk-jsonrpc-demo",
+  "name": "@njydsz/ydb-sdk-jsonrpc-demo",
   "description": "Bin that boots an external Cordis config for the stdio JSON-RPC SDK runtime",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -45,14 +45,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-app-boot": "workspace:^"
+    "@njydsz/ydb-app-boot": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

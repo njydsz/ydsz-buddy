@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-subagent",
+  "name": "@njydsz/ydb-tool-subagent",
   "description": "Model-facing subagent delegation tool over the ctx.subagents seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-jobs": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-jobs": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -46,19 +46,19 @@
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-session-persistence-jsonl": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-subagent-spawn-in-process": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-jobs": "workspace:^",
-    "@njydsz/dsh-jobs-local": "workspace:^",
-    "@njydsz/dsh-tool-jobs": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-session-persistence-jsonl": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-subagent-spawn-in-process": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-jobs": "workspace:^",
+    "@njydsz/ydb-jobs-local": "workspace:^",
+    "@njydsz/ydb-tool-jobs": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

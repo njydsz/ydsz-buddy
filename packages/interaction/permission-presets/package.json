@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-permission-presets",
+  "name": "@njydsz/ydb-permission-presets",
   "description": "User-facing permission presets (ctx.permissionPresets) for the Ydsz Buddy: one product-level Permissions select bundling the sandbox-mode and approval-policy knobs, written through to their own session events",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -41,15 +41,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-user-approval": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-user-approval": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -57,15 +57,15 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-user-approval": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-user-approval": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

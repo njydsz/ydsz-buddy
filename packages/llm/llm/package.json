@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-llm",
+  "name": "@njydsz/ydb-llm",
   "description": "Provider-neutral LLM service interface for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -45,20 +45,20 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-attachment": "workspace:^",
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-attachment": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-attachment": "workspace:^",
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-attachment": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

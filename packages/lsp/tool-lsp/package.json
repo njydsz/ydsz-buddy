@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-lsp",
+  "name": "@njydsz/ydb-tool-lsp",
   "description": "Model-facing lsp tool over the Ydsz Buddy LSP capability seam (ctx.lsp) — one read-only tool with goToDefinition/findReferences/goToImplementation/hover operations, one-based UTF-16 cursor coordinates, bounded location rendering, and hover normalization",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,30 +32,30 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-lsp": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-lsp": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-fs-local": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-lsp": "workspace:^",
-    "@njydsz/dsh-lsp-stdio": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-tool-call-timeout-policy": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-fs-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-lsp": "workspace:^",
+    "@njydsz/ydb-lsp-stdio": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-tool-call-timeout-policy": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

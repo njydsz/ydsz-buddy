@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-storage-sqlite",
+  "name": "@njydsz/ydb-storage-sqlite",
   "description": "SQLite storage backend (kv facet) for the Ydsz Buddy storage hub",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,16 +32,16 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-storage": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-storage": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-storage": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-storage": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

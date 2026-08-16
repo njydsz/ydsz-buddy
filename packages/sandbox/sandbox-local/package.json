@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-sandbox-local",
+  "name": "@njydsz/ydb-sandbox-local",
   "description": "Local process-sandbox backends for the Ydsz Buddy sandbox seam: bwrap, the npm-distributed landlock-run launcher, macOS Seatbelt, or the Windows ACL restricted-token runner — functionally probed, fail-closed",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,22 +32,22 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
-    "@njydsz/dsh-sandbox-windows-acl": "workspace:^",
+    "@njydsz/ydb-sandbox-windows-acl": "workspace:^",
     "@njydsz/node-addon-landlock-run": "workspace:^",
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

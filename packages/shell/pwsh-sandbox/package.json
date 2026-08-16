@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-pwsh-sandbox",
+  "name": "@njydsz/ydb-pwsh-sandbox",
   "description": "Sandbox-consuming implementation of the Ydsz Buddy PowerShell executor seam (confines every command via ctx.sandbox, reports denial/enforcement result facts)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,21 +32,21 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-pwsh-local": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-pwsh-local": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-pwsh-local": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-local": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-pwsh-local": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-local": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

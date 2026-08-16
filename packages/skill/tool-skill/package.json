@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-skill",
+  "name": "@njydsz/ydb-tool-skill",
   "description": "Model-facing skill loading tool for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,25 +32,25 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-skill": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-skill": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-skill": "workspace:^",
-    "@njydsz/dsh-skill-filesystem": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-skill": "workspace:^",
+    "@njydsz/ydb-skill-filesystem": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

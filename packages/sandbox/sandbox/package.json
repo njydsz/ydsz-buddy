@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-sandbox",
+  "name": "@njydsz/ydb-sandbox",
   "description": "Abstract process-sandbox seam (ctx.sandbox) for the Ydsz Buddy: same-world confinement vocabulary and the SandboxProvider contract",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

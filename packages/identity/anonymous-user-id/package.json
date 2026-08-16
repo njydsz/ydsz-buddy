@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-anonymous-user-id",
+  "name": "@njydsz/ydb-anonymous-user-id",
   "description": "Shared anonymous user identity for Ydsz Buddy telemetry and feedback correlation",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,15 +32,15 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

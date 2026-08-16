@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-compaction",
+  "name": "@njydsz/ydb-compaction",
   "description": "Abstract compaction service seam (ctx.compaction) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -41,19 +41,19 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

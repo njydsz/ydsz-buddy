@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-goal",
+  "name": "@njydsz/ydb-goal",
   "description": "Event-sourced same-session goal state and lifecycle service for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -53,14 +53,14 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-typert-protocol": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -68,15 +68,15 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-loader-smoke": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-loader-smoke": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-typert-protocol": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

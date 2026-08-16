@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-fs-search",
+  "name": "@njydsz/ydb-tool-fs-search",
   "description": "Model-facing filesystem discovery tools (glob, grep) backed by the packaged ripgrep binary (@vscode/ripgrep)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -36,29 +36,29 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-output-retention": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-spill": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-output-retention": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-spill": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-output-retention": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-spill": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-output-retention": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-spill": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

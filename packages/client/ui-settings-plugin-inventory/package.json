@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-settings-plugin-inventory",
+  "name": "@njydsz/ydb-client-ui-settings-plugin-inventory",
   "description": "Read-only Cordis Loader inventory tab in Web Plugins settings",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,10 +32,10 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-api-remotes",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-settings",
-        "@njydsz/dsh-client-locale"
+        "@njydsz/ydb-api-remotes",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-settings",
+        "@njydsz/ydb-client-locale"
       ],
       "platform": "web"
     }
@@ -46,25 +46,25 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-settings": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-settings": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-settings": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-settings": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@testing-library/react": "^16.1.0",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",

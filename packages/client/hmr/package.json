@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-hmr",
+  "name": "@njydsz/ydb-client-hmr",
   "description": "Dev-only hot-reload driver for script-loaded client entries: SSE rebuilt frames → invalidate/prefetch → fiber swap through the vendored Loader entry",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -42,16 +42,16 @@
   },
   "peerDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-client-modules": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-modules": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-client-modules": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-modules": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "files": [

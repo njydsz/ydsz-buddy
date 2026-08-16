@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-compaction-basic",
+  "name": "@njydsz/ydb-compaction-basic",
   "description": "Token-meter-driven compaction policy and LLM summarization backend for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,18 +32,18 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
-    "@njydsz/dsh-compaction-tool-result-pruner": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
+    "@njydsz/ydb-compaction-tool-result-pruner": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "peerDependenciesMeta": {
-    "@njydsz/dsh-compaction-tool-result-pruner": {
+    "@njydsz/ydb-compaction-tool-result-pruner": {
       "optional": true
     }
   },
@@ -53,18 +53,18 @@
   "devDependencies": {
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-loop": "workspace:^",
-    "@njydsz/dsh-agent-loop-testkit": "workspace:^",
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-llm-retry": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
-    "@njydsz/dsh-compaction-tool-result-pruner": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-loop": "workspace:^",
+    "@njydsz/ydb-agent-loop-testkit": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-llm-retry": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
+    "@njydsz/ydb-compaction-tool-result-pruner": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

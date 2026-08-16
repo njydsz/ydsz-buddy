@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-headless",
+  "name": "@njydsz/ydb-headless",
   "description": "The dsh one-shot bundle: a direct core Agent/Session runner over dsh-base with no Host, HTTP, or browser layer",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -44,27 +44,27 @@
     }
   },
   "dependencies": {
-    "@njydsz/dsh-cmdline": "workspace:^",
-    "@njydsz/dsh-code-runtime-worker-thread": "workspace:^",
+    "@njydsz/ydb-cmdline": "workspace:^",
+    "@njydsz/ydb-code-runtime-worker-thread": "workspace:^",
     "@njydsz/schemastery": "workspace:^",
     "commander": "^15.0.0"
   },
   "peerDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-default-model": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-default-model": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-default-model": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-default-model": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

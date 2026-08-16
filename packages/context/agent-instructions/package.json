@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-agent-instructions",
+  "name": "@njydsz/ydb-agent-instructions",
   "description": "Workspace context loader for AGENTS.md/CLAUDE.md instruction files",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -46,18 +46,18 @@
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-loop": "workspace:^",
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-fs-local": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-llm-deepseek": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tool-fs": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-loop": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-fs-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-llm-deepseek": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tool-fs": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

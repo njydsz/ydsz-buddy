@@ -27,13 +27,13 @@
  */
 
 import { fileURLToPath } from 'node:url'
-import type { Context } from '@deepseek-ai/cordis'
-import type { PatchOptions } from '@deepseek-ai/cordis-plugin-include'
+import type { Context } from '@njydsz/cordis'
+import type { PatchOptions } from '@njydsz/cordis-plugin-include'
 import {
   boot, composeEntries, healProfilesModuleFallback, installFailLoud,
   loadOptionalPatches, loadProfile,
-} from '@njydsz/dsh-app-boot'
-import type { Profile } from '@njydsz/dsh-app-boot'
+} from '@njydsz/ydb-app-boot'
+import type { Profile } from '@njydsz/ydb-app-boot'
 import { join } from 'node:path'
 import { writeFileSync } from 'node:fs'
 
@@ -76,7 +76,7 @@ export async function bootHostRuntime(): Promise<ElectronHost> {
     { id: 'web-startup', disabled: true },
     { id: 'web-runtime', disabled: true },
     // Provide the webStartup/webRuntime services the composition expects.
-    { insert: [{ id: 'electron-runtime', name: '@deepseek-ai/dsh-electron/runtime' }] },
+    { insert: [{ id: 'electron-runtime', name: '@njydsz/ydb-electron/runtime' }] },
     // Drop the webserver's flag-provider dependency; use static values.
     { id: 'webserver', inject: [], config: { host: '127.0.0.1', port: 0 } },
   ]

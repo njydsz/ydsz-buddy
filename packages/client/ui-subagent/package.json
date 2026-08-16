@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-subagent",
+  "name": "@njydsz/ydb-client-ui-subagent",
   "description": "Subagent conversation catalog, continuation routing UI, and '@' reference source",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,11 +32,11 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-conversation",
-        "@njydsz/dsh-client-ui-primitives",
-        "@njydsz/dsh-client-ui-input-trigger"
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-conversation",
+        "@njydsz/ydb-client-ui-primitives",
+        "@njydsz/ydb-client-ui-input-trigger"
       ],
       "platform": "web"
     }
@@ -50,28 +50,28 @@
     "react": "^18.2.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-input-trigger": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-input-trigger": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-input-trigger": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-input-trigger": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^"
   },

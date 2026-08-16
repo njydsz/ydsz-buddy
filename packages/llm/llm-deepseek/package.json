@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-llm-deepseek",
+  "name": "@njydsz/ydb-llm-deepseek",
   "description": "DeepSeek chat-completions adapter for the Ydsz Buddy LLM seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -46,13 +46,13 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

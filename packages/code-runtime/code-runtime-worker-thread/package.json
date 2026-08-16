@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-code-runtime-worker-thread",
+  "name": "@njydsz/ydb-code-runtime-worker-thread",
   "description": "Worker-thread implementation of the Ydsz Buddy code-execution seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -36,20 +36,20 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-code-runtime": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-code-runtime": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-code-runtime": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-code-runtime": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

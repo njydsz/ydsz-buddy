@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-ask-user",
+  "name": "@njydsz/ydb-tool-ask-user",
   "description": "Model-facing ask_user_question tool over the ctx.userQuestions seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,19 +32,19 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
-    "@njydsz/dsh-user-questions": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
+    "@njydsz/ydb-user-questions": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
-    "@njydsz/dsh-user-questions": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
+    "@njydsz/ydb-user-questions": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

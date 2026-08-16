@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-session-query",
+  "name": "@njydsz/ydb-session-query",
   "description": "Combined session query service contract with concrete reads, traces, and filters",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,26 +32,26 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-title": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-title": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "peerDependenciesMeta": {
-    "@njydsz/dsh-session-persistence": {
+    "@njydsz/ydb-session-persistence": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-title": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-title": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

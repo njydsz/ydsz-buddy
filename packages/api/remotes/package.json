@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-api-remotes",
+  "name": "@njydsz/ydb-api-remotes",
   "description": "Remote BFF assembly and Host Agent/Session lookup policy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -36,7 +36,7 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-api-gateway"
+        "@njydsz/ydb-api-gateway"
       ],
       "platform": "web",
       "immediately": true
@@ -55,42 +55,42 @@
     "lib/types/**/*.d.ts"
   ],
   "dependencies": {
-    "@njydsz/dsh-typert-protocol": "workspace:^"
+    "@njydsz/ydb-typert-protocol": "workspace:^"
   },
   "peerDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-api-gateway": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-goal": "workspace:^",
-    "@njydsz/dsh-cordis-host-runner": "workspace:^",
-    "@njydsz/dsh-host-plugin-inventory": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-agent-presets": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-message-feedback": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-typert-registry": "workspace:^"
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-api-gateway": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-goal": "workspace:^",
+    "@njydsz/ydb-cordis-host-runner": "workspace:^",
+    "@njydsz/ydb-host-plugin-inventory": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-agent-presets": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-message-feedback": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-typert-registry": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-api-gateway": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-goal": "workspace:^",
-    "@njydsz/dsh-cordis-host-runner": "workspace:^",
-    "@njydsz/dsh-host-plugin-inventory": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-agent-presets": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-message-feedback": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-typert-registry": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-api-gateway": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-goal": "workspace:^",
+    "@njydsz/ydb-cordis-host-runner": "workspace:^",
+    "@njydsz/ydb-host-plugin-inventory": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-agent-presets": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-message-feedback": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-typert-registry": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

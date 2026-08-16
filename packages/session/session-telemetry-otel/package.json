@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-session-telemetry-otel",
+  "name": "@njydsz/ydb-session-telemetry-otel",
   "description": "OpenTelemetry backend for the Ydsz Buddy telemetry seam: hands captured session records to the OTel JS SDK's log pipeline",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -41,22 +41,22 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-command-feedback": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-telemetry": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-command-feedback": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-telemetry": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-command-feedback": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-telemetry": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-command-feedback": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-telemetry": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

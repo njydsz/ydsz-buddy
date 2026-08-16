@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-host-directory-picker-native",
+  "name": "@njydsz/ydb-host-directory-picker-native",
   "description": "Native-OS-chooser backend of the directory-picker seam for the Ydsz Buddy web GUI host",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -37,16 +37,16 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-host-directory-picker": "workspace:^",
-    "@njydsz/dsh-native-command": "workspace:^",
+    "@njydsz/ydb-host-directory-picker": "workspace:^",
+    "@njydsz/ydb-native-command": "workspace:^",
     "koffi": "^3.1.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "tsx": "^4.19.2"
   }

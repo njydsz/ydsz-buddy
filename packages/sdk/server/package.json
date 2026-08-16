@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-sdk-jsonrpc-server",
+  "name": "@njydsz/ydb-sdk-jsonrpc-server",
   "description": "Stdio JSON-RPC server plugin for out-of-process Ydsz Buddy SDK clients",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -35,28 +35,28 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-llm-deepseek": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-sdk-protocol": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-llm-deepseek": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-sdk-protocol": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-spine-demo": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-llm-deepseek": "workspace:^",
-    "@njydsz/dsh-scope": "workspace:^",
-    "@njydsz/dsh-sdk-protocol": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence-jsonl": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-spine-demo": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-llm-deepseek": "workspace:^",
+    "@njydsz/ydb-scope": "workspace:^",
+    "@njydsz/ydb-sdk-protocol": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence-jsonl": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

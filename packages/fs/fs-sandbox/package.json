@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-fs-sandbox",
+  "name": "@njydsz/ydb-fs-sandbox",
   "description": "Sandbox-enforcing implementation of the Ydsz Buddy filesystem seam: fences write/edit by the per-call sandbox mode (read-only denies mutation, workspace-write contains it to the workspace + temp roots) while reads pass through",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,19 +32,19 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-fs-local": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-fs-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-fs-local": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-sandbox": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-fs-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-sandbox": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

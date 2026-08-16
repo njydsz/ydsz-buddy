@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-invariants",
+  "name": "@njydsz/ydb-invariants",
   "description": "Registry service for package-owned Ydsz Buddy runtime invariants",
   "version": "0.1.0-rc.5",
   "publishConfig": {

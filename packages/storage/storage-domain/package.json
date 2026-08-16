@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-storage-domain",
+  "name": "@njydsz/ydb-storage-domain",
   "description": "Domain data form (ctx.storage.domain): schema-validated, event-emitting KV domains over storage backends for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,8 +32,8 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-storage": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-storage": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -41,8 +41,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-storage": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-storage": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

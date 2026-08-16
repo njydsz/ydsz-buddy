@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-typert-generator",
+  "name": "@njydsz/ydb-typert-generator",
   "description": "TypeScript project analyzer and model-driven Typert artifact generator",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -41,13 +41,13 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-tool-cordis": "workspace:^",
-    "@njydsz/dsh-typert-registry": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-tool-cordis": "workspace:^",
+    "@njydsz/ydb-typert-registry": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "zod": "^4.4.3"
   }

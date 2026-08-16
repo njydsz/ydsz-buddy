@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-e2b",
+  "name": "@njydsz/ydb-e2b",
   "description": "Shared E2B sandbox lifecycle for Ydsz Buddy provider adapters",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,7 +32,7 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -40,9 +40,9 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-loader-smoke": "workspace:^",
-    "@njydsz/dsh-sandbox-policy": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-loader-smoke": "workspace:^",
+    "@njydsz/ydb-sandbox-policy": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-hooks-codex",
+  "name": "@njydsz/ydb-hooks-codex",
   "description": "Bridge plugin: run a Codex hooks.json hook config on the Ydsz Buddy interception seams",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -35,29 +35,29 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-hook-protocol": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-hook-protocol": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-loop": "workspace:^",
-    "@njydsz/dsh-agent-loop-testkit": "workspace:^",
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-bash-local": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
-    "@njydsz/dsh-hook-protocol": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-session-persistence-jsonl": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-loop": "workspace:^",
+    "@njydsz/ydb-agent-loop-testkit": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-bash-local": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
+    "@njydsz/ydb-hook-protocol": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-session-persistence-jsonl": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

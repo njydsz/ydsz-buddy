@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-message-feedback",
+  "name": "@njydsz/ydb-message-feedback",
   "description": "Lifecycle-bound per-message rating and note sidecar for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -49,13 +49,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-storage-domain": "workspace:^",
-    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-storage-domain": "workspace:^",
+    "@njydsz/ydb-typert-protocol": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -65,16 +65,16 @@
   "devDependencies": {
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-persistence": "workspace:^",
-    "@njydsz/dsh-session-persistence-jsonl": "workspace:^",
-    "@njydsz/dsh-storage": "workspace:^",
-    "@njydsz/dsh-storage-domain": "workspace:^",
-    "@njydsz/dsh-storage-json": "workspace:^",
-    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-persistence": "workspace:^",
+    "@njydsz/ydb-session-persistence-jsonl": "workspace:^",
+    "@njydsz/ydb-storage": "workspace:^",
+    "@njydsz/ydb-storage-domain": "workspace:^",
+    "@njydsz/ydb-storage-json": "workspace:^",
+    "@njydsz/ydb-typert-protocol": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

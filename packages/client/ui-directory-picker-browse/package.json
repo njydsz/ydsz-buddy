@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-directory-picker-browse",
+  "name": "@njydsz/ydb-client-ui-directory-picker-browse",
   "description": "In-app directory browsing surface: the workspace directory-flow owner rendering the host's listing and creation primitives",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,9 +32,9 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-workspace",
-        "@njydsz/dsh-client-locale"
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-workspace",
+        "@njydsz/ydb-client-locale"
       ],
       "platform": "web"
     }
@@ -48,23 +48,23 @@
     "clsx": "^2.0.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-workspace": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-workspace": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-workspace": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-workspace": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@testing-library/react": "^16.1.0",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",

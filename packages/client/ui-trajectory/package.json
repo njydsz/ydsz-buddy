@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-trajectory",
+  "name": "@njydsz/ydb-client-ui-trajectory",
   "description": "Trajectory event ledger with an interactive timing overview: pure-consumer plugin registering into the conversation ViewMap (no service)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,9 +32,9 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-conversation"
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-conversation"
       ],
       "platform": "web"
     }
@@ -49,28 +49,28 @@
     "diff": "^9.0.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@types/react": "~18.3.1",
     "@types/react-dom": "~18.3.0",
     "@njydsz/cordis": "workspace:^",

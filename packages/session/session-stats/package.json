@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-session-stats",
+  "name": "@njydsz/ydb-session-stats",
   "description": "Whole-log conversation counts and wall times projection (sessionStats) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -41,10 +41,10 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -53,10 +53,10 @@
   "devDependencies": {
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-web-search-deepseek",
+  "name": "@njydsz/ydb-web-search-deepseek",
   "description": "DeepSeek-backed search provider (native web_search via the Anthropic-compatible API) for the Ydsz Buddy web capability seam (ctx.web)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,27 +32,27 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-web": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-web": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-credentials-local": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-web": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-credentials-local": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-web": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   }
 }

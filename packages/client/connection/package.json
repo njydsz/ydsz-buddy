@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-connection",
+  "name": "@njydsz/ydb-client-connection",
   "description": "Wire consumer layer: HTTP-up/WebSocket-down client, ConnectionController dual streams with reconnect, and fixture api",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -38,12 +38,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-attachment": "workspace:^",
-    "@njydsz/dsh-host-apiproxy": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
+    "@njydsz/ydb-attachment": "workspace:^",
+    "@njydsz/ydb-host-apiproxy": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
     "@njydsz/schemastery": "workspace:^",
     "ws": "^8.21.0"
   },
@@ -54,13 +54,13 @@
     "lib/types/**/*.d.ts"
   ],
   "peerDependencies": {
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/ws": "^8.18.1",
     "@njydsz/cordis": "workspace:^"
   }

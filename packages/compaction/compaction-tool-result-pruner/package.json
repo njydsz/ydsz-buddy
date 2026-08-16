@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-compaction-tool-result-pruner",
+  "name": "@njydsz/ydb-compaction-tool-result-pruner",
   "description": "Replay-safe model-free head/middle/tail pruning for tool-result surface nodes",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,11 +32,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -45,11 +45,11 @@
   "devDependencies": {
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-token-meter": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-token-meter": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-command-feedback",
+  "name": "@njydsz/ydb-command-feedback",
   "description": "Log-only session feedback producer and human-facing slash command",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,23 +32,23 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-telemetry": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-telemetry": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-commands": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-telemetry": "workspace:^",
-    "@njydsz/dsh-anonymous-user-id": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-commands": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-telemetry": "workspace:^",
+    "@njydsz/ydb-anonymous-user-id": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

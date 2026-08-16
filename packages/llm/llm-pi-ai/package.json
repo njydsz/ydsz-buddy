@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-llm-pi-ai",
+  "name": "@njydsz/ydb-llm-pi-ai",
   "description": "pi-ai-backed DeepSeek adapter for the Ydsz Buddy LLM seam (design-verification twin of dsh-llm-deepseek)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-attachment": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-attachment": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -46,14 +46,14 @@
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-attachment": "workspace:^",
-    "@njydsz/dsh-credentials": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-llm-deepseek": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-attachment": "workspace:^",
+    "@njydsz/ydb-credentials": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-llm-deepseek": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

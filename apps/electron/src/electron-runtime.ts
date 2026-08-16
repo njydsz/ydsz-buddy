@@ -12,7 +12,7 @@
  * @module @njydsz/ydb-electron/runtime
  */
 
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@njydsz/cordis'
 
 /** Stable Cordis plugin name. */
 export const name = 'electron-runtime'

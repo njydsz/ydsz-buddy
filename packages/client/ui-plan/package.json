@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-plan",
+  "name": "@njydsz/ydb-client-ui-plan",
   "description": "Plan-mode composer control: the conversation.input.plan seat over the plan projection and the /plan command channel",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,9 +32,9 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-api-remotes",
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-ui-conversation"
+        "@njydsz/ydb-api-remotes",
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-ui-conversation"
       ],
       "platform": "web"
     }
@@ -45,28 +45,28 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-plan-mode": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-plan-mode": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-web-react": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-plan-mode": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-web-react": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-plan-mode": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"

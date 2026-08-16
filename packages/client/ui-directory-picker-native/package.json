@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-directory-picker-native",
+  "name": "@njydsz/ydb-client-ui-directory-picker-native",
   "description": "Native directory-picker surface: the renderless workspace directory-flow occupant driving the host's OS chooser",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,8 +32,8 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-ui-workspace"
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-ui-workspace"
       ],
       "platform": "web"
     }
@@ -44,18 +44,18 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-workspace": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-workspace": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-workspace": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-workspace": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@testing-library/react": "^16.1.0",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^",

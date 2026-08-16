@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-settings",
+  "name": "@njydsz/ydb-settings",
   "description": "Abstract user-settings seam (ctx.settings) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -37,14 +37,14 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-brand": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-brand": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "@njydsz/schemastery": "workspace:^"
   }

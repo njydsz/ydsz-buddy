@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-host-webserver",
+  "name": "@njydsz/ydb-host-webserver",
   "description": "Web route-registration plugin: HTTP and upgrade routes, index transform taps, and static dist fallback; knows no harness concepts",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -33,13 +33,13 @@
   "license": "MIT",
   "peerDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^"
+    "@njydsz/ydb-invariants": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^"
+    "@njydsz/ydb-invariants": "workspace:^"
   }
 }

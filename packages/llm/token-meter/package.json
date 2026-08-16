@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-token-meter",
+  "name": "@njydsz/ydb-token-meter",
   "description": "Replay-aware token measurement service (ctx.tokenMeter) for the Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -37,11 +37,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -49,11 +49,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@njydsz/dsh-compaction": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-session-projection": "workspace:^",
+    "@njydsz/ydb-compaction": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-session-projection": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

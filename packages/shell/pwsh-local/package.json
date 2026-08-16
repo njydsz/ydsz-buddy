@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-pwsh-local",
+  "name": "@njydsz/ydb-pwsh-local",
   "description": "Local PowerShell implementation of the Ydsz Buddy bash executor seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,23 +32,23 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   },
   "dependencies": {
     "@njydsz/schemastery": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-shell": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
-    "@njydsz/dsh-subprocess-local": "workspace:^",
-    "@njydsz/dsh-timeout": "workspace:^",
+    "@njydsz/ydb-shell": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
+    "@njydsz/ydb-subprocess-local": "workspace:^",
+    "@njydsz/ydb-timeout": "workspace:^",
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-settings": "workspace:^"
+    "@njydsz/ydb-settings": "workspace:^"
   }
 }

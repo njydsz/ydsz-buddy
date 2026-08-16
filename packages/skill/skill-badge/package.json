@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-skill-badge",
+  "name": "@njydsz/ydb-skill-badge",
   "description": "Bundled dsh badge skill provider for Ydsz Buddy",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-skill": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-skill": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-skill": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-skill": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

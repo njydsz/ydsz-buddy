@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-modules",
+  "name": "@njydsz/ydb-client-modules",
   "description": "Client module system, dual-face: node half composes the __DSH_BOOT__ entry graph (incremental dsh.client scan, bundle route, index tap, webPlugins service); browser half is the lazy-CJS module table the vendored cordis Loader consumes as its internal seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -43,8 +43,8 @@
   "license": "MIT",
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "files": [
@@ -54,7 +54,7 @@
     "lib/types/**/*.d.ts"
   ],
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

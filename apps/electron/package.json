@@ -1,27 +1,85 @@
 {
-  "name": "@njydsz/dsh-electron",
+  "name": "@njydsz/ydb-electron",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Ydsz Buddy Electron desktop shell — IPC carrier replacement for the webserver transport.",
+  "description": "DeepSeek Harness Electron desktop shell — reuses the web composition with an HTTP-carriage host runtime, with a Stage 2 IPC carrier planned.",
   "main": "lib/main.js",
+  "exports": {
+    ".": {
+      "types": "./lib/types/main.d.ts",
+      "default": "./lib/main.js"
+    },
+    "./runtime": {
+      "types": "./lib/types/electron-runtime.d.ts",
+      "default": "./lib/electron-runtime.js"
+    },
+    "./host-runtime": {
+      "types": "./lib/types/host-runtime.d.ts",
+      "default": "./lib/host-runtime.js"
+    },
+    "./preload": {
+      "types": "./lib/types/preload.d.ts",
+      "default": "./lib/preload.js"
+    },
+    "./ipc-api-client": {
+      "types": "./lib/types/ipc-api-client.d.ts",
+      "default": "./lib/ipc-api-client.js"
+    },
+    "./ipc-connection-controller": {
+      "types": "./lib/types/ipc-connection-controller.d.ts",
+      "default": "./lib/ipc-connection-controller.js"
+    },
+    "./ipc-protocol": {
+      "types": "./lib/types/ipc-protocol.d.ts",
+      "default": "./lib/ipc-protocol.js"
+    }
+  },
   "scripts": {
     "dev": "tsx src/main.ts",
     "build": "tsdown",
+    "build:watch": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "@njydsz/cordis": "workspace:*",
-    "@njydsz/dsh-host-apiproxy": "workspace:*",
-    "@njydsz/dsh-client-connection": "workspace:*",
+    "@njydsz/cordis-plugin-include": "workspace:*",
+    "@njydsz/ydb-app-boot": "workspace:*",
+    "@njydsz/ydb-host-apiproxy": "workspace:*",
+    "@njydsz/ydb-client-connection": "workspace:*",
+    "@njydsz/ydb-web-app": "workspace:*",
     "electron": "^33.0.0"
   },
   "devDependencies": {
     "@njydsz/schemastery": "workspace:*",
     "@types/node": "^22.10.0",
+    "electron-builder": "^25.0.0",
     "tsx": "^4.19.0",
     "tsdown": "^0.10.0",
     "typescript": "^5.7.0"
+  },
+  "build": {
+    "appId": "ai.deepseek.harness-electron",
+    "productName": "DeepSeek Harness",
+    "files": [
+      "lib/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Development"
+    }
   }
 }

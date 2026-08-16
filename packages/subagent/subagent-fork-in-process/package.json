@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-subagent-fork-in-process",
+  "name": "@njydsz/ydb-subagent-fork-in-process",
   "description": "In-process fork subagent backend: runs a child agent seeded with a prefix of the parent's log",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,11 +32,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-subagent-in-process-driver": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-subagent-in-process-driver": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -44,15 +44,15 @@
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-agent-loop": "workspace:^",
-    "@njydsz/dsh-agent-loop-testkit": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-subagent-in-process-driver": "workspace:^",
-    "@njydsz/dsh-subagent-spawn-in-process": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-agent-loop": "workspace:^",
+    "@njydsz/ydb-agent-loop-testkit": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-subagent-in-process-driver": "workspace:^",
+    "@njydsz/ydb-subagent-spawn-in-process": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

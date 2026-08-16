@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-api-gateway",
+  "name": "@njydsz/ydb-api-gateway",
   "description": "Typert Remote Host dispatcher and Client API endpoint",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -36,8 +36,8 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-typert-registry",
-        "@njydsz/dsh-client-connection"
+        "@njydsz/ydb-typert-registry",
+        "@njydsz/ydb-client-connection"
       ],
       "platform": "web",
       "immediately": true
@@ -56,19 +56,19 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-typert-protocol": "workspace:^"
+    "@njydsz/ydb-typert-protocol": "workspace:^"
   },
   "peerDependencies": {
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-typert-registry": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-typert-registry": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-typert-registry": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-typert-registry": "workspace:^",
     "@njydsz/cordis": "workspace:^",
     "zod": "^4.4.3"
   }

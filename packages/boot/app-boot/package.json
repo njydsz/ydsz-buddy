@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-app-boot",
+  "name": "@njydsz/ydb-app-boot",
   "description": "Shared boot glue for the app bins: .env loading, fail-loud Loader guards, snapshot-aware config resolution, and the Loader boot sequence",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -39,10 +39,10 @@
     "@njydsz/cordis-plugin-hmr": "workspace:^",
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "peerDependenciesMeta": {
@@ -56,10 +56,10 @@
     "@njydsz/cordis-plugin-include": "workspace:^",
     "@njydsz/cordis-plugin-loader": "workspace:^",
     "@njydsz/cordis-plugin-timer": "workspace:^",
-    "@njydsz/dsh-launch-environment": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-home-paths": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
+    "@njydsz/ydb-launch-environment": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-home-paths": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
     "@types/js-yaml": "^4.0.9",
     "@njydsz/cordis": "workspace:^"
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-web-react",
+  "name": "@njydsz/ydb-client-web-react",
   "description": "Shell-side React glue: createSlotRenderer, SessionProvider, bindSnapshotSelector (uSES bridge), useInvoke",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -27,16 +27,16 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
     "react": "^18.2.0",
     "use-sync-external-store": "1.2.0"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "@njydsz/cordis": "workspace:^"
   },

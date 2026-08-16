@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-user-questions",
+  "name": "@njydsz/ydb-client-ui-user-questions",
   "description": "Web ask_user_question feature: host tool mount plus composer-takeover question UI",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,8 +32,8 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-ui-conversation"
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-ui-conversation"
       ],
       "platform": "web"
     }
@@ -44,29 +44,29 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-conversation": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-conversation": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
     "clsx": "^2.0.0",
     "react": "^18.2.0"
   },
   "peerDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^"
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^"
   },
   "devDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
-    "@njydsz/dsh-user-questions": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
+    "@njydsz/ydb-user-questions": "workspace:^",
     "@types/react": "~18.3.1"
   },
   "files": [

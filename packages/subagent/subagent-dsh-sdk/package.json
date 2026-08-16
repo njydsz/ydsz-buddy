@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-subagent-dsh-sdk",
+  "name": "@njydsz/ydb-subagent-dsh-sdk",
   "description": "Out-of-process SDK subagent backend: drives a child Ydsz Buddy runtime subprocess over stdio JSON-RPC through the TypeScript SDK client",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,13 +32,13 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-sdk-client": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-sdk-client": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -46,15 +46,15 @@
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-agent": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-loader-smoke": "workspace:^",
-    "@njydsz/dsh-sdk-client": "workspace:^",
-    "@njydsz/dsh-sdk-protocol": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-subagent": "workspace:^",
-    "@njydsz/dsh-subprocess": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-loader-smoke": "workspace:^",
+    "@njydsz/ydb-sdk-client": "workspace:^",
+    "@njydsz/ydb-sdk-protocol": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-subagent": "workspace:^",
+    "@njydsz/ydb-subprocess": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

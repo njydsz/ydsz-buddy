@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-web",
+  "name": "@njydsz/ydb-client-web",
   "description": "Web shell kernel: bootWebShell (module system holding + seed table + two-stage boot + AppRoot gate + app-shell assembly entry), consumed by the apps/web vite entry",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -27,21 +27,21 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-client-modules": "workspace:^",
-    "@njydsz/dsh-client-schema-form": "workspace:^",
-    "@njydsz/dsh-client-ui-attachment": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-client-ui-theme": "workspace:^",
-    "@njydsz/dsh-client-web-react": "workspace:^",
+    "@njydsz/ydb-client-modules": "workspace:^",
+    "@njydsz/ydb-client-schema-form": "workspace:^",
+    "@njydsz/ydb-client-ui-attachment": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-client-ui-theme": "workspace:^",
+    "@njydsz/ydb-client-web-react": "workspace:^",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "@types/react-dom": "~18.3.0",
     "@njydsz/cordis": "workspace:^",
@@ -49,7 +49,7 @@
   },
   "peerDependencies": {
     "@njydsz/cordis-plugin-loader": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "files": [

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-client-ui-theme",
+  "name": "@njydsz/ydb-client-ui-theme",
   "description": "Theme plugin: Host bootstrap for the pre-plugin palette; DOM-free ThemeRuntime for light/dark/system state; --dsw-* token styles and Appearance settings row",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -33,11 +33,11 @@
   "ydb": {
     "client": {
       "inject": [
-        "@njydsz/dsh-client-connection",
-        "@njydsz/dsh-client-runtime",
-        "@njydsz/dsh-client-locale",
-        "@njydsz/dsh-client-ui-settings",
-        "@njydsz/dsh-api-remotes"
+        "@njydsz/ydb-client-connection",
+        "@njydsz/ydb-client-runtime",
+        "@njydsz/ydb-client-locale",
+        "@njydsz/ydb-client-ui-settings",
+        "@njydsz/ydb-api-remotes"
       ],
       "platform": "web",
       "immediately": true
@@ -46,28 +46,28 @@
   "license": "MIT",
   "peerDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-connection": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-settings": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-connection": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-settings": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "@njydsz/cordis": "workspace:^",
-    "@njydsz/dsh-api-remotes": "workspace:^",
-    "@njydsz/dsh-client-locale": "workspace:^",
-    "@njydsz/dsh-client-runtime": "workspace:^",
-    "@njydsz/dsh-client-test-runtime": "workspace:^",
-    "@njydsz/dsh-client-ui-primitives": "workspace:^",
-    "@njydsz/dsh-client-ui-settings": "workspace:^",
-    "@njydsz/dsh-client-ui-slots": "workspace:^",
-    "@njydsz/dsh-host-webserver": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-api-remotes": "workspace:^",
+    "@njydsz/ydb-client-locale": "workspace:^",
+    "@njydsz/ydb-client-runtime": "workspace:^",
+    "@njydsz/ydb-client-test-runtime": "workspace:^",
+    "@njydsz/ydb-client-ui-primitives": "workspace:^",
+    "@njydsz/ydb-client-ui-settings": "workspace:^",
+    "@njydsz/ydb-client-ui-slots": "workspace:^",
+    "@njydsz/ydb-host-webserver": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@types/react": "~18.3.1",
     "react": "^18.2.0"
   },
@@ -83,7 +83,7 @@
     "watch": "tsdown --watch"
   },
   "dependencies": {
-    "@njydsz/dsh-settings": "workspace:^",
+    "@njydsz/ydb-settings": "workspace:^",
     "clsx": "^2.0.0",
     "@njydsz/schemastery": "workspace:^"
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-tool-web",
+  "name": "@njydsz/ydb-tool-web",
   "description": "Model-facing web tools (web_search, web_fetch) over the Ydsz Buddy web capability seam (ctx.web)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,11 +32,11 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
-    "@njydsz/dsh-web": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
+    "@njydsz/ydb-web": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
@@ -45,19 +45,19 @@
     "turndown": "^7.2.4"
   },
   "devDependencies": {
-    "@njydsz/dsh-agent": "workspace:^",
+    "@njydsz/ydb-agent": "workspace:^",
     "@types/turndown": "^5.0.6",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
-    "@njydsz/dsh-spill-local": "workspace:^",
-    "@njydsz/dsh-spill-policy": "workspace:^",
-    "@njydsz/dsh-system-prompt": "workspace:^",
-    "@njydsz/dsh-tool-call-timeout-policy": "workspace:^",
-    "@njydsz/dsh-tools": "workspace:^",
-    "@njydsz/dsh-web": "workspace:^",
-    "@njydsz/dsh-web-fetch-http": "workspace:^",
-    "@njydsz/dsh-web-search-exa": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
+    "@njydsz/ydb-spill-local": "workspace:^",
+    "@njydsz/ydb-spill-policy": "workspace:^",
+    "@njydsz/ydb-system-prompt": "workspace:^",
+    "@njydsz/ydb-tool-call-timeout-policy": "workspace:^",
+    "@njydsz/ydb-tools": "workspace:^",
+    "@njydsz/ydb-web": "workspace:^",
+    "@njydsz/ydb-web-fetch-http": "workspace:^",
+    "@njydsz/ydb-web-search-exa": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

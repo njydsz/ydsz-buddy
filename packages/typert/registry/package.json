@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-typert-registry",
+  "name": "@njydsz/ydb-typert-registry",
   "description": "Runtime registry for generated package reflection and Zod schemas",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -53,15 +53,15 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@njydsz/dsh-typert-protocol": "workspace:^",
+    "@njydsz/ydb-typert-protocol": "workspace:^",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

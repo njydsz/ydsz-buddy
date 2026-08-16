@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-acp-snapshot",
+  "name": "@njydsz/ydb-acp-snapshot",
   "description": "ACP test kit: shared subprocess launcher, snapshot scenario harness, expected-output normalizers, and suite factory",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -33,17 +33,17 @@
   "license": "MIT",
   "dependencies": {
     "@agentclientprotocol/sdk": "0.25.1",
-    "@njydsz/dsh-loader-smoke": "workspace:*",
+    "@njydsz/ydb-loader-smoke": "workspace:*",
     "vitest": "^4.1.8"
   },
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-session": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-session": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

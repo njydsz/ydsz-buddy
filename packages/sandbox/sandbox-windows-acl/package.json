@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-sandbox-windows-acl",
+  "name": "@njydsz/ydb-sandbox-windows-acl",
   "description": "Windows ACL write-restriction sandbox backend (restricted-token spawn with capability-SID write allowlist) for the Ydsz Buddy sandbox seam",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -38,16 +38,16 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "dependencies": {
     "koffi": "^3.1.0"
   },
   "devDependencies": {
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-pwsh-local": "workspace:^",
-    "@njydsz/dsh-sandbox-local": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-pwsh-local": "workspace:^",
+    "@njydsz/ydb-sandbox-local": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }

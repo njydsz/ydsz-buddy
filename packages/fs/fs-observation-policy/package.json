@@ -1,5 +1,5 @@
 {
-  "name": "@njydsz/dsh-fs-observation-policy",
+  "name": "@njydsz/ydb-fs-observation-policy",
   "description": "File-context policy plugin for the Ydsz Buddy — observed-state, read-before-edit, and version-guarded write/edit added over the ctx.fs provider seam through the fs/* event gate (no service API)",
   "version": "0.1.0-rc.5",
   "publishConfig": {
@@ -32,14 +32,14 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   },
   "devDependencies": {
-    "@njydsz/dsh-fs": "workspace:^",
-    "@njydsz/dsh-invariants": "workspace:^",
-    "@njydsz/dsh-llm": "workspace:^",
+    "@njydsz/ydb-fs": "workspace:^",
+    "@njydsz/ydb-invariants": "workspace:^",
+    "@njydsz/ydb-llm": "workspace:^",
     "@njydsz/cordis": "workspace:^"
   }
 }
