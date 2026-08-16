@@ -1,5 +1,5 @@
-﻿[package]
-name = "ydsz-core"
+[package]
+name = "ydsz-flow"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -7,14 +7,22 @@ license.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+ydsz-core = { workspace = true }
+ydsz-shared = { workspace = true }
+ydsz-provider = { workspace = true }
+
+tokio = { workspace = true }
+async-trait = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
-thiserror = { workspace = true }
 tracing = { workspace = true }
-async-trait = { workspace = true }
+
+specta = { workspace = true }
+specta-serde = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
-tokio = { workspace = true }

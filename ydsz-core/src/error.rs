@@ -13,6 +13,7 @@
 //! | [`SerializationError`](CoreError::SerializationError) | 序列化/反序列化失败 | JSON 解析错误、数据格式不匹配 |
 //! | [`InvalidOperation`](CoreError::InvalidOperation) | 非法的业务操作 | 对已删除的线程发送消息、状态转换不合法 |
 //! | [`InternalError`](CoreError::InternalError) | 内部未预期的错误 | 系统内部异常、不可恢复的错误 |
+//! | [`ToolError`](CoreError::ToolError) | 工具调用错误 | 权限不足、参数校验失败、执行超时 |
 //!
 //! ## 使用示例
 //!
@@ -124,6 +125,33 @@ pub enum CoreError {
     /// ```
     #[error("内部错误: {0}")]
     InternalError(String),
+
+    /// 工具调用错误
+    ///
+    /// 当工具执行流水线中发生错误时返回，携带工具名、调用 ID 和错误描述。
+    /// 可能发生在权限校验失败、参数验证不通过、执行超时或内部异常等场景。
+    ///
+    /// # 示例
+    ///
+    /// ```rust
+    /// use ydsz_core::CoreError;
+    ///
+    /// let err = CoreError::ToolError {
+    ///     tool_name: "bash".to_string(),
+    ///     call_id: "call-123".to_string(),
+    ///     message: "权限不足".to_string(),
+    /// };
+    /// assert!(err.to_string().contains("bash"));
+    /// ```
+    #[error("工具错误 [{tool_name}] ({call_id}): {message}")]
+    ToolError {
+        /// 发生错误的工具名称
+        tool_name: String,
+        /// 关联的调用 ID
+        call_id: String,
+        /// 错误描述
+        message: String,
+    },
 }
 
 /// # 核心结果类型

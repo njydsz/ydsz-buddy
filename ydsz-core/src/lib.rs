@@ -69,6 +69,12 @@ pub mod preset;
 /// 提供基于白名单/黑名单/审批模式的工具权限控制。
 pub mod tool_permissions;
 
+/// 工具执行标准化拦截器链（pre-execute / execute / post-execute 三阶段流水线）。
+///
+/// 借鉴 DeepSeek Harness 的工具执行流水线设计，为所有工具调用提供统一的
+/// 权限审计、参数校验、耗时统计、活动日志和错误脱敏等拦截能力。
+pub mod tool_pipeline;
+
 #[cfg(test)]
 mod tests;
 
