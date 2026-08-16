@@ -6,7 +6,7 @@
 
 import { relative } from 'node:path'
 import z from '@deepseek-ai/schemastery'
-import { resolveDshHome } from '@njydsz/ydb-home-paths'
+import { resolveYdbHome } from '@njydsz/ydb-home-paths'
 
 const DEFAULT_PROJECT_ROOT_MARKERS = ['.git'] as const
 const DEFAULT_INSTRUCTION_FILE_CANDIDATES = ['AGENTS.md', 'CLAUDE.md'] as const
@@ -103,7 +103,7 @@ export function resolveDiscoveryConfig(
   config: Pick<Config, 'dshHome' | 'projectRootMarkers' | 'instructionFileCandidates' | 'localInstructionFileCandidates'>,
 ): ResolvedDiscoveryConfig {
   return {
-    dshHome: resolveDshHome(config.dshHome),
+    dshHome: resolveYdbHome(config.dshHome),
     projectRootMarkers: config.projectRootMarkers ?? [...DEFAULT_PROJECT_ROOT_MARKERS],
     instructionFileCandidates: resolveInstructionFileCandidates(
       config.instructionFileCandidates,

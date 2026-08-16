@@ -54,7 +54,7 @@
     - id: storage-json
       name: '@njydsz/ydb-storage-json'
       config:
-        root: !!js dshHomePath('storages')
+        root: !!js ydbHomePath('storages')
 
     - id: storage-domain
       name: '@njydsz/ydb-storage-domain'

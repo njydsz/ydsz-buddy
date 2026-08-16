@@ -1,6 +1,6 @@
 {
   "name": "@njydsz/ydb-web-frontend",
-  "description": "Web application entry: vite build over the @njydsz/dsh-client-web shell library; dist/ served by apps/cli's dsh web",
+  "description": "Web application entry: vite build over the @njydsz/ydb-client-web shell library; dist/ served by apps/cli's ydb web",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"

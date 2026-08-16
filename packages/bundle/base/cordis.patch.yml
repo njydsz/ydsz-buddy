@@ -98,7 +98,7 @@
     - id: session-persistence-jsonl
       name: '@njydsz/ydb-session-persistence-jsonl'
       config:
-        root: !!js dshHomePath('sessions')
+        root: !!js ydbHomePath('sessions')
 
     # Durable image bytes live outside the append-only session log. Messages
     # keep content-addressed references that this shared backend resolves for

@@ -2,7 +2,7 @@
  * Per-harness-home anonymous user id shared by telemetry and feedback.
  *
  * The id is a random UUID persisted as a bare line in `.anonymous-user-id` inside the
- * harness home resolved by {@link resolveDshHome} (`$YDB_HOME` > `~/.dsh`),
+ * harness home resolved by {@link resolveYdbHome} (`$YDB_HOME` > `~/.dsh`),
  * and never derived from the hostname, network address, git remote, or any
  * other identifying source. It is scoped to the harness home, not the
  * machine: every process sharing one `$YDB_HOME` reports the same id, and
@@ -20,7 +20,7 @@ import { randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { Branded } from '@njydsz/ydb-brand'
-import { resolveDshHome } from '@njydsz/ydb-home-paths'
+import { resolveYdbHome } from '@njydsz/ydb-home-paths'
 
 /** A harness-home-scoped anonymous user id (random UUID v4). */
 export type AnonymousUserId = Branded<'AnonymousUserId'>
@@ -66,7 +66,7 @@ function readPersistedId(file: string): AnonymousUserId | undefined {
  * @returns the stable per-harness-home anonymous user id.
  */
 export function getOrCreateAnonymousUserId(options: AnonymousUserIdOptions = {}): AnonymousUserId {
-  const file = join(resolveDshHome(undefined, options.env ?? process.env), ANONYMOUS_USER_ID_FILE_NAME)
+  const file = join(resolveYdbHome(undefined, options.env ?? process.env), ANONYMOUS_USER_ID_FILE_NAME)
   const cached = memo.get(file)
   if (cached !== undefined) return cached
 

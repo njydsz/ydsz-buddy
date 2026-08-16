@@ -4,7 +4,7 @@
  */
 
 /* jscpd:ignore-start */
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@njydsz/cordis'
 import type { InvariantInstaller } from '@njydsz/ydb-invariants'
 
 const PACKAGE_NAME = '@njydsz/ydb-app-boot'

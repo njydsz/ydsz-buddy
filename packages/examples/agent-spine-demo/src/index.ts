@@ -35,7 +35,7 @@ import * as toolSkill from '@njydsz/ydb-tool-skill'
 import * as toolJobs from '@njydsz/ydb-tool-jobs'
 import AgentLoop, { type Config as AgentLoopConfig } from '@njydsz/ydb-agent-loop'
 import * as llmRetry from '@njydsz/ydb-llm-retry'
-import { resolveDshHome } from '@njydsz/ydb-home-paths'
+import { resolveYdbHome } from '@njydsz/ydb-home-paths'
 
 export const name = 'agent-spine-demo'
 
@@ -212,10 +212,10 @@ export function pickSpineConfig(config: Omit<Config, 'agents'>): Omit<Config, 'a
 export function apply(ctx: Context, config: Config): void {
   const nestedDshHome = config.skills?.filesystem?.dshHome
   if (config.dshHome !== undefined && nestedDshHome !== undefined
-    && resolveDshHome(config.dshHome) !== resolveDshHome(nestedDshHome)) {
+    && resolveYdbHome(config.dshHome) !== resolveYdbHome(nestedDshHome)) {
     throw new Error('agent-spine-demo: dshHome and skills.filesystem.dshHome must resolve to the same directory')
   }
-  const dshHome = resolveDshHome(config.dshHome ?? nestedDshHome)
+  const dshHome = resolveYdbHome(config.dshHome ?? nestedDshHome)
 
   ctx.plugin(Timer)
   ctx.plugin(LlmRuntime)

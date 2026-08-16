@@ -14,7 +14,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 import { Document, parseDocument } from 'yaml'
 import { withFileLock, writeFileAtomic } from '@njydsz/ydb-atomic-write'
-import { canonicalizeWatchPath, resolveDshHome } from '@njydsz/ydb-home-paths'
+import { canonicalizeWatchPath, resolveYdbHome } from '@njydsz/ydb-home-paths'
 import { SettingsProvider, deepEqualJson, type SettingsNamespace } from '@njydsz/ydb-settings'
 
 /** Plugin config: file location and hot-reload behavior. */
@@ -53,7 +53,7 @@ interface ResolvedSpec {
  * @returns the resolved file location, format, and watch behavior.
  */
 export function resolveSpec(config: Config): ResolvedSpec {
-  const filename = resolve(config.path ?? join(resolveDshHome(config.dshHome), 'settings.yaml'))
+  const filename = resolve(config.path ?? join(resolveYdbHome(config.dshHome), 'settings.yaml'))
   const format = FORMATS[extname(filename)]
   if (format === undefined) {
     throw new Error(`settings-file: extension "${extname(filename)}" is not supported (use .yaml, .yml, or .json)`)

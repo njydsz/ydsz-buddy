@@ -42,7 +42,7 @@ import { mkdir, readFile, stat } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { Document, parseDocument, type YAMLError } from 'yaml'
 import { withFileLock, writeFileAtomic } from '@njydsz/ydb-atomic-write'
-import { canonicalizeWatchPath, resolveDshHome } from '@njydsz/ydb-home-paths'
+import { canonicalizeWatchPath, resolveYdbHome } from '@njydsz/ydb-home-paths'
 import { launchEnvironmentOf } from '@njydsz/ydb-launch-environment'
 import { CredentialProvider, credentialRef } from '@njydsz/ydb-credentials'
 import type { CredentialInfo, CredentialRef, ResolvedCredential } from '@njydsz/ydb-credentials'
@@ -78,7 +78,7 @@ interface ResolvedSpec {
  */
 export function resolveSpec(config: Config): ResolvedSpec {
   return {
-    filename: resolve(config.path ?? join(resolveDshHome(config.dshHome), CREDENTIALS_FILENAME)),
+    filename: resolve(config.path ?? join(resolveYdbHome(config.dshHome), CREDENTIALS_FILENAME)),
     watch: config.watch ?? true,
     debounceMs: config.debounceMs ?? 100,
   }

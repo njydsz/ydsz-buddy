@@ -12,7 +12,7 @@ import { Service, type Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { DSH_ENV_PREFIX } from '@njydsz/ydb-shell'
 import type { DshEnvironment, DshEnvironmentKey } from '@njydsz/ydb-shell'
-import { DSH_HOME_ENV, resolveDshHome } from '@njydsz/ydb-home-paths'
+import { YDB_HOME_ENV, resolveYdbHome } from '@njydsz/ydb-home-paths'
 import type { ToolExecution } from '@njydsz/ydb-tools'
 import type {} from '@njydsz/ydb-session-persistence'
 
@@ -72,7 +72,7 @@ const DSH_SHELL_KEY = `${DSH_ENV_PREFIX}SHELL` as const
 const DSH_SESSION_ID_KEY = `${DSH_ENV_PREFIX}SESSION_ID` as const
 const DSH_SESSION_JSONL_KEY = `${DSH_ENV_PREFIX}SESSION_JSONL` as const
 const RESERVED_BASH_ENV_KEYS = new Set<DshEnvironmentKey>([
-  DSH_HOME_ENV,
+  YDB_HOME_ENV,
   DSH_SHELL_KEY,
   DSH_SESSION_ID_KEY,
 ])
@@ -98,7 +98,7 @@ export class ShellEnvRegistry extends Service {
    */
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'shellEnv')
-    this.dshHome = resolveDshHome(config.dshHome)
+    this.dshHome = resolveYdbHome(config.dshHome)
   }
 
   /**
@@ -151,7 +151,7 @@ export class ShellEnvRegistry extends Service {
    */
   collect(execution: ToolExecution): DshEnvironment {
     const values: Record<DshEnvironmentKey, string> = {
-      [DSH_HOME_ENV]: this.dshHome,
+      [YDB_HOME_ENV]: this.dshHome,
       [DSH_SHELL_KEY]: '1',
     }
     if (execution.agent !== undefined) {

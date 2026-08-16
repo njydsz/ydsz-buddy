@@ -3,61 +3,61 @@ import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  DEFAULT_DSH_HOME_DISPLAY,
-  DSH_HOME_DIR_NAME,
+  DEFAULT_YDB_HOME_DISPLAY,
+  YDB_HOME_DIR_NAME,
   canonicalizeWatchPath,
-  defaultDshHome,
-  dshHomeDisplay,
-  dshHomePath,
+  defaultYdbHome,
   expandHomePath,
-  resolveDshHome,
+  resolveYdbHome,
+  ydbHomeDisplay,
+  ydbHomePath,
 } from '@njydsz/ydb-home-paths'
 
 afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('dsh path helpers', () => {
-  it('owns the shared default DSH home directory name', () => {
-    expect(DSH_HOME_DIR_NAME).toBe('.dsh')
-    expect(DEFAULT_DSH_HOME_DISPLAY).toBe('~/.dsh')
-    expect(defaultDshHome()).toBe(join(homedir(), '.dsh'))
+describe('ydb path helpers', () => {
+  it('owns the shared default YDB home directory name', () => {
+    expect(YDB_HOME_DIR_NAME).toBe('.ydb')
+    expect(DEFAULT_YDB_HOME_DISPLAY).toBe('~/.ydb')
+    expect(defaultYdbHome()).toBe(join(homedir(), '.ydb'))
   })
 
   it('expands tilde paths without changing non-tilde paths', () => {
     expect(expandHomePath('~')).toBe(homedir())
-    expect(expandHomePath('~/.dsh')).toBe(join(homedir(), '.dsh'))
-    expect(expandHomePath('~\\.dsh')).toBe(join(homedir(), '.dsh'))
-    expect(expandHomePath('/tmp/.dsh')).toBe('/tmp/.dsh')
-    expect(expandHomePath('~other/.dsh')).toBe('~other/.dsh')
+    expect(expandHomePath('~/.ydb')).toBe(join(homedir(), '.ydb'))
+    expect(expandHomePath('~\\.ydb')).toBe(join(homedir(), '.ydb'))
+    expect(expandHomePath('/tmp/.ydb')).toBe('/tmp/.ydb')
+    expect(expandHomePath('~other/.ydb')).toBe('~other/.ydb')
   })
 
   it('resolves explicit path before YDB_HOME and the default', () => {
-    const envHome = join(homedir(), 'env-dsh')
+    const envHome = join(homedir(), 'env-ydb')
 
-    expect(resolveDshHome('/tmp/explicit-dsh', { YDB_HOME: '~/env-dsh' })).toBe(resolve('/tmp/explicit-dsh'))
-    expect(resolveDshHome(undefined, { YDB_HOME: '~/env-dsh' })).toBe(envHome)
-    expect(resolveDshHome(undefined, {})).toBe(defaultDshHome())
+    expect(resolveYdbHome('/tmp/explicit-ydb', { YDB_HOME: '~/env-ydb' })).toBe(resolve('/tmp/explicit-ydb'))
+    expect(resolveYdbHome(undefined, { YDB_HOME: '~/env-ydb' })).toBe(envHome)
+    expect(resolveYdbHome(undefined, {})).toBe(defaultYdbHome())
   })
 
   it('treats an empty or whitespace-only YDB_HOME as unset', () => {
-    expect(resolveDshHome(undefined, { YDB_HOME: '' })).toBe(defaultDshHome())
-    expect(resolveDshHome(undefined, { YDB_HOME: '   ' })).toBe(defaultDshHome())
+    expect(resolveYdbHome(undefined, { YDB_HOME: '' })).toBe(defaultYdbHome())
+    expect(resolveYdbHome(undefined, { YDB_HOME: '   ' })).toBe(defaultYdbHome())
   })
 
   it('joins child segments onto the resolved YDB_HOME', () => {
-    vi.stubEnv('YDB_HOME', '~/env-dsh')
-    expect(dshHomePath()).toBe(join(homedir(), 'env-dsh'))
-    expect(dshHomePath('storages', 'cache')).toBe(join(homedir(), 'env-dsh', 'storages', 'cache'))
+    vi.stubEnv('YDB_HOME', '~/env-ydb')
+    expect(ydbHomePath()).toBe(join(homedir(), 'env-ydb'))
+    expect(ydbHomePath('storages', 'cache')).toBe(join(homedir(), 'env-ydb', 'storages', 'cache'))
   })
 
   it('labels a resolved home by whether it is the default root', () => {
-    expect(dshHomeDisplay(resolve(defaultDshHome()))).toBe('~/.dsh')
-    expect(dshHomeDisplay('/some/other/root')).toBe('$YDB_HOME')
+    expect(ydbHomeDisplay(resolve(defaultYdbHome()))).toBe('~/.ydb')
+    expect(ydbHomeDisplay('/some/other/root')).toBe('$YDB_HOME')
   })
 
   it('canonicalizes a watcher ancestor while preserving a missing suffix', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'dsh-watch-path-'))
+    const root = await mkdtemp(join(tmpdir(), 'ydb-watch-path-'))
     const target = join(root, 'target')
     const alias = join(root, 'alias')
     try {

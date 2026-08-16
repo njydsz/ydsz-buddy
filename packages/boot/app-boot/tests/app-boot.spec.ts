@@ -658,7 +658,7 @@ describe('boot', () => {
     expect(disposed).toBe(true)
   })
 
-  it('exposes dshHomePath to Loader config expressions', async () => {
+  it('exposes ydbHomePath to Loader config expressions', async () => {
     const dir = tmp()
     const dshHome = join(dir, 'home')
     vi.stubEnv('YDB_HOME', dshHome)
@@ -673,7 +673,7 @@ describe('boot', () => {
       '- id: capture',
       '  name: ./capture.mjs',
       '  config:',
-      "    path: !!js dshHomePath('sessions')",
+      "    path: !!js ydbHomePath('sessions')",
       '',
     ].join('\n'))
     let ctx: Context | undefined

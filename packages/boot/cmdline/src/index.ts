@@ -17,7 +17,7 @@
  */
 
 import type { Command } from 'commander'
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@njydsz/cordis'
 
 /**
  * The invocation's inner arguments: everything after the launcher's own flags,
@@ -41,7 +41,7 @@ export interface AppExit {
   (code: number): void
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module '@njydsz/cordis' {
   interface Context {
     /** The invocation's inner arguments; provided by a launcher before the tree mounts. */
     cmdlineArgs?: CmdlineArgs
