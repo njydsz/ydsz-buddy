@@ -1,0 +1,1253 @@
+﻿//! # 编排命令定义
+//!
+//! 本模块定义了 ydsz 工作区中所有编排命令（Orchestration Command）。
+//! 采用命令查询职责分离（CQRS）模式，命令用于驱动状态变更。
+//!
+//! ## 设计原则
+//!
+//! - 所有命令均包含可选的 `command_id`，用于追踪命令-事件的因果关系
+//! - 命令是不可变的（immutable），一旦创建不可修改
+//! - 命令通过带标签的枚举（tagged enum）进行序列化，标签格式为 `kebab-case`
+//!
+//! ## 命令分类
+//!
+//! - **项目命令**: 项目的创建、更新、删除
+//! - **线程命令**: 线程的创建、删除、归档、模式切换等
+//! - **Turn 命令**: 交互轮次的启动、中断、分发
+//! - **审批命令**: 审批响应和用户输入响应
+//! - **检查点命令**: 检查点回退、对话回滚
+//! - **消息命令**: 消息编辑重发、会话停止
+//! - **活动命令**: 活动追加
+//! - **内部命令**: 会话设置、消息导入、助手消息增量/完成、计划更新、差异完成、回退完成、回滚完成
+
+use serde::{Deserialize, Serialize};
+
+use crate::models::{
+    Activity, DispatchMode, EnvMode, HandoffInfo, InteractionMode, MessageId, ProjectId,
+    ProposedPlan, PullRequestInfo, RuntimeMode, ThreadId,
+};
+use crate::provider::ModelSelection;
+/// # 编排命令
+///
+/// 系统所有编排命令的聚合枚举。每个变体对应一个具体的命令结构体。
+/// 命令通过 `serde` 的标签联合（tagged union）机制序列化，
+/// 使用 `_tag` 字段区分变体，标签值采用 `kebab-case` 格式。
+///
+/// ## 命令命名规范
+///
+/// 命令标签格式为 `{聚合根}.{动作}`，例如：
+/// - `project.create` - 创建项目
+/// - `thread.message.edit-and-resend` - 编辑并重新发送消息
+/// - `thread.turn.start` - 启动 Turn
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "_tag", rename_all = "kebab-case")]
+pub enum OrchestrationCommand {
+    // ==================== 项目命令 ====================
+
+    /// 创建项目
+    #[serde(rename = "project.create")]
+    ProjectCreate(ProjectCreateCommand),
+    /// 更新项目元数据
+    #[serde(rename = "project.meta.update")]
+    ProjectMetaUpdate(ProjectMetaUpdateCommand),
+    /// 删除项目
+    #[serde(rename = "project.delete")]
+    ProjectDelete(ProjectDeleteCommand),
+
+    // ==================== 线程命令 ====================
+
+    /// 创建线程
+    #[serde(rename = "thread.create")]
+    ThreadCreate(ThreadCreateCommand),
+    /// 删除线程
+    #[serde(rename = "thread.delete")]
+    ThreadDelete(ThreadDeleteCommand),
+    /// 归档线程
+    #[serde(rename = "thread.archive")]
+    ThreadArchive(ThreadArchiveCommand),
+    /// 取消归档线程
+    #[serde(rename = "thread.unarchive")]
+    ThreadUnarchive(ThreadUnarchiveCommand),
+    /// 更新线程元数据
+    #[serde(rename = "thread.meta.update")]
+    ThreadMetaUpdate(ThreadMetaUpdateCommand),
+    /// 设置线程运行时模式
+    #[serde(rename = "thread.runtime-mode.set")]
+    ThreadRuntimeModeSet(ThreadRuntimeModeSetCommand),
+    /// 设置线程交互模式
+    #[serde(rename = "thread.interaction-mode.set")]
+    ThreadInteractionModeSet(ThreadInteractionModeSetCommand),
+
+    /// 创建交接线程
+    #[serde(rename = "thread.handoff.create")]
+    ThreadHandoffCreate(ThreadHandoffCreateCommand),
+    /// 创建分叉线程
+    #[serde(rename = "thread.fork.create")]
+    ThreadForkCreate(ThreadForkCreateCommand),
+    /// 并行扇出 — 创建 N 个子线程并行执行同一 prompt
+    #[serde(rename = "thread.fanout")]
+    ThreadFanOut(ThreadFanOutCommand),
+
+    // ==================== Turn 命令 ====================
+
+    /// 启动 Turn
+    #[serde(rename = "thread.turn.start")]
+    ThreadTurnStart(ThreadTurnStartCommand),
+    /// 中断 Turn
+    #[serde(rename = "thread.turn.interrupt")]
+    ThreadTurnInterrupt(ThreadTurnInterruptCommand),
+    /// 分发排队的 Turn
+    #[serde(rename = "thread.turn.dispatch-queued")]
+    ThreadTurnDispatchQueued(ThreadTurnDispatchQueuedCommand),
+
+    // ==================== 审批命令 ====================
+
+    /// 响应审批请求
+    #[serde(rename = "thread.approval.respond")]
+    ThreadApprovalRespond(ThreadApprovalRespondCommand),
+    /// 响应用户输入请求
+    #[serde(rename = "thread.user-input.respond")]
+    ThreadUserInputRespond(ThreadUserInputRespondCommand),
+
+    // ==================== 检查点命令 ====================
+
+    /// 回退到检查点
+    #[serde(rename = "thread.checkpoint.revert")]
+    ThreadCheckpointRevert(ThreadCheckpointRevertCommand),
+    /// 回滚对话
+    #[serde(rename = "thread.conversation.rollback")]
+    ThreadConversationRollback(ThreadConversationRollbackCommand),
+
+    // ==================== 消息命令 ====================
+
+    /// 编辑并重新发送消息
+    #[serde(rename = "thread.message.edit-and-resend")]
+    ThreadMessageEditAndResend(ThreadMessageEditAndResendCommand),
+    /// 停止会话
+    #[serde(rename = "thread.session.stop")]
+    ThreadSessionStop(ThreadSessionStopCommand),
+
+    // ==================== 活动命令 ====================
+
+    /// 追加活动
+    #[serde(rename = "thread.activity.append")]
+    ThreadActivityAppend(ThreadActivityAppendCommand),
+
+    // ==================== 定时任务命令 ====================
+
+    /// 创建定时任务
+    #[serde(rename = "scheduler.task.create")]
+    SchedulerTaskCreate(SchedulerTaskCreateCommand),
+    /// 更新定时任务
+    #[serde(rename = "scheduler.task.update")]
+    SchedulerTaskUpdate(SchedulerTaskUpdateCommand),
+    /// 删除定时任务
+    #[serde(rename = "scheduler.task.delete")]
+    SchedulerTaskDelete(SchedulerTaskDeleteCommand),
+    /// 启用/禁用定时任务
+    #[serde(rename = "scheduler.task.set-enabled")]
+    SchedulerTaskSetEnabled(SchedulerTaskSetEnabledCommand),
+    /// 立即触发定时任务
+    #[serde(rename = "scheduler.task.trigger")]
+    SchedulerTaskTrigger(SchedulerTaskTriggerCommand),
+    /// 列出定时任务
+    #[serde(rename = "scheduler.task.list")]
+    SchedulerTaskList(SchedulerTaskListCommand),
+
+    // ==================== 内部命令 ====================
+
+    /// 设置线程会话
+    #[serde(rename = "thread.session.set")]
+    ThreadSessionSet(ThreadSessionSetCommand),
+    /// 导入消息
+    #[serde(rename = "thread.messages.import")]
+    ThreadMessagesImport(ThreadMessagesImportCommand),
+    /// 助手消息增量更新
+    #[serde(rename = "thread.message.assistant.delta")]
+    ThreadMessageAssistantDelta(ThreadMessageAssistantDeltaCommand),
+    /// 助手消息完成
+    #[serde(rename = "thread.message.assistant.complete")]
+    ThreadMessageAssistantComplete(ThreadMessageAssistantCompleteCommand),
+    /// 创建或更新提议计划
+    #[serde(rename = "thread.proposed-plan.upsert")]
+    ThreadProposedPlanUpsert(ThreadProposedPlanUpsertCommand),
+    /// Turn 差异比较完成
+    #[serde(rename = "thread.turn.diff.complete")]
+    ThreadTurnDiffComplete(ThreadTurnDiffCompleteCommand),
+    /// 回退完成
+    #[serde(rename = "thread.revert.complete")]
+    ThreadRevertComplete(ThreadRevertCompleteCommand),
+    /// 对话回滚完成
+    #[serde(rename = "thread.conversation.rollback.complete")]
+    ThreadConversationRollbackComplete(ThreadConversationRollbackCompleteCommand),
+}
+
+impl OrchestrationCommand {
+    /// 获取命令 ID
+    ///
+    /// 命令 ID 用于追踪命令-事件的因果关系。
+    ///
+    /// # 返回值
+    ///
+    /// - `Some(command_id)` - 返回命令 ID 的字符串切片
+    /// - `None` - 命令未设置 ID
+    pub fn command_id(&self) -> Option<&str> {
+        // 通过模式匹配从每个命令变体中提取 command_id 字段
+        match self {
+            OrchestrationCommand::ProjectCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ProjectMetaUpdate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ProjectDelete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadDelete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadArchive(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadUnarchive(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadMetaUpdate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadRuntimeModeSet(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadInteractionModeSet(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadHandoffCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadForkCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadFanOut(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadTurnStart(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadTurnInterrupt(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadTurnDispatchQueued(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadApprovalRespond(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadUserInputRespond(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadCheckpointRevert(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadConversationRollback(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadMessageEditAndResend(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadSessionStop(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadActivityAppend(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadSessionSet(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadMessagesImport(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadMessageAssistantDelta(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadMessageAssistantComplete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadProposedPlanUpsert(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadTurnDiffComplete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadRevertComplete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::ThreadConversationRollbackComplete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskCreate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskUpdate(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskDelete(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskSetEnabled(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskTrigger(c) => c.command_id.as_deref(),
+            OrchestrationCommand::SchedulerTaskList(c) => c.command_id.as_deref(),
+        }
+    }
+}
+
+// ==================== 项目命令 ====================
+
+/// # 创建项目命令
+///
+/// 用于创建新项目。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `project_id`: 新项目 ID
+/// - `title`: 项目标题
+/// - `workspace_root`: 工作区根目录路径
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新项目 ID
+    pub project_id: ProjectId,
+    /// 项目标题
+    pub title: String,
+    /// 工作区根目录路径
+    pub workspace_root: String,
+}
+
+/// # 更新项目元数据命令
+///
+/// 用于更新项目的元数据（如标题）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `project_id`: 项目 ID
+/// - `title`: 新的项目标题（`None` 表示不更新）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMetaUpdateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 项目 ID
+    pub project_id: ProjectId,
+    /// 新的项目标题（`None` 表示不更新）
+    pub title: Option<String>,
+}
+
+/// # 删除项目命令
+///
+/// 用于删除项目（软删除）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `project_id`: 要删除的项目 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectDeleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 要删除的项目 ID
+    pub project_id: ProjectId,
+}
+
+// ==================== 线程命令 ====================
+
+/// # 创建线程命令
+///
+/// 用于创建新线程。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式（Agent/Ask/Plan）
+/// - `interaction_mode`: 交互模式（Chat/Review）
+/// - `env_mode`: 环境模式（Local/Worktree）
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `is_pinned`: 是否置顶（可选，默认为 false）
+/// - `parent_thread_id`: 父线程 ID（可选，用于子线程）
+/// - `subagent_agent_id`: 子代理 ID（可选）
+/// - `subagent_nickname`: 子代理昵称（可选）
+/// - `subagent_role`: 子代理角色（可选）
+/// - `fork_source_thread_id`: 分叉源线程 ID（可选）
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `last_known_pr`: 关联的 PR 信息（可选）
+/// - `handoff`: 交接信息（可选）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式，默认为 Agent
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式，默认为 Chat
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式，默认为 Local
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 是否置顶（可选，默认为 false）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_pinned: Option<bool>,
+    /// 父线程 ID（可选，用于子线程）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_thread_id: Option<ThreadId>,
+    /// 子代理 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_agent_id: Option<String>,
+    /// 子代理昵称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_nickname: Option<String>,
+    /// 子代理角色（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_role: Option<String>,
+    /// 分叉源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fork_source_thread_id: Option<ThreadId>,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 关联的 PR 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_known_pr: Option<PullRequestInfo>,
+    /// 交接信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handoff: Option<HandoffInfo>,
+}
+
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `runtime_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`RuntimeMode::Code`]（代码模式），因为大多数场景下用户期望 AI 主动执行编码操作，
+/// 而非仅回答问题或生成计划。如需 Work 模式，调用方应显式传入。
+fn default_runtime_mode() -> RuntimeMode {
+    RuntimeMode::Code
+}
+
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `interaction_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`InteractionMode::Agent`]（自主执行），这是最常用的交互方式。
+/// `Chat/Plan/Review/Task` 需要用户显式选择。
+fn default_interaction_mode() -> InteractionMode {
+    InteractionMode::Agent
+}
+
+/// 提供 serde 默认值函数，用于 `ThreadCreateCommand` 等结构体中 `env_mode` 字段的反序列化默认值。
+///
+/// 默认为 [`EnvMode::Local`]（本地目录模式），即直接在项目工作区中操作，
+/// Git Worktree 隔离环境需要用户显式选择以避免意外创建工作树。
+fn default_env_mode() -> EnvMode {
+    EnvMode::Local
+}
+
+/// # 删除线程命令
+///
+/// 用于删除线程（软删除）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 要删除的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadDeleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 要删除的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 归档线程命令
+///
+/// 用于归档线程。归档后的线程在 UI 中默认隐藏。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 要归档的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadArchiveCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 要归档的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 取消归档线程命令
+///
+/// 用于取消归档已归档的线程。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 要取消归档的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadUnarchiveCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 要取消归档的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 更新线程元数据命令
+///
+/// 用于更新线程的元数据（如标题）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `title`: 新的线程标题（`None` 表示不更新）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMetaUpdateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的线程标题（`None` 表示不更新）
+    pub title: Option<String>,
+}
+
+/// # 设置线程运行时模式命令
+///
+/// 用于设置线程的运行时模式（Agent / Ask / Plan）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `runtime_mode`: 新的运行时模式
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadRuntimeModeSetCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的运行时模式
+    pub runtime_mode: RuntimeMode,
+}
+
+/// # 设置线程交互模式命令
+///
+/// 用于设置线程的交互模式（Chat / Review）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `interaction_mode`: 新的交互模式
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadInteractionModeSetCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的交互模式
+    pub interaction_mode: InteractionMode,
+}
+
+// ==================== Turn 命令 ====================
+
+/// # 启动 Turn 命令
+///
+/// 用于启动一个新的交互轮次（Turn）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: Turn ID
+/// - `message_id`: 触发 Turn 的消息 ID
+/// - `dispatch_mode`: 分发模式（Normal / Review / Plan / Steer）
+/// - `message_text`: 用户消息文本
+/// - `attachments`: 附件列表（可选）
+/// - `model_selection`: 模型选择（可选）
+/// - `provider_options`: Provider 选项（可选）
+/// - `review_target`: 审查目标（可选）
+/// - `assistant_delivery_mode`: 助手交付模式（可选）
+/// - `runtime_mode`: 运行时模式（可选）
+/// - `interaction_mode`: 交互模式（可选）
+/// - `source_proposed_plan`: 源提议计划（可选）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnStartCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// Turn ID
+    pub turn_id: String,
+    /// 触发 Turn 的消息 ID
+    pub message_id: MessageId,
+    /// 分发模式（Normal / Review / Plan / Steer）
+    pub dispatch_mode: DispatchMode,
+    /// 用户消息文本
+    pub message_text: String,
+    /// 附件列表（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attachments: Option<Vec<crate::models::Attachment>>,
+    /// 模型选择（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model_selection: Option<crate::provider::ModelSelection>,
+    /// Provider 选项（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_options: Option<serde_json::Value>,
+    /// 审查目标（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub review_target: Option<String>,
+    /// 助手交付模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assistant_delivery_mode: Option<String>,
+    /// 运行时模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub runtime_mode: Option<RuntimeMode>,
+    /// 交互模式（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub interaction_mode: Option<InteractionMode>,
+    /// 源提议计划（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_proposed_plan: Option<SourceProposedPlan>,
+    /// 父 Turn ID(子代理派发时设置,标识本 Turn 由哪个父 Turn 触发;
+    /// 顶层 Turn 为 None)
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parent_turn_id: Option<String>,
+    /// 本 Turn 关联的技能名称列表(从前端 Composer 选择的 skills 透传;
+    /// 为空表示未指定技能)
+    #[serde(default)]
+    pub skills: Vec<String>,
+    /// 本 Turn 关联的提及引用列表(从前端 Composer 解析的 mentions 透传;
+    /// 为空表示无提及)
+    #[serde(default)]
+    pub mentions: Vec<crate::models::Mention>,
+}
+
+/// # 源提议计划
+///
+/// 用于指定触发 Turn 的提议计划来源。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SourceProposedPlan {
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 计划 ID
+    pub plan_id: String,
+}
+
+/// # 中断 Turn 命令
+///
+/// 用于中断正在执行的 Turn。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 要中断的 Turn ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnInterruptCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 要中断的 Turn ID（可选：缺省时中断线程当前活动 Turn）
+    #[serde(default)]
+    pub turn_id: Option<String>,
+}
+
+/// # 分发排队 Turn 命令
+///
+/// 用于分发排队的 Turn，触发其执行。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 要分发的 Turn ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnDispatchQueuedCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 要分发的 Turn ID
+    pub turn_id: String,
+}
+
+// ==================== 审批命令 ====================
+
+/// # 响应审批请求命令
+///
+/// 用于响应用户对审批请求的决定（批准或拒绝）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `request_id`: 审批请求 ID
+/// - `approved`: 是否批准
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadApprovalRespondCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 审批请求 ID
+    pub request_id: String,
+    /// 是否批准
+    pub approved: bool,
+}
+
+/// # 响应用户输入请求命令
+///
+/// 用于响应用户提供的输入信息。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `request_id`: 输入请求 ID
+/// - `response`: 用户提供的响应文本
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadUserInputRespondCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 输入请求 ID
+    pub request_id: String,
+    /// 用户提供的响应文本
+    pub response: String,
+}
+
+// ==================== 检查点命令 ====================
+
+/// # 回退到检查点命令
+///
+/// 用于将线程状态回退到指定的检查点。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `checkpoint_id`: 目标检查点 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadCheckpointRevertCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 目标检查点 ID
+    pub checkpoint_id: String,
+}
+
+/// # 回滚对话命令
+///
+/// 用于将对话回滚到指定的消息。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 回滚目标消息 ID（该消息及其之前的消息保留）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadConversationRollbackCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回滚目标消息 ID
+    pub message_id: MessageId,
+}
+
+// ==================== 消息命令 ====================
+
+/// # 编辑并重新发送消息命令
+///
+/// 用于编辑消息并重新发送，触发新的 Turn。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 要编辑的消息 ID
+/// - `new_text`: 新的消息文本
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessageEditAndResendCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 要编辑的消息 ID
+    pub message_id: MessageId,
+    /// 新的消息文本
+    pub new_text: String,
+}
+
+/// # 停止会话命令
+///
+/// 用于停止线程的 Provider 会话。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadSessionStopCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+}
+
+// ==================== 活动命令 ====================
+
+/// # 追加活动命令
+///
+/// 用于向线程追加活动记录（工具调用、文件变更等）。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `activity`: 要追加的活动记录
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadActivityAppendCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 要追加的活动记录
+    pub activity: Activity,
+}
+
+// ==================== 内部命令 ====================
+
+/// # 设置线程会话命令
+///
+/// 用于设置或更新线程的 Provider 会话。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `session`: 新的会话信息（`None` 表示清除会话）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadSessionSetCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的会话信息（`None` 表示清除会话）
+    pub session: Option<crate::models::Session>,
+}
+
+/// # 导入消息命令
+///
+/// 用于批量导入消息到线程。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `messages`: 要导入的消息列表
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessagesImportCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 要导入的消息列表
+    pub messages: Vec<crate::models::Message>,
+}
+
+/// # 助手消息增量更新命令
+///
+/// 用于流式传输 AI 助手消息的增量内容。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `delta`: 增量文本内容
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessageAssistantDeltaCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 增量文本内容
+    pub delta: String,
+}
+
+/// # 助手消息完成命令
+///
+/// 用于标记 AI 助手消息流式传输完成。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `message_id`: 完成的消息 ID
+/// - `text`: 完整的消息文本
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessageAssistantCompleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 完成的消息 ID
+    pub message_id: MessageId,
+    /// 完整的消息文本
+    pub text: String,
+}
+
+/// # 创建或更新提议计划命令
+///
+/// 用于创建或更新 AI 提议的执行计划。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `plan`: 提议的计划实体
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadProposedPlanUpsertCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 提议的计划实体
+    pub plan: ProposedPlan,
+}
+
+/// # Turn 差异比较完成命令
+///
+/// 用于标记 Turn 的代码差异比较完成。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: Turn ID
+/// - `diff`: 差异内容（unified diff 格式）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnDiffCompleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// Turn ID
+    pub turn_id: String,
+    /// 差异内容（unified diff 格式）
+    pub diff: String,
+}
+
+/// # 回退完成命令
+///
+/// 用于标记检查点回退操作完成。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `checkpoint_id`: 回退到的检查点 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadRevertCompleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回退到的检查点 ID
+    pub checkpoint_id: String,
+}
+
+/// # 对话回滚完成命令
+///
+/// 用于标记对话回滚操作完成。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 回滚到的消息 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadConversationRollbackCompleteCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回滚到的消息 ID
+    pub message_id: MessageId,
+}
+
+// ==================== 交接/分叉命令 ====================
+
+/// # 创建交接线程命令
+///
+/// 用于从现有线程创建一个新的交接线程，导入源线程的消息历史。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式
+/// - `interaction_mode`: 交互模式
+/// - `env_mode`: 环境模式
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `source_thread_id`: 交接源线程 ID
+/// - `imported_messages`: 从源线程导入的消息列表
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadHandoffCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 交接源线程 ID
+    pub source_thread_id: ThreadId,
+    /// 从源线程导入的消息列表
+    pub imported_messages: Vec<crate::models::Message>,
+}
+
+/// # 创建分叉线程命令
+///
+/// 用于从现有线程创建一个新的分叉线程，导入源线程的消息历史。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式
+/// - `interaction_mode`: 交互模式
+/// - `env_mode`: 环境模式
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree_path`: 关联 Worktree 路径（可选）
+/// - `associated_worktree_branch`: 关联 Worktree 分支（可选）
+/// - `associated_worktree_ref`: 关联 Worktree Git 引用（可选）
+/// - `create_branch_flow_completed`: 分支创建流程是否完成（可选）
+/// - `source_thread_id`: 分叉源线程 ID
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `imported_messages`: 从源线程导入的消息列表
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadForkCreateCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    #[serde(default = "default_env_mode")]
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联 Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_path: Option<String>,
+    /// 关联 Worktree 分支（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_branch: Option<String>,
+    /// 关联 Worktree Git 引用（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree_ref: Option<String>,
+    /// 分支创建流程是否完成（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_branch_flow_completed: Option<bool>,
+    /// 分叉源线程 ID
+    pub source_thread_id: ThreadId,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 从源线程导入的消息列表
+    pub imported_messages: Vec<crate::models::Message>,
+}
+
+// ==================== 并行扇出命令结构体 ====================
+
+/// # 扇出变体配置
+///
+/// 描述单个并行 Agent 的配置。每个变体创建一个子线程和对应的 worktree。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FanOutVariant {
+    /// 变体标签（如 "claude-opus", "gpt-5" 等，用于 UI 区分）
+    pub label: String,
+    /// 子线程 ID
+    pub thread_id: ThreadId,
+    /// AI 模型选择配置
+    pub model_selection: ModelSelection,
+    /// 运行时模式
+    #[serde(default = "default_runtime_mode")]
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    #[serde(default = "default_interaction_mode")]
+    pub interaction_mode: InteractionMode,
+    /// Worktree 路径（可选，若提供则在该路径创建 worktree）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// Worktree 分支名（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+}
+
+/// # 并行扇出命令
+///
+/// 从一个源线程创建 N 个并行子线程，每个子线程在自己的 worktree 中
+/// 独立执行相同的 prompt。用户可以对比多个 Agent 的输出结果。
+///
+/// ## 字段说明
+///
+/// - `command_id`: 命令 ID（可选）
+/// - `source_thread_id`: 源线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `prompt`: 发送给所有并行 Agent 的 prompt
+/// - `variants`: 并行变体配置列表
+/// - `created_at`: 创建时间
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadFanOutCommand {
+    /// 命令 ID（可选）
+    pub command_id: Option<String>,
+    /// 源线程 ID
+    pub source_thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 发送给所有并行 Agent 的 prompt
+    pub prompt: String,
+    /// 并行变体配置列表
+    pub variants: Vec<FanOutVariant>,
+    /// 创建时间
+    pub created_at: String,
+}
+
+// ==================== 定时任务命令结构体 ====================
+
+/// 创建定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskCreateCommand {
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub thread_id: ThreadId,
+    pub cron_expression: String,
+    pub prompt: String,
+    pub enabled: bool,
+}
+
+/// 更新定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskUpdateCommand {
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub cron_expression: Option<String>,
+    pub prompt: Option<String>,
+}
+
+/// 删除定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskDeleteCommand {
+    pub command_id: Option<String>,
+    pub task_id: String,
+}
+
+/// 启用/禁用定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskSetEnabledCommand {
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub enabled: bool,
+}
+
+/// 立即触发定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskTriggerCommand {
+    pub command_id: Option<String>,
+    pub task_id: String,
+}
+
+/// 列出定时任务命令
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SchedulerTaskListCommand {
+    pub command_id: Option<String>,
+    pub thread_id: Option<ThreadId>,
+}
+

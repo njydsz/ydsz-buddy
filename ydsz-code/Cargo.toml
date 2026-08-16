@@ -1,0 +1,74 @@
+﻿[package]
+name = "ydsz-code"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# 基础：core + provider（Git 文本生成需要 Provider）
+ydsz-core = { workspace = true }
+ydsz-provider = { workspace = true }
+# 基础设施：SSH 连接（用于 SshGitExecutor 远端 git 操作）
+ydsz-shared = { workspace = true }
+
+# 异步
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# 序列化
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# 错误
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# 工具
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+walkdir = { workspace = true }
+
+# Specta 跨 crate 类型派生（共享给 tauri command binding）
+#   - `specta::Type` 用在 MCP / Indexer / Skills 等共享 DTO
+#   - 不引入 specta-typescript / tauri-specta：那些是 desktop/src-tauri 渲染 TS 时才用
+specta = { workspace = true }
+specta-serde = { workspace = true }
+
+# LSP 集成
+lsp-types = "0.95"
+
+# 并发
+parking_lot = "0.12"
+
+# 正则
+regex-lite = "0.1"
+regex = "1.10"
+
+# AST 解析（语义级 symbol 提取）
+tree-sitter = { workspace = true }
+tree-sitter-typescript = { workspace = true }
+tree-sitter-javascript = { workspace = true }
+tree-sitter-rust = { workspace = true }
+tree-sitter-python = { workspace = true }
+tree-sitter-go = { workspace = true }
+tree-sitter-cpp = { workspace = true }
+tree-sitter-c = { workspace = true }
+tree-sitter-java = { workspace = true }
+
+# HTTP 客户端（MCP SSE 传输层）
+reqwest = { workspace = true }
+futures-util = { workspace = true }
+
+# Hashline：行级内容指纹（harness problem 工程化解法）
+sha2 = "0.10"
+
+# HNSW 向量索引(P1-4: 大规模向量库升级,>10k chunks 时启用)
+hnsw_rs = { workspace = true }
+
+[dev-dependencies]
+# 属性化测试（fuzz-like, stable Rust）
+proptest = { workspace = true }
+tempfile = { workspace = true }

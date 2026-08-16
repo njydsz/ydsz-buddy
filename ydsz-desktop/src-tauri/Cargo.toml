@@ -1,0 +1,93 @@
+﻿[package]
+name = "ydsz-buddy"
+version = "0.3.0"
+description = "ydsz-buddy - 双模式 AI 桌面助手 (Work / Code)"
+authors = ["you"]
+edition = "2021"
+
+[lib]
+name = "ydsz_buddy_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["devtools", "test"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+thiserror = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+git2 = "0.18"
+portable-pty = "0.8"
+dirs = "5.0"
+open = "5.0"
+chrono = "0.4"
+url = "2"
+urlencoding = "2"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+which = "6.0"
+base64 = "0.22"
+
+# 截图 OCR(P2-2): 临时文件 + 跨进程 shell 调用(macOS Vision / Windows OCR / Tesseract 兜底)
+tempfile = "3.10"
+
+# OS Keyring (P0-2): macOS Keychain / Windows Credential Manager / Linux Secret Service
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+
+# Coding Plan OAuth Device Flow(P1-5)HTTP 客户端
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# 诊断包打包（zip）
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+walkdir = "2.5"
+
+# ydsz 系统运行时模块依赖
+ydsz-code = { path = "../../ydsz-code" }
+ydsz-core = { path = "../../ydsz-core" }
+ydsz-shared = { path = "../../ydsz-shared" }
+ydsz-flow = { path = "../../ydsz-flow" }
+ydsz-provider = { path = "../../ydsz-provider" }
+ydsz-server = { path = "../../ydsz-server" }
+
+# LSP 类型(LSP 命令层 DTO 转换需要直接引用 lsp_types 的 CodeAction/SignatureHelp/TextEdit)
+lsp-types = "0.95"
+
+# TypeScript contract generation: 端到端类型安全的 Tauri command 调用
+#
+# 用 `#[tauri::command] #[specta::specta]` 标注命令：
+#   - `specta` (function feature) 把命令的入参/返回类型注册到全局 TypeMap
+#   - `tauri-specta` 的 `Builder<tauri::Wry>` + `collect_commands!` 收集所有命令，
+#     既能注入到运行时 invoke_handler，也能调用 `.export(specta_typescript::Typescript)`
+#     把命令签名渲染成 `_generated/commands.ts`
+#   - `specta-typescript` 渲染 DTO 类型到 `_generated/ydsz_shared/...`
+#
+# 跑 `cargo test --test commands_gen` 或 `pnpm contracts:gen:tauri` 触发生成。
+#
+# tauri-specta 2.0.0-rc.25 (2026-05-08) 已支持 tauri 2.11.x runtime API，
+# `tauri::AppHandle` / `State<...>` / `Window` 等运行时类型会被 tauri-specta
+# 自动从导出类型中剥离，前端拿到的就是纯业务 DTO。
+specta = { version = "2.0.0-rc.25", features = ["derive", "function", "serde_json"] }
+specta-serde = "0.0.12"
+tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
+
+[features]
+# This feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!
+custom-protocol = ["tauri/custom-protocol"]
+
+[dev-dependencies]
+# 用来在 tests/commands_gen.rs 里渲染 TypeScript
+specta-typescript = "0.0.12"
+
+[workspace]

@@ -1,0 +1,4 @@
+# Cargo configuration for Tauri build
+# Using project-local target directory to avoid path/permission issues
+[build]
+target-dir = "target"

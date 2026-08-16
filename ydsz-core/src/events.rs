@@ -1,0 +1,1457 @@
+﻿//! # 编排事件定义
+//!
+//! 本模块定义了 ydsz 工作区中所有编排事件（Orchestration Event）。
+//! 采用事件溯源（Event Sourcing）模式，所有状态变更均通过事件驱动。
+//!
+//! ## 设计原则
+//!
+//! - 所有事件均包含 `sequence`（序列号）、`occurred_at`（发生时间）和可选的 `command_id`（触发命令 ID）
+//! - 事件是不可变的（immutable），一旦产生不可修改
+//! - 事件通过带标签的枚举（tagged enum）进行序列化，标签格式为 `kebab-case`
+//!
+//! ## 事件分类
+//!
+//! - **项目事件**: 项目的创建、更新、删除
+//! - **线程事件**: 线程的创建、删除、归档、模式切换等
+//! - **消息事件**: 消息发送
+//! - **Turn 事件**: 交互轮次的排队、启动、中断
+//! - **审批事件**: 审批请求和用户输入请求
+//! - **检查点事件**: 检查点回滚、差异完成
+//! - **回滚事件**: 对话回滚
+//! - **其他事件**: 消息编辑重发、会话停止、计划更新、活动追加等
+
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+use crate::models::{
+    Activity, AssociatedWorktree, EnvMode, HandoffInfo, InteractionMode, Message, MessageId,
+    ProjectId, ProposedPlan, PullRequestInfo, RuntimeMode, Sequence, SubagentInfo, ThreadId,
+};
+
+/// Event Metadata
+///
+/// Common metadata fields shared by all orchestration events.
+/// These fields provide event tracing and correlation capabilities.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventMetadata {
+    /// Unique event identifier (UUID v4)
+    pub event_id: String,
+    /// ID of the event that caused this event (for causal tracing)
+    pub causation_event_id: Option<String>,
+    /// Correlation ID for distributed tracing
+    pub correlation_id: Option<String>,
+    /// Additional metadata (arbitrary JSON)
+    pub metadata: Option<Value>,
+}
+
+impl EventMetadata {
+    /// Create new event metadata with auto-generated event ID
+    pub fn new() -> Self {
+        Self {
+            event_id: uuid::Uuid::new_v4().to_string(),
+            causation_event_id: None,
+            correlation_id: None,
+            metadata: None,
+        }
+    }
+
+    /// Create new event metadata with causation
+    pub fn with_causation(causation_event_id: String) -> Self {
+        Self {
+            event_id: uuid::Uuid::new_v4().to_string(),
+            causation_event_id: Some(causation_event_id),
+            correlation_id: None,
+            metadata: None,
+        }
+    }
+}
+
+impl Default for EventMetadata {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// # 编排事件 trait
+///
+/// 定义所有编排事件结构体必须实现的通用方法。
+/// 通过此 trait 可以为所有事件类型提供统一的接口，
+/// 避免在 `OrchestrationEvent` 枚举的方法中重复模式匹配。
+///
+/// ## 设计目的
+///
+/// - **消除重复**：避免在 `sequence()`、`occurred_at()`、`command_id()` 三个方法中重复匹配所有事件变体
+/// - **类型安全**：通过 trait 约束确保所有事件类型都实现了必要的方法
+/// - **易于扩展**：添加新事件时只需实现 trait，无需修改枚举方法
+pub trait OrchestrationEventTrait {
+    /// 获取事件的序列号
+    fn sequence(&self) -> Sequence;
+    /// 获取事件发生的时间
+    fn occurred_at(&self) -> DateTime<Utc>;
+    /// 获取触发该事件的命令 ID
+    fn command_id(&self) -> Option<String>;
+}
+
+/// 批量为编排事件结构体实现 [`OrchestrationEventTrait`] 的宏
+///
+/// 所有编排事件结构体都包含 `sequence`、`occurred_at`、`command_id` 三个字段，
+/// 使用此宏可避免为每个结构体重复编写相同的 trait 实现。
+macro_rules! impl_orchestration_event_trait {
+    ($($event_type:ty),* $(,)?) => {
+        $(
+            impl OrchestrationEventTrait for $event_type {
+                #[inline]
+                fn sequence(&self) -> Sequence {
+                    self.sequence
+                }
+                #[inline]
+                fn occurred_at(&self) -> DateTime<Utc> {
+                    self.occurred_at
+                }
+                #[inline]
+                fn command_id(&self) -> Option<String> {
+                    self.command_id.clone()
+                }
+            }
+        )*
+    };
+}
+
+/// # 编排事件
+///
+/// 系统所有编排事件的聚合枚举。每个变体对应一个具体的事件结构体。
+/// 事件通过 `serde` 的标签联合（tagged union）机制序列化，
+/// 使用 `_tag` 字段区分变体，标签值采用 `kebab-case` 格式。
+///
+/// ## 事件命名规范
+///
+/// 事件标签格式为 `{聚合根}.{动作}`，例如：
+/// - `project.created` - 项目创建
+/// - `thread.message-sent` - 线程消息发送
+/// - `thread.turn-start-requested` - 线程 Turn 启动请求
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "_tag", rename_all = "kebab-case")]
+pub enum OrchestrationEvent {
+    // ==================== 项目事件 ====================
+
+    /// 项目已创建
+    #[serde(rename = "project.created")]
+    ProjectCreated(ProjectCreatedEvent),
+    /// 项目元数据已更新（如标题变更）
+    #[serde(rename = "project.meta-updated")]
+    ProjectMetaUpdated(ProjectMetaUpdatedEvent),
+    /// 项目已删除
+    #[serde(rename = "project.deleted")]
+    ProjectDeleted(ProjectDeletedEvent),
+
+    // ==================== 线程事件 ====================
+
+    /// 线程已创建
+    #[serde(rename = "thread.created")]
+    ThreadCreated(ThreadCreatedEvent),
+    /// 线程已删除
+    #[serde(rename = "thread.deleted")]
+    ThreadDeleted(ThreadDeletedEvent),
+    /// 线程已归档
+    #[serde(rename = "thread.archived")]
+    ThreadArchived(ThreadArchivedEvent),
+    /// 线程已取消归档
+    #[serde(rename = "thread.unarchived")]
+    ThreadUnarchived(ThreadUnarchivedEvent),
+    /// 线程元数据已更新（如标题变更）
+    #[serde(rename = "thread.meta-updated")]
+    ThreadMetaUpdated(ThreadMetaUpdatedEvent),
+    /// 线程运行时模式已设置
+    #[serde(rename = "thread.runtime-mode-set")]
+    ThreadRuntimeModeSet(ThreadRuntimeModeSetEvent),
+    /// 线程交互模式已设置
+    #[serde(rename = "thread.interaction-mode-set")]
+    ThreadInteractionModeSet(ThreadInteractionModeSetEvent),
+
+    // ==================== 消息事件 ====================
+
+    /// 线程中发送了新消息
+    #[serde(rename = "thread.message-sent")]
+    ThreadMessageSent(ThreadMessageSentEvent),
+
+    // ==================== Turn 事件 ====================
+
+    /// Turn 已排队等待执行
+    #[serde(rename = "thread.turn-queued")]
+    ThreadTurnQueued(ThreadTurnQueuedEvent),
+    /// 请求启动 Turn
+    #[serde(rename = "thread.turn-start-requested")]
+    ThreadTurnStartRequested(ThreadTurnStartRequestedEvent),
+    /// 请求中断 Turn
+    #[serde(rename = "thread.turn-interrupt-requested")]
+    ThreadTurnInterruptRequested(ThreadTurnInterruptRequestedEvent),
+
+    // ==================== 审批事件 ====================
+
+    /// 请求审批响应（AI 请求用户批准某操作）
+    #[serde(rename = "thread.approval-response-requested")]
+    ThreadApprovalResponseRequested(ThreadApprovalResponseRequestedEvent),
+    /// 请求用户输入响应（AI 请求用户提供额外信息）
+    #[serde(rename = "thread.user-input-response-requested")]
+    ThreadUserInputResponseRequested(ThreadUserInputResponseRequestedEvent),
+
+    // ==================== 检查点事件 ====================
+
+    /// 请求回退到指定检查点
+    #[serde(rename = "thread.checkpoint-revert-requested")]
+    ThreadCheckpointRevertRequested(ThreadCheckpointRevertRequestedEvent),
+    /// 已回退到指定检查点
+    #[serde(rename = "thread.reverted")]
+    ThreadReverted(ThreadRevertedEvent),
+    /// Turn 差异比较已完成
+    #[serde(rename = "thread.turn-diff-completed")]
+    ThreadTurnDiffCompleted(ThreadTurnDiffCompletedEvent),
+
+    // ==================== 回滚事件 ====================
+
+    /// 请求回滚对话到指定消息
+    #[serde(rename = "thread.conversation-rollback-requested")]
+    ThreadConversationRollbackRequested(ThreadConversationRollbackRequestedEvent),
+    /// 对话已回滚到指定消息
+    #[serde(rename = "thread.conversation.rolled-back", alias = "thread.conversation-rolled-back")]
+    ThreadConversationRolledBack(ThreadConversationRolledBackEvent),
+
+    // ==================== 其他事件 ====================
+
+    /// 请求编辑并重新发送消息
+    #[serde(rename = "thread.message-edit-resend-requested")]
+    ThreadMessageEditResendRequested(ThreadMessageEditResendRequestedEvent),
+    /// 请求停止会话
+    #[serde(rename = "thread.session-stop-requested")]
+    ThreadSessionStopRequested(ThreadSessionStopRequestedEvent),
+    /// 设置线程会话
+    #[serde(rename = "thread.session-set")]
+    ThreadSessionSet(ThreadSessionSetEvent),
+    /// 提议计划已创建或更新
+    #[serde(rename = "thread.proposed-plan-upserted")]
+    ThreadProposedPlanUpserted(ThreadProposedPlanUpsertedEvent),
+    /// 活动已追加到线程
+    #[serde(rename = "thread.activity-appended")]
+    ThreadActivityAppended(ThreadActivityAppendedEvent),
+
+    // ==================== 定时任务事件 ====================
+
+    /// 定时任务已创建
+    #[serde(rename = "scheduled-job.created")]
+    ScheduledJobCreated(ScheduledJobCreatedEvent),
+    /// 定时任务已更新
+    #[serde(rename = "scheduled-job.updated")]
+    ScheduledJobUpdated(ScheduledJobUpdatedEvent),
+    /// 定时任务已删除
+    #[serde(rename = "scheduled-job.deleted")]
+    ScheduledJobDeleted(ScheduledJobDeletedEvent),
+    /// 定时任务已启用/禁用
+    #[serde(rename = "scheduled-job.enabled-set")]
+    ScheduledJobEnabledSet(ScheduledJobEnabledSetEvent),
+    /// 定时任务已触发
+    #[serde(rename = "scheduled-job.fired")]
+    ScheduledJobFired(ScheduledJobFiredEvent),
+    /// 定时任务执行完成
+    #[serde(rename = "scheduled-job.finished")]
+    ScheduledJobFinished(ScheduledJobFinishedEvent),
+
+    // ==================== 目标模式事件 ====================
+
+    /// 目标已启动
+    #[serde(rename = "goal.started")]
+    GoalStarted(GoalStartedEvent),
+    /// 目标进度更新
+    #[serde(rename = "goal.progress")]
+    GoalProgress(GoalProgressEvent),
+    /// 目标已达成
+    #[serde(rename = "goal.achieved")]
+    GoalAchieved(GoalAchievedEvent),
+    /// 目标已中止
+    #[serde(rename = "goal.aborted")]
+    GoalAborted(GoalAbortedEvent),
+}
+
+impl OrchestrationEvent {
+    /// 获取事件的序列号
+    ///
+    /// 序列号用于事件排序，保证事件处理的顺序一致性。
+    /// 序列号是单调递增的 `u64` 值。
+    ///
+    /// # 返回值
+    ///
+    /// 返回事件的序列号（`Sequence` 类型，即 `u64`）
+    pub fn sequence(&self) -> Sequence {
+        // 通过 trait 委托到具体事件类型，避免重复模式匹配
+        match self {
+            OrchestrationEvent::ProjectCreated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ProjectMetaUpdated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ProjectDeleted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadCreated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadDeleted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadArchived(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadUnarchived(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadMetaUpdated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadRuntimeModeSet(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadInteractionModeSet(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadMessageSent(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadTurnQueued(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadTurnStartRequested(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadTurnInterruptRequested(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadApprovalResponseRequested(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadUserInputResponseRequested(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadCheckpointRevertRequested(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadReverted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadTurnDiffCompleted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadConversationRollbackRequested(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadConversationRolledBack(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadMessageEditResendRequested(e) => {
+                OrchestrationEventTrait::sequence(e)
+            }
+            OrchestrationEvent::ThreadSessionStopRequested(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadSessionSet(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadProposedPlanUpserted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ThreadActivityAppended(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobCreated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobUpdated(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobDeleted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobEnabledSet(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobFired(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::ScheduledJobFinished(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::GoalStarted(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::GoalProgress(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::GoalAchieved(e) => OrchestrationEventTrait::sequence(e),
+            OrchestrationEvent::GoalAborted(e) => OrchestrationEventTrait::sequence(e),
+        }
+    }
+
+    /// 获取事件发生的时间
+    ///
+    /// 返回事件产生的 UTC 时间戳，用于事件溯源回放和时间线展示。
+    ///
+    /// # 返回值
+    ///
+    /// 返回事件发生时间（`DateTime<Utc>`）
+    pub fn occurred_at(&self) -> DateTime<Utc> {
+        // 通过 trait 委托到具体事件类型，避免重复模式匹配
+        match self {
+            OrchestrationEvent::ProjectCreated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ProjectMetaUpdated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ProjectDeleted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadCreated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadDeleted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadArchived(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadUnarchived(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadMetaUpdated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadRuntimeModeSet(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadInteractionModeSet(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadMessageSent(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadTurnQueued(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadTurnStartRequested(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadTurnInterruptRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadApprovalResponseRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadUserInputResponseRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadCheckpointRevertRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadReverted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadTurnDiffCompleted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadConversationRollbackRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadConversationRolledBack(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadMessageEditResendRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadSessionStopRequested(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadSessionSet(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ThreadProposedPlanUpserted(e) => {
+                OrchestrationEventTrait::occurred_at(e)
+            }
+            OrchestrationEvent::ThreadActivityAppended(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobCreated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobUpdated(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobDeleted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobEnabledSet(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobFired(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::ScheduledJobFinished(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::GoalStarted(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::GoalProgress(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::GoalAchieved(e) => OrchestrationEventTrait::occurred_at(e),
+            OrchestrationEvent::GoalAborted(e) => OrchestrationEventTrait::occurred_at(e),
+        }
+    }
+
+    /// 获取触发该事件的命令 ID
+    ///
+    /// 在 CQRS 模式中，事件通常由命令触发。此方法返回触发当前事件的命令 ID，
+    /// 用于建立命令-事件的因果关系。
+    ///
+    /// # 返回值
+    ///
+    /// - `Some(command_id)` - 事件由命令触发，返回命令 ID
+    /// - `None` - 事件非命令触发（如系统自动产生的事件）
+    pub fn command_id(&self) -> Option<String> {
+        // 通过 trait 委托到具体事件类型，避免重复模式匹配
+        match self {
+            OrchestrationEvent::ProjectCreated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ProjectMetaUpdated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ProjectDeleted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadCreated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadDeleted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadArchived(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadUnarchived(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadMetaUpdated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadRuntimeModeSet(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadInteractionModeSet(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadMessageSent(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadTurnQueued(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadTurnStartRequested(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadTurnInterruptRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadApprovalResponseRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadUserInputResponseRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadCheckpointRevertRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadReverted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadTurnDiffCompleted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadConversationRollbackRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadConversationRolledBack(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadMessageEditResendRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadSessionStopRequested(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadSessionSet(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ThreadProposedPlanUpserted(e) => {
+                OrchestrationEventTrait::command_id(e)
+            }
+            OrchestrationEvent::ThreadActivityAppended(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobCreated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobUpdated(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobDeleted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobEnabledSet(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobFired(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::ScheduledJobFinished(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::GoalStarted(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::GoalProgress(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::GoalAchieved(e) => OrchestrationEventTrait::command_id(e),
+            OrchestrationEvent::GoalAborted(e) => OrchestrationEventTrait::command_id(e),
+        }
+    }
+}
+
+// ==================== 项目事件 ====================
+
+/// # 项目创建事件
+///
+/// 当新项目被创建时产生。包含项目的基本信息。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `project_id`: 新项目 ID
+/// - `title`: 项目标题
+/// - `workspace_root`: 工作区根目录路径
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectCreatedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 事件元数据
+    #[serde(flatten)]
+    pub event_metadata: EventMetadata,
+    /// 新项目 ID
+    pub project_id: ProjectId,
+    /// 项目标题
+    pub title: String,
+    /// 工作区根目录路径
+    pub workspace_root: String,
+}
+
+/// # 项目元数据更新事件
+///
+/// 当项目的元数据（如标题）被更新时产生。
+/// 使用 `Option` 字段表示仅更新有值的属性。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `project_id`: 项目 ID
+/// - `title`: 新的项目标题（`None` 表示未变更）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMetaUpdatedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 项目 ID
+    pub project_id: ProjectId,
+    /// 新的项目标题（`None` 表示未变更）
+    pub title: Option<String>,
+}
+
+/// # 项目删除事件
+///
+/// 当项目被删除时产生（软删除）。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `project_id`: 被删除的项目 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectDeletedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 被删除的项目 ID
+    pub project_id: ProjectId,
+}
+
+// ==================== 线程事件 ====================
+
+/// # 线程创建事件
+///
+/// 当新线程被创建时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 新线程 ID
+/// - `project_id`: 所属项目 ID
+/// - `title`: 线程标题
+/// - `model_selection`: AI 模型选择配置
+/// - `runtime_mode`: 运行时模式（Agent/Ask/Plan）
+/// - `interaction_mode`: 交互模式（Chat/Review）
+/// - `env_mode`: 环境模式（Local/Worktree）
+/// - `branch`: Git 分支名称（可选）
+/// - `worktree_path`: Worktree 路径（可选）
+/// - `associated_worktree`: 关联的 Worktree 信息（可选）
+/// - `is_pinned`: 是否置顶
+/// - `parent_thread_id`: 父线程 ID（可选，用于子线程）
+/// - `subagent`: 子代理信息（可选）
+/// - `fork_source_thread_id`: 分叉源线程 ID（可选）
+/// - `sidechat_source_thread_id`: 侧聊源线程 ID（可选）
+/// - `last_known_pr`: 关联的 PR 信息（可选）
+/// - `handoff`: 交接信息（可选）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadCreatedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 新线程 ID
+    pub thread_id: ThreadId,
+    /// 所属项目 ID
+    pub project_id: ProjectId,
+    /// 线程标题
+    pub title: String,
+    /// AI 模型选择配置
+    pub model_selection: crate::provider::ModelSelection,
+    /// 运行时模式
+    pub runtime_mode: RuntimeMode,
+    /// 交互模式
+    pub interaction_mode: InteractionMode,
+    /// 环境模式
+    pub env_mode: EnvMode,
+    /// Git 分支名称（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Worktree 路径（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub worktree_path: Option<String>,
+    /// 关联的 Worktree 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub associated_worktree: Option<AssociatedWorktree>,
+    /// 是否置顶
+    pub is_pinned: bool,
+    /// 父线程 ID（可选，用于子线程）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_thread_id: Option<ThreadId>,
+    /// 子代理信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent: Option<SubagentInfo>,
+    /// 分叉源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fork_source_thread_id: Option<ThreadId>,
+    /// 侧聊源线程 ID（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sidechat_source_thread_id: Option<ThreadId>,
+    /// 关联的 PR 信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_known_pr: Option<PullRequestInfo>,
+    /// 交接信息（可选）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handoff: Option<HandoffInfo>,
+}
+
+/// # 线程删除事件
+///
+/// 当线程被删除时产生（软删除）。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 被删除的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadDeletedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 被删除的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 线程归档事件
+///
+/// 当线程被归档时产生。归档后的线程在 UI 中默认隐藏。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 被归档的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadArchivedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 被归档的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 线程取消归档事件
+///
+/// 当归档的线程被恢复时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 取消归档的线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadUnarchivedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 取消归档的线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 线程元数据更新事件
+///
+/// 当线程的元数据（如标题）被更新时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `title`: 新的线程标题（`None` 表示未变更）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMetaUpdatedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的线程标题（`None` 表示未变更）
+    pub title: Option<String>,
+}
+
+/// # 线程运行时模式设置事件
+///
+/// 当线程的运行时模式被切换时产生（Agent / Ask / Plan）。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `runtime_mode`: 新的运行时模式
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadRuntimeModeSetEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的运行时模式
+    pub runtime_mode: RuntimeMode,
+}
+
+/// # 线程交互模式设置事件
+///
+/// 当线程的交互模式被切换时产生（Chat / Review）。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `interaction_mode`: 新的交互模式
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadInteractionModeSetEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的交互模式
+    pub interaction_mode: InteractionMode,
+}
+
+// ==================== 消息事件 ====================
+
+/// # 线程消息发送事件
+///
+/// 当线程中发送新消息时产生。消息可以是用户消息、AI 助手回复或系统消息。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `message`: 发送的消息实体
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessageSentEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 发送的消息实体
+    pub message: Message,
+}
+
+// ==================== Turn 事件 ====================
+
+/// # Turn 排队事件
+///
+/// 当 Turn 被加入执行队列时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: Turn ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnQueuedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// Turn ID
+    pub turn_id: String,
+}
+
+/// # Turn 启动请求事件
+///
+/// 当请求启动一个 Turn 时产生。此事件触发 Provider 开始处理 Turn。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: Turn ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnStartRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// Turn ID
+    pub turn_id: String,
+    /// 父 Turn ID(子代理派发时设置,标识本 Turn 由哪个父 Turn 触发;
+    /// 顶层 Turn 为 None)
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parent_turn_id: Option<String>,
+    /// 本 Turn 关联的技能名称列表(供 Reactor 传递给 Provider adapter)
+    #[serde(default)]
+    pub skills: Vec<String>,
+}
+
+/// # Turn 中断请求事件
+///
+/// 当请求中断一个正在执行的 Turn 时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 被中断的 Turn ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnInterruptRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 被中断的 Turn ID（可选：缺省时表示中断线程当前活动 Turn）
+    #[serde(default)]
+    pub turn_id: Option<String>,
+}
+
+// ==================== 审批事件 ====================
+
+/// # 审批响应请求事件
+///
+/// 当 AI 代理请求用户审批某个操作时产生。
+/// 用户需要对该请求做出批准或拒绝的响应。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `request_id`: 审批请求唯一标识
+/// - `approved`: 用户是否批准
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadApprovalResponseRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 审批请求唯一标识
+    pub request_id: String,
+    /// 用户是否批准
+    pub approved: bool,
+}
+
+/// # 用户输入响应请求事件
+///
+/// 当 AI 代理请求用户提供额外输入时产生。
+/// 用户需要提供文本响应以继续执行。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: 所属 Turn ID
+/// - `request_id`: 输入请求唯一标识
+/// - `response`: 用户提供的响应文本
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadUserInputResponseRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 所属 Turn ID
+    pub turn_id: String,
+    /// 输入请求唯一标识
+    pub request_id: String,
+    /// 用户提供的响应文本
+    pub response: String,
+}
+
+// ==================== 检查点事件 ====================
+
+/// # 检查点回退请求事件
+///
+/// 当请求将线程状态回退到指定检查点时产生。
+/// 回退操作会恢复 Git 工作区到检查点对应的 commit。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `checkpoint_id`: 目标检查点 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadCheckpointRevertRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 目标检查点 ID
+    pub checkpoint_id: String,
+}
+
+/// # 线程已回退事件
+///
+/// 当线程成功回退到指定检查点后产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `checkpoint_id`: 回退到的检查点 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadRevertedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回退到的检查点 ID
+    pub checkpoint_id: String,
+}
+
+/// # Turn 差异比较完成事件
+///
+/// 当 Turn 的代码差异比较完成后产生。
+/// 差异信息用于展示 Turn 期间所做的代码变更。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `turn_id`: Turn ID
+/// - `diff`: 差异内容（unified diff 格式）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadTurnDiffCompletedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// Turn ID
+    pub turn_id: String,
+    /// 差异内容（unified diff 格式）
+    pub diff: String,
+}
+
+// ==================== 回滚事件 ====================
+
+/// # 对话回滚请求事件
+///
+/// 当请求将对话回滚到指定消息时产生。
+/// 回滚操作会移除指定消息之后的所有消息。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 回滚目标消息 ID（该消息及其之前的消息保留）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadConversationRollbackRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回滚目标消息 ID
+    pub message_id: MessageId,
+}
+
+/// # 对话已回滚事件
+///
+/// 当对话成功回滚到指定消息后产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 回滚到的消息 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadConversationRolledBackEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 回滚到的消息 ID
+    pub message_id: MessageId,
+}
+
+// ==================== 其他事件 ====================
+
+/// # 消息编辑重发请求事件
+///
+/// 当请求编辑并重新发送一条消息时产生。
+/// 编辑后的消息会替换原消息，并触发新的 Turn。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `message_id`: 被编辑的消息 ID
+/// - `new_text`: 新的消息文本内容
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadMessageEditResendRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 被编辑的消息 ID
+    pub message_id: MessageId,
+    /// 新的消息文本内容
+    pub new_text: String,
+}
+
+/// # 会话停止请求事件
+///
+/// 当请求停止线程的 Provider 会话时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadSessionStopRequestedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+}
+
+/// # 线程会话设置事件
+///
+/// 当线程的 Provider 会话被设置或更新时产生。
+/// 用于同步会话状态（如会话启动、状态变更等）。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `session`: 新的会话信息（`None` 表示清除会话）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadSessionSetEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 新的会话信息（`None` 表示清除会话）
+    pub session: Option<crate::models::Session>,
+}
+
+/// # 提议计划创建/更新事件
+///
+/// 当 AI 提议的执行计划被创建或更新时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `plan`: 提议的计划实体
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadProposedPlanUpsertedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 提议的计划实体
+    pub plan: ProposedPlan,
+}
+
+/// # 活动追加事件
+///
+/// 当新的活动记录被追加到线程时产生。
+/// 活动包括工具调用、文件变更、终端命令、Git 操作等。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `thread_id`: 线程 ID
+/// - `activity`: 追加的活动记录
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThreadActivityAppendedEvent {
+    /// 事件序列号
+    pub sequence: Sequence,
+    /// 事件发生时间（UTC）
+    pub occurred_at: DateTime<Utc>,
+    /// 触发命令 ID
+    pub command_id: Option<String>,
+    /// 线程 ID
+    pub thread_id: ThreadId,
+    /// 追加的活动记录
+    pub activity: Activity,
+}
+
+// ==================== 定时任务事件 ====================
+
+/// # 定时任务创建事件
+///
+/// 当一个新的定时任务被创建时产生。
+///
+/// ## 字段说明
+///
+/// - `sequence`: 事件序列号
+/// - `occurred_at`: 事件发生时间
+/// - `command_id`: 触发命令 ID
+/// - `task_id`: 任务 ID
+/// - `thread_id`: 关联线程 ID
+/// - `cron_expression`: CRON 表达式
+/// - `prompt`: 触发时发送的 prompt
+/// - `enabled`: 是否启用
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobCreatedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub thread_id: ThreadId,
+    pub cron_expression: String,
+    pub prompt: String,
+    pub enabled: bool,
+}
+
+/// # 定时任务更新事件
+///
+/// 当定时任务的配置被更新时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobUpdatedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub cron_expression: Option<String>,
+    pub prompt: Option<String>,
+}
+
+/// # 定时任务删除事件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobDeletedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+}
+
+/// # 定时任务启用/禁用事件
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobEnabledSetEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub enabled: bool,
+}
+
+/// # 定时任务触发事件
+///
+/// 当定时任务到达触发时间或被手动触发时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobFiredEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub thread_id: ThreadId,
+    pub fired_at: DateTime<Utc>,
+}
+
+/// # 定时任务执行完成事件
+///
+/// 当定时任务触发的 Turn 执行完成时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduledJobFinishedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub task_id: String,
+    pub thread_id: ThreadId,
+    pub success: bool,
+    pub finished_at: DateTime<Utc>,
+}
+
+// ==================== 目标模式事件结构体 ====================
+
+/// # 目标已启动事件
+///
+/// 当用户启动一个长期目标时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GoalStartedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub goal_id: String,
+    pub thread_id: ThreadId,
+    pub goal_description: String,
+    pub started_at: DateTime<Utc>,
+}
+
+/// # 目标进度更新事件
+///
+/// 当目标执行过程中有进度更新时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GoalProgressEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub goal_id: String,
+    pub thread_id: ThreadId,
+    pub progress_percent: u8,
+    pub current_task: String,
+    pub completed_tasks: Vec<String>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// # 目标已达成事件
+///
+/// 当目标完全达成时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GoalAchievedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub goal_id: String,
+    pub thread_id: ThreadId,
+    pub achieved_at: DateTime<Utc>,
+    pub summary: String,
+}
+
+/// # 目标已中止事件
+///
+/// 当目标被用户中止或执行失败时产生。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GoalAbortedEvent {
+    pub sequence: Sequence,
+    pub occurred_at: DateTime<Utc>,
+    pub command_id: Option<String>,
+    pub goal_id: String,
+    pub thread_id: ThreadId,
+    pub aborted_at: DateTime<Utc>,
+    pub reason: String,
+}
+
+// ==================== OrchestrationEventTrait 批量实现 ====================
+//
+// 使用宏为所有编排事件结构体实现 OrchestrationEventTrait。
+// 添加新事件类型时，只需在此处追加结构体名称即可。
+impl_orchestration_event_trait!(
+    // 项目事件
+    ProjectCreatedEvent,
+    ProjectMetaUpdatedEvent,
+    ProjectDeletedEvent,
+    // 线程事件
+    ThreadCreatedEvent,
+    ThreadDeletedEvent,
+    ThreadArchivedEvent,
+    ThreadUnarchivedEvent,
+    ThreadMetaUpdatedEvent,
+    ThreadRuntimeModeSetEvent,
+    ThreadInteractionModeSetEvent,
+    // 消息事件
+    ThreadMessageSentEvent,
+    // Turn 事件
+    ThreadTurnQueuedEvent,
+    ThreadTurnStartRequestedEvent,
+    ThreadTurnInterruptRequestedEvent,
+    // 审批事件
+    ThreadApprovalResponseRequestedEvent,
+    ThreadUserInputResponseRequestedEvent,
+    // 检查点事件
+    ThreadCheckpointRevertRequestedEvent,
+    ThreadRevertedEvent,
+    ThreadTurnDiffCompletedEvent,
+    // 回滚事件
+    ThreadConversationRollbackRequestedEvent,
+    ThreadConversationRolledBackEvent,
+    // 其他事件
+    ThreadMessageEditResendRequestedEvent,
+    ThreadSessionStopRequestedEvent,
+    ThreadSessionSetEvent,
+    ThreadProposedPlanUpsertedEvent,
+    ThreadActivityAppendedEvent,
+    // 定时任务事件
+    ScheduledJobCreatedEvent,
+    ScheduledJobUpdatedEvent,
+    ScheduledJobDeletedEvent,
+    ScheduledJobEnabledSetEvent,
+    ScheduledJobFiredEvent,
+    ScheduledJobFinishedEvent,
+    // 目标模式事件
+    GoalStartedEvent,
+    GoalProgressEvent,
+    GoalAchievedEvent,
+    GoalAbortedEvent,
+);
+

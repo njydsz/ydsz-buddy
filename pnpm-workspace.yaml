@@ -1,0 +1,14 @@
+packages:
+  - ydsz-desktop
+  - ydsz-mobile
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+  msw: true
+  "@parcel/watcher": true
+  "@swc/core": true
+minimumReleaseAge: 0
+strictDepBuilds: false
+verifyDepsBeforeRun: false
+overrides:
+  browserslist: 4.28.2

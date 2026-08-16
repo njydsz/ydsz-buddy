@@ -1,0 +1,120 @@
+[workspace]
+resolver = "2"
+members = [
+    "ydsz-core",
+    "ydsz-shared",
+    "ydsz-flow",
+    "ydsz-provider",
+    "ydsz-code",
+    "ydsz-work",
+    "ydsz-server",
+    "ydsz-cli",
+]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2021"
+authors = ["云顶数字团队"]
+license = "MIT"
+rust-version = "1.75"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.36", features = ["full"] }
+async-trait = "0.1"
+
+# Web framework
+axum = { version = "0.7", features = ["ws"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# WebSocket
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database
+rusqlite = { version = "0.31", features = ["bundled", "blob"] }
+
+# ANN index (HNSW) - 大规模向量检索(>10k chunks 时启用,替换线性扫描)
+hnsw_rs = "0.3"
+
+# Process management
+portable-pty = "0.8"
+
+# SSH client (russh 0.61: 真实 SSH 协议库,替换之前的 stub 实现)
+# 使用 ring 后端替代默认的 aws-lc-rs,避免 Windows 上需要 NASM 汇编器
+russh = { version = "0.61", default-features = false, features = ["flate2", "ring", "rsa"] }
+# russh-keys 已合并到 russh 0.61 的 keys 子模块,无需单独引入
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+config = "0.14"
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.7", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+walkdir = "2.4"
+globset = "0.4"
+sha2 = "0.10"
+hmac = "0.12"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+
+# Test utilities
+tempfile = "3.10"
+
+# Property-based testing (fuzz-like, stable Rust)
+proptest = "1.4"
+
+# Benchmarking (Criterion.rs)
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# AST parsing (used by ydsz-code indexer for semantic symbol extraction)
+tree-sitter = "0.25"
+tree-sitter-typescript = "0.23"
+tree-sitter-javascript = "0.23"
+tree-sitter-rust = "0.23"
+tree-sitter-python = "0.23"
+tree-sitter-go = "0.23"
+tree-sitter-cpp = "0.23"
+tree-sitter-c = "0.23"
+tree-sitter-java = "0.23"
+
+# TypeScript contract generation (Rust DTO + Tauri IPC → .ts file) for shared contracts
+# 用 specta + tauri-specta：specta-typescript 生成 DTO 类型，
+# tauri-specta 把 #[tauri::command] #[specta::specta] 的命令签名也导出成 TS binding。
+# 砍掉 TS 端 25 份 zod/effect Schema 的双份维护，命令调用也具备端到端类型。
+specta = { version = "2.0.0-rc.25", features = ["derive", "function", "collect", "uuid", "chrono", "serde_json"] }
+specta-serde = "0.0.12"
+specta-typescript = "0.0.12"
+tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
+
+# Internal crates
+ydsz-core = { path = "ydsz-core" }
+ydsz-shared = { path = "ydsz-shared" }
+ydsz-flow = { path = "ydsz-flow" }
+ydsz-provider = { path = "ydsz-provider" }
+ydsz-code = { path = "ydsz-code" }
+ydsz-work = { path = "ydsz-work" }
+ydsz-server = { path = "ydsz-server" }
+
+# Release 构建优化：LTO + strip + panic=abort + 单 codegen-unit
+# 对标 Zed / tokio 等大厂 Rust 项目的默认 release 配置
+# 效果：binary 体积 -30~40%、运行时栈展开开销消除、移除 debug symbol
+[profile.release]
+lto = "thin"
+strip = true
+panic = "abort"
+codegen-units = 1
+opt-level = 3

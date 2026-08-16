@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": ["vitest/globals", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./src/*"],
+      "@ydsz-buddy/contracts": ["./src/contracts/index.ts"],
+      "@njydsz/shared/*": ["./src/shared/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/**/*.stories.tsx",
+    "src/**/*.browser.test.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/providerE2ETurnReal.test.ts",
+    "src/**/providerE2EDomestic.test.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

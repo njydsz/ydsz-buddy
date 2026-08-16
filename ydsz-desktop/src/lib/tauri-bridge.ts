@@ -1,0 +1,1072 @@
+﻿/**
+ * @file tauri-bridge.ts
+ * @description Tauri 桥接层 - 封装所有与 Tauri 桌面端后端的交互，提供统一的 API 接口
+ * @module lib/tauri-bridge
+ * @layer Web 原生桥接层
+ */
+
+import { invoke } from '@tauri-apps/api/core';
+import { listen, emit, type UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open, save, message as showMessage, confirm, type OpenDialogOptions, type SaveDialogOptions, type MessageDialogOptions, type ConfirmDialogOptions } from '@tauri-apps/plugin-dialog';
+import { writeTextFile, readTextFile, mkdir, readDir, type MkdirOptions, type DirEntry } from '@tauri-apps/plugin-fs';
+import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
+import type {
+  DesktopTheme,
+  DesktopUpdateState,
+  DesktopUpdateActionResult,
+  DesktopNotificationInput,
+  ContextMenuItem,
+  ServerVoiceTranscriptionInput,
+  ServerVoiceTranscriptionResult,
+  ServerVoicePolishInput,
+  ServerVoicePolishResult,
+  BrowserOpenInput,
+  BrowserThreadInput,
+  BrowserSetPanelBoundsInput,
+  BrowserAttachWebviewInput,
+  BrowserTabInput,
+  BrowserCaptureScreenshotResult,
+  BrowserExecuteCdpInput,
+  BrowserDesignModeToggleInput,
+  BrowserDesignModeSelection,
+  BrowserNavigateInput,
+  BrowserNewTabInput,
+  ThreadBrowserState,
+  OrchestrationThread,
+  OrchestrationMessage,
+  ModelSelection,
+  ServerConfig,
+  ServerGetEnvironmentResult,
+  ServerGetSettingsResult,
+  ServerUpdateSettingsInput,
+  ServerProviderUpdateInput,
+  ServerListWorktreesResult,
+  ServerGetProviderUsageSnapshotResult,
+  ServerDiagnosticsResult,
+  ServerUpsertKeybindingInput,
+  ServerProviderStatus,
+  ClientOrchestrationCommand,
+  OrchestrationReadModel,
+  OrchestrationShellSnapshot,
+  OrchestrationThreadDetailSnapshot,
+  OrchestrationProject,
+  OrchestrationEvent,
+  OrchestrationShellStreamItem,
+  OrchestrationThreadStreamItem,
+  DispatchResult,
+  OrchestrationReplayEventsResult,
+  ProviderComposerCapabilities,
+  ProviderGetComposerCapabilitiesInput,
+  ProviderCompactThreadInput,
+  ProviderListCommandsInput,
+  ProviderListCommandsResult,
+  ProviderListSkillsInput,
+  ProviderListSkillsResult,
+  ProviderListPluginsInput,
+  ProviderListPluginsResult,
+  ProviderReadPluginInput,
+  ProviderReadPluginResult,
+  ProviderListAgentsInput,
+  ProviderListAgentsResult,
+  ListLocalUserSkillsResult,
+  GitStatusResult,
+  OrchestrationCheckpointSummary,
+} from '~/contracts';
+import { WS_METHODS } from '~/contracts';
+import { getSharedWsTransport } from '../wsTransport';
+import { isTauri } from '~/env';
+
+/** 已解析的嵌入式 WebSocket 服务器 URL（仅用于同步消费方） */
+let cachedServerWsUrl: string | null = null;
+
+/**
+ * 获取 WebSocket 传输实例（共享单例）
+ *
+ * @description
+ * 返回全局共享的 WsTransport 单例。Tauri 环境下必须等待 getWsUrl() 预热完成
+ * （cachedServerWsUrl 已填充）才能调用，否则 WsTransport 会 fallback 到
+ * window.location 导致连接风暴和启动卡死。
+ *
+ * @returns WebSocket 传输实例
+ */
+function getWsTransport() {
+  if (isTauri && !cachedServerWsUrl) {
+    throw new Error('[tauri-bridge] getWsTransport: WS URL not ready. Call getWsUrl() first to warm up the cache.');
+  }
+  return getSharedWsTransport();
+}
+
+/**
+ * 将 Tauri 异步 listen 包装为同步 cleanup 函数
+ *
+ * @description
+ * Tauri 的 listen 返回 Promise<UnlistenFn>，但上层契约期望 () => void，
+ * 因此在卸载回调内部异步等待 unlisten 完成。
+ *
+ * @typeParam T - 事件载荷类型
+ * @param event - 事件名称
+ * @param handler - 事件处理函数
+ * @returns 同步取消监听函数
+ */
+function syncListen<T>(event: string, handler: (event: { payload: T }) => void): () => void {
+  if (!isTauri) {
+    return () => {};
+  }
+
+  let unlisten: UnlistenFn | null = null;
+  const unlistenPromise = listen<T>(event, handler).then((fn) => {
+    unlisten = fn;
+    return fn;
+  });
+  return () => {
+    if (unlisten) {
+      unlisten();
+    } else {
+      void unlistenPromise.then((fn) => fn());
+    }
+  };
+}
+
+/**
+ * Tauri 桥接对象
+ *
+ * @description
+ * 封装所有与 Tauri 桌面端后端的交互，提供统一的 API 接口。
+ * 包含以下模块：
+ * - 基础操作：文件选择、保存、确认对话框、主题设置、上下文菜单、外部链接
+ * - Shell：在文件管理器中显示文件
+ * - 菜单：监听菜单动作事件
+ * - 更新：检查、下载、安装应用更新
+ * - 通知：桌面通知的权限请求和发送
+ * - 服务器：通过 WebSocket 调用后端服务（配置、环境、设置、提供商等）
+ * - 浏览器：浏览器自动化操作（打开、关闭、截图、导航等）
+ * - 编排引擎：线程创建/管理、命令分发、快照获取、事件监听
+ * - 提供商：AI 模型列表、API Key 管理、命令/技能/插件/代理查询
+ * - 终端：创建、写入、调整大小、关闭、重启
+ * - Git：状态查询、分支操作、提交、推送、拉取、差异查看
+ * - 工作区：项目管理、文件读写
+ * - 检查点：创建、查询、回滚
+ * - 遥测：使用统计、事件、指标
+ * - 窗口：最小化、最大化、关闭、标题设置
+ * - 对话框：打开/保存文件、消息、确认
+ * - 文件系统：读写文件、创建目录
+ * - 剪贴板：读写文本
+ */
+export const tauriBridge = {
+  /**
+   * 获取 WebSocket 服务器 URL（异步）
+   *
+   * 在 Tauri 桌面模式下通过 `invoke('get_server_ws_url')` 拿到嵌入式 ydsz-provider
+   * 的真实监听地址（含操作系统分配的随机端口）。非 Tauri 环境下回退到
+   * `VITE_WS_URL` 环境变量。
+   *
+   * 调用成功后会将结果缓存到 `cachedServerWsUrl`，以便同步消费方
+   * （如 `resolveServerHttpOrigin` / `resolveWsHttpUrl`）读取。
+   */
+  getWsUrl: async (): Promise<string | null> => {
+    if (cachedServerWsUrl) {
+      return cachedServerWsUrl;
+    }
+
+    // 尝试通过 Tauri invoke 获取服务器地址，带重试机制
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const url = await invoke<string>("get_server_ws_url");
+        if (url && url.length > 0) {
+          cachedServerWsUrl = url;
+          return url;
+        }
+      } catch (_error) {
+        if (attempt < 3) {
+          await new Promise((resolve) => window.setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+
+    const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
+    if (envUrl && envUrl.length > 0) {
+      cachedServerWsUrl = envUrl;
+      return envUrl;
+    }
+
+    // Tauri 桌面端：绝不能回退到 window.location（Vite dev 的 localhost:1420）。
+    // 该地址连接 ydsz-server，WsTransport 连接失败后会进入高频重连循环，
+    // 触发渲染风暴并最终导致主窗口"未响应"。返回 null 让上层通过 readNativeApi()
+    // 的 guard 阻止 WsTransport 过早创建，并由 __root.tsx 的轮询等待真实地址。
+    if (isTauri) {
+      return null;
+    }
+
+    // 非 Tauri 环境（浏览器扩展等）：最终回退到当前页面地址作为 WebSocket URL。
+    const fallbackUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:${window.location.port}`;
+    cachedServerWsUrl = fallbackUrl;
+    return fallbackUrl;
+  },
+
+  /**
+   * 获取已缓存的 WebSocket 服务器 URL（同步）
+   *
+   * 仅返回已经通过 {@link tauriBridge.getWsUrl} 异步解析过的值。
+   * 应用启动时应先调用 `getWsUrl()` 完成预热，使同步消费方拿到正确地址。
+   */
+  getCachedWsUrl: (): string | null => cachedServerWsUrl,
+
+  /**
+   * 打开文件夹选择对话框
+   *
+   * @returns 选中的文件夹路径，用户取消时返回 null
+   */
+  pickFolder: async (): Promise<string | null> => {
+    return await open({
+      directory: true,
+      multiple: false,
+      title: '选择文件夹'
+    });
+  },
+
+  /**
+   * 保存文件到磁盘
+   *
+   * @param input - 保存参数
+   * @param input.defaultFilename - 默认文件名
+   * @param input.contents - 文件内容
+   * @param input.filters - 文件类型过滤器
+   * @returns 保存的文件路径，用户取消时返回 null
+   */
+  saveFile: async (input: {
+    defaultFilename: string;
+    contents: string;
+    filters?: ReadonlyArray<{ name: string; extensions: ReadonlyArray<string> }>;
+  }): Promise<string | null> => {
+    const filePath = await save({
+      defaultPath: input.defaultFilename,
+      filters: input.filters?.map(f => ({
+        name: f.name,
+        extensions: [...f.extensions]
+      }))
+    });
+    
+    if (filePath) {
+      await writeTextFile(filePath, input.contents);
+    }
+    
+    return filePath;
+  },
+
+  /**
+   * 显示确认对话框
+   *
+   * @param message - 确认消息内容
+   * @returns 用户是否确认
+   */
+  confirm: async (message: string): Promise<boolean> => {
+    return await confirm(message, {
+      title: '确认',
+      kind: 'info'
+    });
+  },
+
+  /**
+   * 设置桌面端主题模式
+   *
+   * @param theme - 主题模式（light/dark/system）
+   */
+  setTheme: async (theme: DesktopTheme): Promise<void> => {
+    await invoke('set_theme', { theme });
+  },
+
+  /**
+   * 显示上下文菜单
+   *
+   * @typeParam T - 菜单项值的类型
+   * @param items - 菜单项列表
+   * @param position - 可选的菜单位置坐标
+   * @returns 用户选择的菜单项值，取消时返回 null
+   */
+  showContextMenu: async <T extends string>(
+    items: readonly ContextMenuItem<T>[],
+    position?: { x: number; y: number }
+  ): Promise<T | null> => {
+    return await invoke<T | null>('show_context_menu', { items, position });
+  },
+
+  /**
+   * 在系统默认浏览器中打开外部链接
+   *
+   * @param url - 要打开的 URL
+   * @returns 是否成功打开
+   */
+  openExternal: async (url: string): Promise<boolean> => {
+    try {
+      await invoke('open_external', { url });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * 在文件夹中显示文件
+   */
+  showInFolder: async (path: string): Promise<void> => {
+    await invoke('show_in_folder', { path });
+  },
+
+  /**
+   * Shell 模块
+   */
+  shell: {
+    showInFolder: async (path: string): Promise<void> => {
+      await invoke('show_in_folder', { path });
+    },
+  },
+
+  /**
+   * 监听菜单动作
+   */
+  onMenuAction: (listener: (action: string) => void) => {
+    return syncListen<string>('menu-action', (event) => {
+      listener(event.payload);
+    });
+  },
+
+  /**
+   * 获取更新状态
+   */
+  getUpdateState: async (): Promise<DesktopUpdateState> => {
+    return await invoke<DesktopUpdateState>('get_update_state');
+  },
+
+  /**
+   * 检查更新
+   */
+  checkForUpdates: async (): Promise<DesktopUpdateState> => {
+    return await invoke<DesktopUpdateState>('check_for_updates');
+  },
+
+  /**
+   * 下载更新
+   */
+  downloadUpdate: async (): Promise<DesktopUpdateActionResult> => {
+    return await invoke<DesktopUpdateActionResult>('download_update');
+  },
+
+  /**
+   * 安装更新
+   */
+  installUpdate: async (): Promise<DesktopUpdateActionResult> => {
+    return await invoke<DesktopUpdateActionResult>('install_update');
+  },
+
+  /**
+   * 监听更新状态
+   */
+  onUpdateState: (listener: (state: DesktopUpdateState) => void) => {
+    return syncListen<DesktopUpdateState>('update-state', (event) => {
+      listener(event.payload);
+    });
+  },
+
+  /**
+   * 通知模块
+   */
+  notifications: {
+    isSupported: async (): Promise<boolean> => {
+      return true; // Tauri 支持通知
+    },
+    
+    show: async (input: DesktopNotificationInput): Promise<boolean> => {
+      const granted = await isPermissionGranted();
+      if (!granted) {
+        const permission = await requestPermission();
+        if (permission !== 'granted') {
+          return false;
+        }
+      }
+      
+      sendNotification({
+        title: input.title,
+        body: input.body
+      });
+      return true;
+    },
+  },
+
+  /**
+   * 服务器模块 - 通过 WebSocket 调用
+   */
+  server: {
+    transcribeVoice: async (
+      input: ServerVoiceTranscriptionInput
+    ): Promise<ServerVoiceTranscriptionResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerVoiceTranscriptionResult>('server.transcribeVoice', input);
+    },
+
+    voicePolishText: async (
+      input: ServerVoicePolishInput
+    ): Promise<ServerVoicePolishResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerVoicePolishResult>(WS_METHODS.voicePolishText, input);
+    },
+
+    getConfig: async (): Promise<ServerConfig> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerConfig>('server.getConfig');
+    },
+
+    getEnvironment: async (): Promise<ServerGetEnvironmentResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerGetEnvironmentResult>('server.getEnvironment');
+    },
+
+    getSettings: async (): Promise<ServerGetSettingsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerGetSettingsResult>('server.getSettings');
+    },
+
+    updateSettings: async (settings: ServerUpdateSettingsInput): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('server.updateSettings', { settings });
+    },
+
+    refreshProviders: async (): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('server.refreshProviders');
+    },
+
+    updateProvider: async (provider: ServerProviderUpdateInput): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('server.updateProvider', { provider });
+    },
+
+    listWorktrees: async (): Promise<ServerListWorktreesResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerListWorktreesResult>('server.listWorktrees');
+    },
+
+    getProviderUsageSnapshot: async (): Promise<ServerGetProviderUsageSnapshotResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerGetProviderUsageSnapshotResult>('server.getProviderUsageSnapshot');
+    },
+
+    getDiagnostics: async (): Promise<ServerDiagnosticsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerDiagnosticsResult>('server.getDiagnostics');
+    },
+
+    upsertKeybinding: async (keybinding: ServerUpsertKeybindingInput): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('server.upsertKeybinding', { keybinding });
+    },
+  },
+
+  /**
+   * 浏览器模块
+   */
+  browser: {
+    open: async (input: BrowserOpenInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_open', { ...input });
+    },
+
+    close: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_close', { ...input });
+    },
+
+    hide: async (input: BrowserThreadInput): Promise<void> => {
+      await invoke('browser_hide', { ...input });
+    },
+
+    getState: async (input: BrowserThreadInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_get_state', { ...input });
+    },
+
+    setPanelBounds: async (input: BrowserSetPanelBoundsInput): Promise<void> => {
+      await invoke('browser_set_panel_bounds', { ...input });
+    },
+
+    attachWebview: async (input: BrowserAttachWebviewInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_attach_webview', { ...input });
+    },
+
+    copyScreenshotToClipboard: async (input: BrowserTabInput): Promise<void> => {
+      await invoke('browser_copy_screenshot_to_clipboard', { ...input });
+    },
+
+    captureScreenshot: async (input: BrowserTabInput): Promise<BrowserCaptureScreenshotResult> => {
+      return await invoke<BrowserCaptureScreenshotResult>('browser_capture_screenshot', { ...input });
+    },
+
+    executeCdp: async (input: BrowserExecuteCdpInput): Promise<unknown> => {
+      return await invoke('browser_execute_cdp', { ...input });
+    },
+
+    navigate: async (input: BrowserNavigateInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_navigate', { ...input });
+    },
+
+    reload: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_reload', { ...input });
+    },
+
+    goBack: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_go_back', { ...input });
+    },
+
+    goForward: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_go_forward', { ...input });
+    },
+
+    newTab: async (input: BrowserNewTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_new_tab', { ...input });
+    },
+
+    closeTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_close_tab', { ...input });
+    },
+
+    selectTab: async (input: BrowserTabInput): Promise<ThreadBrowserState> => {
+      return await invoke<ThreadBrowserState>('browser_select_tab', { ...input });
+    },
+
+    openDevTools: async (input: BrowserTabInput): Promise<void> => {
+      await invoke('browser_open_dev_tools', { ...input });
+    },
+
+    designModeToggle: async (input: BrowserDesignModeToggleInput): Promise<boolean> => {
+      return await invoke<boolean>('browser_design_mode_toggle', { input });
+    },
+
+    onDesignModeElementSelected: (
+      listener: (selection: BrowserDesignModeSelection) => void,
+    ) => {
+      return syncListen<BrowserDesignModeSelection>('browser-design-mode-element-selected', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onDesignModeCancelled: (listener: () => void) => {
+      return syncListen('browser-design-mode-cancelled', () => {
+        listener();
+      });
+    },
+
+    onState: (listener: (state: ThreadBrowserState) => void) => {
+      return syncListen<ThreadBrowserState>('browser-state', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onBrowserUseOpenPanelRequest: (listener: () => void) => {
+      return syncListen('browser-use-open-panel-request', () => {
+        listener();
+      });
+    },
+  },
+
+  /**
+   * 编排引擎相关命令 - 通过 WebSocket 调用
+   */
+  orchestration: {
+    /**
+     * 通用命令分发器 - 所有编排操作都通过此方法
+     */
+    dispatchCommand: async (command: ClientOrchestrationCommand): Promise<DispatchResult> => {
+      const transport = getWsTransport();
+      return await transport.request<DispatchResult>('orchestration.dispatchCommand', command);
+    },
+
+    /**
+     * 获取完整快照
+     */
+    getSnapshot: async (): Promise<OrchestrationReadModel> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationReadModel>('orchestration.getSnapshot');
+    },
+
+    /**
+     * 获取 Shell 快照
+     */
+    getShellSnapshot: async (): Promise<OrchestrationShellSnapshot> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationShellSnapshot>('orchestration.getShellSnapshot');
+    },
+
+    /**
+     * 获取线程详情
+     */
+    getThreadDetail: async (threadId: string): Promise<OrchestrationThreadDetailSnapshot> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationThreadDetailSnapshot>('orchestration.getThreadDetail', { threadId });
+    },
+
+    /**
+     * 获取项目详情
+     */
+    getProjectDetail: async (projectId: string): Promise<OrchestrationProject> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationProject>('orchestration.getProjectDetail', { projectId });
+    },
+
+    /**
+     * 获取统计数据
+     */
+    getCounts: async (): Promise<Record<string, number>> => {
+      const transport = getWsTransport();
+      return await transport.request<Record<string, number>>('orchestration.getCounts');
+    },
+
+    /**
+     * 重放事件
+     */
+    replayEvents: async (fromSequenceExclusive: number, limit?: number): Promise<OrchestrationReplayEventsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationReplayEventsResult>('orchestration.replayEvents', { fromSequenceExclusive, limit });
+    },
+
+    /**
+     * 修复状态（预留接口）
+     */
+    repairState: async (): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('orchestration.repairState');
+    },
+
+    /**
+     * 监听域事件
+     */
+    onDomainEvent: (listener: (event: OrchestrationEvent) => void) => {
+      return syncListen<OrchestrationEvent>('orchestration-domain-event', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    /**
+     * 监听 Shell 事件
+     */
+    onShellEvent: (listener: (event: OrchestrationShellStreamItem) => void) => {
+      return syncListen<OrchestrationShellStreamItem>('orchestration-shell-event', (event) => {
+        listener(event.payload);
+      });
+    },
+
+    onThreadEvent: (listener: (event: OrchestrationThreadStreamItem) => void) => {
+      return syncListen<OrchestrationThreadStreamItem>('orchestration-thread-event', (event) => {
+        listener(event.payload);
+      });
+    },
+  },
+
+  /**
+   * AI 提供商相关命令 - 通过 WebSocket 调用
+   */
+  provider: {
+    listModels: async (provider?: string): Promise<ModelSelection[]> => {
+      const transport = getWsTransport();
+      return await transport.request<ModelSelection[]>('provider.listModels', { provider });
+    },
+
+    setApiKey: async (provider: string, key: string): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('provider.setApiKey', { provider, key });
+    },
+
+    getProviderStatus: async (): Promise<Record<string, ServerProviderStatus>> => {
+      const transport = getWsTransport();
+      return await transport.request<Record<string, ServerProviderStatus>>('provider.getProviderStatus');
+    },
+
+    getComposerCapabilities: async (input: ProviderGetComposerCapabilitiesInput): Promise<ProviderComposerCapabilities> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderComposerCapabilities>('provider.getComposerCapabilities', input);
+    },
+
+    compactThread: async (input: ProviderCompactThreadInput): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('provider.compactThread', input);
+    },
+
+    listCommands: async (input: ProviderListCommandsInput): Promise<ProviderListCommandsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderListCommandsResult>('provider.listCommands', input);
+    },
+
+    listSkills: async (input: ProviderListSkillsInput): Promise<ProviderListSkillsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderListSkillsResult>('provider.listSkills', input);
+    },
+
+    listPlugins: async (input: ProviderListPluginsInput): Promise<ProviderListPluginsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderListPluginsResult>('provider.listPlugins', input);
+    },
+
+    readPlugin: async (input: ProviderReadPluginInput): Promise<ProviderReadPluginResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderReadPluginResult>('provider.readPlugin', input);
+    },
+
+    listAgents: async (input: ProviderListAgentsInput): Promise<ProviderListAgentsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ProviderListAgentsResult>('provider.listAgents', input);
+    },
+  },
+
+  /**
+   * 技能模块 - 通过 WebSocket 调用
+   */
+  skills: {
+    listLocal: async (): Promise<ListLocalUserSkillsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ListLocalUserSkillsResult>('skills.listLocal');
+    },
+  },
+
+  /**
+   * 终端管理相关命令
+   */
+  terminal: {
+    create: async (cwd: string, shell?: string): Promise<string> => {
+      const transport = getWsTransport();
+      return await transport.request<string>('terminal.open', { cwd, shell });
+    },
+
+    write: async (sessionId: string, data: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('terminal.write', { sessionId, data });
+    },
+
+    resize: async (sessionId: string, rows: number, cols: number): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('terminal.resize', { sessionId, rows, cols });
+    },
+
+    close: async (sessionId: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('terminal.close', { sessionId });
+    },
+
+    clear: async (sessionId: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('terminal.clear', { sessionId });
+    },
+
+    restart: async (sessionId: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('terminal.restart', { sessionId });
+    },
+  },
+
+  /**
+   * Git 操作相关命令
+   */
+  git: {
+    getStatus: async (cwd: string): Promise<GitStatusResult> => {
+      const transport = getWsTransport();
+      return await transport.request<GitStatusResult>('git.status', { cwd });
+    },
+
+    listBranches: async (cwd: string): Promise<string[]> => {
+      const transport = getWsTransport();
+      return await transport.request<string[]>('git.listBranches', { cwd });
+    },
+
+    checkoutBranch: async (cwd: string, branch: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.checkout', { cwd, branch });
+    },
+
+    commit: async (cwd: string, message: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.runStackedAction', { cwd, action: 'commit', message });
+    },
+
+    pull: async (cwd: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.pull', { cwd });
+    },
+
+    push: async (cwd: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.runStackedAction', { cwd, action: 'push' });
+    },
+
+    readWorkingTreeDiff: async (cwd: string): Promise<string> => {
+      const transport = getWsTransport();
+      const result = await transport.request<{ diff: string }>('git.diff', { cwd, staged: false });
+      return result.diff;
+    },
+
+    applyPatch: async (input: { cwd: string; patch: string; cached?: boolean }): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.apply', { cwd: input.cwd, patch: input.patch, cached: input.cached ?? false });
+    },
+
+    summarizeDiff: async (cwd: string): Promise<string> => {
+      const transport = getWsTransport();
+      const result = await transport.request<{ diff: string }>('git.diff', { cwd, staged: true });
+      return result.diff;
+    },
+
+    createBranch: async (cwd: string, branchName: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.createBranch', { cwd, branch: branchName });
+    },
+
+    stash: async (cwd: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.stash', { cwd });
+    },
+
+    stashPop: async (cwd: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request<void>('git.stashPop', { cwd });
+    },
+
+    log: async (cwd: string, maxCount?: number): Promise<string> => {
+      const transport = getWsTransport();
+      const result = await transport.request<{ log: string }>('git.log', { cwd, maxCount: maxCount ?? 50 });
+      return result.log;
+    },
+  },
+
+  /**
+   * 工作区管理相关命令
+   */
+  workspace: {
+    listProjects: async (): Promise<OrchestrationProject[]> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationProject[]>('workspace.listProjects', {});
+    },
+
+    addProject: async (path: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('workspace.addProject', { path });
+    },
+
+    removeProject: async (projectId: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('workspace.removeProject', { projectId });
+    },
+
+    readFile: async (root: string, path: string): Promise<string> => {
+      const transport = getWsTransport();
+      const result = await transport.request<{ content: string }>('workspace.readFile', { root, path });
+      return result.content;
+    },
+
+    writeFile: async (root: string, path: string, content: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('workspace.writeFile', { root, path, content });
+    },
+  },
+
+  /**
+   * 设置管理相关命令
+   */
+  settings: {
+    get: async (): Promise<ServerGetSettingsResult> => {
+      const transport = getWsTransport();
+      return await transport.request<ServerGetSettingsResult>('server.getSettings', {});
+    },
+
+    save: async (settings: ServerUpdateSettingsInput): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('server.updateSettings', settings);
+    },
+  },
+
+  /**
+   * 检查点管理相关命令
+   */
+  checkpoint: {
+    create: async (threadId: string, commitSha: string, message: string): Promise<OrchestrationCheckpointSummary> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationCheckpointSummary>('checkpoint.create', { threadId, commitSha, message });
+    },
+
+    get: async (checkpointId: string): Promise<OrchestrationCheckpointSummary> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationCheckpointSummary>('checkpoint.get', { checkpointId });
+    },
+
+    list: async (threadId: string): Promise<OrchestrationCheckpointSummary[]> => {
+      const transport = getWsTransport();
+      return await transport.request<OrchestrationCheckpointSummary[]>('checkpoint.list', { threadId });
+    },
+
+    delete: async (checkpointId: string): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('checkpoint.delete', { checkpointId });
+    },
+
+    revert: async (threadId: string, checkpointId: string): Promise<void> => {
+      const transport = getWsTransport();
+      return await transport.request<void>('checkpoint.revert', { threadId, checkpointId });
+    },
+  },
+
+  /**
+   * 遥测管理相关命令
+   */
+  telemetry: {
+    getUsageStats: async (): Promise<Record<string, unknown>> => {
+      const transport = getWsTransport();
+      return await transport.request('telemetry.getUsageStats', {});
+    },
+
+    getEvents: async (limit: number = 100): Promise<Record<string, unknown>[]> => {
+      const transport = getWsTransport();
+      return await transport.request('telemetry.getEvents', { limit });
+    },
+
+    clearEvents: async (): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('telemetry.clearEvents', {});
+    },
+
+    getMetrics: async (): Promise<Record<string, unknown>> => {
+      const transport = getWsTransport();
+      return await transport.request('telemetry.getMetrics', {});
+    },
+
+    clearMetrics: async (): Promise<void> => {
+      const transport = getWsTransport();
+      await transport.request('telemetry.clearMetrics', {});
+    },
+  },
+
+  /**
+   * 事件监听
+   */
+  events: {
+    onThreadUpdated: (callback: (thread: OrchestrationThread) => void) => {
+      return syncListen<OrchestrationThread>('thread-updated', (event) => {
+        callback(event.payload);
+      });
+    },
+
+    onTerminalOutput: (callback: (data: { sessionId: string; output: string }) => void) => {
+      return syncListen('terminal-output', (event) => {
+        callback(event.payload as { sessionId: string; output: string });
+      });
+    },
+
+    onMessage: (callback: (message: OrchestrationMessage) => void) => {
+      return syncListen<OrchestrationMessage>('message-received', (event) => {
+        callback(event.payload);
+      });
+    },
+
+    onGitStatusChanged: (callback: (status: GitStatusResult) => void) => {
+      return syncListen<GitStatusResult>('git-status-changed', (event) => {
+        callback(event.payload);
+      });
+    },
+
+    emit: async (event: string, payload?: unknown) => {
+      return await emit(event, payload);
+    },
+  },
+
+  /**
+   * 窗口操作
+   */
+  window: {
+    minimize: async () => {
+      await getCurrentWindow().minimize();
+    },
+
+    maximize: async () => {
+      await getCurrentWindow().toggleMaximize();
+    },
+
+    close: async () => {
+      await getCurrentWindow().close();
+    },
+
+    setTitle: async (title: string) => {
+      await getCurrentWindow().setTitle(title);
+    },
+  },
+
+  /**
+   * 对话框
+   */
+  dialog: {
+    open: async (options?: OpenDialogOptions): Promise<string | null> => {
+      const result = await open(options);
+      return Array.isArray(result) ? (result[0] ?? null) : result;
+    },
+
+    save: async (options?: SaveDialogOptions): Promise<string | null> => {
+      return await save(options);
+    },
+
+    message: async (text: string, options?: string | MessageDialogOptions) => {
+      return await showMessage(text, options);
+    },
+
+    confirm: async (message: string, options?: string | ConfirmDialogOptions): Promise<boolean> => {
+      return await confirm(message, options);
+    },
+  },
+
+  /**
+   * 文件系统
+   */
+  fs: {
+    readTextFile: async (path: string): Promise<string> => {
+      return await readTextFile(path);
+    },
+
+    writeTextFile: async (path: string, content: string): Promise<void> => {
+      return await writeTextFile(path, content);
+    },
+
+    createDir: async (path: string, options?: MkdirOptions): Promise<void> => {
+      return await mkdir(path, options);
+    },
+
+    readDir: async (path: string): Promise<DirEntry[]> => {
+      return await readDir(path);
+    },
+  },
+
+  /**
+   * 剪贴板
+   */
+  clipboard: {
+    writeText: async (text: string): Promise<void> => {
+      return await writeText(text);
+    },
+
+    readText: async (): Promise<string> => {
+      return await readText();
+    },
+  },
+
+  /**
+   * 通知
+   */
+  notification: {
+    requestPermission: async (): Promise<boolean> => {
+      const granted = await isPermissionGranted();
+      if (!granted) {
+        return await requestPermission() === 'granted';
+      }
+      return true;
+    },
+
+    send: async (title: string, body: string): Promise<void> => {
+      sendNotification({ title, body });
+    },
+  },
+};
+
+/**
+ * 类型导出
+ */
+export type TauriBridge = typeof tauriBridge;

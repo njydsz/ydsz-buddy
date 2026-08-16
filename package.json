@@ -1,0 +1,38 @@
+{
+  "name": "ydsz-buddy",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @ydsz-buddy/desktop dev",
+    "dev:fresh": "node -e \"process.env.YDSZ_BUDDY_HOME='.dbg/tauri-fresh-home';require('child_process').spawnSync('pnpm',['--filter','@ydsz-buddy/desktop','tauri','dev'],{stdio:'inherit',env:process.env})\"",
+    "build": "pnpm --filter @ydsz-buddy/desktop build",
+    "tauri": "pnpm --filter @ydsz-buddy/desktop tauri",
+    "typecheck": "pnpm --filter @ydsz-buddy/desktop typecheck",
+    "dev:mobile": "pnpm --filter @ydsz-buddy/mobile dev",
+    "build:mobile": "pnpm --filter @ydsz-buddy/mobile build",
+    "tauri:mobile": "pnpm --filter @ydsz-buddy/mobile tauri",
+    "typecheck:mobile": "pnpm --filter @ydsz-buddy/mobile typecheck",
+    "test": "pnpm -r --parallel test",
+    "test:coverage": "pnpm -r --parallel test:coverage",
+    "test:mobile": "pnpm --filter @ydsz-buddy/mobile test",
+    "test:mobile:coverage": "pnpm --filter @ydsz-buddy/mobile test:coverage",
+    "contracts:gen": "pnpm contracts:gen:shared && pnpm contracts:gen:tauri",
+    "contracts:gen:shared": "cargo test -p ydsz-shared --features ts-export --test contracts_gen",
+    "contracts:gen:tauri": "cargo test --manifest-path ydsz-desktop/src-tauri/Cargo.toml --test commands_gen",
+    "contracts:check": "cargo check -p ydsz-shared --features ts-export && cargo check -p ydsz-buddy --tests",
+    "contracts:verify": "pnpm contracts:gen && pnpm typecheck",
+    "coverage:rust": "cargo llvm-cov --workspace --lcov --output-path coverage/lcov.info",
+    "coverage:rust:html": "cargo llvm-cov --workspace --html --output-dir coverage/rust-html",
+    "bench:rust": "cargo bench --workspace --benches",
+    "bench:ts": "pnpm --filter @ydsz-buddy/desktop bench",
+    "bench": "pnpm bench:rust && pnpm bench:ts",
+    "bench:check": "node .github/scripts/check-bench-thresholds.mjs --input target/bench-event-store.txt --config .github/scripts/bench-thresholds.json --suite rust",
+    "lint": "pnpm --filter @ydsz-buddy/desktop lint && pnpm --filter @ydsz-buddy/mobile lint",
+    "lint:fix": "pnpm --filter @ydsz-buddy/desktop lint:fix && pnpm --filter @ydsz-buddy/mobile lint:fix"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  },
+  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed"
+}

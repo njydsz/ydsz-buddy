@@ -1,0 +1,389 @@
+﻿// FILE: providerDiscovery.ts
+// Purpose: Defines provider discovery request/response contracts shared across web and server.
+// Layer: Shared contracts
+// Exports: provider discovery schemas and inferred types used by the WS/native API.
+//
+// 本模块定义了 ydsz 工作区中"Provider 能力发现"（Provider Discovery）相关的契约，
+// 用于探测本地或远程 Provider 的可用性、版本、能力、模型列表等信息。
+//
+// ## 核心契约
+//
+// - `ProviderDiscoveryRequest`：发现请求（指定 Provider 类型、可选路径）
+// - `ProviderDiscoveryResult`：发现结果（Provider 元数据 + 可用模型）
+// - `ProviderDiscoveryStatus`：发现状态枚举（discovered / unavailable / unsupported）
+// - `LocalProviderProbeInput`：本地 Provider 探测输入（指定可执行文件路径）
+// - `LocalProviderProbeResult`：本地 Provider 探测结果
+//
+// ## 使用场景
+//
+// - 启动时自动探测本地安装的 Claude Code / OpenCode / Codex CLI
+// - 添加自定义 Provider 时的能力探测
+// - 健康检查：定期探测 Provider 是否可用
+//
+// ## 协议设计
+//
+// - **异步探测**：探测操作可能耗时较长，UI 需要展示进度
+// - **缓存机制**：探测结果会被缓存，避免重复探测
+// - **失败兜底**：探测失败时返回 `unavailable` 而非抛出错误
+
+import { Schema } from "effect";
+import { TrimmedNonEmptyString } from "./baseSchemas";
+import { ProviderOptionDescriptor } from "./model";
+
+const ProviderDiscoveryKind = Schema.Literal(
+  "codex",
+  "claudeAgent",
+  "cursor",
+  "gemini",
+  "grok",
+  "kilo",
+  "opencode",
+  "pi",
+  "glm",
+  "deepseek",
+  "moonshot",
+  "qwen",
+  "mimo",
+  "MiniMax",
+  // 新增 3 家国内 OpenAI 兼容 Provider
+  "doubao",
+  "ernie",
+  "hunyuan",
+);
+
+export const ProviderSkillInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+  shortDescription: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderSkillInterface = typeof ProviderSkillInterface.Type;
+
+export const ProviderSkillDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  path: TrimmedNonEmptyString,
+  enabled: Schema.Boolean,
+  scope: Schema.optional(TrimmedNonEmptyString),
+  interface: Schema.optional(ProviderSkillInterface),
+  dependencies: Schema.optional(Schema.Unknown),
+});
+export type ProviderSkillDescriptor = typeof ProviderSkillDescriptor.Type;
+
+export const ProviderSkillReference = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+});
+export type ProviderSkillReference = typeof ProviderSkillReference.Type;
+
+export const ProviderMentionReference = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+});
+export type ProviderMentionReference = typeof ProviderMentionReference.Type;
+
+export const ProviderComposerCapabilities = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  supportsSkillMentions: Schema.Boolean,
+  supportsSkillDiscovery: Schema.Boolean,
+  supportsNativeSlashCommandDiscovery: Schema.Boolean,
+  supportsPluginMentions: Schema.Boolean,
+  supportsPluginDiscovery: Schema.Boolean,
+  supportsRuntimeModelList: Schema.Boolean,
+  supportsThreadCompaction: Schema.optional(Schema.Boolean),
+  supportsThreadImport: Schema.optional(Schema.Boolean),
+});
+export type ProviderComposerCapabilities = typeof ProviderComposerCapabilities.Type;
+
+export const ProviderGetComposerCapabilitiesInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+});
+export type ProviderGetComposerCapabilitiesInput = typeof ProviderGetComposerCapabilitiesInput.Type;
+
+export const ProviderListSkillsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: TrimmedNonEmptyString,
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  agentDir: Schema.optional(TrimmedNonEmptyString),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListSkillsInput = typeof ProviderListSkillsInput.Type;
+
+export const ProviderListSkillsResult = Schema.Struct({
+  skills: Schema.Array(ProviderSkillDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListSkillsResult = typeof ProviderListSkillsResult.Type;
+
+export const LocalUserSkillSource = Schema.Literal(
+  "claude",
+  "codex",
+  "agents",
+  "openclaw",
+  "unknown",
+);
+export type LocalUserSkillSource = typeof LocalUserSkillSource.Type;
+
+export const LocalUserSkillDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  version: Schema.optional(TrimmedNonEmptyString),
+  homepage: Schema.optional(TrimmedNonEmptyString),
+  path: TrimmedNonEmptyString,
+  source: LocalUserSkillSource,
+  sourceDir: TrimmedNonEmptyString,
+  enabled: Schema.Boolean,
+});
+export type LocalUserSkillDescriptor = typeof LocalUserSkillDescriptor.Type;
+
+export const ListLocalUserSkillsResult = Schema.Struct({
+  skills: Schema.Array(LocalUserSkillDescriptor),
+  searchedDirs: Schema.Array(TrimmedNonEmptyString),
+});
+export type ListLocalUserSkillsResult = typeof ListLocalUserSkillsResult.Type;
+
+export const ListLocalUserSkillsInput = Schema.Struct({});
+export type ListLocalUserSkillsInput = typeof ListLocalUserSkillsInput.Type;
+
+export const ProviderNativeCommandDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderNativeCommandDescriptor = typeof ProviderNativeCommandDescriptor.Type;
+
+export const ProviderListCommandsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: TrimmedNonEmptyString,
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  agentDir: Schema.optional(TrimmedNonEmptyString),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListCommandsInput = typeof ProviderListCommandsInput.Type;
+
+export const ProviderListCommandsResult = Schema.Struct({
+  commands: Schema.Array(ProviderNativeCommandDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListCommandsResult = typeof ProviderListCommandsResult.Type;
+
+// Plugin discovery mirrors Codex app-server's marketplace + plugin summary surface.
+export const ProviderPluginMarketplaceInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderPluginMarketplaceInterface = typeof ProviderPluginMarketplaceInterface.Type;
+
+export const ProviderPluginInstallPolicy = Schema.Literal(
+  "NOT_AVAILABLE",
+  "AVAILABLE",
+  "INSTALLED_BY_DEFAULT",
+);
+export type ProviderPluginInstallPolicy = typeof ProviderPluginInstallPolicy.Type;
+
+export const ProviderPluginAuthPolicy = Schema.Literal("ON_INSTALL", "ON_USE");
+export type ProviderPluginAuthPolicy = typeof ProviderPluginAuthPolicy.Type;
+
+export const ProviderPluginSource = Schema.Struct({
+  type: Schema.Literal("local"),
+  path: TrimmedNonEmptyString,
+});
+export type ProviderPluginSource = typeof ProviderPluginSource.Type;
+
+export const ProviderPluginInterface = Schema.Struct({
+  displayName: Schema.optional(TrimmedNonEmptyString),
+  shortDescription: Schema.optional(TrimmedNonEmptyString),
+  longDescription: Schema.optional(TrimmedNonEmptyString),
+  developerName: Schema.optional(TrimmedNonEmptyString),
+  category: Schema.optional(TrimmedNonEmptyString),
+  capabilities: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+  websiteUrl: Schema.optional(TrimmedNonEmptyString),
+  privacyPolicyUrl: Schema.optional(TrimmedNonEmptyString),
+  termsOfServiceUrl: Schema.optional(TrimmedNonEmptyString),
+  defaultPrompt: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+  brandColor: Schema.optional(TrimmedNonEmptyString),
+  composerIcon: Schema.optional(TrimmedNonEmptyString),
+  logo: Schema.optional(TrimmedNonEmptyString),
+  screenshots: Schema.optional(Schema.Array(TrimmedNonEmptyString)),
+});
+export type ProviderPluginInterface = typeof ProviderPluginInterface.Type;
+
+export const ProviderPluginDescriptor = Schema.Struct({
+  id: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  source: ProviderPluginSource,
+  installed: Schema.Boolean,
+  enabled: Schema.Boolean,
+  installPolicy: ProviderPluginInstallPolicy,
+  authPolicy: ProviderPluginAuthPolicy,
+  interface: Schema.optional(ProviderPluginInterface),
+});
+export type ProviderPluginDescriptor = typeof ProviderPluginDescriptor.Type;
+
+export const ProviderPluginMarketplaceLoadError = Schema.Struct({
+  marketplacePath: TrimmedNonEmptyString,
+  message: TrimmedNonEmptyString,
+});
+export type ProviderPluginMarketplaceLoadError = typeof ProviderPluginMarketplaceLoadError.Type;
+
+export const ProviderPluginMarketplaceDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  path: TrimmedNonEmptyString,
+  interface: Schema.optional(ProviderPluginMarketplaceInterface),
+  plugins: Schema.Array(ProviderPluginDescriptor),
+});
+export type ProviderPluginMarketplaceDescriptor = typeof ProviderPluginMarketplaceDescriptor.Type;
+
+export const ProviderPluginAppSummary = Schema.Struct({
+  id: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  installUrl: Schema.optional(TrimmedNonEmptyString),
+  needsAuth: Schema.Boolean,
+});
+export type ProviderPluginAppSummary = typeof ProviderPluginAppSummary.Type;
+
+export const ProviderListPluginsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  cwd: Schema.optional(TrimmedNonEmptyString),
+  threadId: Schema.optional(TrimmedNonEmptyString),
+  forceRemoteSync: Schema.optional(Schema.Boolean),
+  forceReload: Schema.optional(Schema.Boolean),
+});
+export type ProviderListPluginsInput = typeof ProviderListPluginsInput.Type;
+
+export const ProviderListPluginsResult = Schema.Struct({
+  marketplaces: Schema.Array(ProviderPluginMarketplaceDescriptor),
+  marketplaceLoadErrors: Schema.Array(ProviderPluginMarketplaceLoadError),
+  remoteSyncError: Schema.NullOr(TrimmedNonEmptyString),
+  featuredPluginIds: Schema.Array(TrimmedNonEmptyString),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListPluginsResult = typeof ProviderListPluginsResult.Type;
+
+export const ProviderReadPluginInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  marketplacePath: TrimmedNonEmptyString,
+  pluginName: TrimmedNonEmptyString,
+});
+export type ProviderReadPluginInput = typeof ProviderReadPluginInput.Type;
+
+export const ProviderPluginDetail = Schema.Struct({
+  marketplaceName: TrimmedNonEmptyString,
+  marketplacePath: TrimmedNonEmptyString,
+  summary: ProviderPluginDescriptor,
+  description: Schema.optional(TrimmedNonEmptyString),
+  skills: Schema.Array(ProviderSkillDescriptor),
+  apps: Schema.Array(ProviderPluginAppSummary),
+  mcpServers: Schema.Array(TrimmedNonEmptyString),
+});
+export type ProviderPluginDetail = typeof ProviderPluginDetail.Type;
+
+export const ProviderReadPluginResult = Schema.Struct({
+  plugin: ProviderPluginDetail,
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderReadPluginResult = typeof ProviderReadPluginResult.Type;
+
+export const ProviderListModelsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+  apiKey: Schema.optional(TrimmedNonEmptyString),
+  baseUrl: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderListModelsInput = typeof ProviderListModelsInput.Type;
+
+export const ProviderReasoningEffortDescriptor = Schema.Struct({
+  value: TrimmedNonEmptyString,
+  label: Schema.optional(TrimmedNonEmptyString),
+  description: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderReasoningEffortDescriptor = typeof ProviderReasoningEffortDescriptor.Type;
+
+export const ProviderContextWindowDescriptor = Schema.Struct({
+  value: TrimmedNonEmptyString,
+  label: TrimmedNonEmptyString,
+  isDefault: Schema.optional(Schema.Literal(true)),
+});
+export type ProviderContextWindowDescriptor = typeof ProviderContextWindowDescriptor.Type;
+
+/**
+ * 模型输入/输出模态。
+ *
+ * 借鉴 OpenCode / models.dev 的 modality 概念：
+ * - Text 永远隐含支持
+ * - Image 输入=视觉理解，输出=图像生成
+ * - File 表示 PDF/Office 等附件
+ */
+export const ProviderModality = Schema.Literal(
+  "text",
+  "image",
+  "audio",
+  "video",
+  "file",
+);
+export type ProviderModality = typeof ProviderModality.Type;
+
+/**
+ * 模型能力矩阵（细粒度 flags）。
+ *
+ * 与 Rust `ydsz_core::provider::ModelCapabilities` 一一对应。
+ * 所有字段 optional，未知时前端使用 .unwrapOr(false) 兜底。
+ */
+export const ProviderModelCapabilities = Schema.Struct({
+  supportsImageInput: Schema.optional(Schema.Boolean),
+  supportsToolUse: Schema.optional(Schema.Boolean),
+  supportsReasoning: Schema.optional(Schema.Boolean),
+  supportsStreaming: Schema.optional(Schema.Boolean),
+  supportsAttachment: Schema.optional(Schema.Boolean),
+});
+export type ProviderModelCapabilities = typeof ProviderModelCapabilities.Type;
+
+export const ProviderModelDescriptor = Schema.Struct({
+  slug: TrimmedNonEmptyString,
+  name: TrimmedNonEmptyString,
+  upstreamProviderId: Schema.optional(TrimmedNonEmptyString),
+  upstreamProviderName: Schema.optional(TrimmedNonEmptyString),
+  optionDescriptors: Schema.optional(Schema.Array(ProviderOptionDescriptor)),
+  // Codex model/list results are normalized here so the web app can consume both
+  // the legacy string array and Remodex-style reasoning objects uniformly.
+  supportedReasoningEfforts: Schema.optional(Schema.Array(ProviderReasoningEffortDescriptor)),
+  defaultReasoningEffort: Schema.optional(TrimmedNonEmptyString),
+  supportsFastMode: Schema.optional(Schema.Boolean),
+  supportsThinkingToggle: Schema.optional(Schema.Boolean),
+  contextWindowOptions: Schema.optional(Schema.Array(ProviderContextWindowDescriptor)),
+  defaultContextWindow: Schema.optional(TrimmedNonEmptyString),
+  // W1-2 能力矩阵与模态（与 Rust 端 ModelCapabilities / Modality 一一对应）
+  capabilities: Schema.optional(ProviderModelCapabilities),
+  inputModalities: Schema.optional(Schema.Array(ProviderModality)),
+  outputModalities: Schema.optional(Schema.Array(ProviderModality)),
+  costPerMtokInput: Schema.optional(Schema.Number),
+  costPerMtokOutput: Schema.optional(Schema.Number),
+});
+export type ProviderModelDescriptor = typeof ProviderModelDescriptor.Type;
+
+export const ProviderListModelsResult = Schema.Struct({
+  models: Schema.Array(ProviderModelDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListModelsResult = typeof ProviderListModelsResult.Type;
+
+export const ProviderListAgentsInput = Schema.Struct({
+  provider: ProviderDiscoveryKind,
+});
+export type ProviderListAgentsInput = typeof ProviderListAgentsInput.Type;
+
+export const ProviderAgentDescriptor = Schema.Struct({
+  name: TrimmedNonEmptyString,
+  displayName: TrimmedNonEmptyString,
+  description: Schema.optional(TrimmedNonEmptyString),
+  model: Schema.optional(TrimmedNonEmptyString),
+});
+export type ProviderAgentDescriptor = typeof ProviderAgentDescriptor.Type;
+
+export const ProviderListAgentsResult = Schema.Struct({
+  agents: Schema.Array(ProviderAgentDescriptor),
+  source: Schema.optional(TrimmedNonEmptyString),
+  cached: Schema.optional(Schema.Boolean),
+});
+export type ProviderListAgentsResult = typeof ProviderListAgentsResult.Type;

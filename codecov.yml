@@ -1,0 +1,87 @@
+# Codecov configuration for 2. 环境变量 YDSZ_BOOTSTRAP_TOKEN
+# 互联网大厂基线：差异化门槛 + 自动注释 + patch coverage 卡点
+codecov:
+  require_ci_to_pass: true
+  notify:
+    after_n_builds: 3
+    wait_for_ci: true
+  status:
+    project:
+      default:
+        target: 70%
+        threshold: 2%
+        if_ci_failed: error
+      rust:
+        target: 70%
+        threshold: 2%
+        if_ci_failed: error
+      desktop:
+        target: 70%
+        threshold: 2%
+        if_ci_failed: error
+      mobile:
+        target: 65%
+        threshold: 3%
+        if_ci_failed: error
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        if_ci_failed: error
+comment:
+  layout: "reach, diff, flags, components, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 2%
+      - type: patch
+        target: 80%
+  individual_flags:
+    - name: rust
+      paths:
+        - ydsz-**/
+    - name: desktop
+      paths:
+        - ydsz-desktop/src/**
+    - name: mobile
+      paths:
+        - ydsz-mobile/src/**
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 80%
+      - type: patch
+        target: 85%
+  individual_components:
+    - component_id: core
+      name: "Core Lib (lib/shared/hooks)"
+      paths:
+        - ydsz-desktop/src/lib/**
+        - ydsz-desktop/src/shared/**
+        - ydsz-desktop/src/hooks/**
+        - ydsz-mobile/src/lib/**
+    - component_id: server
+      name: "Backend (Rust Server)"
+      paths:
+        - ydsz-server/src/**
+        - ydsz-shared/src/**
+        - ydsz-provider/src/**
+        - ydsz-flow/src/**
+        - ydsz-core/src/**
+        - ydsz-code/src/**
+ignore:
+  - "**/*.test.{ts,tsx,rs}"
+  - "**/coverage/**"
+  - "**/dist/**"
+  - "**/target/**"
+  - "**/node_modules/**"
+  - "**/routeTree.gen.ts"
+  - "**/__tests__/**"

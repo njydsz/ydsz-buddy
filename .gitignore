@@ -1,0 +1,228 @@
+# ============================================
+# Dependencies & Build
+# ============================================
+node_modules/
+.bun/
+.turbo/
+build/
+dist/
+apps/*/dist/
+packages/*/dist/
+.next/
+out/
+.vercel/
+
+# ============================================
+# Rust (Cargo & Tauri)
+# ============================================
+/target/
+**/target/
+**/*.rs.bk
+Cargo.lock
+*.pdb
+Cargo.toml.user
+
+# ============================================
+# Tauri Specific
+# ============================================
+**/src-tauri/target/
+**/src-tauri/Cargo.lock
+**/src-tauri/gen/
+**/src-tauri/WixTools/
+**/src-tauri/binaries/
+*.msi
+*.app
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+
+# ============================================
+# OS generated files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Logs
+# ============================================
+*.txt
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.tsbuildinfo
+*.rs-logs
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# ============================================
+# IDEs & Editors
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+*.sublime-project
+*.sublime-workspace
+.history/
+*.code-workspace
+
+# ============================================
+# Testing & Coverage
+# ============================================
+coverage/
+.nyc_output/
+.vitest-*
+.playwright/
+apps/web/.playwright/
+apps/web/playwright-report/
+playwright-report/
+test-results/
+.playwright-cli/
+.playwright-mcp/
+__screenshots__/
+apps/web/src/components/__screenshots__/
+*.lcov
+coverage.lcov
+
+# ============================================
+# Package Manager & Cache
+# ============================================
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ============================================
+# Framework specific
+# ============================================
+.astro/
+.tanstack/
+.t3/
+.turbopack/
+.next/
+
+# ============================================
+# Build artifacts
+# ============================================
+/bootstrap.js
+/bootstrap.js.map
+/preload.js
+/preload.js.map
+/main-*.js
+/main-*.js.map
+/browser-sidebar-comment-preload.js
+/browser-sidebar-comment-preload.js.map
+/release/
+*.wasm
+*.node
+
+# ============================================
+# Local dev instance data
+# ============================================
+.ydszcode-*/
+.ydszcode/
+userdata/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+
+# ============================================
+# Windows reserved device names
+# ============================================
+nul
+
+# ============================================
+# Temp & Misc
+# ============================================
+.tmp/
+.plans/
+.plans/**/*.md
+docs/
+.claude/
+.cowork-temp/
+成/
+*.bak
+*.swp
+*.temp
+*.tmp
+run-logs/
+
+# Debug / fix scripts (should never be committed)
+check-*.mjs
+fix-*.mjs
+check-null.mjs
+
+# Tauri dev live logs
+tauri-dev*.log
+
+# Stryker mutation testing output
+.stryker-tmp/
+
+# Bench output
+target/bench-*.txt
+
+# Type check / test output files
+tsc-output*.txt
+tsc_output*.txt
+typecheck*.txt
+test_out*.txt
+test_output*.txt
+lib_test*.txt
+proj_test*.txt
+thread_boot.txt
+ws_test.txt
+errors.txt
+coverage_*.txt
+coverage-*.txt
+cov*.log
+cov*.txt
+
+# ============================================
+# Trae IDE
+# ============================================
+.trae/
+.trae-cn/
+
+# ============================================
+# AI & MCP Tools
+# ============================================
+.cursor/
+.cursorrules
+.cline/
+.aider*
+.continue/
+.github/copilot-instructions.md
