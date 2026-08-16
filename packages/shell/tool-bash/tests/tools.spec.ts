@@ -1138,7 +1138,7 @@ describe('the model-facing bash tool builds its request from named args only (no
     })
 
     expect(bash.requests[0]?.dshEnv).toEqual({
-      DSH_HOME: recordingDshHome,
+      YDB_HOME: recordingDshHome,
       DSH_SESSION_ID: 'request-fg',
       DSH_SESSION_JSONL: path,
       DSH_SHELL: '1',
@@ -1165,7 +1165,7 @@ describe('the model-facing bash tool builds its request from named args only (no
 
     expect(bash.requests[0]?.env).toBeUndefined()
     expect(bash.requests[0]?.dshEnv).toEqual({
-      DSH_HOME: recordingDshHome,
+      YDB_HOME: recordingDshHome,
       DSH_SESSION_ID: 'request-bg',
       DSH_SESSION_JSONL: path,
       DSH_SHELL: '1',
@@ -1186,7 +1186,7 @@ describe('the model-facing bash tool builds its request from named args only (no
     })
 
     expect(bash.requests[0]?.dshEnv).toEqual({
-      DSH_HOME: recordingDshHome,
+      YDB_HOME: recordingDshHome,
       DSH_SESSION_ID: 'request-id-only',
       DSH_SHELL: '1',
     })
@@ -1210,13 +1210,13 @@ describe('the model-facing bash tool builds its request from named args only (no
 
     expect(bash.requests.map(request => request.dshEnv)).toEqual([
       {
-        DSH_HOME: recordingDshHome,
+        YDB_HOME: recordingDshHome,
         DSH_SESSION_ID: 'request-parent',
         DSH_SESSION_JSONL: ctx.sessionPersistence.locate(parent.session.header)?.path,
         DSH_SHELL: '1',
       },
       {
-        DSH_HOME: recordingDshHome,
+        YDB_HOME: recordingDshHome,
         DSH_SESSION_ID: 'request-child',
         DSH_SESSION_JSONL: ctx.sessionPersistence.locate(child.session.header)?.path,
         DSH_SHELL: '1',

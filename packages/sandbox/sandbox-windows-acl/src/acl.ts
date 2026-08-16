@@ -46,7 +46,7 @@ export function buildExplicitAccess(sidPtr: NativePtr, mode: number, permissions
 /**
  * One lock file per protected path: `<GetTempPathW()>\dsh-acl-locks\<first 16
  * hex of sha256(lowercased path)>.lock`. The lock root derives from
- * GetTempPathW (never from runner argv or DSH_HOME), and the lowercasing
+ * GetTempPathW (never from runner argv or YDB_HOME), and the lowercasing
  * maps Windows's case-insensitive path spellings onto one lock.
  * @param api - the binding table.
  * @param path - the protected directory (absolute).

@@ -367,7 +367,7 @@ describe('execution through the bash seam', () => {
     expect(request?.workdir).toBe('/sessions/s1')
     expect(request?.timeoutMs).toBe(1234)
     expect(request?.dshEnv).toEqual({
-      DSH_HOME: dshHome,
+      YDB_HOME: dshHome,
       DSH_SHELL: '1',
       DSH_SESSION_ID: 'session-1',
     })
@@ -393,7 +393,7 @@ describe('execution through the bash seam', () => {
     const dshEnv = bash.requests[0]?.dshEnv
     expect(dshEnv).toBeDefined()
     expect(dshEnv?.['DSH_SHELL']).toBe('1')
-    expect(dshEnv?.['DSH_HOME']).toEqual(expect.any(String))
+    expect(dshEnv?.['YDB_HOME']).toEqual(expect.any(String))
     expect(dshEnv).not.toHaveProperty('DSH_SESSION_ID')
   })
 

@@ -2,7 +2,7 @@
  * Deliverables plugin, node half. Registers the response-format guidance that
  * lets the browser half recognize final-response file references. The browser
  * half ships via exports["./client"], discovered through the package.json
- * dsh.client declaration.
+ * ydb.client declaration.
  */
 
 import type { Context } from '@deepseek-ai/cordis'

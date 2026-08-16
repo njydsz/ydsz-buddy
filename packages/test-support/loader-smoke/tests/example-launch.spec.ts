@@ -62,13 +62,13 @@ describe('resolveExampleLaunch', () => {
       srcBin: SRC_BIN,
       configArgs: ['--config', './cordis.yml'],
       mode: 'lib',
-      env: { DSH_HOME: '/tmp/home' },
+      env: { YDB_HOME: '/tmp/home' },
     })
     expect(args).not.toContain('--import')
     expect(args).toContain('/repo/packages/examples/acp-demo/lib/bin.js')
     expect(args.slice(-2)).toEqual(['--config', './cordis.yml'])
     expect(env.TSX_TSCONFIG_PATH).toBeUndefined()
-    expect(env.DSH_HOME).toBe('/tmp/home')
+    expect(env.YDB_HOME).toBe('/tmp/home')
   })
 
   it('lib mode: uses an explicit plain-Node bin when provided', () => {

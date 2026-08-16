@@ -106,14 +106,14 @@ function prepareProfile(profileName: string): import('@deepseek-ai/dsh-app-boot'
 }
 
 /**
- * The home-level user patch layer (`$DSH_HOME/cordis.patch.yml`).
+ * The home-level user patch layer (`$YDB_HOME/cordis.patch.yml`).
  * @returns the absolute patch-file path.
  */
 function homePatchPath(): string {
   return join(homeDir(), 'cordis.patch.yml')
 }
 
-/** Resolve $DSH_HOME (the electron app shares the same home as `dsh`). */
+/** Resolve $YDB_HOME (the electron app shares the same home as `dsh`). */
 function homeDir(): string {
-  return process.env.DSH_HOME ?? `${process.env.USERPROFILE ?? process.env.HOME ?? ''}/.dsh`
+  return process.env.YDB_HOME ?? `${process.env.USERPROFILE ?? process.env.HOME ?? ''}/.dsh`
 }

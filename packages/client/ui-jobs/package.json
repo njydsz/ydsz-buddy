@@ -21,7 +21,7 @@
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
-  "dsh": {
+  "ydb": {
     "client": {
       "inject": [
         "@njydsz/dsh-client-locale",
@@ -39,7 +39,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
+    "url": "git+https://github.com/njydsz/ydsz-buddy.git",
     "directory": "packages/client/ui-jobs"
   },
   "publishConfig": {

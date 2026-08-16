@@ -26,7 +26,7 @@ export type AgentContext = Omit<Context, 'remote'> & {
 }
 
 /** Context tag written by {@link createScope}. */
-const kScope = Symbol('dsh.client.scope')
+const kScope = Symbol('ydb.client.scope')
 
 /** A minted Agent scope and its disposal boundary. */
 export interface AgentScopeHandle {

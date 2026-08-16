@@ -138,7 +138,7 @@ describe.skipIf(!existsSync(acpBin))('dsh-acp-demo BUILT bin (node lib/bin.js, n
       cwd: consumer,
       env: {
         ...process.env,
-        DSH_HOME: join(consumer, '.dsh'),
+        YDB_HOME: join(consumer, '.dsh'),
         DSH_AGENTS_HOME: join(consumer, '.agents'),
       },
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -218,7 +218,7 @@ async function runBinExpectingExit(configArg: string, cwd: string = tmpdir()): P
   const result = await execa(process.execPath, [acpBin, '--config', configArg], {
     cwd,
     env: {
-      DSH_HOME: join(cwd, '.dsh'),
+      YDB_HOME: join(cwd, '.dsh'),
       DSH_AGENTS_HOME: join(cwd, '.agents'),
     },
     input: '',

@@ -816,12 +816,12 @@ describe('FileSystemSkillProvider', () => {
   })
 
   it('uses default home root resolution without exposing builtin skills', async () => {
-    const previousDshHome = process.env.DSH_HOME
+    const previousDshHome = process.env.YDB_HOME
     const previousAgentsHome = process.env.DSH_AGENTS_HOME
     const previousBundledSkillDir = process.env.DSH_BUNDLED_SKILL_DIR
     const envHome = await tempDir('skill-env-home')
     try {
-      process.env.DSH_HOME = join(envHome, '.dsh')
+      process.env.YDB_HOME = join(envHome, '.dsh')
       process.env.DSH_AGENTS_HOME = join(envHome, '.agents')
       const bundled = join(envHome, 'bundled-skills')
       process.env.DSH_BUNDLED_SKILL_DIR = bundled
@@ -848,7 +848,7 @@ describe('FileSystemSkillProvider', () => {
       expect((await isolated.skills.list()).map(skill => skill.name)).toEqual(['custom-isolated-skill'])
       await isolated.fiber.dispose()
 
-      process.env.DSH_HOME = join(envHome, 'empty-dsh')
+      process.env.YDB_HOME = join(envHome, 'empty-dsh')
       delete process.env.DSH_BUNDLED_SKILL_DIR
       process.env.DSH_AGENTS_HOME = join(envHome, 'empty-agents')
       const empty = new Context()
@@ -863,9 +863,9 @@ describe('FileSystemSkillProvider', () => {
       }, { dshHome: join(envHome, 'empty-dsh') }).name).toBe('filesystem')
     } finally {
       if (previousDshHome === undefined) {
-        delete process.env.DSH_HOME
+        delete process.env.YDB_HOME
       } else {
-        process.env.DSH_HOME = previousDshHome
+        process.env.YDB_HOME = previousDshHome
       }
       if (previousAgentsHome === undefined) {
         delete process.env.DSH_AGENTS_HOME

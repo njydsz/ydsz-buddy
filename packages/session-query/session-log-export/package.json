@@ -5,7 +5,7 @@
   "publishConfig": { "access": "public" },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/ydsz-buddy.git",
+    "url": "git+https://github.com/njydsz/ydsz-buddy.git",
     "directory": "packages/session-query/session-log-export"
   },
   "type": "module",
@@ -49,7 +49,7 @@
     "@types/react": "~18.3.1",
     "react": "^18.2.0"
   },
-  "dsh": {
+  "ydb": {
     "client": {
       "inject": [
         "@njydsz/dsh-client-locale",

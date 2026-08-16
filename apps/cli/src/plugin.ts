@@ -2,11 +2,11 @@
  * `dsh plugin --profile <name> <args...>` — profile plugin management as a
  * thin pnpm forwarder: initialize the profile on first use, run
  * `pnpm <args...>` in the profile directory, then reconcile the
- * `dsh.profile.bundles` layer list against the installed state (a dependency
- * resolving to a package that declares `dsh.bundle` joins the layer stack; a
+ * `ydb.profile.bundles` layer list against the installed state (a dependency
+ * resolving to a package that declares `ydb.bundle` joins the layer stack; a
  * removed or bundle-less dependency leaves it). Reconciling by installed
  * state, not by dependency diff, means `update` activates a package that
- * gained its `dsh.bundle` declaration in a newer version.
+ * gained its `ydb.bundle` declaration in a newer version.
  * @module @deepseek-ai/dsh/plugin
  */
 
@@ -31,7 +31,7 @@ const NAME = 'dsh'
  * Whether a resolved dependency exports a profile patch, i.e. is a bundle.
  * @param packageName - the dependency's package name.
  * @param profileDir - the profile directory (resolution anchor).
- * @returns true when the package manifest declares `dsh.bundle`.
+ * @returns true when the package manifest declares `ydb.bundle`.
  */
 function exportsPatch(packageName: string, profileDir: string): boolean {
   let dir: string
@@ -41,14 +41,14 @@ function exportsPatch(packageName: string, profileDir: string): boolean {
     return false // pnpm reported success yet the package is unresolvable — treat as plain
   }
   const manifest = readProfileManifest(NAME, dir)
-  return manifest.dsh?.bundle?.patch !== undefined
+  return manifest.ydb?.bundle?.patch !== undefined
 }
 
 /**
- * Reconcile `dsh.profile.bundles` against the installed state: pnpm has
+ * Reconcile `ydb.profile.bundles` against the installed state: pnpm has
  * already written the real installed names (so a git/path/tarball/alias spec
  * on the command line reconciles by its true package name) and materialized
- * the packages. A dependency that resolves to a `dsh.bundle`-declaring
+ * the packages. A dependency that resolves to a `ydb.bundle`-declaring
  * package joins the layer stack (appended in dependency order); a
  * dependency-listed name that no longer does — removed, or the installed
  * version dropped the declaration — leaves it. In-box bundles from the
@@ -60,7 +60,7 @@ function reconcilePlugins(before: ProfileManifest, profileDir: string): void {
   const after = readProfileManifest(NAME, profileDir)
   const beforeDeps = new Set(Object.keys(before.dependencies ?? {}))
   const dependencies = Object.keys(after.dependencies ?? {})
-  const plugins = after.dsh?.profile?.bundles ?? []
+  const plugins = after.ydb?.profile?.bundles ?? []
   let changed = false
   for (const packageName of dependencies) {
     const isBundle = exportsPatch(packageName, profileDir)
@@ -69,7 +69,7 @@ function reconcilePlugins(before: ProfileManifest, profileDir: string): void {
       changed = true
     } else if (!isBundle && !beforeDeps.has(packageName)) {
       process.stderr.write(
-        `${NAME}: warning: ${packageName} declares no dsh.bundle — installed as a plain dependency, not a profile layer `
+        `${NAME}: warning: ${packageName} declares no ydb.bundle — installed as a plain dependency, not a profile layer `
         + '(a later update that gains one activates it automatically)\n',
       )
     }
@@ -86,7 +86,7 @@ function reconcilePlugins(before: ProfileManifest, profileDir: string): void {
     }
   }
   if (!changed) return
-  after.dsh = { ...after.dsh, profile: { ...after.dsh?.profile, bundles: plugins } }
+  after.ydb = { ...after.ydb, profile: { ...after.ydb?.profile, bundles: plugins } }
   writeProfileManifest(profileDir, after)
 }
 

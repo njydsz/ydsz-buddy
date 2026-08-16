@@ -1,5 +1,5 @@
 /**
- * Watch-build for client-plugin HMR: runs every `dsh.client` plugin package
+ * Watch-build for client-plugin HMR: runs every `ydb.client` plugin package
  * through the tsdown JS API in watch mode. Reload signaling is not this
  * script's business — the host webserver stat-polls the bundles it serves and
  * broadcasts `rebuilt` frames itself (`dsh web`), so any process that
@@ -27,7 +27,7 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url))
 
 /**
  * Discover the watch workspace by declaration: every packages/<group>/<name>
- * whose package.json carries `dsh.client` with platform "web" is a client
+ * whose package.json carries `ydb.client` with platform "web" is a client
  * plugin bundle emitter. Scanned once at startup — a package added while
  * watching means restarting this script.
  * @param root - repository root containing the grouped package directories.
@@ -39,7 +39,7 @@ export function discoverPluginDirs(root = repoRoot): string[] {
     const manifest = JSON.parse(readFileSync(join(root, manifestPath), 'utf8')) as {
       dsh?: { client?: { platform?: unknown } }
     }
-    if (manifest.dsh?.client?.platform === 'web') dirs.push(dirname(manifestPath).split(sep).join('/'))
+    if (manifest.ydb?.client?.platform === 'web') dirs.push(dirname(manifestPath).split(sep).join('/'))
   }
   return dirs
 }
@@ -90,7 +90,7 @@ const isMain = invokedPath !== undefined && import.meta.url === pathToFileURL(re
 if (isMain) {
   const pluginDirs = discoverPluginDirs()
   if (pluginDirs.length === 0) {
-    console.error('dev-web: no dsh.client (platform "web") packages found under packages/')
+    console.error('dev-web: no ydb.client (platform "web") packages found under packages/')
     process.exit(1)
   }
 
@@ -108,7 +108,7 @@ if (isMain) {
 
   await watchClientPlugins(repoRoot, pluginDirs, pollInterval)
   console.log(
-    `dev-web: watching ${String(pluginDirs.length)} dsh.client plugin packages`
+    `dev-web: watching ${String(pluginDirs.length)} ydb.client plugin packages`
     + `${pollInterval !== undefined ? ` (polling ${String(pollInterval)}ms)` : ''}:\n  ${pluginDirs.join('\n  ')}`,
   )
 }

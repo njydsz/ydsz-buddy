@@ -1,4 +1,4 @@
-/** Local durable attachment backend rooted below `DSH_HOME`. @module @deepseek-ai/dsh-attachment-local */
+/** Local durable attachment backend rooted below `YDB_HOME`. @module @deepseek-ai/dsh-attachment-local */
 
 import { join, resolve } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
@@ -22,7 +22,7 @@ export const DEFAULT_MAX_IMAGE_PIXELS = 40_000_000
 
 /** Local attachment backend configuration. */
 export interface Config {
-  /** Explicit harness home; omitted follows `DSH_HOME`, then `~/.dsh`. */
+  /** Explicit harness home; omitted follows `YDB_HOME`, then `~/.dsh`. */
   dshHome?: string
   /** Maximum encoded bytes accepted for one image. */
   maxImageBytes?: number

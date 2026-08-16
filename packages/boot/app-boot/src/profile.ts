@@ -1,25 +1,25 @@
 /**
  * Profile discovery, initialization, and patch-layer composition for the
- * `dsh --profile` launcher family.
+ * `ydb --profile` launcher family.
  *
- * A profile is a directory under `$DSH_HOME/profiles/<name>` holding a
+ * A profile is a directory under `$YDB_HOME/profiles/<name>` holding a
  * `package.json` (out-of-tree plugin dependencies plus the profile manifest
- * `dsh.profile` with its ordered `bundles` list) and a `cordis.patch.yml`
+ * `ydb.profile` with its ordered `bundles` list) and a `cordis.patch.yml`
  * (the user's own patch layer, applied after every bundle layer). Bundles are
  * npm packages whose manifest declares
- * `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`; the tree is
- * composed by applying each bundle's patch list in `dsh.profile.bundles` order over
+ * `"ydb": { "bundle": { "patch": "./cordis.patch.yml" } }`; the tree is
+ * composed by applying each bundle's patch list in `ydb.profile.bundles` order over
  * an empty entry list, then the profile's own patches, then any launcher
  * layers (`--patch` files and flag-derived patches).
  *
  * Module resolution is two-anchor by construction: a bundle name resolves
- * first from the dsh installation (the launcher's own package), then from the
+ * first from the ydb installation (the launcher's own package), then from the
  * profile directory. The Loader's `baseUrl` is the profile directory, whose
  * `node_modules` pnpm manages for out-of-tree plugins, while the maintained
- * flat fallback directory `$DSH_HOME/profiles/node_modules` (one symlink per
+ * flat fallback directory `$YDB_HOME/profiles/node_modules` (one symlink per
  * package the installation's app and bundles depend on) makes every in-box
  * plugin Node-resolvable from any profile through the ordinary parent-walk.
- * @module @deepseek-ai/dsh-app-boot/profile
+ * @module @njydsz/dsh-app-boot/profile
  */
 
 import { createRequire } from 'node:module'
@@ -38,27 +38,27 @@ export const PROFILES_DIR = 'profiles'
 /** The user patch layer inside a profile directory (hot-reloaded on long-lived surfaces). */
 export const PROFILE_PATCH_FILENAME = 'cordis.patch.yml'
 
-/** The bundle half of the `dsh` manifest section: what a bundle package exports. */
-export interface DshBundleManifest {
+/** The bundle half of the `ydb` manifest section: what a bundle package exports. */
+export interface YdbBundleManifest {
   /** The patch layer this bundle exports, relative to its package root. */
   patch: string
 }
 
-/** The profile half of the `dsh` manifest section: what a profile directory composes. */
-export interface DshProfileManifest {
+/** The profile half of the `ydb` manifest section: what a profile directory composes. */
+export interface YdbProfileManifest {
   /** Ordered bundle layer list (package names). */
   bundles?: string[]
 }
 
 /**
- * The profile-launcher slice of the `dsh`-owned package.json section. A
+ * The profile-launcher slice of the `ydb`-owned package.json section. A
  * manifest may declare both roles; other consumers own additional keys.
  */
-export interface DshManifestSection {
+export interface YdbManifestSection {
   /** Bundle metadata consumed by the profile launcher. */
-  bundle?: DshBundleManifest
+  bundle?: YdbBundleManifest
   /** Profile metadata consumed by the profile launcher. */
-  profile?: DshProfileManifest
+  profile?: YdbProfileManifest
 }
 
 /** The slice of package.json both profiles and bundles use. */
@@ -66,12 +66,12 @@ export interface ProfileManifest {
   name?: string
   dependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
-  dsh?: DshManifestSection
+  ydb?: YdbManifestSection
 }
 
 /** One resolved bundle layer of a profile. */
 export interface ProfileLayer {
-  /** The bundle's package name, as listed in `dsh.profile.bundles`. */
+  /** The bundle's package name, as listed in `ydb.profile.bundles`. */
   packageName: string
   /** Absolute directory of the resolved bundle package. */
   packageDir: string
@@ -87,7 +87,7 @@ export interface Profile {
   name: string
   /** Absolute profile directory. */
   dir: string
-  /** Bundle layers in `dsh.profile.bundles` order. */
+    /** Bundle layers in `ydb.profile.bundles` order. */
   layers: ProfileLayer[]
   /** Absolute path of the profile's own patch file. */
   patchPath: string
@@ -97,7 +97,7 @@ export interface Profile {
 
 /**
  * Resolve a profile's directory under the Harness home.
- * @param name - the profile name (`dsh --profile <name>`).
+ * @param name - the profile name (`ydb --profile <name>`).
  * @param home - the Harness home; defaults to {@link resolveDshHome}.
  * @returns the absolute profile directory (which may not exist yet).
  */
@@ -147,7 +147,7 @@ autoInstallPeers: false
  * pnpm settings out-of-tree plugins need. Existing files are never touched,
  * so re-running is a no-op on an initialized profile.
  * @param dir - the profile directory from {@link resolveProfileDir}.
- * @param bundles - the initial `dsh.profile.bundles` layer list.
+ * @param bundles - the initial `ydb.profile.bundles` layer list.
  */
 export function initProfile(dir: string, bundles: readonly string[]): void {
   mkdirSync(dir, { recursive: true })
@@ -202,7 +202,7 @@ function ensureSymlink(link: string, target: string): void {
 }
 
 /**
- * Maintain the flat module fallback `$DSH_HOME/profiles/node_modules`: one
+ * Maintain the flat module fallback `$YDB_HOME/profiles/node_modules`: one
  * symlink per package in the dsh app's resolvable dependency CLOSURE (BFS
  * over `dependencies` from the app manifest), each resolved from its own
  * real location. Node's parent-directory walk from any profile finds this
@@ -297,14 +297,14 @@ function sameBundles(left: readonly string[], right: readonly string[]): boolean
 function normalizeShippedProfile(name: string, dir: string, manifest: ProfileManifest): ProfileManifest {
   const installationOwned = INSTALLATION_OWNED_PROFILE_TUPLES[name]
   const current = PROFILE_TEMPLATES[name]
-  const bundles = manifest.dsh?.profile?.bundles
+  const bundles = manifest.ydb?.profile?.bundles
   if (installationOwned === undefined || current === undefined || bundles === undefined
     || !sameBundles(bundles, installationOwned)) return manifest
   const normalized: ProfileManifest = {
     ...manifest,
     dsh: {
-      ...manifest.dsh,
-      profile: { ...manifest.dsh?.profile, bundles: [...current] },
+      ...manifest.ydb,
+      profile: { ...manifest.ydb?.profile, bundles: [...current] },
     },
   }
   writeProfileManifest(dir, normalized)
@@ -336,7 +336,7 @@ function packageDirFromAnchor(anchor: string, packageName: string): string | und
  * the same installation as the running dsh, never from a profile-local copy.
  * Resolution does not require the package to export `./package.json`.
  * @param binName - the diagnostic prefix on the thrown error.
- * @param packageName - the bundle's package name from `dsh.profile.bundles`.
+ * @param packageName - the bundle's package name from `ydb.profile.bundles`.
  * @param installAnchor - absolute path of a file inside the dsh app package (its package.json).
  * @param profileDir - the profile directory (second anchor).
  * @returns the bundle package's absolute directory.
@@ -355,9 +355,9 @@ export function resolveBundleDir(
 }
 
 /**
- * Load a profile: resolve every `dsh.profile.bundles` entry to its patch
+ * Load a profile: resolve every `ydb.profile.bundles` entry to its patch
  * layer and parse the profile's own patch file. A listed bundle without a
- * `dsh.bundle` manifest fails loud — naming a bundle-less package as a layer
+ * `ydb.bundle` manifest fails loud — naming a bundle-less package as a layer
  * is a misconfiguration, not "no patches".
  * @param binName - the diagnostic prefix on thrown errors.
  * @param name - the profile name.
@@ -384,13 +384,13 @@ export function loadProfile(
   }
   const manifest = normalizeShippedProfile(name, dir, readProfileManifest(binName, dir))
   // A hand-written profile manifest may omit the dsh section entirely.
-  const bundles = manifest.dsh?.profile?.bundles ?? []
+  const bundles = manifest.ydb?.profile?.bundles ?? []
   const layers = bundles.map((packageName): ProfileLayer => {
     const packageDir = resolveBundleDir(binName, packageName, installAnchor, dir)
     const bundleManifest = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8')) as ProfileManifest
     const declared = bundleManifest.dsh?.bundle?.patch
     if (declared === undefined) {
-      throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no dsh.bundle in its package.json`)
+      throw new Error(`${binName}: profile bundle ${JSON.stringify(packageName)} declares no ydb.bundle in its package.json`)
     }
     const patchPath = join(packageDir, declared)
     return { packageName, packageDir, patchPath, patches: loadOverlayPatches(binName, patchPath) }

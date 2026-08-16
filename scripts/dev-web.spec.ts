@@ -5,7 +5,7 @@ import { expect, it } from 'vitest'
 import type { TsdownBundle } from 'tsdown'
 import { discoverPluginDirs, watchClientPlugins } from './dev-web.ts'
 
-it('discovers dsh.client packages with sibling roles', async () => {
+it('discovers ydb.client packages with sibling roles', async () => {
   const root = await mkdtemp(join(tmpdir(), 'dsh-dev-web-discovery-'))
   try {
     const current = join(root, 'packages', 'client', 'current')

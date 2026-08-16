@@ -107,7 +107,7 @@ describe('layering and reads', () => {
 })
 
 describe('layer ladder', () => {
-  // inherited process env > .credentials.yaml > $DSH_HOME/.env, and the
+  // inherited process env > .credentials.yaml > $YDB_HOME/.env, and the
   // invoking directory's .env supplies no credential at all.
   async function bootLayered(
     path: string,

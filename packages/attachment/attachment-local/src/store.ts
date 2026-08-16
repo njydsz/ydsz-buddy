@@ -113,7 +113,7 @@ async function ensureDurableDirectory(path: string, boundary: string): Promise<v
 }
 
 /**
- * Establish this process's proof that one DSH_HOME entry and every ancestor
+ * Establish this process's proof that one YDB_HOME entry and every ancestor
  * below the filesystem root are durable. Mere existence is insufficient: a
  * concurrent process may have created the directory but not synced its parent.
  */
@@ -128,7 +128,7 @@ async function ensureDurableHome(path: string): Promise<string> {
 
 /**
  * Save and verify immutable image bytes below a versioned attachment root.
- * @param root - absolute `DSH_HOME/attachments/v1` root.
+ * @param root - absolute `YDB_HOME/attachments/v1` root.
  * @param input - encoded bytes and declared metadata.
  * @param limits - resolved storage policy.
  * @returns durable content-addressed reference.
@@ -139,7 +139,7 @@ export async function saveImageFile(root: string, input: SaveImageAttachment, li
   const sha256 = digest(input.data)
   const bucket = join(root, 'objects', sha256.slice(0, 2))
   const staging = join(root, 'tmp')
-  // Establish DSH_HOME itself against the filesystem root once per process.
+  // Establish YDB_HOME itself against the filesystem root once per process.
   // Every process performs that proof independently, so observing a directory
   // another process created can never be mistaken for durable publication.
   const boundary = await ensureDurableHome(dirname(dirname(resolve(root))))
@@ -195,7 +195,7 @@ export async function saveImageFile(root: string, input: SaveImageAttachment, li
 
 /**
  * Read and verify one content-addressed image.
- * @param root - absolute `DSH_HOME/attachments/v1` root.
+ * @param root - absolute `YDB_HOME/attachments/v1` root.
  * @param ref - reference recorded in the session log.
  * @param signal - optional cancellation for filesystem and verification work.
  * @returns verified bytes and reference.

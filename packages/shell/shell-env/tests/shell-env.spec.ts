@@ -38,24 +38,24 @@ describe('ShellEnvRegistry', () => {
     const registry = new ShellEnvRegistry(ctx, { dshHome: './test-dsh-home' })
 
     expect(registry.collect(execution())).toEqual({
-      DSH_HOME: resolve('./test-dsh-home'),
+      YDB_HOME: resolve('./test-dsh-home'),
       DSH_SHELL: '1',
     })
     expect(registry.collect(execution('session-a'))).toEqual({
-      DSH_HOME: resolve('./test-dsh-home'),
+      YDB_HOME: resolve('./test-dsh-home'),
       DSH_SESSION_ID: 'session-a',
       DSH_SHELL: '1',
     })
   })
 
-  it('resolves DSH_HOME from the ambient override or the user-home default', () => {
-    vi.stubEnv('DSH_HOME', './ambient-dsh-home')
+  it('resolves YDB_HOME from the ambient override or the user-home default', () => {
+    vi.stubEnv('YDB_HOME', './ambient-dsh-home')
     const fromEnvironment = new ShellEnvRegistry(new Context())
-    expect(fromEnvironment.collect(execution()).DSH_HOME).toBe(resolve('./ambient-dsh-home'))
+    expect(fromEnvironment.collect(execution()).YDB_HOME).toBe(resolve('./ambient-dsh-home'))
 
-    vi.stubEnv('DSH_HOME', undefined)
+    vi.stubEnv('YDB_HOME', undefined)
     const fromDefault = new ShellEnvRegistry(new Context())
-    expect(fromDefault.collect(execution()).DSH_HOME).toBe(join(homedir(), '.dsh'))
+    expect(fromDefault.collect(execution()).YDB_HOME).toBe(join(homedir(), '.dsh'))
   })
 
   it('collects declared contributor variables and omits unavailable values', () => {
@@ -134,7 +134,7 @@ describe('ShellEnvRegistry', () => {
     })).toThrow(/invalid key/)
     expect(() => registry.register({
       name: 'reserved-key',
-      variables: { DSH_HOME: { description: 'Reserved key.' } },
+      variables: { YDB_HOME: { description: 'Reserved key.' } },
       resolve: () => ({}),
     })).toThrow(/reserved key/)
     expect(() => registry.register({
