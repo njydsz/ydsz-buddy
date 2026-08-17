@@ -12,7 +12,7 @@
  * - 设置页中的 Preset 管理面板
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 // ==================== 类型 ====================
@@ -53,7 +53,6 @@ export interface PresetSelectorProps {
 export function PresetSelector({
   currentPresetId,
   onSelect,
-  showManage = true,
 }: PresetSelectorProps) {
   const [presets, setPresets] = useState<AgentPreset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,15 +83,6 @@ export function PresetSelector({
       onSelect?.(preset.id, preset);
     },
     [onSelect],
-  );
-
-  const builtinPresets = useMemo(
-    () => presets.filter((p) => p.builtin),
-    [presets],
-  );
-  const customPresets = useMemo(
-    () => presets.filter((p) => !p.builtin),
-    [presets],
   );
 
   if (loading) {

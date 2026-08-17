@@ -81,4 +81,5 @@ pub mod credential_store;      // OS Keyring 凭证存储（P0-2）
 pub mod review_comments;        // 行级 Review Comment 后端持久化（P2-2）
 pub mod code_sandbox;           // Agent 代码执行沙箱（P2-8）
 pub mod extensions;             // Extension 扩展系统（P1-1: 安装/管理/启用/禁用 UI）
+pub mod image_gen;              // AI 文生图（DALL-E 3 / FLUX / SD / 通义万相 / 混元）
 

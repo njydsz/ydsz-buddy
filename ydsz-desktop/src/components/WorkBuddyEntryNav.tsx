@@ -36,7 +36,6 @@ import {
   Plus,
   Settings,
   Search,
-  Bell,
   Sparkles,
   History,
   Star,
@@ -47,7 +46,6 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "~/lib/utils";
-import { useMessages } from "~/i18n/I18nContext";
 
 // ==================== Types ====================
 
@@ -193,7 +191,6 @@ export function WorkBuddyEntryNav({
   onLayerChange: (layer: EntryLayer) => void;
   onSearch?: (query: string) => void;
 }) {
-  const messages = useMessages();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = useCallback(

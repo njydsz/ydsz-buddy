@@ -28,17 +28,14 @@ import {
   MessageSquare,
   Webhook,
   Check,
-  X,
   ExternalLink,
   Shield,
   Bell,
   Loader2,
   Plus,
-  Trash2,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Badge } from "./ui/badge";
 import {
   Card,
   CardContent,
@@ -193,16 +190,15 @@ function ChannelCard({ channel, onUpdate, onTest }: ChannelCardProps) {
                 placeholder={`输入 ${channel.name} Webhook URL`}
                 className="text-[12px]"
               />
-              <Button variant="outline" size="icon" className="shrink-0" asChild>
-                <a
-                  href={channel.docsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="查看配置文档"
-                >
-                  <ExternalLink className="size-3.5" />
-                </a>
-              </Button>
+              <a
+                href={channel.docsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="查看配置文档"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <ExternalLink className="size-3.5" />
+              </a>
             </div>
           </div>
 
@@ -256,7 +252,6 @@ function ChannelCard({ channel, onUpdate, onTest }: ChannelCardProps) {
 // ==================== Main Component ====================
 
 export function IMIntegrationSettings() {
-  const [channels, setChannels] = useState<IMChannel[]>(IM_CHANNELS.map((c) => c.id));
   const [channelConfigs, setChannelConfigs] = useState<Record<IMChannel, ChannelConfig>>(
     () =>
       IM_CHANNELS.reduce(

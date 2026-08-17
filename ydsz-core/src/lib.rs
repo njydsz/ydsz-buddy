@@ -99,6 +99,33 @@ pub mod effect_registry;
 /// 使不同场景可替换不同的循环策略（Simple、Standard、Review、Quest）。
 pub mod agent_loop;
 
+/// Memory 记忆系统——跨会话持久化记忆。
+///
+/// 为 Agent 提供项目级的上下文延续能力，支持：
+/// - 结构化记忆条目（决策/偏好/教训/上下文/操作）
+/// - 基于项目 ID + 关键词的召回
+/// - 记忆压缩（将冗长对话浓缩为结构化记忆）
+/// - 时间衰减与重要性评分
+pub mod memory;
+
+/// 自定义斜杠命令系统（P1-7）。
+///
+/// 允许用户注册和执行自定义的斜杠命令（如 `/commit`、`/review-pr`），
+/// 支持 Prompt 模板 / Shell 脚本 / 内置函数三种执行方式。
+pub mod slash_command;
+
+/// Subagent 运行时派生（P1-4）。
+///
+/// 允许主 Agent 在 Turn 中动态创建子代理 Worktree 线程，
+/// 支持 Supervisor / PeerReview / Pipeline 三种编排拓扑。
+pub mod subagent;
+
+/// 多模型并行对比 Fan-Out（P1-5）。
+///
+/// 同一 prompt 同时分发给多个 Provider/模型执行，
+/// 自动评分对比选出最优结果。
+pub mod fanout;
+
 #[cfg(test)]
 mod tests;
 

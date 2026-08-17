@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
 
 import { UnifiedLandingPage } from "../components/UnifiedLandingPage";
 import { AppTopChrome } from "../components/AppTopChrome";
+import { LandingModeSwitcher } from "../components/LandingModeSwitcher";
 import { YdszBuddyWordmark } from "../components/Sidebar";
 import { SidebarInset } from "../components/ui/sidebar";
 import { useWorkspaceStore } from "../workspaceStore";
@@ -44,11 +45,7 @@ function WorkspaceIndexRouteView() {
               <YdszBuddyWordmark />
             </span>
           }
-          title={
-            <h2 className="max-w-[clamp(16rem,50vw,40rem)] cursor-default truncate text-sm font-medium text-foreground">
-              ydsz-shared::
-            </h2>
-          }
+          title={<LandingModeSwitcher mode="code" />}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <UnifiedLandingPage mode="code" />

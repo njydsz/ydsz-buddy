@@ -134,7 +134,7 @@ export function useComposerImageGenPick(
       menuItems.push({
         id: "image-loading",
         label: "正在加载图像生成 Provider...",
-        kind: "hint",
+        type: "hint",
         disabled: true,
       });
       return menuItems;
@@ -144,7 +144,7 @@ export function useComposerImageGenPick(
       menuItems.push({
         id: "image-error",
         label: "加载失败，请检查网络后重试",
-        kind: "hint",
+        type: "hint",
         disabled: true,
       });
       return menuItems;
@@ -156,7 +156,7 @@ export function useComposerImageGenPick(
         menuItems.push({
           id: "image-no-provider",
           label: "未配置图像生成 Provider，请在设置中配置",
-          kind: "hint",
+          type: "hint",
           disabled: true,
         });
       } else {
@@ -166,7 +166,7 @@ export function useComposerImageGenPick(
           id: `image-generate-${defaultProvider.provider}`,
           label: `使用 ${defaultProvider.displayName} 生成图像`,
           description: `提示词: "${extracted.query.slice(0, 40)}${extracted.query.length > 40 ? "..." : ""}"`,
-          kind: "action",
+          type: "action",
           icon: "image",
           metadata: {
             action: "image_generate",
@@ -180,7 +180,7 @@ export function useComposerImageGenPick(
             id: `image-generate-${p.provider}`,
             label: `${p.displayName}`,
             description: `使用 ${p.models[0] ?? p.provider} 生成`,
-            kind: "action",
+            type: "action",
             icon: "image",
             metadata: {
               action: "image_generate",
@@ -196,13 +196,13 @@ export function useComposerImageGenPick(
         menuItems.push({
           id: "image-hint",
           label: "继续输入图像描述，生成 AI 图片",
-          kind: "hint",
+          type: "hint",
           disabled: true,
         });
         menuItems.push({
           id: "image-config-hint",
           label: "⚙️ 在设置中配置 FLUX / DALL-E / SD API Key",
-          kind: "action",
+          type: "action",
           icon: "settings",
           metadata: { action: "open_settings", tab: "imageGen" },
         });
@@ -210,7 +210,7 @@ export function useComposerImageGenPick(
         menuItems.push({
           id: "image-hint",
           label: "继续输入图像描述，按 Enter 生成",
-          kind: "hint",
+          type: "hint",
           disabled: true,
         });
         // 展示可用 Provider 快捷入口
@@ -219,7 +219,7 @@ export function useComposerImageGenPick(
             id: `image-provider-${p.provider}`,
             label: `${p.displayName}`,
             description: p.models[0] ?? "",
-            kind: "info",
+            type: "hint",
             icon: "check",
             disabled: true,
           });

@@ -13,6 +13,7 @@ import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-route
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { UnifiedLandingPage, type LandingPageMode } from "../components/UnifiedLandingPage";
+import { LandingModeSwitcher } from "../components/LandingModeSwitcher";
 import { LandingComposer } from "../components/LandingComposer";
 import { AppTopChrome } from "../components/AppTopChrome";
 import { YdszBuddyWordmark } from "../components/Sidebar";
@@ -76,9 +77,9 @@ function ChatIndexRouteView() {
   // Work 模式快捷操作 → prompt 模板
   const workQuickActionPrompts: Record<string, string> = useMemo(
     () => ({
+      docProcess: messages.landing.quickActionDocProcess + "：",
+      dataAnalysis: messages.landing.quickActionDataAnalysis + "：",
       webRead: messages.landing.quickActionWebRead + "：",
-      research: messages.landing.quickActionResearch + "：",
-      dataMining: messages.landing.quickActionDataMining + "：",
       fileManager: messages.landing.quickActionFileManager + "：",
     }),
     [messages.landing],
@@ -186,11 +187,7 @@ function ChatIndexRouteView() {
               <YdszBuddyWordmark />
             </span>
           }
-          title={
-            <h2 className="max-w-[clamp(16rem,50vw,40rem)] cursor-default truncate text-sm font-medium text-foreground">
-              云顶数字 {landingMode === "work" ? "Work" : "Code"}
-            </h2>
-          }
+          title={<LandingModeSwitcher mode={landingMode} />}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {errorMessage ? (

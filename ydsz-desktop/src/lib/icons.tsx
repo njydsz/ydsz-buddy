@@ -96,6 +96,7 @@ import {
   IconMoon,
   IconPalette,
   IconPaperclip,
+  IconPhoto,
   IconPinnedFilled,
   IconPlayerPlay,
   IconPlayerPause,
@@ -162,6 +163,7 @@ export const BellIcon = adaptIcon(IconBell);
 export const BookIcon = adaptIcon(IconBook);
 export const ClockIcon = adaptIcon(IconClock);
 export const Code2Icon = adaptIcon(IconCode);
+export const CodeIcon = Code2Icon;
 export const ArrowRightIcon = adaptIcon(IconArrowRight);
 export const ArrowDownIcon = adaptIcon(IconArrowDown);
 export const ArrowUpIcon = adaptIcon(IconArrowUp);
@@ -170,6 +172,7 @@ export const GripVerticalIcon = adaptIcon(IconGripVertical);
 export const BotIcon = adaptIcon(IconRobot);
 export const BugIcon = adaptIcon(IconBug);
 export const CameraIcon = adaptIcon(IconCamera);
+export const ImageIcon = adaptIcon(IconPhoto);
 export const CheckIcon = adaptIcon(IconCheck);
 export const ChevronDownIcon = adaptIcon(IconChevronDown);
 export const ChevronLeftIcon = adaptIcon(IconChevronLeft);
@@ -206,6 +209,7 @@ export const GitForkIcon = adaptIcon(IconGitFork);
 export const GitHubIcon: LucideIcon = (props) => (
   <SiGithub className={props.className} style={props.style} />
 );
+export const GithubIcon = GitHubIcon;
 export const GitPullRequestIcon = adaptIcon(IconGitPullRequest);
 export const GlobeIcon = adaptIcon(IconWorld);
 export const McpIcon: LucideIcon = (props) => (
@@ -245,6 +249,7 @@ export const LockOpenIcon = adaptIcon(IconLockOpen);
 export const Maximize2 = adaptIcon(IconMaximize);
 export const Minimize2 = adaptIcon(IconMinimize);
 export const MessageCircleIcon = adaptIcon(IconMessageCircle);
+export const MessageSquareIcon = adaptIcon(IconMessageCircle);
 export const MicIcon = adaptIcon(IconMicrophone);
 export const PanelLeftCloseIcon = adaptIcon(IconLayoutSidebarLeftCollapse);
 export const PanelLeftIcon = adaptIcon(IconLayoutSidebarLeftExpand);
@@ -274,6 +279,7 @@ export const SkipForwardIcon = adaptIcon(IconPlayerSkipForward);
 export const Plus = adaptIcon(IconPlus);
 export const PlusIcon = adaptIcon(IconPlus);
 export const PuzzleIcon = adaptIcon(IconPuzzle);
+export const PackageIcon = PuzzleIcon;
 export const RefreshCwIcon = adaptIcon(IconRefresh);
 export const RocketIcon = adaptIcon(IconRocket);
 export const RotateCcwIcon = adaptIcon(IconRotate2);
@@ -290,6 +296,7 @@ export const SunIcon = adaptIcon(IconSun);
 export const MoonIcon = adaptIcon(IconMoon);
 export const DeviceLaptopIcon = adaptIcon(IconDeviceLaptop);
 export const DeviceMobileIcon = adaptIcon(IconDeviceMobile);
+export const SmartphoneIcon = adaptIcon(IconDeviceMobile);
 export const StopIcon = adaptIcon(IconPlayerStop);
 export const SquarePenIcon = adaptIcon(IconEdit);
 export const SquareSplitHorizontal: LucideIcon = (props) => (
@@ -303,8 +310,11 @@ export const TerminalSquare = adaptIcon(IconTerminal2);
 export const TerminalSquareIcon = adaptIcon(IconTerminal2);
 export const TextWrapIcon = adaptIcon(IconTextWrap);
 export const Trash2 = adaptIcon(IconTrash);
+export const Trash2Icon = Trash2;
+export const TrashIcon = Trash2;
 export const TriangleAlertIcon = adaptIcon(IconAlertTriangle);
 export const Undo2Icon = adaptIcon(IconArrowBackUp);
+export const UploadIcon = adaptIcon(IconCloudUpload);
 export const WrenchIcon = adaptIcon(IconTool);
 export const WorktreeIcon: LucideIcon = (props) => (
   <LuSplit

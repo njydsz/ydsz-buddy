@@ -96,9 +96,9 @@ export function BrowserRecordingPanel({ threadId, tabId }: BrowserRecordingPanel
       await invoke("browser_start_recording", { threadId });
       setRecordingState({ isRecording: true, actionCount: 0 });
       setActions([]);
-      anchoredToastManager.success("已开始录制浏览器操作");
+      anchoredToastManager.add({ type: "success", title: "已开始录制浏览器操作" });
     } catch (e) {
-      anchoredToastManager.error(`开始录制失败: ${String(e)}`);
+      anchoredToastManager.add({ type: "error", title: `开始录制失败: ${String(e)}` });
     }
   }, [threadId]);
 
@@ -109,11 +109,12 @@ export function BrowserRecordingPanel({ threadId, tabId }: BrowserRecordingPanel
         threadId,
       });
       setRecordingState({ isRecording: false, actionCount: 0 });
-      anchoredToastManager.success(
-        `录制完成: ${summary.totalActions} 个操作 (${summary.successCount} 成功, ${summary.errorCount} 失败)`
-      );
+      anchoredToastManager.add({
+        type: "success",
+        title: `录制完成: ${summary.totalActions} 个操作 (${summary.successCount} 成功, ${summary.errorCount} 失败)`,
+      });
     } catch (e) {
-      anchoredToastManager.error(`停止录制失败: ${String(e)}`);
+      anchoredToastManager.add({ type: "error", title: `停止录制失败: ${String(e)}` });
     }
   }, [threadId]);
 
@@ -132,14 +133,15 @@ export function BrowserRecordingPanel({ threadId, tabId }: BrowserRecordingPanel
       });
       setReplayResult(result);
       if (result.failed === 0) {
-        anchoredToastManager.success(`回放完成: ${result.successful}/${result.total} 成功`);
+        anchoredToastManager.add({ type: "success", title: `回放完成: ${result.successful}/${result.total} 成功` });
       } else {
-        anchoredToastManager.warning(
-          `回放完成: ${result.successful}/${result.total} 成功, ${result.failed} 失败`
-        );
+        anchoredToastManager.add({
+          type: "warning",
+          title: `回放完成: ${result.successful}/${result.total} 成功, ${result.failed} 失败`,
+        });
       }
     } catch (e) {
-      anchoredToastManager.error(`回放失败: ${String(e)}`);
+      anchoredToastManager.add({ type: "error", title: `回放失败: ${String(e)}` });
     } finally {
       setReplaying(false);
     }
@@ -159,9 +161,9 @@ export function BrowserRecordingPanel({ threadId, tabId }: BrowserRecordingPanel
       a.download = `browser-recording-${threadId}-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      anchoredToastManager.success("导出录制成功");
+      anchoredToastManager.add({ type: "success", title: "导出录制成功" });
     } catch (e) {
-      anchoredToastManager.error(`导出失败: ${String(e)}`);
+      anchoredToastManager.add({ type: "error", title: `导出失败: ${String(e)}` });
     }
   }, [threadId]);
 
@@ -178,15 +180,15 @@ export function BrowserRecordingPanel({ threadId, tabId }: BrowserRecordingPanel
       const data = JSON.parse(text);
       if (Array.isArray(data.actions)) {
         setActions(data.actions);
-        anchoredToastManager.success(`导入录制: ${data.actions.length} 个操作`);
+        anchoredToastManager.add({ type: "success", title: `导入录制: ${data.actions.length} 个操作` });
       } else if (Array.isArray(data)) {
         setActions(data);
-        anchoredToastManager.success(`导入录制: ${data.length} 个操作`);
+        anchoredToastManager.add({ type: "success", title: `导入录制: ${data.length} 个操作` });
       } else {
-        anchoredToastManager.error("无效的录制文件格式");
+        anchoredToastManager.add({ type: "error", title: "无效的录制文件格式" });
       }
     } catch (err) {
-      anchoredToastManager.error(`导入失败: ${String(err)}`);
+      anchoredToastManager.add({ type: "error", title: `导入失败: ${String(err)}` });
     }
 
     // Reset input so same file can be re-imported

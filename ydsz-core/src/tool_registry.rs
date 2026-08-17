@@ -330,6 +330,119 @@ impl ToolRegistry {
             parameters: serde_json::json!({ "type": "object" }),
         });
 
+        // === P0-2: Web 搜索工具 ===
+        registry.register(ToolDescriptor {
+            name: "web_search".into(),
+            domain: ToolDomain::Work,
+            description: "执行网页搜索引擎查询，返回标题、链接和摘要".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "query": { "type": "string", "description": "搜索查询词" },
+                    "max_results": { "type": "integer", "description": "最大返回结果数（默认 5）" },
+                    "search_depth": { "type": "string", "enum": ["basic", "advanced"], "description": "搜索深度" }
+                },
+                "required": ["query"]
+            }),
+        });
+
+        registry.register(ToolDescriptor {
+            name: "web_fetch".into(),
+            domain: ToolDomain::Work,
+            description: "抓取指定 URL 的页面内容并转换为 Markdown".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string", "description": "目标 URL" },
+                    "extract_mode": { "type": "string", "enum": ["markdown", "text", "html"], "description": "提取模式（默认 markdown）" },
+                    "max_length": { "type": "integer", "description": "最大返回字符数" }
+                },
+                "required": ["url"]
+            }),
+        });
+
+        // === P0-1: 文生图工具 ===
+        registry.register(ToolDescriptor {
+            name: "image_generate".into(),
+            domain: ToolDomain::Work,
+            description: "根据文本描述生成图片（支持 DALL·E / FLUX / Stable Diffusion）".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "prompt": { "type": "string", "description": "图片描述提示词" },
+                    "negative_prompt": { "type": "string", "description": "负面提示词（不希望出现的内容）" },
+                    "width": { "type": "integer", "description": "图片宽度（默认 1024）" },
+                    "height": { "type": "integer", "description": "图片高度（默认 1024）" },
+                    "provider": { "type": "string", "enum": ["dall-e", "flux", "stable-diffusion"], "description": "图片生成 Provider" },
+                    "num_images": { "type": "integer", "description": "生成数量（默认 1）" }
+                },
+                "required": ["prompt"]
+            }),
+        });
+
+        // === P0-3: Memory 记忆工具 ===
+        registry.register(ToolDescriptor {
+            name: "memory_store".into(),
+            domain: ToolDomain::Shared,
+            description: "存储一条项目记忆（决策/偏好/教训/上下文）".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "category": { "type": "string", "enum": ["decision", "preference", "lesson", "context", "operation", "custom"], "description": "记忆类别" },
+                    "title": { "type": "string", "description": "记忆标题" },
+                    "content": { "type": "string", "description": "记忆详细内容" },
+                    "tags": { "type": "array", "items": { "type": "string" }, "description": "关键词标签" },
+                    "importance": { "type": "number", "description": "重要性评分 0.0-1.0" }
+                },
+                "required": ["category", "title", "content"]
+            }),
+        });
+
+        registry.register(ToolDescriptor {
+            name: "memory_recall".into(),
+            domain: ToolDomain::Shared,
+            description: "根据关键词/项目召回相关记忆".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "keyword": { "type": "string", "description": "搜索关键词" },
+                    "category": { "type": "string", "enum": ["decision", "preference", "lesson", "context", "operation", "custom"], "description": "按类别筛选" },
+                    "limit": { "type": "integer", "description": "最大返回数量（默认 10）" }
+                }
+            }),
+        });
+
+        // === P1-7: 自定义斜杠命令工具 ===
+        registry.register(ToolDescriptor {
+            name: "slash_command_execute".into(),
+            domain: ToolDomain::Shared,
+            description: "执行用户自定义的斜杠命令".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "command": { "type": "string", "description": "命令名称（不含 / 前缀）" },
+                    "args": { "type": "string", "description": "命令参数" }
+                },
+                "required": ["command"]
+            }),
+        });
+
+        // === P2-9: TTS 语音合成工具 ===
+        registry.register(ToolDescriptor {
+            name: "tts_speak".into(),
+            domain: ToolDomain::Shared,
+            description: "将文本转换为语音播放".into(),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "text": { "type": "string", "description": "要合成的文本" },
+                    "voice": { "type": "string", "description": "语音类型（如 zh-CN-XiaoxiaoNeural）" },
+                    "speed": { "type": "number", "description": "语速（默认 1.0）" }
+                },
+                "required": ["text"]
+            }),
+        });
+
         // 文件系统管理工具
         registry.register(ToolDescriptor {
             name: "fs_list_directory".into(),

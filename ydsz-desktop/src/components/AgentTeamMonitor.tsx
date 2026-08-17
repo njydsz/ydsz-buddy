@@ -71,15 +71,6 @@ interface TeamSnapshot {
   createdAt: string;
 }
 
-interface TaskDagNode {
-  taskId: string;
-  title: string;
-  status: TaskStatus;
-  assignee?: string;
-  dependencies: string[];
-  dependents: string[];
-}
-
 // ==================== 主组件 ====================
 
 export interface AgentTeamMonitorProps {

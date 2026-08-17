@@ -19,5 +19,8 @@ tracing = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
 
+# Memory 系统依赖
+ydsz-core = { path = "../ydsz-core" }
+
 [dev-dependencies]
 tempfile = { workspace = true }

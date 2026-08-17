@@ -1,14 +1,13 @@
 /**
  * @file 统一落地页组件
  *
- * 合并原 AppLandingPage 和 ChatLandingPage，提供统一的 Work/Code 模式落地页：
+ * 按 WorkBuddy 风格布局的落地页，结构自上而下：
  *
- * - **模式徽标**：顶部彩色 chip 标识当前模式（Work 琥珀色 / Code 天蓝色）
- * - **标题 + 副标题**：居中展示模式定位文案
- * - **Composer 插槽**：可选的输入区域（有线程时传入，无线程时为 null）
- * - **快捷操作**：4 个 chip 按钮，点击通过回调通知父组件（不再直接路由跳转）
- * - **底部提示**：引导用户按快捷键开启新会话
- * - **加载态**：loading=true 时显示脉冲动画
+ * 1. **品牌标题**：大字号品牌名 + 价值主张
+ * 2. **模式切换**：分段控件（办公 / 编码）
+ * 3. **功能快捷入口**：图标 + 标签横排按钮
+ * 4. **Composer 插槽**：输入区域
+ * 5. **底部工具栏**：工作空间选择 + 权限选择 + 模型选择器 + 发送
  *
  * ## 核心导出
  *
@@ -21,12 +20,6 @@
  * - ChatView 中无线程 / 有线程但无消息时的居中落地页
  * - _chat.index 路由的启动加载态
  * - _chat.workspace.index 路由的工作区空态
- *
- * ## 与旧组件的差异
- *
- * - 快捷操作不再内置路由跳转，改为 `onQuickAction` 回调，由父组件决定行为
- * - 统一了 AppLandingPage 和 ChatLandingPage 的两套快捷操作文案
- * - 支持通过 `composerSection` 插槽嵌入 Composer 输入区域
  */
 import { type FC, useMemo } from "react";
 import {
@@ -44,6 +37,7 @@ import {
 
 import { cn } from "~/lib/utils";
 import { useMessages } from "~/i18n/I18nContext";
+import { HomepageTemplateCards } from "./HomepageTemplateCards";
 
 export type LandingPageMode = "work" | "code";
 
@@ -95,15 +89,15 @@ const modeConfig: Record<
 
 /**
  * 根据模式返回快捷操作列表。
- * Work 模式：网页读取、调研分析、数据挖掘、文件管理
+ * Work 模式：文档处理、数据分析、网页读取、文件管理
  * Code 模式：应用开发、项目理解、调试修复、代码审查
  */
 function getQuickActions(messages: ReturnType<typeof useMessages>): LandingQuickAction[] {
   return [
+    { id: "docProcess", icon: GoFile, label: messages.landing.quickActionDocProcess },
+    { id: "dataAnalysis", icon: GoDatabase, label: messages.landing.quickActionDataAnalysis },
     { id: "webRead", icon: GoBrowser, label: messages.landing.quickActionWebRead },
-    { id: "research", icon: GoBook, label: messages.landing.quickActionResearch },
-    { id: "dataMining", icon: GoDatabase, label: messages.landing.quickActionDataMining },
-    { id: "fileManager", icon: GoFile, label: messages.landing.quickActionFileManager },
+    { id: "fileManager", icon: GoBook, label: messages.landing.quickActionFileManager },
   ];
 }
 
@@ -141,10 +135,16 @@ export function UnifiedLandingPage({
       )}
     >
       <div className="flex w-full max-w-3xl flex-col items-center select-none">
+        {/* Brand title — WorkBuddy style large heading */}
+        <h1 className="text-center text-[28px] font-semibold tracking-[-0.02em] text-foreground/95 sm:text-[34px]">
+          {messages.landing.brandName}
+          <span className="ml-2 text-muted-foreground/80">{messages.landing.brandTagline}</span>
+        </h1>
+
         {/* Mode badge */}
         <span
           className={cn(
-            "mb-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium tracking-wide",
+            "mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium tracking-wide",
             config.badgeClass,
           )}
         >
@@ -152,10 +152,7 @@ export function UnifiedLandingPage({
           {messages.landing[config.badgeKey]}
         </span>
 
-        {/* Title */}
-        <h1 className="text-center text-[28px] font-semibold tracking-[-0.02em] text-foreground/95 sm:text-[34px]">
-          {messages.landing[config.titleKey]}
-        </h1>
+        {/* Subtitle */}
         <p className="mt-3 max-w-xl text-center text-[13px] leading-relaxed text-muted-foreground/75">
           {messages.landing[config.subtitleKey]}
         </p>
@@ -163,9 +160,16 @@ export function UnifiedLandingPage({
         {/* Composer section */}
         {composerSection ? <div className="mt-8 w-full">{composerSection}</div> : null}
 
-        {/* Quick actions */}
+        {/* Template cards for work mode */}
+        {mode === "work" && !composerSection ? (
+          <div className="mt-8 w-full max-w-2xl">
+            <HomepageTemplateCards />
+          </div>
+        ) : null}
+
+        {/* Quick actions — WorkBuddy style icon + label buttons */}
         <div className={cn("mt-8 flex w-full flex-col items-center", composerSection ? "mt-6" : "mt-8")}>
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {quickActions.map((action) => {
               const ActionIcon = action.icon;
               return (
@@ -174,13 +178,13 @@ export function UnifiedLandingPage({
                   type="button"
                   onClick={() => onQuickAction?.(action.id)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-normal transition-all duration-150",
+                    "inline-flex flex-col items-center gap-1.5 rounded-xl border px-4 py-3 text-[12px] font-normal transition-all duration-150",
                     "border-border/60 bg-background/80 text-foreground/80",
                     "hover:scale-[1.02] hover:border-border hover:bg-muted/50 hover:text-foreground",
                     "active:scale-[0.98]",
                   )}
                 >
-                  <ActionIcon className="size-3.5 shrink-0" />
+                  <ActionIcon className="size-5 shrink-0" />
                   <span>{action.label}</span>
                 </button>
               );

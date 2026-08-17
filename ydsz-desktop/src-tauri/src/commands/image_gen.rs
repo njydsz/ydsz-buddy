@@ -12,16 +12,17 @@
 //! | 命令 | 说明 |
 //! |------|------|
 //! | `image_generate` | 根据文本描述生成图片 |
-//! | `image_generate_status` | 查询异步生成任务状态 |
 
-use std::path::Path;
-
+use base64::Engine;
+use chrono::Utc;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use tracing::{info, error};
+use specta::Type;
+use tauri::Manager;
+use tracing::info;
 
 /// 图片生成后端类型
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum ImageGenBackend {
     /// OpenAI DALL-E 3
@@ -37,7 +38,7 @@ pub enum ImageGenBackend {
 }
 
 /// 图片尺寸
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum ImageSize {
     /// 1024x1024 (正方形)
@@ -63,10 +64,21 @@ impl ImageSize {
             ImageSize::Thumbnail256 => "256x256",
         }
     }
+
+    /// 获取 (width, height)
+    pub fn dimensions(&self) -> (u32, u32) {
+        match self {
+            ImageSize::Square1024 => (1024, 1024),
+            ImageSize::Portrait1024x1792 => (1024, 1792),
+            ImageSize::Landscape1792x1024 => (1792, 1024),
+            ImageSize::Small512 => (512, 512),
+            ImageSize::Thumbnail256 => (256, 256),
+        }
+    }
 }
 
 /// 图片风格
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum ImageStyle {
     /// 自然/写实
@@ -93,7 +105,7 @@ impl ImageStyle {
             ImageStyle::Illustration => ", illustration style, cartoon",
             ImageStyle::FlatDesign => ", flat design, clean lines",
             ImageStyle::ThreeD => ", 3D render, C4D, octane render",
-            ImageStyle::Watercolor => "", // 水彩风格需要特殊处理
+            ImageStyle::Watercolor => ", watercolor painting style",
             ImageStyle::PixelArt => ", pixel art, 8-bit style",
             ImageStyle::Minimalist => ", minimalist, simple, clean",
         }
@@ -101,7 +113,7 @@ impl ImageStyle {
 }
 
 /// 图片生成请求
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ImageGenRequest {
     /// 文本描述（prompt）
@@ -128,7 +140,7 @@ fn default_num_images() -> u32 {
 }
 
 /// 图片生成响应
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ImageGenResponse {
     /// 生成的图片路径列表
@@ -139,28 +151,11 @@ pub struct ImageGenResponse {
     pub elapsed_ms: u64,
 }
 
-/// 图片生成配置（全局）
-#[derive(Debug, Clone, Default, Serialize, Deserialize, specta::Type)]
-#[serde(rename_all = "camelCase")]
-pub struct ImageGenConfig {
-    /// 默认后端
-    pub default_backend: Option<ImageGenBackend>,
-    /// 默认尺寸
-    pub default_size: Option<ImageSize>,
-    /// 默认风格
-    pub default_style: Option<ImageStyle>,
-    /// API Keys（按后端存储）
-    pub api_keys: std::collections::HashMap<String, String>,
-    /// 自定义 API 端点
-    pub api_endpoints: std::collections::HashMap<String, String>,
-    /// 输出目录
-    pub output_dir: Option<String>,
-}
-
 /// 生成图片（Tauri 命令）
 ///
 /// 根据文本描述调用指定后端生成图片，保存到本地并返回路径。
 #[tauri::command]
+#[specta::specta]
 pub async fn image_generate(
     request: ImageGenRequest,
     app_handle: tauri::AppHandle,
@@ -181,7 +176,8 @@ pub async fn image_generate(
 
     // 获取输出目录
     let output_dir = get_output_dir(&app_handle)?;
-    std::fs::create_dir_all(&output_dir).map_err(|e| format!("Failed to create output dir: {e}"))?;
+    std::fs::create_dir_all(&output_dir)
+        .map_err(|e| format!("Failed to create output dir: {e}"))?;
 
     // 根据后端调用不同 API
     let image_paths = match request.backend {
@@ -300,13 +296,7 @@ async fn generate_flux(
         .clone()
         .unwrap_or_else(|| "https://api.together.xyz/v1/images/generations".to_string());
 
-    let (width, height) = match request.size {
-        ImageSize::Square1024 => (1024, 1024),
-        ImageSize::Portrait1024x1792 => (1024, 1792),
-        ImageSize::Landscape1792x1024 => (1792, 1024),
-        ImageSize::Small512 => (512, 512),
-        ImageSize::Thumbnail256 => (256, 256),
-    };
+    let (width, height) = request.size.dimensions();
 
     let client = Client::new();
     let response = client
@@ -364,16 +354,11 @@ async fn generate_sd(
         .api_endpoint
         .clone()
         .unwrap_or_else(|| {
-            "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image".to_string()
+            "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
+                .to_string()
         });
 
-    let (width, height) = match request.size {
-        ImageSize::Square1024 => (1024, 1024),
-        ImageSize::Portrait1024x1792 => (1024, 1792),
-        ImageSize::Landscape1792x1024 => (1792, 1024),
-        ImageSize::Small512 => (512, 512),
-        ImageSize::Thumbnail256 => (256, 256),
-    };
+    let (width, height) = request.size.dimensions();
 
     let client = Client::new();
     let response = client
@@ -406,8 +391,8 @@ async fn generate_sd(
     let mut paths = Vec::new();
     if let Some(artifacts) = json["artifacts"].as_array() {
         for (i, item) in artifacts.iter().enumerate() {
-            if let Some(base64) = item["base64"].as_str() {
-                let path = save_base64_image(base64, output_dir, "sd", i)?;
+            if let Some(b64) = item["base64"].as_str() {
+                let path = save_base64_image(b64, output_dir, "sd", i)?;
                 paths.push(path);
             }
         }
@@ -432,16 +417,11 @@ async fn generate_tongyi(
         .api_endpoint
         .clone()
         .unwrap_or_else(|| {
-            "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis".to_string()
+            "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis"
+                .to_string()
         });
 
-    let (width, height) = match request.size {
-        ImageSize::Square1024 => (1024, 1024),
-        ImageSize::Portrait1024x1792 => (1024, 1792),
-        ImageSize::Landscape1792x1024 => (1792, 1024),
-        ImageSize::Small512 => (512, 512),
-        ImageSize::Thumbnail256 => (256, 256),
-    };
+    let (width, height) = request.size.dimensions();
 
     let client = Client::new();
     let response = client
@@ -472,9 +452,13 @@ async fn generate_tongyi(
         .await
         .map_err(|e| format!("Failed to parse 通义万相 response: {e}"))?;
 
-    // 简化处理：返回空列表，实际应轮询任务状态
-    info!("通义万相 task submitted: {:?}", json.get("output").and_then(|o| o.get("task_id")));
+    info!(
+        "通义万相 task submitted: {:?}",
+        json.get("output").and_then(|o| o.get("task_id"))
+    );
 
+    // 简化处理：返回空列表，实际应轮询任务状态
+    let _ = output_dir;
     Ok(vec![])
 }
 
@@ -484,21 +468,9 @@ async fn generate_hunyuan(
     request: &ImageGenRequest,
     output_dir: &str,
 ) -> Result<Vec<String>, String> {
-    let api_key = request
-        .api_key
-        .clone()
-        .or_else(|| std::env::var("HUNYUAN_API_KEY").ok())
-        .ok_or("混元生图 requires HUNYUAN_API_KEY")?;
-
-    let endpoint = request
-        .api_endpoint
-        .clone()
-        .unwrap_or_else(|| "https://hunyuan.tencentcloudapi.com".to_string());
-
+    let _ = (prompt, request, output_dir);
     // 简化实现：实际应使用腾讯云 SDK
-    info!("混元生图 request: prompt={}, size={}", prompt, request.size.as_str());
-
-    // 返回空列表作为占位
+    info!("混元生图 request: prompt={}", prompt);
     Ok(vec![])
 }
 
@@ -521,8 +493,8 @@ async fn download_image(
         .await
         .map_err(|e| format!("Failed to read image bytes: {e}"))?;
 
-    let filename = format!("{prefix}_{}_{}.png", chrono::Utc::now().timestamp(), index);
-    let path = Path::new(output_dir).join(&filename);
+    let filename = format!("{prefix}_{}_{}.png", Utc::now().timestamp(), index);
+    let path = std::path::Path::new(output_dir).join(&filename);
 
     std::fs::write(&path, &bytes).map_err(|e| format!("Failed to save image: {e}"))?;
 
@@ -531,39 +503,19 @@ async fn download_image(
 
 /// 保存 base64 编码的图片
 fn save_base64_image(
-    base64: &str,
+    b64: &str,
     output_dir: &str,
     prefix: &str,
     index: usize,
 ) -> Result<String, String> {
-    let bytes = base64::decode(base64).map_err(|e| format!("Failed to decode base64: {e}"))?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(b64)
+        .map_err(|e| format!("Failed to decode base64: {e}"))?;
 
-    let filename = format!("{prefix}_{}_{}.png", chrono::Utc::now().timestamp(), index);
-    let path = Path::new(output_dir).join(&filename);
+    let filename = format!("{prefix}_{}_{}.png", Utc::now().timestamp(), index);
+    let path = std::path::Path::new(output_dir).join(&filename);
 
     std::fs::write(&path, &bytes).map_err(|e| format!("Failed to save image: {e}"))?;
 
     Ok(path.to_string_lossy().to_string())
-}
-
-// Base64 解码辅助（如果项目中没有 base64 crate）
-mod base64 {
-    pub fn decode(input: &str) -> Result<Vec<u8>, String> {
-        // 简化实现，实际应使用 base64 crate
-        Ok(Vec::new())
-    }
-}
-
-// 时间辅助（如果项目中没有 chrono crate）
-mod chrono {
-    pub struct Utc;
-    impl Utc {
-        pub fn now() -> Self { Self }
-        pub fn timestamp(&self) -> i64 {
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap_or_default()
-                .as_secs() as i64
-        }
-    }
 }

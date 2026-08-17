@@ -102,6 +102,10 @@ export type Messages = {
     codeBadge: string;
     workHint: string;
     codeHint: string;
+    /** 品牌名（WorkBuddy 风格大标题左侧） */
+    brandName: string;
+    /** 品牌标语（WorkBuddy 风格大标题右侧） */
+    brandTagline: string;
     quickActionsHeading: string;
     quickActionWebRead: string;
     quickActionResearch: string;
@@ -113,6 +117,10 @@ export type Messages = {
     quickActionCodeReview: string;
     quickActionGameIdea: string;
     quickActionToolScript: string;
+    /** WorkBuddy 风格快捷入口：文档处理 */
+    quickActionDocProcess: string;
+    /** WorkBuddy 风格快捷入口：数据分析 */
+    quickActionDataAnalysis: string;
     /**
      * Code 模式 composer 的占位提示
      */
@@ -692,6 +700,9 @@ export type Messages = {
       indexer: { label: string; description: string };
       skills: { label: string; description: string };
       rules: { label: string; description: string };
+      imageGen: { label: string; description: string };
+      im: { label: string; description: string };
+      mobile: { label: string; description: string };
       advanced: { label: string; description: string };
       push: { label: string; description: string };
     };
@@ -2119,6 +2130,8 @@ const en: Messages = {
     codeBadge: "Code Mode",
     workHint: "Press ⌘N to start a new session",
     codeHint: "Press ⌘N to start a new workspace",
+    brandName: "云顶数字",
+    brandTagline: "— 我帮你",
     quickActionsHeading: "Get started",
     quickActionWebRead: "Web reading",
     quickActionResearch: "Research analysis",
@@ -2130,6 +2143,8 @@ const en: Messages = {
     quickActionCodeReview: "Code review",
     quickActionGameIdea: "Game idea",
     quickActionToolScript: "Tool & scripts",
+    quickActionDocProcess: "Document processing",
+    quickActionDataAnalysis: "Data analysis",
     codeComposerPlaceholder:
       "Describe a coding task, e.g. explain project structure, debug a bug, generate unit tests, review a diff…",
     openTerminal: "Open terminal",
@@ -2730,6 +2745,18 @@ const en: Messages = {
       rules: {
         label: "Rules & Memory",
         description: "Project rules, team rules, and persistent memory configuration.",
+      },
+      imageGen: {
+        label: "Image Generation",
+        description: "Configure AI image generation backends (DALL-E 3, FLUX, Stable Diffusion).",
+      },
+      im: {
+        label: "IM Integration",
+        description: "Connect WeChat Work, DingTalk, Feishu and other IM platforms.",
+      },
+      mobile: {
+        label: "Mobile Remote",
+        description: "Push notifications, remote approval, and device pairing.",
       },
       advanced: {
         label: "Advanced",
@@ -4101,9 +4128,9 @@ const zh: Messages = {
     open: "打开",
     ok: "好的",
     done: "完成",
-    loading: "加载中?",
-    yes: "?",
-    no: "?",
+    loading: "加载中…",
+    yes: "是",
+    no: "否",
     errorOccurred: "发生错误",
     unexpectedError: "发生意外错误",
   },
@@ -4134,7 +4161,7 @@ const zh: Messages = {
     noDetails: "没有更多可用的错误信息",
     copyDetails: "复制错误详情",
     copySuccessTitle: "已复制错误详情",
-    copySuccessDescription: "可粘贴到 Issue 或反馈中",
+    copySuccessDescription: "可粘贴到问题或反馈中",
     copyFailedTitle: "复制失败",
     copyFailedDescription: "请手动复制错误详情",
   },
@@ -4143,8 +4170,8 @@ const zh: Messages = {
   },
   providerFeedback: {
     switchedTitle: (_provider) => `已切换到 {_provider}`,
-    switchedDescription: "新消息将使用此 Provider。",
-    switchFailedTitle: "Provider 切换失败",
+    switchedDescription: "新消息将使用此提供方。",
+    switchFailedTitle: "提供方切换失败",
     switchFailedDescription: (_provider) => `无法切换到 {_provider},请重试。`,
   },
   networkStatus: {
@@ -4159,7 +4186,7 @@ const zh: Messages = {
       return `已断开网络连接，${count} 条消息已保存为草稿，联网后将自动发送。`;
     },
     degradedMessage: "网络连接不稳定，AI 响应可能延迟。",
-    providerFallbackMessage: (provider) => `当前 Provider 不可用，已切换到 ${provider} 降级。`,
+    providerFallbackMessage: (provider) => `当前提供方不可用，已切换到 ${provider} 降级。`,
     flushStartToastTitle: "正在重发离线草稿",
     flushStartToastDescription: (count) =>
       count <= 1
@@ -4189,11 +4216,13 @@ const zh: Messages = {
     workTitle: "使用云顶数字 工作",
     codeTitle: "使用云顶数字 编码",
     workSubtitle: "任务驱动的数字员工 — 文档、浏览器自动化、数据处理、定时调度。",
-    codeSubtitle: "仓库内的程序员副驾 — 代码编辑、Diff 审查、调试构建、Git 操作。",
-    workBadge: "Work 模式",
-    codeBadge: "Code 模式",
+    codeSubtitle: "仓库内的程序员副驾 — 代码编辑、差异审查、调试构建、Git 操作。",
+    workBadge: "办公模式",
+    codeBadge: "编码模式",
     workHint: "按 ⌘N 开启新会话",
     codeHint: "按 ⌘N 开启新工作区",
+    brandName: "云顶数字",
+    brandTagline: "— 我帮你",
     quickActionsHeading: "开始",
     quickActionWebRead: "网页读取",
     quickActionResearch: "调研分析",
@@ -4205,7 +4234,9 @@ const zh: Messages = {
     quickActionCodeReview: "代码审查",
     quickActionGameIdea: "游戏创意",
     quickActionToolScript: "工具脚本",
-    codeComposerPlaceholder: "输入你的代码任务，例如解释项目结构、调试 Bug、生成单元测试、审查 Diff 等",
+    quickActionDocProcess: "文档处理",
+    quickActionDataAnalysis: "数据分析",
+    codeComposerPlaceholder: "输入你的代码任务，例如解释项目结构、调试缺陷、生成单元测试、审查差异等",
     openTerminal: "打开终端",
   },
   codeEditor: {
@@ -4253,8 +4284,8 @@ const zh: Messages = {
     wikiLabel: "Wiki",
     editorLabel: "编辑器",
     editorNoWorkspace: "请先打开一个工作区文件夹以开始编辑文件。",
-    pullsLabel: "PR",
-    pullsNoWorkspace: "请先打开一个工作区文件夹以浏览 Pull Requests。",
+    pullsLabel: "合并请求",
+    pullsNoWorkspace: "请先打开一个工作区文件夹以浏览合并请求。",
     linearLabel: "Linear",
     linearNoWorkspace: "请先打开一个工作区文件夹以浏览 Linear 任务。",
     extensionsLabel: "扩展",
@@ -4272,7 +4303,7 @@ const zh: Messages = {
     projectActionCopyPath: "复制路径",
     projectActionArchive: "归档项目",
     projectActionDeleteThreads: "删除所有线程",
-    intelOnArmTitle: "Apple Silicon 上的 Intel 构建",
+    intelOnArmTitle: "Apple 芯片上的 Intel 构建",
     sortProjects: "项目排序",
     sortThreads: "线程排序",
     sortChats: "聊天排序",
@@ -4425,14 +4456,14 @@ const zh: Messages = {
       draftSavedToastDescription: "网络恢复后将自动恢复你的输入。",
       draftsRestoredToastTitle: "已恢复 {count} 条草稿",
       draftsRestoredToastDescription: "你之前保存的草稿已可用。",
-      networkDegradedTitle: "Provider 不可达",
-      networkDegradedDescription: "当前 Provider 无法响应，可能会自动切换到备用 Provider。",
+      networkDegradedTitle: "提供方不可达",
+      networkDegradedDescription: "当前提供方无法响应，可能会自动切换到备用提供方。",
       networkOfflineTitle: "已离线",
       networkOfflineDescription: "草稿将自动保存到本机。",
     },
     continueInNewWorktree: "在新工作树中继续",
     reviewLocalChanges: "查看本地未提交的变更",
-    reviewBranchDiff: "查看当前分支相对基线的 diff",
+    reviewBranchDiff: "查看当前分支相对基线的差异",
     composerPlaceholder: (providerName) => `向 ${providerName} 发送消息…`,
     stopGenerationAria: "停止生成",
     stopGenerationTitle: "停止当前回复。在 Mac 上，按 Ctrl+C 中断",
@@ -4471,21 +4502,21 @@ const zh: Messages = {
     },
     rollback: {
       drawerTitle: (turnCount) => `回滚到检查点 #${turnCount}`,
-      drawerDescription: "此操作将丢弃该线程中更新的消息和 turn 差异。",
-      turns: "将丢弃的 Turn",
+      drawerDescription: "此操作将丢弃该线程中更新的消息和轮次差异。",
+      turns: "将丢弃的轮次",
       files: "变更文件",
       lines: "行数 +/−",
       filesHeading: "将被回滚的文件",
       moreFiles: (extra) => `还有 ${extra} 个文件未显示`,
-      showDiff: "显示 diff",
-      hideDiff: "收起 diff",
-      loadingDiff: "正在加载 diff 预览…",
+      showDiff: "显示差异",
+      hideDiff: "收起差异",
+      loadingDiff: "正在加载差异预览…",
       warning: (turnCount) =>
-        `此操作不可撤销。检查点 #${turnCount} 之后的所有消息和 turn 差异将被永久删除。`,
+        `此操作不可撤销。检查点 #${turnCount} 之后的所有消息和轮次差异将被永久删除。`,
       cancel: "取消",
       confirm: "回滚线程",
       reverting: "回滚中…",
-      apiUnavailable: "Native API 不可用，无法预览 diff",
+      apiUnavailable: "原生 API 不可用，无法预览差异",
     },
     copy: {
       buttonAria: "复制到剪贴板",
@@ -4563,7 +4594,7 @@ const zh: Messages = {
     blankStateDescription: "新建第一个 .md 文件来定义代码规范、测试要求或评审清单,自动跟随每一个项目。",
   },
   chatRoute: {
-    loadingDiff: "正在加载 diff 视图",
+    loadingDiff: "正在加载差异视图",
     splitPaneEmptyTitle: "选择一个聊天",
     splitPaneEmptyProject: "项目",
   },
@@ -4629,7 +4660,7 @@ const zh: Messages = {
     title: "技能",
     subtitle: "赋予 ydsz-buddy 更强大的能力",
     newSkill: "新技能",
-    browseSkillSh: "浏览 skill.sh",
+    browseSkillSh: "浏览 Skill.sh",
     searchPlaceholder: "搜索技能",
     localHeading: "本机已安装",
     localCount: "{count} 个已安装",
@@ -4787,7 +4818,7 @@ const zh: Messages = {
         description: "对话管理、轮次限制与上下文窗口设置",
       },
       browser: {
-        label: "Browser",
+        label: "浏览器",
         description: "Web 自动化、CDP 集成与浏览器工具配置",
       },
       indexer: {
@@ -4801,6 +4832,18 @@ const zh: Messages = {
       rules: {
         label: "规则与记忆",
         description: "项目规则、团队规则与持久化记忆配置",
+      },
+      imageGen: {
+        label: "文生图",
+        description: "配置 AI 图片生成后端（DALL-E 3、FLUX、Stable Diffusion）",
+      },
+      im: {
+        label: "IM 集成",
+        description: "连接企业微信、钉钉、飞书等即时通讯平台",
+      },
+      mobile: {
+        label: "移动端远程",
+        description: "推送通知、远程审批与设备配对",
       },
       advanced: {
         label: "高级",
@@ -5151,10 +5194,10 @@ const zh: Messages = {
       dialogModelIdPlaceholder: "输入模型 ID",
     },
     byok: {
-      heading: "自定义 Provider (BYOK)",
+      heading: "自定义提供方 (BYOK)",
       description:
         "接入任意 OpenAI / Anthropic / LiteLLM / Ollama 兼容端点。API Key 加密存储在本地凭证保险箱,不会明文写入 localStorage。",
-      emptyState: "还没有自定义 Provider。点击下方“添加 Provider”开始配置。",
+      emptyState: '还没有自定义提供方。点击下方"添加提供方"开始配置。',
       testConnection: "测试连接",
       testing: "测试中…",
       discoverModels: "发现本地模型",
@@ -5495,7 +5538,7 @@ const zh: Messages = {
       },
     },
     browser: {
-      title: "Browser",
+      title: "浏览器",
       heading: "浏览器配置",
       description: "Web 自动化、CDP 集成与浏览器工具配置",
       automation: {
@@ -5612,7 +5655,7 @@ const zh: Messages = {
       },
     },
     work: {
-      heading: "Work 模式",
+      heading: "办公模式",
       description: "办公文档生成、浏览器自动化与定时任务等能力开关。",
       officeSection: "办公文档",
       officePptx: {
@@ -5634,9 +5677,9 @@ const zh: Messages = {
         ariaLabel: "切换定时任务持久化",
       },
       skillMentions: {
-        title: "Skill 提及",
-        description: "在输入框中显示 @indexer、@ppt、@html 等 Work 域 Skill 节点。",
-        ariaLabel: "切换 Skill 提及",
+        title: "技能提及",
+        description: "在输入框中显示 @indexer、@ppt、@html 等办公域技能节点。",
+        ariaLabel: "切换技能提及",
       },
       ocrSection: "识别",
       ocr: {
@@ -5848,14 +5891,14 @@ const zh: Messages = {
     handoffNewWorktree: "交接至新工作树",
     handoffLocal: "交接至本地",
     rateLimitsRemaining: "剩余速率限制",
-    checkoutPR: "签出 Pull Request",
+    checkoutPR: "签出合并请求",
     searchPlaceholder: "搜索分支",
     createTitle: "创建分支",
-    discardStash: "放弃已保存的 stash",
-    loadingStash: "正在加载 stash",
+    discardStash: "放弃已保存的储藏",
+    loadingStash: "正在加载储藏",
     fieldBranch: "分支",
     fieldWorktree: "工作树",
-    fieldStash: "Stash",
+    fieldStash: "储藏",
     fieldName: "名称",
   },
   projectScripts: {
@@ -5982,7 +6025,7 @@ const zh: Messages = {
   },
   costBudget: {
     sectionTitle: "成本预算",
-    sectionDescription: "设置每日或每月 AI 花费上限。客户端会统计所有 Provider 的 token 用量,在超支前给出提示或拦截。",
+    sectionDescription: "设置每日或每月 AI 花费上限。客户端会统计所有提供方的 token 用量,在超支前给出提示或拦截。",
     dailyBudget: {
       label: "每日预算(美元)",
       placeholder: "例如 10",
@@ -6037,14 +6080,14 @@ const zh: Messages = {
     },
     panel: {
       sectionTitle: "AI 生产占比",
-      sectionDescription: "本线程所有 turn 的净行归属;混合归属文件按 50/50 拆分到 AI 与你。",
+      sectionDescription: "本线程所有轮次的净行归属;混合归属文件按 50/50 拆分到 AI 与你。",
       ai: "AI",
       human: "你",
       mixed: "混合",
       total: "总行数",
-      turnCount: (n) => `${n} 个 turn`,
+      turnCount: (n) => `${n} 个轮次`,
       fileCount: (n) => `${n} 个文件`,
-      empty: "暂无代码改动记录,首个 AI diff 出现后会自动显示。",
+      empty: "暂无代码改动记录,首个 AI 差异出现后会自动显示。",
     },
     workspace: {
       title: "整库 AI 占比",
@@ -6110,7 +6153,7 @@ const zh: Messages = {
   termsAcceptance: {
     heading: "欢迎使用 ydsz-buddy",
     subtitle:
-      "开始前请阅读并接受使用条款与隐私政策。文档说明了你的工作区数据、Provider Key 与本地向量库的处理方式。",
+      "开始前请阅读并接受使用条款与隐私政策。文档说明了你的工作区数据、提供方密钥与本地向量库的处理方式。",
     viewPrivacy: "查看隐私政策",
     viewTerms: "查看使用条款",
     acceptLabel: "我已阅读并同意《使用条款》与《隐私政策》。",

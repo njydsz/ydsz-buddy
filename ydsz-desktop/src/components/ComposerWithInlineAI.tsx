@@ -64,7 +64,7 @@ export function ComposerWithInlineAI({
   onRemoveTerminalContext,
   onChange,
   onCommandKeyDown,
-  onPaste,
+  onPaste = () => {},
   onAIAction,
 }: ComposerWithInlineAIProps) {
   const editorRef = useRef<ComposerPromptEditorHandle>(null);

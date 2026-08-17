@@ -23,9 +23,9 @@
  * ```
  */
 
+import type { ComponentType, SVGProps } from "react";
 import { useCallback, useMemo, useState } from "react";
 import {
-  FileText,
   FileSpreadsheet,
   Presentation,
   Calendar,
@@ -40,7 +40,6 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "~/lib/utils";
 import { toastManager } from "./ui/toast";
 import {
@@ -57,7 +56,7 @@ interface TemplateCard {
   name: string;
   description: string;
   docType: OfficeDocType;
-  icon: React.FC<{ className?: string } />;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   colorClass: string;
   bgClass: string;
   estimatedTime: string;

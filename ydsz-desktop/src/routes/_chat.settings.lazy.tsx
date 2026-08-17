@@ -142,6 +142,9 @@ import { AuthorizedDirsPanel } from "../components/AuthorizedDirsPanel";
 import { CredentialStoragePanel } from "../components/CredentialStoragePanel";
 import { McpSettingsPanel } from "../components/McpSettingsPanel";
 import { SshConnectionConfig } from "../components/SshConnectionConfig";
+import { ImageGenerationPanel } from "../components/ImageGenerationPanel";
+import { IMIntegrationSettings } from "../components/IMIntegrationSettings";
+import { MobileRemoteSettings } from "../components/MobileRemoteSettings";
 import { LegalDocumentsSettingsCard } from "../components/TermsAcceptanceGate";
 import { useWorkspaceStore } from "../workspaceStore";
 
@@ -3405,6 +3408,36 @@ export function Component() {
     </div>
   );
 
+  const renderImageGenPanel = () => (
+    <div className="space-y-6">
+      <SettingsSection title="AI 文生图" description="配置 AI 图片生成后端">
+        <div className="rounded-lg border border-border/60 bg-background">
+          <ImageGenerationPanel />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
+  const renderIMPanel = () => (
+    <div className="space-y-6">
+      <SettingsSection title="IM 渠道集成" description="连接企业微信、钉钉、飞书等 IM 平台">
+        <div className="rounded-lg border border-border/60 bg-background">
+          <IMIntegrationSettings />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
+  const renderMobilePanel = () => (
+    <div className="space-y-6">
+      <SettingsSection title="移动端远程协作" description="推送通知、远程审批与设备配对">
+        <div className="rounded-lg border border-border/60 bg-background">
+          <MobileRemoteSettings />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
   const renderActivePanel = () => {
     switch (activeSection) {
       case "general":
@@ -3439,6 +3472,12 @@ export function Component() {
         return renderSkillsPanel();
       case "rules":
         return renderRulesPanel();
+      case "imageGen":
+        return renderImageGenPanel();
+      case "im":
+        return renderIMPanel();
+      case "mobile":
+        return renderMobilePanel();
       case "advanced":
         return renderAdvancedPanel();
       case "push":

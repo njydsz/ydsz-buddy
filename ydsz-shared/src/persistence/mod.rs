@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 pub mod event_store;
+pub mod memory_store_sqlite;
+
+// Re-export MemoryStore implementation
+pub use memory_store_sqlite::SqliteMemoryStore;
 
 /// SQLite-based event store stub
 #[derive(Debug)]

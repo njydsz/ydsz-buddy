@@ -8499,9 +8499,9 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
   // Quick action → prompt 模板映射（Work 模式）
   const workQuickActionPrompts: Record<string, string> = useMemo(
     () => ({
+      docProcess: messages.landing.quickActionDocProcess + "：",
+      dataAnalysis: messages.landing.quickActionDataAnalysis + "：",
       webRead: messages.landing.quickActionWebRead + "：",
-      research: messages.landing.quickActionResearch + "：",
-      dataMining: messages.landing.quickActionDataMining + "：",
       fileManager: messages.landing.quickActionFileManager + "：",
     }),
     [messages.landing],

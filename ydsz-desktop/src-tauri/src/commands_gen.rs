@@ -131,6 +131,7 @@ pub fn build_specta() -> Builder<tauri::Wry> {
             crate::mcp_update_server,
             crate::ocr_list_providers,
             crate::ocr_recognize_text,
+            crate::image_generate,
             crate::office_docx_read,
             crate::office_docx_write,
             crate::office_docx_write_rich,

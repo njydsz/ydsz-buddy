@@ -95,6 +95,7 @@ use commands::{
     review_comments::*,  // 行级 Review Comment 后端持久化（P2-2）
     code_sandbox::*,     // Agent 代码执行沙箱(P2-8)
     extensions::*,       // Extension 扩展系统(P1-1: 安装/管理/启用/禁用 UI)
+    image_gen::*,        // AI 文生图（DALL-E 3 / FLUX / SD / 通义万相 / 混元）
 };
 
 use std::net::SocketAddr;
@@ -753,6 +754,9 @@ pub fn run() {
             ocr_list_providers,               // 列出可用 OCR provider
             ocr_recognize_text,               // 识别图像中的文字
             ocr_recognize_from_path,           // Agent 简化版 OCR（路径直接识别）
+
+            // 文生图命令（P1-3: AI 图片生成）
+            image_generate,                   // 根据文本描述生成图片（DALL-E 3 / FLUX / SD / 通义万相 / 混元）
 
             // Ollama 本地模型服务发现命令（P2-4:走 Rust 绕开浏览器 CORS）
             indexer_ollama_discover,          // 探测 Ollama 服务（version + tags）

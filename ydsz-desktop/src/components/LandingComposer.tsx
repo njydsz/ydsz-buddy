@@ -1,9 +1,10 @@
 /**
  * @file 落地页独立 Composer 组件
  *
- * 当没有活跃线程时，在落地页中央展示一个 Trae 风格的 composer：
+ * 当没有活跃线程时，在落地页中央展示一个 WorkBuddy 风格的 composer：
+ *
  * - 大尺寸多行文本输入框，带描述性 placeholder
- * - 底部工具栏：附件、语音、速通、模型选择器、发送按钮
+ * - 底部工具栏：工作空间选择 + 权限选择 + 模型选择器 + 发送按钮
  * - 卡片容器：明显边框 + 阴影 + 圆角
  *
  * 用户输入后点击发送，通过 `onSubmit` 回调通知父组件创建新线程。
@@ -22,7 +23,6 @@ import {
   ChevronDownIcon,
   MicIcon,
   PaperclipIcon,
-  SettingsIcon,
   SparklesIcon,
   ZapIcon,
 } from "~/lib/icons";
@@ -67,6 +67,32 @@ function ToolbarButton({
       )}
     >
       {children}
+    </button>
+  );
+}
+
+function DropdownButton({
+  label,
+  icon,
+  disabled,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={cn(
+        "inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-[13px] text-foreground/70 transition-colors",
+        "hover:bg-muted/60 hover:text-foreground",
+        disabled && "cursor-not-allowed opacity-40",
+      )}
+    >
+      {icon}
+      <span>{label}</span>
+      <ChevronDownIcon className="size-3 opacity-70" />
     </button>
   );
 }
@@ -172,7 +198,7 @@ export function LandingComposer({
           onKeyDown={handleKeyDown}
           placeholder={
             placeholder ??
-            "输入任何内容，使用 @ 引用文件/文件夹，或使用 / 查看可用命令"
+            "今天帮你做些什么？@引用对话文件，/调用技能与指令"
           }
           disabled={disabled}
           rows={2}
@@ -185,10 +211,12 @@ export function LandingComposer({
           style={{ maxHeight: 180, minHeight: 64 }}
         />
 
-        {/* Bottom toolbar */}
+        {/* Bottom toolbar — WorkBuddy style: workspace + permission + model + send */}
         <div className="flex items-center justify-between px-2 pb-2">
-          {/* Left tools */}
-          <div className="flex items-center gap-0.5">
+          {/* Left: workspace + permission selectors */}
+          <div className="flex items-center gap-1">
+            <DropdownButton label="选择工作空间" disabled={disabled} />
+            <DropdownButton label="默认权限" disabled={disabled} />
             <ToolbarButton title="添加附件" disabled={disabled}>
               <PaperclipIcon className="size-4" />
             </ToolbarButton>
@@ -200,12 +228,9 @@ export function LandingComposer({
             </ToolbarButton>
           </div>
 
-          {/* Right tools */}
+          {/* Right: model picker + send */}
           <div className="flex items-center gap-1">
             <ModelPickerButton disabled={disabled} />
-            <ToolbarButton title="设置" disabled={disabled}>
-              <SettingsIcon className="size-4" />
-            </ToolbarButton>
             <button
               type="button"
               onClick={handleSubmit}

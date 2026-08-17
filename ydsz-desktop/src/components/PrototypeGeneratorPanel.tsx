@@ -24,12 +24,10 @@ import {
   Code2,
   Eye,
   Download,
-  RefreshCw,
   Loader2,
   Send,
   Layers,
   Palette,
-  Type,
   Smartphone,
   Monitor,
   Tablet,
@@ -38,10 +36,8 @@ import {
   FileCode,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
-import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "~/lib/utils";
 import { toastManager } from "./ui/toast";
 import { Label } from "./ui/label";
@@ -53,15 +49,6 @@ type ViewportSize = "mobile" | "tablet" | "desktop";
 
 /** 导出格式 */
 type ExportFormat = "html" | "react" | "vue";
-
-/** 生成的原型 */
-interface GeneratedPrototype {
-  id: string;
-  html: string;
-  css: string;
-  prompt: string;
-  createdAt: number;
-}
 
 /** 设计规范 Token */
 interface DesignTokens {
@@ -97,7 +84,6 @@ const PROTOTYPE_PRESETS = [
 export function PrototypeGeneratorPanel() {
   const [prompt, setPrompt] = useState("");
   const [code, setCode] = useState("");
-  const [css, setCss] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
   const [showCode, setShowCode] = useState(false);
@@ -148,7 +134,6 @@ export function PrototypeGeneratorPanel() {
 </html>`;
 
       setCode(generatedHtml);
-      setCss(generatedCss);
       setTokens(generateMockTokens());
 
       toastManager.add({

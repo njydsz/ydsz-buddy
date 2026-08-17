@@ -610,6 +610,33 @@ export type ComposerCommandItem =
       type: "indexer-empty";
       label: string;
       description: string;
+    }
+  | {
+      /**
+       * 通用提示条目(仅展示,不可选中)。
+       *
+       * 用于在功能加载/出错/空状态时展示引导信息,例如图像生成
+       * Provider 加载中、未配置、加载失败等场景。
+       */
+      id: string;
+      type: "hint";
+      label: string;
+      description?: string;
+      disabled?: boolean;
+      icon?: string;
+    }
+  | {
+      /**
+       * 通用动作条目(可点击执行)。
+       *
+       * 用于图像生成等需要直接执行动作的场景,带有图标和元数据。
+       */
+      id: string;
+      type: "action";
+      label: string;
+      description?: string;
+      icon?: string;
+      metadata?: Record<string, string>;
     };
 
 type ComposerCommandGroupModel = {

@@ -24,26 +24,19 @@ import {
   Sparkles,
   Image as ImageIcon,
   Download,
-  RefreshCw,
   Loader2,
   Settings,
   ChevronDown,
   Trash2,
   Copy,
   Check,
-  X,
 } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import {
   Select,
   SelectContent,
@@ -55,7 +48,7 @@ import { cn } from "~/lib/utils";
 import { toastManager } from "./ui/toast";
 import { Label } from "./ui/label";
 
-// ==================== Types ====================
+// ==================== Types (mirrors Rust DTOs) ====================
 
 /** 图片生成后端 */
 type ImageGenBackend = "dalle3" | "flux" | "sd" | "tongyi" | "hunyuan";
@@ -66,10 +59,28 @@ type ImageSize = "1024x1024" | "1024x1792" | "1792x1024" | "512x512" | "256x256"
 /** 风格选项 */
 type ImageStyle = "natural" | "illustration" | "flat" | "3d" | "watercolor" | "pixel" | "minimal";
 
+/** 图片生成请求（对齐 Rust ImageGenRequest） */
+interface ImageGenRequest {
+  prompt: string;
+  backend: ImageGenBackend;
+  size: ImageSize;
+  style: ImageStyle;
+  api_key?: string;
+  api_endpoint?: string;
+  negative_prompt?: string;
+  num_images: number;
+}
+
+/** 图片生成响应（对齐 Rust ImageGenResponse） */
+interface ImageGenResponse {
+  image_paths: string[];
+  actual_prompt: string;
+  elapsed_ms: number;
+}
+
 /** 生成结果 */
 interface GeneratedImage {
   id: string;
-  url: string;
   path: string;
   prompt: string;
   backend: ImageGenBackend;
@@ -151,15 +162,35 @@ export function ImageGenerationPanel({
 
     setIsGenerating(true);
     try {
-      // 模拟 API 调用（实际应调用 Tauri 命令）
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // 生成模拟结果
-      const newImages: GeneratedImage[] = Array.from({ length: numImages }, (_, i) => ({
-        id: `img_${Date.now()}_${i}`,
-        url: `https://placeholder.image/${size}/${style}/${i}`,
-        path: `/tmp/generated_${Date.now()}_${i}.png`,
+      // 构建请求参数
+      const request: ImageGenRequest = {
         prompt,
+        backend,
+        size,
+        style,
+        num_images: Math.min(numImages, 4),
+        api_key: undefined, // 从环境变量获取
+        api_endpoint: undefined,
+        negative_prompt: negativePrompt || undefined,
+      };
+
+      // 调用 Tauri 命令
+      const response = await invoke<ImageGenResponse>("image_generate", { request });
+
+      if (response.image_paths.length === 0) {
+        toastManager.add({
+          type: "warning",
+          title: "未生成图片",
+          description: "后端返回空结果，请检查 API 配置",
+        });
+        return;
+      }
+
+      // 生成结果
+      const newImages: GeneratedImage[] = response.image_paths.map((path, i) => ({
+        id: `img_${Date.now()}_${i}`,
+        path,
+        prompt: response.actual_prompt,
         backend,
         size,
         style,
@@ -172,7 +203,7 @@ export function ImageGenerationPanel({
       toastManager.add({
         type: "success",
         title: "图片生成成功",
-        description: `已生成 ${numImages} 张图片`,
+        description: `已生成 ${newImages.length} 张图片（耗时 ${response.elapsed_ms}ms）`,
         timeout: 3000,
       });
     } catch (error) {

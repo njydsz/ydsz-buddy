@@ -30,7 +30,6 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import {
   FileText,
-  FileSpreadsheet,
   Presentation,
   ChevronRight,
   Loader2,
@@ -96,18 +95,6 @@ interface OfficeTemplate {
 /** 格式化当前日期为 YYYY-MM-DD */
 function today(): string {
   return new Date().toISOString().slice(0, 10);
-}
-
-/** 文档类型图标 */
-function DocTypeIcon({ docType, className }: { docType: OfficeDocType; className?: string }) {
-  switch (docType) {
-    case "docx":
-      return <FileText className={className} />;
-    case "xlsx":
-      return <FileSpreadsheet className={className} />;
-    case "pptx":
-      return <Presentation className={className} />;
-  }
 }
 
 /** 文档类型标签 */
@@ -854,7 +841,7 @@ const OFFICE_TEMPLATES: OfficeTemplate[] = [
       const slides: PptxSlideInput[] = [
         { slideType: "title", title: params.title || "项目汇报", subtitle: params.subtitle || "" },
         { slideType: "content", title: "项目概述", bullets: (params.overview || "").split("\n").filter((s) => s.trim()) },
-        { slideType: "two-column", title: "核心成果 vs 挑战", leftHeading: "核心成果", leftBullets: (params.highlights || "").split("\n").filter((s) => s.trim()), rightHeading: "挑战与应对", rightBullets: (params.challenges || "").split("\n").filter((s) => s.trim()) },
+        { slideType: "twoColumn", title: "核心成果 vs 挑战", leftHeading: "核心成果", leftBullets: (params.highlights || "").split("\n").filter((s) => s.trim()), rightHeading: "挑战与应对", rightBullets: (params.challenges || "").split("\n").filter((s) => s.trim()) },
         { slideType: "section", title: "下一步计划" },
         { slideType: "content", title: "行动计划", bullets: (params.nextSteps || "").split("\n").filter((s) => s.trim()) },
       ];
@@ -879,7 +866,7 @@ const OFFICE_TEMPLATES: OfficeTemplate[] = [
     generate: async (params, outputPath) => {
       const slides: PptxSlideInput[] = [
         { slideType: "title", title: params.title || "产品介绍", subtitle: params.subtitle || "" },
-        { slideType: "two-column", title: "定位 vs 功能", leftHeading: "产品定位", leftBullets: (params.positioning || "").split("\n").filter((s) => s.trim()), rightHeading: "功能亮点", rightBullets: (params.features || "").split("\n").filter((s) => s.trim()) },
+        { slideType: "twoColumn", title: "定位 vs 功能", leftHeading: "产品定位", leftBullets: (params.positioning || "").split("\n").filter((s) => s.trim()), rightHeading: "功能亮点", rightBullets: (params.features || "").split("\n").filter((s) => s.trim()) },
         { slideType: "table", title: "技术架构", headers: ["层级", "技术", "说明"], rows: (params.techStack || "").split("\n").filter((s) => s.trim()).map((s) => [s, "", ""]) },
         { slideType: "section", title: "产品路线图" },
         { slideType: "content", title: "规划里程碑", bullets: (params.roadmap || "").split("\n").filter((s) => s.trim()) },
@@ -906,7 +893,7 @@ const OFFICE_TEMPLATES: OfficeTemplate[] = [
       const slides: PptxSlideInput[] = [
         { slideType: "title", title: params.title || "培训材料", subtitle: params.audience || "" },
         { slideType: "content", title: "培训目标", bullets: (params.objectives || "").split("\n").filter((s) => s.trim()) },
-        { slideType: "two-column", title: "课程大纲", leftHeading: "上午课程", leftBullets: (params.outline || "").split("\n").filter((s) => s.trim()).slice(0, 5), rightHeading: "下午课程", rightBullets: (params.outline || "").split("\n").filter((s) => s.trim()).slice(5) },
+        { slideType: "twoColumn", title: "课程大纲", leftHeading: "上午课程", leftBullets: (params.outline || "").split("\n").filter((s) => s.trim()).slice(0, 5), rightHeading: "下午课程", rightBullets: (params.outline || "").split("\n").filter((s) => s.trim()).slice(5) },
         { slideType: "content", title: "案例分析", bullets: (params.cases || "").split("\n").filter((s) => s.trim()) },
         { slideType: "content", title: "考核方式", bullets: (params.assessment || "").split("\n").filter((s) => s.trim()) },
       ];
@@ -932,7 +919,7 @@ const OFFICE_TEMPLATES: OfficeTemplate[] = [
       const slides: PptxSlideInput[] = [
         { slideType: "title", title: `${params.system || "系统"} 运维手册`, subtitle: "部署 · 监控 · 应急" },
         { slideType: "content", title: "系统架构", bullets: (params.architecture || "").split("\n").filter((s) => s.trim()) },
-        { slideType: "two-column", title: "部署与监控", leftHeading: "部署流程", leftBullets: (params.deploy || "").split("\n").filter((s) => s.trim()), rightHeading: "监控指标", rightBullets: (params.monitoring || "").split("\n").filter((s) => s.trim()) },
+        { slideType: "twoColumn", title: "部署与监控", leftHeading: "部署流程", leftBullets: (params.deploy || "").split("\n").filter((s) => s.trim()), rightHeading: "监控指标", rightBullets: (params.monitoring || "").split("\n").filter((s) => s.trim()) },
         { slideType: "table", title: "告警规则", headers: ["告警项", "阈值", "通知方式"], rows: (params.alerts || "").split("\n").filter((s) => s.trim()).map((s) => [s, "", ""]) },
         { slideType: "content", title: "应急预案", bullets: (params.contingency || "").split("\n").filter((s) => s.trim()) },
       ];
@@ -960,9 +947,9 @@ const OFFICE_TEMPLATES: OfficeTemplate[] = [
       const slides: PptxSlideInput[] = [
         { slideType: "title", title: params.title || "项目立项评审", subtitle: `发起人：${params.sponsor || ""}` },
         { slideType: "content", title: "项目背景", bullets: (params.background || "").split("\n").filter((s) => s.trim()) },
-        { slideType: "two-column", title: "目标与范围", leftHeading: "项目目标", leftBullets: (params.objectives || "").split("\n").filter((s) => s.trim()), rightHeading: "项目范围", rightBullets: (params.scope || "").split("\n").filter((s) => s.trim()) },
+        { slideType: "twoColumn", title: "目标与范围", leftHeading: "项目目标", leftBullets: (params.objectives || "").split("\n").filter((s) => s.trim()), rightHeading: "项目范围", rightBullets: (params.scope || "").split("\n").filter((s) => s.trim()) },
         { slideType: "content", title: "项目计划", bullets: (params.timeline || "").split("\n").filter((s) => s.trim()) },
-        { slideType: "two-column", title: "资源与风险", leftHeading: "资源需求", leftBullets: (params.resources || "").split("\n").filter((s) => s.trim()), rightHeading: "风险评估", rightBullets: (params.risks || "").split("\n").filter((s) => s.trim()) },
+        { slideType: "twoColumn", title: "资源与风险", leftHeading: "资源需求", leftBullets: (params.resources || "").split("\n").filter((s) => s.trim()), rightHeading: "风险评估", rightBullets: (params.risks || "").split("\n").filter((s) => s.trim()) },
       ];
       await officePptxGenerate(outputPath, slides);
     },
