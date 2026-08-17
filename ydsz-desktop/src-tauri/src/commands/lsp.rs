@@ -241,7 +241,7 @@ pub async fn lsp_start_server(
                 .get(&conn_id)
                 .await
                 .map_err(|e| format!("获取 SSH 连接失败: {e}"))?;
-            let transport = SshLspTransport::spawn(conn.as_ref(), &preset)
+            let transport = SshLspTransport::spawn(&conn, &preset)
                 .await
                 .map_err(|e| e.to_string())?;
             LspClient::start_with_transport(

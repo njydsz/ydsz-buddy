@@ -31,7 +31,7 @@ use tauri::State;
 use tracing::info;
 
 use ydsz_work::code_sandbox::{
-    CodeSandboxError, SandboxExecResult, SandboxExecutor, SandboxLevel, SandboxPolicy,
+    SandboxExecResult, SandboxExecutor, SandboxLevel, SandboxPolicy,
 };
 
 // ============================================================================
@@ -54,7 +54,7 @@ impl CodeSandboxState {
         // P0-S5: Agent 驱动的默认级别从 Workspace 切换为 Strict（白名单模式）
         // 用户通过 AuthorizedDirsPanel 显式授权目录后，Agent 方可在沙箱中读写
         Self {
-            executor: Mutex::new(SandboxExecutor::new(SandboxPolicy::strict(".")),
+            executor: Mutex::new(SandboxExecutor::new(SandboxPolicy::strict("."))),
         }
     }
 }
@@ -115,7 +115,7 @@ impl From<&SandboxPolicy> for SandboxPolicyDto {
             allowed_write_dirs: p.allowed_write_dirs.clone(),
             network_allowed: p.network_allowed,
             blocked_env_vars: p.blocked_env_vars.clone(),
-            allowed_commands: p.allowed_commands.clone(),
+            allowed_commands: if p.allowed_commands.is_empty() { None } else { Some(p.allowed_commands.clone()) },
             blocked_commands: p.blocked_commands.clone(),
             timeout_secs: p.timeout_secs,
             max_output_bytes: p.max_output_bytes,
@@ -153,7 +153,7 @@ impl From<SandboxExecResult> for SandboxExecResultDto {
             killed: r.killed,
             policy_violations: r.policy_violations,
             stripped_env_vars: r.stripped_env_vars,
-            level: r.level,
+            level: "unknown".to_string(),
             success,
         }
     }
@@ -205,7 +205,7 @@ pub async fn code_sandbox_execute_command(
         .map_err(|e| e.to_string())?)
         .clone();
 
-    let result = executor
+    let (result, _warnings) = executor
         .execute_command(&input.command, input.cwd.as_deref(), input.env.as_ref())
         .await
         .map_err(|e| e.to_string())?;
@@ -228,7 +228,7 @@ pub async fn code_sandbox_execute_code(
         .map_err(|e| e.to_string())?)
         .clone();
 
-    let result = executor
+    let (result, _warnings) = executor
         .execute_code(&input.code, &input.language, input.cwd.as_deref())
         .await
         .map_err(|e| e.to_string())?;
@@ -356,7 +356,7 @@ pub async fn code_sandbox_check_path(
         policy.check_read_path(&path)
     };
 
-    Ok(check.is_ok())
+    Ok(check)
 }
 
 // ============================================================================

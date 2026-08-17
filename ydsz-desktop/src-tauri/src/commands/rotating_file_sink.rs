@@ -135,7 +135,7 @@ mod tests {
     use super::*;
 
     fn temp_dir(name: &str) -> PathBuf {
-        let p = std::env::temp_dir().join("ydsz-test-migrations", name));
+        let p = std::env::temp_dir().join("ydsz-test-migrations").join(name);
         let _ = fs::remove_dir_all(&p);
         fs::create_dir_all(&p).unwrap();
         p

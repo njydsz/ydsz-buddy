@@ -59,6 +59,7 @@ ydsz-shared = { path = "../../ydsz-shared" }
 ydsz-flow = { path = "../../ydsz-flow" }
 ydsz-provider = { path = "../../ydsz-provider" }
 ydsz-server = { path = "../../ydsz-server" }
+ydsz-work = { path = "../../ydsz-work" }
 
 # LSP 类型(LSP 命令层 DTO 转换需要直接引用 lsp_types 的 CodeAction/SignatureHelp/TextEdit)
 lsp-types = "0.95"

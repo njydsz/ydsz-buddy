@@ -154,10 +154,11 @@ impl IndexerService {
                     continue;
                 }
             };
+            let content_str = String::from_utf8_lossy(&content);
 
             let mut extracted = match self.strategy {
                 IndexStrategy::AstWithRegexFallback => {
-                    match self.ast.extract_symbols(&path, &content) {
+                    match self.ast.extract_symbols(&path, &content_str) {
                         Ok(s) => {
                             stats.ast_files += 1;
                             s
@@ -166,13 +167,13 @@ impl IndexerService {
                             // AST 失败（语法错误或不支持）→ 正则兜底
                             stats.fallback_files += 1;
                             stats.regex_files += 1;
-                            Self::extract_symbols_regex(&path, &content)
+                            Self::extract_symbols_regex(&path, &content_str)
                         }
                     }
                 }
                 IndexStrategy::RegexOnly => {
                     stats.regex_files += 1;
-                    Self::extract_symbols_regex(&path, &content)
+                    Self::extract_symbols_regex(&path, &content_str)
                 }
             };
 

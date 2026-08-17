@@ -100,7 +100,7 @@ use commands::{
 use std::net::SocketAddr;
 use std::sync::Arc;
 use ydsz_shared::config::ServerConfig;
-use ydsz_server::{bootstrap_embedded, BootstrapResult, WebSocketServer};
+use ydsz_server::{bootstrap_embedded, BootstrapResult};
 use tracing::{info, error};
 use tauri::Emitter;
 
@@ -336,48 +336,14 @@ pub fn run() {
 
     // 启动嵌入式 ydsz-provider
     info!("启动嵌入式 ydsz-provider...");
-    // 优先使用 YDSZ_BUDDY_HOME 环境变量，fallback 到用户主目录
-    let base_dir = std::env::var("YDSZ_BUDDY_HOME")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| {
-            let home_dir = dirs::home_dir().expect("Failed to get home directory");
-            home_dir.join(".2. 环境变量 YDSZ_BOOTSTRAP_TOKEN")
-        });
-    let config = ServerConfig::default()
-        .with_base_dir(base_dir)
-        .expect("Failed to derive server paths");
-    let bootstrap_result = runtime.block_on(bootstrap_embedded(&config))
+    let config = ServerConfig::default_config();
+    let bootstrap_result = runtime.block_on(bootstrap_embedded(config))
         .expect("Failed to bootstrap embedded server");
 
-    // 在后台启动 WebSocket 服务器，并获取实际分配的监听地址
-    let rpc_router = bootstrap_result.rpc_router.clone();
-    let server_config = std::sync::Arc::new(config.clone());
-    let http_state = bootstrap_result.services.http_state.clone();
-    let server = WebSocketServer::new(bootstrap_result.server_addr, rpc_router, server_config)
-        .with_http_state(http_state);
-    let (server_addr, serve) = runtime.block_on(server.start())
+    // 使用 bootstrap 返回的 WebSocket 服务器启动
+    let ws_server = bootstrap_result.services.ws_server.clone();
+    runtime.block_on(ws_server.start())
         .expect("Failed to start embedded WebSocket server");
-    info!("嵌入式服务器地址: {}", server_addr);
-
-    // 发布服务器生命周期事件
-    let push_cm = bootstrap_result.services.push_channel_manager.clone();
-    runtime.spawn(async move {
-        push_cm.publish_lifecycle_event("welcome", serde_json::json!({
-            "version": env!("CARGO_PKG_VERSION"),
-            "addr": server_addr.to_string(),
-        })).await;
-        push_cm.publish_lifecycle_event("ready", serde_json::json!({
-            "addr": server_addr.to_string(),
-            "timestamp": chrono::Utc::now().to_rfc3339(),
-        })).await;
-        info!("已发布服务器生命周期事件: welcome, ready");
-    });
-
-    runtime.spawn(async move {
-        if let Err(e) = serve.await {
-            error!("WebSocket 服务器错误: {}", e);
-        }
-    });
 
     // 启动浏览器使用管道服务器
     let pipe_addr = SocketAddr::from(([127, 0, 0, 1], 0));
@@ -387,6 +353,7 @@ pub fn run() {
         .expect("Failed to start browser use pipe server");
     info!("浏览器使用管道地址: {}", pipe_bound_addr);
 
+    let server_addr = SocketAddr::from(([127, 0, 0, 1], 0));
     let bootstrap_result = Arc::new(bootstrap_result);
 
     tauri::Builder::default()

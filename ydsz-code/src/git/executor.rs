@@ -204,7 +204,7 @@ impl GitExecutor for SshGitExecutor {
             .await
             .map_err(|e| GitError::CommandError(format!("SSH 执行失败: {}", e)))?;
 
-        let (output, code) = Self::parse_output(&raw);
+        let (output, code) = Self::parse_output(&raw.stdout);
 
         if code != 0 && !input.allow_non_zero_exit {
             warn!(

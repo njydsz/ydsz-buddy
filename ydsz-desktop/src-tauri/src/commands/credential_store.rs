@@ -24,7 +24,7 @@
 use tracing::{debug, info, warn};
 
 /// Keyring service name 前缀
-ydsz-ping;
+const SERVICE_NAME: &str = "ydsz-buddy";
 
 /// 将凭证写入 OS Keyring
 #[tauri::command]

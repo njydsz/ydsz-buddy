@@ -652,15 +652,10 @@ impl ToolInterceptor for ErrorWrapInterceptor {
         _ctx: &ToolContext,
     ) -> CoreResult<ToolOutput> {
         if !output.success {
-            // 对错误结果中的敏感字段做脱敏
-            let mut result = output.result.clone();
-            if let Value::Object(ref mut map) = result {
-                for field in &self.sensitive_fields {
-                    if map.contains_key(field) {
-                        map.insert(field.clone(), Value::String("***REDACTED***".to_string()));
-                    }
-                }
-            }
+            // 对错误结果做脱敏：
+            // 1. 对 JSON 对象中命名字段直接替换
+            // 2. 对字符串值中的 key=value 模式做正则替换
+            let result = Self::sanitize_value(output.result.clone(), &self.sensitive_fields);
             return Ok(ToolOutput { result, ..output });
         }
         Ok(output)
@@ -671,13 +666,89 @@ impl ToolInterceptor for ErrorWrapInterceptor {
         error: ToolError,
         _ctx: &ToolContext,
     ) -> CoreResult<ToolError> {
-        // 确保错误消息中不包含敏感信息
-        let message = if error.message.contains("api_key=") || error.message.contains("token=") {
-            "Execution failed (sensitive details redacted)".to_string()
+        // 确保错误消息中不包含敏感信息（key=value 模式）
+        let message = Self::sanitize_string(&error.message, &self.sensitive_fields);
+        if message != error.message {
+            Ok(ToolError { message, ..error })
         } else {
-            error.message
-        };
-        Ok(ToolError { message, ..error })
+            Ok(error)
+        }
+    }
+}
+
+impl ErrorWrapInterceptor {
+    /// 递归清理 JSON 值中的敏感信息
+    fn sanitize_value(value: Value, sensitive_fields: &[String]) -> Value {
+        match value {
+            Value::Object(mut map) => {
+                for (k, v) in map.iter_mut() {
+                    if sensitive_fields.iter().any(|s| s.eq_ignore_ascii_case(k)) {
+                        *v = Value::String("***REDACTED***".to_string());
+                    } else {
+                        *v = Self::sanitize_value(v.clone(), sensitive_fields);
+                    }
+                }
+                Value::Object(map)
+            }
+            Value::String(s) => {
+                Value::String(Self::sanitize_string(&s, sensitive_fields))
+            }
+            Value::Array(arr) => {
+                Value::Array(arr.into_iter().map(|v| Self::sanitize_value(v, sensitive_fields)).collect())
+            }
+            other => other,
+        }
+    }
+
+    /// 清理字符串中的 key=value 模式敏感信息
+    ///
+    /// 不引入 regex 依赖，使用简单的字符串扫描实现。
+    /// 对每个敏感字段，查找 `field=value` 模式并替换 value 为 `***REDACTED***`。
+    fn sanitize_string(s: &str, sensitive_fields: &[String]) -> String {
+        let mut result = s.to_string();
+        for field in sensitive_fields {
+            // 查找 field= 模式，替换后续非空白字符
+            let marker = format!("{}=", field.to_lowercase());
+            result = Self::redact_after_marker(&result, &marker);
+        }
+        result
+    }
+
+    /// 在字符串中查找 marker，将其后的非空白字符替换为 ***REDACTED***
+    ///
+    /// 使用 char_indices 安全处理 UTF-8 多字节字符。
+    fn redact_after_marker(s: &str, marker: &str) -> String {
+        let lower = s.to_lowercase();
+        let mut output = String::with_capacity(s.len());
+        let mut matched_up_to: Option<usize> = None;
+
+        for (idx, ch) in s.char_indices() {
+            // 跳过已脱敏区域
+            if let Some(end) = matched_up_to {
+                if idx < end {
+                    continue;
+                }
+                matched_up_to = None;
+            }
+
+            // 检查从当前位置开始是否匹配 marker（不区分大小写）
+            if lower[idx..].starts_with(marker) {
+                // 输出 marker 部分（保持原始大小写）
+                output.push_str(&s[idx..idx + marker.len()]);
+                let value_start = idx + marker.len();
+                // 查找 value 结束位置（空白字符或字符串结尾）
+                let value_end = s[value_start..]
+                    .char_indices()
+                    .find(|(_, c)| c.is_ascii_whitespace())
+                    .map(|(wi, _)| value_start + wi)
+                    .unwrap_or(s.len());
+                output.push_str("***REDACTED***");
+                matched_up_to = Some(value_end);
+            } else {
+                output.push(ch);
+            }
+        }
+        output
     }
 }
 
@@ -691,9 +762,6 @@ pub trait ToolExecutor: Send + Sync {
     /// 执行工具
     async fn execute(&self, input: ToolInput, ctx: &ToolContext) -> CoreResult<ToolOutput>;
 }
-
-/// 工具执行器函数类型
-pub type ToolFn = Arc<dyn Fn(ToolInput, ToolContext) -> CoreResult<ToolOutput> + Send + Sync>;
 
 /// 工具管道
 ///
@@ -744,7 +812,6 @@ impl ToolPipeline {
         let mut output = match executor.execute(processed_input.clone(), ctx).await {
             Ok(out) => out,
             Err(e) => {
-                let elapsed = start.elapsed().as_millis() as u64;
                 let tool_error = ToolError {
                     phase: ToolPhase::Execute,
                     code: ToolErrorCode::ExecutionFailed,
@@ -769,17 +836,6 @@ impl ToolPipeline {
         }
 
         Ok(output)
-    }
-
-    /// 执行工具调用（使用闭包）
-    pub async fn run_with_fn(
-        &self,
-        input: ToolInput,
-        ctx: &ToolContext,
-        f: impl FnOnce(ToolInput, ToolContext) -> CoreResult<ToolOutput> + Send + Sync,
-    ) -> CoreResult<ToolOutput> {
-        let executor = ClosureExecutor::new(f);
-        self.run(input, ctx, &executor).await
     }
 
     /// 获取拦截器数量
@@ -829,37 +885,6 @@ impl Default for ToolPipeline {
     }
 }
 
-/// 闭包执行器（用于便捷地将闭包包装为 ToolExecutor）
-struct ClosureExecutor<F>
-where
-    F: FnOnce(ToolInput, ToolContext) -> CoreResult<ToolOutput>,
-{
-    f: Option<F>,
-}
-
-impl<F> ClosureExecutor<F>
-where
-    F: FnOnce(ToolInput, ToolContext) -> CoreResult<ToolOutput>,
-{
-    fn new(f: F) -> Self {
-        Self { f: Some(f) }
-    }
-}
-
-#[async_trait]
-impl<F> ToolExecutor for ClosureExecutor<F>
-where
-    F: FnOnce(ToolInput, ToolContext) -> CoreResult<ToolOutput> + Send + Sync,
-{
-    async fn execute(&self, input: ToolInput, ctx: &ToolContext) -> CoreResult<ToolOutput> {
-        if let Some(f) = self.f.as_ref() {
-            (f)(input, ctx.clone())
-        } else {
-            Err(CoreError::InternalError("ClosureExecutor already consumed".to_string()))
-        }
-    }
-}
-
 // ============================================================================
 // 便捷构造器
 // ============================================================================
@@ -902,6 +927,7 @@ fn json_type_name(value: &Value) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use uuid::Uuid;
 
     fn test_context() -> ToolContext {
         ToolContext {

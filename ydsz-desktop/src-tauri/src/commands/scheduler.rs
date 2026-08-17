@@ -65,11 +65,12 @@ pub async fn scheduler_task_create(
         enabled,
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -108,11 +109,12 @@ pub async fn scheduler_task_update(
         prompt,
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -145,11 +147,12 @@ pub async fn scheduler_task_delete(
         task_id,
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -185,11 +188,12 @@ pub async fn scheduler_task_set_enabled(
         enabled,
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -222,11 +226,12 @@ pub async fn scheduler_task_trigger(
         task_id,
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -261,13 +266,14 @@ pub async fn scheduler_task_list(
         thread_id: Some(thread_id),
     });
 
+    let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
     let sequence = state
         .bootstrap_result
         .services
         .orchestration_engine
-        .dispatch(command)
+        .dispatch(&command_json)
         .await
         .map_err(|e| e.to_string())?;
 
-    Ok(sequence)
+    Ok(sequence.parse::<u64>().unwrap_or(0))
 }

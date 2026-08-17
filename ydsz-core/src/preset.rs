@@ -31,12 +31,13 @@ use crate::provider::ModelSelection;
 pub type PresetId = String;
 
 /// Permission Level（权限级别）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PermissionLevel {
     /// 只读模式，不允许文件写入和执行命令
     ReadOnly,
-    /// 标准模式，可读写文件、执行白名单命令
+    /// 标准模式，可读写文件、执行白名单命令（默认）
+    #[default]
     Standard,
     /// 完全模式，无限制（需用户确认危险操作）
     Full,

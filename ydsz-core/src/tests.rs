@@ -578,6 +578,8 @@ mod test {
             input: Some(json!({"path": "/tmp/test.txt"})),
             output: Some(json!({"content": "hello"})),
             success: true,
+            duration_ms: Some(42),
+            pipeline_execution_id: Some("pipe-001".to_string()),
         };
         let v: Value = serde_json::to_value(&payload).unwrap();
         assert_eq!(v["type"], "toolCall");
@@ -656,5 +658,209 @@ mod test {
         assert_eq!(v["checkpointTurnCount"], 5);
         assert_eq!(v["files"][0]["path"], "src/main.rs");
         assert_eq!(v["assistantMessageId"], "msg-1");
+    }
+
+    // ==================== Agent Bundle Tests ====================
+
+    #[test]
+    fn agent_bundle_standard_creation() {
+        use crate::agent_bundle::{standard_interceptor_chain, AgentBundle, InterceptorStageType};
+
+        let bundle = AgentBundle::builtin_bundles();
+        assert!(!bundle.is_empty());
+        let standard = &bundle[0];
+        assert_eq!(standard.id, "builtin-standard-bundle");
+        assert!(standard.builtin);
+        assert!(standard.is_multi_agent() == false);
+
+        // 验证拦截器链包含预期的预执行拦截器
+        let pre_names = standard.interceptor_chain.pre_execute_names();
+        assert!(pre_names.contains(&"permission_audit"));
+        assert!(pre_names.contains(&"param_validation"));
+    }
+
+    #[test]
+    fn agent_bundle_interceptor_chain_ordering() {
+        use crate::agent_bundle::{InterceptorChainConfig, InterceptorStageType};
+
+        let chain = InterceptorChainConfig::new()
+            .add(InterceptorStageType::PreExecute, "first")
+            .add(InterceptorStageType::PreExecute, "second")
+            .add(InterceptorStageType::PostExecute, "third");
+
+        let pre = chain.pre_execute_names();
+        assert_eq!(pre, vec!["first", "second"]);
+
+        let post = chain.post_execute_names();
+        assert_eq!(post, vec!["third"]);
+
+        assert!(chain.contains("first"));
+        assert!(!chain.contains("nonexistent"));
+    }
+
+
+    #[test]
+    fn agent_builder_pattern() {
+        use crate::agent_bundle::{AgentBundleBuilder, InterceptorChainConfig, InterceptorStageType};
+
+        let bundle = AgentBundleBuilder::new("test-bundle", "Test")
+            .description("A test bundle")
+            .interceptor_chain(
+                InterceptorChainConfig::new()
+                    .add(InterceptorStageType::PreExecute, "audit")
+                    .add(InterceptorStageType::PostExecute, "log"),
+            )
+            .build();
+
+        assert_eq!(bundle.id, "test-bundle");
+        assert_eq!(bundle.name, "Test");
+        assert_eq!(bundle.interceptor_chain.stages.len(), 2);
+    }
+
+    // ==================== Provider Capabilities Tests ====================
+
+    #[test]
+    fn model_capabilities_builder() {
+        use crate::provider_capabilities::{
+            ModelCapabilities, ToolSupport, VisionCapability,
+        };
+
+        let caps = ModelCapabilities::new(crate::provider::ProviderKind::DeepSeek, "deepseek-v3")
+            .with_context_tokens(64000, 8192)
+            .with_tool_support(ToolSupport::Full {
+                max_parallel: 4,
+                streaming_results: false,
+            })
+            .with_vision(VisionCapability {
+                enabled: false,
+                ..Default::default()
+            });
+
+        assert_eq!(caps.model, "deepseek-v3");
+        assert_eq!(caps.max_context_tokens, 64000);
+        assert!(caps.supports_parallel_tool_calls());
+        assert_eq!(caps.max_parallel_tool_calls(), 4);
+        assert!(!caps.vision.enabled);
+    }
+
+    #[test]
+    fn capability_matcher_compatible() {
+        use crate::provider_capabilities::{
+            CapabilityMatcher, CapabilityMatchResult, ModelCapabilities, ToolSupport,
+        };
+
+        let caps = ModelCapabilities::new(crate::provider::ProviderKind::Codex, "gpt-4o")
+            .with_context_tokens(128000, 16000)
+            .with_tool_support(ToolSupport::Full {
+                max_parallel: 8,
+                streaming_results: true,
+            });
+
+        let matcher = CapabilityMatcher::new()
+            .require_context_tokens(64000)
+            .require_tool_support(ToolSupport::Basic);
+
+        let result = matcher.matches(&caps);
+        assert!(result.is_compatible());
+    }
+
+    #[tokio::test]
+    async fn static_adapter_health_check() {
+        use crate::provider_capabilities::{
+            ModelCapabilities, ProviderAdapter, StaticProviderAdapter,
+        };
+
+        let caps = ModelCapabilities::default();
+        let adapter = StaticProviderAdapter::new(
+            "test-adapter",
+            crate::provider::ProviderKind::Glm,
+            caps,
+            vec!["read_file", "write_file"],
+            true,
+        );
+
+        let health = adapter.check_health().await;
+        assert!(health.available);
+        assert_eq!(adapter.name(), "test-adapter");
+        assert!(adapter.supports_tool("read_file"));
+        assert!(!adapter.supports_tool("browser"));
+    }
+
+    // ==================== Effect Registry Tests ====================
+
+    #[test]
+    fn effect_registry_rollback_all() {
+        use crate::effect_registry::{EffectKind, EffectRegistry};
+
+        let mut registry = EffectRegistry::new("turn-001", "thread-001");
+        registry.register_file_write(
+            std::path::PathBuf::from("/tmp/test.txt"),
+            Some(b"old content".to_vec()),
+            "hash123",
+        );
+        registry.register_git_operation("commit", "abc123", Some("main".to_string()), Some("def456".to_string()));
+        registry.register_tool_registration("read_file", true);
+
+        assert_eq!(registry.active_records().len(), 3);
+        assert_eq!(registry.reversible_count(), 3);
+
+        let result = registry.rollback_all();
+        assert_eq!(result.succeeded, 3);
+        assert_eq!(result.skipped, 0);
+        assert!(registry.is_fully_rolled_back());
+    }
+
+    #[test]
+    fn effect_registry_audit_summary() {
+        use crate::effect_registry::{EffectKind, EffectRegistry};
+
+        let mut registry = EffectRegistry::new("turn-001", "thread-001");
+        registry.register_file_write(
+            std::path::PathBuf::from("/tmp/test.txt"),
+            None,
+            "hash456",
+        );
+
+        let summary = registry.audit_summary();
+        assert_eq!(summary["totalEffects"], 1);
+        assert_eq!(summary["reversibleCount"], 1);
+
+        let file_records = registry.records_by_kind(EffectKind::FileWrite);
+        assert_eq!(file_records.len(), 1);
+    }
+
+    // ==================== Agent Loop Tests ====================
+
+    #[tokio::test]
+    async fn simple_agent_loop_returns_response() {
+        use crate::agent_loop::{AgentLoop, SimpleAgentLoop, LoopContext};
+
+        let loop_impl = SimpleAgentLoop::new("test-simple", |_input| {
+            Ok("Hello from AI".to_string())
+        });
+
+        let mut ctx = LoopContext::new("thread-001", "turn-001", "Hi");
+        let result = loop_impl.run(&mut ctx).await;
+
+        assert!(result.is_completed());
+        assert_eq!(result.tool_calls_count(), 0);
+    }
+
+    #[test]
+    fn loop_result_status_checks() {
+        use crate::agent_loop::LoopResult;
+
+        let completed = LoopResult::Completed {
+            summary: "done".to_string(),
+            tool_calls_count: 3,
+            total_duration_ms: 1500,
+        };
+        assert!(completed.is_completed());
+
+        let error = LoopResult::Error { message: "fail".to_string(), phase: "tool".to_string() };
+        assert!(error.is_error());
+
+        let awaiting = LoopResult::AwaitingUserInput { prompt: "what?".to_string() };
+        assert!(awaiting.requires_user_interaction());
     }
 }

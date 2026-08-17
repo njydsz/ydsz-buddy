@@ -107,7 +107,7 @@ pub async fn ssh_connect(
     let config = conn.get_config().await;
     Ok(SshConnectionStatusView {
         state: to_state_view(conn.get_state().await),
-        connection_id: Some(connection_id),
+        connection_id,
         host: config.host.clone(),
         port: config.port,
         username: config.username.clone(),
@@ -148,7 +148,7 @@ pub async fn ssh_get_status(
     let config = conn.get_config().await;
     Ok(SshConnectionStatusView {
         state: to_state_view(conn.get_state().await),
-        connection_id: Some(connection_id),
+        connection_id,
         host: config.host.clone(),
         port: config.port,
         username: config.username.clone(),
@@ -167,7 +167,7 @@ pub async fn ssh_list_connections(
         .into_iter()
         .map(|info| SshConnectionStatusView {
             state: to_state_view(info.state),
-            connection_id: Some(info.connection_id),
+            connection_id: info.connection_id,
             host: info.host,
             port: info.port,
             username: info.username,
@@ -307,7 +307,8 @@ pub async fn ssh_exec(
         .get(&connection_id)
         .await
         .map_err(|e| e.to_string())?;
-    conn.execute_command(&command).await.map_err(|e| e.to_string())
+    let output = conn.execute_command(&command).await.map_err(|e| e.to_string())?;
+    Ok(output.stdout)
 }
 
 /// 检测远程环境信息（P2-9）

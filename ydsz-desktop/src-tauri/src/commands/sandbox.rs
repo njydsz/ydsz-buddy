@@ -168,12 +168,18 @@ impl TryFrom<ChartSpecDto> for ChartSpec {
             y_column: dto.y_column,
             group_column: dto.group_column,
             agg_func: dto.agg_func,
+            data: ChartData { series: vec![] },
+            x_label: None,
+            y_label: None,
+            categories: vec![],
+            y_min: None,
+            y_max: None,
         })
     }
 }
 
-impl From<ChartData> for ChartDataDto {
-    fn from(c: ChartData) -> Self {
+impl From<ChartSpec> for ChartDataDto {
+    fn from(c: ChartSpec) -> Self {
         Self {
             chart_type: match c.chart_type {
                 ChartType::Bar => "bar",
@@ -183,12 +189,12 @@ impl From<ChartData> for ChartDataDto {
                 ChartType::Area => "area",
             }.to_string(),
             title: c.title,
-            x_label: c.x_label,
-            y_label: c.y_label,
-            series: c.series.into_iter().map(Into::into).collect(),
+            x_label: c.x_label.unwrap_or_default(),
+            y_label: c.y_label.unwrap_or_default(),
+            series: c.data.series.into_iter().map(Into::into).collect(),
             categories: c.categories,
-            y_max: c.y_max,
-            y_min: c.y_min,
+            y_max: c.y_max.unwrap_or_default(),
+            y_min: c.y_min.unwrap_or_default(),
         }
     }
 }
@@ -247,7 +253,7 @@ pub async fn sandbox_transform_csv(
 ) -> Result<TransformResultDto, String> {
     info!(ops = ops.len(), "转换 CSV 数据");
     let ops: Vec<TransformOp> = ops.into_iter().map(Into::into).collect();
-    let result = DataSandbox::transform_csv(&content, &ops).map_err(|e| e.to_string())?;
+    let result = DataSandbox::transform_csv(&content, &ops, "inline").map_err(|e| e.to_string())?;
     Ok(TransformResultDto {
         row_count: result.row_count,
         rows: result.rows.into_iter().map(|m| serde_json::to_value(m).unwrap_or_default()).collect(),
@@ -263,7 +269,15 @@ pub async fn sandbox_generate_chart(
 ) -> Result<ChartDataDto, String> {
     info!(chart_type = %spec.chart_type, "生成图表");
     let chart_spec: ChartSpec = spec.try_into()?;
-    let result = DataSandbox::generate_chart(&content, &chart_spec).map_err(|e| e.to_string())?;
+    let result = DataSandbox::generate_chart(
+        &content,
+        chart_spec.chart_type,
+        &chart_spec.x_column,
+        &chart_spec.y_column,
+        chart_spec.group_column.as_deref(),
+        chart_spec.agg_func.as_deref(),
+    )
+    .map_err(|e| e.to_string())?;
     Ok(result.into())
 }
 

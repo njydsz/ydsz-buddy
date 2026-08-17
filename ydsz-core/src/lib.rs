@@ -75,6 +75,30 @@ pub mod tool_permissions;
 /// 权限审计、参数校验、耗时统计、活动日志和错误脱敏等拦截能力。
 pub mod tool_pipeline;
 
+/// 声明式 Agent Bundle（智能体运行契约包）。
+///
+/// 将 Agent 的完整运行时行为声明式组合：拦截器链顺序、错误恢复策略、
+/// 多 Agent 编排拓扑。是 AgentPreset 的超集，面向系统运行时。
+pub mod agent_bundle;
+
+/// Provider 能力声明系统（ModelCapabilities + ProviderAdapter trait）。
+///
+/// 将 Provider/模型的能力形式化声明，实现运行时能力匹配与校验。
+/// 借鉴 DeepSeek Harness 的 Provider Capabilities 设计。
+pub mod provider_capabilities;
+
+/// Effect 注册表——可逆副作用追踪。
+///
+/// 将文件系统写入、Git 操作、工具注册等副作用建模为可逆操作，
+/// 确保 Turn 失败或中断时能回滚到一致状态。
+pub mod effect_registry;
+
+/// Agent Loop 插件化——主循环抽象为可替换接缝。
+///
+/// 借鉴 DeepSeek Harness 的 Seam 概念，将 Agent 主循环抽象为 AgentLoop trait，
+/// 使不同场景可替换不同的循环策略（Simple、Standard、Review、Quest）。
+pub mod agent_loop;
+
 #[cfg(test)]
 mod tests;
 

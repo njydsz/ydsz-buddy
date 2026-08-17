@@ -88,7 +88,6 @@ fn dispatcher(state: &State<'_, ServerState>) -> Arc<MobilePushDispatcher> {
 
 /// 推送"待审批"提醒到指定 alias 的所有设备
 #[tauri::command]
-#[specta::specta]
 pub async fn push_dispatch_approval(
     state: State<'_, ServerState>,
     params: DispatchApprovalParams,
@@ -119,7 +118,6 @@ pub async fn push_dispatch_approval(
 
 /// 推送任务状态更新
 #[tauri::command]
-#[specta::specta]
 pub async fn push_dispatch_task_update(
     state: State<'_, ServerState>,
     params: DispatchTaskUpdateParams,
@@ -156,7 +154,6 @@ pub async fn push_dispatch_task_update(
 
 /// 列出某 alias 已绑定的所有移动设备
 #[tauri::command]
-#[specta::specta]
 pub async fn push_list_mobile_devices(
     state: State<'_, ServerState>,
     alias: String,
@@ -202,7 +199,6 @@ pub async fn push_get_dry_run_status(
 
 /// 获取推送通道配置状态（P2-4: 实际对接联调）
 #[tauri::command]
-#[specta::specta]
 pub async fn push_get_config_status(
     state: State<'_, ServerState>,
 ) -> Result<PushConfigStatus, String> {

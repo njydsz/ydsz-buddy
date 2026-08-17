@@ -598,6 +598,8 @@ pub struct Activity {
 /// - [`FileChange`](ActivityKind::FileChange) - 文件变更
 /// - [`TerminalCommand`](ActivityKind::TerminalCommand) - 终端命令执行
 /// - [`GitOperation`](ActivityKind::GitOperation) - Git 操作（如 commit、push 等）
+/// - [`ContextCompacted`](ActivityKind::ContextCompacted) - 上下文压缩
+/// - [`PipelineExecution`](ActivityKind::PipelineExecution) - 工具流水线执行（包含完整拦截器链路追踪）
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum ActivityKind {
@@ -607,10 +609,12 @@ pub enum ActivityKind {
     FileChange,
     /// 终端命令执行
     TerminalCommand,
-/// Git 操作
-GitOperation,
-/// 上下文压缩
-ContextCompacted,
+    /// Git 操作
+    GitOperation,
+    /// 上下文压缩
+    ContextCompacted,
+    /// 工具流水线执行（完整拦截器链路追踪）
+    PipelineExecution,
 }
 
 /// # 活动负载枚举
@@ -629,6 +633,12 @@ pub enum ActivityPayload {
         output: Option<serde_json::Value>,
         /// 是否成功
         success: bool,
+        /// 执行耗时（毫秒）
+        #[serde(skip_serializing_if = "Option::is_none")]
+        duration_ms: Option<u64>,
+        /// 关联的流水线执行 ID（如果有）
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pipeline_execution_id: Option<String>,
     },
     /// 文件变更负载
     FileChange {
@@ -683,6 +693,69 @@ pub enum ActivityPayload {
         /// 压缩后估算的 token 数
         estimated_tokens_after: u64,
     },
+    /// 工具流水线执行负载（完整拦截器链路追踪数据）
+    ///
+    /// 记录从 pre-execute 到 execute 再到 post-execute 的完整生命周期，
+    /// 包含每个拦截器的执行数据和最终结果。
+    PipelineExecution {
+        /// 被调用的工具名称
+        tool_name: String,
+        /// 调用唯一标识（关联 ToolContext.call_id）
+        call_id: String,
+        /// 工具输入参数（JSON,已脱敏）
+        input: Option<serde_json::Value>,
+        /// 工具输出结果（JSON,已脱敏）
+        output: Option<serde_json::Value>,
+        /// 是否执行成功
+        success: bool,
+        /// 总耗时（毫秒）
+        total_duration_ms: u64,
+        /// 各拦截器的执行阶段数据
+        stages: Vec<PipelineStageTrace>,
+        /// 错误信息（失败时）
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error_message: Option<String>,
+    },
+}
+
+/// # 流水线阶段追踪
+///
+/// 记录拦截器链中单个阶段的执行细节，用于 Trace View 展示。
+///
+/// ## 设计目的
+/// 借鉴 DeepSeek Harness 的 Trace View 概念，将工具执行过程可视化为
+/// 离散的阶段序列（pre-execute → execute → post-execute）,每个阶段
+/// 包含时间戳、状态和可选的诊断信息。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PipelineStageTrace {
+    /// 阶段名称（如 "PermissionAudit"、"Validation"、"Execution"、"ErrorWrap"）
+    pub stage_name: String,
+    /// 阶段类型（前置处理 / 实际执行 / 后置处理）
+    pub stage_type: PipelineStageType,
+    /// 阶段开始时间（UTC）
+    pub started_at: DateTime<Utc>,
+    /// 阶段耗时（毫秒）
+    pub duration_ms: u64,
+    /// 阶段是否成功
+    pub success: bool,
+    /// 阶段诊断信息（失败时包含错误详情,成功时可能包含耗时提示等）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostic: Option<String>,
+}
+
+/// # 流水线阶段类型
+///
+/// 标识一个拦截器阶段在工具执行流程中的位置。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PipelineStageType {
+    /// 前置处理阶段（参数校验、权限检查等）
+    PreExecute,
+    /// 实际执行阶段（调用工具实现）
+    Execute,
+    /// 后置处理阶段（日志记录、错误脱敏等）
+    PostExecute,
 }
 
 /// # 文件变更条目

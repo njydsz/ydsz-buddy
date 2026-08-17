@@ -22,6 +22,7 @@
 //! 工作区根目录由 Tauri State 中的 `workspace_roots` 提供。
 
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::sync::OnceLock;
 use tracing::{info, warn};
 
@@ -72,7 +73,13 @@ pub struct DirEntryDto {
 
 impl From<DirEntry> for DirEntryDto {
     fn from(e: DirEntry) -> Self {
-        Self { name: e.name, path: e.path, is_dir: e.is_dir, size: e.size, modified: e.modified }
+        Self {
+            name: e.name,
+            path: e.path,
+            is_dir: e.is_dir,
+            size: Some(e.size),
+            modified: e.modified.and_then(|s| s.parse::<u64>().ok()),
+        }
     }
 }
 
@@ -88,7 +95,14 @@ pub struct FileInfoDto {
 
 impl From<FileInfo> for FileInfoDto {
     fn from(f: FileInfo) -> Self {
-        Self { path: f.path, size: f.size, is_dir: f.is_dir, modified: f.modified, created: f.created, read_only: f.read_only }
+        Self {
+            path: f.path,
+            size: f.size,
+            is_dir: f.is_dir,
+            modified: f.modified.and_then(|s| s.parse::<u64>().ok()),
+            created: f.created.and_then(|s| s.parse::<u64>().ok()),
+            read_only: f.read_only,
+        }
     }
 }
 
@@ -101,7 +115,11 @@ pub struct SearchFilesResultDto {
 
 impl From<SearchFilesResult> for SearchFilesResultDto {
     fn from(s: SearchFilesResult) -> Self {
-        Self { pattern: s.pattern, matches: s.matches, root: s.root }
+        Self {
+            pattern: s.pattern,
+            matches: s.matches.into_iter().map(|m| m.path).collect(),
+            root: s.root,
+        }
     }
 }
 
@@ -111,7 +129,7 @@ impl From<SearchFilesResult> for SearchFilesResultDto {
 pub async fn fs_list_directory(path: String) -> Result<Vec<DirEntryDto>, String> {
     info!(path = %path, "列出目录");
     let guard = get_path_guard();
-    let entries = list_directory_guarded(guard, &path).map_err(|e| {
+    let entries = list_directory_guarded(guard, Path::new(&path)).map_err(|e| {
         warn!(path = %path, error = %e, "目录列表被安全策略阻止");
         e.to_string()
     })?;
@@ -124,7 +142,7 @@ pub async fn fs_list_directory(path: String) -> Result<Vec<DirEntryDto>, String>
 pub async fn fs_read_file(path: String) -> Result<String, String> {
     info!(path = %path, "读取文件");
     let guard = get_path_guard();
-    read_file_guarded(guard, &path).map_err(|e| {
+    read_file_guarded(guard, Path::new(&path)).map_err(|e| {
         warn!(path = %path, error = %e, "文件读取被安全策略阻止");
         e.to_string()
     })
@@ -136,7 +154,7 @@ pub async fn fs_read_file(path: String) -> Result<String, String> {
 pub async fn fs_write_file(path: String, content: String) -> Result<(), String> {
     info!(path = %path, len = content.len(), "写入文件");
     let guard = get_path_guard();
-    write_file_guarded(guard, &path, &content).map_err(|e| {
+    write_file_guarded(guard, Path::new(&path), &content).map_err(|e| {
         warn!(path = %path, error = %e, "文件写入被安全策略阻止");
         e.to_string()
     })
@@ -152,7 +170,7 @@ pub async fn fs_search_files(
 ) -> Result<SearchFilesResultDto, String> {
     info!(root = %root, pattern = %pattern, "搜索文件");
     let guard = get_path_guard();
-    let result = search_files_guarded(guard, &root, &pattern, max_results.unwrap_or(100))
+    let result = search_files_guarded(guard, Path::new(&root), &pattern)
         .map_err(|e| {
             warn!(root = %root, error = %e, "文件搜索被安全策略阻止");
             e.to_string()
@@ -166,7 +184,7 @@ pub async fn fs_search_files(
 pub async fn fs_file_info(path: String) -> Result<FileInfoDto, String> {
     info!(path = %path, "获取文件信息");
     let guard = get_path_guard();
-    let info = file_info_guarded(guard, &path).map_err(|e| {
+    let info = file_info_guarded(guard, Path::new(&path)).map_err(|e| {
         warn!(path = %path, error = %e, "文件信息获取被安全策略阻止");
         e.to_string()
     })?;
