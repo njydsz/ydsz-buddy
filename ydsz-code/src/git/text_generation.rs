@@ -380,8 +380,8 @@ impl GitTextGenerationService {
             approval_policy: None,
         };
 
-        provider_svc
-            .start_session(&thread_id, start_input)
+        let session_id = provider_svc
+            .start_session(start_input)
             .await
             .map_err(|e| GitError::CommandError(format!("启动 Provider 会话失败: {}", e)))?;
 
@@ -400,17 +400,17 @@ impl GitTextGenerationService {
         };
 
         provider_svc
-            .send_turn(turn_input)
+            .send_turn(turn_input, Some(&model), None)
             .await
             .map_err(|e| GitError::CommandError(format!("发送 Turn 失败: {}", e)))?;
 
         // 4. 监听事件流，收集 Assistant 文本
         let generated_text = self
-            .collect_response_from_events(&mut event_rx, &thread_id, &turn_id)
+            .collect_response_from_events(&mut event_rx, &session_id, &turn_id)
             .await?;
 
         // 5. 清理临时会话
-        if let Err(e) = provider_svc.stop_session(&thread_id, provider).await {
+        if let Err(e) = provider_svc.stop_session(&session_id).await {
             warn!("清理临时会话失败: {}", e);
         }
 

@@ -34,7 +34,38 @@ use std::sync::Mutex;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tracing::{debug, info, warn};
+
+/// 对话消息快照（Checkpoint 内嵌）
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, specta::Type)]
+pub struct SnapshotMessage {
+    /// 消息角色 (user / assistant / tool)
+    pub role: String,
+    /// 消息内容（纯文本摘要）
+    pub content: String,
+    /// 工具调用名称（role=tool 时）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_name: Option<String>,
+    /// 消息序号
+    pub sequence: u32,
+}
+
+/// Provider 会话快照（Checkpoint 内嵌）
+#[derive(Debug, Clone, Default, Serialize, Deserialize, specta::Type)]
+pub struct SnapshotProviderSession {
+    /// Provider 名称
+    pub provider_name: String,
+    /// 模型名称
+    pub model_name: String,
+    /// Provider 内部 session ID（用于断点续传）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+    /// 累计 token 数
+    pub total_tokens: u32,
+    /// 会话开始时间
+    pub started_at: String,
+}
 
 /// 任务状态
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, specta::Type)]
@@ -65,6 +96,8 @@ impl CheckpointStatus {
 }
 
 /// Checkpoint 记录
+///
+/// 包含完整的对话快照，支持崩溃恢复后继续对话。
 #[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 pub struct CheckpointRecord {
     /// 线程 ID
@@ -83,6 +116,15 @@ pub struct CheckpointRecord {
     /// 任务摘要
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
+    /// 对话消息快照（用于断点恢复时重建上下文）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub messages: Option<Vec<SnapshotMessage>>,
+    /// Provider 会话快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_session: Option<SnapshotProviderSession>,
+    /// 工具调用结果列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_results: Option<Vec<Value>>,
 }
 
 impl CheckpointRecord {
@@ -96,6 +138,9 @@ impl CheckpointRecord {
             status,
             last_message_id: None,
             summary: None,
+            messages: None,
+            provider_session: None,
+            tool_results: None,
         }
     }
 }
@@ -235,6 +280,15 @@ pub struct CheckpointSaveParams {
     /// 任务摘要
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
+    /// 对话消息快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub messages: Option<Vec<SnapshotMessage>>,
+    /// Provider 会话快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_session: Option<SnapshotProviderSession>,
+    /// 工具调用结果列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_results: Option<Vec<Value>>,
 }
 
 /// `checkpoint_update` 参数
@@ -251,6 +305,15 @@ pub struct CheckpointUpdateParams {
     /// 任务摘要
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
+    /// 对话消息快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub messages: Option<Vec<SnapshotMessage>>,
+    /// Provider 会话快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_session: Option<SnapshotProviderSession>,
+    /// 工具调用结果列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_results: Option<Vec<Value>>,
 }
 
 /// `checkpoint_complete` / `checkpoint_cancel` / `checkpoint_resume` /
@@ -275,6 +338,8 @@ pub struct CheckpointCleanupParams {
 // ── 命令实现 ─────────────────────────────────────────────────────────
 
 /// 创建或覆盖一个 Checkpoint(任务启动时调用)
+///
+/// 保存对话快照（messages + provider_session + tool_results），用于崩溃恢复后继续对话。
 #[tauri::command]
 #[specta::specta]
 pub fn checkpoint_save(
@@ -283,15 +348,25 @@ pub fn checkpoint_save(
     app: tauri::AppHandle,
 ) -> Result<TurnCheckpoint, String> {
     let status = params.status.unwrap_or(CheckpointStatus::Running);
+    let now = Utc::now();
     let record = CheckpointRecord {
+        thread_id: params.thread_id,
+        turn_id: params.turn_id,
+        created_at: now,
+        updated_at: now,
+        status,
         last_message_id: params.last_message_id,
         summary: params.summary,
-        ..CheckpointRecord::new(params.thread_id, params.turn_id, status)
+        messages: params.messages,
+        provider_session: params.provider_session,
+        tool_results: params.tool_results,
     };
     upsert(&store, &app, record)
 }
 
 /// 刷新 Checkpoint 的 `updated_at`(定时心跳)
+///
+/// 同时更新对话快照（用于断点续传时获取最新上下文）。
 #[tauri::command]
 #[specta::specta]
 pub fn checkpoint_update(
@@ -320,6 +395,16 @@ pub fn checkpoint_update(
     }
     if params.summary.is_some() {
         record.summary = params.summary;
+    }
+    // 更新对话快照（增量更新：仅当传入非 None 值时才覆盖）
+    if params.messages.is_some() {
+        record.messages = params.messages;
+    }
+    if params.provider_session.is_some() {
+        record.provider_session = params.provider_session;
+    }
+    if params.tool_results.is_some() {
+        record.tool_results = params.tool_results;
     }
 
     let snapshot = TurnCheckpoint::from(&*record);
@@ -436,6 +521,75 @@ pub fn checkpoint_cleanup_old(
 
     info!(removed, cutoff = %params.cutoff_iso, "Checkpoint 清理完成");
     Ok(removed)
+}
+
+// ── 对话快照恢复 ─────────────────────────────────────────────────────
+
+/// Checkpoint 对话快照（包含恢复所需的完整上下文）
+#[derive(Debug, Clone, Serialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckpointSnapshot {
+    /// 线程 ID
+    pub thread_id: String,
+    /// Turn ID
+    pub turn_id: String,
+    /// 任务状态字符串
+    pub status: String,
+    /// 最后一条消息 ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_message_id: Option<String>,
+    /// 任务摘要
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+    /// 对话消息快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub messages: Option<Vec<SnapshotMessage>>,
+    /// Provider 会话快照
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_session: Option<SnapshotProviderSession>,
+    /// 工具调用结果列表
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_results: Option<Vec<Value>>,
+}
+
+/// 获取 Checkpoint 对话快照（用于断点恢复时重建上下文）
+///
+/// 返回当前对话上下文（消息列表 + Provider 会话 + 工具结果），
+/// 前端可在恢复时将这些数据注入 Agent 循环以继续对话。
+#[tauri::command]
+#[specta::specta]
+pub fn checkpoint_get_snapshot(
+    params: CheckpointKeyParams,
+    store: tauri::State<'_, CheckpointStore>,
+) -> Result<Option<CheckpointSnapshot>, String> {
+    let guard = store
+        .inner
+        .lock()
+        .map_err(|error| format!("Checkpoint 锁失败: {error}"))?;
+
+    let result = guard.iter().find(|record| {
+        record.thread_id == params.thread_id && record.turn_id == params.turn_id
+    }).map(|record| {
+        CheckpointSnapshot {
+            thread_id: record.thread_id.clone(),
+            turn_id: record.turn_id.clone(),
+            status: match record.status {
+                CheckpointStatus::Running => "running".to_string(),
+                CheckpointStatus::Paused => "paused".to_string(),
+                CheckpointStatus::Failed => "failed".to_string(),
+                CheckpointStatus::Completed => "completed".to_string(),
+                CheckpointStatus::Cancelled => "cancelled".to_string(),
+                CheckpointStatus::Resuming => "resuming".to_string(),
+            },
+            last_message_id: record.last_message_id.clone(),
+            summary: record.summary.clone(),
+            messages: record.messages.clone(),
+            provider_session: record.provider_session.clone(),
+            tool_results: record.tool_results.clone(),
+        }
+    });
+
+    Ok(result)
 }
 
 // ── 内部辅助 ─────────────────────────────────────────────────────────

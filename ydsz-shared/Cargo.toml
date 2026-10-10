@@ -22,5 +22,9 @@ hmac = { workspace = true }
 # Memory 系统依赖
 ydsz-core = { path = "../ydsz-core" }
 
+# SQLite 持久化
+rusqlite = { workspace = true }
+parking_lot = "0.12"
+
 [dev-dependencies]
 tempfile = { workspace = true }

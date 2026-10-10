@@ -30,11 +30,17 @@
 //! - `on_error`
 
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::Instant;
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::error::CoreResult;
+use crate::tool_pipeline::{
+    CallerIdentity, PermissionAuditInterceptor, PermissionLevel, ToolContext, ToolExecutor,
+    ToolInput, ToolOutput, ToolPipeline,
+};
 
 // ============================================================================
 // 循环上下文
@@ -403,6 +409,12 @@ where
     provider_fn: F,
     /// 最大迭代次数
     max_iterations: u32,
+    /// 工具执行管道（含权限审计、参数校验、日志、错误脱敏拦截器）
+    pipeline: ToolPipeline,
+    /// 工具执行器（实际执行工具逻辑）
+    executor: Arc<dyn ToolExecutor>,
+    /// 权限级别
+    permission_level: PermissionLevel,
 }
 
 impl<F> StandardAgentLoop<F>
@@ -411,13 +423,36 @@ where
         + Send
         + Sync,
 {
-    /// 创建标准循环
+    /// 创建标准循环（使用默认 pipeline 和 executor）
     pub fn new(name: impl Into<String>, provider_fn: F) -> Self {
+        let pipeline = ToolPipeline::new()
+            .add(PermissionAuditInterceptor::new());
         Self {
             name: name.into(),
             provider_fn,
             max_iterations: 20,
+            pipeline,
+            executor: Arc::new(DefaultToolExecutor::new()),
+            permission_level: PermissionLevel::Standard,
         }
+    }
+
+    /// 设置工具管道（替换默认 pipeline）
+    pub fn with_pipeline(mut self, pipeline: ToolPipeline) -> Self {
+        self.pipeline = pipeline;
+        self
+    }
+
+    /// 设置工具执行器
+    pub fn with_executor(mut self, executor: Arc<dyn ToolExecutor>) -> Self {
+        self.executor = executor;
+        self
+    }
+
+    /// 设置权限级别
+    pub fn with_permission_level(mut self, level: PermissionLevel) -> Self {
+        self.permission_level = level;
+        self
     }
 
     /// 设置最大迭代次数
@@ -504,11 +539,75 @@ where
                         .on_tool_call_start(ctx, tool_name, input)
                         .await;
 
-                    // 模拟工具调用（实际场景中使用 ToolPipeline）
+                    // 通过 ToolPipeline 执行工具（权限审计 → 参数校验 → 执行 → 日志 → 脱敏）
+                    let call_id = format!("call-{}", uuid::Uuid::new_v4());
+                    let tool_input = ToolInput {
+                        tool_name: tool_name.to_string(),
+                        arguments: input.clone(),
+                        timeout_ms: 0,
+                    };
+                    let tool_ctx = ToolContext {
+                        call_id: call_id.clone(),
+                        thread_id: ctx.thread_id.clone(),
+                        turn_id: ctx.turn_id.clone(),
+                        session_id: ctx.session_id.clone(),
+                        caller: CallerIdentity::Agent,
+                        permission_level: self.permission_level,
+                        metadata: ctx.metadata.clone(),
+                    };
+
+                    let tool_output = match self
+                        .pipeline
+                        .run(tool_input, &tool_ctx, &*self.executor)
+                        .await
+                    {
+                        Ok(output) => {
+                            tracing::info!(
+                                tool_name = %tool_name,
+                                success = output.success,
+                                elapsed_ms = output.elapsed_ms,
+                                "工具执行成功"
+                            );
+                            output
+                        }
+                        Err(e) => {
+                            tracing::error!(
+                                tool_name = %tool_name,
+                                error = %e,
+                                "工具执行被 Pipeline 拦截"
+                            );
+                            let err_msg = format!("工具 '{}' 执行失败: {}", tool_name, e);
+                            let _ = self.on_error(ctx, "tool", &err_msg).await;
+                            return LoopResult::Error {
+                                message: err_msg,
+                                phase: "tool".to_string(),
+                            };
+                        }
+                    };
+
                     tool_call_count += 1;
 
-                    // 工具调用结束 hook（占位）—— 实际场景传入 ToolOutput
-                    let _ = tool_name;
+                    // 将工具输出结果转为响应片段追加到历史
+                    let result_fragment = ProviderResponseFragment::Text {
+                        content: format!(
+                            "[{}] {}",
+                            tool_name,
+                            tool_output.summary.as_deref()
+                                .or_else(|| tool_output.result.as_str())
+                                .unwrap_or("")
+                        ),
+                    };
+                    history.push(result_fragment);
+
+                    // 工具调用结束 hook
+                    let _ = self
+                        .on_tool_call_end(
+                            ctx,
+                            tool_name,
+                            tool_output.success,
+                            Some(&tool_output.result),
+                        )
+                        .await;
                 }
             }
         }
@@ -625,4 +724,79 @@ pub fn loop_context(
     user_input: impl Into<String>,
 ) -> LoopContext {
     LoopContext::new(thread_id, turn_id, user_input)
+}
+
+// ============================================================================
+// 默认工具执行器
+// ============================================================================
+
+/// 默认工具执行器
+///
+/// 按工具名路由到具体执行逻辑。在最小实现中，返回一个占位成功结果。
+/// 生产使用时，应由调用方通过 `with_executor()` 替换为完整实现
+/// （接入 SandboxExecutor / 文件读写 / Git / LSP 等能力）。
+pub struct DefaultToolExecutor;
+
+impl DefaultToolExecutor {
+    /// 创建默认执行器
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Default for DefaultToolExecutor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[async_trait]
+impl ToolExecutor for DefaultToolExecutor {
+    async fn execute(&self, input: ToolInput, ctx: &ToolContext) -> CoreResult<ToolOutput> {
+        let start = Instant::now();
+        let elapsed_ms = start.elapsed().as_millis() as u64;
+
+        tracing::debug!(
+            tool_name = %input.tool_name,
+            call_id = %ctx.call_id,
+            "DefaultToolExecutor 执行工具（占位实现，请替换为真实 Executor）"
+        );
+
+        // 按工具名路由
+        let result = match input.tool_name.as_str() {
+            "read_file" | "fs_read_file" => serde_json::json!({
+                "status": "ok",
+                "content": "",
+                "note": "DefaultToolExecutor placeholder — file read not wired"
+            }),
+            "write_file" | "fs_write_file" | "multi_edit_execute" => serde_json::json!({
+                "status": "ok",
+                "note": "DefaultToolExecutor placeholder — file write not wired"
+            }),
+            "execute_command" | "runner_execute" | "code_sandbox_execute_command" => {
+                serde_json::json!({
+                    "status": "ok",
+                    "exit_code": 0,
+                    "stdout": "",
+                    "note": "DefaultToolExecutor placeholder — command execution not wired"
+                })
+            }
+            "search_web" => serde_json::json!({
+                "status": "ok",
+                "results": [],
+                "note": "DefaultToolExecutor placeholder — web search not wired"
+            }),
+            _ => serde_json::json!({
+                "status": "ok",
+                "message": format!("Tool '{}' acknowledged (placeholder)", input.tool_name)
+            }),
+        };
+
+        Ok(ToolOutput::success(
+            input.tool_name,
+            ctx.call_id.clone(),
+            result,
+            elapsed_ms,
+        ))
+    }
 }

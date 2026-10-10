@@ -82,4 +82,6 @@ pub mod review_comments;        // 行级 Review Comment 后端持久化（P2-2�
 pub mod code_sandbox;           // Agent 代码执行沙箱（P2-8）
 pub mod extensions;             // Extension 扩展系统（P1-1: 安装/管理/启用/禁用 UI）
 pub mod image_gen;              // AI 文生图（DALL-E 3 / FLUX / SD / 通义万相 / 混元）
+pub mod turn;                   // Turn 生命周期管理（取消/中断）
+pub mod artifacts;              // 产物批量导出
 

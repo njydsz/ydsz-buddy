@@ -1822,3 +1822,93 @@ pub async fn browser_record_navigation(
 
     Ok(())
 }
+
+// ===== Design Mode =====
+
+use serde::{Deserialize, Serialize as _};
+
+/// Design Mode 切换输入
+#[derive(Debug, Clone, Deserialize, specta::Type)]
+pub struct BrowserDesignModeToggleInput {
+    pub thread_id: String,
+    pub tab_id: String,
+    pub enabled: bool,
+}
+
+/// 切换 Design Mode 状态
+///
+/// 启用时在浏览器窗口注入元素选择脚本，禁用时清理选择状态。
+#[tauri::command]
+#[specta::specta]
+pub async fn browser_design_mode_toggle(
+    app: AppHandle,
+    state: State<'_, BrowserState>,
+    input: BrowserDesignModeToggleInput,
+) -> Result<bool, String> {
+    info!(
+        "Design Mode 切换: thread_id={}, tab_id={}, enabled={}",
+        input.thread_id, input.tab_id, input.enabled
+    );
+
+    let label = browser_window_label(&input.thread_id);
+    let window = app.get_webview_window(&label).ok_or("Browser window not found")?;
+
+    if input.enabled {
+        // 注入元素选择 JS 脚本
+        let js = r#"
+            (function() {
+                if (window.__ydszDesignModeActive) return;
+                window.__ydszDesignModeActive = true;
+
+                document.addEventListener('click', window.__ydszDesignModeClickHandler = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const el = e.target;
+                    const data = {
+                        tagName: el.tagName,
+                        elementId: el.id || '',
+                        classList: Array.from(el.classList),
+                        outerHtml: el.outerHtml || el.outerHTML,
+                        computedStyles: JSON.stringify(getComputedStyle(el)),
+                        rect: JSON.stringify(el.getBoundingClientRect()),
+                        textContent: el.textContent || '',
+                        url: window.location.href,
+                        pageTitle: document.title,
+                    };
+                    window.__TAURI_INTERNALS__.invoke('browser_design_mode_element_selected', { data });
+                }, true);
+
+                // 添加视觉提示：给所有元素加 hover 高亮
+                const style = document.createElement('style');
+                style.id = '__ydszDesignModeStyle';
+                style.textContent = '*:hover { outline: 2px solid #3b82f6 !important; cursor: crosshair !important; }';
+                document.head.appendChild(style);
+            })();
+"#;
+        window.eval(js).map_err(|e| format!("注入 Design Mode 脚本失败: {}", e))?;
+    } else {
+        // 清理 Design Mode
+        let cleanup_js = r#"
+            (function() {
+                window.__ydszDesignModeActive = false;
+                if (window.__ydszDesignModeClickHandler) {
+                    document.removeEventListener('click', window.__ydszDesignModeClickHandler, true);
+                    window.__ydszDesignModeClickHandler = null;
+                }
+                const style = document.getElementById('__ydszDesignModeStyle');
+                if (style) style.remove();
+            })();
+"#;
+        window.eval(cleanup_js).map_err(|e| format!("清理 Design Mode 失败: {}", e))?;
+    }
+
+    Ok(input.enabled)
+}
+
+/// Design Mode 元素选中事件（内部命令，仅供 emit 序列化用）
+#[derive(Debug, Clone, serde::Serialize, specta::Type)]
+pub struct BrowserDesignModeSelection {
+    pub thread_id: String,
+    pub tab_id: String,
+    pub element: serde_json::Value,
+}

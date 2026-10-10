@@ -53,6 +53,7 @@ pub mod commands_gen;
 // 从各命令子模块中通配导入所有公开项（struct、fn、enum 等）
 // 这些项在下方 `tauri::generate_handler!` 宏中被注册为前端可调用的命令
 use commands::{
+    artifacts::*,      // 产物批量导出
     context_menu::*,   // 右键上下文菜单命令
     dialog::*,         // 文件对话框、消息对话框相关命令
     terminal::*,       // 终端会话管理命令
@@ -87,6 +88,7 @@ use commands::{
     sandbox::*,         // 数据分析沙箱
     multi_edit::*,      // 多文件协调编辑
     tool_registry::*,   // 工具注册表与模式过滤
+    turn::*,            // Turn 生命周期管理
     fs::*,              // 文件系统管理工具
     semantic::*,        // 语义搜索
     build_runner::*,    // Build/Test Runner
@@ -546,6 +548,7 @@ pub fn run() {
             browser_export_recording,        // 导出录制为 JSON
             browser_replay_actions,          // 回放录制操作
             browser_record_navigation,       // 录制并执行导航
+            browser_design_mode_toggle,      // 切换 Design Mode（元素检查）
 
             // 自动更新命令
             get_update_state,                // 获取更新状态
@@ -660,6 +663,7 @@ pub fn run() {
             checkpoint_inspect,              // 获取 Checkpoint 详情
             checkpoint_list_pending,         // 列出未完成的 Checkpoint
             checkpoint_cleanup_old,          // 清理旧 Checkpoint
+            checkpoint_get_snapshot,         // 获取对话快照（用于断点恢复）
 
             // MCP 集成命令
             mcp_list_servers,                // 列出工作区 MCP 服务器
@@ -855,6 +859,10 @@ pub fn run() {
             code_sandbox_add_authorized_dir,  // 添加授权目录
             code_sandbox_remove_authorized_dir, // 移除授权目录
             code_sandbox_check_path,          // 检查路径是否在授权范围内
+
+            // Turn 与产物补充命令
+            turn_cancel,                      // 取消正在运行的 Turn
+            artifacts_export_all,             // 批量导出所有产物
         ])
         // 生成 Tauri 上下文并启动事件循环
         .run(tauri::generate_context!())

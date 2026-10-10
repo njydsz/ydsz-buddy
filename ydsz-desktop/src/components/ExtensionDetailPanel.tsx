@@ -110,7 +110,7 @@ export function ExtensionDetailPanel({
     setLoading(true);
     setError(null);
     try {
-      const result = await invoke<ExtensionEntry>("extension.get", {
+      const result = await invoke<ExtensionEntry>("extension_get", {
         name: extensionName,
       });
       setEntry(result);
@@ -125,7 +125,7 @@ export function ExtensionDetailPanel({
   const handleActivate = async () => {
     setActionInProgress(true);
     try {
-      await invoke("extension.activate", { name: extensionName });
+      await invoke("extension_activate", { name: extensionName });
       setEntry((prev) => prev ? { ...prev, state: "activated" } : prev);
       onStateChange?.(extensionName, "activated");
     } catch (err) {
@@ -139,7 +139,7 @@ export function ExtensionDetailPanel({
   const handleDeactivate = async () => {
     setActionInProgress(true);
     try {
-      await invoke("extension.deactivate", { name: extensionName });
+      await invoke("extension_deactivate", { name: extensionName });
       setEntry((prev) => prev ? { ...prev, state: "deactivated" } : prev);
       onStateChange?.(extensionName, "deactivated");
     } catch (err) {
@@ -153,7 +153,7 @@ export function ExtensionDetailPanel({
   const handleUninstall = async () => {
     setActionInProgress(true);
     try {
-      await invoke("extension.uninstall", { name: extensionName });
+      await invoke("extension_uninstall", { name: extensionName });
       onStateChange?.(extensionName, "installed");
     } catch (err) {
       console.error("卸载失败:", err);
