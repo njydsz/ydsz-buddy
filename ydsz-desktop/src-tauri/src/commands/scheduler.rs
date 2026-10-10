@@ -254,7 +254,6 @@ pub async fn scheduler_task_trigger(
 /// - `Ok(Vec<ScheduledJobDto>)`: 查询成功，返回任务列表
 /// - `Err(String)`: 查询失败
 #[tauri::command]
-#[specta::specta]
 pub async fn scheduler_task_list(
     state: State<'_, ServerState>,
     thread_id: Option<String>,

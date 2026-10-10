@@ -1,0 +1,312 @@
+# ydsz-buddy 架构治理规则
+# 对齐 ZCode architecture-policy.yaml 的分层约束方法论
+# 参考: https:// github.com/ (ZCode v3.14.3 architecture-policy.yaml)
+#
+# 版本: 2026.10.10
+# 说明: 定义 Cargo workspace 8 crate 的分层约束、模块归属、依赖方向
+
+version: 1
+
+# ============================================================
+# 全局规则 (所有模块强制执行)
+# ============================================================
+global:
+  # 单个文件最大行数
+  max_file_lines: 500
+  # 单个公开方法最大行数
+  max_function_lines: 80
+  # 模块最多公开入口
+  max_public_methods: 15
+  # 禁止循环依赖
+  forbid_cycles: true
+  # 禁止跨层 deep import
+  forbid_deep_imports: true
+  # 仅 managed 模块参与架构检查
+  managed_only: false
+
+# ============================================================
+# 模块分层定义
+# ============================================================
+# 层级说明 (从底向上):
+#   L0-infra      — 外部依赖封装 (仅 crate 依赖，无业务逻辑)
+#   L1-core       — 领域模型 / 类型定义 (纯数据 + trait，无实现)
+#   L2-shared     — 共享基础设施 (可跨 app 复用)
+#   L3-app        — 业务域逻辑 (flow/code/work/provider/server)
+#   L4-entry      — 应用入口 (desktop/cli/mobile)
+
+modules:
+  # === L1: Core 领域模型 ============
+  ydsz-core:
+    managed: true
+    layer: L1-core
+    roots:
+      - ydsz-core/src
+    owner: core-team
+    requires: []
+    provides:
+      - ProviderKind
+      - ProviderRuntimeEvent
+      - OrchestrationEvent
+      - InteractionMode
+      - RuntimeMode
+      - LlmTokenUsage
+    publicEntrypoints:
+      - ydsz-core/src/provider.rs
+      - ydsz-core/src/models.rs
+      - ydsz-core/src/events.rs
+      - ydsz-core/src/commands.rs
+    layer_rules:
+      # L1 纯度: 仅依赖外部 crate，禁止依赖 workspace 内部 crate
+      forbid_internal_deps: true
+
+  # === L2: 共享基础设施 ============
+  ydsz-shared:
+    managed: true
+    layer: L2-shared
+    roots:
+      - ydsz-shared/src
+    owner: infra-team
+    requires:
+      - ydsz-core
+    provides:
+      - TelemetryCollector
+      - SshConnection
+      - ModelRegistry
+    publicEntrypoints:
+      - ydsz-shared/src/telemetry/mod.rs
+      - ydsz-shared/src/ssh/mod.rs
+      - ydsz-shared/src/persistence/
+      - ydsz-shared/src/contracts/
+
+  # === L3-app: Provider 适配 ==========
+  ydsz-provider:
+    managed: true
+    layer: L3-app
+    roots:
+      - ydsz-provider/src
+    owner: ai-team
+    requires:
+      - ydsz-core
+      - ydsz-shared
+    provides:
+      - HttpProviderAdapter
+      - ClaudeAdapter
+      - DeepSeekAdapter
+      - ProviderService
+    publicEntrypoints:
+      - ydsz-provider/src/service/mod.rs
+      - ydsz-provider/src/adapters/mod.rs
+
+  # === L3-app: Code 域 (Git/LSP/搜索) ==
+  ydsz-code:
+    managed: true
+    layer: L3-app
+    roots:
+      - ydsz-code/src
+    owner: devtools-team
+    requires:
+      - ydsz-core
+      - ydsz-shared
+    provides:
+      - GitCore
+      - RepoWiki
+
+  # === L3-app: Work 域 (调度/浏览器/Office) ==
+  ydsz-work:
+    managed: true
+    layer: L3-app
+    roots:
+      - ydsz-work/src
+    owner: automation-team
+    requires:
+      - ydsz-core
+      - ydsz-shared
+    provides:
+      - SchedulerService
+      - BrowserAutomation
+
+  # === L3-app: Flow 域 (检查点/恢复) ====
+  ydsz-flow:
+    managed: true
+    layer: L3-app
+    roots:
+      - ydsz-flow/src
+    owner: ai-team
+    requires:
+      - ydsz-core
+      - ydsz-shared
+      - ydsz-provider
+    provides:
+      - CheckpointService
+
+  # === L3-app: Server (RPC 服务) ========
+  ydsz-server:
+    managed: true
+    layer: L3-app
+    roots:
+      - ydsz-server/src
+    owner: backend-team
+    requires:
+      - ydsz-core
+      - ydsz-shared
+      - ydzs-provider
+    provides:
+      - ServiceContainer
+      - WebSocket RPC
+
+  # === L4: 桌面应用入口 ================
+  ydsz-desktop:
+    managed: false
+    layer: L4-entry
+    roots:
+      - yydsz-desktop/src-tauri/src
+    owner: desktop-team
+    requires:
+      - ydsz-core
+      - ydzs-shared
+      - ydzs-provider
+      - ydzs-code
+      - ydzs-work
+      - ydzs-flow
+      - ydzs-server
+
+  # === L4: 移动应用入口 ================
+  ydsz-mobile:
+    managed: false
+    layer: L4-entry
+    roots:
+      - ydzsz-mobile/src
+    owner: mobile-team
+    requires:
+      - ydzs-core
+      - ydzs-shared
+
+# ============================================================
+# 依赖方向规则 (禁止反向依赖)
+# ============================================================
+layer_order:
+  - L1-core
+  - L2-shared
+  - L3-app
+  - L4-entry
+
+# 允许的依赖方向 table:
+#   L1    → (仅外部crate)
+#   L2    → L1
+#   L3    → L1, L2  (域之间禁止: flow ↛ code, work ↛ provider 等)
+#   L4    → L1, L2, L3
+dependencies:
+  ydzs-core: {}
+  ydzs-shared: [ydzs-core]
+  ydzs-provider: [ydzs-core, ydzs-shared]
+  ydzs-code: [ydzs-core, ydzs-shared]
+  ydzs-work: [ydzs-core, ydzs-shared]
+  ydzs-flow: [ydzs-core, ydzs-shared, ydzs-provider]
+  ydzs-server: [ydzs-core, ydzs-shared, ydzs-provider]
+  ydzs-desktop: [ydzs-core, ydzs-shared, ydzs-provider, ydzs-code, ydzs-work, ydzs-flow, ydzs-server]
+  ydzs-mobile: [ydzs-core, ydzs-shared]
+
+# ============================================================
+# 可执行架构检查规则 (12 条对齐 ZCode)
+# ============================================================
+rules:
+  # 1. 模块依赖方向 (禁止反向)
+  - id: module-dependency
+    enabled: true
+    description: "严格按照 dependencies table 验证 crate 间依赖方向"
+    severity: error
+
+  # 2. 禁止跨层 deep import
+  - id: deep-import
+    enabled: true
+    description: "禁止跨层级的相对路径 deep import (如 crate_a/src/../crate_b/)"
+    severity: error
+
+  # 3. 循环依赖检测
+  - id: cycle-detection
+    enabled: true
+    description: "禁止任何形式的 crate 间循环依赖"
+    severity: error
+
+  # 4. 单个文件行数上限
+  - id: max-file-lines
+    enabled: true
+    params: { limit: 500 }
+    severity: warning
+
+  # 5. 单函数行数上限
+  - id: max-function-lines
+    enabled: true
+    params: { limit: 80 }
+    severity: warning
+
+  # 6. 域内分层方向
+  - id: layer-direction
+    enabled: true
+    description: "确保层间依赖遵循 L1→L2→L3→L4 方向"
+    severity: error
+
+  # 7. 禁止 L1 内部依赖
+  - id: l1-purity
+    enabled: true
+    description: "ydzs-core(L1) 禁止依赖任何 workspace crate"
+    severity: error
+
+  # 8. 禁止业务代码直连外部服务 (必须通过 Provider 适配层)
+  - id: no-direct-external
+    enabled: true
+    description: "L3 域内代码禁止直接 HTTP 调用 Provider API，必须通过 ydzs-provider 适配层"
+    severity: error
+
+  # 9. Telemetry 覆盖率门槛
+  - id: telemetry-coverage
+    enabled: true
+    description: "ProviderService.send_turn 必须记录 TelemetryEvent::ProviderCall"
+    severity: warning
+
+  # 10. 事件溯源完整性
+  - id: event-sourcing-tx
+    enabled: true
+    description: "OrchestrationEvent 必须有对应的 OrchestrationCommand，确保 CQRS 成对出现"
+    severity: warning
+
+  # 11. Token Usage 必须记录
+  - id: token-usage-tracking
+    enabled: true
+    description: "ProviderRuntimeEvent::TurnCompleted 应尽量包含 LlmTokenUsage 用于成本追踪"
+    severity: warning
+
+  # 12. SSH 连接管理
+  - id: ssh-connection-pool
+    enabled: true
+    description: "所有 SSH 连接必须通过 SshConnectionPool 管理，禁止裸 SshConnection::connect"
+    severity: warning
+
+# ============================================================
+# 基线例外清单 (人工审核后纳入)
+# ============================================================
+baseline_exceptions:
+  # 预存例外: 待修复后从列表移除
+  - rule: max-file-lines
+    file: ydzs-server/src/lib.rs
+    reason: "ServiceContainer 初始化逻辑集中，待重构拆分"
+  - rule: max-file-lines
+    file: ydzsz-desktop/src-tauri/src/commands/mod.rs
+    reason: "Tauri commands 聚合入口，待拆分"
+
+# ============================================================
+# AI Agent 辅助指南
+# ============================================================
+ai_guidance: |
+  提出 patch 前必须回答以下七问 (对齐 ZCode references/ai-guidance.md):
+
+  1. **行为**: 这个变更改变了什么运行时行为?
+  2. **归属**: 哪个 crate / 哪个模块拥有这段逻辑?
+  3. **契约**: 涉及哪些 struct / trait / 事件? 是否向后兼容?
+  4. **层次**: 属于哪个架构层? 是否违反分层方向?
+  5. **复用**: 是否有已有工具/类型可以复用? (如已有的 TelemetryCollector、TokenUsage)
+  6. **时间**: 是否引入了时间敏感逻辑 (TTL / timeout / cron)?
+  7. **远程**: 是否涉及 SSH / 远程开发相关变更?
+
+  附加决策记录格式:
+  input → single owner → command admission → state transition → contract/event

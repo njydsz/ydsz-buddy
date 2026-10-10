@@ -189,6 +189,13 @@ impl ProviderService {
                     session_id: session_id.clone(),
                     last_turn_id: Some(input.turn_id.clone()),
                 });
+
+                // TurnCompleted 事件（含 token 计量）
+                let _ = self.event_tx.send(ProviderRuntimeEvent::TurnCompleted {
+                    session_id: session_id.clone(),
+                    turn_id: input.turn_id.clone(),
+                    usage: None, // TODO: 从 Provider 响应中提取实际 token 用量
+                });
                 
                 Ok(text)
             }

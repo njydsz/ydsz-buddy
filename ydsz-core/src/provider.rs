@@ -12,6 +12,35 @@
 
 use serde::{Deserialize, Serialize};
 
+/// 单次 LLM 调用的 token 计量
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmTokenUsage {
+    pub input_tokens: u64,
+    pub output_tokens: u64,
+    pub cached_input_tokens: u64,
+    pub total_tokens: u64,
+}
+
+impl LlmTokenUsage {
+    pub fn new(input_tokens: u64, output_tokens: u64, cached_input_tokens: u64) -> Self {
+        Self {
+            input_tokens,
+            output_tokens,
+            cached_input_tokens,
+            total_tokens: input_tokens + output_tokens,
+        }
+    }
+
+    pub fn zero() -> Self {
+        Self {
+            input_tokens: 0,
+            output_tokens: 0,
+            cached_input_tokens: 0,
+            total_tokens: 0,
+        }
+        }
+}
+
 /// # Provider 类型枚举
 ///
 /// 定义系统支持的所有 AI Provider 类型：
@@ -415,11 +444,15 @@ pub enum ProviderRuntimeEvent {
     /// Turn 已完成
     ///
     /// 当 Provider 成功完成一个交互轮次时触发，标识 AI 响应已完整生成。
+    /// 携带 token 计量用于遥算追踪和成本统计。
     TurnCompleted {
         /// 会话 ID
         session_id: String,
         /// Turn ID
         turn_id: String,
+        /// Token 计量（可选，Provider 支持时填充）
+        #[serde(default)]
+        usage: Option<LlmTokenUsage>,
     },
     /// Turn 完成（携带结果数据）
     ///

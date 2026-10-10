@@ -455,6 +455,7 @@ impl GitTextGenerationService {
                         ProviderRuntimeEvent::TurnCompleted {
                             session_id,
                             turn_id: evt_turn_id,
+                            ..
                         } => {
                             if session_id == thread_id && evt_turn_id == turn_id {
                                 debug!("Turn 完成，收集到 {} 字节文本", collected_text.len());

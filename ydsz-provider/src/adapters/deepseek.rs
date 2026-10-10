@@ -193,6 +193,7 @@ impl HttpProviderAdapter for DeepSeekAdapter {
         let _ = event_tx.send(ProviderRuntimeEvent::TurnCompleted {
             session_id: session_id.to_string(),
             turn_id: turn_id.clone(),
+            usage: None,
         });
 
         info!(text_len=%full_text.len(), "OpenAI-compatible adapter turn completed");

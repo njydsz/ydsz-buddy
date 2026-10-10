@@ -82,6 +82,7 @@ use commands::{
     ocr::*,            // 截图 OCR（P2-2:macOS Vision / Windows OCR / Tesseract 兜底）
     ollama::*,         // Ollama 本地模型服务发现（P2-4:走 Rust 绕开浏览器 CORS 拦截）
     team_rules::*,     // 团队共享规则（P2-5:~/.ydsz-buddy/team-rules/）
+    telemetry::*,      // 遥测与指标（计数器 + 事件环形缓冲区）
     ssh::*,            // SSH 远程连接（P1-C:russh 真集成）
     search::*,          // Web 搜索与 URL 内容抓取
     runner::*,          // Agent 命令执行器
@@ -919,6 +920,13 @@ pub fn run() {
             // Turn 与产物补充命令
             turn_cancel,                      // 取消正在运行的 Turn
             artifacts_export_all,             // 批量导出所有产物
+
+            // 遥测与指标命令
+            telemetry_get_stats,              // 计数器快照 + 健康分
+            telemetry_get_recent_events,      // 最近 N 条事件
+            telemetry_record_event,           // 从前端记录事件
+            telemetry_reset_counters,         // 重置计数器
+            telemetry_get_diagnostics         // 诊断聚合报告
         ])
         // ========== 应用退出事件（孤儿 Worktree 清理） ==========
         .on_event(|_app, event| {
