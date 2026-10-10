@@ -1553,9 +1553,18 @@ export const ThreadTurnStartedPayload = Schema.Struct({
 });
 
 export const ThreadTurnCompletedPayload = Schema.Struct({
-  threadId: ThreadId,
-  turnId: TurnId,
-  completedAt: IsoDateTime,
+threadId: ThreadId,
+turnId: TurnId,
+completedAt: IsoDateTime,
+usage: Schema.optional(Schema.Struct({
+provider: Schema optional(Schema.String),
+model: Schema.optional(Schema.String),
+inputTokens: Schema.optional(Schema.Number),
+outputTokens: Schema.optional(Schema.Number),
+cachedInputTokens: Schema.optional(Schema.Number),
+costUsd: Schema.optional(Schema.Number),
+totalTokens: Schema.optional(Schema.Number),
+})),
 });
 
 export const ThreadTurnFailedPayload = Schema.Struct({
