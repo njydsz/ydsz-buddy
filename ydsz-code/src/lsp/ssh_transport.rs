@@ -126,8 +126,11 @@ impl LspTransport for SshLspTransport {
             let chunk = channel
                 .recv()
                 .await
-                .map_err(|e| LspError::CommunicationFailed(format!("SSH 接收失败: {e}")))?
-                .ok_or_else(|| LspError::CommunicationFailed("远端 LSP 服务器关闭连接".into()))?;
+                .map_err(|e| LspError::CommunicationFailed(format!("SSH 接收失败: {e}")))?;
+
+            if chunk.is_empty() {
+                return Err(LspError::CommunicationFailed("远端 LSP 服务器关闭连接".into()));
+            }
 
             // 3. 追加到 buffer
             {

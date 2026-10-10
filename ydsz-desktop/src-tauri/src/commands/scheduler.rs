@@ -23,6 +23,7 @@ use ydsz_core::commands::{
     SchedulerTaskUpdateCommand,
 };
 use ydsz_core::models::ThreadId;
+use ydsz_server::ScheduledJobDto;
 
 use crate::ServerState;
 
@@ -240,34 +241,37 @@ pub async fn scheduler_task_trigger(
 
 /// 列出定时任务
 ///
-/// 列出指定线程下的所有定时任务。通过编排引擎分发查询命令。
+/// 列出指定线程下的所有定时任务（如果 thread_id 为空则列出全部）。
+/// 通过编排引擎分发查询命令，返回 JSON 数组。
 ///
 /// # 参数
 ///
 /// - `state`: 服务器状态
-/// - `thread_id`: 对话线程 ID
+/// - `thread_id`: 对话线程 ID（可选）
 ///
 /// # 返回值
 ///
-/// - `Ok(u64)`: 查询成功，返回当前事件序列号
+/// - `Ok(Vec<ScheduledJobDto>)`: 查询成功，返回任务列表
 /// - `Err(String)`: 查询失败
 #[tauri::command]
 #[specta::specta]
 pub async fn scheduler_task_list(
     state: State<'_, ServerState>,
-    thread_id: String,
-) -> Result<u64, String> {
-    let thread_id = ThreadId::parse_str(&thread_id).map_err(|e| e.to_string())?;
+    thread_id: Option<String>,
+) -> Result<Vec<ScheduledJobDto>, String> {
+    let parsed_tid = thread_id
+        .map(|t| ThreadId::parse_str(&t).map_err(|e| e.to_string()))
+        .transpose()?;
 
-    info!(thread_id = %thread_id, "列出定时任务");
+    info!(thread_id = ?parsed_tid, "列出定时任务");
 
     let command = OrchestrationCommand::SchedulerTaskList(SchedulerTaskListCommand {
         command_id: None,
-        thread_id: Some(thread_id),
+        thread_id: parsed_tid,
     });
 
     let command_json = serde_json::to_string(&command).map_err(|e| e.to_string())?;
-    let sequence = state
+    let json = state
         .bootstrap_result
         .services
         .orchestration_engine
@@ -275,5 +279,8 @@ pub async fn scheduler_task_list(
         .await
         .map_err(|e| e.to_string())?;
 
-    Ok(sequence.parse::<u64>().unwrap_or(0))
+    let jobs: Vec<ScheduledJobDto> = serde_json::from_str(&json)
+        .map_err(|e| format!( "Failed to parse scheduler task list response: {}", e))?;
+
+    Ok(jobs)
 }

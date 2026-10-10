@@ -44,11 +44,11 @@ struct ProviderSessionHandle {
 }
 
 impl ProviderService {
-    /// 创建新的 Provider 服务实例
+    /// 创建新的 Provider 服务实例（预加载默认模型列表）
     pub fn new() -> Self {
         let (event_tx, _) = broadcast::channel(256);
         Self {
-            registry: Arc::new(RwLock::new(ModelRegistry::new())),
+            registry: Arc::new(RwLock::new(ModelRegistry::with_defaults())),
             api_keys: Arc::new(RwLock::new(HashMap::new())),
             base_urls: Arc::new(RwLock::new(HashMap::new())),
             sessions: Arc::new(Mutex::new(HashMap::new())),

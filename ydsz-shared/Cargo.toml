@@ -22,6 +22,11 @@ hmac = { workspace = true }
 # Memory 系统依赖
 ydsz-core = { path = "../ydsz-core" }
 
+# SSH 远程连接 (支持密码/密钥认证、SFTP、远程命令执行)
+russh = { workspace = true }
+russh-sftp = "2.1"  # SFTP 远程文件系统操作
+ssh-key = { workspace = true }  # SSH 公钥解析 (Handler trait 需要)
+
 # SQLite 持久化
 rusqlite = { workspace = true }
 parking_lot = "0.12"

@@ -35,6 +35,7 @@ futures-util = "0.3"
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+toml = "0.8"
 
 # Database
 rusqlite = { version = "0.31", features = ["bundled", "blob"] }
@@ -49,6 +50,8 @@ portable-pty = "0.8"
 # 使用 ring 后端替代默认的 aws-lc-rs,避免 Windows 上需要 NASM 汇编器
 russh = { version = "0.61", default-features = false, features = ["flate2", "ring", "rsa"] }
 # russh-keys 已合并到 russh 0.61 的 keys 子模块,无需单独引入
+russh-sftp = "2.1"  # SFTP 远程文件系统操作
+ssh-key = "=0.7.0-rc.10"  # SSH 公钥解析 (russh 依赖)
 
 # Logging
 tracing = "0.1"
@@ -79,6 +82,9 @@ proptest = "1.4"
 
 # Benchmarking (Criterion.rs)
 criterion = { version = "0.5", features = ["html_reports"] }
+
+# CRON scheduling (PERF-2 定时任务调度引擎)
+croner = "2"
 
 # AST parsing (used by ydsz-code indexer for semantic symbol extraction)
 tree-sitter = "0.25"

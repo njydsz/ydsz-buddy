@@ -1,6 +1,19 @@
+//! # SSH 远程连接模块
+//!
+//! 提供密码/密钥认证、远程命令执行等能力。
+//!
+//! ## 状态
+//!
+//! 当前 SSH 模块处于**临时禁用**状态（russh 版本兼容性问题）。
+//! 详见 `.bak` 文件保留的原始代码。
+
 pub mod connection;
 
 use serde::{Deserialize, Serialize};
+
+// =============================================================================
+// 类型定义（桩）
+// =============================================================================
 
 /// SSH 认证方式
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,186 +34,108 @@ impl Default for SshAuth {
 #[serde(rename_all = "snake_case")]
 pub enum HostKeyPolicy {
     AcceptAll,
+    AcceptKnown,
     Strict,
-    AcceptNew,
 }
 
 impl Default for HostKeyPolicy {
     fn default() -> Self {
-        HostKeyPolicy::AcceptNew
+        HostKeyPolicy::AcceptKnown
     }
 }
 
-/// SSH 连接配置
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+/// SSH 配置
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SshConfig {
     pub host: String,
     pub port: u16,
     pub username: String,
     pub auth: SshAuth,
-    pub auto_reconnect: bool,
     pub host_key_policy: HostKeyPolicy,
-    pub known_hosts_path: Option<std::path::PathBuf>,
 }
 
-/// SSH 执行输出
+/// SSH 连接
 #[derive(Debug, Clone)]
+pub struct SshConnection;
+
+/// SSH 通道
+#[derive(Debug)]
+pub struct SshChannel;
+
+/// 连接状态
+#[derive(Debug, Clone)]
+pub struct ConnectionState;
+
+/// SSH 连接池
+#[derive(Debug, Clone)]
+pub struct SshConnectionPool;
+
+/// SSH 命令输出（桩）
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SshOutput {
     pub stdout: String,
     pub stderr: String,
     pub exit_code: i32,
 }
 
-/// SSH 连接状态
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ConnectionState {
-    Disconnected,
-    Connecting,
-    Connected,
-    Reconnecting,
-}
-
-/// Remote environment info
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// 远程环境变量（桩）
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RemoteEnvironment {
-    pub os: String,
-    pub arch: String,
-    pub shell: String,
+    pub env_vars: std::collections::HashMap<String, String>,
 }
 
-/// 远程文件系统操作
-#[derive(Debug, Clone)]
-pub struct RemoteFileSystem {
-    connection_id: String,
-}
-
-impl RemoteFileSystem {
-    pub fn new(connection_id: impl AsRef<str>) -> Self {
-        Self { connection_id: connection_id.as_ref().to_string() }
-    }
-    pub async fn read_file(&self, _path: &str) -> anyhow::Result<String> {
-        Ok(String::new())
-    }
-    pub async fn write_file(&self, _path: &str, content: &str, _create_directories: bool) -> anyhow::Result<()> {
-        let _ = content;
-        Ok(())
-    }
-    pub async fn list_directory(&self, _path: &str) -> anyhow::Result<Vec<String>> {
-        Ok(vec![])
-    }
-    pub async fn delete_file(&self, _path: &str) -> anyhow::Result<()> {
-        Ok(())
-    }
-    pub async fn create_directory(&self, _path: &str, _recursive: bool) -> anyhow::Result<()> {
-        Ok(())
-    }
-    pub async fn delete_directory(&self, _path: &str, _recursive: bool) -> anyhow::Result<()> {
-        Ok(())
-    }
-}
-
-/// SSH channel (bidirectional communication)
-#[derive(Debug, Clone)]
-pub struct SshChannel {
-    pub alive: bool,
-}
-
-impl SshChannel {
-    pub fn new() -> Self {
-        Self { alive: true }
-    }
-
-    pub async fn exec(&mut self, _command: &str) -> anyhow::Result<SshOutput> {
-        Ok(SshOutput {
-            stdout: String::new(),
-            stderr: String::new(),
-            exit_code: 0,
-        })
-    }
-
-    pub async fn send(&mut self, data: &[u8]) -> anyhow::Result<()> {
-        let _ = data;
-        Ok(())
-    }
-
-    pub async fn recv(&mut self) -> anyhow::Result<Option<Vec<u8>>> {
-        Ok(None)
-    }
-
-    pub async fn close(&mut self) -> anyhow::Result<()> {
-        self.alive = false;
-        Ok(())
-    }
-}
-
-impl Default for SshChannel {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-/// SSH connection with id
-#[derive(Debug, Clone)]
-pub struct SshConnection {
-    pub id: String,
-    pub config: SshConfig,
-    state: ConnectionState,
-}
+// =============================================================================
+// 方法桩
+// =============================================================================
 
 impl SshConnection {
-    pub fn new(config: SshConfig) -> Self {
-        Self { id: String::new(), config, state: ConnectionState::Connected }
-    }
-
-    pub async fn connect(config: &SshConfig) -> anyhow::Result<Self> {
-        Ok(Self { id: String::new(), config: config.clone(), state: ConnectionState::Connected })
-    }
-
-    pub async fn open_channel(&self) -> anyhow::Result<SshChannel> {
-        Ok(SshChannel::new())
-    }
-
-    pub async fn exec(&self, _command: &str) -> anyhow::Result<SshOutput> {
-        Ok(SshOutput {
-            stdout: String::new(),
-            stderr: String::new(),
-            exit_code: 0,
-        })
+    pub async fn open_channel(&self) -> Result<SshChannel, String> {
+        Err("SSH module temporarily disabled".to_string())
     }
 
     pub async fn is_connected(&self) -> bool {
-        true
+        false
     }
 
-    pub async fn execute_command(&self, command: &str) -> anyhow::Result<SshOutput> {
-        self.exec(command).await
-    }
-    
-    pub async fn get_config(&self) -> &SshConfig {
-        &self.config
-    }
-    
-    pub async fn get_state(&self) -> ConnectionState {
-        self.state
-    }
-    
-    /// Detect remote environment (stub)
-    pub async fn detect_environment(&self) -> anyhow::Result<RemoteEnvironment> {
-        Ok(RemoteEnvironment {
-            os: "unknown".to_string(),
-            arch: "unknown".to_string(),
-            shell: "sh".to_string(),
-        })
+    pub async fn execute_command(&self, _cmd: &str) -> Result<SshOutput, String> {
+        Err("SSH module temporarily disabled".to_string())
     }
 }
 
-impl AsRef<str> for SshConnection {
-    fn as_ref(&self) -> &str {
-        &self.id
+impl SshChannel {
+    pub async fn exec(&mut self, _cmd: &str) -> Result<(), String> {
+        Err("SSH module temporarily disabled".to_string())
+    }
+
+    pub async fn send(&self, _data: &[u8]) -> Result<(), String> {
+        Err("SSH module temporarily disabled".to_string())
+    }
+
+    pub async fn recv(&self) -> Result<Vec<u8>, String> {
+        Err("SSH module temporarily disabled".to_string())
     }
 }
 
-/// Detect tool versions from SSH connection id (stub)
-pub async fn detect_tool_versions(_conn_id: &str) -> anyhow::Result<Vec<(String, String)>> {
-    Ok(vec![])
+impl ConnectionState {
+    pub fn is_connected(&self) -> bool {
+        false
+    }
+}
+
+impl Default for ConnectionState {
+    fn default() -> Self {
+        Self
+    }
+}
+
+impl SshConnectionPool {
+    pub fn new() -> Self {
+        panic!("SSH module temporarily disabled")
+    }
+}
+
+impl Default for SshConnectionPool {
+    fn default() -> Self {
+        Self::new()
+    }
 }

@@ -98,6 +98,12 @@ use commands::{
     code_sandbox::*,     // Agent 代码执行沙箱(P2-8)
     extensions::*,       // Extension 扩展系统(P1-1: 安装/管理/启用/禁用 UI)
     image_gen::*,        // AI 文生图（DALL-E 3 / FLUX / SD / 通义万相 / 混元）
+    missing::*,          // 补齐命令（env_get / fs_exists / fs_which / preset.list / image_gen.list_providers）
+    event_store_ext::*,  // 事件存储追加/查询（P0-3 审计事件持久化）
+    knowledge::*,        // 知识库 RAG Phase A（P1-4）
+    hitl::*,             // HITL 审批（P1-5）
+    thread_persist::*,   // Thread 持久化（P1-6）
+    connectors::*,       // 开发者连接器（P2-8）
 };
 
 use std::net::SocketAddr;
@@ -406,7 +412,17 @@ pub fn run() {
 .manage(commands::permissions::PermissionsState::new())      // 工具权限白名单状态
 .manage(McpState::new())                          // MCP 客户端状态(P1-B4: 升级至库级 McpState 含 reconnect/health_check 能力)
 .manage(commands::code_sandbox::CodeSandboxState::new()) // Agent 代码执行沙箱状态（P2-8）
-.manage(commands::extensions::ExtState::new())       // Extension 扩展系统状态（P1-1）
+        .manage(commands::extensions::ExtState::new())       // Extension 扩展系统状态（P1-1）
+        .manage(                                  // SqliteEventStore（审计事件存储）
+            ydzz_shared::persistence::SqliteEventStore::open_in_memory()
+                .expect("Failed to create event store")
+        )
+        .manage(commands::hitl::ApprovalsState::new())            // HITL 审批状态 (P1-5)
+        .manage(commands::thread_persist::ThreadPersistState::new( // Thread 持久化 (P1-6)
+            ydzs_shared::persistence::ThreadStore::open_in_memory()
+                .expect("Failed to create thread store")
+        ))
+        .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
 
         // ========== 无边框窗口初始化 ==========
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
@@ -635,13 +651,32 @@ pub fn run() {
             // W2 AST-Grep / Hashline 命令暂未实装 IPC 序列化（RewriteResult 等 DTO 待补），
             // 暂从 generate_handler 中移除以保持 dev 启动通路；W2 完成时再补回。
 
+            // 补齐缺失命令
+            env_get,                         // 获取环境变量
+            fs_exists,                       // 检查文件/目录是否存在
+            fs_which,                        // 在 PATH 中查找二进制
+            preset_list,                     // 列出 Agent 预设
+            image_gen_list_providers,        // 列出图片生成 Provider
+
             // 审计日志导出命令
             audit_export,                    // 导出审计日志
+
+            // 事件存储直接操作（P0-3：为 Agent Loop 提供事件写入入口）
+            event_store_append,              // 追加审计事件
+            event_store_query,               // 查询审计事件
+            event_store_count,               // 事件总数
 
             // Repo Wiki 知识引擎命令
             repo_wiki_generate,              // 生成项目 Wiki
             repo_wiki_generate_incremental,  // 增量生成 Wiki
             repo_wiki_search,                // 搜索 Wiki 条目
+
+            // 知识库 RAG Phase A（P1-4：结构化知识管理）
+            knowledge_index_project,         // 项目 AST + Embedding 索引
+            knowledge_search,                // 语义搜索（TF-IDF + Embedding）
+            knowledge_list_sources,          // 列出已索引知识源
+            knowledge_add_note,              // 添加用户笔记
+            knowledge_stats,                 // 知识库统计
             repo_wiki_list,                  // 列出所有 Wiki 条目
             repo_wiki_get,                   // 按模块名获取 Wiki 条目
             repo_wiki_status,                // Wiki 元数据状态(目录 + 最后生成时间)
@@ -649,6 +684,27 @@ pub fn run() {
             repo_wiki_export,                // 导出全量 Wiki
             repo_wiki_outline,               // 模块文档大纲 (TOC)
             repo_wiki_dependencies,          // 模块依赖图
+
+            // HITL 审批（P1-5: Human-in-the-Loop）
+            approval_list_pending,           // 列出待审批请求
+            approval_respond,                // 审批响应（批准/拒绝）
+            approval_create,                 // 创建审批请求
+
+            // Thread 会话持久化（P1-6: SQLite CRUD）
+            thread_save,                     // 保存/更新线程
+            thread_get,                      // 获取单个线程
+            thread_list,                     // 列出最近线程
+            thread_delete,                   // 删除线程
+            thread_save_message,             // 保存消息
+            thread_get_messages,             // 获取消息列表
+
+            // 开发者连接器（P2-8: Jira / GitHub Issues / Sentry / Grafana / Webhook）
+            connector_list,                  // 列出可用连接器类型
+            connector_list_instances,        // 列出已注册实例
+            connector_test_connection,       // 测试连接
+            connector_get_default_config,    // 获取默认配置模板
+            connector_register,              // 注册/激活连接器
+            connector_unregister,            // 注销连接器
 
             // Plan 文档导出命令
             plan_export_to_disk,             // 导出 Plan 到磁盘
@@ -864,6 +920,15 @@ pub fn run() {
             turn_cancel,                      // 取消正在运行的 Turn
             artifacts_export_all,             // 批量导出所有产物
         ])
+        // ========== 应用退出事件（孤儿 Worktree 清理） ==========
+        .on_event(|_app, event| {
+            if let tauri::RunEvent::Exit = event {
+                tracing::info!("应用退出，清理孤儿 Worktree...");
+                // TODO: 实际实现中遍历已知 worktree 列表，
+                // 清理未关联 thread_id 的孤儿目录（磁盘空间回收）
+            }
+        })
+
         // 生成 Tauri 上下文并启动事件循环
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

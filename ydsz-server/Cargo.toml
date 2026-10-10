@@ -35,6 +35,11 @@ uuid = { workspace = true }
 chrono = { workspace = true }
 tracing = { workspace = true }
 
+# CRON 调度
+croner = { workspace = true }
+# 定时任务状态内嵌 locks
+parking_lot = "0.12"
+
 # Specta
 specta = { workspace = true }
 specta-serde = { workspace = true }

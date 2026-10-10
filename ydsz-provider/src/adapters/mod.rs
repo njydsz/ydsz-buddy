@@ -155,7 +155,7 @@ impl AdapterFactory {
             ydsz_core::provider::ProviderKind::ClaudeAgent => {
                 Some(Box::new(ClaudeAdapter::new(endpoint)))
             }
-            // DeepSeek、Moonshot、Qwen 均兼容 OpenAI Chat Completions API
+            // OpenAI Chat Completions 兼容（国产 9 家 + Codex/OpenAI + Grok/xAI + Gemini）
             ydsz_core::provider::ProviderKind::DeepSeek
             | ydsz_core::provider::ProviderKind::Moonshot
             | ydsz_core::provider::ProviderKind::Qwen
@@ -164,10 +164,13 @@ impl AdapterFactory {
             | ydsz_core::provider::ProviderKind::Ernie
             | ydsz_core::provider::ProviderKind::Hunyuan
             | ydsz_core::provider::ProviderKind::Glm
-            | ydsz_core::provider::ProviderKind::Mimo => {
+            | ydsz_core::provider::ProviderKind::Mimo
+            | ydsz_core::provider::ProviderKind::Codex
+            | ydsz_core::provider::ProviderKind::Grok
+            | ydsz_core::provider::ProviderKind::Gemini => {
                 Some(Box::new(DeepSeekAdapter::new(endpoint, kind)))
             }
-            // Codex / Cursor / Gemini 等使用官方 SDK 或 CLI 封装，需单独实现
+            // Cursor / Kilo / OpenCode / Pi 等 CLI-based Provider 需 CLI 封装适配器
             _ => None,
         }
     }
@@ -186,6 +189,10 @@ impl AdapterFactory {
             Hunyuan => "https://api.hunyuan.cloud.tencent.com/v1",
             Glm => "https://open.bigmodel.cn/api/paas/v4",
             Mimo => "https://api.xiaomimimo.com/v1",
+            // 以下为新增：OpenAI Chat Completions 兼容
+            Codex => "https://api.openai.com/v1",
+            Grok => "https://api.xai.com/v1",
+            Gemini => "https://generativelanguage.googleapis.com/v1beta/openai",
             _ => "",
         }
     }

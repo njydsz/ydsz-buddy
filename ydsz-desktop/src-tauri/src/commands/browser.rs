@@ -1825,7 +1825,6 @@ pub async fn browser_record_navigation(
 
 // ===== Design Mode =====
 
-use serde::{Deserialize, Serialize as _};
 
 /// Design Mode 切换输入
 #[derive(Debug, Clone, Deserialize, specta::Type)]

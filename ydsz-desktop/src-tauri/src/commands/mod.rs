@@ -85,3 +85,12 @@ pub mod image_gen;              // AI 文生图（DALL-E 3 / FLUX / SD / 通义�
 pub mod turn;                   // Turn 生命周期管理（取消/中断）
 pub mod artifacts;              // 产物批量导出
 
+// === 竞品差距补齐（P0/P1/P2）===
+pub mod missing;                // 补齐缺失命令（env_get / fs_exists / fs_which / preset.list / image_gen.list_providers）
+pub mod event_store_ext;        // 事件存储追加/查询（P0-3 审计事件持久化）
+pub mod knowledge;              // 知识库 RAG Phase A（P1-4）
+pub mod hitl;                   // HITL 审批（P1-5: Human-in-the-Loop）
+pub mod thread_persist;         // Thread 会话持久化（P1-6: SQLite CRUD）
+pub mod connectors;             // 开发者连接器（P2-8: Jira / GitHub Issues / Sentry / Grafana / Webhook）
+pub mod telemetry;              // 遥测与指标（计数器 + 事件环形缓冲区）
+

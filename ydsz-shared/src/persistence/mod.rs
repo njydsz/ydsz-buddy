@@ -99,7 +99,7 @@ impl SqliteEventStore {
         let tx = conn.transaction()?;
         let sequence: i64 = {
             let mut stmt = tx.prepare(
-                "INSERT INTO event_sequence (name, VALUES) VALUES ('global', 1)
+                "INSERT INTO event_sequence (name, value) VALUES ('global', 1)
                  ON CONFLICT(name) DO UPDATE SET value = value + 1
                  RETURNING value",
             )?;
@@ -215,6 +215,34 @@ impl SqliteEventStore {
         let conn = self.conn.lock();
         let count: i64 = conn.query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))?;
         Ok(count as u64)
+    }
+
+    /// 读取事件（分页），兼容旧接口
+    pub fn read_events(&self, offset: u64, limit: u64) -> anyhow::Result<Vec<EventRecord>> {
+        let conn = self.conn.lock();
+        let offset = offset as i64;
+        let limit = limit as i64;
+        let mut stmt = conn.prepare(
+            "SELECT id, sequence, event_type, aggregate_kind, stream_id, payload, occurred_at, created_at
+             FROM events ORDER BY sequence ASC LIMIT ?1 OFFSET ?2",
+        )?;
+        let rows = stmt.query_map(rusqlite::params![limit, offset], |row| {
+            Ok(EventRecord {
+                id: row.get(0)?,
+                sequence: row.get::<_, i64>(1)? as u64,
+                event_type: row.get(2)?,
+                aggregate_kind: row.get(3)?,
+                stream_id: row.get(4)?,
+                payload: serde_json::from_str(&row.get::<_, String>(5)?).unwrap_or(serde_json::Value::Null),
+                occurred_at: row.get(6)?,
+                created_at: row.get(7)?,
+            })
+        })?;
+        let mut records = Vec::new();
+        for row in rows {
+            records.push(row?);
+        }
+        Ok(records)
     }
 }
 
