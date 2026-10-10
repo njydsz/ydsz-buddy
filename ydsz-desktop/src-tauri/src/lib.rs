@@ -415,12 +415,12 @@ pub fn run() {
 .manage(commands::code_sandbox::CodeSandboxState::new()) // Agent 代码执行沙箱状态（P2-8）
         .manage(commands::extensions::ExtState::new())       // Extension 扩展系统状态（P1-1）
         .manage(                                  // SqliteEventStore（审计事件存储）
-            ydzz_shared::persistence::SqliteEventStore::open_in_memory()
+            ydsz_shared::persistence::SqliteEventStore::open_in_memory()
                 .expect("Failed to create event store")
         )
         .manage(commands::hitl::ApprovalsState::new())            // HITL 审批状态 (P1-5)
         .manage(commands::thread_persist::ThreadPersistState::new( // Thread 持久化 (P1-6)
-            ydzs_shared::persistence::ThreadStore::open_in_memory()
+            ydsz_shared::persistence::ThreadStore::open_in_memory()
                 .expect("Failed to create thread store")
         ))
         .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
@@ -928,15 +928,12 @@ pub fn run() {
             telemetry_reset_counters,         // 重置计数器
             telemetry_get_diagnostics         // 诊断聚合报告
         ])
-        // ========== 应用退出事件（孤儿 Worktree 清理） ==========
-        .on_event(|_app, event| {
-            if let tauri::RunEvent::Exit = event {
-                tracing::info!("应用退出，清理孤儿 Worktree...");
-                // TODO: 实际实现中遍历已知 worktree 列表，
-                // 清理未关联 thread_id 的孤儿目录（磁盘空间回收）
-            }
+        // ========== 应用上下文生成 ==========
+        .setup(|_app| {
+            tracing::info!("ydsz-buddy 应用初始化完成");
+            // TODO: Worktree 退出清理（Tauri 2 不支持 on_event）
+            Ok(())
         })
-
         // 生成 Tauri 上下文并启动事件循环
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

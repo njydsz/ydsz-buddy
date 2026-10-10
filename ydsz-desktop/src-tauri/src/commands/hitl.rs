@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use tracing::info;
 
-use ydzs_core::commands::OrchestrationCommand;
+use ydsz_core::commands::OrchestrationCommand;
 use crate::ServerState;
 
 // ===== 类型 =====

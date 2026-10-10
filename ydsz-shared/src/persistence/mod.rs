@@ -14,7 +14,7 @@ pub mod thread_store;
 
 // Re-export
 pub use memory_store_sqlite::SqliteMemoryStore;
-pub use thread_store::ThreadStore;
+pub use thread_store::{MessageRecord, ThreadRecord, ThreadStore, TurnRecord};
 
 /// SQLite 事件存储 — 真实实现
 ///

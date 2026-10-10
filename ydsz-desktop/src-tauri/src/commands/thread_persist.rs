@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::info;
 
-use ydzs_shared::persistence::ThreadStore;
+use ydsz_shared::persistence::ThreadStore;
 use crate::ServerState;
 
 // ===== DTO =====
@@ -68,7 +68,7 @@ pub async fn thread_save(
 ) -> Result<(), String> {
     info!(thread_id = %thread.id, title = %thread.title, "Thread 持久化: 保存");
 
-    use ydzs_shared::persistence::ThreadRecord;
+    use ydsz_shared::persistence::ThreadRecord;
     let record = ThreadRecord {
         id: thread.id,
         title: thread.title,
@@ -169,7 +169,7 @@ pub async fn thread_save_message(
 ) -> Result<(), String> {
     info!(thread_id = %msg.thread_id, msg_id = %msg.id, role = %msg.role, "Thread 持久化: 保存消息");
 
-    use ydzs_shared::persistence::MessageRecord;
+    use ydsz_shared::persistence::MessageRecord;
     let record = MessageRecord {
         id: msg.id,
         thread_id: msg.thread_id,

@@ -12,7 +12,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use tracing::info;
 
-use ydzs_core::commands::OrchestrationCommand;
+use ydsz_core::commands::OrchestrationCommand;
 use crate::ServerState;
 
 // ===== 类型 =====

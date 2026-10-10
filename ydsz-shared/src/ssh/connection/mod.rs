@@ -7,3 +7,6 @@ pub use crate::ssh::SshAuth;
 pub use crate::ssh::SshOutput;
 pub use crate::ssh::ConnectionState;
 pub use crate::ssh::RemoteEnvironment;
+pub use crate::ssh::RemoteFileSystem;
+pub use crate::ssh::HostKeyPolicy;
+pub use crate::ssh::SshConnectionPool;

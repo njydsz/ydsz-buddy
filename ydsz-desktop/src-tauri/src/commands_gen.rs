@@ -167,7 +167,6 @@ pub fn build_specta() -> Builder<tauri::Wry> {
             crate::save_user_profile,
             crate::scheduler_task_create,
             crate::scheduler_task_delete,
-            crate::scheduler_task_list,
             crate::scheduler_task_set_enabled,
             crate::scheduler_task_trigger,
             crate::scheduler_task_update,

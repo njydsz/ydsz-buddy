@@ -10,7 +10,7 @@ use tauri::State;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use ydzs_core::commands::OrchestrationCommand;
+use ydsz_core::commands::OrchestrationCommand;
 use crate::ServerState;
 
 // ===== 数据类型定义 =====
