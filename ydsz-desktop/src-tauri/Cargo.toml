@@ -68,10 +68,14 @@ walkdir = "2.5"
 # SQLite 持久化 (P0-3: 多用户认证存储)
 rusqlite = { version = "0.31", features = ["bundled", "blob"] }
 parking_lot = "0.12"
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
 
 # WebSocket (P0-1: IM 网关长连接)
 tokio-tungstenite = "0.21"
 async-trait = "0.1"
+futures-util = "0.3"
 
 # ydsz 系统运行时模块依赖
 ydsz-code = { path = "../../ydsz-code" }

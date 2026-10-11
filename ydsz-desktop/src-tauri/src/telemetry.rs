@@ -31,6 +31,10 @@
 
 use std::time::Duration;
 
+use opentelemetry::trace::TracerProvider as _;
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::Resource;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 /// 初始化 OpenTelemetry 遥测系统
@@ -49,17 +53,19 @@ pub fn init_telemetry() {
 
     // ---- 2. 构建 tracing layers ----
     // 2a. fmt layer: 本地人类可读日志输出
+    let fmt_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
     let fmt_layer = tracing_subscriber::fmt::layer()
         .with_target(true)
         .with_thread_ids(false)
-        .with_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")));
+        .with_filter(fmt_filter);
 
     // 2b. OTel bridge layer: 将 tracing Event/Span 桥接到 OpenTelemetry
-    let otel_layer = if let Some(t) = tracer {
+    let otel_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let otel_layer = if let Some(ref t) = tracer {
         Some(
             tracing_opentelemetry::layer()
-                .with_tracer(t)
-                .with_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"))),
+                .with_tracer(t.clone())
+                .with_filter(otel_filter),
         )
     } else {
         None
@@ -92,30 +98,38 @@ fn build_otlp_tracer() -> Option<opentelemetry_sdk::trace::Tracer> {
         return None;
     }
 
+    let endpoint = endpoint.unwrap();
     let service_name = std::env::var("OTEL_SERVICE_NAME").unwrap_or_else(|_| "ydsz-buddy".to_string());
 
     // 构建 OTLP trace exporter（gRPC + tonic）
-    let exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
-        .with_timeout(Duration::from_secs(3));
+    let exporter = match opentelemetry_otlp::SpanExporter::builder()
+        .with_tonic()
+        .with_endpoint(&endpoint)
+        .with_timeout(Duration::from_secs(3))
+        .build()
+    {
+        Ok(e) => e,
+        Err(e) => {
+            tracing::warn!("Failed to create OTLP exporter: {}, falling back to stdout", e);
+            return None;
+        }
+    };
 
-    // 构建 TracerProvider
-    let tracer = opentelemetry_otlp::new_pipeline()
-        .tracing()
-        .with_exporter(exporter)
-        .with_trace_config(
-            opentelemetry_sdk::trace::Config::default()
-                .with_resource(opentelemetry_sdk::Resource::new(vec![
-                    opentelemetry::KeyValue::new("service.name", service_name.clone()),
-                    opentelemetry::KeyValue::new("service.version", env!("CARGO_PKG_VERSION")),
-                    opentelemetry::KeyValue::new("deployment.environment", deployment_env()),
-                ])),
-        )
-        .install_batch(opentelemetry_sdk::runtime::Tokio)
-        .map_err(|e| {
-            tracing::warn!("Failed to install OTLP tracer: {}, falling back to stdout", e);
-        })
-        .ok()?;
+    // 构建 TracerProvider with batch exporter and resource config
+    let resource = Resource::new(vec![
+        KeyValue::new("service.name", service_name.clone()),
+        KeyValue::new("service.version", env!("CARGO_PKG_VERSION")),
+        KeyValue::new("deployment.environment", deployment_env()),
+    ]);
+
+    let tracer_provider = opentelemetry_sdk::trace::TracerProvider::builder()
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+        .with_resource(resource)
+        .build();
+
+    // 从 TracerProvider 获取 Tracer（tracing-opentelemetry 需要 Tracer 而非 TracerProvider）
+    // TracerProvider trait 必须 in scope 才能调用 .tracer() 方法
+    let tracer = tracer_provider.tracer("ydsz-buddy");
 
     Some(tracer)
 }
@@ -156,7 +170,7 @@ pub fn record_model_call_span(
     elapsed_ms: u64,
     success: bool,
 ) {
-    tracing::info_span!(
+    let _span = tracing::info_span!(
         "model_call",
         otel.name = "model_call",
         otel.kind = "Client",
@@ -174,7 +188,7 @@ pub fn record_tool_execution_span(
     elapsed_ms: u64,
     success: bool,
 ) {
-    tracing::info_span!(
+    let _span = tracing::info_span!(
         "tool_execution",
         otel.name = "tool_execution",
         otel.kind = "Internal",

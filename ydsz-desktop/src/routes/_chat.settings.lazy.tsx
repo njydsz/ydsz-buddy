@@ -152,6 +152,7 @@ import { MobileRemoteSettings } from "../components/MobileRemoteSettings";
 import { BackupPanel } from "../components/BackupPanel";
 import { LegalDocumentsSettingsCard } from "../components/TermsAcceptanceGate";
 import { useWorkspaceStore } from "../workspaceStore";
+import { HooksSettingsPanel } from "../components/settings/HooksSettingsPanel";
 
 // ── Settings taxonomy ──────────────────────────────────────────────────────
 
@@ -1906,6 +1907,10 @@ export function Component() {
 
   const renderBehaviorPanel = () => (
     <div className="space-y-6">
+      {/* 生命周期钩子 — Workspace Hooks */}
+      <SettingsSection description="在特定生命周期事件发生时执行自定义脚本或 Skill。支持工作区打开/关闭、会话开始/结束、文件变更、命令执行等 7 种事件。">
+        <HooksSettingsPanel />
+      </SettingsSection>
       <SettingsSection title={messages.settings.behavior.runtimeSection}>
         <div className="space-y-2">
           <SettingsRow

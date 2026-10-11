@@ -251,7 +251,7 @@ export async function isKeyringAvailable(): Promise<boolean> {
 /**
  * 获取所有国产 Provider 的迁移状态
  */
-export function getDomesticProviderIds(): string[]> {
+export function getDomesticProviderIds(): string[] {
   return Object.keys(DOMESTIC_PROVIDER_REFS);
 }
 

@@ -30,6 +30,7 @@ ssh-key = { workspace = true }  # SSH 公钥解析 (Handler trait 需要)
 # SQLite 持久化
 rusqlite = { workspace = true }
 parking_lot = "0.12"
+log = "0.4"
 
 [dev-dependencies]
 tempfile = { workspace = true }

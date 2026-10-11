@@ -441,7 +441,8 @@ pub fn run() {
 .manage(commands::semantic::SemanticState::new())            // 语义搜索状态 (TF-IDF)
         .manage(commands::semantic::EmbeddingState::new())           // 语义搜索状态 (Embedding)
 .manage(commands::build_runner::BuildRunnerState::new())      // Build/Test Runner 状态
-.manage(commands::permissions::PermissionsState::new())      // 工具权限白名单状态
+        .manage(commands::permissions::PermissionsState::new())      // 工具权限白名单状态
+        .manage(commands::permissions::DynamicPermissionState::new()) // 权限动态升降级 (P1)
 .manage(McpState::new())                          // MCP 客户端状态(P1-B4: 升级至库级 McpState 含 reconnect/health_check 能力)
 .manage(commands::code_sandbox::CodeSandboxState::new()) // Agent 代码执行沙箱状态（P2-8）
         .manage(commands::extensions::ExtState::new())       // Extension 扩展系统状态（P1-1）
@@ -450,11 +451,13 @@ pub fn run() {
                 .expect("Failed to create event store")
         )
         .manage(commands::hitl::ApprovalsState::new())            // HITL 审批状态 (P1-5)
-        .manage(crate::auth::AuthState::new())                    // RBAC 认证状态 (G3-P0)
-        .manage(commands::thread_persist::ThreadPersistState::new( // Thread 持久化 (P1-6)
+        .manage(crate::auth::AuthState::new())                   // RBAC 认证状态 (G3-P0)
+        .manage(commands::ssh_hostkey::SshHostKeyState::new())  // SSH known_hosts 校验
+        .manage(commands::thread_persist::ThreadPersistState::new(
             ydsz_shared::persistence::ThreadStore::open_in_memory()
                 .expect("Failed to create thread store")
         ))
+        .manage(commands::audit_integrity::AuditIntegrityState::new()) // 审计完整性校验 (P0-3 增强)
         .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
         .manage(commands::token_tracking::TokenTrackingState::new()) // Token 追踪 + AI 占比 (P0-3 增强)
         .manage(commands::workflow::WorkflowState::new())             // 工作流引擎状态 (P0-1)
@@ -724,6 +727,11 @@ pub fn run() {
             // 审计日志导出命令
             audit_export,                    // 导出审计日志
 
+            // 审计完整性防篡改
+            audit_integrity_verify,          // 验证审计事件完整性
+            audit_integrity_anchor,          // 锚定 Merkle Root
+            audit_integrity_get_anchor,      // 获取锚定记录
+
             // 事件存储直接操作（P0-3：为 Agent Loop 提供事件写入入口）
             event_store_append,              // 追加审计事件
             event_store_query,               // 查询审计事件
@@ -916,6 +924,14 @@ pub fn run() {
             ssh_create_directory,              // 创建远程目录
             ssh_delete_directory,              // 删除远程目录
             ssh_exec,                          // 执行远程命令
+
+            // SSH known_hosts 严格校验（P1 安全增强）
+            ssh_known_hosts_get,               // 获取已知主机密钥
+            ssh_known_hosts_add,               // 添加主机密钥
+            ssh_known_hosts_remove,            // 移除主机密钥
+            ssh_known_hosts_verify,            // 验证主机密钥
+            ssh_known_hosts_load_system,       // 从系统 known_hosts 加载
+            ssh_compute_fingerprint,           // 计算公钥指纹
 
             // Web 搜索与 URL 内容抓取命令
             search_web,                       // 执行网页搜索

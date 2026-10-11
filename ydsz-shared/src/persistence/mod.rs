@@ -11,10 +11,12 @@ use std::sync::Arc;
 pub mod event_store;
 pub mod memory_store_sqlite;
 pub mod thread_store;
+pub mod mod_migrations;
 
 // Re-export
 pub use memory_store_sqlite::SqliteMemoryStore;
 pub use thread_store::{MessageRecord, ThreadRecord, ThreadStore, TurnRecord};
+pub use mod_migrations::{DbMigrator, Migration, MigrationRecord, SqlMigration, register_all_migrations};
 
 /// SQLite 事件存储 — 真实实现
 ///

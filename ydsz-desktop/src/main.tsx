@@ -260,4 +260,18 @@ document.title = APP_DISPLAY_NAME;
       // OS Keyring 不可用时静默降级到 session/local-obfuscated 模式
     });
   }
+
+  // 初始化 Workspace Hooks 引擎（异步、不阻塞 UI 渲染）
+  void (async () => {
+    try {
+      const { getHookEngine } = await import("./hookEngine");
+      const engine = getHookEngine();
+      engine.init();
+      _dbg("hook-engine-init-ok");
+    } catch (error) {
+      _dbg("hook-engine-init-failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })();
 })();

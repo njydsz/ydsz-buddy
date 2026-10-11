@@ -58,6 +58,7 @@ export const SETTINGS_SECTION_IDS = [
   "imageGen",
   "im",
   "mobile",
+  "hooks",
   "advanced",
   "push",
 ] as const;

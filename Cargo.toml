@@ -9,6 +9,7 @@ members = [
     "ydsz-work",
     "ydsz-server",
     "ydsz-cli",
+    "ydsz-tui",
 ]
 
 [workspace.package]

@@ -1606,7 +1606,7 @@ threadId: ThreadId,
 turnId: TurnId,
 completedAt: IsoDateTime,
 usage: Schema.optional(Schema.Struct({
-provider: Schema optional(Schema.String),
+provider: Schema.optional(Schema.String),
 model: Schema.optional(Schema.String),
 inputTokens: Schema.optional(Schema.Number),
 outputTokens: Schema.optional(Schema.Number),

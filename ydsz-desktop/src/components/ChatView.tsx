@@ -58,7 +58,7 @@ import {
   type MouseEvent,
 } from "react";
 import { GoTasklist } from "react-icons/go";
-import { PiArrowBendDownRight } from "react-icons/pi";
+import { PiArrowBendDownRight, PiLightning } from "react-icons/pi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Debouncer, useDebouncedValue } from "@tanstack/react-pacer";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -355,6 +355,7 @@ import {
 } from "./chat/ComposerLocalDirectoryMenu";
 import { ComposerPendingApprovalActions } from "./chat/ComposerPendingApprovalActions";
 import { ComposerExtrasMenu } from "./chat/ComposerExtrasMenu";
+import { CuaPermissionPanel } from "./cua/CuaPermissionPanel";
 import { ComposerPendingApprovalPanel } from "./chat/ComposerPendingApprovalPanel";
 import { ComposerPendingUserInputPanel } from "./chat/ComposerPendingUserInputPanel";
 import { ComposerPlanFollowUpBanner } from "./chat/ComposerPlanFollowUpBanner";
@@ -1196,6 +1197,7 @@ export default function ChatView({
   const [taskSidebarOpen, setTaskSidebarOpen] = useState(false);
   const [artifactsPanelOpen, setArtifactsPanelOpen] = useState(false);
   const [goalModeOpen, setGoalModeOpen] = useState(false);
+  const [cuaPanelOpen, setCuaPanelOpen] = useState(false);
 const [questPanelOpen, setQuestPanelOpen] = useState(false);
   const [artifacts] = useState<ArtifactsData>({});
   const [activeTaskListCompact, setActiveTaskListCompact] = useState(false);
@@ -9142,6 +9144,27 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
                           </span>
                         </Button>
                       </>
+
+                      {/* CUA (Computer Use Agent) 入口按钮 */}
+                      <>
+                        <Separator
+                          orientation="vertical"
+                          className="mx-0.5 hidden h-4 sm:block"
+                        />
+                        <Button
+                          variant={cuaPanelOpen ? "default" : "ghost"}
+                          className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal sm:px-3"
+                          size="sm"
+                          type="button"
+                          onClick={() => setCuaPanelOpen(!cuaPanelOpen)}
+                          title={cuaPanelOpen ? "关闭 Computer Use" : "开启 Computer Use"}
+                        >
+                          <PiLightning className="size-3.5" />
+                          <span className="sr-only sm:not-sr-only">
+                            {cuaPanelOpen ? "关闭 CUA" : "Computer Use"}
+                          </span>
+                        </Button>
+                      </>
                     </>
                   ) : null}
                 </div>
@@ -9976,6 +9999,27 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
                                       </Button>
                                     </>
                                   ) : null}
+
+                                  {/* CUA (Computer Use Agent) 入口按钮 */}
+                                  <>
+                                    <Separator
+                                      orientation="vertical"
+                                      className="mx-0.5 hidden h-4 sm:block"
+                                    />
+                                    <Button
+                                      variant={cuaPanelOpen ? "default" : "ghost"}
+                                      className="shrink-0 whitespace-nowrap px-2 text-(length:--app-font-size-ui-sm,11px) sm:text-(length:--app-font-size-ui-sm,11px) font-normal sm:px-3"
+                                      size="sm"
+                                      type="button"
+                                      onClick={() => setCuaPanelOpen(!cuaPanelOpen)}
+                                      title={cuaPanelOpen ? "关闭 Computer Use" : "开启 Computer Use"}
+                                    >
+                                      <PiLightning className="size-3.5" />
+                                      <span className="sr-only sm:not-sr-only">
+                                        {cuaPanelOpen ? "关闭 CUA" : "Computer Use"}
+                                      </span>
+                                    </Button>
+                                  </>
                                 </>
                               ) : null}
                             </div>
@@ -10288,6 +10332,25 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
           visible={goalModeOpen}
           onClose={() => setGoalModeOpen(false)}
         />
+
+        {/* CUA 权限面板 */}
+        {cuaPanelOpen && (
+          <div className="absolute inset-y-0 right-0 w-80 border-l border-sidebar-border bg-background overflow-y-auto p-3 space-y-3">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-semibold text-foreground">
+                Computer Use Agent
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCuaPanelOpen(false)}
+                className="p-1 rounded hover:bg-muted"
+              >
+                <XIcon />
+              </button>
+            </div>
+            <CuaPermissionPanel />
+          </div>
+        )}
 
         {/* Quest Panel 侧边栏 */}
         {questPanelOpen && (

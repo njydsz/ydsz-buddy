@@ -232,3 +232,259 @@ mod tests {
         assert!(state.manager.lock().is_ok());
     }
 }
+
+// ============================================================================
+// 运行时权限动态升降级（P1 增强）
+// ============================================================================
+
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+
+/// 权限调整动作
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum PermissionAdjustment {
+    /// 临时提升（带超时自动恢复）
+    Escalate { tool: String, duration_secs: u64 },
+    /// 临时降级
+    Deescalate { tool: String, level: String },
+    /// 重置为默认
+    Reset { tool: String },
+}
+
+/// 动态权限状态
+#[derive(Debug, Clone)]
+pub struct DynamicPermissionState {
+    inner: Arc<Mutex<DynamicPermissionInner>>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct DynamicPermissionInner {
+    /// 当前活动的权限调整: tool_name -> (adjustment, expires_at)
+    active_adjustments: HashMap<String, (PermissionAdjustment, Option<Instant>)>,
+    /// 违规计数: tool_name -> count
+    violation_count: HashMap<String, u32>,
+    /// 自动降级阈值（连续违规次数）
+    auto_deescalate_threshold: u32,
+}
+
+impl DynamicPermissionState {
+    pub fn new() -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(DynamicPermissionInner {
+                active_adjustments: HashMap::new(),
+                violation_count: HashMap::new(),
+                auto_deescalate_threshold: 3,
+            })),
+        }
+    }
+
+    /// 应用权限调整
+    pub fn apply_adjustment(&self, adjustment: PermissionAdjustment) -> Result<(), String> {
+        let mut inner = self.inner.lock().map_err(|e| e.to_string())?;
+
+        match &adjustment {
+            PermissionAdjustment::Escalate { tool, duration_secs } => {
+                let expires = Duration::from_secs(*duration_secs);
+                inner.active_adjustments.insert(
+                    tool.clone(),
+                    (adjustment.clone(), Some(Instant::now() + expires)),
+                );
+                info!(tool = %tool, secs = duration_secs, "权限临时提升");
+            }
+            PermissionAdjustment::Deescalate { tool, level: _ } => {
+                inner.active_adjustments.insert(
+                    tool.clone(),
+                    (adjustment.clone(), None),
+                );
+                info!(tool = %tool, "权限降级");
+            }
+            PermissionAdjustment::Reset { tool } => {
+                inner.active_adjustments.remove(tool);
+                inner.violation_count.remove(tool);
+                info!(tool = %tool, "权限重置为默认");
+            }
+        }
+
+        Ok(())
+    }
+
+    /// 记录一次违规并判断是否需要自动降级
+    pub fn record_violation(&self, tool: &str) -> bool {
+        let mut inner = match self.inner.lock() {
+            Ok(g) => g,
+            Err(_) => return false,
+        };
+
+        let count = inner.violation_count.entry(tool.to_string()).or_insert(0);
+        *count += 1;
+
+        if *count >= inner.auto_deescalate_threshold {
+            warn!(tool = %tool, violations = *count, "违规次数过多，自动降级权限");
+            inner.active_adjustments.insert(
+                tool.to_string(),
+                (
+                    PermissionAdjustment::Deescalate {
+                        tool: tool.to_string(),
+                        level: "readonly".to_string(),
+                    },
+                    None,
+                ),
+            );
+            true
+        } else {
+            false
+        }
+    }
+
+    /// 清理过期的调整
+    pub fn cleanup_expired(&self) -> Vec<String> {
+        let mut inner = match self.inner.lock() {
+            Ok(g) => g,
+            Err(_) => return Vec::new(),
+        };
+
+        let now = Instant::now();
+        let expired: Vec<String> = inner
+            .active_adjustments
+            .iter()
+            .filter(|(_, (_, exp))| exp.map_or(false, |e| now > e))
+            .map(|(tool, _)| tool.clone())
+            .collect();
+
+        for tool in &expired {
+            inner.active_adjustments.remove(tool);
+            info!(tool = %tool, "过期权限调整已自动清除");
+        }
+
+        expired
+    }
+
+    /// 查询工具当前的动态调整（考虑过期）
+    pub fn get_effective_adjustment(&self, tool: &str) -> Option<PermissionAdjustment> {
+        let inner = self.inner.lock().ok()?;
+        if let Some((adj, expires)) = inner.active_adjustments.get(tool) {
+            if let Some(exp) = expires {
+                if Instant::now() > *exp {
+                    return None;
+                }
+            }
+            Some(adj.clone())
+        } else {
+            None
+        }
+    }
+
+    /// 列出所有活动调整
+    pub fn list_active(&self) -> Vec<(String, PermissionAdjustment, Option<u64>)> {
+        let inner = match self.inner.lock() {
+            Ok(g) => g,
+            Err(_) => return Vec::new(),
+        };
+
+        let now = Instant::now();
+        inner
+            .active_adjustments
+            .iter()
+            .filter(|(_, (_, exp))| exp.map_or(true, |e| now <= e))
+            .map(|(tool, (adj, exp))| {
+                let remaining_secs = exp.map(|e| {
+                    let remaining = e.saturating_duration_since(now);
+                    remaining.as_secs()
+                });
+                (tool.clone(), adj.clone(), remaining_secs)
+            })
+            .collect()
+    }
+
+    /// 设置自动降级阈值
+    pub fn set_deescalate_threshold(&self, threshold: u32) {
+        if let Ok(mut inner) = self.inner.lock() {
+            inner.auto_deescalate_threshold = threshold;
+        }
+    }
+
+    /// 获取违规统计
+    pub fn get_violation_stats(&self) -> HashMap<String, u32> {
+        self.inner.lock().map(|i| i.violation_count.clone()).unwrap_or_default()
+    }
+}
+
+impl Default for DynamicPermissionState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---- Tauri 命令 ----
+
+/// 应用运行时权限调整
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_dynamic_adjust(
+    state: State<'_, DynamicPermissionState>,
+    adjustment: PermissionAdjustment,
+) -> Result<(), String> {
+    state.apply_adjustment(adjustment)
+}
+
+/// 列出所有活动的动态权限调整
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_dynamic_list(
+    state: State<'_, DynamicPermissionState>,
+) -> Result<Vec<serde_json::Value>, String> {
+    let active = state.list_active();
+    let result: Vec<serde_json::Value> = active
+        .into_iter()
+        .map(|(tool, adj, remaining)| {
+            serde_json::json!({
+                "tool": tool,
+                "adjustment": adj,
+                "remainingSecs": remaining,
+            })
+        })
+        .collect();
+    Ok(result)
+}
+
+/// 查询工具的动态权限调整状态
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_dynamic_get(
+    state: State<'_, DynamicPermissionState>,
+    tool: String,
+) -> Result<Option<PermissionAdjustment>, String> {
+    Ok(state.get_effective_adjustment(&tool))
+}
+
+/// 设置自动降级阈值
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_set_deescalate_threshold(
+    state: State<'_, DynamicPermissionState>,
+    threshold: u32,
+) -> Result<(), String> {
+    state.set_deescalate_threshold(threshold);
+    info!(threshold = threshold, "自动降级阈值已设置");
+    Ok(())
+}
+
+/// 获取违规统计
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_get_violations(
+    state: State<'_, DynamicPermissionState>,
+) -> Result<HashMap<String, u32>, String> {
+    Ok(state.get_violation_stats())
+}
+
+/// 清理过期调整
+#[tauri::command]
+#[specta::specta]
+pub async fn permissions_cleanup_expired(
+    state: State<'_, DynamicPermissionState>,
+) -> Result<Vec<String>, String> {
+    Ok(state.cleanup_expired())
+}

@@ -120,6 +120,18 @@ use commands::{
     system_service::*,   // 系统服务注册（G14-P2）
     expert_market::*,    // 专家市场与共享（G11-P2）
     auth_commands::*,    // 多用户认证 RBAC（G3-P0）
+    audit_integrity::*,  // 审计日志防篡改校验
+    audit_bridge::*,     // ToolPipeline → Event Sourcing 审计桥接
+    token_tracking::*,   // Provider Token 追踪 + AI 占比分析
+    ssh_hostkey::*,      // SSH known_hosts 严格校验
+    usage_stats::*,      // 用量统计面板（P1-6: 三维度聚合）
+    knowledge_parse::*,  // 知识库多格式文档解析（P1-4: PDF/DOCX/PPTX/HTML/TXT/MD）
+    langfuse_config::*,  // Langfuse 可观测性集成（P1-5: 配置管理 + 凭证验证）
+    slash_gw::*,         // 斜杠命令跨渠道化网关（P1-7: 元命令 + 来源过滤）
+    connector_presets_v2::*, // 连接器生态扩展（P2-8: 10 个高价值预置连接器）
+    self_update::*,      // 自更新基础设施（P2-10: 多镜像源探测 + Tauri updater）
+    hooks::*,            // Workspace Hooks 脚本执行
+    cua::*,              // CUA (Computer Use Agent) 命令 stub
 };
 
 use std::net::SocketAddr;
@@ -438,12 +450,18 @@ pub fn run() {
                 .expect("Failed to create thread store")
         ))
         .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
-        .manage(commands::im_channel::ImRegistry::new())          // IM 通道注册表 (G4)
+        .manage(commands::im_channel::ImGatewayComposite::new())  // IM 网关 (P0-1 MVP: WebSocket + 管线)
         .manage(commands::acp::AcpManager::new())                // ACP 管理器 (G10)
         .manage(commands::auth_commands::AuthState::new())       // 认证状态 (G3)
+.manage(commands::usage_stats::UsageStatsState::new())   // 用量统计 (P1-6)
+.manage(commands::langfuse_config::LangfuseState::new()) // Langfuse 配置 (P1-5)
+.manage(commands::slash_gw::SlashGateway::new())       // 斜杠命令网关 (P1-7)
+.manage(commands::connector_presets_v2::ConnectorPresetV2State::new()) // 连接器预置 (P2-8)
+.manage(commands::self_update::SelfUpdateState::new()) // 自更新 (P2-10)
         .manage(commands::connector_presets::ConnectorPresetsState::new()) // Connector 预置状态 (G16)
         .manage(commands::evolution::EvolutionState::new())             // 自进化状态 (G18)
         .manage(commands::push::PushSchedulerState::new())             // 推送调度器 (G19)
+        .manage(commands::workflow::WorkflowState::new())              // Dynamic Workflow Engine (P0-1)
 
         // ========== 无边框窗口初始化 ==========
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
@@ -716,16 +734,11 @@ pub fn run() {
 
             // HITL 审批（P1-5: Human-in-the-Loop + 规则引擎 + 委托）
             approval_list_pending,           // 列出待审批请求
-            approval_get,                    // 获取单个审批详情
             approval_respond,                // 审批响应（批准/拒绝）
-            approval_create,                 // 创建审批请求（自动算风险）
-            approval_list_rules,             // 列出审批规则
-            approval_add_rule,               // 创建审批规则
-            approval_remove_rule,            // 删除审批规则
-            approval_set_rule_enabled,       // 启用/禁用规则
-            approval_list_delegations,       // 列出委托
-            approval_add_delegation,         // 创建委托
-            approval_revoke_delegation,      // 撤回委托
+            approval_create,                 // 创建审批请求
+            approval_rules_list,             // 列出审批规则
+            approval_rules_save,             // 保存审批规则
+            approval_rules_delete,           // 删除审批规则
             approval_list_history,           // 审批历史
             approval_process_timeouts,       // 处理超时审批
 
@@ -940,6 +953,12 @@ pub fn run() {
             permissions_check,                // 检查权限
             permissions_filter,               // 过滤允许的工具
             permissions_load_preset,          // 加载预设模板
+            permissions_dynamic_adjust,       // 运行时权限动态调整
+            permissions_dynamic_list,         // 列出活动动态调整
+            permissions_dynamic_get,          // 查询工具动态权限
+            permissions_set_deescalate_threshold, // 设置自动降级阈值
+            permissions_get_violations,       // 获取违规统计
+            permissions_cleanup_expired,      // 清理过期调整
 
             // OS Keyring 凭证存储命令（P0-2）
             credential_store_set,             // 写入凭证到 OS Keyring
@@ -996,12 +1015,54 @@ pub fn run() {
             auth_feishu_callback,             // 飞书 OAuth 回调
             auth_consume_tokens,              // 消费 token (Agent 运行时调用)
 
-            // --- G4: IM 通道框架 ---
+            // --- G6: 用量统计面板 (P1-6: SQLite + 三维度聚合) ---
+            usage_init,                       // 初始化用量数据库
+            usage_record,                     // 记录一次用量
+            usage_summary_by_day,             // 按日聚合
+            usage_summary_by_user,            // 按用户聚合
+            usage_summary_by_model,           // 按模型聚合
+            usage_total_summary,              // 总览统计
+
+            // --- G7: 知识库多格式文档解析 (P1-4) ---
+            knowledge_parse_document,         // 解析文档提取文本
+            knowledge_list_supported_formats, // 列出支持的格式
+
+            // --- G8: Langfuse 可观测性集成 (P1-5: 配置管理 + 凭证验证) ---
+            langfuse_init,                    // 初始化配置数据库
+            langfuse_get_config,              // 获取配置（不含 secret_key）
+            langfuse_save_config,             // 保存配置
+            langfuse_verify,                  // 验证凭证
+            langfuse_clear,                   // 清除配置
+
+            // --- G9: 斜杠命令跨渠道化 (P1-7: 元命令 + 来源过滤) ---
+            slash_parse,                      // 解析斜杠命令
+            slash_list,                       // 列出可用命令（按来源）
+            slash_execute,                    // 执行斜杠命令
+            slash_register,                   // 注册自定义命令
+
+            // --- G10: 连接器生态扩展 (P2-8: 10 个高价值预置连接器) ---
+            connector_v2_list_presets,         // 列出所有可用预置连接器
+            connector_v2_get_preset,          // 获取单个预置详情
+            connector_v2_get_default_config,  // 获取默认配置模板
+
+            // --- G11: 自更新基础设施 (P2-10: 多镜像源 + Tauri updater) ---
+            self_update_get_version,           // 获取当前版本
+            self_update_get_install_method,    // 检测安装方式
+            self_update_check,                 // 检查更新
+            self_update_get_status,            // 获取更新状态
+            self_update_install,               // 触发更新安装
+            self_update_list_mirrors,          // 列出可用镜像源
+
+            // --- Workspace Hooks 脚本执行 ---
+            hook_run_script,                  // 执行 Hook 脚本（子进程 + 超时）
+
+            // --- G4: IM 网关 (P0-1: WebSocket + 管线) ---
             im_channel_list,                  // 列出已注册通道
-            im_channel_connect,               // 注册并连接通道
+            im_channel_connect,               // 连接飞书 WebSocket（真实）
             im_channel_disconnect,            // 断开通道
             im_channel_status,                // 获取通道状态
             im_channel_send,                  // 发送消息
+            im_channel_history,               // 消息历史
 
             // --- G5: 定时任务可视化 ---
             scheduler_task_create,            // 创建定时任务
@@ -1076,7 +1137,20 @@ pub fn run() {
             push_schedule_delete,
             push_schedule_trigger,
             push_list_channels,
-            push_test_all_channels
+            push_test_all_channels,
+
+            // --- Dynamic Workflow Engine (P0-1: DAG-based orchestration) ---
+            workflow_template_list,           // 列出工作流模板
+            workflow_template_find_by_tag,    // 按标签筛选模板
+            workflow_template_create,         // 创建自定义模板
+            workflow_instance_create,         // 创建工作流实例
+            workflow_instance_list,           // 列出所有实例
+            workflow_instance_get,            // 获取实例详情
+            workflow_instance_ready_nodes,    // 获取就绪节点
+            workflow_node_complete,           // 标记节点完成
+            workflow_node_fail,               // 标记节点失败
+            workflow_instance_pause,          // 暂停实例
+            workflow_instance_resume,         // 恢复实例
         ])
         // ========== 应用上下文生成 ==========
         .setup(|_app| {

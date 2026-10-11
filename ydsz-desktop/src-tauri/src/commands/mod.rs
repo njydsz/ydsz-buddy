@@ -1,28 +1,6 @@
-﻿//! 命令模块聚合导出
+//! 命令模块聚合导出
 //!
 //! 本模块是 ydsz-buddy Tauri 应用所有命令子模块的聚合入口。
-//!
-//! ## 模块职责
-//!
-//! - 统一导出所有命令子模块，供 `lib.rs` 通过通配符导入
-//! - 每个子模块对应一个业务领域，提供该领域的 Tauri IPC 命令
-//!
-//! ## 模块清单
-//!
-//! | 模块名 | 职责说明 |
-//! |--------|----------|
-//! | `dialog` | 文件对话框、消息对话框、确认对话框等系统对话框操作 |
-//! | `terminal` | 终端会话管理（创建、写入、调整大小、关闭） |
-//! | `browser` | 内嵌浏览器面板（标签页管理、导航、截图、CDP 执行） |
-//! | `update` | 应用自动更新（版本检查、下载、安装） |
-//! | `window` | 窗口主题、系统交互（主题切换、文件管理器定位、外部链接打开） |
-//! | `context_menu` | 右键上下文菜单 |
-//! | `voice` | 语音识别命令 |
-//!
-//! ## 使用场景
-//!
-//! 在 `lib.rs` 中通过 `use commands::*;` 导入所有子模块的公开项，
-//! 然后在 `tauri::generate_handler!` 宏中注册为前端可调用的命令。
 
 // 命令模块导出
 // 所有子模块均声明为 `pub mod`，确保其公开项可被外部访问
@@ -49,6 +27,7 @@ pub mod browser_use_pipe;       // Codex 兼容的浏览器使用管道服务器
 // === Sprint 2 扩展命令 ===
 pub mod lsp;                    // LSP 语言服务器集成
 pub mod office;                 // Office 文档处理（docx/xlsx/pdf）
+pub mod scheduler;              // 定时任务调度命令
 pub mod indexer;                // 仓库语义检索命令
 pub mod audit_export;           // 审计日志导出
 pub mod repo_wiki;              // Repo Wiki 知识引擎
@@ -56,7 +35,7 @@ pub mod plan_export;            // Plan 文档导出
 pub mod checkpoint;             // 任务崩溃恢复 Checkpoint
 pub mod mcp;                    // MCP (Model Context Protocol) 客户端
 pub mod project_rules;          // 项目规则加载（AGENTS.md / CLAUDE.md / .ydsz/rules/）
-pub mod push;                   // 移动端推送（桌面端 ↔ 移动端）
+pub mod push;                   // 移动端推送（桌面端 <-> 移动端）
 pub mod diagnostics;            // 诊断日志打包与上报
 pub mod skills;                 // Skill 模块（SKILL.md / 注册表 / 市场索引 / 安装器）
 pub mod goal;                   // Goal Mode 目标模式命令
@@ -64,7 +43,7 @@ pub mod failover;               // Provider 故障转移（P1-4 后端化）
 pub mod coding_plan_oauth;      // 国产 Coding Plan 订阅 OAuth Device Flow（P1-5）
 pub mod idle_lock;              // 离座锁定 / 隐私屏（P2-1）
 pub mod ocr;                    // 截图 OCR（P2-2:macOS Vision / Windows OCR / Tesseract 兜底）
-pub mod ollama;                 // Ollama 本地模型服务发现（P2-4:避免浏览器 CORS 拦截）
+pub mod ollama;                 // Ollama 本地模型服务发现（P2-4:避开浏览器 CORS 拦截）
 pub mod team_rules;              // 团队共享规则（~/.ydsz-buddy/team-rules/,P2-5）
 pub mod ssh;                    // SSH 远程连接（P1-C:russh 真集成）
 pub mod search;                  // Web 搜索与 URL 内容抓取
@@ -88,21 +67,51 @@ pub mod artifacts;              // 产物批量导出
 pub mod missing;                // 补齐缺失命令（env_get / fs_exists / fs_which / preset.list / image_gen.list_providers）
 pub mod event_store_ext;        // 事件存储追加/查询（P0-3 审计事件持久化）
 pub mod knowledge;              // 知识库 RAG Phase A（P1-4）
-pub mod hitl;                   // HITL 审批增强（P1-5: Human-in-the-Loop + 规则引擎）
+pub mod hitl;                   // HITL 审批（P1-5: Human-in-the-Loop）
 pub mod thread_persist;         // Thread 会话持久化（P1-6: SQLite CRUD）
 pub mod connectors;             // 开发者连接器（P2-8: Jira / GitHub Issues / Sentry / Grafana / Webhook）
 pub mod telemetry;              // 遥测与指标（计数器 + 事件环形缓冲区）
-pub mod scheduler;              // 定时任务可视化 + 真实 CRON 引擎（G5-P1）
-pub mod backup;                 // 备份与恢复（G8-P1）
-pub mod connector_presets;      // Connector 预置实例 GitHub/Notion/Slack（G16-P1）
-pub mod api_server;             // HTTP API 网关（G2-P0）
-pub mod personas;               // MBTI 人格模板（G12-P2）
-pub mod agent_teams;            // AgentTeams 多 Agent 协作编排（G13-P2）
-pub mod evolution;              // 自进化能力框架（G18-P2）
-pub mod im_channel;             // IM 通道集成框架 飞书（G4-P1）
-pub mod acp;                    // ACP 双向集成（G10-P1）
-pub mod system_service;         // 系统服务注册（G14-P2）
-pub mod expert_market;          // 专家市场与共享（G11-P2）
-pub mod auth_store;            // SQLite 持久化用户存储（P0-3）
-pub mod auth_commands;          // 多用户认证 RBAC + SSO（P0-2/P0-3）
 
+// === G8-P1 / G12-P2 / G16-P1 / G18-P2: 跨能力框架 ===
+pub mod evolution;              // 自进化能力框架 (G18-P2)
+pub mod connector_presets;      // Connector 预置实例（G16-P1: GitHub/Notion/Slack）
+pub mod personas;               // MBTI 人格模板（G12-P2）
+pub mod workflow;               // 动态工作流引擎（P0-1）
+pub mod bot;                    // 多通道 Bot 集成（P0-4）
+pub mod memory;                 // 项目记忆系统（P1-2）
+pub mod backup;                 // 备份与恢复（G8-P1）
+pub mod session_share;          // 会话共享（P1-1）
+pub mod custom_command;         // 自定义命令系统（P2-11）
+pub mod feedback;               // 反馈系统（P2-6）
+pub mod storage_cleaner;        // 存储扫描与清理工具（P2-9）
+pub mod offpeak;                // 低谷任务调度（P1-3）
+pub mod browser_recorder;       // 浏览器录制（P1-5）
+pub mod auth_store;             // 认证持久化存储
+pub mod im_gw;                  // IM 网关
+pub mod im_feishu_ws;           // 飞书 IM WebSocket
+pub mod api_server;             // HTTP API 服务
+pub mod agent_teams;            // Agent Teams 协作
+pub mod system_service;         // 系统服务注册
+pub mod usage_stats;            // 用量统计面板
+pub mod knowledge_parse;        // 知识库多格式文档解析
+pub mod langfuse_config;        // Langfuse 可观测性集成
+pub mod hooks;                  // Workspace Hooks 脚本执行
+pub mod cua;                    // CUA (Computer Use Agent)
+pub mod slash_gw;               // Slash 命令网关
+pub mod connector_presets_v2;   // 连接器生态扩展（P2-8: 10 个高价值预置连接器）
+pub mod self_update;            // 自更新基础设施（P2-10: 多镜像源探测 + Tauri updater）
+// === G3-P0: RBAC 多用户认证 ===
+pub mod auth_commands;
+pub mod audit_bridge;            // ToolPipeline → Event Sourcing 审计桥接
+pub mod audit_integrity;         // 审计日志 tamper-proof 默克尔校验
+pub mod token_tracking;          // Provider Token 强制追踪 + AI 占比分析
+pub mod ssh_hostkey;             // SSH known_hosts 严格校验
+
+// === G4-P1: IM Channel Integration Framework ===
+pub mod im_channel;
+
+// === G10-P1: ACP Bidirectional Integration Framework ===
+pub mod acp;
+
+// === G11-P2: Expert Marketplace ===
+pub mod expert_market;

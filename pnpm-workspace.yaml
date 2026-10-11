@@ -1,6 +1,7 @@
 packages:
   - ydsz-desktop
   - ydsz-mobile
+  - ydsz-web
 allowBuilds:
   esbuild: true
   msgpackr-extract: true
