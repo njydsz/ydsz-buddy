@@ -38,6 +38,12 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 which = "6.0"
 base64 = "0.22"
+log = "0.4"
+sha2 = "0.10"
+rand = "0.8"
+once_cell = "1.19"
+croner = "2"
+cron = "0.12"
 
 # 截图 OCR(P2-2): 临时文件 + 跨进程 shell 调用(macOS Vision / Windows OCR / Tesseract 兜底)
 tempfile = "3.10"

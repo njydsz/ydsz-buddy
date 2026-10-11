@@ -98,6 +98,7 @@ export function useComposerSlashCommands(input: {
   threadId: ThreadId;
   syncServerShellSnapshot: (snapshot: OrchestrationShellSnapshot) => void;
   navigateToThread: (threadId: ThreadId, options?: { splitViewId?: SplitViewId }) => Promise<void>;
+  navigateToScheduler: () => void;
   handleClearConversation: () => Promise<void> | void;
   handleInteractionModeChange: (mode: ProviderInteractionMode) => Promise<void> | void;
   openForkTargetPicker: () => void;
@@ -146,6 +147,7 @@ export function useComposerSlashCommands(input: {
     threadId,
     syncServerShellSnapshot,
     navigateToThread,
+    navigateToScheduler,
     handleClearConversation,
     handleInteractionModeChange,
     openForkTargetPicker,
@@ -730,6 +732,11 @@ export function useComposerSlashCommands(input: {
         }
         return true;
       }
+      if (slashInvocation.command === "cron") {
+        editorActions.clearComposerSlashDraft();
+        navigateToScheduler();
+        return true;
+      }
       return false;
     },
     [
@@ -741,6 +748,7 @@ export function useComposerSlashCommands(input: {
       editorActions,
       handleClearConversation,
       handleInteractionModeChange,
+      navigateToScheduler,
       openForkTargetPicker,
       openReviewTargetPicker,
       selectedProvider,
@@ -911,6 +919,16 @@ export function useComposerSlashCommands(input: {
                 : "An error occurred while creating the sidechat.",
           });
         });
+        return;
+      }
+
+      if (item.command === "cron") {
+        const applied = clearSlashCommandFromComposer();
+        if (!wasPromptReplacementApplied(applied)) {
+          return;
+        }
+        editorActions.setComposerHighlightedItemId(null);
+        navigateToScheduler();
       }
     },
     [
@@ -919,6 +937,7 @@ export function useComposerSlashCommands(input: {
       editorActions,
       handleClearConversation,
       handleInteractionModeChange,
+      navigateToScheduler,
       openForkTargetPicker,
       openReviewTargetPicker,
       selectedProvider,

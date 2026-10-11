@@ -198,6 +198,7 @@ import { useComposerOfficePick } from "../hooks/useComposerOfficePick";
 import { useComposerBrowserPick } from "../hooks/useComposerBrowserPick";
 import { useComposerLspPick } from "../hooks/useComposerLspPick";
 import { useComposerIndexerPick } from "../hooks/useComposerIndexerPick";
+import { useComposerImageGenPick } from "../hooks/useComposerImageGenPick";
 import { useThreadHandoff } from "../hooks/useThreadHandoff";
 import { useTurnDiffSummaries } from "../hooks/useTurnDiffSummaries";
 import { useTurnAiShare } from "../hooks/useTurnAiShare";
@@ -2999,6 +3000,11 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
     effectiveComposerTrigger,
     activeProject?.cwd ?? null,
   );
+  // 图像生成触发器:仅在 mention 触发器为 @image 模式时执行
+  const imageGenPick = useComposerImageGenPick(
+    effectiveComposerTrigger,
+    activeThread?.id ?? null,
+  );
   const normalComposerMenuItems = useComposerCommandMenuItems({
     composerTrigger: effectiveComposerTrigger,
     provider: selectedProvider,
@@ -3035,6 +3041,8 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
     // work-skill-mention flag 关闭时,不展示 @indexer 提及结果(回退到普通 Skill 路径)
     indexerItems: featureFlags["work-skill-mention"] ? indexerPick.items : [],
     indexerLoading: featureFlags["work-skill-mention"] ? indexerPick.isLoading : false,
+    imageGenItems: imageGenPick.items,
+    imageGenLoading: imageGenPick.isLoading,
   });
   const composerMenuItems = useMemo(() => {
     if (composerCommandPicker === "fork-target") {
@@ -7855,6 +7863,7 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
         params: { threadId: nextThreadId },
         ...(options?.splitViewId ? { search: () => ({ splitViewId: options.splitViewId }) } : {}),
       }),
+    navigateToScheduler: () => navigate({ to: "/scheduler" }),
     handleClearConversation: async () => {
       if (!activeProject) {
         toastManager.add({

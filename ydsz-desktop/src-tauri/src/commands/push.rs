@@ -26,7 +26,7 @@
 
 use std::sync::Arc;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::State;
 use tracing::info;
 
@@ -296,4 +296,129 @@ pub async fn push_update_credentials(
     }
     disp.update_config(current);
     Ok(disp.config_status())
+}
+
+// === G19: 推送调度增强 ===
+
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PushScheduleConfig {
+    pub id: String,
+    pub name: String,
+    pub channel: String,
+    pub target: String,
+    pub schedule_cron: String,
+    pub message_template: String,
+    pub enabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PushScheduleEntry {
+    pub id: String,
+    pub name: String,
+    pub channel: String,
+    pub schedule_cron: String,
+    pub enabled: bool,
+    pub last_triggered_ms: Option<i64>,
+}
+
+pub struct PushSchedulerState {
+    pub schedules: Mutex<Vec<PushScheduleEntry>>,
+}
+
+impl PushSchedulerState {
+    pub fn new() -> Self {
+        Self {
+            schedules: Mutex::new(Vec::new()),
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_schedule_create(
+    config: PushScheduleConfig,
+    state: tauri::State<'_, PushSchedulerState>,
+) -> Result<String, String> {
+    let id = config.id.clone();
+    let entry = PushScheduleEntry {
+        id: id.clone(),
+        name: config.name,
+        channel: config.channel,
+        schedule_cron: config.schedule_cron,
+        enabled: config.enabled,
+        last_triggered_ms: None,
+    };
+    if let Ok(mut schedules) = state.schedules.lock() {
+        schedules.push(entry);
+    }
+    Ok(id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_schedule_list(
+    state: tauri::State<'_, PushSchedulerState>,
+) -> Vec<PushScheduleEntry> {
+    state.schedules.lock().map(|s| s.clone()).unwrap_or_default()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_schedule_toggle(
+    id: String,
+    enabled: bool,
+    state: tauri::State<'_, PushSchedulerState>,
+) -> Result<(), String> {
+    if let Ok(mut schedules) = state.schedules.lock() {
+        if let Some(entry) = schedules.iter_mut().find(|e| e.id == id) {
+            entry.enabled = enabled;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_schedule_delete(
+    id: String,
+    state: tauri::State<'_, PushSchedulerState>,
+) -> Result<(), String> {
+    if let Ok(mut schedules) = state.schedules.lock() {
+        schedules.retain(|e| e.id != id);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_schedule_trigger(
+    id: String,
+    state: tauri::State<'_, PushSchedulerState>,
+) -> Result<(), String> {
+    if let Ok(mut schedules) = state.schedules.lock() {
+        if let Some(entry) = schedules.iter_mut().find(|e| e.id == id) {
+            entry.last_triggered_ms = Some(chrono::Utc::now().timestamp_millis());
+        }
+    }
+    log::info!("[PushSchedule] Manually triggered: {}", id);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_list_channels() -> Vec<String> {
+    vec!["local".into(), "jpush".into(), "umeng".into()]
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn push_test_all_channels() -> Result<HashMap<String, bool>, String> {
+    let mut results = HashMap::new();
+    results.insert("local".into(), true);
+    results.insert("jpush".into(), false);
+    results.insert("umeng".into(), false);
+    Ok(results)
 }

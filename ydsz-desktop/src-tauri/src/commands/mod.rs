@@ -49,7 +49,6 @@ pub mod browser_use_pipe;       // Codex 兼容的浏览器使用管道服务器
 // === Sprint 2 扩展命令 ===
 pub mod lsp;                    // LSP 语言服务器集成
 pub mod office;                 // Office 文档处理（docx/xlsx/pdf）
-pub mod scheduler;              // 定时任务调度命令
 pub mod indexer;                // 仓库语义检索命令
 pub mod audit_export;           // 审计日志导出
 pub mod repo_wiki;              // Repo Wiki 知识引擎
@@ -89,8 +88,20 @@ pub mod artifacts;              // 产物批量导出
 pub mod missing;                // 补齐缺失命令（env_get / fs_exists / fs_which / preset.list / image_gen.list_providers）
 pub mod event_store_ext;        // 事件存储追加/查询（P0-3 审计事件持久化）
 pub mod knowledge;              // 知识库 RAG Phase A（P1-4）
-pub mod hitl;                   // HITL 审批（P1-5: Human-in-the-Loop）
+pub mod hitl;                   // HITL 审批增强（P1-5: Human-in-the-Loop + 规则引擎）
 pub mod thread_persist;         // Thread 会话持久化（P1-6: SQLite CRUD）
 pub mod connectors;             // 开发者连接器（P2-8: Jira / GitHub Issues / Sentry / Grafana / Webhook）
 pub mod telemetry;              // 遥测与指标（计数器 + 事件环形缓冲区）
+pub mod scheduler;              // 定时任务可视化 + 真实 CRON 引擎（G5-P1）
+pub mod backup;                 // 备份与恢复（G8-P1）
+pub mod connector_presets;      // Connector 预置实例 GitHub/Notion/Slack（G16-P1）
+pub mod api_server;             // HTTP API 网关（G2-P0）
+pub mod personas;               // MBTI 人格模板（G12-P2）
+pub mod agent_teams;            // AgentTeams 多 Agent 协作编排（G13-P2）
+pub mod evolution;              // 自进化能力框架（G18-P2）
+pub mod im_channel;             // IM 通道集成框架 飞书（G4-P1）
+pub mod acp;                    // ACP 双向集成（G10-P1）
+pub mod system_service;         // 系统服务注册（G14-P2）
+pub mod expert_market;          // 专家市场与共享（G11-P2）
+pub mod auth_commands;          // 多用户认证 RBAC（G3-P0）
 

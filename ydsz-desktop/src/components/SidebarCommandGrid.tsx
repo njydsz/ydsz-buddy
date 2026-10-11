@@ -25,12 +25,15 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   BookIcon,
   ClockIcon,
+  DatabaseIcon,
   PlugIcon,
+  SettingsIcon,
   FileTextIcon,
   Code2Icon,
   GitPullRequestIcon,
   ListTodoIcon,
   PuzzleIcon,
+  BotIcon,
 } from "../lib/icons";
 import { cn } from "../lib/utils";
 import { useMessages } from "../i18n/I18nContext";
@@ -76,6 +79,9 @@ export function SidebarCommandGrid({ pathname }: { readonly pathname: string }) 
   const isOnEditor = pathname.startsWith("/editor");
   const isOnPulls = pathname.startsWith("/pulls");
   const isOnLinear = pathname.startsWith("/linear");
+  const isOnScheduler = pathname.startsWith("/scheduler");
+  const isOnKnowledge = pathname.startsWith("/knowledge");
+  const isOnTeams = pathname.startsWith("/teams");
   // 当 `/plugins?tab=extensions` 时,高亮 Extensions 卡;否则按 tab 区分 Skills / Plugins。
   const activeTab =
     isOnPlugins && routeSearch.tab === "skills"
@@ -114,6 +120,18 @@ export function SidebarCommandGrid({ pathname }: { readonly pathname: string }) 
 
   const onSelectLinear = useCallback(() => {
     void navigate({ to: "/linear" });
+  }, [navigate]);
+
+  const onSelectScheduler = useCallback(() => {
+    void navigate({ to: "/scheduler" });
+  }, [navigate]);
+
+  const onSelectTeams = useCallback(() => {
+    void navigate({ to: "/teams" });
+  }, [navigate]);
+
+  const onSelectKnowledge = useCallback(() => {
+    void navigate({ to: "/knowledge" });
   }, [navigate]);
 
   return (
@@ -179,6 +197,27 @@ export function SidebarCommandGrid({ pathname }: { readonly pathname: string }) 
           active={isOnLinear}
           onClick={onSelectLinear}
           testId="sidebar-command-linear"
+        />
+        <CommandCard
+          icon={SettingsIcon}
+          label={messages.sidebar.schedulerLabel ?? "Scheduler"}
+          active={isOnScheduler}
+          onClick={onSelectScheduler}
+          testId="sidebar-command-scheduler"
+        />
+        <CommandCard
+          icon={DatabaseIcon}
+          label={messages.sidebar.knowledgeLabel ?? "Knowledge"}
+          active={isOnKnowledge}
+          onClick={onSelectKnowledge}
+          testId="sidebar-command-knowledge"
+        />
+        <CommandCard
+          icon={BotIcon}
+          label="Teams"
+          active={isOnTeams}
+          onClick={onSelectTeams}
+          testId="sidebar-command-teams"
         />
       </div>
     </div>

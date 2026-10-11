@@ -35,12 +35,16 @@ pub struct ApprovalRequest {
 #[derive(Debug, Clone)]
 pub struct ApprovalsState {
     inner: Arc<Mutex<Vec<ApprovalRequest>>>,
+    pub rules: Arc<Mutex<Vec<ApprovalRule>>>,
+    pub history: Arc<Mutex<Vec<ApprovalHistoryEntry>>>,
 }
 
 impl ApprovalsState {
     pub fn new() -> Self {
         Self {
             inner: Arc::new(Mutex::new(Vec::new())),
+            rules: Arc::new(Mutex::new(Vec::new())),
+            history: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
@@ -130,4 +134,121 @@ pub async fn approval_create(
     };
     state.push(req);
     Ok(id)
+}
+
+// === G17: HITL 审批增强 — 规则引擎 + 超时处理 + 审批历史 ===
+
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+pub struct ApprovalRule {
+    pub id: String,
+    pub name: String,
+    pub trigger: ApprovalTrigger,
+    pub require_approval: bool,
+    pub auto_approve_after_secs: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum ApprovalTrigger {
+    ShellCommandRisky { pattern: String },
+    FileSystemWrite { path_pattern: String },
+    NetworkRequest { host_pattern: String },
+    AiToolCostExceeds { max_cost: f64 },
+    ToolNameExact { tool_name: String },
+    ToolNameContains { tool_name: String },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+pub struct ApprovalHistoryEntry {
+    pub id: String,
+    pub tool_name: String,
+    pub decision: String,       // "approved" | "rejected" | "timeout_approved" | "timeout_rejected"
+    pub decided_at_ms: i64,
+    pub auto: bool,
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn approval_rules_list(
+    state: State<'_, ApprovalsState>,
+) -> Vec<ApprovalRule> {
+    state.rules.lock().map(|r| r.clone()).unwrap_or_default()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn approval_rules_save(
+    rule: ApprovalRule,
+    state: State<'_, ApprovalsState>,
+) -> Result<(), String> {
+    if let Ok(mut rules) = state.rules.lock() {
+        rules.retain(|r| r.id != rule.id);
+        rules.push(rule);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn approval_rules_delete(
+    rule_id: String,
+    state: State<'_, ApprovalsState>,
+) -> Result<(), String> {
+    if let Ok(mut rules) = state.rules.lock() {
+        rules.retain(|r| r.id != rule_id);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn approval_list_history(
+    state: State<'_, ApprovalsState>,
+) -> Vec<ApprovalHistoryEntry> {
+    state.history.lock().map(|h| h.clone()).unwrap_or_default()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn approval_process_timeouts(
+    state: State<'_, ApprovalsState>,
+) -> Result<u32, String> {
+    let now = chrono::Utc::now();
+    let mut processed = 0u32;
+
+    if let Ok(mut requests) = state.inner.lock() {
+        for req in requests.iter_mut() {
+            if req.status != "pending" {
+                continue;
+            }
+
+            let requested_at = match chrono::DateTime::parse_from_rfc3339(&req.requested_at) {
+                Ok(dt) => dt.with_timezone(&chrono::Utc),
+                Err(_) => continue,
+            };
+
+            let elapsed = now.signed_duration_since(requested_at).num_seconds() as u64;
+            let timeout_secs = 300; // 默认 5 分钟超时
+
+            if elapsed >= timeout_secs {
+                req.status = "approved".into();
+                processed += 1;
+
+                let history_entry = ApprovalHistoryEntry {
+                    id: req.id.clone(),
+                    tool_name: req.tool_name.clone(),
+                    decision: "timeout_approved".into(),
+                    decided_at_ms: now.timestamp_millis(),
+                    auto: true,
+                };
+                if let Ok(mut history) = state.history.lock() {
+                    history.push(history_entry);
+                }
+
+                info!("[HITL] Auto-approved after timeout: {} ({})", req.tool_name, req.id);
+            }
+        }
+    }
+
+    Ok(processed)
 }

@@ -174,6 +174,26 @@ export function useComposerCommandMenuItems(input: {
   indexerItems?: readonly ComposerCommandItem[];
   /** Indexer 列表是否在加载中(防抖或后端响应中) */
   indexerLoading?: boolean;
+  /**
+   * 由 `useComposerImageGenPick` 注入的图像生成 Provider 条目。
+   *
+   * - 空数组:不展示 ImageGen 列表
+   * - 含 hint:展示输入 prompt 引导
+   * - 含 action:可直接触发生成
+   */
+  imageGenItems?: readonly ComposerCommandItem[];
+  /** ImageGen Provider 列表是否在加载中 */
+  imageGenLoading?: boolean;
+  /**
+   * 由 `useComposerKnowledgeSearch` 注入的知识库提及条目。
+   *
+   * - 空数组:不展示 Knowledge 列表
+   * - 含 hint/empty:展示占位提示
+   * - 含 knowledge-result:可被选中插入到 Composer
+   */
+  knowledgeItems?: readonly ComposerCommandItem[];
+  /** Knowledge Base 搜索是否在加载中 */
+  knowledgeLoading?: boolean;
 }): ComposerCommandItem[] {
   const {
     composerTrigger,
@@ -205,6 +225,10 @@ export function useComposerCommandMenuItems(input: {
     lspLoading,
     indexerItems,
     indexerLoading,
+    imageGenItems,
+    imageGenLoading,
+    knowledgeItems,
+    knowledgeLoading,
   } = input;
 
   return useMemo<ComposerCommandItem[]>(() => {
@@ -430,6 +454,64 @@ export function useComposerCommandMenuItems(input: {
               type: "indexer-hint",
               label: "搜索 Indexer 中…",
               description: "正在检索项目符号索引",
+            },
+          ];
+        }
+        return [];
+      }
+
+      // 检测 @knowledge 触发:
+      // - `@knowledge`(query === "knowledge"):展示已接入的知识库列表
+      // - `@knowledge <query>`(query 以 "knowledge " 开头):按关键词过滤知识源
+      // 列表由 `useComposerKnowledgeSearch` 注入到 `knowledgeItems` 中。
+      const KNOWLEDGE_TRIGGER = "knowledge";
+      const isKnowledgeMention = query === KNOWLEDGE_TRIGGER;
+      const isKnowledgeQuery = query.startsWith(`${KNOWLEDGE_TRIGGER} `);
+      if (isKnowledgeMention || isKnowledgeQuery) {
+        const safeKnowledgeItems = knowledgeItems ?? [];
+        if (safeKnowledgeItems.length > 0) {
+          return [...safeKnowledgeItems];
+        }
+        if (knowledgeLoading) {
+          return [
+            {
+              id: "knowledge-hint:loading",
+              type: "knowledge-hint",
+              label: "搜索知识库中…",
+              description: "正在检索已接入的知识源",
+            },
+          ];
+        }
+        // 展示静态 hint 引导用户
+        return [
+          {
+            id: "knowledge-hint:empty",
+            type: "knowledge-hint",
+            label: "输入关键词搜索知识库",
+            description: "在 @knowledge 后输入查询内容,从已索引的知识源中检索",
+          },
+        ];
+      }
+
+      // 检测 @image 触发:
+      // - `@image`(query === "image"):展示可用 Provider 列表 + 输入 prompt 引导
+      // - `@image <prompt>`(query 以 "image " 开头):用户已输入 prompt,展示 Provider 选择
+      // 触发器由 `useComposerImageGenPick` 注入到 `imageGenItems` 中。
+      const IMAGE_TRIGGER = "image";
+      const isImageMention = query === IMAGE_TRIGGER;
+      const isImageQuery = query.startsWith(`${IMAGE_TRIGGER} `);
+      if (isImageMention || isImageQuery) {
+        const safeImageGenItems = imageGenItems ?? [];
+        if (safeImageGenItems.length > 0) {
+          return [...safeImageGenItems];
+        }
+        if (imageGenLoading) {
+          return [
+            {
+              id: "image-hint:loading",
+              type: "image-hint",
+              label: "加载图像生成 Provider 中…",
+              description: "正在检索可用的图像生成后端",
             },
           ];
         }

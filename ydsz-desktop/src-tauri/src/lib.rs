@@ -105,9 +105,22 @@ use commands::{
     hitl::*,             // HITL 审批（P1-5）
     thread_persist::*,   // Thread 持久化（P1-6）
     connectors::*,       // 开发者连接器（P2-8）
+    scheduler::*,        // 定时任务调度 + 可视化（G5-P1）
+    backup::*,           // 备份与恢复（G8-P1）
+    connector_presets::*, // Connector 预置实例（G16-P1）
+    api_server::*,       // HTTP API 网关（G2-P0）
+    personas::*,         // MBTI 人格模板（G12-P2）
+    agent_teams::*,      // AgentTeams 协作编排（G13-P2）
+    evolution::*,        // 自进化框架（G18-P2）
+    im_channel::*,       // IM 通道框架（G4-P1）
+    acp::*,              // ACP 双向集成（G10-P1）
+    system_service::*,   // 系统服务注册（G14-P2）
+    expert_market::*,    // 专家市场与共享（G11-P2）
+    auth_commands::*,    // 多用户认证 RBAC（G3-P0）
 };
 
 use std::net::SocketAddr;
+mod connectors;
 use std::sync::Arc;
 use ydsz_shared::config::ServerConfig;
 use ydsz_server::{bootstrap_embedded, BootstrapResult};
@@ -424,6 +437,12 @@ pub fn run() {
                 .expect("Failed to create thread store")
         ))
         .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
+        .manage(commands::im_channel::ImRegistry::new())          // IM 通道注册表 (G4)
+        .manage(commands::acp::AcpManager::new())                // ACP 管理器 (G10)
+        .manage(commands::auth_commands::AuthState::new())       // 认证状态 (G3)
+        .manage(commands::connector_presets::ConnectorPresetsState::new()) // Connector 预置状态 (G16)
+        .manage(commands::evolution::EvolutionState::new())             // 自进化状态 (G18)
+        .manage(commands::push::PushSchedulerState::new())             // 推送调度器 (G19)
 
         // ========== 无边框窗口初始化 ==========
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
@@ -926,7 +945,116 @@ pub fn run() {
             telemetry_get_recent_events,      // 最近 N 条事件
             telemetry_record_event,           // 从前端记录事件
             telemetry_reset_counters,         // 重置计数器
-            telemetry_get_diagnostics         // 诊断聚合报告
+            telemetry_get_diagnostics,        // 诊断聚合报告
+
+            // === G1-G22 竞品差距补齐命令 ===
+
+            // --- G1: 文生图 (已在 P1-3 注册 image_generate) ---
+            image_gen_list_providers,         // 列出可用图片生成 Provider (missing.rs)
+
+            // --- G2: HTTP API 网关 ---
+            api_server_start,                 // 启动 HTTP API 服务
+            api_server_stop,                  // 停止 HTTP API 服务
+            api_server_status,                // 获取 API 服务状态
+            api_server_regenerate_key,        // 重新生成 API Key
+
+            // --- G3: 多用户 RBAC ---
+            auth_check_first_run,             // 首次启动检测（无用户）
+            auth_register,                    // 注册用户
+            auth_login,                       // 登录
+            auth_logout,                      // 登出
+            auth_current_user,                // 获取当前用户
+            auth_list_users,                  // 列出所有用户 (Admin)
+            auth_delete_user,                 // 删除用户 (Admin)
+
+            // --- G4: IM 通道框架 ---
+            im_channel_list,                  // 列出已注册通道
+            im_channel_connect,               // 注册并连接通道
+            im_channel_disconnect,            // 断开通道
+            im_channel_status,                // 获取通道状态
+            im_channel_send,                  // 发送消息
+
+            // --- G5: 定时任务可视化 ---
+            scheduler_task_create,            // 创建定时任务
+            scheduler_task_update,            // 更新任务
+            scheduler_task_delete,            // 删除任务
+            scheduler_task_list,              // 列出任务
+            // scheduler_task_toggle 和 scheduler_job_run_log_* 待 scheduler.rs 补充实现
+
+            // --- G8: 备份与恢复 ---
+            backup_export,                    // 导出备份
+            backup_restore,                   // 恢复备份
+            backup_list,                      // 列出备份
+            backup_delete,                    // 删除备份
+
+            // --- G10: ACP 双向集成 ---
+            acp_start_server,                 // 启动入站服务
+            acp_stop_server,                  // 停止入站服务
+            acp_server_status,                // 服务状态
+            acp_delegate_task,                // 出站委派任务
+            acp_list_runners,                 // 列出 Runner
+            acp_register_runner,              // 注册 Runner
+            acp_remove_runner,                // 移除 Runner
+
+            // --- G11: 专家市场 ---
+            expert_export,                    // 导出专家
+            expert_import,                    // 导入专家
+            expert_share_link,                // 生成分享链接
+            expert_validate,                  // 验证专家
+
+            // --- G12: MBTI 人格模板 ---
+            preset_personas_list,             // 列出人格模板
+            preset_personas_get,              // 获取单个人格模板
+
+            // --- G13: AgentTeams ---
+            agent_teams_list,                 // 列出团队
+            agent_teams_get,                  // 获取团队配置
+            agent_teams_save,                 // 保存团队配置
+            agent_teams_delete,               // 删除团队
+            agent_teams_execute,              // 执行团队任务
+            agent_teams_templates,            // 列出预设模板
+            agent_teams_create_from_template, // 从模板创建
+
+            // --- G14: 系统服务 ---
+            system_service_status,            // 查询服务状态
+            system_service_install,           // 安装服务
+            system_service_uninstall,         // 卸载服务
+            system_service_start,             // 启动服务
+            system_service_stop,              // 停止服务
+            system_service_restart,           // 重启服务
+            system_service_set_autostart,     // 设置开机自启
+
+            // --- G16: Connector 预置 ---
+            connector_presets_list,           // 列出预置连接器
+            connector_presets_connect,        // 连接预置连接器
+            connector_presets_call,           // 调用连接器功能
+            connector_presets_disconnect,     // 断开连接器
+
+            // --- G17: HITL 审批增强 ---
+            approval_rules_list,              // 列出审批规则
+            approval_rules_save,              // 保存审批规则
+            approval_rules_delete,            // 删除审批规则
+            approval_list_history,            // 审批历史
+            approval_process_timeouts,        // 处理超时审批
+
+            // --- G18: 自进化框架 ---
+            evolution_rules_list,             // 列出进化规则
+            evolution_rules_save,             // 保存进化规则
+            evolution_rules_toggle,           // 启用/禁用规则
+            evolution_skills_list,            // 列出已生成技能
+            evolution_skill_approve,          // 批准技能
+            evolution_skill_reject,           // 拒绝技能
+            evolution_analyze_conversation,   // 分析对话生成技能骨架
+
+            // --- G19: 推送调度增强 ---
+            // push_schedule_create 使用自定义 struct 参数，Tauri CommandArg 需额外配置
+            // 暂不注册，等待 specta::Type 与 Tauri 兼容性修复后启用
+            push_schedule_list,
+            push_schedule_toggle,
+            push_schedule_delete,
+            push_schedule_trigger,
+            push_list_channels,
+            push_test_all_channels
         ])
         // ========== 应用上下文生成 ==========
         .setup(|_app| {

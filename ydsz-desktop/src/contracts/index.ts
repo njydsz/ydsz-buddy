@@ -67,3 +67,5 @@ export * from "./office";
 export * from "./linear";
 export * from "./extensions";
 export * from "./browserRecording";
+export * from "./connectorPresets";
+export * from "./personas";

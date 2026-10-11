@@ -688,6 +688,7 @@ export type Messages = {
       appearance: { label: string; description: string };
       notifications: { label: string; description: string };
       behavior: { label: string; description: string };
+      security: { label: string; description: string };
       worktrees: { label: string; description: string };
       archived: { label: string; description: string };
       budget: { label: string; description: string };
@@ -2697,6 +2698,10 @@ const en: Messages = {
       behavior: {
         label: "Behavior",
         description: "Streaming, diff handling, and destructive confirmations.",
+      },
+      security: {
+        label: "安全",
+        description: "用户管理、审批规则与权限配置。",
       },
       worktrees: {
         label: "Worktrees",

@@ -12,6 +12,7 @@ export const BUILT_IN_COMPOSER_SLASH_COMMANDS = [
   "status",
   "subagents",
   "fast",
+  "cron",
 ] as const;
 
 export type ComposerSlashCommand = (typeof BUILT_IN_COMPOSER_SLASH_COMMANDS)[number];
@@ -183,6 +184,13 @@ const COMPOSER_SLASH_COMMAND_DEFINITIONS: Record<
     command: "fast",
     label: "/fast",
     description: "Turn fast mode on or off for this thread",
+    source: "app",
+    modes: ["code", "work"],
+  },
+  cron: {
+    command: "cron",
+    label: "/cron",
+    description: "管理定时任务，创建/查看/暂停/删除定时任务",
     source: "app",
     modes: ["code", "work"],
   },

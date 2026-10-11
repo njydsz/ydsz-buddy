@@ -115,6 +115,11 @@ pub struct SshConnection {
 }
 
 impl SshConnection {
+    /// 从已有连接创建（类型转换用）
+    pub fn new(conn: SshConnection) -> Self {
+        conn
+    }
+
     /// 创建新的 SSH 连接（执行连接测试）
     pub async fn connect(config: SshConfig) -> Result<Self, String> {
         let id = uuid::Uuid::new_v4().to_string();
@@ -287,6 +292,68 @@ impl SshConnection {
         } else {
             Err(format!("ls failed: {}", output.stderr))
         }
+    }
+
+    /// 删除远程文件
+    pub async fn delete_remote_file(&self, path: &str) -> Result<(), String> {
+        let output = self.execute_command(&format!("rm {path}")).await?;
+        if output.exit_code == 0 {
+            Ok(())
+        } else {
+            Err(format!("rm failed: {}", output.stderr))
+        }
+    }
+
+    /// 创建远程目录
+    pub async fn create_remote_dir(&self, path: &str, recursive: bool) -> Result<(), String> {
+        let flag = if recursive { "-p" } else { "" };
+        let output = self.execute_command(&format!("mkdir {flag} {path}")).await?;
+        if output.exit_code == 0 {
+            Ok(())
+        } else {
+            Err(format!("mkdir failed: {}", output.stderr))
+        }
+    }
+
+    /// 删除远程目录
+    pub async fn delete_remote_dir(&self, path: &str, recursive: bool) -> Result<(), String> {
+        let flag = if recursive { "-rf" } else { "-r" };
+        let output = self.execute_command(&format!("rm {flag} {path}")).await?;
+        if output.exit_code == 0 {
+            Ok(())
+        } else {
+            Err(format!("rm failed: {}", output.stderr))
+        }
+    }
+
+    /// 读取远程文件 (别名: read_file)
+    pub async fn read_file(&self, remote_path: &str) -> Result<String, String> {
+        self.read_remote_file(remote_path).await
+    }
+
+    /// 写入远程文件 (别名: write_file)
+    pub async fn write_file(&self, remote_path: &str, content: &str, _create_dirs: bool) -> Result<(), String> {
+        self.write_remote_file(remote_path, content).await
+    }
+
+    /// 删除远程文件 (别名: delete_file)
+    pub async fn delete_file(&self, path: &str) -> Result<(), String> {
+        self.delete_remote_file(path).await
+    }
+
+    /// 列出远程目录 (别名: list_directory)
+    pub async fn list_directory(&self, path: &str) -> Result<Vec<String>, String> {
+        self.list_remote_dir(path).await
+    }
+
+    /// 创建远程目录 (别名: create_directory)
+    pub async fn create_directory(&self, path: &str, recursive: bool) -> Result<(), String> {
+        self.create_remote_dir(path, recursive).await
+    }
+
+    /// 删除远程目录 (别名: delete_directory)
+    pub async fn delete_directory(&self, path: &str, recursive: bool) -> Result<(), String> {
+        self.delete_remote_dir(path, recursive).await
     }
 
     /// 断开连接

@@ -1,21 +1,76 @@
-﻿// auth 契约：类型来自 Rust 端 specta 自动生成；运行时 Schema 保留 effect Schema。
+// auth 契约：类型来自 Rust 端 specta 自动生成；运行时 Schema 保留 effect Schema。
 //
-// 真实源（Single Source of Truth）：ydsz-shared/src/contracts/auth.rs
-// 重新生成类型：
-//   pnpm --filter @ydsz-buddy/desktop contracts:gen
-//   → ydsz-desktop/src/contracts/_generated/ydsz_shared/contracts/auth.ts
+// 真实源（Single Source of Truth）：
+//   - ydsz-shared/src/contracts/auth.rs (server auth)
+//   - ydzs-desktop/src-tauri/src/auth/mod.rs (local RBAC)
 //
-// 命名约定：
-// - 编译期类型：从 generated re-export（如 `type ServerAuthDescriptor`）
-// - 运行时校验：本地 effect Schema 仅保留给后续业务做 IPC payload 校验/编解码使用，
-//   与同名类型隔离（命名为 *Schema）。
-// - 业务消费 `import type { ServerAuthPolicy }` 走类型；`import { ServerAuthPolicySchema }` 走运行时。
+// 本地多用户 RBAC (G3-P0) 新增类型在此手动定义（等待 specta 生成对齐）。
 
 import { Schema } from "effect";
+import { TrimmedNonEmptyString } from "./baseSchemas";
 
-import { AuthSessionId, TrimmedNonEmptyString } from "./baseSchemas";
+// ===== G3-P0: 本地多用户 RBAC 类型 =====
 
-// ===== 编译期类型（来自 Rust 单一来源）=====
+/** 用户角色 */
+export const UserRoleSchema = Schema.Literal("admin", "developer", "viewer");
+
+export type UserRole = Schema.Schema.Type<typeof UserRoleSchema>;
+
+/** 用户公开信息（IPC 安全 DTO，不含密码哈希） */
+export const UserInfoSchema = Schema.Struct({
+  id: TrimmedNonEmptyString,
+  username: TrimmedNonEmptyString,
+  role: Schema.Literal("admin", "developer", "viewer"),
+  createdAtMs: Schema.Number,
+  lastLoginMs: Schema.optional(Schema.Number),
+});
+
+export type UserInfo = Schema.Schema.Type<typeof UserInfoSchema>;
+
+/** 登录请求 */
+export const LoginRequestSchema = Schema.Struct({
+  username: TrimmedNonEmptyString,
+  password: TrimmedNonEmptyString,
+});
+
+export type LoginRequest = Schema.Schema.Type<typeof LoginRequestSchema>;
+
+/** 认证结果（登录返回） */
+export const AuthResultSchema = Schema.Struct({
+  token: TrimmedNonEmptyString,
+  user: UserInfoSchema,
+  expiresAtMs: Schema.Number,
+});
+
+export type AuthResult = Schema.Schema.Type<typeof AuthResultSchema>;
+
+/** 注册请求 */
+export const RegisterRequestSchema = Schema.Struct({
+  username: TrimmedNonEmptyString,
+  password: TrimmedNonEmptyString,
+  role: Schema.Literal("admin", "developer", "viewer"),
+  adminToken: Schema.optional(TrimmedNonEmptyString),
+});
+
+export type RegisterRequest = Schema.Schema.Type<typeof RegisterRequestSchema>;
+
+/** 当前用户响应 */
+export const CurrentUserResponseSchema = Schema.Struct({
+  user: Schema.optional(UserInfoSchema),
+  requiresLogin: Schema.Boolean,
+});
+
+export type CurrentUserResponse = Schema.Schema.Type<typeof CurrentUserResponseSchema>;
+
+/** 首次运行检查响应 */
+export const FirstRunResponseSchema = Schema.Struct({
+  isFirstRun: Schema.Boolean,
+  userCount: Schema.Number,
+});
+
+export type FirstRunResponse = Schema.Schema.Type<typeof FirstRunResponseSchema>;
+
+// ===== 编译期类型（来自 Rust 单一来源 — server auth）=====
 
 export type {
   ServerAuthPolicy,
@@ -40,8 +95,6 @@ export type {
 } from "./_generated/ydsz_shared/contracts/auth";
 
 // ===== 运行时 Schema（effect Schema，保留用于 IPC payload 校验 / 业务编码）=====
-// 加 Schema 后缀以避免与上方 re-exported 类型同名冲突（TS 编译期 namespace 隔离但
-// 配合 isolatedModules 时存在不必要歧义）。
 
 export const ServerAuthPolicySchema = Schema.Literal(
   "desktop-managed-local",
@@ -67,100 +120,4 @@ export const ServerAuthDescriptorSchema = Schema.Struct({
   bootstrapMethods: Schema.Array(ServerAuthBootstrapMethodSchema),
   sessionMethods: Schema.Array(ServerAuthSessionMethodSchema),
   sessionCookieName: TrimmedNonEmptyString,
-});
-
-export const AuthBootstrapInputSchema = Schema.Struct({
-  credential: TrimmedNonEmptyString,
-});
-
-export const AuthBootstrapResultSchema = Schema.Struct({
-  authenticated: Schema.Literal(true),
-  role: AuthSessionRoleSchema,
-  sessionMethod: ServerAuthSessionMethodSchema,
-  expiresAt: Schema.DateTimeUtc,
-});
-
-export const AuthBearerBootstrapResultSchema = Schema.Struct({
-  authenticated: Schema.Literal(true),
-  role: AuthSessionRoleSchema,
-  sessionMethod: Schema.Literal("bearer-session-token"),
-  expiresAt: Schema.DateTimeUtc,
-  sessionToken: TrimmedNonEmptyString,
-});
-
-export const AuthWebSocketTokenResultSchema = Schema.Struct({
-  token: TrimmedNonEmptyString,
-  expiresAt: Schema.DateTimeUtc,
-});
-
-export const AuthPairingCredentialResultSchema = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  credential: TrimmedNonEmptyString,
-  label: Schema.optional(TrimmedNonEmptyString),
-  expiresAt: Schema.DateTimeUtc,
-});
-
-export const AuthPairingLinkSchema = Schema.Struct({
-  id: TrimmedNonEmptyString,
-  credential: TrimmedNonEmptyString,
-  role: AuthSessionRoleSchema,
-  subject: TrimmedNonEmptyString,
-  label: Schema.optional(TrimmedNonEmptyString),
-  createdAt: Schema.DateTimeUtc,
-  expiresAt: Schema.DateTimeUtc,
-});
-
-export const AuthClientMetadataDeviceTypeSchema = Schema.Literal(
-  "desktop",
-  "mobile",
-  "tablet",
-  "bot",
-  "unknown",
-);
-
-export const AuthClientMetadataSchema = Schema.Struct({
-  label: Schema.optional(TrimmedNonEmptyString),
-  ipAddress: Schema.optional(TrimmedNonEmptyString),
-  userAgent: Schema.optional(TrimmedNonEmptyString),
-  deviceType: AuthClientMetadataDeviceTypeSchema,
-  os: Schema.optional(TrimmedNonEmptyString),
-  browser: Schema.optional(TrimmedNonEmptyString),
-});
-
-export const AuthClientSessionSchema = Schema.Struct({
-  sessionId: AuthSessionId,
-  subject: TrimmedNonEmptyString,
-  role: AuthSessionRoleSchema,
-  method: ServerAuthSessionMethodSchema,
-  client: AuthClientMetadataSchema,
-  issuedAt: Schema.DateTimeUtc,
-  expiresAt: Schema.DateTimeUtc,
-  lastConnectedAt: Schema.optional(Schema.DateTimeUtc),
-  connected: Schema.Boolean,
-  current: Schema.Boolean,
-});
-
-export const AuthAccessSnapshotSchema = Schema.Struct({
-  pairingLinks: Schema.Array(AuthPairingLinkSchema),
-  clientSessions: Schema.Array(AuthClientSessionSchema),
-});
-
-export const AuthRevokePairingLinkInputSchema = Schema.Struct({
-  id: TrimmedNonEmptyString,
-});
-
-export const AuthRevokeClientSessionInputSchema = Schema.Struct({
-  sessionId: TrimmedNonEmptyString,
-});
-
-export const AuthCreatePairingCredentialInputSchema = Schema.Struct({
-  label: Schema.optional(TrimmedNonEmptyString),
-});
-
-export const AuthSessionStateSchema = Schema.Struct({
-  authenticated: Schema.Boolean,
-  auth: ServerAuthDescriptorSchema,
-  role: Schema.optional(AuthSessionRoleSchema),
-  sessionMethod: Schema.optional(ServerAuthSessionMethodSchema),
-  expiresAt: Schema.optional(Schema.DateTimeUtc),
 });

@@ -42,6 +42,10 @@ import { CostBudgetPanel } from "../components/CostBudgetPanel";
 import { TeamRulesView } from "../components/TeamRulesView";
 import { OfficeTemplateLibrary } from "../components/OfficeTemplateLibrary";
 import { PushChannelPanel } from "../components/PushChannelPanel";
+import { PushSchedulePanel } from "../components/PushSchedulePanel";
+import { ApiServerPanel } from "../components/ApiServerPanel";
+import { SystemServicePanel } from "../components/SystemServicePanel";
+import { KnowledgeView } from "../components/KnowledgeView";
 import { useDesktopTopBarTrafficLightGutterClassName } from "../hooks/useDesktopTopBarGutter";
 import {
   ClaudeAI,
@@ -145,6 +149,7 @@ import { SshConnectionConfig } from "../components/SshConnectionConfig";
 import { ImageGenerationPanel } from "../components/ImageGenerationPanel";
 import { IMIntegrationSettings } from "../components/IMIntegrationSettings";
 import { MobileRemoteSettings } from "../components/MobileRemoteSettings";
+import { BackupPanel } from "../components/BackupPanel";
 import { LegalDocumentsSettingsCard } from "../components/TermsAcceptanceGate";
 import { useWorkspaceStore } from "../workspaceStore";
 
@@ -3394,6 +3399,34 @@ export function Component() {
     </div>
   );
 
+  // G2-P0: HTTP API 网关配置面板
+  const renderApiServerPanel = () => (
+    <div className="space-y-6">
+      <SettingsSection
+        title={messages.settings.apiServer.heading}
+        description={messages.settings.apiServer.description}
+      >
+        <div className="rounded-lg border border-border/60 bg-background p-3">
+          <ApiServerPanel />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
+  // G6-P1: 知识库 RAG 管理面板
+  const renderKnowledgePanel = () => (
+    <div className="space-y-6">
+      <SettingsSection
+        title={messages.settings.knowledge.heading}
+        description={messages.settings.knowledge.description}
+      >
+        <div className="rounded-lg border border-border/60 bg-background p-3">
+          <KnowledgeView />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
   // P1-2: 移动推送通道配置面板（JPush / Umeng 凭证 + 连接测试 + dry_run）
   const renderPushPanel = () => (
     <div className="space-y-6">
@@ -3405,6 +3438,14 @@ export function Component() {
           <PushChannelPanel />
         </div>
       </SettingsSection>
+      <SettingsSection
+        title="定时推送调度"
+        description="创建和管理定时推送规则（cron 表达式），支持极光 / 友盟 / 本地通知通道"
+      >
+        <div className="rounded-lg border border-border/60 bg-background p-3">
+          <PushSchedulePanel />
+        </div>
+      </SettingsSection>
     </div>
   );
 
@@ -3413,6 +3454,20 @@ export function Component() {
       <SettingsSection title="AI 文生图" description="配置 AI 图片生成后端">
         <div className="rounded-lg border border-border/60 bg-background">
           <ImageGenerationPanel />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
+  // G14-P2: 系统服务注册面板
+  const renderServicePanel = () => (
+    <div className="space-y-6">
+      <SettingsSection
+        title="Background Service"
+        description="Register ydsz-buddy as a system service for auto-start and background running"
+      >
+        <div className="rounded-lg border border-border/60 bg-background">
+          <SystemServicePanel />
         </div>
       </SettingsSection>
     </div>
@@ -3433,6 +3488,19 @@ export function Component() {
       <SettingsSection title="移动端远程协作" description="推送通知、远程审批与设备配对">
         <div className="rounded-lg border border-border/60 bg-background">
           <MobileRemoteSettings />
+        </div>
+      </SettingsSection>
+    </div>
+  );
+
+  const renderDataBackupPanel = () => (
+    <div className="space-y-6">
+      <SettingsSection
+        title={messages.settings.dataBackup.heading}
+        description={messages.settings.dataBackup.description}
+      >
+        <div className="rounded-lg border border-border/60 bg-background p-3">
+          <BackupPanel />
         </div>
       </SettingsSection>
     </div>
@@ -3478,10 +3546,18 @@ export function Component() {
         return renderIMPanel();
       case "mobile":
         return renderMobilePanel();
+      case "dataBackup":
+        return renderDataBackupPanel();
       case "advanced":
         return renderAdvancedPanel();
       case "push":
         return renderPushPanel();
+      case "service":
+        return renderServicePanel();
+      case "apiAccess":
+        return renderApiServerPanel();
+      case "knowledge":
+        return renderKnowledgePanel();
       default:
         return null;
     }

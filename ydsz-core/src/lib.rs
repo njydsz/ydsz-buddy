@@ -75,6 +75,9 @@ pub mod tool_permissions;
 /// 权限审计、参数校验、耗时统计、活动日志和错误脱敏等拦截能力。
 pub mod tool_pipeline;
 
+/// 持久化 Hook 抽象（EventSink / ThreadSink）。
+pub mod hooks;
+
 /// 声明式 Agent Bundle（智能体运行契约包）。
 ///
 /// 将 Agent 的完整运行时行为声明式组合：拦截器链顺序、错误恢复策略、
@@ -98,6 +101,11 @@ pub mod effect_registry;
 /// 借鉴 DeepSeek Harness 的 Seam 概念，将 Agent 主循环抽象为 AgentLoop trait，
 /// 使不同场景可替换不同的循环策略（Simple、Standard、Review、Quest）。
 pub mod agent_loop;
+
+/// MBTI 人格模板（G12-P2）。
+///
+/// 为 Agent 赋予 16 种鲜明的 MBTI 性格，影响对话风格与系统提示词。
+pub mod persona;
 
 /// Memory 记忆系统——跨会话持久化记忆。
 ///

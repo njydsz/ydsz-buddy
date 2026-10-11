@@ -123,6 +123,8 @@ import {
   IconTextWrap,
   IconTool,
   IconTrash,
+  IconDatabase,
+  IconKey,
   IconWorld,
   IconX,
   type TablerIcon,
@@ -164,6 +166,8 @@ export const BookIcon = adaptIcon(IconBook);
 export const ClockIcon = adaptIcon(IconClock);
 export const Code2Icon = adaptIcon(IconCode);
 export const CodeIcon = Code2Icon;
+export const KeyIcon = adaptIcon(IconKey);
+export const DatabaseIcon = adaptIcon(IconDatabase);
 export const ArrowRightIcon = adaptIcon(IconArrowRight);
 export const ArrowDownIcon = adaptIcon(IconArrowDown);
 export const ArrowUpIcon = adaptIcon(IconArrowUp);

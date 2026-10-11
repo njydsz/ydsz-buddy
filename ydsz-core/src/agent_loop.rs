@@ -37,6 +37,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::error::CoreResult;
+use crate::hooks::{EventSink, ThreadSink};
 use crate::tool_pipeline::{
     CallerIdentity, PermissionAuditInterceptor, PermissionLevel, ToolContext, ToolExecutor,
     ToolInput, ToolOutput, ToolPipeline,
@@ -326,12 +327,27 @@ pub trait AgentLoop: Send + Sync {
     }
 
     /// Hook：Turn 开始
-    async fn on_turn_start(&self, _ctx: &LoopContext) -> CoreResult<()> {
+    async fn on_turn_start(&self, ctx: &LoopContext) -> CoreResult<()> {
+        if let Some(sink) = self.event_sink() {
+            let payload = serde_json::json!({
+                "thread_id": ctx.thread_id,
+                "turn_id": ctx.turn_id,
+            });
+            let _ = sink.append_event("thread.turn_start", &ctx.thread_id, &payload).await;
+        }
         Ok(())
     }
 
     /// Hook：Turn 结束
-    async fn on_turn_end(&self, _ctx: &LoopContext, _result: &LoopResult) -> CoreResult<()> {
+    async fn on_turn_end(&self, ctx: &LoopContext, result: &LoopResult) -> CoreResult<()> {
+        if let Some(sink) = self.event_sink() {
+            let payload = serde_json::json!({
+                "thread_id": ctx.thread_id,
+                "turn_id": ctx.turn_id,
+                "result": format!("{:?}", result),
+            });
+            let _ = sink.append_event("thread.turn_end", &ctx.thread_id, &payload).await;
+        }
         Ok(())
     }
 
@@ -348,10 +364,18 @@ pub trait AgentLoop: Send + Sync {
     /// Hook：工具调用开始
     async fn on_tool_call_start(
         &self,
-        _ctx: &LoopContext,
-        _tool_name: &str,
+        ctx: &LoopContext,
+        tool_name: &str,
         _input: &serde_json::Value,
     ) -> CoreResult<()> {
+        if let Some(sink) = self.event_sink() {
+            let payload = serde_json::json!({
+                "tool_name": tool_name,
+                "thread_id": ctx.thread_id,
+                "turn_id": ctx.turn_id,
+            });
+            let _ = sink.append_event("thread.tool_call_start", &ctx.thread_id, &payload).await;
+        }
         Ok(())
     }
 
@@ -381,6 +405,18 @@ pub trait AgentLoop: Send + Sync {
         _error: &str,
     ) -> CoreResult<()> {
         Ok(())
+    }
+
+    // ── 持久化 Sink（可选，由上层注入）──────────────────────────────
+
+    /// 获取事件写入 sink（默认 None = 不写入）
+    fn event_sink(&self) -> Option<Arc<dyn EventSink>> {
+        None
+    }
+
+    /// 获取线程消息写入 sink（默认 None = 不写入）
+    fn thread_sink(&self) -> Option<Arc<dyn ThreadSink>> {
+        None
     }
 }
 
@@ -415,6 +451,10 @@ where
     executor: Arc<dyn ToolExecutor>,
     /// 权限级别
     permission_level: PermissionLevel,
+    /// 事件写入 sink（可选）
+    event_sink: Option<Arc<dyn EventSink>>,
+    /// 线程消息写入 sink（可选）
+    thread_sink: Option<Arc<dyn ThreadSink>>,
 }
 
 impl<F> StandardAgentLoop<F>
@@ -434,6 +474,8 @@ where
             pipeline,
             executor: Arc::new(DefaultToolExecutor::new()),
             permission_level: PermissionLevel::Standard,
+            event_sink: None,
+            thread_sink: None,
         }
     }
 
@@ -459,6 +501,70 @@ where
     pub fn with_max_iterations(mut self, max: u32) -> Self {
         self.max_iterations = max;
         self
+    }
+
+    /// 设置事件写入 sink
+    pub fn with_event_sink(mut self, sink: Arc<dyn EventSink>) -> Self {
+        self.event_sink = Some(sink);
+        self
+    }
+
+    /// 设置线程消息写入 sink
+    pub fn with_thread_sink(mut self, sink: Arc<dyn ThreadSink>) -> Self {
+        self.thread_sink = Some(sink);
+        self
+    }
+}
+
+// ── EventSink / ThreadSink 转发实现 ────────────────────────────────────────
+
+#[async_trait]
+impl<F> EventSink for StandardAgentLoop<F>
+where
+    F: Fn(&LoopContext, &[ProviderResponseFragment]) -> CoreResult<ProviderResponse>
+        + Send
+        + Sync,
+{
+    async fn append_event(
+        &self,
+        event_type: &str,
+        stream_id: &str,
+        payload: &serde_json::Value,
+    ) -> CoreResult<()> {
+        if let Some(sink) = &self.event_sink {
+            sink.append_event(event_type, stream_id, payload).await?;
+        }
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl<F> ThreadSink for StandardAgentLoop<F>
+where
+    F: Fn(&LoopContext, &[ProviderResponseFragment]) -> CoreResult<ProviderResponse>
+        + Send
+        + Sync,
+{
+    async fn save_message(
+        &self,
+        thread_id: &str,
+        turn_id: &str,
+        role: &str,
+        content: &str,
+        tool_name: Option<&str>,
+        sequence: u32,
+    ) -> CoreResult<()> {
+        if let Some(sink) = &self.thread_sink {
+            sink.save_message(thread_id, turn_id, role, content, tool_name, sequence).await?;
+        }
+        Ok(())
+    }
+
+    async fn save_thread(&self, thread_id: &str, title: Option<&str>) -> CoreResult<()> {
+        if let Some(sink) = &self.thread_sink {
+            sink.save_thread(thread_id, title).await?;
+        }
+        Ok(())
     }
 }
 
