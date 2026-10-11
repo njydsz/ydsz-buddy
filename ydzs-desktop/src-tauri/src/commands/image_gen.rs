@@ -401,7 +401,7 @@ async fn generate_sd(
     Ok(paths)
 }
 
-/// 通义万相生成
+/// 通义万相生成（异步 + 轮询）
 async fn generate_tongyi(
     prompt: &str,
     request: &ImageGenRequest,
@@ -421,10 +421,13 @@ async fn generate_tongyi(
                 .to_string()
         });
 
+    let query_endpoint = endpoint.replacen("/services/", "/tasks/", 1);
     let (width, height) = request.size.dimensions();
 
     let client = Client::new();
-    let response = client
+
+    // 1. 提交异步任务
+    let submit_response = client
         .post(&endpoint)
         .header("Authorization", format!("Bearer {api_key}"))
         .header("Content-Type", "application/json")
@@ -439,39 +442,257 @@ async fn generate_tongyi(
         }))
         .send()
         .await
-        .map_err(|e| format!("通义万相 API request failed: {e}"))?;
+        .map_err(|e| format!("通义万相 API 提交失败: {e}"))?;
 
-    if !response.status().is_success() {
-        let err_text = response.text().await.unwrap_or_default();
-        return Err(format!("通义万相 API error: {err_text}"));
+    if !submit_response.status().is_success() {
+        let err_text = submit_response.text().await.unwrap_or_default();
+        return Err(format!("通义万相 API 错误: {err_text}"));
     }
 
-    // 通义万相是异步的，返回 task_id
-    let json: serde_json::Value = response
+    let submit_json: serde_json::Value = submit_response
         .json()
         .await
-        .map_err(|e| format!("Failed to parse 通义万相 response: {e}"))?;
+        .map_err(|e| format!("解析通义万相提交响应失败: {e}"))?;
 
-    info!(
-        "通义万相 task submitted: {:?}",
-        json.get("output").and_then(|o| o.get("task_id"))
-    );
+    let task_id = submit_json
+        .get("output")
+        .and_then(|o| o.get("task_id"))
+        .and_then(|t| t.as_str())
+        .ok_or("通义万相 未返回 task_id")?
+        .to_string();
 
-    // 简化处理：返回空列表，实际应轮询任务状态
-    let _ = output_dir;
-    Ok(vec![])
+    info!(%task_id, "通义万相任务已提交，开始轮询");
+
+    // 2. 轮询任务状态（最多 60 秒，每 3 秒一次）
+    let poll_url = format!("{}/{task_id}", query_endpoint);
+    let max_polls = 20;
+    let mut paths = Vec::new();
+
+    for _ in 0..max_polls {
+        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
+        let poll_response = client
+            .get(&poll_url)
+            .header("Authorization", format!("Bearer {api_key}"))
+            .send()
+            .await
+            .map_err(|e| format!("轮询通义万相任务失败: {e}"))?;
+
+        if !poll_response.status().is_success() {
+            continue;
+        }
+
+        let poll_json: serde_json::Value = match poll_response.json().await {
+            Ok(j) => j,
+            Err(_) => continue,
+        };
+
+        let status = poll_json
+            .get("output")
+            .and_then(|o| o.get("task_status"))
+            .and_then(|s| s.as_str());
+
+        match status {
+            Some("SUCCEEDED") => {
+                if let Some(results) = poll_json
+                    .get("output")
+                    .and_then(|o| o.get("results"))
+                    .and_then(|r| r.as_array())
+                {
+                    for (i, result) in results.iter().enumerate() {
+                        if let Some(url) = result.get("url").and_then(|u| u.as_str()) {
+                            match download_image(url, output_dir, "tongyi", i).await {
+                                Ok(path) => paths.push(path),
+                                Err(e) => warn!(%e, "下载通义万相图片失败"),
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            Some("FAILED") | Some("CANCELED") => {
+                let msg = poll_json
+                    .get("output")
+                    .and_then(|o| o.get("message"))
+                    .and_then(|m| m.as_str())
+                    .unwrap_or("未知错误");
+                return Err(format!("通义万相任务失败: {msg}"));
+            }
+            _ => continue,
+        }
+    }
+
+    if paths.is_empty() {
+        return Err("通义万相任务超时或未生成图片".to_string());
+    }
+
+    Ok(paths)
 }
 
-/// 混元生图生成
+/// 混元生图生成（腾讯混元生图 API）
+///
+/// 文档: https://cloud.tencent.com/document/product/1759
+/// 使用腾讯云混元生图（HY-Image）API，仅需要 Secretariat 鉴权
+/// 简化版：使用 SecretId/SecretKey 计算 HMAC-SHA1 签名后调用 API
 async fn generate_hunyuan(
     prompt: &str,
     request: &ImageGenRequest,
     output_dir: &str,
 ) -> Result<Vec<String>, String> {
-    let _ = (prompt, request, output_dir);
-    // 简化实现：实际应使用腾讯云 SDK
-    info!("混元生图 request: prompt={}", prompt);
-    Ok(vec![])
+    let secret_id = request
+        .api_key
+        .clone()
+        .or_else(|| std::env::var("TENCENT_SECRET_ID").ok())
+        .ok_or("混元生图 requires TENCENT_SECRET_ID (格式: SecretId:SecretKey)")?;
+
+    let secret_key = request
+        .api_endpoint
+        .clone()
+        .or_else(|| std::env::var("TENCENT_SECRET_KEY").ok())
+        .or_else(|| {
+            // 尝试从 api_key 中解析 SecretId:SecretKey 格式
+            if let Some(pos) = secret_id.find(':') {
+                Some(secret_id[pos + 1..].to_string())
+            } else {
+                None
+            }
+        })
+        .ok_or("混元生图 requires TENCENT_SECRET_KEY")?;
+
+    let actual_secret_id = if secret_id.contains(':') {
+        secret_id.split(':').next().unwrap().to_string()
+    } else {
+        secret_id.clone()
+    };
+
+    let endpoint = "https://hy-image.tencentcloudapi.com";
+    let region = "ap-guangzhou";
+    let action = "GenerateImage";
+    let version = "2024-11-11";
+    let timestamp = Utc::now().timestamp();
+    let date = Utc::now().format("%Y-%m-%d").to_string();
+
+    let (width, height) = request.size.dimensions();
+    let payload = serde_json::json!({
+        "Prompt": prompt,
+        "Width": width,
+        "Height": height,
+        "Seed": request.num_images.min(1)
+    });
+
+    let payload_str = payload.to_string();
+    // 1. 构造 StringToSign
+    let hashed_request_payload = {
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(&payload_str);
+        format!("{:x}", hasher.finalize())
+    };
+
+    let canonical_request = format!(
+        "POST\n/\n\ncontent-type:application/json\nhost:hy-image.tencentcloudapi.com\n\ncontent-type;host\n{hashed_request_payload}"
+    );
+
+    let string_to_sign = {
+        use sha2::{Sha256, Digest};
+        let hashed_canonical = {
+            let mut hasher = Sha256::new();
+            hasher.update(&canonical_request);
+            format!("{:x}", hasher.finalize())
+        };
+        format!("TC3-HMAC-SHA256\n{timestamp}\n{date}/hy_image/tc3_request\n{hashed_canonical}")
+    };
+
+    // 2. 计算签名
+    let signature = tc3_hmac_sign(&secret_key, &date, &region, &string_to_sign);
+
+    let authorization = format!(
+        "TC3-HMAC-SHA256 Credential={actual_secret_id}/{date}/hy_image/tc3_request, SignedHeaders=content-type;host, Signature={signature}"
+    );
+
+    let client = Client::new();
+    let response = client
+        .post(endpoint)
+        .header("Authorization", authorization)
+        .header("Content-Type", "application/json")
+        .header("Host", "hy-image.tencentcloudapi.com")
+        .header("X-TC-Action", action)
+        .header("X-TC-Timestamp", timestamp.to_string())
+        .header("X-TC-Version", version)
+        .header("X-TC-Region", region)
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| format!("混元生图 API 请求失败: {e}"))?;
+
+    if !response.status().is_success() {
+        let err_text = response.text().await.unwrap_or_default();
+        return Err(format!("混元生图 API 错误: {err_text}"));
+    }
+
+    let json: serde_json::Value = response
+        .json()
+        .await
+        .map_err(|e| format!("解析混元生图响应失败: {e}"))?;
+
+    let mut paths = Vec::new();
+    // 混元生图响应结构: { Result: { ImageUrl: "..." } }
+    if let Some(image_url) = json
+        .get("Response")
+        .and_then(|r| r.get("ImageUrl"))
+        .and_then(|u| u.as_str())
+    {
+        match download_image(image_url, output_dir, "hunyuan", 0).await {
+            Ok(path) => paths.push(path),
+            Err(e) => warn!(%e, "下载混元生图图片失败"),
+        }
+    }
+
+    if paths.is_empty() {
+        return Err("混元生图未返回有效图片 URL".to_string());
+    }
+
+    Ok(paths)
+}
+
+/// TC3-HMAC-SHA256 签名计算
+fn tc3_hmac_sign(secret_key: &str, date: &str, region: &str, string_to_sign: &str) -> String {
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
+
+    type HmacSha256 = Hmac<Sha256>;
+
+    // SecretDate
+    let mut mac = HmacSha256::new_from_slice(b"TC3")
+        .expect("HMAC can take key of any size");
+    mac.update(secret_key.as_bytes());
+    let secret_date = mac.finalize().into_bytes();
+
+    // SecretService
+    let mut mac = HmacSha256::new_from_slice(&secret_date)
+        .expect("HMAC can take key of any size");
+    mac.update(date.as_bytes());
+    let secret_service = mac.finalize().into_bytes();
+
+    // SecretRegion
+    let mut mac = HmacSha256::new_from_slice(&secret_service)
+        .expect("HMAC can take key of any size");
+    mac.update(region.as_bytes());
+    let secret_region = mac.finalize().into_bytes();
+
+    // SecretSigning
+    let mut mac = HmacSha256::new_from_slice(&secret_region)
+        .expect("HMAC can take key of any size");
+    mac.update(b"tc3_request");
+    let secret_signing = mac.finalize().into_bytes();
+
+    // Sign
+    let mut mac = HmacSha256::new_from_slice(&secret_signing)
+        .expect("HMAC can take key of any size");
+    mac.update(string_to_sign.as_bytes());
+    let signature = mac.finalize().into_bytes();
+
+    format!("{:x}", signature)
 }
 
 /// 下载图片到本地

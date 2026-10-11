@@ -39,7 +39,8 @@ import {
   ZapIcon,
 } from "~/lib/icons";
 import { Button } from "../ui/button";
-import { buildExpandedImagePreview, ExpandedImagePreview } from "./ExpandedImagePreview";
+import { ImagePartRenderer } from "./ImagePartRenderer";
+import { type ExpandedImagePreview } from "./ExpandedImagePreview";
 import { ProposedPlanCard } from "./ProposedPlanCard";
 import { DiffStatLabel } from "./DiffStatLabel";
 import { FileEntryIcon } from "./FileEntryIcon";
@@ -579,16 +580,18 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                           showUserText && "mb-1",
                         )}
                       >
-                        {userImages.map((image) => (
-                          <UserImageAttachmentThumbnail
-                            key={image.id}
-                            image={image}
-                            userImages={userImages}
-                            onImageExpand={onImageExpand}
-                            onTimelineImageLoad={onTimelineImageLoad}
-                            resolvedTheme={resolvedTheme}
-                          />
-                        ))}
+                        {userImages.flatMap((image) =>
+                          image.previewUrl
+                            ? [
+                                <ImagePartRenderer
+                                  key={image.id}
+                                  src={image.previewUrl}
+                                  alt={image.name}
+                                  name={image.name}
+                                />,
+                              ]
+                            : [],
+                        )}
                       </div>
                     )}
                     {isEditingThisMessage ? (
@@ -1313,49 +1316,6 @@ const UserMessageInlineSkillChip = memo(function UserMessageInlineSkillChip(prop
         {formatComposerSkillChipLabel(props.skillName)}
       </span>
     </span>
-  );
-});
-
-const UserImageAttachmentThumbnail = memo(function UserImageAttachmentThumbnail(props: {
-  image: Extract<NonNullable<TimelineMessage["attachments"]>[number], { type: "image" }>;
-  userImages: Array<
-    Extract<NonNullable<TimelineMessage["attachments"]>[number], { type: "image" }>
-  >;
-  onImageExpand: (preview: ExpandedImagePreview) => void;
-  onTimelineImageLoad: () => void;
-  resolvedTheme: "light" | "dark";
-}) {
-  return (
-    <button
-      type="button"
-      className="flex size-15 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-background/82 text-left shadow-[0_1px_0_rgba(255,255,255,0.2)_inset] transition-colors hover:bg-background/94"
-      aria-label={`Preview ${props.image.name}`}
-      title={props.image.name}
-      onClick={() => {
-        const preview = buildExpandedImagePreview(props.userImages, props.image.id);
-        if (!preview) return;
-        props.onImageExpand(preview);
-      }}
-    >
-      {props.image.previewUrl ? (
-        <img
-          src={props.image.previewUrl}
-          alt={props.image.name}
-          className="size-full object-cover"
-          onLoad={props.onTimelineImageLoad}
-          onError={props.onTimelineImageLoad}
-        />
-      ) : (
-        <div className="flex size-full items-center justify-center">
-          <FileEntryIcon
-            pathValue={props.image.name}
-            kind="file"
-            theme={props.resolvedTheme}
-            className="size-4 opacity-70"
-          />
-        </div>
-      )}
-    </button>
   );
 });
 

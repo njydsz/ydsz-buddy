@@ -366,6 +366,55 @@ export function normalizeProviderInteractionModeValue(
   if (lower === "default") return "agent";
   return DEFAULT_PROVIDER_INTERACTION_MODE;
 }
+// ydsz-buddy 0.4.0+: 4 态执行权限模式（与 InteractionMode 正交）
+// 用于快速切换 Agent 的执行自主度
+const EXECUTION_PERMISSION_LEVEL_VALUES = ["plan", "build", "edit", "yolo"] as const;
+export const ExecutionPermissionLevel = Schema.Literal(...EXECUTION_PERMISSION_LEVEL_VALUES);
+export type ExecutionPermissionLevel = (typeof EXECUTION_PERMISSION_LEVEL_VALUES)[number];
+export const DEFAULT_EXECUTION_PERMISSION_LEVEL: ExecutionPermissionLevel = "edit";
+
+/**
+ * 将外部输入的执行权限字符串归一化为枚举值，未知值兜底为 "edit"。
+ */
+export function normalizeExecutionPermissionLevelValue(
+  value: unknown,
+): ExecutionPermissionLevel {
+  if (typeof value !== "string") return DEFAULT_EXECUTION_PERMISSION_LEVEL;
+  const lower = value.toLowerCase();
+  if (
+    lower === "plan" ||
+    lower === "build" ||
+    lower === "edit" ||
+    lower === "yolo"
+  ) {
+    return lower as ExecutionPermissionLevel;
+  }
+  return DEFAULT_EXECUTION_PERMISSION_LEVEL;
+}
+
+/**
+ * 执行权限级别 -> 后端 SandboxLevel 映射
+ *
+ * - plan  -> read-only（只读，不能写入任何文件或执行命令）
+ * - build -> read-only + 构建白名单（tsc/cargo/mvn 等）
+ * - edit  -> workspace-write（Workspace 级别沙箱，危险操作需审批）
+ * - yolo  -> danger-full-access（完全自主，自动批准）
+ */
+export function executionPermissionLevelToSandboxMode(
+  level: ExecutionPermissionLevel,
+): ProviderSandboxMode {
+  switch (level) {
+    case "plan":
+      return "read-only";
+    case "build":
+      return "read-only";
+    case "edit":
+      return "workspace-write";
+    case "yolo":
+      return "danger-full-access";
+  }
+}
+
 const SidechatSourceThreadId = Schema.optional(Schema.NullOr(ThreadId)).pipe(
   Schema.withDecodingDefault(() => null),
 );

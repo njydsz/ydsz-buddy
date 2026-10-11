@@ -69,3 +69,4 @@ export * from "./extensions";
 export * from "./browserRecording";
 export * from "./connectorPresets";
 export * from "./personas";
+export * from "./hooks";

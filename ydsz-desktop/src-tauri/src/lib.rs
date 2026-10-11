@@ -46,6 +46,9 @@
 // 所有子模块均通过 `pub mod` 暴露，供 Tauri invoke_handler 引用
 mod commands;
 
+// OpenTelemetry 分布式追踪初始化
+mod telemetry;
+
 // 端到端 IPC 绑定生成器：被 tests/commands_gen.rs 调用，
 // 把 #[tauri::command] #[specta::specta] 标注的命令导出为 commands.ts。
 pub mod commands_gen;
@@ -327,10 +330,8 @@ async fn save_user_profile(
 ///
 /// 由 `main.rs` 中的 `main()` 函数调用，不应在其他位置重复调用。
 pub fn run() {
-    // 初始化日志系统
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .init();
+    // 初始化日志系统 + OpenTelemetry 分布式追踪
+    telemetry::init_telemetry();
 
     // 桌面端性能/调试:YDSZ_BUDDY_DEVTOOLS=1 时为 WebView2 启用
     // --remote-debugging-port=9222,通过外部 Chrome DevTools (chrome://inspect)
@@ -686,6 +687,14 @@ pub fn run() {
             event_store_query,               // 查询审计事件
             event_store_count,               // 事件总数
 
+            // Token 追踪 + AI 占比分析（P0-3 增强：强制 token 审计 + user/mixed 分类）
+            token_usage_record,              // 记录 Provider Token 消耗
+            token_usage_get_stats,           // Token 使用统计
+            ai_ratio_record_turn,            // 记录 Turn AI 占比快照
+            ai_ratio_get_stats,              // AI 占比统计
+            ai_ratio_list_snapshots,         // AI 占比快照列表
+            ai_ratio_classify_turn,          // 自动分类 Turn 贡献者类型
+
             // Repo Wiki 知识引擎命令
             repo_wiki_generate,              // 生成项目 Wiki
             repo_wiki_generate_incremental,  // 增量生成 Wiki
@@ -705,15 +714,26 @@ pub fn run() {
             repo_wiki_outline,               // 模块文档大纲 (TOC)
             repo_wiki_dependencies,          // 模块依赖图
 
-            // HITL 审批（P1-5: Human-in-the-Loop）
+            // HITL 审批（P1-5: Human-in-the-Loop + 规则引擎 + 委托）
             approval_list_pending,           // 列出待审批请求
+            approval_get,                    // 获取单个审批详情
             approval_respond,                // 审批响应（批准/拒绝）
-            approval_create,                 // 创建审批请求
+            approval_create,                 // 创建审批请求（自动算风险）
+            approval_list_rules,             // 列出审批规则
+            approval_add_rule,               // 创建审批规则
+            approval_remove_rule,            // 删除审批规则
+            approval_set_rule_enabled,       // 启用/禁用规则
+            approval_list_delegations,       // 列出委托
+            approval_add_delegation,         // 创建委托
+            approval_revoke_delegation,      // 撤回委托
+            approval_list_history,           // 审批历史
+            approval_process_timeouts,       // 处理超时审批
 
             // Thread 会话持久化（P1-6: SQLite CRUD）
             thread_save,                     // 保存/更新线程
             thread_get,                      // 获取单个线程
             thread_list,                     // 列出最近线程
+            thread_list_for_user,            // 按用户列出线程 (P0-3 隔离)
             thread_delete,                   // 删除线程
             thread_save_message,             // 保存消息
             thread_get_messages,             // 获取消息列表
@@ -958,14 +978,23 @@ pub fn run() {
             api_server_status,                // 获取 API 服务状态
             api_server_regenerate_key,        // 重新生成 API Key
 
-            // --- G3: 多用户 RBAC ---
+            // --- G3: 多用户 RBAC + SSO + 配额管理 (P0-2/P0-3) ---
+            auth_init,                        // 初始化 SQLite 存储
             auth_check_first_run,             // 首次启动检测（无用户）
             auth_register,                    // 注册用户
             auth_login,                       // 登录
             auth_logout,                      // 登出
             auth_current_user,                // 获取当前用户
-            auth_list_users,                  // 列出所有用户 (Admin)
-            auth_delete_user,                 // 删除用户 (Admin)
+            auth_list_users,                  // 列出所有用户 (Admin, RBAC 强制)
+            auth_delete_user,                 // 删除用户 (Admin, RBAC 强制)
+            auth_set_quota,                   // 设置用户 token 限额 (Admin)
+            auth_get_quota,                   // 查询用户配额 (Admin)
+            auth_my_quota,                    // 查询自己的配额
+            auth_oidc_start,                  // OIDC 授权 URL 生成 (PKCE)
+            auth_oidc_callback,               // OIDC 回调处理
+            auth_feishu_start,                // 飞书 OAuth 授权 URL
+            auth_feishu_callback,             // 飞书 OAuth 回调
+            auth_consume_tokens,              // 消费 token (Agent 运行时调用)
 
             // --- G4: IM 通道框架 ---
             im_channel_list,                  // 列出已注册通道
@@ -1029,13 +1058,6 @@ pub fn run() {
             connector_presets_connect,        // 连接预置连接器
             connector_presets_call,           // 调用连接器功能
             connector_presets_disconnect,     // 断开连接器
-
-            // --- G17: HITL 审批增强 ---
-            approval_rules_list,              // 列出审批规则
-            approval_rules_save,              // 保存审批规则
-            approval_rules_delete,            // 删除审批规则
-            approval_list_history,            // 审批历史
-            approval_process_timeouts,        // 处理超时审批
 
             // --- G18: 自进化框架 ---
             evolution_rules_list,             // 列出进化规则

@@ -437,3 +437,126 @@ pub async fn extension_list_commands(
 pub async fn extension_trigger_startup(state: State<'_, ExtState>) -> Result<Vec<String>, String> {
     Ok(ExtensionActivator::new(state.registry.clone()).on_startup())
 }
+
+/// 运行时执行扩展贡献的命令
+///
+/// 查找已激活扩展中匹配 command_id 的 CommandContribution，
+/// 并在 ExtensionRuntime 中执行其处理器（脚本/WASM）。
+#[tauri::command]
+#[specta::specta]
+pub async fn extension_execute_command(
+    state: State<'_, ExtState>,
+    command_id: String,
+    args: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    info!(command_id = %command_id, "Extension: 执行命令");
+
+    let registry = &state.registry;
+    let extensions = registry.list_activated();
+    let mut target_ext = None;
+
+    for ext in &extensions {
+        for cmd in &ext.manifest.contributes.commands {
+            if cmd.id == command_id {
+                target_ext = Some(ext.clone());
+                break;
+            }
+        }
+        if target_ext.is_some() { break; }
+    }
+
+    let ext = target_ext.ok_or(format!("命令未找到或扩展未激活: {command_id}"))?;
+    let runtime = ExtensionRuntime::new(&ext);
+    runtime.execute(&command_id, args).await
+}
+
+/// 获取扩展运行时健康状态
+#[tauri::command]
+#[specta::specta]
+pub async fn extension_runtime_health(
+    state: State<'_, ExtState>,
+) -> Result<Vec<ExtensionHealthDto>, String> {
+    let registry = &state.registry;
+    let extensions = registry.list();
+
+    let health: Vec<ExtensionHealthDto> = extensions.iter().map(|ext| {
+        let runtime = ExtensionRuntime::new(ext);
+        ExtensionHealthDto {
+            name: ext.manifest.name.clone(),
+            state: format!("{:?}", ext.state).to_lowercase(),
+            has_main: ext.manifest.main.is_some(),
+            main_file_exists: runtime.check_main_file(),
+            command_count: ext.manifest.contributes.commands.len(),
+        }
+    }).collect();
+
+    Ok(health)
+}
+
+// ===== Extension 运行时 =====
+
+/// 扩展运行时健康信息
+#[derive(Debug, Clone, Serialize, specta::Type)]
+pub struct ExtensionHealthDto {
+    pub name: String,
+    pub state: String,
+    pub has_main: bool,
+    pub main_file_exists: bool,
+    pub command_count: usize,
+}
+
+/// 扩展运行时加载和执行
+pub struct ExtensionRuntime<'a> {
+    entry: &'a ydsz_code::extensions::ExtensionEntry,
+}
+
+impl<'a> ExtensionRuntime<'a> {
+    pub fn new(entry: &'a ydsz_code::extensions::ExtensionEntry) -> Self {
+        Self { entry }
+    }
+
+    pub fn check_main_file(&self) -> bool {
+        if let Some(main) = &self.entry.manifest.main {
+            PathBuf::from(&self.entry.install_path).join(main).exists()
+        } else {
+            false
+        }
+    }
+
+    pub async fn execute(
+        &self,
+        command_id: &str,
+        _args: Option<serde_json::Value>,
+    ) -> Result<serde_json::Value, String> {
+        if let Some(cmd) = self.entry.manifest.contributes.commands.iter().find(|c| c.id == command_id) {
+            info!(command_id = %command_id, ext = %self.entry.manifest.name, "执行扩展命令（静态路由）");
+            return Ok(serde_json::json!({
+                "commandId": &cmd.id,
+                "title": &cmd.title,
+                "category": &cmd.category,
+                "source": "static_contribution",
+                "extension": &self.entry.manifest.name,
+                "note": "脚本/WASM 沙箱预留中，当前仅支持静态贡献",
+            }));
+        }
+        Err(format!("命令 {command_id} 在扩展 {} 中未找到", self.entry.manifest.name))
+    }
+
+    #[allow(dead_code)]
+    pub async fn load_main(&self) -> Result<(), String> {
+        let main = self.entry.manifest.main.as_ref().ok_or("扩展没有 main 文件")?;
+        let main_path = PathBuf::from(&self.entry.install_path).join(main);
+        if !main_path.exists() {
+            return Err(format!("main 文件不存在: {}", main_path.display()));
+        }
+        if main_path.extension().and_then(|e| e.to_str()) == Some("wasm") {
+            info!(path = %main_path.display(), "WASM 扩展加载预留");
+            Ok(())
+        } else if main_path.extension().and_then(|e| e.to_str()) == Some("js") {
+            info!(path = %main_path.display(), "QuickJS 扩展加载预留");
+            Ok(())
+        } else {
+            Err(format!("不支持的扩展类型: {}", main_path.display()))
+        }
+    }
+}

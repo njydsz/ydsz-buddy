@@ -24,6 +24,7 @@ import { AppErrorBoundary } from "./app/ErrorBoundary";
 import { applyThemeTransitionToDom } from "./shared/appearanceStore";
 import { monitor } from "./lib/monitor";
 import { initOsKeychainBackend } from "./lib/credentialVault";
+import { initWebVitals } from "./webVitals";
 
 // #region debug-point warmup-timing
 //
@@ -108,6 +109,9 @@ function installE2EMonitorHooksIfRequested() {
 }
 
 installE2EMonitorHooksIfRequested();
+
+// 初始化 Web Vitals 性能监控（轻量、零依赖）
+initWebVitals();
 
 _dbg("top-level-start");
 

@@ -437,3 +437,64 @@ pub async fn extension_list_commands(
 pub async fn extension_trigger_startup(state: State<'_, ExtState>) -> Result<Vec<String>, String> {
     Ok(ExtensionActivator::new(state.registry.clone()).on_startup())
 }
+
+/// 运行时执行扩展贡献的命令
+///
+/// 查找已激活扩展中匹配 command_id 的 CommandContribution，
+/// 并在 ExtensionRuntime 中执行其处理器（脚本/WASM）。
+#[tauri::command]
+#[specta::specta]
+pub async fn extension_execute_command(
+    state: State<'_, ExtState>,
+    command_id: String,
+    args: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    info!(command_id = %command_id, "Extension: 执行命令");
+
+    // 查找命令归属的扩展
+    let registry = &state.registry;
+    let extensions = registry.list_activated();
+    let mut target_ext = None;
+    let mut target_cmd = None;
+
+    for ext in &extensions {
+        for cmd in &ext.manifest.contributes.commands {
+            if cmd.id == command_id {
+                target_ext = Some(ext.clone());
+                target_cmd = Some(cmd.clone());
+                break;
+            }
+        }
+        if target_cmd.is_some() { break; }
+    }
+
+    let _cmd = target_cmd.ok_or(format!("命令未找到或扩展未激活: {command_id}"))?;
+    let ext = target_ext.unwrap();
+
+    // 构建运行时并执行
+    let runtime = ExtensionRuntime::new(&ext);
+    runtime.execute(&command_id, args).await
+}
+
+/// 获取扩展运行时健康状态
+#[tauri::command]
+#[specta::specta]
+pub async fn extension_runtime_health(
+    state: State<'_, ExtState>,
+) -> Result<Vec<ExtensionHealthDto>, String> {
+    let registry = &state.registry;
+    let extensions = registry.list();
+
+    let health: Vec<ExtensionHealthDto> = extensions.iter().map(|ext| {
+        let runtime = ExtensionRuntime::new(ext);
+        ExtensionHealthDto {
+            name: ext.manifest.name.clone(),
+            state: format!("{:?}", ext.state).to_lowercase(),
+            has_main: ext.manifest.main.is_some(),
+            main_file_exists: runtime.check_main_file(),
+            command_count: ext.manifest.contributes.commands.len(),
+        }
+    }).collect();
+
+    Ok(health)
+}

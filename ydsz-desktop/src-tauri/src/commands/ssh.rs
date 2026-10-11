@@ -88,7 +88,7 @@ pub async fn ssh_connect(
                 ydsz_shared::ssh::HostKeyPolicy::AcceptNew
             }
         },
-        known_hosts_path: params.known_hosts_path.map(std::path::PathBuf::from),
+        known_hosts_path: params.known_hosts_path,
         ..Default::default()
     };
 
@@ -106,7 +106,7 @@ pub async fn ssh_connect(
 
     let config = conn.get_config().await;
     Ok(SshConnectionStatusView {
-        state: to_state_view(conn.get_state().await),
+        state: to_state_view(conn.get_state().await.clone()),
         connection_id,
         host: config.host.clone(),
         port: config.port,
@@ -147,7 +147,7 @@ pub async fn ssh_get_status(
 
     let config = conn.get_config().await;
     Ok(SshConnectionStatusView {
-        state: to_state_view(conn.get_state().await),
+        state: to_state_view(conn.get_state().await.clone()),
         connection_id,
         host: config.host.clone(),
         port: config.port,
@@ -352,7 +352,7 @@ pub async fn ssh_detect_tool_versions(
         .get(&connection_id)
         .await
         .map_err(|e| e.to_string())?;
-    let versions = ydsz_shared::ssh::detect_tool_versions(conn.as_ref())
+    let versions = ydsz_shared::ssh::detect_tool_versions(&*conn)
         .await
         .map_err(|e| e.to_string())?;
     versions

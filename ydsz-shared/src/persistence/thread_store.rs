@@ -43,10 +43,12 @@ impl ThreadStore {
                 status          TEXT NOT NULL DEFAULT 'active',
                 turn_count      INTEGER NOT NULL DEFAULT 0,
                 message_count   INTEGER NOT NULL DEFAULT 0,
+                user_id         TEXT,                   -- P0-3: 多用户隔离
                 created_at      TEXT NOT NULL,
                 updated_at      TEXT NOT NULL,
                 metadata        TEXT NOT NULL DEFAULT '{}'
             );
+            CREATE INDEX IF NOT EXISTS idx_threads_user ON threads(user_id);
 
             CREATE TABLE IF NOT EXISTS turns (
                 id              TEXT PRIMARY KEY,
@@ -85,8 +87,8 @@ impl ThreadStore {
     pub fn save_thread(&self, record: &ThreadRecord) -> Result<()> {
         let conn = self.conn.lock();
         conn.execute(
-            "INSERT OR REPLACE INTO threads (id, title, mode, status, turn_count, message_count, created_at, updated_at, metadata)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            "INSERT OR REPLACE INTO threads (id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             rusqlite::params![
                 &record.id,
                 &record.title,
@@ -94,6 +96,7 @@ impl ThreadStore {
                 &record.status,
                 record.turn_count as i64,
                 record.message_count as i64,
+                &record.user_id,
                 &record.created_at,
                 &record.updated_at,
                 serde_json::to_string(&record.metadata)?,
@@ -107,7 +110,7 @@ impl ThreadStore {
         let conn = self.conn.lock();
         let result = conn
             .query_row(
-                "SELECT id, title, mode, status, turn_count, message_count, created_at, updated_at, metadata
+                "SELECT id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata
                  FROM threads WHERE id = ?1",
                 rusqlite::params![id],
                 |row| {
@@ -118,9 +121,10 @@ impl ThreadStore {
                         status: row.get(3)?,
                         turn_count: row.get::<_, i64>(4)? as u32,
                         message_count: row.get::<_, i64>(5)? as u32,
-                        created_at: row.get(6)?,
-                        updated_at: row.get(7)?,
-                        metadata: serde_json::from_str(&row.get::<_, String>(8)?)
+                        user_id: row.get(7)?,
+                        created_at: row.get(8)?,
+                        updated_at: row.get(9)?,
+                        metadata: serde_json::from_str(&row.get::<_, String>(10)?)
                             .unwrap_or_default(),
                     })
                 },
@@ -129,17 +133,17 @@ impl ThreadStore {
         Ok(result)
     }
 
-    /// 列出所有线程
+    /// 列出所有线程（兼容旧行为：全局列表）
     pub fn list_threads(&self, limit: Option<usize>) -> Result<Vec<ThreadRecord>> {
         let conn = self.conn.lock();
         let sql = if let Some(l) = limit {
             format!(
-                "SELECT id, title, mode, status, turn_count, message_count, created_at, updated_at, metadata
+                "SELECT id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata
                  FROM threads ORDER BY updated_at DESC LIMIT {}",
                 l
             )
         } else {
-            "SELECT id, title, mode, status, turn_count, message_count, created_at, updated_at, metadata
+            "SELECT id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata
              FROM threads ORDER BY updated_at DESC".to_string()
         };
         let mut stmt = conn.prepare(&sql)?;
@@ -151,9 +155,45 @@ impl ThreadStore {
                 status: row.get(3)?,
                 turn_count: row.get::<_, i64>(4)? as u32,
                 message_count: row.get::<_, i64>(5)? as u32,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
-                metadata: serde_json::from_str(&row.get::<_, String>(8)?).unwrap_or_default(),
+                user_id: row.get(6)?,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
+                metadata: serde_json::from_str(&row.get::<_, String>(9)?).unwrap_or_default(),
+            })
+        })?;
+        let mut result = Vec::new();
+        for row in rows {
+            result.push(row?);
+        }
+        Ok(result)
+    }
+
+    /// 按 user_id 列出线程（P0-3: 多用户隔离）
+    pub fn list_threads_for_user(&self, user_id: &str, limit: Option<usize>) -> Result<Vec<ThreadRecord>> {
+        let conn = self.conn.lock();
+        let sql = if let Some(l) = limit {
+            format!(
+                "SELECT id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata
+                 FROM threads WHERE user_id = ?1 ORDER BY updated_at DESC LIMIT {}",
+                l
+            )
+        } else {
+            "SELECT id, title, mode, status, turn_count, message_count, user_id, created_at, updated_at, metadata
+             FROM threads WHERE user_id = ?1 ORDER BY updated_at DESC".to_string()
+        };
+        let mut stmt = conn.prepare(&sql)?;
+        let rows = stmt.query_map(rusqlite::params![user_id], |row| {
+            Ok(ThreadRecord {
+                id: row.get(0)?,
+                title: row.get(1)?,
+                mode: row.get(2)?,
+                status: row.get(3)?,
+                turn_count: row.get::<_, i64>(4)? as u32,
+                message_count: row.get::<_, i64>(5)? as u32,
+                user_id: row.get(6)?,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
+                metadata: serde_json::from_str(&row.get::<_, String>(9)?).unwrap_or_default(),
             })
         })?;
         let mut result = Vec::new();
@@ -289,6 +329,7 @@ pub struct ThreadRecord {
     pub status: String,
     pub turn_count: u32,
     pub message_count: u32,
+    pub user_id: Option<String>,    // P0-3: 多用户隔离（None = 全局/旧数据兼容）
     pub created_at: String,
     pub updated_at: String,
     pub metadata: serde_json::Value,

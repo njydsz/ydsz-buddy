@@ -328,6 +328,8 @@ import { useSmartRetry } from "~/hooks/useSmartRetry";
 import { useFailedTaskRetryProgress } from "~/hooks/useFailedTaskRetryProgress";
 import { PullRequestThreadDialog } from "./PullRequestThreadDialog";
 import { ChatHeader } from "./chat/ChatHeader";
+import { useExecutionPermissionStore } from "~/executionPermissionStore";
+import type { ExecutionPermissionLevel } from "~/contracts/orchestration";
 import { ThreadStatusBar } from "./ThreadStatusBar";
 import { getModeBadgeLabel } from "./ModeSwitcher";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
@@ -1492,6 +1494,9 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
     composerDraft.runtimeMode ?? activeThread?.runtimeMode ?? DEFAULT_RUNTIME_MODE;
   const interactionMode =
     composerDraft.interactionMode ?? activeThread?.interactionMode ?? DEFAULT_INTERACTION_MODE;
+  // 4 态执行权限级别：从独立 store 读取，持久化在 localStorage
+  const executionPermissionLevel = useExecutionPermissionStore((s) => s.level);
+  const setExecutionPermissionLevel = useExecutionPermissionStore((s) => s.setLevel);
   const isServerThread = serverThread !== undefined;
   const isLocalDraftThread = !isServerThread && localDraftThread !== undefined;
   const canCheckoutPullRequestIntoThread = isLocalDraftThread;
@@ -9392,6 +9397,8 @@ const [questPanelOpen, setQuestPanelOpen] = useState(false);
           interactionMode={interactionMode}
           onRuntimeModeChange={handleRuntimeModeChange}
           onInteractionModeChange={handleInteractionModeChange}
+          executionPermissionLevel={executionPermissionLevel}
+          onExecutionPermissionLevelChange={setExecutionPermissionLevel}
           isSidechat={Boolean(activeThread.sidechatSourceThreadId)}
           showWindowControls={isFocusedPane}
           hideHandoffControls={terminalWorkspaceTerminalTabActive}

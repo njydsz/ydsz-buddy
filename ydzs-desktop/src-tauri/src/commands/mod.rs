@@ -89,6 +89,8 @@ pub mod browser_recorder;       // 浏览器录制（P1-5）
 
 // === G3-P0: RBAC 多用户认证 ===
 pub mod auth_commands;
+pub mod audit_bridge;            // ToolPipeline → Event Sourcing 审计桥接
+pub mod token_tracking;          // Provider Token 强制追踪 + AI 占比分析
 
 // === G4-P1: IM Channel Integration Framework ===
 pub mod im_channel;

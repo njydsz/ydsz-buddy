@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use serde::Serialize;
+use tracing::instrument;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SandboxLevel {
@@ -194,6 +195,7 @@ impl SandboxExecutor {
     /// 3. 环境变量脱敏
     /// 4. 启动进程并设置超时
     /// 5. 收集输出（受 max_output_bytes 限制）
+    #[instrument(skip(self, env), fields(sandbox.level = ?self.policy.level, command = ?command))]
     pub async fn execute_command(
         &self,
         command: &str,
@@ -327,6 +329,7 @@ impl SandboxExecutor {
     }
 
     /// 执行代码片段（路由到对应解释器后 execute_command）
+    #[instrument(skip(self, code), fields(sandbox.level = ?self.policy.level, language = ?language))]
     pub async fn execute_code(
         &self,
         code: &str,

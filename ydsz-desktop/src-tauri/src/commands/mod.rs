@@ -103,5 +103,6 @@ pub mod im_channel;             // IM 通道集成框架 飞书（G4-P1）
 pub mod acp;                    // ACP 双向集成（G10-P1）
 pub mod system_service;         // 系统服务注册（G14-P2）
 pub mod expert_market;          // 专家市场与共享（G11-P2）
-pub mod auth_commands;          // 多用户认证 RBAC（G3-P0）
+pub mod auth_store;            // SQLite 持久化用户存储（P0-3）
+pub mod auth_commands;          // 多用户认证 RBAC + SSO（P0-2/P0-3）
 

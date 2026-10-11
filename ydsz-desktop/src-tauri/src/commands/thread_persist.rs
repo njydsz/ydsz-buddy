@@ -26,6 +26,7 @@ pub struct ThreadRecordDto {
     pub status: String,      // "active" | "archived"
     pub turn_count: u32,
     pub message_count: u32,
+    pub user_id: Option<String>,  // P0-3: 多用户隔离
     pub created_at: String,
     pub updated_at: String,
 }
@@ -76,6 +77,7 @@ pub async fn thread_save(
         status: thread.status,
         turn_count: thread.turn_count,
         message_count: thread.message_count,
+        user_id: thread.user_id,
         created_at: thread.created_at,
         updated_at: thread.updated_at,
         metadata: serde_json::Value::Null,
@@ -109,6 +111,7 @@ pub async fn thread_get(
         status: t.status,
         turn_count: t.turn_count,
         message_count: t.message_count,
+        user_id: t.user_id,
         created_at: t.created_at,
         updated_at: t.updated_at,
     }))
@@ -137,6 +140,40 @@ pub async fn thread_list(
             status: t.status,
             turn_count: t.turn_count,
             message_count: t.message_count,
+            user_id: t.user_id,
+            created_at: t.created_at,
+            updated_at: t.updated_at,
+        })
+        .collect();
+
+    Ok(result)
+}
+
+/// 列出当前用户的线程（P0-3: 多用户隔离）
+#[tauri::command]
+#[specta::specta]
+pub async fn thread_list_for_user(
+    state: State<'_, ThreadPersistState>,
+    user_id: String,
+    limit: Option<usize>,
+) -> Result<Vec<ThreadRecordDto>, String> {
+    info!(user_id = %user_id, limit = ?limit, "Thread 持久化: 按用户列出");
+
+    let threads = state
+        .store
+        .list_threads_for_user(&user_id, limit)
+        .map_err(|e| format!("列出用户线程失败: {}", e))?;
+
+    let result: Vec<ThreadRecordDto> = threads
+        .into_iter()
+        .map(|t| ThreadRecordDto {
+            id: t.id.to_string(),
+            title: t.title,
+            mode: t.mode,
+            status: t.status,
+            turn_count: t.turn_count,
+            message_count: t.message_count,
+            user_id: t.user_id,
             created_at: t.created_at,
             updated_at: t.updated_at,
         })
@@ -157,7 +194,9 @@ pub async fn thread_delete(
     state
         .store
         .delete_thread(&id)
-        .map_err(|e| format!("删除线程失败: {}", e))
+        .map_err(|e| format!("删除线程失败: {}", e))?;
+
+    Ok(true)
 }
 
 /// 保存消息

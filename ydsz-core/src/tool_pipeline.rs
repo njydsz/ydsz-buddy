@@ -558,21 +558,33 @@ impl ToolInterceptor for TimingInterceptor {
 /// 活动日志拦截器
 ///
 /// 在 post-execute 阶段将工具调用结果写入 Activity 审计日志。
+///
+/// 当提供 `EventSink` 时，会将 tool_call 事件持久化到事件存储中；
+/// 未提供时退化为纯 tracing 日志（兼容单元测试等无存储场景）。
 pub struct ActivityLogInterceptor {
     /// 是否记录完整 payload（否则只记录摘要）
     log_full_payload: bool,
+    /// 可选的事件写入 sink
+    event_sink: Option<Arc<dyn crate::hooks::EventSink>>,
 }
 
 impl ActivityLogInterceptor {
     pub fn new() -> Self {
         Self {
             log_full_payload: false,
+            event_sink: None,
         }
     }
 
     /// 设置是否记录完整 payload
     pub fn log_full_payload(mut self, yes: bool) -> Self {
         self.log_full_payload = yes;
+        self
+    }
+
+    /// 设置事件写入 sink
+    pub fn with_event_sink(mut self, sink: Arc<dyn crate::hooks::EventSink>) -> Self {
+        self.event_sink = Some(sink);
         self
     }
 }
@@ -592,10 +604,9 @@ impl ToolInterceptor for ActivityLogInterceptor {
     async fn post_execute(
         &self,
         output: ToolOutput,
-        _ctx: &ToolContext,
+        ctx: &ToolContext,
     ) -> CoreResult<ToolOutput> {
-        // 这里仅做结构化日志输出；实际 Activity 写入由编排引擎消费 ToolOutput 后处理
-        // 保持拦截器无状态，不直接依赖 ActivityEmitter
+        // 1. 始终输出结构化日志
         tracing::info!(
             tool = %output.tool_name,
             call_id = %output.call_id,
@@ -603,6 +614,33 @@ impl ToolInterceptor for ActivityLogInterceptor {
             elapsed_ms = output.elapsed_ms,
             "tool_executed"
         );
+
+        // 2. 如有 EventSink，写入审计事件
+        if let Some(sink) = &self.event_sink {
+            let event_payload = serde_json::json!({
+                "toolName": &output.tool_name,
+                "callId": &output.call_id,
+                "threadId": &ctx.thread_id,
+                "turnId": &ctx.turn_id,
+                "caller": format!("{:?}", ctx.caller),
+                "permissionLevel": format!("{:?}", ctx.permission_level),
+                "success": output.success,
+                "elapsedMs": output.elapsed_ms,
+                "summary": output.summary,
+            });
+
+            if let Err(e) = sink
+                .append_event("tool_call", &ctx.thread_id, &event_payload)
+                .await
+            {
+                tracing::warn!(
+                    error = %e,
+                    tool = %output.tool_name,
+                    "写入审计事件失败"
+                );
+            }
+        }
+
         Ok(output)
     }
 }
@@ -888,6 +926,21 @@ impl Default for ToolPipeline {
 // ============================================================================
 // 便捷构造器
 // ============================================================================
+
+/// 创建带事件写入的标准管道
+///
+/// 与 `standard_pipeline()` 类似，但 ActivityLogInterceptor 会额外将 tool_call
+/// 事件写入提供的 EventSink（如 SqliteEventStore 适配器）。
+#[allow(dead_code)]
+pub fn standard_pipeline_with_sink(
+    event_sink: Arc<dyn crate::hooks::EventSink>,
+) -> ToolPipeline {
+    ToolPipeline::new()
+        .add(PermissionAuditInterceptor::new())
+        .add(ParameterValidationInterceptor::new())
+        .add(ActivityLogInterceptor::new().with_event_sink(event_sink))
+        .add(ErrorWrapInterceptor::new())
+}
 
 /// 创建标准管道（包含所有内置拦截器）
 pub fn standard_pipeline() -> ToolPipeline {

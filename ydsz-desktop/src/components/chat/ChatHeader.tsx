@@ -31,6 +31,7 @@
  */
 import {
   type EditorId,
+  type ExecutionPermissionLevel,
   type ProjectScript,
   type ProviderInteractionMode,
   PROVIDER_DISPLAY_NAMES,
@@ -59,6 +60,7 @@ import { WindowCaptionButtons } from "../WindowCaptionButtons";
 import ProjectScriptsControl, { type NewProjectScriptInput } from "../ProjectScriptsControl";
 import { Toggle } from "../ui/toggle";
 import { ModeSwitcher } from "../ModeSwitcher";
+import { ExecutionPermissionSwitcher } from "../ExecutionPermissionSwitcher";
 import { isDesktop } from "~/env";
 import { cn } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
@@ -87,6 +89,8 @@ interface ChatHeaderProps {
   interactionMode: ProviderInteractionMode;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
   onInteractionModeChange: (mode: ProviderInteractionMode) => void;
+  executionPermissionLevel: ExecutionPermissionLevel;
+  onExecutionPermissionLevelChange: (level: ExecutionPermissionLevel) => void;
   hideHandoffControls?: boolean;
   isGitRepo: boolean;
   openInCwd: string | null;
@@ -160,6 +164,8 @@ export const ChatHeader = memo(function ChatHeader({
   interactionMode,
   onRuntimeModeChange,
   onInteractionModeChange,
+  executionPermissionLevel,
+  onExecutionPermissionLevelChange,
   hideHandoffControls = false,
   isGitRepo,
   openInCwd,
@@ -369,6 +375,10 @@ export const ChatHeader = memo(function ChatHeader({
           interactionMode={interactionMode}
           onRuntimeModeChange={onRuntimeModeChange}
           onInteractionModeChange={onInteractionModeChange}
+        />
+        <ExecutionPermissionSwitcher
+          level={executionPermissionLevel}
+          onLevelChange={onExecutionPermissionLevelChange}
         />
         {/* Review 模式切回 Chat 按钮 */}
         {interactionMode === "review" && (

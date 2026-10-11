@@ -30,7 +30,7 @@ use std::process::Stdio;
 use std::sync::Arc;
 
 use tokio::process::Command;
-use tracing::{debug, warn};
+use tracing::{debug, instrument, warn};
 
 use super::error::{GitError, GitResult};
 use super::executor::{GitExecutor, LocalGitExecutor};
@@ -454,6 +454,7 @@ impl GitCore {
     ///
     /// 如果 Git 命令返回非零退出码且 `allow_non_zero_exit` 为 false，
     /// 将返回 `GitError::CommandError`，包含 stderr 内容和退出码。
+    #[instrument(skip(self, input), fields(git.operation = %input.operation, git.cwd = %input.cwd))]
     pub async fn execute(&self, input: ExecuteGitInput) -> GitResult<ExecuteGitResult> {
         // 委托给 executor（LocalGitExecutor 或 SshGitExecutor）
         self.executor.execute(input).await
@@ -772,6 +773,7 @@ impl GitCore {
     /// # 注意事项
     ///
     /// 切换前建议检查 `status().is_dirty`，如有未提交更改可先 `stash`。
+    #[instrument(skip(self), fields(git.operation = "checkout", git.cwd = %cwd, git.branch = %branch_name))]
     pub async fn checkout_branch(&self, cwd: &str, branch_name: &str) -> GitResult<()> {
         self.execute(ExecuteGitInput {
             operation: "checkout".to_string(),
@@ -814,6 +816,7 @@ impl GitCore {
     /// let sha = core.commit('/path/to/repo', 'feat: add new feature').await?;
     /// println!('提交成功: {}', sha);
     /// }
+    #[instrument(skip(self, message), fields(git.operation = "commit", git.cwd = %cwd))]
     pub async fn commit(&self, cwd: &str, message: &str) -> GitResult<String> {
         let _result = self
             .execute(ExecuteGitInput {
@@ -858,6 +861,7 @@ impl GitCore {
     ///
     /// - 当前分支必须有设置上游跟踪分支，或者远程有同名分支
     /// - 如果是新分支，可能需要先 `git push -u origin <branch>` 设置上游
+    #[instrument(skip(self), fields(git.operation = "push", git.cwd = %cwd))]
     pub async fn push_current_branch(&self, cwd: &str) -> GitResult<()> {
         self.execute(ExecuteGitInput {
             operation: "push".to_string(),

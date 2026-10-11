@@ -456,6 +456,7 @@ pub fn run() {
                 .expect("Failed to create thread store")
         ))
         .manage(commands::connectors::ConnectorsState::new())      // Connector 注册表 (P2-8)
+        .manage(commands::token_tracking::TokenTrackingState::new()) // Token 追踪 + AI 占比 (P0-3 增强)
         .manage(commands::workflow::WorkflowState::new())             // 工作流引擎状态 (P0-1)
         .manage(commands::bot::BotState::new())                       // Bot 通道状态 (P0-4)
         .manage(commands::memory::MemoryState::new())                 // 项目记忆状态 (P1-2)
@@ -841,6 +842,8 @@ pub fn run() {
             extension_install_from_github,    // 从 GitHub 仓库安装
             extension_list_commands,           // 列出已激活扩展贡献的命令
             extension_trigger_startup,         // 触发 OnStartup 激活
+            extension_execute_command,         // 运行时执行扩展命令
+            extension_runtime_health,          // 扩展运行时健康检测
 
             // 诊断日志打包与上报命令
             diagnostics_get_logs,            // 获取近期日志条目

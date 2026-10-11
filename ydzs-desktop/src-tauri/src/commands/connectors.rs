@@ -173,7 +173,7 @@ pub async fn connector_list_instances(
     Ok(instances.values().cloned().collect())
 }
 
-/// 测试连接器连接
+/// 测试连接器连接（真实 HTTP 调用）
 #[tauri::command]
 #[specta::specta]
 pub async fn connector_test_connection(
@@ -183,29 +183,16 @@ pub async fn connector_test_connection(
 ) -> Result<ConnectorTestResult, String> {
     info!(conn_type = %conn_type, "Connector: 测试连接");
 
-    // Stub: 模拟连接测试，实际需按类型分发
-    let auth_present = match conn_type.as_str() {
-        "jira" => config.get("apiToken").and_then(|v| v.as_str()).map_or(false, |s| !s.is_empty()),
-        "github_issues" => config.get("token").and_then(|v| v.as_str()).map_or(false, |s| !s.is_empty()),
-        "sentry" => config.get("token").and_then(|v| v.as_str()).map_or(false, |s| !s.is_empty()),
-        "grafana" => config.get("apiKey").and_then(|v| v.as_str()).map_or(false, |s| !s.is_empty()),
-        "webhook" => true,
-        _ => false,
-    };
+    // 构建真实连接器实例并执行 HTTP 测试
+    let connector = crate::connectors::build_connector(&conn_type, config)
+        .map_err(|e| format!("构建连接器失败: {e}"))?;
 
-    if auth_present {
-        Ok(ConnectorTestResult {
-            success: true,
-            message: format!("{} 连接测试通过", conn_type),
-            latency_ms: Some(42),
-        })
-    } else {
-        Ok(ConnectorTestResult {
-            success: false,
-            message: format!("{} 缺少有效的认证信息", conn_type),
-            latency_ms: None,
-        })
-    }
+    let result = connector.test_connection().await;
+    Ok(ConnectorTestResult {
+        success: result.success,
+        message: result.message,
+        latency_ms: result.latency_ms,
+    })
 }
 
 /// 获取连接器的默认配置模板
