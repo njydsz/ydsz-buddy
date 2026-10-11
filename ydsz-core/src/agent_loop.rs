@@ -30,6 +30,8 @@
 //! - `on_error`
 
 use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -518,34 +520,38 @@ where
 
 // ── EventSink / ThreadSink 转发实现 ────────────────────────────────────────
 
-#[async_trait]
 impl<F> EventSink for StandardAgentLoop<F>
 where
     F: Fn(&LoopContext, &[ProviderResponseFragment]) -> CoreResult<ProviderResponse>
         + Send
         + Sync,
 {
-    async fn append_event(
+    fn append_event(
         &self,
         event_type: &str,
         stream_id: &str,
         payload: &serde_json::Value,
-    ) -> CoreResult<()> {
-        if let Some(sink) = &self.event_sink {
-            sink.append_event(event_type, stream_id, payload).await?;
-        }
-        Ok(())
+    ) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
+        let sink = self.event_sink.clone();
+        let event_type = event_type.to_string();
+        let stream_id = stream_id.to_string();
+        let payload = payload.clone();
+        Box::pin(async move {
+            if let Some(sink) = &sink {
+                sink.append_event(&event_type, &stream_id, &payload).await?;
+            }
+            Ok(())
+        })
     }
 }
 
-#[async_trait]
 impl<F> ThreadSink for StandardAgentLoop<F>
 where
     F: Fn(&LoopContext, &[ProviderResponseFragment]) -> CoreResult<ProviderResponse>
         + Send
         + Sync,
 {
-    async fn save_message(
+    fn save_message(
         &self,
         thread_id: &str,
         turn_id: &str,
@@ -553,18 +559,31 @@ where
         content: &str,
         tool_name: Option<&str>,
         sequence: u32,
-    ) -> CoreResult<()> {
-        if let Some(sink) = &self.thread_sink {
-            sink.save_message(thread_id, turn_id, role, content, tool_name, sequence).await?;
-        }
-        Ok(())
+    ) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
+        let sink = self.thread_sink.clone();
+        let thread_id = thread_id.to_string();
+        let turn_id = turn_id.to_string();
+        let role = role.to_string();
+        let content = content.to_string();
+        let tool_name = tool_name.map(|s| s.to_string());
+        Box::pin(async move {
+            if let Some(sink) = &sink {
+                sink.save_message(&thread_id, &turn_id, &role, &content, tool_name.as_deref(), sequence).await?;
+            }
+            Ok(())
+        })
     }
 
-    async fn save_thread(&self, thread_id: &str, title: Option<&str>) -> CoreResult<()> {
-        if let Some(sink) = &self.thread_sink {
-            sink.save_thread(thread_id, title).await?;
-        }
-        Ok(())
+    fn save_thread(&self, thread_id: &str, title: Option<&str>) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
+        let sink = self.thread_sink.clone();
+        let thread_id = thread_id.to_string();
+        let title = title.map(|s| s.to_string());
+        Box::pin(async move {
+            if let Some(sink) = &sink {
+                sink.save_thread(&thread_id, title.as_deref()).await?;
+            }
+            Ok(())
+        })
     }
 }
 

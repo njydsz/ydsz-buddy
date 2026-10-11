@@ -22,7 +22,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   PiShieldCheck,
-  PiShieldWarning,
   PiShieldSlash,
   PiMonitor,
   PiKeyboard,
@@ -319,7 +318,7 @@ function CuaPermissionPanelInner() {
   );
   const [mode, setMode] = useState<CuaMode>("safe");
   const [stats] = useState<CuaHistoryStats>(getDefaultStats);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 根据权限项更新权限状态
@@ -385,7 +384,7 @@ function CuaPermissionPanelInner() {
 
   // 检查是否所有必需权限都已授予
   const allRequiredGranted = useMemo(
-    () =>_permissions.filter((p) => p.required).every((p) => p.granted),
+    () => permissions.filter((p: CuaPermissionItem) => p.required).every((p: CuaPermissionItem) => p.granted),
     [permissions],
   );
 

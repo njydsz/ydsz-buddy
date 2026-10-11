@@ -13,12 +13,13 @@
 //! 解决了原先 `ActivityLogInterceptor` 仅做 `tracing::info!` 而造成审计日志为空的问题。
 //! 现在每个经过 ToolPipeline 的工具调用都会自动产生 `tool_call` 事件记录。
 
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 
 use serde_json::Value;
 use tracing::info;
 
-use ydsz_core::error::CoreResult;
 use ydsz_core::hooks::EventSink;
 
 /// 事件存储适配器：将 SqliteEventStore 桥接到 ydsz_core::EventSink
@@ -43,23 +44,30 @@ impl EventStoreAdapter {
 }
 
 impl EventSink for EventStoreAdapter {
-    async fn append_event(
+    fn append_event(
         &self,
         event_type: &str,
         stream_id: &str,
         payload: &Value,
-    ) -> CoreResult<()> {
-        info!(
-            event_type = %event_type,
-            stream_id = %stream_id,
-            "审计事件写入"
-        );
+    ) -> Pin<Box<dyn Future<Output = ydsz_core::error::CoreResult<()>> + Send + '_>> {
+        let event_store = self.event_store.clone();
+        let event_type = event_type.to_string();
+        let stream_id = stream_id.to_string();
+        let payload = payload.clone();
+        Box::pin(async move {
+            info!(
+                event_type = %event_type,
+                stream_id = %stream_id,
+                "审计事件写入"
+            );
 
-        self.event_store
-            .append(event_type, "system", stream_id, payload)
-            .map_err(|e| ydsz_core::error::CoreError::InternalError(format!(
-                "写入事件失败: {e}"
-            )))
+            event_store
+                .append(&event_type, "system", &stream_id, &payload)
+                .map(|_| ())
+                .map_err(|e| ydsz_core::error::CoreError::InternalError(format!(
+                    "写入事件失败: {e}"
+                )))
+        })
     }
 }
 

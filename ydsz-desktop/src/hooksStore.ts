@@ -22,6 +22,7 @@ import {
 } from "./contracts/hooks";
 
 const HOOKS_STORAGE_KEY = "ydsz-buddy:hooks:v1";
+const HOOK_DEFAULT_TIMEOUT_SECS = 30;
 
 // ===== 工具函数 =====
 
@@ -165,7 +166,7 @@ function validateHook(hook: WorkspaceHook): string | null {
   if (hook.handlerType === "skill" && !hook.skillId) {
     return "Skill 类型 Hook 必须提供 Skill ID";
   }
-  if (hook.timeoutSecs < 1 || hook.timeoutSecs > 300) {
+  if ((hook.timeoutSecs ?? HOOK_DEFAULT_TIMEOUT_SECS) < 1 || (hook.timeoutSecs ?? HOOK_DEFAULT_TIMEOUT_SECS) > 300) {
     return "超时时间必须在 1-300 秒之间";
   }
   return null;

@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use parking_lot::Mutex;
 use rusqlite::Connection;
+use rusqlite::OptionalExtension;
 
 /// Langfuse 配置（不含 secret_key）
 #[derive(Debug, Clone, Serialize, Deserialize, specta::Type, Default)]
@@ -72,10 +73,10 @@ impl LangfuseState {
     }
 
     fn conn(&self) -> Result<Connection, String> {
-        self.conn.lock()
-            .as_ref()
-            .cloned()
-            .ok_or_else(|| "Langfuse 配置未初始化".to_string())
+        // 每次从存储路径重新打开连接，避免 rusqlite::Connection 非 Clone 的限制
+        let path = Self::db_path();
+        Connection::open(&path)
+            .map_err(|e| format!("打开 Langfuse 配置数据库失败: {}", e))
     }
 
     /// 保存 Langfuse 配置

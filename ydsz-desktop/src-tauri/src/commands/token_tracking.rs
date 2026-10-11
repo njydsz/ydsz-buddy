@@ -46,7 +46,7 @@ pub struct TokenUsageRecord {
 }
 
 /// Token 使用统计
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TokenUsageStats {
     pub total_calls: u64,

@@ -8,7 +8,7 @@ import ReactDOM from "react-dom/client";
 import { App } from "./App";
 import "./styles/globals.css";
 
-// 初始化主题
+// 初始化主题（根据系统偏好）
 const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 if (isDark) {
   document.documentElement.classList.add("dark");

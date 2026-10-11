@@ -58,8 +58,8 @@ function hookToForm(hook: WorkspaceHook): HookFormData {
     handlerType: hook.handlerType,
     scriptContent: hook.scriptContent ?? "",
     skillId: hook.skillId ?? "",
-    timeoutSecs: hook.timeoutSecs,
-    errorPolicy: hook.errorPolicy,
+    timeoutSecs: hook.timeoutSecs ?? 30,
+    errorPolicy: hook.errorPolicy ?? "continue",
   };
 }
 

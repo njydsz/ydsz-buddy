@@ -1,45 +1,39 @@
 /**
  * @file WebSocket JSON-RPC 客户端
- * @description 轻量级 WebSocket JSON-RPC 客户端，从 ydzs-desktop 的 wsTransport 提取核心协议逻辑。
- *              支持自动重连（指数退避）、订阅模式（服务端 push）、请求-响应匹配。
+ * @description 轻量级 WebSocket JSON-RPC 2.0 客户端，与 ydzs-desktop 协议格式兼容。
+ *              支持：请求-响应匹配、Pending Map、心跳 ping/pong、指数退避重连（最多10次）、
+ *              服务端推送事件分发。
+ *
+ * ## 协议格式
+ *
+ * 请求:  { jsonrpc: "2.0", id: string, method: string, params?: unknown }
+ * 响应:  { jsonrpc: "2.0", id: string, result?: unknown, error?: { message, code? } }
+ * 通知:  { jsonrpc: "2.0", method: string, params?: unknown }
+ * 推送:  { type: "push", sequence: number, channel: string, data?: unknown }
  */
-
-// ── 协议常量（与 ydzs-desktop/src/contracts/ws.ts 保持一致）────────────────
-
-/** WebSocket RPC 方法名称 */
-export const WS_METHODS = {
-  serverGetConfig: "server.getConfig",
-  serverGetEnvironment: "server.getEnvironment",
-  serverGetSettings: "server.getSettings",
-  serverUpdateSettings: "server.updateSettings",
-  subscribeServerLifecycle: "server.subscribeLifecycle",
-  subscribeServerConfig: "server.subscribeConfig",
-  subscribeServerSettings: "server.subscribeSettings",
-} as const;
-
-/** WebSocket 推送通道名称 */
-export const WS_CHANNELS = {
-  serverWelcome: "server.welcome",
-  serverMaintenanceUpdated: "server.maintenanceUpdated",
-  serverConfigUpdated: "server.configUpdated",
-  serverProviderStatusesUpdated: "server.providerStatusesUpdated",
-  serverSettingsUpdated: "server.settingsUpdated",
-  gitActionProgress: "git.actionProgress",
-  terminalEvent: "terminal.event",
-} as const;
 
 // ── 类型定义 ──────────────────────────────────────────────────────────
 
-/** 推送通道值类型 */
-export type WsPushChannel = (typeof WS_CHANNELS)[keyof typeof WS_CHANNELS];
-
 /** 推送监听器 */
 export type PushListener = (data: unknown) => void;
+
+/** 推送通道名称 */
+export type WsPushChannel =
+  | "server.welcome"
+  | "server.configUpdated"
+  | "server.settingsUpdated"
+  | "server.providerStatusesUpdated"
+  | "orchestration.threadEvent"
+  | "orchestration.domainEvent"
+  | "orchestration.shellEvent"
+  | "git.actionProgress"
+  | "terminal.event";
 
 interface PendingRequest {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timer: ReturnType<typeof setTimeout>;
+  method: string;
 }
 
 type TransportState = "connecting" | "open" | "closed" | "disposed";
@@ -66,23 +60,35 @@ interface JsonRpcNotification {
   params?: unknown;
 }
 
-type JsonRpcMessage = JsonRpcResponse | JsonRpcNotification;
+/** 服务端推送消息 */
+interface JsonRpcPush {
+  type: "push";
+  sequence: number;
+  channel: string;
+  data?: unknown;
+}
+
+type JsonRpcInbound = JsonRpcResponse | JsonRpcNotification | JsonRpcPush;
 
 // ── 配置选项 ──────────────────────────────────────────────────────────
 
 export interface WsClientConfig {
   /** WebSocket URL，不传则自动推导 */
   url?: string;
-  /** 请求超时时间（毫秒），默认 15000 */
+  /** 请求超时时间（毫秒），默认 30000 */
   requestTimeoutMs?: number;
   /** 是否启用自动重连，默认 true */
   autoReconnect?: boolean;
-  /** 重连最大尝试次数，默认 5 */
+  /** 重连最大尝试次数，默认 10 */
   maxReconnectAttempts?: number;
-  /** 初始退避延迟（毫秒），默认 500 */
+  /** 初始退避延迟（毫秒），默认 1000 */
   baseDelayMs?: number;
-  /** 最大退避延迟（毫秒），默认 5000 */
+  /** 最大退避延迟（毫秒），默认 30000 */
   maxDelayMs?: number;
+  /** 心跳间隔（毫秒），默认 30000 */
+  heartbeatIntervalMs?: number;
+  /** 心跳超时（毫秒），默认 10000 */
+  heartbeatTimeoutMs?: number;
   /** 连接成功回调 */
   onConnected?: () => void;
   /** 连接断开回调 */
@@ -94,11 +100,13 @@ export interface WsClientConfig {
 // ── 默认配置 ──────────────────────────────────────────────────────────
 
 const DEFAULT_CONFIG: Required<Omit<WsClientConfig, "url" | "onConnected" | "onDisconnected" | "onError">> = {
-  requestTimeoutMs: 15_000,
+  requestTimeoutMs: 30_000,
   autoReconnect: true,
-  maxReconnectAttempts: 5,
-  baseDelayMs: 500,
-  maxDelayMs: 5_000,
+  maxReconnectAttempts: 10,
+  baseDelayMs: 1_000,
+  maxDelayMs: 30_000,
+  heartbeatIntervalMs: 30_000,
+  heartbeatTimeoutMs: 10_000,
 };
 
 // ── WebSocket JSON-RPC 客户端 ─────────────────────────────────────────
@@ -116,6 +124,9 @@ export class WsJsonRpcClient {
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
+  private reqIdCounter = 0;
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private heartbeatTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(config: WsClientConfig = {}) {
     this.config = config;
@@ -125,6 +136,8 @@ export class WsJsonRpcClient {
     if (config.maxReconnectAttempts !== undefined) this.mergedConfig.maxReconnectAttempts = config.maxReconnectAttempts;
     if (config.baseDelayMs !== undefined) this.mergedConfig.baseDelayMs = config.baseDelayMs;
     if (config.maxDelayMs !== undefined) this.mergedConfig.maxDelayMs = config.maxDelayMs;
+    if (config.heartbeatIntervalMs !== undefined) this.mergedConfig.heartbeatIntervalMs = config.heartbeatIntervalMs;
+    if (config.heartbeatTimeoutMs !== undefined) this.mergedConfig.heartbeatTimeoutMs = config.heartbeatTimeoutMs;
   }
 
   // ── 公共 API ────────────────────────────────────────────────────
@@ -140,6 +153,7 @@ export class WsJsonRpcClient {
     try {
       this.ws = new WebSocket(url);
     } catch (error) {
+      console.warn("[WsClient] WebSocket creation failed", error);
       this.scheduleReconnect();
       return;
     }
@@ -147,6 +161,7 @@ export class WsJsonRpcClient {
     this.ws.onopen = () => {
       this.state = "open";
       this.reconnectAttempts = 0;
+      this.startHeartbeat();
       this.config.onConnected?.();
     };
 
@@ -156,6 +171,7 @@ export class WsJsonRpcClient {
 
     this.ws.onclose = (event: CloseEvent) => {
       this.state = "closed";
+      this.stopHeartbeat();
       this.config.onDisconnected?.(event);
       if (this.mergedConfig.autoReconnect && !this.disposed) {
         this.scheduleReconnect();
@@ -169,6 +185,10 @@ export class WsJsonRpcClient {
 
   /**
    * 发送 JSON-RPC 请求并等待响应
+   * @param method 方法名（如 "orchestration.dispatchCommand"）
+   * @param params 参数对象
+   * @returns 服务端返回的 result
+   * @throws 连接失败、超时或服务端返回 error 时抛出 Error
    */
   async request<T = unknown>(method: string, params?: unknown): Promise<T> {
     if (this.disposed) throw new Error("Client disposed");
@@ -187,21 +207,45 @@ export class WsJsonRpcClient {
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingRequests.delete(id);
-        reject(new Error(`Request timeout: ${method}`));
+        reject(new Error(`Request timeout (${this.mergedConfig.requestTimeoutMs}ms): ${method}`));
       }, this.mergedConfig.requestTimeoutMs);
 
       this.pendingRequests.set(id, {
         resolve: resolve as (value: unknown) => void,
         reject,
         timer,
+        method,
       });
 
-      this.ws!.send(JSON.stringify(message));
+      try {
+        this.ws!.send(JSON.stringify(message));
+      } catch (sendError) {
+        clearTimeout(timer);
+        this.pendingRequests.delete(id);
+        reject(sendError instanceof Error ? sendError : new Error(String(sendError)));
+      }
     });
   }
 
   /**
+   * 发送通知（不等待响应）
+   */
+  notify(method: string, params?: unknown): void {
+    if (this.disposed || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    const message: JsonRpcNotification = {
+      jsonrpc: "2.0",
+      method,
+      params,
+    };
+    this.ws.send(JSON.stringify(message));
+  }
+
+  /**
    * 订阅推送通道
+   * @param channel 通道名称
+   * @param listener 监听器
+   * @param options.replayLatest 是否重播最新推送
+   * @returns 取消订阅函数
    */
   subscribe(
     channel: WsPushChannel,
@@ -220,7 +264,11 @@ export class WsJsonRpcClient {
     if (options?.replayLatest) {
       const latest = this.latestPush.get(channel);
       if (latest !== undefined) {
-        listener(latest);
+        try {
+          listener(latest);
+        } catch {
+          // Listener 错误不影响其他监听器
+        }
       }
     }
 
@@ -234,10 +282,24 @@ export class WsJsonRpcClient {
   }
 
   /**
-   * 获取连接状态
+   * 获取当前连接状态
    */
   getState(): TransportState {
     return this.state;
+  }
+
+  /**
+   * 检查是否已连接
+   */
+  isConnected(): boolean {
+    return this.state === "open" && this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  /**
+   * 获取当前重连次数
+   */
+  getReconnectAttempts(): number {
+    return this.reconnectAttempts;
   }
 
   /**
@@ -252,6 +314,9 @@ export class WsJsonRpcClient {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+
+    // 停止心跳
+    this.stopHeartbeat();
 
     // 拒绝所有待处理请求
     for (const [, pending] of this.pendingRequests) {
@@ -279,14 +344,11 @@ export class WsJsonRpcClient {
 
   // ── 内部方法 ────────────────────────────────────────────────────
 
-  /** 请求 ID 计数器 */
-  private reqIdCounter = 0;
-
   /**
    * 推导 WebSocket URL
+   * 优先使用 Vite 代理的 /ws 路径（开发模式）
    */
   private deriveUrl(): string {
-    // 优先使用 Vite 代理的 /ws 路径（开发模式）
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     return `${protocol}://${window.location.host}/ws`;
   }
@@ -295,35 +357,42 @@ export class WsJsonRpcClient {
    * 处理收到的 WebSocket 消息
    */
   private handleMessage(raw: string | ArrayBuffer): void {
-    let message: JsonRpcMessage;
+    let message: JsonRpcInbound;
     try {
       const text = typeof raw === "string" ? raw : new TextDecoder().decode(raw);
-      message = JSON.parse(text) as JsonRpcMessage;
+      message = JSON.parse(text) as JsonRpcInbound;
     } catch {
+      // 忽略无法解析的消息
       return;
     }
 
-    // 通知（无 id）：可能是推送或 Server -> Client 通知
-    if (!("id" in message)) {
-      const notification = message as JsonRpcNotification;
-      // 按 method 字段匹配推送通道（运行时检查）
-      this.dispatchPush(notification.method as WsPushChannel, notification.params);
+    // 推送消息（type: "push"）
+    if ("type" in message && message.type === "push") {
+      const push = message as JsonRpcPush;
+      this.dispatchPush(push.channel as WsPushChannel, push.data);
       return;
     }
 
-    // 响应（有 id）：匹配到待处理请求
-    const response = message as JsonRpcResponse;
-    const pending = this.pendingRequests.get(response.id);
-    if (!pending) return;
+    // 响应消息（有 id 字段且不是 push 类型）
+    if ("id" in message) {
+      const response = message as JsonRpcResponse;
+      const pending = this.pendingRequests.get(response.id);
+      if (!pending) return;
 
-    clearTimeout(pending.timer);
-    this.pendingRequests.delete(response.id);
+      clearTimeout(pending.timer);
+      this.pendingRequests.delete(response.id);
 
-    if (response.error) {
-      pending.reject(new Error(response.error.message));
-    } else {
-      pending.resolve(response.result);
+      if (response.error) {
+        pending.reject(new Error(response.error.message));
+      } else {
+        pending.resolve(response.result);
+      }
+      return;
     }
+
+    // 通知消息（jsonrpc + method，无 id）
+    const notification = message as JsonRpcNotification;
+    this.dispatchPush(notification.method as WsPushChannel, notification.params);
   }
 
   /**
@@ -367,6 +436,58 @@ export class WsJsonRpcClient {
       }
     }, delay);
   }
+
+  // ── 心跳 ──────────────────────────────────────────────────────
+
+  /**
+   * 启动心跳
+   * 定期发送 server.getConfig 作为心跳检测
+   */
+  private startHeartbeat(): void {
+    this.stopHeartbeat();
+    const interval = this.mergedConfig.heartbeatIntervalMs;
+
+    this.heartbeatTimer = setInterval(() => {
+      if (!this.isConnected()) return;
+
+      // 设置心跳超时
+      this.heartbeatTimeoutTimer = setTimeout(() => {
+        // 心跳超时，主动断开触发重连
+        console.warn("[WsClient] Heartbeat timeout, disconnecting...");
+        this.ws?.close();
+      }, this.mergedConfig.heartbeatTimeoutMs);
+
+      // 发送心跳（轻量级 RPC）
+      this.request("server.getConfig")
+        .then(() => {
+          if (this.heartbeatTimeoutTimer) {
+            clearTimeout(this.heartbeatTimeoutTimer);
+            this.heartbeatTimeoutTimer = null;
+          }
+        })
+        .catch(() => {
+          // 心跳失败会在 onclose 中触发重连
+          if (this.heartbeatTimeoutTimer) {
+            clearTimeout(this.heartbeatTimeoutTimer);
+            this.heartbeatTimeoutTimer = null;
+          }
+        });
+    }, interval);
+  }
+
+  /**
+   * 停止心跳
+   */
+  private stopHeartbeat(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+    if (this.heartbeatTimeoutTimer) {
+      clearTimeout(this.heartbeatTimeoutTimer);
+      this.heartbeatTimeoutTimer = null;
+    }
+  }
 }
 
 // ── 单例管理 ──────────────────────────────────────────────────────────
@@ -374,11 +495,51 @@ export class WsJsonRpcClient {
 let sharedClient: WsJsonRpcClient | null = null;
 
 /**
-   * 获取共享的 WebSocket 客户端单例
-   */
+ * 获取共享的 WebSocket 客户端单例
+ */
 export function getSharedWsClient(config?: WsClientConfig): WsJsonRpcClient {
   if (!sharedClient || sharedClient.getState() === "disposed") {
     sharedClient = new WsJsonRpcClient(config);
   }
   return sharedClient;
+}
+
+/**
+ * 销毁共享客户端
+ */
+export function disposeSharedWsClient(): void {
+  if (sharedClient) {
+    sharedClient.dispose();
+    sharedClient = null;
+  }
+}
+
+// ── 便捷 RPC 方法封装 ──────────────────────────────────────────────────
+
+/**
+ * 发送编排层命令（orchestration.dispatchCommand）
+ * @param command 命令体，如 { type: "thread.turn.start", ... }
+ */
+export async function dispatchOrchestrationCommand(
+  command: Record<string, unknown>,
+): Promise<unknown> {
+  const client = getSharedWsClient();
+  return client.request("orchestration.dispatchCommand", { command });
+}
+
+/**
+ * 订阅编排层 Thread 事件
+ * @param listener 事件监听器（接收 threadEvent 数据）
+ * @returns 取消订阅函数
+ */
+export function subscribeThreadEvents(listener: PushListener): () => void {
+  const client = getSharedWsClient();
+  return client.subscribe("orchestration.threadEvent", listener, { replayLatest: true });
+}
+
+/**
+ * 获取共享客户端实例（用于高级操作）
+ */
+export function getRawClient(): WsJsonRpcClient {
+  return getSharedWsClient();
 }

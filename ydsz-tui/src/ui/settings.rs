@@ -2,6 +2,8 @@
 //!
 //! 允许用户切换 Provider、执行权限模式等配置。
 
+use std::sync::{LazyLock, Mutex};
+
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyModifiers};
 use ratatui::{
@@ -37,10 +39,17 @@ const MODES: &[&str] = &[
     "ask (问答模式)",
 ];
 
+/// 设置面板的持久状态
+#[derive(Default)]
+struct SettingsState {
+    provider_selected: usize,
+    mode_selected: usize,
+    active_section: u8, // 0=Provider, 1=Mode
+}
+
 /// 当前设置项选中索引
-static mut PROVIDER_SELECTED: usize = 0;
-static mut MODE_SELECTED: usize = 0;
-static mut ACTIVE_SECTION: u8 = 0; // 0=Provider, 1=Mode
+static SETTINGS_STATE: LazyLock<Mutex<SettingsState>> =
+    LazyLock::new(|| Mutex::new(SettingsState::default()));
 
 /// 渲染设置面板
 pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
@@ -90,19 +99,22 @@ pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Re
 }
 
 fn render_provider_list(theme: &Theme, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
-    let highlight = unsafe { ACTIVE_SECTION == 0 };
+    let state = SETTINGS_STATE.lock().unwrap();
+    let highlight = state.active_section == 0;
+    let selected = state.provider_selected;
+
     let items: Vec<ListItem> = PROVIDERS
         .iter()
         .enumerate()
         .map(|(i, p)| {
-            let selected = highlight && unsafe { PROVIDER_SELECTED } == i;
-            let style = if selected {
+            let is_selected = highlight && selected == i;
+            let style = if is_selected {
                 theme.selected()
             } else {
                 theme.text()
             };
             ListItem::new(Line::from(vec![
-                Span::styled(if selected { " ▶ " } else { "   " }, theme.primary_text()),
+                Span::styled(if is_selected { " ▶ " } else { "   " }, theme.primary_text()),
                 Span::styled(*p, style),
             ]))
         })
@@ -117,25 +129,28 @@ fn render_provider_list(theme: &Theme, frame: &mut Frame<'_>, area: ratatui::lay
 
     let list = List::new(items).block(block);
 
-    let mut state = ListState::default();
-    state.select(Some(unsafe { PROVIDER_SELECTED }));
-    frame.render_stateful_widget(list, area, &mut state);
+    let mut list_state = ListState::default();
+    list_state.select(Some(selected));
+    frame.render_stateful_widget(list, area, &mut list_state);
 }
 
 fn render_mode_list(theme: &Theme, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
-    let highlight = unsafe { ACTIVE_SECTION == 1 };
+    let state = SETTINGS_STATE.lock().unwrap();
+    let highlight = state.active_section == 1;
+    let selected = state.mode_selected;
+
     let items: Vec<ListItem> = MODES
         .iter()
         .enumerate()
         .map(|(i, m)| {
-            let selected = highlight && unsafe { MODE_SELECTED } == i;
-            let style = if selected {
+            let is_selected = highlight && selected == i;
+            let style = if is_selected {
                 theme.selected()
             } else {
                 theme.text()
             };
             ListItem::new(Line::from(vec![
-                Span::styled(if selected { " ▶ " } else { "   " }, theme.primary_text()),
+                Span::styled(if is_selected { " ▶ " } else { "   " }, theme.primary_text()),
                 Span::styled(*m, style),
             ]))
         })
@@ -150,9 +165,9 @@ fn render_mode_list(theme: &Theme, frame: &mut Frame<'_>, area: ratatui::layout:
 
     let list = List::new(items).block(block);
 
-    let mut state = ListState::default();
-    state.select(Some(unsafe { MODE_SELECTED }));
-    frame.render_stateful_widget(list, area, &mut state);
+    let mut list_state = ListState::default();
+    list_state.select(Some(selected));
+    frame.render_stateful_widget(list, area, &mut list_state);
 }
 
 /// 处理输入
@@ -163,39 +178,35 @@ pub async fn handle_input(
 ) -> Result<()> {
     match code {
         KeyCode::Tab => {
-            unsafe {
-                ACTIVE_SECTION = if ACTIVE_SECTION == 0 { 1 } else { 0 };
-            }
+            let mut state = SETTINGS_STATE.lock().unwrap();
+            state.active_section = if state.active_section == 0 { 1 } else { 0 };
         }
         KeyCode::Up => {
-            unsafe {
-                if ACTIVE_SECTION == 0 && PROVIDER_SELECTED > 0 {
-                    PROVIDER_SELECTED -= 1;
-                } else if ACTIVE_SECTION == 1 && MODE_SELECTED > 0 {
-                    MODE_SELECTED -= 1;
-                }
+            let mut state = SETTINGS_STATE.lock().unwrap();
+            if state.active_section == 0 && state.provider_selected > 0 {
+                state.provider_selected -= 1;
+            } else if state.active_section == 1 && state.mode_selected > 0 {
+                state.mode_selected -= 1;
             }
         }
         KeyCode::Down => {
-            unsafe {
-                if ACTIVE_SECTION == 0 && PROVIDER_SELECTED < PROVIDERS.len() - 1 {
-                    PROVIDER_SELECTED += 1;
-                } else if ACTIVE_SECTION == 1 && MODE_SELECTED < MODES.len() - 1 {
-                    MODE_SELECTED += 1;
-                }
+            let mut state = SETTINGS_STATE.lock().unwrap();
+            if state.active_section == 0 && state.provider_selected < PROVIDERS.len() - 1 {
+                state.provider_selected += 1;
+            } else if state.active_section == 1 && state.mode_selected < MODES.len() - 1 {
+                state.mode_selected += 1;
             }
         }
         KeyCode::Enter => {
             // 确认选择
-            unsafe {
-                app.mode = match MODE_SELECTED {
-                    0 => "code".to_string(),
-                    1 => "work".to_string(),
-                    2 => "plan".to_string(),
-                    3 => "ask".to_string(),
-                    _ => "code".to_string(),
-                };
-            }
+            let state = SETTINGS_STATE.lock().unwrap();
+            app.mode = match state.mode_selected {
+                0 => "code".to_string(),
+                1 => "work".to_string(),
+                2 => "plan".to_string(),
+                3 => "ask".to_string(),
+                _ => "code".to_string(),
+            };
         }
         KeyCode::Esc => {
             // 返回工作区选择

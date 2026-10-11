@@ -40,13 +40,13 @@ async function loadTauriInvoke(): Promise<TauriInvokeModule | null> {
 }
 
 // Also need dialog + fs-ext from Tauri plugins for open/save file dialogs
-let tauriDialogPromise: Promise<typeof import("@tauri-apps/api/dialog") | null> | null = null;
+let tauriDialogPromise: Promise<typeof import("@tauri-apps/plugin-dialog") | null> | null = null;
 
-async function loadTauriDialog(): Promise<typeof import("@tauri-apps/api/dialog") | null> {
+async function loadTauriDialog(): Promise<typeof import("@tauri-apps/plugin-dialog") | null> {
   if (tauriDialogPromise) return tauriDialogPromise;
   tauriDialogPromise = (async () => {
     try {
-      const mod = await import("@tauri-apps/api/dialog");
+      const mod = await import("@tauri-apps/plugin-dialog");
       return mod;
     } catch {
       return null;

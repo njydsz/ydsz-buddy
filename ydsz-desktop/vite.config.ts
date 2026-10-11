@@ -8,10 +8,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "./src"),
-      "@": path.resolve(__dirname, "./src"),
-      "@ydsz-buddy/contracts": path.resolve(__dirname, "./src/contracts/index.ts"),
-      "@njydsz/shared": path.resolve(__dirname, "./src/shared"),
+      "~": path.resolve(import.meta.dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
+      "@ydsz-buddy/contracts": path.resolve(import.meta.dirname, "./src/contracts/index.ts"),
+      "@njydsz/shared": path.resolve(import.meta.dirname, "./src/shared"),
     },
   },
   // 强制把 worker 输出格式改为 ES，避免 @pierre/diffs 的 worker.js (iife)

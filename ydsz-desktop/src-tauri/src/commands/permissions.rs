@@ -18,7 +18,7 @@ use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 use tauri::State;
-use tracing::info;
+use tracing::{info, warn};
 
 use ydsz_core::tool_permissions::{
     PermissionManager, PermissionMode, PermissionDecision, ToolPermissions,
@@ -317,11 +317,14 @@ impl DynamicPermissionState {
             Err(_) => return false,
         };
 
+        // 先读取阈值避免借用冲突
+        let threshold = inner.auto_deescalate_threshold;
         let count = inner.violation_count.entry(tool.to_string()).or_insert(0);
         *count += 1;
+        let count_val = *count;
 
-        if *count >= inner.auto_deescalate_threshold {
-            warn!(tool = %tool, violations = *count, "违规次数过多，自动降级权限");
+        if count_val >= threshold {
+            warn!(tool = %tool, violations = count_val, "违规次数过多，自动降级权限");
             inner.active_adjustments.insert(
                 tool.to_string(),
                 (

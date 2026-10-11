@@ -9,7 +9,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 /// 连接器预置定义
 #[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]

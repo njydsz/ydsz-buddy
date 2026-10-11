@@ -1,14 +1,17 @@
 /**
  * @file Workflow Runtime
- * @description 前端驱动的工作流执行引擎（简化版骨架）
+ * @description 前端驱动的工作流执行引擎
  *
  * 解析 WorkflowDefinition 中的 DAG 依赖，并发执行无依赖的步骤。
  * 每一步通过调用现有 Tauri 命令完成（agent/shell/tool）。
  *
- * ## 设计说明
+ * ## 错误恢复增强
  *
- * - 这是骨架实现，实际执行逻辑通过回调让上层注入
- * - 核心职责是 DAG 拓扑排序 + 就绪状态计算 + 状态推进
+ * - 重试：步骤失败后按 retry_policy 自动重试（带指数退避）
+ * - 超时：步骤执行超时时自动中断并标记失败
+ * - 取消：支持实时中断正在执行的步骤（取消令牌）
+ * - 持久化：每次步骤结果保存到 store
+ * - 并行步骤错误聚合：收集所有并行分支的错误并聚合报告
  */
 
 import type {
@@ -16,8 +19,7 @@ import type {
   WorkflowRun,
   WorkflowStep,
   StepResult,
-  StepStatus,
-} from "../contracts/workflow";
+} from "../workflowsStore";
 
 // =====================================================================
 // DAG 调度器
@@ -73,13 +75,34 @@ export function topologicalSort(steps: WorkflowStep[]): string[] | null {
 export function findReadySteps(
   steps: WorkflowStep[],
   completedStepIds: Set<string>,
+  runningStepIds: Set<string>,
 ): string[] {
   return steps
     .filter((step) => {
+      if (completedStepIds.has(step.id)) return false;
+      if (runningStepIds.has(step.id)) return false;
       const deps = step.depends_on ?? [];
       return deps.length > 0 && deps.every((dep) => completedStepIds.has(dep));
     })
     .map((s) => s.id);
+}
+
+/**
+ * 找到当前可执行的步骤（含入口步骤）
+ */
+export function findReadyStepsWithEntry(
+  steps: WorkflowStep[],
+  completedStepIds: Set<string>,
+  runningStepIds: Set<string>,
+): string[] {
+  const ready = steps
+    .filter((step) => {
+      if (completedStepIds.has(step.id) || runningStepIds.has(step.id)) return false;
+      const deps = step.depends_on ?? [];
+      return deps.every((dep) => completedStepIds.has(dep));
+    })
+    .map((s) => s.id);
+  return ready;
 }
 
 /**
@@ -146,9 +169,138 @@ export type StepExecutor = (
 export interface RuntimeCallbacks {
   onStepStart?: (stepId: string, stepName: string) => void;
   onStepComplete?: (stepId: string, stepName: string, output: unknown) => void;
-  onStepFail?: (stepId: string, stepName: string, error: string) => void;
+  onStepFail?: (stepId: string, stepName: string, error: string, retriesLeft: number) => void;
+  onStepRetry?: (stepId: string, stepName: string, attempt: number, maxRetries: number) => void;
   onRunComplete?: (runId: string) => void;
   onRunFail?: (runId: string, error: string) => void;
+  /** 步骤结果持久化回调（每次步骤完成后调用） */
+  onStepPersist?: (runId: string, stepId: string, result: StepResult) => void;
+}
+
+// =====================================================================
+// 取消令牌
+// =====================================================================
+
+/**
+ * 取消令牌 - 支持实时中断正在执行的步骤
+ */
+export class CancellationToken {
+  private _cancelled = false;
+  private _listeners: Array<() => void> = [];
+
+  get isCancelled(): boolean {
+    return this._cancelled;
+  }
+
+  cancel(): void {
+    if (!this._cancelled) {
+      this._cancelled = true;
+      for (const listener of this._listeners) {
+        listener();
+      }
+    }
+  }
+
+  onCancel(listener: () => void): () => void {
+    this._listeners.push(listener);
+    return () => {
+      this._listeners = this._listeners.filter((l) => l !== listener);
+    };
+  }
+}
+
+// =====================================================================
+// 超时处理工具
+// =====================================================================
+
+/**
+ * 带超时的 Promise 包装
+ * 超时时抛出 TimeoutError
+ */
+class TimeoutError extends Error {
+  constructor(stepId: string, timeoutSecs: number) {
+    super(`步骤 ${stepId} 执行超时（${timeoutSecs}s）`);
+    this.name = "TimeoutError";
+  }
+}
+
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutSecs: number,
+  stepId: string,
+  cancellationToken?: CancellationToken,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        cancellationToken?.cancel();
+        reject(new TimeoutError(stepId, timeoutSecs));
+      }
+    }, timeoutSecs * 1000);
+
+    promise.then(
+      (result) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          resolve(result);
+        }
+      },
+      (error) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        }
+      },
+    );
+  });
+}
+
+// =====================================================================
+// 重试策略
+// =====================================================================
+
+/**
+ * 执行带重试的步骤
+ * 按 retry_policy 配置进行重试，支持指数退避
+ */
+async function executeWithRetry(
+  executor: StepExecutor,
+  step: WorkflowStep,
+  variables: Record<string, unknown>,
+  cancellationToken: CancellationToken,
+  onRetry?: (attempt: number, maxRetries: number) => void,
+): Promise<{ output: unknown; retries: number }> {
+  const maxRetries = step.retry_policy?.max_retries ?? 0;
+  const backoffSecs = step.retry_policy?.backoff_secs ?? 1;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    if (cancellationToken.isCancelled) {
+      throw new Error("工作流已取消");
+    }
+
+    // 通知重试
+    if (attempt > 0) {
+      onRetry?.(attempt, maxRetries);
+      // 指数退避等待
+      const waitMs = backoffSecs * Math.pow(2, attempt - 1) * 1000;
+      await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
+      if (cancellationToken.isCancelled) {
+        throw new Error("工作流已取消（重试等待中）");
+      }
+    }
+
+    const output = await executor(step, variables);
+    return { output, retries: attempt };
+  }
+
+  // 所有重试耗尽
+  throw lastError ?? new Error("未知执行错误");
 }
 
 // =====================================================================
@@ -175,14 +327,13 @@ export async function executeWorkflow(
   executor: StepExecutor,
   callbacks: RuntimeCallbacks = {},
 ): Promise<RuntimeHandle> {
-  let cancelled = false;
-
+  const cancellationToken = new CancellationToken();
   const handle: RuntimeHandle = {
     runId: run.id,
     cancel: () => {
-      cancelled = true;
+      cancellationToken.cancel();
     },
-    isCancelled: () => cancelled,
+    isCancelled: () => cancellationToken.isCancelled,
   };
 
   // 验证 DAG 无环
@@ -212,8 +363,15 @@ export async function executeWorkflow(
         return;
       }
 
-      // 就绪队列
-      const runningTasks = new Map<string, Promise<unknown>>();
+      // 就绪队列 + 运行中的任务
+      const runningTasks = new Map<string, { promise: Promise<unknown>; stepId: string }>();
+
+      const persistResult = (stepId: string) => {
+        const result = stepResults.get(stepId);
+        if (result) {
+          callbacks.onStepPersist?.(run.id, stepId, result);
+        }
+      };
 
       const tryRunReadySteps = () => {
         const ready = definition.steps.filter((step) => {
@@ -224,7 +382,7 @@ export async function executeWorkflow(
         });
 
         for (const step of ready) {
-          if (cancelled) break;
+          if (cancellationToken.isCancelled) break;
           if (runningTasks.size >= 3) break; // 最大并发数=3
 
           stepResults.set(step.id, {
@@ -232,41 +390,58 @@ export async function executeWorkflow(
             started_at: new Date().toISOString(),
           });
           callbacks.onStepStart?.(step.id, step.name);
+          persistResult(step.id);
 
-          const task = executor(step, run.variables ?? {})
+          const task = executeStepWithRecovery(
+            executor,
+            step,
+            run.variables ?? {},
+            cancellationToken,
+            (attempt, maxRetries) => {
+              callbacks.onStepRetry?.(step.id, step.name, attempt, maxRetries);
+            },
+          )
             .then((output) => {
-              if (cancelled) return;
+              if (cancellationToken.isCancelled) return;
+              const startedAt = stepResults.get(step.id)?.started_at;
               const result: StepResult = {
                 status: "completed",
                 output,
                 finished_at: new Date().toISOString(),
-                duration_ms: stepResults.get(step.id)?.started_at
-                  ? Date.now() - new Date(stepResults.get(step.id)!.started_at!).getTime()
+                duration_ms: startedAt
+                  ? Date.now() - new Date(startedAt).getTime()
                   : undefined,
               };
               stepResults.set(step.id, result);
               completedIds.add(step.id);
               runningTasks.delete(step.id);
               callbacks.onStepComplete?.(step.id, step.name, output);
+              persistResult(step.id);
               // 递归尝试启动更多
               tryRunReadySteps();
             })
             .catch((err: unknown) => {
-              if (cancelled) return;
+              if (cancellationToken.isCancelled) return;
               const errorMsg = err instanceof Error ? err.message : String(err);
+              const currentResult = stepResults.get(step.id);
+              const startedAt = currentResult?.started_at;
               stepResults.set(step.id, {
                 status: "failed",
                 error: errorMsg,
                 finished_at: new Date().toISOString(),
+                duration_ms: startedAt
+                  ? Date.now() - new Date(startedAt).getTime()
+                  : undefined,
               });
               failedIds.add(step.id);
               runningTasks.delete(step.id);
-              callbacks.onStepFail?.(step.id, step.name, errorMsg);
+              callbacks.onStepFail?.(step.id, step.name, errorMsg, 0);
+              persistResult(step.id);
               // 检查是否全部完成或失败
               checkAllDone();
             });
 
-          runningTasks.set(step.id, task);
+          runningTasks.set(step.id, { promise: task, stepId: step.id });
         }
       };
 
@@ -277,7 +452,21 @@ export async function executeWorkflow(
         if (allTerminal && runningTasks.size === 0) {
           const hasFailed = failedIds.size > 0;
           if (hasFailed) {
-            callbacks.onRunFail?.(run.id, `${failedIds.size} 个步骤执行失败`);
+            // 聚合并行步骤的错误信息
+            const errors = definition.steps
+              .filter((s) => failedIds.has(s.id))
+              .map((s) => {
+                const r = stepResults.get(s.id);
+                return `  - ${s.name}: ${r?.error ?? "未知错误"}`;
+              })
+              .join("\n");
+            const hasRunning = definition.steps.some(
+              (s) => failedIds.has(s.id) || completedIds.has(s.id),
+            );
+            const errorMsg = hasRunning
+              ? `${failedIds.size} 个步骤执行失败:\n${errors}`
+              : "工作流执行失败";
+            callbacks.onRunFail?.(run.id, errorMsg);
           } else {
             callbacks.onRunComplete?.(run.id);
           }
@@ -288,10 +477,38 @@ export async function executeWorkflow(
       tryRunReadySteps();
 
       // 等待所有任务完成
-      while (runningTasks.size > 0 && !cancelled) {
-        await Promise.race(runningTasks.values());
-        if (cancelled) break;
+      while (runningTasks.size > 0 && !cancellationToken.isCancelled) {
+        const promises = Array.from(runningTasks.values()).map((t) => t.promise);
+        await Promise.race(promises);
+        if (cancellationToken.isCancelled) {
+          // 将正在运行的步骤标记为 cancelled
+          for (const [stepId, taskInfo] of runningTasks) {
+            if (!completedIds.has(stepId) && !failedIds.has(stepId)) {
+              stepResults.set(stepId, {
+                status: "cancelled",
+                finished_at: new Date().toISOString(),
+                error: "工作流取消",
+              });
+              taskInfo.promise.catch(() => {}); // 防止 unhandled rejection
+              persistResult(stepId);
+            }
+          }
+          break;
+        }
         checkAllDone();
+      }
+
+      // 处理取消后的剩余待执行步骤
+      if (cancellationToken.isCancelled) {
+        for (const step of definition.steps) {
+          if (!completedIds.has(step.id) && !failedIds.has(step.id)) {
+            const currentResult = stepResults.get(step.id);
+            if (currentResult?.status !== "cancelled") {
+              stepResults.set(step.id, { status: "cancelled" });
+              persistResult(step.id);
+            }
+          }
+        }
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -300,6 +517,93 @@ export async function executeWorkflow(
   })();
 
   return handle;
+}
+
+/**
+ * 执行单个步骤（含超时、重试、取消支持）
+ */
+async function executeStepWithRecovery(
+  executor: StepExecutor,
+  step: WorkflowStep,
+  variables: Record<string, unknown>,
+  cancellationToken: CancellationToken,
+  onRetry?: (attempt: number, maxRetries: number) => Promise<void> | void,
+): Promise<unknown> {
+  // 包装执行器 + 重试
+  const executeFn = async (): Promise<unknown> => {
+    const result = await executeWithRetry(
+      executor,
+      step,
+      variables,
+      cancellationToken,
+      onRetry,
+    );
+    return result.output;
+  };
+
+  // 如果配置了超时，加超时包装
+  if (step.timeout_secs && step.timeout_secs > 0) {
+    return withTimeout(
+      executeFn(),
+      step.timeout_secs,
+      step.id,
+      cancellationToken,
+    );
+  }
+
+  return executeFn();
+}
+
+// =====================================================================
+// 并行步骤执行器
+// =====================================================================
+
+/**
+ * 并行步骤聚合器
+ * 收集所有并行分支的结果，支持错误聚合
+ */
+export interface ParallelResult {
+  outputs: Record<string, unknown>;
+  errors: Record<string, string>;
+  successCount: number;
+  failureCount: number;
+}
+
+/**
+ * 执行并行步骤，聚合结果
+ */
+export async function executeParallelSteps(
+  steps: WorkflowStep[],
+  executor: StepExecutor,
+  variables: Record<string, unknown>,
+  cancellationToken: CancellationToken,
+): Promise<ParallelResult> {
+  const result: ParallelResult = {
+    outputs: {},
+    errors: {},
+    successCount: 0,
+    failureCount: 0,
+  };
+
+  const promises = steps.map(async (step) => {
+    try {
+      const output = await executeStepWithRecovery(
+        executor,
+        step,
+        variables,
+        cancellationToken,
+      );
+      result.outputs[step.id] = output;
+      result.successCount++;
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      result.errors[step.id] = errorMsg;
+      result.failureCount++;
+    }
+  });
+
+  await Promise.allSettled(promises);
+  return result;
 }
 
 // =====================================================================

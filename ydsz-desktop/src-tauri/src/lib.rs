@@ -46,6 +46,9 @@
 // 所有子模块均通过 `pub mod` 暴露，供 Tauri invoke_handler 引用
 mod commands;
 
+// Tauri Manager trait——提供 app.manage() / app.handle() 等方法
+use tauri::Manager;
+
 // OpenTelemetry 分布式追踪初始化
 mod telemetry;
 
@@ -132,10 +135,10 @@ use commands::{
     self_update::*,      // 自更新基础设施（P2-10: 多镜像源探测 + Tauri updater）
     hooks::*,            // Workspace Hooks 脚本执行
     cua::*,              // CUA (Computer Use Agent) 命令 stub
+    workflow::*,         // 动态工作流引擎（P0-1）
 };
 
 use std::net::SocketAddr;
-mod connectors;
 use std::sync::Arc;
 use ydsz_shared::config::ServerConfig;
 use ydsz_server::{bootstrap_embedded, BootstrapResult};
@@ -461,7 +464,7 @@ pub fn run() {
         .manage(commands::connector_presets::ConnectorPresetsState::new()) // Connector 预置状态 (G16)
         .manage(commands::evolution::EvolutionState::new())             // 自进化状态 (G18)
         .manage(commands::push::PushSchedulerState::new())             // 推送调度器 (G19)
-        .manage(commands::workflow::WorkflowState::new())              // Dynamic Workflow Engine (P0-1)
+        // WorkflowState 将在 setup 中初始化（见 .setup() 闭包），因为需要 app_handle 解析持久化路径
 
         // ========== 无边框窗口初始化 ==========
         // Windows / Linux：移除原生标题栏（min/max/close），由前端自定义标题栏按钮承担
@@ -539,6 +542,12 @@ pub fn run() {
                         tracing::warn!(?error, "启动时加载 Checkpoint 失败,使用空列表");
                     }
                 }
+            }
+            // 初始化 WorkflowState（延迟注入，需要 app_handle）
+            {
+                let wf_state = commands::workflow::WorkflowState::new(app.handle());
+                app.manage(wf_state);
+                info!("工作流引擎已初始化，模板从磁盘加载");
             }
             let _ = app;
             Ok(())
@@ -1143,6 +1152,7 @@ pub fn run() {
             workflow_template_list,           // 列出工作流模板
             workflow_template_find_by_tag,    // 按标签筛选模板
             workflow_template_create,         // 创建自定义模板
+            workflow_template_delete,         // 删除模板（持久化）
             workflow_instance_create,         // 创建工作流实例
             workflow_instance_list,           // 列出所有实例
             workflow_instance_get,            // 获取实例详情
@@ -1151,6 +1161,8 @@ pub fn run() {
             workflow_node_fail,               // 标记节点失败
             workflow_instance_pause,          // 暂停实例
             workflow_instance_resume,         // 恢复实例
+            workflow_instance_cancel,         // 取消实例（持久化）
+            workflow_storage_dir,             // 获取持久化存储路径
         ])
         // ========== 应用上下文生成 ==========
         .setup(|_app| {

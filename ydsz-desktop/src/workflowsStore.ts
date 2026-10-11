@@ -7,8 +7,16 @@
  *
  * ## 持久化
  *
- * - 存储 key: `ydsz-buddy:workflows:v1`
+ * - 存储 key: `ydsz-buddy:workflows:v2`
  * - 使用 zustand/middleware persist + localStorage
+ *
+ * ## 错误恢复增强
+ *
+ * - 手动触发 workflow（带变量输入）
+ * - 运行历史保存/加载
+ * - 运行暂停/恢复
+ * - 步骤结果自动持久化
+ * - 重试计数跟踪
  */
 
 import { create } from "zustand";
@@ -21,7 +29,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 export type WorkflowTriggerType = "manual" | "schedule" | "event" | "hook";
 export type WorkflowStepType = "agent" | "tool" | "shell" | "condition" | "parallel" | "wait" | "subworkflow";
 export type StepStatus = "pending" | "running" | "completed" | "failed" | "skipped" | "cancelled";
-export type WorkflowRunStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+export type WorkflowRunStatus = "pending" | "running" | "paused" | "completed" | "failed" | "cancelled";
 
 export interface WorkflowTrigger {
   type: WorkflowTriggerType;
@@ -99,7 +107,7 @@ export interface WorkflowRun {
 // Constants
 // =====================================================================
 
-const WORKFLOWS_STORAGE_KEY = "ydsz-buddy:workflows:v1";
+const WORKFLOWS_STORAGE_KEY = "ydsz-buddy:workflows:v2";
 
 // =====================================================================
 // Utilities
@@ -290,6 +298,8 @@ interface WorkflowsStoreState {
   definitions: WorkflowDefinition[];
   runs: WorkflowRun[];
   builtInSeeded: boolean;
+  /** 当前活跃的运行 ID（用于快速查询） */
+  activeRunIds: string[];
 
   // Definition CRUD
   listDefinitions: () => WorkflowDefinition[];
@@ -303,7 +313,24 @@ interface WorkflowsStoreState {
   getRun: (id: string) => WorkflowRun | undefined;
   updateRun: (id: string, patch: Partial<WorkflowRun>) => boolean;
   listRuns: () => WorkflowRun[];
+  listRunsByWorkflow: (workflowName: string) => WorkflowRun[];
   cancelRun: (id: string) => boolean;
+
+  // 手动触发运行（带变量输入 + 执行）
+  triggerRun: (definition: WorkflowDefinition, variables?: Record<string, unknown>) => WorkflowRun;
+
+  // 运行暂停/恢复
+  pauseRun: (id: string) => boolean;
+  resumeRun: (id: string) => boolean;
+
+  // 步骤结果持久化
+  persistStepResult: (runId: string, stepId: string, result: StepResult) => boolean;
+  updateStepStatus: (runId: string, stepId: string, status: StepStatus, error?: string) => boolean;
+  updateStepOutput: (runId: string, stepId: string, output: unknown) => boolean;
+
+  // 历史记录管理
+  clearFinishedRuns: () => void;
+  getRecentRuns: (limit: number) => WorkflowRun[];
 
   // Built-in seeding
   seedBuiltinWorkflows: () => void;
@@ -315,6 +342,7 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
       definitions: [],
       runs: [],
       builtInSeeded: false,
+      activeRunIds: [],
 
       // ---- Definition CRUD ----
 
@@ -369,6 +397,7 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
         };
         set((state) => ({
           runs: [run, ...state.runs],
+          activeRunIds: [...state.activeRunIds, run.id],
         }));
         return run;
       },
@@ -383,12 +412,20 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
           updated = true;
           const next = [...state.runs];
           next[idx] = { ...next[idx], ...patch };
-          return { runs: next };
+          // 如果运行结束，从 activeRunIds 中移除
+          const newStatus = patch.status;
+          let activeRunIds = state.activeRunIds;
+          if (newStatus && newStatus !== "running" && newStatus !== "pending" && newStatus !== "paused") {
+            activeRunIds = activeRunIds.filter((rid) => rid !== id);
+          }
+          return { runs: next, activeRunIds };
         });
         return updated;
       },
 
       listRuns: () => get().runs,
+
+      listRunsByWorkflow: (workflowName) => get().runs.filter((r) => r.workflow_name === workflowName),
 
       cancelRun: (id) => {
         let cancelled = false;
@@ -396,18 +433,157 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
           const idx = state.runs.findIndex((r) => r.id === id);
           if (idx === -1) return state;
           const run = state.runs[idx];
-          if (run.status !== "running" && run.status !== "pending") return state;
+          if (run.status !== "running" && run.status !== "pending" && run.status !== "paused") return state;
           cancelled = true;
           const next = [...state.runs];
+          // 将正在运行的步骤标记为 cancelled
+          const updatedStepResults = { ...run.step_results };
+          for (const stepId of run.current_steps) {
+            if (updatedStepResults[stepId]?.status === "running") {
+              updatedStepResults[stepId] = {
+                ...updatedStepResults[stepId],
+                status: "cancelled",
+                finished_at: nowIso(),
+              };
+            }
+          }
+          // 将 pending 步骤标记为 skipped
+          // 注意：这里简化处理，实际需要从 definition 获取全部步骤
           next[idx] = {
             ...run,
             status: "cancelled",
             finished_at: nowIso(),
+            step_results: updatedStepResults,
           };
-          return { runs: next };
+          return {
+            runs: next,
+            activeRunIds: state.activeRunIds.filter((rid) => rid !== id),
+          };
         });
         return cancelled;
       },
+
+      // ---- 手动触发运行 ----
+
+      triggerRun: (definition, variables) => {
+        const run = get().createRun(definition, variables);
+        // 将运行状态设置为 running
+        get().updateRun(run.id, { status: "running" });
+        return { ...run, status: "running" as const };
+      },
+
+      // ---- 运行暂停/恢复 ----
+
+      pauseRun: (id) => {
+        let paused = false;
+        set((state) => {
+          const idx = state.runs.findIndex((r) => r.id === id);
+          if (idx === -1) return state;
+          const run = state.runs[idx];
+          if (run.status !== "running") return state;
+          paused = true;
+          const next = [...state.runs];
+          next[idx] = { ...run, status: "paused" };
+          return { runs: next };
+        });
+        return paused;
+      },
+
+      resumeRun: (id) => {
+        let resumed = false;
+        set((state) => {
+          const idx = state.runs.findIndex((r) => r.id === id);
+          if (idx === -1) return state;
+          const run = state.runs[idx];
+          if (run.status !== "paused") return state;
+          resumed = true;
+          const next = [...state.runs];
+          next[idx] = { ...run, status: "running" };
+          return {
+            runs: next,
+            activeRunIds: state.activeRunIds.includes(id)
+              ? state.activeRunIds
+              : [...state.activeRunIds, id],
+          };
+        });
+        return resumed;
+      },
+
+      // ---- 步骤结果持久化 ----
+
+      persistStepResult: (runId, stepId, result) => {
+        let updated = false;
+        set((state) => {
+          const idx = state.runs.findIndex((r) => r.id === runId);
+          if (idx === -1) return state;
+          updated = true;
+          const next = [...state.runs];
+          const run = { ...next[idx] };
+          run.step_results = { ...run.step_results, [stepId]: result };
+          next[idx] = run;
+          return { runs: next };
+        });
+        return updated;
+      },
+
+      updateStepStatus: (runId, stepId, status, error) => {
+        let updated = false;
+        set((state) => {
+          const idx = state.runs.findIndex((r) => r.id === runId);
+          if (idx === -1) return state;
+          updated = true;
+          const next = [...state.runs];
+          const run = { ...next[idx] };
+          const current = run.step_results[stepId] ?? { status: "pending" as StepStatus };
+          run.step_results = {
+            ...run.step_results,
+            [stepId]: { ...current, status, error: error ?? current.error },
+          };
+          // 更新 current_steps
+          if (status === "running") {
+            if (!run.current_steps.includes(stepId)) {
+              run.current_steps = [...run.current_steps, stepId];
+            }
+          } else if (status !== "pending") {
+            run.current_steps = run.current_steps.filter((id) => id !== stepId);
+          }
+          next[idx] = run;
+          return { runs: next };
+        });
+        return updated;
+      },
+
+      updateStepOutput: (runId, stepId, output) => {
+        let updated = false;
+        set((state) => {
+          const idx = state.runs.findIndex((r) => r.id === runId);
+          if (idx === -1) return state;
+          updated = true;
+          const next = [...state.runs];
+          const run = { ...next[idx] };
+          const current = run.step_results[stepId] ?? { status: "completed" as StepStatus };
+          run.step_results = {
+            ...run.step_results,
+            [stepId]: { ...current, output, status: "completed" },
+          };
+          run.current_steps = run.current_steps.filter((id) => id !== stepId);
+          next[idx] = run;
+          return { runs: next };
+        });
+        return updated;
+      },
+
+      // ---- 历史记录管理 ----
+
+      clearFinishedRuns: () => {
+        set((state) => ({
+          runs: state.runs.filter(
+            (r) => r.status === "running" || r.status === "pending" || r.status === "paused",
+          ),
+        }));
+      },
+
+      getRecentRuns: (limit) => get().runs.slice(0, limit),
 
       // ---- Built-in Seed ----
 
@@ -436,11 +612,15 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
         }
         return window.localStorage;
       }),
-      version: 1,
+      version: 2,
       partialize: (state) => ({
         definitions: state.definitions,
-        runs: state.runs.slice(0, 50), // 只保留最近 50 条运行记录
+        runs: state.runs.slice(0, 100), // 保留最近 100 条运行记录
         builtInSeeded: state.builtInSeeded,
+        activeRunIds: state.activeRunIds.filter((id) => {
+          const run = state.runs.find((r) => r.id === id);
+          return run && (run.status === "running" || run.status === "pending" || run.status === "paused");
+        }),
       }),
       merge: (persistedState, currentState) => {
         const p = (persistedState ?? {}) as Partial<WorkflowsStoreState>;
@@ -449,6 +629,7 @@ export const useWorkflowsStore = create<WorkflowsStoreState>()(
           definitions: Array.isArray(p.definitions) ? p.definitions : [],
           runs: Array.isArray(p.runs) ? p.runs : [],
           builtInSeeded: p.builtInSeeded ?? false,
+          activeRunIds: Array.isArray(p.activeRunIds) ? p.activeRunIds : [],
         };
       },
     },

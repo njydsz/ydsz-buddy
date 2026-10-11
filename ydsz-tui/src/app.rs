@@ -39,6 +39,8 @@ pub struct TuiApp {
     pub current_workspace: Option<String>,
     /// 是否正在运行
     pub running: bool,
+    /// 连接状态描述（用于显示重连信息）
+    pub connection_status: Option<String>,
     /// 会话列表
     pub threads: Vec<ydsz_core::models::Thread>,
     /// 当前对话的消息列表
@@ -71,6 +73,7 @@ impl TuiApp {
             client: Arc::new(YdszClient::new(server_url)),
             current_workspace: None,
             running: true,
+            connection_status: Some("正在连接...".to_string()),
             threads: Vec::new(),
             messages: Vec::new(),
             input: String::new(),
@@ -81,7 +84,7 @@ impl TuiApp {
 
     /// 主运行循环（完整 TUI 模式）
     pub async fn run(&mut self) -> Result<()> {
-        use crossterm::event::{self, Event, KeyCode, KeyModifiers};
+        use crossterm::event::{self, Event};
         use crossterm::{execute, terminal};
         use std::io;
         use std::time::Duration;
@@ -140,14 +143,34 @@ impl TuiApp {
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<ClientEvent>();
         self.client.connect(tx).await?;
 
+        // 等待连接建立（最多等 10 秒）
+        let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(10);
+        loop {
+            if self.client.is_connected() {
+                break;
+            }
+            let timeout = deadline.saturating_duration_since(tokio::time::Instant::now());
+            if timeout.is_zero() {
+                anyhow::bail!("连接超时：10 秒内未能建立连接");
+            }
+            match tokio::time::timeout(timeout, rx.recv()).await {
+                Ok(Some(ClientEvent::ConnectionStatus { connected: true, .. })) => break,
+                Ok(Some(_)) => continue,
+                Ok(None) => anyhow::bail!("连接通道已关闭"),
+                Err(_) => anyhow::bail!("连接超时：10 秒内未能建立连接"),
+            }
+        }
+
         // 发送用户消息
         self.client.send_message(prompt).await?;
 
         // 等待并打印响应
+        let mut got_response = false;
         while let Some(event) = rx.recv().await {
             match event {
                 ClientEvent::MessageDelta { delta, .. } => {
                     print!("{delta}");
+                    got_response = true;
                 }
                 ClientEvent::TurnComplete { .. } => {
                     println!();
@@ -155,11 +178,20 @@ impl TuiApp {
                     break;
                 }
                 ClientEvent::Error { message } => {
-                    eprintln!("错误: {message}");
+                    eprintln!("\n错误: {message}");
                     break;
+                }
+                ClientEvent::ConnectionStatus { connected: false, reconnecting } => {
+                    if let Some(msg) = reconnecting {
+                        eprintln!("\n[连接异常: {}]", msg);
+                    }
                 }
                 _ => {}
             }
+        }
+
+        if !got_response {
+            eprintln!("警告：未收到任何响应");
         }
 
         Ok(())
@@ -234,8 +266,21 @@ impl TuiApp {
     /// 处理服务端推送事件
     async fn handle_client_event(&mut self, event: ClientEvent) {
         match event {
+            ClientEvent::ConnectionStatus { connected, reconnecting } => {
+                self.connection_status = if connected {
+                    reconnecting.clone().or_else(|| Some("已连接".to_string()))
+                } else {
+                    reconnecting.clone().or_else(|| Some("已断开".to_string()))
+                };
+            }
             ClientEvent::ThreadList { threads } => {
                 self.threads = threads;
+            }
+            ClientEvent::MessageComplete { thread: _ } => {
+                // 消息传输完成，确保最后一条消息的 streaming 标记为 false
+                if let Some(last) = self.messages.last_mut() {
+                    last.streaming = false;
+                }
             }
             ClientEvent::MessageDelta { thread_id: _, delta } => {
                 // 流式更新最后一条助手消息
@@ -287,11 +332,8 @@ impl TuiApp {
                     updated_at: chrono::Utc::now(),
                 });
             }
-            _ => {}
         }
     }
-
-    /// 渲染当前界面到 Frame
     fn render(&mut self, frame: &mut Frame<'_>) {
         use ratatui::layout::{Constraint, Direction, Layout};
 

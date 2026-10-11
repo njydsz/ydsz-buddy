@@ -82,7 +82,7 @@ const CoordinatePoint = memo(function CoordinatePoint(props: {
     element,
     containerWidth,
     containerHeight,
-    scale,
+    scale: _scale,
     compact,
     isHovered,
     onHover,

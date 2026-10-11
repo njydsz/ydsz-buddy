@@ -11,13 +11,13 @@ use serde_json::Value;
 use tauri::State;
 use tracing::info;
 
-use crate::connectors::presets::github::{
+use crate::commands::connectors::presets::github::{
     CreateIssueRequest, GitHubConfig, GitHubConnector,
 };
-use crate::connectors::presets::notion::{
+use crate::commands::connectors::presets::notion::{
     CreatePageRequest, NotionConfig, NotionConnector,
 };
-use crate::connectors::presets::slack::{
+use crate::commands::connectors::presets::slack::{
     SendMessageRequest, SlackConfig, SlackConnector,
 };
 

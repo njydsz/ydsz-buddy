@@ -244,7 +244,7 @@ pub async fn im_channel_connect(
     let registry_clone = state.registry.clone();
 
     // 启动飞书 WebSocket 连接任务
-    let ws_client = FeishuWsClient::new(ws_config, tx_inbound, channel_id.clone());
+    let ws_client = FeishuWsClient::new(ws_config, tx_inbound.clone(), channel_id.clone());
 
     tokio::spawn(async move {
         // 飞书 WS 连接任务
@@ -293,11 +293,7 @@ pub async fn im_channel_connect(
             app_secret: config.app_secret,
             ..Default::default()
         },
-        state.registry.channels.lock().map(|_| tx_outbound).unwrap_or_else(|_| {
-            // 创建新的 sender（用于实际 WS 入站处理）
-            let (tx, _) = tokio::sync::mpsc::channel(1);
-            tx
-        }),
+        tx_inbound,
         channel_id.clone(),
     );
 

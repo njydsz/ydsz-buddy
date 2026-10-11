@@ -207,7 +207,7 @@ fn extract_docx_text(path: &Path) -> Result<String, String> {
     }
 
     // 简单 XML 标签剥离（<w:t> 标签内的文本）
-    extract_xml_text(&xml_content, "w:t")
+    Ok(extract_xml_text(&xml_content, "w:t"))
 }
 
 /// 提取 PPTX 文本
@@ -266,7 +266,7 @@ fn extract_xlsx_text(path: &Path) -> Result<String, String> {
         let _ = f.read_to_string(&mut sheet_content);
     }
 
-    extract_sheet_text(&sheet_content, &shared_strings)
+    Ok(extract_sheet_text(&sheet_content, &shared_strings))
 }
 
 // ──────────── XML 解析辅助 ────────────

@@ -2,6 +2,8 @@
 //!
 //! 显示当前工作区中的所有活跃会话线程，支持选择、新建等操作。
 
+use std::sync::{LazyLock, Mutex};
+
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyModifiers};
 use ratatui::{
@@ -16,7 +18,7 @@ use crate::app::{Screen, TuiApp};
 use crate::theme::Theme;
 
 /// 当前列表选中的索引
-static mut SELECTED_INDEX: usize = 0;
+static SELECTED_INDEX: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(0));
 
 /// 渲染会话列表
 pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
@@ -56,11 +58,12 @@ pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Re
             .collect()
     };
 
+    let selected = *SELECTED_INDEX.lock().unwrap();
     let items: Vec<ListItem> = threads
         .iter()
         .enumerate()
         .map(|(i, (title, subtitle))| {
-            let style = if unsafe { SELECTED_INDEX } == i {
+            let style = if selected == i {
                 theme.selected()
             } else {
                 theme.text()
@@ -97,7 +100,7 @@ pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Re
         .highlight_style(theme.selected());
 
     let mut state = ListState::default();
-    state.select(Some(unsafe { SELECTED_INDEX }));
+    state.select(Some(selected));
     frame.render_stateful_widget(list, chunks[1], &mut state);
 
     // 底部操作提示
@@ -126,25 +129,24 @@ pub async fn handle_input(
 
     match code {
         KeyCode::Up => {
-            unsafe {
-                if SELECTED_INDEX > 0 {
-                    SELECTED_INDEX -= 1;
-                }
+            let mut idx = SELECTED_INDEX.lock().unwrap();
+            if *idx > 0 {
+                *idx -= 1;
             }
         }
         KeyCode::Down => {
-            unsafe {
-                if SELECTED_INDEX < max_index {
-                    SELECTED_INDEX += 1;
-                }
+            let mut idx = SELECTED_INDEX.lock().unwrap();
+            if *idx < max_index {
+                *idx += 1;
             }
         }
         KeyCode::Enter => {
             // 进入选中的会话
+            let idx = *SELECTED_INDEX.lock().unwrap();
             let thread_id = if app.threads.is_empty() {
-                format!("skeleton-thread-{}", unsafe { SELECTED_INDEX })
+                format!("skeleton-thread-{}", idx)
             } else {
-                app.threads[unsafe { SELECTED_INDEX }].id.to_string()
+                app.threads[idx].id.to_string()
             };
             app.screen = Screen::Chat { thread_id };
         }

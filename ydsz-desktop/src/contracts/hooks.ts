@@ -78,12 +78,8 @@ export const WorkspaceHook = Schema.Struct({
     Schema.String.pipe(Schema.maxLength(HOOK_SCRIPT_CONTENT_MAX_LENGTH)),
   ),
   skillId: Schema.optional(TrimmedNonEmptyString),
-  timeoutSecs: PositiveInt.pipe(Schema.lessThanOrEqualTo(300)).pipe(
-    Schema.withDecodingDefault(() => HOOK_DEFAULT_TIMEOUT_SECS),
-  ),
-  errorPolicy: HookErrorPolicy.pipe(
-    Schema.withDecodingDefault(() => "continue" as const),
-  ),
+  timeoutSecs: Schema.optional(PositiveInt.pipe(Schema.lessThanOrEqualTo(300))),
+  errorPolicy: Schema.optional(HookErrorPolicy),
   createdAt: Schema.optional(Schema.String),
   updatedAt: Schema.optional(Schema.String),
 });

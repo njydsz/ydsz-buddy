@@ -1,18 +1,34 @@
 /**
  * @file 应用外壳
- * @description Web 应用主壳：侧边栏 + Chat 区域 + 设置面板
+ * @description Web 应用主壳：侧边栏 + Chat 区域 + 设置面板 + WebSocket 初始化
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { WebSidebar } from "./components/WebSidebar";
 import { WebChatView } from "./components/WebChatView";
 import { WebSettingsPanel } from "./components/WebSettingsPanel";
 import { useAppStore } from "./store/appStore";
+import { getSharedWsClient } from "./adapters/wsClient";
 
 export function App() {
-  const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const { sidebarOpen, setSidebarOpen, setConnectionStatus } = useAppStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // ── 初始化 WebSocket 连接 ──────────────────────────────────────────
+  useEffect(() => {
+    const client = getSharedWsClient({
+      onConnected: () => setConnectionStatus("connected"),
+      onDisconnected: () => setConnectionStatus("disconnected"),
+      onError: () => setConnectionStatus("error"),
+    });
+    client.connect();
+
+    return () => {
+      // 页面关闭时断开连接
+      client.dispose();
+    };
+  }, [setConnectionStatus]);
 
   const handleOpenSettings = useCallback(() => {
     setSettingsOpen(true);

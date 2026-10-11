@@ -88,7 +88,7 @@ export const WorkflowStep = Schema.Struct({
       backoff_secs: Schema.Number,
     }),
   ),
-  timeout_secs: Schema.optional(Schema.String.pipe(Schema.brand("PositiveInt") as unknown as Schema.Schema<number, string>)),
+  timeout_secs: Schema.optional(Schema.Number),
   // 条件分支专用：condition 类型的条件表达式
   condition_expression: Schema.optional(Schema.String),
   // 并行分支专用：parallel 类型的子步骤
@@ -155,6 +155,7 @@ export type StepResult = typeof StepResult.Type;
 export const WorkflowRunStatus = Schema.Literal(
   "pending",
   "running",
+  "paused",
   "completed",
   "failed",
   "cancelled",
@@ -182,6 +183,7 @@ export type WorkflowRun = typeof WorkflowRun.Type;
 export const WORKFLOW_RUN_STATUS_LABELS: Record<string, string> = {
   pending: "待执行",
   running: "运行中",
+  paused: "已暂停",
   completed: "已完成",
   failed: "失败",
   cancelled: "已取消",

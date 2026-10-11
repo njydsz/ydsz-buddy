@@ -352,9 +352,8 @@ pub async fn ssh_detect_tool_versions(
         .get(&connection_id)
         .await
         .map_err(|e| e.to_string())?;
-    let versions = ydsz_shared::ssh::detect_tool_versions(&*conn)
-        .await
-        .map_err(|e| e.to_string())?;
+    let versions = ydsz_shared::ssh::detect_tool_versions(&conn)
+        .await;
     versions
         .into_iter()
         .map(|v| serde_json::to_value(v).map_err(|e| e.to_string()))

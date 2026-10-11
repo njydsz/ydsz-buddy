@@ -52,7 +52,7 @@ impl FeishuWsClient {
         let base_delay = Duration::from_secs(2);
 
         loop {
-            (self.channel_id.clone(), ImChannelStatus::Connecting, None);
+            (status_cb)(self.channel_id.clone(), ImChannelStatus::Connecting, None);
 
             // 1. 获取 tenant_access_token
             let token = match self.fetch_tenant_token().await {
@@ -63,7 +63,7 @@ impl FeishuWsClient {
                 }
                 Err(e) => {
                     error!("[FeishuWS] 获取 token 失败: {}", e);
-                    (self.channel_id.clone(), ImChannelStatus::Error, Some(e.clone()));
+                    (status_cb)(self.channel_id.clone(), ImChannelStatus::Error, Some(e.clone()));
                     retry_count += 1;
                     if retry_count > max_retries {
                         error!("[FeishuWS] 超过最大重试次数，停止连接");
@@ -88,7 +88,7 @@ impl FeishuWsClient {
             match connect_async(&ws_url).await {
                 Ok((ws_stream, _)) => {
                     info!("[FeishuWS] WebSocket 连接成功");
-                    (self.channel_id.clone(), ImChannelStatus::Connected, None);
+                    (status_cb)(self.channel_id.clone(), ImChannelStatus::Connected, None);
                     retry_count = 0;
 
                     // 3. 进入消息接收循环
@@ -96,11 +96,11 @@ impl FeishuWsClient {
                         warn!("[FeishuWS] 消息循环异常: {}", e);
                     }
 
-                    (self.channel_id.clone(), ImChannelStatus::Disconnected, None);
+                    (status_cb)(self.channel_id.clone(), ImChannelStatus::Disconnected, None);
                 }
                 Err(e) => {
                     error!("[FeishuWS] 连接失败: {}", e);
-                    (self.channel_id.clone(), ImChannelStatus::Error, Some(format!("WS 连接失败: {}", e)));
+                    (status_cb)(self.channel_id.clone(), ImChannelStatus::Error, Some(format!("WS 连接失败: {}", e)));
                     retry_count += 1;
                 }
             }

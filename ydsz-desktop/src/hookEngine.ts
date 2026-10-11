@@ -21,10 +21,18 @@ import {
   type HookEvent,
   type HookExecutionContext,
   type HookExecutionResult,
-  type HookExecutionStatus,
   type WorkspaceHook,
 } from "./contracts/hooks";
 import { useHooksStore } from "./hooksStore";
+
+/** 可传递给 emit 的部分上下文字段（不含 triggerId 和 timestamp，由引擎自动补充） */
+export type PartialHookContext = {
+  workspaceId?: string;
+  workspacePath?: string;
+  sessionId?: string;
+  filePath?: string;
+  command?: string;
+};
 
 // ===== 事件发射器 =====
 
@@ -86,7 +94,7 @@ class HookEngine {
    */
   emit(
     event: HookEvent,
-    partialContext?: Omit<HookExecutionContext, "triggerId" | "timestamp">,
+    partialContext?: PartialHookContext,
   ): void {
     if (!this.initialized) {
       console.warn("[HookEngine] 引擎未初始化，忽略事件:", event);
@@ -203,7 +211,7 @@ class HookEngine {
     startTime: number,
   ): Promise<HookExecutionResult> {
     const scriptContent = hook.scriptContent ?? "";
-    const timeoutMs = hook.timeoutSecs * 1000;
+    const timeoutMs = (hook.timeoutSecs ?? 30) * 1000;
 
     // 环境变量
     const env: Record<string, string> = {

@@ -25,8 +25,8 @@ import {
   PiArrowsOut,
   PiCamera,
   PiCursor,
-  PiTextTB,
-  PiHandSwipeUp,
+  PiTextT,
+  PiHand,
 } from "react-icons/pi";
 import { cn } from "~/lib/utils";
 import type {
@@ -197,7 +197,7 @@ function CuaScreenshotViewerInner(props: CuaScreenshotViewerProps) {
         setError("Tauri API 不可用");
         return;
       }
-      const result = await tauri.invoke<CuaGetScreenshotResponse>(
+      await tauri.invoke<CuaGetScreenshotResponse>(
         "cua_get_screenshot",
         {},
       );
@@ -443,7 +443,7 @@ function CuaScreenshotViewerInner(props: CuaScreenshotViewerProps) {
                 className="p-1 rounded border border-border/40 text-xs hover:bg-muted/50 transition-colors"
                 title="输入文字"
               >
-                <PiTextTB />
+                <PiTextT />
               </button>
             )}
             {selectedElement.interactive && (
@@ -460,7 +460,7 @@ function CuaScreenshotViewerInner(props: CuaScreenshotViewerProps) {
               className="p-1 rounded border border-border/40 text-xs hover:bg-muted/50 transition-colors"
               title="悬停"
             >
-              <PiHandSwipeUp />
+              <PiHand />
             </button>
           </div>
         </div>

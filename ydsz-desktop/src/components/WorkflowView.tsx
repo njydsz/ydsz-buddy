@@ -18,7 +18,7 @@ import type {
   WorkflowRun,
   WorkflowStep,
   StepResult,
-} from "../contracts/workflow";
+} from "../workflowsStore";
 
 // =====================================================================
 // Main Component
@@ -111,7 +111,7 @@ export function WorkflowView() {
       {detailPanelOpen && selectedRun && (
         <RunDetailPanel
           run={selectedRun}
-          definitionName={selected_run.workflow_name}
+          definitionName={selectedRun.workflow_name}
           selectedNodeId={selectedNodeId}
           onSelectNode={setSelectedNodeId}
           onClose={() => {
@@ -175,7 +175,7 @@ function DefinitionList({
           <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
             <span>{def.steps.length} 步骤</span>
             <span>
-              {def.triggers.map((t) => t.type).join(", ") || "手动"}
+              {def.triggers?.map((t) => t.type).join(", ") || "手动"}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-3">
@@ -406,7 +406,7 @@ function DefinitionDetailPanel({
         {/* Triggers & Variables summary */}
         <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
           <span>
-            触发: {definition.triggers.map((t) => t.type).join(", ") || "手动"}
+            触发: {definition.triggers?.map((t) => t.type).join(", ") || "手动"}
           </span>
           {definition.variables && definition.variables.length > 0 && (
             <span>变量: {definition.variables.length}</span>

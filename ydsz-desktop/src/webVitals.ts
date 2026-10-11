@@ -144,7 +144,7 @@ function setupCLSObserver(): void {
 
         if (
           sessionValue &&
-          layoutShiftEntry.startTime - (lastEntry?.endTime ?? 0) < 1000 &&
+          layoutShiftEntry.startTime - ((lastEntry as PerformanceEntry & { endTime: number })?.endTime ?? 0) < 1000 &&
           layoutShiftEntry.startTime - (firstEntry?.startTime ?? 0) < 5000
         ) {
           sessionValue += layoutShiftEntry.value;
@@ -191,7 +191,7 @@ function setupINPObserver(): void {
         });
       }
     });
-    observer.observe({ type: "event", buffered: true, durationThreshold: 16 });
+    observer.observe({ type: "event", buffered: true, durationThreshold: 16 } as PerformanceObserverInit);
     observers.push(observer);
   } catch {
     // INP not supported (durationThreshold 或 event type)

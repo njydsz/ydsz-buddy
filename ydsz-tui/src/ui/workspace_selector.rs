@@ -3,6 +3,8 @@
 //! 启动时显示可用工作区列表，用户通过上下箭头选择，
 //! 确认后进入会话列表界面。
 
+use std::sync::{LazyLock, Mutex};
+
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyModifiers};
 use ratatui::{
@@ -24,20 +26,7 @@ const WORKSPACES: &[&str] = &[
 ];
 
 /// 当前列表选中的索引
-static mut SELECTED_INDEX: usize = 0;
-static mut LIST_STATE: Option<ListState> = None;
-
-/// 初始化列表状态
-fn ensure_list_state() -> &'static mut ListState {
-    unsafe {
-        if LIST_STATE.is_none() {
-            let mut state = ListState::default();
-            state.select(Some(0));
-            LIST_STATE = Some(state);
-        }
-        LIST_STATE.as_mut().unwrap()
-    }
-}
+static SELECTED_INDEX: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(0));
 
 /// 渲染工作区选择界面
 pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
@@ -63,11 +52,12 @@ pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Re
     frame.render_widget(title, chunks[0]);
 
     // 工作区列表
+    let selected = *SELECTED_INDEX.lock().unwrap();
     let items: Vec<ListItem> = WORKSPACES
         .iter()
         .enumerate()
         .map(|(i, ws)| {
-            let style = if unsafe { SELECTED_INDEX } == i && matches!(app.screen, Screen::WorkspaceSelect) {
+            let style = if selected == i && matches!(app.screen, Screen::WorkspaceSelect) {
                 theme.selected()
             } else {
                 theme.text()
@@ -91,7 +81,7 @@ pub fn render(app: &mut TuiApp, frame: &mut Frame<'_>, area: ratatui::layout::Re
         .highlight_style(theme.selected());
 
     let mut state = ListState::default();
-    state.select(Some(unsafe { SELECTED_INDEX }));
+    state.select(Some(selected));
     frame.render_stateful_widget(list, chunks[1], &mut state);
 
     // 底部提示
@@ -115,24 +105,21 @@ pub async fn handle_input(
 ) -> Result<()> {
     match code {
         KeyCode::Up => {
-            unsafe {
-                if SELECTED_INDEX > 0 {
-                    SELECTED_INDEX -= 1;
-                }
+            let mut idx = SELECTED_INDEX.lock().unwrap();
+            if *idx > 0 {
+                *idx -= 1;
             }
         }
         KeyCode::Down => {
-            unsafe {
-                if SELECTED_INDEX < WORKSPACES.len() - 1 {
-                    SELECTED_INDEX += 1;
-                }
+            let mut idx = SELECTED_INDEX.lock().unwrap();
+            if *idx < WORKSPACES.len() - 1 {
+                *idx += 1;
             }
         }
         KeyCode::Enter => {
             // 确认选择，切换到会话列表
-            unsafe {
-                app.current_workspace = Some(WORKSPACES[SELECTED_INDEX].to_string());
-            }
+            let idx = *SELECTED_INDEX.lock().unwrap();
+            app.current_workspace = Some(WORKSPACES[idx].to_string());
             app.screen = Screen::SessionList;
         }
         _ => {}

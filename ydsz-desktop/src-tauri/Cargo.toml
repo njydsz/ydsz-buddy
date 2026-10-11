@@ -55,6 +55,18 @@ cron = "0.12"
 # 截图 OCR(P2-2): 临时文件 + 跨进程 shell 调用(macOS Vision / Windows OCR / Tesseract 兜底)
 tempfile = "3.10"
 
+# CUA (Computer Use Agent): 跨平台截图 / 元素检测 / 输入模拟
+image = "0.25"
+enigo = "0.2"
+
+# CUA Windows 端 GDI 截图 + EnumWindows 元素检测
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+]}
+
 # OS Keyring (P0-2): macOS Keychain / Windows Credential Manager / Linux Secret Service
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 
@@ -68,7 +80,6 @@ walkdir = "2.5"
 # SQLite 持久化 (P0-3: 多用户认证存储)
 rusqlite = { version = "0.31", features = ["bundled", "blob"] }
 parking_lot = "0.12"
-sha2 = "0.10"
 hmac = "0.12"
 hex = "0.4"
 

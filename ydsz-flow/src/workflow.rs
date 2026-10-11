@@ -606,6 +606,21 @@ impl WorkflowInstance {
             self.updated_at = chrono::Utc::now().to_rfc3339();
         }
     }
+
+    /// 取消工作流（将运行中和待执行的节点标记为取消）
+    pub fn cancel(&mut self) {
+        if self.status == WorkflowStatus::Running || self.status == WorkflowStatus::Paused {
+            self.status = WorkflowStatus::Cancelled;
+            self.finished_at = Some(chrono::Utc::now().to_rfc3339());
+            self.updated_at = chrono::Utc::now().to_rfc3339();
+            for node in &mut self.nodes {
+                if matches!(node.status, NodeStatus::Pending | NodeStatus::Waiting | NodeStatus::Running) {
+                    node.status = NodeStatus::Skipped;
+                    node.finished_at = Some(chrono::Utc::now().to_rfc3339());
+                }
+            }
+        }
+    }
 }
 
 /// 工作流引擎错误
@@ -648,6 +663,11 @@ impl WorkflowEngine {
     /// 注册工作流模板
     pub fn register_template(&mut self, template: WorkflowTemplate) {
         self.templates.insert(template.id.clone(), template);
+    }
+
+    /// 移除工作流模板
+    pub fn remove_template(&mut self, id: &str) -> bool {
+        self.templates.remove(id).is_some()
     }
 
     /// 列出所有模板
@@ -733,6 +753,16 @@ impl WorkflowEngine {
             .get_mut(id)
             .ok_or(WorkflowError::InstanceNotFound(id.into()))?;
         instance.resume();
+        Ok(())
+    }
+
+    /// 取消实例
+    pub fn cancel_instance(&mut self, id: &str) -> Result<(), WorkflowError> {
+        let instance = self
+            .instances
+            .get_mut(id)
+            .ok_or(WorkflowError::InstanceNotFound(id.into()))?;
+        instance.cancel();
         Ok(())
     }
 

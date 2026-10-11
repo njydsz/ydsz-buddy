@@ -1,13 +1,14 @@
 /**
  * @file Web 设置面板组件
- * @description 简化版设置面板：连接配置 + 主题切换
+ * @description 连接配置 + 主题切换 + WebSocket 重连控制
  */
 
 import { useCallback, useState } from "react";
-import { X, Wifi, WifiOff, Moon, Sun } from "lucide-react";
+import { X, Wifi, WifiOff, Moon, Sun, Monitor, RotateCcw } from "lucide-react";
 import { useAppStore } from "~/store/appStore";
 import { cn } from "~/lib/utils";
 import type { ConnectionStatus } from "~/store/appStore";
+import { getSharedWsClient, disposeSharedWsClient } from "~/adapters/wsClient";
 
 interface WebSettingsPanelProps {
   /** 是否可见 */
@@ -18,7 +19,10 @@ interface WebSettingsPanelProps {
 
 /** 连接状态指示器 */
 function ConnectionIndicator({ status }: { status: ConnectionStatus }) {
-  const statusMap: Record<ConnectionStatus, { color: string; label: string; icon: typeof Wifi }> = {
+  const statusMap: Record<
+    ConnectionStatus,
+    { color: string; label: string; icon: typeof Wifi }
+  > = {
     connecting: { color: "text-yellow-500", label: "连接中...", icon: Wifi },
     connected: { color: "text-green-500", label: "已连接", icon: Wifi },
     disconnected: { color: "text-muted-foreground", label: "未连接", icon: WifiOff },
@@ -36,24 +40,39 @@ function ConnectionIndicator({ status }: { status: ConnectionStatus }) {
 }
 
 export function WebSettingsPanel({ isOpen, onClose }: WebSettingsPanelProps) {
-  const { isDark, toggleTheme, connectionStatus, setConnectionStatus } = useAppStore();
-  const [wsUrl, setWsUrl] = useState("");
+  const { isDark, connectionStatus, setConnectionStatus } =
+    useAppStore();
+  const [wsUrl, setWsUrl] = useState(
+    () => localStorage.getItem("ydsz_ws_url") ?? "",
+  );
 
   // 保存配置
   const handleSave = useCallback(() => {
-    // TODO: 保存到 localStorage 并重新连接
     if (wsUrl.trim()) {
       localStorage.setItem("ydsz_ws_url", wsUrl.trim());
+    } else {
+      localStorage.removeItem("ydsz_ws_url");
     }
     onClose();
   }, [wsUrl, onClose]);
 
-  // 手动重连
+  // 手动重连：销毁旧客户端并用新 URL 重建
   const handleReconnect = useCallback(() => {
     setConnectionStatus("connecting");
-    // TODO: 触发 WebSocket 重连
-    setTimeout(() => setConnectionStatus("connected"), 1000);
-  }, [setConnectionStatus]);
+
+    // 销毁旧客户端
+    disposeSharedWsClient();
+
+    // 创建新客户端并连接
+    const newUrl = wsUrl.trim() || undefined;
+    const client = getSharedWsClient({
+      url: newUrl,
+      onConnected: () => setConnectionStatus("connected"),
+      onDisconnected: () => setConnectionStatus("disconnected"),
+      onError: () => setConnectionStatus("error"),
+    });
+    client.connect();
+  }, [wsUrl, setConnectionStatus]);
 
   if (!isOpen) return null;
 
@@ -91,8 +110,13 @@ export function WebSettingsPanel({ isOpen, onClose }: WebSettingsPanelProps) {
               <button
                 type="button"
                 onClick={handleReconnect}
-                className="text-xs text-primary hover:underline"
+                disabled={connectionStatus === "connecting"}
+                className={cn(
+                  "flex items-center gap-1 text-xs text-primary hover:underline",
+                  connectionStatus === "connecting" && "opacity-50 cursor-not-allowed",
+                )}
               >
+                <RotateCcw size={12} />
                 重连
               </button>
             </div>
@@ -118,15 +142,33 @@ export function WebSettingsPanel({ isOpen, onClose }: WebSettingsPanelProps) {
 
           {/* 主题切换 */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">外观</label>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="flex w-full items-center gap-2 rounded-md border p-3 text-sm transition-colors hover:bg-accent"
-            >
-              {isDark ? <Moon size={14} /> : <Sun size={14} />}
-              <span>{isDark ? "深色模式" : "浅色模式"}</span>
-            </button>
+            <label className="text-sm font-medium">外观主题</label>
+            <div className="grid grid-cols-3 gap-2">
+              <ThemeButton
+                active={!isDark && !window.matchMedia("(prefers-color-scheme: dark)").matches}
+                onClick={() => useAppStore.getState().setDark(false)}
+                icon={<Sun size={14} />}
+                label="浅色"
+              />
+              <ThemeButton
+                active={isDark}
+                onClick={() => useAppStore.getState().setDark(true)}
+                icon={<Moon size={14} />}
+                label="深色"
+              />
+              <ThemeButton
+                active={false}
+                onClick={() => {
+                  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                  useAppStore.getState().setDark(systemDark);
+                }}
+                icon={<Monitor size={14} />}
+                label="跟随系统"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              当前: {isDark ? "深色模式" : "浅色模式"}
+            </p>
           </div>
         </div>
 
@@ -149,5 +191,34 @@ export function WebSettingsPanel({ isOpen, onClose }: WebSettingsPanelProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** 主题切换按钮 */
+function ThemeButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center gap-1 rounded-md border p-2 text-xs transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "hover:bg-accent hover:text-accent-foreground",
+      )}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }

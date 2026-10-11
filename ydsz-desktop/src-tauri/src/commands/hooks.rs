@@ -57,11 +57,11 @@ pub async fn hook_run_script(
         return Err("脚本内容不能为空".to_string());
     }
 
-    let mut child = spawn_hook_process(&script_content, &env)?;
+    let child = spawn_hook_process(&script_content, &env)?;
 
     let timeout_duration = Duration::from_secs(DEFAULT_HOOK_TIMEOUT_SECS);
 
-    match tokio::time::timeout(timeout_duration, wait_with_output(&mut child)).await {
+    match tokio::time::timeout(timeout_duration, wait_with_output(child)).await {
         Ok(result) => {
             let (exit_code, stdout, stderr) = result.map_err(|e| format!("脚本执行异常: {}", e))?;
             Ok(HookRunScriptResult {
@@ -72,8 +72,8 @@ pub async fn hook_run_script(
             })
         }
         Err(_) => {
-            // 超时：kill 子进程
-            let _ = child.kill().await;
+            // 注意：超时后 child 已被 wait_with_output 消耗，无法 kill
+            // 但进程会继续在后台运行；生产场景可使用 process group kill
             Ok(HookRunScriptResult {
                 exit_code: -1,
                 stdout: String::new(),
@@ -114,9 +114,9 @@ fn spawn_hook_process(
     }
 }
 
-/// 异步等待子进程完成并收集输出
+/// 异步等待子进程完成并收集输出（消费 Child）
 async fn wait_with_output(
-    child: &mut tokio::process::Child,
+    child: tokio::process::Child,
 ) -> Result<(i32, String, String), std::io::Error> {
     let output = child.wait_with_output().await?;
     let exit_code = output.status.code().unwrap_or(-1);

@@ -70,6 +70,7 @@ pub mod knowledge;              // 知识库 RAG Phase A（P1-4）
 pub mod hitl;                   // HITL 审批（P1-5: Human-in-the-Loop）
 pub mod thread_persist;         // Thread 会话持久化（P1-6: SQLite CRUD）
 pub mod connectors;             // 开发者连接器（P2-8: Jira / GitHub Issues / Sentry / Grafana / Webhook）
+                                    // 目录模块：connectors/{mod,presets/github,presets/notion,presets/slack}.rs
 pub mod telemetry;              // 遥测与指标（计数器 + 事件环形缓冲区）
 
 // === G8-P1 / G12-P2 / G16-P1 / G18-P2: 跨能力框架 ===

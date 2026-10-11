@@ -4,9 +4,10 @@
 //! - `ProductionEventStore` — 包装 `SqliteEventStore`，实现事件溯源写入
 //! - `ProductionThreadStore` — 包装 `ThreadStore`，实现消息线程持久化
 
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -25,29 +26,28 @@ impl ProductionEventStore {
     }
 }
 
-#[async_trait]
 impl EventSink for ProductionEventStore {
-    async fn append_event(
+    fn append_event(
         &self,
         event_type: &str,
         stream_id: &str,
         payload: &Value,
-    ) -> CoreResult<()> {
+    ) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
         let store = self.inner.clone();
         let event_type = event_type.to_string();
         let stream_id = stream_id.to_string();
         let payload = payload.clone();
-
-        let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
-            store
-                .append(&event_type, "thread", &stream_id, &payload)
-                .map(|_| ())
-                .map_err(|e| CoreError::InternalError(format!("事件写入失败: {e}")))
+        Box::pin(async move {
+            let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
+                store
+                    .append(&event_type, "thread", &stream_id, &payload)
+                    .map(|_| ())
+                    .map_err(|e| CoreError::InternalError(format!("事件写入失败: {e}")))
+            })
+            .await
+            .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
+            result
         })
-        .await
-        .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
-
-        result
     }
 }
 
@@ -68,9 +68,8 @@ impl ProductionThreadStore {
     }
 }
 
-#[async_trait]
 impl ThreadSink for ProductionThreadStore {
-    async fn save_message(
+    fn save_message(
         &self,
         thread_id: &str,
         turn_id: &str,
@@ -78,7 +77,7 @@ impl ThreadSink for ProductionThreadStore {
         content: &str,
         tool_name: Option<&str>,
         sequence: u32,
-    ) -> CoreResult<()> {
+    ) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
         let store = self.inner.clone();
         let record = MessageRecord {
             id: Uuid::new_v4().to_string(),
@@ -94,44 +93,49 @@ impl ThreadSink for ProductionThreadStore {
             },
             created_at: chrono::Utc::now().to_rfc3339(),
         };
-
-        let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
-            store
-                .save_message(&record)
-                .map_err(|e| CoreError::InternalError(format!("消息持久化失败: {e}")))
+        let _ = sequence;
+        Box::pin(async move {
+            let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
+                store
+                    .save_message(&record)
+                    .map_err(|e| CoreError::InternalError(format!("消息持久化失败: {e}")))
+            })
+            .await
+            .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
+            result
         })
-        .await
-        .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
-
-        result
     }
 
-    async fn save_thread(&self, thread_id: &str, title: Option<&str>) -> CoreResult<()> {
+    fn save_thread(
+        &self,
+        thread_id: &str,
+        title: Option<&str>,
+    ) -> Pin<Box<dyn Future<Output = CoreResult<()>> + Send + '_>> {
         let store = self.inner.clone();
         let thread_id = thread_id.to_string();
         let title = title.unwrap_or("新对话").to_string();
         let now = chrono::Utc::now().to_rfc3339();
-
-        let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
-            let record = ThreadRecord {
-                id: thread_id.clone(),
-                title: title.clone(),
-                mode: "code".to_string(),
-                status: "active".to_string(),
-                turn_count: 0,
-                message_count: 0,
-                created_at: now.clone(),
-                updated_at: now,
-                metadata: serde_json::json!({}),
-            };
-            store
-                .save_thread(&record)
-                .map_err(|e| CoreError::InternalError(format!("线程持久化失败: {e}")))
+        Box::pin(async move {
+            let result: Result<(), CoreError> = tokio::task::spawn_blocking(move || {
+                let record = ThreadRecord {
+                    id: thread_id.clone(),
+                    title: title.clone(),
+                    mode: "code".to_string(),
+                    status: "active".to_string(),
+                    turn_count: 0,
+                    message_count: 0,
+                    created_at: now.clone(),
+                    updated_at: now,
+                    metadata: serde_json::json!({}),
+                };
+                store
+                    .save_thread(&record)
+                    .map_err(|e| CoreError::InternalError(format!("线程持久化失败: {e}")))
+            })
+            .await
+            .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
+            result
         })
-        .await
-        .map_err(|e| CoreError::InternalError(format!("spawn_blocking join 错误: {e}")))?;
-
-        result
     }
 }
 
