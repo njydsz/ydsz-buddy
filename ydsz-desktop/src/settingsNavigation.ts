@@ -23,7 +23,6 @@ import {
   MessageCircleIcon,
   MessageSquareIcon,
   PaletteIcon,
-  ShieldIcon,
   SparklesIcon,
   SettingsIcon,
   WrenchIcon,
@@ -31,10 +30,8 @@ import {
   ImageIcon,
   SmartphoneIcon,
 } from "./lib/icons";
-import { type FC, type SVGProps } from "react";
-import { useMessages, type Messages } from "./i18n";
-
-type LucideIcon = FC<SVGProps<SVGSVGElement>>;
+import { useMessages } from "./i18n";
+import type { Messages } from "./i18n";
 
 /** 设置页面的分区 ID 列表，按显示顺序排列 */
 export const SETTINGS_SECTION_IDS = [
@@ -59,6 +56,10 @@ export const SETTINGS_SECTION_IDS = [
   "im",
   "mobile",
   "hooks",
+  "dataBackup",
+  "service",
+  "apiAccess",
+  "knowledge",
   "advanced",
   "push",
 ] as const;
@@ -312,7 +313,7 @@ export function buildSettingsNavGroups(messages: Messages): ReadonlyArray<{
 
 /** React Hook：获取国际化后的设置导航项列表 */
 export function useSettingsNavItems(): readonly SettingsNavItem[] {
-  const { messages } = useMessages();
+  const messages = useMessages();
   return buildSettingsNavItems(messages);
 }
 
@@ -321,7 +322,7 @@ export function useSettingsNavGroups(): ReadonlyArray<{
   id: SettingsNavGroupId;
   label: string;
 }> {
-  const { messages } = useMessages();
+  const messages = useMessages();
   return buildSettingsNavGroups(messages);
 }
 

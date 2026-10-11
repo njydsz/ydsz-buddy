@@ -637,6 +637,43 @@ export type ComposerCommandItem =
       description?: string;
       icon?: string;
       metadata?: Record<string, string>;
+    }
+  | {
+      /**
+       * 知识库搜索的占位/空状态项。
+       *
+       * 由 Composer 中输入 `@knowledge` 还未输入查询、或者知识库
+       * 服务暂时不可用时,给出一个引导条目。
+       */
+      id: string;
+      type: "knowledge-hint";
+      label: string;
+      description: string;
+    }
+  | {
+      /**
+       * 知识库检索结果。
+       *
+       * 由 Composer 中输入 `@knowledge <query>` 触发,
+       * 后端 `knowledge_search` 返回的匹配片段。
+       */
+      id: string;
+      type: "knowledge-result";
+      /** 原始知识源路径 */
+      sourcePath?: string;
+      sourceType?: string;
+      score?: number;
+      label: string;
+      description: string;
+    }
+  | {
+      /**
+       * 图像生成加载/搜索的占位提示条目(仅展示,不可选中)。
+       */
+      id: string;
+      type: "image-hint";
+      label: string;
+      description: string;
     };
 
 type ComposerCommandGroupModel = {

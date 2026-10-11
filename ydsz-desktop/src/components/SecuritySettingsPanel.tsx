@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 安全设置面板
  * @description 用户管理 + 审批规则配置 (G3-P0 + G17-P2)

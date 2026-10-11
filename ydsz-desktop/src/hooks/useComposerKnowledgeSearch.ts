@@ -21,21 +21,13 @@ import { invoke } from "@tauri-apps/api/core";
 
 // ===== 类型 =====
 
-interface KnowledgeSource {
-  id: string;
-  name: string;
-  sourceType: "project" | "url" | "note" | "wiki" | "docs";
-  indexedAt: string;
-  chunkCount: number;
-}
-
-interface KnowledgeSearchResult {
+type KnowledgeSearchResult = {
   title: string;
   snippet: string;
   sourcePath: string;
   sourceType: string;
   score: number;
-}
+};
 
 interface UseComposerKnowledgeSearchResult {
   knowledgeItems: ComposerCommandItem[];

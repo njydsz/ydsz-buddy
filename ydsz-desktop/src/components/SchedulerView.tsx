@@ -33,7 +33,7 @@ import { useMemo, useState } from "react";
 import {
   CalendarIcon,
   ClockIcon,
-  ListDetailsIcon,
+  ListTodoIcon as ListDetailsIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,

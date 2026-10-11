@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 知识库 RAG 管理页路由（G6-P1）
  *

@@ -7,7 +7,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AgentTeamsView } from '../components/AgentTeamsView';
 
-export const Route = createFileRoute('/_chat/teams/')({
+export const Route = createFileRoute('/_chat/teams')({
   component: AgentTeamsRouteComponent,
 });
 

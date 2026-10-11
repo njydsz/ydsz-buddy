@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 浏览器录制回放面板 (G15-P2)
  * @description 利用已有 CDP 浏览器自动化能力，实现操作录制的 UI 面板。

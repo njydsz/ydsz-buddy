@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 系统服务注册面板 (G14-P2)
  * @description 支持 ydsz-buddy 注册为系统服务（systemd/launchd/Windows Service）

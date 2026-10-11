@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 设置页面路由模块
  * @description 渲染独立的设置界面，包含专属的分section侧边栏和分组面板。

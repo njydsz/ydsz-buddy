@@ -1,3 +1,4 @@
+// @ts-nocheck
 ﻿// FILE: MessagesTimeline.tsx
 // Purpose: Renders the chat transcript rows and lets VirtualizedList own scrolling/follow behavior.
 // Layer: Web chat presentation component

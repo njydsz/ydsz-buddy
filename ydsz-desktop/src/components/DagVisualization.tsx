@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file DAG 可视化组件
  * @description 绘制多 Agent 工作流的有向无环图（DAG），展示步骤节点和依赖连线

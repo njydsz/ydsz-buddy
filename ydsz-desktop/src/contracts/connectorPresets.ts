@@ -36,15 +36,15 @@ export function connectorPresetsConnect(
 }
 
 /** 调用预置连接器功能 */
-export function connectorPresetsCall(
+export function connectorPresetsCall<T = unknown>(
   connectorId: string,
   action: string,
-  params: Record<string, unknown>,
+  params: T,
 ): Promise<unknown> {
   return invoke<unknown>("connector_presets_call", {
     connectorId,
     action,
-    params,
+    params: params as Record<string, unknown>,
   });
 }
 

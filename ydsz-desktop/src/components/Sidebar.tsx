@@ -1079,7 +1079,7 @@ export default function Sidebar() {
     select: (search) => parseDiffRouteSearch(search),
   });
   const settingsSectionSearch = useSearch({ strict: false }) as Record<string, unknown>;
-  const activeSettingsSection = normalizeSettingsSection(settingsSectionSearch.section);
+  const activeSettingsSection = normalizeSettingsSection(settingsSectionSearch.section as string | null | undefined);
   const activeSplitView = useSplitViewStore(selectSplitView(routeSearch.splitViewId ?? null));
   const splitViewsById = useSplitViewStore((store) => store.splitViewsById);
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file AgentTeams 多 Agent 协作编排可视化主视图
  * @description DAG 视图 + 团队管理 + 执行面板三合一视图

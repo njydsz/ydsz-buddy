@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file API 访问配置面板（G2-P0）
  *

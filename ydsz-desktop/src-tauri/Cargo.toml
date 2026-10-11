@@ -65,7 +65,7 @@ windows = { version = "0.58", features = [
     "Win32_Foundation",
     "Win32_Graphics_Gdi",
     "Win32_UI_WindowsAndMessaging",
-]}
+] }
 
 # OS Keyring (P0-2): macOS Keychain / Windows Credential Manager / Linux Secret Service
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }

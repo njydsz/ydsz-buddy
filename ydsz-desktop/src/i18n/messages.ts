@@ -196,15 +196,25 @@ export type Messages = {
      * PR 浏览器着陆页提示文案:尚未选择工作区目录时显示。
      */
     pullsNoWorkspace: string;
-    /**
-     * 侧栏 Linear Tasks 入口的显示标签。
-     * 点击后进入 `/linear` 路由,在内嵌面板中浏览 Linear 任务并从任务创建线程。
-     */
-    linearLabel: string;
-    /**
-     * Linear 任务浏览器着陆页提示文案:尚未选择工作区目录时显示。
-     */
-    linearNoWorkspace: string;
+/**
+* 侧栏 Linear Tasks 入口的显示标签。
+* 点击后进入 `/linear` 路由,在内嵌面板中浏览 Linear 任务并从任务创建线程。
+*/
+linearLabel: string;
+/**
+* Linear 任务浏览器着陆页提示文案:尚未选择工作区目录时显示。
+*/
+linearNoWorkspace: string;
+/**
+* 侧栏 Scheduler 入口的显示标签。
+* 点击后进入 `/scheduler` 路由,浏览定时任务列表。
+*/
+schedulerLabel: string;
+/**
+* 侧栏 Knowledge (知识库) 入口的显示标签。
+* 点击后进入 `/knowledge` 路由,浏览已索引的知识源。
+*/
+knowledgeLabel: string;
     /**
      * 侧栏 Extensions 入口的显示标签。
      * 点击后进入 `/plugins?tab=extensions` 路由,管理本地扩展(启用/停用/卸载/安装)。
@@ -704,6 +714,11 @@ export type Messages = {
       imageGen: { label: string; description: string };
       im: { label: string; description: string };
       mobile: { label: string; description: string };
+      hooks: { label: string; description: string };
+      dataBackup: { label: string; description: string };
+      service: { label: string; description: string };
+      apiAccess: { label: string; description: string };
+      knowledge: { label: string; description: string };
       advanced: { label: string; description: string };
       push: { label: string; description: string };
     };
@@ -1559,6 +1574,18 @@ export type Messages = {
       umengTestSuccess: string;
       umengTestFailed: string;
     };
+    apiServer: {
+      heading: string;
+      description: string;
+    };
+    dataBackup: {
+      heading: string;
+      description: string;
+    };
+    knowledge: {
+      heading: string;
+      description: string;
+    };
     themePack: {
       importTitle: string;
       importDescription: string;
@@ -2199,6 +2226,8 @@ const en: Messages = {
     pullsNoWorkspace: "Open a workspace folder to browse pull requests.",
     linearLabel: "Linear",
     linearNoWorkspace: "Open a workspace folder to browse Linear tasks.",
+    schedulerLabel: "Scheduler",
+    knowledgeLabel: "Knowledge",
     extensionsLabel: "Extensions",
     automationsComingSoon: "Coming soon",
     confirm: "Confirm",
@@ -2700,8 +2729,8 @@ const en: Messages = {
         description: "Streaming, diff handling, and destructive confirmations.",
       },
       security: {
-        label: "安全",
-        description: "用户管理、审批规则与权限配置。",
+        label: "Security",
+        description: "User management, approval rules, and permission configuration.",
       },
       worktrees: {
         label: "Worktrees",
@@ -2762,6 +2791,26 @@ const en: Messages = {
       mobile: {
         label: "Mobile Remote",
         description: "Push notifications, remote approval, and device pairing.",
+      },
+      hooks: {
+        label: "Hooks",
+        description: "Event-driven automation hooks and lifecycle triggers.",
+      },
+      dataBackup: {
+        label: "Data Backup",
+        description: "Backup and restore workspace data, threads, and configurations.",
+      },
+      service: {
+        label: "System Service",
+        description: "Register as system service for auto-start and background operation.",
+      },
+      apiAccess: {
+        label: "API Server",
+        description: "HTTP API gateway configuration, authentication, and access control.",
+      },
+      knowledge: {
+        label: "Knowledge Base",
+        description: "Manage RAG knowledge sources, indexing, and semantic search.",
       },
       advanced: {
         label: "Advanced",
@@ -3676,6 +3725,18 @@ const en: Messages = {
       umengTestSuccess: "Umeng connection test succeeded",
       umengTestFailed: "Umeng connection test failed",
     },
+    apiServer: {
+      heading: "API Server",
+      description: "HTTP API gateway configuration, authentication, and access control settings.",
+    },
+    dataBackup: {
+      heading: "Data Backup",
+      description: "Backup and restore workspace data, threads, and configurations.",
+    },
+    knowledge: {
+      heading: "Knowledge Base",
+      description: "Manage RAG knowledge sources, semantic indexing, and retrieval settings.",
+    },
     changedSettingLabel: {
       theme: "Theme",
       darkThemePack: "Dark theme pack",
@@ -4293,6 +4354,8 @@ const zh: Messages = {
     pullsNoWorkspace: "请先打开一个工作区文件夹以浏览合并请求。",
     linearLabel: "Linear",
     linearNoWorkspace: "请先打开一个工作区文件夹以浏览 Linear 任务。",
+    schedulerLabel: "定时任务",
+    knowledgeLabel: "知识库",
     extensionsLabel: "扩展",
     automationsComingSoon: "即将推出",
     confirm: "确认",
@@ -4790,6 +4853,10 @@ const zh: Messages = {
         label: "行为",
         description: "流式输出、差异处理与危险操作的二次确认",
       },
+      security: {
+        label: "安全",
+        description: "用户管理、审批规则与权限配置",
+      },
       worktrees: {
         label: "工作树",
         description: "查看并清理由 云顶数字 Buddy 创建的工作树",
@@ -4846,14 +4913,34 @@ const zh: Messages = {
         label: "IM 集成",
         description: "连接企业微信、钉钉、飞书等即时通讯平台",
       },
-      mobile: {
-        label: "移动端远程",
-        description: "推送通知、远程审批与设备配对",
-      },
-      advanced: {
-        label: "高级",
-        description: "快捷键、恢复与版本信息",
-      },
+mobile: {
+  label: "移动端远程",
+  description: "推送通知、远程审批与设备配对",
+},
+hooks: {
+  label: "Hooks",
+  description: "事件驱动自动化钩子与生命周期触发器",
+},
+dataBackup: {
+  label: "数据备份",
+  description: "备份与恢复工作区数据、线程和配置",
+},
+service: {
+  label: "系统服务",
+  description: "注册为系统服务，实现开机自启与后台运行",
+},
+apiAccess: {
+  label: "API 服务",
+  description: "HTTP API 网关配置、鉴权与访问控制",
+},
+knowledge: {
+  label: "知识库",
+  description: "管理 RAG 知识源、索引与语义搜索",
+},
+advanced: {
+  label: "高级",
+  description: "快捷键、恢复与版本信息",
+},
       push: {
         label: "推送通道",
         description: "配置极光 / 友盟推送凭证，测试移动端推送连通性。",
@@ -5731,6 +5818,18 @@ const zh: Messages = {
       jpushTestFailed: "极光连接测试失败",
       umengTestSuccess: "友盟连接测试成功",
       umengTestFailed: "友盟连接测试失败",
+    },
+    apiServer: {
+      heading: "API 服务",
+      description: "HTTP API 网关配置、鉴权与访问控制设置。",
+    },
+    dataBackup: {
+      heading: "数据备份",
+      description: "备份与恢复工作区数据、线程和配置。",
+    },
+    knowledge: {
+      heading: "知识库",
+      description: "管理 RAG 知识源、语义索引与检索设置。",
     },
     changedSettingLabel: {
       theme: "主题",

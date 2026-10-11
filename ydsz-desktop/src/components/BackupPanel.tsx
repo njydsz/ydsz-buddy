@@ -13,7 +13,7 @@
  */
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { PiArchive, PiDownloadCloud, PiUploadCloud, PiTrash, PiHardDrive, PiSpinner, PiWarning, PiCheck } from "react-icons/pi";
+import { PiArchive, PiCloudArrowDown, PiCloudArrowUp, PiTrash, PiHardDrive, PiSpinner, PiWarning, PiCheck } from "react-icons/pi";
 import { cn } from "~/lib/utils";
 
 // ============================================================================
@@ -282,7 +282,7 @@ export const BackupPanel = memo(function BackupPanel() {
           {restoring ? (
             <PiSpinner className="size-3.5 animate-spin" />
           ) : (
-            <PiUploadCloud className="size-3.5" />
+            <PiCloudArrowUp className="size-3.5" />
           )}
           {restoring ? "正在恢复..." : "恢复备份"}
         </button>
@@ -296,7 +296,7 @@ export const BackupPanel = memo(function BackupPanel() {
           onClick={() => void loadBackups()}
           disabled={loading}
         >
-          <PiDownloadCloud className={cn("size-3.5", loading && "animate-spin")} />
+          <PiCloudArrowDown className={cn("size-3.5", loading && "animate-spin")} />
           刷新
         </button>
       </div>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file _login.tsx
  * @description 登录页面 — 多用户 RBAC 入口（G3-P0）

@@ -66,8 +66,26 @@ type ThreadToastData = {
   dismissAfterVisibleMs?: number;
 };
 
-const toastManager = Toast.createToastManager<ThreadToastData>();
+const _toastManager = Toast.createToastManager<ThreadToastData>();
 const anchoredToastManager = Toast.createToastManager<ThreadToastData>();
+
+/** 注入 success / error 便捷方法（base-ui 原生不提供） */
+(_toastManager as unknown as { success: (r: unknown) => void; error: (m: string) => void }).success = (
+  result: unknown,
+) => {
+  const title =
+    typeof result === "string"
+      ? result
+      : (result as { message?: string })?.message ?? String(result);
+  _toastManager.add({ type: "success", title, timeout: 5000 });
+};
+(_toastManager as unknown as { success: (r: unknown) => void; error: (m: string) => void }).error = (
+  message: string,
+) => {
+  _toastManager.add({ type: "error", title: message, timeout: 5000 });
+};
+const toastManager = _toastManager;
+
 type ToastId = ReturnType<typeof toastManager.add>;
 const threadToastVisibleTimeoutRemainingMs = new Map<ToastId, number>();
 
