@@ -1,0 +1,16 @@
+id: demo-greeting
+version: 0.1.0
+name: Demo Greeting Plugin
+description: A demo plugin that registers a "greet" tool
+entry: main.py
+author: ydsz-buddy
+tools:
+  - name: greet
+    description: Generate a friendly greeting message
+    parameters:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the person to greet
+      required: []
