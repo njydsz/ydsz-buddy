@@ -421,9 +421,9 @@ Full catalog, auth kinds, and MCP modes: **[docs/connectors.md](docs/connectors.
 | `ydsz-worker init` | Bootstrap `~/.octop/` (DB, admin, JWT secret) |
 | `ydsz-worker run` | Start Ydsz Worker in the foreground |
 | `ydsz-worker service start` | Install and start as a system service |
-| `octop service stop` | Stop the system service |
-| `octop agent` | Create, list, start/stop agents |
-| `octop channel` | Install and manage IM channels |
+| `ydsz-worker service stop` | Stop the system service |
+| `ydsz-worker agent` | Create, list, start/stop agents |
+| `ydsz-worker channel` | Install and manage IM channels |
 | `ydsz-worker chats` | REPL and session management |
 | `ydsz-worker acp` | Stdio ACP server for IDE integration |
 | `ydsz-worker cron` | Manage scheduled tasks |
