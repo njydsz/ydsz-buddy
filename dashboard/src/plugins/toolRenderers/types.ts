@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 
 /** Parsed ``octop_ui`` envelope from a tool JSON string output. */
-export interface OctopUiHint {
+export interface YdszUiHint {
   renderer: string;
   version?: number;
 }
@@ -10,7 +10,7 @@ export interface ParsedToolOutput {
   /** True when ``output`` parsed as JSON object. */
   isJson: boolean;
   raw: unknown;
-  octopUi?: OctopUiHint;
+  octopUi?: YdszUiHint;
   data?: unknown;
   text?: string;
 }

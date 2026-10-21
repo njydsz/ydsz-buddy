@@ -1,21 +1,21 @@
 import { bridgeAgentHeaders, request } from "../request";
 
-export interface OctopTimezoneSettings {
+export interface YdszTimezoneSettings {
   timezone: string;
 }
 
-export interface OctopUploadSettings {
+export interface YdszUploadSettings {
   max_upload_mb: number;
   max_upload_bytes: number;
 }
 
-export interface OctopHitlSettings {
+export interface YdszHitlSettings {
   enabled: boolean;
   tool_guard_require_approval: boolean;
   show_approval_ui: boolean;
 }
 
-export interface OctopCapabilitiesSettings {
+export interface YdszCapabilitiesSettings {
   mobile: { enabled: boolean; backend: string };
 }
 
@@ -47,14 +47,14 @@ export interface CaptchaSettingsPut {
 }
 
 export const ydszSettingsApi = {
-  timezone: () => request<OctopTimezoneSettings>("/settings/timezone"),
-  upload: () => request<OctopUploadSettings>("/settings/upload"),
+  timezone: () => request<YdszTimezoneSettings>("/settings/timezone"),
+  upload: () => request<YdszUploadSettings>("/settings/upload"),
   hitl: (agentId?: string | null) =>
-    request<OctopHitlSettings>("/settings/hitl", {
+    request<YdszHitlSettings>("/settings/hitl", {
       headers: bridgeAgentHeaders(agentId),
     }),
   capabilities: () =>
-    request<OctopCapabilitiesSettings>("/settings/capabilities", {
+    request<YdszCapabilitiesSettings>("/settings/capabilities", {
       cache: "no-store",
     }),
   captcha: () => request<CaptchaSettings>("/settings/captcha"),

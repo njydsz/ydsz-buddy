@@ -37,7 +37,7 @@ octop update --yes
   pip: `pip install -U octop
 # optional extras, e.g. browser automation:
 # pip install -U "octop[browser]"`,
-  source: `cd Octop
+  source: `cd Ydsz Worker
 git pull
 make build-frontend
 # or: cd dashboard && npm ci && npm run build && cd ..

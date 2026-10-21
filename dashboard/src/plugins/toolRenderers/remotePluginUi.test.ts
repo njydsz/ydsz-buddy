@@ -18,7 +18,7 @@ describe("remotePluginUiUnavailable", () => {
       remotePluginUiUnavailable({
         agentId: "bridge:39CF56:FW1MED",
         toolName: "get_weather",
-        hasOctopUi: true,
+        hasYdszUi: true,
       }),
     ).toBe(false);
   });
@@ -29,7 +29,7 @@ describe("remotePluginUiUnavailable", () => {
       remotePluginUiUnavailable({
         agentId: "bridge:39CF56:FW1MED",
         toolName: "get_weather",
-        hasOctopUi: true,
+        hasYdszUi: true,
       }),
     ).toBe(true);
   });
@@ -40,7 +40,7 @@ describe("remotePluginUiUnavailable", () => {
       remotePluginUiUnavailable({
         agentId: "bridge:39CF56:FW1MED",
         toolName: "get_weather",
-        hasOctopUi: true,
+        hasYdszUi: true,
       }),
     ).toBe(false);
   });
@@ -51,7 +51,7 @@ describe("remotePluginUiUnavailable", () => {
       remotePluginUiUnavailable({
         agentId: "C10WX7",
         toolName: "get_weather",
-        hasOctopUi: true,
+        hasYdszUi: true,
       }),
     ).toBe(false);
   });

@@ -20,7 +20,7 @@ import {
 
 type CronJob = CronJobSpecOutput;
 
-/** Octop-aligned form values for create / edit drawer. */
+/** Ydsz Worker-aligned form values for create / edit drawer. */
 export interface CronJobFormValues {
   id?: string;
   name: string;
@@ -49,7 +49,7 @@ function promptLabel(prompt: string, id: string): string {
   return text.length > 40 ? `${text.slice(0, 40)}…` : text;
 }
 
-function fromOctop(row: YdszCronRow, timezone: string): CronJob {
+function fromYdszCron(row: YdszCronRow, timezone: string): CronJob {
   const cron = scheduleFieldFromTrigger(row.trigger);
   const channel = channelFromSessionKey(row.session_key);
 
@@ -329,7 +329,7 @@ export function useCronJobs() {
         const data = await octopCronApi.list(agentId);
         if (gen !== fetchGenRef.current) return;
         const mapped = (data || []).map((row) =>
-          fromOctop(row, timezoneRef.current),
+          fromYdszCron(row, timezoneRef.current),
         );
         writeJobs(agentId, mapped);
       } catch (error) {
@@ -363,7 +363,7 @@ export function useCronJobs() {
         activeAgentId,
         toOctopCreateBody(values),
       );
-      const row = fromOctop(created, cronTimezone);
+      const row = fromYdszCron(created, cronTimezone);
       patchJobs(activeAgentId, (prev) => [row, ...prev]);
       if (values.enabled && !row.enabled && isOnceTrigger(row.schedule?.cron)) {
         message.warning(t("cronJobs.oneShotEnableBlocked"));
@@ -410,7 +410,7 @@ export function useCronJobs() {
 
     try {
       const updated = await octopCronApi.patch(activeAgentId, jobId, body);
-      const row = fromOctop(updated, cronTimezone);
+      const row = fromYdszCron(updated, cronTimezone);
       patchJobs(activeAgentId, (prev) =>
         prev.map((j) => (j.id === jobId ? row : j)),
       );
@@ -463,7 +463,7 @@ export function useCronJobs() {
       const returned = await octopCronApi.patch(activeAgentId, job.id, {
         enabled: nextEnabled,
       });
-      const row = fromOctop(returned, cronTimezone);
+      const row = fromYdszCron(returned, cronTimezone);
       patchJobs(activeAgentId, (prev) =>
         prev.map((j) => (j.id === job.id ? row : j)),
       );

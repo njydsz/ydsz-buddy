@@ -219,7 +219,7 @@ export function DockerEnvFooter() {
       {/* 3. Worker agent install */}
       <section className={styles.section}>
         <div className={styles.sectionTitle}>
-          {t("storage.dockerEnv.sectionOctop")}
+          {t("storage.dockerEnv.sectionYdsz")}
         </div>
         <p className={styles.sectionDesc}>{t("storage.dockerEnv.octopDesc")}</p>
         {env?.agent_prompt ? (

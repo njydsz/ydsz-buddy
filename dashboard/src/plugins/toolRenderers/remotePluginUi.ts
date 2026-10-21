@@ -11,9 +11,9 @@ import {
 export function remotePluginUiUnavailable(opts: {
   agentId?: string | null;
   toolName?: string;
-  hasOctopUi: boolean;
+  hasYdszUi: boolean;
 }): boolean {
-  if (!opts.hasOctopUi) return false;
+  if (!opts.hasYdszUi) return false;
   if (!isBridgeAgentId(opts.agentId)) return false;
   if (!isToolPluginIndexReady()) return false;
   return lookupPluginIdForTool(opts.toolName) == null;

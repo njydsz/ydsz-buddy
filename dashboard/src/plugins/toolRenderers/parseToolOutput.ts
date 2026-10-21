@@ -1,6 +1,6 @@
-import type { OctopUiHint, ParsedToolOutput } from "./types";
+import type { YdszUiHint, ParsedToolOutput } from "./types";
 
-function asOctopUi(value: unknown): OctopUiHint | undefined {
+function asYdszUi(value: unknown): YdszUiHint | undefined {
   if (!value || typeof value !== "object") return undefined;
   const obj = value as Record<string, unknown>;
   const renderer = typeof obj.renderer === "string" ? obj.renderer.trim() : "";
@@ -33,7 +33,7 @@ export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
     return {
       isJson: true,
       raw: output,
-      octopUi: asOctopUi(obj.octop_ui),
+      octopUi: asYdszUi(obj.octop_ui),
       data: "data" in obj ? obj.data : undefined,
       text: typeof obj.text === "string" ? obj.text : undefined,
     };
@@ -53,7 +53,7 @@ export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
       };
     }
     const obj = raw as Record<string, unknown>;
-    const octopUi = asOctopUi(obj.octop_ui);
+    const octopUi = asYdszUi(obj.octop_ui);
     const text = typeof obj.text === "string" ? obj.text : undefined;
     const data = "data" in obj ? obj.data : undefined;
     return { isJson: true, raw, octopUi, data, text };

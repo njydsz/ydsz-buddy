@@ -900,7 +900,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                       "chat.steer.placeholder",
                       "Keep typing to queue a mid-turn steer…",
                     )
-                  : t("chatWelcome.inputPlaceholder", "Message Octop...")
+                  : t("chatWelcome.inputPlaceholder", "Message Ydsz Worker...")
               }
               rows={1}
               disabled={disabled}

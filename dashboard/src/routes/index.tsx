@@ -21,7 +21,7 @@ const RemoteDesktopPage = lazy(() => import("../pages/Control/RemoteDesktop"));
 const ModelsPage = lazy(() => import("../pages/Settings/Models"));
 
 // Lazy-loaded pages — Admin
-const OctopAdminUsersPage = lazy(() => import("../pages/Admin/Users"));
+const YdszAdminUsersPage = lazy(() => import("../pages/Admin/Users"));
 const AdminSecurityPage = lazy(() => import("../pages/Settings/Security"));
 const AdvancedSettingsPage = lazy(
   () => import("../pages/Settings/AdvancedSettings"),
@@ -216,7 +216,7 @@ export const routeConfigs: RouteConfig[] = [
   { path: "/admin/models", element: <ModelsPage /> },
 
   // Admin (RequirePermission wrapper applied in MainLayout)
-  { path: "/admin/users", element: <OctopAdminUsersPage /> },
+  { path: "/admin/users", element: <YdszAdminUsersPage /> },
   {
     path: "/admin/sso",
     element: <Navigate to="/admin/users?tab=oidc" replace />,

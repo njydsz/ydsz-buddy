@@ -150,7 +150,7 @@ export function workspacePathFromAccessUrl(url: string): string | undefined {
   try {
     const parsed = url.startsWith("http")
       ? new URL(url)
-      : new URL(url, "http://octop.local");
+      : new URL(url, "http://ydsz.local");
     for (const key of ["source", "path"] as const) {
       const raw = parsed.searchParams.get(key);
       if (!raw) continue;
@@ -281,7 +281,7 @@ export function canonicalizeMediaApiUrl(
   try {
     const parsed = url.startsWith("http")
       ? new URL(url)
-      : new URL(url, "http://octop.local");
+      : new URL(url, "http://ydsz.local");
     const pathMatch = parsed.pathname.match(
       /^\/api\/agents\/([^/]+)\/(media\/preview|workspace\/download)$/,
     );
@@ -331,7 +331,7 @@ export function normalizeStoredMediaUrl(
   try {
     const parsed = url.startsWith("http")
       ? new URL(url)
-      : new URL(url, "http://octop.local");
+      : new URL(url, "http://ydsz.local");
     const pathParam = parsed.searchParams.get("path") || "";
     if (!pathParam) return url;
     const rel = extractWorkspaceRel(pathParam);

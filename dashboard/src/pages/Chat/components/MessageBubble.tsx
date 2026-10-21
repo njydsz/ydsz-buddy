@@ -531,7 +531,7 @@ export function ToolDetailsInline({
     const annotateMissingPlugin = remotePluginUiUnavailable({
       agentId,
       toolName: toolData.name,
-      hasOctopUi: true,
+      hasYdszUi: true,
     });
     return (
       <div

@@ -28,16 +28,16 @@ interface SpeechRuntime {
 }
 
 function runtime(): SpeechRuntime {
-  const w = window as Window & { __octopSpeech?: SpeechRuntime };
-  if (!w.__octopSpeech) {
-    w.__octopSpeech = {
+  const w = window as Window & { __ydszSpeech?: SpeechRuntime };
+  if (!w.__ydszSpeech) {
+    w.__ydszSpeech = {
       session: 0,
       pendingTimer: null,
       keepAliveTimer: null,
       needsSpeakDelay: false,
     };
   }
-  return w.__octopSpeech;
+  return w.__ydszSpeech;
 }
 
 function clearTimer(id: number | null): void {
