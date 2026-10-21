@@ -11,9 +11,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
 from langchain_core.messages import HumanMessage
+from PIL import Image
 from ydsz_gateway.models import FileContent, ImageContent, InboundMessage, TextContent
 from ydsz_harness.backends.workspace import BackendWorkspace
-from PIL import Image
 
 from ydsz.api.routers.chat.models import ChatTurnBody
 from ydsz.api.routers.chat.serialize import _serialize_history_message

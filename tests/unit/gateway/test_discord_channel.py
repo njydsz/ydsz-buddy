@@ -5,9 +5,9 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+from tests.unit.gateway.test_gateway_runtime_status import _make_gateway
 from ydsz_gateway.channels.discord import DiscordChannel, DiscordConfig
 from ydsz_gateway.models import ChannelSubject, InboundMessage, MessageEvent
-from tests.unit.gateway.test_gateway_runtime_status import _make_gateway
 
 from ydsz.infra.gateway.gateway import ChannelCreateSpec, ChannelKind, Gateway
 from ydsz.infra.gateway.process.message_keys import (

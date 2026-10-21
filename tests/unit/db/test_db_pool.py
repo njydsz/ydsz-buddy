@@ -194,8 +194,7 @@ def test_repair_legacy_schema_ensures_columns(tmp_path: Path) -> None:
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         # Simulate a schema version ahead of what the columns reflect
@@ -214,8 +213,7 @@ def test_migration_002_idempotent_when_column_already_present(tmp_path: Path) ->
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("ALTER TABLE cron_jobs ADD COLUMN mcp_servers TEXT NOT NULL DEFAULT '[]'")
@@ -353,8 +351,7 @@ def test_stuck_version_6_without_permissions_column_is_repaired(tmp_path: Path) 
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 6")
@@ -373,8 +370,7 @@ def test_schema_v10_without_projection_tables_is_repaired(tmp_path: Path) -> Non
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 10")
@@ -406,8 +402,7 @@ def test_ahead_of_max_schema_version_clamps_to_max(tmp_path: Path) -> None:
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 8")
@@ -434,8 +429,7 @@ def test_current_watermark_repairs_pre_v13_connectors_schema(tmp_path: Path) -> 
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 13")
@@ -487,8 +481,7 @@ def test_pre_squash_schema_version_clamped_and_knowledge_tables_filled(
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         # Simulate a develop DB whose recorded version is ahead of the

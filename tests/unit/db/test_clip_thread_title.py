@@ -54,8 +54,7 @@ def test_migration_003_repairs_stored_hard_cuts(tmp_path: Path) -> None:
     with pool.connect() as conn:
         conn.executescript(
             (
-                Path(__file__).resolve().parents[3]
-                / "src/Ydsz/infra/db/migrations/001_initial.sql"
+                Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         # Partial v2 columns so full migrate can finish.
