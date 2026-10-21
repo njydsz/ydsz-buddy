@@ -1,6 +1,6 @@
-# Octop 绿色便携包（多平台）
+# Ydsz Worker 绿色便携包（多平台）
 
-解压即用：内置便携 CPython + Octop 及依赖，通过 `start.sh` / `start.bat` 启动。  
+解压即用：内置便携 CPython + Ydsz Worker 及依赖，通过 `start.sh` / `start.bat` 启动。  
 **不依赖**系统 Python，也**不包含** Wails / 桌面壳——用浏览器打开 Dashboard。  
 首启走上游正常 setup wizard（本目录**不含** OOB / UI 裁剪）。
 
@@ -34,7 +34,7 @@ make -f desktop/portable/Makefile green
 ```
 Octop-<plat>/
   runtime/       # python-build-standalone
-  packages/      # Octop + 依赖（site-packages，可搬迁）
+  packages/      # Ydsz Worker + 依赖（site-packages，可搬迁）
   launch.py      # 启动引导（site.addsitedir / Windows pywin32）
   start.sh       # macOS / Linux
   start.bat      # Windows

@@ -21,9 +21,6 @@ interface HeaderProps {
  */
 export default function Header({ onToggle, isMobile }: HeaderProps) {
   const { isDark } = useTheme();
-  const mobileLogoSrc = isDark
-    ? "/logo_horizontal_white.png"
-    : "/logo_horizontal_dark.png";
 
   if (!isMobile) return null;
 
@@ -77,18 +74,19 @@ export default function Header({ onToggle, isMobile }: HeaderProps) {
             <MenuIcon size={20} strokeWidth={1.8} />
           </button>
         )}
-        <img
-          src={mobileLogoSrc}
-          alt="云顶数字工作台"
+        <span
           style={{
-            height: 36,
-            width: "auto",
-            maxWidth: 160,
-            objectFit: "contain",
+            fontSize: 17,
+            fontWeight: 700,
+            color: isDark ? "#fff" : "#1a1a1a",
+            letterSpacing: "0.02em",
+            lineHeight: 1.2,
             flexShrink: 0,
             display: "block",
           }}
-        />
+        >
+          Ydsz Worker
+        </span>
         <div
           style={{
             display: "flex",

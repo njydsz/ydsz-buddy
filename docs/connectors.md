@@ -1,6 +1,6 @@
 # Built-in connectors
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 **English** · [中文](#内置连接器)
 
@@ -72,7 +72,7 @@ are updating `catalog.json` in the same change.
 |------|---------|------|
 | `remote` | The harness talks to the vendor MCP URL. | Harness 直连厂商 MCP 地址。 |
 | `gateway` | An in-process Python adapter; the harness config is a name-only placeholder. | 进程内 Python 适配器；Harness 配置只占位。 |
-| `internal` | Octop hosts HTTP MCP at `/api/internal/mcp`; the harness loads it over HTTP. | Octop 在 `/api/internal/mcp` 托管 HTTP MCP，Harness 经 HTTP 加载。 |
+| `internal` | Ydsz Worker hosts HTTP MCP at `/api/internal/mcp`; the harness loads it over HTTP. | Ydsz Worker 在 `/api/internal/mcp` 托管 HTTP MCP，Harness 经 HTTP 加载。 |
 
 ## Catalog JSON / 目录 JSON
 

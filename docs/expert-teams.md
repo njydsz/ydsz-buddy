@@ -1,6 +1,6 @@
 # 专家团队模式
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 主持专家是团队主持人：独立工作区、记忆、通道，负责调度。成员仍是普通专家，可单独聊天、可加入多个团队。过程是群聊上墙，收尾由主持人总结并判断是否收工。
 

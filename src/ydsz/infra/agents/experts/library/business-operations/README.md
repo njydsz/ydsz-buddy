@@ -8,7 +8,7 @@
 
 六项技能改编自 [Anthropic Knowledge Work Plugins 的 operations 1.3.0](https://github.com/anthropics/knowledge-work-plugins/tree/02ffa99ff00ce4d3046ccebabb8357cb39f3ab06/operations)，固定提交 `02ffa99ff00ce4d3046ccebabb8357cb39f3ab06`。
 
-`skills/bo-*/SKILL.md` 对应上游 `operations/skills/*/SKILL.md`：`process-doc`、`runbook`、`process-optimization`、`risk-assessment`、`vendor-review`、`status-report`。这些文件均已为 Octop 改写：使用中文业务表述，移除 Claude/Cowork 专用命令与连接器假设，补充事实、建议和执行权限的区分。原生专家配置另行编写；本专家是独立适配，非 Anthropic 官方集成。
+`skills/bo-*/SKILL.md` 对应上游 `operations/skills/*/SKILL.md`：`process-doc`、`runbook`、`process-optimization`、`risk-assessment`、`vendor-review`、`status-report`。这些文件均已为 Ydsz Worker 改写：使用中文业务表述，移除 Claude/Cowork 专用命令与连接器假设，补充事实、建议和执行权限的区分。原生专家配置另行编写；本专家是独立适配，非 Anthropic 官方集成。
 
 改编技能遵循上游 Apache-2.0 许可，相关版权及署名归原作者所有。以下保留固定版本的完整许可证原文；来源和修改说明统一在本文件维护。
 

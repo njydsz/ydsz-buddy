@@ -65,7 +65,7 @@ function loadViewMode(): ViewMode {
   return stored === "table" ? "table" : "card";
 }
 
-export default function OctopAgentsPage() {
+export default function YdszAgentsPage() {
   const { t } = useTranslation();
   const [agents, setAgents] = useState<YdszAgent[]>([]);
   const [loading, setLoading] = useState(true);

@@ -82,7 +82,7 @@ metadata:
 | **官网** | https://octop.cloud | 想了解产品、看介绍、找下载与社区入口 |
 | **帮助文档** | https://docs.octop.cloud/guide/ | 安装、概念、具体操作；中文默认入口 |
 | **English docs** | https://docs.octop.cloud/en/guide/ | 用户用英文提问时，用同一路径加上 `/en` 前缀 |
-| **源码** | https://github.com/TencentCloud/Octop | 提 issue、看发行版、从源码安装 |
+| **源码** | https://github.com/TencentCloud/Ydsz Worker | 提 issue、看发行版、从源码安装 |
 
 回答时用用户的语言。英文问题给 `https://docs.octop.cloud/en/...`（把中文路径里的 `/guide/` 换成 `/en/guide/`，`/cli/`、`/api/` 同理加上 `/en` 前缀）。
 

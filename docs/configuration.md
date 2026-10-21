@@ -22,7 +22,7 @@ on first server start (or by `ydsz-worker init` / `ydsz-worker run`).
 ```
 
 `env` is dotenv format, applied before `config.json` is loaded
-(`OctopServer.start` → `apply_env_file`). Dashboard **Advanced → Environment
+(`YdszServer.start` → `apply_env_file`). Dashboard **Advanced → Environment
 variables** writes this file. Saving **replaces** the file and drops removed
 keys from the process environment (host/systemd keys that were never in the
 file are left alone). Every running agent inherits those keys:
@@ -32,8 +32,8 @@ file are left alone). Every running agent inherits those keys:
   cannot be overridden from `.env`). New agents store that file at
   `{workspace}/.octop/.env`; existing agents keep `{workspace}/.env` when
   their stored internal system-files prefix uses the legacy layout. Remote
-  object-store workspaces are not read from the host path — Octop/harness
-  also reads `.env` through the agent backend on each execute. Octop also
+  object-store workspaces are not read from the host path — Ydsz Worker/harness
+  also reads `.env` through the agent backend on each execute. Ydsz Worker also
   injects `OCTOP_AGENT_ID`, `OCTOP_AUTH_DIR` (under `{workspace}/.octop/auth`
   for new agents; legacy agents keep `{workspace}/.octop-auth`),
   and `YDSZ_HOME` into shell/sandbox env.
@@ -91,7 +91,7 @@ deployments retain their own process/container resource policies.
 ## `config.json`
 
 Generated with defaults on first run; merged with environment overrides
-on each start. Schema (`OctopConfig` in `octop/config.py`):
+on each start. Schema (`YdszConfig` in `ydsz/config.py`):
 
 ```json
 {
@@ -207,7 +207,7 @@ Each variable, when set, takes precedence over the matching key in
 
 Invalid integer values are logged and ignored — the on-disk default
 remains in effect. `database_env_configured()` returns `True` when any
-`YDSZ_DATABASE_*` is set, which lets `OctopServer.start()` pick the
+`YDSZ_DATABASE_*` is set, which lets `YdszServer.start()` pick the
 configured backend at boot.
 
 **Docker Compose:** put `YDSZ_DATABASE_*` in `docker/.env` *and* ensure

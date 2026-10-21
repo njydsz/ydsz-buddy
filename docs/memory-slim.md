@@ -1,6 +1,6 @@
 # 手动在线整理 memory.sqlite
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 ## 用户命令与表现
 
@@ -33,7 +33,7 @@ octop memory slim --all       # 顺序整理列表中所有符合条件的智能
 `ydsz-worker --json memory slim --all` 的进度带 `agent_id`、`index`、`total_agents`，批次终态为
 `batch_done` 或 `batch_failed`。`memory list` 可用于提前查看范围，它本身不执行瘦身。
 
-上述终端命令直接触发维护，不是预览。它连接运行中的同一个 YDSZ_HOME 实例，不会启动第二份 Octop；
+上述终端命令直接触发维护，不是预览。它连接运行中的同一个 YDSZ_HOME 实例，不会启动第二份 Ydsz Worker；
 不指定数据库路径，服务使用该智能体实际打开的 SQLite 文件。
 原 `octop-memory db slim FILE` / `scripts/memory-slim FILE` 仍然是离线预览入口。
 
@@ -65,7 +65,7 @@ PG 尚未接入，避免把“命令不支持”误解成“数据库无需维�
 再按实际收益和共享范围提供管理员维护操作。本轮只做只读评估和提示修正，没有开启 PG 整理。
 
 2026-09-18 文案回归：memory/slash memory/i18n 117 passed、2 deselected，Ruff/format 和
-strict mypy 499 files 通过。未重启正在运行的 Octop；新提示需加载更新后的代码才生效。
+strict mypy 499 files 通过。未重启正在运行的 Ydsz Worker；新提示需加载更新后的代码才生效。
 
 ## 实现与一致性边界
 
@@ -129,7 +129,7 @@ IM 暂不开放：现有 IM `user_id` 是用于会话存储的 agent owner，不
   写锁串行协调，不通过关闭连接或跳过 capture 来制造“空闲”。完整备份与校验在改写之前执行。
 - VACUUM 可能等待其他事务。长读事务仍占用 WAL 时，会报告“去重完成但空间回收未完成”；
   释放聊天预约，保留可读的混合格式和备份，不伪报全部压缩完成，也不自动回滚。
-- 此模式针对一个运行中的 Octop 管理的库。它不能升级独立运行的旧 reader，不能保证其他进程
+- 此模式针对一个运行中的 Ydsz Worker 管理的库。它不能升级独立运行的旧 reader，不能保证其他进程
   使用旧格式 reader 或自定义写库脚本时兼容；部署前需统一升级。共享同库的其他写入仍受 SQLite 锁影响。
 
 ## 验证
@@ -168,7 +168,7 @@ PYTHONPATH=../octop-memory/src:src uv run --no-sync pytest tests/unit/agents/tes
 本机控制认证/进度及 CLI 中文输出。前端测试覆盖每个阻塞阶段与成功/失败后的发送恢复。
 
 ```bash
-# 从 Octop 仓库运行，加载配套 octop-memory 源码。
+# 从 Ydsz Worker 仓库运行，加载配套 octop-memory 源码。
 PYTHONPATH=../octop-memory/src:src uv run --no-sync pytest tests/unit/agents/test_memory_slim.py tests/unit/i18n -q
 cd dashboard
 npm test -- src/pages/Chat/hooks/useMemoryMaintenance.test.ts
@@ -189,21 +189,21 @@ strict mypy 498 files、Ruff/format、wrapper `--online --all --help` 通过。�
 2026-09-18 验证结果：
 
 - octop-memory checkpoint compaction：37 passed（含长 reader 与并发写入）。
-- Octop 协调器/本机控制/CLI/记忆面板保护 + 原 memory API 集成 + i18n：90 passed。
+- Ydsz Worker 协调器/本机控制/CLI/记忆面板保护 + 原 memory API 集成 + i18n：90 passed。
   本机 socket 测试因默认 sandbox 不允许 bind，放行仅此临时测试后通过；没有使用真实用户库。
 - 更广的 agent manager、启动及 CLI registry 回归：153 passed、1 skipped；唯一初次失败为
   上述 socket bind 权限，已在后续放行的测试中通过。
-- Ruff/format、strict mypy（Octop 498 files、octop-memory 107 files）通过；
+- Ruff/format、strict mypy（Ydsz Worker 498 files、octop-memory 107 files）通过；
   前端 2 个阶段恢复测试、TypeScript 编译与生产构建通过。
 - 两仓完整门禁均未全绿：octop-memory 的 24 个既有测试访问不可写的默认用户目录失败；
-  Octop 全量在旧 captcha 测试绑定端口时报 PermissionError，确认环境原因后中止全量运行，
+  Ydsz Worker 全量在旧 captcha 测试绑定端口时报 PermissionError，确认环境原因后中止全量运行，
   复跑该文件定位为 2 passed / 1 error。未把中止结果或 PostgreSQL skip 当成通过。
-- 多 GiB 库/完整生产 IM 端到端/长期磁盘增长未测；本轮没有提交、部署或重启真实 Octop。
+- 多 GiB 库/完整生产 IM 端到端/长期磁盘增长未测；本轮没有提交、部署或重启真实 Ydsz Worker。
 
 ## 2026-09-20 提交前验证与依赖收敛
 
 - 维护对象由 `AgentManager.memory_slim` 持有，shutdown 等待维护完成后关闭 Agent；
-  Gateway、SlashCtx、OctopServer 不再增加专用传递字段。CLI 控制入口按请求获取当前 runtime，
+  Gateway、SlashCtx、YdszServer 不再增加专用传递字段。CLI 控制入口按请求获取当前 runtime，
   支持首次配置完成后加载 AgentManager。
 - `/memory` 在 catalog 声明 `persist_checkpoint=False`；processor 统一读取保存策略，
   普通命令及别名继续写入 checkpoint 和已就绪的聊天展示记录。

@@ -174,7 +174,7 @@ function resolveCronExpression(values: CronJobFormValues): string {
   return /^(cron|interval|date|agently):/.test(cron) ? cron : `cron:${cron}`;
 }
 
-function toOctopCreateBody(values: CronJobFormValues) {
+function toYdszCreateBody(values: CronJobFormValues) {
   return {
     name: (values.name || "").trim(),
     trigger: resolveCronExpression(values),
@@ -188,9 +188,9 @@ function toOctopCreateBody(values: CronJobFormValues) {
   };
 }
 
-function toOctopPatchBody(values: CronJobFormValues) {
+function toYdszPatchBody(values: CronJobFormValues) {
   return {
-    ...toOctopCreateBody(values),
+    ...toYdszCreateBody(values),
     enabled: Boolean(values.enabled),
   };
 }
@@ -361,7 +361,7 @@ export function useCronJobs() {
     try {
       const created = await octopCronApi.create(
         activeAgentId,
-        toOctopCreateBody(values),
+        toYdszCreateBody(values),
       );
       const row = fromYdszCron(created, cronTimezone);
       patchJobs(activeAgentId, (prev) => [row, ...prev]);
@@ -381,7 +381,7 @@ export function useCronJobs() {
   const updateJob = async (jobId: string, values: CronJobFormValues) => {
     if (!activeAgentId) return false;
     const original = jobs.find((j) => j.id === jobId);
-    const body = toOctopPatchBody(values);
+    const body = toYdszPatchBody(values);
     const optimistic = {
       ...original,
       name: (values.name || "").trim(),

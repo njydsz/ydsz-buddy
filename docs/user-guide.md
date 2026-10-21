@@ -1,6 +1,6 @@
 # 云顶数字工作台（Ydsz Worker）用户帮助文档
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 > 本帮助文档面向最终用户，介绍 **安装 → 设置向导 → 配置模型 → 基本使用** 的完整流程。
 > 所有运行时数据默认存放在 `~/.octop/`（可通过 `YDSZ_HOME` 覆盖）。
@@ -45,9 +45,9 @@
 
 ## 一、简介
 
-**Octop** 是一个开源、自托管的 AI 助手平台，支持多用户、多 Agent。它在单进程中同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、QQ、Discord、企业微信等）和定时任务，所有数据都保存在你自己的机器上。
+**Ydsz Worker** 是一个开源、自托管的 AI 助手平台，支持多用户、多 Agent。它在单进程中同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、QQ、Discord、企业微信等）和定时任务，所有数据都保存在你自己的机器上。
 
-![图 1.1 — Octop 产品总览](assets/overview.png)
+![图 1.1 — Ydsz Worker 产品总览](assets/overview.png)
 
 核心特性速览：
 
@@ -222,7 +222,7 @@ ydsz-worker run
 
 ## 四、配置模型（LLM 供应商）
 
-Octop 通过 **供应商（Provider）** 接入大模型。每个 Agent 可使用不同的供应商与模型。支持 OpenAI 兼容 API、Anthropic、AWS Bedrock、DashScope（通义千问）、Ollama 本地模型等。
+Ydsz Worker 通过 **供应商（Provider）** 接入大模型。每个 Agent 可使用不同的供应商与模型。支持 OpenAI 兼容 API、Anthropic、AWS Bedrock、DashScope（通义千问）、Ollama 本地模型等。
 
 ### 4.1 预设供应商
 
@@ -280,7 +280,7 @@ ydsz-worker provider --help     # 供应商增删改查帮助
 
 若本机已运行 Ollama，可选择 `ollama` 预设（默认 `base_url` 为本地地址），无需 API Key 即可接入本地模型，适合隐私敏感或离线场景。
 
-如果 Ollama 把模型存在非默认目录（例如从系统盘改到其它磁盘），在供应商设置里填写 **模型下载目录** 后保存。Octop 会按该路径识别已下载模型，并在启动本地 Ollama 服务时设置 `OLLAMA_MODELS`。
+如果 Ollama 把模型存在非默认目录（例如从系统盘改到其它磁盘），在供应商设置里填写 **模型下载目录** 后保存。Ydsz Worker 会按该路径识别已下载模型，并在启动本地 Ollama 服务时设置 `OLLAMA_MODELS`。
 
 ### 4.7 图片与视频生成模型
 
@@ -396,13 +396,13 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 
 | 命令 | 说明 |
 |------|------|
-| `ydsz-worker run` | 前台启动 Octop |
+| `ydsz-worker run` | 前台启动 Ydsz Worker |
 | `ydsz-worker run --host 0.0.0.0 --port 8088` | 自定义监听地址与端口 |
 | `ydsz-worker service start` | 安装并启动系统服务 |
 | `ydsz-worker service stop` | 停止系统服务 |
 | `ydsz-worker agent` | 创建、列出、启停 Agent |
 | `ydsz-worker channel` | 安装与管理 IM 通道 |
-| `ydsz-worker bridge` | 添加 / 探测 / 编辑 / 删除远程 Octop 对端 |
+| `ydsz-worker bridge` | 添加 / 探测 / 编辑 / 删除远程 Ydsz Worker 对端 |
 | `ydsz-worker chats` | REPL 与会话管理 |
 | `ydsz-worker acp` | 为 IDE 提供 stdio ACP 服务 |
 | `ydsz-worker cron` | 管理定时任务 |
@@ -465,7 +465,7 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 
 | 编号 | 位置 | 文件名 | 状态 | 内容说明 |
 |------|------|--------|------|----------|
-| 图 1.1 | 一、简介 | `overview.png` | ✅ 已就位 | Octop 品牌 Banner |
+| 图 1.1 | 一、简介 | `overview.png` | ✅ 已就位 | Ydsz Worker 品牌 Banner |
 | 图 3.1 | 3.2 向导步骤 | `setup-01-steps.png` | ✅ 已就位 | 向导步骤条（验证密码页） |
 | 图 3.2 | 3.2 管理员 | `setup-02-admin.png` | ✅ 已就位 | 创建管理员账号表单 |
 | 图 3.3 | 3.2 模型 | `setup-03-model.png` | ✅ 已就位 | 向导内预设供应商选择 |

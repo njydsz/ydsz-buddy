@@ -5,11 +5,11 @@
   "info": {
     "0000": {
       "ProductVersion": "0.9.26",
-      "CompanyName": "Octop",
-      "FileDescription": "Octop desktop",
+      "CompanyName": "Ydsz Worker",
+      "FileDescription": "Ydsz Worker desktop",
       "LegalCopyright": "Copyright © 2026",
-      "ProductName": "Octop",
-      "Comments": "Octop desktop shell"
+      "ProductName": "Ydsz Worker",
+      "Comments": "Ydsz Worker desktop shell"
     }
   }
 }

@@ -1,6 +1,6 @@
 # Bridge（Ydsz Worker ↔ Ydsz Worker 实例桥）
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 > 状态：实现中（Phase 0–3 骨架已落地）。命名与范围以本文为准；实现落在 `infra/bridge/`。  
 > 与同机 Agent 互调无关：见 [agent-call-agent.md](./agent-call-agent.md)（`ask_agent` 不参与跨实例）。

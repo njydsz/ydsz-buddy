@@ -1,6 +1,6 @@
 # ADR 001 — Single-Process, No External Queue
 
-> **品牌更名注记:** 本文档为历史架构决策记录（ADR），原载于 Tencent Octop 项目。Ydsz Worker 基于 Octop 二开后保留了相同的架构决策与进程模型，品牌名称已更新但技术决策保持不变。文中 "Octop" 产品名为上游引用，MIT 合规保留归属。
+> **品牌更名注记:** 本文档为历史架构决策记录（ADR），原载于 Tencent Ydsz Worker 项目。Ydsz Worker 基于 Ydsz Worker 二开后保留了相同的架构决策与进程模型，品牌名称已更新但技术决策保持不变。文中 "Ydsz Worker" 产品名为上游引用，MIT 合规保留归属。
 
 **Status:** Accepted
 **Date:** 2026-06
@@ -9,7 +9,7 @@
 
 ## Context
 
-Octop needs to run a web server, a CLI, per-user Agent runtimes, IM channel connections, and cron schedulers simultaneously. The question was whether to split these into separate services (worker + API server) or keep everything in one process.
+Ydsz Worker needs to run a web server, a CLI, per-user Agent runtimes, IM channel connections, and cron schedulers simultaneously. The question was whether to split these into separate services (worker + API server) or keep everything in one process.
 
 ## Decision
 
@@ -20,7 +20,7 @@ Everything runs in a single Python process served by uvicorn. There is no extern
 - **Self-hosted target:** Operators install with `pip install ydsz-worker && ydsz-worker init`. Adding Redis or a process supervisor doubles the ops burden for the primary audience.
 - **Workload profile:** Agent calls are LLM-bound (seconds to minutes of I/O wait). Python's asyncio handles this fan-out efficiently without threads or processes.
 - **SQLite is sufficient:** Concurrent writes are rare (one writer per agent at a time); WAL mode handles the load. Migrating to Postgres requires only a new `SqlitePool` implementation.
-- **Restart semantics are simple:** `OctopServer.start()` rebuilds the entire runtime tree from the SQLite file. No external state to reconcile.
+- **Restart semantics are simple:** `YdszServer.start()` rebuilds the entire runtime tree from the SQLite file. No external state to reconcile.
 
 ## Trade-offs
 

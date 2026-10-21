@@ -278,7 +278,7 @@ export function LayaLocalInstall({
         ) : null}
         {status.phase === "failed" ? (
           <Button icon={<Copy size={14} />} onClick={() => void copyLog()}>
-            {t("common.copyErrorForOctop")}
+            {t("common.copyErrorForYdsz")}
           </Button>
         ) : null}
       </div>

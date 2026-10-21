@@ -439,9 +439,6 @@ export default function Sidebar({
   const chatRailOpen = showChatRailToggle && onChatPath && chatSidebarOpen;
 
   const isRailCollapsed = collapsed && !isMobile;
-  const wordmarkSrc = isDark
-    ? "/logo_horizontal_white.png"
-    : "/logo_horizontal_dark.png";
 
   const selectMinimalPane = useCallback(
     (pane: MinimalNavPane, opts?: { expand?: boolean }) => {
@@ -508,19 +505,20 @@ export default function Sidebar({
 
   const brandInner = (
     <>
-      <img
-        src={isRailCollapsed ? "/pwa-192.png" : wordmarkSrc}
-        alt="云顶数字工作台"
+      <span
         style={{
-          height: isRailCollapsed ? 32 : isMobile ? 38 : 36,
-          width: isRailCollapsed ? 32 : "auto",
-          maxWidth: isRailCollapsed ? 32 : isMobile ? 190 : 160,
-          objectFit: "contain",
-          display: "block",
+          fontSize: isRailCollapsed ? 13 : isMobile ? 17 : 16,
+          fontWeight: 700,
+          color: isDark ? "#fff" : "#1a1a1a",
+          letterSpacing: "0.02em",
+          lineHeight: 1.2,
+          whiteSpace: isRailCollapsed ? "nowrap" : "normal",
           flexShrink: 0,
-          borderRadius: isRailCollapsed ? 8 : undefined,
+          display: "block",
         }}
-      />
+      >
+        {isRailCollapsed ? "Yd" : "Ydsz Worker"}
+      </span>
       {!isRailCollapsed && !isMobile && (
         <>
           <CurrentVersionBadge isMobile={isMobile} />

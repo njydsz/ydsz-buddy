@@ -1,6 +1,6 @@
 """End-to-end smoke for the orca memory router using TestClient.
 
-Bypasses OctopServer / DB / auth — we override the FastAPI deps used
+Bypasses YdszServer / DB / auth — we override the FastAPI deps used
 by the router (``current_user``, ``get_server``, ``require_agent_row``)
 with stubs that point straight at the real ZYWZTD sqlite. Useful for
 hand-checking the wire shape before the dashboard frontend is wired.
@@ -19,7 +19,7 @@ from ydsz.api.routers import memory
 
 
 class _StubPaths:
-    """Stub of ``OctopServer.services.paths`` with ensure_agent_workspace."""
+    """Stub of ``YdszServer.services.paths`` with ensure_agent_workspace."""
 
     def __init__(self, root: Path) -> None:
         self._root = root

@@ -1,15 +1,15 @@
 # ACP (Agent Client Protocol)
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 Ydsz Worker integrates [ACP](https://agentclientprotocol.com/) in two directions:
 
 | Direction | ACP server | ACP client | Typical use |
 |-----------|------------|------------|-------------|
-| **Inbound** | Ydsz Worker (`ydsz-worker acp`) | Zed, OpenCode, … | External IDE drives your Octop agent |
-| **Outbound** | OpenCode, CodeBuddy, … | Octop (`acp_runner` tool) | Octop agent delegates coding tasks |
+| **Inbound** | Ydsz Worker (`ydsz-worker acp`) | Zed, OpenCode, … | External IDE drives your Ydsz Worker agent |
+| **Outbound** | OpenCode, CodeBuddy, … | Ydsz Worker (`acp_runner` tool) | Ydsz Worker agent delegates coding tasks |
 
-Both use **stdio** JSON-RPC today. Octop does not expose an HTTP ACP endpoint.
+Both use **stdio** JSON-RPC today. Ydsz Worker does not expose an HTTP ACP endpoint.
 
 ---
 
@@ -69,7 +69,7 @@ After changing global runners, Ydsz Worker reloads your agents automatically. Ch
 
 ---
 
-## CLI: inbound — expose Octop as an ACP server
+## CLI: inbound — expose Ydsz Worker as an ACP server
 
 Let external clients (e.g. Zed) use a Ydsz Worker agent as their coding agent:
 
@@ -82,7 +82,7 @@ ydsz-worker acp --agent main
 | `--agent ID` | Agent to expose (default: CLI `default_agent` or first agent) |
 | `--debug` | Log to stderr |
 
-This starts a **standalone** `OctopServer` (reads `~/.octop`), boots the agent, and speaks ACP on stdin/stdout. It does **not** require `ydsz-worker run` to be running; it is a separate process.
+This starts a **standalone** `YdszServer` (reads `~/.octop`), boots the agent, and speaks ACP on stdin/stdout. It does **not** require `ydsz-worker run` to be running; it is a separate process.
 
 Pin the default agent for convenience:
 
@@ -99,7 +99,7 @@ ydsz-worker --agent main acp
 ```json
 {
   "agent_servers": {
-    "Octop": {
+    "Ydsz Worker": {
       "command": "ydsz-worker",
       "args": ["acp", "--agent", "main"],
       "env": {}
@@ -113,7 +113,7 @@ From a dev checkout:
 ```json
 {
   "agent_servers": {
-    "Octop": {
+    "Ydsz Worker": {
       "command": "uv",
       "args": ["run", "ydsz-worker", "acp", "--agent", "main"],
       "env": {}
@@ -166,7 +166,7 @@ Runner shape:
 
 ## Prerequisites
 
-- **octop-harness `[acp]` extra** — pulls in `agent-client-protocol` (included in the Octop wheel dependency on octop-harness).
+- **octop-harness `[acp]` extra** — pulls in `agent-client-protocol` (included in the Ydsz Worker wheel dependency on octop-harness).
 - **Outbound:** install external CLIs (`opencode`, `codebuddy`, …) on the machine running `ydsz-worker run`.
 - **Inbound:** agent must start successfully (provider + model configured).
 

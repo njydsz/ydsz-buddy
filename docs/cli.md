@@ -1,6 +1,6 @@
 # CLI Reference
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。CLI 命令已更名为 `ydsz-worker`。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。CLI 命令已更名为 `ydsz-worker`。
 
 `ydsz-worker` is a single Click app installed as `ydsz-worker` on `pip install ydsz-worker`.
 It is registered in `src/octop/cli/main.py`; commands are loaded
@@ -10,7 +10,7 @@ lazily from `src/octop/cli/registry.py`.
 $ ydsz-worker --help
 Usage: ydsz-worker [OPTIONS] COMMAND [ARGS]...
 
-  Octop command-line interface.
+  Ydsz Worker command-line interface.
 
 Options:
   -v, --version           Show the installed ydsz-worker version.
@@ -21,10 +21,10 @@ Options:
   -h, --help              Show this message and exit.
 
 Commands:
-  acp        Run Octop agent as ACP server (stdio).
+  acp        Run Ydsz Worker agent as ACP server (stdio).
   admin      Admin commands.
   agent      Agent lifecycle commands.
-  backup     Export and restore Octop backups.
+  backup     Export and restore Ydsz Worker backups.
   bridge     Manage remote Ydsz Worker bridge peers.
   chat       [deprecated] Alias for `ydsz-worker chats`.
   chats      Chat REPL and session management.
@@ -65,7 +65,7 @@ Ydsz Worker commands pick one of these transports:
 |-------|------|--------|----------|
 | **Offline** (local DB only) | Need to read/write `~/.octop` without a running server | No | `init`, `backup`, `plugin`, `agent list`, `chats list/get/create/update/delete`, `cron list`, `user *`, `admin overview/audit`, `models presets/list/active`, `bridge list/get` |
 | **Attach** (HTTP / WS) | Need a live `ydsz-worker run` process (IM, streams, model pulls) | Yes (`ydsz-worker user login`) | `chats send/repl`, `channel test/probe`, `models ollama-*`, `skills enable/disable`, `provider test` |
-| **Embedded** (in-process) | CLI boots `OctopServer` for a single command | No | `ydsz-worker acp`, `ydsz-worker chats repl`, `ydsz-worker chats send` (defaults to embedded), `ydsz-worker agent create/from-expert/start/stop/reload` |
+| **Embedded** (in-process) | CLI boots `YdszServer` for a single command | No | `ydsz-worker acp`, `ydsz-worker chats repl`, `ydsz-worker chats send` (defaults to embedded), `ydsz-worker agent create/from-expert/start/stop/reload` |
 | **Embedded (bridge)** | In-process `BridgeManager` (no full server); CLI cannot keep the WS after exit | No | `bridge probe/create/patch/delete/connect/disconnect/agents` |
 
 The dashboards and HTTP callers manage their own JWTs and do **not**
@@ -113,7 +113,7 @@ Options:
 
 ## `ydsz-worker service`
 
-Install and manage the Octop system service. The backend is detected
+Install and manage the Ydsz Worker system service. The backend is detected
 automatically (systemd on Linux, launchd on macOS); the scope
 (`user` vs `system`) can be forced via `--scope` or
 `OCTOP_SERVICE_SCOPE`.
@@ -165,7 +165,7 @@ Commands:
 ## `ydsz-worker agent`
 
 Lifecycle and templates. Most commands boot an embedded
-`OctopServer` to operate on the local DB without a remote round-trip.
+`YdszServer` to operate on the local DB without a remote round-trip.
 
 ```
 Usage: ydsz-worker agent [OPTIONS] COMMAND [ARGS]...
@@ -214,7 +214,7 @@ forwards to `chats`.
 
 ## `ydsz-worker bridge`
 
-User-scoped Octop-to-Octop peer links (same surface as Dashboard **远程桥接**).
+User-scoped Ydsz Worker-to-Ydsz Worker peer links (same surface as Dashboard **远程桥接**).
 `--user` / pinned `default_user` selects the local owner. `--peer-user` is
 the **remote** login. `probe` talks HTTP only; `create --connect` /
 `connect` / `agents` verify the Bridge WebSocket then close it — start
@@ -385,7 +385,7 @@ Restart `ydsz-worker run` (if already running) for the change to apply.
 
 ## `ydsz-worker backup`
 
-Export and restore Octop backups. Works fully offline.
+Export and restore Ydsz Worker backups. Works fully offline.
 
 ```
 Usage: ydsz-worker backup [OPTIONS] COMMAND [ARGS]...
@@ -461,13 +461,13 @@ Commands:
 ## `ydsz-worker acp`
 
 Expose a Ydsz Worker agent as a stdio JSON-RPC ACP server. Boots a
-standalone `OctopServer` (reads `~/.octop`); does **not** require
+standalone `YdszServer` (reads `~/.octop`); does **not** require
 `ydsz-worker run` to be running.
 
 ```
 Usage: ydsz-worker acp [OPTIONS]
 
-  Run Octop agent as ACP server (stdio).
+  Run Ydsz Worker agent as ACP server (stdio).
 
 Options:
   --agent TEXT   Agent to expose (default: OCTOP_AGENT or first agent).

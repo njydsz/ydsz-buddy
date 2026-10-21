@@ -13,15 +13,15 @@ export type ThemePalette =
   | "custom";
 
 export const VALID_PALETTES: ThemePalette[] = [
-  "rose",
+  "yuanbao",
   "tech",
   "indigo",
   "teal",
   "violet",
   "emerald",
-  "yuanbao",
   "amber",
   "slate",
+  "rose",
 ];
 
 /** Curated palettes only — "custom" is handled separately via a hex value. */

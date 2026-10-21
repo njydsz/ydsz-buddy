@@ -344,7 +344,7 @@ class YdszError(Exception):
 
 
 def corrupt_config_error(path: object, detail: str) -> YdszError:
-    """``OctopError`` for a config file that exists but cannot be parsed.
+    """``YdszError`` for a config file that exists but cannot be parsed.
 
     Raised instead of writing back a merged-into-empty dict, which would destroy
     every unrelated setting (issue #730). Carries the path and the parser

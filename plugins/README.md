@@ -1,13 +1,13 @@
-# Octop Plugin Demos
+# Ydsz Worker Plugin Demos
 
 [中文版](./README_CN.md)
 
-Sample plugins for Octop / octop-harness `kind` values, plus a **dual
+Sample plugins for Ydsz Worker / octop-harness `kind` values, plus a **dual
 frontend + backend** demo that renders tool results in chat.
 Layout inspired by [octop-toolkit](https://github.com/veenyi/octop-plugins/tree/main/octop-toolkit).
 
 Product plugins shipped with the wheel live in
-`src/octop/infra/agents/plugins/bundled/`. `octop init` and `octop run`
+`src/octop/infra/agents/plugins/bundled/`. `ydsz-worker init` and `ydsz-worker run`
 copy missing ones into `~/.octop/plugins/` and set them **globally off**
 in `config.json`. Uninstalled ids are not re-copied.
 

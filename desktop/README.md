@@ -62,7 +62,7 @@ wails3 task package ARCH=arm64 VERSION=<version> \
   PORTABLE_ZIP=../portable/release/Octop-portable-darwin-arm64-<version>.zip
 ```
 
-Dev against an already-running Octop (skips the bundled green zip):
+Dev against an already-running Ydsz Worker (skips the bundled green zip):
 
 ```bash
 cd desktop/src
@@ -76,7 +76,7 @@ Wails shell never downloads Octop. For local runtime debugging, set
 `OCTOP_DESKTOP_PORTABLE_ZIP=/absolute/path/Octop-portable-<plat>-<version>.zip`.
 On later launches, a newer bundled portable version replaces the extracted
 runtime after creating a consistent SQLite backup under `~/.octop/backups/`.
-The upgraded Octop process then applies the normal database migrations during
+The upgraded Ydsz Worker process then applies the normal database migrations during
 startup. Newer extracted runtimes are never downgraded; PostgreSQL remains
 externally managed and is not copied by the desktop shell.
 
@@ -84,15 +84,15 @@ GitHub Release names follow `Octop-<kind>-<os>-<arch>-<version>.<ext>`:
 
 - Desktop GUI: `Octop-desktop-<plat>-<version>.dmg` (macOS; open and drag
   `Octop.app` into Applications), `.exe` (Windows NSIS installer — copies
-  into `Program Files\Octop` and creates Start Menu + desktop shortcuts),
+  into `Program Files\Ydsz Worker` and creates Start Menu + desktop shortcuts),
   `.tar.gz` (Linux)
 - Green runtime zip: `Octop-portable-<plat>-<version>.zip`
 - PyPI wheels stay `octop-<version>-py3-none-any.whl` (PEP 427)
 
 The Linux tar.gz contains only the GUI binary; it has no separate portable zip or
-server terminal process. Runtime upgrades remain owned by Octop:
+server terminal process. Runtime upgrades remain owned by Ydsz Worker:
 the shell sets `OCTOP_GREEN_PACKAGES`, so `octop update` upgrades the extracted
-`packages/` directory through Octop's existing `--target` logic.
+`packages/` directory through Ydsz Worker's existing `--target` logic.
 
 Linux also needs GTK4 + WebKitGTK 6 to link. macOS 12+.
 

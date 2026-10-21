@@ -5,11 +5,11 @@
 version: "3"
 
 info:
-  companyName: "Octop"
-  productName: "Octop"
+  companyName: "YdszWorker"
+  productName: "YdszWorker"
   productIdentifier: "com.tencent.octop"
-  description: "Octop desktop shell"
-  copyright: "(c) 2026, Octop"
+  description: "YdszWorker desktop shell"
+  copyright: "(c) 2026, YdszWorker"
   comments: "Wails v3 + green portable"
   version: "0.9.26"
 

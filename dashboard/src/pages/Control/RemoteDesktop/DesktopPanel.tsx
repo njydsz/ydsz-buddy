@@ -840,7 +840,7 @@ export default function DesktopPanel({
                 icon={<Copy size={14} />}
                 onClick={() => void handleCopyInstallLog()}
               >
-                {t("common.copyErrorForOctop", "复制错误信息")}
+                {t("common.copyErrorForYdsz", "复制错误信息")}
               </Button>
             </div>
             {renderInstallLog(
@@ -857,7 +857,7 @@ export default function DesktopPanel({
               }}
             >
               {t(
-                "common.askOctopHint",
+                "common.askYdszHint",
                 "若安装失败，可复制下方错误信息发给开发者排查。",
               )}
             </div>

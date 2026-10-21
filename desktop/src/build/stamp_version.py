@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stamp the Octop version into Wails desktop metadata copies."""
+"""Stamp the Ydsz Worker version into Wails desktop metadata copies."""
 
 from __future__ import annotations
 

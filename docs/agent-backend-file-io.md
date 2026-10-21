@@ -286,7 +286,7 @@ Harness 侧只认调用方传入的 ``workspace_dir``；Docker 默认把它镜�
 | 字段 | 说明 |
 |------|------|
 | `sandbox_scope` | `agent`（默认）/ `user` / `fixed` |
-| `sandbox_prefix` | 容器名前缀；Ydsz Worker 默认注入 `octop_sandbox`；库默认 `sandbox` |
+| `sandbox_prefix` | 容器名前缀；Ydsz Worker 默认注入 `ydsz_sandbox`；库默认 `sandbox` |
 | `sandbox_id` | `fixed` 必填 |
 | `username` | `user` 用；缺省时 Ydsz Worker 注入专家所有者用户名 |
 | `previewable` | 仅影响 Admin「我的存储」浏览按钮；默认仅 `fixed` 为 true。专家工作区始终可预览 |

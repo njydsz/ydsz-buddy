@@ -1,6 +1,6 @@
 # API Reference
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 Every route is mounted under `/api`. JSON unless otherwise noted; SSE
 endpoints emit `text/event-stream`; chat turns use a WebSocket
@@ -64,7 +64,7 @@ process starts. `GET /api/envs` redacts `YDSZ_CAPTCHA_SECRET` as
 If you serve the dashboard behind a CSP, allow
 `challenges.cloudflare.com`; `js.hcaptcha.com`, `newassets.hcaptcha.com`,
 `api.hcaptcha.com`; `www.google.com`, `www.gstatic.com`;
-`turing.captcha.qcloud.com`, `captcha.qq.com`, `ssl.captcha.qq.com`. Octop
+`turing.captcha.qcloud.com`, `captcha.qq.com`, `ssl.captcha.qq.com`. Ydsz Worker
 does not set these headers itself.
 
 ## Setup & auth
@@ -521,7 +521,7 @@ for non-`/` paths.
 | `GET`    | `/connectors/oauth/callback` | public | OAuth redirect target |
 | `GET`    | `/connectors/oauth/pending/{state_id}` | user | poll the OAuth result |
 
-Custom MCP OAuth (streamable HTTP, public HTTPS URL only): Octop discovers the authorization
+Custom MCP OAuth (streamable HTTP, public HTTPS URL only): Ydsz Worker discovers the authorization
 server from the MCP URL (401 / RFC 9728 protected-resource metadata), requires dynamic client
 registration (DCR), stores encrypted tokens in the custom MCP spec, and injects `Authorization:
 Bearer` when loading tools. Loopback and LAN MCP URLs may use HTTP and do not use remote OAuth
@@ -533,9 +533,9 @@ discovery.
 |--------|------|------|-------|
 | `POST`/`GET`/… | `/internal/mcp/*` | public (mTLS / network-isolated) | MCP gateway used by octop-harness agents (not the dashboard) |
 
-## Octop Agent MCP Gateway
+## Ydsz Worker Agent MCP Gateway
 
-External agents call installed Octop experts through the authenticated
+External agents call installed Ydsz Worker experts through the authenticated
 Streamable HTTP endpoint:
 
 `POST/GET/DELETE /mcp/agents`
@@ -552,7 +552,7 @@ The server exposes three tools:
 | `resume_octop_expert` | Resume a call that stopped for tool approval or user input |
 
 `call_octop_expert` returns `thread_id`. Store this value in the external
-agent's working state. Pass it only when the next task must use the same Octop
+agent's working state. Pass it only when the next task must use the same Ydsz Worker
 conversation. Omit it for a new task. MCP threads cannot attach to dashboard,
 CLI, or IM threads.
 
@@ -611,7 +611,7 @@ endpoint (public, mounted directly in `api/app.py`).
 | `WS`/`POST`/`GET`/… | `/agents/{aid}/terminal` | owner | AI-assisted remote PTY |
 | `GET` | `/agents/{aid}/terminal/context` | owner | recent terminal context for the AI helper |
 | `WS`/`POST`/`GET`/… | `/browser/...` | user | octop-browser sessions, live stream, record/replay |
-| `POST` | `/browser/shutdown` | user | stop the current user's Octop-managed Chrome |
+| `POST` | `/browser/shutdown` | user | stop the current user's Ydsz Worker-managed Chrome |
 | `POST` | `/agents/{aid}/upload` | user | multipart upload → `{workspace}/inbound/` |
 | `POST` | `/agents/{aid}/files/access-urls` | user | refresh inbound media URLs (signed) |
 | `GET`  | `/agents/{aid}/files/{path}` | owner | read an inbound file |
@@ -662,7 +662,7 @@ Every non-2xx JSON response uses:
 ```
 
 `code` matches the `ErrorCode` enum in `octop.infra.errors`; the
-server-localized `message` is rendered by `OctopError.to_envelope`
+server-localized `message` is rendered by `YdszError.to_envelope`
 with the locale from `Accept-Language` (falling back to `en`). The
 dashboard mirrors every code under `apiErrors.*` in
 `dashboard/src/locales/{en,zh}.json`.

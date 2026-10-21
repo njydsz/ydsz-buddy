@@ -44,7 +44,7 @@ LOG_TS=$(stat -c %Y "$LOG" 2>/dev/null || echo 0)
 if [ "$CRED_TS" -gt "$LOG_TS" ]; then tccli sts GetCallerIdentity; else tail -5 "$LOG"; fi
 ```
 
-> 远程/容器部署注意：OAuth 回调发往 tccli 进程监听的 `localhost:9000-9100`。若用户浏览器与 tccli 不在同一台机器（如 Octop 部署在服务器、用户在本地电脑点链接），回调到不了 tccli，凭证永远不会写入。此时改用：用户在**自己电脑**上装 tccli 并 `tccli auth login`，再把生成的 `~/.tccli/default.credential`（OAuth 类型，含 refreshToken 可自动续期）复制到 Octop 服务器的同路径；或退回子账号密钥方式（`tccli configure` 由用户自行填写）。
+> 远程/容器部署注意：OAuth 回调发往 tccli 进程监听的 `localhost:9000-9100`。若用户浏览器与 tccli 不在同一台机器（如 Ydsz Worker 部署在服务器、用户在本地电脑点链接），回调到不了 tccli，凭证永远不会写入。此时改用：用户在**自己电脑**上装 tccli 并 `tccli auth login`，再把生成的 `~/.tccli/default.credential`（OAuth 类型，含 refreshToken 可自动续期）复制到 Ydsz Worker 服务器的同路径；或退回子账号密钥方式（`tccli configure` 由用户自行填写）。
 
 **多账户与登出**
 

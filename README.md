@@ -3,7 +3,7 @@
 > **归属声明 / Attribution:** Ydsz Worker 基于腾讯 Octop（[MIT 协议](https://github.com/TencentCloud/Octop/blob/main/LICENSE)）二开，保留原始版权归属。
 
 <p align="center">
-  <img src="docs/assets/readme-banner.png" alt="Octop Banner" width="600" />
+  <img src="docs/assets/readme-banner.png" alt="Ydsz Worker Banner" width="600" />
 </p>
 
 <p align="center">
@@ -145,7 +145,7 @@ Ydsz Worker supports ACP in two directions:
 
 1. **Inbound** — external tools use **your** Ydsz Worker agent
    ```bash
-   octop acp --agent main   # stdio ACP server for Zed, OpenCode, …
+   ydsz-worker acp --agent main   # stdio ACP server for Zed, OpenCode, …
    ```
 
 2. **Outbound** — Ydsz Worker delegates to external coding agents
@@ -241,7 +241,7 @@ See [desktop/README.md](desktop/README.md) for the desktop shell and [fnos/READM
 
 ```bash
 pip install ydsz-worker
-# optional local ONNX embedding model cache (Models → Local): pip install "octop[local-embedding]"
+# optional local ONNX embedding model cache (Models → Local): pip install "ydsz-worker[local-embedding]"
 # Downloads catalog weights under ~/.octop/embedding_models; not chat, not Memory.
 # Browser automation uses the bundled Playwright package; install Chromium via the installer --extras browser,
 # the dashboard, or: python -m playwright install chromium
@@ -256,7 +256,7 @@ uv sync --extra local-embedding
 ### 2. Initialize
 
 ```bash
-octop init
+ydsz-worker init
 ```
 
 The interactive wizard creates the SQLite database, JWT secret, and first admin account under `~/.octop/`.
@@ -265,13 +265,13 @@ The interactive wizard creates the SQLite database, JWT secret, and first admin 
 
 ```bash
 # Foreground (API + Web dashboard)
-octop run
+ydsz-worker run
 
 # Custom host / port
-octop run --host 0.0.0.0 --port 8088
+ydsz-worker run --host 0.0.0.0 --port 8088
 
 # Register as a system service (systemd / launchd / Windows service)
-octop service start
+ydsz-worker service start
 ```
 
 Open **http://127.0.0.1:8088**. With Docker, a valid `YDSZ_DEFAULT_PASSWORD` creates the admin on first boot (credentials in `/data/.octop/credential.txt`); if it is unset or rejected, open the setup wizard (unlock password in `/data/.octop/octop-login.txt`). Interactive `ydsz-worker init` / the setup wizard asks you to choose a password (≥8 characters, letters and digits).

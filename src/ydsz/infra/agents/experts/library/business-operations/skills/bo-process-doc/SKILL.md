@@ -2,7 +2,7 @@
 name: bo-process-doc
 description: 将组织实际执行或拟议的流程整理为可复用的标准操作流程（SOP），明确职责、异常处理和验证方式。适用于编写 SOP、流程图、RACI、交接说明或流程文档。
 ---
-<!-- 已为 Octop 改编。 -->
+<!-- 已为 Ydsz Worker 改编。 -->
 
 # 流程文档与标准操作流程（SOP）
 

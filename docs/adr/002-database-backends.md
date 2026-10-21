@@ -1,6 +1,6 @@
 # ADR 002 — Dual Database Backends (SQLite | PostgreSQL)
 
-> **品牌更名注记:** 本文档为历史架构决策记录（ADR），原载于 Tencent Octop 项目。Ydsz Worker 基于 Octop 二开后保留了相同的数据库架构决策，品牌名称已更新但技术决策保持不变。文中 "Octop" 产品名为上游引用，MIT 合规保留归属。
+> **品牌更名注记:** 本文档为历史架构决策记录（ADR），原载于 Tencent Ydsz Worker 项目。Ydsz Worker 基于 Ydsz Worker 二开后保留了相同的数据库架构决策，品牌名称已更新但技术决策保持不变。文中 "Ydsz Worker" 产品名为上游引用，MIT 合规保留归属。
 
 **Status:** Accepted  
 **Date:** 2026-07-20  
@@ -43,7 +43,7 @@ Workspace content files (SOUL, skills, inbound, JSONL) remain files via `Backend
 - Repos keep `?` placeholders; `PostgresPool` rewrites to `%s` at the boundary.
 - Parallel migrations: `NNN_*.sql` (SQLite) and `NNN_*.pg.sql` (PostgreSQL).
 - Sync pool from async (same pattern as today). Optional `asyncio.to_thread` helpers are **out of scope** (follow-up “1b”).
-- Single active Octop writer; no multi-instance write promise.
+- Single active Ydsz Worker writer; no multi-instance write promise.
 - Greenfield only — no SQLite→PG data migrator.
 - Backup: SQLite file snapshot vs `pg_dump -Fc`; manifest carries `database_driver` + `database_dump_format`; refuse cross-engine restore.
 - Default dependency includes `psycopg[binary]`. Live PG tests are gated by `@pytest.mark.postgresql` + `OCTOP_TEST_DATABASE_URL`.
@@ -69,4 +69,4 @@ Ydsz Worker passes `memory_backend` into `HarnessAgentConfig` and opens dashboar
 - `DatabasePool` Protocol; `open_database()` returns SQLite or PG.
 - Setup first step must succeed before admin creation when operators choose PG.
 - Operators may colocate control plane + memory on one Postgres (separate schemas) or split DSNs.
-- ADR 001’s “one process” model is unchanged; PG is an optional backing store, not a second Octop instance.
+- ADR 001’s “one process” model is unchanged; PG is an optional backing store, not a second Ydsz Worker instance.

@@ -1,12 +1,12 @@
-# Octop 插件示例
+# Ydsz Worker 插件示例
 
 [English](./README.md)
 
-本目录提供插件 demo，对应 Octop / octop-harness 支持的 `kind`，以及**前后端一体**的 UI 渲染示例。
+本目录提供插件 demo，对应 Ydsz Worker / octop-harness 支持的 `kind`，以及**前后端一体**的 UI 渲染示例。
 结构参考 [octop-toolkit](https://github.com/veenyi/octop-plugins/tree/main/octop-toolkit)。
 
-随 Octop 安装包一并分发的产品插件在 `src/octop/infra/agents/plugins/bundled/`。
-`octop init` 与 `octop run` 启动时会把缺失的插件复制到 `~/.octop/plugins/`，并在 `config.json` 里写成 **全局关闭**；管理员在 Dashboard 插件页打开后再给 Agent 用。卸载过的 id 不会自动装回。
+随 Ydsz Worker 安装包一并分发的产品插件在 `src/octop/infra/agents/plugins/bundled/`。
+`ydsz-worker init` 与 `ydsz-worker run` 启动时会把缺失的插件复制到 `~/.octop/plugins/`，并在 `config.json` 里写成 **全局关闭**；管理员在 Dashboard 插件页打开后再给 Agent 用。卸载过的 id 不会自动装回。
 
 ## 示例一览
 
