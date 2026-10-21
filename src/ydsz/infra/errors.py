@@ -358,4 +358,4 @@ def corrupt_config_error(path: object, detail: str) -> YdszError:
 
 
 # Backward-compat alias — remove in next major version
-OctopError = YdszError
+YdszError = YdszError

@@ -34,7 +34,7 @@ def _scoped_cfg(root: Path, **extra: object) -> dict:
 def test_scoped_default_persists_agent_facing_path(tmp_path: Path) -> None:
     root = tmp_path / "home"
     root.mkdir()
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     cfg = _scoped_cfg(root)
     host = seed_workspace_dir_on_create(cfg, paths=paths, agent_id="J1BT2X")
     assert cfg["workspace_dir"] == "/.ydsz/workspaces/J1BT2X"
@@ -70,7 +70,7 @@ def test_user_assigned_workspace_wins(tmp_path: Path) -> None:
     root = tmp_path / "home"
     root.mkdir()
     custom = tmp_path / "custom-ws"
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     cfg = _scoped_cfg(root, workspace_dir=str(custom))
     host = seed_workspace_dir_on_create(cfg, paths=paths, agent_id="USR1")
     assert cfg["workspace_dir"] == str(custom)
@@ -121,7 +121,7 @@ def test_harness_workspace_maps_non_absolute_persisted_value(tmp_path: Path) -> 
 
 def test_workspace_dir_from_config_roundtrip(tmp_path: Path) -> None:
     root = tmp_path / "home"
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     cfg = _scoped_cfg(root)
     host = default_agent_workspace_dir(paths, "RT001", cfg=cfg)
     cfg["workspace_dir"] = scoped_workspace_dir_str("RT001")
@@ -129,7 +129,7 @@ def test_workspace_dir_from_config_roundtrip(tmp_path: Path) -> None:
 
 
 def test_workspace_dir_from_config_ensure_false_does_not_mkdir(tmp_path: Path) -> None:
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     missing = tmp_path / "gone" / "YZQ7X4"
     cfg = {"workspace_dir": str(missing)}
     out = workspace_dir_from_config(cfg, paths=paths, agent_id="YZQ7X4", ensure=False)
@@ -138,14 +138,14 @@ def test_workspace_dir_from_config_ensure_false_does_not_mkdir(tmp_path: Path) -
 
 
 def test_default_workspace_ensure_false_does_not_mkdir(tmp_path: Path) -> None:
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     out = default_agent_workspace_dir(paths, "A1", ensure=False)
     assert out == paths.agent_workspace("A1")
     assert not out.exists()
 
 
 def test_workspace_dir_from_config_falls_back_when_unwritable(tmp_path: Path) -> None:
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     blocker = tmp_path / "not-a-dir"
     blocker.write_text("x", encoding="utf-8")
     stale = blocker / "YZQ7X4"
@@ -157,7 +157,7 @@ def test_workspace_dir_from_config_falls_back_when_unwritable(tmp_path: Path) ->
 
 
 def test_default_workspace_falls_back_when_scoped_root_unwritable(tmp_path: Path) -> None:
-    paths = PathLayout(tmp_path / "octop-home")
+    paths = PathLayout(tmp_path / "Ydsz-home")
     blocker = tmp_path / "not-a-dir"
     blocker.write_text("x", encoding="utf-8")
     cfg = _scoped_cfg(blocker)

@@ -221,7 +221,7 @@ export function DockerEnvFooter() {
         <div className={styles.sectionTitle}>
           {t("storage.dockerEnv.sectionYdsz")}
         </div>
-        <p className={styles.sectionDesc}>{t("storage.dockerEnv.octopDesc")}</p>
+        <p className={styles.sectionDesc}>{t("storage.dockerEnv.ydszDesc")}</p>
         {env?.agent_prompt ? (
           <pre className={styles.promptBlock}>{env.agent_prompt}</pre>
         ) : null}

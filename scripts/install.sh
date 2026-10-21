@@ -1049,7 +1049,7 @@ add_to_profile() {
     if [ -f "$profile" ] && grep -qF "$YDSZ_BIN" "$profile" 2>/dev/null; then
         return 0
     fi
-    # backward-compat for legacy .octop/bin markers
+    # backward-compat for legacy .Ydsz/bin markers
     if [ -f "$profile" ] && grep -qF '.ydsz/bin' "$profile" 2>/dev/null; then
         return 0
     fi

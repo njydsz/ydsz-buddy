@@ -6,7 +6,7 @@ $RepoRoot = Split-Path $PSScriptRoot -Parent
 Set-Location $RepoRoot
 
 $DashboardDir = Join-Path $RepoRoot "dashboard"
-$DashboardDest = Join-Path $RepoRoot "src\octop\dashboard"
+$DashboardDest = Join-Path $RepoRoot "src\Ydsz\dashboard"
 
 Write-Host "[wheel_build] Building dashboard frontend..."
 Push-Location $DashboardDir
@@ -16,10 +16,10 @@ Pop-Location
 
 $indexHtml = Join-Path $DashboardDest "index.html"
 if (-not (Test-Path $indexHtml)) {
-    throw "Dashboard build did not produce src/octop/dashboard/index.html"
+    throw "Dashboard build did not produce src/Ydsz/dashboard/index.html"
 }
 
-Write-Host "[wheel_build] Dashboard ready at src/octop/dashboard/"
+Write-Host "[wheel_build] Dashboard ready at src/Ydsz/dashboard/"
 
 Write-Host "[wheel_build] Building wheel + sdist..."
 python -m pip install --quiet build

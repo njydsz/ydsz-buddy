@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function ShortLink(props) {
   const d = props.data && typeof props.data === "object" ? props.data : {};
@@ -13,7 +13,7 @@ function ShortLink(props) {
       background: "linear-gradient(135deg,#ecfeff,#cffafe)",
       border: "1px solid #67e8f9",
     },
-    "data-octop-plugin-ui": "short-link",
+    "data-Ydsz-plugin-ui": "short-link",
     children: [
       _jsx("div", { style: { fontWeight: 800, marginBottom: 8 }, children: "🔗 短链接" }),
       _jsx("a", {

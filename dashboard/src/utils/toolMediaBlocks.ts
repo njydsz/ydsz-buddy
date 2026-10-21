@@ -85,8 +85,8 @@ export function extractWorkspaceRel(path: string): string | null {
 /**
  * Build the ``source`` query for ``/media/preview``.
  *
- * Workspace tree entries use leading-slash keys (``/octop-logo.png``). Wrapping
- * those as ``file:///octop-logo.png`` makes the backend look on the host root
+ * Workspace tree entries use leading-slash keys (``/ydsz-logo.png``). Wrapping
+ * those as ``file:///ydsz-logo.png`` makes the backend look on the host root
  * and returns NOT_FOUND. Prefer workspace-relative keys whenever we can.
  */
 export function toMediaPreviewSource(
@@ -120,8 +120,8 @@ export function toMediaPreviewSource(
     if (agentId) {
       const idLower = agentId.toLowerCase();
       for (const marker of [
-        `/.octop/agents/${idLower}/`,
-        `.octop/agents/${idLower}/`,
+        `/.ydsz/agents/${idLower}/`,
+        `.ydsz/agents/${idLower}/`,
       ]) {
         const idx = lower.lastIndexOf(marker);
         if (idx >= 0) {

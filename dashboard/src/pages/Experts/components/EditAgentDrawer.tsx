@@ -180,7 +180,7 @@ interface EditAgentDrawerBodyProps {
 }
 
 /**
- * Merge page-config fields into the existing workspace .octop/manifest.json.
+ * Merge page-config fields into the existing workspace .ydsz/manifest.json.
  * Missing file → start from {}. Invalid JSON is refused so we do not
  * clobber a hand-edited manifest.
  */
@@ -192,7 +192,7 @@ async function persistWelcomeManifest(
   try {
     const file = await workspaceApi.readWorkspaceFile(
       agentId,
-      "/.octop/manifest.json",
+      "/.ydsz/manifest.json",
     );
     const parsed = parseManifestObject(file.content ?? "");
     if (!parsed.ok) return "invalid-json";
@@ -215,7 +215,7 @@ async function persistWelcomeManifest(
   const merged = mergeWelcomeIntoManifest(existing, data);
   await workspaceApi.createWorkspaceFile(
     agentId,
-    "/.octop/manifest.json",
+    "/.ydsz/manifest.json",
     JSON.stringify(merged, null, 2),
   );
   return "ok";

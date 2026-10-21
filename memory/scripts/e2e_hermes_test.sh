@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # =============================================================================
 # e2e_hermes_test.sh — Hermes + ydsz-memory end-to-end verifier
 #
@@ -143,7 +143,7 @@ plugin_dir, hermes_home = sys.argv[1], sys.argv[2]
 # The real base class must be importable now.
 from agent.memory_provider import MemoryProvider as RealBase  # noqa: E402
 
-spec = importlib.util.spec_from_file_location("octop_hermes_e2e", Path(plugin_dir) / "__init__.py")
+spec = importlib.util.spec_from_file_location("Ydsz_hermes_e2e", Path(plugin_dir) / "__init__.py")
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 

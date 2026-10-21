@@ -1,6 +1,6 @@
 services:
   ydsz-worker:
-    image: ghcr.io/tencentcloud/octop:1.0.2
+    image: ghcr.io/tencentcloud/ydsz:1.0.2
     container_name: ydsz-worker
     restart: unless-stopped
     ulimits:

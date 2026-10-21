@@ -198,7 +198,7 @@ LangGraph 按类型要求 ConnectionPool；内部租约适配器继承该类型�
 
 ## ADR-041：按来源隔离运行诊断，保护用户知识（Accepted）
 
-运行失败的发生事实不等于可长期使用的知识。ydsz-harness / Ydsz 使用 `on_failure="error"` 让模型失败保留为 checkpoint 异常，由宿主单独展示；团队自动失败通知排除采集。仍合成错误回复的宿主必须标记 `payload.octop_runtime_error=true`，memory 在 capture、两类 extractor、promotion 和 raw prompt recall 仅按结构化来源排除。移除“记住”与“已验证”等意图/价值词表；主动保存由 Agent 自行调用 memory_save，手动写入、人工批准/编辑按来源保护。提炼模型判断普通对话的长期价值。⚠️ 召回/写入路径变更：后台采集不再给意图短句特例；存量治理即使 apply 也只软停用全部证据均带错误标记的自动记录。旧版严格重试失败格式仅在 operations 审核清单中使用，缺失或混合来源保留原状态、返回 review_*_ids；不据文字推断来源，不删 raw 或新增 schema。
+运行失败的发生事实不等于可长期使用的知识。ydsz-harness / Ydsz 使用 `on_failure="error"` 让模型失败保留为 checkpoint 异常，由宿主单独展示；团队自动失败通知排除采集。仍合成错误回复的宿主必须标记 `payload.Ydsz_runtime_error=true`，memory 在 capture、两类 extractor、promotion 和 raw prompt recall 仅按结构化来源排除。移除“记住”与“已验证”等意图/价值词表；主动保存由 Agent 自行调用 memory_save，手动写入、人工批准/编辑按来源保护。提炼模型判断普通对话的长期价值。⚠️ 召回/写入路径变更：后台采集不再给意图短句特例；存量治理即使 apply 也只软停用全部证据均带错误标记的自动记录。旧版严格重试失败格式仅在 operations 审核清单中使用，缺失或混合来源保留原状态、返回 review_*_ids；不据文字推断来源，不删 raw 或新增 schema。
 
 ## ADR-042：手动文档为准，冲突转候选，去重绑定会话快照（Accepted）
 

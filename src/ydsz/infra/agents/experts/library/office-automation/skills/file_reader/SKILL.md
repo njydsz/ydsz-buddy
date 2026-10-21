@@ -6,7 +6,7 @@ metadata:
   qwenpaw:
     emoji: "📄"
     requires: {}
-  octop:
+  Ydsz:
     emoji: "📖"
     label:
       zh: "文件读取"

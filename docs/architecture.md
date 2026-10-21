@@ -28,8 +28,8 @@ provider the user configures.
 ## 2. Process model
 
 `YdszServer.start()` wires the runtime tree in dependency order. The
-composition root lives in `src/octop/infra/server.py`; FastAPI/uvicorn
-is attached from `src/octop/launch.py` (the only module that may import
+composition root lives in `src/ydsz/infra/server.py`; FastAPI/uvicorn
+is attached from `src/ydsz/launch.py` (the only module that may import
 both `infra/server` and `api/app`).
 
 ```
@@ -41,7 +41,7 @@ YdszServer.start()
  ├─ SharedServices (repos + factories)
  ├─ WizardTokenStore                 (5-min TTL setup tokens)
  ├─ ExpertCatalog  / SubagentCatalog (bundled MD libraries)
- ├─ PluginManager.seed_bundled() then load_installed()  (~/.octop/plugins/*; bundled default off)
+ ├─ PluginManager.seed_bundled() then load_installed()  (~/.ydsz/plugins/*; bundled default off)
  ├─ AgentManager (global registry — one per process)
  │    └─ for each agent row: builds HarnessAgentRuntime on demand
  │       ├─ HarnessAgent (LangGraph)
@@ -97,11 +97,11 @@ see `infra/gateway/threads.py` for the full state machine.
 The **control plane** (users, agents, providers, channels, cron,
 sessions, audit, JWT secret) lives in either:
 
-* SQLite — default file under `~/.octop/` (legacy `octop.db` or
+* SQLite — default file under `~/.ydsz/` (legacy `ydsz.db` or
   `config.json` → `database.sqlite_path`), or
 * PostgreSQL — `config.json` / `YDSZ_DATABASE_*` / Setup wizard database step.
 
-Migrations: `src/octop/infra/db/migrations/NNN_*.sql` (SQLite) and
+Migrations: `src/ydsz/infra/db/migrations/NNN_*.sql` (SQLite) and
 `NNN_*.pg.sql` (PostgreSQL). Connection PRAGMAs live on the SQLite pool;
 PostgreSQL extensions (e.g. `vector`) are docker/ops init, not app
 migrations. Agent memory DDL is owned by the built-in memory module. See
@@ -112,9 +112,9 @@ The wheel ships the built dashboard SPA, so the entire stack is one
 
 Per-agent workspace files (Markdown, skills, expert templates) are
 read and written through the agent's `BackendWorkspace`
-(`octop.infra.backend` → `ydsz_harness.backends`). The default
+(`ydsz.infra.backend` → `ydsz_harness.backends`). The default
 backend is a `filesystem` adapter rooted at
-`~/.octop/agents/<agent_id>/`; remote backends (S3, COS) are mounted
+`~/.ydsz/agents/<agent_id>/`; remote backends (S3, COS) are mounted
 on top of the same root_dir and the Ydsz Worker service never reads
 content files via `Path.write_text` / `read_text` (see
 [agent-backend-file-io.md](./agent-backend-file-io.md) for the full
@@ -126,8 +126,8 @@ they are harness-managed.
 
 Server-owned strings (slash replies, IM status, API error messages,
 tool display names, CLI output) come from the bundles in
-`src/octop/i18n/{en,zh}.json` and helpers under
-`src/octop/i18n/domains/`. Locale resolution lives in
+`src/ydsz/i18n/{en,zh}.json` and helpers under
+`src/ydsz/i18n/domains/`. Locale resolution lives in
 `infra/utils/locale.py`: stored user preference → `Accept-Language`
 header → channel-type hint. The dashboard mirrors the codes under
 `dashboard/src/locales/{en,zh}.json → apiErrors.*` and may hydrate
@@ -149,7 +149,7 @@ checkpoint and are pushed to the dashboard / IM channel by
 
 - [AGENTS.md](../AGENTS.md) — module boundaries, hard bans, change workflow
 - [Architecture Decision Records](./adr/) — single-process, no queue (ADR 001)
-- [Configuration](configuration.md) — `~/.octop/` layout + env vars
+- [Configuration](configuration.md) — `~/.ydsz/` layout + env vars
 - [API reference](api.md) — every route, body, and error
 - [CLI reference](cli.md) — every subcommand
 - [Personas](personas.md) — MBTI templates and the mbti_profiles data module

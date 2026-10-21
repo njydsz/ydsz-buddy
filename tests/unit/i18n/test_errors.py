@@ -52,7 +52,7 @@ def test_resolve_request_locale_from_accept_language():
 def test_dashboard_api_errors_match_backend():
     repo = Path(__file__).resolve().parents[3]
     dash_en = json.loads((repo / "dashboard/src/locales/en.json").read_text(encoding="utf-8"))
-    backend_en = json.loads((repo / "src/octop/i18n/en.json").read_text(encoding="utf-8"))
+    backend_en = json.loads((repo / "src/Ydsz/i18n/en.json").read_text(encoding="utf-8"))
     dash_codes = set(dash_en["apiErrors"].keys())
     backend_codes = set(backend_en["errors"].keys())
     assert dash_codes == backend_codes == {c.value for c in ErrorCode}

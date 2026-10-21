@@ -21,7 +21,7 @@ export function isPinnedToolUiMessage(message: ChatMessage): boolean {
   const toolData = message.toolData;
   if (!toolData) return false;
   const parsed = parseYdszToolOutput(toolData.output);
-  if (parsed.octopUi) {
+  if (parsed.ydszUi) {
     if (isSilentPluginUiData(parsed.data)) return false;
     return true;
   }

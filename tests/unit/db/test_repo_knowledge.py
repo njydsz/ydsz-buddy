@@ -168,7 +168,7 @@ def test_migration_007_rebuilds_text_primary_keys(tmp_path: Path) -> None:
         conn.executescript(
             (
                 Path(__file__).resolve().parents[3]
-                / "src/octop/infra/db/migrations/001_initial.sql"
+                / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 6")

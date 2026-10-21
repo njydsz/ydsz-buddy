@@ -433,7 +433,7 @@ def test_map_virtual_paths_in_env_maps_path_lists_only_when_credible(tmp_path: P
 
     mapped = map_virtual_paths_in_env(
         {
-            "OCTOP_SKILLS_DIR": "/.Ydsz/workspaces/QH53B8/.Ydsz/skills",
+            "Ydsz_SKILLS_DIR": "/.Ydsz/workspaces/QH53B8/.Ydsz/skills",
             "PYTHONPATH": f"/.Ydsz/workspaces/QH53B8/lib{os.pathsep}/usr/lib",
             "PATH": f"/usr/bin{os.pathsep}/.Ydsz/workspaces/QH53B8/bin",
             "URL": "https://example.com/a",
@@ -443,7 +443,7 @@ def test_map_virtual_paths_in_env_maps_path_lists_only_when_credible(tmp_path: P
         workspace_dir=workspace,
     )
 
-    assert mapped["OCTOP_SKILLS_DIR"] == str(skills)
+    assert mapped["Ydsz_SKILLS_DIR"] == str(skills)
     assert mapped["PYTHONPATH"] == f"{workspace / 'lib'}{os.pathsep}/usr/lib"
     assert mapped["PATH"] == f"/usr/bin{os.pathsep}{custom_bin}"
     assert mapped["URL"] == "https://example.com/a"
@@ -462,7 +462,7 @@ def test_scoped_workspace_skill_script_executes_without_bwrap(tmp_path: Path) ->
         "import os\n"
         "from pathlib import Path\n"
         "print(Path.cwd().name)\n"
-        "print(Path(os.environ['OCTOP_SKILLS_DIR']).name)\n",
+        "print(Path(os.environ['Ydsz_SKILLS_DIR']).name)\n",
         encoding="utf-8",
     )
     (workspace / "workspace_probe.py").write_text("print('workspace-cwd')\n", encoding="utf-8")
@@ -472,7 +472,7 @@ def test_scoped_workspace_skill_script_executes_without_bwrap(tmp_path: Path) ->
         workspace_dir=workspace,
         virtual_mode=True,
         inherit_env=False,
-        env={"OCTOP_SKILLS_DIR": "/.Ydsz/workspaces/QH53B8/.Ydsz/skills"},
+        env={"Ydsz_SKILLS_DIR": "/.Ydsz/workspaces/QH53B8/.Ydsz/skills"},
     )
     virtual_skill = "/.Ydsz/workspaces/QH53B8/.Ydsz/skills/commind-data-fetch"
     assert backend.read(f"{virtual_skill}/SKILL.md").error is not None
@@ -484,7 +484,7 @@ def test_scoped_workspace_skill_script_executes_without_bwrap(tmp_path: Path) ->
     assert "commind-data-fetch" in listed.output
 
     via_env = backend.execute(
-        f'{shlex.quote(sys.executable)} "$OCTOP_SKILLS_DIR/commind-data-fetch/scripts/fetch_gateway.py"'
+        f'{shlex.quote(sys.executable)} "$Ydsz_SKILLS_DIR/commind-data-fetch/scripts/fetch_gateway.py"'
     )
     assert via_env.exit_code == 0
     assert "QH53B8" in via_env.output

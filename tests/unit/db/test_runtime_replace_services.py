@@ -75,7 +75,7 @@ def test_replace_services_retargets_user_and_provider_repos(tmp_path: Path) -> N
 
 def test_rebind_module_delegates_retarget_to_app_runtime() -> None:
     """db.rebind must not own runtime private-field surgery."""
-    src = Path(__file__).resolve().parents[3] / "src/octop/infra/db/rebind.py"
+    src = Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/rebind.py"
     text = src.read_text(encoding="utf-8")
     assert "replace_services" in text
     assert "_retarget_runtime" not in text

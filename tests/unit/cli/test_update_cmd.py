@@ -102,7 +102,7 @@ def test_build_upgrade_command_pins_version() -> None:
     python = "/home/user/.ydsz/venv/bin/python"
     cmd = self_update.build_upgrade_command("uv", python, version="0.9.33")
     assert cmd is not None
-    assert "octop==0.9.33" in cmd
+    assert "Ydsz==0.9.33" in cmd
     assert "--prerelease" not in cmd
 
 
@@ -112,7 +112,7 @@ def test_build_upgrade_command_green_packages_target(
     packages = tmp_path / "packages"
     packages.mkdir()
     monkeypatch.setenv("YDSZ_GREEN_PACKAGES", str(packages))
-    python = "/opt/octop/runtime/bin/python3"
+    python = "/opt/Ydsz/runtime/bin/python3"
     cmd = self_update.build_upgrade_command("uv", python)
     assert cmd is not None
     assert "--target" in cmd

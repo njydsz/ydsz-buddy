@@ -4,7 +4,7 @@ description: >-
   Use a concise, polite greeting and opening. Trigger this skill when the user
   says hello, asks for a self-introduction, or wants a more formal / polite tone.
 metadata:
-  octop:
+  Ydsz:
     emoji: "👋"
 ---
 

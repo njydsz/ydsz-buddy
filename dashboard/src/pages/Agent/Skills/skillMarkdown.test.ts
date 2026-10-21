@@ -23,13 +23,13 @@ describe("parseSkillPreviewFromMarkdown", () => {
     });
   });
 
-  it("reads emoji from legacy octop-frontmatter SKILL.md", () => {
+  it("reads emoji from legacy ydsz-frontmatter SKILL.md", () => {
     const md = [
       "---",
       "name: Legacy Skill",
       "description: Old format",
       "metadata:",
-      "  octop:",
+      "  ydsz:",
       '    emoji: "🔧"',
       "---",
       "",

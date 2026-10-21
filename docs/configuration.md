@@ -1,15 +1,15 @@
 # Configuration
 
-Ydsz Worker stores all of its state under `~/.octop/`. The directory is created
+Ydsz Worker stores all of its state under `~/.ydsz/`. The directory is created
 on first server start (or by `ydsz-worker init` / `ydsz-worker run`).
 
 ## Filesystem layout
 
 ```
-~/.octop/
+~/.ydsz/
 ├── config.json              # process-level settings (host, port, CORS, DB, TLS, …)
 ├── env                      # optional dotenv (YDSZ_DATABASE_*, API keys, …); loaded at server start
-├── octop.db                 # SQLite — users, agents, providers, sessions, audit
+├── ydsz.db                 # SQLite — users, agents, providers, sessions, audit
 ├── cli_state.json           # CLI token + pinned defaults (`ydsz-worker user login`)
 ├── repl_history             # readline-style history for `ydsz-worker chats repl`
 ├── secrets/
@@ -30,14 +30,14 @@ file are left alone). Every running agent inherits those keys:
 - **Local shell** — live process env (including this file) plus the agent's
   workspace `.env` (workspace wins on the same key; `YDSZ_*` / `HOME` / `USER`
   cannot be overridden from `.env`). New agents store that file at
-  `{workspace}/.octop/.env`; existing agents keep `{workspace}/.env` when
+  `{workspace}/.ydsz/.env`; existing agents keep `{workspace}/.env` when
   their stored internal system-files prefix uses the legacy layout. Remote
   object-store workspaces are not read from the host path — Ydsz Worker/harness
   also reads `.env` through the agent backend on each execute. Ydsz Worker also
-  injects `YDSZ_AGENT_ID`, `YDSZ_AUTH_DIR` (under `{workspace}/.octop/auth`
-  for new agents; legacy agents keep `{workspace}/.octop-auth`),
+  injects `YDSZ_AGENT_ID`, `YDSZ_AUTH_DIR` (under `{workspace}/.ydsz/auth`
+  for new agents; legacy agents keep `{workspace}/.ydsz-auth`),
   and `YDSZ_HOME` into shell/sandbox env.
-- **Docker sandbox** — re-reads `~/.octop/env` on execute, plus workspace `.env`
+- **Docker sandbox** — re-reads `~/.ydsz/env` on execute, plus workspace `.env`
   and a minimal `PATH` (not the full host environment). Admin `PATH`/`HOME`
   cannot override the container toolchain; workspace `.env` may set `PATH`.
 - **Web search tools** (Tavily, Brave, …) register at agent start from process
@@ -46,12 +46,12 @@ file are left alone). Every running agent inherits those keys:
   effect on the next execute without reload.
 
 Per-agent secrets belong in `{workspace}/.env` or, for new agents,
-`{workspace}/.octop/.env` (also writable via the `write_env_file` tool).
+`{workspace}/.ydsz/.env` (also writable via the `write_env_file` tool).
 That file is excluded from published-expert snapshots.
 
 The root can be overridden with `YDSZ_HOME` (absolute path). Most
 sub-paths are exposed as properties on `PathLayout` in
-`octop.infra.utils.paths`.
+`ydsz.infra.utils.paths`.
 
 ## Local knowledge indexing and systemd resource limits
 
@@ -62,7 +62,7 @@ model, releases the resident session. Knowledge indexing processes one document
 at a time; large imports continue in the background.
 
 On Linux, `ydsz-worker service start` and `ydsz-worker service restart` install/update
-`octop.service.d/15-resource-limits.conf` alongside the existing service unit.
+`ydsz.service.d/15-resource-limits.conf` alongside the existing service unit.
 The main unit, custom `ExecStart`, service user, and other drop-ins are preserved.
 Defaults are `MemoryHigh=60%` and `MemoryMax=75%` of physical RAM,
 `MemorySwapMax=512M`, `OOMPolicy=kill`, a 30-second restart delay, and at most three
@@ -109,11 +109,11 @@ on each start. Schema (`YdszConfig` in `ydsz/config.py`):
   "max_upload_mb": 100,
   "database": {
     "driver": "sqlite",
-    "sqlite_path": "octop.db",
+    "sqlite_path": "ydsz.db",
     "host": "127.0.0.1",
     "port": 5432,
-    "database": "octop",
-    "user": "octop",
+    "database": "ydsz",
+    "user": "ydsz",
     "password": null,
     "url": null
   },
@@ -156,7 +156,7 @@ Notes:
   `client_max_body_size`). Agent workspace file upload, plugin ZIPs,
   and backup archives use separate limits and are not this setting.
 - `plugins.<id>.enabled` is the **global** plugin switch (Dashboard Admin →
-  Plugins). Bundled plugins are copied into `~/.octop/plugins/` on init and
+  Plugins). Bundled plugins are copied into `~/.ydsz/plugins/` on init and
   server start with `enabled: false`. `bundled_plugins_seeded` lists ids
   already offered so uninstall does not come back on the next start.
 
@@ -167,13 +167,13 @@ Each variable, when set, takes precedence over the matching key in
 
 | Variable | Type | Default | Effect |
 |----------|------|---------|--------|
-| `YDSZ_HOME` | path | `~/.octop` | Install root (DB, secrets, workspaces, plugins) |
+| `YDSZ_HOME` | path | `~/.ydsz` | Install root (DB, secrets, workspaces, plugins) |
 | `YDSZ_BIND_HOST` | string | `127.0.0.1` | Listen address (use `0.0.0.0` for LAN access) |
 | `YDSZ_PORT` | int | `8088` | Listen port (`0`–`65535`; `0` asks the OS for a free port) |
 | `YDSZ_LOG_LEVEL` | string | `info` | One of `debug` `info` `warning` `error` |
-| `YDSZ_LOG_RETENTION_DAYS` | int | `14` | Keep rotated `octop.YYYY-MM-DD.log` files for this many days |
+| `YDSZ_LOG_RETENTION_DAYS` | int | `14` | Keep rotated `ydsz.YYYY-MM-DD.log` files for this many days |
 | `YDSZ_LOG_MAX_BYTES` | int | `104857600` (100 MiB) | Roll the active log when it exceeds this size (in addition to daily rotation) |
-| `YDSZ_LOG_COMPRESS` | bool | `true` | logrotate-style `compress` + `delaycompress`: gzip prior rotated plains on the next cycle (`octop.YYYY-MM-DD.log.gz`); the newest rotated file stays uncompressed until then |
+| `YDSZ_LOG_COMPRESS` | bool | `true` | logrotate-style `compress` + `delaycompress`: gzip prior rotated plains on the next cycle (`ydsz.YYYY-MM-DD.log.gz`); the newest rotated file stays uncompressed until then |
 | `YDSZ_ACCESS_TOKEN_TTL` | int (seconds) | `86400` | JWT access-token lifetime |
 | `YDSZ_LOGIN_MAX_ATTEMPTS` | int | `5` | Failed-login attempts before lockout |
 | `YDSZ_LOGIN_LOCKOUT_SECONDS` | int | `900` | Lockout duration after `YDSZ_LOGIN_MAX_ATTEMPTS` failures |
@@ -191,18 +191,18 @@ Each variable, when set, takes precedence over the matching key in
 | `YDSZ_MAX_UPLOAD_MB` | int | `100` | Max upload size in MiB for chat attachments, IM inbound, and knowledge documents (1–1024) |
 | `YDSZ_DATABASE_URL` | string | empty | Full DSN — overrides the `YDSZ_DATABASE_*` fields below |
 | `YDSZ_DATABASE_DRIVER` | `sqlite` \| `postgresql` | `sqlite` | Storage backend |
-| `YDSZ_DATABASE_SQLITE_PATH` | path | `octop.db` | SQLite file path (relative to `YDSZ_HOME` unless absolute) |
+| `YDSZ_DATABASE_SQLITE_PATH` | path | `ydsz.db` | SQLite file path (relative to `YDSZ_HOME` unless absolute) |
 | `YDSZ_DATABASE_HOST` | string | `127.0.0.1` | PostgreSQL host (when `driver=postgresql`) |
 | `YDSZ_DATABASE_PORT` | int | `5432` | PostgreSQL port |
-| `YDSZ_DATABASE_NAME` | string | `octop` | PostgreSQL database name |
-| `YDSZ_DATABASE_USER` | string | `octop` | PostgreSQL user |
+| `YDSZ_DATABASE_NAME` | string | `ydsz` | PostgreSQL database name |
+| `YDSZ_DATABASE_USER` | string | `ydsz` | PostgreSQL user |
 | `YDSZ_DATABASE_PASSWORD` | string | empty | PostgreSQL password (overrides file; prefer env in production) |
-| `YDSZ_ADMIN_USERNAME` | string | empty | Pre-fills the first-admin username in `octop init` |
-| `YDSZ_ADMIN_PASSWORD` | string | empty | Pre-fills the first-admin password in `octop init` |
+| `YDSZ_ADMIN_USERNAME` | string | empty | Pre-fills the first-admin username in `ydsz init` |
+| `YDSZ_ADMIN_PASSWORD` | string | empty | Pre-fills the first-admin password in `ydsz init` |
 | `YDSZ_ADMIN_DISPLAY_NAME` | string | empty | Pre-fills the admin display name |
 | `YDSZ_USER` | string | empty | Default `--user` for CLI subcommands |
 | `YDSZ_AGENT` | string | empty | Default `--agent` for CLI subcommands |
-| `YDSZ_SERVICE_MODE` | `systemd` \| `launchd` | auto | Override the service backend (used by `octop service`) |
+| `YDSZ_SERVICE_MODE` | `systemd` \| `launchd` | auto | Override the service backend (used by `ydsz service`) |
 | `YDSZ_SERVICE_SCOPE` | `user` \| `system` | auto | systemd `--user` vs system unit (Linux only) |
 
 Invalid integer values are logged and ignored — the on-disk default
@@ -213,14 +213,14 @@ configured backend at boot.
 **Docker Compose:** put `YDSZ_DATABASE_*` in `docker/.env` *and* ensure
 they are listed under `environment:` in `docker/docker-compose.yml`
 (Compose uses `.env` for interpolation only; unset keys do not enter the
-container). Writing the same keys to the mounted `~/.octop/env` also works.
+container). Writing the same keys to the mounted `~/.ydsz/env` also works.
 
 ### Agent memory vs control plane
 
 Control-plane `database` and agent memory are separate layers. Defaults:
 
 - Control plane SQLite → agent memory stays `{workspace}/memory.sqlite`
-  (or `{workspace}/.octop/memory.sqlite` for new agents).
+  (or `{workspace}/.ydsz/memory.sqlite` for new agents).
 - Control plane PostgreSQL → agent memory **defaults to the same DSN**
   (ydsz-memory per-agent PG schema `agent_<id>`). Runtime also needs
   ``langgraph-checkpoint-postgres`` (pulled in via
@@ -267,10 +267,10 @@ runs the same migrations + admin creation without the HTTP wizard.
 ## Secrets
 
 The JWT secret is generated on first start and stored in
-`~/.octop/secrets/jwt_secret`. Rotate it with:
+`~/.ydsz/secrets/jwt_secret`. Rotate it with:
 
 ```bash
-octop admin rotate-jwt-secret
+ydsz admin rotate-jwt-secret
 ```
 
 Rotation invalidates every outstanding access token immediately. The

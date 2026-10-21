@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-/** Parsed ``octop_ui`` envelope from a tool JSON string output. */
+/** Parsed ``YDSZ_ui`` envelope from a tool JSON string output. */
 export interface YdszUiHint {
   renderer: string;
   version?: number;
@@ -10,7 +10,7 @@ export interface ParsedToolOutput {
   /** True when ``output`` parsed as JSON object. */
   isJson: boolean;
   raw: unknown;
-  octopUi?: YdszUiHint;
+  ydszUi?: YdszUiHint;
   data?: unknown;
   text?: string;
 }
@@ -44,11 +44,11 @@ export interface ToolRenderProps {
 }
 
 export interface ToolRendererRegistration {
-  /** Plugin-local renderer id (matches ``octop_ui.renderer``). */
+  /** Plugin-local renderer id (matches ``YDSZ_ui.renderer``). */
   id: string;
   /** Owning plugin id (``builtin`` for first-party renderers). */
   pluginId: string;
-  /** Tool names this renderer handles when ``octop_ui`` is absent. */
+  /** Tool names this renderer handles when ``YDSZ_ui`` is absent. */
   tools?: string[];
   component: ComponentType<ToolRenderProps>;
 }

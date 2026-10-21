@@ -33,4 +33,4 @@
 
 - 前端：用户停留在当前 thread 时，除未读角标外主动 `loadHistory`（或 SSE/WS 通知）。
 - harness：inbox `cancel(job_id)` 暴露给 slash 或管理 API（若需要取消长任务）。
-- 重启后 in-flight 任务丢失（inbox 纯内存）——若需持久化队列，应在 harness 层扩展，而非 octop DB 重复实现。
+- 重启后 in-flight 任务丢失（inbox 纯内存）——若需持久化队列，应在 harness 层扩展，而非 ydsz DB 重复实现。

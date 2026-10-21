@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 const { useEffect, useRef, useState } = React;
 
 const COLS = 10;
@@ -307,7 +307,7 @@ function TetrisCard(props) {
       boxShadow: "0 16px 36px rgba(2,6,23,.45)",
       fontFamily: "ui-sans-serif, system-ui, sans-serif",
     },
-    "data-octop-plugin-ui": "tetris",
+    "data-Ydsz-plugin-ui": "tetris",
     children: [
       _jsxs("div", {
         style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },

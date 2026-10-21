@@ -132,7 +132,7 @@ class TestRuntimeErrorRetentionParity:
         from ydsz_memory.operations.retention import audit_runtime_errors
 
         memory = Memory(namespace="retention", backend=backend)
-        marker = {"octop_runtime_error": True} if origin == "mixed" else {}
+        marker = {"Ydsz_runtime_error": True} if origin == "mixed" else {}
         backend.save_raw(_make_raw(event_type="assistant_message", payload=marker, content=self.FAILURE))
         refs = ["raw-1"]
         if origin == "missing":
@@ -167,7 +167,7 @@ class TestRuntimeErrorRetentionParity:
                     {
                         "event_type": "assistant_message",
                         "content": self.FAILURE,
-                        "payload": {"octop_runtime_error": True},
+                        "payload": {"Ydsz_runtime_error": True},
                     },
                 ]
             }
@@ -178,7 +178,7 @@ class TestRuntimeErrorRetentionParity:
             _make_raw(
                 event_type="assistant_message",
                 content=self.FAILURE,
-                payload={"role": "assistant", "octop_runtime_error": True},
+                payload={"role": "assistant", "Ydsz_runtime_error": True},
             )
         )
         assert not recall_for_prompt(memory, "token_expired", raw_policy="always").snippets
@@ -195,7 +195,7 @@ class TestRuntimeErrorRetentionParity:
             _make_raw(
                 event_type="assistant_message",
                 content=self.FAILURE,
-                payload={"role": "assistant", "octop_runtime_error": True},
+                payload={"role": "assistant", "Ydsz_runtime_error": True},
             )
         )
         refs = ["raw-1"]
@@ -266,7 +266,7 @@ class TestRuntimeErrorRetentionParity:
             _make_raw(
                 event_type="assistant_message",
                 content=self.FAILURE,
-                payload={"role": "assistant", "octop_runtime_error": True},
+                payload={"role": "assistant", "Ydsz_runtime_error": True},
             )
         )
         backend.save_candidate(_make_candidate())
@@ -284,7 +284,7 @@ class TestRuntimeErrorRetentionParity:
             _make_raw(
                 event_type="assistant_message",
                 content=self.FAILURE,
-                payload={"role": "assistant", "octop_runtime_error": True},
+                payload={"role": "assistant", "Ydsz_runtime_error": True},
             )
         )
         backend.save_candidate(_make_candidate())
@@ -300,7 +300,7 @@ class TestRuntimeErrorRetentionParity:
             _make_raw(
                 event_type="assistant_message",
                 content=self.FAILURE,
-                payload={"role": "assistant", "octop_runtime_error": True},
+                payload={"role": "assistant", "Ydsz_runtime_error": True},
             )
         )
         backend.save_entity(_make_entity(atom_count=1))

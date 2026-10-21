@@ -1,7 +1,7 @@
 """Merge process env, admin/global keys, and workspace ``.env`` for agent spawn.
 
 Precedence (later wins): base → extra → workspace ``.env``.
-Workspace keys listed in :data:`PROTECTED_ENV_KEYS` / ``OCTOP_*`` are ignored
+Workspace keys listed in :data:`PROTECTED_ENV_KEYS` / `YDSZ_*` are ignored
 so an agent file cannot clobber platform identity or Ydsz process config.
 
 Spawn surfaces are intentionally not identical:
@@ -54,7 +54,7 @@ PROTECTED_ENV_KEYS = frozenset(
         "PROGRAMFILES(X86)",
     }
 )
-PROTECTED_ENV_PREFIXES = ("OCTOP_",)
+PROTECTED_ENV_PREFIXES = ("YDSZ_",)
 
 DOCKER_MINIMAL_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 

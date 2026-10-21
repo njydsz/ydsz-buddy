@@ -84,10 +84,10 @@ Ydsz Worker 侧依赖 `ldap3`，已加入 `pyproject.toml`，`uv sync` 后会安
 
 开发用目录选 [glauth](https://github.com/glauth/glauth)——Go 写的轻量 LDAP 服务，单二进制、配置文件驱动、不需要数据库或容器。
 
-下面的示例把沙箱放在 `~/octop-ldap-dev/`（任意目录都行，**不要**放在 Ydsz Worker 仓库内，避免污染工作区）：
+下面的示例把沙箱放在 `~/ydsz-ldap-dev/`（任意目录都行，**不要**放在 Ydsz Worker 仓库内，避免污染工作区）：
 
 ```bash
-LDAP_DEV=~/octop-ldap-dev
+LDAP_DEV=~/ydsz-ldap-dev
 mkdir -p "$LDAP_DEV" && cd "$LDAP_DEV"
 
 # 1) 克隆
@@ -98,7 +98,7 @@ cd ldap-glauth/v2
 GOWORK=off go build -o "$LDAP_DEV/glauth" .
 ```
 
-新建 `~/octop-ldap-dev/glauth.cfg`（下方为完整内容，测试账号可自行增删）：
+新建 `~/ydsz-ldap-dev/glauth.cfg`（下方为完整内容，测试账号可自行增删）：
 
 ```toml
 debug = false
@@ -128,7 +128,7 @@ debug = false
 
 # 服务账号：仅用于检索
 [[users]]
-  name = "svc-octop"
+  name = "svc-ydsz"
   uidnumber = 6001
   primarygroup = 5501
   passsha256 = "ec9cea51278ff8572536540a2458a016872a2270b5876ec7ece0b31c885fdfde" # bindpw
@@ -195,7 +195,7 @@ printf '%s' 'mypassword' | sha256sum | cut -d' ' -f1         # Linux
 先生成自签证书（glauth 按相对路径解析，故放在配置同目录）：
 
 ```bash
-cd ~/octop-ldap-dev
+cd ~/ydsz-ldap-dev
 openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 -nodes \
   -keyout glauth.key -out glauth.crt \
   -subj "/CN=127.0.0.1" \
@@ -206,11 +206,11 @@ chmod 600 glauth.key
 启动并自检（`-ZZ` 表示强制 StartTLS）：
 
 ```bash
-~/octop-ldap-dev/glauth -c ~/octop-ldap-dev/glauth.cfg
+~/ydsz-ldap-dev/glauth -c ~/ydsz-ldap-dev/glauth.cfg
 
 # 另开一个终端：以服务账号检索
 ldapsearch -LLL -x -H ldap://127.0.0.1:3893 \
-  -D "uid=svc-octop,cn=users,dc=example,dc=org" -w bindpw \
+  -D "uid=svc-ydsz,cn=users,dc=example,dc=org" -w bindpw \
   -b "dc=example,dc=org" "(uid=alice)" uid mail memberOf
 ```
 
@@ -229,15 +229,15 @@ memberOf: cn=admin,ou=groups,dc=example,dc=org
 
 ```bash
 cd <repo 根目录>
-RUNTIME=/tmp/octop-ldap-dev
+RUNTIME=/tmp/ydsz-ldap-dev
 mkdir -p "$RUNTIME/home"
 
 HOME="$RUNTIME/home" \
-YDSZ_HOME="$RUNTIME/home/.octop" \
+YDSZ_HOME="$RUNTIME/home/.ydsz" \
 uv run ydsz-worker run --host 127.0.0.1 --port 8799
 ```
 
-首次启动会打印一次性的设置向导密码，同时写入 `$RUNTIME/home/octop-login.txt`：
+首次启动会打印一次性的设置向导密码，同时写入 `$RUNTIME/home/ydsz-login.txt`：
 
 ```
 ╔══════════════════════════════════════════════════════════╗
@@ -255,8 +255,8 @@ uv run ydsz-worker run --host 127.0.0.1 --port 8799
 
 ```bash
 API=http://127.0.0.1:8799/api
-RUNTIME=/tmp/octop-ldap-dev
-PW=$(head -1 "$RUNTIME/home/octop-login.txt")
+RUNTIME=/tmp/ydsz-ldap-dev
+PW=$(head -1 "$RUNTIME/home/ydsz-login.txt")
 
 # 1) 校验向导密码 → 拿到一次性 wizard_token
 TOK=$(curl -sS -X POST "$API/setup/verify-password" \
@@ -296,7 +296,7 @@ curl -sS -X PUT "$API/auth/ldap/config" -H 'Content-Type: application/json' \
     "enabled": true,
     "display_name": "Corp Directory",
     "server_url": "ldap://127.0.0.1:3893",
-    "bind_dn": "uid=svc-octop,cn=users,dc=example,dc=org",
+    "bind_dn": "uid=svc-ydsz,cn=users,dc=example,dc=org",
     "bind_password": "bindpw",
     "user_base_dn": "dc=example,dc=org",
     "admin_groups": "admin",
@@ -319,7 +319,7 @@ curl -sS "$API/auth/ldap/status"
 | 服务器地址 `server_url` | `ldap://127.0.0.1:3893` | |
 | StartTLS `start_tls` | 开 | 本地目录自签证书，**必须**开启（否则启用会被拒） |
 | 校验 TLS 证书 `verify_tls` | 关 | 仅因测试用自签证书；生产保持开启 |
-| 绑定 DN `bind_dn` | `uid=svc-octop,cn=users,dc=example,dc=org` | 留空则匿名检索 |
+| 绑定 DN `bind_dn` | `uid=svc-ydsz,cn=users,dc=example,dc=org` | 留空则匿名检索 |
 | 绑定密码 `bind_password` | `bindpw` | 只写；省略则保留已存值 |
 | 用户基准 DN `user_base_dn` | `dc=example,dc=org` | |
 | 用户过滤器 `user_filter` | `(uid={username})` | 必须含字面量 `{username}` |
@@ -477,7 +477,7 @@ uv run pytest tests/integration/test_auth_ldap.py -q
 
 ```bash
 YDSZ_LDAP_TEST_URL=ldap://127.0.0.1:3893 \
-YDSZ_LDAP_TEST_BIND_DN='uid=svc-octop,cn=users,dc=example,dc=org' \
+YDSZ_LDAP_TEST_BIND_DN='uid=svc-ydsz,cn=users,dc=example,dc=org' \
 YDSZ_LDAP_TEST_BIND_PASSWORD=bindpw \
 YDSZ_LDAP_TEST_BASE_DN='dc=example,dc=org' \
 YDSZ_LDAP_TEST_ADMIN_GROUP=admin \
@@ -538,11 +538,11 @@ cd dashboard && npx tsc -b
 
 | 路径 | 作用 |
 |---|---|
-| `src/octop/infra/auth/ldap/config.py` | 配置模型、校验、`extra` 序列化与组名解析 |
-| `src/octop/infra/auth/ldap/client.py` | `ldap3` 客户端：服务 bind、检索、用户 bind 验证 |
-| `src/octop/infra/auth/ldap/service.py` | 配置读写、开通账号、角色映射 |
-| `src/octop/api/routers/auth_ldap.py` | 4 个 HTTP 端点 |
-| `src/octop/api/routers/auth.py` | 登录时回退目录（`_authenticate_ldap`） |
+| `src/ydsz/infra/auth/ldap/config.py` | 配置模型、校验、`extra` 序列化与组名解析 |
+| `src/ydsz/infra/auth/ldap/client.py` | `ldap3` 客户端：服务 bind、检索、用户 bind 验证 |
+| `src/ydsz/infra/auth/ldap/service.py` | 配置读写、开通账号、角色映射 |
+| `src/ydsz/api/routers/auth_ldap.py` | 4 个 HTTP 端点 |
+| `src/ydsz/api/routers/auth.py` | 登录时回退目录（`_authenticate_ldap`） |
 | `dashboard/src/pages/Admin/Users/LdapPanel.tsx` | 管理端配置表单 |
 | `tests/support/ldap_fake.py` | 测试用假目录（替换 `ldap3.Connection`） |
 | `tests/live/test_ldap_live.py` | 对真实目录的端到端测试 |

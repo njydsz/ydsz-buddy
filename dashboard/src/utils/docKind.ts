@@ -24,7 +24,7 @@ export function getDocKind(path: string): DocKind | null {
 /**
  * Documents editable online via a Markdown round-trip, mapped to the Monaco
  * language used while editing. Mirrors the backend converter registry in
- * ``src/octop/infra/utils/doc_edit.py`` — to enable a new extension, add it
+ * ``src/ydsz/infra/utils/doc_edit.py`` — to enable a new extension, add it
  * here AND register a matching converter on the backend.
  */
 const EDITABLE_DOCS: Record<string, string> = {

@@ -139,7 +139,7 @@ def test_classify_model_call_failed_fallback() -> None:
 
 def test_classify_path_outside_root() -> None:
     msg = (
-        r"Path:D:\octop-data\data\文章存稿\x.md outside root directory: "
+        r"Path:D:\ydsz-data\data\文章存稿\x.md outside root directory: "
         r"C:\Users\Administrator"
     )
     assert classify_stream_error_message(msg) == PATH_OUTSIDE_ROOT
@@ -148,7 +148,7 @@ def test_classify_path_outside_root() -> None:
 
 def test_format_path_outside_root_zh_guides_to_storage_root() -> None:
     msg = (
-        r"ValueError: Path:D:\octop-data\data\文章存稿\_核验与备选标题.md "
+        r"ValueError: Path:D:\ydsz-data\data\文章存稿\_核验与备选标题.md "
         r"outside root directory: C:\Users\Administrator"
     )
     text = format_stream_error(msg, "zh")
@@ -206,7 +206,7 @@ def test_format_stream_error_unknown_keeps_actual_cause() -> None:
 def test_format_stream_error_passes_through_send_file_failures() -> None:
     msg = (
         "send_file_to_user: no such file: "
-        "/home/octop/.ydsz/agents/CS6ZRF/.ydsz/generated/expense_stats/x.xlsx"
+        "/home/Ydsz/.ydsz/agents/CS6ZRF/.ydsz/generated/expense_stats/x.xlsx"
     )
     assert format_stream_error(msg, "zh") == msg
     assert format_stream_error(FileNotFoundError(msg), "en") == msg

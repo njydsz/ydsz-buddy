@@ -370,8 +370,8 @@ class TestMkdir:
         backend.mkdir_path("/.Ydsz")
         assert "ws/.Ydsz/" in fake_client.objects
         entries = backend.ls("/").entries or []
-        octop_dir = next(e for e in entries if e.get("is_dir") and e["path"].rstrip("/") == "/.Ydsz")
-        assert octop_dir["is_dir"] is True
+        Ydsz_dir = next(e for e in entries if e.get("is_dir") and e["path"].rstrip("/") == "/.Ydsz")
+        assert Ydsz_dir["is_dir"] is True
         assert sum(1 for e in entries if e["path"].rstrip("/") == "/.Ydsz") == 1
 
     def test_mkdir_path_creates_parents(self, backend: CosBackend, fake_client: FakeCosClient) -> None:

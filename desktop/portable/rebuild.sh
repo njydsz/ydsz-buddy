@@ -11,7 +11,7 @@ if [[ -f "${HOME}/.nvm/nvm.sh" ]]; then
   nvm use 24
 fi
 
-rm -rf src/octop/dashboard
+rm -rf src/ydsz/dashboard
 rm -rf desktop/portable/runtimes desktop/portable/wheels \
   desktop/portable/.cache desktop/portable/release
 rm -f desktop/portable/requirements-*.txt desktop/portable/overrides-*.txt

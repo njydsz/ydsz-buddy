@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function iconFor(code, fallback) {
   if (fallback) return fallback;
@@ -42,7 +42,7 @@ function WeatherCard(props) {
       color: dark ? "#f8fafc" : "#0f172a",
       boxShadow: dark ? "0 12px 32px rgba(0,0,0,.35)" : "0 12px 28px rgba(14,165,233,.18)",
     },
-    "data-octop-plugin-ui": "weather",
+    "data-Ydsz-plugin-ui": "weather",
     children: [
       _jsxs("div", {
         style: {

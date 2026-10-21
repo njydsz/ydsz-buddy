@@ -34,15 +34,15 @@ pytestmark = pytest.mark.skipif(os.name != "posix", reason="POSIX service manage
 
 
 def _runtime(tmp_path: Path) -> ServiceRuntime:
-    octop_bin = tmp_path / "bin" / "ydsz"
-    octop_bin.parent.mkdir(parents=True)
-    octop_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    Ydsz_bin = tmp_path / "bin" / "ydsz"
+    Ydsz_bin.parent.mkdir(parents=True)
+    Ydsz_bin.write_text("#!/bin/sh\n", encoding="utf-8")
     return ServiceRuntime(
         mode="systemd",
         host="0.0.0.0",
         port=9000,
         home=tmp_path,
-        octop_bin=octop_bin,
+        Ydsz_bin=Ydsz_bin,
         run_as_user=getpass.getuser(),
     )
 
@@ -50,8 +50,8 @@ def _runtime(tmp_path: Path) -> ServiceRuntime:
 def test_resolve_ydsz_executable_falls_back_to_path(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    fake_octop = tmp_path / "fake-octop"
-    fake_octop.write_text("#!/bin/sh\n", encoding="utf-8")
+    fake_Ydsz = tmp_path / "fake-Ydsz"
+    fake_Ydsz.write_text("#!/bin/sh\n", encoding="utf-8")
     python_dir = tmp_path / "python-only"
     python_dir.mkdir()
     python = python_dir / "python"
@@ -59,9 +59,9 @@ def test_resolve_ydsz_executable_falls_back_to_path(
 
     monkeypatch.setenv("YDSZ_HOME", str(tmp_path / "empty-home"))
     monkeypatch.setattr(sys, "executable", str(python))
-    monkeypatch.setattr(shutil, "which", lambda _name: str(fake_octop))
+    monkeypatch.setattr(shutil, "which", lambda _name: str(fake_Ydsz))
 
-    assert service_mod.resolve_ydsz_executable() == fake_octop
+    assert service_mod.resolve_ydsz_executable() == fake_Ydsz
 
 
 def test_render_systemd_unit_user_scope(tmp_path: Path) -> None:
@@ -173,7 +173,7 @@ def test_install_service_systemd_user_uses_systemctl_user(
 def test_install_service_does_not_rewrite_custom_unit_without_force(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """Hand-edited ExecStart/User must survive `octop service start/restart`."""
+    """Hand-edited ExecStart/User must survive `Ydsz service start/restart`."""
     runtime = replace(_runtime(tmp_path), scope="user")
     writes: list[object] = []
     calls: list[list[str]] = []
@@ -478,7 +478,7 @@ def test_install_service_launchd_force_reload(
     monkeypatch.setattr(service_mod, "_run_cmd", _fake_run_cmd)
 
     install_service(runtime, force=True)
-    assert ["launchctl", "bootout", "system/octop"] in calls
+    assert ["launchctl", "bootout", "system/Ydsz"] in calls
     assert any(cmd[:3] == ["launchctl", "bootstrap", "system"] for cmd in calls)
 
 
@@ -516,7 +516,7 @@ def test_install_service_launchd_force_reload_tolerates_unloaded(
     monkeypatch.setattr(service_mod, "_run_cmd", _fake_run_cmd)
 
     install_service(runtime, force=True)  # must not raise
-    assert any(cmd[:3] == ["launchctl", "bootout", "system/octop"] for cmd in calls)
+    assert any(cmd[:3] == ["launchctl", "bootout", "system/Ydsz"] for cmd in calls)
     # ... and bootstrap must still run afterwards.
     assert any(cmd[:3] == ["launchctl", "bootstrap", "system"] for cmd in calls)
 
@@ -590,7 +590,7 @@ def test_launchd_domain_user_vs_system() -> None:
     user = launchd_domain("user")
     assert user.startswith("gui/")
     assert user.endswith("/ydsz")
-    assert launchd_domain("system") == "system/octop"
+    assert launchd_domain("system") == "system/Ydsz"
 
 
 def test_launchd_bootstrap_target_must_be_qualified() -> None:
@@ -651,7 +651,7 @@ def test_unit_path_launchd_system_is_under_library(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(service_mod, "is_root", lambda: True)
     monkeypatch.setenv("YDSZ_SERVICE_SCOPE", "system")
     path = unit_path("launchd")
-    assert path == Path("/Library/LaunchDaemons/octop.plist")
+    assert path == Path("/Library/LaunchDaemons/Ydsz.plist")
 
 
 def test_render_launchd_plist_user_scope_omits_username(tmp_path: Path) -> None:
@@ -788,9 +788,9 @@ def test_build_runtime_root_always_system_scope(
     # not a user-scope unit for the original invoker.
     root_home = tmp_path / "root-home"
     root_home.mkdir()
-    octop_bin = root_home / ".ydsz" / "bin" / "ydsz"
-    octop_bin.parent.mkdir(parents=True)
-    octop_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    Ydsz_bin = root_home / ".ydsz" / "bin" / "ydsz"
+    Ydsz_bin.parent.mkdir(parents=True)
+    Ydsz_bin.write_text("#!/bin/sh\n", encoding="utf-8")
 
     monkeypatch.setattr(service_mod, "is_root", lambda: True)
     monkeypatch.setenv("SUDO_USER", "ubuntu")

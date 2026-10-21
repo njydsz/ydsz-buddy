@@ -56,7 +56,7 @@ rejected before siteverify.
 Offline recovery: delete the `captcha.settings` row via local CLI /
 `settings_repo` if a settings-sourced strong provider is unreachable. If
 the process refused to start because `YDSZ_CAPTCHA_PROVIDER` is strong
-without both keys and no readable settings blob, edit `~/.octop/env` on
+without both keys and no readable settings blob, edit `~/.ydsz/env` on
 disk — the dashboard and `PUT /api/envs` are unreachable until the
 process starts. `GET /api/envs` redacts `YDSZ_CAPTCHA_SECRET` as
 `********`; sending that sentinel on PUT keeps the on-disk value.
@@ -162,7 +162,7 @@ Model calls retain LangChain's default retry eligibility and the configured
 retry budget/backoff. Exhausted calls raise and remain failed
 checkpoint tasks, without a synthetic assistant reply. WebUI, IM and team tasks
 display the failure separately. Team rooms publish an `error` frame followed by
-`done`; stored error bubbles carry `additional_kwargs.octop_stream_error` for
+`done`; stored error bubbles carry `additional_kwargs.YDSZ_stream_error` for
 history display. These diagnostics and automatic team failure notifications do
 not become long-term memory.
 
@@ -214,7 +214,7 @@ approval card. A park older than 30 minutes is discarded (`park_expired`).
 
 **Tool result blocks.** `tool_result` blocks in history (and `tool_result`
 frames on the chat WebSocket) carry the tool's return value in `output`. When a
-plugin returns a large `octop_ui` payload, the backend offloads the envelope's
+plugin returns a large `YDSZ_ui` payload, the backend offloads the envelope's
 `data` field: `output` then contains the slim envelope with
 `data_ref: "artifact"`, and the full payload is on the block's `artifact` key
 (absent otherwise). An explicit `data` key always takes precedence over
@@ -258,7 +258,7 @@ plugin returns a large `octop_ui` payload, the backend offloads the envelope's
 | `GET`    | `/settings/captcha` | `captcha` | `{active, available, providers, source, v3_min_score}`; secrets omitted |
 | `PUT`    | `/settings/captcha` | `captcha` | merge `{active?, providers?}`; empty secret keeps ciphertext; `null` removes a pair |
 | `GET`    | `/cron/settings` | user | compat alias of `/settings/timezone` |
-| `GET`    | `/agents/{aid}/cron/examples` | agent access | `{task_examples}` from workspace `.octop/manifest.json` (`{zh,en}` string arrays, display-normalized to 3 or 6); `null` if the field is absent (dashboard keeps default cards). Prefer `GET /agents/{aid}/chat/welcome` which includes the same field. |
+| `GET`    | `/agents/{aid}/cron/examples` | agent access | `{task_examples}` from workspace `.ydsz/manifest.json` (`{zh,en}` string arrays, display-normalized to 3 or 6); `null` if the field is absent (dashboard keeps default cards). Prefer `GET /agents/{aid}/chat/welcome` which includes the same field. |
 | `GET`    | `/agents/{aid}/cron` | owner only | list cron rows; non-owners (including admin) get `[]` |
 | `POST`   | `/agents/{aid}/cron` | owner only | body `{name?, trigger, prompt, session_key?, fresh_thread?, enabled?, model?, task_type?}` → `201` |
 | `GET`    | `/agents/{aid}/cron/{cid}` | owner only | cron row |
@@ -335,7 +335,7 @@ reloads running agents so the image and video tools receive the new configuratio
 | `GET`    | `/personas` | user | `[{code}, ...]` (compat shim) |
 | `GET`    | `/personas/{code}` | user | rendered template (compat shim) |
 
-Persona content lives in `src/octop/infra/agents/persona/mbti_profiles.py` —
+Persona content lives in `src/ydsz/infra/agents/persona/mbti_profiles.py` —
 see [Personas](./personas.md).
 
 ## Experts
@@ -346,7 +346,7 @@ see [Personas](./personas.md).
 | `GET`    | `/experts/{expert_id}` | user | full expert template (SOUL.md, skills, files, `task_examples`) |
 | `POST`   | `/agents/from-expert/{expert_id}` | user | body `{name, locale?, quick_prompts?, ...}` → `201`; optional `quick_prompts` overwrites workspace cards after seed |
 
-Bundled experts live in `src/octop/infra/agents/experts/library/`
+Bundled experts live in `src/ydsz/infra/agents/experts/library/`
 (en/zh divisions); the catalog is locale-aware via
 `Accept-Language` / user preference.
 
@@ -547,11 +547,11 @@ The server exposes three tools:
 
 | Tool | Purpose |
 |------|---------|
-| `list_octop_experts` | List experts visible to the authenticated user |
-| `call_octop_expert` | Start a new isolated expert conversation, or continue one with `thread_id` |
-| `resume_octop_expert` | Resume a call that stopped for tool approval or user input |
+| `list_YDSZ_experts` | List experts visible to the authenticated user |
+| `call_YDSZ_expert` | Start a new isolated expert conversation, or continue one with `thread_id` |
+| `resume_YDSZ_expert` | Resume a call that stopped for tool approval or user input |
 
-`call_octop_expert` returns `thread_id`. Store this value in the external
+`call_YDSZ_expert` returns `thread_id`. Store this value in the external
 agent's working state. Pass it only when the next task must use the same Ydsz Worker
 conversation. Omit it for a new task. MCP threads cannot attach to dashboard,
 CLI, or IM threads.
@@ -559,18 +559,18 @@ CLI, or IM threads.
 When a tool needs approval, the call returns `status: "approval_required"` and
 an `approval` object. Read `approval.request.action_requests` and
 `approval.request.review_configs`. Send one allowed decision for each action to
-`resume_octop_expert`. A resumed call can return another approval request.
+`resume_YDSZ_expert`. A resumed call can return another approval request.
 
 Example client configuration:
 
 ```json
 {
   "mcpServers": {
-    "octop-agents": {
+    "ydsz-agents": {
       "type": "streamable_http",
       "url": "http://127.0.0.1:8090/api/mcp/agents",
       "headers": {
-        "Authorization": "Bearer <octop-access-token>"
+        "Authorization": "Bearer <ydsz-access-token>"
       }
     }
   }
@@ -661,7 +661,7 @@ Every non-2xx JSON response uses:
 { "error": { "code": "AGENT_NOT_FOUND", "message": "...", "details": { } } }
 ```
 
-`code` matches the `ErrorCode` enum in `octop.infra.errors`; the
+`code` matches the `ErrorCode` enum in `ydsz.infra.errors`; the
 server-localized `message` is rendered by `YdszError.to_envelope`
 with the locale from `Accept-Language` (falling back to `en`). The
 dashboard mirrors every code under `apiErrors.*` in

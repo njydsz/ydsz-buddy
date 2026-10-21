@@ -16,7 +16,7 @@ Docker Python SDK (``exec_run``, ``put_archive``, ``get_archive``). Host and
 sandbox trees are **not** automatically bind-mounted to each other.
 
 **Sandbox naming** (``sandbox_scope`` + ``sandbox_prefix``, default prefix
-``sandbox``; Ydsz may pass ``octop_sandbox``):
+``sandbox``; Ydsz may pass ``ydsz_sandbox``):
 
 - ``agent`` (default): ``{prefix}_agent_{agent_id}``
 - ``user``: ``{prefix}_{username}`` (multi-expert share one sandbox)

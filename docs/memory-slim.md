@@ -7,10 +7,10 @@
 升级本次 Ydsz Worker 和 ydsz-memory 0.9.11 或更新版本，重启 Ydsz Worker 一次加载控制入口。之后每次整理无需停服：
 
 ```bash
-octop memory list             # 只看可整理的智能体名称和 ID，不触发维护
-octop memory slim             # 使用已设定的默认智能体；没有默认时按编号选择
-octop memory slim --agent ID  # 已知 ID 时直接指定
-octop memory slim --all       # 顺序整理列表中所有符合条件的智能体
+ydsz memory list             # 只看可整理的智能体名称和 ID，不触发维护
+ydsz memory slim             # 使用已设定的默认智能体；没有默认时按编号选择
+ydsz memory slim --agent ID  # 已知 ID 时直接指定
+ydsz memory slim --all       # 顺序整理列表中所有符合条件的智能体
 ```
 
 不需要记住 agent 名称或 ID；没有默认智能体时会列出运行中、使用兼容 SQLite 记忆库的智能体，
@@ -145,7 +145,7 @@ strict mypy 499 files、Ruff/format 通过。这里只验证 PostgreSQL 拒绝�
 全部未提交改动。Ydsz Worker 原分支为 `feature/ydsz-harness-bump`，ydsz-memory 原分支为 `main`。
 
 - 上述对话/维护回归加 `tests/integration/test_memory_api.py`：201 passed，覆盖预览无任务/无改写、
-  确认后执行、权限和接口终态；`uv run --no-sync mypy --strict src/octop`：499 files 通过。
+  确认后执行、权限和接口终态；`uv run --no-sync mypy --strict src/ydsz`：499 files 通过。
 - `npm test -- src/pages/Chat/hooks/useMemoryMaintenance.test.ts src/pages/Chat/components/MemoryMaintenanceBanner.test.tsx`：
   9 passed，覆盖长耗时解释、断连重试、完成/失败恢复发送和可关闭结果；`npm run build` 通过。
 - 本轮不改库内迁移实现、不重复完整门禁；此前全量门禁限制见下。未提交、部署或执行真实库维护。
@@ -207,7 +207,7 @@ strict mypy 498 files、Ruff/format、wrapper `--online --all --help` 通过。�
   支持首次配置完成后加载 AgentManager。
 - `/memory` 在 catalog 声明 `persist_checkpoint=False`；processor 统一读取保存策略，
   普通命令及别名继续写入 checkpoint 和已就绪的聊天展示记录。
-- `UV_CACHE_DIR=/tmp/octop-uv-cache PYTHONPATH=../ydsz-memory/src:src make all RUN='uv run --no-sync' PYTEST_JOBS=4`：
+- `UV_CACHE_DIR=/tmp/ydsz-uv-cache PYTHONPATH=../ydsz-memory/src:src make all RUN='uv run --no-sync' PYTEST_JOBS=4`：
   3361 passed、18 skipped；Ruff/format 和 mypy（499 source files）通过。
 - `cd dashboard && npm test -- src/pages/Chat/components/MemoryMaintenanceBanner.test.tsx src/pages/Chat/hooks/useMemoryMaintenance.test.ts`：
   9 passed。提交钩子另执行 change-aware 检查和 `npm run build`（包含 `tsc -b`）。

@@ -1,4 +1,4 @@
-﻿"""``MemoryMiddleware`` — capture conversations through MemoryService and/or JSONL.
+"""``MemoryMiddleware`` — capture conversations through MemoryService and/or JSONL.
 
 Hooks the langgraph model loop to:
 
@@ -1149,7 +1149,7 @@ def _filter_visible_messages(
     - ``ToolMessage`` (tool outputs).
     - Intermediate ``AIMessage`` instances that carry ``tool_calls`` or
       whose content is empty (no text was emitted).
-    - Runtime-generated failure replies marked ``octop_runtime_error``.
+    - Runtime-generated failure replies marked ``ydsz_runtime_error``.
       Their triggering user input is still captured; JSONL keeps diagnostics.
     """
     visible: list[BaseMessage] = []
@@ -1166,7 +1166,7 @@ def _filter_visible_messages(
             if not tool_calls and has_text:
                 # Last write wins — if a turn somehow produces multiple
                 # tool_call-free AIMessages (rare), keep the latest.
-                runtime_failure = msg.response_metadata.get("octop_runtime_error") is True
+                runtime_failure = msg.response_metadata.get("ydsz_runtime_error") is True
                 final_ai = None if runtime_failure else msg
         # ToolMessage and tool-call-only AIMessages are intentionally skipped.
     if final_ai is not None:

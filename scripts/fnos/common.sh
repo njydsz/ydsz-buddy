@@ -106,7 +106,7 @@ free_ydsz_ports() {
         done
     done
 
-    appdir="${TRIM_APPDEST:-/var/apps/octop-native}"
+    appdir="${TRIM_APPDEST:-/var/apps/ydsz-native}"
     for pat in "$appdir/bin/ydsz-worker" "$appdir/app/bin/ydsz-worker"; do
         pids="$(pgrep -f -- "$pat" 2>/dev/null | tr '\n' ' ')" || true
         [ -z "$pids" ] && continue
@@ -132,12 +132,12 @@ free_ydsz_ports() {
 # ---------------------------------------------------------------------------
 # 修正数据目录与 .env 的属主/权限。
 # install_callback/config_callback 以 root 写 .env，若不 chown 给运行用户，
-# 服务（octop-native，历史上称为 octop-native，保留以兼容旧安装）启动时 `. "$PKGVAR/.env"` 会 Permission denied。
+# 服务（ydsz-native，历史上称为 ydsz-native，保留以兼容旧安装）启动时 `. "$PKGVAR/.env"` 会 Permission denied。
 # 若目录曾带 ACL，单纯 chmod 会把 mask 压成 ---，需 setfacl -b 清除。
 # ---------------------------------------------------------------------------
 fix_ownership_and_perms() {
     local pkgvar="$1" envfile="$2"
-    local ydsz_user="octop-native"  # 系统用户名，历史上称为 octop-native，保留以兼容旧安装
+    local ydsz_user="ydsz-native"  # 系统用户名，历史上称为 ydsz-native，保留以兼容旧安装
     id "$ydsz_user" >/dev/null 2>&1 || {
         echo "[ydsz] 警告：${ydsz_user} 账户不存在，跳过数据目录 chown（服务将回退以 root 运行）" > "${TRIM_TEMP_LOGFILE:-/dev/null}" 2>&1 || true
         return 0
@@ -198,7 +198,7 @@ ydsz_packed_fpk_arch() {
         return 0
     fi
     here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    for f in "$here/fpk-arch" "/var/apps/octop-native/cmd/fpk-arch"; do
+    for f in "$here/fpk-arch" "/var/apps/ydsz-native/cmd/fpk-arch"; do
         if [ -f "$f" ]; then
             tr -d '[:space:]' < "$f"
             return 0
@@ -295,7 +295,7 @@ EOF
 # 管理员密码：生成 / 校验 / 凭据回落保存。
 #
 # 背景（issue #502）：src/ydsz/infra/users/password.py 的弱密码黑名单包含
-# "octop123"，而 FPK 旧版把初始密码写死为 Octop123，导致 ydsz-worker init 在首次
+# "ydsz123"，而 FPK 旧版把初始密码写死为 Ydsz123，导致 ydsz-worker init 在首次
 # 启动时报 "password is too common" 直接退出、应用永远起不来。这里的函数
 # 让安装向导接管密码设置：用户自定义（先本地校验，杜绝无效密码进入 init）
 # 或自动生成随机强密码，并回落保存到数据目录，保证用户不丢密码。
@@ -442,24 +442,24 @@ ydsz_env_set() {
 # ---------------------------------------------------------------------------
 # Docker 版数据持久化：必须挂飞牛 data-share，不能写 /var/apps/<app>/share/。
 #
-# 旧 FPK 把 compose 绑到 /var/apps/ydsz/share/octop/data（单数 share，且
+# 旧 FPK 把 compose 绑到 /var/apps/ydsz/share/ydsz/data（单数 share，且
 # 不是 @appshare）。应用中心重启 / 重建容器后该目录被清空或未挂载，
 # entrypoint 看不到 ydsz.db 就再次 init，表现为「每次重启都要重新配置」。
 # 官方 docker-project 在 compose up 时注入 TRIM_DATA_SHARE_PATHS
-# （一般为 /volX/@appshare/octop/data）；本地版回调也读同一变量。
+# （一般为 /volX/@appshare/ydsz/data）；本地版回调也读同一变量。
 # ---------------------------------------------------------------------------
 
 ydsz_legacy_docker_data_dir() {
-    printf '%s' "/var/apps/ydsz/share/octop/data"
+    printf '%s' "/var/apps/ydsz/share/ydsz/data"
 }
 
 # 解析飞牛持久 data-share 目录。可选参数为 resource.json 里的 share name。
 ydsz_data_share_dir() {
-    local share_name="${1:-}" app="${TRIM_APPNAME:-octop}" cand dir
+    local share_name="${1:-}" app="${TRIM_APPNAME:-ydsz}" cand dir
     if [ -z "$share_name" ]; then
         case "$app" in
-            octop-native) share_name="octop-native/data" ;;
-            *) share_name="octop/data" ;;
+            ydsz-native) share_name="ydsz-native/data" ;;
+            *) share_name="ydsz/data" ;;
         esac
     fi
     if [ -n "${TRIM_DATA_SHARE_PATHS:-}" ]; then
@@ -592,14 +592,14 @@ EOF
 
 # docker/.env 在 target/ 下，升级会整目录替换；副本落到 TRIM_PKGVAR（@appdata）。
 ydsz_persist_docker_env() {
-    local env_file="$1" pkgvar="${TRIM_PKGVAR:-/var/apps/octop/var}"
+    local env_file="$1" pkgvar="${TRIM_PKGVAR:-/var/apps/ydsz/var}"
     [ -f "$env_file" ] || return 0
     mkdir -p "$pkgvar"
     cp -a "$env_file" "${pkgvar}/docker.env" 2>/dev/null || true
 }
 
 ydsz_restore_docker_env() {
-    local env_file="$1" pkgvar="${TRIM_PKGVAR:-/var/apps/octop/var}"
+    local env_file="$1" pkgvar="${TRIM_PKGVAR:-/var/apps/ydsz/var}"
     [ -f "$env_file" ] && return 0
     [ -f "${pkgvar}/docker.env" ] || return 0
     mkdir -p "$(dirname "$env_file")"
@@ -704,8 +704,8 @@ ydsz_apply_wizard_password() {
     pass="$(ydsz_env_get "$env_file" YDSZ_DEFAULT_PASSWORD)"
     [ -n "$user" ] || user="admin"
     [ -n "$pass" ] || return 0
-    if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx octop; then
-        if docker exec octop ydsz-worker user passwd "$user" --password "$pass" >/dev/null 2>&1; then
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx ydsz; then
+        if docker exec ydsz ydsz-worker user passwd "$user" --password "$pass" >/dev/null 2>&1; then
             echo "[ydsz] 已将向导密码同步到容器内管理员 ${user}" > "${TRIM_TEMP_LOGFILE:-/dev/null}" 2>/dev/null || true
         fi
     fi
@@ -715,7 +715,7 @@ ydsz_apply_wizard_password() {
 ydsz_prepare_docker_persist() {
     local env_file="$1" data_dir compose
     ydsz_restore_docker_env "$env_file"
-    data_dir="$(ydsz_data_share_dir octop/data)"
+    data_dir="$(ydsz_data_share_dir ydsz/data)"
     mkdir -p "${data_dir}/.ydsz"
     ydsz_migrate_legacy_docker_data "$data_dir"
     ydsz_env_set "$env_file" TRIM_DATA_SHARE_PATHS "$data_dir"

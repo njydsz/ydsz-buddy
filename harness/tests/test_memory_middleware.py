@@ -1,4 +1,4 @@
-﻿"""Tests for MemoryMiddleware."""
+"""Tests for MemoryMiddleware."""
 
 from __future__ import annotations
 
@@ -87,7 +87,7 @@ class TestMemoryMiddleware:
         user_msg = HumanMessage(content="记住: 排障时先检查服务状态。")
         failure = AIMessage(
             content="Model call failed after 3 attempts with AuthenticationError: 401 token_expired",
-            response_metadata={"octop_runtime_error": True},
+            response_metadata={"Ydsz_runtime_error": True},
         )
         runtime = _make_runtime()
         mw.before_model(_make_state([user_msg]), runtime)

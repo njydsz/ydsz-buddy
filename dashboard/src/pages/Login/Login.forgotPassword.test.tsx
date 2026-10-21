@@ -43,7 +43,7 @@ describe("Login forgot-password hint", () => {
     const dialog = await screen.findByRole("dialog");
     const hint = screen.getByTestId("login-forgot-password");
     expect(dialog).toContainElement(hint);
-    expect(hint.textContent).toMatch(/ydsz-worker user passwd|"octop user passwd"/);
+    expect(hint.textContent).toMatch(/ydsz-worker user passwd|"ydsz user passwd"/);
     expect(hint.textContent).toMatch(/--password/);
     expect(hint.textContent).toMatch(/Users|用户/);
     expect(hint.textContent).toMatch(/Linux|终端|Terminal/);

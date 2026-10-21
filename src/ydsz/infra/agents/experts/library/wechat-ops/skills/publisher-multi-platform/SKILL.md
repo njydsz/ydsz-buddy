@@ -9,7 +9,7 @@ metadata:
         "requires": { "bins": ["node", "npx", "python3"] },
         "primaryEnv": "WECHAT_APP_ID",
       },
-    "octop":
+    "Ydsz":
       {
         "emoji": "✍️",
         "label": { "zh": "一文多发", "en": "Multi-Platform Publisher" },

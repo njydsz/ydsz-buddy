@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function FortuneCard(props) {
   const theme = props.host.getToolContext().theme;
@@ -17,7 +17,7 @@ function FortuneCard(props) {
         background: dark ? "linear-gradient(165deg,#27272a,#18181b)" : "linear-gradient(165deg,#fff7ed,#ffedd5)",
         boxShadow: "0 10px 28px rgba(234,88,12,.12)",
       },
-      "data-octop-plugin-ui": "fortune",
+      "data-Ydsz-plugin-ui": "fortune",
       children: [
         _jsx("div", { style: { fontSize: 22 }, children: "🎲" }),
         _jsx("div", { style: { opacity: 0.7, margin: "4px 0 12px", fontWeight: 600 }, children: d.notation || "dice" }),
@@ -63,7 +63,7 @@ function FortuneCard(props) {
         color: "#fef3c7",
         boxShadow: "0 12px 24px rgba(127,29,29,.35)",
       },
-      "data-octop-plugin-ui": "fortune",
+      "data-Ydsz-plugin-ui": "fortune",
       children: [
         _jsx("div", { style: { fontWeight: 800, fontSize: 20, letterSpacing: 4 }, children: d.title || "" }),
         _jsx("div", { style: { marginTop: 16, lineHeight: 1.8 }, children: d.verse || "" }),
@@ -82,7 +82,7 @@ function FortuneCard(props) {
       color: dark ? "#e0e7ff" : "#1e1b4b",
       boxShadow: "0 14px 32px rgba(79,70,229,.18)",
     },
-    "data-octop-plugin-ui": "fortune",
+    "data-Ydsz-plugin-ui": "fortune",
     children: [
       _jsx("div", { style: { fontSize: 13, opacity: 0.75 }, children: `✨ ${d.name || "你"} · ${d.date || ""}` }),
       _jsxs("div", { style: { fontSize: 52, fontWeight: 800, margin: "6px 0 2px" }, children: [score, _jsx("span", { style: { fontSize: 16 }, children: "分" })] }),

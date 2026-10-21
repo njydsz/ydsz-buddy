@@ -60,7 +60,7 @@ High-level tree — see [§5 Module boundaries](#5-module-boundaries) for what e
 ```
 Ydsz Worker (`ydsz/` workspace directory)     Python package root (`src/ydsz/`)
   config.py
-  launch.py                   composition root: OctopServer + FastAPI + uvicorn
+  launch.py                   composition root: YdszServer + FastAPI + uvicorn
   i18n/                       locale JSON bundles + tr() + domain helpers
   infra/                      domain core (agents, DB, gateway, …)
   api/                        HTTP adapters (FastAPI)
@@ -85,9 +85,9 @@ cli/ ──► launch.py ──► api/ + infra/
 
 | Layer | Role | May import | Must NOT import |
 |-------|------|------------|-----------------|
-| `ydsz.config` | Env-based `OctopConfig` | stdlib, pydantic | `infra/`, `api/`, `cli/`, `launch.py` |
+| `ydsz.config` | Env-based `YdszConfig` | stdlib, pydantic | `infra/`, `api/`, `cli/`, `launch.py` |
 | `ydsz.i18n` | Locale JSON + `tr()` + per-namespace helpers | `infra/utils/locale`, stdlib | `api/`, `cli/`, `dashboard/` |
-| `ydsz.launch` | Wire `OctopServer`, `build_app`, uvicorn for `ydsz-worker run` | `infra/`, `api/` | business logic; must not be imported by `infra/` |
+| `ydsz.launch` | Wire `YdszServer`, `build_app`, uvicorn for `ydsz-worker run` | `infra/`, `api/` | business logic; must not be imported by `infra/` |
 | `infra/utils/` | Pure helpers (paths, ulid, env files, Ollama) | stdlib, third-party | any other `infra/*` domain code |
 | `infra/db/repos/` | One repo per table — SQL only | `infra/db/_base`, `infra/utils/` | `agents/`, `gateway/`, `api/`, orchestration |
 | `infra/` (domain) | Business logic & orchestration | `infra/utils/`, `infra/db/`, `ydsz.config`, peer `infra/*` subpackages, `infra/errors`, `infra/metrics` | `api/`, `cli/`, `launch.py`, `dashboard/` |
@@ -118,15 +118,15 @@ cli/ ──► launch.py ──► api/ + infra/
 | `infra/setup/` | First-run wizard, system service install, TLS / Let's Encrypt | `server.py`, `launch.py`, `api/routers/setup.py`, `api/routers/tls.py` |
 | `infra/skills/` | Skill packages, SkillHub HTTP client (`skillhub_market`, `skillhub_common`) | `api/routers/skills.py`, `agents/experts` |
 | `infra/users/` | Users, roles, password hashing, `UserManager` | `server.py`, `api/routers/auth.py`, `users.py` |
-| `infra/errors.py` | `OctopError`, `ErrorCode` — shared exception types | everywhere in `infra/` and `api/` |
+| `infra/errors.py` | `YdszError`, `ErrorCode` — shared exception types | everywhere in `infra/` and `api/` |
 | `infra/metrics.py` | In-process counters (`METRICS`) | lazy-import inside hot paths |
-| `infra/server.py` | `OctopServer.start()` — wires infra singletons | `launch.py`, `api/app.py` |
+| `infra/server.py` | `YdszServer.start()` — wires infra singletons | `launch.py`, `api/app.py` |
 
 ### `launch.py`
 
 | Path | Owns | Must NOT |
 |------|------|----------|
-| `launch.py` | `run_foreground` / `run_foreground_blocking` — boot `OctopServer`, serve via uvicorn + `build_app`, clean shutdown | HTTP routes, SQL, CLI argument parsing |
+| `launch.py` | `run_foreground` / `run_foreground_blocking` — boot `YdszServer`, serve via uvicorn + `build_app`, clean shutdown | HTTP routes, SQL, CLI argument parsing |
 
 Only `launch.py` may import both `infra/server` and `api/app` in the same module.
 
@@ -138,7 +138,7 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 | `api/deps.py` | JWT extraction, `current_user`, `get_server` | agent lifecycle, cron logic |
 | `api/middleware/` | JWT gate, setup lockdown | business validation beyond auth/setup |
 | `api/openapi_meta.py` | Scalar tags, API intro text | route handlers |
-| `api/errors.py` | Map `OctopError` → HTTP status + JSON | new error semantics (add to `infra/errors.py`) |
+| `api/errors.py` | Map `YdszError` → HTTP status + JSON | new error semantics (add to `infra/errors.py`) |
 | `api/routers/` | One resource per module; Pydantic request/response models | persistence, harness calls — delegate to `infra/` |
 | `api/routers/browser/` | Browser session/stream/harness HTTP surface | Playwright logic (stays in harness or helpers here only as glue) |
 
@@ -150,7 +150,7 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 | `cli/*_cmd.py` | User-facing subcommands |
 | `cli/support/db.py` | Offline DB (`open_cli_services`) |
 | `cli/support/offline_ops.py` | Local CRUD via repos (thin wrappers) |
-| `cli/support/embedded_ops.py` | Short-lived `OctopServer` for runtime ops |
+| `cli/support/embedded_ops.py` | Short-lived `YdszServer` for runtime ops |
 | `cli/support/acting.py` | Resolve `--user` / pinned defaults / agent owner |
 | `cli/support/ctx.py` | Root `--user` / `--agent` / `--json` resolution |
 | `cli/support/state.py` | Pinned `default_user` / `default_agent` in `cli_state.json` |
@@ -161,12 +161,12 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 
 | Layer | When | Examples |
 |-------|------|----------|
-| **Offline** | Read/write local `~/.octop` SQLite only | `user *`, `provider *`, `cron` list/create/delete, `agent list/delete`, `chats` CRUD, `models` presets/list/active, `channel` CRUD, `admin`, `skills` enable/disable, `bridge` list/get |
-| **Embedded** | Needs harness/gateway runtime; boots in-process `OctopServer` | `chats send/repl`, `chats get` (history), `cron run-now`, `agent` create/start/stop/reload, `provider test`, `channel test`, `skills list`, `acp` |
+| **Offline** | Read/write local `~/.ydsz` SQLite only | `user *`, `provider *`, `cron` list/create/delete, `agent list/delete`, `chats` CRUD, `models` presets/list/active, `channel` CRUD, `admin`, `skills` enable/disable, `bridge` list/get |
+| **Embedded** | Needs harness/gateway runtime; boots in-process `YdszServer` | `chats send/repl`, `chats get` (history), `cron run-now`, `agent` create/start/stop/reload, `provider test`, `channel test`, `skills list`, `acp` |
 | **Embedded (bridge)** | In-process `BridgeManager` (no full server); CLI cannot keep Bridge WS after exit | `bridge` probe/create/patch/delete/connect/disconnect/agents |
 | **External** | Talks to OS/daemon directly, no Ydsz Worker HTTP | `models ollama-*`, channel QR bind (WeCom/WeChat), Feishu bot-creator subprocess |
 
-No `ydsz-worker user login` — CLI trusts local filesystem access to `~/.octop`. Pin acting user with `ydsz-worker config set-user` or root `--user`; pin agent with `ydsz-worker agent use` or root `--agent`. If `ydsz-worker run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
+No `ydsz-worker user login` — CLI trusts local filesystem access to `~/.ydsz`. Pin acting user with `ydsz-worker config set-user` or root `--user`; pin agent with `ydsz-worker agent use` or root `--agent`. If `ydsz-worker run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
 
 ### `dashboard/src/` layout
 
@@ -204,13 +204,13 @@ make build-frontend                     # dashboard/ → src/ydsz/dashboard/
 
 ## 7. Key patterns
 
-**DI:** Routers receive `server: OctopServer = Depends(get_server)`; core services live on `server.services` (`SharedServices` from `infra/db/services.py`). Never import repos at module level outside `SharedServices` / `RepoBundle`.
+**DI:** Routers receive `server: YdszServer = Depends(get_server)`; core services live on `server.services` (`SharedServices` from `infra/db/services.py`). Never import repos at module level outside `SharedServices` / `RepoBundle`.
 
-**Agent scope:** Most agent routes use `/api/agents/{agent_id}/…` in the URL. A few legacy endpoints (e.g. MBTI) still take `X-Octop-Agent-Id`. Always validate ownership: load the agent row → `_assert_agent_owner(row, user)` (or admin bypass).
+**Agent scope:** Most agent routes use `/api/agents/{agent_id}/…` in the URL. A few legacy endpoints (e.g. MBTI) still take `X-Ydsz-Agent-Id`. Always validate ownership: load the agent row → `_assert_agent_owner(row, user)` (or admin bypass).
 
-**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `ydsz-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.octop/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Ydsz — path rules live in `BackendWorkspace`.
+**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `ydsz-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.ydsz/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Ydsz — path rules live in `BackendWorkspace`.
 
-New agents additionally keep system-scoped files under `{workspace}/.octop/` (e.g. sessions/sqlite, skills/agents system trees, auth tokens under `.octop/auth`). `system_files_path` is internal and not user-configurable; the `.octop` directory is created on first harness workspace init. Legacy agents keep auth at `{workspace}/.octop-auth`.
+New agents additionally keep system-scoped files under `{workspace}/.ydsz/` (e.g. sessions/sqlite, skills/agents system trees, auth tokens under `.ydsz/auth`). `system_files_path` is internal and not user-configurable; the `.ydsz` directory is created on first harness workspace init. Legacy agents keep auth at `{workspace}/.ydsz-auth`.
 
 | Context | Entry |
 |---------|--------|
@@ -220,7 +220,7 @@ New agents additionally keep system-scoped files under `{workspace}/.octop/` (e.
 
 **Path conventions:** Pass workspace-relative paths to `BackendWorkspace` (`SOUL.md`, `skills/foo/SKILL.md`). Directory listing defaults to `"."` (current workspace directory). `"/"` is a distinct backend-root path inside `BackendWorkspace` — do **not** conflate it with `"."` there. The dashboard may send leading-`/` paths; HTTP adapters normalize those in `workspace_api_path()` before calling `BackendWorkspace`.
 
-**Chat attachments:** Dashboard uploads go to `{workspace}/inbound/` via `api/common/attachments.py` + `api/routers/uploads.py`, not a separate `~/.octop/uploads/` store.
+**Chat attachments:** Dashboard uploads go to `{workspace}/inbound/` via `api/common/attachments.py` + `api/routers/uploads.py`, not a separate `~/.ydsz/uploads/` store.
 
 **Database:** SQLite and PostgreSQL share one schema. Add or change tables via a numbered pair
 `infra/db/migrations/00N_description.sql` **and** `00N_description.pg.sql`, then bump the
@@ -278,7 +278,7 @@ i18n/
 
 **Locale resolution** (`infra/utils/locale.py`): stored user preference wins, then `Accept-Language` (dashboard sends this on API calls), then channel-type hints (IM platforms default `zh`, `telegram` → `en`). Use `resolve_user_locale()` in gateway/IM paths; `resolve_request_locale()` in HTTP handlers.
 
-**API errors:** `ErrorCode` values map to `errors.<CODE>` in JSON. `OctopError.to_envelope(locale=…)` and the global exception handler localize `message`. Dashboard mirrors codes under `apiErrors.*` in `dashboard/src/locales/{en,zh}.json` — tests require backend and frontend keys to match.
+**API errors:** `ErrorCode` values map to `errors.<CODE>` in JSON. `YdszError.to_envelope(locale=…)` and the global exception handler localize `message`. Dashboard mirrors codes under `apiErrors.*` in `dashboard/src/locales/{en,zh}.json` — tests require backend and frontend keys to match.
 
 **IM channels:** Tool names and hint lines must be localized in `stream_project.py` — pass localized `tool_name` and pre-formatted `tool_hint_text` on `MessageEvent.tool_start/end` (ydsz-gateway reads `tool_hint_text` when present). Do not rely on English `ChannelConstraints.tool_hint_template` alone.
 
@@ -302,7 +302,7 @@ User-facing datetime display and cron/scheduling defaults MUST use the server ti
 
 | Layer | Entry |
 |-------|--------|
-| Config | `OctopConfig.default_timezone` in `config.py` |
+| Config | `YdszConfig.default_timezone` in `config.py` |
 | API | `GET /api/settings/timezone` → `{ "timezone": "…" }` (`GET /api/cron/settings` remains a compat alias) |
 | Dashboard | `useServerTimezone()`; format with `formatServerDateTime` / `formatServerIsoDateTime` / `formatMessageTime(..., timeZone)` in `dashboard/src/utils/formatMessageTime.ts` |
 
@@ -331,7 +331,7 @@ User-facing datetime display and cron/scheduling defaults MUST use the server ti
 - Prefer `tmp_path` / `tmp_path_factory` and `pathlib.Path` over OS-specific literals; compare paths with `Path` equality (`tmp_path / "a" / "b"`), not string prefixes with `/`. Use `Path.as_posix()` / `os.sep` only when a serialized path string is part of the contract under test.
 - Do not assert `chmod` mode bits, symlink semantics, or Unix-only subprocess shells unless the test is marked `posix_only` (and production code short-circuits on non-POSIX the same way).
 - When a feature's semantics are inherently POSIX-only (e.g. the host root_dir denied prefixes in `infra/utils/host_dirs.py`), keep the source guards (`os.name != "posix"` short-circuit) and mirror them in the tests.
-- New connector/CLI/gateway tests that materialize files under `YDSZ_HOME` must set `monkeypatch.setenv("YDSZ_HOME", str(tmp_path))` and assert dirs with `Path` joins — never assume `~/.octop/...` string shape.
+- New connector/CLI/gateway tests that materialize files under `YDSZ_HOME` must set `monkeypatch.setenv("YDSZ_HOME", str(tmp_path))` and assert dirs with `Path` joins — never assume `~/.ydsz/...` string shape.
 
 ## 8. Do not
 

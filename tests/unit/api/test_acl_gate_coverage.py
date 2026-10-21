@@ -7,7 +7,7 @@ import pathlib
 
 from ydsz.infra.users.permissions import ALL_PERMISSION_KEYS
 
-API_ROOT = pathlib.Path("src/octop/api")
+API_ROOT = pathlib.Path("src/Ydsz/api")
 
 GATED_FILES = [
     "routers/users.py",

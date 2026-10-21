@@ -21,15 +21,15 @@ pytestmark = pytest.mark.skipif(os.name != "posix", reason="POSIX service manage
 
 
 def _runtime(tmp_path: Path, *, mode: str = "systemd", scope: str = "system") -> ServiceRuntime:
-    octop_bin = tmp_path / "bin" / "ydsz"
-    octop_bin.parent.mkdir(parents=True)
-    octop_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    Ydsz_bin = tmp_path / "bin" / "ydsz"
+    Ydsz_bin.parent.mkdir(parents=True)
+    Ydsz_bin.write_text("#!/bin/sh\n", encoding="utf-8")
     return ServiceRuntime(
         mode=mode,  # type: ignore[arg-type]
         host="127.0.0.1",
         port=8088,
         home=tmp_path,
-        octop_bin=octop_bin,
+        Ydsz_bin=Ydsz_bin,
         run_as_user=getpass.getuser(),
         scope=scope,  # type: ignore[arg-type]
     )
@@ -143,7 +143,7 @@ def test_service_start_emits_diagnostic_hint_when_health_unreachable(
     # `start` is warn-only, so exit code stays 0 but the hint must appear.
     assert result.exit_code == 0, result.output
     assert "connection refused" in result.output
-    assert "journalctl -u octop" in result.output
+    assert "journalctl -u Ydsz" in result.output
 
 
 def test_service_status_exits_when_health_unreachable(

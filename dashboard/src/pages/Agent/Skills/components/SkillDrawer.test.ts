@@ -64,6 +64,6 @@ describe("SkillDrawer emoji metadata", () => {
       { key: "ydsz.requires.bins", value: "git" },
     ]);
     expect(emoji).toBe("🔧");
-    expect(metadata).toEqual([{ key: "octop.requires.bins", value: "git" }]);
+    expect(metadata).toEqual([{ key: "ydsz.requires.bins", value: "git" }]);
   });
 });

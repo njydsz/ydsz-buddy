@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function Card(props) {
   const theme = props.host.getToolContext().theme;
@@ -17,7 +17,7 @@ function Card(props) {
         color: dark ? "#fecaca" : "#b91c1c",
         fontWeight: 600,
       },
-      "data-octop-plugin-ui": "slack-calendar",
+      "data-Ydsz-plugin-ui": "slack-calendar",
       children: String(d.error),
     });
   }
@@ -35,7 +35,7 @@ function Card(props) {
       color: dark ? "#e0e7ff" : "#312e81",
       boxShadow: "0 12px 28px rgba(99,102,241,.18)",
     },
-    "data-octop-plugin-ui": "slack-calendar",
+    "data-Ydsz-plugin-ui": "slack-calendar",
     children: [
       _jsx("div", { style: { fontSize: 22 }, children: "🐟" }),
       _jsx("div", {

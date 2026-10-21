@@ -3,7 +3,7 @@ name: tcapi
 display_name: 腾讯云 API 助手
 description: Skill to call Cloud API for Tencent Cloud (腾讯云). Used for cloud automation or resource management. 当用户需要查询、创建、管理腾讯云资源，或执行云 API 自动化操作时触发。优先使用 Ydsz Worker 自带 venv 中的 tccli，凭证支持全自动 OAuth 登录。
 metadata:
-  octop:
+  Ydsz:
     emoji: "☁️"
     label:
       zh: "腾讯云 API"
@@ -62,13 +62,13 @@ TCCLI="$YDSZ_ROOT/.venv/bin/tccli"
 # ② 逐级探测：venv 内 → PATH → 均无则装进 venv
 if [ -x "$TCCLI" ]; then :
 elif command -v tccli >/dev/null 2>&1; then TCCLI=tccli
-else uv pip install --python "$OCTOP_ROOT/.venv/bin/python3" tccli; fi
+else uv pip install --python "$Ydsz_ROOT/.venv/bin/python3" tccli; fi
 
 # ③ 验证可运行且凭证有效
 "$TCCLI" cvm DescribeRegions >/dev/null 2>&1 && echo "TCCLI_OK" || echo "TCCLI_NEED_CHECK"
 ```
 
-> 若系统无 `uv`：`"$OCTOP_ROOT/.venv/bin/python3" -m ensurepip --upgrade` 后用同路径的 `python3 -m pip install tccli`。
+> 若系统无 `uv`：`"$Ydsz_ROOT/.venv/bin/python3" -m ensurepip --upgrade` 后用同路径的 `python3 -m pip install tccli`。
 
 判定分支：
 
@@ -204,8 +204,8 @@ fi
 旧版没有 `auth` 子命令。**先自动升级再走 2.2**（装进 Ydsz Worker venv，不需要 sudo）：
 
 ```sh
-uv pip install --python "$OCTOP_ROOT/.venv/bin/python3" -U tccli
-# 无 uv 时："$OCTOP_ROOT/.venv/bin/python3" -m ensurepip --upgrade && ... -m pip install -U tccli
+uv pip install --python "$Ydsz_ROOT/.venv/bin/python3" -U tccli
+# 无 uv 时："$Ydsz_ROOT/.venv/bin/python3" -m ensurepip --upgrade && ... -m pip install -U tccli
 ```
 
 升级后重新探测（2.1），一般即可支持 `auth login`。若升级失败（如离线环境），才退化为半手动：引导用户在自己的终端执行 `tccli configure` 交互式填密钥——**Agent 仍不代填、不索要、不打印密钥**。

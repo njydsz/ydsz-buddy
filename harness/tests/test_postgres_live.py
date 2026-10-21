@@ -11,14 +11,14 @@ import pytest
 
 psycopg = pytest.importorskip("psycopg")
 
-LIVE_HOST = os.environ.get("OCTOP_LIVE_PG_HOST", "172.19.0.22")
+LIVE_HOST = os.environ.get("Ydsz_LIVE_PG_HOST", "172.19.0.22")
 LIVE_SPEC: dict[str, object] = {
     "type": "postgres",
     "host": LIVE_HOST,
-    "port": int(os.environ.get("OCTOP_LIVE_PG_PORT", "5432")),
-    "database": os.environ.get("OCTOP_LIVE_PG_DB", "postgres"),
-    "user": os.environ.get("OCTOP_LIVE_PG_USER", "postgres"),
-    "password": os.environ.get("OCTOP_LIVE_PG_PASSWORD", "postgres"),
+    "port": int(os.environ.get("Ydsz_LIVE_PG_PORT", "5432")),
+    "database": os.environ.get("Ydsz_LIVE_PG_DB", "postgres"),
+    "user": os.environ.get("Ydsz_LIVE_PG_USER", "postgres"),
+    "password": os.environ.get("Ydsz_LIVE_PG_PASSWORD", "postgres"),
     "schema": "public",
     "table": "ydsz_harness_live_files",
     "connection_timeout": 5,

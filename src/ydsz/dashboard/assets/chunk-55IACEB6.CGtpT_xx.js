@@ -1,0 +1,1 @@
+import{_ as __name,d as select}from"./mermaid.core.D9jJ3Gwl.js";var getDiagramElement=__name((id,securityLevel)=>{let sandboxElement;return securityLevel==="sandbox"&&(sandboxElement=select("#i"+id)),(securityLevel==="sandbox"?select(sandboxElement.nodes()[0].contentDocument.body):select("body")).select(`[id="${id}"]`)},"getDiagramElement");export{getDiagramElement as g};

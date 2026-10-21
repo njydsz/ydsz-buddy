@@ -76,7 +76,7 @@ export function resolveToolRenderer(opts: {
   parsed: ParsedToolOutput;
 }): ToolRendererRegistration | null {
   const { toolName, pluginId, parsed } = opts;
-  const hint = parsed.octopUi;
+  const hint = parsed.ydszUi;
   if (hint?.renderer) {
     if (pluginId) {
       const hit = byKey.get(rendererKey(pluginId, hint.renderer));

@@ -17,15 +17,15 @@ function Dummy(_: ToolRenderProps) {
 }
 
 describe("parseYdszToolOutput", () => {
-  it("parses octop_ui envelope", () => {
+  it("parses ydsz_ui envelope", () => {
     const raw = JSON.stringify({
-      octop_ui: { renderer: "demo_card", version: 1 },
+      ydsz_ui: { renderer: "demo_card", version: 1 },
       data: { count: 2 },
       text: "hi",
     });
     const parsed = parseYdszToolOutput(raw);
     expect(parsed.isJson).toBe(true);
-    expect(parsed.octopUi).toEqual({ renderer: "demo_card", version: 1 });
+    expect(parsed.ydszUi).toEqual({ renderer: "demo_card", version: 1 });
     expect(parsed.data).toEqual({ count: 2 });
     expect(parsed.text).toBe("hi");
   });
@@ -40,13 +40,13 @@ describe("parseYdszToolOutput", () => {
 describe("mergePatchedYdszToolOutput", () => {
   it("merges data into existing envelope", () => {
     const prev = JSON.stringify({
-      octop_ui: { renderer: "demo_card" },
+      ydsz_ui: { renderer: "demo_card" },
       data: { count: 1 },
       text: "x",
     });
     const next = mergePatchedYdszToolOutput(prev, { count: 3 });
     expect(JSON.parse(next)).toEqual({
-      octop_ui: { renderer: "demo_card" },
+      ydsz_ui: { renderer: "demo_card" },
       data: { count: 3 },
       text: "x",
     });
@@ -59,7 +59,7 @@ describe("resolvePluginUiData", () => {
   it("resolves data_ref envelopes from the artifact", () => {
     const parsed = parseYdszToolOutput(
       JSON.stringify({
-        octop_ui: { renderer: "bilibili_player", version: 1 },
+        ydsz_ui: { renderer: "bilibili_player", version: 1 },
         data_ref: "artifact",
         text: "找到 1 部番剧。",
       }),
@@ -71,7 +71,7 @@ describe("resolvePluginUiData", () => {
   it("explicit data wins over data_ref/artifact (patched state)", () => {
     const patched = mergePatchedYdszToolOutput(
       JSON.stringify({
-        octop_ui: { renderer: "bilibili_player" },
+        ydsz_ui: { renderer: "bilibili_player" },
         data_ref: "artifact",
       }),
       { results: [], current_episode: 5 },
@@ -86,7 +86,7 @@ describe("resolvePluginUiData", () => {
   it("falls back to legacy shapes without data_ref", () => {
     const inline = parseYdszToolOutput(
       JSON.stringify({
-        octop_ui: { renderer: "demo_card" },
+        ydsz_ui: { renderer: "demo_card" },
         data: { count: 2 },
       }),
     );
@@ -106,7 +106,7 @@ describe("resolvePluginUiData", () => {
   it("keeps the slim envelope when artifact is missing", () => {
     const parsed = parseYdszToolOutput(
       JSON.stringify({
-        octop_ui: { renderer: "bilibili_player" },
+        ydsz_ui: { renderer: "bilibili_player" },
         data_ref: "artifact",
       }),
     );
@@ -118,7 +118,7 @@ describe("resolvePluginUiData", () => {
 });
 
 describe("resolveToolRenderer", () => {
-  it("matches by octop_ui.renderer then tool name", () => {
+  it("matches by ydsz_ui.renderer then tool name", () => {
     clearToolRenderers();
     registerToolRenderer({
       id: "demo_card",
@@ -130,7 +130,7 @@ describe("resolveToolRenderer", () => {
       toolName: "other",
       pluginId: "demo-ui-card",
       parsed: parseYdszToolOutput(
-        JSON.stringify({ octop_ui: { renderer: "demo_card" }, data: {} }),
+        JSON.stringify({ ydsz_ui: { renderer: "demo_card" }, data: {} }),
       ),
     });
     expect(byHint?.id).toBe("demo_card");

@@ -500,7 +500,7 @@ async def test_state_update_does_not_replace_stream_error(archive):
         (await archive.page("t", limit=20, cursor=None, legacy_reader=no_anchor))["messages"]
     )
     error = next(
-        message for message in recovered if message.additional_kwargs.get("octop_stream_error")
+        message for message in recovered if message.additional_kwargs.get("Ydsz_stream_error")
     )
     assert "insufficient" in str(error.content).lower()
     assert any("partial" in str(message.content) for message in recovered)
@@ -826,7 +826,7 @@ async def test_dashboard_error_keeps_partial_tokens_and_error(archive):
     assert any("question" in text for text in texts)
     assert "partial answer" in texts
     error = next(
-        message for message in recovered if message.additional_kwargs.get("octop_stream_error")
+        message for message in recovered if message.additional_kwargs.get("Ydsz_stream_error")
     )
     assert "余额" in str(error.content) or "insufficient" in str(error.content).lower()
     assert archive.store.turn("t")["status"] == "failed"

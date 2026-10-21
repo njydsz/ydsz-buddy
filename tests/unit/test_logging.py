@@ -219,7 +219,7 @@ def test_log_handler_rotates_when_max_bytes_exceeded(tmp_path: Path):
         handler.flush()
         backups = [p for p in tmp_path.glob("ydsz.*") if p != log_path]
         assert all(
-            re.fullmatch(r"octop\.\d{4}-\d{2}-\d{2}\.log(?:\.\d{3})?(?:\.gz)?", p.name)
+            re.fullmatch(r"Ydsz\.\d{4}-\d{2}-\d{2}\.log(?:\.\d{3})?(?:\.gz)?", p.name)
             for p in backups
         )
         assert len(backups) >= 1
@@ -341,7 +341,7 @@ def test_rollover_writes_date_before_extension(tmp_path: Path):
         handler.flush()
         rotated = [p for p in tmp_path.iterdir() if p != log_path]
         assert len(rotated) == 1
-        assert re.fullmatch(r"octop\.\d{4}-\d{2}-\d{2}\.log", rotated[0].name)
+        assert re.fullmatch(r"Ydsz\.\d{4}-\d{2}-\d{2}\.log", rotated[0].name)
         assert "before roll" in rotated[0].read_text(encoding="utf-8")
         assert "after roll" in log_path.read_text(encoding="utf-8")
     finally:

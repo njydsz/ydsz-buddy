@@ -36,9 +36,9 @@ const SCRIPTS_DIR = __dirname;
 const SKILL_DIR = path.dirname(SCRIPTS_DIR);
 const CLIENT_ID = 'c6f50b5a1e2f4e2bb00a3e2f58df3ced';
 const PT_PASSPORT_BIN = path.join(SCRIPTS_DIR, 'node_modules', '.bin', 'pt-passport');
-// 认证目录：Octop 多用户/多 Agent 隔离时通过 OCTOP_AUTH_DIR 环境变量注入
-// （如 ~/.octop/agents/<id>/credentials/meituan/）；未注入时回退到本机默认目录。
-const AUTH_DIR = process.env.OCTOP_AUTH_DIR
+// 认证目录：Ydsz 多用户/多 Agent 隔离时通过 YDSZ_AUTH_DIR 环境变量注入
+// （如 ~/.ydsz/agents/<id>/credentials/meituan/）；未注入时回退到本机默认目录。
+const AUTH_DIR = process.env.YDSZ_AUTH_DIR
     || path.join(require('os').homedir(), '.workbuddy', 'credentials', 'meituan-living-deals-assistant');
 
 // 自愈：专家模板经字节流拷贝播种到 Agent 工作区后，npm bin 的执行位会丢失。
@@ -74,20 +74,20 @@ function isPython3(pythonPath) {
 
 /**
  * Python 解释器解析优先级：
- * 1. OCTOP_PYTHON 环境变量（显式指定）
- * 2. Octop 自托管 venv（裸机安装：$OCTOP_HOME/venv/bin/python，默认 ~/.octop/venv）
- * 3. Octop Docker 镜像 venv（/app/.venv/bin/python）
- * 4. 回退：PATH 上的 python3 / python（非 Octop 宿主环境的兼容路径）
+ * 1. YDSZ_PYTHON 环境变量（显式指定）
+ * 2. Ydsz 自托管 venv（裸机安装：$YDSZ_HOME/venv/bin/python，默认 ~/.ydsz/venv）
+ * 3. Ydsz Docker 镜像 venv（/app/.venv/bin/python）
+ * 4. 回退：PATH 上的 python3 / python（非 Ydsz 宿主环境的兼容路径）
  */
 function findPython() {
-  if (process.env.OCTOP_PYTHON && isPython3(process.env.OCTOP_PYTHON)) {
-    return process.env.OCTOP_PYTHON;
+  if (process.env.YDSZ_PYTHON && isPython3(process.env.YDSZ_PYTHON)) {
+    return process.env.YDSZ_PYTHON;
   }
-  const octopHome = process.env.OCTOP_HOME || path.join(require('os').homedir(), '.octop');
+  const ydszHome = process.env.YDSZ_HOME || path.join(require('os').homedir(), '.ydsz');
   const venvCandidates = [
-    path.join(octopHome, 'venv', 'bin', 'python'),            // macOS / Linux
-    path.join(octopHome, 'venv', 'Scripts', 'python.exe'),    // Windows
-    '/app/.venv/bin/python',                                   // Octop Docker 镜像
+    path.join(ydszHome, 'venv', 'bin', 'python'),             // macOS / Linux
+    path.join(ydszHome, 'venv', 'Scripts', 'python.exe'),     // Windows
+    '/app/.venv/bin/python',                                   // Ydsz Docker 镜像
   ];
   for (const p of venvCandidates) {
     try {
@@ -214,7 +214,7 @@ commands.init = function () {
     fail('PATH_NOT_FOUND');
   }
 
-  // 2. Python 检查（优先使用 Octop 自托管 venv，见 findPython 解析顺序）
+  // 2. Python 检查（优先使用 Ydsz 自托管 venv，见 findPython 解析顺序）
   let pyVer = '';
   try {
     pyVer = execSync(`"${PYTHON}" --version`, { encoding: 'utf-8', timeout: 10000, stdio: 'pipe' }).trim();

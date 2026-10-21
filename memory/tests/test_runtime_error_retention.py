@@ -1,4 +1,4 @@
-﻿"""Runtime failures are diagnostic evidence, never automatic durable knowledge."""
+"""Runtime failures are diagnostic evidence, never automatic durable knowledge."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def failure_event(*, marked: bool = False) -> RawEvent:
         timestamp=datetime.now(UTC),
         event_type="assistant_message",
         content=FAILURE,
-        payload={"octop_runtime_error": True} if marked else {},
+        payload={"Ydsz_runtime_error": True} if marked else {},
     )
 
 
@@ -49,7 +49,7 @@ def test_capture_preserves_user_request_and_drops_generated_failure(memory: Memo
         {
             "events": [
                 {"event_type": "user_message", "content": "401 故障修复后要验证成功请求。"},
-                {"event_type": "assistant_message", "content": FAILURE, "payload": {"octop_runtime_error": True}},
+                {"event_type": "assistant_message", "content": FAILURE, "payload": {"Ydsz_runtime_error": True}},
             ]
         }
     )
@@ -105,7 +105,7 @@ def test_capture_checks_source_before_privacy_redaction(memory: Memory, store_co
     event = {
         "event_type": "assistant_message",
         "content": "运行请求失败" if marked else FAILURE,
-        "payload": {"octop_runtime_error": True} if marked else {},
+        "payload": {"Ydsz_runtime_error": True} if marked else {},
     }
     result = runtime.capture({"events": [event]})
     assert result["accepted"] == (0 if marked else 1)
@@ -143,6 +143,6 @@ def test_unknown_legacy_source_is_left_to_the_extraction_model(extractor_type: t
 def test_marked_diagnostics_are_excluded_regardless_of_value_words(memory: Memory, content: str) -> None:
     runtime = MemoryRuntime(memory, config={"capture": {"min_message_chars": 0}})
     result = runtime.capture(
-        {"events": [{"event_type": "assistant_message", "content": content, "payload": {"octop_runtime_error": True}}]}
+        {"events": [{"event_type": "assistant_message", "content": content, "payload": {"Ydsz_runtime_error": True}}]}
     )
     assert result["accepted"] == 0 and result["skipped_runtime_error"] == 1

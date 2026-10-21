@@ -1,4 +1,4 @@
-"""Tests for `octop captcha reset` (lockout escape hatch)."""
+"""Tests for `Ydsz captcha reset` (lockout escape hatch)."""
 
 from __future__ import annotations
 

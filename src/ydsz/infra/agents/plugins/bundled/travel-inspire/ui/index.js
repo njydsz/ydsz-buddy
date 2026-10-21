@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function TravelInspire(props) {
   const theme = props.host.getToolContext().theme;
@@ -14,7 +14,7 @@ function TravelInspire(props) {
       background: dark ? "linear-gradient(165deg,#431407,#7c2d12)" : "linear-gradient(165deg,#fff7ed,#ffedd5)",
       boxShadow: "0 12px 28px rgba(234,88,12,.15)",
     },
-    "data-octop-plugin-ui": "travel-inspire",
+    "data-Ydsz-plugin-ui": "travel-inspire",
     children: [
       _jsx("div", { style: { fontSize: 12, opacity: 0.7 }, children: "✈️ 旅行灵感" }),
       _jsxs("div", { style: { fontSize: 24, fontWeight: 800, marginTop: 6 }, children: [d.city, " · ", d.country] }),

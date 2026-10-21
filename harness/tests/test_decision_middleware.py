@@ -1,4 +1,4 @@
-﻿"""Decision shortlist: confidence cutoff, HTTP parse, and middleware."""
+"""Decision shortlist: confidence cutoff, HTTP parse, and middleware."""
 
 from __future__ import annotations
 
@@ -266,7 +266,7 @@ def test_low_tool_scores_keep_only_basic_tools() -> None:
 
     first = mw.wrap_model_call(request, reply)
     assert events[0]["tools"] == ["read_file", "web_fetch", "execute"]
-    part = first.result[0].additional_kwargs["octop_decision"]["parts"][0]
+    part = first.result[0].additional_kwargs["Ydsz_decision"]["parts"][0]
     assert part == {"kind": "tool", "kept": []}
     scorer.probabilities = {"tool:browser_use": 0.95}
     mw.wrap_model_call(request, reply)
@@ -491,7 +491,7 @@ def test_host_decision_lists_dispatch_tools() -> None:
     with _configurable(peer_invoke_mode="async", user=1, agent_id="host", thread_id="room-1"):
         out = mw.wrap_model_call(_request(tools=_host_tools(), text="请安排人查一下资料"), reply)
     assert seen["tools"] == ["ask_agent", "agent_list", "current_time"]
-    parts = out.result[0].additional_kwargs["octop_decision"]["parts"]
+    parts = out.result[0].additional_kwargs["Ydsz_decision"]["parts"]
     assert parts[0] == {"kind": "tool", "kept": [{"name": "ask_agent"}, {"name": "agent_list"}]}
     assert parts[1]["kind"] == "member"
     assert "tool:ask_agent" not in [item_id for item_id, _ in scorer.statements]
@@ -520,8 +520,8 @@ def test_followup_scores_the_next_member_not_the_one_who_just_finished() -> None
         user=1,
         agent_id="host",
         thread_id="room-1",
-        octop_decision_followup=True,
-        octop_decision_finished_member="agent-research",
+        Ydsz_decision_followup=True,
+        Ydsz_decision_finished_member="agent-research",
     ):
         out = mw.wrap_model_call(request, reply)
     assert scorer.calls == 1
@@ -533,7 +533,7 @@ def test_followup_scores_the_next_member_not_the_one_who_just_finished() -> None
     ]
     assert "写作者" in seen["system"]
     assert "研究员" not in seen["system"].split("这轮只派给")[-1]
-    parts = out.result[0].additional_kwargs["octop_decision"]["parts"]
+    parts = out.result[0].additional_kwargs["Ydsz_decision"]["parts"]
     assert parts[0]["kind"] == "result"
     assert parts[1]["kind"] == "tool"
     assert parts[2]["kept"][0]["name"] == "写作者"
@@ -554,8 +554,8 @@ def test_followup_filters_catalogs_with_the_dispatched_task() -> None:
     )
     with _configurable(
         thread_id="room-1",
-        octop_decision_followup=True,
-        octop_decision_task="读取 pdf 合同",
+        Ydsz_decision_followup=True,
+        Ydsz_decision_task="读取 pdf 合同",
     ):
         mw.wrap_model_call(request, lambda item: item)
     assert scorer.state.startswith("读取 pdf 合同")
@@ -585,8 +585,8 @@ def test_followup_low_scores_close_dispatch() -> None:
         user=1,
         agent_id="host",
         thread_id="room-1",
-        octop_decision_followup=True,
-        octop_decision_finished_member="agent-research",
+        Ydsz_decision_followup=True,
+        Ydsz_decision_finished_member="agent-research",
     ):
         out = mw.wrap_model_call(request, reply)
         blocked = mw.wrap_tool_call(
@@ -601,7 +601,7 @@ def test_followup_low_scores_close_dispatch() -> None:
     assert "不必再派工" in seen["system"]
     assert seen["tools"] == ["ask_agent", "agent_list", "current_time"]
     assert blocked.status == "error"
-    parts = out.result[0].additional_kwargs["octop_decision"]["parts"]
+    parts = out.result[0].additional_kwargs["Ydsz_decision"]["parts"]
     assert parts == [
         {
             "kind": "result",
@@ -636,13 +636,13 @@ def test_followup_evaluates_result_when_no_member_remains() -> None:
         user=1,
         agent_id="host",
         thread_id="room-1",
-        octop_decision_followup=True,
-        octop_decision_finished_member="agent-research",
+        Ydsz_decision_followup=True,
+        Ydsz_decision_finished_member="agent-research",
     ):
         out = mw.wrap_model_call(request, reply)
     assert [item_id for item_id, _ in scorer.statements] == ["result:sufficient"]
     assert "结果已经足够" in seen["system"]
-    parts = out.result[0].additional_kwargs["octop_decision"]["parts"]
+    parts = out.result[0].additional_kwargs["Ydsz_decision"]["parts"]
     assert parts == [
         {
             "kind": "result",
@@ -666,7 +666,7 @@ def test_named_member_is_evaluated_without_overriding_user_choice() -> None:
         )
     assert scorer.calls == 1
     assert [item_id for item_id, _ in scorer.statements] == ["member:agent-research"]
-    part = out.result[0].additional_kwargs["octop_decision"]["parts"][0]
+    part = out.result[0].additional_kwargs["Ydsz_decision"]["parts"][0]
     assert part == {
         "kind": "member",
         "kept": [{"name": "研究员", "score": 0.1}],
@@ -682,7 +682,7 @@ def test_member_name_without_at_sign_does_not_force_routing() -> None:
             _request(text="研究员的方案可以参考。请安排最合适的人处理"),
             lambda _request: ModelResponse(result=[AIMessage(content="好")]),
         )
-    part = out.result[0].additional_kwargs["octop_decision"]["parts"][0]
+    part = out.result[0].additional_kwargs["Ydsz_decision"]["parts"][0]
     assert part == {
         "kind": "member",
         "kept": [{"name": "写作者", "score": 0.9}],
@@ -744,10 +744,10 @@ def test_middleware_stamps_the_reply_once_per_turn() -> None:
         return ModelResponse(result=[AIMessage(content="好")])
 
     first = mw.wrap_model_call(request, reply)
-    stamped = first.result[0].additional_kwargs["octop_decision"]
+    stamped = first.result[0].additional_kwargs["Ydsz_decision"]
     assert stamped["kind"] == "decision"
     assert stamped["parts"][0]["kind"] == "tool"
     assert stamped["parts"][0]["kept"][0]["name"] == "read_pdf"
     second = mw.wrap_model_call(request, reply)
-    assert "octop_decision" not in second.result[0].additional_kwargs
+    assert "Ydsz_decision" not in second.result[0].additional_kwargs
     assert scorer.calls == 1

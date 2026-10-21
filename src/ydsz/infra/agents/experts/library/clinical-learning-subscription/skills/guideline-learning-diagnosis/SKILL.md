@@ -6,7 +6,7 @@ description: >-
   本技能只做学习诊断与诊断标准教学，不对具体患者作疾病诊断、治疗、处方、剂量、
   急诊处置或医保报销判断。
 metadata:
-  octop:
+  Ydsz:
     emoji: "🧩"
     label:
       zh: "学习诊断"

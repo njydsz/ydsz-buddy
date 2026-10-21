@@ -75,7 +75,7 @@ def test_postgres_use_control_plane_dsn() -> None:
             database="ydsz",
             user="ydsz",
             password="x",
-            url="postgresql://ydsz:x@127.0.0.1:5432/octop?sslmode=require",
+            url="postgresql://ydsz:x@127.0.0.1:5432/Ydsz?sslmode=require",
         )
     )
     out = memory_backend_from_agent_config(

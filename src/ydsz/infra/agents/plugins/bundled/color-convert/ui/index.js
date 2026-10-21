@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function ColorConvert(props) {
   const d = props.data && typeof props.data === "object" ? props.data : {};
@@ -14,7 +14,7 @@ function ColorConvert(props) {
       overflow: "hidden",
       boxShadow: "0 10px 24px rgba(0,0,0,.1)",
     },
-    "data-octop-plugin-ui": "color-convert",
+    "data-Ydsz-plugin-ui": "color-convert",
     children: [
       _jsx("div", { style: { height: 56, background: swatch } }),
       _jsxs("div", { style: { padding: 14, background: "#fff" }, children: [

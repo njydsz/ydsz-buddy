@@ -4,11 +4,11 @@
 
 Sample plugins for Ydsz Worker / ydsz-harness `kind` values, plus a **dual
 frontend + backend** demo that renders tool results in chat.
-Layout inspired by [octop-toolkit](https://github.com/veenyi/octop-plugins/tree/main/octop-toolkit).
+Layout inspired by [Ydsz-toolkit](https://github.com/veenyi/Ydsz-plugins/tree/main/Ydsz-toolkit).
 
 Product plugins shipped with the wheel live in
-`src/octop/infra/agents/plugins/bundled/`. `ydsz-worker init` and `ydsz-worker run`
-copy missing ones into `~/.octop/plugins/` and set them **globally off**
+`src/Ydsz/infra/agents/plugins/bundled/`. `ydsz-worker init` and `ydsz-worker run`
+copy missing ones into `~/.Ydsz/plugins/` and set them **globally off**
 in `config.json`. Uninstalled ids are not re-copied.
 
 ## Demos
@@ -18,7 +18,7 @@ in `config.json`. Uninstalled ids are not re-copied.
 | [`demo-toolkit`](./demo-toolkit/) | `tool` | Register callable tools (time, text stats, configurable echo) |
 | [`demo-greeting-skill`](./demo-greeting-skill/) | `skill` | Sync a sample Skill into the agent workspace |
 | [`demo-turn-logger`](./demo-turn-logger/) | `hook` | Register `AgentMiddleware` that logs before/after model calls |
-| [`demo-ui-card`](./demo-ui-card/) | `tool` + `ui/` | Backend returns `octop_ui` JSON; frontend renders an interactive card |
+| [`demo-ui-card`](./demo-ui-card/) | `tool` + `ui/` | Backend returns `Ydsz_ui` JSON; frontend renders an interactive card |
 
 ## Plugin layout
 
@@ -62,7 +62,7 @@ Prefer JSON tool output:
 
 ```json
 {
-  "octop_ui": { "renderer": "demo_card", "version": 1 },
+  "Ydsz_ui": { "renderer": "demo_card", "version": 1 },
   "data": { "title": "…", "count": 1 },
   "text": "plain fallback"
 }
@@ -71,17 +71,17 @@ Prefer JSON tool output:
 The Dashboard loads `index.js` via `GET /api/plugins/{id}/ui/…`, calls
 `setup(host)`, and resolves renderers in chat. Use `host.patchResult` for
 interactive L2 updates; streaming still replaces `output` via SSE (L1).
-Ship a self-contained ESM; React is provided as `window.__OCTOP_REACT__` /
-`__OCTOP_JSX__`.
+Ship a self-contained ESM; React is provided as `window.__Ydsz_REACT__` /
+`__Ydsz_JSX__`.
 
 ## Install locally
 
 ```bash
-octop plugin install ./plugins/demo-toolkit --force
-octop plugin install ./plugins/demo-greeting-skill --force
-octop plugin install ./plugins/demo-turn-logger --force
-octop plugin install ./plugins/demo-ui-card --force
-octop plugin list
+Ydsz plugin install ./plugins/demo-toolkit --force
+Ydsz plugin install ./plugins/demo-greeting-skill --force
+Ydsz plugin install ./plugins/demo-turn-logger --force
+Ydsz plugin install ./plugins/demo-ui-card --force
+Ydsz plugin list
 ```
 
 Or pack a ZIP first (include prebuilt `ui/dist/` when present — the server

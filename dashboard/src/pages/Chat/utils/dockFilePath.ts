@@ -21,12 +21,12 @@ export {
 export const normalizeDockFilePath = normalizeIoPath;
 
 /**
- * Collapse agent-home absolute paths (and truncated ``/.octop/agents/…``
+ * Collapse agent-home absolute paths (and truncated ``/.ydsz/agents/…``
  * extracts) to a workspace-relative path for stable list / tab identity.
  *
- * ``/home/wally/.octop/agents/main/generated/a.pptx``,
- * ``C:/Users/wally/.octop/agents/main/generated/a.pptx``, and
- * ``/.octop/agents/main/generated/a.pptx`` all become
+ * ``/home/wally/.ydsz/agents/main/generated/a.pptx``,
+ * ``C:/Users/wally/.ydsz/agents/main/generated/a.pptx``, and
+ * ``/.ydsz/agents/main/generated/a.pptx`` all become
  * ``generated/a.pptx``.
  *
  * Do **not** use this for download / file API paths — use
@@ -49,19 +49,19 @@ export function canonicalizeDockFilePath(
   if (agentId) {
     const id = agentId.replace(/\\/g, "/");
     const idLower = id.toLowerCase();
-    const markers = [`/.octop/agents/${idLower}/`, `.octop/agents/${idLower}/`];
+    const markers = [`/.ydsz/agents/${idLower}/`, `.ydsz/agents/${idLower}/`];
     for (const marker of markers) {
       const idx = lower.lastIndexOf(marker);
       if (idx >= 0) {
         return posix.slice(idx + marker.length);
       }
     }
-    const agentRoot = `/.octop/agents/${idLower}`;
+    const agentRoot = `/.ydsz/agents/${idLower}`;
     if (
       lower === agentRoot ||
       lower.endsWith(agentRoot) ||
       lower === agentRoot.slice(1) ||
-      lower.endsWith(`.octop/agents/${idLower}`)
+      lower.endsWith(`.ydsz/agents/${idLower}`)
     ) {
       return "";
     }
@@ -121,8 +121,8 @@ function preferDisplayPath(current: string, candidate: string): string {
     let s = p.length;
     if (p.startsWith("/") || /^[A-Za-z]:\//.test(p)) s += 1000;
     if (
-      p.includes("/.octop/agents/") ||
-      p.startsWith("/.octop/agents/") ||
+      p.includes("/.ydsz/agents/") ||
+      p.startsWith("/.ydsz/agents/") ||
       /(?:^|\/).ydsz\/agents\//i.test(p)
     ) {
       s += 500;

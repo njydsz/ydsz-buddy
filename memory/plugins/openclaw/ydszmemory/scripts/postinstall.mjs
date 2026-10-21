@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * postinstall.mjs — after `openclaw plugins install @ydsz-memory/openclaw`,
  * automatically write plugins.slots.memory = ydszmemory into openclaw.json.
@@ -115,7 +115,7 @@ function probeBridge() {
 /**
  * Find the ydsz-memory CLI command.
  */
-function findOctopCli() {
+function findYdszCli() {
   return findExecutable("ydsz-memory");
 }
 
@@ -179,7 +179,7 @@ async function main() {
   log.ok(`找到 bridge：${probe.path}`);
 
   // Find the ydsz-memory CLI.
-  const cliPath = findOctopCli();
+  const cliPath = findYdszCli();
   if (!cliPath) {
     log.warn("找到了 ydszmemory-bridge 但找不到 ydsz-memory CLI，跳过自动 setup。");
     log.warn("请手动运行：ydsz-memory openclaw setup");

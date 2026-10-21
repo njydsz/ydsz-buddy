@@ -20,22 +20,22 @@ describe("dockFilePath", () => {
     );
   });
 
-  it("canonicalizes agent-home and truncated .octop paths together", () => {
+  it("canonicalizes agent-home and truncated .ydsz paths together", () => {
     expect(
       canonicalizeDockFilePath(
-        "/home/wally/.octop/agents/main/generated/iron-man.pptx",
+        "/home/wally/.ydsz/agents/main/generated/iron-man.pptx",
         "main",
       ),
     ).toBe("generated/iron-man.pptx");
     expect(
       canonicalizeDockFilePath(
-        "/.octop/agents/main/generated/iron-man.pptx",
+        "/.ydsz/agents/main/generated/iron-man.pptx",
         "main",
       ),
     ).toBe("generated/iron-man.pptx");
     expect(
       canonicalizeDockFilePath(
-        ".octop/agents/main/generated/iron-man.pptx",
+        ".ydsz/agents/main/generated/iron-man.pptx",
         "main",
       ),
     ).toBe("generated/iron-man.pptx");
@@ -53,7 +53,7 @@ describe("dockFilePath", () => {
     ).toBe("generated/a.pptx");
     expect(
       canonicalizeDockFilePath(
-        "C:/Users/wally/.octop/agents/main/generated/a.pptx",
+        "C:/Users/wally/.ydsz/agents/main/generated/a.pptx",
         "main",
       ),
     ).toBe("generated/a.pptx");
@@ -63,16 +63,16 @@ describe("dockFilePath", () => {
     expect(
       dedupeDockFilePaths(
         [
-          "/.octop/agents/main/generated/iron-man.pptx",
-          "/home/wally/.octop/agents/main/generated/iron-man.pptx",
-          "/home/wally/.octop/agents/main/generated/ironman-ppt.js",
+          "/.ydsz/agents/main/generated/iron-man.pptx",
+          "/home/wally/.ydsz/agents/main/generated/iron-man.pptx",
+          "/home/wally/.ydsz/agents/main/generated/ironman-ppt.js",
           "generated/ironman-ppt.py",
         ],
         "main",
       ),
     ).toEqual([
-      "/home/wally/.octop/agents/main/generated/iron-man.pptx",
-      "/home/wally/.octop/agents/main/generated/ironman-ppt.js",
+      "/home/wally/.ydsz/agents/main/generated/iron-man.pptx",
+      "/home/wally/.ydsz/agents/main/generated/ironman-ppt.js",
       "generated/ironman-ppt.py",
     ]);
   });
@@ -116,10 +116,10 @@ describe("dockFilePath", () => {
   it("toWorkspaceApiPath keeps agent-home absolute as file:// for failback", () => {
     expect(
       toWorkspaceApiPath(
-        "/Users/jubaoliang/.octop/agents/SBGM5Q/earth-presentation.html",
+        "/Users/jubaoliang/.ydsz/agents/SBGM5Q/earth-presentation.html",
       ),
     ).toBe(
-      "file:///Users/jubaoliang/.octop/agents/SBGM5Q/earth-presentation.html",
+      "file:///Users/jubaoliang/.ydsz/agents/SBGM5Q/earth-presentation.html",
     );
   });
 
@@ -127,37 +127,37 @@ describe("dockFilePath", () => {
     expect(dockFileBasename("outbound/docs/note.md")).toBe("note.md");
     expect(dockFileTabId("file:///workspace/x.py")).toBe("file:x.py");
     expect(
-      dockFileTabId("/home/wally/.octop/agents/main/generated/a.pptx", "main"),
+      dockFileTabId("/home/wally/.ydsz/agents/main/generated/a.pptx", "main"),
     ).toBe("file:main:generated/a.pptx");
   });
 
   it("folder tree uses absolute paths from artifacts", () => {
     const tree = buildDockPathTree(
       [
-        "/home/wally/.octop/agents/main/generated/iron-man.pptx",
-        "/.octop/agents/main/generated/iron-man.pptx",
+        "/home/wally/.ydsz/agents/main/generated/iron-man.pptx",
+        "/.ydsz/agents/main/generated/iron-man.pptx",
       ],
       "main",
     );
     expect(tree).toHaveLength(1);
     expect(tree[0].name).toBe(
-      "home / wally / .octop / agents / main / generated",
+      "home / wally / .ydsz / agents / main / generated",
     );
-    expect(tree[0].path).toBe("/home/wally/.octop/agents/main/generated");
+    expect(tree[0].path).toBe("/home/wally/.ydsz/agents/main/generated");
     expect(tree[0].children.map((c) => c.name)).toEqual(["iron-man.pptx"]);
   });
 
   it("nests system-scoped skill paths under agent home", () => {
     const tree = buildDockPathTree(
       [
-        "/home/wally/.octop/agents/0DMHDH/.octop/skills/weather-query/SKILL.md",
-        "/home/wally/.octop/agents/0DMHDH/.octop/skills/weather-query/scripts/weather.py",
+        "/home/wally/.ydsz/agents/0DMHDH/.ydsz/skills/weather-query/SKILL.md",
+        "/home/wally/.ydsz/agents/0DMHDH/.ydsz/skills/weather-query/scripts/weather.py",
       ],
       "0DMHDH",
     );
     expect(tree).toHaveLength(1);
     expect(tree[0].name).toBe(
-      "home / wally / .octop / agents / 0DMHDH / .octop / skills / weather-query",
+      "home / wally / .ydsz / agents / 0DMHDH / .ydsz / skills / weather-query",
     );
     expect(tree[0].children.map((c) => c.name).sort()).toEqual([
       "SKILL.md",
@@ -170,12 +170,12 @@ describe("dockFilePath", () => {
   it("listDockFilePathsForTree dedupes by canonical key and keeps absolute", () => {
     expect(
       listDockFilePathsForTree(
-        ["/home/wally/.octop/agents/main/generated/a.pptx", "generated/a.pptx"],
+        ["/home/wally/.ydsz/agents/main/generated/a.pptx", "generated/a.pptx"],
         "main",
       ),
     ).toEqual([
       {
-        path: "/home/wally/.octop/agents/main/generated/a.pptx",
+        path: "/home/wally/.ydsz/agents/main/generated/a.pptx",
         agentId: "main",
       },
     ]);
@@ -202,20 +202,20 @@ describe("dockFilePath", () => {
     expect(toWorkspaceApiPath("outbound/a.txt")).toBe("outbound/a.txt");
     expect(
       toDockWorkspaceApiPath(
-        "/home/wally/.octop/agents/main/generated/a.pptx",
+        "/home/wally/.ydsz/agents/main/generated/a.pptx",
         "main",
       ),
-    ).toBe("file:///home/wally/.octop/agents/main/generated/a.pptx");
+    ).toBe("file:///home/wally/.ydsz/agents/main/generated/a.pptx");
     expect(
       toDockWorkspaceApiPath(
         "C:\\Users\\wally\.ydsz\\agents\\main\\generated\\a.pptx",
         "main",
       ),
-    ).toBe("file:///C:/Users/wally/.octop/agents/main/generated/a.pptx");
+    ).toBe("file:///C:/Users/wally/.ydsz/agents/main/generated/a.pptx");
     // Tab identity still collapses; API path does not.
     expect(
       canonicalizeDockFilePath(
-        "/home/wally/.octop/agents/main/generated/a.pptx",
+        "/home/wally/.ydsz/agents/main/generated/a.pptx",
         "main",
       ),
     ).toBe("generated/a.pptx");
@@ -225,7 +225,7 @@ describe("dockFilePath", () => {
     const tree = buildDockPathTree([
       "dashboard/src/pages/Chat/hooks/useChatDockPanel.ts",
       "dashboard/src/pages/Chat/hooks/chatStore.ts",
-      "src/octop/api.md",
+      "src/ydsz/api.md",
       "tests/unit/gateway/ws.py",
     ]);
     expect(tree).toEqual([
@@ -249,13 +249,13 @@ describe("dockFilePath", () => {
         ],
       },
       {
-        name: "src / octop",
-        path: "src/octop",
+        name: "src / ydsz",
+        path: "src/ydsz",
         isDir: true,
         children: [
           {
             name: "api.md",
-            path: "src/octop/api.md",
+            path: "src/ydsz/api.md",
             isDir: false,
             children: [],
           },

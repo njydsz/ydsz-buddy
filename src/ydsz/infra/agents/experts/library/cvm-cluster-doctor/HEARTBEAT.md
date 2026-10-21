@@ -89,7 +89,7 @@ echo '<score_json>' | python3 scripts/cluster_patrol_record.py \
 
 - `--rotate`：每次写入后自动清理 7 天前的旧记录（压缩归档至 `cluster-doctor.old.jsonl.gz`）
 - 脚本内部所有错误均静默处理（写 stderr，`exit 0`），**不会中断心跳任务**
-- 记录写入路径：`~/.octop/stats/cluster-doctor.jsonl`
+- 记录写入路径：`~/.Ydsz/stats/cluster-doctor.jsonl`
 
 **6b. 写入 MEMORY.md（可读摘要，供对话检索）**
 

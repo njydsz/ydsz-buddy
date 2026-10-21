@@ -22,7 +22,7 @@ _REQ_RE = re.compile(r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)(?:\s*==\s*(?P<ver>[
 
 # Import names that have historically drifted across lock/install environments.
 _SMOKE_IMPORTS = (
-    "octop",
+    "ydsz",
     "fastapi",
     "cryptography.fernet",
     "langchain_core",

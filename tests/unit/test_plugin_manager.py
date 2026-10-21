@@ -85,17 +85,17 @@ def test_set_enabled_roundtrip(tmp_path: Path) -> None:
 
 
 def test_normalize_github_blob_url() -> None:
-    blob = "https://github.com/veenyi/octop-plugins/blob/main/octop-toolkit.zip"
+    blob = "https://github.com/veenyi/Ydsz-plugins/blob/main/Ydsz-toolkit.zip"
     assert (
         normalize_plugin_download_url(blob)
-        == "https://raw.githubusercontent.com/veenyi/octop-plugins/main/octop-toolkit.zip"
+        == "https://raw.githubusercontent.com/veenyi/Ydsz-plugins/main/Ydsz-toolkit.zip"
     )
-    raw_page = "https://github.com/veenyi/octop-plugins/raw/main/octop-toolkit.zip"
+    raw_page = "https://github.com/veenyi/Ydsz-plugins/raw/main/Ydsz-toolkit.zip"
     assert (
         normalize_plugin_download_url(raw_page)
-        == "https://raw.githubusercontent.com/veenyi/octop-plugins/main/octop-toolkit.zip"
+        == "https://raw.githubusercontent.com/veenyi/Ydsz-plugins/main/Ydsz-toolkit.zip"
     )
-    already_raw = "https://raw.githubusercontent.com/veenyi/octop-plugins/main/octop-toolkit.zip"
+    already_raw = "https://raw.githubusercontent.com/veenyi/Ydsz-plugins/main/Ydsz-toolkit.zip"
     assert normalize_plugin_download_url(already_raw) == already_raw
 
 

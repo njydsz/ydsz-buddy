@@ -231,11 +231,11 @@ print(f"当前时间: {now.strftime('%Y-%m-%d %H:%M:%S')} 星期{['一','二','�
 
 Skills 定义工具的用法。用之前翻它的 `SKILL.md`。
 
-Python 脚本执行环境：`~/.octop/venv/bin/python3`
+Python 脚本执行环境：`~/.Ydsz/venv/bin/python3`
 
 **工具可用性验证：**
 ```bash
-~/.octop/venv/bin/python3 -c "import akshare as ak; print('akshare', ak.__version__, '✓')"
+~/.Ydsz/venv/bin/python3 -c "import akshare as ak; print('akshare', ak.__version__, '✓')"
 ```
 akshare 不可用？按 `skills/stock-info/SKILL.md` 的安装指引处理。
 

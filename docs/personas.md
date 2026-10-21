@@ -4,12 +4,12 @@
 
 Each agent has an optional MBTI persona (`persona_mbti` column on the
 `agents` row). The persona profile is rendered into the agent's
-`SOUL.md` (via `octop.infra.agents.persona.render_persona_template` /
+`SOUL.md` (via `ydsz.infra.agents.persona.render_persona_template` /
 `PersonaLoader`) at boot. If the user also sets a `system_prompt` on the
 agent row, it is **appended** to the persona — the persona file is the
 backbone, the user prompt is the trim.
 
-If `persona_mbti` is `NULL` or the empty string, octop falls back to
+If `persona_mbti` is `NULL` or the empty string, ydsz falls back to
 the built-in `_DEFAULT_PERSONA_TEMPLATE` (warm, direct, competent tone).
 
 ## Where the 16 codes live
@@ -18,12 +18,12 @@ Persona content is now data, not files:
 
 | Resource | Location |
 |----------|----------|
-| 16 `MBTIProfile` records | [`src/octop/infra/agents/persona/mbti_profiles.py`](../src/octop/infra/agents/persona/mbti_profiles.py) |
-| Public API (`get_profile`, `get_all_profiles`, `MBTIProfile`, …) | same module (also re-exported from `octop.infra.agents.persona`) |
-| SOUL.md / persona rendering | [`src/octop/infra/agents/persona/loader.py`](../src/octop/infra/agents/persona/loader.py) |
+| 16 `MBTIProfile` records | [`src/ydsz/infra/agents/persona/mbti_profiles.py`](../src/ydsz/infra/agents/persona/mbti_profiles.py) |
+| Public API (`get_profile`, `get_all_profiles`, `MBTIProfile`, …) | same module (also re-exported from `ydsz.infra.agents.persona`) |
+| SOUL.md / persona rendering | [`src/ydsz/infra/agents/persona/loader.py`](../src/ydsz/infra/agents/persona/loader.py) |
 | Persisted agent field | `agents.persona_mbti` (string, e.g. `"INTJ"`) |
 
-The legacy `src/octop/infra/agents/personas/*.md` directory is gone —
+The legacy `src/ydsz/infra/agents/personas/*.md` directory is gone —
 persona content is now structured dataclasses with explicit
 `summary_zh` / `summary_en` / `behavior_*` fields, so it can be
 localized without shipping 16 separate Markdown files.

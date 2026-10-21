@@ -26,7 +26,7 @@ pip install tccli
 # pip uninstall tccli jmespath && pip install tccli
 ```
 
-升级同理，加 `-U`：`uv pip install --python "$OCTOP_ROOT/.venv/bin/python3" -U tccli`
+升级同理，加 `-U`：`uv pip install --python "$Ydsz_ROOT/.venv/bin/python3" -U tccli`
 
 其他系统安装方式：
 
@@ -43,6 +43,6 @@ brew install tccli
 验证安装：
 
 ```sh
-"$OCTOP_ROOT/.venv/bin/tccli" --version   # venv 内验证
+"$Ydsz_ROOT/.venv/bin/tccli" --version   # venv 内验证
 tccli --version                            # 系统安装验证
 ```

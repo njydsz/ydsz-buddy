@@ -37,7 +37,7 @@ function matchesMarketQuery(row: MarketPlugin, query: string): boolean {
   return haystack.includes(q);
 }
 
-/** Marketplace catalog — install copies in-tree packages to ~/.octop/plugins. */
+/** Marketplace catalog — install copies in-tree packages to ~/.ydsz/plugins. */
 export function PluginMarketPanel() {
   const { t } = useTranslation();
   const [items, setItems] = useState<MarketPlugin[]>([]);

@@ -174,7 +174,7 @@ def _minimal_manifest_json(**flags: bool) -> bytes:
 
     payload = {
         "manifest_version": 1,
-        "octop_version": "0.0.0-test",
+        "Ydsz_version": "0.0.0-test",
         "schema_version": 1,
         "created_at": "2026-01-01T00:00:00+00:00",
         "home": "/tmp",

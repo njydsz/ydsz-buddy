@@ -77,7 +77,7 @@ Candidate 可自动晋升、合并、丢弃或进入 conflict/needs_review，不
 Episode 从 RawEvent 独立提炼；页面由 dirty 标记和 regeneration 触发更新，不承诺每次写入即时刷新。
 自动提炼使用注入的 `LLMClient`；无模型时 capture 和 FTS 可用，提炼返回不可用原因。
 
-ydsz-harness 主路径使用 `on_failure="error"`，失败写入 checkpoint task error，不产生合成助手回复；团队自动失败通知使用 `configurable.ydsz_memory_capture_exclude=true` 排除整轮采集。自定义宿主仍合成错误时必须使用 `payload.octop_runtime_error=true`。capture、Candidate/Episode extractor、promotion 及 raw prompt recall 只共用结构化来源规则，无记忆意图/排障价值关键词。Agent 自行调用 memory_save；后台采集只保留既有长度等策略，不为特定措辞放行短句。`audit_runtime_errors` 默认预览，显式 apply 也只在全部证据带错误标记时停用自动 Atom、拒绝未决 Candidate。旧版严格报错格式仅在 operations 层生成审核提示，缺失/混合来源返回 review_*_ids，原状态不改；原始证据不改写，人工保存/批准/编辑按来源保护。
+ydsz-harness 主路径使用 `on_failure="error"`，失败写入 checkpoint task error，不产生合成助手回复；团队自动失败通知使用 `configurable.ydsz_memory_capture_exclude=true` 排除整轮采集。自定义宿主仍合成错误时必须使用 `payload.Ydsz_runtime_error=true`。capture、Candidate/Episode extractor、promotion 及 raw prompt recall 只共用结构化来源规则，无记忆意图/排障价值关键词。Agent 自行调用 memory_save；后台采集只保留既有长度等策略，不为特定措辞放行短句。`audit_runtime_errors` 默认预览，显式 apply 也只在全部证据带错误标记时停用自动 Atom、拒绝未决 Candidate。旧版严格报错格式仅在 operations 层生成审核提示，缺失/混合来源返回 review_*_ids，原状态不改；原始证据不改写，人工保存/批准/编辑按来源保护。
 
 `Memory.store()` 的 leaf 写入使用手工 RawEvent/Candidate/AtomCard 路径，无需 LLM。
 `root → branch → leaf` 是组织树，leaf 用 `atom_id` 投影事实正文，不复制第二份事实。

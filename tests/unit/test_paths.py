@@ -60,7 +60,7 @@ def test_knowledge_dir(tmp_path: Path) -> None:
     assert p.knowledge_dir == tmp_path / ".ydsz" / "knowledge"
 
 
-def test_path_layout_from_env_defaults_to_dot_octop(monkeypatch) -> None:
+def test_path_layout_from_env_defaults_to_dot_Ydsz(monkeypatch) -> None:
     monkeypatch.delenv("YDSZ_HOME", raising=False)
     assert PathLayout.from_env().root == Path.home() / ".ydsz"
 

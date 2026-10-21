@@ -4,7 +4,7 @@ description: "当用户需要创建、读取、编辑或处理 Word 文档（.do
 license: Proprietary. LICENSE.txt has complete terms
 metadata:
   builtin_skill_version: "1.1"
-  octop:
+  Ydsz:
     emoji: "📝"
     label:
       zh: "Word 文档"

@@ -164,14 +164,14 @@ def test_alt_profiles_root_uses_tempdir_on_windows(
     monkeypatch.setattr(prep.tempfile, "gettempdir", lambda: str(fake_tmp))
     if hasattr(prep.os, "getuid"):
         monkeypatch.setattr(prep.os, "getuid", object())
-    monkeypatch.setenv("USERNAME", "OctopUser")
+    monkeypatch.setenv("USERNAME", "YdszUser")
     monkeypatch.delenv("USER", raising=False)
 
     profiles = _alt_profiles_root()
     runtime = _runtime_dir_for_uid()
 
-    assert profiles == fake_tmp / "ydsz-browser-profiles-OctopUser"
-    assert runtime == fake_tmp / "runtime-ydsz-browser-OctopUser"
+    assert profiles == fake_tmp / "ydsz-browser-profiles-YdszUser"
+    assert runtime == fake_tmp / "runtime-ydsz-browser-YdszUser"
     assert profiles.is_absolute()
     assert runtime.is_absolute()
 
@@ -183,10 +183,10 @@ def test_temp_scope_token_uses_username_when_getuid_missing(
 
     if hasattr(prep.os, "getuid"):
         monkeypatch.setattr(prep.os, "getuid", object())
-    monkeypatch.setenv("USERNAME", "OctopUser")
+    monkeypatch.setenv("USERNAME", "YdszUser")
     monkeypatch.delenv("USER", raising=False)
 
-    assert _temp_scope_token() == "OctopUser"
+    assert _temp_scope_token() == "YdszUser"
     assert _temp_scope_token(uid=3) == "3"
 
 

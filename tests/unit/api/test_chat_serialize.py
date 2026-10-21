@@ -30,7 +30,7 @@ def test_json_chunk_default_serializes_langchain_messages() -> None:
 
 
 def test_json_chunk_default_keeps_tool_message_artifact() -> None:
-    """Live WS/SSE frames must carry the offloaded octop_ui payload."""
+    """Live WS/SSE frames must carry the offloaded Ydsz_ui payload."""
     msg = ToolMessage(
         content='{"ydsz_ui": {"renderer": "bilibili_player"}, "data_ref": "artifact"}',
         tool_call_id="call_1",

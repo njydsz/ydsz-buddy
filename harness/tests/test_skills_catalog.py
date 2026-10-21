@@ -137,7 +137,7 @@ class TestSkillCatalog:
         rows = await list_skill_summaries(ws)
         assert rows[0]["emoji"] == "🎯"
 
-    async def test_octop_presentation_metadata_in_summary(self, fs_backend: Any, tmp_path: Path) -> None:
+    async def test_Ydsz_presentation_metadata_in_summary(self, fs_backend: Any, tmp_path: Path) -> None:
         ws = BackendWorkspace(fs_backend, tmp_path)
         await ws.awrite_text(
             "skills/pdf-reader/SKILL.md",
@@ -176,7 +176,7 @@ class TestSkillCatalog:
             }
         ]
 
-    async def test_octop_display_name_does_not_replace_identity(self, fs_backend: Any, tmp_path: Path) -> None:
+    async def test_Ydsz_display_name_does_not_replace_identity(self, fs_backend: Any, tmp_path: Path) -> None:
         ws = BackendWorkspace(fs_backend, tmp_path)
         await ws.awrite_text(
             "skills/pdf-reader/SKILL.md",

@@ -1,4 +1,4 @@
-/** Translate agent ``last_error`` values stored with an ``octop:`` prefix. */
+/** Translate agent ``last_error`` values stored with an ``ydsz:`` prefix. */
 
 import type { TFunction } from "i18next";
 

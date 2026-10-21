@@ -32,7 +32,7 @@ build_ydsz_wheel() {
   mkdir -p "$wheel_dir"
   # Drop previous local ydsz-worker wheels so we pick the fresh build.
   find "$wheel_dir" -maxdepth 1 -type f -name 'ydsz_worker-*.whl' -delete 2>/dev/null || true
-  if [[ ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" && ! -f "${REPO_ROOT}/src/octop/dashboard/index.html" ]]; then
+  if [[ ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" && ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" ]]; then
     echo "[package] WARNING: dashboard not built (src/ydsz/dashboard/index.html missing)." >&2
     echo "  Run: make build-frontend" >&2
   fi

@@ -144,7 +144,7 @@ class TestSendFileToUser:
 
         root = tmp_path / "root"
         workspace = tmp_path / "agent_ws"
-        proc_cwd = tmp_path / "octop_repo"
+        proc_cwd = tmp_path / "Ydsz_repo"
         root.mkdir()
         workspace.mkdir()
         proc_cwd.mkdir()
@@ -178,7 +178,7 @@ class TestSendFileToUser:
 
         root = tmp_path / "root"
         workspace = tmp_path / "agent_ws"
-        proc_cwd = tmp_path / "octop_repo"
+        proc_cwd = tmp_path / "Ydsz_repo"
         root.mkdir()
         workspace.mkdir()
         proc_cwd.mkdir()

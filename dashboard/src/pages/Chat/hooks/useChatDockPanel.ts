@@ -169,9 +169,9 @@ export function useChatDockPanel(isMobile: boolean, agentId?: string | null) {
       }
       const ownerId = (fileAgentId || agentId || "").trim() || null;
       const hostAbs = normalizeDockFilePath(path);
-      // Keep host-absolute tool paths. Collapsing ``~/.octop/agents/<id>/…`` to a
+      // Keep host-absolute tool paths. Collapsing ``~/.ydsz/agents/<id>/…`` to a
       // relative key breaks virtual ``root_dir`` nests (bytes live under
-      // ``{root}/Users/…/.octop/agents/<id>/…``, not the real agent home).
+      // ``{root}/Users/…/.ydsz/agents/<id>/…``, not the real agent home).
       const tabPath = isHostAbsolutePath(hostAbs)
         ? hostAbs
         : canonicalizeDockFilePath(path, ownerId);

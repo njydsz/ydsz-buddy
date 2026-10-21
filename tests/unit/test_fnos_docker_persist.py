@@ -156,10 +156,10 @@ def test_ydsz_prepare_docker_persist_migrates_legacy_db(tmp_path: Path) -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_legacy_docker_data_dir() {{ printf '%s' "{legacy}"; }}
+Ydsz_legacy_docker_data_dir() {{ printf '%s' "{legacy}"; }}
 export TRIM_DATA_SHARE_PATHS="{dest}"
 export TRIM_PKGVAR="{pkgvar}"
-octop_prepare_docker_persist "{env_file}"
+Ydsz_prepare_docker_persist "{env_file}"
 """
     out = subprocess.check_output(["bash", "-c", script], text=True)
     assert out == str(dest)
@@ -186,10 +186,10 @@ def test_ydsz_prepare_docker_persist_does_not_overwrite_existing_db(
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_legacy_docker_data_dir() {{ printf '%s' "{legacy}"; }}
+Ydsz_legacy_docker_data_dir() {{ printf '%s' "{legacy}"; }}
 export TRIM_DATA_SHARE_PATHS="{dest}"
 export TRIM_PKGVAR="{tmp_path / "pkgvar"}"
-octop_prepare_docker_persist "{env_file}" >/dev/null
+Ydsz_prepare_docker_persist "{env_file}" >/dev/null
 """
     subprocess.check_call(["bash", "-c", script])
     assert (dest_home / "ydsz.db").read_text(encoding="utf-8") == "keep"
@@ -215,7 +215,7 @@ def test_ydsz_sync_fnos_compose_bakes_absolute_bind(tmp_path: Path) -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_sync_fnos_compose "{compose}" "{data_dir}" "{env_file}"
+Ydsz_sync_fnos_compose "{compose}" "{data_dir}" "{env_file}"
 """
     subprocess.check_call(["bash", "-c", script])
     text = compose.read_text(encoding="utf-8")
@@ -232,7 +232,7 @@ def test_ydsz_write_fnos_bootstrap_script(tmp_path: Path) -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_write_fnos_bootstrap "{share}" alice WizardPass1
+Ydsz_write_fnos_bootstrap "{share}" alice WizardPass1
 bash -n "{share}/fnos-boot.sh"
 """
     subprocess.check_call(["bash", "-c", script])
@@ -240,8 +240,8 @@ bash -n "{share}/fnos-boot.sh"
     assert "YDSZ_ADMIN_USERNAME=alice" in env_text
     assert "YDSZ_DEFAULT_PASSWORD=WizardPass1" in env_text
     boot = (share / "fnos-boot.sh").read_text(encoding="utf-8")
-    assert "octop user passwd" in boot
-    assert "octop init" in boot
+    assert "Ydsz user passwd" in boot
+    assert "Ydsz init" in boot
     assert "set-email" in boot
     assert "初始化失败" in boot
     assert ".fnos-apply-wizard-password" in boot
@@ -254,7 +254,7 @@ def test_ydsz_write_login_file_is_backup_only(tmp_path: Path) -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_write_login_file "{tmp_path}" alice WizardPass1 8088
+Ydsz_write_login_file "{tmp_path}" alice WizardPass1 8088
 """
     subprocess.check_call(["bash", "-c", script])
     text = (tmp_path / "ydsz-login.txt").read_text(encoding="utf-8")
@@ -282,11 +282,11 @@ def test_ydsz_distribute_docker_env_copies_to_compose_dirs(tmp_path: Path) -> No
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_docker_compose_dirs() {{
+Ydsz_docker_compose_dirs() {{
     printf '%s\\n' "{src.parent}"
     printf '%s\\n' "{runtime}"
 }}
-octop_distribute_docker_env "{src}" "{tmp_path / "share"}"
+Ydsz_distribute_docker_env "{src}" "{tmp_path / "share"}"
 """
     subprocess.check_call(["bash", "-c", script])
     copied = runtime / ".env"
@@ -304,7 +304,7 @@ def test_ydsz_restore_docker_env_from_pkgvar(tmp_path: Path) -> None:
 set -euo pipefail
 source "{COMMON_SH}"
 export TRIM_PKGVAR="{pkgvar}"
-octop_restore_docker_env "{env_file}"
+Ydsz_restore_docker_env "{env_file}"
 """
     subprocess.check_call(["bash", "-c", script])
     assert env_file.read_text(encoding="utf-8") == "YDSZ_PORT=8088\n"
@@ -343,7 +343,7 @@ def test_fnos_native_start_reports_failure() -> None:
     launcher = (FNOS_NATIVE / "app" / "bin" / "ydsz").read_text(encoding="utf-8")
     install = (FNOS_NATIVE / "cmd" / "install_callback").read_text(encoding="utf-8")
     assert "fail_start" in main
-    assert "octop-start-error.txt" in main
+    assert "Ydsz-start-error.txt" in main
     assert "YDSZ_START_WAIT_SECS" in main
     assert "return 0" in main
     assert "--prepare" in launcher
@@ -425,7 +425,7 @@ def test_fnos_install_wizard_is_account_then_next_steps() -> None:
         if rel.startswith("fnos/docker/"):
             assert "ghcr.io" in json.dumps(data[1], ensure_ascii=False)
         else:
-            assert "octop-start-error.txt" in json.dumps(data[1], ensure_ascii=False)
+            assert "Ydsz-start-error.txt" in json.dumps(data[1], ensure_ascii=False)
 
 
 def test_fnos_config_wizard_is_password_change_only() -> None:
@@ -446,9 +446,9 @@ def test_fnos_config_wizard_is_password_change_only() -> None:
         data = json.loads(path.read_text(encoding="utf-8"))
         assert len(data) == 1
         text = path.read_text(encoding="utf-8")
-        assert "octop-current-password" not in text
-        assert "octop-current-username" in text
-        assert "octop-data-dir" in text
+        assert "Ydsz-current-password" not in text
+        assert "Ydsz-current-username" in text
+        assert "ydsz-data-dir" in text
         assert "不会自动更新" in text
         assert "/volX/@appshare" not in text
         fields = _wizard_fields(path, 0)
@@ -465,11 +465,11 @@ set -euo pipefail
 source "{COMMON_SH}"
 export YDSZ_FPK_ARCH_FILE="{marker}"
 export YDSZ_FPK_HOST_ARCH=amd64
-octop_assert_native_arch && exit 10
+Ydsz_assert_native_arch && exit 10
 export YDSZ_FPK_HOST_ARCH=arm64
-octop_assert_native_arch || exit 11
+Ydsz_assert_native_arch || exit 11
 unset YDSZ_FPK_ARCH_FILE
-octop_assert_native_arch || exit 12
+Ydsz_assert_native_arch || exit 12
 """
     subprocess.check_call(["bash", "-c", script])
 
@@ -488,7 +488,7 @@ set -euo pipefail
 source "{COMMON_SH}"
 export PATH="{empty}"
 export YDSZ_FNOS_NODE_BIN_DIRS="{bindir}"
-octop_prepend_fnos_node_path
+Ydsz_prepend_fnos_node_path
 found="$(command -v node)"
 test "$found" = "{node}"
 """
@@ -512,7 +512,7 @@ set -euo pipefail
 source "{COMMON_SH}"
 export PATH="{existing}"
 export YDSZ_FNOS_NODE_BIN_DIRS="{other}"
-octop_prepend_fnos_node_path
+Ydsz_prepend_fnos_node_path
 found="$(command -v node)"
 test "$found" = "{node}"
 """
@@ -524,10 +524,10 @@ def test_ydsz_validate_install_fields_rejects_mismatch_and_bad_email() -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_validate_install_fields admin 'GoodPass1' 'GoodPass1' '' '' || exit 10
-octop_validate_install_fields admin 'GoodPass1' 'GoodPass2' '' '' && exit 11
-octop_validate_install_fields admin 'GoodPass1' 'GoodPass1' 'not-an-email' '' && exit 12
-octop_validate_install_fields admin 'GoodPass1' 'GoodPass1' 'a@b.co' 'Ada' || exit 13
+Ydsz_validate_install_fields admin 'GoodPass1' 'GoodPass1' '' '' || exit 10
+Ydsz_validate_install_fields admin 'GoodPass1' 'GoodPass2' '' '' && exit 11
+Ydsz_validate_install_fields admin 'GoodPass1' 'GoodPass1' 'not-an-email' '' && exit 12
+Ydsz_validate_install_fields admin 'GoodPass1' 'GoodPass1' 'a@b.co' 'Ada' || exit 13
 """
     subprocess.check_call(["bash", "-c", script])
 
@@ -545,7 +545,7 @@ def test_fnos_upgrade_wizard_explains_password_kept() -> None:
 
 def test_fnos_docker_main_does_not_apply_wizard_password_on_start() -> None:
     text = (FNOS_DOCKER / "cmd" / "main").read_text(encoding="utf-8")
-    assert "octop_apply_wizard_password" not in text
+    assert "Ydsz_apply_wizard_password" not in text
 
 
 @posix_only
@@ -554,20 +554,20 @@ def test_ydsz_render_config_wizard_injects_data_dir(tmp_path: Path) -> None:
     wizard_dir = tmp_path / "wizard"
     wizard_dir.mkdir()
     template.write_text(
-        "user=<octop-current-username> dir=<octop-data-dir>\n",
+        "user=<Ydsz-current-username> dir=<ydsz-data-dir>\n",
         encoding="utf-8",
     )
     data_dir = tmp_path / "share"
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_render_config_wizard "{template}" "{wizard_dir}" alice Secret1 "{data_dir}"
+Ydsz_render_config_wizard "{template}" "{wizard_dir}" alice Secret1 "{data_dir}"
 """
     subprocess.check_call(["bash", "-c", script])
     text = (wizard_dir / "config").read_text(encoding="utf-8")
     assert "user=alice" in text
     assert f"dir={data_dir}" in text
-    assert "<octop-data-dir>" not in text
+    assert "<ydsz-data-dir>" not in text
 
 
 @posix_only
@@ -576,7 +576,7 @@ def test_ydsz_mark_fnos_passwd_pending(tmp_path: Path) -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_mark_fnos_passwd_pending "{share}"
+Ydsz_mark_fnos_passwd_pending "{share}"
 """
     subprocess.check_call(["bash", "-c", script])
     assert (share / ".ydsz" / ".fnos-apply-wizard-password").is_file()
@@ -587,10 +587,10 @@ def test_ydsz_validate_optional_password_change() -> None:
     script = f"""
 set -euo pipefail
 source "{COMMON_SH}"
-octop_validate_optional_password_change '' '' || exit 10
-octop_validate_optional_password_change 'GoodPass1' '' && exit 11
-octop_validate_optional_password_change '' 'GoodPass1' && exit 12
-octop_validate_optional_password_change 'GoodPass1' 'GoodPass2' && exit 13
-octop_validate_optional_password_change 'GoodPass1' 'GoodPass1' || exit 14
+Ydsz_validate_optional_password_change '' '' || exit 10
+Ydsz_validate_optional_password_change 'GoodPass1' '' && exit 11
+Ydsz_validate_optional_password_change '' 'GoodPass1' && exit 12
+Ydsz_validate_optional_password_change 'GoodPass1' 'GoodPass2' && exit 13
+Ydsz_validate_optional_password_change 'GoodPass1' 'GoodPass1' || exit 14
 """
     subprocess.check_call(["bash", "-c", script])

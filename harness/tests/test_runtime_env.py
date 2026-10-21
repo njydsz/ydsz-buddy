@@ -22,7 +22,7 @@ def test_parse_env_text_ignores_comments() -> None:
 def test_protected_keys() -> None:
     assert is_protected_env_key("HOME")
     assert is_protected_env_key("YDSZ_HOME")
-    assert is_protected_env_key("OCTOP_DATABASE_URL")
+    assert is_protected_env_key("Ydsz_DATABASE_URL")
     assert not is_protected_env_key("TAVILY_API_KEY")
 
 

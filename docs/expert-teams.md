@@ -56,7 +56,7 @@
 | 可见 peer | 默认同用户其它专家 | 仅 `team_peers` = 团队成员 |
 | 通道 | 可绑（1:1） | 可绑（团队入口） |
 
-`team_id` = 主持人 `agent_id`。成员编制只写在主持人工作区 `.octop/manifest.json`（`kind` + `members`）。`agents.kind = team` 只作列表索引。
+`team_id` = 主持人 `agent_id`。成员编制只写在主持人工作区 `.ydsz/manifest.json`（`kind` + `members`）。`agents.kind = team` 只作列表索引。
 
 ## 数据
 
@@ -105,7 +105,7 @@ inbox 按 callee 并发：同一成员串行，不同成员并行；主持人回
 - 启动时 `init_workspace=False`，不拷贝 harness `_builtin_skills` / 内置 subagent
 - `tools_disabled` 只保留 `agent_list` / `ask_agent` / 记忆 / `current_time`（含原本不可关的文件系统与 `task`）
 - `team_peers` = 成员
-- 种子写入工作区 `SOUL.md`（主持人人格）+ `AGENTS.md`（协调/派工准则）+ `.octop/manifest.json`（`kind=team` 与 `members`）
+- 种子写入工作区 `SOUL.md`（主持人人格）+ `AGENTS.md`（协调/派工准则）+ `.ydsz/manifest.json`（`kind=team` 与 `members`）
 
 成员被派工时仍用自己的工作区。对方 `last_state` 非 running 则 harness 调用失败，主持人走失败回叫。
 
@@ -153,7 +153,7 @@ conversation_id = 主持人 thread_id
 
 ## 隐藏模板
 
-`src/octop/infra/agents/teams/template/`，不进 `GET /api/experts`。`template_name = team-host` 仅内部标记。
+`src/ydsz/infra/agents/teams/template/`，不进 `GET /api/experts`。`template_name = team-host` 仅内部标记。
 
 ## 非目标（第一版）
 

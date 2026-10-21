@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 const THEMES = {
   weibo: { emoji: "🔥", title: "微博热搜", accent: "#f97316", bg: "linear-gradient(135deg,#fff7ed,#ffedd5)" },
@@ -24,7 +24,7 @@ function HotTopics(props) {
       border: dark ? "1px solid #3f3f46" : "1px solid #fed7aa",
       boxShadow: "0 10px 28px rgba(249,115,22,.12)",
     },
-    "data-octop-plugin-ui": "hot-topics",
+    "data-Ydsz-plugin-ui": "hot-topics",
     children: [
       _jsxs("div", {
         style: {

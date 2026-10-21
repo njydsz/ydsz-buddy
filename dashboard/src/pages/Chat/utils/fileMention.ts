@@ -4,8 +4,8 @@ import { withFromWorkspace } from "../../../utils/fromWorkspace";
 export const WORKSPACE_MENTION_LIMIT = 20;
 
 const SKIP_SEGMENTS = new Set([
-  ".octop",
-  ".octop-auth",
+  ".ydsz",
+  ".ydsz-auth",
   "_builtin_skills",
   "node_modules",
   ".git",

@@ -19,7 +19,7 @@ export interface ToolCallData {
   arguments?: string;
   output?: string;
   /**
-   * Offloaded ``octop_ui`` payload. When the backend strips a large ``data``
+   * Offloaded ``YDSZ_ui`` payload. When the backend strips a large ``data``
    * field from the tool output (envelope carries ``data_ref: "artifact"``),
    * the full payload lands here — never in the model's context.
    */

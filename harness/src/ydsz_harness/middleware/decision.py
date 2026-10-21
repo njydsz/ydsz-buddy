@@ -1,4 +1,4 @@
-﻿"""Narrow skills, tools, and team members with a decision model before the chat model speaks.
+"""Narrow skills, tools, and team members with a decision model before the chat model speaks.
 
 Mounted only when :func:`ydsz_harness.decision.decision_active` is true.
 A low score, a failed request, or a user who already named a teammate leaves
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # Set while one model call is being scored, then copied onto that reply so
 # history can show the same row the live stream already showed.
 _PENDING_DECISION: ContextVar[dict[str, Any] | None] = ContextVar(
-    "octop_pending_decision",
+    "ydsz_pending_decision",
     default=None,
 )
 
@@ -124,7 +124,7 @@ def _stamp_decision(response: ModelResponse, payload: dict[str, Any] | None) -> 
     for message in result:
         if not attached and isinstance(message, AIMessage):
             extra = dict(message.additional_kwargs or {})
-            extra["octop_decision"] = payload
+            extra["ydsz_decision"] = payload
             stamped.append(message.model_copy(update={"additional_kwargs": extra}))
             attached = True
         else:
@@ -882,15 +882,15 @@ def _configurable_of(request: ModelRequest) -> dict[str, Any]:
 
 def _is_followup(request: ModelRequest) -> bool:
     """Host wrap-up after a member finishes. Not a new user question."""
-    return bool(_configurable_of(request).get("octop_decision_followup"))
+    return bool(_configurable_of(request).get("ydsz_decision_followup"))
 
 
 def _finished_member(request: ModelRequest) -> str:
-    return str(_configurable_of(request).get("octop_decision_finished_member") or "").strip()
+    return str(_configurable_of(request).get("ydsz_decision_finished_member") or "").strip()
 
 
 def _followup_task(request: ModelRequest) -> str:
-    return str(_configurable_of(request).get("octop_decision_task") or "").strip()
+    return str(_configurable_of(request).get("ydsz_decision_task") or "").strip()
 
 
 def _earlier_user_text(request: ModelRequest) -> str:

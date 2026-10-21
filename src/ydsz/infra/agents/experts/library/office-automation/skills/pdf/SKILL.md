@@ -4,7 +4,7 @@ description: 当用户需要对PDF文件进行任何操作时，请使用此技�
 license: Proprietary. LICENSE.txt has complete terms
 metadata:
   builtin_skill_version: "1.1"
-  octop:
+  Ydsz:
     emoji: "📄"
     label:
       zh: "PDF 处理"

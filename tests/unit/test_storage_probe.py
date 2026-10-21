@@ -86,7 +86,7 @@ class _FakeWrite:
 
 class _FakeRead:
     error = None
-    file_data = {"content": "octop-docker-probe"}
+    file_data = {"content": "Ydsz-docker-probe"}
 
 
 def test_docker_probe_roundtrip(monkeypatch: pytest.MonkeyPatch) -> None:

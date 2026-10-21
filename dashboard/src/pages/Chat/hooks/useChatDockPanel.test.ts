@@ -19,11 +19,11 @@ describe("useChatDockPanel tabs", () => {
     const { result } = renderHook(() => useChatDockPanel(false, "main"));
     act(() => {
       result.current.openFileAt(
-        "/home/wally/.octop/agents/main/outbound/a.txt",
+        "/home/wally/.ydsz/agents/main/outbound/a.txt",
       );
     });
     act(() => {
-      result.current.openFileAt("/.octop/agents/main/outbound/a.txt");
+      result.current.openFileAt("/.ydsz/agents/main/outbound/a.txt");
     });
     const fileId = dockFileTabId("outbound/a.txt", "main");
     expect(

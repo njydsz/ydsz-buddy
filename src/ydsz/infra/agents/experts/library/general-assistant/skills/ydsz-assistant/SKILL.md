@@ -79,12 +79,12 @@ metadata:
 
 | 去处 | 地址 | 什么时候给 |
 |------|------|------------|
-| **官网** | https://octop.cloud | 想了解产品、看介绍、找下载与社区入口 |
-| **帮助文档** | https://docs.octop.cloud/guide/ | 安装、概念、具体操作；中文默认入口 |
-| **English docs** | https://docs.octop.cloud/en/guide/ | 用户用英文提问时，用同一路径加上 `/en` 前缀 |
+| **官网** | https://Ydsz.cloud | 想了解产品、看介绍、找下载与社区入口 |
+| **帮助文档** | https://docs.Ydsz.cloud/guide/ | 安装、概念、具体操作；中文默认入口 |
+| **English docs** | https://docs.Ydsz.cloud/en/guide/ | 用户用英文提问时，用同一路径加上 `/en` 前缀 |
 | **源码** | https://github.com/TencentCloud/Ydsz Worker | 提 issue、看发行版、从源码安装 |
 
-回答时用用户的语言。英文问题给 `https://docs.octop.cloud/en/...`（把中文路径里的 `/guide/` 换成 `/en/guide/`，`/cli/`、`/api/` 同理加上 `/en` 前缀）。
+回答时用用户的语言。英文问题给 `https://docs.Ydsz.cloud/en/...`（把中文路径里的 `/guide/` 换成 `/en/guide/`，`/cli/`、`/api/` 同理加上 `/en` 前缀）。
 
 ### 按问题给文档
 
@@ -92,47 +92,47 @@ metadata:
 
 | 用户在问 | 链接 |
 |----------|------|
-| 文档首页 / 产品简介 | https://docs.octop.cloud/guide/ |
-| 安装、五分钟上手 | https://docs.octop.cloud/guide/quickstart |
-| Docker 部署 | https://docs.octop.cloud/guide/quickstart-docker |
-| 在腾讯云上使用 | https://docs.octop.cloud/guide/use-in-tencent-cloud |
-| 核心概念 | https://docs.octop.cloud/guide/concepts/overview |
-| 专家 / Agent | https://docs.octop.cloud/guide/concepts/agents |
-| 人格、MBTI | https://docs.octop.cloud/guide/concepts/experts-personas |
-| 知识库 | https://docs.octop.cloud/guide/concepts/knowledge |
-| 通道是什么 | https://docs.octop.cloud/guide/concepts/channels |
-| 连接器、MCP | https://docs.octop.cloud/guide/concepts/connectors |
-| 配置模型 / Provider | https://docs.octop.cloud/guide/guides/llm-providers |
-| 接入 IM | https://docs.octop.cloud/guide/guides/im-channels |
-| 定时任务怎么设 | https://docs.octop.cloud/guide/guides/cron-jobs |
-| ACP、IDE、编程 Agent | https://docs.octop.cloud/guide/guides/acp-ide |
-| 浏览器与终端 | https://docs.octop.cloud/guide/guides/browser-terminal |
-| 远程桌面 | https://docs.octop.cloud/guide/guides/remote-desktop |
-| 远程手机 | https://docs.octop.cloud/guide/guides/remote-phone |
-| 备份与恢复 | https://docs.octop.cloud/guide/guides/backup-restore |
-| 忘记 / 重置密码 | https://docs.octop.cloud/guide/guides/reset-password |
-| 飞牛 NAS（FnOS） | https://docs.octop.cloud/guide/guides/fnos |
-| 从 LightClaw 迁移 | https://docs.octop.cloud/guide/guides/migrate-from-lightclaw |
-| macOS 提示未签名 | https://docs.octop.cloud/guide/guides/macos-unsigned-app |
-| 配置文件 | https://docs.octop.cloud/guide/configuration/config-file |
-| 环境变量 | https://docs.octop.cloud/guide/configuration/environment-variables |
-| TLS 与系统服务 | https://docs.octop.cloud/guide/configuration/tls-service |
-| 数据目录 | https://docs.octop.cloud/guide/configuration/data-directory |
-| CLI 全文 | https://docs.octop.cloud/cli/overview |
-| HTTP / WebSocket API | https://docs.octop.cloud/api/overview |
+| 文档首页 / 产品简介 | https://docs.Ydsz.cloud/guide/ |
+| 安装、五分钟上手 | https://docs.Ydsz.cloud/guide/quickstart |
+| Docker 部署 | https://docs.Ydsz.cloud/guide/quickstart-docker |
+| 在腾讯云上使用 | https://docs.Ydsz.cloud/guide/use-in-tencent-cloud |
+| 核心概念 | https://docs.Ydsz.cloud/guide/concepts/overview |
+| 专家 / Agent | https://docs.Ydsz.cloud/guide/concepts/agents |
+| 人格、MBTI | https://docs.Ydsz.cloud/guide/concepts/experts-personas |
+| 知识库 | https://docs.Ydsz.cloud/guide/concepts/knowledge |
+| 通道是什么 | https://docs.Ydsz.cloud/guide/concepts/channels |
+| 连接器、MCP | https://docs.Ydsz.cloud/guide/concepts/connectors |
+| 配置模型 / Provider | https://docs.Ydsz.cloud/guide/guides/llm-providers |
+| 接入 IM | https://docs.Ydsz.cloud/guide/guides/im-channels |
+| 定时任务怎么设 | https://docs.Ydsz.cloud/guide/guides/cron-jobs |
+| ACP、IDE、编程 Agent | https://docs.Ydsz.cloud/guide/guides/acp-ide |
+| 浏览器与终端 | https://docs.Ydsz.cloud/guide/guides/browser-terminal |
+| 远程桌面 | https://docs.Ydsz.cloud/guide/guides/remote-desktop |
+| 远程手机 | https://docs.Ydsz.cloud/guide/guides/remote-phone |
+| 备份与恢复 | https://docs.Ydsz.cloud/guide/guides/backup-restore |
+| 忘记 / 重置密码 | https://docs.Ydsz.cloud/guide/guides/reset-password |
+| 飞牛 NAS（FnOS） | https://docs.Ydsz.cloud/guide/guides/fnos |
+| 从 LightClaw 迁移 | https://docs.Ydsz.cloud/guide/guides/migrate-from-lightclaw |
+| macOS 提示未签名 | https://docs.Ydsz.cloud/guide/guides/macos-unsigned-app |
+| 配置文件 | https://docs.Ydsz.cloud/guide/configuration/config-file |
+| 环境变量 | https://docs.Ydsz.cloud/guide/configuration/environment-variables |
+| TLS 与系统服务 | https://docs.Ydsz.cloud/guide/configuration/tls-service |
+| 数据目录 | https://docs.Ydsz.cloud/guide/configuration/data-directory |
+| CLI 全文 | https://docs.Ydsz.cloud/cli/overview |
+| HTTP / WebSocket API | https://docs.Ydsz.cloud/api/overview |
 
 ### 安装（用户还没装、或问怎么装）
 
-详细步骤以文档为准：https://docs.octop.cloud/guide/quickstart 。可以同时给出一键安装：
+详细步骤以文档为准：https://docs.Ydsz.cloud/guide/quickstart 。可以同时给出一键安装：
 
 ```bash
 # macOS / Linux
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash
+curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/Ydsz/install.sh | bash
 ```
 
 ```powershell
 # Windows PowerShell
-irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex
+irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/Ydsz/install.ps1 | iex
 ```
 
 装好后新开终端，再：
@@ -142,7 +142,7 @@ ydsz-worker init    # 创建 ~/.ydsz/、管理员账号
 ydsz-worker run     # 前台启动，浏览器打开 http://127.0.0.1:8088
 ```
 
-生产环境用 Docker 时，指向 https://docs.octop.cloud/guide/quickstart-docker ，不要凭记忆编 compose 参数。桌面客户端从 GitHub Releases 下载，说明页是官网 https://octop.cloud 。
+生产环境用 Docker 时，指向 https://docs.Ydsz.cloud/guide/quickstart-docker ，不要凭记忆编 compose 参数。桌面客户端从 GitHub Releases 下载，说明页是官网 https://Ydsz.cloud 。
 
 ### 回答规则
 
@@ -610,7 +610,7 @@ ydsz-worker plugin uninstall <plugin_id>
 ### 场景：Ydsz Worker 是什么 / 能做什么 / 求助
 
 1. 用「产品介绍与求助」里的简介和亮点直接回答，不要先要 `/status`
-2. 给官网 https://octop.cloud ；操作细节再给一条 https://docs.octop.cloud/guide/ 下的对应页面
+2. 给官网 https://Ydsz.cloud ；操作细节再给一条 https://docs.Ydsz.cloud/guide/ 下的对应页面
 3. 用户要在当前实例上动手时，再进入第零节
 
 ### 场景：换 AI 模型
@@ -657,7 +657,7 @@ ydsz-worker plugin uninstall <plugin_id>
 
 | 任务 | 推荐方式 |
 |------|----------|
-| 产品介绍、概念、安装说明 | 直接回答，并给 https://octop.cloud 或 https://docs.octop.cloud/guide/ |
+| 产品介绍、概念、安装说明 | 直接回答，并给 https://Ydsz.cloud 或 https://docs.Ydsz.cloud/guide/ |
 | 首次向导、Provider、用户 | Web 控制台或 `ydsz-worker init` / `models config` |
 | 脚本化、批量、排障 | CLI（本 skill） |
 | 环境变量 | 控制台 Environments 或编辑 `~/.ydsz/env` |

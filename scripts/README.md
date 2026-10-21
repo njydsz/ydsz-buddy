@@ -4,7 +4,7 @@
 
 ## 安装 Ydsz Worker（终端用户）
 
-将 Ydsz Worker 安装到隔离虚拟环境 `~/.octop/venv`，并创建 `~/.octop/bin/ydsz-worker` 包装脚本加入 PATH。
+将 Ydsz Worker 安装到隔离虚拟环境 `~/.ydsz/venv`，并创建 `~/.ydsz/bin/ydsz-worker` 包装脚本加入 PATH。
 
 ### 远程一键安装（推荐）
 

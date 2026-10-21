@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function SportsScores(props) {
   const theme = props.host.getToolContext().theme;
@@ -16,7 +16,7 @@ function SportsScores(props) {
       background: dark ? "#18181b" : "#fff",
       border: dark ? "1px solid #3f3f46" : "1px solid #bbf7d0",
     },
-    "data-octop-plugin-ui": "sports-scores",
+    "data-Ydsz-plugin-ui": "sports-scores",
     children: [
       _jsx("div", { style: { padding: "12px 14px", fontWeight: 800, background: dark ? "#14532d" : "#dcfce7" }, children: "⚽ 赛况" }),
       items.map((row, i) =>

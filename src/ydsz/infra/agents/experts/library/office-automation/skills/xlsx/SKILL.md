@@ -4,7 +4,7 @@ description: "当电子表格文件是主要输入或输出时使用此技能。
 license: Proprietary. LICENSE.txt has complete terms
 metadata:
   builtin_skill_version: "1.1"
-  octop:
+  Ydsz:
     emoji: "📊"
     label:
       zh: "Excel 表格"

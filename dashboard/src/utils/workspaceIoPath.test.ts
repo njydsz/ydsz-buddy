@@ -27,12 +27,12 @@ describe("workspaceIoPath", () => {
 
   it("keeps agent-home absolute as file:// for BackendWorkspace failback", () => {
     const abs =
-      "/Users/jubaoliang/.octop/agents/SBGM5Q/earth-presentation.html";
+      "/Users/jubaoliang/.ydsz/agents/SBGM5Q/earth-presentation.html";
     expect(toWorkspaceApiPath(abs)).toBe(`file://${abs}`);
     expect(toDockWorkspaceApiPath(abs)).toBe(`file://${abs}`);
     expect(
-      toDockWorkspaceApiPath("/home/wally/.octop/agents/main/generated/a.pptx"),
-    ).toBe("file:///home/wally/.octop/agents/main/generated/a.pptx");
+      toDockWorkspaceApiPath("/home/wally/.ydsz/agents/main/generated/a.pptx"),
+    ).toBe("file:///home/wally/.ydsz/agents/main/generated/a.pptx");
   });
 
   it("rewrites legacy /outbound to relative", () => {

@@ -1,4 +1,4 @@
-/** Client-side mirror of ``octop.infra.users.password.validate_password_policy``. */
+/** Client-side mirror of ``ydsz.infra.users.password.validate_password_policy``. */
 
 export const MIN_PASSWORD_LENGTH = 8;
 
@@ -14,7 +14,7 @@ const COMMON_PASSWORDS = new Set([
   "welcome1",
   "letmein1",
   "changeme1",
-  "octop123",
+  "ydsz123",
   "abc12345",
   "iloveyou1",
 ]);

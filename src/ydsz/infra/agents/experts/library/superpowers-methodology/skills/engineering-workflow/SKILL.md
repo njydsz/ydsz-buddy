@@ -2,7 +2,7 @@
 name: engineering-workflow
 description: 可靠工程工作流的执行细则——探索→计划→TDD→系统化调试→代码审查→完成前验证。供方法论教练在开发任务中逐步引导。
 metadata:
-  octop:
+  Ydsz:
     emoji: "🛠️"
     label:
       zh: "工程工作流"

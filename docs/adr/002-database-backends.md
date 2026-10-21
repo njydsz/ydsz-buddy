@@ -11,7 +11,7 @@
 
 ## Context
 
-Operators need an optional PostgreSQL control plane for compliance / externalized state, while keeping zero-friction SQLite as the default. Agent memory (ydsz-memory) already supports a postgres backend; Ydsz Worker must be able to pass it through without forking octop-*.
+Operators need an optional PostgreSQL control plane for compliance / externalized state, while keeping zero-friction SQLite as the default. Agent memory (ydsz-memory) already supports a postgres backend; Ydsz Worker must be able to pass it through without forking ydsz-*.
 
 ## Decision
 

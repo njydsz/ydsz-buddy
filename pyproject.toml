@@ -96,7 +96,13 @@ dev = [
 
 [project.scripts]
 ydsz-worker = "ydsz.cli.main:cli"
-octop = "ydsz.cli.main:cli"  # DEPRECATED: use ydsz-worker instead
+ydsz = "ydsz.cli.main:cli"  # DEPRECATED: legacy entry point alias
+
+[tool.uv.sources]
+ydsz-harness = { path = "harness", editable = true }
+ydsz-gateway = { path = "gateway", editable = true }
+ydsz-browser = { path = "browser", editable = true }
+ydsz-memory = { path = "memory", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ydsz"]

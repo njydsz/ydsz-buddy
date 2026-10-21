@@ -1,4 +1,4 @@
-﻿"""Both retry paths must distinguish generated errors from model answers."""
+"""Both retry paths must distinguish generated errors from model answers."""
 
 from __future__ import annotations
 
@@ -171,7 +171,7 @@ def test_sync_exhausted_retry_is_marked() -> None:
     middleware = ModelRetryMiddleware(max_retries=0)
     response = middleware.wrap_model_call(None, fail)  # type: ignore[arg-type]
     assert isinstance(response, ModelResponse)
-    assert response.result[0].response_metadata["octop_runtime_error"] is True
+    assert response.result[0].response_metadata["Ydsz_runtime_error"] is True
     assert "TimeoutError" in str(response.result[0].content)
 
 
@@ -184,7 +184,7 @@ async def test_async_retry_marks_only_generated_failures() -> None:
 
     response = await middleware.awrap_model_call(None, afail)  # type: ignore[arg-type]
     assert isinstance(response, ModelResponse)
-    assert response.result[0].response_metadata["octop_runtime_error"] is True
+    assert response.result[0].response_metadata["Ydsz_runtime_error"] is True
 
     success = ModelResponse(result=[AIMessage(content="401 排障经验: 刷新凭据后验证成功。")])
 
@@ -192,4 +192,4 @@ async def test_async_retry_marks_only_generated_failures() -> None:
         return success
 
     assert await middleware.awrap_model_call(None, succeed) is success  # type: ignore[arg-type]
-    assert "octop_runtime_error" not in success.result[0].response_metadata
+    assert "Ydsz_runtime_error" not in success.result[0].response_metadata

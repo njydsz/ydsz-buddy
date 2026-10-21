@@ -1,7 +1,7 @@
 id: demo-ui-card
 version: 0.1.0
 name: Demo UI Card
-description: Dual plugin — backend tool returns octop_ui JSON; frontend renders an interactive card
+description: Dual plugin — backend tool returns YDSZ_ui JSON; frontend renders an interactive card
 icon: "🃏"
 kind: tool
 entry: main.py

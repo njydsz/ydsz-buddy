@@ -467,9 +467,9 @@ def test_get_version_in_dir_does_not_use_other_installs(tmp_path: Path, has_meta
     from ydsz.infra.setup import self_update
 
     if has_metadata:
-        metadata = tmp_path / "octop-1.0.2b4.dist-info" / "METADATA"
+        metadata = tmp_path / "Ydsz-1.0.2b4.dist-info" / "METADATA"
         metadata.parent.mkdir()
-        metadata.write_text("Name: octop\nVersion: 1.0.2b4\n", encoding="utf-8")
+        metadata.write_text("Name: Ydsz\nVersion: 1.0.2b4\n", encoding="utf-8")
 
     assert self_update.get_version_in_dir(sys.executable, str(tmp_path)) is None
 
@@ -501,9 +501,9 @@ def test_target_versions_load_package_despite_stale_metadata(
 
 
 def _write_ydsz_metadata(target: Path, version: str) -> None:
-    metadata = target / f"octop-{version}.dist-info" / "METADATA"
+    metadata = target / f"Ydsz-{version}.dist-info" / "METADATA"
     metadata.parent.mkdir(parents=True)
-    metadata.write_text(f"Name: octop\nVersion: {version}\n", encoding="utf-8")
+    metadata.write_text(f"Name: Ydsz\nVersion: {version}\n", encoding="utf-8")
 
 
 def _write_ydsz_package(target: Path, version: str) -> None:
@@ -513,7 +513,7 @@ def _write_ydsz_package(target: Path, version: str) -> None:
     (package.parent / "__main__.py").write_text(
         "import sys\nfrom . import __version__\n"
         "assert sys.argv[1:] == ['--version']\n"
-        "print('octop v' + __version__)\nraise SystemExit(0)\n",
+        "print('Ydsz v' + __version__)\nraise SystemExit(0)\n",
         encoding="utf-8",
     )
 
@@ -522,7 +522,7 @@ def _write_upgrade_wheel(directory: Path, metadata: str | None = None) -> Path:
     wheel = directory / "ydsz-worker-1.0.2b5-py3-none-any.whl"
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr(
-            "ydsz-worker-1.0.2b5.dist-info/METADATA", metadata or "Name: octop\nVersion: 1.0.2b5\n"
+            "ydsz-worker-1.0.2b5.dist-info/METADATA", metadata or "Name: Ydsz\nVersion: 1.0.2b5\n"
         )
     return wheel
 
@@ -639,7 +639,7 @@ def test_application_only_checks_target_dependency_closure(
         requirement = "absent>=1; python_version < '0'"
     elif scenario == "direct-url":
         requirement = "upgrade-dep @ https://example.com/dep.whl"
-    release = f"Name: octop\nVersion: 1.0.2b5\nRequires-Dist: {requirement}\n"
+    release = f"Name: Ydsz\nVersion: 1.0.2b5\nRequires-Dist: {requirement}\n"
     metadata("ydsz", "1.0.2b4", ["old-absent-dep>=1"])
     if scenario != "missing":
         metadata(
@@ -667,10 +667,10 @@ def test_application_only_checks_target_dependency_closure(
     "metadata",
     [
         "Name: other\nVersion: 1.0.2b5\n",
-        "Name: octop\nVersion: 1.0.2b6\n",
-        "Name: octop\nVersion: broken\n",
-        "Name: octop\n",
-        "Name: octop\nVersion: 1.0.2b5\nVersion: 1.0.2b4\n",
+        "Name: Ydsz\nVersion: 1.0.2b6\n",
+        "Name: Ydsz\nVersion: broken\n",
+        "Name: Ydsz\n",
+        "Name: Ydsz\nVersion: 1.0.2b5\nVersion: 1.0.2b4\n",
     ],
 )
 def test_preflight_rejects_wrong_or_ambiguous_release(tmp_path: Path, metadata: str) -> None:
@@ -692,7 +692,7 @@ def test_preflight_rejects_unreadable_wheel(tmp_path: Path, broken: str) -> None
             pass
     else:
         with zipfile.ZipFile(wheel, "a") as archive:
-            archive.writestr("other.dist-info/METADATA", "Name: octop\nVersion: 1.0.2b5\n")
+            archive.writestr("other.dist-info/METADATA", "Name: Ydsz\nVersion: 1.0.2b5\n")
     assert not self_update._target_dependencies_satisfied(tmp_path, wheel)
 
 
@@ -726,7 +726,7 @@ def test_legacy_pip_fast_path_falls_back_and_verifies_full_install(
             calls.append(("download", timeout))
             directory = Path(cmd[cmd.index("--dest") + 1])
             downloads.append(directory)
-            release = "Name: octop\nVersion: 1.0.2b5\n"
+            release = "Name: Ydsz\nVersion: 1.0.2b5\n"
             if failure == "dependency":
                 release += "Requires-Dist: missing-upgrade-dependency>=1\n"
             _write_upgrade_wheel(directory, release)
@@ -828,7 +828,7 @@ def test_verify_green_upgrade_reads_only_target(
 
     metadata = tmp_path / "ydsz-worker-1.0.2b5.dist-info" / "METADATA"
     metadata.parent.mkdir()
-    metadata.write_text("Name: octop\nVersion: 1.0.2b5\n", encoding="utf-8")
+    metadata.write_text("Name: Ydsz\nVersion: 1.0.2b5\n", encoding="utf-8")
     _write_ydsz_package(tmp_path, "1.0.2b5")
     installed = self_update._verify_upgrade("1.0.2b4", sys.executable, [], version="1.0.2b5")
     assert installed.success
@@ -862,7 +862,7 @@ def test_pip_target_upgrade_with_stale_metadata_succeeds_without_retry(
         if "download" in cmd:
             assert kwargs["timeout"] == 90
             assert "--no-deps" in cmd and "--only-binary=:all:" in cmd
-            assert "--pre" in cmd and cmd[-1] == "octop==1.0.2b5"
+            assert "--pre" in cmd and cmd[-1] == "Ydsz==1.0.2b5"
             assert self_update.get_local_version() == "1.0.2b4"
             directory = Path(cmd[cmd.index("--dest") + 1])
             downloads.append(directory)
@@ -955,7 +955,7 @@ def test_legacy_pip_fallback_window_is_shared_across_mirrors(
             elapsed += 80
             _write_upgrade_wheel(
                 Path(cmd[cmd.index("--dest") + 1]),
-                "Name: octop\nVersion: 1.0.2b5\nRequires-Dist: missing-upgrade-dependency>=1\n",
+                "Name: Ydsz\nVersion: 1.0.2b5\nRequires-Dist: missing-upgrade-dependency>=1\n",
             )
             return 0, ""
         assert "--no-deps" not in cmd
@@ -1157,7 +1157,7 @@ def test_cold_target_install_budget_preserves_regular_timeout(
         if "download" in cmd:
             _write_upgrade_wheel(
                 Path(cmd[cmd.index("--dest") + 1]),
-                "Name: octop\nVersion: 1.0.2b5\nRequires-Dist: absent>=1\n",
+                "Name: Ydsz\nVersion: 1.0.2b5\nRequires-Dist: absent>=1\n",
             )
         return (
             (0, "")

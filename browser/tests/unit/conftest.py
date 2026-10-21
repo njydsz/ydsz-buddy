@@ -21,7 +21,7 @@ _ENV_PREFIX = "BROWSER_USE_"
 
 
 @pytest.fixture(autouse=True)
-def _isolate_octop_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def _isolate_Ydsz_env(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in [key for key in os.environ if key.startswith(_ENV_PREFIX)]:
         monkeypatch.delenv(name, raising=False)
 

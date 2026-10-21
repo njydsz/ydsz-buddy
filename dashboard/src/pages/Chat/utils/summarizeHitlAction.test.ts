@@ -99,20 +99,20 @@ describe("summarizeHitlAction", () => {
     const view = summarizeHitlAction(
       "write_file",
       {
-        file_path: "/.octop/workspaces/J7Y3TW/test.txt",
+        file_path: "/.ydsz/workspaces/J7Y3TW/test.txt",
         content: "Hello, this is a test file!\nCreated at: 2025-01-25\n",
       },
       tZh,
       "写入文件",
-      "Tool execution requires approval Tool: write_file Args: {'file_path': '/.octop/workspaces/J7Y3TW/test.txt', 'content': 'Hello, this is a test file!\\nCreated at: 2025-01-25\\n'}",
+      "Tool execution requires approval Tool: write_file Args: {'file_path': '/.ydsz/workspaces/J7Y3TW/test.txt', 'content': 'Hello, this is a test file!\\nCreated at: 2025-01-25\\n'}",
     );
 
-    expect(view.summary).toBe("写入文件 /.octop/workspaces/J7Y3TW/test.txt");
+    expect(view.summary).toBe("写入文件 /.ydsz/workspaces/J7Y3TW/test.txt");
     expect(view.summary).not.toContain("Tool execution");
     expect(view.rows).toEqual([
       {
         label: "文件路径",
-        value: "/.octop/workspaces/J7Y3TW/test.txt",
+        value: "/.ydsz/workspaces/J7Y3TW/test.txt",
         mono: true,
       },
       {

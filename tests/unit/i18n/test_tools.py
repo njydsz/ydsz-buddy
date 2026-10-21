@@ -77,5 +77,5 @@ def test_hitl_tool_catalog_bilingual_labels():
 def test_dashboard_tools_match_backend():
     repo = Path(__file__).resolve().parents[3]
     dash_en = json.loads((repo / "dashboard/src/locales/en.json").read_text(encoding="utf-8"))
-    backend_en = json.loads((repo / "src/octop/i18n/en.json").read_text(encoding="utf-8"))
+    backend_en = json.loads((repo / "src/Ydsz/i18n/en.json").read_text(encoding="utf-8"))
     assert dash_en["tools"] == backend_en["tools"]

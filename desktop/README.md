@@ -25,7 +25,7 @@ From repo root:
 make -f desktop/portable/Makefile green
 ```
 
-CI: `.github/workflows/octop-desktop.yml` builds native platform/arch variants.
+CI: `.github/workflows/ydsz-desktop.yml` builds native platform/arch variants.
 `v*` tags and `workflow_dispatch` (platforms=`all`) run all six; pull requests
 that touch `desktop/` build `darwin-*` and `windows-*` (amd64 + arm64). Each job
 first creates the green zip and then packages the matching Wails application.
@@ -69,13 +69,13 @@ cd desktop/src
 YDSZ_DESKTOP_URL=http://127.0.0.1:8088 wails3 dev
 ```
 
-Without `YDSZ_DESKTOP_URL`, first launch uses `~/.octop/portable/` if valid,
+Without `YDSZ_DESKTOP_URL`, first launch uses `~/.ydsz/portable/` if valid,
 otherwise extracts the matching zip shipped with the desktop package (embedded
 in the Windows and Linux binaries, under `Contents/Resources` on macOS). The
 Wails shell never downloads Ydsz. For local runtime debugging, set
 `YDSZ_DESKTOP_PORTABLE_ZIP=/absolute/path/ydsz-portable-<plat>-<version>.zip`.
 On later launches, a newer bundled portable version replaces the extracted
-runtime after creating a consistent SQLite backup under `~/.octop/backups/`.
+runtime after creating a consistent SQLite backup under `~/.ydsz/backups/`.
 The upgraded Ydsz Worker process then applies the normal database migrations during
 startup. Newer extracted runtimes are never downgraded; PostgreSQL remains
 externally managed and is not copied by the desktop shell.

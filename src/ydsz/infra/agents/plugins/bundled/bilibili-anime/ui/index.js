@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function cardStyle(theme) {
   const dark = theme === "dark";
@@ -46,7 +46,7 @@ function BilibiliPlayer(props) {
 
   return _jsxs("div", {
     style: cardStyle(theme),
-    "data-octop-plugin-ui": "bilibili-anime",
+    "data-Ydsz-plugin-ui": "bilibili-anime",
     children: [
       d.error
         ? _jsx("div", { style: { color: "#dc2626" }, children: String(d.error) })

@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function DailyEnglish(props) {
   const theme = props.host.getToolContext().theme;
@@ -16,7 +16,7 @@ function DailyEnglish(props) {
       color: dark ? "#dbeafe" : "#1e3a8a",
       boxShadow: "0 12px 28px rgba(37,99,235,.18)",
     },
-    "data-octop-plugin-ui": "daily-english",
+    "data-Ydsz-plugin-ui": "daily-english",
     children: [
       _jsx("div", { style: { fontSize: 12, opacity: 0.75 }, children: d.daily ? `📘 今日单词 · ${d.date || ""}` : "📘 单词" }),
       _jsx("div", { style: { fontSize: 28, fontWeight: 800, margin: "8px 0 4px" }, children: d.word || "" }),

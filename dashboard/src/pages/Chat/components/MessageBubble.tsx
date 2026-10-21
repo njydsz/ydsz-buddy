@@ -358,7 +358,7 @@ function canDockToolUi(
   registration: ToolRendererRegistration | null,
   parsed: ParsedToolOutput,
 ): boolean {
-  if (parsed.octopUi) return true;
+  if (parsed.ydszUi) return true;
   return (
     registration != null &&
     registration.id !== "default" &&
@@ -397,7 +397,7 @@ export function ToolDetailsInline({
     () => parseYdszToolOutput(toolData.output),
     [toolData.output],
   );
-  // Offloaded octop_ui payloads: explicit data wins; data_ref → artifact.
+  // Offloaded ydsz_ui payloads: explicit data wins; data_ref → artifact.
   const resolvedData = useMemo(
     () => resolvePluginUiData(parsed, toolData.artifact, toolData.output),
     [parsed, toolData.artifact, toolData.output],
@@ -527,7 +527,7 @@ export function ToolDetailsInline({
   }
 
   // Structured plugin envelope without a loaded custom renderer — still show a card.
-  if (parsed.octopUi) {
+  if (parsed.ydszUi) {
     const annotateMissingPlugin = remotePluginUiUnavailable({
       agentId,
       toolName: toolData.name,

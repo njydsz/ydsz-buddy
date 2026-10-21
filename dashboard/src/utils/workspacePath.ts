@@ -10,7 +10,7 @@ export function workspaceEntryPath(infoPath: string): string {
  * workspace file API expects.
  *
  * Harness file tools may report an on-disk absolute path such as
- * ``/home/wally/.octop/agents/main/hello.py`` (or ``/workspace/hello.py`` on a
+ * ``/home/wally/.ydsz/agents/main/hello.py`` (or ``/workspace/hello.py`` on a
  * container where the workspace dir *is* ``/workspace``). The workspace viewer
  * always passes a relative path like ``/hello.py``; collapse absolute forms to
  * the same shape so the chat file box opens them instead of 404-ing.
@@ -25,7 +25,7 @@ export function toWorkspaceRelativePath(raw: string, agentId: string): string {
     .replace(/\\/g, "/")
     .replace(/^file:\/\//i, "");
 
-  const agentMarker = `/.octop/agents/${agentId.toLowerCase()}/`;
+  const agentMarker = `/.ydsz/agents/${agentId.toLowerCase()}/`;
   const lower = p.toLowerCase();
   const idx = lower.lastIndexOf(agentMarker);
   if (idx >= 0) {

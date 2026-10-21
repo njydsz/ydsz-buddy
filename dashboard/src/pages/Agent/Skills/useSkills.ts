@@ -33,7 +33,7 @@ export interface SkillSpec {
   emoji?: string;
   /** Persisted SkillHub marketplace icon. */
   iconUrl?: string;
-  /** ``metadata.octop.label`` when the API keeps the localized map. */
+  /** ``metadata.ydsz.label`` when the API keeps the localized map. */
   label?:
     | string
     | { zh?: string; en?: string; [key: string]: string | undefined };
@@ -59,7 +59,7 @@ interface ServerSummary {
   kind?: "workspace" | "builtin" | "package";
   emoji?: string;
   icon_url?: string;
-  /** ``metadata.octop.label`` map (zh/en) when not yet folded into ``name``. */
+  /** ``metadata.ydsz.label`` map (zh/en) when not yet folded into ``name``. */
   label?:
     | string
     | { zh?: string; en?: string; [key: string]: string | undefined };

@@ -2,7 +2,7 @@
 name: exam-material-recommendation
 description: 根据医生自述的考试或岗位目标（副高、中级、规培、执业医师等）推荐学习材料、教材与学习顺序，并按目标动态调整学习内容。必须以官方考试大纲为准，不得断言考试范围或承诺通过结果，也不得输出个体诊疗内容。
 metadata:
-  octop:
+  Ydsz:
     emoji: "📚"
     label:
       zh: "备考材料推荐"

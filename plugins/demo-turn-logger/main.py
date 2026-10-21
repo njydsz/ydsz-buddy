@@ -15,7 +15,7 @@ from typing import Any
 
 from ydsz_harness.plugins import AgentMiddleware, PluginContext
 
-logger = logging.getLogger("octop.plugins.demo_turn_logger")
+logger = logging.getLogger("Ydsz.plugins.demo_turn_logger")
 
 
 def _message_count(state: Any) -> int:

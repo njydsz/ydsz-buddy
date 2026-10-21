@@ -194,7 +194,7 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
           ]}
           extra={t("wizard.database.sqlitePathHint")}
         >
-          <Input prefix={<Database size={14} />} placeholder="octop.db" />
+          <Input prefix={<Database size={14} />} placeholder="ydsz.db" />
         </Form.Item>
 
         <Button

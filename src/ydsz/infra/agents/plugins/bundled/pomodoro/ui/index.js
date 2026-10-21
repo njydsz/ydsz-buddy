@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 const { useEffect, useState } = React;
 
 function formatSec(total) {
@@ -105,7 +105,7 @@ function TimerCard(props) {
           : "linear-gradient(165deg,#1d4ed8,#2563eb 45%,#7c3aed)",
       boxShadow: "0 16px 36px rgba(234,88,12,.28)",
     },
-    "data-octop-plugin-ui": "pomodoro",
+    "data-Ydsz-plugin-ui": "pomodoro",
     children: [
       _jsx("div", { style: { fontSize: 28, lineHeight: 1 }, children: isPomo ? "🍅" : "⏳" }),
       _jsx("div", {

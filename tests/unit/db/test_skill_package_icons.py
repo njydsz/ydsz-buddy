@@ -11,7 +11,7 @@ from ydsz.infra.db.migrate import run_migrations
 from ydsz.infra.db.pool import SqlitePool
 from ydsz.infra.db.repos.skill_packages import SkillPackageRepo
 
-_MIGRATIONS = Path(__file__).resolve().parents[3] / "src/octop/infra/db/migrations"
+_MIGRATIONS = Path(__file__).resolve().parents[3] / "src/Ydsz/infra/db/migrations"
 
 _LEGACY_SKILL_PACKAGES_WITHOUT_ICONS = """
 CREATE TABLE skill_packages (

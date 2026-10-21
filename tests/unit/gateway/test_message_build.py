@@ -99,7 +99,7 @@ def test_build_harness_request_marks_auto_route() -> None:
         auto_route=True,
     )
 
-    assert req["configurable"]["octop_auto_route"] is True
+    assert req["configurable"]["Ydsz_auto_route"] is True
 
 
 @pytest.mark.asyncio

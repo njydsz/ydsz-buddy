@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 const LABEL_COLOR = { 优: "#22c55e", 良: "#84cc16", 轻度: "#eab308", 中度: "#f97316", 重度: "#ef4444" };
 
@@ -19,7 +19,7 @@ function AirQuality(props) {
       border: `2px solid ${accent}`,
       boxShadow: `0 12px 28px ${accent}33`,
     },
-    "data-octop-plugin-ui": "air-quality",
+    "data-Ydsz-plugin-ui": "air-quality",
     children: [
       _jsx("div", { style: { fontWeight: 800 }, children: d.city || "空气质量" }),
       _jsxs("div", { style: { display: "flex", alignItems: "baseline", gap: 10, marginTop: 10 }, children: [

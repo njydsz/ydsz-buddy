@@ -1,10 +1,10 @@
 # 多专家协作协议（AGENTS 指南）
 
-本文件定义主 agent 在「多专家协作编排」模式下的派发协议。它把 agency-orchestrator 的 DAG 理念落到 OCTOP 已有的子智能体委派机制上。
+本文件定义主 agent 在「多专家协作编排」模式下的派发协议。它把 agency-orchestrator 的 DAG 理念落到 Ydsz 已有的子智能体委派机制上。
 
 ## 1. 角色目录与 slug
 
-OCTOP 子智能体人格文件位于：
+Ydsz 子智能体人格文件位于：
 
 ```
 subagents/library/zh/<division>/<slug>.md

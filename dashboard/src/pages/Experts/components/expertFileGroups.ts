@@ -106,9 +106,9 @@ export function filterConfigMdFiles(entries: WorkspaceEntry[]): string[] {
       return (
         !p.startsWith("/skills/") &&
         !p.startsWith("/_builtin_skills/") &&
-        !p.startsWith("/.octop/skills/") &&
-        !p.startsWith("/.octop/_builtin_skills/") &&
-        !p.startsWith("/.octop/agents/")
+        !p.startsWith("/.ydsz/skills/") &&
+        !p.startsWith("/.ydsz/_builtin_skills/") &&
+        !p.startsWith("/.ydsz/agents/")
       );
     })
     .map((f) => (f.path.startsWith("/") ? f.path : `/${f.path}`))

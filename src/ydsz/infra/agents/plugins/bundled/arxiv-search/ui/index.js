@@ -1,4 +1,4 @@
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function ArxivSearch(props) {
   const context = props.host.getToolContext();
@@ -34,7 +34,7 @@ function ArxivSearch(props) {
       background: dark ? "#18181b" : "#fff",
       border: dark ? "1px solid #3f3f46" : "1px solid #e4e4e7",
     },
-    "data-octop-plugin-ui": "arxiv-search",
+    "data-Ydsz-plugin-ui": "arxiv-search",
     children: [
       _jsxs("div", {
         style: {

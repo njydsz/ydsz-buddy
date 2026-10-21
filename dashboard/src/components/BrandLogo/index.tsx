@@ -1,7 +1,7 @@
 /**
  * BrandLogo — 启动/登录页品牌标识：SVG 图标 + 本地化文字。
  *
- * 替代原有的 PNG 水平 logo（PNG 中烘焙了 "Octop" 文字），改为组件化渲染，
+ * 替代原有的 PNG 水平 logo（PNG 中烘焙了 "Ydsz" 文字），改为组件化渲染，
  * 品牌文字根据当前 i18n 语言环境动态切换：
  *   - zh → 云顶数字工作台
  *   - en → Ydsz Worker

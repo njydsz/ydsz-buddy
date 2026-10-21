@@ -30,9 +30,9 @@ def _shipped_langfuse_names() -> set[str]:
     return names
 
 
-def _names_read_by_octop() -> set[str]:
+def _names_read_by_Ydsz() -> set[str]:
     names: set[str] = set()
-    for path in (REPO_ROOT / "src/octop").rglob("*.py"):
+    for path in (REPO_ROOT / "src/Ydsz").rglob("*.py"):
         names.update(
             re.findall(
                 r"\b(?:getenv|environ\.get|environ\[)\(?\s*[\"']([A-Z][A-Z0-9_]{3,})[\"']",
@@ -49,7 +49,7 @@ def _sdk_env_names() -> set[str]:
 
 def test_ydsz_reads_no_langfuse_env_var() -> None:
     """Guard the premise: Ydsz Worker's switch lives in the settings table, not env."""
-    source = (REPO_ROOT / "src/octop/infra/agents/settings/langfuse.py").read_text(encoding="utf-8")
+    source = (REPO_ROOT / "src/Ydsz/infra/agents/settings/langfuse.py").read_text(encoding="utf-8")
     assert '"observability_langfuse_enabled"' in source
     assert not re.search(r"(?:getenv|environ(?:\.get)?)\(\s*[\"']YDSZ_LANGFUSE", source)
 
@@ -57,5 +57,5 @@ def test_ydsz_reads_no_langfuse_env_var() -> None:
 def test_shipped_langfuse_names_have_a_reader() -> None:
     shipped = _shipped_langfuse_names()
     assert shipped, "no Langfuse variables found in the shipped config"
-    unread = sorted(n for n in shipped if n not in _sdk_env_names() | _names_read_by_octop())
+    unread = sorted(n for n in shipped if n not in _sdk_env_names() | _names_read_by_Ydsz())
     assert not unread, f"{unread} is passed to the container but no code reads it"

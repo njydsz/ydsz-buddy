@@ -6,7 +6,7 @@ metadata:
     requires:
       bins: ["bash", "ps"]
     os: ["linux", "darwin", "windows"]
-  octop:
+  Ydsz:
     emoji: "🩺"
     label:
       zh: "CVM AI 诊断"

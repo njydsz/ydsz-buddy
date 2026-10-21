@@ -2,8 +2,8 @@
 
 > Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
-**状态：** 已实现（harness `teams/` + octop `GlobalProcessor` 作为 `TeamProcessor`）
-**范围：** `ydsz-harness`（主实现）+ `octop`（宿主适配）
+**状态：** 已实现（harness `teams/` + ydsz `GlobalProcessor` 作为 `TeamProcessor`）
+**范围：** `ydsz-harness`（主实现）+ `ydsz`（宿主适配）
 **关联：** [agent-call-agent.md](./agent-call-agent.md)、[agent-delegation.md](./agent-delegation.md)
 
 > 说明：早前实现的 `AgentMailbox`（把所有 `stream`/`call` 透明入队）将被本方案取代。

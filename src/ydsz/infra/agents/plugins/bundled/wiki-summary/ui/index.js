@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function WikiSummary(props) {
   const theme = props.host.getToolContext().theme;
@@ -15,7 +15,7 @@ function WikiSummary(props) {
       background: dark ? "#18181b" : "#fff",
       border: dark ? "1px solid #3f3f46" : "1px solid #bfdbfe",
     },
-    "data-octop-plugin-ui": "wiki-summary",
+    "data-Ydsz-plugin-ui": "wiki-summary",
     children: [
       d.thumbnail
         ? _jsx("img", { src: d.thumbnail, alt: "", style: { width: "100%", maxHeight: 160, objectFit: "cover" } })

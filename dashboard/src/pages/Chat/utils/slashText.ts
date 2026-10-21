@@ -1,5 +1,5 @@
 /**
- * Mirrors the backend guard in `src/octop/infra/gateway/slash/parser.py`: a
+ * Mirrors the backend guard in `src/ydsz/infra/gateway/slash/parser.py`: a
  * command name ends at whitespace, so a path like `/root/ddd` is plain text.
  */
 const SLASH_COMMAND_RE = /^\/(?:[a-zA-Z][\w-]*(?:\s[\s\S]*)?)?$/;

@@ -136,7 +136,7 @@ async def test_iter_turn_chunks_persists_partial_output_and_error() -> None:
     assert "partial answer" in texts
     assert any("余额" in text or "insufficient" in text.lower() for text in texts)
     assert any(
-        json.loads(item.message_json)["data"]["additional_kwargs"].get("octop_stream_error")
+        json.loads(item.message_json)["data"]["additional_kwargs"].get("Ydsz_stream_error")
         for item in appended[0]
         if "余额" in _wire_text(item) or "insufficient" in _wire_text(item).lower()
     )
@@ -159,7 +159,7 @@ async def test_terminal_error_is_saved_before_delivery_even_if_consumer_closes(e
         async for event in events:
             if (event.get("type") if isinstance(event, dict) else event.type) == "error":
                 assert len(appended) == 1
-                assert any("octop_stream_error" in item.message_json for item in appended[0])
+                assert any("Ydsz_stream_error" in item.message_json for item in appended[0])
                 break
     finally:
         await events.aclose()

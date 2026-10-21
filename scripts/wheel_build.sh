@@ -14,11 +14,11 @@ echo "[wheel_build] Building dashboard frontend..."
 (cd "$DASHBOARD_DIR" && npm run build)
 
 if [ ! -f "$DASHBOARD_DEST/index.html" ]; then
-    echo "[wheel_build] ERROR: dashboard build did not produce src/octop/dashboard/index.html" >&2
+    echo "[wheel_build] ERROR: dashboard build did not produce src/Ydsz/dashboard/index.html" >&2
     exit 1
 fi
 
-echo "[wheel_build] Dashboard ready at src/octop/dashboard/"
+echo "[wheel_build] Dashboard ready at src/Ydsz/dashboard/"
 
 echo "[wheel_build] Building wheel + sdist..."
 python3 -m pip install --quiet build

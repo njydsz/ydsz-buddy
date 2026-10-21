@@ -144,10 +144,10 @@ def configure_browser_idle_timeout(timeout_minutes: int) -> None:
 def harness_settings_for_screenshots_dir(screenshots_dir: Path) -> Any | None:
     """Build :class:`YdszSettings` when ydsz-browser is installed."""
     try:
-        from ydsz_browser.settings import OctopSettings
+        from ydsz_browser.settings import YdszSettings
     except ImportError:
         return None
-    return OctopSettings(screenshots_dir=screenshots_dir.resolve())
+    return YdszSettings(screenshots_dir=screenshots_dir.resolve())
 
 
 def legacy_harness_screenshots_dir() -> Path:

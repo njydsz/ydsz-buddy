@@ -20,7 +20,7 @@ describe("workspace file mention helpers", () => {
   });
 
   it("skips system and dependency trees", () => {
-    expect(isSkippedWorkspacePath(".octop/auth/token")).toBe(true);
+    expect(isSkippedWorkspacePath(".ydsz/auth/token")).toBe(true);
     expect(isSkippedWorkspacePath("node_modules/pkg/index.js")).toBe(true);
     expect(isSkippedWorkspacePath("docs/api.md")).toBe(false);
     expect(isSkippedWorkspacePath("inbound/shot.png")).toBe(true);
@@ -80,7 +80,7 @@ describe("workspace file mention helpers", () => {
         { path: "/docs/other.md" },
         { path: "/docs/SOUL.md" },
         { path: "/SOUL.md" },
-        { path: "/.octop/SOUL.md", is_dir: false },
+        { path: "/.ydsz/SOUL.md", is_dir: false },
         { path: "/inbound/soul.png", is_dir: false },
         { path: "/skills", is_dir: true },
       ],

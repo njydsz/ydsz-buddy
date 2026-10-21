@@ -40,7 +40,7 @@ _FILTERED_SEGMENT_KEYS = (
 )
 
 # Set by decision middleware around the model call it narrowed.
-pending_decision_saved: ContextVar[int] = ContextVar("octop_pending_decision_saved", default=0)
+pending_decision_saved: ContextVar[int] = ContextVar("ydsz_pending_decision_saved", default=0)
 
 
 # Han / kana / Hangul cost far more tokens per character than Latin text: BPE

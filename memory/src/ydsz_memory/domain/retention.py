@@ -1,4 +1,4 @@
-﻿"""Source-based retention rules shared by capture, extraction and recall.
+"""Source-based retention rules shared by capture, extraction and recall.
 
 401/timeout keywords do not identify a source: users may discuss these normally.
 Only an explicit host marker identifies synthetic output.
@@ -34,7 +34,7 @@ def is_runtime_error(event: RawEvent) -> bool:
     """Identify synthetic assistant failures without filtering user error reports."""
     if event.event_type != "assistant_message" or event.payload.get("role") == "user":
         return False
-    return event.payload.get("octop_runtime_error") is True
+    return event.payload.get("ydsz_runtime_error") is True
 
 
 def is_runtime_error_candidate(candidate: Candidate, get_raw: Callable[[str], RawEvent | None]) -> bool:

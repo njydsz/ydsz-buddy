@@ -25,11 +25,11 @@ async def client(tmp_path: Path):
     app = build_app(srv)
 
     # Outside /api so JWT middleware does not intercept.
-    @app.get("/_test/octop-500")
+    @app.get("/_test/Ydsz-500")
     async def _boom() -> None:
         raise YdszError(ErrorCode.INTERNAL_ERROR, "jwt secret missing")
 
-    @app.get("/_test/octop-401")
+    @app.get("/_test/Ydsz-401")
     async def _auth() -> None:
         raise YdszError(ErrorCode.AUTH_FAILED, "missing credentials")
 
@@ -42,7 +42,7 @@ async def client(tmp_path: Path):
 
 async def test_ydsz_error_5xx_is_logged(client: httpx.AsyncClient) -> None:
     with patch("ydsz.api.app.logger") as mock_logger:
-        r = await client.get("/_test/octop-500", headers={"Accept-Language": "zh"})
+        r = await client.get("/_test/Ydsz-500", headers={"Accept-Language": "zh"})
     assert r.status_code == 500
     assert r.json()["error"]["message"] == "服务器内部错误。"
     mock_logger.error.assert_called_once()
@@ -55,6 +55,6 @@ async def test_ydsz_error_5xx_is_logged(client: httpx.AsyncClient) -> None:
 
 async def test_ydsz_error_4xx_is_not_logged(client: httpx.AsyncClient) -> None:
     with patch("ydsz.api.app.logger") as mock_logger:
-        r = await client.get("/_test/octop-401")
+        r = await client.get("/_test/Ydsz-401")
     assert r.status_code == 401
     mock_logger.error.assert_not_called()

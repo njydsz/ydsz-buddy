@@ -10,17 +10,17 @@ import {
 describe("parseYdszToolOutput object input", () => {
   it("accepts already-parsed envelope objects", () => {
     const parsed = parseYdszToolOutput({
-      octop_ui: { renderer: "demo_card", version: 1 },
+      ydsz_ui: { renderer: "demo_card", version: 1 },
       data: { title: "Hello", count: 1 },
       text: "Hello",
     });
-    expect(parsed.octopUi?.renderer).toBe("demo_card");
+    expect(parsed.ydszUi?.renderer).toBe("demo_card");
     expect(parsed.data).toEqual({ title: "Hello", count: 1 });
   });
 });
 
 describe("isPinnedToolUiMessage", () => {
-  it("pins messages whose output has octop_ui", () => {
+  it("pins messages whose output has ydsz_ui", () => {
     const msg = {
       id: "1",
       role: "assistant",
@@ -29,7 +29,7 @@ describe("isPinnedToolUiMessage", () => {
       toolData: {
         name: "demo_ui_card",
         output: JSON.stringify({
-          octop_ui: { renderer: "demo_card" },
+          ydsz_ui: { renderer: "demo_card" },
           data: { title: "T", count: 1 },
         }),
       },
@@ -57,7 +57,7 @@ describe("isPinnedToolUiMessage", () => {
       toolData: {
         name: "get_hot_topics",
         output: JSON.stringify({
-          octop_ui: { renderer: "hot_topics_list" },
+          ydsz_ui: { renderer: "hot_topics_list" },
           data: { source: "weibo", items: [], error: "403 Forbidden" },
         }),
       },
@@ -76,7 +76,7 @@ describe("partitionPinnedTools + process summary counts", () => {
       toolData: {
         name: "get_server_status",
         output: JSON.stringify({
-          octop_ui: { renderer: "server_status_card" },
+          ydsz_ui: { renderer: "server_status_card" },
           data: { ok: true },
         }),
       },

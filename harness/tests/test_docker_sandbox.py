@@ -1,4 +1,4 @@
-﻿"""Tests for the Docker sandbox backend (mocked docker SDK — no daemon required)."""
+"""Tests for the Docker sandbox backend (mocked docker SDK — no daemon required)."""
 
 from __future__ import annotations
 
@@ -655,15 +655,15 @@ class TestSandboxNaming:
 
         assert resolve_sandbox_name(agent_id="ZE6GR2") == "sandbox_agent_ZE6GR2"
 
-    def test_resolve_agent_octop_prefix(self) -> None:
+    def test_resolve_agent_Ydsz_prefix(self) -> None:
         from ydsz_harness.backends.docker_sandbox import resolve_sandbox_name
 
         assert (
             resolve_sandbox_name(
-                sandbox_prefix="octop_sandbox",
+                sandbox_prefix="Ydsz_sandbox",
                 agent_id="ZE6GR2",
             )
-            == "octop_sandbox_agent_ZE6GR2"
+            == "Ydsz_sandbox_agent_ZE6GR2"
         )
 
     def test_resolve_user_scope(self) -> None:
@@ -672,10 +672,10 @@ class TestSandboxNaming:
         assert (
             resolve_sandbox_name(
                 sandbox_scope="user",
-                sandbox_prefix="octop_sandbox",
+                sandbox_prefix="Ydsz_sandbox",
                 username="alice",
             )
-            == "octop_sandbox_alice"
+            == "Ydsz_sandbox_alice"
         )
 
     def test_resolve_fixed_scope(self) -> None:
@@ -712,10 +712,10 @@ class TestSandboxNaming:
         sandbox = DockerSandbox(
             workspace_dir=tmp_path,
             sandbox_scope="user",
-            sandbox_prefix="octop_sandbox",
+            sandbox_prefix="Ydsz_sandbox",
             username="bob",
         )
-        assert client.containers.run.call_args.kwargs["name"] == "octop_sandbox_bob"
+        assert client.containers.run.call_args.kwargs["name"] == "Ydsz_sandbox_bob"
         assert sandbox.previewable is False
         sandbox.close()
 

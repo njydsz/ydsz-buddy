@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function UnitConvert(props) {
   const d = props.data && typeof props.data === "object" ? props.data : {};
@@ -13,7 +13,7 @@ function UnitConvert(props) {
       background: "linear-gradient(135deg,#eef2ff,#e0e7ff)",
       fontWeight: 600,
     },
-    "data-octop-plugin-ui": "unit-convert",
+    "data-Ydsz-plugin-ui": "unit-convert",
     children: [
       _jsxs("div", { style: { fontSize: 22, fontWeight: 800 }, children: [d.value, " ", d.from_unit] }),
       _jsx("div", { style: { margin: "8px 0", opacity: 0.5 }, children: "↓" }),

@@ -3,10 +3,10 @@
 [English](./README.md)
 
 本目录提供插件 demo，对应 Ydsz Worker / ydsz-harness 支持的 `kind`，以及**前后端一体**的 UI 渲染示例。
-结构参考 [octop-toolkit](https://github.com/veenyi/octop-plugins/tree/main/octop-toolkit)。
+结构参考 [Ydsz-toolkit](https://github.com/veenyi/Ydsz-plugins/tree/main/Ydsz-toolkit)。
 
-随 Ydsz Worker 安装包一并分发的产品插件在 `src/octop/infra/agents/plugins/bundled/`。
-`ydsz-worker init` 与 `ydsz-worker run` 启动时会把缺失的插件复制到 `~/.octop/plugins/`，并在 `config.json` 里写成 **全局关闭**；管理员在 Dashboard 插件页打开后再给 Agent 用。卸载过的 id 不会自动装回。
+随 Ydsz Worker 安装包一并分发的产品插件在 `src/Ydsz/infra/agents/plugins/bundled/`。
+`ydsz-worker init` 与 `ydsz-worker run` 启动时会把缺失的插件复制到 `~/.Ydsz/plugins/`，并在 `config.json` 里写成 **全局关闭**；管理员在 Dashboard 插件页打开后再给 Agent 用。卸载过的 id 不会自动装回。
 
 ## 示例一览
 
@@ -15,7 +15,7 @@
 | [`demo-toolkit`](./demo-toolkit/) | `tool` | 注册可调用工具（时间、文本统计、可配置前缀回显） |
 | [`demo-greeting-skill`](./demo-greeting-skill/) | `skill` | 向 Agent 工作区同步一份示例 Skill |
 | [`demo-turn-logger`](./demo-turn-logger/) | `hook` | 注册 `AgentMiddleware`，在模型调用前后打日志 |
-| [`demo-ui-card`](./demo-ui-card/) | `tool` + `ui/` | 后端返回 `octop_ui` JSON；前端在聊天页渲染可交互卡片 |
+| [`demo-ui-card`](./demo-ui-card/) | `tool` + `ui/` | 后端返回 `Ydsz_ui` JSON；前端在聊天页渲染可交互卡片 |
 
 ## 目录约定
 
@@ -55,7 +55,7 @@ ui:
 
 ```json
 {
-  "octop_ui": { "renderer": "demo_card", "version": 1 },
+  "Ydsz_ui": { "renderer": "demo_card", "version": 1 },
   "data": { "title": "…", "count": 1 },
   "text": "纯文本回退"
 }
@@ -64,17 +64,17 @@ ui:
 Dashboard 通过 `GET /api/plugins/{id}/ui/…` 加载 `index.js`，调用 `setup(host)` 注册渲染器。
 `host.patchResult(callId, data)` 可在不重跑 LLM 的情况下刷新气泡（L2）；流式仍走 SSE 整段替换 `output`（L1）。
 
-插件 ESM 为自包含文件；React 由 Dashboard 注入 `window.__OCTOP_REACT__` / `__OCTOP_JSX__`。
+插件 ESM 为自包含文件；React 由 Dashboard 注入 `window.__Ydsz_REACT__` / `__Ydsz_JSX__`。
 
 ## 本地安装
 
 ```bash
 # 从目录安装（开发时常用）
-octop plugin install ./plugins/demo-toolkit --force
-octop plugin install ./plugins/demo-greeting-skill --force
-octop plugin install ./plugins/demo-turn-logger --force
-octop plugin install ./plugins/demo-ui-card --force
-octop plugin list
+Ydsz plugin install ./plugins/demo-toolkit --force
+Ydsz plugin install ./plugins/demo-greeting-skill --force
+Ydsz plugin install ./plugins/demo-turn-logger --force
+Ydsz plugin install ./plugins/demo-ui-card --force
+Ydsz plugin list
 ```
 
 或先打包再安装：
@@ -82,7 +82,7 @@ octop plugin list
 ```bash
 cd plugins
 zip -r demo-ui-card.zip demo-ui-card/
-octop plugin install ./demo-ui-card.zip --force
+Ydsz plugin install ./demo-ui-card.zip --force
 ```
 
 **Dashboard：** Admin → Plugins → 安装。请粘贴 ZIP 的 **直接下载地址**

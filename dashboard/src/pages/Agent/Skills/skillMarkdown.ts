@@ -22,7 +22,7 @@ export function parseSkillPreviewFromMarkdown(
   let emoji = DEFAULT_SKILL_EMOJI;
   const emojiMatch =
     fm.match(/ydsz:\s*\n\s*emoji:\s*(.+)/) ??
-    fm.match(/octop:\s*\n\s*emoji:\s*(.+)/);
+    fm.match(/ydsz:\s*\n\s*emoji:\s*(.+)/);
   if (emojiMatch?.[1]) {
     const value = emojiMatch[1].trim().replace(/^["']|["']$/g, "");
     if (value) emoji = value;

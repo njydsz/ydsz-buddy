@@ -57,11 +57,11 @@ const PRESENTATION_META_KEYS = new Set([
   YDSZ_SUMMARY_ZH_META_KEY,
   YDSZ_SUMMARY_EN_META_KEY,
 ]);
-const LEGACY_EMOJI_META_KEY = "octop.emoji";
-const LEGACY_LABEL_ZH_META_KEY = "octop.label.zh";
-const LEGACY_LABEL_EN_META_KEY = "octop.label.en";
-const LEGACY_SUMMARY_ZH_META_KEY = "octop.summary.zh";
-const LEGACY_SUMMARY_EN_META_KEY = "octop.summary.en";
+const LEGACY_EMOJI_META_KEY = "ydsz.emoji";
+const LEGACY_LABEL_ZH_META_KEY = "ydsz.label.zh";
+const LEGACY_LABEL_EN_META_KEY = "ydsz.label.en";
+const LEGACY_SUMMARY_ZH_META_KEY = "ydsz.summary.zh";
+const LEGACY_SUMMARY_EN_META_KEY = "ydsz.summary.en";
 const ALL_PRESENTATION_META_KEYS = new Set([
   ...PRESENTATION_META_KEYS,
   LEGACY_LABEL_ZH_META_KEY,

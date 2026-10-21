@@ -214,7 +214,7 @@ def test_parse_html_json_and_plain_variants(tmp_path: Path) -> None:
     rst = tmp_path / "notes.rst"
     rst.write_text("Heading\n=======\n\nbody", encoding="utf-8")
     yaml_path = tmp_path / "config.yaml"
-    yaml_path.write_text("name: octop\n", encoding="utf-8")
+    yaml_path.write_text("name: Ydsz\n", encoding="utf-8")
     json_path = tmp_path / "data.json"
     json_path.write_text('{"name":"ydsz","ok":true}', encoding="utf-8")
     jsonl = tmp_path / "rows.jsonl"
@@ -223,7 +223,7 @@ def test_parse_html_json_and_plain_variants(tmp_path: Path) -> None:
     assert parse_document(html) == "Title\nHello world"
     assert parse_document(markdown) == "# Heading\n\nbody"
     assert parse_document(rst) == "Heading\n=======\n\nbody"
-    assert parse_document(yaml_path) == "name: octop\n"
+    assert parse_document(yaml_path) == "name: Ydsz\n"
     assert parse_document(json_path) == '{\n  "name": "ydsz",\n  "ok": true\n}'
     assert parse_document(jsonl) == '{"a":1}\n{"b":2}\n'
 

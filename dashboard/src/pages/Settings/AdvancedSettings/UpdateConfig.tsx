@@ -27,8 +27,8 @@ import styles from "./UpdateConfig.module.less";
 
 /** Shell snippets shown in the manual upgrade guide (commands are locale-agnostic). */
 const UPGRADE_GUIDE_CODE = {
-  installerUnix: `curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash`,
-  installerWin: `irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex`,
+  installerUnix: `curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/ydsz/install.sh | bash`,
+  installerWin: `irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/ydsz/install.ps1 | iex`,
   cli: `ydsz-worker update
 # or non-interactive:
 ydsz-worker update --yes
@@ -51,7 +51,7 @@ bash docker/docker_build.sh
 docker run -d \\
   --name ydsz-worker \\
   -p 8088:8088 \\
-  -v ydsz-data:/data/.octop \\
+  -v ydsz-data:/data/.ydsz \\
   -e HOME=/data \\
   ydsz-worker:latest`,
   restart: `# system service (systemd / launchd / Windows service)

@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function MovieSearch(props) {
   const theme = props.host.getToolContext().theme;
@@ -17,7 +17,7 @@ function MovieSearch(props) {
       border: dark ? "1px solid #3f3f46" : "1px solid #fecdd3",
       boxShadow: "0 10px 28px rgba(225,29,72,.12)",
     },
-    "data-octop-plugin-ui": "movie-search",
+    "data-Ydsz-plugin-ui": "movie-search",
     children: [
       _jsxs("div", { style: { fontWeight: 800, marginBottom: 10 }, children: ["🎬 ", d.query || "搜索"] }),
       items.map((row, i) =>

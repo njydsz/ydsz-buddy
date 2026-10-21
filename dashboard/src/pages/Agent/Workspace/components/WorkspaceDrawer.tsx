@@ -123,8 +123,8 @@ function isProtectedPath(path: string): boolean {
   return (
     path === "/_builtin_skills" ||
     path.startsWith("/_builtin_skills/") ||
-    path === "/.octop/_builtin_skills" ||
-    path.startsWith("/.octop/_builtin_skills/")
+    path === "/.ydsz/_builtin_skills" ||
+    path.startsWith("/.ydsz/_builtin_skills/")
   );
 }
 

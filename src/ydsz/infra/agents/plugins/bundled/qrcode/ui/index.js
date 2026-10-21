@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function QrCard(props) {
   const theme = props.host.getToolContext().theme;
@@ -17,7 +17,7 @@ function QrCard(props) {
       boxShadow: "0 12px 28px rgba(15,23,42,.12)",
       border: dark ? "1px solid #27272a" : "1px solid #e2e8f0",
     },
-    "data-octop-plugin-ui": "qrcode",
+    "data-Ydsz-plugin-ui": "qrcode",
     children: [
       _jsx("div", { style: { fontWeight: 800, marginBottom: 10 }, children: "🔳 二维码" }),
       _jsx("img", {

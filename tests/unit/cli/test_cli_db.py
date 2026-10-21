@@ -132,7 +132,7 @@ def test_models_active_explains_an_unset_default(fake_home: Path) -> None:
     assert unset.exit_code == 0, unset.output
     assert unset.output.strip() != "/"
     assert "No global default model is set" in unset.output
-    assert "octop models active --provider" in unset.output
+    assert "Ydsz models active --provider" in unset.output
 
     runner.invoke(cli, ["models", "active", "--provider", "acme", "--model", "small"])
     shown = runner.invoke(cli, ["models", "active"])

@@ -2,7 +2,7 @@
 name: akshare-data
 description: 使用 akshare-cli 获取中国及全球金融市场数据（1090+ 个函数）。覆盖股票、基金、期货、债券、外汇、宏观经济、指数、期权、新闻等全领域。当用户需要以下任何一种数据时触发此 skill：股票行情、历史K线、实时报价、涨停跌停池、龙虎榜、板块资金流向、基金/ETF净值、期货行情、债券/可转债、外汇汇率、宏观经济指标（GDP/CPI/PMI）、指数数据、期权数据、财经新闻。关键词触发：akshare、股票、行情、K线、基金、期货、外汇、宏观、国债、可转债、涨停、龙虎榜、板块、资金流向、stock data、market data、financial data、A股、港股、美股。即使用户只是随口提到"看看某个股票"或"最近市场怎么样"，也应触发。
 metadata:
-  octop:
+  Ydsz:
     emoji: "📈"
     label:
       zh: "金融行情"

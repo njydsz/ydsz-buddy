@@ -16,5 +16,5 @@ class ModelRetryMiddleware(BaseModelRetryMiddleware):
     @staticmethod
     def _format_failure_message(exc: Exception, attempts_made: int) -> AIMessage:
         message = BaseModelRetryMiddleware._format_failure_message(exc, attempts_made)
-        message.response_metadata["octop_runtime_error"] = True
+        message.response_metadata["ydsz_runtime_error"] = True
         return message

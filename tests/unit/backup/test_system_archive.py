@@ -29,25 +29,25 @@ def layout(tmp_path: Path) -> PathLayout:
 def test_manifest_roundtrip_includes_driver_fields() -> None:
     m = BackupManifest(
         manifest_version=1,
-        octop_version="0.0.0",
+        Ydsz_version="0.0.0",
         schema_version=1,
         created_at="t",
         home="/tmp",
-        db_file="db/octop.dump",
+        db_file="db/Ydsz.dump",
         database_driver="postgresql",
         database_dump_format="pg_custom",
     )
     loaded = BackupManifest.load_text(m.to_json())
     assert loaded.database_driver == "postgresql"
     assert loaded.database_dump_format == "pg_custom"
-    assert loaded.db_file == "db/octop.dump"
+    assert loaded.db_file == "db/Ydsz.dump"
 
 
 def test_legacy_manifest_defaults_plugins_omitted() -> None:
     loaded = BackupManifest.from_dict(
         {
             "manifest_version": 1,
-            "octop_version": "0.0.0",
+            "Ydsz_version": "0.0.0",
             "schema_version": 1,
             "created_at": "t",
             "home": "/tmp",
@@ -909,7 +909,7 @@ def _make_migration_backup(
         dest=dest,
         include_chats=True,
     )
-    # Rewrite octop_version to signal a LightClaw migration backup.
+    # Rewrite Ydsz_version to signal a LightClaw migration backup.
     members: dict[str, bytes] = {}
     with tarfile.open(dest, mode="r:gz") as tf:
         for m in tf.getmembers():
@@ -918,7 +918,7 @@ def _make_migration_backup(
                 assert f is not None
                 members[m.name] = f.read()
     manifest_obj = json.loads(members["manifest.json"])
-    manifest_obj["octop_version"] = manifest_obj["octop_version"] + "-migrated-from-lightclaw"
+    manifest_obj["Ydsz_version"] = manifest_obj["Ydsz_version"] + "-migrated-from-lightclaw"
     members["manifest.json"] = json.dumps(manifest_obj).encode()
     with tarfile.open(dest, mode="w:gz") as tf:
         for name, blob in members.items():
@@ -940,7 +940,7 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
 
     After restore the expected state is:
     - agents from the backup (``agent-lc``) are present.
-    - users table contains only the *current instance* users (``octop_admin``).
+    - users table contains only the *current instance* users (``YDSZ_ADMIN``).
     - the LightClaw user (``lc_user``) is gone — replaced by the current users.
     - JWT secret from the *current* instance is kept (session continuity).
     """
@@ -956,11 +956,11 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
     tgt_layout.root.mkdir()
     tgt_pool = SqlitePool(tgt_layout.db)
     run_migrations(tgt_pool)
-    local_jwt = b"local-octop-jwt-secret-must-survive-restore!!"
+    local_jwt = b"local-Ydsz-jwt-secret-must-survive-restore!!"
     with tgt_pool.connect() as conn:
         conn.execute(
             "INSERT INTO users(username, password_hash, role, created_at) VALUES (?, ?, ?, ?)",
-            ("octop_admin", "admin_hash", "admin", 2),
+            ("YDSZ_ADMIN", "admin_hash", "admin", 2),
         )
         conn.execute(
             "INSERT INTO secrets(k, v, created_at) VALUES (?, ?, ?)",
@@ -981,9 +981,9 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
     with tgt_pool.connect() as conn:
         # The target instance's admin must survive with original password hash.
         row = conn.execute(
-            "SELECT password_hash FROM users WHERE username = ?", ("octop_admin",)
+            "SELECT password_hash FROM users WHERE username = ?", ("YDSZ_ADMIN",)
         ).fetchone()
-        assert row is not None, "octop_admin was deleted — users not preserved"
+        assert row is not None, "YDSZ_ADMIN was deleted — users not preserved"
         assert row[0] == "admin_hash"
 
         # JWT secret from the current instance must survive (not the foreign backup's).
@@ -1000,7 +1000,7 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
             "agent-lc was deleted — upsert strategy triggered CASCADE on agents"
         )
         admin_id = conn.execute(
-            "SELECT id FROM users WHERE username = ?", ("octop_admin",)
+            "SELECT id FROM users WHERE username = ?", ("YDSZ_ADMIN",)
         ).fetchone()[0]
         assert agent_row[1] == admin_id
 
@@ -1028,7 +1028,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
         conn.execute(
             "INSERT INTO users(id, username, password_hash, role, created_at)"
             " VALUES (2, ?, ?, ?, ?)",
-            ("octop_admin", "admin_hash", "admin", 2),
+            ("YDSZ_ADMIN", "admin_hash", "admin", 2),
         )
 
     result = restore_system_backup(
@@ -1045,7 +1045,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
 
     with tgt_pool.connect() as conn:
         users = conn.execute("SELECT id, username FROM users ORDER BY id").fetchall()
-        assert [(r[0], r[1]) for r in users] == [(2, "octop_admin")]
+        assert [(r[0], r[1]) for r in users] == [(2, "YDSZ_ADMIN")]
 
         agent = conn.execute(
             "SELECT user_id FROM agents WHERE agent_id = ?", ("agent-lc",)
@@ -1088,7 +1088,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
 
 
 def test_migration_restore_via_none_autodetect(tmp_path: Path) -> None:
-    """preserve_users=None auto-detects the migration flag from octop_version."""
+    """preserve_users=None auto-detects the migration flag from Ydsz_version."""
     src_layout = PathLayout(tmp_path / "src")
     src_layout.root.mkdir()
     migration_archive = tmp_path / "migration-auto.tar.gz"
@@ -1133,7 +1133,7 @@ def test_restore_repairs_old_physical_schema_with_current_watermark(tmp_path: Pa
         conn.executescript(
             (
                 Path(__file__).resolve().parents[3]
-                / "src/octop/infra/db/migrations/001_initial.sql"
+                / "src/Ydsz/infra/db/migrations/001_initial.sql"
             ).read_text()
         )
         conn.execute("UPDATE _schema_version SET version = 13")

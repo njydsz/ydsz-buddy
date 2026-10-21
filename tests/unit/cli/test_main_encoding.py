@@ -38,7 +38,7 @@ def test_init_completes_with_gbk_stdout(tmp_path: Path) -> None:
     """``ydsz-worker init`` still bootstraps when stdout is forced to GBK. The crash
     previously happened at the final success message, after the DB and admin
     user were already created."""
-    home = tmp_path / "octop-home"
+    home = tmp_path / "Ydsz-home"
     env = dict(os.environ)
     env["YDSZ_HOME"] = str(home)
     env["PYTHONIOENCODING"] = "gbk"

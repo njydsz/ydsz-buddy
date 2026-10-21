@@ -79,7 +79,7 @@ function pathFromStructuredArgs(raw: unknown): string {
  */
 function pathFromText(text: string): string {
   if (!text) return "";
-  // Prefer full absolute path ending at ``/.octop/agents/…`` (keep ``/home/…``).
+  // Prefer full absolute path ending at ``/.ydsz/agents/…`` (keep ``/home/…``).
   const absMatch = text.match(/(?:\/[\w.-]+)*\/.ydsz\/agents\/[^\s"'<>]+/i);
   if (absMatch) return absMatch[0];
   const outbound = text.match(

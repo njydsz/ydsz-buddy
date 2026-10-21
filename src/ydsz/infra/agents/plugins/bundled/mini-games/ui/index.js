@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function MiniGameCard(props) {
   const theme = props.host.getToolContext().theme;
@@ -19,7 +19,7 @@ function MiniGameCard(props) {
         boxShadow: "0 12px 28px rgba(37,99,235,.12)",
         border: `2px solid ${tone}`,
       },
-      "data-octop-plugin-ui": "mini-games",
+      "data-Ydsz-plugin-ui": "mini-games",
       children: [
         _jsx("div", { style: { fontSize: 22 }, children: "🎯" }),
         _jsx("div", { style: { fontWeight: 800, marginTop: 4 }, children: "猜数字" }),
@@ -48,7 +48,7 @@ function MiniGameCard(props) {
       background: dark ? "#18181b" : "#fff7ed",
       boxShadow: "0 12px 28px rgba(234,88,12,.12)",
     },
-    "data-octop-plugin-ui": "mini-games",
+    "data-Ydsz-plugin-ui": "mini-games",
     children: [
       _jsx("div", { style: { fontWeight: 800, marginBottom: 10 }, children: "⭕ 井字棋" }),
       _jsx("div", {

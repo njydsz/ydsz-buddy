@@ -914,7 +914,7 @@ def _run_fpk_upgrade(
     安装到该打包目录本身，重启服务后即加载新版，升级真正生效。
 
     与普通部署不同，FPK 首次在线升级需要从零解析并下载完整依赖树
-    （octop 依赖 ydsz-harness 等大包），故安装超时显著放宽；先并行探测
+    （Ydsz 依赖 ydsz-harness 等大包），故安装超时显著放宽；先并行探测
     simple index，缺版本/不可达的镜像直接跳过，最后以 pypi.org 兜底。
     """
     if not os.path.isdir(site_packages):

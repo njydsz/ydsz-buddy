@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 const TITLES = { forex: "💱 汇率", crypto: "🪙 加密货币", cn_stock: "📈 A股" };
 
@@ -28,7 +28,7 @@ function QuotesCard(props) {
       border: dark ? "1px solid #27272a" : "1px solid #e2e8f0",
       boxShadow: "0 10px 24px rgba(15,23,42,.08)",
     },
-    "data-octop-plugin-ui": "market-quotes",
+    "data-Ydsz-plugin-ui": "market-quotes",
     children: [
       _jsx("div", {
         style: {

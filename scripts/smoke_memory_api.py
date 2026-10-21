@@ -39,8 +39,8 @@ class _StubServer:
 
 
 def _build_app() -> FastAPI:
-    octop_home = Path.home() / ".octop"
-    server = _StubServer(_StubServices(_StubPaths(octop_home / "agents")))
+    Ydsz_home = Path.home() / ".Ydsz"
+    server = _StubServer(_StubServices(_StubPaths(Ydsz_home / "agents")))
 
     app = FastAPI()
     app.include_router(memory.router, prefix="/api")
@@ -52,7 +52,7 @@ def _build_app() -> FastAPI:
     from ydsz.infra.errors import YdszError
 
     @app.exception_handler(YdszError)
-    async def _octop_error_handler(_req: Request, exc: YdszError):
+    async def _Ydsz_error_handler(_req: Request, exc: YdszError):
         return JSONResponse(status_code=exc.status, content=exc.to_envelope())
 
     # Override the router's auth + server deps with no-op stubs.

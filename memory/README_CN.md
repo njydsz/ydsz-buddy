@@ -196,7 +196,7 @@ Candidate 是候选，不代表每条都要人工审批。promotion 会按价值
 
 prompt 召回默认路由 `atom`、`raw`；解析到 entity 时加入 `page_headline`，配置 vector index 后加入 `vector`。默认 raw fallback 策略在命中已提炼记忆时排除 raw；传入当前 session/thread 时排除本会话原始事件。
 
-系统生成的运行报错不自动进入长期记忆，也不通过历史 raw 兜底召回。ydsz-harness / Ydsz 将模型异常保留为 checkpoint 失败任务，由宿主单独显示错误；团队自动失败通知排除采集。仍生成合成报错的宿主必须使用 `payload.octop_runtime_error=true` 标记；在线链路只按结构化来源排除，不判断“记住”“已验证”等文字。Agent 自行决定调用 `memory_save`，手工保存与人工批准由来源记录保护。后台采集保留原长度策略，不再有记忆意图关键词例外；主动保存不受此长度限制。原始诊断证据仍可按 ID 检查。`operations.retention.audit_runtime_errors(memory)` 默认仅预览，显式 `apply=True` 也仅软停用全部证据均有错误标记的自动 Atom。旧版固定报错格式只生成 `review_atom_ids` / `review_candidate_ids` 审核清单；证据缺失或混合来源也保留待审，不自动改变这些记录的状态。
+系统生成的运行报错不自动进入长期记忆，也不通过历史 raw 兜底召回。ydsz-harness / Ydsz 将模型异常保留为 checkpoint 失败任务，由宿主单独显示错误；团队自动失败通知排除采集。仍生成合成报错的宿主必须使用 `payload.Ydsz_runtime_error=true` 标记；在线链路只按结构化来源排除，不判断“记住”“已验证”等文字。Agent 自行决定调用 `memory_save`，手工保存与人工批准由来源记录保护。后台采集保留原长度策略，不再有记忆意图关键词例外；主动保存不受此长度限制。原始诊断证据仍可按 ID 检查。`operations.retention.audit_runtime_errors(memory)` 默认仅预览，显式 `apply=True` 也仅软停用全部证据均有错误标记的自动 Atom。旧版固定报错格式只生成 `review_atom_ids` / `review_candidate_ids` 审核清单；证据缺失或混合来源也保留待审，不自动改变这些记录的状态。
 
 手动文档治理使用 `MemoryService.reconcile_manual_documents({"USER.md": text, "MEMORY.md": text})`，Bridge 对应 `reconcile_manual_documents` / `manual_document_review_status`。手动文档优先：明确冲突的旧 Atom 软停用，文档中的替代事实转为待审核 Candidate，保留旧来源和 Journal；采纳才更新为确定事实。重复 Atom 保留，`recall(..., manual_context=实际会话快照)` 避免重复注入。宿主可传 `manual_documents_provider` 在 save/自动晋升后检查当前文件，不刷新聊天快照。每次最多核对 100 条新事实、文档总长最多 100,000 字符；partial 可继续，模型不可用、不确定或证据无效会明确报告，不擅自停用。完整文档只存对账元数据，不导入 Atom 或索引。规则见 ADR-042。
 

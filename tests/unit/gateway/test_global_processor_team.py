@@ -479,10 +479,10 @@ async def test_wrapup_request_marks_decision_followup() -> None:
     await inbox._synthesize_reply(msg, "成员正文", None)
     req = seen["req"]
     configurable = getattr(req, "configurable", None)
-    assert configurable["octop_decision_followup"] is True
+    assert configurable["Ydsz_decision_followup"] is True
     assert configurable["peer_invoke_mode"] == "async"
-    assert configurable["octop_decision_finished_member"] == "agent-research"
-    assert configurable["octop_decision_task"] == "查资料"
+    assert configurable["Ydsz_decision_finished_member"] == "agent-research"
+    assert configurable["Ydsz_decision_task"] == "查资料"
     assert seen["room"] == "room-1"
     assert seen["speaker"] == "host"
 
@@ -2085,7 +2085,7 @@ async def test_on_reply_failed_releases_job(processor_env: dict) -> None:
     assert not any(frame.get("type") == "token" for frame in frames)
     assert frames[-1]["type"] == "done"
     inputs = processor._thread_message_repo.append_if_ready.call_args.args[1]
-    assert json.loads(inputs[0].message_json)["data"]["additional_kwargs"]["octop_stream_error"]
+    assert json.loads(inputs[0].message_json)["data"]["additional_kwargs"]["Ydsz_stream_error"]
 
 
 @pytest.mark.asyncio
@@ -2112,7 +2112,7 @@ async def test_failed_host_wrapup_is_excluded_from_memory() -> None:
     request = stream.call_args.args[0]
     assert request.to_runnable_config()["configurable"]["ydsz_memory_capture_exclude"] is True
     configurable = request.to_runnable_config()["configurable"]
-    assert configurable["octop_decision_followup"] is True
+    assert configurable["Ydsz_decision_followup"] is True
     assert configurable["peer_invoke_mode"] == "async"
 
 

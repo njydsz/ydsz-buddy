@@ -25,7 +25,7 @@ metadata:
         "lighthouse-app-deploy"
       ]
     },
-    "octop": {
+    "Ydsz": {
       "emoji": "☁️",
       "label": { "zh": "腾讯云基础设施", "en": "Tencent Cloud Infra" },
       "summary": {

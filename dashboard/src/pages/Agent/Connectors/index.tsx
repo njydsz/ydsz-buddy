@@ -819,7 +819,7 @@ function ConnectorConfigDrawer({
         message.warning(
           t(
             "connectors.weknoraNotFound",
-            "未在 OCTOP 主机的 127.0.0.1:8080 检测到 WeKnora",
+            "未在 Ydsz 主机的 127.0.0.1:8080 检测到 WeKnora",
           ),
         );
         return;

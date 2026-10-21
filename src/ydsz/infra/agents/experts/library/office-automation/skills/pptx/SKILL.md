@@ -4,7 +4,7 @@ description: "当涉及到 .pptx 文件的任何操作时使用此技能——�
 license: Proprietary. LICENSE.txt has complete terms
 metadata:
   builtin_skill_version: "1.1"
-  octop:
+  Ydsz:
     emoji: "📽️"
     label:
       zh: "PPT 演示"

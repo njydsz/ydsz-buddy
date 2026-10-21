@@ -7,13 +7,13 @@
 
 ## 1. 背景与问题
 
-当前部分代码在 agent 已配置远程 backend（S3/COS 等）时，仍向本地 `~/.octop/agents/<agent_id>/` 读写内容文件，导致：
+当前部分代码在 agent 已配置远程 backend（S3/COS 等）时，仍向本地 `~/.ydsz/agents/<agent_id>/` 读写内容文件，导致：
 
 - 用户配置了 backend，agent 工具读的是远程存储；
 - Ydsz Worker 服务端 seed / 写 SOUL / 同步插件 skills 等仍写本地；
 - Dashboard 部分读路径优先本地，展示与真实存储不一致。
 
-默认未配置 backend 时，harness 使用 `filesystem` + `virtual_mode`，`root_dir` 由 `workspace_dir`（即 `~/.octop/agents/<id>/`）在创建 backend 时挂载。此时直连磁盘与经 backend 写入**同一物理文件**，但远程 backend 场景下必须统一走 backend。
+默认未配置 backend 时，harness 使用 `filesystem` + `virtual_mode`，`root_dir` 由 `workspace_dir`（即 `~/.ydsz/agents/<id>/`）在创建 backend 时挂载。此时直连磁盘与经 backend 写入**同一物理文件**，但远程 backend 场景下必须统一走 backend。
 
 ---
 
@@ -34,7 +34,7 @@ backend = await agent_registry.resolve_harness_backend(agent_id)
 await backend.aupload_files([(soul_path, text.encode("utf-8"))])
 ```
 
-- **禁止**在 Ydsz Worker 层把 `~/.octop/agents/<id>/SOUL.md`「转换」为 `/SOUL.md`、`SOUL.md` 等另一套命名。
+- **禁止**在 Ydsz Worker 层把 `~/.ydsz/agents/<id>/SOUL.md`「转换」为 `/SOUL.md`、`SOUL.md` 等另一套命名。
 - 专家模板、skills、seed 等：backend 参数中的 path 与原先 `disk_path = workspace_dir / rel` 的字符串形式一致。
 
 ### 2.2 Backend 获取方式
@@ -58,7 +58,7 @@ await backend.aupload_files([(soul_path, text.encode("utf-8"))])
 
 ### 2.4 `workspace_dir` 的保留用途
 
-`~/.octop/agents/<id>/` 仍作为 harness 的 `workspace_dir`，用于：
+`~/.ydsz/agents/<id>/` 仍作为 harness 的 `workspace_dir`，用于：
 
 - 构造 backend 时的 `root_dir` 挂载（默认 filesystem）；
 - checkpoint、sessions JSONL、ydsz-memory SQLite 等**本地产物**（不由 backend 协议管理）；
@@ -96,7 +96,7 @@ await backend.aupload_files([(soul_path, text.encode("utf-8"))])
 ### 3.3 不在范围
 
 - Expert library 内 skill 脚本（agent 运行时经 harness 工具执行）
-- `~/.octop/plugins/` 安装、`~/.octop/security/` tool guard
+- `~/.ydsz/plugins/` 安装、`~/.ydsz/security/` tool guard
 - Expert catalog  bundled 源码读取
 
 ---
@@ -259,7 +259,7 @@ do not collapse host abs before calling BackendWorkspace.
 自动压缩与 `/compact` 把被挤出的原文写到
 ``{artifacts_root}/conversation_history/{session_id}.md``。本地
 ``local_shell`` / ``filesystem`` 经 harness ``MountedCompositeBackend`` 把
-``artifacts_root`` 收到工作区（Ydsz Worker：``.octop/conversation_history/``）。
+``artifacts_root`` 收到工作区（Ydsz Worker：``.ydsz/conversation_history/``）。
 ``docker`` / ``opensandbox`` / COS 等**没有**这层 wrap：offload 可能落到
 容器内 ``/conversation_history/``。自动压缩在写失败时仍继续摘要
 （``file_path=None``）；``/compact`` 写失败则整次失败，不改对话状态。
@@ -294,7 +294,7 @@ Harness 侧只认调用方传入的 ``workspace_dir``；Docker 默认把它镜�
 
 容器命名：
 
-- `agent` → `{prefix}_agent_{agentId}`（如 `octop_sandbox_agent_ZE6GR2`）
+- `agent` → `{prefix}_agent_{agentId}`（如 `YDSZ_sandbox_agent_ZE6GR2`）
 - `user` → `{prefix}_{username}`（同用户多专家共用一沙箱）
 - `fixed` → `sandbox_id`
 

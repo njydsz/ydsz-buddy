@@ -2,7 +2,7 @@
 name: guideline-learning
 description: 指南学习流程约束。判断请求类型→读取状态→按流程创建轨道/预览/投递/排查迁移；操作命令与细则见 references/learning-operations.md。选题用权威信源，输出前经 output-format 校验。不生成诊疗/处方/急诊SOP/个体患者建议。
 metadata:
-  octop:
+  Ydsz:
     emoji: "📘"
     label:
       zh: "指南学习"

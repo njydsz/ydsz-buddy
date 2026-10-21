@@ -13,7 +13,7 @@ function asYdszUi(value: unknown): YdszUiHint | undefined {
 }
 
 /**
- * Parse tool ``output`` for the ``octop_ui`` envelope.
+ * Parse tool ``output`` for the ``ydsz_ui`` envelope.
  * Accepts a JSON string or an already-parsed object.
  */
 export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
@@ -33,7 +33,7 @@ export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
     return {
       isJson: true,
       raw: output,
-      octopUi: asYdszUi(obj.octop_ui),
+      ydszUi: asYdszUi(obj.ydsz_ui),
       data: "data" in obj ? obj.data : undefined,
       text: typeof obj.text === "string" ? obj.text : undefined,
     };
@@ -53,10 +53,10 @@ export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
       };
     }
     const obj = raw as Record<string, unknown>;
-    const octopUi = asYdszUi(obj.octop_ui);
+    const ydszUi = asYdszUi(obj.ydsz_ui);
     const text = typeof obj.text === "string" ? obj.text : undefined;
     const data = "data" in obj ? obj.data : undefined;
-    return { isJson: true, raw, octopUi, data, text };
+    return { isJson: true, raw, ydszUi, data, text };
   } catch {
     return { isJson: false, raw: output, text: output };
   }
@@ -99,7 +99,7 @@ export function resolvePluginUiData(
   if (parsed.data !== undefined) return parsed.data;
   const raw = parsed.raw;
   if (
-    parsed.octopUi &&
+    parsed.ydszUi &&
     raw !== null &&
     typeof raw === "object" &&
     !Array.isArray(raw) &&

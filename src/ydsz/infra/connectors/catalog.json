@@ -445,7 +445,7 @@
       },
       "oauth_issuer": "https://mcp.notion.com",
       "mcp_url": "https://mcp.notion.com/mcp",
-      "mcp_user_agent": "octop-connector/0.1"
+      "mcp_user_agent": "ydsz-connector/0.1"
     },
     {
       "kind": "openalex",

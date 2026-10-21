@@ -76,7 +76,7 @@ def _probe_env() -> dict[str, Any]:
     except ImportError as exc:
         if not out["harness_browser"]:
             out["error"] = (
-                f"playwright not installed: {exc}. Install octop[browser] extras or ydsz-browser."
+                f"playwright not installed: {exc}. Install Ydsz[browser] extras or ydsz-browser."
             )
         return out
 

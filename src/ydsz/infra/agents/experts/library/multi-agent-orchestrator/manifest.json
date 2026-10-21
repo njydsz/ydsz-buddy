@@ -5,7 +5,7 @@
     "en": "Multi-Agent Orchestrator"
   },
   "description": {
-    "zh": "源自 agency-orchestrator 的 DAG 协作理念：把一句话需求拆成有依赖关系的步骤，匹配最合适的子智能体角色，按 depends_on 串联执行并接力输出。让 OCTOP 从单 agent 升级为多专家协作。",
+    "zh": "源自 agency-orchestrator 的 DAG 协作理念：把一句话需求拆成有依赖关系的步骤，匹配最合适的子智能体角色，按 depends_on 串联执行并接力输出。让 YDSZ 从单 Agent 升级为多专家协作。",
     "en": "From agency-orchestrator: turn one sentence into a dependency-ordered DAG, match each step to the best sub-agent role, and chain outputs via depends_on."
   },
   "welcome_message": {

@@ -1,5 +1,5 @@
-const React = window.__OCTOP_REACT__;
-const { jsx: _jsx, jsxs: _jsxs } = window.__OCTOP_JSX__;
+const React = window.__Ydsz_REACT__;
+const { jsx: _jsx, jsxs: _jsxs } = window.__Ydsz_JSX__;
 
 function IpLookup(props) {
   const theme = props.host.getToolContext().theme;
@@ -16,7 +16,7 @@ function IpLookup(props) {
       color: dark ? "#ccfbf1" : "#115e59",
       boxShadow: "0 10px 24px rgba(13,148,136,.15)",
     },
-    "data-octop-plugin-ui": "ip-lookup",
+    "data-Ydsz-plugin-ui": "ip-lookup",
     children: [
       _jsx("div", { style: { fontWeight: 800, fontSize: 18 }, children: d.query || "IP" }),
       _jsxs("div", { style: { marginTop: 8, lineHeight: 1.6 }, children: [
