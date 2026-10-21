@@ -116,3 +116,5 @@ scripts/lh_image_install_octop_tencentos.sh
 .worktrees/
 # Local conda environment
 .conda-octop/
+desktop/portable/release/
+.ps1

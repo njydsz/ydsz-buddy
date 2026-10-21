@@ -3,7 +3,7 @@ import type { Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import { octopCronApi } from "../../../api/modules/cronjob";
 import { useAgent } from "../../../context/AgentContext";
-import type { CronJobSpecOutput, OctopCronRow } from "../../../api/types";
+import type { CronJobSpecOutput, YdszCronRow } from "../../../api/types";
 import { channelFromSessionKey } from "./cronDisplay";
 import { presetToCron, cronToPreset } from "./components/constants";
 import {
@@ -49,7 +49,7 @@ function promptLabel(prompt: string, id: string): string {
   return text.length > 40 ? `${text.slice(0, 40)}…` : text;
 }
 
-function fromOctop(row: OctopCronRow, timezone: string): CronJob {
+function fromOctop(row: YdszCronRow, timezone: string): CronJob {
   const cron = scheduleFieldFromTrigger(row.trigger);
   const channel = channelFromSessionKey(row.session_key);
 

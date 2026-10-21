@@ -61,9 +61,9 @@ import {
 import styles from "../index.module.less";
 import {
   DefaultToolRenderer,
-  builtinPluginHost,
+  builtinYdszPluginHost,
   createPluginUiHost,
-  parseOctopToolOutput,
+  parseYdszToolOutput,
   resolvePluginUiData,
   resolveToolRenderer,
   useToolRendererVersion,
@@ -394,7 +394,7 @@ export function ToolDetailsInline({
   const rendererVersion = useToolRendererVersion();
   useToolPluginIndexVersion();
   const parsed = useMemo(
-    () => parseOctopToolOutput(toolData.output),
+    () => parseYdszToolOutput(toolData.output),
     [toolData.output],
   );
   // Offloaded octop_ui payloads: explicit data wins; data_ref → artifact.
@@ -443,7 +443,7 @@ export function ToolDetailsInline({
     host:
       registration && registration.pluginId !== "builtin"
         ? createPluginUiHost(registration.pluginId)
-        : builtinPluginHost,
+        : builtinYdszPluginHost,
     output: toolData.output,
     isStreaming,
     hideMediaPreview,

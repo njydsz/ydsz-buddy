@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  mergePatchedToolOutput,
-  parseOctopToolOutput,
+  mergePatchedYdszToolOutput,
+  parseYdszToolOutput,
   resolvePluginUiData,
 } from "./parseToolOutput";
 import {
@@ -16,14 +16,14 @@ function Dummy(_: ToolRenderProps) {
   return null;
 }
 
-describe("parseOctopToolOutput", () => {
+describe("parseYdszToolOutput", () => {
   it("parses octop_ui envelope", () => {
     const raw = JSON.stringify({
       octop_ui: { renderer: "demo_card", version: 1 },
       data: { count: 2 },
       text: "hi",
     });
-    const parsed = parseOctopToolOutput(raw);
+    const parsed = parseYdszToolOutput(raw);
     expect(parsed.isJson).toBe(true);
     expect(parsed.octopUi).toEqual({ renderer: "demo_card", version: 1 });
     expect(parsed.data).toEqual({ count: 2 });
@@ -31,20 +31,20 @@ describe("parseOctopToolOutput", () => {
   });
 
   it("keeps plain text", () => {
-    const parsed = parseOctopToolOutput("hello");
+    const parsed = parseYdszToolOutput("hello");
     expect(parsed.isJson).toBe(false);
     expect(parsed.text).toBe("hello");
   });
 });
 
-describe("mergePatchedToolOutput", () => {
+describe("mergePatchedYdszToolOutput", () => {
   it("merges data into existing envelope", () => {
     const prev = JSON.stringify({
       octop_ui: { renderer: "demo_card" },
       data: { count: 1 },
       text: "x",
     });
-    const next = mergePatchedToolOutput(prev, { count: 3 });
+    const next = mergePatchedYdszToolOutput(prev, { count: 3 });
     expect(JSON.parse(next)).toEqual({
       octop_ui: { renderer: "demo_card" },
       data: { count: 3 },
@@ -57,7 +57,7 @@ describe("resolvePluginUiData", () => {
   const artifact = { results: [{ season_id: 1 }] };
 
   it("resolves data_ref envelopes from the artifact", () => {
-    const parsed = parseOctopToolOutput(
+    const parsed = parseYdszToolOutput(
       JSON.stringify({
         octop_ui: { renderer: "bilibili_player", version: 1 },
         data_ref: "artifact",
@@ -69,14 +69,14 @@ describe("resolvePluginUiData", () => {
   });
 
   it("explicit data wins over data_ref/artifact (patched state)", () => {
-    const patched = mergePatchedToolOutput(
+    const patched = mergePatchedYdszToolOutput(
       JSON.stringify({
         octop_ui: { renderer: "bilibili_player" },
         data_ref: "artifact",
       }),
       { results: [], current_episode: 5 },
     );
-    const parsed = parseOctopToolOutput(patched);
+    const parsed = parseYdszToolOutput(patched);
     const data = resolvePluginUiData(parsed, artifact, undefined) as {
       current_episode: number;
     };
@@ -84,7 +84,7 @@ describe("resolvePluginUiData", () => {
   });
 
   it("falls back to legacy shapes without data_ref", () => {
-    const inline = parseOctopToolOutput(
+    const inline = parseYdszToolOutput(
       JSON.stringify({
         octop_ui: { renderer: "demo_card" },
         data: { count: 2 },
@@ -94,17 +94,17 @@ describe("resolvePluginUiData", () => {
       count: 2,
     });
 
-    const plainJson = parseOctopToolOutput(JSON.stringify({ foo: 1 }));
+    const plainJson = parseYdszToolOutput(JSON.stringify({ foo: 1 }));
     expect(resolvePluginUiData(plainJson, artifact, undefined)).toEqual({
       foo: 1,
     });
 
-    const text = parseOctopToolOutput("hello");
+    const text = parseYdszToolOutput("hello");
     expect(resolvePluginUiData(text, artifact, "hello")).toBe("hello");
   });
 
   it("keeps the slim envelope when artifact is missing", () => {
-    const parsed = parseOctopToolOutput(
+    const parsed = parseYdszToolOutput(
       JSON.stringify({
         octop_ui: { renderer: "bilibili_player" },
         data_ref: "artifact",
@@ -129,14 +129,14 @@ describe("resolveToolRenderer", () => {
     const byHint = resolveToolRenderer({
       toolName: "other",
       pluginId: "demo-ui-card",
-      parsed: parseOctopToolOutput(
+      parsed: parseYdszToolOutput(
         JSON.stringify({ octop_ui: { renderer: "demo_card" }, data: {} }),
       ),
     });
     expect(byHint?.id).toBe("demo_card");
     const byTool = resolveToolRenderer({
       toolName: "demo_ui_card",
-      parsed: parseOctopToolOutput("plain"),
+      parsed: parseYdszToolOutput("plain"),
     });
     expect(byTool?.id).toBe("demo_card");
     clearToolRenderers();

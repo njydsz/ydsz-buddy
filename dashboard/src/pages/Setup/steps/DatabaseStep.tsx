@@ -62,15 +62,15 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
 
   const buildSqliteBody = (values: DatabaseSetupBody): DatabaseSetupBody => ({
     driver: "sqlite",
-    sqlite_path: values.sqlite_path?.trim() || "octop.db",
+    sqlite_path: values.sqlite_path?.trim() || "ydsz.db",
   });
 
   const buildPostgresBody = (values: DatabaseSetupBody): DatabaseSetupBody => ({
     driver: "postgresql",
     host: values.host?.trim() || "127.0.0.1",
     port: values.port ?? 5432,
-    database: values.database?.trim() || "octop",
-    user: values.user?.trim() || "octop",
+    database: values.database?.trim() || "ydsz",
+    user: values.user?.trim() || "ydsz",
     password: values.password || undefined,
   });
 
@@ -176,11 +176,11 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
         form={form}
         layout="vertical"
         initialValues={{
-          sqlite_path: "octop.db",
+          sqlite_path: "ydsz.db",
           host: "127.0.0.1",
           port: 5432,
-          database: "octop",
-          user: "octop",
+          database: "ydsz",
+          user: "ydsz",
         }}
       >
         <Form.Item

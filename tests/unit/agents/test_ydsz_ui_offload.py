@@ -1,4 +1,4 @@
-"""OctopUiOffloadMiddleware: oversized octop_ui payloads move to ToolMessage.artifact."""
+"""WorkerUiOffloadMiddleware: oversized ydsz_ui payloads move to ToolMessage.artifact."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from langgraph.types import Command
 
 from ydsz.infra.agents.middleware.ydsz_ui_offload import (
     _OFFLOAD_MIN_CHARS,
-    OctopUiOffloadMiddleware,
+    WorkerUiOffloadMiddleware,
 )
 
 
@@ -61,7 +61,7 @@ def _big_message() -> ToolMessage:
 
 
 def test_offloads_oversized_ydsz_ui_payload_in_place() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     result = _big_message()
     out = mw.wrap_tool_call(_request(), lambda _req: result)
 
@@ -86,7 +86,7 @@ def test_offloads_oversized_ydsz_ui_payload_in_place() -> None:
 
 @pytest.mark.asyncio
 async def test_awrap_tool_call_offloads() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     result = _big_message()
 
     async def handler(_req: Any) -> ToolMessage:
@@ -98,7 +98,7 @@ async def test_awrap_tool_call_offloads() -> None:
 
 
 def test_skips_small_payload() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     content = json.dumps(_envelope({"results": []}), ensure_ascii=False)
     assert len(content) < _OFFLOAD_MIN_CHARS
     result = ToolMessage(content=content, tool_call_id="tc1")
@@ -108,7 +108,7 @@ def test_skips_small_payload() -> None:
 
 
 def test_skips_non_json_text() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     content = "x" * (_OFFLOAD_MIN_CHARS + 10)
     result = ToolMessage(content=content, tool_call_id="tc1")
     out = mw.wrap_tool_call(_request(), lambda _req: result)
@@ -117,7 +117,7 @@ def test_skips_non_json_text() -> None:
 
 
 def test_skips_json_without_ydsz_ui() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     content = json.dumps({"data": {"big": "x" * _OFFLOAD_MIN_CHARS}})
     result = ToolMessage(content=content, tool_call_id="tc1")
     out = mw.wrap_tool_call(_request(), lambda _req: result)
@@ -126,7 +126,7 @@ def test_skips_json_without_ydsz_ui() -> None:
 
 
 def test_skips_ydsz_ui_without_renderer() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     envelope = _envelope({"big": "x" * _OFFLOAD_MIN_CHARS})
     envelope["ydsz_ui"] = {"renderer": " "}
     content = json.dumps(envelope)
@@ -137,7 +137,7 @@ def test_skips_ydsz_ui_without_renderer() -> None:
 
 
 def test_skips_empty_data() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     for empty in (None, {}, []):
         envelope = _envelope(empty)
         envelope["pad"] = "x" * _OFFLOAD_MIN_CHARS
@@ -149,7 +149,7 @@ def test_skips_empty_data() -> None:
 
 
 def test_skips_payload_with_file_url() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     data = _big_data()
     data["results"][0]["cover_file"] = "file:///tmp/cover.png"
     content = json.dumps(_envelope(data), ensure_ascii=False)
@@ -160,7 +160,7 @@ def test_skips_payload_with_file_url() -> None:
 
 
 def test_skips_non_string_content_and_command() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     blocks = [{"type": "text", "text": "x" * (_OFFLOAD_MIN_CHARS + 10)}]
     result = ToolMessage(content=blocks, tool_call_id="tc1")
     out = mw.wrap_tool_call(_request(), lambda _req: result)
@@ -172,7 +172,7 @@ def test_skips_non_string_content_and_command() -> None:
 
 
 def test_offload_never_breaks_tool_call() -> None:
-    mw = OctopUiOffloadMiddleware()
+    mw = WorkerUiOffloadMiddleware()
     result = _big_message()
     with patch(
         "ydsz.infra.agents.middleware.ydsz_ui_offload.json.loads",

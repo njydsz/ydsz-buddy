@@ -34,9 +34,9 @@ import { useAgent } from "../../../context/AgentContext";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import styles from "./index.module.less";
 
-const AI_PANEL_LAYOUT_KEY = "octop:terminal-ai-layout";
-const AI_PANEL_WIDTH_KEY = "octop:terminal-ai-width";
-const AI_PANEL_HEIGHT_KEY = "octop:terminal-ai-height";
+const AI_PANEL_LAYOUT_KEY = "ydsz:terminal-ai-layout";
+const AI_PANEL_WIDTH_KEY = "ydsz:terminal-ai-width";
+const AI_PANEL_HEIGHT_KEY = "ydsz:terminal-ai-height";
 const AI_PANEL_MIN_WIDTH = 220;
 const AI_PANEL_MAX_WIDTH = 720;
 const AI_PANEL_MIN_HEIGHT = 160;

@@ -32,7 +32,7 @@ export type ChannelKey =
   | "YdszBot";
 
 /**
- * Channel kinds backed by Octop ``ChannelKind`` / octop-gateway ``BUILTIN_CHANNELS``.
+ * Channel kinds backed by Worker ``ChannelKind`` / octop-gateway ``BUILTIN_CHANNELS``.
  * ``dashboard`` / ``agentchat`` are intentionally omitted until implemented.
  */
 export const CHANNEL_KEYS: ChannelKey[] = [
@@ -89,7 +89,7 @@ export const CHANNEL_LABEL_KEYS: Record<ChannelKey, string> = {
   telegram: "channels.label_telegram",
   dashboard: "channels.label_dashboard",
   agentchat: "channels.label_agentchat",
-  ydszbot: "channels.label_octopbot",
+  YdszBot: "channels.label_ydszbot",
 };
 
 /** Hardcoded Chinese labels used as fallback when t() returns the key. */
@@ -106,7 +106,7 @@ export const CHANNEL_LABELS: Record<ChannelKey, string> = {
   telegram: "Telegram",
   dashboard: "控制台",
   agentchat: "AgentChat",
-  ydszbot: "YdszBot",
+  YdszBot: "YdszBot",
 };
 
 export const CHANNEL_ICONS: Record<ChannelKey, string> = {
@@ -122,7 +122,7 @@ export const CHANNEL_ICONS: Record<ChannelKey, string> = {
   telegram: telegramIcon,
   dashboard: dashboardIcon,
   agentchat: consoleIcon,
-  ydszbot: octopIcon,
+  YdszBot: octopIcon,
 };
 
 /** Brand accent per channel — used for cron task card stripes, badges, etc. */
@@ -139,7 +139,7 @@ export const CHANNEL_COLORS: Record<ChannelKey, string> = {
   discord: "#5865F2",
   dashboard: "#6366F1",
   agentchat: "#64748B",
-  ydszbot: "#10B981",
+  YdszBot: "#10B981",
 };
 
 export function getChannelColor(channel: string): string {
@@ -158,7 +158,7 @@ export const CHANNEL_URLS: Partial<Record<ChannelKey, string>> = {
   yuanbao: "https://yuanbao.tencent.com/bot",
   wecom: "https://work.weixin.qq.com/wework_admin/frame#/aiHelper/create",
   telegram: "https://t.me/BotFather",
-  ydszbot: "https://octop.cloud.tencent.com",
+  YdszBot: "https://octop.cloud.tencent.com",
 };
 
 /** A single field of a channel's config form. */
@@ -370,7 +370,7 @@ export const CHANNEL_FIELDS: Partial<Record<ChannelKey, ChannelField[]>> = {
     { name: "token", label: "Token", type: "password", required: true },
     { name: "base_url", label: "Base URL" },
   ],
-  ydszbot: [
+  YdszBot: [
     { name: "api_key", label: "API Key", type: "password", required: true },
     { name: "api_base_url", label: "API Base URL", required: true },
   ],

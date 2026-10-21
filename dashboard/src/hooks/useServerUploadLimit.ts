@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { octopSettingsApi } from "../api/modules/settings";
+import { ydszSettingsApi } from "../api/modules/settings";
 
 export const DEFAULT_MAX_UPLOAD_MB = 100;
 export const DEFAULT_MAX_UPLOAD_BYTES = DEFAULT_MAX_UPLOAD_MB * 1024 * 1024;
@@ -22,7 +22,7 @@ export function applyUploadLimitFetchResult(
 async function fetchMaxUploadBytes(): Promise<number> {
   if (cachedBytes != null) return cachedBytes;
   if (!inflight) {
-    inflight = octopSettingsApi
+    inflight = ydszSettingsApi
       .upload()
       .then((settings) => {
         const next = applyUploadLimitFetchResult({

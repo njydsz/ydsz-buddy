@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactJSX from "react/jsx-runtime";
 import { DefaultToolRenderer } from "./builtin/DefaultToolRenderer";
-import { builtinPluginHost } from "./host";
+import { builtinYdszPluginHost } from "./host";
 import { registerToolRenderer } from "./registry";
 
 let builtinsRegistered = false;
@@ -30,5 +30,5 @@ export function ensureBuiltinToolRenderers(): void {
     pluginId: "builtin",
     component: DefaultToolRenderer,
   });
-  void builtinPluginHost;
+  void builtinYdszPluginHost;
 }

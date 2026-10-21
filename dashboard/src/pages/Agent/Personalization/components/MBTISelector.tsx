@@ -331,7 +331,7 @@ export default function MBTISelector({
         navigate("/chat");
         setTimeout(
           () =>
-            window.dispatchEvent(new CustomEvent("octop:pending-chat-message")),
+            window.dispatchEvent(new CustomEvent("ydsz:pending-chat-message")),
           100,
         );
       }

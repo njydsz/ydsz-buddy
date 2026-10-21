@@ -45,7 +45,7 @@ export default function SessionChannelIcon({
     : channelType;
   const iconSrc = isChannelKey(channelType)
     ? CHANNEL_ICONS[channelType]
-    : CHANNEL_ICONS.octopbot;
+    : CHANNEL_ICONS.YdszBot;
 
   const img = (
     <img

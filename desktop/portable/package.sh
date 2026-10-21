@@ -32,7 +32,7 @@ build_octop_wheel() {
   mkdir -p "$wheel_dir"
   # Drop previous local octop wheels so we pick the fresh build.
   find "$wheel_dir" -maxdepth 1 -type f -name 'ydsz_worker-*.whl' -delete 2>/dev/null || true
-  if [[ ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" ]]; then
+  if [[ ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" && ! -f "${REPO_ROOT}/src/octop/dashboard/index.html" ]]; then
     echo "[package] WARNING: dashboard not built (src/ydsz/dashboard/index.html missing)." >&2
     echo "  Run: make build-frontend" >&2
   fi
@@ -266,7 +266,7 @@ assemble_one() {
   (
     cd "$GREEN_RELEASE"
     if command -v zip >/dev/null 2>&1; then
-      zip -qry "$zip_name" "Octop-${plat}"
+      zip -qry "$zip_name" "YdszWorker-${plat}"
     else
       # Windows runners often have `python` but not `python3` / `zip`.
       py=""

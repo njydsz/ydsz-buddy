@@ -54,7 +54,7 @@ import styles from "../index.module.less";
 /** Default preview size per expert in minimal nav (matches session page size). */
 export const MINIMAL_AGENT_SESSION_PREVIEW = 10;
 
-const FOLDER_COLLAPSED_KEY = "octop:minimal-agent-folders-collapsed";
+const FOLDER_COLLAPSED_KEY = "ydsz:minimal-agent-folders-collapsed";
 
 function loadCollapsedFolders(): Set<string> {
   try {

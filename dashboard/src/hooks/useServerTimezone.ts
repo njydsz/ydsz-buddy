@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { octopSettingsApi } from "../api/modules/settings";
+import { ydszSettingsApi } from "../api/modules/settings";
 
 export const DEFAULT_SERVER_TIMEZONE = "UTC";
 
@@ -28,7 +28,7 @@ export function applyTimezoneFetchResult(
 async function fetchServerTimezone(): Promise<string> {
   if (cachedTimezone) return cachedTimezone;
   if (!inflight) {
-    inflight = octopSettingsApi
+    inflight = ydszSettingsApi
       .timezone()
       .then((settings) => {
         const next = applyTimezoneFetchResult({

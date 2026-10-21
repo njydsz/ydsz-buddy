@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { message } from "@/utils/antdMessage";
 import {
-  octopSettingsApi,
+  ydszSettingsApi,
   type CaptchaSettings,
 } from "../../../api/modules/settings";
 import { apiErrorMessage } from "../../../utils/apiError";
@@ -34,7 +34,7 @@ export default function CaptchaSettingsPanel() {
 
   const load = useCallback(async () => {
     try {
-      applyView(await octopSettingsApi.captcha());
+      applyView(await ydszSettingsApi.captcha());
     } catch (err) {
       message.error(
         apiErrorMessage(err, t("advancedSettings.captcha.loadFailed"), t),
@@ -75,7 +75,7 @@ export default function CaptchaSettingsPanel() {
                   : {}),
               },
             };
-      const saved = await octopSettingsApi.putCaptcha({ active, providers });
+      const saved = await ydszSettingsApi.putCaptcha({ active, providers });
       applyView(saved);
       message.success(t("advancedSettings.captcha.saved"));
     } catch (err) {

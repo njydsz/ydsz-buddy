@@ -34,7 +34,7 @@ export interface ToolRenderProps {
   /** Parsed ``data`` field, or full parsed object / raw string. */
   data: unknown;
   textFallback?: string;
-  host: OctopPluginUIHost;
+  host: YdszPluginUIHost;
   /** Original tool output string (for builtins that need media parsing). */
   output?: string;
   isStreaming: boolean;
@@ -59,7 +59,7 @@ export interface OpenSidePanelOptions {
   toolName?: string;
 }
 
-export interface OctopPluginUIHost {
+export interface YdszPluginUIHost {
   registerRenderer(
     reg: Omit<ToolRendererRegistration, "pluginId"> & { pluginId?: string },
   ): void;
@@ -76,8 +76,8 @@ export interface OctopPluginUIHost {
 
 /** Shape expected from ``ui/dist/index.js``. */
 export interface PluginUiModule {
-  setup?: (host: OctopPluginUIHost) => void;
-  default?: { setup?: (host: OctopPluginUIHost) => void };
+  setup?: (host: YdszPluginUIHost) => void;
+  default?: { setup?: (host: YdszPluginUIHost) => void };
 }
 
 export interface PluginUiManifest {

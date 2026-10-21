@@ -1,10 +1,10 @@
 import type { UpdateStatus } from "../api/modules/update";
 
-export const UPDATE_STATUS_STORAGE_KEY = "octop:update-status";
+export const UPDATE_STATUS_STORAGE_KEY = "ydsz:update-status";
 export const UPDATE_STATUS_TTL_MS = 60 * 60 * 1000;
 /** How often the UI re-evaluates the local cache / probes the API. */
 export const UPDATE_STATUS_POLL_MS = UPDATE_STATUS_TTL_MS;
-export const UPDATE_STATUS_CHANGED_EVENT = "octop:update-status-changed";
+export const UPDATE_STATUS_CHANGED_EVENT = "ydsz:update-status-changed";
 
 interface StoredUpdateStatus {
   checkedAt: number;

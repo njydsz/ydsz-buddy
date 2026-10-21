@@ -20,7 +20,7 @@ vi.mock("../../../api/modules/memoryDashboard", () => ({
 }));
 
 vi.mock("../../../api/modules/settings", () => ({
-  octopSettingsApi: {
+  ydszSettingsApi: {
     timezone: vi.fn().mockResolvedValue({ timezone: "Asia/Shanghai" }),
   },
 }));

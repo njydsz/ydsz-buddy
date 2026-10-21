@@ -952,7 +952,7 @@ function ConnectorConfigDrawer({
 
     const onMessage = (ev: MessageEvent) => {
       if (ev.origin !== window.location.origin) return;
-      if (ev.data?.type !== "octop:connector-oauth") return;
+      if (ev.data?.type !== "ydsz:connector-oauth") return;
       if (ev.data.state_id !== stateId) return;
       void claimPending();
     };
@@ -1502,7 +1502,7 @@ function ConnectorConfigDrawer({
                 {cliInfo.error ??
                   t(
                     "connectors.cliMissingHint",
-                    "主机尚未安装 CLI。可点击「安装 CLI」，或在 Octop 主机终端手动执行下方命令。",
+                    "主机尚未安装 CLI。可点击「安装 CLI」，或在 Worker 主机终端手动执行下方命令。",
                   )}
               </div>
             )}

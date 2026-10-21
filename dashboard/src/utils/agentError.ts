@@ -3,8 +3,8 @@
 import type { TFunction } from "i18next";
 
 const MODEL_CONFIG_KEYS = new Set([
-  "octop:agent_errors.no_models_configured",
-  "octop:agent_errors.model_ref_unavailable",
+  "ydsz:agent_errors.no_models_configured",
+  "ydsz:agent_errors.model_ref_unavailable",
 ]);
 
 function isRawModelRefError(error: string): boolean {
@@ -44,8 +44,8 @@ export function formatAgentError(
   t: TFunction,
 ): string {
   if (!error) return "";
-  if (error.startsWith("octop:")) {
-    const key = error.slice("octop:".length);
+  if (error.startsWith("ydsz:")) {
+    const key = error.slice("ydsz:".length);
     return t(key, { defaultValue: error });
   }
   if (isRawModelRefError(error)) {

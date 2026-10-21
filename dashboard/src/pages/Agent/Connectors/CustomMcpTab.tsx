@@ -515,7 +515,7 @@ export function CustomMcpTab({ focusServerName }: CustomMcpTabProps) {
     };
 
     const onMessage = (ev: MessageEvent) => {
-      if (ev.data?.type !== "octop:connector-oauth") return;
+      if (ev.data?.type !== "ydsz:connector-oauth") return;
       if (ev.data.state_id !== stateId) return;
       void claimPending();
     };

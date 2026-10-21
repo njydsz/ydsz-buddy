@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 const { timezone } = vi.hoisted(() => ({ timezone: vi.fn() }));
 
 vi.mock("../api/modules/settings", () => ({
-  octopSettingsApi: { timezone },
+  ydszSettingsApi: { timezone },
 }));
 
 import {

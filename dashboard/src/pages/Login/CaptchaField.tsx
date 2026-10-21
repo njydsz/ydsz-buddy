@@ -82,7 +82,7 @@ function loadVendorScript(
     const script = document.createElement("script");
     script.src = src;
     script.async = true;
-    script.dataset.octopCaptcha = adapter.slug;
+    script.dataset.ydszCaptcha = adapter.slug;
     if (!adapter.onloadName) {
       script.onload = () => {
         const api = vendorGlobal(adapter.globalName);

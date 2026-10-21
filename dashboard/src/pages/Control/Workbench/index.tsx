@@ -42,7 +42,7 @@ export default function WorkbenchPage({
   const { activeTab, handleTabChange, isMounted } = usePathTabs({
     basePath: "/workbench",
     tabs: WORKBENCH_TABS,
-    storageKey: "octop:workbench:tab",
+    storageKey: "ydsz:workbench:tab",
     defaultTab,
     isAllowed,
   });

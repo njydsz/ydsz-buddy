@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { hitl } = vi.hoisted(() => ({ hitl: vi.fn() }));
 
 vi.mock("../api/modules/settings", () => ({
-  octopSettingsApi: { hitl },
+  ydszSettingsApi: { hitl },
 }));
 
 import { useHitlEnabled } from "./useHitlEnabled";

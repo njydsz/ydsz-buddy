@@ -1,6 +1,6 @@
 export { DefaultToolRenderer } from "./builtin/DefaultToolRenderer";
 export {
-  builtinPluginHost,
+  builtinYdszPluginHost,
   createPluginUiHost,
   setPluginUiToolContext,
   setPluginUiDockHandlers,
@@ -12,8 +12,8 @@ export {
   isPluginUiLoaded,
 } from "./loader";
 export {
-  parseOctopToolOutput,
-  mergePatchedToolOutput,
+  parseYdszToolOutput,
+  mergePatchedYdszToolOutput,
   resolvePluginUiData,
 } from "./parseToolOutput";
 export {
@@ -29,7 +29,7 @@ export { ensureBuiltinToolRenderers } from "./ensureBuiltins";
 export { usePluginToolUis } from "./usePluginToolUis";
 export { useToolRendererVersion } from "./useToolRendererVersion";
 export type {
-  OctopPluginUIHost,
+  YdszPluginUIHost,
   ParsedToolOutput,
   PluginUiModule,
   ToolRenderProps,

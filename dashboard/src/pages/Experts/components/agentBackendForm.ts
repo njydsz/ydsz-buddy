@@ -104,7 +104,7 @@ export function isHostRootDir(rootDir?: string | null): boolean {
 }
 
 /**
- * Mirror of Octop ``_backend_supports_host_skill_packages`` for local UI gates.
+ * 镜像自 Worker ``_backend_supports_host_skill_packages`` for local UI gates.
  *
  * Host root ``/`` or ``root_dir`` equal to the agent workspace root may mount
  * packages; scoped project roots and non-local backends may not.

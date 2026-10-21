@@ -46,7 +46,7 @@ export interface CaptchaSettingsPut {
   providers?: Record<string, CaptchaPairBody>;
 }
 
-export const octopSettingsApi = {
+export const ydszSettingsApi = {
   timezone: () => request<OctopTimezoneSettings>("/settings/timezone"),
   upload: () => request<OctopUploadSettings>("/settings/upload"),
   hitl: (agentId?: string | null) =>

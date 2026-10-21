@@ -11,13 +11,13 @@ import { dockKnowledgeTabId } from "../utils/dockKnowledgeTabId";
 import { dockToolUiTabId } from "../utils/dockToolUiTabId";
 import { usePanelResize, type PanelSizes } from "./usePanelResize";
 
-const PANEL_MODE_KEY = "octop:chat-dock:mode";
-const PANEL_SIZE_KEY = "octop:chat-dock:size";
+const PANEL_MODE_KEY = "ydsz:chat-dock:mode";
+const PANEL_SIZE_KEY = "ydsz:chat-dock:size";
 /** Legacy keys — read once for migration. */
-const LEGACY_FILE_MODE_KEY = "octop:file-panel:mode";
-const LEGACY_BROWSER_MODE_KEY = "octop:browser-panel:mode";
-const LEGACY_FILE_SIZE_KEY = "octop:file-panel:size";
-const LEGACY_BROWSER_SIZE_KEY = "octop:browser-panel:size";
+const LEGACY_FILE_MODE_KEY = "ydsz:file-panel:mode";
+const LEGACY_BROWSER_MODE_KEY = "ydsz:browser-panel:mode";
+const LEGACY_FILE_SIZE_KEY = "ydsz:file-panel:size";
+const LEGACY_BROWSER_SIZE_KEY = "ydsz:browser-panel:size";
 
 export type DockTab =
   | { id: "files"; kind: "files" }

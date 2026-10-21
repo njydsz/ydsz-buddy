@@ -16,7 +16,7 @@ function asOctopUi(value: unknown): OctopUiHint | undefined {
  * Parse tool ``output`` for the ``octop_ui`` envelope.
  * Accepts a JSON string or an already-parsed object.
  */
-export function parseOctopToolOutput(output: unknown): ParsedToolOutput {
+export function parseYdszToolOutput(output: unknown): ParsedToolOutput {
   if (output === undefined || output === null || output === "") {
     return {
       isJson: false,
@@ -63,11 +63,11 @@ export function parseOctopToolOutput(output: unknown): ParsedToolOutput {
 }
 
 /** Rebuild a JSON output string after L2 ``patchResult`` on ``data``. */
-export function mergePatchedToolOutput(
+export function mergePatchedYdszToolOutput(
   previousOutput: string | undefined,
   nextData: unknown,
 ): string {
-  const parsed = parseOctopToolOutput(previousOutput);
+  const parsed = parseYdszToolOutput(previousOutput);
   if (parsed.isJson && parsed.raw && typeof parsed.raw === "object") {
     const base = { ...(parsed.raw as Record<string, unknown>) };
     base.data = nextData;

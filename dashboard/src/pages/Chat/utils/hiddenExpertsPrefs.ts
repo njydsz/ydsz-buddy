@@ -1,6 +1,6 @@
 /** localStorage preference: shared experts the current user has hidden from chat lists. */
 
-export const HIDDEN_SHARED_EXPERTS_STORAGE_KEY = "octop:hidden-shared-experts";
+export const HIDDEN_SHARED_EXPERTS_STORAGE_KEY = "ydsz:hidden-shared-experts";
 
 export function hiddenExpertsStorageKey(userId?: number | null): string {
   return userId == null || userId <= 0

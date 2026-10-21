@@ -2483,7 +2483,7 @@
     "label_dashboard": "Dashboard",
     "label_wecom": "WeCom",
     "label_weixin": "WeChat",
-    "label_octopbot": "Ydsz WorkerBot",
+    "label_ydszbot": "Ydsz WorkerBot",
     "label_agentchat": "AgentChat",
     "label_xiaoyi": "XiaoYi",
     "label_mqtt": "MQTT",

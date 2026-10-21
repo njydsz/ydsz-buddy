@@ -1,6 +1,6 @@
 import type { ChatMessage } from "../../pages/Chat/hooks/useChat";
 import type { AssistantTurnSplit } from "../../pages/Chat/utils/messageContent";
-import { parseOctopToolOutput } from "./parseToolOutput";
+import { parseYdszToolOutput } from "./parseToolOutput";
 import { resolveToolRenderer } from "./registry";
 import { lookupPluginIdForTool } from "./toolPluginIndex";
 
@@ -20,7 +20,7 @@ export function isSilentPluginUiData(data: unknown): boolean {
 export function isPinnedToolUiMessage(message: ChatMessage): boolean {
   const toolData = message.toolData;
   if (!toolData) return false;
-  const parsed = parseOctopToolOutput(toolData.output);
+  const parsed = parseYdszToolOutput(toolData.output);
   if (parsed.octopUi) {
     if (isSilentPluginUiData(parsed.data)) return false;
     return true;

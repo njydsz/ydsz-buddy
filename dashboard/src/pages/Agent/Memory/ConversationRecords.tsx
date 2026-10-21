@@ -28,7 +28,7 @@ import Markdown from "../../../components/Markdown/LazyMarkdown";
 import {
   CHAT_HISTORY_PAGE_SIZE,
   ydszThreadsApi,
-  type OctopThread,
+  type YdszThread,
 } from "../../../api/modules/ydszThreads";
 import {
   extractText,
@@ -74,13 +74,13 @@ function channelLabel(channel: string, t: (key: string) => string): string {
 }
 
 interface ConversationThreadCardProps {
-  thread: OctopThread;
+  thread: YdszThread;
   selected: boolean;
   deleting: boolean;
   channelLabel: string;
   timeZone: string;
-  onView: (thread: OctopThread) => void;
-  onDelete: (thread: OctopThread) => void;
+  onView: (thread: YdszThread) => void;
+  onDelete: (thread: YdszThread) => void;
 }
 
 function ConversationThreadCard({
@@ -156,9 +156,9 @@ export default function ConversationRecords({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const serverTimezone = useServerTimezone();
-  const [threads, setThreads] = useState<OctopThread[]>([]);
+  const [threads, setThreads] = useState<YdszThread[]>([]);
   const [listLoading, setListLoading] = useState(false);
-  const [selectedThread, setSelectedThread] = useState<OctopThread | null>(
+  const [selectedThread, setSelectedThread] = useState<YdszThread | null>(
     null,
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -219,7 +219,7 @@ export default function ConversationRecords({
   );
 
   const openThread = useCallback(
-    async (thread: OctopThread) => {
+    async (thread: YdszThread) => {
       setSelectedThread(thread);
       setDrawerOpen(true);
       setHistoryLoading(true);
@@ -299,7 +299,7 @@ export default function ConversationRecords({
   }, [resetHistoryState]);
 
   const confirmDelete = useCallback(
-    (thread: OctopThread) => {
+    (thread: YdszThread) => {
       confirmDeleteConversation(t, async (compact) => {
         setDeletingId(thread.thread_id);
         try {
@@ -342,7 +342,7 @@ export default function ConversationRecords({
     return threads.slice(start, start + cardPageSize);
   }, [threads, cardPage, cardPageSize]);
 
-  const columns: ColumnsType<OctopThread> = useMemo(
+  const columns: ColumnsType<YdszThread> = useMemo(
     () => [
       {
         title: t("memory.conversationColumns.threadId"),
@@ -511,7 +511,7 @@ export default function ConversationRecords({
           mobileList
         ) : (
           <Card className={styles.conversationTableCard} bordered={false}>
-            <Table<OctopThread>
+            <Table<YdszThread>
               className={styles.conversationTable}
               rowKey="thread_id"
               loading={listLoading}

@@ -39,7 +39,7 @@ import {
   speakerTurnWasInterrupted,
 } from "../utils/messageGrouping";
 import { turnStatusAction } from "./turnStatusGate";
-import { mergePatchedToolOutput } from "../../../plugins/toolRenderers/parseToolOutput";
+import { mergePatchedYdszToolOutput } from "../../../plugins/toolRenderers/parseToolOutput";
 import {
   isAskHitl,
   normalizeHitlRequest,
@@ -204,7 +204,7 @@ export function consumePendingPrefillAttachments(): ChatAttachment[] {
 // ── Composer draft (sessionStorage) ───────────────────────────────────────
 // Survives navigating away from /chat and back; keyed per agent + thread.
 
-const DRAFT_STORAGE_PREFIX = "octop:chat-draft:";
+const DRAFT_STORAGE_PREFIX = "ydsz:chat-draft:";
 
 function draftStorageKey(
   agentId: string,
@@ -2179,7 +2179,7 @@ export function patchToolResultData(callId: string, nextData: unknown): void {
     }
     if (idx < 0) return false;
     const target = state.messages[idx];
-    const output = mergePatchedToolOutput(target.toolData?.output, nextData);
+    const output = mergePatchedYdszToolOutput(target.toolData?.output, nextData);
     state.messages = [
       ...state.messages.slice(0, idx),
       {

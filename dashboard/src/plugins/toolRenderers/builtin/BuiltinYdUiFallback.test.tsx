@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import zh from "../../../locales/zh.json";
-import { builtinPluginHost } from "../host";
+import { builtinYdszPluginHost } from "../host";
 import { BuiltinYdUiFallback } from "./BuiltinYdUiFallback";
 
 vi.mock("react-i18next", () => ({
@@ -21,7 +21,7 @@ const base = {
   args: { city: "北京" },
   data: { city: "北京", current: { temp: 18.7 } },
   textFallback: "☁️ 北京 · 阴 18.7°C",
-  host: builtinPluginHost,
+  host: builtinYdszPluginHost,
   isStreaming: false,
 };
 

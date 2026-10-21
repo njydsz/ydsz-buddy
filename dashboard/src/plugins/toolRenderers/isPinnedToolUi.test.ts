@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseOctopToolOutput } from "./parseToolOutput";
+import { parseYdszToolOutput } from "./parseToolOutput";
 import { isPinnedToolUiMessage, partitionPinnedTools } from "./isPinnedToolUi";
 import type { ChatMessage } from "../../pages/Chat/hooks/useChat";
 import {
@@ -7,9 +7,9 @@ import {
   type AssistantTurnSplit,
 } from "../../pages/Chat/utils/messageContent";
 
-describe("parseOctopToolOutput object input", () => {
+describe("parseYdszToolOutput object input", () => {
   it("accepts already-parsed envelope objects", () => {
-    const parsed = parseOctopToolOutput({
+    const parsed = parseYdszToolOutput({
       octop_ui: { renderer: "demo_card", version: 1 },
       data: { title: "Hello", count: 1 },
       text: "Hello",

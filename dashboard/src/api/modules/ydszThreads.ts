@@ -42,7 +42,7 @@ export function normalizeThreadArtifacts(
   return out;
 }
 
-export interface OctopThread {
+export interface YdszThread {
   thread_id: string;
   title: string | null;
   channel_type: string;
@@ -69,7 +69,7 @@ export interface OctopThread {
   awaiting_user?: boolean;
 }
 
-export interface OctopThreadHistory {
+export interface YdszThreadHistory {
   thread_id: string;
   messages: Array<{
     role: string;
@@ -114,7 +114,7 @@ export interface ThreadDeleteResult {
   scheduled?: boolean;
 }
 
-export interface OctopThreadPatch {
+export interface YdszThreadPatch {
   title?: string;
   pinned?: boolean;
   model_ref?: string | null;
@@ -162,7 +162,7 @@ export const CHAT_HISTORY_PAGE_SIZE = 25;
 
 export const ydszThreadsApi = {
   list: (agentId: string, limit = 50) =>
-    request<OctopThread[]>(
+    request<YdszThread[]>(
       `/agents/${encodeURIComponent(agentId)}/threads?limit=${limit}`,
     ),
 
@@ -190,7 +190,7 @@ export const ydszThreadsApi = {
   ) => {
     const limit = params.limit ?? CHAT_HISTORY_PAGE_SIZE;
     const offset = params.offset ?? 0;
-    return request<OctopThreadHistory>(
+    return request<YdszThreadHistory>(
       `/agents/${encodeURIComponent(agentId)}/threads/${encodeURIComponent(
         threadId,
       )}/history?limit=${limit}&offset=${offset}${
@@ -233,7 +233,7 @@ export const ydszThreadsApi = {
   rename: (agentId: string, threadId: string, title: string) =>
     ydszThreadsApi.patch(agentId, threadId, { title }),
 
-  patch: (agentId: string, threadId: string, body: OctopThreadPatch) =>
+  patch: (agentId: string, threadId: string, body: YdszThreadPatch) =>
     request<{
       thread_id: string;
       title: string | null;

@@ -139,7 +139,7 @@ type BaseFormValues = {
 };
 
 type DocsViewMode = "card" | "table";
-const DOCS_VIEW_STORAGE_KEY = "octop:knowledge-bases-docs-view";
+const DOCS_VIEW_STORAGE_KEY = "ydsz:knowledge-bases-docs-view";
 
 const BASE_DOCUMENT_TYPES =
   ".md,.markdown,.txt,.rst,.html,.htm,.json,.jsonl,.yaml,.yml,.csv,.tsv,.pdf,.doc,.wps,.docx,.pptx,.xls,.xlsx,.xlsm";
@@ -693,12 +693,12 @@ export default function KnowledgeBasesPage() {
     min: 220,
     max: 480,
     defaultSize: 280,
-    storageKey: "octop:knowledge-bases:sidebar-width",
+    storageKey: "ydsz:knowledge-bases:sidebar-width",
   });
   const { collapsed: listPanelCollapsed, toggle: toggleListPanel } =
-    useListPanelCollapsed("octop:knowledge-bases:list-collapsed");
+    useListPanelCollapsed("ydsz:knowledge-bases:list-collapsed");
   const { collapsed: docTreeCollapsed, toggle: toggleDocTree } =
-    useListPanelCollapsed("octop:knowledge-bases:doc-tree-collapsed", {
+    useListPanelCollapsed("ydsz:knowledge-bases:doc-tree-collapsed", {
       defaultCollapsed: true,
     });
   const { size: docTreeWidth, onResizeStart: onDocTreeResizeStart } =
@@ -706,7 +706,7 @@ export default function KnowledgeBasesPage() {
       min: 180,
       max: 420,
       defaultSize: 220,
-      storageKey: "octop:knowledge-bases:doc-tree-width",
+      storageKey: "ydsz:knowledge-bases:doc-tree-width",
     });
 
   const canManageSelected = Boolean(
