@@ -53,7 +53,7 @@ export function CronJobCard({
   const { t } = useTranslation();
   const meta = (job.meta as Record<string, unknown> | undefined) ?? {};
   const sessionKey =
-    typeof meta.octop_session_key === "string" ? meta.octop_session_key : "";
+    typeof meta.ydsz_session_key === "string" ? meta.ydsz_session_key : "";
   const channel = sessionKey
     ? channelFromSessionKey(sessionKey)
     : Array.isArray(job.dispatch?.channel)
@@ -66,11 +66,11 @@ export function CronJobCard({
   const prompt = extractPromptFromJob(job);
 
   const lastStatus =
-    typeof meta.octop_last_status === "string" ? meta.octop_last_status : null;
+    typeof meta.ydsz_last_status === "string" ? meta.ydsz_last_status : null;
   const lastError =
-    typeof meta.octop_last_error === "string" ? meta.octop_last_error : null;
+    typeof meta.ydsz_last_error === "string" ? meta.ydsz_last_error : null;
   const lastRunAt =
-    typeof meta.octop_last_run_at === "number" ? meta.octop_last_run_at : null;
+    typeof meta.ydsz_last_run_at === "number" ? meta.ydsz_last_run_at : null;
 
   const accent = job.enabled ? ENABLED_ACCENT : DISABLED_ACCENT;
   const phase = oneShotPhase(

@@ -57,8 +57,8 @@ export const createColumns = (
       render: (id: string, record: CronJob) => {
         const meta = (record.meta as Record<string, unknown> | undefined) ?? {};
         const sessionKey =
-          typeof meta.octop_session_key === "string"
-            ? meta.octop_session_key
+          typeof meta.ydsz_session_key === "string"
+            ? meta.ydsz_session_key
             : "";
         const channel = sessionKey
           ? channelFromSessionKey(sessionKey)
@@ -147,8 +147,8 @@ export const createColumns = (
       render: (enabled: boolean, record: CronJob) => {
         const meta = (record.meta as Record<string, unknown> | undefined) ?? {};
         const lastStatus =
-          typeof meta.octop_last_status === "string"
-            ? meta.octop_last_status
+          typeof meta.ydsz_last_status === "string"
+            ? meta.ydsz_last_status
             : null;
         const phase = oneShotPhase(record.schedule?.cron, enabled, lastStatus);
         const label = phase
@@ -241,7 +241,7 @@ export const createColumns = (
       width: 168,
       render: (_: unknown, record: CronJob) => {
         const meta = (record.meta as Record<string, unknown> | undefined) ?? {};
-        const ts = meta.octop_last_run_at;
+        const ts = meta.ydsz_last_run_at;
         return (
           <span style={{ fontSize: 12, color: "var(--fn-text-secondary)" }}>
             {formatCronTimestamp(
@@ -258,10 +258,10 @@ export const createColumns = (
       width: 100,
       render: (_: unknown, record: CronJob) => {
         const meta = (record.meta as Record<string, unknown> | undefined) ?? {};
-        const status = meta.octop_last_status;
+        const status = meta.ydsz_last_status;
         const lastError =
-          typeof meta.octop_last_error === "string"
-            ? meta.octop_last_error
+          typeof meta.ydsz_last_error === "string"
+            ? meta.ydsz_last_error
             : null;
         if (typeof status !== "string" || !status) {
           return <span style={{ color: "var(--fn-text-tertiary)" }}>—</span>;
@@ -284,7 +284,7 @@ export const createColumns = (
       width: 96,
       render: (_: unknown, record: CronJob) => {
         const meta = (record.meta as Record<string, unknown> | undefined) ?? {};
-        const fresh = Boolean(meta.octop_fresh_thread);
+        const fresh = Boolean(meta.ydsz_fresh_thread);
         return (
           <Tag style={{ fontSize: 11 }}>
             {fresh

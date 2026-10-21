@@ -49,13 +49,13 @@ export function JobDetailDrawer({
 
   const meta = (job.meta as Record<string, unknown> | undefined) ?? {};
   const sessionKey =
-    typeof meta.octop_session_key === "string" ? meta.octop_session_key : "";
+    typeof meta.ydsz_session_key === "string" ? meta.ydsz_session_key : "";
   const channel = sessionKey
     ? channelFromSessionKey(sessionKey)
     : String(job.dispatch?.channel || "—");
   const agentPrompt = extractPromptFromJob(job) || null;
   const lastStatus =
-    typeof meta.octop_last_status === "string" ? meta.octop_last_status : "";
+    typeof meta.ydsz_last_status === "string" ? meta.ydsz_last_status : "";
   const phase = oneShotPhase(
     job.schedule?.cron,
     Boolean(job.enabled),
@@ -67,8 +67,8 @@ export function JobDetailDrawer({
     once: t("cronJobs.form.scheduleModeOnce"),
   });
   const lastError =
-    typeof meta.octop_last_error === "string" && meta.octop_last_error.trim()
-      ? meta.octop_last_error
+    typeof meta.ydsz_last_error === "string" && meta.ydsz_last_error.trim()
+      ? meta.ydsz_last_error
       : null;
 
   const handleGoToChat = () => {
@@ -176,8 +176,8 @@ export function JobDetailDrawer({
         </Descriptions.Item>
         <Descriptions.Item label={t("cronJobs.col.lastRunAt")}>
           {formatCronTimestamp(
-            typeof meta.octop_last_run_at === "number"
-              ? meta.octop_last_run_at
+            typeof meta.ydsz_last_run_at === "number"
+              ? meta.ydsz_last_run_at
               : null,
             timeZone,
           )}
@@ -231,13 +231,13 @@ export function JobDetailDrawer({
             </Text>
           </Descriptions.Item>
         )}
-        {job.model || meta.octop_model ? (
+        {job.model || meta.ydsz_model ? (
           <Descriptions.Item label={t("cronJobs.form.model")}>
-            {String(job.model || meta.octop_model)}
+            {String(job.model || meta.ydsz_model)}
           </Descriptions.Item>
         ) : null}
         <Descriptions.Item label={t("cronJobs.col.freshThread")}>
-          {meta.octop_fresh_thread
+          {meta.ydsz_fresh_thread
             ? t("cronJobs.col.freshThreadOn")
             : t("cronJobs.col.freshThreadOff")}
         </Descriptions.Item>

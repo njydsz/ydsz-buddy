@@ -34,7 +34,9 @@ Navigation guide for AI coding agents working in this repository.
 
 ## 2. What this is
 
-**Octop** — self-hosted AI assistant platform (multi-user, multi-agent).
+> Ydsz Worker is a continued fork of Tencent Octop (MIT License).
+
+**Ydsz Worker** — self-hosted AI assistant platform (multi-user, multi-agent).
 One Python wheel: FastAPI backend + React dashboard + Click CLI.
 No external queue. No required services beyond an LLM provider.
 
@@ -57,7 +59,7 @@ No external queue. No required services beyond an LLM provider.
 High-level tree — see [§5 Module boundaries](#5-module-boundaries) for what each folder owns and what it may import.
 
 ```
-Octop (`octop/` workspace directory)     Python package root (`src/octop/`)
+Ydsz Worker (`octop/` workspace directory)     Python package root (`src/octop/`)
   config.py
   launch.py                   composition root: OctopServer + FastAPI + uvicorn
   i18n/                       locale JSON bundles + tr() + domain helpers
@@ -86,7 +88,7 @@ cli/ ──► launch.py ──► api/ + infra/
 |-------|------|------------|-----------------|
 | `octop.config` | Env-based `OctopConfig` | stdlib, pydantic | `infra/`, `api/`, `cli/`, `launch.py` |
 | `octop.i18n` | Locale JSON + `tr()` + per-namespace helpers | `infra/utils/locale`, stdlib | `api/`, `cli/`, `dashboard/` |
-| `octop.launch` | Wire `OctopServer`, `build_app`, uvicorn for `octop run` | `infra/`, `api/` | business logic; must not be imported by `infra/` |
+| `octop.launch` | Wire `OctopServer`, `build_app`, uvicorn for `ydsz-worker run` | `infra/`, `api/` | business logic; must not be imported by `infra/` |
 | `infra/utils/` | Pure helpers (paths, ulid, env files, Ollama) | stdlib, third-party | any other `infra/*` domain code |
 | `infra/db/repos/` | One repo per table — SQL only | `infra/db/_base`, `infra/utils/` | `agents/`, `gateway/`, `api/`, orchestration |
 | `infra/` (domain) | Business logic & orchestration | `infra/utils/`, `infra/db/`, `octop.config`, peer `infra/*` subpackages, `infra/errors`, `infra/metrics` | `api/`, `cli/`, `launch.py`, `dashboard/` |
@@ -98,7 +100,7 @@ cli/ ──► launch.py ──► api/ + infra/
 
 - `infra/` → `api/`, `cli/`, or `launch.py`.
 - `api/` → `cli/` or `launch.py`.
-- `cli/` → `api/` (use `launch.py` for `octop run` instead).
+- `cli/` → `api/` (use `launch.py` for `ydsz-worker run` instead).
 - `infra/db/repos/` → any non-DB `infra` package.
 - `infra/utils/` → any non-utils `infra` package.
 - Routers/helpers in `api/routers/` must stay thin: validate HTTP, call `infra/`, map errors — not new domain rules.
@@ -153,7 +155,7 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 | `cli/support/acting.py` | Resolve `--user` / pinned defaults / agent owner |
 | `cli/support/ctx.py` | Root `--user` / `--agent` / `--json` resolution |
 | `cli/support/state.py` | Pinned `default_user` / `default_agent` in `cli_state.json` |
-| `cli/run_cmd.py` | `octop run` — delegates to `launch.run_foreground_blocking` |
+| `cli/run_cmd.py` | `ydsz-worker run` — delegates to `launch.run_foreground_blocking` |
 | `cli/init_cmd.py`, `cli/backup_cmd.py` | Local DB bootstrap / backup via `infra/db` |
 
 **CLI transport layers** (pick one per command; domain rules live in `infra/`, not duplicated in `cli/`):
@@ -163,9 +165,9 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 | **Offline** | Read/write local `~/.octop` SQLite only | `user *`, `provider *`, `cron` list/create/delete, `agent list/delete`, `chats` CRUD, `models` presets/list/active, `channel` CRUD, `admin`, `skills` enable/disable, `bridge` list/get |
 | **Embedded** | Needs harness/gateway runtime; boots in-process `OctopServer` | `chats send/repl`, `chats get` (history), `cron run-now`, `agent` create/start/stop/reload, `provider test`, `channel test`, `skills list`, `acp` |
 | **Embedded (bridge)** | In-process `BridgeManager` (no full server); CLI cannot keep Bridge WS after exit | `bridge` probe/create/patch/delete/connect/disconnect/agents |
-| **External** | Talks to OS/daemon directly, no Octop HTTP | `models ollama-*`, channel QR bind (WeCom/WeChat), Feishu bot-creator subprocess |
+| **External** | Talks to OS/daemon directly, no Ydsz Worker HTTP | `models ollama-*`, channel QR bind (WeCom/WeChat), Feishu bot-creator subprocess |
 
-No `octop user login` — CLI trusts local filesystem access to `~/.octop`. Pin acting user with `octop config set-user` or root `--user`; pin agent with `octop agent use` or root `--agent`. If `octop run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
+No `ydsz-worker user login` — CLI trusts local filesystem access to `~/.octop`. Pin acting user with `ydsz-worker config set-user` or root `--user`; pin agent with `ydsz-worker agent use` or root `--agent`. If `ydsz-worker run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
 
 ### `dashboard/src/` layout
 
@@ -180,7 +182,7 @@ No `octop user login` — CLI trusts local filesystem access to `~/.octop`. Pin 
 | `locales/` | i18n strings | — |
 | `utils/` | Frontend pure helpers | API or server knowledge |
 
-Frontend talks to Octop **only** via `/api` HTTP — never import or assume Python module layout.
+Frontend talks to Ydsz Worker **only** via `/api` HTTP — never import or assume Python module layout.
 
 ## 6. Run commands
 
@@ -323,14 +325,14 @@ User-facing datetime display and cron/scheduling defaults MUST use the server ti
 - Document non-obvious fields with `Field(..., description="…")`; name models clearly.
 - Spot-check `/api/docs` after API changes — a route that renders as an empty card or untyped blob is unfinished.
 
-**Cross-platform tests:** Octop CI runs on both Linux and Windows, so tests must not assume a single platform:
+**Cross-platform tests:** Ydsz Worker CI runs on both Linux and Windows, so tests must not assume a single platform:
 
 - Guard POSIX-only behavior with the repo convention `@pytest.mark.skipif(os.name != "posix", reason="…")`; prefer a module-level `posix_only = pytest.mark.skipif(os.name != "posix", reason="…")` alias. Use `pytest.mark.skipif(os.name == "nt", reason="…")` when a case is Linux/macOS-only for a different reason (e.g. forbidden path characters).
 - Do not hard-code POSIX paths (`/`, `/proc`, `/etc`, `/root`, `/usr/bin/…`, `~` → HOME) in assertions that run on every platform — they resolve differently on Windows (e.g. `/` → `D:\`). Prefer opaque mock tokens via `tests.support.fakes.fake_bin_path("tool")` (uses `pathlib` / `os.sep`) when stubbing `shutil.which` / `resolve_binary`.
 - Prefer `tmp_path` / `tmp_path_factory` and `pathlib.Path` over OS-specific literals; compare paths with `Path` equality (`tmp_path / "a" / "b"`), not string prefixes with `/`. Use `Path.as_posix()` / `os.sep` only when a serialized path string is part of the contract under test.
 - Do not assert `chmod` mode bits, symlink semantics, or Unix-only subprocess shells unless the test is marked `posix_only` (and production code short-circuits on non-POSIX the same way).
 - When a feature's semantics are inherently POSIX-only (e.g. the host root_dir denied prefixes in `infra/utils/host_dirs.py`), keep the source guards (`os.name != "posix"` short-circuit) and mirror them in the tests.
-- New connector/CLI/gateway tests that materialize files under `OCTOP_HOME` must set `monkeypatch.setenv("OCTOP_HOME", str(tmp_path))` and assert dirs with `Path` joins — never assume `~/.octop/...` string shape.
+- New connector/CLI/gateway tests that materialize files under `YDSZ_HOME` must set `monkeypatch.setenv("YDSZ_HOME", str(tmp_path))` and assert dirs with `Path` joins — never assume `~/.octop/...` string shape.
 
 ## 8. Do not
 
@@ -358,7 +360,7 @@ Boundary rules are in [§5](#5-module-boundaries). Additionally:
 | LDAP (directory) login | `infra/auth/ldap/`, `api/routers/auth_ldap.py`; config row is `sso_providers.kind='ldap'`; guide: `docs/ldap.md` |
 | Setup wizard (password file, tokens) | `infra/setup/`, `api/routers/setup.py` |
 | TLS / Let's Encrypt | `infra/setup/tls/`, `api/routers/tls.py` |
-| `octop run` boot sequence | `launch.py`, `cli/run_cmd.py` |
+| `ydsz-worker run` boot sequence | `launch.py`, `cli/run_cmd.py` |
 | How is a message processed? | `infra/gateway/processor.py` → harness agent |
 | How are agents started/stopped? | `infra/agents/manager.py` |
 | How does cron work? | `infra/cron/manager.py`, `infra/cron/job.py` |

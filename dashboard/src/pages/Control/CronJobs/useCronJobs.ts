@@ -83,14 +83,14 @@ function fromYdszCron(row: YdszCronRow, timezone: string): CronJob {
     },
     meta: {
       orca_agent_id: row.agent_id,
-      octop_fresh_thread: row.fresh_thread,
-      octop_session_key: row.session_key,
-      octop_model: row.model,
-      octop_task_type: row.task_type,
-      octop_mcp_servers: row.mcp_servers ?? [],
-      octop_last_run_at: row.last_run_at,
-      octop_last_status: row.last_status,
-      octop_last_error: row.last_error,
+      ydsz_fresh_thread: row.fresh_thread,
+      ydsz_session_key: row.session_key,
+      ydsz_model: row.model,
+      ydsz_task_type: row.task_type,
+      ydsz_mcp_servers: row.mcp_servers ?? [],
+      ydsz_last_run_at: row.last_run_at,
+      ydsz_last_status: row.last_status,
+      ydsz_last_error: row.last_error,
     },
   };
 }
@@ -128,15 +128,15 @@ export function jobToFormValues(
     task_type: job.task_type === "text" ? "text" : "agent",
     model: defaultModelToForm(
       job.model ??
-        (typeof meta.octop_model === "string" ? meta.octop_model : undefined),
+        (typeof meta.ydsz_model === "string" ? meta.ydsz_model : undefined),
     ),
-    fresh_thread: Boolean(meta.octop_fresh_thread),
+    fresh_thread: Boolean(meta.ydsz_fresh_thread),
     session_key:
-      typeof meta.octop_session_key === "string"
-        ? meta.octop_session_key
+      typeof meta.ydsz_session_key === "string"
+        ? meta.ydsz_session_key
         : null,
-    mcp_servers: Array.isArray(meta.octop_mcp_servers)
-      ? (meta.octop_mcp_servers as string[])
+    mcp_servers: Array.isArray(meta.ydsz_mcp_servers)
+      ? (meta.ydsz_mcp_servers as string[])
       : [],
     _scheduleMode: once
       ? "once"
@@ -399,9 +399,9 @@ export function useCronJobs() {
       },
       meta: {
         ...(original?.meta as object),
-        octop_fresh_thread: values.fresh_thread,
-        octop_session_key: values.session_key,
-        octop_model: values.model,
+        ydsz_fresh_thread: values.fresh_thread,
+        ydsz_session_key: values.session_key,
+        ydsz_model: values.model,
       },
     } as CronJob;
     patchJobs(activeAgentId, (prev) =>
