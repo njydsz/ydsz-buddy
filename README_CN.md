@@ -20,7 +20,7 @@
   <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white" /></a>
   <a href="https://github.com/TencentCloud/Octop/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
   <a href="https://github.com/TencentCloud/Octop/releases"><img alt="Version" src="https://img.shields.io/badge/version-1.0.2-orange" /></a>
-  <a href="https://pypi.org/project/octop/"><img src="https://img.shields.io/pypi/v/octop" alt="PyPI" /></a>
+  <a href="https://pypi.org/project/ydsz-worker/"><img src="https://img.shields.io/pypi/v/ydsz-worker" alt="PyPI" /></a>
   <a href="https://github.com/astral-sh/ruff"><img alt="Code Style: Ruff" src="https://img.shields.io/badge/code%20style-ruff-000000?logo=ruff&logoColor=white" /></a>
   <a href="https://github.com/TencentCloud/Octop"><img alt="GitHub stars" src="https://img.shields.io/github/stars/TencentCloud/Octop?style=social" /></a>
   <a href="https://github.com/TencentCloud/Octop/fork"><img alt="GitHub forks" src="https://img.shields.io/github/forks/TencentCloud/Octop?style=social" /></a>
@@ -258,7 +258,7 @@ uv sync --extra local-embedding
 ### 2. 初始化
 
 ```bash
-octop init
+ydsz-worker init
 ```
 
 交互式向导会在 `~/.octop/` 下创建 SQLite 数据库、JWT 密钥，并引导你设置首个管理员账号。
@@ -294,7 +294,7 @@ docker run -d \
   -v octop-data:/data/.octop \
   -e HOME=/data \
   -e YDSZ_DEFAULT_PASSWORD="<自定义强密码，留空则进入设置向导>" \
-  octop:latest
+  ydsz-worker:latest
 ```
 
 打开 `http://localhost:8088`。`YDSZ_DEFAULT_PASSWORD` 合格时首次启动会创建管理员，并把凭据写入 `/data/.octop/credential.txt`。未设置或密码被策略拒绝时不自动建账号，打开页面走设置向导（向导口令在 `/data/.octop/octop-login.txt`）。可通过 `YDSZ_ADMIN_USERNAME` 覆盖用户名。
@@ -348,7 +348,7 @@ docker run -d \
 | 方式 | 平台 | 说明 |
 |------|------|------|
 | 远程一键安装 | macOS / Linux | `curl …/ydsz-worker/install.sh \| bash` |
-| 远程一键安装 | Windows | `irm …/octop/install.ps1 \| iex` 或 `install.bat` |
+| 远程一键安装 | Windows | `irm …/ydsz-worker/install.ps1 \| iex` 或 `install.bat` |
 | 本地脚本 | macOS / Linux | `bash scripts/install.sh` |
 | 本地脚本 | Windows | `scripts\install.bat` 或 `install.ps1` |
 | PyPI | 全平台 | `pip install ydsz-worker`（可选 extras 如 `local-embedding`） |
@@ -361,10 +361,10 @@ docker run -d \
 `ydsz-worker update` 只替换 wheel / 二进制，你的 `~/.octop/` 数据库、工作区、密钥与 `config.json` 均会保留：
 
 ```bash
-octop update          # 获取并安装最新版 云顶数字工作台，若已注册系统服务则自动重启
+ydsz-worker update          # 获取并安装最新版 云顶数字工作台，若已注册系统服务则自动重启
 ```
 
-数据库结构会在下次启动时自动迁移；仅当设置向导提示需要迁移时才运行 `ydsz-worker init`。跨版本升级前请务必先备份（`octop backup`）。
+数据库结构会在下次启动时自动迁移；仅当设置向导提示需要迁移时才运行 `ydsz-worker init`。跨版本升级前请务必先备份（`ydsz-worker backup`）。
 
 ## ⚙️ 配置
 
@@ -372,22 +372,22 @@ octop update          # 获取并安装最新版 云顶数字工作台，若已�
 
 ```bash
 # LLM 供应商与模型
-octop models
-octop provider list
+ydsz-worker models
+ydsz-worker provider list
 
 # IM 通道
-octop channel list
-octop channel install
+ydsz-worker channel list
+ydsz-worker channel install
 
 # Skill（按 Agent）
-octop skills list --agent main
+ydsz-worker skills list --agent main
 
 # 定时任务
-octop cron list
-octop cron create --help
+ydsz-worker cron list
+ydsz-worker cron create --help
 
 # 用户（管理员）
-octop user list
+ydsz-worker user list
 ```
 
 ### 支持的 LLM 供应商

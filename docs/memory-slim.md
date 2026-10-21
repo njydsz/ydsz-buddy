@@ -33,7 +33,7 @@ octop memory slim --all       # 顺序整理列表中所有符合条件的智能
 `ydsz-worker --json memory slim --all` 的进度带 `agent_id`、`index`、`total_agents`，批次终态为
 `batch_done` 或 `batch_failed`。`memory list` 可用于提前查看范围，它本身不执行瘦身。
 
-上述终端命令直接触发维护，不是预览。它连接运行中的同一个 OCTOP_HOME 实例，不会启动第二份 Octop；
+上述终端命令直接触发维护，不是预览。它连接运行中的同一个 YDSZ_HOME 实例，不会启动第二份 Octop；
 不指定数据库路径，服务使用该智能体实际打开的 SQLite 文件。
 原 `octop-memory db slim FILE` / `scripts/memory-slim FILE` 仍然是离线预览入口。
 

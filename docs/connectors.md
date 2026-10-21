@@ -17,7 +17,7 @@ You can also add **custom MCP** servers in the dashboard; they are not listed he
 
 [English](#built-in-connectors) · **中文**
 
-Octop 内置一组 OAuth / MCP 连接器。控制台展示的名称、描述、授权提示和凭证字段
+Ydsz Worker 内置一组 OAuth / MCP 连接器。控制台展示的名称、描述、授权提示和凭证字段
 文案支持中英双语，跟随 `Accept-Language`。
 
 **元数据源：** [`src/octop/infra/connectors/catalog.json`](../src/octop/infra/connectors/catalog.json)。

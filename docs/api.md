@@ -438,7 +438,7 @@ because maintenance preserves history; concurrent background writes may affect t
 
 PostgreSQL limits every read/delete to the live expert's verified namespace and
 backs up exact target rows to a private JSONL file under
-`OCTOP_HOME/backups/memory-maintenance/` before committing a single transaction:
+`YDSZ_HOME/backups/memory-maintenance/` before committing a single transaction:
 
 - Rejected candidates decided more than 30 days ago, with no atom referencing them.
 - Operational journal entries older than 14 days (`extract_run`, `gc_*`,

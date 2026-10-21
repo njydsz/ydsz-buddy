@@ -2,12 +2,14 @@
 
 > Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。本文档描述 Ydsz Worker 的架构设计。
 
-Octop is a self-hosted AI assistant platform for multiple users and agents,
+Ydsz Worker is a self-hosted AI assistant platform for multiple users and agents,
 delivered as a single Python process.
 It glues three reusable libraries — `octop-harness` (LangGraph-based
 chat runtime), `octop-gateway` (IM channel pipeline), and a React
 + TypeScript dashboard — into one wheel that ships with a CLI, an
 HTTP/WebSocket API, and a web UI.
+
+> Ydsz Worker is a continued fork of Tencent Octop (MIT License).
 
 > Looking for the contributor-facing navigation guide (module boundaries,
 > change workflow, hard bans)? See [AGENTS.md](../AGENTS.md) at the repo
@@ -87,7 +89,7 @@ Three surfaces share the same agent runtime:
 | Surface | Wire | Session key (default) | Notes |
 |---------|------|-----------------------|-------|
 | Web UI | WebSocket `/api/agents/{aid}/chat/ws` | `<aid>:dashboard:<user_id>:dm` | Dashboard turn endpoint |
-| CLI | Embedded `OctopServer` (REPL) or WebSocket | `<aid>:cli:<user_id>:dm` | `octop chats send` / `chats repl` |
+| CLI | Embedded `OctopServer` (REPL) or WebSocket | `<aid>:cli:<user_id>:dm` | `ydsz-worker chats send` / `chats repl` |
 | IM channel | gateway `ChannelManager` | `<aid>:<channel_kind>:<platform_session>:<dm\|group>` | See `infra/gateway/process/message_keys.py` |
 | Cron job | APScheduler trigger → `Gateway.push_text_from_session` | row's `session_key` (defaults to `dashboard_key` of the owner) | `task_type=text\|agent` chooses direct-push vs run-AI-then-push |
 

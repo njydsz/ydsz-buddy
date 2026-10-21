@@ -209,7 +209,7 @@
 - 专家清单生成读取技能元数据改用共享 frontmatter 解析器：模块内自带的解析只认首行 `---` 并按 `:` 逐行切分，导致 `description: >-` 折叠块被当成字面量 `'>-'`、前导 HTML 注释会让整段 frontmatter 失效——技能描述以空值/错值进入生成提示词，进而写坏专家清单的 `description` 与 `welcome_message`
 - `date:` 定时触发与 `cron:` 一样使用 `default_timezone`，裸 ISO 时间不再回落宿主系统时区
 - HITL resume 流失败时将 pending 标为 `expired`（不再像成功批准），避免错误状态误导排查
-- SQLite 写事务改用 `BEGIN IMMEDIATE`：多 worker（`octop run --workers N`）或 CLI 与服务并发写入时，先读后写的事务不再因快照过期而立即报 `database is locked`
+- SQLite 写事务改用 `BEGIN IMMEDIATE`：多 worker（`ydsz-worker run --workers N`）或 CLI 与服务并发写入时，先读后写的事务不再因快照过期而立即报 `database is locked`
 - 登录页「忘记密码」改为按需展开：优先提示联系管理员，本机 CLI 重置作为次要说明（#869）
 - iOS PWA 状态栏不再虚化遮挡内容：顶栏改为不透明、去掉 backdrop-filter；登录页与设置向导补 `safe-area-inset` 内边距（#874）
 - 知识库纯文本/Markdown/CSV 在 UTF-8 失败时回退 GB18030，避免 Windows GBK 文档被替换成乱码后入库
@@ -233,7 +233,7 @@
 
 ### 修复
 
-- Windows 自升级：`octop.exe` 运行中也可完成升级
+- Windows 自升级：`ydsz-worker.exe` 运行中也可完成升级
 - 同一线程回合串行，避免 HITL 与普通回合交错污染会话
 - agent 配置 PATCH 不再丢掉 `workspace_dir`；cron / 系统任务按时区触发
 - iOS PWA 状态栏与 safe-area；无网络启动错误提示；旧版 Chromium 启动兼容
@@ -249,7 +249,7 @@
 ### 新增
 
 - 飞书 / 钉钉 / 企业微信 OAuth SSO 登录与绑定
-- 可选登录验证码（滑块及多家云验证码），并提供 `octop captcha reset`
+- 可选登录验证码（滑块及多家云验证码），并提供 `ydsz-worker captcha reset`
 - 容器工作区默认、专家头像，以及聊天 HITL / 技能选择体验优化
 - 模型列表搜索；ACP 纳入个性化「工具」页签
 
@@ -294,7 +294,7 @@
 - 语音探测按界面语言返回中文/英文错误（含腾讯云 SecretId 等常见鉴权失败）
 - 语音探测失败直接展示错误，不再返回 500；录音上传前转码为 WAV
 - `/compact` 回复隐藏本机绝对路径
-- `octop run` 正确应用 `OCTOP_PORT` / `OCTOP_BIND_HOST`
+- `ydsz-worker run` 正确应用 `OCTOP_PORT` / `OCTOP_BIND_HOST`
 
 ## [0.9.34] - 2026-09-12
 
@@ -423,7 +423,7 @@
 - 数据库 v10 迁移遗漏 thread projection 表
 - 飞牛 FPK 无效在线升级与原生版启动加载；长会话相关问题
 - 通道弹框文案统一为「通道」，新建默认实时过程
-- `octop acp` 启动即崩溃（CLI 注册表属性应对齐 `acp_cmd`）
+- `ydsz-worker acp` 启动即崩溃（CLI 注册表属性应对齐 `acp_cmd`）
 
 ## [0.9.29] - 2026-08-27
 
@@ -580,11 +580,11 @@
 - 新增每用户模型与推理（reasoning）偏好设置
 
 ### 变更
-- 依赖 `orcakit-harness-agent[all]>=0.9.20`；FilesystemGuard / ModelSettings 由 harness 自动挂载（Octop 仅保留 BinaryReadGuard 与 runtime_limits）
-- 专家 `workspace_dir`：创建时写入 `config_json.workspace_dir`（默认 `{OCTOP_HOME}/agents/<id>/`），所有 backend 共用；Docker 在容器内镜像同名路径为专家工作区，宿主同路径放 sessions/memory/checkpoints
-- Docker：`sandbox_scope`（agent/user/fixed）+ `sandbox_prefix`（默认 `octop_sandbox`）；删专家不删容器；专家工作区在 running 时可预览；Admin 存储 `previewable` 仅控制浏览（默认仅 fixed）；探测用 test 沙箱做真实读写
+- 依赖 `orcakit-harness-agent[all]>=0.9.20`；FilesystemGuard / ModelSettings 由 harness 自动挂载（Ydsz Worker 仅保留 BinaryReadGuard 与 runtime_limits）
+- 专家 `workspace_dir`：创建时写入 `config_json.workspace_dir`（默认 `{YDSZ_HOME}/agents/<id>/`），所有 backend 共用；Docker 在容器内镜像同名路径为专家工作区，宿主同路径放 sessions/memory/checkpoints
+- Docker：`sandbox_scope`（agent/user/fixed）+ `sandbox_prefix`（默认 `ydsz_sandbox`）；删专家不删容器；专家工作区在 running 时可预览；Admin 存储 `previewable` 仅控制浏览（默认仅 fixed）；探测用 test 沙箱做真实读写
 - 删除被专家 `named` 引用的存储后端时返回 `STORAGE_BACKEND_REFERENCED` 并列出引用专家
-- 将 IM 频道定时任务从 ACE 迁移至 Octop cron
+- 将 IM 频道定时任务从 ACE 迁移至 Ydsz Worker cron
 
 ### 修复
 - 超大图片不再降级为附件路径提示：超过视觉嵌入上限（2 MB）的图片由 Pillow 压缩缩放至最长边 1568px 后仍以内联图片嵌入请求（保留 EXIF 方向与透明通道，仅当压缩失败时才回退为路径提示），视觉模型自动升级随之生效 (#219)
@@ -594,7 +594,7 @@
 ## [0.9.20] - 2026-08-09
 
 ### 新增
-- QQ 频道二维码扫码绑定，支持群聊上下文（仪表盘频道抽屉 + `octop channel` CLI）(#160)
+- QQ 频道二维码扫码绑定，支持群聊上下文（仪表盘频道抽屉 + `ydsz-worker channel` CLI）(#160)
 - 语音接入小米 MiMo STT / TTS 供应商（`mimo-v2.5-asr` / `mimo-v2.5-tts`），设置页可选择计费端点与 9 种预置音色，TTS 标注限免 (#186)
 - 仪表盘自定义品牌配色：8 套调色板（玫瑰 / 科技 / 靛蓝 / 青绿 / 紫罗兰 / 翠绿 / 琥珀 / 石墨），与浅色 / 深色模式正交且本地持久化
 
@@ -623,7 +623,7 @@
 
 ### 变更
 - `make all` 先执行前后端 `format-all`（Ruff + Prettier）；pre-commit 在 format 后回写已暂存文件并构建 dashboard (#143)
-- harness runtime 诊断日志写入 `~/.octop/logs`（与 `octop.log` 并排），不再落到各 agent workspace 的 `logs/`；行内带 `[agent=…]`
+- harness runtime 诊断日志写入 `~/.octop/logs`（与 `ydsz-worker.log` 并排），不再落到各 agent workspace 的 `logs/`；行内带 `[agent=…]`
 - 依赖 `orcakit-harness-agent>=0.9.19`、`harness-gateway>=0.9.1`（scoped root execute jail）
 - 企业微信客户群二维码与文档有效期更新至 2026-08-08 (#149)
 
@@ -785,7 +785,7 @@
 ## [0.9.8] - 2026-07-15
 
 ### 新增
-- 远程浏览器/远程桌面安装日志面板新增「复制日志」按钮，并在安装失败时提示可将日志交给 Octop 协助排查
+- 远程浏览器/远程桌面安装日志面板新增「复制日志」按钮，并在安装失败时提示可将日志交给 Ydsz Worker 协助排查
 - 新增前端 `copyText` 工具，在非安全上下文（如 plain-http 管理页）下通过临时 textarea + execCommand 回退，保证剪贴板复制可用
 - 桌面安装脚本新增 `A-F4`（关闭窗口）与 `C-A-D`（显示桌面）openbox 快捷键，对应桌面快捷键
 
@@ -798,7 +798,7 @@
 - 新增 `docker-publish.yml` 工作流，构建并推送镜像到 Docker Hub
 - 移除 `release.yml` 中多余的 `id-token: write` 权限
 - 删除已与现行 Docker Hub 发版流程脱节的离线部署脚本 `docker_deploy.sh`，并清理 `docker/README.md`、`README_CN.md` 中的相关章节
-- 修正 `docker/README.md` 标题笔误（`ODocker` → `Octop`）
+- 修正 `docker/README.md` 标题笔误（`ODocker` → `Ydsz Worker`）
 
 ## [0.9.7] - 2026-07-14
 

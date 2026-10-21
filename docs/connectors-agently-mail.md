@@ -12,7 +12,7 @@ Agent Mail 为 Agent 提供独立邮箱。本连接器通过官方 `@tencent-qqm
 
 每个实例使用独立的 CLI 原生 workspace（同时隔离配置与 keychain 命名空间）。不同 Agent 需要不同邮箱时，分别创建实例并授权。
 同一实例被显式共享或绑定到多个 Agent 时，这些 Agent 使用同一个邮箱。
-OAuth 凭据由官方 CLI 管理；Octop 不向 Dashboard 或模型返回访问令牌。
+OAuth 凭据由官方 CLI 管理；Ydsz Worker 不向 Dashboard 或模型返回访问令牌。
 登录流程在后台运行，超时、取消、删除实例和服务关闭时清理子进程。
 
 授权页还支持刷新、注销。注销会清除 CLI 授权并尝试撤销远端凭据。

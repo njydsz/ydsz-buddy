@@ -1,6 +1,6 @@
 # 分段历史归档：启用、验证和回退
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 本期增加可选的历史存储，不运行历史数据迁移，不清理 checkpoint。默认关闭。
 
@@ -32,7 +32,7 @@ checkpoint、Memory 原始记录及会话 JSONL 仍遵循现有行为。
 
 分段归档关闭时，旧投影回填仍可读取 checkpoint。SQLite 回填使用独立只读连接、事务和内容缓存；
 若 octop-memory 使用共享正文格式，须同时安装提供 `CheckpointSerializer.with_connection` 的
-octop-memory 和本次 Octop 读取修正。原有 inline 格式仍可读取。
+octop-memory 和本次 Ydsz Worker 读取修正。原有 inline 格式仍可读取。
 PostgreSQL 不进入 SQLite 读取入口，继续经 graph 恢复消息；这不改变下述分段归档的 SQLite-only 限制。
 
 ## 启用

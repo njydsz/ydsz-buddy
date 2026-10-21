@@ -17,7 +17,7 @@
 1. **请用系统浏览器授权**：在 Chrome 等系统浏览器打开 Ydsz Worker，进入「连接器 → 内置连接器 → 企查查」，点击「一键授权」。内嵌/桌面弹窗可能无法回调；显示企查查授权成功不等于 Ydsz Worker 已收到。
 2. 本机部署可以使用 `http://127.0.0.1:端口` 或 `http://localhost:端口`。服务和浏览器必须在同一台电脑。
 3. 公网部署必须配置正确的 **HTTPS 公网地址及回调** `/api/connectors/oauth/callback`，并按企查查要求完成回调域名/地址登记。公网 HTTP 会在发起授权前被拒绝，也不能用 localhost 替代远端服务器地址。
-4. 使用 DCR + 授权码 + PKCE S256，Client Name 为 **`Octop Connector`**，scope 为 `mcp:tools`，授权服务器为 `https://agent.qcc.com`。
+4. 使用 DCR + 授权码 + PKCE S256，Client Name 为 **`Ydsz Worker Connector`**，scope 为 `mcp:tools`，授权服务器为 `https://agent.qcc.com`。
 
 ### 方式二：API Key（无公网 HTTPS 时）
 
@@ -27,7 +27,7 @@
 4. 不依赖 OAuth 回调；适合内网、HTTP 公网或无法登记回调域名的部署。
 5. 与一键授权二选一：保存 API Key 会替换已有 OAuth 凭证；完成一键授权会替换已有 API Key。本机或 HTTPS 环境下也可同时看到「打开授权页」，用于手动取 Key。
 
-完成任一方式后，确认 Octop 显示已授权/已配置、探测成功，在对话中选择卡片并使用默认执行模式（Craft），输入企业全称及查询需求。Ask / Plan 模式按产品设计禁用 MCP，不能用于验证连接器调用。
+完成任一方式后，确认 Ydsz Worker 显示已授权/已配置、探测成功，在对话中选择卡片并使用默认执行模式（Craft），输入企业全称及查询需求。Ask / Plan 模式按产品设计禁用 MCP，不能用于验证连接器调用。
 
 五类资源共用卡片保存的同一份凭证；只向固定资源发送凭证，并校验 Protected Resource Metadata。
 

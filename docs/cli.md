@@ -59,7 +59,7 @@ Commands:
 
 ## Transport layers
 
-Octop commands pick one of these transports:
+Ydsz Worker commands pick one of these transports:
 
 | Layer | When | Login? | Examples |
 |-------|------|--------|----------|
@@ -79,7 +79,7 @@ Idempotent on the DB; pass `--force` to wipe `~/.octop` first.
 ```
 Usage: ydsz-worker init [OPTIONS]
 
-  Bootstrap an Octop server (~/.octop dir, DB migrations, JWT secret, first admin).
+  Bootstrap a Ydsz Worker server (~/.octop dir, DB migrations, JWT secret, first admin).
 
 Options:
   --admin-username TEXT       [env: OCTOP_ADMIN_USERNAME]
@@ -188,7 +188,7 @@ Commands:
 agents on behalf of another user. `use` writes the agent id into
 `~/.octop/cli_state.json` so subsequent commands default to it.
 
-## `octop chats`
+## `ydsz-worker chats`
 
 Thread CRUD + interactive REPL. The REPL and `send` use an embedded
 server (no separate `ydsz-worker run` needed); `list` / `get` / `create` /
@@ -400,11 +400,11 @@ Commands:
 
 ### `ydsz-worker backup auto`
 
-Automatic backups are scheduled **inside** a running `octop run` process
+Automatic backups are scheduled **inside** a running `ydsz-worker run` process
 (via the same system-job mechanism as TLS renewal). Configure in
 `config.json` under `backup`, with env overrides
-`OCTOP_BACKUP_AUTO_ENABLED`, `OCTOP_BACKUP_SCHEDULE`,
-`OCTOP_BACKUP_RETENTION_COUNT`, or via the dashboard Backup settings.
+`YDSZ_BACKUP_AUTO_ENABLED`, `YDSZ_BACKUP_SCHEDULE`,
+`YDSZ_BACKUP_RETENTION_COUNT`, or via the dashboard Backup settings.
 
 ```
 Usage: ydsz-worker backup auto [OPTIONS] COMMAND [ARGS]...
@@ -440,7 +440,7 @@ Options:
 Install and manage third-party plugins (drop into `~/.octop/plugins/`).
 The same plugin manager powers the dashboard's "Plugins" page.
 
-Octop also **seeds bundled plugins** into `~/.octop/plugins/` during
+Ydsz Worker also **seeds bundled plugins** into `~/.octop/plugins/` during
 `ydsz-worker init` and every `ydsz-worker run` start. They are listed in Admin →
 Plugins but stay **globally disabled** until you turn them on. An id
 already recorded in `config.json` → `bundled_plugins_seeded` is not
@@ -458,11 +458,11 @@ Commands:
   reload     Reload all installed plugins without restart.
 ```
 
-## `octop acp`
+## `ydsz-worker acp`
 
-Expose an Octop agent as a stdio JSON-RPC ACP server. Boots a
+Expose a Ydsz Worker agent as a stdio JSON-RPC ACP server. Boots a
 standalone `OctopServer` (reads `~/.octop`); does **not** require
-`octop run` to be running.
+`ydsz-worker run` to be running.
 
 ```
 Usage: ydsz-worker acp [OPTIONS]
@@ -509,7 +509,7 @@ Commands:
   set-user   Pin the default --user.
 ```
 
-## `octop completion` / `octop version`
+## `ydsz-worker completion` / `ydsz-worker version`
 
 ```text
 $ ydsz-worker completion show bash   # dump a shell snippet

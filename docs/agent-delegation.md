@@ -18,7 +18,7 @@
 
 可选 `user_question`：写入 inbox 消息，供 `compose_followup` 使用。
 
-## Octop 侧保留代码
+## Ydsz Worker 侧保留代码
 
 | 路径 | 职责 |
 |------|------|

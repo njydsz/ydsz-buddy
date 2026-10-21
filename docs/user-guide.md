@@ -10,7 +10,7 @@
 ## 目录
 
 - [一、简介](#一简介)
-- [二、安装 Octop](#二安装-octop)
+- [二、安装 Ydsz Worker](#二安装-ydsz-worker)
   - [2.1 环境要求](#21-环境要求)
   - [2.2 一键脚本安装（推荐）](#22-一键脚本安装推荐)
   - [2.3 验证安装](#23-验证安装)
@@ -104,8 +104,8 @@ source ~/.bashrc  # Bash
 ### 2.3 验证安装
 
 ```bash
-octop --version
-octop run --help
+ydsz-worker --version
+ydsz-worker run --help
 ```
 
 若提示 `command not found: ydsz-worker`，请确认已重新加载 shell 或检查 `~/.octop/bin` 是否在 PATH 中。
@@ -122,8 +122,8 @@ docker run -d \
   -p 8088:8088 \
   -v octop-data:/data/.octop \
   -e HOME=/data \
-  -e OCTOP_DEFAULT_PASSWORD="<自定义强密码，留空则进入设置向导>" \
-  octop:latest
+  -e YDSZ_DEFAULT_PASSWORD="<自定义强密码，留空则进入设置向导>" \
+  ydsz-worker:latest
 ```
 
 完整环境变量见 [.env.example](../.env.example)：
@@ -146,13 +146,13 @@ docker run -d \
 安装完成后，直接启动服务即可。首次运行时，控制面数据库、JWT 密钥与首个管理员都会在**设置向导**中创建（绿场默认延后打开数据库，直到向导里确认 SQLite / PostgreSQL）：
 
 ```bash
-octop run       # 前台启动 API + Web 控制台
+ydsz-worker run       # 前台启动 API + Web 控制台
 ```
 
 若希望服务在后台常驻，可注册为系统服务：
 
 ```bash
-octop service start   # Linux(systemd) / macOS(launchd) / Windows 服务
+ydsz-worker service start   # Linux(systemd) / macOS(launchd) / Windows 服务
 ```
 
 启动后打开 **http://127.0.0.1:8088**。
@@ -213,7 +213,7 @@ octop service start   # Linux(systemd) / macOS(launchd) / Windows 服务
 ```bash
 export OCTOP_ADMIN_USERNAME=admin
 export OCTOP_ADMIN_PASSWORD="<你的强密码，≥8 位且含字母和数字>"
-octop run
+ydsz-worker run
 ```
 
 密码须满足策略（≥8 位，同时包含字母和数字）。之后再在 Web 控制台中完成模型等其余配置即可。
@@ -271,9 +271,9 @@ Octop 通过 **供应商（Provider）** 接入大模型。每个 Agent 可使�
 ### 4.5 通过 CLI 配置供应商
 
 ```bash
-octop models              # 查看供应商预设与模型解析
-octop provider list       # 列出已配置供应商
-octop provider --help     # 供应商增删改查帮助
+ydsz-worker models              # 查看供应商预设与模型解析
+ydsz-worker provider list       # 列出已配置供应商
+ydsz-worker provider --help     # 供应商增删改查帮助
 ```
 
 ### 4.6 本地模型 Ollama
@@ -358,7 +358,7 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 1. **入站** —— 让外部工具（Zed、OpenCode 等）使用你的 Ydsz Worker Agent：
 
    ```bash
-   octop acp --agent main
+   ydsz-worker acp --agent main
    ```
 
 2. **出站** —— 在对话中把编码任务委派给外部 Agent（OpenCode、CodeBuddy、Claude Code、Codex）：
@@ -374,7 +374,7 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 - **TLS**：配置 HTTPS（自签或 Let's Encrypt）。
 - **系统**：监听地址 / 端口、日志级别、定时任务时区等。
 
-> 手动编辑配置文件：运行时参数保存在 `~/.octop/config.json`，可用环境变量覆盖（如 `YDSZ_PORT`、`OCTOP_BIND_HOST`）。详见 [docs/configuration.md](configuration.md)。
+> 手动编辑配置文件：运行时参数保存在 `~/.octop/config.json`，可用环境变量覆盖（如 `YDSZ_PORT`、`YDSZ_BIND_HOST`）。详见 [docs/configuration.md](configuration.md)。
 
 ![图 5.6 — 设置页面](assets/use-06-settings.png)
 
@@ -397,18 +397,18 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 | 命令 | 说明 |
 |------|------|
 | `ydsz-worker run` | 前台启动 Octop |
-| `octop run --host 0.0.0.0 --port 8088` | 自定义监听地址与端口 |
+| `ydsz-worker run --host 0.0.0.0 --port 8088` | 自定义监听地址与端口 |
 | `ydsz-worker service start` | 安装并启动系统服务 |
-| `octop service stop` | 停止系统服务 |
-| `octop agent` | 创建、列出、启停 Agent |
-| `octop channel` | 安装与管理 IM 通道 |
-| `octop bridge` | 添加 / 探测 / 编辑 / 删除远程 Octop 对端 |
-| `octop chats` | REPL 与会话管理 |
-| `octop acp` | 为 IDE 提供 stdio ACP 服务 |
-| `octop cron` | 管理定时任务 |
+| `ydsz-worker service stop` | 停止系统服务 |
+| `ydsz-worker agent` | 创建、列出、启停 Agent |
+| `ydsz-worker channel` | 安装与管理 IM 通道 |
+| `ydsz-worker bridge` | 添加 / 探测 / 编辑 / 删除远程 Octop 对端 |
+| `ydsz-worker chats` | REPL 与会话管理 |
+| `ydsz-worker acp` | 为 IDE 提供 stdio ACP 服务 |
+| `ydsz-worker cron` | 管理定时任务 |
 | `ydsz-worker models` | 供应商预设与模型解析 |
 | `ydsz-worker provider list` | 列出已配置供应商 |
-| `octop skills` | 按 Agent 启用 / 禁用 Skill |
+| `ydsz-worker skills` | 按 Agent 启用 / 禁用 Skill |
 | `ydsz-worker user list` | 列出用户（管理员） |
 | `ydsz-worker backup` | 导出 / 恢复备份 |
 | `ydsz-worker update` | 检查并安装更新 |
@@ -431,7 +431,7 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 - 检查 API Key、Base URL 是否正确，网络是否可访问该服务，账户是否有配额。
 
 **Q：如何修改监听地址让局域网访问？**
-- 启动时：`octop run --host 0.0.0.0 --port 8088`；或设置环境变量 `YDSZ_BIND_HOST=0.0.0.0`、`YDSZ_PORT=8088`。
+- 启动时：`ydsz-worker run --host 0.0.0.0 --port 8088`；或设置环境变量 `YDSZ_BIND_HOST=0.0.0.0`、`YDSZ_PORT=8088`。
 
 **Q：数据存放在哪里？**
 - 全部在 `~/.octop/`：

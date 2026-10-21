@@ -1,6 +1,6 @@
 # Personas
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 Each agent has an optional MBTI persona (`persona_mbti` column on the
 `agents` row). The persona profile is rendered into the agent's

@@ -1,6 +1,6 @@
 # 第三方通道插件
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 通道插件依赖配套的 harness `kind: channel` 与 gateway 动态注册接口。部署前应先安装包含这些能力的正式版本；本变更不预先填写尚未发布的版本号。
 

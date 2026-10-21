@@ -9,10 +9,10 @@ Discord 适配器已随 `octop-gateway 0.9.9` 发布。Octop 要求 `octop-gatew
 ```sh
 cd Octop
 uv sync --locked --extra dev
-uv run octop run
+uv run ydsz-worker run
 ```
 
-可在 `uv run octop run` 后追加原有启动参数。先停止占用同一服务端口的旧进程；不要同时启动两个使用同一 Bot Token 的实例。
+可在 `uv run ydsz-worker run` 后追加原有启动参数。先停止占用同一服务端口的旧进程；不要同时启动两个使用同一 Bot Token 的实例。
 
 仅在联调相邻 `octop-gateway` 源码时使用 `bash scripts/run-discord-local.sh`；该脚本会覆盖发布包为本地可编辑依赖。恢复发布包时重新运行 `uv sync --locked --extra dev`。
 
@@ -60,7 +60,7 @@ uv run octop run
 | 前端通道测试 | 12 项通过，包含 Discord 入口、Token 和长数字 ID 的完整保存流程 |
 | `make build-frontend` / 启动脚本 | TypeScript 与 Vite 构建通过；`run-discord-local.sh --help` 通过；内置网页产物已生成 |
 
-命令使用 `RUN='uv run --no-sync'` 保留未发布的本地网关；通道库复用 Octop 的开发环境（`UV_PROJECT_ENVIRONMENT=../Octop/.venv`）。Octop 完整测试需允许绑定本机随机端口，最初沙箱导致的 15 项端口权限失败已在允许本机端口后完整重跑通过。
+命令使用 `RUN='uv run --no-sync'` 保留未发布的本地网关；通道库复用 Ydsz Worker 的开发环境（`UV_PROJECT_ENVIRONMENT=../Octop/.venv`）。Octop 完整测试需允许绑定本机随机端口，最初沙箱导致的 15 项端口权限失败已在允许本机端口后完整重跑通过。
 
 没有使用真实 Bot Token，也没有发布包、提交或推送代码。人工测试请使用本文第一节的本地启动方式。
 

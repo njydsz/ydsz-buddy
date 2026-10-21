@@ -74,7 +74,7 @@ After changing global runners, Ydsz Worker reloads your agents automatically. Ch
 Let external clients (e.g. Zed) use a Ydsz Worker agent as their coding agent:
 
 ```bash
-octop acp --agent main
+ydsz-worker acp --agent main
 ```
 
 | Option | Description |
@@ -87,7 +87,7 @@ This starts a **standalone** `OctopServer` (reads `~/.octop`), boots the agent, 
 Pin the default agent for convenience:
 
 ```bash
-octop user login --username you
+ydsz-worker user login --username you
 # set default_agent in ~/.octop/cli_state.json, or:
 ydsz-worker --agent main acp
 ```

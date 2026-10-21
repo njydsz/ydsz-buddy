@@ -20,7 +20,7 @@ We aim to acknowledge reports within **3 business days** and provide a fix timel
 
 ## Scope
 
-Octop is a self-hosted control plane. Operators are responsible for:
+Ydsz Worker is a self-hosted control plane. Operators are responsible for:
 
 - Securing the host and network exposure of `ydsz-worker run`
 - Rotating JWT secrets and admin credentials

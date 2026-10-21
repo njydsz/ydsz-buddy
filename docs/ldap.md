@@ -2,7 +2,7 @@
 
 > Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
 
-> Octop 支持接入企业目录（Active Directory、OpenLDAP 等）作为登录方式：用户在**现有登录表单**里直接输入域账号和密码，Octop 通过目录完成认证，并可自动创建本地账号、按目录组映射角色。
+> Ydsz Worker 支持接入企业目录（Active Directory、OpenLDAP 等）作为登录方式：用户在**现有登录表单**里直接输入域账号和密码，Octop 通过目录完成认证，并可自动创建本地账号、按目录组映射角色。
 
 本文覆盖：功能与设计、跑起来（含本地 LDAP 开发服务器）、配置项参考、登录行为细则、HTTP API、测试方法、故障排查。
 
@@ -225,7 +225,7 @@ memberOf: cn=admin,ou=groups,dc=example,dc=org
 
 ### 3.2 启动 Octop（独立 HOME，避免污染现有实例）
 
-用独立 `HOME` + `OCTOP_HOME` 起一个一次性实例，数据库与向导密码都落在临时目录：
+用独立 `HOME` + `YDSZ_HOME` 起一个一次性实例，数据库与向导密码都落在临时目录：
 
 ```bash
 cd <repo 根目录>
@@ -233,8 +233,8 @@ RUNTIME=/tmp/octop-ldap-dev
 mkdir -p "$RUNTIME/home"
 
 HOME="$RUNTIME/home" \
-OCTOP_HOME="$RUNTIME/home/.octop" \
-uv run octop run --host 127.0.0.1 --port 8799
+YDSZ_HOME="$RUNTIME/home/.octop" \
+uv run ydsz-worker run --host 127.0.0.1 --port 8799
 ```
 
 首次启动会打印一次性的设置向导密码，同时写入 `$RUNTIME/home/octop-login.txt`：
@@ -243,7 +243,7 @@ uv run octop run --host 127.0.0.1 --port 8799
 ╔══════════════════════════════════════════════════════════╗
 ║  Octop first-run wizard password (one-time use):          ║
 ║  xxxxxxxxxxxxxxxxxxxx                                     ║
-║  File: ~/octop-login.txt                                  ║
+║  File: ~/ydsz-login.txt                                  ║
 ╚══════════════════════════════════════════════════════════╝
 ```
 

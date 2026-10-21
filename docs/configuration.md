@@ -1,6 +1,6 @@
 # Configuration
 
-Octop stores all of its state under `~/.octop/`. The directory is created
+Ydsz Worker stores all of its state under `~/.octop/`. The directory is created
 on first server start (or by `ydsz-worker init` / `ydsz-worker run`).
 
 ## Filesystem layout
@@ -8,17 +8,17 @@ on first server start (or by `ydsz-worker init` / `ydsz-worker run`).
 ```
 ~/.octop/
 ├── config.json              # process-level settings (host, port, CORS, DB, TLS, …)
-├── env                      # optional dotenv (OCTOP_DATABASE_*, API keys, …); loaded at server start
+├── env                      # optional dotenv (YDSZ_DATABASE_*, API keys, …); loaded at server start
 ├── octop.db                 # SQLite — users, agents, providers, sessions, audit
-├── cli_state.json           # CLI token + pinned defaults (`octop user login`)
-├── repl_history             # readline-style history for `octop chats repl`
+├── cli_state.json           # CLI token + pinned defaults (`ydsz-worker user login`)
+├── repl_history             # readline-style history for `ydsz-worker chats repl`
 ├── secrets/
-│   └── jwt_secret           # 32-byte random; rotate with `octop admin rotate-jwt-secret`
+│   └── jwt_secret           # 32-byte random; rotate with `ydsz-worker admin rotate-jwt-secret`
 ├── agents/<agent_id>/       # per-agent workspace (LangGraph state, attachments, …)
 ├── plugins/                 # installed third-party plugins
-├── ssl/                     # self-signed certs when `octop run --ssl` is used without --cert/--key
-├── logs/                    # rotating log files (when `octop service start` writes a logfile)
-└── octop.log                # default foreground log path
+├── ssl/                     # self-signed certs when `ydsz-worker run --ssl` is used without --cert/--key
+├── logs/                    # rotating log files (when `ydsz-worker service start` writes a logfile)
+└── ydsz-worker.log          # default foreground log path
 ```
 
 `env` is dotenv format, applied before `config.json` is loaded

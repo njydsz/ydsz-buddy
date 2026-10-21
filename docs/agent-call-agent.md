@@ -1,6 +1,6 @@
 # Agent 互调（harness teams）
 
-> Ydsz Worker 基于 Tencent Octop（MIT 协议）二开。
+> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 > 架构与 inbox 设计见 [agent-interop-mailbox.md](./agent-interop-mailbox.md)。  
 > 后台协作见 [agent-delegation.md](./agent-delegation.md)。

@@ -89,7 +89,7 @@ octop-harness 增加 `peer_invoke_mode: "sync" | "async" | "both"`（默认 `bot
 - `async`：只注入异步派工（发完即返回）
 - `both`：一个工具两个 mode
 
-Ydsz Worker 普通专家设 `peer_invoke_mode=sync`（单聊：结果回工具）；团队主持人设 `async` 且 `team_peers` = 成员 id（群聊：上墙）。主持人自己的对话请求也会带上 `peer_invoke_mode=async`。在仍默认 `ask_agent mode=sync` 的运行时上，Octop 会把主持人对成员的 `call_peer` 改写成 inbox `submit_peer`，保证发完即返回。异步管道按 inbox / 房间走群聊双写，不按 `kind=team` 决定要不要上墙。
+Ydsz Worker 普通专家设 `peer_invoke_mode=sync`（单聊：结果回工具）；团队主持人设 `async` 且 `team_peers` = 成员 id（群聊：上墙）。主持人自己的对话请求也会带上 `peer_invoke_mode=async`。在仍默认 `ask_agent mode=sync` 的运行时上，Ydsz Worker 会把主持人对成员的 `call_peer` 改写成 inbox `submit_peer`，保证发完即返回。异步管道按 inbox / 房间走群聊双写，不按 `kind=team` 决定要不要上墙。
 
 inbox 按 callee 并发：同一成员串行，不同成员并行；主持人回叫按源 `thread_id` 串行。
 

@@ -206,13 +206,13 @@
 2. **隧道面过大**：协议通用后需身份隔离 + 可选 path 策略 + 审计，避免误暴露危险管理 API。
 3. **双连接竞态**：两边同时 dial 同一 `connection_id` 必须合并。
 4. **流式对话**：不要把 turn 硬塞进模拟 HTTP SSE；HTTP 隧道与 turn 流分帧、同连接多路复用。
-5. **版本 skew**：握手带 octop / bridge protocol version；不兼容则拒绝并提示升级。
+5. **版本 skew**：握手带 ydsz-worker / bridge protocol version；不兼容则拒绝并提示升级。
 
 ## 10. 命名一览
 
 | 用途 | 命名 |
 |------|------|
-| 包 | `octop.infra.bridge` |
+| 包 | `ydsz-worker.infra.bridge` |
 | HTTP 管理 API | `/api/bridge/...` |
 | CLI | `ydsz-worker bridge`（与 Dashboard 对端管理同一套 `BridgeManager`） |
 | 远程 agent id | `bridge:{connection_id}:{remote_agent_id}` |
