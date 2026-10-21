@@ -1,0 +1,51 @@
+# =============================================================================
+# Ydsz Worker — Remote Phone (mobile) compose overlay for local / DinD testing
+#
+# Usage (from repo root):
+#   # once: download platform-tools next to the repo
+#   mkdir -p .tools && cd /tmp && curl -fsSL -o pt.zip \
+#     https://dl.google.com/android/repository/platform-tools-latest-linux.zip \
+#     && unzip -qo pt.zip -d /workspace/Ydsz/.tools
+#
+#   docker compose -f docker/docker-compose.mobile.yml up -d --build
+#
+# This file is standalone (not an overlay) because ``network_mode: host``
+# conflicts with published ``ports`` from the base compose file.
+#
+# Host prerequisites:
+# - Docker socket usable by the container
+# - /dev/binder or /dev/binderfs on the host
+# - Enough free disk for the Redroid image
+# =============================================================================
+
+services:
+  ydsz:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ydsz-worker:latest
+    container_name: ydsz-worker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    privileged: true
+    network_mode: host
+    volumes:
+      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/binderfs:/dev/binderfs
+      - ${YDSZ_PLATFORM_TOOLS:-../.tools/platform-tools}:/opt/android-sdk/platform-tools:ro
+    environment:
+      - HOME=/data
+      - YDSZ_BIND_HOST=0.0.0.0
+      - YDSZ_PORT=${YDSZ_PORT:-8088}
+      - YDSZ_LOG_LEVEL=${YDSZ_LOG_LEVEL:-info}
+      - YDSZ_DEFAULT_PASSWORD=${YDSZ_DEFAULT_PASSWORD:-}
+      - YDSZ_ADMIN_USERNAME=${YDSZ_ADMIN_USERNAME:-admin}
+      - YDSZ_MOBILE_ADB_HOST=${YDSZ_MOBILE_ADB_HOST:-127.0.0.1:5555}
+      - YDSZ_MOBILE_CONTAINER=${YDSZ_MOBILE_CONTAINER:-ydsz-mobile-android}
+      - YDSZ_ENABLE_MOBILE=${YDSZ_ENABLE_MOBILE:-1}
+      - ANDROID_HOME=/opt/android-sdk
+      - ANDROID_SDK_ROOT=/opt/android-sdk

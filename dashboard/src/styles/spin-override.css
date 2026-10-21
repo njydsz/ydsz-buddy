@@ -1,0 +1,37 @@
+/**
+ * Layout contract for the global antd Spin indicator (OctopSpinner).
+ * antd sizes and positions its default dot from the `dotSize` token, so every
+ * geometry rule it derives (box, nested-pattern centering, tip gap) has to be
+ * restated from the size variable.
+ */
+
+/* One ring size for page- and section-level loading (`size` default / large). */
+.ydsz-spin {
+  --ydsz-spinner-size: 48px;
+  --ydsz-spinner-ring-width: 4px;
+}
+
+/* `size="small"` marks spins nested in a control — input suffixes, select
+   dropdowns, inline labels — where a 48px ring would stretch its container. */
+.ydsz-spin-sm {
+  --ydsz-spinner-size: 18px;
+  --ydsz-spinner-ring-width: 2px;
+}
+
+.ydsz-spin .ydsz-spin-dot {
+  width: var(--ydsz-spinner-size) !important;
+  height: var(--ydsz-spinner-size) !important;
+}
+
+.ydsz-spin-nested-loading .ydsz-spin .ydsz-spin-dot {
+  margin: calc(var(--ydsz-spinner-size) / -2) !important;
+}
+
+/* With a tip, lift the ring and drop the text below it. */
+.ydsz-spin-nested-loading .ydsz-spin-show-text .ydsz-spin-dot {
+  margin-top: calc(var(--ydsz-spinner-size) / -2 - 12px) !important;
+}
+
+.ydsz-spin-nested-loading .ydsz-spin-show-text .ydsz-spin-text {
+  padding-top: calc(var(--ydsz-spinner-size) / 2 - 4px) !important;
+}

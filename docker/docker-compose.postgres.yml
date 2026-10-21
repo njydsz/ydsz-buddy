@@ -1,0 +1,42 @@
+# =============================================================================
+# Local PostgreSQL (+ pgvector) for Ydsz Worker dual-backend development / tests
+#
+# From repo root:
+#   docker compose -f docker/docker-compose.postgres.yml up -d
+#   docker compose -f docker/docker-compose.postgres.yml down
+#
+# Connection (default):
+#   postgresql://ydsz:ydsz@127.0.0.1:5432/ydsz
+#
+# For pytest / Ydsz Worker:
+#   export YDSZ_TEST_DATABASE_URL='postgresql://ydsz:ydsz@127.0.0.1:5432/ydsz'
+#   export YDSZ_DATABASE_URL='postgresql://ydsz:ydsz@127.0.0.1:5432/ydsz'
+#
+# Init layers (ADR 002):
+#   - Control-plane schema → Ydsz migrate (NNN_*.pg.sql), not this compose
+#   - CREATE EXTENSION vector → postgres/init-vector.sql (initdb.d only)
+#   - Agent memory tables → octop-memory at runtime
+# =============================================================================
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ydsz-postgres
+    restart: unless-stopped
+    ports:
+      - "${YDSZ_PG_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${YDSZ_PG_USER:-ydsz}
+      POSTGRES_PASSWORD: ${YDSZ_PG_PASSWORD:-ydsz}
+      POSTGRES_DB: ${YDSZ_PG_DB:-ydsz}
+    volumes:
+      - ydsz_pgdata:/var/lib/postgresql/data
+      - ./postgres/init-vector.sql:/docker-entrypoint-initdb.d/01-vector.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ydsz_pgdata:

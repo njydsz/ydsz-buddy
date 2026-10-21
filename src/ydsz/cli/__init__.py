@@ -1,0 +1,1 @@
+"""ydsz-worker CLI package."""

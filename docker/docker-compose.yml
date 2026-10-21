@@ -1,0 +1,60 @@
+# =============================================================================
+# Ydsz Worker — Docker Compose
+#
+# 用法（在仓库根目录执行）:
+#   docker compose -f docker/docker-compose.yml up -d
+#   YDSZ_PORT=9090 docker compose -f docker/docker-compose.yml up -d
+#   YDSZ_DEFAULT_PASSWORD=<your-strong-password> docker compose -f docker/docker-compose.yml up -d
+#
+# 可在 docker/ 目录放置 .env 文件，例如:
+#   YDSZ_PORT=9090
+#   YDSZ_DEFAULT_PASSWORD=<your-strong-password>
+#   YDSZ_ADMIN_USERNAME=admin
+#   YDSZ_DATABASE_DRIVER=postgresql
+#   YDSZ_DATABASE_URL=postgresql://ydsz:ydsz@host.docker.internal:5432/ydsz
+#
+# 注意: docker/.env 仅用于 Compose 插值；变量必须列在下方 environment
+# 才会进入容器。也可写入数据卷内的 ~/.ydsz/env（宿主机挂载目录下的 env）。
+# 密码须 ≥8 位且同时包含字母与数字（与控制台改密策略一致）。
+# 未设置或未通过策略时不自动建管理员，打开页面走设置向导
+# （向导口令写入 /data/.ydsz/ydsz-login.txt）。
+# =============================================================================
+
+services:
+  ydsz:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ydsz-worker:latest
+    container_name: ydsz-worker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    ports:
+      - "${YDSZ_PORT:-8088}:${YDSZ_PORT:-8088}"
+    volumes:
+      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+    environment:
+      - HOME=/data
+      - YDSZ_BIND_HOST=0.0.0.0
+      - YDSZ_PORT=${YDSZ_PORT:-8088}
+      - YDSZ_LOG_LEVEL=${YDSZ_LOG_LEVEL:-info}
+      - YDSZ_DEFAULT_PASSWORD=${YDSZ_DEFAULT_PASSWORD:-}
+      - YDSZ_ADMIN_USERNAME=${YDSZ_ADMIN_USERNAME:-admin}
+      - YDSZ_ADMIN_DISPLAY_NAME=${YDSZ_ADMIN_DISPLAY_NAME:-Admin}
+      - YDSZ_DATABASE_URL=${YDSZ_DATABASE_URL:-}
+      - YDSZ_DATABASE_DRIVER=${YDSZ_DATABASE_DRIVER:-}
+      - YDSZ_DATABASE_SQLITE_PATH=${YDSZ_DATABASE_SQLITE_PATH:-}
+      - YDSZ_DATABASE_HOST=${YDSZ_DATABASE_HOST:-}
+      - YDSZ_DATABASE_PORT=${YDSZ_DATABASE_PORT:-}
+      - YDSZ_DATABASE_NAME=${YDSZ_DATABASE_NAME:-}
+      - YDSZ_DATABASE_USER=${YDSZ_DATABASE_USER:-}
+      - YDSZ_DATABASE_PASSWORD=${YDSZ_DATABASE_PASSWORD:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}
+      - LANGFUSE_TRACING_ENABLED=${LANGFUSE_TRACING_ENABLED:-true}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL:-}

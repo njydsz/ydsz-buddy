@@ -1,0 +1,50 @@
+# =============================================================================
+# Ydsz Worker — Docker Compose（国内镜像）
+#
+# 不在本地构建。官方 GHCR（ghcr.nju.edu.cn/tencentcloud/ydsz-worker）拉取失败时用本文件，
+# 镜像来自南京大学 GHCR 源：ghcr.nju.edu.cn/tencentcloud/ydsz:latest
+#
+# 用法（在仓库根目录执行）:
+#   docker compose -f docker/docker-compose.cn.yml up -d
+#   YDSZ_PORT=9090 docker compose -f docker/docker-compose.cn.yml up -d
+#   YDSZ_DEFAULT_PASSWORD=<your-strong-password> docker compose -f docker/docker-compose.cn.yml up -d
+#
+# 环境变量与 docker-compose.yml 相同。docker/.env 仅用于 Compose 插值；
+# 变量必须列在下方 environment 才会进入容器。
+# =============================================================================
+
+services:
+  ydsz:
+    image: ghcr.nju.edu.cn/tencentcloud/ydsz-worker:latest
+    container_name: ydsz-worker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    ports:
+      - "${YDSZ_PORT:-8088}:${YDSZ_PORT:-8088}"
+    volumes:
+      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+    environment:
+      - HOME=/data
+      - YDSZ_BIND_HOST=0.0.0.0
+      - YDSZ_PORT=${YDSZ_PORT:-8088}
+      - YDSZ_LOG_LEVEL=${YDSZ_LOG_LEVEL:-info}
+      - YDSZ_DEFAULT_PASSWORD=${YDSZ_DEFAULT_PASSWORD:-}
+      - YDSZ_ADMIN_USERNAME=${YDSZ_ADMIN_USERNAME:-admin}
+      - YDSZ_ADMIN_DISPLAY_NAME=${YDSZ_ADMIN_DISPLAY_NAME:-Admin}
+      - YDSZ_DATABASE_URL=${YDSZ_DATABASE_URL:-}
+      - YDSZ_DATABASE_DRIVER=${YDSZ_DATABASE_DRIVER:-}
+      - YDSZ_DATABASE_SQLITE_PATH=${YDSZ_DATABASE_SQLITE_PATH:-}
+      - YDSZ_DATABASE_HOST=${YDSZ_DATABASE_HOST:-}
+      - YDSZ_DATABASE_PORT=${YDSZ_DATABASE_PORT:-}
+      - YDSZ_DATABASE_NAME=${YDSZ_DATABASE_NAME:-}
+      - YDSZ_DATABASE_USER=${YDSZ_DATABASE_USER:-}
+      - YDSZ_DATABASE_PASSWORD=${YDSZ_DATABASE_PASSWORD:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}
+      - LANGFUSE_TRACING_ENABLED=${LANGFUSE_TRACING_ENABLED:-true}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL:-}
