@@ -176,7 +176,7 @@ Here are our mid-to-long term plans:
 - [ ] **Project** — project-scoped workspaces that group agents, files, and conversations around a shared goal.
 - [ ] **Cloud–edge continuum** — run Ydsz Worker locally while offloading selected tasks to the cloud, so light work stays on-device and heavier jobs use remote capacity when you need it.
 - [ ] **Plugin marketplace** — a curated market to discover, install, and update third-party plugins without leaving Ydsz Worker.
-- [ ] **Conversational control plane** — deepen Octop’s own skills so chat can cover the full dashboard surface: create experts, wire channels, manage knowledge bases, and scaffold plugins end-to-end.
+- [ ] **Conversational control plane** — deepen Ydsz Worker's own skills so chat can cover the full dashboard surface: create experts, wire channels, manage knowledge bases, and scaffold plugins end-to-end.
 
 This roadmap may shift as the community grows; treat it as indicative only.
 
