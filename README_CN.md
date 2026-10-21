@@ -267,13 +267,13 @@ octop init
 
 ```bash
 # 前台运行（API + Web 控制台）
-octop run
+ydsz-worker run
 
 # 自定义主机与端口
-octop run --host 0.0.0.0 --port 8088
+ydsz-worker run --host 0.0.0.0 --port 8088
 
 # 注册为系统服务（systemd / launchd / Windows 服务）
-octop service start
+ydsz-worker service start
 ```
 
 打开 **http://127.0.0.1:8088**。Docker 若设置了合格的 `YDSZ_DEFAULT_PASSWORD`，首次启动会创建管理员（凭据写入 `/data/.octop/credential.txt`）；未设置或密码不合格则打开设置向导（向导口令在 `/data/.octop/octop-login.txt`）。交互式 `ydsz-worker init` / 设置向导会让你自行设置密码（至少 8 位，且同时包含字母和数字）。
@@ -354,7 +354,7 @@ docker run -d \
 | PyPI | 全平台 | `pip install ydsz-worker`（可选 extras 如 `local-embedding`） |
 | Docker | 全平台 | `docker/docker-compose.yml`；国内镜像 `docker/docker-compose.cn.yml` |
 
-所有安装脚本均在 `~/.octop/venv` 创建隔离环境，并通过 `~/.octop/bin/octop` 包装 CLI，不会影响系统 Python。
+所有安装脚本均在 `~/.octop/venv` 创建隔离环境，并通过 `~/.octop/bin/ydsz-worker` 包装 CLI，不会影响系统 Python。
 
 ### 升级
 
