@@ -477,7 +477,7 @@ Interactive API docs: **http://127.0.0.1:8088/api/docs** (disabled by default �
 ├── security/tool_guard/           # shell command allow/deny rules
 ├── logs/                          # runtime logs
 ├── venv/                          # uv-managed Python (installer layout)
-└── bin/octop                      # PATH wrapper → venv/bin/octop
+└── bin/ydsz-worker                # PATH wrapper → venv/bin/octop
 ```
 
 The control plane can also use PostgreSQL — set `database` in `config.json`, or `YDSZ_DATABASE_*` / the first-run wizard. With PostgreSQL, agent memory reuses the same DSN by default (per-agent schema); to keep file-based memory, set `"memory": { "backend": { "type": "sqlite" } }` in the agent config. See [docs/configuration.md](docs/configuration.md) and [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md).
