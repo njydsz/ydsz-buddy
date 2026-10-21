@@ -1,4 +1,4 @@
-"""Built-in provider template loading (octop-harness bundles)."""
+"""Built-in provider template loading (ydsz-harness bundles)."""
 
 from __future__ import annotations
 
@@ -212,12 +212,12 @@ def _reasoning_profile(provider_id: str, model_id: str) -> dict[str, Any] | None
 
 
 def load_provider_presets() -> list[dict[str, Any]]:
-    """Serialize octop-harness provider templates for API / CLI."""
+    """Serialize ydsz-harness provider templates for API / CLI."""
     from importlib import resources
 
-    from octop_harness.providers import load_provider_templates, serialize_provider_preset
+    from ydsz_harness.providers import load_provider_templates, serialize_provider_preset
 
-    bundled = resources.files("octop_harness.providers").joinpath("provider_template.json")
+    bundled = resources.files("ydsz_harness.providers").joinpath("provider_template.json")
     out = [serialize_provider_preset(p) for p in load_provider_templates(str(bundled))]
     if not any(p.get("id") == "openai-codex" for p in out):
         out.insert(

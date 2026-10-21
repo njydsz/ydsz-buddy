@@ -99,7 +99,7 @@ async def get_strong_memory(
     "/agents/{agent_id}/memory/strong",
     response_model=StrongMemoryFile,
     summary="Save strong memory",
-    description="Replace the owner's MEMORY.md with the supplied text. Edits apply to new sessions; existing sessions keep their snapshot. Ordinary remember requests are saved separately to octop-memory.",
+    description="Replace the owner's MEMORY.md with the supplied text. Edits apply to new sessions; existing sessions keep their snapshot. Ordinary remember requests are saved separately to ydsz-memory.",
 )
 async def put_strong_memory(
     agent_id: str,
@@ -140,7 +140,7 @@ async def get_user_profile(
     "/agents/{agent_id}/memory/user",
     response_model=UserProfileFile,
     summary="Save user-maintained profile",
-    description="Replace the owner's USER.md. Agents cannot edit this document. Edits apply to new sessions; remember requests use octop-memory.",
+    description="Replace the owner's USER.md. Agents cannot edit this document. Edits apply to new sessions; remember requests use ydsz-memory.",
 )
 async def put_user_profile(
     agent_id: str,

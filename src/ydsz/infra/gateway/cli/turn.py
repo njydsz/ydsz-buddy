@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.errors import ErrorCode, YdszError
 from ydsz.infra.gateway.cli.cli_channel import CLI_CHANNEL_ID, CLI_CONNECTION_META

@@ -1,10 +1,8 @@
 # CLI Reference
 
-> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。CLI 命令已更名为 `ydsz-worker`。
-
 `ydsz-worker` is a single Click app installed as `ydsz-worker` on `pip install ydsz-worker`.
-It is registered in `src/octop/cli/main.py`; commands are loaded
-lazily from `src/octop/cli/registry.py`.
+It is registered in `src/ydsz/cli/main.py`; commands are loaded
+lazily from `src/ydsz/cli/registry.py`.
 
 ```
 $ ydsz-worker --help
@@ -15,8 +13,8 @@ Usage: ydsz-worker [OPTIONS] COMMAND [ARGS]...
 Options:
   -v, --version           Show the installed ydsz-worker version.
   --user TEXT             Default --user for subcommands (admin acting on behalf
-                          of a user). [env: OCTOP_USER]
-  --agent TEXT            Default --agent for subcommands. [env: OCTOP_AGENT]
+                          of a user). [env: YDSZ_USER]
+  --agent TEXT            Default --agent for subcommands. [env: YDSZ_AGENT]
   --json                  Emit machine-readable JSON for list-style commands.
   -h, --help              Show this message and exit.
 
@@ -52,8 +50,8 @@ Commands:
 
 | Option | Env | Effect |
 |--------|-----|--------|
-| `--user NAME` | `OCTOP_USER` | Default `--user` for subcommands (admin acting on behalf of a user) |
-| `--agent ID` | `OCTOP_AGENT` | Default `--agent` for subcommands |
+| `--user NAME` | `YDSZ_USER` | Default `--user` for subcommands (admin acting on behalf of a user) |
+| `--agent ID` | `YDSZ_AGENT` | Default `--agent` for subcommands |
 | `--json` | — | Emit machine-readable JSON for list-style commands |
 | `-v, --version` | — | Print version and exit |
 
@@ -82,9 +80,9 @@ Usage: ydsz-worker init [OPTIONS]
   Bootstrap a Ydsz Worker server (~/.octop dir, DB migrations, JWT secret, first admin).
 
 Options:
-  --admin-username TEXT       [env: OCTOP_ADMIN_USERNAME]
-  --admin-password TEXT       [env: OCTOP_ADMIN_PASSWORD]
-  --admin-display-name TEXT   [env: OCTOP_ADMIN_DISPLAY_NAME]
+  --admin-username TEXT       [env: YDSZ_ADMIN_USERNAME]
+  --admin-password TEXT       [env: YDSZ_ADMIN_PASSWORD]
+  --admin-display-name TEXT   [env: YDSZ_ADMIN_DISPLAY_NAME]
   --force                     Wipe existing ~/.octop contents before bootstrapping.
   --yes                       Skip all interactive prompts.
   -h, --help                  Show this message and exit.
@@ -101,8 +99,8 @@ Usage: ydsz-worker run [OPTIONS]
   Start the Ydsz Worker server (foreground; uvicorn).
 
 Options:
-  --host TEXT                 Override OCTOP_BIND_HOST.
-  --port INTEGER RANGE        Override OCTOP_PORT (0-65535, 0 = OS-assigned).
+  --host TEXT                 Override YDSZ_BIND_HOST.
+  --port INTEGER RANGE        Override YDSZ_PORT (0-65535, 0 = OS-assigned).
   --reload / --no-reload      Enable uvicorn auto-reload (dev only).
   --ssl / --no-ssl            Enable HTTPS with a self-signed cert (or a real one).
   --certfile PATH             TLS certificate (PEM).
@@ -116,7 +114,7 @@ Options:
 Install and manage the Ydsz Worker system service. The backend is detected
 automatically (systemd on Linux, launchd on macOS); the scope
 (`user` vs `system`) can be forced via `--scope` or
-`OCTOP_SERVICE_SCOPE`.
+`YDSZ_SERVICE_SCOPE`.
 
 ```
 Usage: ydsz-worker service [OPTIONS] COMMAND [ARGS]...
@@ -318,7 +316,7 @@ Usage: ydsz-worker models [OPTIONS] COMMAND [ARGS]...
   Model catalog and active-model settings.
 
 Commands:
-  presets       List built-in provider templates from octop-harness.
+  presets       List built-in provider templates from ydsz-harness.
   list          List all resolved models across enabled providers.
   active        Show or set the global default model (admin).
   config        Interactively create a provider from presets and set the active model.
@@ -379,7 +377,7 @@ Commands:
   reset    Clear stored captcha settings so login falls back to the slider default.
 ```
 
-Boot-env captcha (`OCTOP_CAPTCHA_*`) is not touched by `reset` — unset
+Boot-env captcha (`YDSZ_CAPTCHA_*`) is not touched by `reset` — unset
 those in the environment file if they are the actual lockout cause.
 Restart `ydsz-worker run` (if already running) for the change to apply.
 
@@ -470,7 +468,7 @@ Usage: ydsz-worker acp [OPTIONS]
   Run Ydsz Worker agent as ACP server (stdio).
 
 Options:
-  --agent TEXT   Agent to expose (default: OCTOP_AGENT or first agent).
+  --agent TEXT   Agent to expose (default: YDSZ_AGENT or first agent).
   --debug        Log to stderr.
   -h, --help     Show this message and exit.
 ```
@@ -531,6 +529,6 @@ $ ydsz-worker version                # print the installed ydsz-worker version
 ```
 
 The path is exposed as `ydsz_worker.cli.support.state.default_state_path()`
-and can be overridden via `OCTOP_HOME`. Delete the file to log out
+and can be overridden via `YDSZ_HOME`. Delete the file to log out
 the CLI without hitting the server. The dashboard and HTTP callers
 do not share this file — they manage their own tokens.

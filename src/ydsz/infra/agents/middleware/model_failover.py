@@ -10,9 +10,9 @@ from langchain.agents.middleware import AgentMiddleware, ModelRequest, ModelResp
 from langchain.agents.middleware.model_retry import ModelRetryMiddleware
 from langchain_core.messages import AIMessage
 from langgraph.errors import GraphBubbleUp
-from octop_harness.context_usage import breakdown_from_model_request
-from octop_harness.middleware.runtime import runtime_config
-from octop_harness.middleware.turn_model import latest_human_needs_multimodal
+from ydsz_harness.context_usage import breakdown_from_model_request
+from ydsz_harness.middleware.runtime import runtime_config
+from ydsz_harness.middleware.turn_model import latest_human_needs_multimodal
 
 from ydsz.i18n.domains.stream import model_retry_failure_prompt
 from ydsz.infra.agents.providers.health import (

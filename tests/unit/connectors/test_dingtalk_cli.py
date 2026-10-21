@@ -61,7 +61,7 @@ def test_call_tool_rejects_interactive_and_bad_args() -> None:
 def test_llm_facing_schema_round_trips_a_command_line(monkeypatch, tmp_path) -> None:
     # Regression: harness mcp_args_model maps non-scalar JSON types to str, so an
     # array schema made every real LLM call fail validation in the adapter.
-    from octop_harness.mcp import mcp_args_model
+    from ydsz_harness.mcp import mcp_args_model
 
     monkeypatch.setenv("YDSZ_HOME", str(tmp_path))
     seen: dict = {}

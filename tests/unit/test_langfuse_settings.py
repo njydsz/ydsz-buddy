@@ -48,7 +48,7 @@ def test_langfuse_requires_secret_when_enabling(store: LangfuseSettingsStore) ->
 
 
 def test_langfuse_harness_config(store: LangfuseSettingsStore) -> None:
-    from octop_harness.observability.langfuse import LangfuseConfig
+    from ydsz_harness.observability.langfuse import LangfuseConfig
 
     assert store.harness_config() == LangfuseConfig(enabled=False)
     store.save(

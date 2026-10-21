@@ -50,6 +50,7 @@ async def test_bridge_probe_returns_expert_list(env: Any) -> None:
             ),
         ),
         patch("ydsz.infra.bridge.manager.httpx.AsyncClient", return_value=mock_client),
+        patch("ydsz.infra.bridge.manager.normalize_peer_base_url", side_effect=lambda u: u.rstrip("/")),
     ):
         r = await client.post(
             "/api/bridge/probe",
@@ -77,11 +78,14 @@ async def test_bridge_probe_returns_expert_list(env: Any) -> None:
 async def test_bridge_probe_peer_rejection_stays_logged_in(env: Any) -> None:
     """Peer credential failure is 400, so the dashboard does not clear the local session."""
     client, _srv, auth = env
-    with patch(
-        "ydsz.infra.bridge.manager.login_peer",
-        new=AsyncMock(
-            side_effect=YdszError(ErrorCode.BRIDGE_AUTH_FAILED, "peer rejected credentials")
+    with (
+        patch(
+            "ydsz.infra.bridge.manager.login_peer",
+            new=AsyncMock(
+                side_effect=YdszError(ErrorCode.BRIDGE_AUTH_FAILED, "peer rejected credentials")
+            ),
         ),
+        patch("ydsz.infra.bridge.manager.normalize_peer_base_url", side_effect=lambda u: u.rstrip("/")),
     ):
         r = await client.post(
             "/api/bridge/probe",

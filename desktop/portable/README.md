@@ -29,10 +29,10 @@ make -f desktop/portable/Makefile green
 
 ## 产物布局
 
-公开文件名：`Octop-portable-<plat>-<version>.zip`。zip 内目录仍是：
+公开文件名：`ydsz-portable-<plat>-<version>.zip`。zip 内目录仍是：
 
 ```
-Octop-<plat>/
+ydsz-<plat>/
   runtime/       # python-build-standalone
   packages/      # Ydsz Worker + 依赖（site-packages，可搬迁）
   launch.py      # 启动引导（site.addsitedir / Windows pywin32）
@@ -76,7 +76,7 @@ bash desktop/portable/rebuild.sh
 
 ```bash
 bash desktop/portable/vendor-wheels.sh          # 按当前 uv.lock 预取 wheel
-OCTOP_GREEN_OFFLINE=1 bash desktop/portable/package.sh
+YDSZ_GREEN_OFFLINE=1 bash desktop/portable/package.sh
 ```
 
 离线缓存必须来自**当前分支**的 `uv.lock`，不要复用旧分叉的 wheel 目录。
@@ -114,5 +114,5 @@ Actions 使用 GitHub 上游 PBS（`PBS_BASE_URL`），本机构建默认 npmmir
 
 ## Electron 壳
 
-壳只消费 `Octop-portable-<plat>-<version>.zip`（zip 内仍是 `Octop-<plat>/`），不要把绿包编进 asar。步骤见
+壳只消费 `ydsz-portable-<plat>-<version>.zip`（zip 内仍是 `ydsz-<plat>/`），不要把绿包编进 asar。步骤见
 [`AGENT_ELECTRON_INTEGRATION.md`](AGENT_ELECTRON_INTEGRATION.md)。

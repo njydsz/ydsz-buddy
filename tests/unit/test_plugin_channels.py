@@ -1,7 +1,7 @@
 """Tests for plugin-contributed channel bridging (infra + API validation).
 
 The full path (plugin.yaml ``kind: channel`` -> loader -> registry -> gateway
-registration) needs the *updated* octop-harness; on test environments with a
+registration) needs the *updated* ydsz-harness; on test environments with a
 released harness those tests skip. The bridging logic itself is exercised
 with stub registrations so it is covered everywhere.
 """
@@ -15,14 +15,14 @@ from typing import Any
 import pytest
 
 _HARNESS_FIXTURES = (
-    Path(__file__).resolve().parents[3] / "octop-harness" / "tests" / "fixtures" / "plugins"
+    Path(__file__).resolve().parents[3] / "ydsz-harness" / "tests" / "fixtures" / "plugins"
 )
 _ACME = _HARNESS_FIXTURES / "acme-channel"
 
 
 def _harness_supports_channel_kind() -> bool:
     try:
-        from octop_harness.plugins.manifest import PLUGIN_KINDS
+        from ydsz_harness.plugins.manifest import PLUGIN_KINDS
 
         return "channel" in PLUGIN_KINDS
     except ImportError:
@@ -30,7 +30,7 @@ def _harness_supports_channel_kind() -> bool:
 
 
 def _channel_fixture_ready() -> bool:
-    """The acme fixture lives in a sibling octop-harness checkout, not the wheel."""
+    """The acme fixture lives in a sibling ydsz-harness checkout, not the wheel."""
     return _harness_supports_channel_kind() and (_ACME / "plugin.yaml").is_file()
 
 
@@ -65,7 +65,7 @@ class _StubRegistry:
 
 
 class _RecordingGateway:
-    """Minimal stand-in for octop_gateway.channels.register_channel_kind."""
+    """Minimal stand-in for ydsz_gateway.channels.register_channel_kind."""
 
     def __init__(self, *, fail_on: set[str] | None = None) -> None:
         self.registered: dict[str, Any] = {}
@@ -190,7 +190,7 @@ def test_api_kind_validator_accepts_plugin_kind(
         def all_channels(self) -> list[_StubReg]:
             return [_StubReg("p1", "acme", _FakeChannel)]
 
-    monkeypatch.setattr("octop_harness.plugins.registry.PluginRegistry", _PatchedRegistry)
+    monkeypatch.setattr("ydsz_harness.plugins.registry.PluginRegistry", _PatchedRegistry)
     from ydsz.infra.gateway import plugin_channels
 
     info = plugin_channels._summarize(_PatchedRegistry().all_channels())[0]
@@ -209,7 +209,7 @@ def test_api_kind_validator_tolerates_old_harness(
     class _OldRegistry:  # released harness: no all_channels()
         pass
 
-    monkeypatch.setattr("octop_harness.plugins.registry.PluginRegistry", _OldRegistry)
+    monkeypatch.setattr("ydsz_harness.plugins.registry.PluginRegistry", _OldRegistry)
     # Builtin kinds still validate; unknown kinds are rejected.
     assert channels_router._validate_channel_kind("telegram") == "telegram"
     with pytest.raises(ValueError, match="unknown channel kind"):
@@ -218,17 +218,17 @@ def test_api_kind_validator_tolerates_old_harness(
 
 @pytest.mark.skipif(
     not _channel_fixture_ready(),
-    reason="channel plugin fixture is only in a sibling octop-harness checkout",
+    reason="channel plugin fixture is only in a sibling ydsz-harness checkout",
 )
 def test_end_to_end_with_real_fixture_plugin() -> None:
-    from octop_harness.plugins import registry as harness_registry
-    from octop_harness.plugins.loader import load_plugin_dir
+    from ydsz_harness.plugins import registry as harness_registry
+    from ydsz_harness.plugins.loader import load_plugin_dir
 
     from ydsz.infra.gateway.plugin_channels import apply_plugin_channels
 
     harness_registry.PluginRegistry.reset()
     try:
-        from octop_gateway.channel import BaseChannel
+        from ydsz_gateway.channel import BaseChannel
 
         loaded = load_plugin_dir(_ACME, install_deps=False)
 
@@ -239,11 +239,11 @@ def test_end_to_end_with_real_fixture_plugin() -> None:
         assert loaded.manifest.kind == "channel"
         applied = apply_plugin_channels(registry=harness_registry.PluginRegistry())
         assert "acme" in [info.kind for info in applied]
-        from octop_gateway.channels import BUILTIN_CHANNELS
+        from ydsz_gateway.channels import BUILTIN_CHANNELS
 
         assert BUILTIN_CHANNELS["acme"].channel_type == "acme"
     finally:
-        from octop_gateway.channels import unregister_channel_kind
+        from ydsz_gateway.channels import unregister_channel_kind
 
         unregister_channel_kind("acme", plugin_id="acme-channel")
         from ydsz.infra.gateway import plugin_channels
@@ -388,7 +388,7 @@ async def test_unrelated_plugin_change_does_not_restart_channels() -> None:
 
 
 def test_old_gateway_capability_failure_is_reported(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop_gateway import channels
+    from ydsz_gateway import channels
 
     from ydsz.infra.gateway import plugin_channels as bridge
 

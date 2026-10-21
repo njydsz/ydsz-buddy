@@ -29,6 +29,7 @@ export function SkillsetFromHubDrawer({
   const [items, setItems] = useState<MarketExpert[]>([]);
   const [loading, setLoading] = useState(false);
   const [importingSlug, setImportingSlug] = useState<string | null>(null);
+  const [marketOffline, setMarketOffline] = useState(false);
   const tRef = useRef(t);
   tRef.current = t;
   const lang = i18n.language.startsWith("zh") ? "zh" : "en";
@@ -36,12 +37,16 @@ export function SkillsetFromHubDrawer({
   useEffect(() => {
     if (!open) return;
     let active = true;
+    setMarketOffline(false);
 
     const load = async () => {
       setLoading(true);
       try {
         const response = await expertMarketApi.list("");
-        if (active) setItems(response.items);
+        if (active) {
+          setItems(response.items);
+          setMarketOffline(response.market_available === false);
+        }
       } catch (error) {
         if (active) {
           showApiError(
@@ -89,6 +94,15 @@ export function SkillsetFromHubDrawer({
         <div className={styles.loading}>
           <Spin />
         </div>
+      ) : marketOffline ? (
+        <Empty
+          description={t("experts.marketOffline")}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        >
+          <Typography.Paragraph type="secondary">
+            {t("experts.marketOfflineHint")}
+          </Typography.Paragraph>
+        </Empty>
       ) : items.length === 0 ? (
         <Empty description={t("skillPackages.empty")} />
       ) : (

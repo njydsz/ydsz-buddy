@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 import httpx
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _TEMPLATES: tuple[tuple[str, str, str], ...] = (
     ("doge", "Doge", "经典柴犬"),

@@ -2,7 +2,7 @@
 # Run Ydsz Worker against the sibling gateway source for local development.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-bridge_dir="$(cd ../octop-gateway && pwd)"
+bridge_dir="$(cd ../ydsz-gateway && pwd)"
 if [[ ! -x .venv/bin/python ]]; then
   echo "Create the Ydsz development environment first: uv sync --extra dev" >&2
   exit 1
@@ -12,9 +12,9 @@ import sys
 from pathlib import Path
 
 try:
-    import octop_gateway
-    expected = Path(sys.argv[1]) / "src/octop_gateway/__init__.py"
-    sys.exit(Path(octop_gateway.__file__).resolve() != expected.resolve())
+    import ydsz_gateway
+    expected = Path(sys.argv[1]) / "src/ydsz_gateway/__init__.py"
+    sys.exit(Path(ydsz_gateway.__file__).resolve() != expected.resolve())
 except ImportError:
     sys.exit(1)
 PY

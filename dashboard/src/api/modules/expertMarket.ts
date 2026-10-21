@@ -34,6 +34,10 @@ export interface MarketExpert {
 export interface ExpertHubListResponse {
   items: MarketExpert[];
   scenes: string[];
+  /** False when SkillHub upstream is unreachable and items are a fallback. */
+  market_available?: boolean;
+  /** Machine-readable error kind when market_available is false (e.g. "upstream_failed"). */
+  market_error?: string;
 }
 
 export interface CreateMarketExpertResponse {

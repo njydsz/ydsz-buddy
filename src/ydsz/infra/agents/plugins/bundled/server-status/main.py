@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import psutil
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 
 def _bytes_human(n: int | float) -> str:

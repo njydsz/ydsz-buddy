@@ -9,7 +9,7 @@ import re
 from datetime import date
 from typing import Any
 
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _DICE_RE = re.compile(r"^\s*(\d+)\s*[dD]\s*(\d+)\s*$")
 _FACES = {4, 6, 8, 10, 12, 20, 100}

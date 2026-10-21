@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
-from octop_harness.backends.workspace import BackendWorkspace
-from octop_harness.middleware.bootstrap import bootstrap_marker_exists
+from ydsz_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.middleware.bootstrap import bootstrap_marker_exists
 
 from ydsz.infra.agents.experts.catalog import (
     WORKSPACE_MANIFEST_PATH,

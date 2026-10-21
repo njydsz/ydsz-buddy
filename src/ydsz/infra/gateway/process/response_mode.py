@@ -5,15 +5,15 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import Any, Literal
 
-from octop_gateway.channel import MessageProcessor
-from octop_gateway.models import (
+from ydsz_gateway.channel import MessageProcessor
+from ydsz_gateway.models import (
     ContentPart,
     InboundMessage,
     MessageEvent,
     MessageEventType,
     TextContent,
 )
-from octop_gateway.utils import close_event_stream
+from ydsz_gateway.utils import close_event_stream
 
 from ydsz.infra.utils.llm_text import strip_thinking
 

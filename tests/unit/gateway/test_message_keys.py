@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.gateway.process.message_keys import (
     resolve_user_id_for_message,

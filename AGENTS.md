@@ -208,7 +208,7 @@ make build-frontend                     # dashboard/ → src/ydsz/dashboard/
 
 **Agent scope:** Most agent routes use `/api/agents/{agent_id}/…` in the URL. A few legacy endpoints (e.g. MBTI) still take `X-Octop-Agent-Id`. Always validate ownership: load the agent row → `_assert_agent_owner(row, user)` (or admin bypass).
 
-**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `octop-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.octop/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Octop — path rules live in `BackendWorkspace`.
+**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `ydsz-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.octop/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Ydsz — path rules live in `BackendWorkspace`.
 
 New agents additionally keep system-scoped files under `{workspace}/.octop/` (e.g. sessions/sqlite, skills/agents system trees, auth tokens under `.octop/auth`). `system_files_path` is internal and not user-configurable; the `.octop` directory is created on first harness workspace init. Legacy agents keep auth at `{workspace}/.octop-auth`.
 
@@ -280,7 +280,7 @@ i18n/
 
 **API errors:** `ErrorCode` values map to `errors.<CODE>` in JSON. `OctopError.to_envelope(locale=…)` and the global exception handler localize `message`. Dashboard mirrors codes under `apiErrors.*` in `dashboard/src/locales/{en,zh}.json` — tests require backend and frontend keys to match.
 
-**IM channels:** Tool names and hint lines must be localized in `stream_project.py` — pass localized `tool_name` and pre-formatted `tool_hint_text` on `MessageEvent.tool_start/end` (octop-gateway reads `tool_hint_text` when present). Do not rely on English `ChannelConstraints.tool_hint_template` alone.
+**IM channels:** Tool names and hint lines must be localized in `stream_project.py` — pass localized `tool_name` and pre-formatted `tool_hint_text` on `MessageEvent.tool_start/end` (ydsz-gateway reads `tool_hint_text` when present). Do not rely on English `ChannelConstraints.tool_hint_template` alone.
 
 **Frontend split**
 
@@ -298,7 +298,7 @@ Do **not** use gettext (`.po` files). Do **not** embed user-visible English in `
 
 **Timezone (config.json):**
 
-User-facing datetime display and cron/scheduling defaults MUST use the server timezone from `config.json` → `default_timezone` (env override `OCTOP_DEFAULT_TIMEZONE`; legacy `cron_timezone` / `OCTOP_CRON_TIMEZONE` still accepted) — not the browser's local timezone.
+User-facing datetime display and cron/scheduling defaults MUST use the server timezone from `config.json` → `default_timezone` (env override `YDSZ_DEFAULT_TIMEZONE`; legacy `cron_timezone` / `YDSZ_CRON_TIMEZONE` still accepted) — not the browser's local timezone.
 
 | Layer | Entry |
 |-------|--------|
@@ -310,7 +310,7 @@ User-facing datetime display and cron/scheduling defaults MUST use the server ti
 
 **Language:** Keep the existing locale resolution (user preference → `Accept-Language` / dashboard i18n → channel hints → `DEFAULT_LOCALE`). Language is **not** a `config.json` key — do not add one unless explicitly requested.
 
-**Workspace storage:** `infra/backend/resolver.py` resolves harness `BackendProtocol` from agent config; remote backends use `probe.py` for fast tree listing. Docker sandbox (`type: "docker"` / storage `kind=docker`) uses `sandbox_scope` + `sandbox_prefix` (Octop default `octop_sandbox`) — see `docs/agent-backend-file-io.md` §13.
+**Workspace storage:** `infra/backend/resolver.py` resolves harness `BackendProtocol` from agent config; remote backends use `probe.py` for fast tree listing. Docker sandbox (`type: "docker"` / storage `kind=docker`) uses `sandbox_scope` + `sandbox_prefix` (Ydsz default `ydsz_sandbox`) — see `docs/agent-backend-file-io.md` §13.
 
 **Connectors:** `infra/connectors/` — catalog, OAuth registry, MCP gateway; HTTP surface in `api/routers/connectors.py`.
 

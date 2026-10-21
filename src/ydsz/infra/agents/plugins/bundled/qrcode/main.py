@@ -8,7 +8,7 @@ from io import BytesIO
 from typing import Any
 
 import segno
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _MAX_LEN = 2048
 

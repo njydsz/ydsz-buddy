@@ -1,4 +1,4 @@
-"""WebSocket browser screencast — attaches to octop-browser sessions.
+"""WebSocket browser screencast — attaches to ydsz-browser sessions.
 
 Wire protocol matches the dashboard ``useBrowserStream`` hook (screencast)
 and ``useBrowserSessionState`` (listen-only status):

@@ -57,7 +57,7 @@ def prepare_channel_text(
 ) -> str:
     """Format or strip embedded thinking tags for IM channel delivery.
 
-    Mirrors octop-gateway ``BaseChannel._clean_output`` but also handles
+    Mirrors ydsz-gateway ``BaseChannel._clean_output`` but also handles
     ``<thinking>`` tags and orphan closing markers. Used for both inbound
     reply cleaning and proactive ``push_text`` (team wrap-up, cron, …).
     """

@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-本目录提供插件 demo，对应 Ydsz Worker / octop-harness 支持的 `kind`，以及**前后端一体**的 UI 渲染示例。
+本目录提供插件 demo，对应 Ydsz Worker / ydsz-harness 支持的 `kind`，以及**前后端一体**的 UI 渲染示例。
 结构参考 [octop-toolkit](https://github.com/veenyi/octop-plugins/tree/main/octop-toolkit)。
 
 随 Ydsz Worker 安装包一并分发的产品插件在 `src/octop/infra/agents/plugins/bundled/`。
@@ -111,7 +111,7 @@ zip -r demo-toolkit.zip demo-toolkit/
 ```bash
 uv run python - <<'PY'
 from pathlib import Path
-from octop_harness.plugins import PluginRegistry, load_plugin_dir
+from ydsz_harness.plugins import PluginRegistry, load_plugin_dir
 
 for name in ("demo-toolkit", "demo-greeting-skill", "demo-turn-logger", "demo-ui-card"):
     PluginRegistry.reset()

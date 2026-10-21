@@ -511,7 +511,7 @@ async def test_state_update_does_not_replace_stream_error(archive):
 async def test_dashboard_processor_writes_only_new_archive(archive):
     from unittest.mock import AsyncMock, MagicMock
 
-    from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+    from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
     from ydsz.infra.gateway.process.processor import GlobalProcessor
     from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher
@@ -675,7 +675,7 @@ def _committed_messages(archive):
 def _dashboard_with_chunks(archive, chunks):
     from unittest.mock import AsyncMock, MagicMock
 
-    from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+    from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
     from ydsz.infra.gateway.process.processor import GlobalProcessor
     from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher
@@ -784,7 +784,7 @@ async def test_write_failure_does_not_deliver_or_retry_uncommitted_content(archi
 async def test_dashboard_error_keeps_partial_tokens_and_error(archive):
     from unittest.mock import AsyncMock, MagicMock
 
-    from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+    from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
     from ydsz.infra.gateway.process.processor import GlobalProcessor
     from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher

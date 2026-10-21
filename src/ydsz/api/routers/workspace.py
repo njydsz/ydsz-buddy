@@ -8,7 +8,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from fastapi.responses import Response, StreamingResponse
-from octop_harness.backends.utils import BackendOperationNotSupportedError
+from ydsz_harness.backends.utils import BackendOperationNotSupportedError
 from pydantic import BaseModel
 
 from ydsz.api.common.agent_workspace import resolve_agent_workspace_dir

@@ -1,6 +1,6 @@
-"""Vendored from octop-harness until PyPI ships ``backends.storage_errors``.
+"""Vendored from ydsz-harness until PyPI ships ``backends.storage_errors``.
 
-Native FPK CI copies this file into site-packages so ``octop.launch`` can import.
+Native FPK CI copies this file into site-packages so ``ydsz.launch`` can import.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ _IO_WRAP_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _PROBE_PATH_RE = re.compile(
-    r"/?\.?(?:harness|octop)-probe-[0-9a-f]+\.txt",
+    r"/?\.?(?:harness|ydsz)-probe-[0-9a-f]+\.txt",
     re.IGNORECASE,
 )
 _CODE_IN_PARENS_RE = re.compile(r"\(([A-Za-z][A-Za-z0-9]{2,})\)")

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from octop_harness.slash import SlashCommand
-from octop_harness.slash import parse_slash as _parse_slash
+from ydsz_harness.slash import SlashCommand
+from ydsz_harness.slash import parse_slash as _parse_slash
 
 # The harness parser stops the command name at the first non-word character, so
 # ``/root/ddd`` would dispatch as ``/root``. Require the name to end at

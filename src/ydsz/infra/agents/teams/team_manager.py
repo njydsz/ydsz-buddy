@@ -22,10 +22,10 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
 from langchain_core.messages import AIMessage, HumanMessage
-from octop_harness.messages import extract_call_response
-from octop_harness.teams.inbox import InboxMessage
-from octop_harness.teams.processor import ReplyEvent
-from octop_harness.teams.util import (
+from ydsz_harness.messages import extract_call_response
+from ydsz_harness.teams.inbox import InboxMessage
+from ydsz_harness.teams.processor import ReplyEvent
+from ydsz_harness.teams.util import (
     PeerCall,
     PeerSession,
     build_one_shot_request,
@@ -2014,7 +2014,7 @@ def _patch_inbox_wrapup(
             text=prompt,
             source="inbox",
             configurable={
-                **({"octop_memory_capture_exclude": True} if error_text else {}),
+                **({"ydsz_memory_capture_exclude": True} if error_text else {}),
                 "ydsz_decision_followup": True,
                 "peer_invoke_mode": "async",
                 "ydsz_decision_finished_member": str(getattr(msg, "target_agent_id", "") or ""),
@@ -2044,7 +2044,7 @@ def _clean_peer_names(raw: Sequence[str] | None) -> tuple[str, ...] | None:
 
 
 def _request_peer_allowlist() -> tuple[str, ...] | None:
-    from octop_harness.teams.team_manager import _request_team_peers  # noqa: PLC0415
+    from ydsz_harness.teams.team_manager import _request_team_peers  # noqa: PLC0415
 
     return _clean_peer_names(_request_team_peers())
 

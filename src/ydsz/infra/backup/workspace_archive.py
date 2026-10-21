@@ -10,7 +10,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Literal
 
-from octop_harness.backends.utils import materialize_storage_path
+from ydsz_harness.backends.utils import materialize_storage_path
 
 from ydsz.infra.agents.builtin_skills import (
     YDSZ_BUILTIN_SKILLS_ROOT,
@@ -18,7 +18,7 @@ from ydsz.infra.agents.builtin_skills import (
 )
 
 if TYPE_CHECKING:
-    from octop_harness.backends.workspace import BackendWorkspace
+    from ydsz_harness.backends.workspace import BackendWorkspace
 
 WorkspaceImportMode = Literal["merge", "replace"]
 

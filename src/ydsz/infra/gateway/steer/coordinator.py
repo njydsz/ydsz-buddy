@@ -1,6 +1,6 @@
 """In-process mid-turn steer queues (Dashboard v1; sticky single process).
 
-Authoritative admission lives here until octop-harness exposes a native
+Authoritative admission lives here until ydsz-harness exposes a native
 between-model drain seam. Drain currently happens at Ydsz Worker turn boundaries
 (after each harness ``stream`` invocation completes) via continuation loops.
 """

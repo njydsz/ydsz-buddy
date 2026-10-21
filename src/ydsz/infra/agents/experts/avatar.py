@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Protocol
 
-from octop_harness.backends.utils import BackendOperationNotSupportedError
+from ydsz_harness.backends.utils import BackendOperationNotSupportedError
 
 from ydsz.infra.errors import ErrorCode, YdszError
 from ydsz.infra.gateway.media.attachment_hints import sniff_image_media_type

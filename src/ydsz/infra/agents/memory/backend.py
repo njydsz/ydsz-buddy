@@ -1,4 +1,4 @@
-"""Resolve agent memory storage backend for octop-harness / octop-memory."""
+"""Resolve agent memory storage backend for ydsz-harness / ydsz-memory."""
 
 from __future__ import annotations
 

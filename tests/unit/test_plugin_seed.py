@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 import pytest
-from octop_harness.plugins import PluginRegistry
+from ydsz_harness.plugins import PluginRegistry
 
 from ydsz.infra.agents.plugins.manager import PluginManager
 from ydsz.infra.agents.plugins.seed import seed_bundled_plugins
@@ -22,7 +22,7 @@ def _write_plugin(root: Path, plugin_id: str, *, version: str = "0.1.0") -> Path
         encoding="utf-8",
     )
     (dest / "main.py").write_text(
-        "from octop_harness.plugins import PluginContext\n"
+        "from ydsz_harness.plugins import PluginContext\n"
         "\n"
         "def setup(ctx: PluginContext) -> None:\n"
         f"    ctx.tool('{plugin_id}_tool', lambda: 'ok', description='d')\n",

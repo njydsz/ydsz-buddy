@@ -112,7 +112,7 @@ The wheel ships the built dashboard SPA, so the entire stack is one
 
 Per-agent workspace files (Markdown, skills, expert templates) are
 read and written through the agent's `BackendWorkspace`
-(`octop.infra.backend` → `octop_harness.backends`). The default
+(`octop.infra.backend` → `ydsz_harness.backends`). The default
 backend is a `filesystem` adapter rooted at
 `~/.octop/agents/<agent_id>/`; remote backends (S3, COS) are mounted
 on top of the same root_dir and the Ydsz Worker service never reads

@@ -1,4 +1,4 @@
-"""Recover HITL interrupts dropped by octop-harness on LangGraph astream v2.
+"""Recover HITL interrupts dropped by ydsz-harness on LangGraph astream v2.
 
 LangGraph v2 moves ``__interrupt__`` off the values payload onto
 ``chunk["interrupts"]``. Harness ``_project_chunk`` only reads
@@ -65,7 +65,7 @@ def install_harness_hitl_compat() -> None:
     global _INSTALLED
     if _INSTALLED:
         return
-    from octop_harness.protocols.langgraph import LangGraphProtocol
+    from ydsz_harness.protocols.langgraph import LangGraphProtocol
 
     original = LangGraphProtocol._project_chunk
 

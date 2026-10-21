@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.errors import ErrorCode, YdszError
 from ydsz.infra.gateway.process.processor import GlobalProcessor

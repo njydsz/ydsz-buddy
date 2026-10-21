@@ -674,7 +674,7 @@ def inject_missing_gateway_tools(
     """Register gateway tools in-process when HTTP MCP load did not produce them."""
     import logging
 
-    from octop_harness.mcp import mcp_tool_names
+    from ydsz_harness.mcp import mcp_tool_names
 
     from ydsz.infra.connectors.gateway import build_gateway_langchain_tools
 

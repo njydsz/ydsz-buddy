@@ -216,7 +216,7 @@ async def test_probe_reports_when_the_endpoint_is_down(
         async def score_async(self, **_kwargs: object) -> dict[str, float]:
             raise ConnectionError("All connection attempts failed")
 
-    monkeypatch.setattr("octop_harness.decision.client.HttpDecisionClient", _Down)
+    monkeypatch.setattr("ydsz_harness.decision.client.HttpDecisionClient", _Down)
     result = await store.probe(
         endpoint="http://127.0.0.1:8000/v1/systemone",
         api_key="",
@@ -252,7 +252,7 @@ async def test_probe_does_not_send_saved_key_to_another_endpoint(
         async def score_async(self, **_kwargs: object) -> dict[str, float]:
             return {"ping": 0.9}
 
-    monkeypatch.setattr("octop_harness.decision.client.HttpDecisionClient", _Probe)
+    monkeypatch.setattr("ydsz_harness.decision.client.HttpDecisionClient", _Probe)
     result = await store.probe(
         endpoint="https://two.example.test/decisions",
         api_key=None,

@@ -27,8 +27,8 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _SHELL_MODULES = (
-    "octop_harness.backends.local_shell",
-    "octop_harness.backends.bwrap_shell",
+    "ydsz_harness.backends.local_shell",
+    "ydsz_harness.backends.bwrap_shell",
 )
 _INSTALLED = False
 
@@ -87,7 +87,7 @@ def install_shell_output_decoding() -> None:
     global _INSTALLED
     if _INSTALLED:
         return
-    local_shell = importlib.import_module("octop_harness.backends.local_shell")
+    local_shell = importlib.import_module("ydsz_harness.backends.local_shell")
     if hasattr(local_shell, "decode_child_output"):
         _INSTALLED = True
         logger.info("harness already decodes child output; skipping ydsz shell patch")

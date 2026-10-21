@@ -11,7 +11,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from uuid import uuid4
 
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.infra.agents.builtin_skills import YDSZ_BUILTIN_SKILLS_ROOT
 from ydsz.infra.agents.experts.avatar import copy_workspace_avatar_to_dir

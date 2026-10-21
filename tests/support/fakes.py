@@ -17,9 +17,9 @@ from deepagents.backends.protocol import (
     LsResult,
     ReadResult,
 )
-from octop_gateway.channel import BaseChannel
-from octop_gateway.models import InboundMessage, MessageEvent
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_gateway.channel import BaseChannel
+from ydsz_gateway.models import InboundMessage, MessageEvent
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 
 def fake_bin_path(name: str) -> str:
@@ -32,7 +32,7 @@ def fake_bin_path(name: str) -> str:
 
 
 class FakeHarnessAgent:
-    """Minimal stand-in for ``octop_harness.HarnessAgent``.
+    """Minimal stand-in for ``ydsz_harness.HarnessAgent``.
 
     Yields a programmable list of chunk dicts, then ``state_snapshot``.
     The ``request`` argument is captured into ``last_request`` for
@@ -199,18 +199,18 @@ description: General-purpose agent
         self,
         disabled: set[str] | frozenset[str] | list[str] | None,
     ) -> None:
-        """Hot-update disabled skills (mirrors octop_harness.HarnessAgent)."""
+        """Hot-update disabled skills (mirrors ydsz_harness.HarnessAgent)."""
         self.config.skills_disabled = frozenset(str(x) for x in (disabled or ()))
 
     def set_tools_disabled(
         self,
         disabled: set[str] | frozenset[str] | list[str] | None,
     ) -> None:
-        """Hot-update disabled tools (mirrors octop_harness.HarnessAgent)."""
+        """Hot-update disabled tools (mirrors ydsz_harness.HarnessAgent)."""
         self.config.tools_disabled = frozenset(str(x) for x in (disabled or ()))
 
     def set_skill_package_roots(self, roots: list[dict[str, str]] | None) -> None:
-        """Hot-update skill package roots (mirrors octop_harness.HarnessAgent)."""
+        """Hot-update skill package roots (mirrors ydsz_harness.HarnessAgent)."""
         self.config.skill_package_roots = roots
 
     async def list_skill_summaries(self) -> list[dict[str, Any]]:

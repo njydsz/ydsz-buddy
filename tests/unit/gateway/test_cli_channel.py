@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import pytest
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.gateway.cli import CLI_CHANNEL_ID, CLI_CONNECTION_META, CliChannel, CliHub
 

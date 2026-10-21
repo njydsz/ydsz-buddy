@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from octop_gateway.models import MessageEvent, MessageEventType, TextContent
+from ydsz_gateway.models import MessageEvent, MessageEventType, TextContent
 
 __all__ = ["message_event_to_cli_chunks"]
 

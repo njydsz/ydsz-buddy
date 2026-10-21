@@ -9,8 +9,8 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from octop_harness.teams.inbox import InboxMessage
-from octop_harness.teams.processor import ReplyEvent
+from ydsz_harness.teams.inbox import InboxMessage
+from ydsz_harness.teams.processor import ReplyEvent
 
 from ydsz.infra.db.migrate import run_migrations
 from ydsz.infra.db.pool import SqlitePool
@@ -312,7 +312,7 @@ async def test_stream_host_followup_marks_live_and_persists(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -364,7 +364,7 @@ async def test_stream_host_followup_relays_decision_custom(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -414,7 +414,7 @@ async def test_stream_host_followup_relays_decision_custom(
 @pytest.mark.asyncio
 async def test_member_stream_does_not_relay_decision_custom(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -493,7 +493,7 @@ async def test_stream_host_followup_waits_for_dispatch_turn(
 ) -> None:
     import asyncio
 
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -526,7 +526,7 @@ async def test_unwatched_wrapup_is_persisted_once(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -573,7 +573,7 @@ async def test_stream_host_followup_pushes_wrapup_when_no_tokens(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -615,7 +615,7 @@ async def test_stream_host_followup_pushes_wrapup_when_no_tokens(
 @pytest.mark.asyncio
 async def test_record_peer_turn_persists_room_user_question(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -665,7 +665,7 @@ async def test_record_peer_turn_persists_room_user_question(processor_env: dict)
 @pytest.mark.asyncio
 async def test_record_peer_turn_keeps_sync_ask_agent_message(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     repo = MagicMock()
@@ -719,7 +719,7 @@ async def test_ensure_projection_leaves_pending_threads_with_history(
 async def test_prepare_peer_session_creates_callee_thread_without_rebind(
     processor_env: dict,
 ) -> None:
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     parent_sk = processor_env["parent_sk"]
@@ -746,7 +746,7 @@ async def test_prepare_peer_session_creates_callee_thread_without_rebind(
 @pytest.mark.asyncio
 async def test_prepare_team_peer_seeds_host_assignment(processor_env: dict) -> None:
     from langchain_core.messages import HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     parent_sk = processor_env["parent_sk"]
@@ -784,7 +784,7 @@ async def test_prepare_team_peer_seeds_host_assignment(processor_env: dict) -> N
 
 @pytest.mark.asyncio
 async def test_prepare_team_peer_uses_isolated_session_key(processor_env: dict) -> None:
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     parent_sk = processor_env["parent_sk"]
@@ -812,7 +812,7 @@ async def test_prepare_team_peer_uses_isolated_session_key(processor_env: dict) 
 @pytest.mark.asyncio
 async def test_prepare_followup_seeds_new_user_question(processor_env: dict) -> None:
     from langchain_core.messages import HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     parent_sk = processor_env["parent_sk"]
@@ -869,7 +869,7 @@ async def test_prepare_followup_seeds_new_user_question(processor_env: dict) -> 
 async def test_prepare_team_dispatch_tracks_job_and_forces_sync(
     processor_env: dict,
 ) -> None:
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     from ydsz.infra.agents.teams import TeamJobTracker
 
@@ -904,7 +904,7 @@ async def test_prepare_team_dispatch_includes_room_history(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     parent_sk = processor_env["parent_sk"]
@@ -949,7 +949,7 @@ async def test_prepare_team_dispatch_uses_projected_member_speech(
     import json
 
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -1031,7 +1031,7 @@ def test_stamp_team_host_runtime_forces_async(processor_env: dict) -> None:
 @pytest.mark.asyncio
 async def test_stream_team_peer_relays_tokens_to_room(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1074,7 +1074,7 @@ async def test_stream_team_peer_relays_tokens_to_room(processor_env: dict) -> No
 async def test_live_member_catchup_replays_partial_then_clears(
     processor_env: dict,
 ) -> None:
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1138,7 +1138,7 @@ async def test_stream_team_peer_relays_tokens_to_member_and_room(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1183,7 +1183,7 @@ async def test_stream_team_peer_unwatched_is_not_live_streamed(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
 
@@ -1206,7 +1206,7 @@ async def test_stream_team_peer_unwatched_is_not_live_streamed(
 @pytest.mark.asyncio
 async def test_stream_team_peer_relays_reasoning_and_tools(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1261,7 +1261,7 @@ async def test_member_tokens_stay_off_the_room_until_the_host_is_idle(
     processor_env: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     import ydsz.infra.agents.teams.team_manager as team_mod
 
@@ -1321,7 +1321,7 @@ async def test_member_tokens_stay_off_the_room_until_the_host_is_idle(
 @pytest.mark.asyncio
 async def test_member_hitl_waits_for_each_approval_before_finishing(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1407,7 +1407,7 @@ async def test_member_hitl_waits_for_each_approval_before_finishing(processor_en
 async def test_member_hitl_timeout_does_not_finish_the_job(
     processor_env: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     import ydsz.infra.agents.teams.team_manager as team_mod
 
@@ -1436,7 +1436,7 @@ async def test_member_model_does_not_start_while_the_host_turn_is_active(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1469,7 +1469,7 @@ async def test_member_model_does_not_start_while_the_host_turn_is_active(
 
 @pytest.mark.asyncio
 async def test_replacing_the_room_turn_cancels_a_member_approval(processor_env: dict) -> None:
-    from octop_harness.request import ChatRequest
+    from ydsz_harness.request import ChatRequest
 
     processor = processor_env["processor"]
 
@@ -1504,7 +1504,7 @@ async def test_fan_in_persists_member_turn_without_dispatch_prompt(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -1545,7 +1545,7 @@ async def test_fan_in_stamps_edited_files_on_room_history(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -1616,7 +1616,7 @@ async def test_record_peer_turn_keeps_tool_trail_on_member_page(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -1686,7 +1686,7 @@ async def test_fan_in_truncates_large_tool_results(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     from ydsz.infra.agents.teams.team_manager import _HISTORY_TOOL_RESULT_MAX_CHARS
 
@@ -1732,7 +1732,7 @@ async def test_fan_in_stamps_edited_files_when_final_text_missing(
     processor_env: dict,
 ) -> None:
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     processor._agent_repo.create(agent_id="host", user_id=1, name="Host", kind="team")
@@ -1777,7 +1777,7 @@ async def test_fan_in_stamps_edited_files_when_final_text_missing(
 @pytest.mark.asyncio
 async def test_fan_in_skips_snapshot_after_live_stream(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1809,7 +1809,7 @@ async def test_fan_in_skips_snapshot_after_live_stream(processor_env: dict) -> N
 @pytest.mark.asyncio
 async def test_fan_in_pushes_snapshot_when_not_live(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1871,7 +1871,7 @@ def _bind_im_session(processor_env: dict, *, thread_id: str = "thr_parent") -> s
 async def test_prepare_team_peer_pushes_dispatch_notice_to_im(
     processor_env: dict,
 ) -> None:
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1904,7 +1904,7 @@ async def test_prepare_team_peer_pushes_dispatch_notice_to_im(
 @pytest.mark.asyncio
 async def test_fan_in_pushes_member_speech_to_im_channel(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1935,7 +1935,7 @@ async def test_fan_in_pushes_member_speech_to_im_channel(processor_env: dict) ->
 @pytest.mark.asyncio
 async def test_fan_in_skips_dashboard_when_pushing_channels(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     gateway = processor_env["gateway"]
@@ -1995,7 +1995,7 @@ async def test_on_reply_live_wrapup_still_pushes_im(processor_env: dict) -> None
 @pytest.mark.asyncio
 async def test_fan_in_async_non_team_writes_caller_room(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     repo = MagicMock()
@@ -2024,7 +2024,7 @@ async def test_fan_in_async_non_team_writes_caller_room(processor_env: dict) -> 
 @pytest.mark.asyncio
 async def test_fan_in_sync_non_team_skips_caller_room(processor_env: dict) -> None:
     from langchain_core.messages import AIMessage
-    from octop_harness.teams.util import PeerCall
+    from ydsz_harness.teams.util import PeerCall
 
     processor = processor_env["processor"]
     repo = MagicMock()
@@ -2110,7 +2110,7 @@ async def test_failed_host_wrapup_is_excluded_from_memory() -> None:
     )
     await inbox._synthesize_reply(msg, None, "Authentication failed")
     request = stream.call_args.args[0]
-    assert request.to_runnable_config()["configurable"]["octop_memory_capture_exclude"] is True
+    assert request.to_runnable_config()["configurable"]["ydsz_memory_capture_exclude"] is True
     configurable = request.to_runnable_config()["configurable"]
     assert configurable["octop_decision_followup"] is True
     assert configurable["peer_invoke_mode"] == "async"

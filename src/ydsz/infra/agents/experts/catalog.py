@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, cast
 
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.infra.agents.manager import AgentCreateSpec
 from ydsz.infra.agents.workspace.dir import DEFAULT_SYSTEM_FILES_PATH

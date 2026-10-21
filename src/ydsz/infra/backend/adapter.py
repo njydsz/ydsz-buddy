@@ -1,4 +1,4 @@
-"""Map Ydsz Worker ``storage_backends`` rows to octop-harness backend specs (no I/O)."""
+"""Map Ydsz Worker ``storage_backends`` rows to ydsz-harness backend specs (no I/O)."""
 
 from __future__ import annotations
 

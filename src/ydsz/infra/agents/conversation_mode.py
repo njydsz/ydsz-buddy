@@ -1,4 +1,4 @@
-"""Ask / Plan / Craft helpers for Ydsz Worker (policy SoT lives in octop-harness)."""
+"""Ask / Plan / Craft helpers for Ydsz Worker (policy SoT lives in ydsz-harness)."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from octop_harness.middleware.conversation_mode import (
+from ydsz_harness.middleware.conversation_mode import (
     CONFIG_EXTRA_READ_KEY,
     CONFIG_MODE_KEY,
     DEFAULT_CONVERSATION_MODE,
     ConversationMode,
     parse_conversation_mode,
 )
-from octop_harness.middleware.conversation_mode import (
+from ydsz_harness.middleware.conversation_mode import (
     is_allowed_plan_path as _harness_is_allowed_plan_path,
 )
 
@@ -101,7 +101,7 @@ def workspace_plan_path(path: str, workspace_dir: Path | str) -> str:
 
 def _install_harness_plan_path_allowlist() -> None:
     """Let Plan mode accept the rewritten workspace-prefixed plan path."""
-    import octop_harness.middleware.conversation_mode as harness_cm
+    import ydsz_harness.middleware.conversation_mode as harness_cm
 
     harness_cm.is_allowed_plan_path = is_allowed_plan_path
 

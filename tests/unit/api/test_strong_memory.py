@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from deepagents.backends import FilesystemBackend
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.api.routers.agent_files import (
     StrongMemoryBody,

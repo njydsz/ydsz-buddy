@@ -2,7 +2,7 @@
 
 ``deepagents_backends`` 0.2 still implements the older surface: ``read()``
 returns a formatted ``str``, and listing lives on ``ls_info`` / ``als_info``.
-Current ``octop-harness`` / ``BackendWorkspace`` expects ``ReadResult`` /
+Current ``ydsz-harness`` / ``BackendWorkspace`` expects ``ReadResult`` /
 ``LsResult`` and calls ``ls`` / ``als``. Without this wrap, expert start on
 S3 raises ``'str' object has no attribute 'error'`` and Admin tree listing
 raises ``NotImplementedError``.

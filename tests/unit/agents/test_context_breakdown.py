@@ -1,4 +1,4 @@
-"""Tests for Ydsz Worker context-usage adapter over octop-harness."""
+"""Tests for Ydsz Worker context-usage adapter over ydsz-harness."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ def test_segment_keys_stable() -> None:
 
 
 def test_segment_keys_match_harness_when_available() -> None:
-    pytest.importorskip("octop_harness.context_usage")
-    from octop_harness.context_usage import SEGMENT_KEYS as HARNESS_KEYS
+    pytest.importorskip("ydsz_harness.context_usage")
+    from ydsz_harness.context_usage import SEGMENT_KEYS as HARNESS_KEYS
 
     assert SEGMENT_KEYS == HARNESS_KEYS
 

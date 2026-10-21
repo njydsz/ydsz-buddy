@@ -67,7 +67,7 @@ export function canonicalizeDockFilePath(
     }
   }
 
-  const anyAgent = posix.match(/(?:^|\/)\.octop\/agents\/[^/]+\/(.+)$/i);
+  const anyAgent = posix.match(/(?:^|\/).ydsz\/agents\/[^/]+\/(.+)$/i);
   if (anyAgent?.[1]) return anyAgent[1];
 
   if (posix === "/workspace") return "";
@@ -123,7 +123,7 @@ function preferDisplayPath(current: string, candidate: string): string {
     if (
       p.includes("/.octop/agents/") ||
       p.startsWith("/.octop/agents/") ||
-      /(?:^|\/)\.octop\/agents\//i.test(p)
+      /(?:^|\/).ydsz\/agents\//i.test(p)
     ) {
       s += 500;
     }

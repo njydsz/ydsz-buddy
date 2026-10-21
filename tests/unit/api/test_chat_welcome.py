@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.infra.agents.experts.catalog import (
     ExpertCatalog,

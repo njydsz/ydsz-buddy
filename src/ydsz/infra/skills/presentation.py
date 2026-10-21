@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from ydsz.infra.utils.locale import Locale
 
-# Keep in sync with octop_harness.skills.catalog._summary_dict.
+# Keep in sync with ydsz_harness.skills.catalog._summary_dict.
 _EXTENSION_NAMESPACES = ("ydsz", "harness", "lightclaw", "orca", "openclaw")
 
 

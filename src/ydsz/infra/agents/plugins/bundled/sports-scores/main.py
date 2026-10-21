@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 import httpx
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _BASE = "https://www.thesportsdb.com/api/v1/json/3"
 _EPL_LEAGUE = "4328"

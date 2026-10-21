@@ -6,9 +6,9 @@ import base64
 import logging
 from typing import Any
 
-from octop_gateway.channel import BaseChannel, MessageProcessor
-from octop_gateway.constraints import ChannelConstraints
-from octop_gateway.models import (
+from ydsz_gateway.channel import BaseChannel, MessageProcessor
+from ydsz_gateway.constraints import ChannelConstraints
+from ydsz_gateway.models import (
     AudioContent,
     ChannelSubject,
     ContentPart,
@@ -18,7 +18,7 @@ from octop_gateway.models import (
     TextContent,
     VideoContent,
 )
-from octop_gateway.utils import close_event_stream
+from ydsz_gateway.utils import close_event_stream
 
 from ydsz.i18n.domains.stream import format_stream_error
 from ydsz.infra.gateway.media.attachment_hints import (

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from octop_harness.slash import SlashCommand, SlashSink
+from ydsz_harness.slash import SlashCommand, SlashSink
 
 from ydsz.i18n.domains.slash import tr
 from ydsz.infra.db.repos.threads import clip_thread_title

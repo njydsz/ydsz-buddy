@@ -31,7 +31,7 @@ export interface AuthStatus {
   enabled: boolean;
   /** Legacy field — ydsz always uses passwords. */
   has_password: boolean;
-  /** True when ~/.octop/octop-login.txt exists on the server (wizard-only). */
+  /** True when ~/.ydsz/ydsz-login.txt exists on the server (wizard-only). */
   wizard_password_exists: boolean;
   /** When false, the wizard skips the CLI bootstrap password step. */
   wizard_password_required: boolean;

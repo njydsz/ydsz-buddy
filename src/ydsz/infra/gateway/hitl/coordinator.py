@@ -7,8 +7,8 @@ from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
-from octop_gateway.models import MessageEvent
-from octop_harness.slash import SlashCommand
+from ydsz_gateway.models import MessageEvent
+from ydsz_harness.slash import SlashCommand
 
 from ydsz.i18n.domains.slash import tr
 from ydsz.infra.agents.security.hitl_session import HitlSessionPolicyStore

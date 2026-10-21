@@ -16,7 +16,7 @@ def models() -> None:
 
 @models.command("presets")
 def presets() -> None:
-    """List built-in provider templates from octop-harness."""
+    """List built-in provider templates from ydsz-harness."""
     from ydsz.cli.support.ctx import json_output_enabled
     from ydsz.cli.support.offline_ops import load_provider_presets_offline
 

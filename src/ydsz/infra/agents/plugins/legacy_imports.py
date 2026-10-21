@@ -1,8 +1,8 @@
-"""Alias the pre-rename plugin SDK import ``harness_agent`` to ``octop_harness``.
+"""Alias the pre-rename plugin SDK import ``harness_agent`` to ``ydsz_harness``.
 
 Marketplace plugins written before the package rename still do
 ``from harness_agent.plugins import PluginContext``. The installed
-distribution only provides ``octop_harness``, so loading those plugins
+distribution only provides ``ydsz_harness``, so loading those plugins
 raises ``ModuleNotFoundError: No module named 'harness_agent'``.
 """
 
@@ -18,13 +18,13 @@ from collections.abc import Sequence
 from types import ModuleType
 
 _PREFIX = "harness_agent"
-_TARGET = "octop_harness"
+_TARGET = "ydsz_harness"
 _lock = threading.Lock()
 _installed = False
 
 
 class _LegacyAliasLoader(importlib.abc.Loader):
-    """Return the already-imported ``octop_harness`` module for an alias name."""
+    """Return the already-imported ``ydsz_harness`` module for an alias name."""
 
     def __init__(self, real_name: str) -> None:
         self._real_name = real_name
@@ -68,7 +68,7 @@ class _LegacyHarnessAgentFinder:
 
 
 def ensure_legacy_harness_agent_alias() -> None:
-    """Map ``import harness_agent`` onto the installed ``octop_harness`` package.
+    """Map ``import harness_agent`` onto the installed ``ydsz_harness`` package.
 
     A real ``harness_agent`` distribution, when present, is left untouched.
     """

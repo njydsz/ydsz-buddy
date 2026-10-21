@@ -15,9 +15,9 @@ from pathlib import Path
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
 from deepagents.backends.utils import validate_path
-from octop_gateway.models import ImageContent, InboundMessage
-from octop_harness.backends import DEFAULT_BACKEND_SPEC, resolve_backend
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_gateway.models import ImageContent, InboundMessage
+from ydsz_harness.backends import DEFAULT_BACKEND_SPEC, resolve_backend
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.api.common.attachments import save_attachment
 from ydsz.infra.agents.middleware.binary_read_guard import read_file_block_reason

@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.db.migrate import run_migrations
 from ydsz.infra.db.pool import SqlitePool

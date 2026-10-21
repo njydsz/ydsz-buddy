@@ -27,16 +27,16 @@ if [[ "$missing" -eq 1 ]]; then
   exit 1
 fi
 
-octop_pid=""
+ydsz_pid=""
 cleaned=0
 
 cleanup() {
   [[ "$cleaned" -eq 1 ]] && return
   cleaned=1
   trap - EXIT INT TERM
-  if [[ -n "$octop_pid" ]] && kill -0 "$octop_pid" 2>/dev/null; then
-    kill -TERM "$octop_pid" 2>/dev/null || true
-    wait "$octop_pid" 2>/dev/null || true
+  if [[ -n "$ydsz_pid" ]] && kill -0 "$ydsz_pid" 2>/dev/null; then
+    kill -TERM "$ydsz_pid" 2>/dev/null || true
+    wait "$ydsz_pid" 2>/dev/null || true
   fi
 }
 trap cleanup EXIT INT TERM
@@ -52,13 +52,13 @@ echo "starting ydsz-worker --reload on port ${PORT}"
   # Env overrides apply for this process and are not written back to config.json.
   exec env YDSZ_DESKTOP=1 YDSZ_BIND_HOST=127.0.0.1 YDSZ_PORT="$PORT" uv run ydsz-worker run --reload
 ) &
-octop_pid=$!
+ydsz_pid=$!
 
 for _ in $(seq 1 60); do
   if curl -sf -o /dev/null --max-time 1 "$HEALTH"; then
     break
   fi
-  if ! kill -0 "$octop_pid" 2>/dev/null; then
+  if ! kill -0 "$ydsz_pid" 2>/dev/null; then
     echo "Ydsz Worker 进程在就绪前退出了，请查看上方日志。" >&2
     exit 1
   fi

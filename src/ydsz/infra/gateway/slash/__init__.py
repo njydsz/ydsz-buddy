@@ -1,6 +1,6 @@
 """Slash command parsing and dispatch."""
 
-from octop_harness.slash import BufferSink, SlashCommand, SlashSink
+from ydsz_harness.slash import BufferSink, SlashCommand, SlashSink
 
 from ydsz.infra.gateway.slash.ctx import SlashCtx, build_slash_ctx
 from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher, build_default_dispatcher

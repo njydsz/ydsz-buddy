@@ -1,4 +1,4 @@
-"""Map agent ``config_json`` runtime knobs onto octop-harness semantics.
+"""Map agent ``config_json`` runtime knobs onto ydsz-harness semantics.
 
 Configurable stream contract (``ChatRequest.configurable``)
 -----------------------------------------------------------
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from octop_harness.middleware.model_settings import (
+from ydsz_harness.middleware.model_settings import (
     CONFIGURABLE_MAX_INPUT_TOKENS,
     CONFIGURABLE_MODEL_SETTINGS,
 )

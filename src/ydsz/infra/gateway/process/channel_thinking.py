@@ -1,4 +1,4 @@
-"""Patch octop-gateway inbound cleaning to honour Ydsz Worker thinking helpers."""
+"""Patch ydsz-gateway inbound cleaning to honour Ydsz Worker thinking helpers."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def install_channel_thinking_clean() -> None:
     global _PATCHED
     if _PATCHED:
         return
-    from octop_gateway.channel import BaseChannel
+    from ydsz_gateway.channel import BaseChannel
 
     def _clean_output(self: BaseChannel, text: str) -> str:  # noqa: ANN001
         constraints = self.constraints

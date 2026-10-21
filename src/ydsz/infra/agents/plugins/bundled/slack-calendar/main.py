@@ -7,7 +7,7 @@ import random
 from datetime import date
 from typing import Any
 
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 # (start, end inclusive, name)
 _HOLIDAYS: list[tuple[date, date, str]] = [

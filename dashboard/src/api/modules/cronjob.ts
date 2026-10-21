@@ -42,6 +42,3 @@ export const ydszCronApi = {
       method: "POST",
     }),
 };
-
-
-export { ydszCronApi };

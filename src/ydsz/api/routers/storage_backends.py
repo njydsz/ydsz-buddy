@@ -233,7 +233,7 @@ async def probe_storage_backend_config(
 
 
 def _storage_browse_ydsz_error(exc: BaseException) -> YdszError:
-    from octop_harness.backends.storage_errors import classify_storage_error
+    from ydsz_harness.backends.storage_errors import classify_storage_error
 
     from ydsz.infra.backend.browse import StorageBrowseError
 

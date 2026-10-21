@@ -65,7 +65,7 @@ if [[ "$plat" == windows-* ]] && ! command -v makensis >/dev/null 2>&1; then
 fi
 
 arch="${plat##*-}"
-ver="$(octop_version)"
+ver="$(ydsz_version)"
 portable_zip="${REPO_ROOT}/desktop/portable/release/$(portable_zip_basename "$plat")"
 
 echo "[desktop-release] platform=${plat}"
@@ -80,7 +80,7 @@ else
   bash "${REPO_ROOT}/desktop/portable/package.sh" "$plat"
 fi
 
-staging="${REPO_ROOT}/desktop/portable/release/Octop-${plat}"
+staging="${REPO_ROOT}/desktop/portable/release/ydsz-${plat}"
 requirements="${REPO_ROOT}/desktop/portable/requirements-${plat}.txt"
 if [[ "$plat" == windows-* ]]; then
   portable_python="${staging}/runtime/python.exe"

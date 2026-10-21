@@ -28,13 +28,13 @@ keys from the process environment (host/systemd keys that were never in the
 file are left alone). Every running agent inherits those keys:
 
 - **Local shell** — live process env (including this file) plus the agent's
-  workspace `.env` (workspace wins on the same key; `OCTOP_*` / `HOME` / `USER`
+  workspace `.env` (workspace wins on the same key; `YDSZ_*` / `HOME` / `USER`
   cannot be overridden from `.env`). New agents store that file at
   `{workspace}/.octop/.env`; existing agents keep `{workspace}/.env` when
   their stored internal system-files prefix uses the legacy layout. Remote
   object-store workspaces are not read from the host path — Ydsz Worker/harness
   also reads `.env` through the agent backend on each execute. Ydsz Worker also
-  injects `OCTOP_AGENT_ID`, `OCTOP_AUTH_DIR` (under `{workspace}/.octop/auth`
+  injects `YDSZ_AGENT_ID`, `YDSZ_AUTH_DIR` (under `{workspace}/.octop/auth`
   for new agents; legacy agents keep `{workspace}/.octop-auth`),
   and `YDSZ_HOME` into shell/sandbox env.
 - **Docker sandbox** — re-reads `~/.octop/env` on execute, plus workspace `.env`
@@ -222,9 +222,9 @@ Control-plane `database` and agent memory are separate layers. Defaults:
 - Control plane SQLite → agent memory stays `{workspace}/memory.sqlite`
   (or `{workspace}/.octop/memory.sqlite` for new agents).
 - Control plane PostgreSQL → agent memory **defaults to the same DSN**
-  (octop-memory per-agent PG schema `agent_<id>`). Runtime also needs
+  (ydsz-memory per-agent PG schema `agent_<id>`). Runtime also needs
   ``langgraph-checkpoint-postgres`` (pulled in via
-  ``octop-memory[langgraph-postgres]``) so LangGraph checkpoints work.
+  ``ydsz-memory[langgraph-postgres]``) so LangGraph checkpoints work.
   To keep file memory while the control plane is PG, set on the agent:
 
 ```json
@@ -261,7 +261,7 @@ blocks non-setup routes until the wizard completes.
 
 For unattended installs, use `ydsz-worker init --yes` with
 `YDSZ_ADMIN_USERNAME` / `YDSZ_ADMIN_PASSWORD` (and
-`OCTOP_REQUIRE_SETUP_PASSWORD=false` if the env-var path is used). This
+`YDSZ_REQUIRE_SETUP_PASSWORD=false` if the env-var path is used). This
 runs the same migrations + admin creation without the HTTP wizard.
 
 ## Secrets
@@ -283,7 +283,7 @@ Per-agent provider credentials (e.g. API keys) live in the SQLite
 ## Optional segmented history archive
 
 `history_v2_enabled` defaults to `false`; enable it with
-`OCTOP_HISTORY_V2_ENABLED=true`.
+`YDSZ_HISTORY_V2_ENABLED=true`.
 This switch only affects the write format of the next complete turn —
 once disabled, turns already saved in the new format are still read
 correctly.

@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.infra.agents.teams.welcome import team_host_welcome_payload
 from ydsz.infra.db.repos.agents import AgentRow

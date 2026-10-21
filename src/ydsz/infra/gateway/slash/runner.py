@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop_harness.slash import BufferSink, SlashCommand, SlashSink
+from ydsz_harness.slash import BufferSink, SlashCommand, SlashSink
 
 from ydsz.infra.gateway.slash.ctx import SlashCtx
 from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher

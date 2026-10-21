@@ -9,8 +9,8 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from octop_harness.config import HarnessAgentConfig, ModelConfig, ProviderConfig
-from octop_harness.manager import HarnessAgentManager
+from ydsz_harness.config import HarnessAgentConfig, ModelConfig, ProviderConfig
+from ydsz_harness.manager import HarnessAgentManager
 
 from ydsz.infra.agents.teams.team_manager import wire_shared_member_peers
 
@@ -51,7 +51,7 @@ def _registry(tmp_path: Path) -> tuple[HarnessAgentManager, dict[str, SimpleName
     mock_agent = MagicMock()
     mock_agent.init_workspace.return_value = MagicMock()
     mock_agent.call = AsyncMock(return_value={"messages": []})
-    with patch("octop_harness.manager.HarnessAgent", return_value=mock_agent):
+    with patch("ydsz_harness.manager.HarnessAgent", return_value=mock_agent):
         mgr = HarnessAgentManager()
         mgr.create_agent(
             _config(
@@ -124,14 +124,14 @@ def test_member_request_allowlist_sees_shared_colleague(tmp_path: Path) -> None:
     peers = mgr.team.list_peers(3, exclude_agent_id="exp-a", team_peers=("exp-b", "private"))
     assert [entry.agent_id for entry in peers] == ["exp-b"]
     with patch(
-        "octop_harness.teams.team_manager._request_team_peers",
+        "ydsz_harness.teams.team_manager._request_team_peers",
         return_value=("exp-b",),
     ):
         entry = mgr.team._resolve_peer_entry("exp-a", "exp-b", 3)
     assert entry.agent_id == "exp-b"
     with (
         patch(
-            "octop_harness.teams.team_manager._request_team_peers",
+            "ydsz_harness.teams.team_manager._request_team_peers",
             return_value=("private",),
         ),
         pytest.raises(ValueError, match="not owned by user"),

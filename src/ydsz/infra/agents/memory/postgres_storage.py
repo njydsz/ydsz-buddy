@@ -48,7 +48,7 @@ def _predicates(namespace: str, now: datetime) -> dict[str, tuple[str, tuple[Any
     return {
         "candidates": (
             "t.namespace = %s AND t.status = 'rejected' AND t.decided_at < %s "
-            "AND NOT EXISTS (SELECT 1 FROM octop_memory.atoms a "
+            "AND NOT EXISTS (SELECT 1 from ydsz_memory.atoms a "
             "WHERE a.namespace = t.namespace AND a.candidate_id = t.id)",
             (namespace, now - timedelta(days=CANDIDATE_DAYS)),
         ),
@@ -82,7 +82,7 @@ def inspect_postgres_storage(backend: Any, *, blocked_reason: str | None = None)
             cur.execute(
                 sql.SQL(
                     "SELECT count(*) AS rows, COALESCE(sum(pg_column_size(t)), 0) AS row_bytes "
-                    "FROM octop_memory.{} t WHERE namespace = %s"
+                    "from ydsz_memory.{} t WHERE namespace = %s"
                 ).format(sql.Identifier(table)),
                 (namespace,),
             )
@@ -93,7 +93,7 @@ def inspect_postgres_storage(backend: Any, *, blocked_reason: str | None = None)
         for table, (predicate, params) in _predicates(namespace, now).items():
             cur.execute(
                 sql.SQL(
-                    "SELECT count(*) AS rows FROM (SELECT t.id FROM octop_memory.{} t WHERE "
+                    "SELECT count(*) AS rows FROM (SELECT t.id from ydsz_memory.{} t WHERE "
                     + predicate
                     + " LIMIT %s) eligible"
                 ).format(sql.Identifier(table)),
@@ -151,7 +151,7 @@ def maintain_postgres_storage(
             # Generated FTS columns are derived, and must not be restored as data.
             cur.execute(
                 sql.SQL(
-                    "SELECT t.id, (to_jsonb(t) - 'fts_tsv') AS data FROM octop_memory.{} t WHERE "
+                    "SELECT t.id, (to_jsonb(t) - 'fts_tsv') AS data from ydsz_memory.{} t WHERE "
                     + predicate
                     + " ORDER BY t.id LIMIT %s FOR UPDATE OF t SKIP LOCKED"
                 ).format(sql.Identifier(table)),
@@ -198,7 +198,7 @@ def maintain_postgres_storage(
                 deleted[table] = 0
                 continue
             cur.execute(
-                sql.SQL("DELETE FROM octop_memory.{} WHERE namespace = %s AND id = ANY(%s)").format(
+                sql.SQL("DELETE from ydsz_memory.{} WHERE namespace = %s AND id = ANY(%s)").format(
                     sql.Identifier(table)
                 ),
                 (namespace, [row["id"] for row in rows]),

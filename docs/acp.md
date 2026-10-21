@@ -166,7 +166,7 @@ Runner shape:
 
 ## Prerequisites
 
-- **octop-harness `[acp]` extra** — pulls in `agent-client-protocol` (included in the Ydsz Worker wheel dependency on octop-harness).
+- **ydsz-harness `[acp]` extra** — pulls in `agent-client-protocol` (included in the Ydsz Worker wheel dependency on ydsz-harness).
 - **Outbound:** install external CLIs (`opencode`, `codebuddy`, …) on the machine running `ydsz-worker run`.
 - **Inbound:** agent must start successfully (provider + model configured).
 
@@ -192,4 +192,4 @@ Runner shape:
 - Dashboard: `/acp`
 - CLI: `ydsz-worker acp --help`
 - OpenAPI: `/api/docs`
-- Harness implementation: `octop-harness` → `octop_harness.acp` (server + `acp_runner` tool)
+- Harness implementation: `ydsz-harness` → `ydsz_harness.acp` (server + `acp_runner` tool)

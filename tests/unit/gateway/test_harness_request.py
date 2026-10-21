@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from octop_gateway.models import (
+from ydsz_gateway.models import (
     ChannelSubject,
     FileContent,
     GroupContext,

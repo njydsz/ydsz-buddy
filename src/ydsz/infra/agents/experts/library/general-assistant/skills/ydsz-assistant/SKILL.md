@@ -73,7 +73,7 @@ metadata:
 | 🪟 | 桌面客户端 | Windows / macOS / Linux，以及飞牛（FnOS）安装包 |
 | 🏠 | 自托管 | 单进程 `ydsz-worker run`，数据在 `~/.ydsz/` |
 
-底层是 Python 3.12+、FastAPI，Agent 运行时为 Ydsz Worker Harness（octop-harness），IM 桥接为 Ydsz Worker Gateway（octop-gateway）。不依赖外部消息队列。
+底层是 Python 3.12+、FastAPI，Agent 运行时为 Ydsz Worker Harness（ydsz-harness），IM 桥接为 Ydsz Worker Gateway（ydsz-gateway）。不依赖外部消息队列。
 
 ### 入口
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
-from octop_harness.subagents.loader import parse_agent_markdown
+from ydsz_harness.subagents.loader import parse_agent_markdown
 
 from ydsz.infra.agents.experts.catalog import default_library_root
 

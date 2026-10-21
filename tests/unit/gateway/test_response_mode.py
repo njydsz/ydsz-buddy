@@ -6,14 +6,14 @@ import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
-from octop_gateway.models import (
+from ydsz_gateway.models import (
     FileContent,
     InboundMessage,
     MessageEvent,
     MessageEventType,
     TextContent,
 )
-from octop_gateway.utils import close_event_stream
+from ydsz_gateway.utils import close_event_stream
 
 from ydsz.infra.gateway.process.response_mode import (
     collapse_to_invoke_response,

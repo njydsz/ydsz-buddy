@@ -7,7 +7,7 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _UA = "Ydsz Worker-wiki-summary/0.1.0"
 

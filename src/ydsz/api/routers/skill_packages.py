@@ -287,8 +287,6 @@ async def package_hub_search(
     limit: int = 50,
     _user: User = Depends(require_permission("skill_packages")),
 ) -> list[dict[str, Any]]:
-    from fastapi import HTTPException  # noqa: PLC0415
-
     from ydsz.infra.skills.skillhub_market import (  # noqa: PLC0415
         SkillHubMarketError,
         search_skillhub,
@@ -298,8 +296,10 @@ async def package_hub_search(
     effective_limit = max(1, min(limit, 100))
     try:
         return await search_skillhub(query, limit=effective_limit)
-    except SkillHubMarketError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except SkillHubMarketError:
+        # SkillHub upstream unreachable (network / timeout / SSL) or returned
+        # 404 — fall back to an empty result set so the UI stays usable.
+        return []
 
 
 @router.get("/hub/rankings", summary="SkillHub rankings for installing into packages")
@@ -307,8 +307,6 @@ async def package_hub_rankings(
     type: str = "all",
     _user: User = Depends(require_permission("skill_packages")),
 ) -> dict[str, Any]:
-    from fastapi import HTTPException  # noqa: PLC0415
-
     from ydsz.infra.skills.skillhub_market import (  # noqa: PLC0415
         SkillHubMarketError,
         SkillHubMarketTimeout,
@@ -319,10 +317,10 @@ async def package_hub_rankings(
     rtype = type if type in ranking_types else "all"
     try:
         return await fetch_skillhub_rankings(rtype)
-    except SkillHubMarketTimeout as exc:
-        raise HTTPException(status_code=504, detail=str(exc)) from exc
-    except SkillHubMarketError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except (SkillHubMarketTimeout, SkillHubMarketError):
+        # SkillHub upstream unreachable — return empty rankings so the UI
+        # stays usable instead of 502/504-ing.
+        return {"rankings": {}}
 
 
 @router.post("", summary="Create a global skill package")

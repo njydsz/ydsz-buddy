@@ -919,6 +919,8 @@
     },
     "emptyMarket": "No market experts available",
     "emptyMarketHint": "Try another keyword or check again later.",
+    "marketOffline": "Expert market is temporarily unavailable",
+    "marketOfflineHint": "The market server could not be reached. Please check your network connection or try again later.",
     "noMarketDescription": "This market expert has no description yet.",
     "marketSkillCount": "{{count}} skill(s)",
     "createFromMarket": "Create from Market",
@@ -2516,7 +2518,7 @@
     "dingtalkGetCredentialsHint": "Get your bot credentials here",
     "discordGetCredentialsHint": "Get your bot credentials here",
     "wecomGetCredentialsHint": "Get your bot credentials here",
-    "octopbotGetCredentialsHint": "Get your API credentials from Ydsz WorkerBot platform",
+    "ydszbotGetCredentialsHint": "Get your API credentials from Ydsz WorkerBot platform",
     "pleaseInputDbPath": "Please input DB path",
     "pleaseInputPollInterval": "Please input poll interval",
     "discordBotToken": "Discord bot token",
@@ -2531,7 +2533,7 @@
     "intro_weixin": "Connect personal WeChat so users can interact with your assistant via private chat in real time.",
     "intro_dashboard": "Built-in dashboard channel for local debugging — zero third-party setup.",
     "intro_yuanbao": "Connect Tencent YuanBao so agent capabilities show up in YuanBao sessions.",
-    "intro_octopbot": "Connect the Ydsz WorkerBot platform to Tencent Cloud-hosted bots and your agent.",
+    "intro_ydszbot": "Connect the Ydsz WorkerBot platform to Tencent Cloud-hosted bots and your agent.",
     "intro_xiaoyi": "Connect Huawei XiaoYi (OpenClaw) over A2A for voice-assistant interoperability.",
     "intro_mqtt": "Connect MQTT to route IoT device or robot messages to your agent.",
     "intro_telegram": "Connect a Telegram bot for private and group messages via the Bot API.",
@@ -6687,7 +6689,7 @@
   },
   "pageShell": {
     "experts": {
-      "title": "Experts",
+      "title": "Expert Groups",
       "subtitle": "Create and manage your AI experts, or spin one up from a template"
     },
     "tasks": {

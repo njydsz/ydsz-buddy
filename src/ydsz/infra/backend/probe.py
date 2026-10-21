@@ -10,7 +10,7 @@ import tempfile
 import uuid
 from typing import Any, cast
 
-from octop_harness.backends.probe import probe_backend
+from ydsz_harness.backends.probe import probe_backend
 
 from ydsz.infra.backend.adapter import row_to_backend_spec
 from ydsz.infra.backend.docker_spec import (
@@ -136,7 +136,7 @@ def _probe_docker(row: BackendRow) -> dict[str, Any]:
         return {
             "ok": False,
             "message": (
-                "docker Python package not installed (pip install 'octop-harness[docker]')"
+                "docker Python package not installed (pip install 'ydsz-harness[docker]')"
             ),
         }
 
@@ -147,12 +147,12 @@ def _probe_docker(row: BackendRow) -> dict[str, Any]:
         return {"ok": False, "message": f"docker daemon unreachable: {exc}"}
 
     try:
-        from octop_harness.backends import resolve_backend
-        from octop_harness.backends.docker_sandbox import ensure_docker_image
+        from ydsz_harness.backends import resolve_backend
+        from ydsz_harness.backends.docker_sandbox import ensure_docker_image
     except ImportError:
         return {
             "ok": False,
-            "message": ("docker sandbox helpers unavailable (pip install 'octop-harness[docker]')"),
+            "message": ("docker sandbox helpers unavailable (pip install 'ydsz-harness[docker]')"),
         }
 
     try:

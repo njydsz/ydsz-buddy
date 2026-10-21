@@ -52,7 +52,7 @@ tasks:
       # leaves stray pixels in the 32/64/128 layers.
       - |
         set -euo pipefail
-        work="$(mktemp -d "${TMPDIR:-/tmp}/octop-iconset.XXXXXX")"
+        work="$(mktemp -d "${TMPDIR:-/tmp}/ydsz-iconset.XXXXXX")"
         trap 'rm -rf "$work"' EXIT
         iconset="${work}/AppIcon.iconset"
         mkdir -p "$iconset"

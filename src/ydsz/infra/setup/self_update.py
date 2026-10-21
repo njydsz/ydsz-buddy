@@ -141,14 +141,30 @@ def find_uv_executable() -> str:
 
 
 def get_local_version() -> str:
+    """Return the installed ydsz-worker version.
+
+    Prefers ``importlib.metadata`` (works when installed as a distribution) and
+    falls back to ``ydsz.__version__`` (reliable in editable/dev mode and frozen
+    contexts such as PyInstaller / Tauri builds).  Only returns ``"0.0.0"`` when
+    neither source is available — the UI should treat it as "unknown".
+    """
     try:
         from importlib.metadata import version
 
         target = green_packages_dir()
         fpk_target = os.environ.get("YDSZ_FPK_SITE_PACKAGES", "").strip()
         if target is not None or fpk_target:
-            return get_version_in_dir(sys.executable, str(target or fpk_target)) or "0.0.0"
-        return version(_PACKAGE_NAME)
+            discovered = get_version_in_dir(sys.executable, str(target or fpk_target))
+            if discovered:
+                return discovered
+        else:
+            return version(_PACKAGE_NAME)
+    except Exception:
+        pass
+    try:
+        from ydsz import __version__
+
+        return __version__
     except Exception:
         return "0.0.0"
 
@@ -898,7 +914,7 @@ def _run_fpk_upgrade(
     安装到该打包目录本身，重启服务后即加载新版，升级真正生效。
 
     与普通部署不同，FPK 首次在线升级需要从零解析并下载完整依赖树
-    （octop 依赖 octop-harness 等大包），故安装超时显著放宽；先并行探测
+    （octop 依赖 ydsz-harness 等大包），故安装超时显著放宽；先并行探测
     simple index，缺版本/不可达的镜像直接跳过，最后以 pypi.org 兜底。
     """
     if not os.path.isdir(site_packages):
@@ -909,7 +925,7 @@ def _run_fpk_upgrade(
     local_ver = get_local_version()
     ordered, mirror_errors = rank_install_indexes(version)
     python_exe = sys.executable
-    installer = detect_installer()  # uv 优先：pip 对 octop-harness[all] 依赖树解析会卡死
+    installer = detect_installer()  # uv 优先：pip 对 ydsz-harness[all] 依赖树解析会卡死
 
     def _build_cmd(index_url: str) -> list[str]:
         requirement = package_requirement(version)

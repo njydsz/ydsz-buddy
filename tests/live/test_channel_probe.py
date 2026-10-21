@@ -17,9 +17,9 @@ from __future__ import annotations
 
 import aiohttp
 import pytest
-from octop_gateway.channels.weixin.api import WeixinAPIClient
-from octop_gateway.channels.weixin.types import WeixinAPIError
-from octop_gateway.manager import ChannelManager
+from ydsz_gateway.channels.weixin.api import WeixinAPIClient
+from ydsz_gateway.channels.weixin.types import WeixinAPIError
+from ydsz_gateway.manager import ChannelManager
 from tests.support.secrets import optional_env, require_env
 
 pytestmark = pytest.mark.live

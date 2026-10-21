@@ -37,7 +37,7 @@ def compact_agent_store(
     memory = getattr(getattr(agent, "_memory_runtime", None), "memory", None)
     if memory is None:
         raise ValueError(tr("slash.memory.compact_no_memory", locale))
-    from octop_memory.pipeline.lifecycle.vacuum import compact_vacuum
+    from ydsz_memory.pipeline.lifecycle.vacuum import compact_vacuum
 
     stats = compact_vacuum(memory)
     skipped = tuple(item.table for item in stats.tables if item.skipped_reason)

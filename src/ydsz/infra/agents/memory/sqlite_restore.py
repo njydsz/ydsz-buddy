@@ -54,7 +54,7 @@ def delete_backup(path: Path, backup_id: str, locale: str) -> None:
 
 
 def _validate(conn: sqlite3.Connection, namespace: str, locale: str) -> None:
-    from octop_memory.storage.backends.sqlite_checkpoint import CompactSqliteSaver
+    from ydsz_memory.storage.backends.sqlite_checkpoint import CompactSqliteSaver
 
     if conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
         raise ValueError(tr("memory_storage.invalid_backup", locale))

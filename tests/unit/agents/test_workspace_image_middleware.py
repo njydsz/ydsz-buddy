@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 from deepagents.backends.local_shell import LocalShellBackend
 from langchain_core.messages import HumanMessage
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.api.common.attachments import save_attachment
 from ydsz.infra.agents.middleware.workspace_image import WorkspaceImageMaterializeMiddleware

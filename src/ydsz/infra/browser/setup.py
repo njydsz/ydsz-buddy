@@ -50,14 +50,14 @@ def _runtime_dir_for_uid(uid: int | None = None) -> Path:
     token = _temp_scope_token(uid)
     if _is_linux():
         return Path(f"/tmp/runtime-ydsz-browser-{token}")
-    return Path(tempfile.gettempdir()) / f"runtime-octop-browser-{token}"
+    return Path(tempfile.gettempdir()) / f"runtime-ydsz-browser-{token}"
 
 
 def _relocated_profiles_root_for_uid(uid: int | None = None) -> Path:
     token = _temp_scope_token(uid)
     if _is_linux():
         return Path(f"/tmp/ydsz-browser-profiles-{token}")
-    return Path(tempfile.gettempdir()) / f"octop-browser-profiles-{token}"
+    return Path(tempfile.gettempdir()) / f"ydsz-browser-profiles-{token}"
 
 
 def ensure_chrome_runtime_env() -> Path:
@@ -93,7 +93,7 @@ def resolve_browser_display() -> str | None:
     """Pick a usable X11 display for headed Chrome (virtual desktop or env).
 
     When Ydsz Worker's Linux virtual desktop (Xvnc ``:99``) is running, inject
-    ``DISPLAY`` into the process env so octop-browser launches headed and
+    ``DISPLAY`` into the process env so ydsz-browser launches headed and
     the window appears on the remote desktop.
 
     Returns ``None`` when no live X11 socket exists. A stale ``$DISPLAY``
@@ -278,7 +278,7 @@ async def prepare_harness_profile_for_launch(
     force_recover: bool = False,
     profiles_root: Path | None = None,
 ) -> Path:
-    """Make an octop-browser profile safe to (re)launch Chrome against.
+    """Make an ydsz-browser profile safe to (re)launch Chrome against.
 
     - Forces a writable ``XDG_RUNTIME_DIR``
     - Injects virtual-desktop ``DISPLAY`` when Xvnc is up
@@ -355,7 +355,7 @@ def pkill_chrome_profile(profile_dir: Path) -> bool:
 
 def _profiles_root() -> Path:
     try:
-        from octop_browser.settings import settings as _settings  # noqa: PLC0415
+        from ydsz_browser.settings import settings as _settings  # noqa: PLC0415
 
         return Path(_settings.profiles_dir)
     except Exception:  # noqa: BLE001
@@ -408,7 +408,7 @@ def chrome_source_for_path(chrome_path: str | None) -> str | None:
             continue
     # Also match when chromium_executable() reports the same path.
     try:
-        from octop_browser.install import chromium_executable  # noqa: PLC0415
+        from ydsz_browser.install import chromium_executable  # noqa: PLC0415
 
         pw = chromium_executable()
         if pw and Path(pw).resolve() == resolved:
@@ -421,7 +421,7 @@ def chrome_source_for_path(chrome_path: str | None) -> str | None:
 async def _cdp_port_listening(port: int) -> bool:
     try:
         import aiohttp  # noqa: PLC0415
-        from octop_browser.settings import settings as _settings  # noqa: PLC0415
+        from ydsz_browser.settings import settings as _settings  # noqa: PLC0415
 
         host = _settings.cdp_host
         timeout = aiohttp.ClientTimeout(total=1)
@@ -436,7 +436,7 @@ async def _cdp_port_listening(port: int) -> bool:
 
 def _profile_port(profile_name: str) -> int | None:
     try:
-        from octop_browser.profile import ProfileManager  # noqa: PLC0415
+        from ydsz_browser.profile import ProfileManager  # noqa: PLC0415
 
         pm = ProfileManager()
         profile = pm.get_or_create(profile_name)
@@ -447,7 +447,7 @@ def _profile_port(profile_name: str) -> int | None:
 
 def _profile_data_dir(profile_name: str) -> Path:
     try:
-        from octop_browser.profile import ProfileManager  # noqa: PLC0415
+        from ydsz_browser.profile import ProfileManager  # noqa: PLC0415
 
         return Path(ProfileManager().get_or_create(profile_name).data_dir)
     except Exception:  # noqa: BLE001
@@ -457,7 +457,7 @@ def _profile_data_dir(profile_name: str) -> Path:
 async def _close_harness_registry() -> int:
     closed = 0
     try:
-        from octop_browser.tool_interface import _registry  # noqa: PLC0415
+        from ydsz_browser.tool_interface import _registry  # noqa: PLC0415
     except ImportError:
         return 0
 

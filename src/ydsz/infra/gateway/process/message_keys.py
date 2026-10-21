@@ -1,11 +1,11 @@
-"""Derive session keys and user ids from octop-gateway InboundMessage."""
+"""Derive session keys and user ids from ydsz-gateway InboundMessage."""
 
 from __future__ import annotations
 
 import time
 from typing import Any
 
-from octop_gateway.models import ImageContent, InboundMessage
+from ydsz_gateway.models import ImageContent, InboundMessage
 
 from ydsz.infra.gateway.threads import ThreadRegistry
 from ydsz.infra.utils.weixin_context import with_weixin_send_token
@@ -13,7 +13,7 @@ from ydsz.infra.utils.weixin_context import with_weixin_send_token
 # Persisted on HumanMessage.additional_kwargs for dashboard history UI.
 COMPOSER_CTX_KEY = "ydsz_composer_context"
 INBOUND_ATTACHMENTS_KEY = "ydsz_inbound_attachments"
-# Must match octop_harness.messages.CHECKPOINT_TS_KEY (epoch-ms).
+# Must match ydsz_harness.messages.CHECKPOINT_TS_KEY (epoch-ms).
 CHECKPOINT_TS_KEY = "checkpoint_ts"
 # Persisted on AIMessage.additional_kwargs when a stream fails mid-turn.
 STREAM_ERROR_FLAG = "ydsz_stream_error"
@@ -58,8 +58,8 @@ def build_composer_context(
 
 
 try:
-    from octop_gateway.push_routing import EPHEMERAL_PUSH_META
-except ImportError:  # pragma: no cover - older octop-gateway
+    from ydsz_gateway.push_routing import EPHEMERAL_PUSH_META
+except ImportError:  # pragma: no cover - older ydsz-gateway
     EPHEMERAL_PUSH_META = frozenset(
         {
             "msg_id",

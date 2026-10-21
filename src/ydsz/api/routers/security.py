@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from octop_harness.security.models import DEFAULT_HITL_TOOLS, SecurityPolicy
+from ydsz_harness.security.models import DEFAULT_HITL_TOOLS, SecurityPolicy
 from pydantic import BaseModel, Field
 
 from ydsz.api.deps import get_server, require_permission

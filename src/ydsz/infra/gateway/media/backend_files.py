@@ -2,7 +2,7 @@
 
 Dashboard / gateway code uses this module — **not**
 :class:`~ydsz.infra.gateway.media.ingress.AgentBackedMediaBackend`,
-which is only the octop-gateway ``MediaBackend`` adapter for IM ingress.
+which is only the ydsz-gateway ``MediaBackend`` adapter for IM ingress.
 
 Path rule for ``BackendWorkspace``
 ----------------------------------
@@ -33,7 +33,7 @@ from ydsz.infra.gateway.media.constants import OUTBOUND_DIR
 from ydsz.infra.utils.browser_media import legacy_harness_screenshots_dir
 
 if TYPE_CHECKING:
-    from octop_harness.backends.workspace import BackendWorkspace
+    from ydsz_harness.backends.workspace import BackendWorkspace
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ export interface UpdateStatus {
   is_editable: boolean;
   /** Non-null when the process was launched via `ydsz Worker service start` (systemd or launchd). */
   service_mode: "systemd" | "launchd" | null;
-  /** True when Ydsz Worker is spawned by the Wails desktop shell (or ``OCTOP_DESKTOP=1``). */
+  /** True when Ydsz Worker is spawned by the Wails desktop shell (or ``YDSZ_DESKTOP=1``). */
   desktop?: boolean;
   error: string | null;
   /** Stable error code (e.g. "pypi_unreachable") for localized UI messages; null on success. */

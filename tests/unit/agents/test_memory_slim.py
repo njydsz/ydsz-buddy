@@ -19,7 +19,7 @@ from ydsz.infra.agents.memory.slim_control import MemorySlimControl, request_mem
 
 
 def make_manager(tmp_path):
-    from octop_memory import Memory
+    from ydsz_memory import Memory
 
     path = tmp_path / "memory.sqlite"
     conn = sqlite3.connect(path)
@@ -47,7 +47,7 @@ def make_manager(tmp_path):
 
 @pytest.mark.asyncio
 async def test_live_job_waits_for_turn_and_releases_gate(tmp_path, monkeypatch):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     coordinator, registry, memory, cfg, cp = make_manager(tmp_path)
     entered, release = threading.Event(), threading.Event()
@@ -81,7 +81,7 @@ async def test_live_job_waits_for_turn_and_releases_gate(tmp_path, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_live_failure_releases_gate_and_keeps_error(tmp_path, monkeypatch):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     coordinator, registry, memory, _, _ = make_manager(tmp_path)
 
@@ -102,7 +102,7 @@ async def test_live_failure_releases_gate_and_keeps_error(tmp_path, monkeypatch)
 
 @pytest.mark.asyncio
 async def test_cancellation_does_not_release_gate_before_worker_finishes(tmp_path, monkeypatch):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     coordinator, registry, memory, _, _ = make_manager(tmp_path)
     entered, release = threading.Event(), threading.Event()
@@ -129,7 +129,7 @@ async def test_cancellation_does_not_release_gate_before_worker_finishes(tmp_pat
 
 @pytest.mark.asyncio
 async def test_manager_shutdown_waits_for_maintenance_before_closing_agents(tmp_path, monkeypatch):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     coordinator, registry, memory, _, _ = make_manager(tmp_path)
     entered, release = threading.Event(), threading.Event()
@@ -380,7 +380,7 @@ def test_live_discovery_filters_unavailable_agents_without_opening_memory(tmp_pa
 
 @pytest.mark.asyncio
 async def test_control_discovery_and_heartbeat_during_unchanged_phase(tmp_path, monkeypatch):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     from ydsz.infra.agents.memory.slim_control import list_memory_slim_agents
 
@@ -689,7 +689,7 @@ def test_status_api_preserves_manual_terminal_result(phase):
 
 @pytest.mark.parametrize("reason", ["postgres", "disabled", "stopped", "upgrade"])
 def test_preview_reports_specific_ineligibility_without_starting(tmp_path, monkeypatch, reason):
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     from ydsz.infra.errors import ErrorCode, YdszError
 

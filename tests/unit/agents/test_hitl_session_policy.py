@@ -8,7 +8,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from octop_harness.security.models import SecurityPolicy
+from ydsz_harness.security.models import SecurityPolicy
 
 from ydsz.config import YdszConfig
 from ydsz.infra.agents.manager import AgentManager

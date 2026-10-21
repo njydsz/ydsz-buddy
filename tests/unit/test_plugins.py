@@ -1,4 +1,4 @@
-"""Unit tests for octop-harness plugin loader."""
+"""Unit tests for ydsz-harness plugin loader."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 from langchain_core.tools import StructuredTool
-from octop_harness.plugins import (
+from ydsz_harness.plugins import (
     PluginRegistry,
     build_plugin_tools,
     collect_plugin_tool_configs,
@@ -192,8 +192,8 @@ def test_sanitize_plugin_tools_reserved_names() -> None:
 
 def test_build_plugin_tools_then_sanitize_keeps_config_keys_original() -> None:
     pytest.importorskip("pypinyin")
-    from octop_harness.plugins.manifest import PluginManifest
-    from octop_harness.plugins.registry import LoadedPlugin, ToolRegistration
+    from ydsz_harness.plugins.manifest import PluginManifest
+    from ydsz_harness.plugins.registry import LoadedPlugin, ToolRegistration
 
     manifest = PluginManifest(id="demo", version="1.0.0", name="Demo", kind="tool", entry="main.py")
     PluginRegistry().register(

@@ -19,7 +19,7 @@ from ydsz.infra.gateway.media.attachment_hints import (
 )
 
 if TYPE_CHECKING:
-    from octop_harness.backends.workspace import BackendWorkspace
+    from ydsz_harness.backends.workspace import BackendWorkspace
 
 
 class WorkspaceImageMaterializeMiddleware(AgentMiddleware[Any, Any]):

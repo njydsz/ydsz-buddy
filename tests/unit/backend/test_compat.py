@@ -159,7 +159,7 @@ async def test_adapt_sync_reads_share_one_loop() -> None:
 
 
 def test_adapted_read_is_safe_for_harness_exists_check() -> None:
-    from octop_harness.backends.utils import backend_file_exists
+    from ydsz_harness.backends.utils import backend_file_exists
 
     wrapped = adapt_backend_protocol(_LegacyRemote())
     assert backend_file_exists(wrapped, "/hello.txt") is True

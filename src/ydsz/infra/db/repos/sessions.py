@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from octop_gateway.models import ChannelSubject
+from ydsz_gateway.models import ChannelSubject
 
 from ydsz.infra.db.pool import DatabasePool
 from ydsz.infra.db.repos._base import DbRow, now_ts, sql_in_placeholders

@@ -11,13 +11,13 @@
 #   YDSZ_GREEN_OFFLINE=1 bash desktop/portable/package.sh   # require local wheels
 #
 # Layout of each zip:
-#   Octop-<plat>/
+#   ydsz-<plat>/
 #     runtime/     portable CPython
 #     packages/    site-packages (uv --target, relocatable)
 #     start.sh / start.bat
 #     README.txt
 #
-# Public filename is Octop-portable-<plat>-<version>.zip (see portable_zip_basename).
+# Public filename is ydsz-portable-<plat>-<version>.zip (see portable_zip_basename).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -27,16 +27,16 @@ source "${REPO_ROOT}/desktop/portable/_common.sh"
 TEMPLATES="${REPO_ROOT}/desktop/portable/templates"
 require_uv
 
-build_octop_wheel() {
+build_ydsz_wheel() {
   local wheel_dir="$1"
   mkdir -p "$wheel_dir"
-  # Drop previous local octop wheels so we pick the fresh build.
+  # Drop previous local ydsz-worker wheels so we pick the fresh build.
   find "$wheel_dir" -maxdepth 1 -type f -name 'ydsz_worker-*.whl' -delete 2>/dev/null || true
   if [[ ! -f "${REPO_ROOT}/src/ydsz/dashboard/index.html" && ! -f "${REPO_ROOT}/src/octop/dashboard/index.html" ]]; then
     echo "[package] WARNING: dashboard not built (src/ydsz/dashboard/index.html missing)." >&2
     echo "  Run: make build-frontend" >&2
   fi
-  echo "[package] building octop wheel → ${wheel_dir}" >&2
+  echo "[package] building ydsz-worker wheel → ${wheel_dir}" >&2
   uv build --wheel --out-dir "$wheel_dir" "$REPO_ROOT" >&2
   local whl
   whl="$(ls -1 "${wheel_dir}"/ydsz_worker-*.whl 2>/dev/null | sort | tail -1 || true)"
@@ -52,7 +52,7 @@ wheel_cache_usable() {
   local wheel_dir="$1"
   local count
   count="$(find "$wheel_dir" -maxdepth 1 -type f -name '*.whl' 2>/dev/null | wc -l | tr -d ' ')"
-  # Need octop + a reasonable set of deps.
+  # Need ydsz-worker + a reasonable set of deps.
   [[ "${count:-0}" -ge 10 ]] &&
     compgen -G "${wheel_dir}/uv-${GREEN_UV_VERSION}-*.whl" >/dev/null
 }
@@ -85,7 +85,7 @@ assemble_one() {
   local plat="$1"
   local runtime="${GREEN_RUNTIMES}/${plat}"
   local wheel_dir="${GREEN_WHEELS}/${plat}"
-  local staging="${GREEN_RELEASE}/Octop-${plat}"
+  local staging="${GREEN_RELEASE}/ydsz-${plat}"
   local zip_path="${GREEN_RELEASE}/$(portable_zip_basename "$plat")"
   local pyplat
 
@@ -101,8 +101,8 @@ assemble_one() {
   fi
 
   mkdir -p "$wheel_dir" "$GREEN_RELEASE" "$GREEN_ROOT"
-  local octop_whl
-  octop_whl="$(build_octop_wheel "$wheel_dir")"
+  local ydsz_whl
+  ydsz_whl="$(build_ydsz_wheel "$wheel_dir")"
 
   local req_file="${GREEN_ROOT}/requirements-${plat}.txt"
   echo "[package] ${plat}: exporting frozen deps → ${req_file}" >&2
@@ -152,7 +152,7 @@ assemble_one() {
   fi
 
   # uv pip resolves against the host interpreter. macOS /usr/bin/python3 is
-  # often Xcode 3.9, which cannot satisfy octop's requires-python >=3.12.
+  # often Xcode 3.9, which cannot satisfy ydsz-worker's requires-python >=3.12.
   if [[ "$plat" == "$host" ]]; then
     local install_python
     install_python="$(runtime_python "${staging}/runtime")"
@@ -190,21 +190,21 @@ assemble_one() {
     echo "[package] ${plat}: online install from locked requirements"
   fi
 
-  # Install locked deps first, then the local octop wheel without re-resolving deps.
+  # Install locked deps first, then the local ydsz-worker wheel without re-resolving deps.
   # bash 3.2 + set -u: empty array expansion is unbound — branch explicitly.
   set +e
   if [[ ${#offline_args[@]} -gt 0 ]]; then
     uv pip install "${common_args[@]}" "${offline_args[@]}" -r "$req_file"
     status=$?
     if [[ $status -eq 0 ]]; then
-      uv pip install "${common_args[@]}" "${offline_args[@]}" --no-deps "$octop_whl"
+      uv pip install "${common_args[@]}" "${offline_args[@]}" --no-deps "$ydsz_whl"
       status=$?
     fi
   else
     uv pip install "${common_args[@]}" -r "$req_file"
     status=$?
     if [[ $status -eq 0 ]]; then
-      uv pip install "${common_args[@]}" --no-deps "$octop_whl"
+      uv pip install "${common_args[@]}" --no-deps "$ydsz_whl"
       status=$?
     fi
   fi
@@ -254,7 +254,7 @@ assemble_one() {
     echo "platform=${plat}"
     echo "python=${PBS_PY}"
     echo "pbs_tag=${PBS_TAG}"
-    sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/octop_version=\1/p' \
+    sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/ydsz_version=\1/p' \
       "${REPO_ROOT}/pyproject.toml" | head -1
   } > "${staging}/VERSION.txt"
 
@@ -279,7 +279,7 @@ assemble_one() {
         echo "[package] need zip or python to create archive" >&2
         exit 1
       fi
-      "$py" -c "import shutil; shutil.make_archive('${zip_stem}', 'zip', '.', 'Octop-${plat}')"
+      "$py" -c "import shutil; shutil.make_archive('${zip_stem}', 'zip', '.', 'ydsz-')"
     fi
   )
   echo "[package] wrote ${zip_path}"

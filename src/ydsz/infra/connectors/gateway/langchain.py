@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from octop_harness.mcp import mcp_args_model
+from ydsz_harness.mcp import mcp_args_model
 
 from ydsz.infra.agents.plugins.plugin_tool_names import sanitize_plugin_tool_name
 from ydsz.infra.connectors.catalog import ConnectorCatalogEntry, is_inprocess_gateway

@@ -36,7 +36,7 @@ def _services(tmp_path: Path):
 
 def _seed_checkpoint(path: Path, thread_id: str, payload: bytes = b"checkpoint-body") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    from octop_memory.core import Memory
+    from ydsz_memory.core import Memory
 
     memory = Memory(
         namespace="agent_seed",
@@ -141,7 +141,7 @@ def test_delete_agent_drops_its_namespace_and_checkpoints(tmp_path: Path) -> Non
     workspace = tmp_path / "ws"
     db_path = workspace / "memory.sqlite"
     _seed_checkpoint(db_path, "thr_gone")
-    from octop_memory.core import Memory
+    from ydsz_memory.core import Memory
 
     memory = Memory(
         namespace="agent_ab1",
@@ -207,7 +207,7 @@ def test_delete_stored_thread_failure_raises(
     def _boom(self: object, thread_id: str) -> None:
         raise RuntimeError(f"locked {thread_id}")
 
-    monkeypatch.setattr("octop_memory.core.Memory.delete_thread", _boom)
+    monkeypatch.setattr("ydsz_memory.core.Memory.delete_thread", _boom)
 
     with pytest.raises(YdszError) as exc:
         delete_stored_thread(
@@ -231,7 +231,7 @@ def test_reclaim_failure_still_deletes_rows(
     def _boom(*_args: object, **_kwargs: object) -> None:
         raise RuntimeError("vacuum locked")
 
-    monkeypatch.setattr("octop_memory.pipeline.lifecycle.vacuum.nudge_vacuum", _boom)
+    monkeypatch.setattr("ydsz_memory.pipeline.lifecycle.vacuum.nudge_vacuum", _boom)
 
     delete_stored_thread(
         agent_id="ag1",
@@ -342,7 +342,7 @@ def test_compact_skips_when_disk_cannot_hold_a_rewrite(
         "ydsz.infra.agents.memory.thread_cleanup.shutil.disk_usage",
         lambda _path: type("Usage", (), {"free": 1})(),
     )
-    monkeypatch.setattr("octop_memory.pipeline.lifecycle.vacuum.compact_vacuum", _refuse_vacuum)
+    monkeypatch.setattr("ydsz_memory.pipeline.lifecycle.vacuum.compact_vacuum", _refuse_vacuum)
     assert (
         compact_agent_store_file(
             agent_id="ag1",

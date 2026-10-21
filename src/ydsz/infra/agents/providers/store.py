@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from octop_harness.config import ModelConfig, ProviderConfig
+from ydsz_harness.config import ModelConfig, ProviderConfig
 
 from ydsz.infra.agents.providers.model_flags import is_chat_eligible_model, is_vision_model
 from ydsz.infra.agents.providers.opencode_session import session_header_for_provider

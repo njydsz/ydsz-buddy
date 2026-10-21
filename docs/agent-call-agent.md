@@ -42,7 +42,7 @@ ask_agent mode=background
 
 ## 相关文件
 
-- `octop_harness/teams/` — inbox、`TeamManager`、`build_team_tools`
+- `ydsz_harness/teams/` — inbox、`TeamManager`、`build_team_tools`
 - `infra/gateway/processor.py` — `GlobalProcessor`（消息路由 + `TeamProcessor` 回调）
 - `api/routers/chat.py`、`infra/gateway/processor.py` — `@` 与 slash
 

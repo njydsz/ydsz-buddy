@@ -1,4 +1,4 @@
-"""octop-browser media paths aligned with IM ``outbound/`` layout."""
+"""ydsz-browser media paths aligned with IM ``outbound/`` layout."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def parse_ydsz_user_id(raw: object) -> int | None:
 
 
 def user_browser_profile(user_id: int) -> str:
-    """Stable octop-browser profile name for one Ydsz Worker user.
+    """Stable ydsz-browser profile name for one Ydsz Worker user.
 
     Dashboard and CLI turns use the logged-in user. IM turns use the agent
     owner (the same id already stored on the thread). A leftover on-disk
@@ -103,7 +103,7 @@ def ydsz_browser_profiles_dir(paths: PathLayout | None = None) -> Path:
 
 
 def configure_browser_screenshots_dir(screenshots_dir: Path) -> None:
-    """Point octop-browser screenshot actions at an agent workspace directory."""
+    """Point ydsz-browser screenshot actions at an agent workspace directory."""
     resolved = screenshots_dir.resolve()
     resolved.mkdir(parents=True, exist_ok=True)
     os.environ["BROWSER_USE_SCREENSHOTS_DIR"] = str(resolved)
@@ -111,18 +111,18 @@ def configure_browser_screenshots_dir(screenshots_dir: Path) -> None:
 
 
 def configure_browser_profiles_dir(profiles_dir: Path | None = None) -> Path:
-    """Point octop-browser at a profiles directory; return the resolved root.
+    """Point ydsz-browser at a profiles directory; return the resolved root.
 
     When *profiles_dir* is omitted, uses :func:`ydsz_browser_profiles_dir`
     (including legacy migration). Also updates ``BROWSER_USE_PROFILES_DIR``
-    and in-process octop-browser settings.
+    and in-process ydsz-browser settings.
     """
     root = Path(profiles_dir) if profiles_dir is not None else ydsz_browser_profiles_dir()
     root.mkdir(parents=True, exist_ok=True)
     resolved = root.resolve()
     os.environ["BROWSER_USE_PROFILES_DIR"] = str(resolved)
     with contextlib.suppress(Exception):
-        from octop_browser.settings import settings as hb_settings  # noqa: PLC0415
+        from ydsz_browser.settings import settings as hb_settings  # noqa: PLC0415
 
         hb_settings.profiles_dir = resolved
     logger.debug("BROWSER_USE_PROFILES_DIR=%s", resolved)
@@ -130,11 +130,11 @@ def configure_browser_profiles_dir(profiles_dir: Path | None = None) -> Path:
 
 
 def configure_browser_idle_timeout(timeout_minutes: int) -> None:
-    """Apply Ydsz Worker's browser idle policy to octop-browser."""
+    """Apply Ydsz Worker's browser idle policy to ydsz-browser."""
     timeout = max(int(timeout_minutes), 0)
     os.environ["BROWSER_USE_IDLE_TIMEOUT_MINUTES"] = str(timeout)
     with contextlib.suppress(Exception):
-        from octop_browser.settings import settings as hb_settings  # noqa: PLC0415
+        from ydsz_browser.settings import settings as hb_settings  # noqa: PLC0415
 
         runtime_settings: Any = hb_settings
         runtime_settings.idle_timeout_minutes = float(timeout)
@@ -142,12 +142,12 @@ def configure_browser_idle_timeout(timeout_minutes: int) -> None:
 
 
 def harness_settings_for_screenshots_dir(screenshots_dir: Path) -> Any | None:
-    """Build :class:`YdszSettings` when octop-browser is installed."""
+    """Build :class:`YdszSettings` when ydsz-browser is installed."""
     try:
-        from octop_browser.settings import YdszSettings
+        from ydsz_browser.settings import OctopSettings
     except ImportError:
         return None
-    return YdszSettings(screenshots_dir=screenshots_dir.resolve())
+    return OctopSettings(screenshots_dir=screenshots_dir.resolve())
 
 
 def legacy_harness_screenshots_dir() -> Path:

@@ -13,7 +13,7 @@ from typing import Any
 
 import httpx
 import pytest
-from octop_harness.plugins import PluginRegistry, build_plugin_tools, load_plugin_dir
+from ydsz_harness.plugins import PluginRegistry, build_plugin_tools, load_plugin_dir
 
 from ydsz.infra.agents.plugins.bundled import default_bundled_plugins_root
 from ydsz.infra.agents.plugins.manager import PluginManager

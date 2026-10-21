@@ -15,9 +15,9 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
-from octop_memory import Memory
-from octop_memory.storage.backends.postgres import PostgresMemoryBackend
-from octop_memory.types import AtomCard, Candidate, JournalEntry
+from ydsz_memory import Memory
+from ydsz_memory.storage.backends.postgres import PostgresMemoryBackend
+from ydsz_memory.types import AtomCard, Candidate, JournalEntry
 
 from ydsz.infra.agents.memory import postgres_storage as storage
 from ydsz.infra.agents.memory.thread_cleanup import memory_namespace
@@ -104,7 +104,7 @@ def snapshot(backend):
         for table in storage.TABLES:
             cur.execute(
                 sql.SQL(
-                    "SELECT to_jsonb(t) AS data FROM octop_memory.{} t WHERE namespace = %s"
+                    "SELECT to_jsonb(t) AS data from ydsz_memory.{} t WHERE namespace = %s"
                 ).format(sql.Identifier(table)),
                 (backend._ns,),
             )
@@ -133,7 +133,7 @@ def test_cleanup_is_scoped_backed_up_and_other_expert_remains_writable(stores, t
             with storage._connect(second) as conn, conn.cursor() as cur:
                 cur.execute("SET LOCAL lock_timeout = '500ms'")
                 cur.execute(
-                    "UPDATE octop_memory.journal SET note = 'concurrent write' "
+                    "UPDATE ydsz_memory.journal SET note = 'concurrent write' "
                     "WHERE namespace = %s AND id = 'expired'",
                     (second._ns,),
                 )
@@ -194,7 +194,7 @@ def test_sql_failure_rolls_back_both_tables_and_retains_backup(stores, tmp_path)
         )
         cur.execute(
             sql.SQL(
-                "CREATE TRIGGER {} BEFORE DELETE ON octop_memory.journal "
+                "CREATE TRIGGER {} BEFORE DELETE ON ydsz_memory.journal "
                 "FOR EACH ROW EXECUTE FUNCTION public.{}()"
             ).format(sql.Identifier(name), sql.Identifier(name))
         )
@@ -207,7 +207,7 @@ def test_sql_failure_rolls_back_both_tables_and_retains_backup(stores, tmp_path)
     finally:
         with storage._connect(first) as conn, conn.cursor() as cur:
             cur.execute(
-                sql.SQL("DROP TRIGGER {} ON octop_memory.journal").format(sql.Identifier(name))
+                sql.SQL("DROP TRIGGER {} ON ydsz_memory.journal").format(sql.Identifier(name))
             )
             cur.execute(sql.SQL("DROP FUNCTION public.{}()").format(sql.Identifier(name)))
 
@@ -229,7 +229,7 @@ def test_namespace_lock_and_busy_rows_do_not_block_other_experts(stores, tmp_pat
         assert report["total_deleted"] == 2
     with storage._connect(first) as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT id FROM octop_memory.candidates WHERE namespace = %s AND id = 'expired' FOR UPDATE",
+            "SELECT id from ydsz_memory.candidates WHERE namespace = %s AND id = 'expired' FOR UPDATE",
             (first._ns,),
         )
         report = storage.maintain_postgres_storage(

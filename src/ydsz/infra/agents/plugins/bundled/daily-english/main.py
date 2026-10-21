@@ -7,7 +7,7 @@ import json
 from datetime import date
 from typing import Any
 
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 _VOCAB: tuple[tuple[str, str, str, str], ...] = (
     (

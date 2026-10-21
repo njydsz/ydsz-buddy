@@ -47,7 +47,7 @@ def test_is_allowed_plan_path_accepts_workspace_prefix() -> None:
 
 
 def test_harness_allowlist_accepts_workspace_plan_after_ydsz_patch() -> None:
-    from octop_harness.middleware.conversation_mode import (
+    from ydsz_harness.middleware.conversation_mode import (
         is_allowed_plan_path as harness_ok,
     )
 

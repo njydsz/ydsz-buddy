@@ -919,6 +919,8 @@
     },
     "emptyMarket": "暂无可用的市场专家",
     "emptyMarketHint": "可以换个关键词，或稍后再试。",
+    "marketOffline": "专家市场暂时不可用",
+    "marketOfflineHint": "无法连接到市场服务器，请检查网络连接或稍后再试。",
     "noMarketDescription": "该市场专家暂未提供简介。",
     "marketSkillCount": "{{count}} 个技能",
     "createFromMarket": "从市场创建",
@@ -2484,7 +2486,7 @@
     "label_dashboard": "控制台",
     "label_wecom": "企业微信",
     "label_weixin": "微信",
-    "label_ydszbot": "云顶数字工作台Bot",
+    "label_ydszbot": "云顶数字工作台 Bot",
     "label_agentchat": "AgentChat",
     "label_xiaoyi": "小艺",
     "label_mqtt": "MQTT",
@@ -2516,7 +2518,7 @@
     "dingtalkGetCredentialsHint": "在这里获取你的机器人信息",
     "discordGetCredentialsHint": "在这里获取你的机器人信息",
     "wecomGetCredentialsHint": "前往企业微信开放平台获取凭据",
-    "octopbotGetCredentialsHint": "前往 云顶数字工作台Bot 平台获取 API 凭据",
+    "ydszbotGetCredentialsHint": "前往 云顶数字工作台 Bot 平台获取 API 凭据",
     "pleaseInputDbPath": "请输入数据库路径",
     "pleaseInputPollInterval": "请输入轮询间隔",
     "discordBotToken": "Discord机器人令牌",
@@ -2531,7 +2533,7 @@
     "intro_weixin": "配置个人微信频道，用户可通过微信私聊与你的助手实时互动。",
     "intro_dashboard": "本地仪表盘通道，开箱即用；用于后台调试，无需第三方配置。",
     "intro_yuanbao": "配置腾讯元宝通讯频道，将专家能力接入元宝会话场景。",
-    "intro_octopbot": "配置 云顶数字工作台Bot 平台频道，对接腾讯云托管机器人与你的专家。",
+    "intro_ydszbot": "配置 云顶数字工作台 Bot 平台频道，对接企业 IM 机器人与你的专家。",
     "intro_xiaoyi": "配置华为小艺（OpenClaw）频道，经 A2A 协议与语音助手互通。",
     "intro_mqtt": "配置 MQTT 频道，将 IoT 设备或机器人消息路由到专家。",
     "intro_telegram": "配置 Telegram Bot 频道，支持私聊与群组消息经 Bot API 接入。",
@@ -6687,7 +6689,7 @@
   },
   "pageShell": {
     "experts": {
-      "title": "专家",
+      "title": "专家团",
       "subtitle": "创建与管理你的 AI 专家，也可从模板一键新建"
     },
     "tasks": {

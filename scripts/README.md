@@ -4,7 +4,7 @@
 
 ## 安装 Ydsz Worker（终端用户）
 
-将 Ydsz Worker 安装到隔离虚拟环境 `~/.octop/venv`，并创建 `~/.octop/bin/octop` 包装脚本加入 PATH。
+将 Ydsz Worker 安装到隔离虚拟环境 `~/.octop/venv`，并创建 `~/.octop/bin/ydsz-worker` 包装脚本加入 PATH。
 
 ### 远程一键安装（推荐）
 
@@ -80,7 +80,7 @@ powershell -File scripts/wheel_build.ps1
 
 输出：`dist/*.whl`、`dist/*.tar.gz`
 
-发布前请确认 `pyproject.toml` 中的 `octop-harness`、`octop-gateway` 等依赖已发布到 PyPI（`[tool.uv.sources]` 仅对 uv 本地开发生效，pip/PyPI 不读取）。
+发布前请确认 `pyproject.toml` 中的 `ydsz-harness`、`ydsz-gateway` 等依赖已发布到 PyPI（`[tool.uv.sources]` 仅对 uv 本地开发生效，pip/PyPI 不读取）。
 
 ---
 

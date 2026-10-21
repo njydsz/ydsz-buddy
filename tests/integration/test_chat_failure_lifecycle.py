@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage
-from octop_gateway.utils import close_event_stream
+from ydsz_gateway.utils import close_event_stream
 
 from tests.support.app import ydsz_client
 from tests.support.auth import auth_header, bootstrap_admin, create_agent, seed_openai_provider
@@ -52,7 +52,7 @@ async def test_failed_turn_survives_reload_releases_running_state_and_has_no_err
                 finally:
                     producer_closed.set()
 
-        monkeypatch.setattr("octop_gateway.utils.STREAM_CLOSE_TIMEOUT", 0.02)
+        monkeypatch.setattr("ydsz_gateway.utils.STREAM_CLOSE_TIMEOUT", 0.02)
         monkeypatch.setattr(processor, "iter_turn_chunks", broken_tail)
         try:
             created = await client.post(f"/api/agents/{agent_id}/threads", headers=auth)

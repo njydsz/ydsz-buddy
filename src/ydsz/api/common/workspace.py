@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from octop_harness.backends.workspace import BackendWorkspace
+from ydsz_harness.backends.workspace import BackendWorkspace
 
 from ydsz.api.common.agent import require_agent_owner_row, require_agent_row
 from ydsz.infra.errors import ErrorCode, YdszError
 
 if TYPE_CHECKING:
-    from octop_harness import HarnessAgent
+    from ydsz_harness import HarnessAgent
 
 # deepagents.backends.utils.EMPTY_CONTENT_WARNING — shown to LLM tools, not humans.
 _DEEPAGENTS_EMPTY_WARNING = "System reminder: File exists but has empty contents"

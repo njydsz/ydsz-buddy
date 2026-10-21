@@ -129,7 +129,7 @@ def test_stopped_expert_sharing_sqlite_disables_maintenance(store, monkeypatch, 
 @pytest.mark.asyncio
 async def test_failure_retains_result_and_releases_turn_gate(store, monkeypatch):
     coordinator, registry, _memory, _cfg, _cp = store
-    from octop_memory.application import checkpoint_maintenance
+    from ydsz_memory.application import checkpoint_maintenance
 
     def fail(*args, **kwargs):
         raise OSError("disk full")

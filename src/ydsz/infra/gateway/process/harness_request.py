@@ -1,12 +1,12 @@
-"""Assemble octop-harness stream requests and multimodal user content."""
+"""Assemble ydsz-harness stream requests and multimodal user content."""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any
 
-from octop_gateway.media import MediaBackend
-from octop_gateway.models import ContentPart, FileContent, ImageContent, InboundMessage, TextContent
+from ydsz_gateway.media import MediaBackend
+from ydsz_gateway.models import ContentPart, FileContent, ImageContent, InboundMessage, TextContent
 
 from ydsz.i18n.domains.attachment import (
     attachment_empty_image,

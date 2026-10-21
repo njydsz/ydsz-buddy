@@ -12,7 +12,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from octop_gateway.models import (
+from ydsz_gateway.models import (
     AudioContent,
     ContentPart,
     FileContent,
@@ -32,8 +32,8 @@ from ydsz.infra.gateway.media.inbound_store import (
 from ydsz.infra.utils.locale import Locale
 
 if TYPE_CHECKING:
-    from octop_gateway.media import MediaBackend
-    from octop_harness.backends.workspace import BackendWorkspace
+    from ydsz_gateway.media import MediaBackend
+    from ydsz_harness.backends.workspace import BackendWorkspace
 
 logger = logging.getLogger(__name__)
 

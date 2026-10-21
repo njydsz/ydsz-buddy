@@ -146,7 +146,7 @@ function resolveImageSrc(src: string): string {
   }
 
   // Match workspace path: ends in /.ydsz/workspace/<rest>
-  const workspaceMatch = filePath.match(/[/\\]\.octop[/\\]workspace[/\\](.*)/);
+  const workspaceMatch = filePath.match(/[/\\].ydsz[/\\]workspace[/\\](.*)/);
   if (workspaceMatch) {
     const relPath = workspaceMatch[1].replace(/\\/g, "/");
     return `/api/workspace/media?path=${encodeURIComponent(relPath)}`;

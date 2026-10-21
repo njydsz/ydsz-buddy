@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 
 import httpx
 from langgraph.config import get_config
-from octop_harness.plugins import PluginContext
+from ydsz_harness.plugins import PluginContext
 
 from ydsz.i18n import tr
 from ydsz.infra.utils.locale import DEFAULT_LOCALE, normalize_locale

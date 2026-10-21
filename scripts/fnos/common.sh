@@ -80,7 +80,7 @@ ydsz_signal_pids() {
 # 有参数：只释放指定端口（本地版 stop 只清 8089，避免误伤 Docker 版）。
 # 仅清理：(1) 占用这些端口的进程；(2) 本安装目录下尚未 exec 的启动器；
 # (3) 带 YDSZ_INSTALL_MODE=fpk-native 的 `ydsz-worker run`（仅当本次
-# 要释放 8089 时）。不使用宽泛的 `pgrep -f octop`。
+# 要释放 8089 时）。不使用宽泛的 `pgrep -f ydsz`。
 # ---------------------------------------------------------------------------
 free_ydsz_ports() {
     local port pid pids pat appdir ports
@@ -106,7 +106,7 @@ free_ydsz_ports() {
         done
     done
 
-    appdir="${TRIM_APPDEST:-/var/apps/ydsz-native}"
+    appdir="${TRIM_APPDEST:-/var/apps/octop-native}"
     for pat in "$appdir/bin/ydsz-worker" "$appdir/app/bin/ydsz-worker"; do
         pids="$(pgrep -f -- "$pat" 2>/dev/null | tr '\n' ' ')" || true
         [ -z "$pids" ] && continue
@@ -198,7 +198,7 @@ ydsz_packed_fpk_arch() {
         return 0
     fi
     here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    for f in "$here/fpk-arch" "/var/apps/ydsz-native/cmd/fpk-arch"; do
+    for f in "$here/fpk-arch" "/var/apps/octop-native/cmd/fpk-arch"; do
         if [ -f "$f" ]; then
             tr -d '[:space:]' < "$f"
             return 0
@@ -349,7 +349,7 @@ ydsz_validate_password() {
     elif printf '%s' "$pw" | tr 'A-Z' 'a-z' | grep -qx \
         -e 'password' -e 'password1' -e 'password12' -e 'password123' \
         -e '12345678' -e '123456789' -e 'qwerty123' -e 'admin123' \
-        -e 'welcome1' -e 'letmein1' -e 'changeme1' -e 'octop123' \
+        -e 'welcome1' -e 'letmein1' -e 'changeme1' -e 'ydsz123' \
         -e 'abc12345' -e 'iloveyou1'
     then
         reason="密码过于常见（password is too common），请换一个更复杂的密码"
@@ -442,15 +442,15 @@ ydsz_env_set() {
 # ---------------------------------------------------------------------------
 # Docker 版数据持久化：必须挂飞牛 data-share，不能写 /var/apps/<app>/share/。
 #
-# 旧 FPK 把 compose 绑到 /var/apps/ydsz/share/ydsz/data（单数 share，且
+# 旧 FPK 把 compose 绑到 /var/apps/ydsz/share/octop/data（单数 share，且
 # 不是 @appshare）。应用中心重启 / 重建容器后该目录被清空或未挂载，
 # entrypoint 看不到 ydsz.db 就再次 init，表现为「每次重启都要重新配置」。
 # 官方 docker-project 在 compose up 时注入 TRIM_DATA_SHARE_PATHS
-# （一般为 /volX/@appshare/ydsz/data）；本地版回调也读同一变量。
+# （一般为 /volX/@appshare/octop/data）；本地版回调也读同一变量。
 # ---------------------------------------------------------------------------
 
 ydsz_legacy_docker_data_dir() {
-    printf '%s' "/var/apps/ydsz/share/ydsz/data"
+    printf '%s' "/var/apps/ydsz/share/octop/data"
 }
 
 # 解析飞牛持久 data-share 目录。可选参数为 resource.json 里的 share name。
@@ -490,12 +490,12 @@ ydsz_data_share_dir() {
     printf '%s' "/var/apps/${app}/shares/${share_name}"
 }
 
-# 旧绑定目录里若有 ydsz.db / config.json，迁到 share/.octop（不覆盖已有库）。
+# 旧绑定目录里若有 ydsz.db / config.json，迁到 share/.ydsz（不覆盖已有库）。
 ydsz_migrate_legacy_docker_data() {
     local dest="$1" src home
     src="$(ydsz_legacy_docker_data_dir)"
     [ -n "$dest" ] || return 0
-    home="${dest}/.octop"
+    home="${dest}/.ydsz"
     mkdir -p "$home"
     [ -d "$src" ] || return 0
     [ "$src" = "$home" ] && return 0
@@ -526,7 +526,7 @@ ydsz_sync_fnos_compose() {
     local compose="$1" data_dir="$2" env_file="${3:-}" bind tmp line in_env_file=0
     [ -f "$compose" ] || return 0
     [ -n "$data_dir" ] || return 0
-    bind="${data_dir}/.octop"
+    bind="${data_dir}/.ydsz"
     mkdir -p "$bind"
     tmp="${compose}.tmp.$$"
     : > "$tmp"
@@ -548,8 +548,8 @@ ydsz_sync_fnos_compose() {
             esac
         fi
         case "$line" in
-            *":/data/.octop"*)
-                printf '      - "%s:/data/.octop"\n' "$bind" >> "$tmp"
+            *":/data/.ydsz"*)
+                printf '      - "%s:/data/.ydsz"\n' "$bind" >> "$tmp"
                 ;;
             *"/fnos-boot.sh:"*)
                 printf '      - "%s/fnos-boot.sh:/usr/local/bin/fnos-boot.sh:ro"\n' "$data_dir" >> "$tmp"
@@ -611,17 +611,17 @@ ydsz_restore_docker_env() {
 ydsz_mark_fnos_passwd_pending() {
     local data_dir="$1"
     [ -n "$data_dir" ] || return 0
-    mkdir -p "${data_dir}/.octop"
-    : > "${data_dir}/.octop/.fnos-apply-wizard-password"
+    mkdir -p "${data_dir}/.ydsz"
+    : > "${data_dir}/.ydsz/.fnos-apply-wizard-password"
 }
 
-# 向导凭据落到 data-share（不进 .octop，避免 published init 因目录非空失败）。
+# 向导凭据落到 data-share（不进 .ydsz，避免 published init 因目录非空失败）。
 # 容器用 fnos-boot.sh 读取后 init；仅待处理标记或首次遗留同步时才 passwd。
 ydsz_write_fnos_bootstrap() {
     local data_dir="$1" username="${2:-admin}" password="$3" display="${4:-}" email="${5:-}"
     [ -n "$data_dir" ] || return 0
     [ -n "$password" ] || return 0
-    mkdir -p "$data_dir" "${data_dir}/.octop"
+    mkdir -p "$data_dir" "${data_dir}/.ydsz"
     cat > "${data_dir}/fnos-admin.env" << EOF
 YDSZ_ADMIN_USERNAME=${username}
 YDSZ_DEFAULT_PASSWORD=${password}
@@ -716,7 +716,7 @@ ydsz_prepare_docker_persist() {
     local env_file="$1" data_dir compose
     ydsz_restore_docker_env "$env_file"
     data_dir="$(ydsz_data_share_dir octop/data)"
-    mkdir -p "${data_dir}/.octop"
+    mkdir -p "${data_dir}/.ydsz"
     ydsz_migrate_legacy_docker_data "$data_dir"
     ydsz_env_set "$env_file" TRIM_DATA_SHARE_PATHS "$data_dir"
     ydsz_env_set "$env_file" YDSZ_DATA "$data_dir"
@@ -759,7 +759,7 @@ EOF
 }
 
 # 用当前用户名渲染应用「设置」窗口表单（wizard/config）。
-# 模板含 <octop-current-username>；不再写入明文密码。
+# 模板含 <ydsz-current-username>；不再写入明文密码。
 # wizard_dir 为已安装包的向导目录（/var/apps/<app>/wizard），template 为
 # 包内载荷自带的模板文件路径。任一文件缺失则静默跳过（不影响安装）。
 ydsz_render_config_wizard() {
@@ -769,9 +769,9 @@ ydsz_render_config_wizard() {
     target="${wizard_dir}/config"
     content="$(cat "$template" 2>/dev/null)" || return 0
     dir_label="${data_dir:-应用共享 / Ydsz Worker 数据目录}"
-    content="${content//<octop-current-username>/${username}}"
-    content="${content//<octop-current-password>/${password}}"
-    content="${content//<octop-data-dir>/${dir_label}}"
+    content="${content//<ydsz-current-username>/${username}}"
+    content="${content//<ydsz-current-password>/${password}}"
+    content="${content//<ydsz-data-dir>/${dir_label}}"
     tmp="${target}.tmp.$$"
     if printf '%s\n' "$content" > "$tmp" 2>/dev/null; then
         mv -f "$tmp" "$target" 2>/dev/null || rm -f "$tmp"

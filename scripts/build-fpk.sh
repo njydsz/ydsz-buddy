@@ -164,9 +164,9 @@ build_one() {
   if [ "$KIND" = "docker" ]; then
     local compose="$BUILD/app/docker/docker-compose.yaml" image_tag="${FPK_IMAGE_TAG:-$VER}"
     if [ -f "$compose" ]; then
-      sed -i.bak -E "s#ghcr.io/tencentcloud/octop:[^[:space:]]+#ghcr.io/tencentcloud/octop:${image_tag}#" "$compose"
+      sed -i.bak -E "s#ghcr.io/tencentcloud/ydsz:[^[:space:]]+#ghcr.io/tencentcloud/ydsz:${image_tag}#" "$compose"
       rm -f "${compose}.bak"
-      echo "[build-fpk] compose 镜像: ghcr.io/tencentcloud/octop:${image_tag}"
+      echo "[build-fpk] compose 镜像: ghcr.io/tencentcloud/ydsz:${image_tag}"
     fi
   fi
 

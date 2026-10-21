@@ -9,7 +9,7 @@ from langchain_core.exceptions import ModelAuthenticationError, ModelPermissionD
 from ydsz.i18n.loader import lookup, tr
 from ydsz.infra.utils.locale import Locale
 
-# Keep in sync with octop_harness.messages.MODEL_RETRY_FAILURE_MARK.
+# Keep in sync with ydsz_harness.messages.MODEL_RETRY_FAILURE_MARK.
 # Defined locally so Ydsz Worker still imports on older harness wheels.
 MODEL_RETRY_FAILURE_MARK = "[model_call_failed]"
 

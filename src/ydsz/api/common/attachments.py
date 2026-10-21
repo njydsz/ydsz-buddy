@@ -10,7 +10,7 @@ from ydsz.infra.gateway.media.attachment_hints import is_preview_media_type
 from ydsz.infra.gateway.media.inbound_store import InboundFile, write_inbound
 
 if TYPE_CHECKING:
-    from octop_harness.backends.workspace import BackendWorkspace
+    from ydsz_harness.backends.workspace import BackendWorkspace
 
 
 @dataclass(frozen=True)

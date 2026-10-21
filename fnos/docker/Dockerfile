@@ -95,7 +95,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # local-embedding / knowledge-ocr 与 desktop 一起装进镜像层，避免运行时
 # 装进 overlay 后在容器重建时丢失。
 # UV_INDEX_URL 首选阿里云镜像加速；UV_DEFAULT_INDEX 保留 PyPI 作为兜底，
-# 避免新发布的包（如 octop-harness 0.9.16）尚未同步到镜像时构建失败。
+# 避免新发布的包（如 ydsz-harness 0.9.16）尚未同步到镜像时构建失败。
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv venv /app/.venv \
     && UV_DEFAULT_INDEX=https://pypi.org/simple \

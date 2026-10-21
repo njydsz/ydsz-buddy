@@ -3,10 +3,10 @@
 End-to-end smoke: build a real YdszServer with a main agent, seed a
 small graph (entity / candidate / atom / episode / journal) directly
 into the agent memory SQLite (``.ydsz/memory.sqlite`` for new agents)
-via ``octop_memory.Memory``, then drive the FastAPI router and assert
+via ``ydsz_memory.Memory``, then drive the FastAPI router and assert
 the JSON shapes.
 
-We bypass the octop-harness middleware (``capture`` / ``extract``)
+We bypass the ydsz-harness middleware (``capture`` / ``extract``)
 because the dashboard surface is purely read-side; this keeps the
 test fast and deterministic without an LLM.
 """
@@ -18,13 +18,13 @@ from typing import Any
 
 import pytest
 
-# `octop_memory` is an optional dependency (lazy-imported by the app); the
+# `ydsz_memory` is an optional dependency (lazy-imported by the app); the
 # real package is not part of the base install, so skip these integration
 # tests when it is unavailable rather than failing the whole suite. The app
 # reaches memory through the JSON-RPC bridge, so gate on that exact import
-# target (the old ``octop_memory.lightclaw`` name no longer exists and made
+# target (the old ``ydsz_memory.lightclaw`` name no longer exists and made
 # this whole file silently skip).
-pytest.importorskip("octop_memory.adapters.bridge.handlers")
+pytest.importorskip("ydsz_memory.adapters.bridge.handlers")
 
 from ydsz.api.common.memory_client import (
     invalidate_cached_memory,
@@ -39,8 +39,8 @@ def _now() -> datetime:
 
 def _seed_memory(srv: Any, agent_id: str) -> None:
     """Populate the agent's memory.sqlite with one row per layer."""
-    from octop_memory.core import Memory  # noqa: PLC0415
-    from octop_memory.types import (  # noqa: PLC0415
+    from ydsz_memory.core import Memory  # noqa: PLC0415
+    from ydsz_memory.types import (  # noqa: PLC0415
         AtomCard,
         Candidate,
         Entity,

@@ -38,7 +38,7 @@ the final native package:
 
 ```bash
 desktop/package-release.sh
-# Reuse an existing desktop/portable/release/Octop-portable-<plat>-<version>.zip:
+# Reuse an existing desktop/portable/release/ydsz-portable-<plat>-<version>.zip:
 desktop/package-release.sh darwin-arm64 --reuse-portable
 ```
 
@@ -59,39 +59,39 @@ cd desktop/src
 go mod tidy
 wails3 build            # development binary under desktop/src/bin/
 wails3 task package ARCH=arm64 VERSION=<version> \
-  PORTABLE_ZIP=../portable/release/Octop-portable-darwin-arm64-<version>.zip
+  PORTABLE_ZIP=../portable/release/ydsz-portable-darwin-arm64-<version>.zip
 ```
 
 Dev against an already-running Ydsz Worker (skips the bundled green zip):
 
 ```bash
 cd desktop/src
-OCTOP_DESKTOP_URL=http://127.0.0.1:8088 wails3 dev
+YDSZ_DESKTOP_URL=http://127.0.0.1:8088 wails3 dev
 ```
 
-Without `OCTOP_DESKTOP_URL`, first launch uses `~/.octop/portable/` if valid,
+Without `YDSZ_DESKTOP_URL`, first launch uses `~/.octop/portable/` if valid,
 otherwise extracts the matching zip shipped with the desktop package (embedded
 in the Windows and Linux binaries, under `Contents/Resources` on macOS). The
-Wails shell never downloads Octop. For local runtime debugging, set
-`OCTOP_DESKTOP_PORTABLE_ZIP=/absolute/path/Octop-portable-<plat>-<version>.zip`.
+Wails shell never downloads Ydsz. For local runtime debugging, set
+`YDSZ_DESKTOP_PORTABLE_ZIP=/absolute/path/ydsz-portable-<plat>-<version>.zip`.
 On later launches, a newer bundled portable version replaces the extracted
 runtime after creating a consistent SQLite backup under `~/.octop/backups/`.
 The upgraded Ydsz Worker process then applies the normal database migrations during
 startup. Newer extracted runtimes are never downgraded; PostgreSQL remains
 externally managed and is not copied by the desktop shell.
 
-GitHub Release names follow `Octop-<kind>-<os>-<arch>-<version>.<ext>`:
+GitHub Release names follow `Ydsz-<kind>-<os>-<arch>-<version>.<ext>`:
 
-- Desktop GUI: `Octop-desktop-<plat>-<version>.dmg` (macOS; open and drag
-  `Octop.app` into Applications), `.exe` (Windows NSIS installer — copies
+- Desktop GUI: `ydsz-desktop-<plat>-<version>.dmg` (macOS; open and drag
+  `Ydsz.app` into Applications), `.exe` (Windows NSIS installer — copies
   into `Program Files\Ydsz Worker` and creates Start Menu + desktop shortcuts),
   `.tar.gz` (Linux)
-- Green runtime zip: `Octop-portable-<plat>-<version>.zip`
-- PyPI wheels stay `octop-<version>-py3-none-any.whl` (PEP 427)
+- Green runtime zip: `ydsz-portable-<plat>-<version>.zip`
+- PyPI wheels stay `ydsz-worker-<version>-py3-none-any.whl` (PEP 427)
 
 The Linux tar.gz contains only the GUI binary; it has no separate portable zip or
 server terminal process. Runtime upgrades remain owned by Ydsz Worker:
-the shell sets `OCTOP_GREEN_PACKAGES`, so `octop update` upgrades the extracted
+the shell sets `YDSZ_GREEN_PACKAGES`, so `ydsz-worker update` upgrades the extracted
 `packages/` directory through Ydsz Worker's existing `--target` logic.
 
 Linux also needs GTK4 + WebKitGTK 6 to link. macOS 12+.

@@ -19,7 +19,7 @@ async def test_postgres_checkpoint_history_uses_graph_reader(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from langgraph.graph import END, START, MessagesState, StateGraph
-    from octop_memory import Memory
+    from ydsz_memory import Memory
 
     from ydsz.api.routers.chat.serialize import (
         _isolated_sqlite_checkpoint_messages,

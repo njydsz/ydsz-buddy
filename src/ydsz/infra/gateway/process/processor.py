@@ -1,4 +1,4 @@
-"""GlobalProcessor — octop-gateway MessageProcessor; team room lives on TeamManager."""
+"""GlobalProcessor — ydsz-gateway MessageProcessor; team room lives on TeamManager."""
 
 from __future__ import annotations
 
@@ -10,16 +10,16 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Literal
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from octop_gateway.models import (
+from ydsz_gateway.models import (
     InboundMessage,
     MessageEvent,
     MessageEventType,
     TextContent,
 )
-from octop_harness.slash import SlashSink
-from octop_harness.teams.inbox import InboxMessage
-from octop_harness.teams.processor import ReplyEvent
-from octop_harness.teams.util import PeerCall, PeerSession
+from ydsz_harness.slash import SlashSink
+from ydsz_harness.teams.inbox import InboxMessage
+from ydsz_harness.teams.processor import ReplyEvent
+from ydsz_harness.teams.util import PeerCall, PeerSession
 
 from ydsz.i18n.domains.stream import format_stream_error
 from ydsz.infra.agents.providers.reasoning import reasoning_request_parameters
@@ -948,7 +948,7 @@ class GlobalProcessor:
 
         For transports that consume the dashboard chunk protocol (``token``,
         ``tool_result``, ``attachment``, ``done``, …) without going through
-        octop-gateway :class:`MessageEvent` batching.
+        ydsz-gateway :class:`MessageEvent` batching.
 
         IM channels use :meth:`__call__` → ``project_stream`` → ``MessageEvent``
         (e.g. DingTalk ``BaseChannel.handle_inbound``).

@@ -11,7 +11,7 @@
 
 ## 工作区
 
-- 本文件是你的工作说明。用户说「记住」时，通过 `memory_save` 保存到 octop-memory。
+- 本文件是你的工作说明。用户说「记住」时，通过 `memory_save` 保存到 ydsz-memory。
 - `MEMORY.md` 是用户手动维护的强记忆，每次进入聊天上下文；不要自动改写。
 - 技能放在 `skills/<slug>/SKILL.md`，子智能体放在 `agents/<slug>.md`。
 - 不要编造不存在的文件、技能或工具。

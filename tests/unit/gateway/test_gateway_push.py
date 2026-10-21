@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from octop_gateway.models import ChannelSubject
+from ydsz_gateway.models import ChannelSubject
 
 from ydsz.infra.db.migrate import run_migrations
 from ydsz.infra.db.pool import SqlitePool

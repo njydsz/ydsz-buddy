@@ -44,7 +44,7 @@ tasks:
         output="{{.ARCHIVE}}"
         volname="{{.APP_NAME}}"
         app_name="{{.APP_NAME}}.app"
-        work="$(mktemp -d "${TMPDIR:-/tmp}/octop-dmg.XXXXXX")"
+        work="$(mktemp -d "${TMPDIR:-/tmp}/ydsz-dmg.XXXXXX")"
         staging="${work}/root"
         rw_dmg="${work}/rw.dmg"
         device=""
@@ -147,7 +147,7 @@ tasks:
     vars:
       ARCH: "{{.ARCH | default ARCH}}"
       VERSION: '{{.VERSION | default "dev"}}'
-      PORTABLE_ZIP: '{{.PORTABLE_ZIP | default (printf "../portable/release/YdszWorker-portable-darwin-%s-%s.zip" .ARCH .VERSION)}}'
+      PORTABLE_ZIP: '{{.PORTABLE_ZIP | default (printf "../portable/release/ydsz-portable-darwin-%s-%s.zip" .ARCH .VERSION)}}'
       ARCHIVE: '{{.BIN_DIR}}/{{.APP_NAME}}-desktop-darwin-{{.ARCH}}-{{.VERSION}}.dmg'
 
   create:app:bundle:

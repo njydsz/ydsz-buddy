@@ -16,7 +16,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from octop_harness.plugins.registry import PluginRegistry
+from ydsz_harness.plugins.registry import PluginRegistry
 
 from ydsz.config import YdszConfig, load_config
 from ydsz.infra.agents.experts.catalog import ExpertCatalog, default_library_root
@@ -223,7 +223,7 @@ class _YdszLogFormatter(logging.Formatter):
         text = super().format(record)
         agent = getattr(record, "agent", None)
         if not agent:
-            from octop_harness.observability.logging import current_log_agent_id
+            from ydsz_harness.observability.logging import current_log_agent_id
 
             agent = current_log_agent_id()
         if not agent:

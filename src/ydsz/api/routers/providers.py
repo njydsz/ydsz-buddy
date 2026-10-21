@@ -196,7 +196,7 @@ def _row_to_dict(r: Any) -> dict[str, Any]:
 async def list_provider_presets(
     _: Any = Depends(current_user),
 ) -> list[dict[str, Any]]:
-    """Return built-in provider presets from octop-harness."""
+    """Return built-in provider presets from ydsz-harness."""
     return load_provider_presets()
 
 

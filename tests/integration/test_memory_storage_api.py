@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 from langgraph.checkpoint.base import empty_checkpoint
-from octop_memory import Memory
+from ydsz_memory import Memory
 
 
 @pytest.mark.asyncio

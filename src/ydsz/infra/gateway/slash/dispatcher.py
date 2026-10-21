@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from octop_harness.slash import (
+from ydsz_harness.slash import (
     RuntimeSlashDispatcher,
     SlashCommand,
     SlashSink,

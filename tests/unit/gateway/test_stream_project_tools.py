@@ -18,7 +18,7 @@ def test_enrich_tool_stream_chunk_ignores_non_tool():
 
 
 def test_tool_start_event_carries_localized_hint():
-    from octop_gateway.models import MessageEvent
+    from ydsz_gateway.models import MessageEvent
 
     from ydsz.i18n import channel_tool_hint_start
 

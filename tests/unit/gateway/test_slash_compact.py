@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from octop_harness.compaction import CompactResult
+from ydsz_harness.compaction import CompactResult
 
 from ydsz.config import YdszConfig
 from ydsz.infra.agents.manager import AgentManager

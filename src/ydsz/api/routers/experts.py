@@ -309,6 +309,14 @@ class ExpertHubItemResponse(BaseModel):
 class ExpertHubListResponse(BaseModel):
     items: list[ExpertHubItemResponse]
     scenes: list[str] = Field(default_factory=list)
+    market_available: bool = Field(
+        default=True,
+        description="False when SkillHub upstream is unreachable and items are empty as a fallback",
+    )
+    market_error: str | None = Field(
+        default=None,
+        description="Machine-readable error kind when market_available is False (e.g. 'upstream_failed')",
+    )
 
 
 class MarketCreateSourceResponse(BaseModel):
@@ -701,6 +709,15 @@ async def list_experts(
     return [_summary_dict(s) for s in catalog.list_summaries()]
 
 
+# Error kinds that indicate SkillHub upstream is unreachable (as opposed to
+# client-side problems like NOT_FOUND / INVALID_SLUG which should still 404).
+_UNREACHABLE_MARKET_KINDS = (
+    SkillHubMarketErrorKind.UPSTREAM_FAILED,
+    SkillHubMarketErrorKind.UPSTREAM_TIMEOUT,
+    SkillHubMarketErrorKind.SSL_ERROR,
+)
+
+
 @router.get(
     "/experts/hub",
     response_model=ExpertHubListResponse,
@@ -711,10 +728,25 @@ async def list_expert_hub(
     scene: str = "",
     _: Any = Depends(current_user),
 ) -> dict[str, Any]:
-    """List SkillHub skillsets as market expert cards, optionally filtered by scene."""
+    """List SkillHub skillsets as market expert cards, optionally filtered by scene.
+
+    When the SkillHub upstream is unreachable (network / timeout / SSL), the
+    endpoint returns HTTP 200 with ``market_available: false`` and an empty
+    ``items`` list so the dashboard can show a soft offline notice instead of
+    popping a 502 error toast.  Client-side errors (NOT_FOUND, INVALID_SLUG)
+    still map to proper HTTP status codes.
+    """
     try:
         items, scenes = await asyncio.to_thread(browse_skillsets, q, scene=scene)
     except SkillHubMarketError as exc:
+        kind = getattr(exc, "kind", SkillHubMarketErrorKind.UPSTREAM_FAILED)
+        if kind in _UNREACHABLE_MARKET_KINDS:
+            return {
+                "items": [],
+                "scenes": [],
+                "market_available": False,
+                "market_error": kind.value,
+            }
         raise _map_skillhub_error(exc) from exc
     return {
         "items": [item.api_dict(include_content=False) for item in items],

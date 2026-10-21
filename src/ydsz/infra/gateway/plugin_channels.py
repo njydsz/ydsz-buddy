@@ -1,8 +1,8 @@
 """Bridge plugin-contributed channels into the gateway's channel registry.
 
 Plugins with ``kind: channel`` register their implementations through
-``PluginContext.channel()`` at ``setup()`` time (see octop-harness). This
-module applies those registrations to ``octop_gateway`` at boot / plugin
+``PluginContext.channel()`` at ``setup()`` time (see ydsz-harness). This
+module applies those registrations to ``ydsz_gateway`` at boot / plugin
 reload, so channels of that kind can be created, probed, persisted and
 rebuilt exactly like builtin ones.
 
@@ -84,14 +84,14 @@ def apply_plugin_channels(
         registry: The harness ``PluginRegistry`` singleton (or any object
             exposing ``all_channels()`` returning ``ChannelRegistration``s).
         register: The gateway registration callable; defaults to
-            ``octop_gateway.channels.register_channel_kind``. Injectable so
+            ``ydsz_gateway.channels.register_channel_kind``. Injectable so
             hosts (and tests) can target a different registry.
 
     Returns:
         Summaries of the channel kinds that are registered and usable,
         sorted by kind for stable UI ordering.
     """
-    from octop_gateway import channels as gateway_channels
+    from ydsz_gateway import channels as gateway_channels
 
     if register is None:
         register = getattr(gateway_channels, "register_channel_kind", None)
@@ -192,7 +192,7 @@ def plugin_channel_kinds(
             the process-global singleton).
     """
     if registry is None:  # pragma: no cover - default singleton path
-        from octop_harness.plugins.registry import PluginRegistry
+        from ydsz_harness.plugins.registry import PluginRegistry
 
         registry = PluginRegistry()
 

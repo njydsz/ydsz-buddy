@@ -129,7 +129,7 @@ export function toMediaPreviewSource(
         }
       }
     }
-    const anyAgent = posix.match(/(?:^|\/)\.octop\/agents\/[^/]+\/(.+)$/i);
+    const anyAgent = posix.match(/(?:^|\/).ydsz\/agents\/[^/]+\/(.+)$/i);
     if (anyAgent?.[1]) return anyAgent[1];
     const stripped = stripVirtualWorkspaceRoot(posix);
     if (stripped !== posix) return stripped;

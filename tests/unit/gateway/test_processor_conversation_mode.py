@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from langchain_core.messages import HumanMessage
-from octop_gateway.models import ChannelSubject, InboundMessage, TextContent
+from ydsz_gateway.models import ChannelSubject, InboundMessage, TextContent
 
 from ydsz.infra.gateway.process.processor import GlobalProcessor, _overwrite_last_user_text
 from ydsz.infra.gateway.slash.dispatcher import SlashDispatcher

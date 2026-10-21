@@ -211,8 +211,8 @@ ydsz-worker service start   # Linux(systemd) / macOS(launchd) / Windows 服务
 对于自动化部署，可省略向导中的"设置密码"步骤，直接在 Web 控制台通过环境变量预设管理员身份后启动：
 
 ```bash
-export OCTOP_ADMIN_USERNAME=admin
-export OCTOP_ADMIN_PASSWORD="<你的强密码，≥8 位且含字母和数字>"
+export YDSZ_ADMIN_USERNAME=admin
+export YDSZ_ADMIN_PASSWORD="<你的强密码，≥8 位且含字母和数字>"
 ydsz-worker run
 ```
 

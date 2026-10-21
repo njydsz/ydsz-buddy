@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from octop_harness.plugins import PluginRegistry
+from ydsz_harness.plugins import PluginRegistry
 
 from ydsz.infra.agents.plugins.manager import (
     PluginManager,
@@ -350,7 +350,7 @@ def test_set_enabled_refuses_corrupt_config_and_preserves_bytes(tmp_path: Path) 
 
 
 def test_install_plugin_importing_legacy_harness_agent(tmp_path: Path) -> None:
-    """Plugins published before the octop_harness rename still import harness_agent."""
+    """Plugins published before the ydsz_harness rename still import harness_agent."""
     src = tmp_path / "legacy-plugin"
     src.mkdir()
     (src / "plugin.yaml").write_text(
@@ -377,13 +377,13 @@ def test_install_plugin_importing_legacy_harness_agent(tmp_path: Path) -> None:
     assert loaded.manifest.id == "legacy-plugin"
     assert [tool.name for tool in loaded.tools] == ["ping"]
 
-    import octop_harness
+    import ydsz_harness
     from harness_agent.plugins import PluginContext
-    from octop_harness.plugins import PluginContext as RealContext
+    from ydsz_harness.plugins import PluginContext as RealContext
 
     assert PluginContext is RealContext
-    assert octop_harness.__name__ == "octop_harness"
-    assert sys.modules["harness_agent"] is octop_harness
+    assert ydsz_harness.__name__ == "ydsz_harness"
+    assert sys.modules["harness_agent"] is ydsz_harness
 
 
 def test_set_enabled_preserves_unrelated_keys(tmp_path: Path) -> None:
@@ -407,7 +407,7 @@ def test_set_enabled_preserves_unrelated_keys(tmp_path: Path) -> None:
 
 
 def test_channel_reload_preserves_class_until_source_changes(tmp_path: Path) -> None:
-    from octop_harness.plugins.context import PluginContext
+    from ydsz_harness.plugins.context import PluginContext
 
     if not hasattr(PluginContext, "channel"):
         pytest.skip("released harness lacks channel registration; exercised with companion source")

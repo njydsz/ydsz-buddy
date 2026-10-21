@@ -15,11 +15,11 @@ YDSZ_HOME="${YDSZ_HOME:-$HOME/.ydsz}"
 YDSZ_VENV="$YDSZ_HOME/venv"
 YDSZ_BIN="$YDSZ_HOME/bin"
 PYTHON_VERSION="3.12"
-OCTOP_REPO="${OCTOP_REPO:-https://github.com/TencentCloud/Octop.git}"
-_YDSZ_REPO_BASE="${OCTOP_REPO%/*}"
-HARNESS_AGENT_REPO="${HARNESS_AGENT_REPO:-${_YDSZ_REPO_BASE}/octop-harness.git}"
-HARNESS_GATEWAY_REPO="${HARNESS_GATEWAY_REPO:-${_YDSZ_REPO_BASE}/octop-gateway.git}"
-HARNESS_BROWSER_REPO="${HARNESS_BROWSER_REPO:-${_YDSZ_REPO_BASE}/octop-browser.git}"
+YDSZ_REPO="${YDSZ_REPO:-https://github.com/ydsz-buddy/ydsz-worker.git}"
+_YDSZ_REPO_BASE="${YDSZ_REPO%/*}"
+HARNESS_AGENT_REPO="${HARNESS_AGENT_REPO:-${_YDSZ_REPO_BASE}/agent-runtime.git}"
+HARNESS_GATEWAY_REPO="${HARNESS_GATEWAY_REPO:-${_YDSZ_REPO_BASE}/im-gateway.git}"
+HARNESS_BROWSER_REPO="${HARNESS_BROWSER_REPO:-${_YDSZ_REPO_BASE}/browser-automation.git}"
 
 if [ -n "${BASH_SOURCE[0]:-}" ]; then
     _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -96,10 +96,10 @@ Note: Playwright Chromium is not downloaded by default. Pass
 Environment variables:
   YDSZ_HOME               Install directory (default: ~/.ydsz)
   YDSZ_PYPI_MIRROR        PyPI mirror URL (same as --mirror)
-  OCTOP_REPO              Git URL to clone (used by --from-source with no local dir)
-  HARNESS_AGENT_REPO      octop-harness repo (derived from OCTOP_REPO by default)
-  HARNESS_GATEWAY_REPO    octop-gateway repo (derived from OCTOP_REPO by default)
-  HARNESS_BROWSER_REPO    octop-browser repo (used for source installs)
+  YDSZ_REPO               Git URL to clone (used by --from-source with no local dir)
+  HARNESS_AGENT_REPO      agent-runtime repo (derived from YDSZ_REPO by default)
+  HARNESS_GATEWAY_REPO    im-gateway repo (derived from YDSZ_REPO by default)
+  HARNESS_BROWSER_REPO    browser-automation repo (used for source installs)
   PLAYWRIGHT_DOWNLOAD_HOST  Playwright download mirror (optional; auto: npmmirror -> official)
   PLAYWRIGHT_INSTALL_TIMEOUT  Per-mirror download timeout in seconds (default 600)
 
@@ -621,7 +621,7 @@ prepare_console() {
 }
 
 # TEMP: mcp 2.x 移除 RequestContext，与 langchain-mcp-adapters 不兼容。
-# octop-harness>=0.9.18 已在依赖中 pin；此处在验证前再钉一次，覆盖仍拉取到
+# agent-runtime (pinned via dependencies) 已在依赖中 pin；此处在验证前再钉一次，覆盖仍拉取到
 # 旧版 harness / 镜像滞后的安装路径。待 Ydsz 发版跟上后可删除。
 _pin_mcp_compat() {
     info "Pinning mcp<2 (langchain-mcp-adapters compatibility; temporary)..."
@@ -644,11 +644,11 @@ _clone_source_workspace() {
     local workdir="$1"
     command -v git &>/dev/null || die "git is required to clone the repos. Install git or use --from-pypi."
     mkdir -p "$workdir"
-    info "Cloning octop-harness / octop-gateway / Octop sources..."
-    git clone --depth 1 "$HARNESS_AGENT_REPO" "$workdir/octop-harness"
-    git clone --depth 1 "$HARNESS_GATEWAY_REPO" "$workdir/octop-gateway"
-    git clone --depth 1 "$HARNESS_BROWSER_REPO" "$workdir/octop-browser"
-    git clone --depth 1 "$OCTOP_REPO" "$workdir/orca"
+    info "Cloning agent-runtime / im-gateway / ydsz-worker sources..."
+    git clone --depth 1 "$HARNESS_AGENT_REPO" "$workdir/agent-runtime"
+    git clone --depth 1 "$HARNESS_GATEWAY_REPO" "$workdir/im-gateway"
+    git clone --depth 1 "$HARNESS_BROWSER_REPO" "$workdir/browser-automation"
+    git clone --depth 1 "$YDSZ_REPO" "$workdir/ydsz-worker"
 }
 
 if [ "$FROM_SOURCE" = true ]; then
@@ -660,13 +660,13 @@ if [ "$FROM_SOURCE" = true ]; then
         INSTALL_WORKDIR="$(mktemp -d)"
         trap 'rm -rf "$INSTALL_WORKDIR"' EXIT
         _clone_source_workspace "$INSTALL_WORKDIR"
-        REPO_DIR="$INSTALL_WORKDIR/orca"
+        REPO_DIR="$INSTALL_WORKDIR/ydsz-worker"
         prepare_console "$REPO_DIR"
         uv pip install "${REPO_DIR}${EXTRAS_SUFFIX}" --python "$YDSZ_VENV/bin/python"
     fi
 else
-    # PEP 508: extras 必须在包名与版本说明符之间（octop[browser]==x.y.z），
-    # 不能拼在版本号后面（octop==x.y.z[browser] 是非法需求串，uv/pip 解析报错）。
+    # PEP 508: extras must sit between name and version (ydsz-worker[browser]==x.y.z),
+    # appending to version (ydsz-worker==x.y.z[browser]) is invalid.
     PACKAGE="ydsz-worker${EXTRAS_SUFFIX}"
     [ -n "$VERSION" ] && PACKAGE="ydsz-worker${EXTRAS_SUFFIX}==$VERSION"
 
@@ -838,12 +838,12 @@ _install_playwright_browsers() {
 # 检测系统是否已安装 Chrome / Chromium。
 # GUI 系统（macOS / Windows / Linux 桌面）通常已自带，无需再下载 Playwright 自带 Chromium。
 _detect_system_chrome() {
-    # 优先复用 octop-browser 的探测器（与运行期 launch 路径一致）
+    # 优先复用 browser-automation 的探测器（与运行期 launch 路径一致）
     local chrome
     chrome="$("$YDSZ_VENV/bin/python" -c '
 import sys
 try:
-    from octop_browser.cdp.launcher import find_chrome
+    from ydsz_browser.cdp.launcher import find_chrome
 except Exception:
     sys.exit(0)
 p = find_chrome()

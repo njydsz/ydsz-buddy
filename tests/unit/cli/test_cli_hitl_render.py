@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop_gateway.models import MessageEvent, MessageEventType, TextContent
+from ydsz_gateway.models import MessageEvent, MessageEventType, TextContent
 
 from ydsz.cli.repl.render import format_cli_hitl_pause
 from ydsz.infra.gateway.cli.events import message_event_to_cli_chunks

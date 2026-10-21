@@ -35,7 +35,7 @@ vendor_one() {
   fi
 
   # Host python3 may be <3.12 (e.g. Xcode 3.9). Download still needs a 3.12
-  # interpreter so requires-python on octop/deps can resolve.
+  # interpreter so requires-python on ydsz-worker/deps can resolve.
   uv python install 3.12 >/dev/null
   echo "[wheels] ${plat}: downloading → ${wheel_dir}" >&2
   # bash 3.2 (macOS /bin/bash) + set -u: expanding an empty array is unbound.

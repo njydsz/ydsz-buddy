@@ -11,7 +11,7 @@
 
 ## Context
 
-Operators need an optional PostgreSQL control plane for compliance / externalized state, while keeping zero-friction SQLite as the default. Agent memory (octop-memory) already supports a postgres backend; Ydsz Worker must be able to pass it through without forking octop-*.
+Operators need an optional PostgreSQL control plane for compliance / externalized state, while keeping zero-friction SQLite as the default. Agent memory (ydsz-memory) already supports a postgres backend; Ydsz Worker must be able to pass it through without forking octop-*.
 
 ## Decision
 
@@ -26,9 +26,9 @@ Layer 1 — Ydsz Worker control plane
 
 Layer 2 — Harness checkpoints
   default: {workspace}/checkpoints.sqlite
-  when memory is postgres: reuse Memory / PostgresSaver (octop-harness)
+  when memory is postgres: reuse Memory / PostgresSaver (ydsz-harness)
 
-Layer 3 — Agent memory (octop-memory)
+Layer 3 — Agent memory (ydsz-memory)
   default on SQLite control plane: {workspace}/memory.sqlite
   default on PostgreSQL control plane: same DSN, schema agent_<id>
   override: config_json.memory.backend = { type: "sqlite" }
@@ -46,7 +46,7 @@ Workspace content files (SOUL, skills, inbound, JSONL) remain files via `Backend
 - Single active Ydsz Worker writer; no multi-instance write promise.
 - Greenfield only — no SQLite→PG data migrator.
 - Backup: SQLite file snapshot vs `pg_dump -Fc`; manifest carries `database_driver` + `database_dump_format`; refuse cross-engine restore.
-- Default dependency includes `psycopg[binary]`. Live PG tests are gated by `@pytest.mark.postgresql` + `OCTOP_TEST_DATABASE_URL`.
+- Default dependency includes `psycopg[binary]`. Live PG tests are gated by `@pytest.mark.postgresql` + `YDSZ_TEST_DATABASE_URL`.
 - Hot rebind during empty setup: `rebind_control_plane` opens the new pool, then `AppRuntime.replace_services` retargets singletons via each component’s public `replace_*` API (db layer does not poke runtime private fields).
 
 ### Where initialization SQL lives (do not conflate)
@@ -56,9 +56,9 @@ Workspace content files (SOUL, skills, inbound, JSONL) remain files via `Backend
 | Control-plane tables / indexes | Ydsz Worker migrate | `migrations/NNN_*.sql` and `NNN_*.pg.sql` |
 | Connection / session settings | Pool connect | SQLite: `PRAGMA` in `SqlitePool`; PG: defaults (FK on) — **not** in migrations |
 | Instance extensions (`vector`, …) | Ops / docker | `docker/postgres/init-vector.sql` via `initdb.d`, or DBA on managed PG |
-| Agent memory DDL | octop-memory | Runtime `_init_schema` per `agent_*` schema |
+| Agent memory DDL | ydsz-memory | Runtime `_init_schema` per `agent_*` schema |
 
-**Hard rule:** Ydsz Worker control-plane `*.pg.sql` must **not** run `CREATE EXTENSION`. Many managed Postgres roles cannot create extensions; the control plane also does not need `vector` (plain types only). octop-memory today uses built-in `tsvector`, not pgvector. Keep `CREATE EXTENSION vector` in docker/ops for optional future embedding use.
+**Hard rule:** Ydsz Worker control-plane `*.pg.sql` must **not** run `CREATE EXTENSION`. Many managed Postgres roles cannot create extensions; the control plane also does not need `vector` (plain types only). ydsz-memory today uses built-in `tsvector`, not pgvector. Keep `CREATE EXTENSION vector` in docker/ops for optional future embedding use.
 
 ### Memory wiring
 

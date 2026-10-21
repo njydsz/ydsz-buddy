@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Any
 
-from octop_harness.acp.models import ACPConfig, default_acp_runners
+from ydsz_harness.acp.models import ACPConfig, default_acp_runners
 
 from ydsz.infra.db.repos.agents import AgentRepo, AgentRow
 from ydsz.infra.db.repos.settings import SettingsRepo
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 _SETTINGS_PREFIX = "acp_runners:user:"
 _HIDDEN_RUNNERS = frozenset({"qwen_code"})
-# Until octop-harness ships these builtins, merge Ydsz Worker-side defaults.
+# Until ydsz-harness ships these builtins, merge Ydsz Worker-side defaults.
 _YDSZ_BUILTIN_RUNNERS: dict[str, dict[str, Any]] = {
     "kimi_code": {
         "command": "kimi",
