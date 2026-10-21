@@ -18,7 +18,7 @@ import { showApiError } from "../../../utils/showApiToast";
  *
  * To reuse finnie-style components without renaming everything, this
  * hook exposes ``slug`` (= server's ``name``) and synthesises ``kind``
- * (always ``"workspace"`` for now — every octop skill is editable).
+ * (always ``"workspace"`` for now — every ydsz skill is editable).
  * The optional ``emoji`` from frontmatter is also surfaced for the card.
  */
 export interface SkillSpec {

@@ -13,7 +13,7 @@ const DOCK_BTN_INSET = 8;
 function findToolUiCard(root: HTMLElement): HTMLElement | null {
   return (
     root.querySelector<HTMLElement>("[data-ydsz-plugin-ui]") ??
-    root.querySelector<HTMLElement>(".octop-builtin-ui-fallback") ??
+    root.querySelector<HTMLElement>(".ydsz-builtin-ui-fallback") ??
     null
   );
 }

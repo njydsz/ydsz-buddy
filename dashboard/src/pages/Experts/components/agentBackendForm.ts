@@ -152,7 +152,7 @@ export function supportsHostSkillPackagesFromConfig(
  * Scoped ``root_dir`` enables the Linux bwrap jail. Host root ``/`` and the
  * agent workspace root are not treated as a jail (Windows defaults to the
  * workspace). Non-local backends count as locked for that UI. The per-agent
- * ``acp_runner`` tool toggle and inbound ``octop acp`` are unaffected.
+ * ``acp_runner`` tool toggle and inbound ``ydsz-worker acp`` are unaffected.
  */
 export function blocksAcpOutbound(options: {
   backendChoice: string;

@@ -447,7 +447,7 @@ See [docs/architecture.md](docs/architecture.md).
 ## 📁 Project layout
 
 ```
-src/octop/
+src/ydsz/
   config.py    env-var config
   launch.py    YdszServer boot + uvicorn
   infra/       business core (agents, gateway, cron, db, users, ...)
@@ -472,7 +472,7 @@ make all              # format-all + lint + typecheck + test (ship bar)
 
 # Frontend (separate terminal)
 make dev-frontend     # Vite dev server on :5173 (override with VITE_DEV_PORT)
-make build-frontend   # production build -> src/octop/dashboard/
+make build-frontend   # production build -> src/ydsz/dashboard/
 cd dashboard && npx tsc -b
 ```
 

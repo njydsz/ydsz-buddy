@@ -168,7 +168,7 @@ const renderSkillIcon = (skill: SkillSpec) => {
   if (skill.emoji) {
     return <span style={{ fontSize: 22, lineHeight: 1 }}>{skill.emoji}</span>;
   }
-  // For now every octop skill is workspace-kind — show the gradient
+  // For now every ydsz skill is workspace-kind — show the gradient
   // sparkles to differentiate user-created skills visually.
   if (skill.kind === "workspace") {
     return (

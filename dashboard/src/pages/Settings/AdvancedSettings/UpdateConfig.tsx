@@ -29,14 +29,14 @@ import styles from "./UpdateConfig.module.less";
 const UPGRADE_GUIDE_CODE = {
   installerUnix: `curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash`,
   installerWin: `irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex`,
-  cli: `octop update
+  cli: `ydsz-worker update
 # or non-interactive:
-octop update --yes
+ydsz-worker update --yes
 # pre-release (beta) requires --allow-prerelease:
-# octop update --allow-prerelease --yes`,
-  pip: `pip install -U octop
+# ydsz-worker update --allow-prerelease --yes`,
+  pip: `pip install -U ydsz-worker
 # optional extras, e.g. browser automation:
-# pip install -U "octop[browser]"`,
+# pip install -U "ydsz-worker[browser]"`,
   source: `cd Ydsz Worker
 git pull
 make build-frontend
@@ -49,16 +49,16 @@ docker compose -f docker/docker-compose.yml up -d --build
 # or rebuild the image then run with a persistent data volume
 bash docker/docker_build.sh
 docker run -d \\
-  --name octop \\
+  --name ydsz-worker \\
   -p 8088:8088 \\
-  -v octop-data:/data/.octop \\
+  -v ydsz-data:/data/.octop \\
   -e HOME=/data \\
-  octop:latest`,
+  ydsz-worker:latest`,
   restart: `# system service (systemd / launchd / Windows service)
-octop service restart
+ydsz-worker service restart
 
 # foreground process — stop the old process, then:
-octop run`,
+ydsz-worker run`,
 } as const;
 
 type GuideMethodKey =
@@ -528,9 +528,9 @@ export default function UpdateConfig() {
                         <div>
                           <p>{t("advancedSettings.update.restartHint")}</p>
                           <div className={styles.commandBlock}>
-                            <code>octop service restart</code>
+                            <code>ydsz-worker service restart</code>
                             <span className={styles.commandSep}>/</span>
-                            <code>octop run</code>
+                            <code>ydsz-worker run</code>
                           </div>
                         </div>
                       </div>

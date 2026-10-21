@@ -724,7 +724,7 @@ export default function RemoteAndroidPage({
       const url = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = url;
-      a.download = `octop-phone-${device || "screen"}-${Date.now()}.png`;
+      a.download = `ydsz-phone-${device || "screen"}-${Date.now()}.png`;
       a.click();
     } catch {
       message.error(t("remoteAndroid.screenshotFailed", "Screenshot failed"));

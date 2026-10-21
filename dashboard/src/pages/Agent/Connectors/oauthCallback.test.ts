@@ -4,7 +4,7 @@ import { oauthCallbackSupported } from "./oauthCallback";
 
 describe("oauthCallbackSupported", () => {
   it("allows HTTPS and loopback HTTP", () => {
-    expect(oauthCallbackSupported("https://octop.example/connectors")).toBe(
+    expect(oauthCallbackSupported("https://ydsz.example/connectors")).toBe(
       true,
     );
     expect(oauthCallbackSupported("http://localhost:8088/")).toBe(true);
@@ -14,6 +14,6 @@ describe("oauthCallbackSupported", () => {
 
   it("rejects public HTTP (no OAuth callback)", () => {
     expect(oauthCallbackSupported("http://192.168.1.10:8088/")).toBe(false);
-    expect(oauthCallbackSupported("http://octop.example/")).toBe(false);
+    expect(oauthCallbackSupported("http://ydsz.example/")).toBe(false);
   });
 });

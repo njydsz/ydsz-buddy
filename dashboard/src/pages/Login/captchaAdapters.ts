@@ -29,21 +29,21 @@ export const CAPTCHA_WIDGETS: Record<string, CaptchaWidgetAdapter> = {
   hcaptcha: {
     slug: "hcaptcha",
     scriptSrc: (_siteKey: string, hl: string) =>
-      `https://js.hcaptcha.com/1/api.js?render=explicit&onload=__octopHcaptchaOnload&hl=${encodeURIComponent(
+      `https://js.hcaptcha.com/1/api.js?render=explicit&onload=__ydszHcaptchaOnload&hl=${encodeURIComponent(
         hl,
       )}`,
     globalName: "hcaptcha",
-    onloadName: "__octopHcaptchaOnload",
+    onloadName: "__ydszHcaptchaOnload",
     mode: "checkbox",
   },
   recaptcha: {
     slug: "recaptcha",
     scriptSrc: (_siteKey: string, hl: string) =>
-      `https://www.google.com/recaptcha/api.js?render=explicit&onload=__octopRecaptchaOnload&hl=${encodeURIComponent(
+      `https://www.google.com/recaptcha/api.js?render=explicit&onload=__ydszRecaptchaOnload&hl=${encodeURIComponent(
         hl,
       )}`,
     globalName: "grecaptcha",
-    onloadName: "__octopRecaptchaOnload",
+    onloadName: "__ydszRecaptchaOnload",
     mode: "checkbox",
   },
   "recaptcha-v3": {

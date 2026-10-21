@@ -66,7 +66,7 @@ ydsz-worker run     # 启动服务 → http://127.0.0.1:8088
 
 ## 构建 PyPI wheel
 
-先构建前端（产物写入 `src/octop/dashboard/`，与 `dashboard/vite.config.ts` 的 `outDir` 一致），再打包 wheel。
+先构建前端（产物写入 `src/ydsz/dashboard/`，与 `dashboard/vite.config.ts` 的 `outDir` 一致），再打包 wheel。
 
 ```bash
 bash scripts/wheel_build.sh

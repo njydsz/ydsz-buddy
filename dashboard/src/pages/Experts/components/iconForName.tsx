@@ -4,7 +4,7 @@
  * icon node. Returns a sensible default (``Layers``) when the key is missing
  * or unknown so cards never render blank.
  *
- * Ported from finnie's SceneTabContent + Personalization page so the octop
+ * Ported from finnie's SceneTabContent + Personalization page so the ydsz
  * Experts page presents the same colourful, themed iconography.
  */
 

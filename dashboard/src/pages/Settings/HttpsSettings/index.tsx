@@ -251,9 +251,9 @@ export function HttpsSettingsPanel() {
                     <div className={styles.restartBlock}>
                       <p>{t("tls.restartRequiredHint")}</p>
                       <div className={styles.commandBlock}>
-                        <code>octop service restart</code>
+                        <code>ydsz-worker service restart</code>
                         <span className={styles.commandSep}>/</span>
-                        <code>octop run</code>
+                        <code>ydsz-worker run</code>
                       </div>
                     </div>
                   )

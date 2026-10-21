@@ -43,5 +43,5 @@ export const ydszCronApi = {
     }),
 };
 
-/** @deprecated Use ydszCronApi instead. */
-export { ydszCronApi as octopCronApi };
+
+export { ydszCronApi };

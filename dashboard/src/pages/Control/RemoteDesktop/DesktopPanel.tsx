@@ -1219,7 +1219,7 @@ export default function DesktopPanel({
                         {
                           label: t(
                             "remoteDesktop.macPermStep3",
-                            "重启 Ydsz Worker（octop run），再回到本页点击「重新检测」",
+                            "重启 Ydsz Worker（ydsz-worker run），再回到本页点击「重新检测」",
                           ),
                         },
                       ]
