@@ -1,13 +1,13 @@
 # Contributing to Ydsz Worker (云顶数字工作台)
 
-Thank you for your interest in contributing! Ydsz Worker (云顶数字工作台) is an open-source, self-hosted AI assistant platform — a continued fork of [Tencent Octop](https://github.com/TencentCloud/Octop) (MIT). It is the control-plane application in the [Octop Harness](https://github.com/TencentCloud) ecosystem.
+Thank you for your interest in contributing! Ydsz Worker (云顶数字工作台) is an open-source, self-hosted enterprise AI assistant platform.
 
 ## Getting started
 
 **Prerequisites:** Python 3.12+, Node.js 18+, [uv](https://docs.astral.sh/uv/)
 
 ```bash
-git clone https://github.com/TencentCloud/Octop.git ydsz-worker
+git clone https://github.com/njydsz/ydsz-worker.git ydsz-worker
 cd ydsz-worker
 make install          # backend dev dependencies
 make install-hooks    # once per clone: pre-commit runs make all + dashboard build
@@ -164,14 +164,14 @@ Branch from `main` → PR into `main` (tag if shipping a patch) → PR into `dev
 
 # 贡献指南
 
-感谢你对 云顶数字工作台（Ydsz Worker）的关注！云顶数字工作台是 [Octop Harness](https://github.com/TencentCloud) 生态中的可自托管 AI 助手平台，支持多用户与多 Agent，基于腾讯 Octop（MIT 协议）二开。
+感谢你对 云顶数字工作台（Ydsz Worker）的关注！云顶数字工作台是一个开源的、可自托管的企业级 AI 助手平台，支持多用户与多 Agent。
 
 ## 环境搭建
 
 **前置条件：** Python 3.12+、Node.js 18+、[uv](https://docs.astral.sh/uv/)
 
 ```bash
-git clone https://github.com/TencentCloud/Octop.git ydsz-worker
+git clone https://github.com/njydsz/ydsz-worker.git ydsz-worker
 cd ydsz-worker
 make install
 make install-hooks    # 每个 clone 执行一次：提交前跑 make all + 前端 build
@@ -214,7 +214,7 @@ make check-all        # 全栈质量门禁
 
 ## Pull Request 提交规范
 
-为了保证代码质量和协作效率，提交 Pull Request 时请务必遵守以下原则：
+为了保证代码质量和协作效率，提交 Pull Request 时请务必遵守以下原则。
 
 ### ✅ PR 必备清单
 

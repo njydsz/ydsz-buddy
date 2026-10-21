@@ -2,7 +2,7 @@
 
 ---
 
-本目录包含 Ydsz Worker 的 Docker 构建与部署相关文件。
+本目录包含 云顶数字工作台 (Ydsz Worker) 的 Docker 构建与部署相关文件。
 
 ### 文件说明
 
@@ -12,7 +12,7 @@
 | `../.dockerignore` | 构建上下文忽略规则（Podman 与 BuildKit 均适用） |
 | `docker_build.sh` | 从源码构建镜像（默认开启 BuildKit 缓存） |
 | `docker-compose.yml` | 本地开发 / 自托管一键启动 |
-| `docker-compose.cn.yml` | 同一套服务，拉取 `ghcr.nju.edu.cn/tencentcloud/ydsz:latest`（不本地构建） |
+| `docker-compose.cn.yml` | 同一套服务，拉取 `ghcr.io/njydsz/ydsz-worker:latest`（不本地构建） |
 | `docker-compose.postgres.yml` | 仅 PostgreSQL（+ pgvector）开发/测试库；扩展在 `postgres/init-vector.sql` |
 | `postgres/init-vector.sql` | 实例级 `CREATE EXTENSION vector`（initdb.d；**不**进 Ydsz Worker 迁移） |
 | `docker-entrypoint.sh` | 容器入口：首次初始化数据库并启动服务 |
@@ -44,9 +44,9 @@ docker run -d \
   ydsz:latest
 ```
 
-### 国内镜像加速
+### 镜像加速（可选）
 
-构建时可通过环境变量加速依赖下载：
+构建时可通过环境变量加速依赖下载。以下以常用国内镜像为例，可替换为任意可用的镜像源：
 
 ```bash
 PIP_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple \

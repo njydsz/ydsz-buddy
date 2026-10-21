@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveSkillDisplayName } from "./skillDisplayNames";
 
 describe("resolveSkillDisplayName", () => {
-  it("prefers metadata.octop.label for the UI locale", () => {
+  it("prefers metadata.ydsz.label for the UI locale", () => {
     expect(
       resolveSkillDisplayName(
         {

@@ -1,20 +1,8 @@
 # Architecture
 
-> Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。本文档描述 Ydsz Worker 的架构设计。
+Ydsz Worker 是云顶数字工作台 — 会思考，会干活，陪企业成长的智能伙伴。它是自托管的多用户、多智能体 AI 助手平台，以单一 Python 进程交付，将 LangGraph 对话运行时、IM Channel Gateway（即时通讯渠道管线）和 React 前端整合为一个可安装包，内置 CLI、HTTP/WebSocket API 与 Web 控制台。
 
-Ydsz Worker is a self-hosted AI assistant platform for multiple users and agents,
-delivered as a single Python process.
-It glues three reusable libraries — `octop-harness` (LangGraph-based
-chat runtime), `octop-gateway` (IM channel pipeline), and a React
-+ TypeScript dashboard — into one wheel that ships with a CLI, an
-HTTP/WebSocket API, and a web UI.
-
-> Ydsz Worker is a continued fork of Tencent Ydsz Worker (MIT License).
-
-> Looking for the contributor-facing navigation guide (module boundaries,
-> change workflow, hard bans)? See [AGENTS.md](../AGENTS.md) at the repo
-> root. This document is the **human-readable** overview; AGENTS.md is
-> the **agent-facing** handbook.
+> 寻找面向贡献者的导航指南（模块边界、变更流程、硬性约束）？参见仓库根目录的 [AGENTS.md](../AGENTS.md)。本文档是面向人类的架构概览，AGENTS.md 是面向 AI 助手的开发手册。
 
 ## 1. Layering
 
@@ -27,7 +15,7 @@ HTTP/WebSocket API, and a web UI.
 │  Domain layer     │  AgentManager   Gateway   GlobalProcessor     │
 │                   │  CronManager    UserManager   SharedServices │
 ├──────────────────────────────────────────────────────────────────┤
-│  Reusable libs    │  octop-harness   octop-gateway            │
+│  Reusable libs    │  LangGraph       IM Channel Gateway     │
 ├──────────────────────────────────────────────────────────────────┤
 │  Storage          │  SQLite or PostgreSQL control plane + file workspaces│
 └──────────────────────────────────────────────────────────────────┘
@@ -116,7 +104,7 @@ sessions, audit, JWT secret) lives in either:
 Migrations: `src/octop/infra/db/migrations/NNN_*.sql` (SQLite) and
 `NNN_*.pg.sql` (PostgreSQL). Connection PRAGMAs live on the SQLite pool;
 PostgreSQL extensions (e.g. `vector`) are docker/ops init, not app
-migrations. Agent memory DDL is owned by octop-memory. See
+migrations. Agent memory DDL is owned by the built-in memory module. See
 [ADR 002](./adr/002-database-backends.md).
 
 The wheel ships the built dashboard SPA, so the entire stack is one

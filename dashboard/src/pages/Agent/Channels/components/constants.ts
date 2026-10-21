@@ -6,15 +6,15 @@ import dashboardIcon from "../../../../assets/channels/dashboard.svg";
 import yuanbaoIcon from "../../../../assets/channels/yuanbao.svg";
 import wecomIcon from "../../../../assets/channels/wecom.svg";
 import weixinIcon from "../../../../assets/channels/weixin.svg";
-import octopIcon from "../../../../assets/channels/ydsz.svg";
+import ydszIcon from "../../../../assets/channels/ydsz.svg";
 import consoleIcon from "../../../../assets/channels/console.svg";
 import telegramIcon from "../../../../assets/channels/telegram.svg";
 import mqttIcon from "../../../../assets/channels/mqtt.png";
 import xiaoyiIcon from "../../../../assets/channels/xiaoyi.png";
 
 /**
- * Catalogue of channel kinds the octop backend's ``ChannelFactory`` knows
- * how to build. Source of truth: ``octop/channels/factory.py``.
+ * Catalogue of channel kinds the ydsz backend's ``ChannelFactory`` knows
+ * how to build. Source of truth: ``ydsz/channels/factory.py``.
  */
 export type ChannelKey =
   | "feishu"
@@ -122,7 +122,7 @@ export const CHANNEL_ICONS: Record<ChannelKey, string> = {
   telegram: telegramIcon,
   dashboard: dashboardIcon,
   agentchat: consoleIcon,
-  YdszBot: octopIcon,
+  YdszBot: ydszIcon,
 };
 
 /** Brand accent per channel — used for cron task card stripes, badges, etc. */

@@ -46,7 +46,7 @@ describe("ChatTitleBar", () => {
       />,
     );
 
-    expect(container.querySelector(".octop-desktop-drag")).not.toBeNull();
+    expect(container.querySelector(".ydsz-desktop-drag")).not.toBeNull();
   });
 
   it("shows a team badge next to the title for group chats", () => {

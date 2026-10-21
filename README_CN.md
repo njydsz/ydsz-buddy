@@ -1,30 +1,14 @@
-# 云顶数字工作台（Ydsz Worker）
-
-> **归属声明 / Attribution:** 云顶数字工作台（Ydsz Worker）基于腾讯 Octop（[MIT 协议](https://github.com/TencentCloud/Octop/blob/main/LICENSE)）二开，保留原始版权归属。
+<h1 align="center">云顶数字工作台（Ydsz Worker）</h1>
 
 <p align="center">
-  <img src="docs/assets/readme-banner-zh.png" alt="Ydsz Worker Banner" width="600" />
-</p>
-
-<p align="center">
-  <strong>支持多用户、多 Agent 的自托管 AI 助手 — 更聪明，更懂你。</strong>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/95504?utm_source=repository-badge&utm_medium=badge&utm_campaign=badge-repository-95504" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/95504" alt="TencentCloud/Octop | Trendshift" width="250" height="55" />
-  </a>
+  <strong>会思考，会干活，陪企业成长的智能伙伴</strong>
 </p>
 
 <p align="center">
   <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="https://github.com/TencentCloud/Octop/releases"><img alt="Version" src="https://img.shields.io/badge/version-1.0.2-orange" /></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
   <a href="https://pypi.org/project/ydsz-worker/"><img src="https://img.shields.io/pypi/v/ydsz-worker" alt="PyPI" /></a>
   <a href="https://github.com/astral-sh/ruff"><img alt="Code Style: Ruff" src="https://img.shields.io/badge/code%20style-ruff-000000?logo=ruff&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop"><img alt="GitHub stars" src="https://img.shields.io/github/stars/TencentCloud/Octop?style=social" /></a>
-  <a href="https://github.com/TencentCloud/Octop/fork"><img alt="GitHub forks" src="https://img.shields.io/github/forks/TencentCloud/Octop?style=social" /></a>
-  <a href="https://discord.gg/QnWdhJxq9h"><img alt="Discord" src="https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5-5865F2?logo=discord&logoColor=white" /></a>
 </p>
 
 <p align="center">
@@ -43,50 +27,50 @@
 
 ---
 
-**云顶数字工作台（Ydsz Worker）** 是一个开源、自托管的 AI 助手平台——是 [腾讯 Octop](https://github.com/TencentCloud/Octop) 的持续分支（MIT 协议）。它不仅是工具，更是可并行运作的数字生命体。通过多 Agent 架构，它为团队、家庭和个人构建了既独立又协作的智能环境。并且这一切都运行在你的机器上——完全自托管的设计让隐私不再是妥协，而单进程启动的便捷性，则让强大的 Web 控制台、CLI 与 IM 集成触手可及。
+**云顶数字工作台（Ydsz Worker）** 是一个开源、自托管的企业级 AI 助手平台。它不仅是工具，更是可并行运作的智能伙伴——通过多 Agent 架构，为团队和企业构建既独立又协作的数字工作环境。对话即操作，配置即能力，所有数据完全留存在你自己的机器上。
 
-借助飞书、钉钉、QQ、微信、企业微信或 HTTP/SSE/WebSocket API 与任意 Agent 对话；通过**专家库**一键创建专业角色，通过 **Connector**（OAuth + MCP）接入外部服务，通过 **ACP** 与 IDE / 终端 AI 工具双向协作。
+借助飞书、钉钉、企业微信、QQ、微信等 IM 平台与 Agent 对话；通过**专家库**一键创建专业角色，通过 **Connector**（OAuth + MCP）接入外部服务，通过 **ACP** 与 IDE / 终端 AI 工具双向协作。
 
 ## ✨ 亮点
 
 | | 特性 | 说明 |
 |---|------|------|
-| 👥 | **多用户多 Agent 专家团** | 一人管理，全家共用；内置专家库与专家市场，按场景切换专业角色 |
-| 🤝 | **云端协作** | 将本机 云顶数字工作台 连接到另一实例，可浏览对端专家并跨实例对话；对话记录保留在专家所在侧 |
+| 🧠 | **会思考** | 内置 RAG 知识库与长期记忆，对话锚定私有数据，理解企业上下文 |
+| 🛠️ | **会干活** | 浏览器自动化、终端操控、远程桌面、定时任务——不只是聊天，更能动手做事 |
+| 📈 | **陪企业成长** | 自进化能力将日常对话沉淀为可复用技能，知识库与专家配置随业务积累持续增值 |
+| 👥 | **多用户多 Agent 专家团** | 一人管理，多人共用；内置专家库，按场景切换专业角色 |
+| 🤝 | **云端协作** | 将本机 云顶数字工作台 连接到另一实例，可浏览对端专家并跨实例协作 |
 | 🎭 | **MBTI 人格** | 16 种人格模板与互动测试，为每个 Agent 赋予鲜明性格 |
 | 🎯 | **AgentTeams** *（Beta）* | 协调者调度多位专家协作完成多步骤任务；[详见](docs/expert-teams.md) |
-| 🔒 | **更安全** | JWT 多用户隔离、工具审批、Shell 命令防护与敏感信息脱敏，数据留在本地 |
-| 🔌 | **Connector 拓展体系** | 一键接入腾讯全家桶（文档 / 会议 / 新闻等），OAuth 与 MCP 网关轻松扩展 — [支持的连接器](docs/connectors.md) |
+| 🔒 | **安全可控** | JWT 多用户隔离、工具审批、Shell 命令防护与敏感信息脱敏，数据留在本地 |
+| 🔌 | **Connector 拓展体系** | 一键接入腾讯文档、Notion、飞书、企业微信等，OAuth 与 MCP 网关轻松扩展 — [支持的连接器](docs/connectors.md) |
 | 💾 | **可插拔工作区后端** | 本地目录、Docker 沙箱、PostgreSQL 或 COS/S3 存放 Agent 文件 — 与控制面数据库分离 |
-| 🧠 | **可迁移记忆系统** | 基于 [Octop Memory](https://github.com/TencentCloud/octop-memory)，记忆随工作区迁移 |
 | 📚 | **知识库** | 基于文档的 RAG 检索；支持同实例共享语料，让回答锚定私有知识 |
 | 🧩 | **插件** | 支持第三方插件扩展；内置插件随安装注入，按需一键启用 |
-| ↔️ | **ACP 双向集成** | `ydsz-worker acp` 增强 IDE 与终端 AI；对话中委派 OpenCode / Claude Code 等 |
+| ↔️ | **ACP 双向集成** | IDE / 终端 AI 双向协作：既可把外部 Agent 接进来，也可以把任务委派出去 |
 | 💻 | **终端 AI+** | 浏览器内交互式 Shell，AI 辅助命令执行与排障 |
 | 🌐 | **浏览器 AI+** | 基于 Chromium 的无头浏览器会话，支持网页自动化、截图与远程操控 |
-| 🖥️ | **远程桌面** | 控制台内实时看屏与键鼠操控，跨 Linux / Windows / macOS；适合远程办公、GUI 软件操作，无图形 Linux 可一键搭建隔离桌面 |
-| 🪟 | **桌面客户端** | Windows / macOS / Linux 原生应用，另有飞牛（FnOS）安装包，可与 Web 控制台并行使用 |
-| 🏠 | **可自托管** | 一条 `ydsz-worker run` 即可运行控制台、CLI、IM 通道与定时任务，数据存于 `~/.octop/` |
+| 🖥️ | **远程桌面** | 控制台内实时看屏与键鼠操控，跨 Linux / Windows / macOS |
+| 🪟 | **桌面客户端** | Windows / macOS / Linux 原生应用，另有飞牛（FnOS）安装包 |
+| 🏠 | **完全自托管** | 一条命令运行控制台、CLI、IM 通道与定时任务，所有数据在你手中 |
 
 ## 📌 概述
 
-云顶数字工作台（Ydsz Worker）是面向家庭与小团队的自托管 AI 助手平台。单进程同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、QQ、微信、企业微信等）与定时任务，共享 `~/.octop/` 下的控制面数据库（默认 SQLite；可选 PostgreSQL）。
+云顶数字工作台（Ydsz Worker）是面向企业与团队的自托管 AI 助手平台。单进程同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、企业微信、QQ、微信等）与定时任务，共享 `~/.octop/` 下的控制面数据库（默认 SQLite；可选 PostgreSQL）。
 
-> 云顶数字工作台的设计目标：让每一次对话、工作区与凭据都留在你自己的机器上，同时为每个用户配备一组可按场景切换的专业 Agent。
+> **核心理念：** 让 AI 不仅回答问题，更能动手做事。知识在对话中积累，技能在使用中沉淀，陪伴企业每一步成长。
 
 <details>
 <summary>🐾 你能用 云顶数字工作台 做什么</summary>
 
-- **个人助理** — 让专属 Agent 帮你写周报、整理资料、定日程，记忆随工作区长期保留。
-- **家庭共享** — 一个管理员账号，全家共用；按成员分配不同 Agent 与专家角色，也可共享专家与知识库。
-- **团队助手** — AgentTeams 或多 Agent 并行协作，对接飞书 / 钉钉 / 企业微信 / 微信，把任务自动分发到群里。
-- **开发者增效** — 通过 ACP 把编码任务委派给 OpenCode / Claude Code，或在终端用 AI 辅助排障。
-- **网页自动化** — 用浏览器 AI+ 与远程桌面自动填表、截图、操作 GUI 软件。
-- **定时任务** — 用自然语言配置 Cron，让 Agent 每天按时推送或执行任务。
+- **智能客服** — 接入企业微信/飞书/钉钉，结合企业知识库自动回答客户问题。
+- **自动化运营** — 定时推送日报、周报、数据看板；浏览器自动化完成网页操作。
+- **编程助手** — 通过 ACP 与 IDE 协作，代码审查、bug 修复、文档生成一步到位。
+- **知识管理** — 团队内部文档智能检索、知识沉淀、经验复用。
+- **个人助理** — 写周报、整理资料、订日程、操控本地应用。
+- **远程办公** — 远程桌面 + 终端 AI+，随时随地掌控工作环境。
 
 </details>
-
-
 
 ## 🧠 核心技术
 
@@ -94,22 +78,14 @@
 |------|------|
 | **语言** | Python 3.12+ |
 | **Web 框架** | FastAPI + uvicorn |
-| **Agent 运行时** | [Octop Harness](https://github.com/TencentCloud/octop-harness) |
-| **IM 桥接** | [Octop Gateway](https://github.com/TencentCloud/octop-gateway) |
+| **Agent 运行时** | LangGraph |
 | **控制平面数据库** | SQLite (WAL，默认) 或 PostgreSQL（可选） |
-| **前端** | React 18 + TypeScript + Vite + Ant Design |
+| **前端** | React 18 + TypeScript + Vite |
 | **调度** | APScheduler |
 | **ACP** | agent-client-protocol |
 | **构建 / 质量** | hatchling · ruff · mypy · pytest |
 
-云顶数字工作台基于 Octop Harness 工程实践构建——它将这些专注的运行时组合进同一个进程：
-
-- **[Octop Harness](https://github.com/TencentCloud/octop-harness)** — Agent 运行时：模型路由、工具、技能与对话检查点。
-- **[Octop Gateway](https://github.com/TencentCloud/octop-gateway)** — 多平台 IM 通道桥接，将各类入站消息归一为统一的处理管线。
-- **[Octop Memory](https://github.com/TencentCloud/octop-memory)** — 分层记忆与全文检索，让 Agent 的记忆随工作区一同迁移。
-- **[Octop Browser](https://github.com/TencentCloud/octop-browser)** — 基于 CDP 的浏览器自动化，支持持久化配置，用于网页类任务。
-
-云顶数字工作台不依赖外部消息队列或中间件，而是通过进程内的 `HarnessProcessor` 统一路由所有入口——Web UI、IM 与定时任务。最终呈现为一个可重启恢复的单进程：启动时整个状态都从控制面数据库重建（默认 `~/.octop/octop.db`，亦可配置 PostgreSQL）。
+云顶数字工作台将所有入口——Web UI、IM 与定时任务——通过进程内统一的消息处理管线进行路由。不依赖外部消息队列或中间件，最终呈现为一个可重启恢复的单进程：启动时整个状态都从控制面数据库重建。
 
 ## 🤔 功能特性
 
@@ -126,7 +102,7 @@
 - 工作区后端（专家文件）：本地磁盘、Docker 沙箱、PostgreSQL、COS/S3 及其他远程存储 — 与控制面数据库分离
 
 ### 通道与自动化
-- IM 通道：飞书、钉钉、QQ、微信、企业微信等
+- IM 通道：飞书、钉钉、企业微信、QQ、微信等
 - 主动定时任务，支持自然语言和斜杠命令触发
 - Web UI、IM、定时任务共用同一套消息处理链路
 
@@ -163,24 +139,21 @@
 以下是我们的中长期规划：
 
 **已完成**
-- [x] **资源共享池** — 构建技能 / 子智能体共享池，用户在创建专家时可直接取用，无需从零搭建。
-- [x] **专家共享** — 支持用户将自有专家共享给其他用户使用，沉淀优秀配置、避免重复造轮子。
-- [x] **PC 端客户端** — Windows / macOS / Linux 原生桌面应用已发布，可与 Web 控制台、IM 通道并行使用。
+- [x] **资源共享池** — 构建技能 / 子智能体共享池，用户在创建专家时可直接取用。
+- [x] **专家共享** — 支持用户将自有专家共享给其他用户使用。
+- [x] **PC 端客户端** — Windows / macOS / Linux 原生桌面应用。
+- [x] **IM 通道集成** — 飞书、钉钉、企业微信、QQ、微信、Telegram、Discord 全平台覆盖。
 
 **进行中**
-- [ ] **AgentTeams** *（Beta）* — 支持协调者自主调度、编排多位专家，协同完成复杂多步骤任务。
-- [ ] **移动端客户端** *（内测中）* — 原生移动端应用，目前处于内部测试阶段。
+- [ ] **AgentTeams** *（Beta）* — 协调者自主调度多位专家协同完成复杂多步骤任务。
+- [ ] **移动端客户端** *（内测中）* — 原生移动端应用。
 
 **规划中**
-- [ ] **浏览器与终端能力补全** — 增强浏览器技能*录制*（把操作流程录制为可复用技能），并完善终端 AI 助手能力。
 - [ ] **自进化能力** — 将日常对话自动沉淀为技能，让助手随使用不断成长。
-- [ ] **Managed Agents** — 平台托管的 Agent 生命周期（开通、伸缩与运维），无需自行维护完整自托管栈。
-- [ ] **Project** — 以项目为边界组织 Agent、文件与会话，围绕同一目标协作。
-- [ ] **云边端一体** — 本地运行 云顶数字工作台，同时可将选定任务调度到云端执行：轻量工作留在本地，重活按需上云。
-- [ ] **插件市场** — 搭建插件市场，支持在 云顶数字工作台 内发现、安装与更新第三方插件。
-- [ ] **对话式控制面** — 完善 云顶数字工作台 自身 Skill，让对话即可覆盖当前控制台的完整能力：创建专家、配置通道、管理知识库，并支持开发插件。
-
-规划会随社区发展动态调整，以上仅供参考。
+- [ ] **企业知识大脑** — 更深层的企业级知识管理与推理能力。
+- [ ] **Plugin Marketplace** — 插件市场，一键发现、安装与更新第三方插件。
+- [ ] **对话式控制面** — 用对话即可操作整个控制台。
+- [ ] **云边端一体** — 本地运行 + 云端弹性扩展。
 
 ## 🚀 快速开始
 
@@ -195,58 +168,40 @@
 **macOS / Linux** — 一键安装（推荐）：
 
 ```bash
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash
+curl -fsSL https://install.ydsz.ai/install.sh | bash
 ```
 
 **Windows（PowerShell）**：
 
 ```powershell
-irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex
+irm https://install.ydsz.ai/install.ps1 | iex
 ```
 
 **Windows（cmd）** — 下载后运行，或从已克隆的仓库执行：
 
 ```bat
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.bat -o install.bat
+curl -fsSL https://install.ydsz.ai/install.bat -o install.bat
 install.bat
 ```
 
-安装完成后，请打开**新终端**，或重新加载 shell 配置：
+安装完成后，请打开**新终端**，或重新加载 shell 配置。安装脚本会将 `ydsz-worker` 加入 PATH（`~/.octop/bin`）。
 
-```bash
-source ~/.zshrc   # Zsh
-# 或
-source ~/.bashrc  # Bash
-```
+完整安装选项见 [scripts/README.md](scripts/README.md)。
 
-安装脚本会将 `ydsz-worker` 加入 PATH（`~/.octop/bin`）。可选附加组件：
-
-```bash
-# 下载 Playwright Chromium 用于浏览器自动化（若系统已有 Chrome / Chromium 则会跳过）
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash -s -- --extras browser
-```
-
-完整安装选项见 [scripts/README.md](scripts/README.md)（`--version`、`--from-source`、`--mirror` 及 Windows 参数）。
-
-**桌面客户端**（图形界面，无需终端）— 从 [GitHub Releases](https://github.com/TencentCloud/Octop/releases/latest) 下载对应平台的安装包：
+**桌面客户端**（图形界面，无需终端）— 从 [Releases](https://github.com/njydsz/ydsz-worker/releases/latest) 下载对应平台的安装包：
 
 | 平台 | 制品 |
 |------|------|
-| Windows | `Ydsz-desktop-windows-amd64-<version>.exe`（64 位）/ `Ydsz-desktop-windows-arm64-<version>.exe`（ARM64）— NSIS 安装程序 |
-| macOS | `Ydsz-desktop-darwin-arm64-<version>.dmg`（Apple 芯片）/ `Ydsz-desktop-darwin-amd64-<version>.dmg`（Intel） |
-| Linux | `Ydsz-desktop-linux-amd64-<version>.tar.gz` / `Ydsz-desktop-linux-arm64-<version>.tar.gz` |
-| 飞牛 NAS（FnOS） | `Ydsz-fnos-docker-<version>.fpk`（推荐，尤其是 ARM；amd64/arm64 镜像）/ `Ydsz-fnos-native-<version>.fpk`（x86_64，无需 Docker）/ `Ydsz-fnos-native-arm64-<version>.fpk`（ARM64，无 Docker 时再用）— 通过应用中心安装 |
-
-桌面客户端说明见 [desktop/README.md](desktop/README.md)，飞牛打包指南见 [fnos/README.md](fnos/README.md)。
+| Windows | `YdszDesktop-windows-amd64-<version>.exe` / `YdszDesktop-windows-arm64-<version>.exe` |
+| macOS | `YdszDesktop-darwin-arm64-<version>.dmg` / `YdszDesktop-darwin-amd64-<version>.dmg` |
+| Linux | `YdszDesktop-linux-amd64-<version>.tar.gz` / `YdszDesktop-linux-arm64-<version>.tar.gz` |
+| 飞牛 NAS（FnOS） | `YdszFnOS-docker-<version>.fpk` / `YdszFnOS-native-<version>.fpk` / `YdszFnOS-native-arm64-<version>.fpk` |
 
 **备选 — PyPI**（若你已自行管理 Python 环境）：
 
 ```bash
 pip install ydsz-worker
-# 可选本地 ONNX Embedding 模型缓存（设置 → 模型 → 本地）：pip install "ydsz-worker[local-embedding]"
-# 仅下载目录模型到 ~/.octop/embedding_models；不用于对话，也不接入 Memory。
-# 浏览器自动化依赖已内置 Playwright；Chromium 可通过安装脚本 --extras browser、
-# 控制台，或执行：python -m playwright install chromium
+# 可选本地 Embedding：pip install "ydsz-worker[local-embedding]"
 ```
 
 从源码用 uv 开发时：
@@ -276,7 +231,7 @@ ydsz-worker run --host 0.0.0.0 --port 8088
 ydsz-worker service start
 ```
 
-打开 **http://127.0.0.1:8088**。Docker 若设置了合格的 `YDSZ_DEFAULT_PASSWORD`，首次启动会创建管理员（凭据写入 `/data/.octop/credential.txt`）；未设置或密码不合格则打开设置向导（向导口令在 `/data/.octop/octop-login.txt`）。交互式 `ydsz-worker init` / 设置向导会让你自行设置密码（至少 8 位，且同时包含字母和数字）。
+打开 **http://127.0.0.1:8088**。
 
 ### Docker（推荐用于生产部署）
 
@@ -284,91 +239,66 @@ ydsz-worker service start
 # 构建并启动
 docker compose -f docker/docker-compose.yml up -d
 
-# 官方 GHCR 拉取失败时用国内源（不本地构建）
+# 国内镜像加速
 docker compose -f docker/docker-compose.cn.yml up -d
-
-# 或手动构建
-bash docker/docker_build.sh
-docker run -d \
-  -p 8088:8088 \
-  -v octop-data:/data/.octop \
-  -e HOME=/data \
-  -e YDSZ_DEFAULT_PASSWORD="<自定义强密码，留空则进入设置向导>" \
-  ydsz-worker:latest
 ```
 
-打开 `http://localhost:8088`。`YDSZ_DEFAULT_PASSWORD` 合格时首次启动会创建管理员，并把凭据写入 `/data/.octop/credential.txt`。未设置或密码被策略拒绝时不自动建账号，打开页面走设置向导（向导口令在 `/data/.octop/octop-login.txt`）。可通过 `YDSZ_ADMIN_USERNAME` 覆盖用户名。
-
-> **密码策略：** 至少 8 位，且同时包含字母和数字。
+打开 `http://localhost:8088`。
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `YDSZ_PORT` | `8088` | HTTP 监听端口 |
-| `YDSZ_DEFAULT_PASSWORD` | _(未设置)_ | 首次运行管理员密码（Docker 引导）。合格则建账号；未设置或不合格则走设置向导 |
-| `YDSZ_ADMIN_USERNAME` | `admin` | 首次运行管理员用户名 |
-| `YDSZ_DATA` | `~/.octop` | 宿主机数据目录（compose 挂载） |
+| `YDSZ_DEFAULT_PASSWORD` | _(未设置)_ | 首次管理员密码 |
+| `YDSZ_ADMIN_USERNAME` | `admin` | 首次管理员用户名 |
+| `YDSZ_DATA` | `~/.octop` | 宿主机数据目录 |
 
 完整变量列表见 [`.env.example`](.env.example)。
 
-### 云端部署
-
-<p>
-  <a href="https://buy.cloud.tencent.com/lighthouse?blueprintType=APP_OS&blueprintOfficialId=lhbp-nxq7695q&regionId=1&zone=ap-guangzhou-6&bundleId=bundle_rs_mc_med2_01&loginSet=AUTO_PASSWORD&goodsNum=0&from=lh-console"><img alt="部署到轻量云" width="194" height="49" src="docs/assets/deploy-on-lighthouse.png" /></a><br>
-  <a href="https://buy.cloud.tencent.com/cvm?tab=custom&step=1&devPayMode=monthly&regionId=1&zoneId=100007&instanceType=SA9.64XLARGE1152&supportConfidentiality=false&platform=TencentOS&imageId=img-n3gxkolf&systemDiskType=CLOUD_HSSD&systemDiskSize=100&systemDiskBackupQuota=0&isBackup=false&backupDiskType=ALL&backupDiskCustomizeValue=&backupQuotaSegment=1&backupQuota=1&wanIp=0&loginSet=BIND_SSH_KEY&tags=null&templateCreateMode=createLt"><img alt="部署到 CVM" width="194" height="49" src="docs/assets/deploy-on-cvm.png" /></a>
-</p>
-
 ## 📑 目录
 
-- [亮点](#-亮点)
-- [概述](#-概述)
-- [核心技术](#-核心技术)
-- [功能特性](#-功能特性)
-- [规划](#-规划)
-- [快速开始](#-快速开始)
+- **[亮点](#-亮点)** — 核心特性速览
+- **[概述](#-概述)** — 产品定位与使用场景
+- **[核心技术](#-核心技术)** — 技术栈一览
+- **[功能特性](#-功能特性)** — 详细功能列表
+- **[规划](#-规划)** — 路线图
+- **[快速开始](#-快速开始)** — 安装与启动指南
 - **部署与使用**
-  - [安装方式](#-安装方式)
-  - [配置](#️-配置)
-  - [CLI 参考](#-cli-参考)
-  - [Web 控制台](#️-web-控制台)
-  - [数据目录](#-数据目录)
+  - [安装方式](#-安装方式) — 各平台安装方法
+  - [配置](#️-配置) — 环境变量与 config.json
+  - [CLI 参考](#-cli-参考) — 命令行工具
+  - [Web 控制台](#️-web-控制台) — 控制台功能
+  - [数据目录](#-数据目录) — 文件结构
 - **架构与开发**
-  - [架构](#️-架构)
-  - [项目结构](#-项目结构)
-  - [开发](#️-开发)
+  - [架构](#️-架构) — 系统设计
+  - [项目结构](#-项目结构) — 仓库布局
+  - [开发](#️-开发) — 本地开发环境
 - **项目信息**
   - [安全与隐私](#-安全与隐私)
   - [参与贡献](#-参与贡献)
   - [更新日志](#-更新日志)
   - [相关项目](#-相关项目)
-  - [客户企业微信群](#-客户企业微信群)
   - [许可证](#-许可证)
 
 ## 📦 安装方式
 
 | 方式 | 平台 | 说明 |
 |------|------|------|
-| 远程一键安装 | macOS / Linux | `curl …/ydsz-worker/install.sh \| bash` |
-| 远程一键安装 | Windows | `irm …/ydsz-worker/install.ps1 \| iex` 或 `install.bat` |
+| 远程一键安装 | macOS / Linux | `curl …/install.sh \| bash` |
+| 远程一键安装 | Windows | `irm …/install.ps1 \| iex` 或 `install.bat` |
 | 本地脚本 | macOS / Linux | `bash scripts/install.sh` |
 | 本地脚本 | Windows | `scripts\install.bat` 或 `install.ps1` |
-| PyPI | 全平台 | `pip install ydsz-worker`（可选 extras 如 `local-embedding`） |
-| Docker | 全平台 | `docker/docker-compose.yml`；国内镜像 `docker/docker-compose.cn.yml` |
-
-所有安装脚本均在 `~/.octop/venv` 创建隔离环境，并通过 `~/.octop/bin/ydsz-worker` 包装 CLI，不会影响系统 Python。
+| PyPI | 全平台 | `pip install ydsz-worker` |
+| Docker | 全平台 | `docker/docker-compose.yml` |
 
 ### 升级
 
-`ydsz-worker update` 只替换 wheel / 二进制，你的 `~/.octop/` 数据库、工作区、密钥与 `config.json` 均会保留：
-
 ```bash
-ydsz-worker update          # 获取并安装最新版 云顶数字工作台，若已注册系统服务则自动重启
+ydsz-worker update          # 获取并安装最新版，若已注册系统服务则自动重启
 ```
 
-数据库结构会在下次启动时自动迁移；仅当设置向导提示需要迁移时才运行 `ydsz-worker init`。跨版本升级前请务必先备份（`ydsz-worker backup`）。
+跨版本升级前请务必先备份（`ydsz-worker backup`）。
 
 ## ⚙️ 配置
-
-所有运行时数据存放在 `~/.octop/`。可通过 CLI 管理，也可直接编辑文件。
 
 ```bash
 # LLM 供应商与模型
@@ -377,14 +307,12 @@ ydsz-worker provider list
 
 # IM 通道
 ydsz-worker channel list
-ydsz-worker channel install
 
 # Skill（按 Agent）
 ydsz-worker skills list --agent main
 
 # 定时任务
 ydsz-worker cron list
-ydsz-worker cron create --help
 
 # 用户（管理员）
 ydsz-worker user list
@@ -399,28 +327,25 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 | 通道 | 所需凭证 |
 |------|----------|
 | **飞书** | App ID、App Secret |
-| **钉钉** | App Key、App Secret |
+| **钉钉** | App Key、 App Secret |
 | **QQ** | Bot AppID、Token |
 | **微信** | 扫码绑定 / 账号凭证；见 [CLI](docs/cli.md) |
 | **企业微信** | Corp ID、Agent Secret |
 | **Web 控制台** | 默认启用 |
 
-其他通道类型（如元宝、小艺、MQTT 等）可通过网关接入 — 详见控制台或 CLI 的通道配置。
-
 ### 支持的连接器
 
-内置 OAuth / MCP 连接器包括腾讯文档、腾讯会议、Notion、滴答清单、OpenAlex、飞书 CLI、企业微信 CLI、Agent Mail、Obsidian、WeKnora、Dify 等。名称与描述支持中英双语。
+内置 OAuth / MCP 连接器包括腾讯文档、腾讯会议、Notion、滴答清单、OpenAlex、飞书 CLI、企业微信 CLI、Agent Mail、Obsidian、WeKnora、Dify 等。
 
-完整目录、鉴权类型与 MCP 模式见 **[docs/connectors.md](docs/connectors.md)**。也可在控制台添加自定义 MCP。
+详见 **[docs/connectors.md](docs/connectors.md)**。
 
 ## 📖 CLI 参考
 
 | 命令 | 说明 |
 |------|------|
 | `ydsz-worker init` | 初始化 `~/.octop/`（数据库、管理员、JWT 密钥） |
-| `ydsz-worker run` | 前台启动 Ydsz Worker |
+| `ydsz-worker run` | 前台启动 |
 | `ydsz-worker service start` | 安装并启动系统服务 |
-| `ydsz-worker service stop` | 停止系统服务 |
 | `ydsz-worker agent` | 创建、列出、启停 Agent |
 | `ydsz-worker channel` | 安装与管理 IM 通道 |
 | `ydsz-worker chats` | REPL 与会话管理 |
@@ -430,16 +355,8 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 | `ydsz-worker skills` | 按 Agent 启用/禁用 Skill |
 | `ydsz-worker plugin` | 安装并管理第三方插件 |
 | `ydsz-worker backup` | 导出 / 恢复备份 |
-| `ydsz-worker clean` | 清理 CLI 状态或清空 `~/.octop/` |
-| `ydsz-worker memory list` | 列出可参与记忆维护的运行中 Agent；不改动数据库。 |
-| `ydsz-worker memory slim [--agent ID]` | 通过运行中的宿主备份并精简 SQLite 记忆；使用指定 Agent 或按提示选择。在终端与控制台显示进度。[详情](docs/memory-slim.md) |
-| `ydsz-worker memory slim --all` | 依次维护所有符合条件的运行中 Agent，逐个显示进度；首个失败即停止。 |
+| `ydsz-worker memory slim` | 记忆维护 |
 | `ydsz-worker update` | 检查并安装更新 |
-
-在已登录的 Web 控制台或本地 CLI 聊天中，`/memory slim` 会说明当前 Agent 的维护方式；
-`/memory slim --all` 列出符合条件的 Agent。审阅影响后加 `--confirm` 开始维护。
-使用 `/memory status` 查看进度/结果。维护确认并开始之前，聊天始终可用。
-外部 IM 的记忆维护需要已验证的发送者权限，暂未开放。
 
 完整参考：**[docs/cli.md](docs/cli.md)**。
 
@@ -452,99 +369,87 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 </p>
 
 - **对话** — 与专家 / 团队实时聊天
-- **专家** — 创建专家、选择专家库 / MBTI、共享或发布专家、配置供应商
+- **专家** — 创建专家、选择专家库 / MBTI、共享或发布专家
 - **AgentTeams** *（Beta）* — 协调者 + 成员专家协作多步骤任务
 - **Connector** — OAuth 应用与 MCP 网关
 - **通道** — IM 平台配置
 - **定时任务** — 可视化 Cron 管理
-- **知识库** — 管理文档语料、语义检索与同实例共享
+- **知识库** — 管理文档语料、语义检索与共享
 - **插件** — 安装、启用与配置插件
 - **远程桌面** — 控制台内实时看屏与键鼠操控
 - **ACP** — 配置出站编程 Agent Runner
 - **设置** — 用户、安全、TLS、系统
 
-交互式 API 文档：**http://127.0.0.1:8088/api/docs**（默认关闭 — 在 `config.json` 中设置 `"enable_api_docs": true` 开启）
+交互式 API 文档：**http://127.0.0.1:8088/api/docs**（默认关闭）
 
 ## 📁 数据目录
 
 ```
 ~/.octop/                          ← 安装与数据根目录
-├── config.json                    # 进程配置（含可选 database 段）
-├── ydsz.db                       # 默认 SQLite 控制面（用户、Agent、通道、定时任务 …）
+├── config.json                    # 进程配置
+├── ydsz.db                       # 默认 SQLite 控制面
 ├── secrets/                       # JWT 密钥、通道 Token
-├── agents/<agent_id>/             # 各 Agent 工作区（SOUL.md、skills …）
+├── agents/<agent_id>/             # 各 Agent 工作区
 ├── security/tool_guard/           # Shell 命令允许/拒绝规则
 ├── logs/                          # 运行日志
-├── venv/                          # uv 管理的 Python（安装脚本布局）
-└── bin/ydsz-worker                      # PATH 包装脚本 → venv/bin/octop
+├── venv/                          # uv 管理的 Python
+└── bin/ydsz-worker               # PATH 包装脚本
 ```
 
-控制面也可改用 PostgreSQL（`config.json` → `database`，或 `YDSZ_DATABASE_*` / 首次设置向导）。控制面为 PostgreSQL 时，Agent 记忆**默认复用同一 DSN**（per-agent schema）；若需继续用文件记忆，在 agent 配置里设 `"memory": { "backend": { "type": "sqlite" } }`。详见 [docs/configuration.md](docs/configuration.md) 与 [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md)。
-
-环境变量与 `config.json` 详见 [docs/configuration.md](docs/configuration.md)。
+控制面也可改用 PostgreSQL（`config.json` → `database`，或 `YDSZ_DATABASE_*`）。详见 [docs/configuration.md](docs/configuration.md)。
 
 ## 🏗️ 架构
 
 ```
-OctopServer
+YdszServer
  ├─ DatabasePool         SQLite (WAL) 或 PostgreSQL
  ├─ SharedServices       依赖注入根 — 所有 repo 与配置
  ├─ ExpertCatalog        启动时扫描 agents/experts/library/
  ├─ UserManager
- │   └─ HarnessAgentManager（按用户）
- │       └─ AgentRuntime（按 Agent）
- │           ├─ HarnessAgent      Agent 运行时（octop-harness）
- │           ├─ HarnessProcessor  IM / UI / 定时任务入口
- │           ├─ ChannelManager    IM 连接（octop-gateway）
- │           └─ CronManager       APScheduler
+ │   └─ AgentManager
+ │       └─ AgentRuntime（per agent）
+ │           ├─ HarnessAgent      Agent 运行时（LangGraph）
+ │           ├─ IM/UI/Cron 入口
+ │           ├─ ChannelManager    IM 连接
+ │           └─ CronManager       定时任务
  └─ FastAPI app (uvicorn)
 ```
 
-单进程架构。重启后从控制面数据库重建状态（默认本地 SQLite；可选 PostgreSQL）。
+单进程架构。重启后从控制面数据库重建状态。
 
-详见 [docs/architecture.md](docs/architecture.md)、[docs/adr/001-single-process-model.md](docs/adr/001-single-process-model.md) 与 [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md)。
+详见 [docs/architecture.md](docs/architecture.md)。
 
 ## 📁 项目结构
 
 ```
-src/octop/
+src/ydsz/
   config.py    环境变量配置
-  launch.py    OctopServer 启动 + uvicorn
+  launch.py    YdszServer 启动 + uvicorn
   infra/       业务核心（agents、gateway、cron、db、users …）
   api/         HTTP 层 — FastAPI 路由、JWT、SSE
   cli/         CLI 层 — Click 命令
   dashboard/   构建后的 React SPA（wheel 产物）
 
 dashboard/     前端源码（Vite）— 在此编辑，运行 make build-frontend
-
-docker/        Docker Compose、入口脚本、构建与部署脚本
-tests/         unit/ + integration/
 ```
 
 ## 🛠️ 开发
 
-**前置条件：** Python 3.12+、Node 18+、[uv](https://docs.astral.sh/uv/)
-
 ```bash
 # 后端
 make install          # pip install -e ".[dev]"
-make all              # format-all + lint + typecheck + test（发布门槛）
+make all              # format-all + lint + typecheck + test
 
 # 前端（另开终端）
 make dev-frontend     # Vite 开发服务器 :5173
-make build-frontend   # 生产构建 → src/octop/dashboard/
-cd dashboard && npx tsc -b
+make build-frontend   # 生产构建
 ```
-
-单独执行：`make test`、`make lint`、`make typecheck`、`make format`。
-
 
 ## 🔒 安全与隐私
 
 - **本地优先**：配置、对话、工作区与凭证均存储在 `~/.octop/`。
 - **多用户隔离**：JWT 认证，按用户隔离 Agent 与工作区。
-- **敏感信息脱敏与工具审批**：离开工作区前自动脱敏敏感数据；高风险工具或 Shell 命令需依据护栏规则显式审批。
-- **工具护栏**：可在 `~/.octop/security/tool_guard/` 编辑 Shell 命令规则。
+- **敏感信息脱敏与工具审批**：离开工作区前自动脱敏；高风险工具或 Shell 命令需显式审批。
 - **无厂商锁定**：可自由切换 LLM 供应商、存储后端与 IM 通道。
 
 ## 🤝 参与贡献
@@ -556,9 +461,7 @@ cd dashboard && npx tsc -b
 3. 提交前运行 `make all`（后端）或 `make check-all`（全栈）
 4. 发起 Pull Request
 
-完整指南见 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题见 [SECURITY.md](SECURITY.md)。
-
-模块边界与编码规范见 [AGENTS.md](AGENTS.md)。
+详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 📋 更新日志
 
@@ -568,20 +471,9 @@ cd dashboard && npx tsc -b
 
 | 项目 | 描述 |
 |------|------|
-| [Octop Harness](https://github.com/TencentCloud/octop-harness) | Agent 运行时 — 模型路由、工具、Skill、检查点 |
-| [Octop Gateway](https://github.com/TencentCloud/octop-gateway) | 多平台 IM 通道桥接 |
-| [Octop Memory](https://github.com/TencentCloud/octop-memory) | 层级召回与全文搜索 |
-| [Octop Browser](https://github.com/TencentCloud/octop-browser) | CDP 浏览器自动化，支持 profile 持久登录 |
-
-## 💬 客户企业微信群
-
-如需加入客户企业微信服务群，请扫码：
-
-<p align="center">
-  <img src="docs/assets/qrcode.png" alt="客户企业微信服务群二维码" width="220" />
-</p>
-
-> 请扫码进入工作群，如有任何疑问或需求，请直接联系群管理员对接处理。
+| LangGraph | Agent 运行时框架 |
+| LangChain | LLM 应用开发框架 |
+| FastAPI | Web 框架 |
 
 ## 📄 许可证
 
@@ -589,8 +481,4 @@ cd dashboard && npx tsc -b
 
 ## ✨ 贡献者
 
-感谢所有贡献者：
-
-<a href="https://github.com/tencentcloud/octop/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tencentcloud/octop" />
-</a>
+感谢所有为 云顶数字工作台 贡献代码的人。

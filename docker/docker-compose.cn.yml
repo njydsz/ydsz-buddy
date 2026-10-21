@@ -1,8 +1,8 @@
 # =============================================================================
-# Ydsz Worker — Docker Compose（国内镜像）
+# 云顶数字工作台 (Ydsz Worker) — Docker Compose（国内镜像）
 #
-# 不在本地构建。官方 GHCR（ghcr.nju.edu.cn/tencentcloud/ydsz-worker）拉取失败时用本文件，
-# 镜像来自南京大学 GHCR 源：ghcr.nju.edu.cn/tencentcloud/ydsz:latest
+# 不在本地构建。从 GHCR 拉取镜像失败时用本文件，
+# 镜像来自：ghcr.io/njydsz/ydsz-worker:latest
 #
 # 用法（在仓库根目录执行）:
 #   docker compose -f docker/docker-compose.cn.yml up -d
@@ -15,7 +15,7 @@
 
 services:
   ydsz:
-    image: ghcr.nju.edu.cn/tencentcloud/ydsz-worker:latest
+    image: ghcr.io/njydsz/ydsz-worker:latest
     container_name: ydsz-worker
     restart: unless-stopped
     ulimits:

@@ -38,11 +38,11 @@ describe("<SsoPanel />", () => {
       enabled: true,
       display_name: "Acme SSO",
       issuer: "https://identity.example.com",
-      client_id: "octop",
+      client_id: "ydsz",
       scopes: "openid profile email",
-      dashboard_origin: "https://octop.example.com",
+      dashboard_origin: "https://ydsz.example.com",
       has_client_secret: true,
-      redirect_uri: "https://octop.example.com/api/auth/oidc/callback",
+      redirect_uri: "https://ydsz.example.com/api/auth/oidc/callback",
     });
 
     render(<SsoPanel />);
@@ -51,7 +51,7 @@ describe("<SsoPanel />", () => {
     expect(screen.getByDisplayValue("Acme SSO")).toBeInTheDocument();
     expect(
       screen.getByDisplayValue(
-        "https://octop.example.com/api/auth/oidc/callback",
+        "https://ydsz.example.com/api/auth/oidc/callback",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("adminSso.statusEnabled")).toBeInTheDocument();

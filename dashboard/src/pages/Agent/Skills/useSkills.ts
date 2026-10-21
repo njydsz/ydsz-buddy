@@ -9,8 +9,8 @@ import { saveBlobAsFile } from "../../../utils/saveBlobAsFile";
 import { showApiError } from "../../../utils/showApiToast";
 
 /**
- * SkillSpec mirrors the JSON shape returned by octop's
- * ``GET /api/agents/{aid}/skills`` (see ``octop/api/routers/skills.py``).
+ * SkillSpec mirrors the JSON shape returned by ydsz's
+ * ``GET /api/agents/{aid}/skills`` (see ``ydsz/api/routers/skills.py``).
  *
  * Field-name reconciliation: finnie's UI treats the identifier as ``slug``
  * and uses ``kind`` (``builtin`` | ``workspace``) to split built-in vs

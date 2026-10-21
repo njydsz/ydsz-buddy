@@ -1,594 +1,430 @@
-# 云顶数字工作台 — 服务端/客户端拆分策略与商业化路径（v0.3）
+# 云顶数字工作台 — 服务端/客户端拆分策略与商业化路径（v0.4 最终版）
 
 > **定位：** 会思考、会干活、陪企业成长的智能伙伴
 >
 > **核心原则：**
-> - **客户端统一且轻量**：只有一种客户端，功能完全相同
-> - **模式差异由服务端决定**：本地（自托管）/ 云端 / 企业混合，纯服务端配置切换
-> - **客户端自动适配能力**：通过 API 发现服务端 capabilities，动态展示可用功能
+> - **客户端统一且轻量**：一种客户端（Web PWA + 桌面壳 + Mobile 共享代码）
+> - **模式差异由服务端配置决定**：`--mode local | cloud | hybrid`
+> - **能力发现协议**：客户端通过 `/api/v1/capabilities` 动态适配 UI
 >
-> **竞品对标：** 妙手 CatPaw（美团）、WorkBuddy（腾讯）、Kimi Work（月之暗面）、小浣熊 Raccoon Work（商汤）、OpenCode、DeepSeek Harness
+> **竞品对标：** 妙手 CatPaw、WorkBuddy、Kimi Work、小浣熊 Raccoon Work、OpenCode、DeepSeek Harness
 >
-> **日期：** 2026-10-21 · v0.3
+> **日期：** 2026-10-21 · v0.4
 
 ---
 
-## 一、核心洞察：客户端统一，服务端决定一切
+## 一、架构一句话总结
 
-### 1.1 设计哲学
-
-```
-之前的认知（v0.2）：
-  胖客户端 = 一套代码, 瘦客户端 = 一套代码, 混合 = 一套代码 → 三套 UI 逻辑
-
-现在的认知（v0.3）：
-  ┌──────────────── 唯一客户端（统一安装包）────────────────┐
-  │  一套代码 · 一样的功能 · 自动适配                       │
-  │                                                         │
-  │  第一次启动时：                                          │
-  │    → 输入服务地址（或扫码）                              │
-  │    → 调用 GET /api/v1/capabilities                     │
-  │    → 服务端返回当前模式支持的能力列表                    │
-  │    → 客户端据此决定显示哪些功能按钮                      │
-  └─────────────────────────────────────────────────────────┘
-                          │
-            ┌─────────────┼─────────────┐
-            ▼             ▼             ▼
-  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-  │ 本地服务端   │ │ 云端服务端   │ │ 企业混合服务端│
-  │ mode: local │ │ mode: cloud │ │ mode: hybrid │
-  │             │ │             │ │              │
-  │ 自备 API Key│ │ 平台额度    │ │ 自备 + Bridge│
-  │ 本地计费关   │ │ 计费开      │ │ 审计开       │
-  │ 能力: A,B,C │ │ 能力: A,B,  │ │ 能力: A,B,C, │
-  │             │ │   C,D,E     │ │   D,E,F,G    │
-  └─────────────┘ └─────────────┘ └─────────────┘
-
-  客户端不需要知道自己在哪种模式。
-  服务端返回什么 capabilities，客户端就展示什么。
-```
-
-### 1.2 客户端职责（极简）
-
-| 职责 | 说明 | 禁止 |
-|------|------|------|
-| UI 渲染 | Dashboard、对话、配置页面 | 不直接调用 infra/ 模块 |
-| 网络请求 | 通过 SDK 调用 `/api/v1/*` | 不直连数据库 |
-| 输入/输出 | 语音识别、系统通知、文件拖拽 | 不调度 Cron 任务 |
-| 本地缓存 | Token、最近会话、UI 偏好 | 不存储业务数据 |
-| 能力适配 | 根据 `/capabilities` 展示功能 | 不假设服务端模式 |
-
-### 1.3 服务端职责（全部业务逻辑 + 能力声明）
-
-| 职责 | 三种模式共享 | 仅 local | 仅 cloud | 仅 hybrid |
-|------|:----------:|:--------:|:--------:|:---------:|
-| Agent 运行时 | ✅ | | | |
-| IM 通道引擎 | ✅ | | | |
-| 定时任务 Cron | ✅ | | | |
-| 知识库 RAG | ✅ | | | |
-| 专家/技能市场 | ✅ | | | |
-| 会话历史 | ✅ | | | |
-| 模型调用（自备 Key） | | ✅ | | ✅ |
-| 模型 Relay + 计费 | | | ✅ | |
-| 云同步 Sync | | ✅（桥接） | ✅（原生） | ✅ |
-| Bridge Agent | | | | ✅ |
-| 审计日志 | | | | ✅ |
-| 多租户隔离 | | | ✅ | |
-| SSO / LDAP | | | | ✅ |
-
-### 1.4 能力发现协议（Capabilities Negotiation）
-
-客户端第一次连接服务端时，通过 HTTP 握手协商可用能力：
-
-```
-客户端请求：
-  GET /api/v1/capabilities
-  Authorization: Bearer <token>
-
-服务端响应（模式一：本地）：
-  {
-    "mode": "local",
-    "capabilities": {
-      "agent": true,
-      "chat": true,
-      "cron": true,
-      "channels": true,
-      "knowledge_base": true,
-      "marketplace": true,
-      "model_relay": false,        // ← 本地模式无模型 Relay
-      "billing": false,             // ← 本地模式无计费
-      "sync": true,                 // ← 本地模式支持云同步（需绑定账号）
-      "sync_native": false,         // ← 本地模式的同步依赖 Bridge
-      "audit": false,
-      "sso": false,
-      "max_agents": null,           // ← 本地无限
-      "max_team_members": null,
-    }
-  }
-
-服务端响应（模式二：云端 cloud）：
-  {
-    "mode": "cloud",
-    "capabilities": {
-      "agent": true,
-      "chat": true,
-      "cron": true,
-      "channels": true,
-      "knowledge_base": true,
-      "marketplace": true,
-      "model_relay": true,          // ← 云端支持模型 Relay
-      "billing": true,              // ← 云端有计费
-      "sync": true,
-      "sync_native": true,          // ← 云端原生同步
-      "audit": false,
-      "sso": false,
-      "max_agents": 10,             // ← Pro 订阅限额
-      "max_team_members": 10,
-    }
-  }
-
-服务端响应（模式三：混合 hybrid）：
-  {
-    "mode": "hybrid",
-    "capabilities": {
-      "agent": true,
-      "chat": true,
-      "cron": true,
-      "channels": true,
-      "knowledge_base": true,
-      "marketplace": true,
-      "model_relay": false,         // ← 企业自备模型
-      "billing": false,
-      "sync": true,
-      "sync_native": false,         // ← 混合模式同步走 Bridge
-      "audit": true,                // ← 审计开启
-      "sso": true,                  // ← SSO 集成
-      "max_agents": null,
-      "max_team_members": 50,       // ← 企业按 License 限额
-    }
-  }
-```
-
-客户端据此决定 UI 渲染：
-
-```typescript
-// dashboard/src/hooks/useServerCapabilities.ts
-const caps = await fetchCapabilities(serverUrl);
-
-// 计费相关 UI
-showBillingSection = caps.capabilities.billing;
-showModelRelaySelector = caps.capabilities.model_relay;
-
-// 同步相关 UI
-showCloudSyncButton = caps.capabilities.sync;
-syncModeLabel = caps.capabilities.sync_native ? "云同步" : "桥接同步";
-
-// 企业管理 UI
-showAdminPanel = caps.capabilities.audit || caps.capabilities.sso;
-showTeamManagement = caps.capabilities.max_team_members > 1;
-```
+**客户端只渲染和 IO，服务端拥有全部业务逻辑和数据。三种模式的差异 = 服务端启动参数，客户端自动适配。**
 
 ---
 
-## 二、统一客户端设计
+## 二、能力归属矩阵
 
-### 2.1 三种形态，一套代码
+### 2.1 服务端（50+ 项能力）
+
+| 类别 | 能力项 | 文件路径 | 说明 |
+|------|--------|---------|------|
+| **Agent 引擎** | 多 Agent 运行时 | `infra/agents/manager.py` | HarnessAgent 生命周期、模型调用、结果聚合 |
+| | 专家系统 | `infra/agents/experts/` | 定义、启动/停止、健康检查 |
+| | 子代理编排 | `infra/agents/subagents/` | 任务委托、结果汇总 |
+| | 技能引擎 | `infra/skills/` | 加载、执行、热更新 |
+| | MCP 网关 | `infra/connectors/` | OAuth 令牌、API 适配 |
+| **IM 通道** | 飞书/钉钉/微信/QQ/企微 | `infra/gateway/` | Webhook 接收、消息路由 |
+| **知识/RAG** | 向量检索/分块嵌入 | `infra/knowledge/` | 文档解析、检索排序 |
+| **调度引擎** | 定时任务 Cron | `infra/cron/` | 调度、执行、失败重试 |
+| | 主动推送 | `infra/proactive/` | 触发条件、推送队列 |
+| **自动化** | 浏览器自动化 | `infra/browser/` | Playwright、DOM 操作 |
+| | 远程桌面（H264 编码端） | `infra/desktop/` | 屏幕捕获、输入注入 |
+| | 移动端控制 | `infra/mobile/` | ADB、屏幕录制、触控 |
+| **模型服务** | 模型提供者管理 | `infra/agents/providers/` | 健康检查、协议适配 |
+| | **模型 Relay（新增）** | `cloud/model_relay.py` | 智能路由、Token 计费 |
+| | 媒体生成 | `infra/providers/media/` | 图片生成、语音合成 |
+| | 本地OLLAMA | `infra/utils/ollama/` | 本地模型发现、推理 |
+| | ONNX 推理 | `onnx_models/` | 本地隐私模式推理 |
+| **安全认证** | JWT 认证 | `infra/auth/jwt/` | 签发、刷新、撤销 |
+| | LDAP/SSO/OAuth | `infra/auth/` | 企业目录/第三方登录 |
+| | 用户/角色管理 | `infra/users/` | CRUD、权限、密码 |
+| | HITL 审批 | `infra/agents/security/hitl_session.py` | 敏感操作人工暂停 |
+| | 工具执行守卫 | `infra/agents/security/` | 命令白名单、沙箱策略 |
+| | TLS 证书 | `infra/setup/tls/` | Let's Encrypt、自动续期 |
+| | **审计日志（新增）** | `cloud/audit_log.py` | 全链路审计追溯 |
+| **持久化** | SQLite/PostgreSQL | `infra/db/` | 用户/Agent/历史/配置全部持久化 |
+| | 会话历史 | `infra/history/` | 消息版本化、Token 统计 |
+| | 工作区文件 | `infra/backend/` | 沙箱隔离读写 |
+| **云端增值** | **配置同步（新增）** | `cloud/sync_service.py` | 跨设备配置和历史同步 |
+| | **Bridge Agent（新增）** | `cloud/bridge_agent.py` | 企业混合安全隧道 |
+| | **计费系统（新增）** | `cloud/billing.py` | Quota、账单、订阅 |
+| | **多租户（新增）** | `cloud/tenant.py` | 资源隔离 |
+| | **设备管理（新增）** | `cloud/device_manager.py` | 多设备注册、在线状态 |
+| | 技能市场 | `api/routers/skills.py` + `marketplace.py` | UGC 上架、分佣 |
+
+### 2.2 客户端（28 项能力）
+
+| 类别 | 能力项 | 文件路径 | 说明 |
+|------|--------|---------|------|
+| **UI 渲染** | React Dashboard | `dashboard/src/` | 全部页面（对话/Cron/通道/知识库/专家团） |
+| | 对话气泡/Markdown | `src/components/Markdown/` | 代码高亮、SVG 渲染 |
+| | 远程桌面 Viewer | `browser/stream/` | H264 解码显示（编码服务端做） |
+| **Native 壳** | 系统托盘 | `desktop/src/main.go` | 自启、菜单 |
+| | 全局快捷键 | `desktop/src/` | 唤起语音、发送消息 |
+| | 系统通知 | `desktop/src/` | 新消息推送 |
+| | 窗口管理 | `desktop/src/window_chrome.go` | 置顶、无边框 |
+| | 防休眠 | `desktop/src/preventsleep_*.go` | 任务执行时通知客户端触发 |
+| | URL Scheme | `desktop/src/openurl.go` | ydzs:// 协议唤起 |
+| | 应用自动更新 | `desktop/src/download.go` | OTA 升级 |
+| **IO/媒体** | 语音采集 | `dashboard/src/hooks/useVoiceInput.ts` | MediaRecorder API |
+| | 语音播放 | `dashboard/src/hooks/useVoiceOutput.ts` | <audio> 播放 TTS 音频 |
+| | PCM 前处理 | `dashboard/public/pcm-processor.js` | Web Audio 实时降噪 AGC |
+| | 剪贴板/拖放 | `dashboard/src/hooks/` | 文件拖放、截图粘贴 |
+| **状态缓存** | JWT 缓存 | `AuthContext` | localStorage |
+| | 会话缓存 | `useAgentThreadChat.ts` | 最近 N 条本地副本 |
+| | UI 偏好 | `appearanceStorage.ts` | 主题、字号、侧边栏 |
+| | i18n | `locales/` | 前端翻译包 |
+| | **能力发现缓存（新增）** | `useServerCapabilities.ts` | 缓存 capabilities 响应 |
+| **连接管理** | HTTP/SSO 登录 | `api/request.ts` | 自动重连、Token 刷新 |
+| | SSE 流管理 | `request.ts` | 对话流订阅 |
+| | 健康探针 | `api/probeHealth.ts` | 服务端在线检测 |
+
+### 2.3 桌面壳 Go 层分类决策
+
+| Go 模块 | 决策 | 理由 |
+|---------|:----:|------|
+| `main.go` (systray) | ✅ 保留 | macOS/Windows 系统托盘必需 |
+| `window_chrome.go` | ✅ 保留 | 窗口外观控制 |
+| `settings_window.go` | ✅ 保留 | 独立设置窗口 |
+| `download.go` (应用更新) | ✅ 保留 | 壳本体 OTA |
+| `preventsleep_*.go` | ✅ 保留 | 需服务端通知触发（防长任务休眠） |
+| `filedrop.go` | ✅ 保留 | 拖放文件上传 |
+| `openurl.go` | ✅ 保留 | ydzs:// URL Scheme |
+| `dock_reopen_darwin.go` | ✅ 保留 | macOS Dock 集成 |
+| `icons_darwin.go` | ✅ 保留 | 应用图标 |
+| **`embed_portable*.go`** | ❌ 移除 | 不再嵌入 Python 运行时 |
+| **`desktop_copy.go`** | ❌ 移除 | 不再内置绿色运行时 |
+| **`process.go`** | ❌ 移除 | 不再管理本地 ydzz-worker 子进程 |
+| **`download.go`（模型）** | ❌ 移除 | 模型下载改为服务端自行拉取 |
+
+→ **桌面壳 Go 代码净缩减 ~60%，包体积从 500MB+ 降至 ~80MB**
+
+---
+
+## 二（附录）：能力归属完整明细表
+
+下表逐项列出所有能力的代码路径归属，作为 v0.4 方案设计的依据。
+
+### A. 服务端能力（~58 项）
+
+| 类别 | 能力项 | 文件路径 | 说明 | L | C | H |
+|------|--------|---------|------|:---:|:---:|:---:|
+| **Agent 引擎** | Agent 运行时 | `infra/agents/manager.py` | HarnessAgent 生命周期、模型调用 | ✅ | ✅ | ✅ |
+| | 专家系统 | `infra/agents/experts/` | 定义、启动/停止、健康检查 | ✅ | ✅ | ✅ |
+| | 子代理编排 | `infra/agents/subagents/` | 任务委托、结果汇总 | ✅ | ✅ | ✅ |
+| | 技能引擎 | `infra/skills/` | 加载、执行、热更新 | ✅ | ✅ | ✅ |
+| | MCP 网关 | `infra/connectors/` | OAuth 令牌、API 适配 | ✅ | ✅ | ✅ |
+| | 多 Agent 协作 | `infra/agents/teams/` | 多专家协作调度 | ✅ | ✅ | ✅ |
+| **IM 通道** | 飞书/钉钉/微信/QQ/企微 | `infra/gateway/` | Webhook 接收、消息路由 | ✅ | ✅ | ✅ |
+| **知识/RAG** | 向量检索/分块嵌入 | `infra/knowledge/` | 文档解析、检索排序 | ✅ | ✅ | ✅ |
+| **调度引擎** | 定时任务 Cron | `infra/cron/` | 调度、执行、失败重试 | ✅ | ✅ | ✅ |
+| | 主动推送 | `infra/proactive/` | 触发条件、推送队列 | ✅ | ✅ | ✅ |
+| **自动化** | 浏览器自动化 | `infra/browser/` | Playwright、DOM 操作 | ✅ | ✅ | ✅ |
+| | 远程桌面编码端 | `infra/desktop/` | 屏幕捕获、输入注入 | ✅ | ✅ | ✅ |
+| | 移动端控制 | `infra/mobile/` | ADB、屏幕录制、触控 | ✅ | ✅ | ✅ |
+| | 语音处理 | `infra/voice/` | TTS 合成、语音识别 | ✅ | ✅ | ✅ |
+| **模型服务** | 模型提供者管理 | `infra/agents/providers/` | OpenAI/DeepSeek/Qwen/GLM/Kimi 配置 | ✅ | ✅ | ✅ |
+| | 模型 Relay（新增） | `cloud/model_relay.py` | 智能路由、Token 计费 | | ✅ | |
+| | 媒体生成 | `infra/providers/media/` | 图片生成（DALL·E 等） | ✅ | ✅ | ✅ |
+| | OLLAMA 本地 | `infra/utils/ollama/` | 本地模型发现、推理 | ✅ | | ✅ |
+| | ONNX 推理 | `onnx_models/` | 本地隐私推理 | ✅ | | ✅ |
+| **安全认证** | JWT 认证 | `infra/auth/jwt/` | 签发、刷新、撤销 | ✅ | ✅ | ✅ |
+| | LDAP | `infra/auth/ldap/` | 企业目录服务 | | | ✅ |
+| | OAuth/OIDC | `infra/auth/sso/` | 第三方 SSO | | ✅ | ✅ |
+| | 用户/角色管理 | `infra/users/` | CRUD、权限、密码 | ✅ | ✅ | ✅ |
+| | 邀请机制 | `api/routers/invites.py` | 注册邀请码 | | ✅ | ✅ |
+| | HITL 审批 | `infra/agents/security/hitl_session.py` | 敏感操作人工暂停 | ✅ | ✅ | ✅ |
+| | 工具执行守卫 | `infra/agents/security/` | 命令白名单、沙箱 | ✅ | ✅ | ✅ |
+| | TLS 证书 | `infra/setup/tls/` | Let's Encrypt | ✅ | | ✅ |
+| | 审计日志（新增） | `cloud/audit_log.py` | 全链路审计 | | | ✅ |
+| **持久化** | SQLite/PostgreSQL | `infra/db/` | 全部业务数据 | ✅ | ✅ | ✅ |
+| | 会话历史 | `infra/history/` | 消息版本化、Token 统计 | ✅ | ✅ | ✅ |
+| | 工作区文件 | `infra/backend/` | 沙箱隔离 | ✅ | ✅ | ✅ |
+| | 插件存储 | `api/routers/plugins.py` | 注册、安装、启停 | ✅ | ✅ | ✅ |
+| **云端增值** | 配置同步原生（新增） | `cloud/sync_service.py` | 跨设备配置和历史同步 | | ✅ | |
+| | 配置同步桥接（新增） | `cloud/sync_service.py` | 不上传明文同步 | ✅* | | ✅ |
+| | Bridge Agent（新增） | `cloud/bridge_agent.py` | 安全隧道 | | | ✅ |
+| | 计费系统（新增） | `cloud/billing.py` | Quota、账单 | | ✅ | |
+| | 多租户（新增） | `cloud/tenant.py` | 资源隔离 | | ✅ | |
+| | 设备管理（新增） | `cloud/device_manager.py` | 多设备注册 | | ✅ | ✅ |
+| | 技能市场 | `api/routers/skills.py` + `marketplace.py` | UGC 上架、分佣 | ✅ | ✅ | ✅ |
+| **新增模块** | Capability Registry | `api/v1/capabilities.py` | 能力发现注册 | ✅ | ✅ | ✅ |
+| | Feature Flags | `api/v1/feature_flags.py` | 灰度开关 | ✅ | ✅ | ✅ |
+
+（✅* = 可选）
+
+### B. 客户端能力（28 项）
+
+| 类别 | 能力项 | 文件路径 | 说明 |
+|------|--------|---------|------|
+| **UI 渲染（Web SPA）** | Dashboard 全部页面 | `dashboard/src/pages/` | 对话/Agent/专家/技能/连接器/KB/自动化/设置 |
+| | 对话气泡+Markdown | `src/components/Markdown/` | 代码高亮、SVG、流式输出 |
+| | 远程桌面 Viewer | `api/routers/browser/` | H264 解码显示 |
+| | 浏览器 AI 面板 | `BrowserAiPanel.tsx` | 页面内嵌对话框 |
+| | 移动端 AI 面板 | `MobileAiPanel.tsx` | 移动 Web 对话框 |
+| | 专家配置 UI | `dashboard/src/pages/Agent/` | 创建/编辑专家、MBTI |
+| | Connector 配置 UI | `Settings/sections/connectors.tsx` | 第三方连接器配置 |
+| | 知识库管理 UI | `dashboard/src/pages/KnowledgeBases/` | 上传、分块、检索 |
+| | 通道管理 UI | `Settings/sections/channels.tsx` | 飞书/钉钉等通道配置 |
+| | 定时任务 UI | `dashboard/src/pages/Control/cron/` | Cron 配置、执行日志 |
+| | Token 统计 UI | `TokenCountInput.tsx` | 用量展示、成本计算 |
+| **Native 壳（桌面壳 Go）** | 系统托盘 | `main.go` | 自启菜单 |
+| | 全局快捷键 | `desktop/src/` | 唤起语音、发送消息 |
+| | 系统通知 | `desktop/src/` | 新消息推送 |
+| | 窗口管理 | `window_chrome.go` | 置顶、无边框 |
+| | 防休眠 | `preventsleep_*.go` | 执行长任务时防休眠 |
+| | URL Scheme | `openurl.go` | ydzs:// 唤起 |
+| | 应用自动更新 | `download.go` | 壳本体 OTA |
+| | 文件拖拽 | `filedrop.go` | 拖放文件到托盘 |
+| **IO/媒体** | 语音采集 | `hooks/useVoiceInput.ts` | MediaRecorder API |
+| | 语音播放 | `hooks/useVoiceOutput.ts` | <audio> 播放 TTS 音频 |
+| | PCM 前处理 | `pcm-processor.js` | Web Audio 降噪 AGC |
+| | 剪贴板/拖放 | `hooks/` | 截图粘贴、文件上传 |
+| **状态缓存** | JWT 缓存 | `AuthContext` | localStorage |
+| | 会话缓存 | `useAgentThreadChat.ts` | 最近 N 条副本 |
+| | UI 偏好 | `appearanceStorage.ts` | 主题、字号、侧边栏 |
+| | 能力发现缓存 | `useServerCapabilities.ts` ← 新增 | capabilities 响应缓存 |
+| | SSE/SDK 连接 | `api/request.ts` | 自动重连、Token 刷新 |
+
+### C. 桌面壳 Go 层分类决策
+
+| Go 模块 | 决策 | 理由 |
+|---------|:----:|------|
+| `main.go` (systray) | ✅ 保留 | macOS/Windows 系统托盘必需 |
+| `window_chrome.go` | ✅ 保留 | 窗口外观控制 |
+| `settings_window.go` | ✅ 保留 | 独立设置窗口 |
+| `download.go` (应用更新) | ✅ 保留 | 壳本体 OTA |
+| `preventsleep_*.go` | ✅ 保留 | 防长任务休眠 |
+| `filedrop.go` | ✅ 保留 | 拖放文件上传 |
+| `openurl.go` | ✅ 保留 | ydzs:// URL Scheme |
+| `dock_reopen_darwin.go` | ✅ 保留 | macOS Dock |
+| `icons_darwin.go` | ✅ 保留 | 应用图标 |
+| `settings.go` | ✅ 保留 | 托盘菜单、自启 |
+| **`embed_portable*.go`** | ❌ 移除 | 不再嵌入 Python |
+| **`desktop_copy.go`** | ❌ 移除 | 不再内置绿色运行时 |
+| **`process.go`** | ❌ 移除 | 不再管理 ydsz-worker 子进程 |
+| **`process_unix.go`** | ❌ 移除 | 同上 |
+| **`process_windows.go`** | ❌ 移除 | 同上 |
+
+→ 桌面壳 Go 代码净缩减 ~60%，500MB+ → ~80MB
+
+---
+
+## 三、三种接入模式统一架构
+
+### 3.1 客户端统一轻量
 
 ```
-┌─────────────────────────────── 统一客户端 ──────────────────────────────┐
-│                                                                        │
-│                    代码完全相同 · 功能完全一样                            │
-│                    大小 ~80MB · 启动 < 3 秒                              │
-│                                                                        │
-│   ┌─────────────────────────────────────────────────────────────────┐  │
-│   │  Dashboard SPA（React）                                          │  │
-│   │    ├─ 对话页 / Agent 管理 / Cron / Channels / KB / Marketplace   │  │
-│   │    ├─ 统一 SDK 调用 `/api/v1/*`（ydsz-sdk-typescript）          │  │
-│   │    └─ capabilities hook 动态渲染可用功能                         │  │
-│   └─────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐             │
-│   │ 桌面壳（Wails）│   │ Web PWA      │   │ Mobile App   │             │
-│   │ + 托盘        │   │              │   │ + 语音输入   │             │
-│   │ + 全局快捷键  │   │              │   │ + 通知推送   │             │
-│   │ + 系统通知    │   │              │   │              │             │
-│   └──────────────┘   └──────────────┘   └──────────────┘             │
-│                                                                        │
-│   启动 → 选择服务 → 连接 → 获取 capabilities → 渲染对应 UI             │
-│   · localhost:8088 (本地)     · 自动发现 · 渲染 local 模式 UI          │
-│   · cloud.ydsz.ai (云端)      · 自动发现 · 渲染 cloud 模式 UI          │
-│   · 192.168.x.x:8088 (企业)   · 自动发现 · 渲染 hybrid 模式 UI        │
-└────────────────────────────────────────────────────────────────────────┘
+客户端（Web PWA + 桌面壳 + Mobile App 共享一套代码）
+  ↓
+ydsz-sdk-typescript（统一 SDK，包含 capabilities 发现）
+  ↓
+  ├─ 调用 GET /api/v1/capabilities → 获取当前服务端能力列表
+  └─ 据此渲染对应 UI（计费/审计/团队管理 等模块按能力开关显示）
 ```
 
-### 2.2 首次启动流程（统一交互）
+### 3.2 服务端三模式
+
+```
+ydsz-worker run --mode <local|cloud|hybrid>
+```
+
+| 模式 | 启用模块 | 能力暴露 | 商业模式 |
+|------|---------|---------|---------|
+| **local** | Agent引擎 + Cron + Channel + KB + Marketplace + 可选Sync | `model_relay=false` `billing=false` `sync=true(可选)` | 免费 + Bridge订阅增值 ¥19/月 |
+| **cloud** | 全部 + ModelRelay + Billing + 多租户 | `model_relay=true` `billing=true` `sync_native=true` | 订阅 ¥49-199 + Token加价 |
+| **hybrid** | 全部 + BridgeAgent + Audit + SSO + LDAP | `audit=true` `sso=true` `bridge=true` | 私有化部署 ¥5-50万/年 |
+
+### 3.3 能力发现协议
+
+```
+GET /api/v1/capabilities → {
+  "mode": "local|cloud|hybrid",
+  "capabilities": {
+    "agent": true,          // 三种模式都有
+    "chat": true,
+    "cron": true,
+    "channels": true,
+    "knowledge_base": true,
+    "marketplace": true,
+    "model_relay": false,   // 仅 cloud
+    "billing": false,       // 仅 cloud
+    "sync": true,           // local可选/cloud原生/hybrid桥接
+    "sync_native": false,   // 仅 cloud 原生
+    "audit": false,         // 仅 hybrid
+    "sso": false,           // 仅 hybrid
+    "max_agents": null,     // null=无限, 数字=按套餐
+    "max_team_members": null,
+  }
+}
+```
+
+客户端根据 capabilities 动态渲染：
+- `billing=true` → 显示订阅状态、Token余额
+- `model_relay=false` → 显示"自备API Key配置"卡片
+- `audit=true` → 显示"审计日志"管理员面板
+
+---
+
+## 四、首次启动流程（统一客户端）
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│   ① 启动客户端（桌面壳/浏览器/App）                           │
-│              │                                               │
-│              ▼                                               │
-│   ② 服务发现 / 手动输入                                      │
-│     ├─ 自动发现：mDNS 搜索本地 :8088（胖客户端场景）          │
-│     ├─ 手动输入：http://192.168.x.x:8088（企业内网）          │
-│     └─ 选择云端：https://api.ydsz.ai                        │
-│              │                                               │
-│              ▼                                               │
-│   ③ 能力协商                                                 │
-│     └─ GET /api/v1/capabilities → { mode, capabilities }    │
-│              │                                               │
-│              ▼                                               │
-│   ④ UI 自适应                                                │
-│     ├─ mode="local" → 隐藏计费/仪表盘，显示自备 Key 配置     │
-│     ├─ mode="cloud" → 显示订阅状态、Token 余额、高级模型选择  │
-│     └─ mode="hybrid" → 显示企业管理入口、审计日志           │
-│              │                                               │
-│              ▼                                               │
-│   ⑤ 进入正常使用                                             │
-│                                                              │
+│  ① 启动客户端（安装 PWA / 桌面壳 / Mobile App）              │
+│                 │                                             │
+│                 ▼                                             │
+│  ② 服务发现                                                  │
+│     · mDNS 搜索本地 :8088                                  │
+│     · 或用户手动输入 IP                                     │
+│     · 或选择 cloud.ydsz.ai                                  │
+│                 │                                             │
+│                 ▼                                             │
+│  ③ 能力协商  GET /api/v1/capabilities                       │
+│                 │                                             │
+│                 ▼                                             │
+│  ④ 登录（自动判断）                                          │
+│     · mode=local  → 本地账号登录                              │
+│     · mode=cloud  → 云端 JWT 登录                             │
+│     · mode=hybrid → LDAP/SSO 跳转                             │
+│                 │                                             │
+│                 ▼                                             │
+│  ⑤ UI 自适应渲染                                             │
+│     · 根据 capabilities 显示/隐藏功能                         │
+│     · 进入正常使用                                            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 模式切换（用户视角）
+---
+
+## 五、交互流程举例
+
+### 5.1 用户发一条消息
 
 ```
-场景 1：极客小李在家使用胖客户端
-  安装 ydsz-worker → 启动本地服务 → 桌面壳连接 localhost
-  → 自动识别为 local 模式 → 功能 A/B/C 可用
-  后来想要手机远程控制：
-  → 设置中点击"绑定云端账号" → 同步能力开启
-  → 服务端 sync 模块自动启用 → UI 显示同步状态
-  （同一客户端，同一安装包，无需重装）
+客户端（纯UI）                API层                   服务端引擎
+─────────                  ────────                  ──────────
+1. 语音采集+PCM ─┐
+2. 文本/fetch ───► 3. JWT校验 ─────► 4. 加载Agent+Workspace
+                   5. 返回 SSE ◄─── 6. 调用LLM（模型选择）
+7. 流式渲染  ◄──── 8. 返回tokens ── 9. 持久化+更新统计
+                                          10. 异步推送通知
+```
 
-场景 2：员工小王在公司使用瘦客户端
-  浏览器打开 cloud.ydsz.ai → 手机验证码登录
-  → 自动为 cloud 模式 → 功能 A-G 可用（含计费和模型 Relay）
-  同时在家中打开同一网址 →自动延续 sessions
-  （完全无需安装，零配置）
+### 5.2 用户配置飞书通道
 
-场景 3：券商某券商在企业内网使用混合客户端
-  管理员部署 ydsz-worker --mode hybrid
-  → 员工桌面壳连接内网地址 → 自动识别为 hybrid 模式
-  → 功能 A-G 全可用（含审计和 SSO）
-  管理员通过云端管控面统一管理所有企业实例
+```
+客户端                             服务端
+─────────                         ──────────
+1. 填 AppID/Secret
+2. POST /api/v1/channels ────────► 3. 加密存储凭证
+                                   4. 注册 Webhook URL
+                                   5. 测试发送验证
+                                   6. 返回状态 ◄────────
+7. 显示成功/失败
+```
+
+### 5.3 用户升级 Pro（触发计费能力）
+
+```
+客户端                             服务端
+─────────                         ──────────
+1. 点击"升级 Pro"
+2. POST /api/v1/billing/subscribe ► 3. 创建订阅记录
+                                    4. 调用支付网关
+                                    5. Quota 提升 ◄────────
+                                    6. capabilities 更新推送
+7. UI自动刷新（模型Relay开关打开）
 ```
 
 ---
 
-## 三、服务端三种模式设计
+## 六、服务端技术方案
 
-### 3.1 模式一：本地（local）
-
-**用户画像：** 开发极客 / 一人公司 / 隐私敏感企业 / 边缘无网环境
-
-```bash
-# 启动命令（用户执行）
-ydsz-worker run --mode local --listen 127.0.0.1:8088
-
-# 配置片段（config.json）
-{
-  "mode": "local",
-  "auth": "local",           // 本地账号
-  "model": {
-    "provider": "manual",    // 用户自备 API Key
-  },
-  "cloud_sync": {
-    "enabled": false,        // 默认关闭
-    "bridge_endpoint": null, // 绑定云端后自动填充
-  },
-  "modules": {
-    "billing": false,
-    "model_relay": false,
-    "audit": false,
-    "bridge": false,
-  }
-}
-```
-
-**能力暴露：** `model_relay=false, billing=false, audit=false`
-
-**商业模式：**
-- 服务端本身完全免费开源
-- 增值服务来自用户**可选**绑定的云同步账户（¥19/月 Bridge 同步）
-
-### 3.2 模式二：云端（cloud）
-
-**用户画像：** 普罗大众 / 轻度用户 / 跨设备协同 / 无 GPU 用户
-
-```bash
-# 启动命令（云平台运维执行，多租户部署）
-ydsz-worker run --mode cloud --listen 0.0.0.0:8088 --tenant-id=<uuid>
-
-# 配置片段
-{
-  "mode": "cloud",
-  "auth": "cloud_jwt",       // 云端 JWT
-  "model": {
-    "provider": "relay",     // 平台统一调用（第三方 Token 服务商）
-    "relay_endpoint": "https://relay.ydsz.ai",
-  },
-  "cloud_sync": {
-    "enabled": true,
-    "native": true,
-  },
-  "modules": {
-    "billing": true,
-    "model_relay": true,
-    "audit": false,
-    "bridge": false,
-    "marketplace": true,
-    "quota": true,
-  }
-}
-```
-
-**能力暴露：** `model_relay=true, billing=true, sync_native=true, audit=false`
-
-**商业模式：** Free / Pro ¥49 / Pro+ ¥99 / Team ¥199（订阅 + token 加价 15-25%）
-
-**与第三方 Token 服务商合作：**
-
-```
-用户 A 发起对话请求
-  ↓
-cloud.ydsz.ai API Gateway
-  ↓ Auth 校验 + Quota 检查
-  ↓
-云顶 Model Relay Service
-  ↓ 智能路由（按任务选最优模型 + 性价比优先）
-  ├→ DeepSeek（代码任务，走年框折扣）
-  ├→ Kimi（中文创作，走批量团购）
-  └→ Qwen-VL（视觉任务，按需调用）
-  ↓ Token 计量 → 计费系统 → 扣减用户余额
-  ↓
-返回结果给用户 A 的客户端
-```
-
-**合作商分层：**
-
-| 层级 | 合作方式 | 毛利率 |
-|------|---------|--------|
-| L1 API 代采 | 服务商直供，平台加价 25-30% | 高，需垫资 |
-| L2 OEM 接口 | 服务商白标接口，统一计费用 | 中，毛利 20-25% |
-| L3 战略年框 | 年保量 + 阶梯折扣 | 低，但可谈判 |
-
-### 3.3 模式三：混合（hybrid）
-
-**用户画像：** 金融券商 / 政府私企 / 有等保要求的组织
-
-```bash
-# 启动命令（企业 IT 管理员执行）
-ydsz-worker run --mode hybrid \
-  --listen 0.0.0.0:8088 \
-  --bridge-endpoint wss://bridge.ydsz.ai \
-  --bridge-cert /etc/ydsz/bridge.pem \
-  --license /etc/ydsz/license.lic
-
-# 配置片段
-{
-  "mode": "hybrid",
-  "auth": "sso_ldap",        // 对接企业 LDAP/SSO
-  "model": {
-    "provider": "manual",    // 企业自备 API Key（合规要求）
-    "internal_model_url": "http://llm.internal.corp/v1"  // 可选：内部模型
-  },
-  "cloud_sync": {
-    "enabled": true,         // 走 Bridge，不是原生同步
-    "native": false,
-    "bridge_endpoint": "wss://bridge.ydsz.ai"
-  },
-  "modules": {
-    "billing": false,        // 企业不按量计费
-    "model_relay": false,    // 企业自备
-    "audit": true,           // 审计全量开启
-    "bridge": true,          // Bridge Agent 连接云端
-    "marketplace": true,     // 通过云端拉取已审核技能
-  },
-  "compliance": {
-    "log_retention_days": 180,
-    "audit_level": "full",
-    "sso_provider": "ldap",
-    "ip_whitelist": ["10.0.0.0/8"]
-  }
-}
-```
-
-**能力暴露：** `model_relay=false, billing=false, audit=true, sso=true, team_management=true`
-
-**商业模式：** 私有化部署 + 云端管控面订阅（¥5-50 万/年 + Bridge ¥1 万/年）
-
-### 3.4 三种模式的能力对比矩阵
-
-| 能力 | local | cloud | hybrid |
-|------|:-----:|:-----:|:------:|
-| **基础能力** | | | |
-| 单 Agent 对话 | ✅ | ✅ | ✅ |
-| 多 Agent 协作（AgentTeams） | ✅ | ✅ | ✅ |
-| 定时任务（Cron） | ✅ | ✅ | ✅ |
-| IM 通道（飞书/钉钉/微信等） | ✅ | ✅ | ✅ |
-| 知识库 RAG | ✅ | ✅ | ✅ |
-| 专家/技能市场 | ✅ | ✅ | ✅ |
-| 浏览器/终端沙箱 | ✅ | ✅ | ✅ |
-| | | | |
-| **模型相关** | | | |
-| 用户自备 API Key | ✅ | ✅ | ✅ |
-| 平台 Relay（免 Key） | | ✅ | |
-| Token 余额/订阅显示 | | ✅ | |
-| 跨模型智能路由 | | ✅ | |
-| | | | |
-| **同步相关** | | | |
-| 配置同步（Bridge） | ✅（可选） | | ✅ |
-| 会话历史同步（原生） | | ✅ | |
-| 多设备在线 | | ✅ | |
-| | | | |
-| **企业管理** | | | |
-| 团队管理 | | ✅ | ✅ |
-| SSO / LDAP | | | ✅ |
-| 审计日志 | | | ✅ |
-| 策略下发 | | | ✅ |
-| 多租户隔离 | | ✅ | |
-| | | | |
-| **限额** | | | |
-| Agent 数量 | 无限 | 按套餐 | 按 License |
-| 团队成员 | 无限 | 按套餐 | 按 License |
-| 存储空间 | 本地磁盘 | 云端分配 | 本地磁盘 |
-
----
-
-## 四、服务端技术实现
-
-### 4.1 代码改动范围
-
-**核心原则：infra/ 层几乎不动，三种模式复用同一套业务逻辑，差异仅在"启用哪些模块"。**
-
-| 改动区域 | 改动量 | 说明 |
-|---------|:------:|------|
-| `api/v1/capabilities.py` | 🆕 新增 | 能力发现接口 |
-| `api/v1/billing.py` | 🆕 新增 | 计费相关接口 |
-| `api/v1/sync.py` | 🆕 新增 | 同步相关接口 |
-| `api/v1/bridge.py` | 🆕 新增 | Bridge Agent 接口 |
-| `api/v1/auth.py` | 🔧 重构 | 支持 local_jwt / cloud_jwt / ldap 三轨 |
-| `launch.py` | 🔧 重构 | 新增 `--mode` 参数 |
-| `server.py` | 🔧 小改 | 根据 mode 初始化对应模块 |
-| `infra/` | ✅ 基本不动 | 三种模式共享 |
-| `cloud/` | 🆕 新增模块 | 计费/同步/审计/Bridge |
-| `dashboard/` | 🔧 重构 | 改为纯 UI 客户端，使用 SDK |
-
-### 4.2 服务端模块加载逻辑
+### 6.1 模块加载逻辑
 
 ```python
 # server.py
 
 class YdszServer:
-    def __init__(self, config: OctopConfig):
-        # === 三种模式共享的核心模块 ===
-        self.agent_manager = AgentManager(self)
-        self.channel_engine = ChannelEngine(self)
-        self.cron_engine = CronEngine(self)
-        self.kb_manager = KnowledgeBaseManager(self)
-        self.expert_registry = ExpertRegistry(self)
-        self.marketplace = MarketplaceService(self)
+    def __init__(self, config):
+        # ===== 三种模式共享（infra/ 全部保留）=====
+        self.agent_manager = AgentManager()
+        self.channel_engine = Gateway()
+        self.cron_engine = CronManager()
+        self.kb_manager = KnowledgeBaseManager()
+        self.expert_registry = ExpertRegistry()
+        self.marketplace = MarketplaceService()
 
-        # === 按 mode 加载可选模块 ===
-        if config.mode in ("local", "cloud", "hybrid"):
-            # 模型提供器（三种模式都需要，但配置不同）
-            if config.mode == "cloud":
-                self.model_provider = ModelRelayProvider(config.model_relay)
-            else:
-                self.model_provider = ManualKeyProvider()  # 自备 Key
-
+        # ===== 模式差异（mode 配置开关）=====
         if config.mode == "cloud":
-            # 纯云端模块
-            self.billing_service = BillingService(self)
-            self.quota_manager = QuotaManager(self)
-            self.sync_service = NativeSyncService(self)
-            self.tenant_manager = TenantManager(self)
+            self.model_relay = ModelRelay()        # 模型 Relay
+            self.billing_service = BillingService() # 计费
+            self.sync_service = NativeSyncService() # 原生同步
+            self.quota_manager = QuotaManager()     # 配额管理
+            self.tenant_manager = TenantManager()   # 多租户
 
         if config.mode in ("local", "hybrid"):
-            # 本地或混合：可选的云同步
             if config.cloud_sync.enabled:
-                self.sync_service = BridgeSyncService(self)
+                self.sync_service = BridgeSyncService()  # 桥接同步
 
         if config.mode == "hybrid":
-            # 企业混合专属
-            self.bridge_agent = BridgeAgent(self)
-            self.audit_logger = AuditLogger(self)
-            self.sso_provider = SSOProvider(config.sso)
-            self.policy_engine = PolicyEngine(self)
+            self.bridge_agent = BridgeAgent()   # Bridge Agent
+            self.audit_logger = AuditLogger()   # 审计日志
+            self.sso_provider = SSOProvider()   # SSO/LDAP
+            self.policy_engine = PolicyEngine() # 策略引擎
+
+        # ===== 统一能力发现 =====
+        self.capability_registry = CapabilityRegistry(self)
 ```
 
-### 4.3 统一 Dashboard 客户端
+### 6.2 认证双轨
 
-```typescript
-// Dashboard 启动流程（伪代码）
+```python
+# api/v1/auth.py
 
-async function bootstrap() {
-  // 1. 获取服务地址
-  const serverUrl = await discoverServer()    // mDNS / 用户输入 / 书签
-  // 2. 能力协商
-  const caps = await ydzsSdk.getCapabilities(serverUrl)
-  // 3. 根据模式决定 UI
-  configureRouter(caps.capabilities)          // 注册可用路由
-  setupNavigation(caps.capabilities)          // 配置菜单
-  initializeLayout(caps.mode)                 // 设置主题/branding
-  // 4. 启动 React App
-  createRoot(document.getElementById('root')).render(<App />)
-}
-
-// Capabilities-driven UI 示例
-function SettingsPage() {
-  const { caps } = useServerCapabilities()
-
-  return (
-    <SettingsLayout>
-      <AccountSection />                        {/* 三种模式都显示 */}
-      <ModelConfigSection />                    {/* 三种模式都显示 */}
-      {caps.model_relay && <ModelRelaySection />}   {/* 仅 cloud */}
-      {caps.billing && <BillingSection />}          {/* 仅 cloud */}
-      {caps.sync && <SyncSection mode={caps.sync_native ? 'native' : 'bridge'} />}
-      {caps.audit && <AuditSection />}              {/* 仅 hybrid */}
-      {caps.sso && <SSOSection />}                  {/* 仅 hybrid */}
-    </SettingsLayout>
-  )
-}
+POST /api/v1/auth/login
+  ├─ mode=local   → POST /auth/local/login  (argon2 verify)
+  ├─ mode=cloud   → POST /auth/cloud/login  (JWT签发)
+  └─ mode=hybrid  → POST /auth/sso/callback (LDAP/OAuth)
 ```
+
+### 6.3 路由新增清单
+
+| 新增路由 | 归属模式 | 说明 |
+|---------|:--------:|------|
+| `GET  /api/v1/capabilities` | L/C/H | 能力发现（三种模式都响应，返回不同能力列表） |
+| `POST /api/v1/auth/{local\|cloud\|sso}/login` | L/C/H | 按模式自动分发 |
+| `GET  /api/v1/billing/subscription` | C | 当前用户订阅状态 |
+| `POST /api/v1/billing/subscribe` | C | 创建订阅 |
+| `GET  /api/v1/sync/status` | L(可选)/C/H | 同步状态 |
+| `POST /api/v1/sync/trigger` | L(可选)/C/H | 手动触发同步 |
+| `GET  /api/v1/admin/audit` | H | 审计日志查询 |
+| `POST /api/v1/admin/policy` | H | 管理员下发策略 |
+| `GET  /api/v1/admin/devices` | H | 设备管理 |
+| `POST /api/v1/marketplace/purchase` | L/C/H | 技能/专家购买 |
+| `GET  /api/v1/feature-flags` | L/C/H | Feature flags（灰度开关） |
 
 ---
 
-## 五、客户端实现
+## 七、客户端技术方案
 
-### 5.1 桌面客户端
-
-```
-从"嵌 Python 完整运行时"变为"纯 UI 壳 + 自动发现本地服务 + 可连云端"
-
-改动重点：
-
-封装前（胖客户端）：
-  Go 壳 → 启动 Python 子进程 → Python 服务 Dashboard → 浏览器嵌入访问
-
-封装后（统一轻壳）：
-  Go 壳 → 启动器 UI（选择服务地址）→ Dashboard SPA 加载 → 连接 API
-         │
-         └─ 本地服务自动发现（mDNS 搜索 :8088）
-         └─ 云端直连 api.ydsz.ai
-         └─ 企业连接用户配置的地址
-```
-
-**关键决策：桌面壳不再启动 Python 进程。** Python 进程仅在用户主动安装 ydsz-worker 时启动，桌面壳只是 API 客户端。
-
-### 5.2 Web PWA（最简入口）
+### 7.1 SDK 抽取
 
 ```
-用户无需安装任何软件：
-  1. 浏览器打开 https://cloud.ydsz.ai
-  2. SPA 加载（首次 < 1s，缓存后 < 200ms）
-  3. 登录后直连云端 API
-  4. 可选"安装为 PWA"添加到桌面/手机主屏
-
-PWA 本身就是"统一客户端"的 Web 实现，代码与桌面壳共享 Dashboard SPA。
-```
-
-### 5.3 Mobile App（最精简）
-
-```
-移动端客户端职责进一步精简：
-  · 只做语音输入 + 对话浏览 + 推送接收，极简 UI
-  · 完整功能在"设置-连接到服务"中配置（同桌面壳）
-  · 支持模式：方案 A. 纯云端（推荐大众用户）/ 方案 B. 连接本地/企业（高级用户）
-  · 客户端体积 < 30MB（不含 Python，不含模型）
-```
-
-### 5.4 SDK 设计
-
-```
-ydsz-sdk（所有客户端共享）
+ydsz-sdk-typescript（独立 npm 包，三端共享）
+  │
   ├─ core/
-  │   ├─ capabilities.ts      # 能力发现与缓存
-  │   ├─ client.ts            # HTTP 客户端 + 自动重连
-  │   ├─ ws.ts                # WebSocket + 事件订阅
-  │   └─ auth.ts              # Token 管理 + 自动刷新
+  │   ├─ capabilities.ts     # GET /api/v1/capabilities 调用 + 缓存
+  │   ├─ client.ts           # HTTP 客户端 + 自动重连 + Token 刷新
+  │   ├─ ws.ts               # WebSocket 客户端 + 事件订阅
+  │   └─ auth.ts             # 认证三轨分发
   │
   ├─ modules/
   │   ├─ agents.ts
@@ -597,105 +433,229 @@ ydsz-sdk（所有客户端共享）
   │   ├─ channels.ts
   │   ├─ knowledge.ts
   │   ├─ marketplace.ts
-  │   ├─ sync.ts              # 同步模块
-  │   ├─ billing.ts           # 计费模块
-  │   └─ admin.ts             # 企业管理
+  │   ├─ sync.ts             # 同步模块
+  │   ├─ billing.ts          # 计费模块
+  │   └─ admin.ts            # 企业管理
   │
   └─ platforms/
-      ├─ web/                  # Web 入口
-      ├─ wails/                # Wails 绑定
-      └─ rn/                   # React Native 绑定
+      ├─ web/          # Web PWA 入口
+      ├─ wails/        # Wails 绑定
+      └─ flutter/      # Flutter 移动端绑定
+```
+
+### 7.2 Dashboard 改造
+
+```typescript
+// dashboard/src/App.tsx（改造后）
+
+function App() {
+  const { caps, loading } = useServerCapabilities();
+
+  if (loading) return <ConnectingScreen />;
+
+  return (
+    <Layout>
+      <Sidebar>
+        <NavItem to="/chat">对话</NavItem>                    {/* 始终显示 */}
+        <NavItem to="/agents">专家团</NavItem>                {/* 始终显示 */}
+        <NavItem to="/cron">自动化</NavItem>                  {/* 始终显示 */}
+        <NavItem to="/knowledge">知识库</NavItem>             {/* 始终显示 */}
+        <NavItem to="/marketplace">技能市场</NavItem>         {/* 始终显示 */}
+        {caps.audit && <NavItem to="/admin/audit">审计</NavItem>}  {/* 仅 hybrid */}
+        {caps.billing && <NavItem to="/billing">订阅</NavItem>}    {/* 仅 cloud */}
+      </Sidebar>
+      <MainContent>
+        <CapabilityGate capability="billing">                 {/* 按能力挂载路由 */}
+          <Route path="/billing" element={<BillingPage />} />
+        </CapabilityGate>
+      </MainContent>
+    </Layout>
+  );
+}
+```
+
+### 7.3 桌面壳瘦身
+
+```go
+// desktop/src/main.go（改造后）
+
+func main() {
+    // 1. 选择服务连接模式
+    serverURL := selectServerMode()
+    // - 本地自动发现：检测 localhost:8088
+    // - 云端直连：api.ydsz.ai
+    // - 企业手动输入：192.168.x.x:8088
+
+    // 2. 不再启动 Python 子进程
+    // ❌ 移除: embedPortable(), startPythonSubprocess()
+
+    // 3. 启动 WebView 加载 Dashboard SPA
+    wails.Start(&config{
+        URL: dashboardURL(),
+        Systray: true,
+        Shortcuts: true,
+        Notifications: true,
+    })
+}
+```
+
+### 7.4 桌面壳 Go 层变更清单
+
+| 文件 | 操作 | 理由 |
+|------|:----:|------|
+| `main.go` | 🔧 重构 | 新增 ServerModeSelector，移除 PythonManager |
+| `embed_portable.go` | ❌ 删除 | 不再嵌入 Python 运行时 |
+| `embed_portable_embedded.go` | ❌ 删除 | 不再嵌入 |
+| `desktop_copy.go` | ❌ 删除 | 不再 |
+| `process.go` | ❌ 删除 | 不再管理 Python 子进程 |
+| `process_unix.go` | ❌ 删除 | 同上 |
+| `process_windows.go` | ❌ 删除 | 同上 |
+| `go.sum` 中 embed 依赖 | ❌ 移除 | 清理依赖 |
+| `settings.go` | 🔧 改造 | 新增"服务器地址"配置项 |
+| `download.go` | 🔧 改造 | 只下载壳本体（移除模型下载部分） |
+| 其余文件 | ✅ 保留 | tray、window、filedrop、URL等 |
+
+---
+
+## 八、商业化方案
+
+### 8.1 一句话：为服务端能力付费
+
+> 客户端完全免费统一（用 capabilities 展示可用能力）
+> 商业模式 = 服务端运行时能力订阅
+
+### 8.2 定价矩阵
+
+| 套餐 | 月费 | 含能力 | 目标用户 |
+|------|------|--------|---------|
+| **Free** | ¥0 | 基础 Agent+Cron+Channel+KB（自备Key，20次/天） | 尝鲜 |
+| **Pro** | ¥49 | 全功能 + 全模型额度 + 跨设备同步 + 10专家 | 个人重度 |
+| **Pro+** | ¥99 | 全功能+优先算力+20专家+Pro模型 | 数码发烧 |
+| **Team** | ¥199/人 | 全功能+共享专家池+团队配额+审计 | 小团队 |
+| **Enterprise** | ¥5-50万/年 | 私有化部署+Bridge+SSO+SLA | 金融政企 |
+
+### 8.3 Token 加价
+
+| 模型厂商 | 加价幅度 | 备注 |
+|---------|:--------:|------|
+| DeepSeek | +15% | 年框折扣最优 |
+| Kimi | +20% | 中文创作首选 |
+| Qwen | +25% | 多模态能力 |
+| GLM | +25% | 企业定制 |
+| Claude/GPT | +30% | 高端任务 |
+
+---
+
+## 九、实施路线图
+
+### Phase 0（M1-M3）：API 层硬隔离
+
+```
+目标：infra/层不直接暴露给客户端，新增 API 层隔离
+
+任务清单：
+  [ ] 新增 /api/v1/capabilities 接口（含 capabilities 注册机制）
+  [ ] 新增 ydzs-sdk-typescript 包，抽离 dashboard/api/ 层
+  [ ] api/v1/auth.py 支持 local/cloud/sso 三轨分发
+  [ ] 桌面壳 Go 代码瘦身（删除 embed_portable、desktop_copy、process 子进程管理）
+  [ ] Desktop 启动器重构：新增 ServerModeSelector
+
+产出：客户端/服务端代码完全解耦，桌面壳 80MB，启动 < 5s
+```
+
+### Phase 1（M3-M4）：云端 MVP + 计费
+
+```
+目标：cloud 模式端到端跑通
+
+任务清单：
+  [ ] 新增 cloud/billing.py（订阅 + Stripe/连连支付）
+  [ ] 新增 cloud/model_relay.py（DeepSeek 优先接入）
+  [ ] cloud/sync_service.py（原生同步）
+  [ ] API Gateway 支持多租户（tenant_id 隔离）
+  [ ] 桌面/移动端 capabilities 响应 cloud 模式 UI
+
+产出：小范围 Beta，100 付费 Pro 用户
+```
+
+### Phase 2（M4-M6）：跨设备客户端
+
+```
+目标：Mobile App 上线 + 跨设备同步闭环
+
+任务清单：
+  [ ] Mobile App（Flutter 技术栈）上线
+  [ ] 云同步覆盖 配置+历史+工作区
+  [ ] 桌面壳上架（含应用商店 OTA）
+  [ ] PCM Worker 移至服务端（可选，保留客户端低延迟）
+
+产出：对标小浣熊"手机发指令，云跑任务"
+```
+
+### Phase 3（M6-M8）：企业混合
+
+```
+目标：首个券商/政企 PoC
+
+任务清单：
+  [ ] cloud/bridge_agent.py（mTLS 隧道）
+  [ ] cloud/audit_log.py（全链路审计 + 管理员面板）
+  [ ] SSO/LDAP 集成
+  [ ] 安全合规申请（SOC2 / 等保）
+
+产出：3 家付费企业客户
+```
+
+### Phase 4（M8+）：生态
+
+```
+目标：技能市场 + 模型合作伙伴
+
+任务清单：
+  [ ] Marketplace 上架审核 + UGC 分润
+  [ ] 模型合作伙伴 SDK（第三方接入标准协议）
+  [ ] 企业经销商招募
+
+产出：技能开发者可赚钱， 平台佣金收入
 ```
 
 ---
 
-## 六、商业化路径
+## 十、风险与对策
 
-### 6.1 一句话总结
-
-> **客户端完全免费统一，商业模式 = 为服务端能力付费。**
-
-### 6.2 收入模型
-
-| 收入来源 | 模式 | 单价 | 规模化难度 |
-|---------|------|------|----------|
-| Bridge 云同步订阅 | local 用户可选 | ¥19/月 | 低 |
-| Pro 订阅（含模型 Relay） | cloud 用户 | ¥49/月 | 中 |
-| Pro+ 订阅（含高级模型） | cloud 用户 | ¥99/月 | 中 |
-| Team  Seat | cloud 团队用户 | ¥199/月/人 | 中 |
-| Token 加价（第三方算力） | cloud 按量 | +15-25% | 低（自动计费） |
-| 企业私有化 Bridge 管控 | hybrid 企业 | ¥1 万/年 | 高 |
-| 企业 License 部署 | hybrid 企业 | ¥5-50 万/年 | 高 |
-| 技能平台佣金 | 全部模式 | 20% 抽佣 | 中 |
-
-### 6.3 推荐商业化推进路线
-
-```
-Phase 0（M1-M3）：服务端 API 分离
-  └─ 客户端/服务端解耦，ydsz-sdk 就绪
-  └─ capabilities 接口上线
-  └─ 不影响现有胖客户端用户
-
-Phase 1（M3-M5）：模式二-Pro 订阅验证
-  └─ 云端 ydsz-worker --mode cloud 单租户验证
-  └─ 集成 1-2 家第三方 Token 服务商（DeepSeek 优先）
-  └─ 计费系统 MVP + 支付接入
-  └─ 统一客户端上线（Web PWA + 桌面壳）
-  └─ 目标：100 付费 Pro 用户
-
-Phase 2（M5-M8）：模式二-生态扩展
-  └─ 桌面壳 + Mobile App 上架
-  └─ 技能市场开放上架
-  └─ 多模型接入（Kimi/Qwen/GLM）
-  └─ 目标：1000 付费 Pro 用户 + 10 万 MAU
-
-Phase 3（M8-M12）：模式三-企业混合
-  └─ Bridge Agent + 企业管控面开发
-  └─ 首个券商/政企 PoC
-  └─ 合规认证（SOC2 / 等保）
-  └─ 目标：3 家付费企业客户
-
-Phase 4（M12+）：模式一-增值服务
-  └─ Bridge 远程访问/同步作为增值产品
-  └─ 个人极客变现（¥19-39/月）
-```
+| 风险 | 对策 |
+|------|------|
+| API 层重构引入回归 | 现有单元/集成测试覆盖率保护 + 灰度发布 + Feature Flags |
+| Token 服务商合作犹豫 | 先 DeepSeek（折扣最优），同步接触多家 |
+| Mobile App 跨平台重复 Flutter 端后写 | 先做 iOS（短平快验证，用户付费意愿高） |
+| 企业合规周期长 | M6 即开始 SOC2 申请，预留 9 个月 |
+| 社区对云端增值部分闭源反弹 | Open Core：核心引擎永久 MIT，仅 cloud/ 增值闭源 |
+| Capabilities 缓存导致 UI 刷新延迟 | TTL=60s + 长连接推送刷新事件 |
 
 ---
 
-## 七、关键风险与对策
+## 十一、待确认事项
 
-| 风险 | 概率 | 影响 | 对策 |
-|------|:----:|:----:|------|
-| API 化大规模重构引入回归 bug | 高 | 高 | 现有 Coverage 保护 + 灰度 rollout + 功能开关 |
-| 第三方 Token 服务商合作失败 | 中 | 高 | 同时多渠道谈判，不绑定单一供应商 |
-| 统一客户端开发周期超出预期 | 中 | 中 | 分形态交付（先 Web PWA → 桌面壳 → Mobile） |
-| 企业合规认证延迟 | 高 | 中 | M6 即启动申请，预留 6-12 个月 |
-| 付费转化率不及预期 | 中 | 高 | 先邀请制验证 PMF，不急于获客投放 |
-| 云端成本高（模型调用垫资） | 高 | 中 | 预充值模式 + 阶梯定价 + 限量邀请制 |
+### 11.1 架构决策
 
----
+- [ ] **是否同意 client-server 硬隔离原则，客户端 .ts/.go 文件禁止 import `ydsz.infra` 下的任何模块？**
+- [ ] **桌面壳 Go 代码瘦身是否直接删除 embed_portable 等 5 个文件？**
+- [ ] **Capabilities 发现接口是否作为 v1.0 强制入口?（所有客户端必须先协商再渲染）**
 
-## 八、待确认事项
+### 11.2 技术选型
 
-### 8.1 核心架构
+- [ ] **Mobile App 技术栈：Flutter（推荐，音频更强）vs React Native（React 复用）？**
+- **ydzs-sdk 语言**：纯 TypeScript（Web + 桌面壳纯 TS）+ Dart（Flutter 端）？
 
-- [ ] **A. 是否确定"客户端完全统一、模式由服务端决定"为核心设计原则？**
-- [ ] **B. 桌面壳是否彻底去掉"嵌入 Python 运行时"？**（改造为纯 UI 壳）
-- [ ] **C. Web PWA 是否为最优先交付的客户端形态？**（最大化零摩擦获客）
-- [ ] **D. Mobile App 首版是否采用 React Native / Flutter？**
+### 11.3 商业化决策
 
-### 8.2 服务端模式
+- [ ] **定价锚定：Pro ¥49 / Pro+ ¥99 / Team ¥199 是否合理？**
+- [ ] **首批模型 Relay 合作伙伴: DeepSeek（最低价）优先？**
+- [ ] **技能市场首版开放 UGC 还是官方自营？**
 
-- [ ] **E. 服务端模式用 `--mode {local|cloud|hybrid}` 命名是否合适？**
-- [ ] **F. 本地模式可选的云同步增值包是否在 v1.0 范围？**
-- [ ] **G. 第三方 Token 服务商首选合作伙伴？**（DeepSeek / Kimi / Qwen / 其他）
+### 11.4 实施激进度
 
-### 8.3 商业化
-
-- [ ] **H. 基础定价：Pro ¥49 / Pro+ ¥99 / Team ¥199 是否合理？**
-- [ ] **I. Token 加价基准：+15-25% 是否可接受？（对比 OpenCode 加价基准）**
-
-### 8.4 实施
-
-- [ ] **J. Phase 0 目标服务接口就绪日期？**（建议 2027 Q1）
-- [ ] **K. 是否需要在 Phase 0 之前先做现有 API 的全面审计？**
+- [ ] **Phase 0 是否按 M1-M3 节奏（2 人投入）推进？**
+- [ ] **是否保留 ElMessage 等现有 UI 组件在 v1.0？**（可先用现有，后续替换为 ydzs-ui）
+- [ ] **桌面壳瘦身是否保留 ElMessage 等现有 UI 组件在 v1.0？**（可先用现有，后续替换为 ydzs-ui）
+- [ ] **桌面壳瘦身与 API 层重构串行还是并行？**（推荐并行，节省 1 个月）

@@ -1,7 +1,7 @@
 /**
  * Per-agent channels hook.
  *
- * Drives octop's ``/agents/{aid}/channels`` CRUD + ``/test`` endpoints with
+ * Drives ydsz's ``/agents/{aid}/channels`` CRUD + ``/test`` endpoints with
  * finnie-style state management (loading flag, in-place optimistic updates,
  * antd ``message`` toasts). Drop-in replacement for finnie's flat-config
  * ``useChannels`` — the page-level component need only swap the data shape

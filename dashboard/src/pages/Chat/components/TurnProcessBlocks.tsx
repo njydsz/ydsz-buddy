@@ -99,7 +99,7 @@ export function TurnProcessBlocks({
       ) : null}
       {pinned.length > 0 ? (
         <div className={styles.turnInset}>
-          <div className={styles.pinnedToolResults} data-octop-pinned-tools="">
+          <div className={styles.pinnedToolResults} data-ydsz-pinned-tools="">
             {pinned.map((message: ChatMessage) =>
               message.toolData ? (
                 <div key={message.id} className={styles.pinnedToolResultItem}>

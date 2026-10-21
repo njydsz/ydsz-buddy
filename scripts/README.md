@@ -10,9 +10,9 @@
 
 | 平台 | 命令 |
 |------|------|
-| macOS / Linux | `curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh \| bash` |
-| Windows (PowerShell) | `irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 \| iex` |
-| Windows (cmd) | 下载 `…/octop/install.bat` 后运行，或使用下方本地脚本 |
+| macOS / Linux | `curl -fsSL https://install.ydsz.ai/install.sh \| bash` |
+| Windows (PowerShell) | `irm https://install.ydsz.ai/install.ps1 \| iex` |
+| Windows (cmd) | 下载 `…/install.bat` 后运行，或使用下方本地脚本 |
 
 ### 本地脚本（仓库内）
 
@@ -49,7 +49,7 @@ Windows PowerShell 等价参数：`-Version`、`-FromSource`、`-SourceDir`、`-
 | 变量 | 说明 |
 |------|------|
 | `YDSZ_HOME` | 安装根目录，默认 `~/.ydsz` |
-| `OCTOP_REPO` | `--from-source` 无本地目录时的 git 克隆地址 |
+| `YDSZ_REPO` | `--from-source` 无本地目录时的 git 克隆地址 |
 | `YDSZ_PYPI_MIRROR` | PyPI 镜像（与 `--mirror` 等效） |
 | `PLAYWRIGHT_DOWNLOAD_HOST` | Playwright 浏览器下载镜像（仅 `--extras browser`） |
 

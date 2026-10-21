@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSkillMarkdown,
   isValidSkillName,
-  OCTOP_EMOJI_META_KEY,
+  YDSZ_EMOJI_META_KEY,
   parseSkillEmojiAndMetadata,
 } from "./SkillDrawer";
 
@@ -25,7 +25,7 @@ describe("isValidSkillName", () => {
 });
 
 describe("SkillDrawer emoji metadata", () => {
-  it("writes octop.emoji into frontmatter from the emoji field", () => {
+  it("writes ydsz.emoji into frontmatter from the emoji field", () => {
     const md = buildSkillMarkdown({
       name: "demo",
       description: "A demo skill",
@@ -37,7 +37,7 @@ describe("SkillDrawer emoji metadata", () => {
     expect(md).toContain("ydsz:");
   });
 
-  it("writes localized presentation fields into octop metadata", () => {
+  it("writes localized presentation fields into ydsz metadata", () => {
     const md = buildSkillMarkdown({
       name: "demo",
       description: "Agent trigger description",
@@ -60,8 +60,8 @@ describe("SkillDrawer emoji metadata", () => {
 
   it("extracts emoji from flattened metadata and keeps other keys", () => {
     const { emoji, metadata } = parseSkillEmojiAndMetadata([
-      { key: OCTOP_EMOJI_META_KEY, value: "🔧" },
-      { key: "octop.requires.bins", value: "git" },
+      { key: YDSZ_EMOJI_META_KEY, value: "🔧" },
+      { key: "ydsz.requires.bins", value: "git" },
     ]);
     expect(emoji).toBe("🔧");
     expect(metadata).toEqual([{ key: "octop.requires.bins", value: "git" }]);

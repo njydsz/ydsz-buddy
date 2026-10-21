@@ -1,30 +1,14 @@
-# Ydsz Worker
-
-> **归属声明 / Attribution:** Ydsz Worker 基于腾讯 Octop（[MIT 协议](https://github.com/TencentCloud/Octop/blob/main/LICENSE)）二开，保留原始版权归属。
+<h1 align="center">Ydsz Worker</h1>
 
 <p align="center">
-  <img src="docs/assets/readme-banner.png" alt="Ydsz Worker Banner" width="600" />
-</p>
-
-<p align="center">
-  <strong>A smarter, self-hosted AI assistant — multi-user, multi-agent.</strong>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/95504?utm_source=repository-badge&utm_medium=badge&utm_campaign=badge-repository-95504" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/95504" alt="TencentCloud/Octop | Trendshift" width="250" height="55" />
-  </a>
+  <strong>Enterprise AI Assistant Platform — It thinks, it works, it grows with you</strong>
 </p>
 
 <p align="center">
   <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="https://github.com/TencentCloud/Octop/releases"><img alt="Version" src="https://img.shields.io/badge/version-1.0.2-orange" /></a>
-  <a href="https://pypi.org/project/octop/"><img src="https://img.shields.io/pypi/v/octop" alt="PyPI" /></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
+  <a href="https://pypi.org/project/ydsz-worker/"><img src="https://img.shields.io/pypi/v/ydsz-worker" alt="PyPI" /></a>
   <a href="https://github.com/astral-sh/ruff"><img alt="Code Style: Ruff" src="https://img.shields.io/badge/code%20style-ruff-000000?logo=ruff&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop"><img alt="GitHub stars" src="https://img.shields.io/github/stars/TencentCloud/Octop?style=social" /></a>
-  <a href="https://github.com/TencentCloud/Octop/fork"><img alt="GitHub forks" src="https://img.shields.io/github/forks/TencentCloud/Octop?style=social" /></a>
-  <a href="https://discord.gg/QnWdhJxq9h"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?logo=discord&logoColor=white" /></a>
 </p>
 
 <p align="center">
@@ -43,46 +27,48 @@
 
 ---
 
-**Ydsz Worker** (云顶数字工作台) is an open-source, self-hosted AI assistant platform — a continued fork of [Tencent Octop](https://github.com/TencentCloud/Octop) (MIT). It's not just a tool — it's a digital life form that can operate in parallel. Through its multi-agent architecture, it builds an intelligent environment that is both independent and collaborative for teams, families, and individuals. Best of all, it runs entirely on your machine — the fully self-hosted design means privacy is never a compromise, while single-process startup makes the powerful web console, CLI, and IM integrations readily accessible.
+**Ydsz Worker** (云顶数字工作台) is an open-source, self-hosted enterprise AI assistant platform. More than just a tool — it is an intelligent partner that works in parallel. Through its multi-agent architecture, it builds a digital work environment that is both independent and collaborative for teams and enterprises. Chat is the interface, configuration is the capability, and all data stays on your own machine.
 
-Chat through the Web Dashboard, Feishu, DingTalk, QQ, WeChat, Telegram, Discord, WeCom, or programmatic HTTP/SSE/WebSocket. Extend capabilities with the **expert library**, **Connectors** (OAuth + MCP), and **ACP** integration for IDE workflows.
+Talk to agents through the Web Dashboard, Feishu, DingTalk, WeCom, QQ, WeChat, and other IM platforms. Extend capabilities with the **expert library**, **Connectors** (OAuth + MCP), and **ACP** integration for IDE workflows.
 
 ## ✨ Highlights
 
 | | Feature | Description |
 |---|---------|-------------|
-| 👥 | **Multi-user expert team** | One admin, shared household; built-in expert library and expert market — switch specialists per scenario |
-| 🤝 | **Cloud collaboration** | Link this Ydsz Worker to another instance to browse peer experts and chat across instances; history stays on the expert's side |
+| 🧠 | **It thinks** | Built-in RAG knowledge base and long-term memory — conversations are anchored to private data, understanding enterprise context |
+| 🛠️ | **It works** | Browser automation, terminal control, remote desktop, scheduled tasks — not just chat, but real action |
+| 📈 | **It grows with you** | Self-evolution distills everyday conversations into reusable skills; knowledge bases and expert configurations accumulate value over time |
+| 👥 | **Multi-user expert team** | One admin, shared access; built-in expert library — switch specialists per scenario |
+| 🤝 | **Cloud collaboration** | Link this Ydsz Worker to another instance to browse peer experts and collaborate across instances |
 | 🎭 | **MBTI personas** | 16 personality templates plus an interactive quiz — give each agent a distinct character |
 | 🎯 | **AgentTeams** *(Beta)* | A coordinator schedules multiple experts on multi-step work; [details](docs/expert-teams.md) |
 | 🔒 | **Security built-in** | JWT multi-user isolation, tool approval, shell command guardrails, and PII redaction — data stays local |
-| 🔌 | **Connector ecosystem** | Tencent suite (Docs, Meeting, News, …); OAuth and MCP gateway extend resource boundaries — [supported connectors](docs/connectors.md) |
+| 🔌 | **Connector ecosystem** | One-click integration with Tencent Docs, Notion, Feishu, WeCom, and more; OAuth and MCP gateway extend resource boundaries — [supported connectors](docs/connectors.md) |
 | 💾 | **Pluggable workspace backends** | Local disk, Docker sandbox, PostgreSQL, or COS/S3 for agent files — separate from the control-plane DB |
-| 🧠 | **Portable memory** | Powered by [Octop Memory](https://github.com/TencentCloud/octop-memory); memory migrates with the workspace |
 | 📚 | **Knowledge base** | RAG over your documents; share corpora within a deployment and ground answers in your private data |
 | 🧩 | **Plugins** | Extend Ydsz Worker with third-party plugins; bundled plugins are seeded and toggled on demand |
 | ↔️ | **ACP bidirectional** | `ydsz-worker acp` for IDE/terminal AI; delegate to OpenCode / Claude Code with permission gates |
 | 💻 | **Terminal AI+** | Interactive shell in the browser — AI-assisted command execution and troubleshooting |
 | 🌐 | **Browser AI+** | Headless Chromium sessions for web automation, screenshots, and remote browsing |
-| 🖥️ | **Remote desktop** | Live screen and input from the dashboard on Linux, Windows, and macOS — remote office work and GUI apps; one-click isolated desktop on headless Linux |
+| 🖥️ | **Remote desktop** | Live screen and input from the dashboard on Linux, Windows, and macOS |
 | 🪟 | **Desktop client** | Native Windows / macOS / Linux apps (and FnOS packages) alongside the web dashboard |
 | 🏠 | **Self-hosted** | Dashboard, CLI, IM channels, and cron in one `ydsz-worker run` — all data under `~/.octop/` |
 
 ## 📌 Overview
 
-Ydsz Worker (云顶数字工作台) is a self-hosted AI assistant platform for households and small teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, QQ, WeChat, Telegram, Discord, WeCom, and more), and cron automation — all sharing one control-plane database under `~/.octop/` (SQLite by default; PostgreSQL optional).
+Ydsz Worker (云顶数字工作台) is a self-hosted AI assistant platform for enterprises and teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, WeCom, QQ, WeChat, and more), and cron automation — all sharing one control-plane database under `~/.octop/` (SQLite by default; PostgreSQL optional).
 
-> Ydsz Worker's design goal: keep every conversation, workspace, and credential on your own machine, while giving each user a personal team of specialized agents they can switch between per task.
+> **Core idea:** Let AI not only answer questions, but also get things done. Knowledge accumulates through conversation, skills evolve through use, and the platform grows with your business.
 
 <details>
 <summary>🐾 What can you do with Ydsz Worker</summary>
 
-- **Personal assistant** — let a dedicated agent write weekly reports, organize notes, and manage your schedule; memory persists with the workspace.
-- **Family sharing** — one admin account, the whole household; assign different agents and experts per member; share experts and knowledge bases when useful.
-- **Team helper** — AgentTeams or parallel agents, bridging Feishu / DingTalk / WeCom / WeChat to route tasks into group chats.
-- **Developer boost** — delegate coding tasks to OpenCode / Claude Code via ACP, or troubleshoot from the terminal with AI assistance.
-- **Web automation** — use Browser AI+ and remote desktop for forms, screenshots, and GUI apps.
-- **Scheduled tasks** — configure cron in natural language so the agent pushes or runs jobs on time every day.
+- **Intelligent customer service** — Connect to WeCom / Feishu / DingTalk, combined with enterprise knowledge bases to automatically answer customer questions.
+- **Automated operations** — Scheduled daily/weekly reports and dashboards; browser automation for web workflows.
+- **Programming assistant** — Collaborate with IDEs via ACP for code review, bug fixes, and documentation generation.
+- **Knowledge management** — Intelligent search across internal team documents, knowledge accumulation, and experience reuse.
+- **Personal assistant** — Write weekly reports, organize materials, manage schedules, and control local applications.
+- **Remote work** — Remote desktop + terminal AI+ to control your work environment from anywhere.
 
 </details>
 
@@ -92,22 +78,14 @@ Ydsz Worker (云顶数字工作台) is a self-hosted AI assistant platform for h
 |-------|-----------|
 | **Language** | Python 3.12+ |
 | **Web framework** | FastAPI + uvicorn |
-| **Agent runtime** | [Octop Harness](https://github.com/TencentCloud/octop-harness) |
-| **Gateway** | [Octop Gateway](https://github.com/TencentCloud/octop-gateway) |
+| **Agent runtime** | LangGraph |
 | **Control plane DB** | SQLite (WAL, default) or PostgreSQL (optional) |
 | **Frontend** | React 18 + TypeScript + Vite + Ant Design |
 | **Scheduling** | APScheduler |
 | **ACP** | agent-client-protocol |
 | **Build / quality** | hatchling · ruff · mypy · pytest |
 
-Ydsz Worker is built on the Octop Harness stack — a set of focused runtimes that Octop composes into one process:
-
-- **[Octop Harness](https://github.com/TencentCloud/octop-harness)** — Agent runtime: model routing, tools, skills, and conversation checkpointing.
-- **[Octop Gateway](https://github.com/TencentCloud/octop-gateway)** — multi-platform IM channel bridge that normalizes incoming messages into a single processing pipeline.
-- **[Octop Memory](https://github.com/TencentCloud/octop-memory)** — hierarchical recall with full-text search, so an agent's memory travels with its workspace.
-- **[Octop Browser](https://github.com/TencentCloud/octop-browser)** — CDP-based browser automation with persistent profiles for web tasks.
-
-Instead of an external queue or message broker, Ydsz Worker routes every surface — Web UI, IM, and cron — through one in-process `HarnessProcessor`. The result is a single, restart-safe process whose entire state is rebuilt from the control-plane database on boot (local SQLite by default; PostgreSQL optional).
+Ydsz Worker routes every surface — Web UI, IM, and cron — through one in-process message processing pipeline. Instead of an external queue or message broker, the result is a single, restart-safe process whose entire state is rebuilt from the control-plane database on boot.
 
 ## 🤔 Features
 
@@ -124,7 +102,7 @@ Instead of an external queue or message broker, Ydsz Worker routes every surface
 - Workspace backends (expert files): local disk, Docker sandbox, PostgreSQL, COS/S3, and other remote stores — distinct from the control-plane database
 
 ### Channels & automation
-- IM channels: Feishu, DingTalk, QQ, WeChat, Telegram, Discord, WeCom, and more
+- IM channels: Feishu, DingTalk, WeCom, QQ, WeChat, and more
 - Proactive cron jobs with natural-language and slash-command triggers
 - Unified message processing across Web UI, IM, and cron surfaces
 
@@ -164,19 +142,18 @@ Here are our mid-to-long term plans:
 - [x] **Shared resource pool** — a central pool of skills and sub-agents that any user can drop into a new expert without rebuilding from scratch.
 - [x] **Expert sharing** — publish your experts to other users in the same deployment, so good configurations are reused instead of recreated.
 - [x] **PC client** — native desktop apps for Windows / macOS / Linux alongside the web dashboard and IM channels.
+- [x] **IM channel integration** — Feishu, DingTalk, WeCom, QQ, WeChat, Telegram, Discord — full platform coverage.
 
 **In progress**
 - [ ] **AgentTeams** *(Beta)* — let one coordinator autonomously schedule and orchestrate multiple experts to tackle multi-step tasks.
 - [ ] **Mobile client** *(closed beta)* — native mobile apps currently in internal testing.
 
 **Planned**
-- [ ] **Browser & terminal polishing** — browser skill *recording* (capture a workflow and replay it as a skill) and a more capable terminal AI assistant.
 - [ ] **Self-evolution** — automatically distill everyday conversations into reusable skills, so the assistant grows with you.
-- [ ] **Managed Agents** — platform-hosted agent lifecycle (provision, scale, and operate agents without managing the full self-hosted stack yourself).
-- [ ] **Project** — project-scoped workspaces that group agents, files, and conversations around a shared goal.
-- [ ] **Cloud–edge continuum** — run Ydsz Worker locally while offloading selected tasks to the cloud, so light work stays on-device and heavier jobs use remote capacity when you need it.
+- [ ] **Enterprise knowledge brain** — deeper enterprise-level knowledge management and reasoning capabilities.
 - [ ] **Plugin marketplace** — a curated market to discover, install, and update third-party plugins without leaving Ydsz Worker.
-- [ ] **Conversational control plane** — deepen Ydsz Worker's own skills so chat can cover the full dashboard surface: create experts, wire channels, manage knowledge bases, and scaffold plugins end-to-end.
+- [ ] **Conversational control plane** — deepen Ydsz Worker's own skills so chat can cover the full dashboard surface.
+- [ ] **Cloud–edge continuum** — run locally while offloading selected tasks to the cloud.
 
 This roadmap may shift as the community grows; treat it as indicative only.
 
@@ -193,58 +170,38 @@ This roadmap may shift as the community grows; treat it as indicative only.
 **macOS / Linux** — one-line installer (recommended):
 
 ```bash
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash
+curl -fsSL https://install.ydsz.ai/install.sh | bash
 ```
 
 **Windows (PowerShell)**:
 
 ```powershell
-irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex
+irm https://install.ydsz.ai/install.ps1 | iex
 ```
 
 **Windows (cmd)** — download and run, or from a cloned repo:
 
 ```bat
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.bat -o install.bat
+curl -fsSL https://install.ydsz.ai/install.bat -o install.bat
 install.bat
 ```
 
-After installation, open a **new terminal** or reload your shell:
+After installation, open a **new terminal** or reload your shell. The installer places `ydsz-worker` on your PATH via `~/.octop/bin`. See [scripts/README.md](scripts/README.md) for all install options.
 
-```bash
-source ~/.zshrc   # Zsh
-# or
-source ~/.bashrc  # Bash
-```
-
-The installer places `ydsz-worker` on your PATH via `~/.octop/bin`. Optional extras:
-
-```bash
-# Download Playwright Chromium for browser automation (skipped if a system Chrome/Chromium is already present)
-curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash -s -- --extras browser
-```
-
-See [scripts/README.md](scripts/README.md) for all install options (`--version`, `--from-source`, `--mirror`, Windows flags).
-
-**Desktop app** (GUI, no terminal) — grab the artifact for your platform from [GitHub Releases](https://github.com/TencentCloud/Octop/releases/latest):
+**Desktop app** (GUI, no terminal) — grab the artifact for your platform from [GitHub Releases](https://github.com/njydsz/ydsz-worker/releases/latest):
 
 | Platform | Artifact |
 |----------|----------|
-| Windows | `Ydsz-desktop-windows-amd64-<version>.exe` (64-bit) / `Ydsz-desktop-windows-arm64-<version>.exe` (ARM64) — NSIS installer |
-| macOS | `Ydsz-desktop-darwin-arm64-<version>.dmg` (Apple Silicon) / `Ydsz-desktop-darwin-amd64-<version>.dmg` (Intel) |
-| Linux | `Ydsz-desktop-linux-amd64-<version>.tar.gz` / `Ydsz-desktop-linux-arm64-<version>.tar.gz` |
-| FnOS NAS | `Ydsz-fnos-docker-<version>.fpk` (recommended on ARM; amd64/arm64 image) / `Ydsz-fnos-native-<version>.fpk` (x86_64, no Docker) / `Ydsz-fnos-native-arm64-<version>.fpk` (ARM64 fallback if no Docker) — install via App Center |
-
-See [desktop/README.md](desktop/README.md) for the desktop shell and [fnos/README.md](fnos/README.md) for the FnOS packaging guide.
+| Windows | `YdszDesktop-windows-amd64-<version>.exe` (64-bit) / `YdszDesktop-windows-arm64-<version>.exe` (ARM64) — NSIS installer |
+| macOS | `YdszDesktop-darwin-arm64-<version>.dmg` (Apple Silicon) / `YdszDesktop-darwin-amd64-<version>.dmg` (Intel) |
+| Linux | `YdszDesktop-linux-amd64-<version>.tar.gz` / `YdszDesktop-linux-arm64-<version>.tar.gz` |
+| FnOS NAS | `YdszFnOS-docker-<version>.fpk` (recommended on ARM) / `YdszFnOS-native-<version>.fpk` (x86_64) / `YdszFnOS-native-arm64-<version>.fpk` — install via App Center |
 
 **Alternative — PyPI** (if you already manage Python yourself):
 
 ```bash
 pip install ydsz-worker
-# optional local ONNX embedding model cache (Models → Local): pip install "ydsz-worker[local-embedding]"
-# Downloads catalog weights under ~/.octop/embedding_models; not chat, not Memory.
-# Browser automation uses the bundled Playwright package; install Chromium via the installer --extras browser,
-# the dashboard, or: python -m playwright install chromium
+# optional local ONNX embedding model cache: pip install "ydsz-worker[local-embedding]"
 ```
 
 From a source checkout with uv:
@@ -274,7 +231,7 @@ ydsz-worker run --host 0.0.0.0 --port 8088
 ydsz-worker service start
 ```
 
-Open **http://127.0.0.1:8088**. With Docker, a valid `YDSZ_DEFAULT_PASSWORD` creates the admin on first boot (credentials in `/data/.octop/credential.txt`); if it is unset or rejected, open the setup wizard (unlock password in `/data/.octop/octop-login.txt`). Interactive `ydsz-worker init` / the setup wizard asks you to choose a password (≥8 characters, letters and digits).
+Open **http://127.0.0.1:8088**. With Docker, a valid `YDSZ_DEFAULT_PASSWORD` creates the admin on first boot (credentials in `/data/.octop/credential.txt`); if it is unset or rejected, open the setup wizard (unlock password in `/data/.octop/octop-login.txt`). Interactive `ydsz-worker init` / the setup wizard asks you to choose a password (at least 8 characters with letters and digits).
 
 ### Docker (recommended for production)
 
@@ -302,19 +259,11 @@ Open `http://localhost:8088`. A valid `YDSZ_DEFAULT_PASSWORD` creates the admin 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `YDSZ_PORT` | `8088` | HTTP listen port |
-| `YDSZ_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (Docker bootstrap). Valid → create admin; unset or rejected → setup wizard |
+| `YDSZ_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (Docker bootstrap). Valid -> create admin; unset or rejected -> setup wizard |
 | `YDSZ_ADMIN_USERNAME` | `admin` | First-run admin username |
 | `YDSZ_DATA` | `~/.octop` | Host data directory (compose bind mount) |
 
 See [`.env.example`](.env.example) for the full list.
-
-### Deploy with Cloud
-
-<p>
-  <a href="https://buy.cloud.tencent.com/lighthouse?blueprintType=APP_OS&blueprintOfficialId=lhbp-nxq7695q&regionId=1&zone=ap-guangzhou-6&bundleId=bundle_rs_mc_med2_01&loginSet=AUTO_PASSWORD&goodsNum=0&from=lh-console"><img alt="Deploy on Lighthouse" width="194" height="49" src="docs/assets/deploy-on-lighthouse.png" /></a><br>
-  <a href="https://buy.cloud.tencent.com/cvm?tab=custom&step=1&devPayMode=monthly&regionId=1&zoneId=100007&instanceType=SA9.64XLARGE1152&supportConfidentiality=false&platform=TencentOS&imageId=img-n3gxkolf&systemDiskType=CLOUD_HSSD&systemDiskSize=100&systemDiskBackupQuota=0&isBackup=false&backupDiskType=ALL&backupDiskCustomizeValue=&backupQuotaSegment=1&backupQuota=1&wanIp=0&loginSet=BIND_SSH_KEY&tags=null&templateCreateMode=createLt"><img alt="Deploy on CVM" width="194" height="49" src="docs/assets/deploy-on-cvm.png" /></a><br>
-  <a href="https://zenith.hosting/host/octop"><img alt="Deploy with Zenith" width="194" height="49" src="https://cdn.zenith.hosting/buttons/deploy-with-zenith.svg" /></a>
-</p>
 
 ## 📑 Contents
 
@@ -339,31 +288,30 @@ See [`.env.example`](.env.example) for the full list.
   - [Contributing](#-contributing)
   - [Changelog](#-changelog)
   - [Related projects](#-related-projects)
-  - [Community](#-community)
   - [License](#-license)
 
 ## 📦 Install options
 
 | Method | Platform | Description |
 |--------|----------|-------------|
-| Remote one-liner | macOS / Linux | `curl …/octop/install.sh \| bash` |
-| Remote one-liner | Windows | `irm …/octop/install.ps1 \| iex` or `install.bat` |
+| Remote one-liner | macOS / Linux | `curl .../install.sh \| bash` |
+| Remote one-liner | Windows | `irm .../install.ps1 \| iex` or `install.bat` |
 | Local script | macOS / Linux | `bash scripts/install.sh` |
 | Local script | Windows | `scripts\install.bat` or `install.ps1` |
 | PyPI | Any | `pip install ydsz-worker` (optional extras such as `local-embedding`) |
 | Docker | Any | `docker/docker-compose.yml`; China mirror: `docker/docker-compose.cn.yml` |
 
-All install scripts provision an isolated environment at `~/.octop/venv` and a `~/.octop/bin/octop` wrapper — they do not touch system Python.
+All install scripts provision an isolated environment at `~/.octop/venv` and a `~/.octop/bin/ydsz-worker` wrapper — they do not touch system Python.
 
 ### Upgrade
 
 `ydsz-worker update` replaces only the wheel/binary — your `~/.octop/` database, workspaces, secrets, and `config.json` are preserved:
 
 ```bash
-octop update          # fetch and install the latest octop, then restart the service if one is registered
+ydsz-worker update          # fetch and install the latest version, then restart the service if one is registered
 ```
 
-The schema migrates automatically on next boot; run `ydsz-worker init` only if the setup wizard prompts for a migration. Always back up first (`octop backup`) before a cross-version upgrade.
+The schema migrates automatically on next boot; run `ydsz-worker init` only if the setup wizard prompts for a migration. Always back up first (`ydsz-worker backup`) before a cross-version upgrade.
 
 ## ⚙️ Configuration
 
@@ -371,22 +319,22 @@ All runtime state lives in `~/.octop/`. Manage it via CLI or edit files directly
 
 ```bash
 # LLM providers and models
-octop models
-octop provider list
+ydsz-worker models
+ydsz-worker provider list
 
 # IM channels
-octop channel list
-octop channel install
+ydsz-worker channel list
+ydsz-worker channel install
 
 # Skills (per agent)
-octop skills list --agent main
+ydsz-worker skills list --agent main
 
 # Cron jobs
-octop cron list
-octop cron create --help
+ydsz-worker cron list
+ydsz-worker cron create --help
 
 # Users (admin)
-octop user list
+ydsz-worker user list
 ```
 
 ### Supported LLM providers
@@ -401,12 +349,10 @@ OpenAI-compatible APIs, DashScope (Qwen), Ollama, and other presets — configur
 | **DingTalk** | App Key, App Secret |
 | **QQ** | Bot AppID, Token |
 | **WeChat** | QR bind / account credentials; [CLI](docs/cli.md) |
-| **Telegram** | Bot Token |
-| **Discord** | Bot Token; all accessible channels allowed by default, optional channel/DM allowlists; [setup and testing](docs/discord-channel.md) |
 | **WeCom** | Corp ID, Agent Secret |
 | **Web Dashboard** | Enabled by default |
 
-Other kinds (e.g. Yuanbao, Xiaoyi, MQTT) are available via the gateway — see channel setup in the dashboard or CLI.
+Other kinds (e.g. MQTT) are available via the gateway — see channel setup in the dashboard or CLI.
 
 ### Supported connectors
 
@@ -432,15 +378,10 @@ Full catalog, auth kinds, and MCP modes: **[docs/connectors.md](docs/connectors.
 | `ydsz-worker plugin` | Install and manage third-party plugins |
 | `ydsz-worker backup` | Export / restore backups |
 | `ydsz-worker clean` | Remove CLI state or wipe `~/.octop/` |
-| `ydsz-worker memory list` | List running agents eligible for memory maintenance; no database changes. |
-| `ydsz-worker memory slim [--agent ID]` | Back up and slim SQLite memory through the running host; uses the selected agent or prompts by number. Shows terminal and dashboard progress. [Details](docs/memory-slim.md) |
-| `ydsz-worker memory slim --all` | Sequentially maintain all eligible running agents, with per-agent progress; stops on the first failure. |
+| `ydsz-worker memory list` | List running agents eligible for memory maintenance |
+| `ydsz-worker memory slim [--agent ID]` | Back up and slim SQLite memory through the running host; [details](docs/memory-slim.md) |
+| `ydsz-worker memory slim --all` | Sequentially maintain all eligible running agents |
 | `ydsz-worker update` | Check for and install updates |
-
-In signed-in dashboard or local CLI chat, `/memory slim` explains maintenance for the current agent;
-`/memory slim --all` lists your eligible agents. Add `--confirm` to start after reviewing the impact.
-Use `/memory status` for progress/results. Chat stays available until maintenance is confirmed and begins.
-External IM maintenance requires verified sender permissions and is not enabled yet.
 
 Full reference: **[docs/cli.md](docs/cli.md)**.
 
@@ -469,49 +410,47 @@ Interactive API docs: **http://127.0.0.1:8088/api/docs** (disabled by default �
 ## 📁 Data directory
 
 ```
-~/.octop/                          ← install & data root
+~/.octop/                          <- install & data root
 ├── config.json                    # process config (optional database section)
-├── octop.db                       # SQLite — users, agents, channels, cron, …
+├── ydsz.db                        # SQLite — users, agents, channels, cron, ...
 ├── secrets/                       # JWT secret, channel tokens
-├── agents/<agent_id>/             # per-agent workspace (SOUL.md, skills, …)
+├── agents/<agent_id>/             # per-agent workspace (SOUL.md, skills, ...)
 ├── security/tool_guard/           # shell command allow/deny rules
 ├── logs/                          # runtime logs
 ├── venv/                          # uv-managed Python (installer layout)
-└── bin/ydsz-worker                # PATH wrapper → venv/bin/octop
+└── bin/ydsz-worker                # PATH wrapper
 ```
 
-The control plane can also use PostgreSQL — set `database` in `config.json`, or `YDSZ_DATABASE_*` / the first-run wizard. With PostgreSQL, agent memory reuses the same DSN by default (per-agent schema); to keep file-based memory, set `"memory": { "backend": { "type": "sqlite" } }` in the agent config. See [docs/configuration.md](docs/configuration.md) and [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md).
-
-See [docs/configuration.md](docs/configuration.md) for env vars and `config.json`.
+The control plane can also use PostgreSQL — set `database` in `config.json`, or `YDSZ_DATABASE_*` / the first-run wizard. See [docs/configuration.md](docs/configuration.md) for env vars and `config.json`.
 
 ## 🏗️ Architecture
 
 ```
-OctopServer
+YdszServer
  ├─ DatabasePool            SQLite (WAL) or PostgreSQL
- ├─ SharedServices       DI root — every repo + config
- ├─ ExpertCatalog        scans agents/experts/library/ at boot
+ ├─ SharedServices          DI root — every repo + config
+ ├─ ExpertCatalog           scans agents/experts/library/ at boot
  ├─ UserManager
- │   └─ HarnessAgentManager (per user)
+ │   └─ AgentManager
  │       └─ AgentRuntime (per agent)
- │           ├─ HarnessAgent      Agent runtime (octop-harness)
- │           ├─ HarnessProcessor  IM / UI / cron entry point
- │           ├─ ChannelManager    IM connections (octop-gateway)
+ │           ├─ HarnessAgent      Agent runtime (LangGraph)
+ │           ├─ IM/UI/Cron entry point
+ │           ├─ ChannelManager    IM connections
  │           └─ CronManager       APScheduler
  └─ FastAPI app (uvicorn)
 ```
 
 Single process. Restart rebuilds state from the control-plane database (local SQLite by default; PostgreSQL optional).
 
-See [docs/architecture.md](docs/architecture.md), [docs/adr/001-single-process-model.md](docs/adr/001-single-process-model.md), and [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md).
+See [docs/architecture.md](docs/architecture.md).
 
 ## 📁 Project layout
 
 ```
 src/octop/
   config.py    env-var config
-  launch.py    OctopServer boot + uvicorn
-  infra/       business core (agents, gateway, cron, db, users, …)
+  launch.py    YdszServer boot + uvicorn
+  infra/       business core (agents, gateway, cron, db, users, ...)
   api/         HTTP layer — FastAPI app, routers, JWT, SSE
   cli/         CLI layer — Click commands
   dashboard/   built React SPA (wheel artifact)
@@ -533,7 +472,7 @@ make all              # format-all + lint + typecheck + test (ship bar)
 
 # Frontend (separate terminal)
 make dev-frontend     # Vite dev server on :5173 (override with VITE_DEV_PORT)
-make build-frontend   # production build → src/octop/dashboard/
+make build-frontend   # production build -> src/octop/dashboard/
 cd dashboard && npx tsc -b
 ```
 
@@ -568,34 +507,10 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 | Project | Description |
 |---------|-------------|
-| [Octop Harness](https://github.com/TencentCloud/octop-harness) | Agent runtime — model routing, tools, skills, checkpointing |
-| [Octop Gateway](https://github.com/TencentCloud/octop-gateway) | Multi-platform IM channel bridge |
-| [Octop Memory](https://github.com/TencentCloud/octop-memory) | Hierarchical recall and FTS search |
-| [Octop Browser](https://github.com/TencentCloud/octop-browser) | CDP browser automation with persistent profiles |
-| [Octop Pet](https://github.com/jubaoliang/OctopPet) | A desktop pet for Ydsz Worker |
-
-## 💬 Community
-
-- **Discord** — join the English-speaking community: [discord.gg/QnWdhJxq9h](https://discord.gg/QnWdhJxq9h)
-
-### WeCom Customer Group (CN)
-
-For the customer WeCom support group, scan:
-
-<p align="center">
-  <img src="docs/assets/qrcode.png" alt="WeCom customer group QR code" width="220" />
-</p>
-
-> Please scan the QR code to join the group. For any questions or assistance, please contact the group admin directly.
+| [LangGraph](https://github.com/langchain-ai/langgraph) | Agent runtime framework — multi-agent orchestration and state management |
+| [LangChain](https://github.com/langchain-ai/langchain) | LLM application development framework |
+| [FastAPI](https://github.com/fastapi/fastapi) | Modern, high-performance web framework for building APIs |
 
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## ✨ Contributors
-
-Thanks to all contributors:
-
-<a href="https://github.com/tencentcloud/octop/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tencentcloud/octop" />
-</a>

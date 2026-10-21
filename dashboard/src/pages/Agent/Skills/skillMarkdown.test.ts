@@ -8,7 +8,7 @@ import {
 } from "./skillMarkdown";
 
 describe("parseSkillPreviewFromMarkdown", () => {
-  it("reads name, description, and octop emoji from SKILL.md", () => {
+  it("reads name, description, and emoji from ydsz-frontmatter SKILL.md", () => {
     const md = buildSkillMarkdown({
       name: "My Skill",
       description: "Does work",
@@ -20,6 +20,25 @@ describe("parseSkillPreviewFromMarkdown", () => {
       emoji: "🛠️",
       name: "My Skill",
       description: "Does work",
+    });
+  });
+
+  it("reads emoji from legacy octop-frontmatter SKILL.md", () => {
+    const md = [
+      "---",
+      "name: Legacy Skill",
+      "description: Old format",
+      "metadata:",
+      "  octop:",
+      '    emoji: "🔧"',
+      "---",
+      "",
+      "# Body",
+    ].join("\n");
+    expect(parseSkillPreviewFromMarkdown(md, "legacy-skill")).toEqual({
+      emoji: "🔧",
+      name: "Legacy Skill",
+      description: "Old format",
     });
   });
 });

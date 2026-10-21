@@ -107,7 +107,7 @@ export function StorageBackendDrawer({
           sandbox_prefix:
             typeof cfg.sandbox_prefix === "string"
               ? cfg.sandbox_prefix
-              : "octop_sandbox",
+              : "ydsz_sandbox",
           sandbox_id: typeof cfg.sandbox_id === "string" ? cfg.sandbox_id : "",
           username: typeof cfg.username === "string" ? cfg.username : "",
         });
@@ -119,7 +119,7 @@ export function StorageBackendDrawer({
         if (kind === "docker") {
           form.setFieldValue("bucket", "python:3.12-slim");
           form.setFieldValue("sandbox_scope", "agent");
-          form.setFieldValue("sandbox_prefix", "octop_sandbox");
+          form.setFieldValue("sandbox_prefix", "ydsz_sandbox");
         }
         if (kind === "opensandbox") {
           form.setFieldValue("bucket", "python:3.12");
@@ -167,7 +167,7 @@ export function StorageBackendDrawer({
         const scope = (values.sandbox_scope || "agent").trim() || "agent";
         cfg.sandbox_scope = scope;
         cfg.sandbox_prefix =
-          (values.sandbox_prefix || "octop_sandbox").trim() || "octop_sandbox";
+          (values.sandbox_prefix || "ydsz_sandbox").trim() || "ydsz_sandbox";
         if (scope === "fixed" && values.sandbox_id?.trim()) {
           cfg.sandbox_id = values.sandbox_id.trim();
         } else {
@@ -575,9 +575,9 @@ export function StorageBackendDrawer({
               name="sandbox_prefix"
               label={t("storage.sandboxPrefixLabel")}
               extra={t("storage.sandboxPrefixExtra")}
-              initialValue="octop_sandbox"
+              initialValue="ydsz_sandbox"
             >
-              <Input placeholder="octop_sandbox" />
+              <Input placeholder="ydsz_sandbox" />
             </Form.Item>
             {sandboxScope === "fixed" && (
               <Form.Item

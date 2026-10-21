@@ -2,7 +2,7 @@
 
 ---
 
-This directory contains the Docker build and deployment assets for Ydsz Worker.
+This directory contains the Docker build and deployment assets for 云顶数字工作台 (Ydsz Worker).
 
 ### Files
 
@@ -12,7 +12,7 @@ This directory contains the Docker build and deployment assets for Ydsz Worker.
 | `../.dockerignore` | Build context ignore rules (applies to both Podman and BuildKit) |
 | `docker_build.sh` | Build image from source (BuildKit cache enabled by default) |
 | `docker-compose.yml` | One-command local / self-hosted deployment |
-| `docker-compose.cn.yml` | Same stack, pulls `ghcr.nju.edu.cn/tencentcloud/ydsz:latest` (no local build) |
+| `docker-compose.cn.yml` | Same stack, pulls `ghcr.io/njydsz/ydsz-worker:latest` (no local build) |
 | `docker-compose.postgres.yml` | PostgreSQL (+ pgvector) for dual-backend dev/tests |
 | `postgres/init-vector.sql` | Instance-level `CREATE EXTENSION vector` (initdb.d; **not** Ydsz Worker migrations) |
 | `docker-entrypoint.sh` | Container entrypoint: first-run init + start server |
@@ -44,9 +44,9 @@ docker run -d \
   ydsz:latest
 ```
 
-### Faster downloads (China mirrors)
+### Faster downloads (mirrors, optional)
 
-Pass mirror env vars when building:
+Pass mirror env vars when building. The values below are common Chinese mirror examples — replace with any mirror that works for you:
 
 ```bash
 PIP_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple \

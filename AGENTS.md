@@ -34,9 +34,8 @@ Navigation guide for AI coding agents working in this repository.
 
 ## 2. What this is
 
-> Ydsz Worker is a continued fork of Tencent Octop (MIT License).
-
-**Ydsz Worker** — self-hosted AI assistant platform (multi-user, multi-agent).
+**Ydsz Worker** (云顶数字工作台) — self-hosted enterprise AI assistant platform (multi-user, multi-agent).
+Tagline: "会思考，会干活，陪企业成长的智能伙伴" — it thinks, it works, it grows with your enterprise.
 One Python wheel: FastAPI backend + React dashboard + Click CLI.
 No external queue. No required services beyond an LLM provider.
 
@@ -48,8 +47,8 @@ No external queue. No required services beyond an LLM provider.
 | Web framework | FastAPI + uvicorn |
 | Async runtime | asyncio (no threads except `run_in_executor`) |
 | Database | SQLite via sync `sqlite3` (WAL) **or** PostgreSQL via `psycopg` / `psycopg_pool` |
-| LLM runtime | `octop-harness` (LangGraph) |
-| Gateway | `octop-gateway` |
+| LLM runtime | LangGraph |
+| Gateway | Built-in IM Channel Gateway |
 | Frontend | React 18 + TypeScript + Vite |
 | Package manager | uv — always `uv run pytest`, never bare `pytest` |
 | API docs UI | Scalar (`scalar-fastapi`) at `/api/docs` |

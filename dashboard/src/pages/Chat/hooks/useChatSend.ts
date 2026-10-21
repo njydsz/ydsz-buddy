@@ -265,9 +265,9 @@ export function useChatSend({
 
   useEffect(() => {
     const consumePending = () => {
-      const raw = localStorage.getItem("octop.pendingChatMessage");
+      const raw = localStorage.getItem("ydsz.pendingChatMessage");
       if (!raw) return;
-      localStorage.removeItem("octop.pendingChatMessage");
+      localStorage.removeItem("ydsz.pendingChatMessage");
 
       let textToSend = raw;
       let autoRecord = false;

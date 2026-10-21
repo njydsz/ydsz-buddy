@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
-import { octopCronApi } from "../../../api/modules/cronjob";
+import { ydszCronApi } from "../../../api/modules/cronjob";
 import { useAgent } from "../../../context/AgentContext";
 import type { CronJobSpecOutput, YdszCronRow } from "../../../api/types";
 import { channelFromSessionKey } from "./cronDisplay";
@@ -254,7 +254,7 @@ export function useCronJobs() {
 
   useEffect(() => {
     let cancelled = false;
-    void octopCronApi
+    void ydszCronApi
       .settings()
       .then((s) => {
         if (!cancelled) setCronTimezone(s.timezone || "UTC");
@@ -326,7 +326,7 @@ export function useCronJobs() {
       }
 
       try {
-        const data = await octopCronApi.list(agentId);
+        const data = await ydszCronApi.list(agentId);
         if (gen !== fetchGenRef.current) return;
         const mapped = (data || []).map((row) =>
           fromYdszCron(row, timezoneRef.current),
@@ -359,7 +359,7 @@ export function useCronJobs() {
   const createJob = async (values: CronJobFormValues) => {
     if (!activeAgentId) return false;
     try {
-      const created = await octopCronApi.create(
+      const created = await ydszCronApi.create(
         activeAgentId,
         toYdszCreateBody(values),
       );
@@ -409,7 +409,7 @@ export function useCronJobs() {
     );
 
     try {
-      const updated = await octopCronApi.patch(activeAgentId, jobId, body);
+      const updated = await ydszCronApi.patch(activeAgentId, jobId, body);
       const row = fromYdszCron(updated, cronTimezone);
       patchJobs(activeAgentId, (prev) =>
         prev.map((j) => (j.id === jobId ? row : j)),
@@ -438,7 +438,7 @@ export function useCronJobs() {
     patchJobs(activeAgentId, (prev) => prev.filter((j) => j.id !== jobId));
 
     try {
-      await octopCronApi.delete(activeAgentId, jobId);
+      await ydszCronApi.delete(activeAgentId, jobId);
       message.success(t("cronJobs.deletedSuccess"));
       return true;
     } catch (error) {
@@ -460,7 +460,7 @@ export function useCronJobs() {
     );
 
     try {
-      const returned = await octopCronApi.patch(activeAgentId, job.id, {
+      const returned = await ydszCronApi.patch(activeAgentId, job.id, {
         enabled: nextEnabled,
       });
       const row = fromYdszCron(returned, cronTimezone);
@@ -488,7 +488,7 @@ export function useCronJobs() {
   const executeNow = async (jobId: string) => {
     if (!activeAgentId) return false;
     try {
-      await octopCronApi.runNow(activeAgentId, jobId);
+      await ydszCronApi.runNow(activeAgentId, jobId);
       await fetchJobs({ soft: true });
       message.success(t("cronJobs.triggeredSuccess"));
       return true;

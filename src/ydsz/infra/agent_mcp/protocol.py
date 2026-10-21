@@ -105,7 +105,7 @@ async def handle_agent_mcp_request(
                 "protocolVersion": protocol,
                 "capabilities": {"tools": {"listChanged": False}},
                 "serverInfo": {
-                    "name": "octop-agent-mcp-gateway",
+                    "name": "ydsz-agent-mcp-gateway",
                     "version": _server_version(),
                 },
             },

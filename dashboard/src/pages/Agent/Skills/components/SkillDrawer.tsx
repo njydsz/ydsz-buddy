@@ -37,7 +37,7 @@ export interface SkillFormValues {
   labelEn?: string;
   summaryZh?: string;
   summaryEn?: string;
-  /** Surfaced as ``metadata.octop.emoji`` in SKILL.md. */
+  /** Surfaced as ``metadata.ydsz.emoji`` in SKILL.md. */
   emoji: string;
   metadata: MetadataEntry[];
   body: string;
@@ -46,16 +46,28 @@ export interface SkillFormValues {
   path?: string;
 }
 
-export const OCTOP_EMOJI_META_KEY = "octop.emoji";
-const OCTOP_LABEL_ZH_META_KEY = "octop.label.zh";
-const OCTOP_LABEL_EN_META_KEY = "octop.label.en";
-const OCTOP_SUMMARY_ZH_META_KEY = "octop.summary.zh";
-const OCTOP_SUMMARY_EN_META_KEY = "octop.summary.en";
+export const YDSZ_EMOJI_META_KEY = "ydsz.emoji";
+const YDSZ_LABEL_ZH_META_KEY = "ydsz.label.zh";
+const YDSZ_LABEL_EN_META_KEY = "ydsz.label.en";
+const YDSZ_SUMMARY_ZH_META_KEY = "ydsz.summary.zh";
+const YDSZ_SUMMARY_EN_META_KEY = "ydsz.summary.en";
 const PRESENTATION_META_KEYS = new Set([
-  OCTOP_LABEL_ZH_META_KEY,
-  OCTOP_LABEL_EN_META_KEY,
-  OCTOP_SUMMARY_ZH_META_KEY,
-  OCTOP_SUMMARY_EN_META_KEY,
+  YDSZ_LABEL_ZH_META_KEY,
+  YDSZ_LABEL_EN_META_KEY,
+  YDSZ_SUMMARY_ZH_META_KEY,
+  YDSZ_SUMMARY_EN_META_KEY,
+]);
+const LEGACY_EMOJI_META_KEY = "octop.emoji";
+const LEGACY_LABEL_ZH_META_KEY = "octop.label.zh";
+const LEGACY_LABEL_EN_META_KEY = "octop.label.en";
+const LEGACY_SUMMARY_ZH_META_KEY = "octop.summary.zh";
+const LEGACY_SUMMARY_EN_META_KEY = "octop.summary.en";
+const ALL_PRESENTATION_META_KEYS = new Set([
+  ...PRESENTATION_META_KEYS,
+  LEGACY_LABEL_ZH_META_KEY,
+  LEGACY_LABEL_EN_META_KEY,
+  LEGACY_SUMMARY_ZH_META_KEY,
+  LEGACY_SUMMARY_EN_META_KEY,
 ]);
 
 /**
@@ -119,7 +131,7 @@ function metadataToYamlLines(
   return lines;
 }
 
-/** Split ``octop.emoji`` out of flattened metadata for the dedicated picker. */
+/** Split ``ydsz.emoji`` out of flattened metadata for the dedicated picker. */
 export function parseSkillEmojiAndMetadata(
   pairs: MetadataEntry[] | undefined,
   fallback = DEFAULT_SKILL_EMOJI,
@@ -127,7 +139,10 @@ export function parseSkillEmojiAndMetadata(
   let emoji = fallback;
   const metadata: MetadataEntry[] = [];
   for (const row of pairs ?? []) {
-    if (row.key.trim() === OCTOP_EMOJI_META_KEY) {
+    if (
+      row.key.trim() === YDSZ_EMOJI_META_KEY ||
+      row.key.trim() === LEGACY_EMOJI_META_KEY
+    ) {
       const value = row.value.trim();
       if (value) emoji = value;
       continue;
@@ -142,11 +157,13 @@ function withEmojiMetadata(
   emoji: string,
 ): MetadataEntry[] {
   const rest = (pairs ?? []).filter(
-    (row) => row.key.trim() !== OCTOP_EMOJI_META_KEY,
+    (row) =>
+      row.key.trim() !== YDSZ_EMOJI_META_KEY &&
+      row.key.trim() !== LEGACY_EMOJI_META_KEY,
   );
   const value = emoji.trim();
   if (!value) return rest;
-  return [{ key: OCTOP_EMOJI_META_KEY, value }, ...rest];
+  return [{ key: YDSZ_EMOJI_META_KEY, value }, ...rest];
 }
 
 function withPresentationMetadata(
@@ -154,13 +171,13 @@ function withPresentationMetadata(
   values: SkillFormValues,
 ): MetadataEntry[] {
   const rest = (pairs ?? []).filter(
-    (row) => !PRESENTATION_META_KEYS.has(row.key.trim()),
+    (row) => !ALL_PRESENTATION_META_KEYS.has(row.key.trim()),
   );
   const presentation = [
-    [OCTOP_LABEL_ZH_META_KEY, values.labelZh],
-    [OCTOP_LABEL_EN_META_KEY, values.labelEn],
-    [OCTOP_SUMMARY_ZH_META_KEY, values.summaryZh],
-    [OCTOP_SUMMARY_EN_META_KEY, values.summaryEn],
+    [YDSZ_LABEL_ZH_META_KEY, values.labelZh],
+    [YDSZ_LABEL_EN_META_KEY, values.labelEn],
+    [YDSZ_SUMMARY_ZH_META_KEY, values.summaryZh],
+    [YDSZ_SUMMARY_EN_META_KEY, values.summaryEn],
   ]
     .filter((entry): entry is [string, string] => Boolean(entry[1]?.trim()))
     .map(([key, value]) => ({ key, value: value.trim() }));
@@ -249,18 +266,20 @@ function parseSkillFormFromDetail(detail: SkillDetail): SkillFormValues {
     flattenMetadata(fm.metadata),
     detail.emoji?.trim() || DEFAULT_SKILL_EMOJI,
   );
-  const presentationValue = (key: string) =>
-    metadata.find((entry) => entry.key === key)?.value ?? "";
+  const presentationValue = (newKey: string, legacyKey: string) =>
+    metadata.find((entry) => entry.key === newKey)?.value ??
+    metadata.find((entry) => entry.key === legacyKey)?.value ??
+    "";
   return {
     name: displayName,
     description,
-    labelZh: presentationValue(OCTOP_LABEL_ZH_META_KEY),
-    labelEn: presentationValue(OCTOP_LABEL_EN_META_KEY),
-    summaryZh: presentationValue(OCTOP_SUMMARY_ZH_META_KEY),
-    summaryEn: presentationValue(OCTOP_SUMMARY_EN_META_KEY),
+    labelZh: presentationValue(YDSZ_LABEL_ZH_META_KEY, LEGACY_LABEL_ZH_META_KEY),
+    labelEn: presentationValue(YDSZ_LABEL_EN_META_KEY, LEGACY_LABEL_EN_META_KEY),
+    summaryZh: presentationValue(YDSZ_SUMMARY_ZH_META_KEY, LEGACY_SUMMARY_ZH_META_KEY),
+    summaryEn: presentationValue(YDSZ_SUMMARY_EN_META_KEY, LEGACY_SUMMARY_EN_META_KEY),
     emoji,
     metadata: metadata.filter(
-      (entry) => !PRESENTATION_META_KEYS.has(entry.key),
+      (entry) => !ALL_PRESENTATION_META_KEYS.has(entry.key),
     ),
     body: detail.body || "",
     content: detail.raw,

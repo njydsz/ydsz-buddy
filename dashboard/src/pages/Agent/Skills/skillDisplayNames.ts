@@ -2,7 +2,7 @@
  * Resolve skill presentation names for the dashboard.
  *
  * Preference (UI locale aware):
- * 1. ``metadata.octop.label`` map from the API
+ * 1. ``metadata.ydsz.label`` map from the API (falls back to ``metadata.octop.label`` for backward compat)
  * 2. ``display_name``
  * 3. Localized API ``name`` when it differs from the slug
  * 4. Dashboard / API i18n ``skills.<slug>`` (and hyphen/underscore variants)
@@ -16,7 +16,7 @@ import { pickLocale, type LocalizedText } from "../../../utils/localizedText";
 export interface SkillLabelInput {
   slug?: string;
   name?: string;
-  /** Localized map from ``metadata.octop.label``. */
+  /** Localized map from ``metadata.ydsz.label`` (compat: ``metadata.octop.label``). */
   label?: string | LocalizedText | Record<string, string | undefined>;
   display_name?: string;
   displayName?: string;
