@@ -3,7 +3,7 @@
 > **归属声明 / Attribution:** 云顶数字工作台（Ydsz Worker）基于腾讯 Octop（[MIT 协议](https://github.com/TencentCloud/Octop/blob/main/LICENSE)）二开，保留原始版权归属。
 
 <p align="center">
-  <img src="docs/assets/readme-banner-zh.png" alt="Octop Banner" width="600" />
+  <img src="docs/assets/readme-banner-zh.png" alt="Ydsz Worker Banner" width="600" />
 </p>
 
 <p align="center">
@@ -147,7 +147,7 @@
 
 1. **入站** — 外部工具使用**你的** 云顶数字工作台 Agent
    ```bash
-   octop acp --agent main   # 为 Zed、OpenCode 等提供 stdio ACP 服务
+   ydsz-worker acp --agent main   # 为 Zed、OpenCode 等提供 stdio ACP 服务
    ```
 
 2. **出站** — 云顶数字工作台委派给外部编程 Agent
@@ -242,8 +242,8 @@ curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install
 **备选 — PyPI**（若你已自行管理 Python 环境）：
 
 ```bash
-pip install octop
-# 可选本地 ONNX Embedding 模型缓存（设置 → 模型 → 本地）：pip install "octop[local-embedding]"
+pip install ydsz-worker
+# 可选本地 ONNX Embedding 模型缓存（设置 → 模型 → 本地）：pip install "ydsz-worker[local-embedding]"
 # 仅下载目录模型到 ~/.octop/embedding_models；不用于对话，也不接入 Memory。
 # 浏览器自动化依赖已内置 Playwright；Chromium 可通过安装脚本 --extras browser、
 # 控制台，或执行：python -m playwright install chromium
