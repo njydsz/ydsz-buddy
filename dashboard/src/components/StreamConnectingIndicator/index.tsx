@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import styles from "./StreamConnectingIndicator.module.less";
 
-const MASCOT_TYPE = `${import.meta.env.BASE_URL}octop-mascot-type.webp`;
+const MASCOT_TYPE = `${import.meta.env.BASE_URL}ydsz-mascot-type.webp`;
 
 interface StreamConnectingIndicatorProps {
   /** Status line under the animation (e.g. 「连接中」). */

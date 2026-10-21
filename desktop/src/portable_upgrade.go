@@ -46,7 +46,7 @@ func desktopSQLitePath(home string) (string, bool, error) {
 		return "", false, fmt.Errorf("read database config: %w", err)
 	}
 
-	if os.Getenv("YDSZ_DATABASE_URL") != ""
+	if os.Getenv("YDSZ_DATABASE_URL") != "" {
 		driver = "postgresql"
 	}
 	if value := strings.TrimSpace(os.Getenv("YDSZ_DATABASE_DRIVER")); value != "" {

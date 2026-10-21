@@ -6,7 +6,7 @@ import dashboardIcon from "../../../../assets/channels/dashboard.svg";
 import yuanbaoIcon from "../../../../assets/channels/yuanbao.svg";
 import wecomIcon from "../../../../assets/channels/wecom.svg";
 import weixinIcon from "../../../../assets/channels/weixin.svg";
-import octopIcon from "../../../../assets/channels/octop.svg";
+import octopIcon from "../../../../assets/channels/ydsz.svg";
 import consoleIcon from "../../../../assets/channels/console.svg";
 import telegramIcon from "../../../../assets/channels/telegram.svg";
 import mqttIcon from "../../../../assets/channels/mqtt.png";
