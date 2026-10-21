@@ -7,7 +7,7 @@ import json
 
 import httpx
 
-from ydsz.config import YdszConfig, TlsConfig
+from ydsz.config import TlsConfig, YdszConfig
 from ydsz.infra.connectors.builder import (
     _redact_mcp_configs_for_log,
     build_http_mcp_spec,

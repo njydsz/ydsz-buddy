@@ -15,8 +15,8 @@ from typing import Any
 
 import pytest
 
-from ydsz.api.routers.admin import AUDIT_LOG_MAX_LIMIT
 from tests.support.auth import create_agent
+from ydsz.api.routers.admin import AUDIT_LOG_MAX_LIMIT
 
 
 @pytest.fixture

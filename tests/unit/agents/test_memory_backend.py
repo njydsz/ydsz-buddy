@@ -26,9 +26,7 @@ def test_default_memory_backend_follows_postgresql_control_plane() -> None:
     out = memory_backend_from_agent_config({}, ydsz_config=cfg)
     assert out["memory_backend"]["type"] == "postgres"
     assert "127.0.0.1" in out["memory_backend"]["dsn"]
-    assert (
-        out["memory_backend"]["dsn"].endswith("/ydsz") or "/ydsz" in out["memory_backend"]["dsn"]
-    )
+    assert out["memory_backend"]["dsn"].endswith("/ydsz") or "/ydsz" in out["memory_backend"]["dsn"]
 
 
 def test_explicit_sqlite_overrides_postgresql_control_plane() -> None:

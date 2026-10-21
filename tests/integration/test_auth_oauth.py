@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from ydsz.infra.auth.sso.service import RedirectResult, SsoService
 from tests.support.auth import bearer, bootstrap_admin, login
+from ydsz.infra.auth.sso.service import RedirectResult, SsoService
 
 
 @pytest.fixture

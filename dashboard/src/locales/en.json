@@ -1,6 +1,7 @@
 {
   "app": {
-    "pageTitle": "Ydsz Worker - An intelligent partner that understands you, helps you, and grows with you"
+    "pageTitle": "Ydsz Worker - The AI partner that thinks, executes, and grows with your business.",
+    "brandName": "Ydsz Worker"
   },
   "layout": {
     "collapsePanel": "Collapse panel",
@@ -228,7 +229,7 @@
     "chat": "Conversation",
     "common": "Common",
     "control": "Control",
-    "experts": "Expert Library",
+    "experts": "专家团",
     "tasks": "Automation",
     "connectors": "Connectors",
     "bridge": "Cloud collab",
@@ -4068,6 +4069,7 @@
     "myAccount": "My Account",
     "settings": "Personal Settings",
     "appearance": "Appearance",
+    "systemSettings": "System Settings",
     "palette": "Palette",
     "paletteHint": "Choose a brand palette, independent of light/dark mode.",
     "language": "Language",
@@ -5640,7 +5642,7 @@
   },
   "login": {
     "title": "Sign in",
-    "subtitle": "An intelligent partner that understands you, helps you, and grows with you",
+    "subtitle": "The AI partner that thinks, executes, and grows with your business.",
     "username": "Username or email",
     "password": "Password",
     "remember": "Remember me",

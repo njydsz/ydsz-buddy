@@ -6,10 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ydsz.infra.server import YdszServer
-from ydsz.infra.setup.password_file import read_password
 from tests.support.app import write_ydsz_config
 from tests.support.auth import auth_header, bootstrap_admin
+from ydsz.infra.server import YdszServer
+from ydsz.infra.setup.password_file import read_password
 
 
 async def test_setup_status_flips_after_bootstrap(patched_app_client: Any) -> None:
@@ -35,7 +35,7 @@ async def test_bootstrap_creates_default_main_agent(patched_app_client: Any) -> 
     agents = r.json()
     assert len(agents) == 1
     assert agents[0]["agent_id"] == "main"
-    assert agents[0]["name"] == "小通 · 通用助手"
+    assert agents[0]["name"] == "云顶 · 通用助手"
     assert agents[0]["state"] in {"created", "idle", "stopped", "failed", "running", "unknown"}
 
 
@@ -134,5 +134,5 @@ async def test_main_agent_uses_general_assistant_template(patched_app_client: An
     assert r.status_code == 200
     agent = r.json()[0]
     assert agent["agent_id"] == "main"
-    assert agent["name"] == "小通 · 通用助手"
+    assert agent["name"] == "云顶 · 通用助手"
     assert agent.get("template_name") == "general-assistant"

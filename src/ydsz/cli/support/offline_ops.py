@@ -134,9 +134,7 @@ def set_user_email_offline(
         if normalized_email is not None:
             owner = svc.user_repo.get_by_email(normalized_email)
             if owner is not None and owner.id != uid:
-                raise YdszError(
-                    ErrorCode.EMAIL_TAKEN, f"email {normalized_email!r} already exists"
-                )
+                raise YdszError(ErrorCode.EMAIL_TAKEN, f"email {normalized_email!r} already exists")
         svc.user_repo.set_email(uid, normalized_email)
         row = svc.user_repo.get(uid)
         assert row is not None

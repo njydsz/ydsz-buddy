@@ -10,11 +10,11 @@ from typing import Any
 
 import httpx
 
+from tests.support.harness import patch_harness
 from ydsz.api.app import build_app
 from ydsz.config import DatabaseConfig, load_config
 from ydsz.infra.db.rebind import persist_database_config
 from ydsz.infra.server import YdszServer
-from tests.support.harness import patch_harness
 
 
 def write_ydsz_config(home: Path, **overrides: object) -> None:

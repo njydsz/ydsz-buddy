@@ -193,8 +193,8 @@ async def test_non_admin_can_list_outside_home(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    from ydsz.infra.utils.host_dirs import host_fs_tree_root
     from tests.support.auth import create_user
+    from ydsz.infra.utils.host_dirs import host_fs_tree_root
 
     client, _srv, admin_auth = env
     home = tmp_path / "os_home"

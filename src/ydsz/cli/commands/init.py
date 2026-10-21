@@ -130,4 +130,6 @@ def init(
 
     click.echo(f"\u2705 Ydsz Worker bootstrapped at {home}")
     click.echo(f"   admin user: {username}")
-    click.echo("   next: `ydsz-worker run` (optional: `ydsz-worker agent use <id>` to pin default agent)")
+    click.echo(
+        "   next: `ydsz-worker run` (optional: `ydsz-worker agent use <id>` to pin default agent)"
+    )

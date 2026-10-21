@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ydsz.config import YdszConfig, TlsConfig
+from ydsz.config import TlsConfig, YdszConfig
 from ydsz.infra.setup.tls.modes import (
     TlsIssueMode,
     is_issue_eligible,

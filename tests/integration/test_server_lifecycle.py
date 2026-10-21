@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from ydsz.infra.server import YdszServer
 from tests.support.app import ensure_control_plane_bound
+from ydsz.infra.server import YdszServer
 
 
 async def _bind_default_sqlite(srv: YdszServer) -> None:

@@ -75,9 +75,7 @@ def test_typed_auth_error_gets_guidance_without_error_keywords(wrapped: bool) ->
         outer = RuntimeError("request rejected")
         outer.__cause__ = error
         error = outer
-    assert format_stream_error(error, "zh") == stream_error_message(
-        "ydsz:stream_errors.auth", "zh"
-    )
+    assert format_stream_error(error, "zh") == stream_error_message("ydsz:stream_errors.auth", "zh")
 
 
 def test_classify_invalid_request_mindie_422() -> None:

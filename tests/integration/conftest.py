@@ -10,9 +10,6 @@ from unittest.mock import patch
 import httpx
 import pytest
 
-from ydsz.api.app import build_app
-from ydsz.infra.errors import ErrorCode, YdszError
-from ydsz.infra.server import YdszServer
 from tests.support.app import ydsz_client
 from tests.support.auth import (
     auth_header,
@@ -26,6 +23,9 @@ from tests.support.auth import (
 from tests.support.fakes import FakeHarnessAgent
 from tests.support.harness import patch_harness
 from tests.support.scenarios import bootstrap_boundary_env
+from ydsz.api.app import build_app
+from ydsz.infra.errors import ErrorCode, YdszError
+from ydsz.infra.server import YdszServer
 
 __all__ = [
     "bootstrap_admin",

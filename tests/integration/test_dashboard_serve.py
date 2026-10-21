@@ -6,8 +6,8 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from ydsz.api.app import build_app
 from tests.support.app import ydsz_client
+from ydsz.api.app import build_app
 
 _DASHBOARD = Path(__file__).resolve().parents[2] / "src" / "ydsz" / "dashboard"
 

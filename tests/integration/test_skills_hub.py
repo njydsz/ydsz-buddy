@@ -156,9 +156,9 @@ async def test_hub_install_persists_market_name_and_icon(
     env: Any,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.support.auth import create_agent, seed_openai_provider
     from ydsz.api.routers import skills as skills_router
     from ydsz.infra.skills import skillhub_market
-    from tests.support.auth import create_agent, seed_openai_provider
 
     async def fake_download(
         slug: str,
@@ -231,9 +231,9 @@ async def test_hub_install_falls_back_to_cli_on_http_failure(
     env: Any,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.support.auth import create_agent, seed_openai_provider
     from ydsz.api.routers import skills as skills_router
     from ydsz.infra.skills import skillhub_market
-    from tests.support.auth import create_agent, seed_openai_provider
 
     async def failed_download(
         _slug: str,
@@ -287,9 +287,9 @@ async def test_hub_install_does_not_fallback_after_package_validation_failure(
     env: Any,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.support.auth import create_agent, seed_openai_provider
     from ydsz.api.routers import skills as skills_router
     from ydsz.infra.skills import skillhub_market
-    from tests.support.auth import create_agent, seed_openai_provider
 
     async def invalid_download(
         _slug: str,

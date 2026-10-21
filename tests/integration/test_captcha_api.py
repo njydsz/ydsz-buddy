@@ -9,10 +9,10 @@ from typing import Any
 
 import pytest
 
+from tests.support.auth import bootstrap_admin
 from ydsz.infra.auth.captcha import set_test_siteverify_url
 from ydsz.infra.auth.captcha.store import SETTINGS_KEY
 from ydsz.infra.auth.sso.crypto import encrypt_secret
-from tests.support.auth import bootstrap_admin
 
 
 class _Siteverify(BaseHTTPRequestHandler):

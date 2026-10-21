@@ -238,9 +238,9 @@ def test_pg_backup_roundtrip(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_setup_database_postgresql_bind(tmp_ydsz_home: Path) -> None:
     """Wizard: probe + bind live PostgreSQL, then create admin."""
+    from tests.support.app import ydsz_client
     from ydsz.infra.db.pool import PostgresPool
     from ydsz.infra.setup.password_file import read_password
-    from tests.support.app import ydsz_client
 
     pool = PostgresPool(_conninfo())
     try:

@@ -609,9 +609,7 @@ def load_config(path: Path) -> YdszConfig:
         enable_api_docs=bool(merged["enable_api_docs"]),
         history_v2_enabled=_coerce_bool(
             "YDSZ_HISTORY_V2_ENABLED",
-            os.environ.get(
-                "YDSZ_HISTORY_V2_ENABLED", str(merged.get("history_v2_enabled", False))
-            ),
+            os.environ.get("YDSZ_HISTORY_V2_ENABLED", str(merged.get("history_v2_enabled", False))),
             False,
         ),
         require_setup_password=bool(merged["require_setup_password"]),

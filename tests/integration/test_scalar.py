@@ -6,9 +6,9 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from ydsz.api.app import build_app
-from tests.support.app import ydsz_client, write_ydsz_config
+from tests.support.app import write_ydsz_config, ydsz_client
 from tests.support.auth import bootstrap_admin
+from ydsz.api.app import build_app
 
 
 async def test_api_docs_endpoint(tmp_ydsz_home: Path) -> None:

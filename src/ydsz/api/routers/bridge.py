@@ -21,7 +21,9 @@ router = APIRouter()
 
 
 class BridgeCreateBody(BaseModel):
-    peer_base_url: str = Field(..., description="Remote Ydsz Worker base URL, e.g. https://cloud.example")
+    peer_base_url: str = Field(
+        ..., description="Remote Ydsz Worker base URL, e.g. https://cloud.example"
+    )
     peer_username: str = Field(..., min_length=1)
     password: str = Field(..., min_length=1)
     display_name: str = Field(

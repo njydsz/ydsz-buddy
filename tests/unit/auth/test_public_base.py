@@ -40,8 +40,7 @@ def test_resolve_public_base_uses_request_url_without_proxy_headers() -> None:
 
 def test_build_redirect_uri_uses_oidc_callback_path() -> None:
     assert (
-        build_redirect_uri("https://ydsz.example/")
-        == "https://ydsz.example/api/auth/oidc/callback"
+        build_redirect_uri("https://ydsz.example/") == "https://ydsz.example/api/auth/oidc/callback"
     )
 
 

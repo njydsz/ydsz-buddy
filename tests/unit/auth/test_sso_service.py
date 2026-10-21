@@ -113,9 +113,7 @@ def test_status_returns_enabled_provider_display_name(service: SsoService) -> No
 def test_put_config_encrypts_with_supplied_secret_repo_and_redacts_for_admin(
     service: SsoService,
 ) -> None:
-    with patch(
-        "ydsz.infra.auth.sso.service.encrypt_secret", return_value=b"ciphertext"
-    ) as encrypt:
+    with patch("ydsz.infra.auth.sso.service.encrypt_secret", return_value=b"ciphertext") as encrypt:
         result = service.put_config(
             {
                 "enabled": True,

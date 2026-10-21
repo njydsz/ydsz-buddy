@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import httpx
 import pytest
 
-from ydsz.config import YdszConfig, TlsConfig
+from ydsz.config import TlsConfig, YdszConfig
 from ydsz.infra.setup.tls import preflight as preflight_mod
 from ydsz.infra.setup.tls.preflight import (
     _METADATA_PUBLIC_IP_URLS,

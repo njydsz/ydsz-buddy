@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+import ydsz
 from ydsz.infra.setup.self_update import (
     UpgradeResult,
     _all_mirrors_failed,
@@ -576,10 +577,9 @@ def test_target_version_loads_pth_dependencies(tmp_path: Path) -> None:
 def test_target_version_prevents_downgrade_before_service_restart(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import ydsz
     from ydsz.infra.setup import self_update
 
-    monkeypatch.setattr(octop, "__version__", "1.0.2b4")
+    monkeypatch.setattr(ydsz, "__version__", "1.0.2b4")
     monkeypatch.setenv("YDSZ_GREEN_PACKAGES", str(tmp_path))
     _write_ydsz_package(tmp_path, "1.0.2b6")
     assert self_update.get_local_version() == "1.0.2b6"

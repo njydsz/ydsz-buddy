@@ -44,7 +44,7 @@ vi.mock("../../../context/AgentContext", () => ({
       },
       {
         agent_id: "doctor",
-        name: "小通 · 通用助手",
+        name: "云顶 · 通用助手",
         icon_name: "sparkles",
       },
     ],
@@ -74,7 +74,7 @@ describe("MessageBubble team speaker chrome", () => {
     );
 
     expect(screen.getByText("please rest")).toBeInTheDocument();
-    expect(screen.queryByText("小通 · 通用助手")).not.toBeInTheDocument();
+    expect(screen.queryByText("云顶 · 通用助手")).not.toBeInTheDocument();
   });
 
   it("labels the host avatar as team host and opens a member profile", () => {
@@ -103,7 +103,7 @@ describe("MessageBubble team speaker chrome", () => {
         />
       </ChatAgentProfileProvider>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "小通 · 通用助手" }));
+    fireEvent.click(screen.getByRole("button", { name: "云顶 · 通用助手" }));
     expect(onOpen).toHaveBeenCalledWith("doctor");
   });
 });

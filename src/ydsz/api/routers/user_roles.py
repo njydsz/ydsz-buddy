@@ -209,9 +209,7 @@ def public_role(row: UserRoleRow, *, avatar_url: str | None = None) -> dict[str,
 
 def _name_taken(exc: ValueError) -> None:
     if str(exc) == "id_taken":
-        raise YdszError(
-            ErrorCode.USER_ROLE_ID_TAKEN, "role id already exists", status=409
-        ) from exc
+        raise YdszError(ErrorCode.USER_ROLE_ID_TAKEN, "role id already exists", status=409) from exc
     if str(exc) != "name_taken":
         raise exc
     raise YdszError(ErrorCode.FORBIDDEN, "role name already exists", status=409) from exc

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ydsz.config import YdszConfig, TlsConfig
+from ydsz.config import TlsConfig, YdszConfig
 from ydsz.infra.setup.tls.listeners import build_listen_plan
 
 

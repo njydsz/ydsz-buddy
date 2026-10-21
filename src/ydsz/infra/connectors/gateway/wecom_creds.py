@@ -21,7 +21,9 @@ from ydsz.infra.connectors.gateway.cli_fingerprint import credential_fingerprint
 _MCP_CONFIG_URL = "https://qyapi.weixin.qq.com/cgi-bin/aibot/cli/get_mcp_config"
 _FINGERPRINT_NAME = ".ydsz_wecom_fingerprint"
 _BIND_SOURCE_INTERACTIVE = 1
-_USER_AGENT = f"WeComCLI/0.1.9 distribution/ydsz-worker {platform.system().lower()}/{platform.machine()}"
+_USER_AGENT = (
+    f"WeComCLI/0.1.9 distribution/ydsz-worker {platform.system().lower()}/{platform.machine()}"
+)
 
 
 def materialize_wecom_bot_config(config_dir: Path, *, bot_id: str, bot_secret: str) -> None:

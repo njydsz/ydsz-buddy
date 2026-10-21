@@ -369,6 +369,11 @@ export default function AvatarDropdown({
         <ThemeSwitcher compact />
       </div>
 
+      <button type="button" className={styles.menuItem} onClick={openSettings}>
+        <Settings size={16} strokeWidth={1.8} />
+        <span>{t("account.systemSettings")}</span>
+      </button>
+
       <a
         className={styles.menuItem}
         href={HELP_FEEDBACK_URL}
@@ -401,11 +406,6 @@ export default function AvatarDropdown({
           <span>{t("nav.customize")}</span>
         </button>
       ) : null}
-
-      <button type="button" className={styles.menuItem} onClick={openSettings}>
-        <Settings size={16} strokeWidth={1.8} />
-        <span>{t("account.settings")}</span>
-      </button>
 
       <button type="button" className={styles.menuItem} onClick={openPassword}>
         <KeyRound size={16} strokeWidth={1.8} />

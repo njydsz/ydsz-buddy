@@ -77,4 +77,6 @@ def uninstall_plugin(plugin_id: str) -> None:
 def reload_plugins() -> None:
     """Reload plugins from disk (offline; restart ``ydsz-worker run`` to apply to agents)."""
     loaded = _manager().load_installed(install_deps=False)
-    click.echo(f"Reloaded {len(loaded)} plugin(s). Restart ydsz-worker run if the server is running.")
+    click.echo(
+        f"Reloaded {len(loaded)} plugin(s). Restart ydsz-worker run if the server is running."
+    )

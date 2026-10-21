@@ -107,6 +107,13 @@ func (st *settingsStore) save(next Settings) error {
 	return nil
 }
 
+func localizedAppName(locale Locale) string {
+	if locale == LocaleZH {
+		return "云顶数字工作台"
+	}
+	return "Ydsz Worker"
+}
+
 func greenPlat() string {
 	osName := runtime.GOOS
 	arch := runtime.GOARCH

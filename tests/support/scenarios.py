@@ -6,8 +6,8 @@ from typing import Any
 
 import httpx
 
-from ydsz.infra.server import YdszServer
 from tests.support.auth import create_provider, create_user, resolve_user_id
+from ydsz.infra.server import YdszServer
 
 
 async def bootstrap_boundary_env(

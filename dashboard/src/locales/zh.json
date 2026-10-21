@@ -1,6 +1,7 @@
 {
   "app": {
-    "pageTitle": "云顶数字工作台 - 懂你、帮你、陪你成长的智能伙伴"
+    "pageTitle": "云顶数字工作台 - 会思考、能干活、陪企业成长的智能伙伴",
+    "brandName": "云顶数字工作台"
   },
   "layout": {
     "collapsePanel": "收起面板",
@@ -228,7 +229,7 @@
     "chat": "对话",
     "common": "常用",
     "control": "控制",
-    "experts": "专家库",
+    "experts": "专家团",
     "tasks": "自动化",
     "connectors": "连接器",
     "bridge": "云端协同",
@@ -4068,6 +4069,7 @@
     "myAccount": "我的账户",
     "settings": "个人设置",
     "appearance": "外观",
+    "systemSettings": "系统设置",
     "palette": "配色",
     "paletteHint": "选择界面品牌配色，与浅色/深色模式独立。",
     "language": "语言",
@@ -5640,7 +5642,7 @@
   },
   "login": {
     "title": "登录",
-    "subtitle": "懂你、帮你、陪你成长的智能伙伴",
+    "subtitle": "会思考、能干活、陪企业成长的智能伙伴",
     "username": "用户名或邮箱",
     "password": "密码",
     "remember": "记住登录状态",

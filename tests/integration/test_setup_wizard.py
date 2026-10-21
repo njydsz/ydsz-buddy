@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
+from tests.support.app import write_ydsz_config, ydsz_client
 from ydsz.infra.setup.password_file import WIZARD_FILE_NAME, read_password
-from tests.support.app import ydsz_client, write_ydsz_config
 
 
 @pytest.fixture

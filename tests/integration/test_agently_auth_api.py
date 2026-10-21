@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock
 
-from ydsz.infra.connectors.gateway import agently_auth
 from tests.support.auth import create_user
+from ydsz.infra.connectors.gateway import agently_auth
 
 
 async def test_agently_auth_owner_routes_and_isolation(env_with_agent, monkeypatch):

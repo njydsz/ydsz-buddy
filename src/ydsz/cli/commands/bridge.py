@@ -138,7 +138,9 @@ def get_connection(connection_id: str, as_user: str | None) -> None:
 
 @bridge.command("probe")
 @click.argument("connection_id", required=False)
-@click.option("--url", "--peer-url", "peer_base_url", default=None, help="Remote Ydsz Worker base URL.")
+@click.option(
+    "--url", "--peer-url", "peer_base_url", default=None, help="Remote Ydsz Worker base URL."
+)
 @click.option(
     "--peer-user",
     "--username",
@@ -192,7 +194,9 @@ def probe(
 
 
 @bridge.command("create")
-@click.option("--url", "--peer-url", "peer_base_url", required=True, help="Remote Ydsz Worker base URL.")
+@click.option(
+    "--url", "--peer-url", "peer_base_url", required=True, help="Remote Ydsz Worker base URL."
+)
 @click.option(
     "--peer-user",
     "--username",
@@ -256,7 +260,9 @@ def create(
 @click.option("--name", "display_name", default=None, help="Local display name.")
 @click.option("--notes", default=None, help="Local notes; pass empty string to clear.")
 @click.option("--icon", "icon_name", default=None, help="Lucide icon key; empty to clear.")
-@click.option("--url", "--peer-url", "peer_base_url", default=None, help="Remote Ydsz Worker base URL.")
+@click.option(
+    "--url", "--peer-url", "peer_base_url", default=None, help="Remote Ydsz Worker base URL."
+)
 @click.option(
     "--peer-user",
     "--username",

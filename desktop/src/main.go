@@ -330,6 +330,7 @@ func (a *App) requestQuit() {
 
 func main() {
 	store := &settingsStore{cur: loadSettings()}
+	appName := localizedAppName(store.get().Locale)
 	api := &App{
 		store: store,
 		sleep: &sleepGuard{},
@@ -362,7 +363,7 @@ func main() {
 	})
 
 	win := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:                "YdszWorker",
+		Title:                appName,
 		Width:                1200,
 		Height:               800,
 		URL:                  "/",
@@ -386,7 +387,7 @@ func main() {
 	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, installDragOverlay)
 	win.OnWindowEvent(events.Linux.WindowLoadFinished, installDragOverlay)
 	settingsWin := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "YdszWorker 设置",
+		Title:            appName+" Settings",
 		Width:            settingsWindowWidth,
 		Height:           settingsWindowOuterHeight(),
 		URL:              "/?settings=1",
@@ -430,7 +431,7 @@ func main() {
 
 	tray := app.SystemTray.New()
 	applyTrayIcon(tray)
-	tray.SetTooltip("YdszWorker")
+	tray.SetTooltip(appName)
 	tray.AttachWindow(settingsWin).WindowOffset(6)
 	showSettings := func() { tray.ShowWindow() }
 	if trayLeftClickShowsSettings(runtime.GOOS) {

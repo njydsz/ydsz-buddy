@@ -6,14 +6,14 @@ from pathlib import Path
 
 import pytest
 
+from tests.support.app import ydsz_client
+from tests.support.auth import bootstrap_admin, wizard_token
 from ydsz.config import DatabaseConfig, YdszConfig, load_config
 from ydsz.infra.db.factory import open_database
 from ydsz.infra.db.migrate import run_migrations
 from ydsz.infra.db.repos.users import UserRepo
 from ydsz.infra.setup.password_file import read_password
 from ydsz.infra.utils.paths import PathLayout
-from tests.support.app import ydsz_client
-from tests.support.auth import bootstrap_admin, wizard_token
 
 
 def _seed_occupied_sqlite(home, *, relative_path: str = "occupied.db") -> None:

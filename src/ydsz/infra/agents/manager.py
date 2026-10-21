@@ -3861,13 +3861,13 @@ class AgentManager:
 
         from ydsz.infra.agents.middleware.binary_read_guard import BinaryReadGuardMiddleware
         from ydsz.infra.agents.middleware.browser_profile import BrowserProfileMiddleware
-        from ydsz.infra.agents.middleware.ydsz_ui_offload import YdszUiOffloadMiddleware
         from ydsz.infra.agents.middleware.reasoning import ReasoningRequestMiddleware
         from ydsz.infra.agents.middleware.thread_artifacts import ThreadArtifactsMiddleware
         from ydsz.infra.agents.middleware.token_quota import TokenQuotaMiddleware
         from ydsz.infra.agents.middleware.workspace_image import (
             WorkspaceImageMaterializeMiddleware,
         )
+        from ydsz.infra.agents.middleware.ydsz_ui_offload import YdszUiOffloadMiddleware
         from ydsz.infra.knowledge.hint import KnowledgeSearchHintMiddleware
 
         # FilesystemGuard + ModelSettings live in octop-harness (auto-mounted).

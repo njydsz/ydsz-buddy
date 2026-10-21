@@ -50,7 +50,7 @@ def _runtime(tmp_path: Path) -> ServiceRuntime:
 def test_resolve_ydsz_executable_falls_back_to_path(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    fake_ydsz = tmp_path / "fake-octop"
+    fake_octop = tmp_path / "fake-octop"
     fake_octop.write_text("#!/bin/sh\n", encoding="utf-8")
     python_dir = tmp_path / "python-only"
     python_dir.mkdir()

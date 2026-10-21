@@ -12,9 +12,7 @@ async def test_provider_test_ok(env_with_provider_record: Any) -> None:
     fake_model = MagicMock()
     fake_model.ainvoke = AsyncMock(return_value=MagicMock(content="pong"))
 
-    with patch(
-        "ydsz.infra.agents.providers.probe.build_probe_chat_model", return_value=fake_model
-    ):
+    with patch("ydsz.infra.agents.providers.probe.build_probe_chat_model", return_value=fake_model):
         r = await c.post(f"/api/admin/providers/{pid}/test", headers=auth)
     assert r.status_code == 200, r.text
     body = r.json()

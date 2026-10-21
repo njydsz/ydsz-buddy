@@ -12,12 +12,12 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
+from tests.support.app import write_ydsz_config, ydsz_client
+from tests.support.auth import auth_header, bootstrap_admin, create_user, resolve_user_id
+from tests.support.http import ws_chat_turn
 from ydsz.infra.connectors.custom_mcp import CUSTOM_MCP_KIND
 from ydsz.infra.connectors.oauth.registry import save_oauth_ctx
 from ydsz.infra.utils.ulid import new_ulid
-from tests.support.app import ydsz_client, write_ydsz_config
-from tests.support.auth import auth_header, bootstrap_admin, create_user, resolve_user_id
-from tests.support.http import ws_chat_turn
 
 
 @pytest.fixture
