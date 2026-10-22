@@ -150,6 +150,32 @@
   }
 }
 
+.sidebarGearBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--fn-radius-md);
+  background: transparent;
+  color: var(--fn-sidebar-group-text);
+  opacity: 0.55;
+  cursor: pointer;
+  transition:
+    background var(--fn-transition-fast),
+    color var(--fn-transition-fast),
+    opacity var(--fn-transition-fast);
+
+  &:hover {
+    opacity: 0.9;
+    background: color-mix(in srgb, var(--fn-text-primary) 6%, transparent);
+    color: var(--fn-text-secondary);
+  }
+}
+
 .minimalNavBody {
   display: flex;
   flex-direction: column;

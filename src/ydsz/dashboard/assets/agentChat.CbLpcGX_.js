@@ -1,1 +1,0 @@
-import{r as request}from"./index.BBqyqk0u.js";const agentChatApi={welcome:agentId=>request(`/agents/${encodeURIComponent(agentId)}/chat/welcome`),polish:(agentId,text,defaultModel)=>request(`/agents/${encodeURIComponent(agentId)}/chat/polish`,{method:"POST",body:JSON.stringify({text,...defaultModel?{default_model:defaultModel}:{}})})};export{agentChatApi as a};

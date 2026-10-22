@@ -1,4 +1,12 @@
-import { useState, useCallback, useEffect, type ReactNode } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  type ReactNode,
+  type Ref,
+} from "react";
 import {
   Drawer,
   Form,
@@ -93,20 +101,33 @@ interface AvatarDropdownProps {
   onCustomizeNav?: () => void;
 }
 
-export default function AvatarDropdown({
-  user,
-  onUserChange,
-  placement = "default",
-  compact = false,
-  onBeforeOpenSettings,
-  onCustomizeNav,
-}: AvatarDropdownProps) {
+/** Exposed imperative API — lets a parent open the settings drawer directly. */
+export interface AvatarDropdownHandle {
+  openSettings: () => void;
+}
+
+const AvatarDropdown = forwardRef<
+  AvatarDropdownHandle,
+  AvatarDropdownProps
+>(function AvatarDropdown(
+  {
+    user,
+    onUserChange,
+    placement = "default",
+    compact = false,
+    onBeforeOpenSettings,
+    onCustomizeNav,
+  },
+  ref: Ref<AvatarDropdownHandle>,
+) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const role = useUserRole();
   const isMobile = useIsMobile();
   const { layoutMode, setLayoutMode } = useLayoutMode();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useImperativeHandle(ref, () => ({ openSettings }), [openSettings]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -872,3 +893,5 @@ export default function AvatarDropdown({
     </>
   );
 }
+
+export default AvatarDropdown;

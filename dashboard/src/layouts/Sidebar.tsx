@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import AvatarDropdown from "../components/AvatarDropdown";
+import type { AvatarDropdownHandle } from "../components/AvatarDropdown";
 import AppVersionBadge from "../components/AppVersionBadge";
 import CurrentVersionBadge from "../components/CurrentVersionBadge";
-import { ArrowRightLeft, ChevronDown, X } from "lucide-react";
+import { ChevronDown, Settings, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useLayoutMode } from "../context/LayoutModeContext";
 import { useUserRole } from "../hooks/useUserRole";
@@ -23,7 +24,6 @@ import {
 import type { MinimalNavPane } from "./layoutModeStorage";
 import MinimalRecordsHost from "./MinimalRecordsHost";
 import SidebarCollapsedIconNav from "./SidebarCollapsedIconNav";
-import SidebarMinimalPaneToggle from "./SidebarMinimalPaneToggle";
 import { preferencesApi } from "../api/modules/preferences";
 import {
   COLLAPSED_WIDTH,
@@ -503,8 +503,19 @@ export default function Sidebar({
     setChatSidebarOpen,
   ]);
 
+  const avatarDropdownRef = useRef<AvatarDropdownHandle>(null);
+
   const brandInner = (
-    <>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: isRailCollapsed ? "center" : "space-between",
+        width: "100%",
+        minWidth: 0,
+        gap: 4,
+      }}
+    >
       <span
         style={{
           fontSize: isRailCollapsed ? 13 : isMobile ? 17 : 16,
@@ -514,18 +525,26 @@ export default function Sidebar({
           lineHeight: 1.2,
           whiteSpace: isRailCollapsed ? "nowrap" : "normal",
           flexShrink: 0,
-          display: "block",
         }}
       >
         {isRailCollapsed ? "Yd" : "Ydsz Worker"}
       </span>
       {!isRailCollapsed && !isMobile && (
-        <>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
           <CurrentVersionBadge isMobile={isMobile} isSidebar />
           <AppVersionBadge isMobile={isMobile} isSidebar />
-        </>
+        </span>
       )}
-    </>
+      <button
+        type="button"
+        className={styles.sidebarGearBtn}
+        onClick={() => avatarDropdownRef.current?.openSettings()}
+        aria-label={t("account.settings")}
+        hidden={isRailCollapsed}
+      >
+        <Settings size={15} strokeWidth={1.8} />
+      </button>
+    </div>
   );
 
   const userFooter = (
@@ -539,6 +558,7 @@ export default function Sidebar({
       }}
     >
       <AvatarDropdown
+        ref={avatarDropdownRef}
         user={user}
         onUserChange={setUser}
         placement="sidebar"
@@ -560,27 +580,6 @@ export default function Sidebar({
   );
 
   const primaryItems = navSections.find((section) => !section.id)?.items ?? [];
-  const namedSections = navSections.filter((section) => section.id);
-  const firstNamed = namedSections[0];
-  const settingsPaneLabel = firstNamed ? navSectionLabel(firstNamed, t) : null;
-  const groupedItems = namedSections.flatMap((section) =>
-    section.id && isGroupCollapsed(section.id) ? [] : section.items,
-  );
-
-  useEffect(() => {
-    if (isMinimal && !settingsPaneLabel && minimalPane === "settings") {
-      setMinimalPane("records");
-    }
-  }, [isMinimal, settingsPaneLabel, minimalPane, setMinimalPane]);
-
-  const paneToggle = settingsPaneLabel ? (
-    <SidebarMinimalPaneToggle
-      settingsLabel={settingsPaneLabel}
-      minimalPane={minimalPane}
-      collapsed={isRailCollapsed}
-      onSelect={selectMinimalPane}
-    />
-  ) : null;
 
   const classicNavBody = isRailCollapsed ? (
     <div style={{ padding: "8px 0" }}>
@@ -624,52 +623,21 @@ export default function Sidebar({
             hasUpdate={hasUpdate}
             t={t}
           />
-          {paneToggle}
-          {minimalPane === "settings" ? (
-            <SidebarCollapsedIconNav
-              items={groupedItems}
-              selectedKey={selectedKey}
-              onNavigate={handleNavigate}
-              role={role}
-              hasUpdate={hasUpdate}
-              t={t}
-            />
-          ) : null}
         </div>
       ) : (
-        <>
-          <div className={styles.minimalPrimaryBlock}>
-            <NavList
-              sections={navSections}
-              selectedKey={selectedKey}
-              onNavigate={handleNavigate}
-              onToggleChatRail={handleToggleChatRail}
-              showChatRailToggle={false}
-              isMobile={isMobile}
-              isGroupCollapsed={isGroupCollapsed}
-              toggleGroup={toggleGroup}
-              sectionFilter="primary"
-            />
-            {paneToggle}
-          </div>
-          <div
-            className={styles.minimalSettingsPane}
-            hidden={minimalPane !== "settings"}
-          >
-            <NavList
-              sections={navSections}
-              selectedKey={selectedKey}
-              onNavigate={handleNavigate}
-              isMobile={isMobile}
-              isGroupCollapsed={isGroupCollapsed}
-              toggleGroup={toggleGroup}
-              sectionFilter="grouped"
-              hideHeaderIds={
-                firstNamed?.id ? new Set([firstNamed.id]) : undefined
-              }
-            />
-          </div>
-        </>
+        <div className={styles.minimalPrimaryBlock}>
+          <NavList
+            sections={navSections}
+            selectedKey={selectedKey}
+            onNavigate={handleNavigate}
+            onToggleChatRail={handleToggleChatRail}
+            showChatRailToggle={false}
+            isMobile={isMobile}
+            isGroupCollapsed={isGroupCollapsed}
+            toggleGroup={toggleGroup}
+            sectionFilter="primary"
+          />
+        </div>
       )}
       {/*
         Chat route: empty mount point — Chat portals live sessions here.
@@ -678,7 +646,7 @@ export default function Sidebar({
       <div
         id={CHAT_HISTORY_RAIL_ID}
         className={styles.minimalRecordsPane}
-        hidden={isRailCollapsed || minimalPane !== "records"}
+        hidden={isRailCollapsed}
       >
         {!onChatPath ? <MinimalRecordsHost /> : null}
       </div>
@@ -808,7 +776,7 @@ export default function Sidebar({
           gap: 6,
           minWidth: 0,
           padding: isRailCollapsed ? "12px 0" : "14px 14px 10px",
-          justifyContent: isRailCollapsed ? "center" : "flex-start",
+          justifyContent: "center",
           flexShrink: 0,
         }}
       >
