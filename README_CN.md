@@ -364,10 +364,6 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 
 `ydsz-worker run` 启动后访问 **http://127.0.0.1:8088**。
 
-<p align="center">
-  <img src="docs/assets/readme-chat-zh.png" alt="Ydsz Worker Web 控制台" width="800" />
-</p>
-
 - **对话** — 与专家 / 团队实时聊天
 - **专家** — 创建专家、选择专家库 / MBTI、共享或发布专家
 - **AgentTeams** *（Beta）* — 协调者 + 成员专家协作多步骤任务

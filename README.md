@@ -389,10 +389,6 @@ Full reference: **[docs/cli.md](docs/cli.md)**.
 
 After `ydsz-worker run`, open **http://127.0.0.1:8088**.
 
-<p align="center">
-  <img src="docs/assets/readme-chat.png" alt="Ydsz Worker Web Dashboard" width="800" />
-</p>
-
 - **Chat** — real-time conversation with experts and teams
 - **Experts** — create experts, pick templates / MBTI personas, share or publish experts, configure providers
 - **AgentTeams** *(Beta)* — coordinator + member experts for multi-step work

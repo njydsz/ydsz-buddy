@@ -9,9 +9,13 @@ import styles from "./index.module.less";
 
 interface AppVersionBadgeProps {
   isMobile?: boolean;
+  isSidebar?: boolean;
 }
 
-export default function AppVersionBadge({ isMobile }: AppVersionBadgeProps) {
+export default function AppVersionBadge({
+  isMobile,
+  isSidebar,
+}: AppVersionBadgeProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useCurrentUser();
@@ -37,6 +41,11 @@ export default function AppVersionBadge({ isMobile }: AppVersionBadgeProps) {
         className={`${styles.headerVersion} ${
           isMobile ? styles.headerVersionMobile : ""
         } ${styles.headerVersionClickable}`}
+        style={
+          isSidebar
+            ? { color: "var(--fn-sidebar-group-text)" }
+            : undefined
+        }
         onClick={handleClick}
         aria-label={tooltip}
       >
