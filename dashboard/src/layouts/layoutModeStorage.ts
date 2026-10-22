@@ -15,7 +15,7 @@ export function loadLayoutMode(): LayoutMode {
   } catch {
     /* ignore */
   }
-  return "classic";
+  return "minimal";
 }
 
 export function saveLayoutMode(mode: LayoutMode): void {

@@ -24,7 +24,7 @@ interface LayoutModeContextValue {
 }
 
 const LayoutModeContext = createContext<LayoutModeContextValue>({
-  layoutMode: "classic",
+  layoutMode: "minimal",
   setLayoutMode: () => {},
   minimalPane: "settings",
   setMinimalPane: () => {},
