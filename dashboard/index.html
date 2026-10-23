@@ -133,32 +133,13 @@
         position: absolute;
         inset: 0;
         border-radius: 50%;
-        border: 3px solid rgba(232, 93, 117, 0.18);
-        border-top-color: #e85d75;
+        border: 3px solid rgba(0, 128, 85, 0.18);
+        border-top-color: #008055;
         animation: ydsz-boot-spin 0.85s linear infinite;
       }
       html[data-theme="dark"] #ydsz-boot-ring {
-        border-color: rgba(240, 139, 154, 0.22);
-        border-top-color: #f08b9a;
-      }
-      .ydsz-boot-logo {
-        position: absolute;
-        inset: 14px;
-        width: 60px;
-        height: 60px;
-        border-radius: 14px;
-        object-fit: contain;
-        display: block;
-        animation: ydsz-boot-breathe 1.6s ease-in-out infinite;
-      }
-      .ydsz-boot-logo--dark {
-        display: none;
-      }
-      html[data-theme="dark"] .ydsz-boot-logo--light {
-        display: none;
-      }
-      html[data-theme="dark"] .ydsz-boot-logo--dark {
-        display: block;
+        border-color: rgba(52, 217, 155, 0.22);
+        border-top-color: #34D99B;
       }
       #ydsz-boot-text {
         font-size: 14px;
@@ -171,20 +152,8 @@
           transform: rotate(360deg);
         }
       }
-      @keyframes ydsz-boot-breathe {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 1;
-        }
-        50% {
-          transform: scale(0.94);
-          opacity: 0.88;
-        }
-      }
       @media (prefers-reduced-motion: reduce) {
-        #ydsz-boot-ring,
-        .ydsz-boot-logo {
+        #ydsz-boot-ring {
           animation: none;
         }
       }
@@ -277,20 +246,6 @@
       <div id="ydsz-boot" role="status" aria-live="polite">
         <div id="ydsz-boot-mark" aria-hidden="true">
           <div id="ydsz-boot-ring"></div>
-          <img
-            class="ydsz-boot-logo ydsz-boot-logo--light"
-            src="/logo_vertical_dark.svg"
-            alt=""
-            width="60"
-            height="60"
-          />
-          <img
-            class="ydsz-boot-logo ydsz-boot-logo--dark"
-            src="/logo_vertical_white.svg"
-            alt=""
-            width="60"
-            height="60"
-          />
         </div>
         <div id="ydsz-boot-text">Loading…</div>
       </div>

@@ -87,6 +87,7 @@ import { useIsMobile } from "../../hooks/useIsMobile";
 import { useListPanelCollapsed } from "../../hooks/useListPanelCollapsed";
 import { useServerTimezone } from "../../hooks/useServerTimezone";
 import PageShell from "../../layouts/PageShell";
+import { useSettingsHeader } from "../../layouts/SettingsWindow/SettingsHeaderContext";
 import { apiErrorMessage, isNotFoundApiError } from "../../utils/apiError";
 import { saveBlobAsFile } from "../../utils/saveBlobAsFile";
 import { createDetailRequestGate } from "../../utils/detailRequestGate";
@@ -297,6 +298,34 @@ export default function KnowledgeBasesPage() {
   const timeZone = useServerTimezone();
   const user = useCurrentUser();
   const canConfigureKb = userCan(user, "knowledge_settings");
+
+  // Stable handle for the settings action: openSettings is declared further
+  // down, so keep a mutable ref and seed it later — the lifted action always
+  // invokes the latest settings handler without re-registering the header.
+  const openSettingsRef = useRef<(() => void) | null>(null);
+  const settingsAction = canConfigureKb ? (
+    <Button
+      icon={<Settings size={15} />}
+      onClick={() => openSettingsRef.current?.()}
+    >
+      {t("knowledgeBases.settingsTitle")}
+    </Button>
+  ) : undefined;
+
+  /*
+   * When rendered inside a SettingsWindow, lift the page title + settings action
+   * up into the window chrome and suppress PageShell's own title row to avoid
+   * duplication.
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: t("knowledgeBases.title"),
+      subtitle: t("knowledgeBases.subtitle"),
+      actions: settingsAction,
+    },
+    [t, settingsAction],
+  );
+
   const { viewMode, setViewMode, showCardView } = useCardTableView(
     loadDocsViewMode(),
   );
@@ -1332,6 +1361,11 @@ export default function KnowledgeBasesPage() {
     });
   };
 
+  // Point the stable action ref at the real handler (declared above).
+  useEffect(() => {
+    openSettingsRef.current = openSettings;
+  });
+
   const startOnnxDownload = async (modelId: string) => {
     const selected = catalog.find((model) => model.id === modelId);
     const size = formatSizeGb(selected?.size_gb);
@@ -1975,6 +2009,7 @@ export default function KnowledgeBasesPage() {
           </Button>
         ) : undefined
       }
+      hideTitle={inSettings}
     >
       {loading ? (
         <div className={emptyLayoutClassName}>

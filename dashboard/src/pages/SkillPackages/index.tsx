@@ -57,6 +57,7 @@ import { useHorizontalResize } from "../../hooks/useHorizontalResize";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useListPanelCollapsed } from "../../hooks/useListPanelCollapsed";
 import PageShell from "../../layouts/PageShell";
+import { useSettingsHeader } from "../../layouts/SettingsWindow/SettingsHeaderContext";
 import {
   apiErrorMessage,
   isNotFoundApiError,
@@ -164,6 +165,19 @@ function PackageIconPicker({
 
 export default function SkillPackagesPage() {
   const { t } = useTranslation();
+
+  /*
+   * When rendered inside a SettingsWindow, lift the page title up into the
+   * window chrome and suppress PageShell's own title row to avoid duplication.
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: t("skillPackages.title"),
+      subtitle: t("skillPackages.subtitle"),
+    },
+    [t],
+  );
+
   const isMobile = useIsMobile();
   const { viewMode, setViewMode, showCardView } = useCardTableView("card");
   const [packages, setPackages] = useState<SkillPackage[]>([]);
@@ -600,6 +614,7 @@ export default function SkillPackagesPage() {
       title={t("skillPackages.title")}
       subtitle={isMobile ? undefined : t("skillPackages.subtitle")}
       fill
+      hideTitle={inSettings}
     >
       {loading && packages.length === 0 ? (
         <div className={styles.emptyLayout}>

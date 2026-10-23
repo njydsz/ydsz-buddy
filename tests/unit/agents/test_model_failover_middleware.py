@@ -28,7 +28,7 @@ def _model(ref: str, cap: int) -> SimpleNamespace:
 @pytest.mark.asyncio
 async def test_auto_route_switches_after_retry_exhaustion(monkeypatch) -> None:
     models = {"p/a": _model("p/a", 100_000), "p/b": _model("p/b", 100_000)}
-    configurable = {"model": "p/a", "Ydsz_auto_route": True}
+    configurable = {"model": "p/a", "ydsz_auto_route": True}
     health = ModelHealthRegistry(clock=lambda: 100.0)
     middleware = SafeModelFailoverMiddleware(
         health=health,
@@ -70,7 +70,7 @@ async def test_error_policy_raises_after_all_routes_exhaust_retries(
     monkeypatch, automatic: bool, asynchronous: bool
 ) -> None:
     models = {"p/a": _model("p/a", 100_000), "p/b": _model("p/b", 100_000)}
-    configurable = {"model": "p/a", "Ydsz_auto_route": automatic}
+    configurable = {"model": "p/a", "ydsz_auto_route": automatic}
     health = ModelHealthRegistry(clock=lambda: 100.0)
     middleware = SafeModelFailoverMiddleware(
         health=health,
@@ -116,7 +116,7 @@ async def test_explicit_route_retries_but_does_not_switch(monkeypatch) -> None:
     monkeypatch.setattr(
         model_failover,
         "_configurable",
-        lambda _request: {"model": "p/a", "Ydsz_auto_route": False},
+        lambda _request: {"model": "p/a", "ydsz_auto_route": False},
     )
     handler = MagicMock(side_effect=RuntimeError("HTTP 503 service unavailable"))
 
@@ -145,7 +145,7 @@ def test_terminal_failure_uses_observability_callback(monkeypatch) -> None:
     monkeypatch.setattr(
         model_failover,
         "_configurable",
-        lambda _request: {"model": "p/a", "Ydsz_auto_route": False},
+        lambda _request: {"model": "p/a", "ydsz_auto_route": False},
     )
     error = RuntimeError("HTTP 503 service unavailable")
 
@@ -179,7 +179,7 @@ async def test_failover_skips_model_with_smaller_context(monkeypatch) -> None:
     monkeypatch.setattr(
         model_failover,
         "_configurable",
-        lambda _request: {"model": "p/a", "Ydsz_auto_route": True},
+        lambda _request: {"model": "p/a", "ydsz_auto_route": True},
     )
     monkeypatch.setattr(model_failover, "_estimated_input_tokens", lambda _request: 2_000)
     attempts: list[str] = []
@@ -215,7 +215,7 @@ async def test_failover_respects_agent_context_cap(monkeypatch) -> None:
         "_configurable",
         lambda _request: {
             "model": "p/a",
-            "Ydsz_auto_route": True,
+            "ydsz_auto_route": True,
             "max_input_tokens": 1_000,
         },
     )
@@ -249,7 +249,7 @@ async def test_failover_does_not_retry_unknown_invalid_request(monkeypatch) -> N
     monkeypatch.setattr(
         model_failover,
         "_configurable",
-        lambda _request: {"model": "p/a", "Ydsz_auto_route": True},
+        lambda _request: {"model": "p/a", "ydsz_auto_route": True},
     )
     handler = MagicMock(side_effect=RuntimeError("HTTP 400 invalid tool schema"))
 
@@ -269,7 +269,7 @@ async def test_provider_failure_skips_sibling_model(monkeypatch) -> None:
         "p/b": _model("p/b", 100_000),
         "q/c": _model("q/c", 100_000),
     }
-    configurable = {"model": "p/a", "Ydsz_auto_route": True}
+    configurable = {"model": "p/a", "ydsz_auto_route": True}
     middleware = SafeModelFailoverMiddleware(
         health=ModelHealthRegistry(clock=lambda: 100.0),
         candidates=lambda _current, _vision: [

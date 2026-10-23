@@ -9,7 +9,9 @@ from urllib.parse import urlparse
 from ydsz.infra.utils.locale import Locale
 
 # Keep in sync with ydsz_harness.skills.catalog._summary_dict.
-_EXTENSION_NAMESPACES = ("ydsz", "harness", "lightclaw", "orca", "openclaw")
+# yaml.safe_load 保留大小写，SKILL.md 模板使用的 key 是 ``Ydsz``（大写 Y），
+# 同时兼容其他环境可能写入全小写 ``ydsz`` 的场景。
+_EXTENSION_NAMESPACES = ("Ydsz", "ydsz", "harness", "lightclaw", "orca", "openclaw")
 
 
 def _text(value: object) -> str:
@@ -57,7 +59,7 @@ def apply_skill_presentation(
         extension = extensions.get(namespace)
         if not isinstance(extension, Mapping):
             continue
-        if namespace == "ydsz":
+        if namespace.lower() == "ydsz":
             label = extension.get("label")
             short_summary = extension.get("summary")
             if isinstance(label, Mapping):

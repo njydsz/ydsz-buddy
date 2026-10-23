@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from "react";
+import { Segmented } from "antd";
 import { useTranslation } from "react-i18next";
 import { Globe, TerminalSquare } from "lucide-react";
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { usePathTabs } from "../../../hooks/usePathTabs";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { userCan } from "../../../utils/permissions";
@@ -71,12 +73,42 @@ export default function WorkbenchPage({
     `workbench.tabs.${activeTab}`,
   )}`;
 
+  /*
+   * When rendered inside a SettingsWindow, lift the title/subtitle/tab switch
+   * into the window chrome and hide PageShell's own title row. Outside
+   * (route /workbench) the title row + pathTabs stay as-is.
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: pageTitle,
+      subtitle: t("workbench.description"),
+      actions: (
+        <Segmented
+          size="small"
+          value={activeTab}
+          onChange={handleTabChange}
+          options={pathTabs.options.map((opt) => ({
+            value: opt.value,
+            label: (
+              <span>
+                {opt.icon}
+                {opt.label}
+              </span>
+            ),
+          }))}
+        />
+      ),
+    },
+    [activeTab, handleTabChange, pathTabs.options, t],
+  );
+
   return (
     <PageShell
       title={pageTitle}
       subtitle={t("workbench.description")}
       fill
       pathTabs={pathTabs}
+      hideTitle={inSettings}
     >
       <div className={styles.panels}>
         {isMounted("browser") && (

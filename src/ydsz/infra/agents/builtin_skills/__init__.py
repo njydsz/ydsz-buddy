@@ -8,9 +8,9 @@ from typing import Any
 
 YDSZ_BUILTIN_SKILLS_ROOT = "_builtin_skills"
 RETIRED_BUILTIN_SKILLS = ("install-skill",)
-_WORKSPACE_TOKEN = b"{{YDSZ_WORKSPACE}}"
-_SKILLS_TOKEN = b"{{YDSZ_SKILLS}}"
-_BUILTIN_TOKEN = b"{{YDSZ_BUILTIN_SKILLS}}"
+_WORKSPACE_TOKEN = b"{{Ydsz_WORKESPACE}}"
+_SKILLS_TOKEN = b"{{Ydsz_SKILLS}}"
+_BUILTIN_TOKEN = b"{{Ydsz_BUILTIN_SKILLS}}"
 _PACKAGE = "ydsz.infra.agents.builtin_skills"
 
 

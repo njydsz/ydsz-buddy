@@ -164,6 +164,9 @@
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 8px;
   width: 100%;
+  /* Prevent the last row from being clipped by the scroll container's
+     bottom edge when this grid is the last child of a flex scroll body. */
+  padding-bottom: 4px;
 }
 
 .hitlToolTile {

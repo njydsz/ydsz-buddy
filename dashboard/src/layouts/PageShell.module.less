@@ -130,12 +130,16 @@
   padding-top: 8px;
   /* Keep rightmost cards clear of the vertical scrollbar. */
   padding-right: 12px;
+  /* Keep the last row of cards clear of the scrollport's bottom edge so the
+     final tiles are reachable without a "butting against the wall" scroll. */
+  padding-bottom: 12px;
 
   @media (max-width: 767px) {
     flex: none;
     overflow: visible;
     padding-top: 0;
     padding-right: 0;
+    padding-bottom: 0;
   }
 }
 

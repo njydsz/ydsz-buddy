@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import TabBar, { type TabBarItem } from "../../../components/TabLabel/TabBar";
 import StreamSetupGuide from "../../../components/StreamSetupGuide/StreamSetupGuide";
 import { YdEmptyMascot } from "../../../components/EmptyState/YdEmptyMascot";
@@ -2275,6 +2276,20 @@ export default function ConnectorsPage() {
   >(null);
   const { catalog, instances, loading, refresh } = useConnectorInstances();
 
+  /*
+   * When rendered inside a SettingsWindow, lift the page title up into the
+   * window chrome and suppress PageShell's own title row to avoid duplication.
+   * (The custom TabBar used by PageShell.Tabbed renders outside the title row,
+   * so it stays visible — no tab re-lift needed.)
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.connectors.title"),
+      subtitle: t("pageShell.connectors.subtitle"),
+    },
+    [t],
+  );
+
   const configuredCount = useMemo(() => {
     return instances.filter((instance) => instance.has_credentials).length;
   }, [instances]);
@@ -2344,6 +2359,7 @@ export default function ConnectorsPage() {
     <PageShell.Tabbed
       title={t("pageShell.connectors.title")}
       subtitle={t("pageShell.connectors.subtitle")}
+      hideTitle={inSettings}
       tabBar={
         <TabBar
           tabs={CONNECTOR_TABS}

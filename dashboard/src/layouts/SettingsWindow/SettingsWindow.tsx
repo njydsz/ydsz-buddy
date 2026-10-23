@@ -37,6 +37,11 @@ const AdvancedSettingsPage = lazy(
 const RemoteDesktopPage = lazy(
   () => import("../../pages/Control/RemoteDesktop"),
 );
+const ConnectorsPage = lazy(() => import("../../pages/Agent/Connectors"));
+const SkillPackagesPage = lazy(() => import("../../pages/SkillPackages"));
+const KnowledgeBasesPage = lazy(() => import("../../pages/KnowledgeBases"));
+const WorkbenchPage = lazy(() => import("../../pages/Control/Workbench"));
+const AcpPage = lazy(() => import("../../pages/Agent/ACP"));
 
 function PageFallback() {
   return (
@@ -90,6 +95,16 @@ function renderPage(key: SettingsWindowKey) {
       return <RemoteDesktopPage />;
     case "token-usage":
       return <TokenUsagePage />;
+    case "connectors":
+      return <ConnectorsPage />;
+    case "skill-packages":
+      return <SkillPackagesPage />;
+    case "knowledge-bases":
+      return <KnowledgeBasesPage />;
+    case "workbench":
+      return <WorkbenchPage />;
+    case "acp":
+      return <AcpPage />;
     default:
       return null;
   }

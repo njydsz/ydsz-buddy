@@ -3,6 +3,7 @@ import { Alert, App, Button, Empty, Form, Switch } from "antd";
 
 import { useTranslation } from "react-i18next";
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { CardSkeleton } from "../../../components/Skeleton";
 import PeerOnlyRemoteAlert from "../../../components/PeerOnlyRemoteAlert";
 import { acpApi } from "../../../api/modules/acp";
@@ -368,11 +369,25 @@ export function ACPPanel({ agentId: agentIdProp }: ACPPanelProps = {}) {
 /** Standalone ACP page (sidebar Control entry). */
 export default function ACPPage() {
   const { t } = useTranslation();
+
+  /*
+   * When rendered inside a SettingsWindow, lift the page title up into the
+   * window chrome and suppress PageShell's own title row to avoid duplication.
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.acp.title"),
+      subtitle: t("pageShell.acp.subtitle"),
+    },
+    [t],
+  );
+
   return (
     <PageShell
       title={t("pageShell.acp.title")}
       subtitle={t("pageShell.acp.subtitle")}
       agentScoped
+      hideTitle={inSettings}
     >
       <ACPPanel />
     </PageShell>

@@ -1,6 +1,6 @@
 /* ===================================================================
    Ydsz Design System v3 – CSS Custom Properties
-   Default brand: Elegant Rose #E85D75
+   Default brand: Yuanbao Green #008055
    Palettes via html[data-palette="rose|tech|indigo|teal|violet|emerald|amber|slate"]
    Mode via html[data-theme="light|dark"]
    =================================================================== */
@@ -15,9 +15,9 @@ html[data-theme="light"] {
   --fn-bg-elevated: #ffffff;
   --fn-bg-layout: #f5f6f8;
   --fn-bg-container: #ffffff;
-  --fn-bg-hover: rgba(232, 93, 117, 0.04);
-  --fn-bg-active: rgba(232, 93, 117, 0.08);
-  --fn-bg-selected: rgba(232, 93, 117, 0.06);
+  --fn-bg-hover: rgba(0, 128, 85, 0.04);
+  --fn-bg-active: rgba(0, 128, 85, 0.08);
+  --fn-bg-selected: rgba(0, 128, 85, 0.06);
   --fn-bg-code: #f5f6f8;
   --fn-bg-toolbar: #fafbfc;
   --fn-bg-toolbar-hover: #f0f1f3;
@@ -47,10 +47,10 @@ html[data-theme="light"] {
   --fn-text-placeholder: #c0c5ce;
   --fn-text-disabled: #d1d5db;
   --fn-text-inverse: #ffffff;
-  --fn-text-brand: #e85d75;
+  --fn-text-brand: #008055;
   --fn-text-danger: #ef4444;
   --fn-text-link: var(--fn-text-brand);
-  --fn-logo-color: #e05040;
+  --fn-logo-color: #008055;
   --fn-logo-filter: none;
   --fn-font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 
@@ -60,17 +60,17 @@ html[data-theme="light"] {
   --fn-border-tertiary: #f9fafb;
   --fn-border-input: #d1d5db;
   --fn-border-input-alt: #e5e7eb;
-  --fn-border-focus: #e85d75;
+  --fn-border-focus: #008055;
   --fn-border: #e5e7eb;
   --fn-border-color: #e5e7eb;
   --fn-border-strong: #d1d5db;
   --fn-border-subtle: rgba(0, 0, 0, 0.06);
   --fn-border-success: #6ee7b7;
 
-  /* ---- Brand (rose) ---- */
-  --fn-color-brand: #e85d75;
-  --fn-color-brand-hover: #d14a62;
-  --fn-color-brand-soft: #d14a62;
+  /* ---- Brand (yuanbao) ---- */
+  --fn-color-brand: #008055;
+  --fn-color-brand-hover: #006b47;
+  --fn-color-brand-soft: #006b47;
   --fn-accent: var(--fn-color-brand);
   --fn-primary: var(--fn-color-brand);
   --fn-primary-bg: color-mix(in srgb, var(--fn-color-brand) 12%, transparent);
@@ -81,21 +81,21 @@ html[data-theme="light"] {
     transparent
   );
   --fn-color-on-brand: #ffffff;
-  --fn-color-brand-bg: rgba(232, 93, 117, 0.06);
-  --fn-color-brand-light: #fde8ec;
-  --fn-color-brand-shadow: rgba(232, 93, 117, 0.15);
-  --fn-color-brand-glow: rgba(232, 93, 117, 0.08);
+  --fn-color-brand-bg: rgba(0, 128, 85, 0.06);
+  --fn-color-brand-light: #f0fdf8;
+  --fn-color-brand-shadow: rgba(0, 128, 85, 0.15);
+  --fn-color-brand-glow: rgba(0, 128, 85, 0.08);
 
   /* ---- AI message bubble (frosted glass) ---- */
   --fn-assistant-bubble-bg: rgba(255, 255, 255, 0.45);
   --fn-assistant-bubble-bg-gradient: linear-gradient(
     135deg,
-    rgba(255, 240, 243, 0.6) 0%,
+    rgba(240, 253, 248, 0.7) 0%,
     rgba(255, 255, 255, 0.35) 50%,
-    rgba(255, 243, 245, 0.5) 100%
+    rgba(207, 250, 232, 0.45) 100%
   );
-  --fn-assistant-bubble-border: rgba(232, 93, 117, 0.12);
-  --fn-assistant-glow-color: 232, 93, 117;
+  --fn-assistant-bubble-border: rgba(0, 128, 85, 0.12);
+  --fn-assistant-glow-color: 0, 128, 85;
 
   /* ---- Semantic ---- */
   --fn-color-success: #10b981;
@@ -128,7 +128,7 @@ html[data-theme="light"] {
   --fn-tag-remote-bg: #fff7ed;
   --fn-tag-remote-text: #f97316;
   --fn-tag-remote-border: #fed7aa;
-  --fn-tag-channel-text: #e85d75;
+  --fn-tag-channel-text: #008055;
 
   /* ---- Shadows ---- */
   --fn-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -139,15 +139,15 @@ html[data-theme="light"] {
     0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --fn-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.07),
     0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --fn-shadow-brand: 0 4px 14px rgba(232, 93, 117, 0.18);
-  --fn-shadow-brand-lg: 0 8px 24px rgba(232, 93, 117, 0.24);
+  --fn-shadow-brand: 0 4px 14px rgba(0, 128, 85, 0.18);
+  --fn-shadow-brand-lg: 0 8px 24px rgba(0, 128, 85, 0.24);
 
   /* ---- Selected row ---- */
-  --fn-row-selected-bg: rgba(232, 93, 117, 0.05);
-  --fn-row-selected-hover: rgba(232, 93, 117, 0.09);
-  --fn-row-selected-alt-bg: rgba(232, 93, 117, 0.04);
-  --fn-row-selected-alt-hover: rgba(232, 93, 117, 0.08);
-  --fn-row-selected-border: #e85d75;
+  --fn-row-selected-bg: rgba(0, 128, 85, 0.05);
+  --fn-row-selected-hover: rgba(0, 128, 85, 0.09);
+  --fn-row-selected-alt-bg: rgba(0, 128, 85, 0.04);
+  --fn-row-selected-alt-hover: rgba(0, 128, 85, 0.08);
+  --fn-row-selected-border: #008055;
 
   /* ---- Cards ---- */
   --fn-card-border-normal: #e5e7eb;
@@ -159,9 +159,9 @@ html[data-theme="light"] {
   --fn-sidebar-bg: #ffffff;
   --fn-sidebar-border: #ebebeb;
   --fn-sidebar-item-hover: #f5f5f5;
-  --fn-sidebar-item-active-bg: #fde8ec;
-  --fn-sidebar-item-active: rgba(232, 93, 117, 0.08);
-  --fn-sidebar-item-active-text: #e85d75;
+  --fn-sidebar-item-active-bg: #f0fdf8;
+  --fn-sidebar-item-active: rgba(0, 128, 85, 0.08);
+  --fn-sidebar-item-active-text: #008055;
   --fn-sidebar-group-text: #b0b5be;
 
   /* ---- Header ---- */
@@ -199,9 +199,9 @@ html[data-theme="dark"] {
   --fn-bg-elevated: #1e1e1e;
   --fn-bg-layout: #0e0e0e;
   --fn-bg-container: #141414;
-  --fn-bg-hover: rgba(232, 93, 117, 0.08);
-  --fn-bg-active: rgba(232, 93, 117, 0.14);
-  --fn-bg-selected: rgba(232, 93, 117, 0.1);
+  --fn-bg-hover: rgba(0, 128, 85, 0.1);
+  --fn-bg-active: rgba(0, 128, 85, 0.16);
+  --fn-bg-selected: rgba(0, 128, 85, 0.12);
   --fn-bg-code: #1e1e1e;
   --fn-bg-toolbar: #161616;
   --fn-bg-toolbar-hover: #222222;
@@ -231,10 +231,10 @@ html[data-theme="dark"] {
   --fn-text-placeholder: rgba(255, 255, 255, 0.16);
   --fn-text-disabled: rgba(255, 255, 255, 0.16);
   --fn-text-inverse: #0e0e0e;
-  --fn-text-brand: #f08b9a;
+  --fn-text-brand: #34d99b;
   --fn-text-danger: #f87171;
   --fn-text-link: var(--fn-text-brand);
-  --fn-logo-color: #f08b9a;
+  --fn-logo-color: #34d99b;
   --fn-logo-filter: brightness(1.15) saturate(0.9);
   --fn-font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 
@@ -244,17 +244,17 @@ html[data-theme="dark"] {
   --fn-border-tertiary: rgba(255, 255, 255, 0.03);
   --fn-border-input: rgba(255, 255, 255, 0.12);
   --fn-border-input-alt: rgba(255, 255, 255, 0.09);
-  --fn-border-focus: #f08b9a;
+  --fn-border-focus: #34d99b;
   --fn-border: rgba(255, 255, 255, 0.08);
   --fn-border-color: rgba(255, 255, 255, 0.08);
   --fn-border-strong: rgba(255, 255, 255, 0.16);
   --fn-border-subtle: rgba(255, 255, 255, 0.05);
   --fn-border-success: rgba(52, 211, 153, 0.25);
 
-  /* ---- Brand (rose, lightened for dark bg) ---- */
-  --fn-color-brand: #f08b9a;
-  --fn-color-brand-hover: #e85d75;
-  --fn-color-brand-soft: #e85d75;
+  /* ---- Brand (yuanbao, deepened for dark bg) ---- */
+  --fn-color-brand: #008055;
+  --fn-color-brand-hover: #006b47;
+  --fn-color-brand-soft: #006b47;
   --fn-accent: var(--fn-color-brand);
   --fn-primary: var(--fn-color-brand);
   --fn-primary-bg: color-mix(in srgb, var(--fn-color-brand) 16%, transparent);
@@ -265,21 +265,21 @@ html[data-theme="dark"] {
     transparent
   );
   --fn-color-on-brand: #ffffff;
-  --fn-color-brand-bg: rgba(232, 93, 117, 0.12);
-  --fn-color-brand-light: rgba(232, 93, 117, 0.16);
-  --fn-color-brand-shadow: rgba(232, 93, 117, 0.25);
-  --fn-color-brand-glow: rgba(232, 93, 117, 0.08);
+  --fn-color-brand-bg: rgba(0, 128, 85, 0.14);
+  --fn-color-brand-light: rgba(0, 128, 85, 0.18);
+  --fn-color-brand-shadow: rgba(0, 128, 85, 0.28);
+  --fn-color-brand-glow: rgba(0, 128, 85, 0.1);
 
   /* ---- AI message bubble (frosted glass) ---- */
   --fn-assistant-bubble-bg: rgba(255, 255, 255, 0.06);
   --fn-assistant-bubble-bg-gradient: linear-gradient(
     135deg,
-    rgba(240, 139, 154, 0.1) 0%,
+    rgba(0, 212, 136, 0.12) 0%,
     rgba(255, 255, 255, 0.04) 50%,
-    rgba(240, 139, 154, 0.08) 100%
+    rgba(0, 212, 136, 0.08) 100%
   );
-  --fn-assistant-bubble-border: rgba(240, 139, 154, 0.14);
-  --fn-assistant-glow-color: 240, 139, 154;
+  --fn-assistant-bubble-border: rgba(0, 212, 136, 0.16);
+  --fn-assistant-glow-color: 0, 212, 136;
 
   /* ---- Semantic ---- */
   --fn-color-success: #34d399;
@@ -312,7 +312,7 @@ html[data-theme="dark"] {
   --fn-tag-remote-bg: rgba(249, 115, 22, 0.1);
   --fn-tag-remote-text: #fb923c;
   --fn-tag-remote-border: rgba(249, 115, 22, 0.2);
-  --fn-tag-channel-text: #f08b9a;
+  --fn-tag-channel-text: #34d99b;
 
   /* ---- Shadows ---- */
   --fn-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -320,15 +320,15 @@ html[data-theme="dark"] {
   --fn-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.22);
   --fn-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.35), 0 4px 6px rgba(0, 0, 0, 0.22);
   --fn-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4), 0 8px 10px rgba(0, 0, 0, 0.25);
-  --fn-shadow-brand: 0 4px 14px rgba(232, 93, 117, 0.22);
-  --fn-shadow-brand-lg: 0 8px 24px rgba(232, 93, 117, 0.3);
+  --fn-shadow-brand: 0 4px 14px rgba(0, 128, 85, 0.24);
+  --fn-shadow-brand-lg: 0 8px 24px rgba(0, 128, 85, 0.32);
 
   /* ---- Selected row ---- */
-  --fn-row-selected-bg: rgba(232, 93, 117, 0.1);
-  --fn-row-selected-hover: rgba(232, 93, 117, 0.16);
-  --fn-row-selected-alt-bg: rgba(232, 93, 117, 0.08);
-  --fn-row-selected-alt-hover: rgba(232, 93, 117, 0.13);
-  --fn-row-selected-border: #f08b9a;
+  --fn-row-selected-bg: rgba(0, 128, 85, 0.12);
+  --fn-row-selected-hover: rgba(0, 128, 85, 0.18);
+  --fn-row-selected-alt-bg: rgba(0, 128, 85, 0.1);
+  --fn-row-selected-alt-hover: rgba(0, 128, 85, 0.15);
+  --fn-row-selected-border: #34d99b;
 
   /* ---- Cards ---- */
   --fn-card-border-normal: rgba(255, 255, 255, 0.07);
@@ -340,9 +340,9 @@ html[data-theme="dark"] {
   --fn-sidebar-bg: #141414;
   --fn-sidebar-border: rgba(255, 255, 255, 0.06);
   --fn-sidebar-item-hover: rgba(255, 255, 255, 0.05);
-  --fn-sidebar-item-active-bg: rgba(232, 93, 117, 0.14);
-  --fn-sidebar-item-active: rgba(232, 93, 117, 0.14);
-  --fn-sidebar-item-active-text: #f08b9a;
+  --fn-sidebar-item-active-bg: rgba(0, 128, 85, 0.16);
+  --fn-sidebar-item-active: rgba(0, 128, 85, 0.16);
+  --fn-sidebar-item-active-text: #34d99b;
   --fn-sidebar-group-text: rgba(255, 255, 255, 0.28);
 
   /* ---- Header ---- */

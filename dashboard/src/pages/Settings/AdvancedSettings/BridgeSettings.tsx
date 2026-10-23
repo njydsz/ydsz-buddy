@@ -201,7 +201,7 @@ function AgentAvatar({
   return (
     <span
       className={styles.probeAvatar}
-      style={{ color: color || "var(--fn-color-brand, #e85d75)" }}
+      style={{ color: color || "var(--fn-color-brand, #008055)" }}
       aria-label={name}
     >
       <ExpertIcon
