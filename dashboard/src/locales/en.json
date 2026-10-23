@@ -309,6 +309,7 @@
     "title": "Settings",
     "searchPlaceholder": "Search settings",
     "group": {
+      "main": "Main",
       "models": "Model",
       "account": "Account & Security",
       "integration": "Integration & personalization",

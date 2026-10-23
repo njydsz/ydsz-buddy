@@ -309,6 +309,7 @@
     "title": "设置",
     "searchPlaceholder": "搜索设置项",
     "group": {
+      "main": "主要功能",
       "models": "模型",
       "account": "账户与安全",
       "integration": "集成与个性化",
