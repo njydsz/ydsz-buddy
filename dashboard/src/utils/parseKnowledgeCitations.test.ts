@@ -39,8 +39,7 @@ describe("parseKnowledgeCitations", () => {
   });
 
   it("omits path when absent", () => {
-    const raw =
-      'x<!--ydsz-kb-citations:[{"doc_id":"d1","filename":"a.md"}]-->';
+    const raw = 'x<!--ydsz-kb-citations:[{"doc_id":"d1","filename":"a.md"}]-->';
     expect(parseKnowledgeCitations(raw).citations[0].path).toBeUndefined();
   });
 });

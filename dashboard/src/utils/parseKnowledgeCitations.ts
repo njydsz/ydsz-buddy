@@ -11,8 +11,7 @@ export type KnowledgeCitation = {
   path?: string;
 };
 
-const CITATIONS_MARKER_RE =
-  /\n*\s*<!--ydsz-kb-citations:(\[[\s\S]*?\])-->\s*$/;
+const CITATIONS_MARKER_RE = /\n*\s*<!--ydsz-kb-citations:(\[[\s\S]*?\])-->\s*$/;
 
 function asCitation(raw: unknown): KnowledgeCitation | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;

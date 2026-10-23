@@ -123,8 +123,10 @@ const STREAM_ACTIVE_KEY = "云顶数字工作台:remote-browser:stream-active";
 const DEFAULT_REFRESH_INTERVAL = 500;
 const DEFAULT_START_URL = "https://cloud.tencent.com";
 const BROWSER_AI_PANEL_KEY = "云顶数字工作台:remote-browser:ai-panel-open";
-const BROWSER_AI_PANEL_WIDTH_KEY = "云顶数字工作台:remote-browser:ai-panel-width";
-const BROWSER_AI_PANEL_HEIGHT_KEY = "云顶数字工作台:remote-browser:ai-panel-height";
+const BROWSER_AI_PANEL_WIDTH_KEY =
+  "云顶数字工作台:remote-browser:ai-panel-width";
+const BROWSER_AI_PANEL_HEIGHT_KEY =
+  "云顶数字工作台:remote-browser:ai-panel-height";
 const BROWSER_AI_PANEL_MIN_WIDTH = 260;
 const BROWSER_AI_PANEL_MAX_WIDTH = 620;
 const BROWSER_AI_PANEL_MIN_HEIGHT = 200;

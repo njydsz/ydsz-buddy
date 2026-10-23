@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import AvatarDropdown from "../components/AvatarDropdown";
 import AppVersionBadge from "../components/AppVersionBadge";
-import { Popover } from "antd";
 import { ArrowRightLeft, ChevronDown, Settings, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useLayoutMode } from "../context/LayoutModeContext";
@@ -25,7 +24,6 @@ import MinimalRecordsHost from "./MinimalRecordsHost";
 import SidebarCollapsedIconNav from "./SidebarCollapsedIconNav";
 import { preferencesApi } from "../api/modules/preferences";
 import {
-  COLLAPSED_WIDTH,
   EXPANDED_WIDTH,
   buildNavSections,
   navSectionLabel,
@@ -33,7 +31,7 @@ import {
   type NavSection,
 } from "./sidebarNav";
 import { sectionsFromLayout, type SidebarNavLayout } from "./sidebarNavLayout";
-import SidebarNavCustomizer from "./SidebarNavCustomizer";
+import { useSidebarWidth } from "../hooks/useSidebarWidth";
 import styles from "./Sidebar.module.less";
 import { typeSize } from "../utils/mobileTypeScale";
 import { DESKTOP_DRAG_REGION_CLASS } from "../utils/desktopChrome";
@@ -117,6 +115,8 @@ interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   isMobile?: boolean;
+  /** Opens the full-screen settings window at the given page (or default). */
+  onOpenSettings: (key?: import("./SettingsWindow").SettingsWindowKey) => void;
 }
 
 function NavItemButton({
@@ -389,6 +389,7 @@ export default function Sidebar({
   collapsed,
   onToggle,
   isMobile,
+  onOpenSettings,
 }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -402,12 +403,12 @@ export default function Sidebar({
   const { layoutMode, minimalPane, setMinimalPane } = useLayoutMode();
   const isMinimal = layoutMode === "minimal";
   const onChatPath = isChatPath(location.pathname);
+  const { width: sidebarWidth, onResizeMouseDown } = useSidebarWidth(collapsed);
   const catalog = useMemo(
     () => buildNavSections(user, { mobileEnabled }),
     [user, mobileEnabled],
   );
   const [savedLayout, setSavedLayout] = useState<SidebarNavLayout | null>(null);
-  const [customizerOpen, setCustomizerOpen] = useState(false);
   const navSections = useMemo(
     () => sectionsFromLayout(catalog, savedLayout),
     [catalog, savedLayout],
@@ -465,6 +466,13 @@ export default function Sidebar({
   }, [isMinimal, selectMinimalPane]);
 
   const handleNavigate = (path: string) => {
+    // Token 统计 lives inside the SettingsWindow — open it there instead of
+    // navigating to a standalone route.
+    if (path === "/token-usage") {
+      onOpenSettings("token-usage");
+      if (isMobile) onToggle();
+      return;
+    }
     // When navigating to /chat, preserve the current chatId in the URL so the
     // Chat component is not remounted (key stays the same) and the user stays
     // on their most recent conversation instead of seeing a blank welcome screen.
@@ -502,32 +510,6 @@ export default function Sidebar({
     setChatSidebarOpen,
   ]);
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const gearBtnRef = useRef<HTMLButtonElement>(null);
-
-  /** Settings groups shown in the popover — ordered for display. */
-  const settingsGroups = useMemo(() => {
-    const allById = new Map(navSections.flatMap((s) => s.items.map((i) => [i.key, i])));
-    const order = [
-      "models",
-      "admin-users",
-      "admin-storage",
-      "channels",
-      "admin-plugins",
-      "personalization",
-      "workbench",
-      "bridge",
-      "admin-security",
-      "admin-advanced",
-      "remote-desktop",
-      "updates",
-      "environments",
-    ];
-    return order
-      .map((key) => allById.get(key))
-      .filter((item): item is NonNullable<typeof item> => Boolean(item));
-  }, [navSections]);
-
   const brandInner = (
     <div
       style={{
@@ -541,65 +523,29 @@ export default function Sidebar({
     >
       <span
         style={{
-          fontSize: isRailCollapsed ? 13 : isMobile ? 17 : 16,
+          fontSize: isMobile ? 17 : 16,
           fontWeight: 700,
           color: isDark ? "#fff" : "#1a1a1a",
           letterSpacing: "0.02em",
           lineHeight: 1.2,
-          whiteSpace: isRailCollapsed ? "nowrap" : "normal",
+          whiteSpace: "normal",
           flexShrink: 0,
         }}
       >
-        {isRailCollapsed ? "Yd" : "Ydsz Worker"}
+        {isRailCollapsed ? null : t("app.brandName")}
       </span>
-{!isRailCollapsed && !isMobile && (
-  <AppVersionBadge isMobile={isMobile} isSidebar />
-)}
-      <Popover
-        open={settingsOpen && !isRailCollapsed}
-        onOpenChange={setSettingsOpen}
-        placement="bottomRight"
-        trigger="click"
-        destroyOnHidden
-        styles={{
-          body: { padding: 0 },
-        }}
-        getPopupContainer={() => gearBtnRef.current?.parentElement ?? document.body}
-        content={
-          <ul className={styles.settingsGroupList}>
-            {settingsGroups.map((item) => (
-              <li key={item.key}>
-                <button
-                  type="button"
-                  className={styles.settingsGroupItem}
-                  onClick={() => {
-                    setSettingsOpen(false);
-                    navigate(item.path);
-                  }}
-                >
-                  <span className={styles.settingsGroupIcon}>{item.icon}</span>
-                  <span className={styles.settingsGroupLabel}>
-                    {t(item.labelKey)}
-                  </span>
-                  {item.badge ? (
-                    <span className={styles.settingsGroupBadge}>{item.badge}</span>
-                  ) : null}
-                </button>
-              </li>
-            ))}
-          </ul>
-        }
+      {!isRailCollapsed && !isMobile && (
+        <AppVersionBadge isMobile={isMobile} isSidebar />
+      )}
+      <button
+        type="button"
+        className={styles.sidebarGearBtn}
+        aria-label={t("nav.settings")}
+        title={t("nav.settings")}
+        onClick={() => onOpenSettings()}
       >
-        <button
-          ref={gearBtnRef}
-          type="button"
-          className={styles.sidebarGearBtn}
-          aria-label={t("account.settings")}
-          hidden={isRailCollapsed}
-        >
-          <Settings size={15} strokeWidth={1.8} />
-        </button>
-      </Popover>
+        <Settings size={isRailCollapsed ? 16 : 15} strokeWidth={1.8} />
+      </button>
     </div>
   );
 
@@ -619,19 +565,8 @@ export default function Sidebar({
         placement="sidebar"
         compact={isRailCollapsed}
         onBeforeOpenSettings={isMobile && !collapsed ? onToggle : undefined}
-        onCustomizeNav={() => setCustomizerOpen(true)}
       />
     </div>
-  );
-
-  const customizer = (
-    <SidebarNavCustomizer
-      open={customizerOpen}
-      catalog={catalog}
-      layout={savedLayout}
-      onClose={() => setCustomizerOpen(false)}
-      onSaved={setSavedLayout}
-    />
   );
 
   const primaryItems = navSections.find((section) => !section.id)?.items ?? [];
@@ -798,7 +733,6 @@ export default function Sidebar({
           }}
         >
           {userFooter}
-          {customizer}
         </div>
       </div>
     );
@@ -809,8 +743,8 @@ export default function Sidebar({
   return (
     <div
       style={{
-        width: isRailCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
-        minWidth: isRailCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
+        width: sidebarWidth,
+        minWidth: sidebarWidth,
         background: "var(--fn-sidebar-bg)",
         borderRight: "none",
         transition:
@@ -821,6 +755,7 @@ export default function Sidebar({
         flexShrink: 0,
         alignSelf: "stretch",
         minHeight: 0,
+        position: "relative",
       }}
     >
       <div
@@ -830,7 +765,7 @@ export default function Sidebar({
           alignItems: "center",
           gap: 6,
           minWidth: 0,
-          padding: isRailCollapsed ? "12px 0" : "14px 14px 10px",
+          padding: isRailCollapsed ? "12px 8px" : "14px 14px 10px",
           justifyContent: "center",
           flexShrink: 0,
         }}
@@ -852,7 +787,24 @@ export default function Sidebar({
       </div>
 
       {userFooter}
-      {customizer}
+
+      {/* Drag-to-resize handle — desktop expanded only. */}
+      {!isRailCollapsed && (
+        <div
+          onMouseDown={onResizeMouseDown}
+          aria-label="调整侧边栏宽度"
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 4,
+            cursor: "col-resize",
+            zIndex: 40,
+            background: "transparent",
+          }}
+        />
+      )}
     </div>
   );
 }

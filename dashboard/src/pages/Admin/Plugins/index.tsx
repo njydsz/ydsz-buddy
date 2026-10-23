@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Tabs } from "antd";
 import { Puzzle, Store } from "lucide-react";
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import TabLabel from "../../../components/TabLabel";
 import { InstalledPluginsPanel } from "./InstalledPluginsPanel";
 import { PluginMarketPanel } from "./PluginMarketPanel";
@@ -18,6 +19,13 @@ function parseTab(raw: string | null): TabKey {
 
 export default function AdminPluginsPage() {
   const { t } = useTranslation();
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.adminPlugins.title"),
+      subtitle: t("pageShell.adminPlugins.subtitle"),
+    },
+    [],
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabKey>(() =>
     parseTab(searchParams.get("tab")),
@@ -42,6 +50,7 @@ export default function AdminPluginsPage() {
     <PageShell.FillTabs
       title={t("pageShell.adminPlugins.title")}
       subtitle={t("pageShell.adminPlugins.subtitle")}
+      hideTitle={inSettings}
     >
       <Tabs
         activeKey={activeTab}

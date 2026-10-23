@@ -286,8 +286,6 @@
     "records": "Tasks",
     "paneSettings": "Settings",
     "paneRecords": "Tasks",
-    "customize": "Customize navigation",
-    "customizeTitle": "Customize navigation",
     "ungrouped": "Ungrouped",
     "ungroupedHint": "Shown at the top of the sidebar, without a heading.",
     "hiddenItems": "Hidden",
@@ -306,6 +304,19 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list"
+  },
+  "settingsWindow": {
+    "title": "Settings",
+    "searchPlaceholder": "Search settings",
+    "group": {
+      "models": "Model",
+      "account": "Account & Security",
+      "integration": "Integration & personalization",
+      "system": "System & updates",
+      "remote": "Remote",
+      "analytics": "Analytics"
+    },
+    "close": "Close"
   },
   "skillPackages": {
     "title": "Skill Packages",
@@ -4070,15 +4081,15 @@
   "account": {
     "myAccount": "My Account",
     "settings": "Personal Settings",
-    "appearance": "Appearance",
-    "systemSettings": "System Settings",
+    "appearance": "Color Scheme",
+    "systemSettings": "Personal Settings",
     "palette": "Palette",
     "paletteHint": "Choose a brand palette, independent of light/dark mode.",
     "language": "Language",
     "languageHint": "Choose the console display language.",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "helpFeedback": "Help & Feedback",
+    "helpFeedback": "Feedback",
     "helpBuilding": "Under construction",
     "projectUrl": "Project",
     "checkUpdates": "Check for Updates",
@@ -4136,7 +4147,7 @@
     "title": "User Settings",
     "description": "Manage password protection and display preferences.",
     "passwordProtection": "Password Protection",
-    "appearance": "Appearance",
+    "appearance": "Color Scheme",
     "language": "Language",
     "passwordProtectionDesc": "Require a password to access the console.",
     "setPasswordHint": "Set a password to enable protection.",

@@ -42,9 +42,7 @@ export default function AppVersionBadge({
           isMobile ? styles.headerVersionMobile : ""
         } ${styles.headerVersionClickable}`}
         style={
-          isSidebar
-            ? { color: "var(--fn-sidebar-group-text)" }
-            : undefined
+          isSidebar ? { color: "var(--fn-sidebar-group-text)" } : undefined
         }
         onClick={handleClick}
         aria-label={tooltip}

@@ -42,6 +42,12 @@ interface PageShellProps {
   showTeams?: boolean;
   /** When true, the content area does not scroll; children fill remaining height. */
   fill?: boolean;
+  /**
+   * When true, the title row (title + subtitle + actions) is hidden entirely
+   * and no spacer is rendered. Useful when the page is rendered inside a
+   * host chrome (e.g. SettingsWindow) that owns the title.
+   */
+  hideTitle?: boolean;
   children: React.ReactNode;
 }
 
@@ -98,6 +104,7 @@ function PageShell({
   agentScoped,
   showTeams,
   fill,
+  hideTitle,
   children,
 }: PageShellProps) {
   const isMobile = useIsMobile();
@@ -141,43 +148,55 @@ function PageShell({
         overflow: "hidden",
       }}
     >
-      {/* Title row — fixed, never scrolls */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 12,
-          flexShrink: 0,
-          marginBottom: agentScoped ? 12 : 24,
-          paddingRight: titleRowEndPadding(outerPad),
-        }}
-      >
-        <div>
-          <Title
-            level={4}
-            style={{
-              margin: 0,
-              lineHeight: "28px",
-              fontSize: 20,
-              fontWeight: 600,
-            }}
-          >
-            {title}
-          </Title>
-          {subtitle && (
-            <Text
-              type="secondary"
-              style={{ fontSize: 13, marginTop: 4, display: "block" }}
+      {/* Title row — fixed, never scrolls. Skipped entirely when hideTitle. */}
+      {!hideTitle && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 12,
+            flexShrink: 0,
+            marginBottom: agentScoped ? 12 : 24,
+            paddingRight: titleRowEndPadding(outerPad),
+          }}
+        >
+          <div>
+            <Title
+              level={4}
+              style={{
+                margin: 0,
+                lineHeight: "28px",
+                fontSize: 20,
+                fontWeight: 600,
+              }}
             >
-              {subtitle}
-            </Text>
+              {title}
+            </Title>
+            {subtitle && (
+              <Text
+                type="secondary"
+                style={{ fontSize: 13, marginTop: 4, display: "block" }}
+              >
+                {subtitle}
+              </Text>
+            )}
+          </div>
+          {titleActions && (
+            <div
+              style={{
+                flexShrink: 1,
+                paddingTop: 2,
+                minWidth: 0,
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              {titleActions}
+            </div>
           )}
         </div>
-        {titleActions && (
-          <div style={{ flexShrink: 0, paddingTop: 2 }}>{titleActions}</div>
-        )}
-      </div>
+      )}
 
       {agentScoped && (
         <div className={styles.agentBar}>

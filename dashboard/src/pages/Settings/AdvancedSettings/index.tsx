@@ -20,6 +20,7 @@ import tabStyles from "./tabContent.module.less";
 import ForbiddenPage from "../../../components/ForbiddenPage";
 import { useGatedSearchTabs } from "../../../hooks/useGatedSearchTabs";
 import { ADVANCED_TAB_PERMISSIONS } from "../../../utils/permissions";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 
 type TabKey =
   | "env-vars"
@@ -61,6 +62,14 @@ export default function AdvancedSettingsPage() {
     querylessKey: "env-vars",
   });
 
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.adminAdvanced.title"),
+      subtitle: t("pageShell.adminAdvanced.subtitle"),
+    },
+    [],
+  );
+
   const moved = searchParams.get("tab");
   if (moved === "voice" || moved === "search") {
     return <Navigate to={`/admin/models?tab=${moved}`} replace />;
@@ -92,6 +101,7 @@ export default function AdvancedSettingsPage() {
     <PageShell.Tabbed
       title={t("pageShell.adminAdvanced.title")}
       subtitle={t("pageShell.adminAdvanced.subtitle")}
+      hideTitle={inSettings}
       tabBar={
         <TabBar tabs={allowedTabs} activeKey={activeTab} onChange={selectTab} />
       }

@@ -26,8 +26,7 @@ describe("workspaceIoPath", () => {
   });
 
   it("keeps agent-home absolute as file:// for BackendWorkspace failback", () => {
-    const abs =
-      "/Users/jubaoliang/.ydsz/agents/SBGM5Q/earth-presentation.html";
+    const abs = "/Users/jubaoliang/.ydsz/agents/SBGM5Q/earth-presentation.html";
     expect(toWorkspaceApiPath(abs)).toBe(`file://${abs}`);
     expect(toDockWorkspaceApiPath(abs)).toBe(`file://${abs}`);
     expect(

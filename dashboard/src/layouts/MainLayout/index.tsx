@@ -2,6 +2,8 @@ import { Layout } from "antd";
 import { lazy, Suspense, useEffect, useState, useCallback } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "../Sidebar";
+import { SettingsWindow } from "../SettingsWindow";
+import type { SettingsWindowKey } from "../SettingsWindow";
 import Header from "../Header";
 import RailEdgeControl from "../../components/RailEdgeControl";
 import PageLoading from "../../components/PageLoading";
@@ -23,6 +25,7 @@ import { useKeyboardOffset } from "../../hooks/useKeyboardOffset";
 import { useChatSidebarOpen } from "../../pages/Chat/hooks/useChatSidebarState";
 import { EXPAND_CHAT_RAIL_EVENT } from "../../pages/Chat/components/ChatSidebarPanel";
 import RequirePermission from "../../components/RequirePermission";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { routeNeedsPermission } from "../../utils/permissions";
 import { useLayoutMode } from "../../context/LayoutModeContext";
 import { useDashboardPushToast } from "../../hooks/useDashboardPushToast";
@@ -67,8 +70,13 @@ export default function MainLayout() {
     [...FULLSCREEN_PATHS].some((p) => currentPath.startsWith(p + "/")) ||
     (isMobile && MOBILE_FULLSCREEN_PATHS.has(currentPath));
   const onWorkbench = isWorkbenchPath(currentPath);
+  const user = useCurrentUser();
 
   const [collapsed, setCollapsed] = useState(() => getSavedCollapsed());
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsInitialKey, setSettingsInitialKey] = useState<
+    SettingsWindowKey | undefined
+  >(undefined);
   const [chatSidebarOpen, setChatSidebarOpen] = useChatSidebarOpen();
   const [workbenchMounted, setWorkbenchMounted] = useState(() => onWorkbench);
 
@@ -223,6 +231,14 @@ export default function MainLayout() {
               collapsed={collapsed}
               onToggle={toggleCollapsed}
               isMobile={isMobile}
+              onOpenSettings={(key) => {
+                if (key) {
+                  setSettingsInitialKey(key);
+                } else {
+                  setSettingsInitialKey(undefined);
+                }
+                setSettingsOpen(true);
+              }}
             />
             {!isMobile && (
               <RailEdgeControl
@@ -356,6 +372,13 @@ export default function MainLayout() {
           </div>
         </div>
       </BackupOperationProvider>
+
+      <SettingsWindow
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        user={user}
+        initialKey={settingsInitialKey}
+      />
     </ServiceRestartProvider>
   );
 }

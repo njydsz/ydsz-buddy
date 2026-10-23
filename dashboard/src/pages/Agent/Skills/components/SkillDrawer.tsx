@@ -273,10 +273,22 @@ function parseSkillFormFromDetail(detail: SkillDetail): SkillFormValues {
   return {
     name: displayName,
     description,
-    labelZh: presentationValue(YDSZ_LABEL_ZH_META_KEY, LEGACY_LABEL_ZH_META_KEY),
-    labelEn: presentationValue(YDSZ_LABEL_EN_META_KEY, LEGACY_LABEL_EN_META_KEY),
-    summaryZh: presentationValue(YDSZ_SUMMARY_ZH_META_KEY, LEGACY_SUMMARY_ZH_META_KEY),
-    summaryEn: presentationValue(YDSZ_SUMMARY_EN_META_KEY, LEGACY_SUMMARY_EN_META_KEY),
+    labelZh: presentationValue(
+      YDSZ_LABEL_ZH_META_KEY,
+      LEGACY_LABEL_ZH_META_KEY,
+    ),
+    labelEn: presentationValue(
+      YDSZ_LABEL_EN_META_KEY,
+      LEGACY_LABEL_EN_META_KEY,
+    ),
+    summaryZh: presentationValue(
+      YDSZ_SUMMARY_ZH_META_KEY,
+      LEGACY_SUMMARY_ZH_META_KEY,
+    ),
+    summaryEn: presentationValue(
+      YDSZ_SUMMARY_EN_META_KEY,
+      LEGACY_SUMMARY_EN_META_KEY,
+    ),
     emoji,
     metadata: metadata.filter(
       (entry) => !ALL_PRESENTATION_META_KEYS.has(entry.key),

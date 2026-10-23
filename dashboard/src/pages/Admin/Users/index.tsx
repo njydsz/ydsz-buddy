@@ -13,6 +13,7 @@ import OauthProviderCard from "./OauthProviderCard";
 import { OAUTH_APP_PROVIDERS, type OauthAppKind } from "./oauthProviders";
 import ForbiddenPage from "../../../components/ForbiddenPage";
 import { useGatedSearchTabs } from "../../../hooks/useGatedSearchTabs";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { USERS_TAB_PERMISSIONS } from "../../../utils/permissions";
 import feishuIcon from "../../../assets/channels/feishu.svg";
 import wecomIcon from "../../../assets/channels/wecom.svg";
@@ -112,6 +113,13 @@ export default function AdminUsersPage() {
     parseTab,
     querylessKey: "local",
   });
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.adminUsers.title"),
+      subtitle: t("pageShell.adminUsers.subtitle"),
+    },
+    [],
+  );
 
   if (forbidden) return <ForbiddenPage />;
 
@@ -152,6 +160,7 @@ export default function AdminUsersPage() {
     <PageShell.Tabbed
       title={t("pageShell.adminUsers.title")}
       subtitle={t("pageShell.adminUsers.subtitle")}
+      hideTitle={inSettings}
       tabBar={
         <TabBar tabs={allowedTabs} activeKey={activeTab} onChange={selectTab} />
       }

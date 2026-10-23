@@ -11,6 +11,7 @@ import {
   Wrench,
 } from "lucide-react";
 import PageShell, { pageShellStyles } from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { useAgent } from "../../../context/AgentContext";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { usePathTabs } from "../../../hooks/usePathTabs";
@@ -101,6 +102,13 @@ export default function PersonalizationPage() {
   const pageTitle = `${t("personalization.title")} / ${t(
     `personalization.tabs.${activeTab}`,
   )}`;
+  const inSettings = useSettingsHeader(
+    {
+      title: t("personalization.title"),
+      subtitle: t("personalization.description"),
+    },
+    [activeTab, t],
+  );
   const showTeams = activeTab === "memory" || activeTab === "channels";
   const expertOnlyBlocked = isTeamAgent(activeAgent) && !showTeams;
   const teamNeedsExpert = t("agentSelector.teamNeedsExpert", {
@@ -118,10 +126,11 @@ export default function PersonalizationPage() {
     <PageShell
       title={pageTitle}
       subtitle={t("personalization.description")}
+      hideTitle={inSettings}
       agentScoped
       showTeams={showTeams}
       fill={!isMobile}
-      pathTabs={pathTabs}
+      pathTabs={inSettings ? undefined : pathTabs}
     >
       {activeAgent?.bridge ? (
         <Alert

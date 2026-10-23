@@ -45,9 +45,7 @@ describe("inbound peer labels", () => {
 
 describe("peerHostLabel", () => {
   it("keeps the hostname and a non-default port", () => {
-    expect(peerHostLabel("https://demo.ydsz.chat/path")).toBe(
-      "demo.ydsz.chat",
-    );
+    expect(peerHostLabel("https://demo.ydsz.chat/path")).toBe("demo.ydsz.chat");
     expect(peerHostLabel("http://sandbox-a156c721:8088")).toBe(
       "sandbox-a156c721:8088",
     );

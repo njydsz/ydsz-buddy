@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { apiErrorMessage } from "../../../utils/apiError";
 import {
   securityApi,
@@ -80,13 +81,15 @@ function textToRules(text: string | undefined): FilesystemRule[] {
 function PolicyFooter({
   saving,
   onSave,
+  compact = false,
 }: {
   saving: boolean;
   onSave: () => void;
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <div className={styles.footer}>
+    <div className={compact ? styles.footerCompact : styles.footer}>
       <Button type="primary" loading={saving} onClick={onSave}>
         {t("security.saveAll")}
       </Button>
@@ -110,6 +113,8 @@ export default function SecuritySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [policy, setPolicy] = useState<SecurityPolicy | null>(null);
+  // useSettingsHeader must be declared after policy/saving so its handleSave
+  // closure (and [saving, policy] deps) are captured correctly.
   const [hitlToolCatalog, setHitlToolCatalog] = useState<HitlToolCatalogItem[]>(
     [],
   );
@@ -200,7 +205,22 @@ export default function SecuritySettingsPage() {
     }
   };
 
-  const saveFooter = (
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.security.title"),
+      subtitle: t("pageShell.security.subtitle"),
+      actions: (
+        <PolicyFooter
+          saving={saving}
+          onSave={() => void handleSave()}
+          compact
+        />
+      ),
+    },
+    [saving, policy],
+  );
+
+  const saveFooter = inSettings ? null : (
     <PolicyFooter saving={saving} onSave={() => void handleSave()} />
   );
 
@@ -395,6 +415,7 @@ export default function SecuritySettingsPage() {
     <PageShell.Tabbed
       title={t("pageShell.security.title")}
       subtitle={t("pageShell.security.subtitle")}
+      hideTitle={inSettings}
       tabBar={
         <TabBar tabs={allowedTabs} activeKey={activeTab} onChange={selectTab} />
       }

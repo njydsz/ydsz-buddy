@@ -42,6 +42,7 @@ import { UsageStats, type UsageStatItem } from "./UsageStats";
 import { useUserRole } from "../../../hooks/useUserRole";
 import { request, requestBlob } from "../../../api/request";
 import { useAgent } from "../../../context/AgentContext";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import { useTheme } from "../../../context/ThemeContext";
 import { brandPrimary } from "../../../styles/themePalettes";
 import { message } from "../../../utils/antdMessage";
@@ -833,6 +834,19 @@ export default function TokenUsagePage() {
   const role = useUserRole();
   const isAdmin = role === "admin";
   const isMobile = useIsMobile();
+
+  /*
+   * When rendered inside a SettingsWindow, lift the page title up into the
+   * window chrome and suppress PageShell's own title row to avoid duplication.
+   */
+  const inSettings = useSettingsHeader(
+    {
+      title: t("pageShell.tokenUsage.title"),
+      subtitle: t("pageShell.tokenUsage.subtitle"),
+    },
+    [t],
+  );
+
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(() =>
     defaultLast30dRange(),
   );
@@ -1019,6 +1033,7 @@ export default function TokenUsagePage() {
       title={t("pageShell.tokenUsage.title")}
       subtitle={t("pageShell.tokenUsage.subtitle")}
       fill
+      hideTitle={inSettings}
     >
       <div className={styles.page}>
         <Alert

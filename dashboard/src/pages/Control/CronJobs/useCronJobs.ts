@@ -132,9 +132,7 @@ export function jobToFormValues(
     ),
     fresh_thread: Boolean(meta.ydsz_fresh_thread),
     session_key:
-      typeof meta.ydsz_session_key === "string"
-        ? meta.ydsz_session_key
-        : null,
+      typeof meta.ydsz_session_key === "string" ? meta.ydsz_session_key : null,
     mcp_servers: Array.isArray(meta.ydsz_mcp_servers)
       ? (meta.ydsz_mcp_servers as string[])
       : [],

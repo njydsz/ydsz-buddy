@@ -26,6 +26,7 @@ import PageShell from "../../../layouts/PageShell";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { userCan } from "../../../utils/permissions";
 import { useProviders, type ProviderRow } from "./useProviders";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import {
   groupPresets,
   isLocalPreset,
@@ -115,6 +116,31 @@ export default function ModelsPage() {
     } else updated.delete("tab");
     setSearchParams(updated, { replace: true });
   };
+
+  /*
+   * When rendered inside a SettingsWindow, lift the page title/subtitle/
+   * actions up into the window chrome (A区域). PageShell then renders its
+   * own title row empty to avoid duplication. Outside SettingsWindow
+   * (route /admin/models) PageShell retains its title row as-is.
+   */
+  const standaloneTitle = t("pageShell.models.title");
+  const standaloneSubtitle = t("pageShell.models.subtitle");
+  const standaloneActions =
+    modelCategory === "chat" ? (
+      <Space>
+        <Button icon={<RefreshCw size={14} />} onClick={() => void fetchAll()}>
+          {t("common.refresh")}
+        </Button>
+      </Space>
+    ) : null;
+  const inSettings = useSettingsHeader(
+    {
+      title: standaloneTitle,
+      subtitle: standaloneSubtitle,
+      actions: standaloneActions,
+    },
+    [modelCategory, standaloneTitle],
+  );
 
   const {
     featured: cloudFeatured,
@@ -246,20 +272,10 @@ export default function ModelsPage() {
 
   return (
     <PageShell
-      title={t("pageShell.models.title")}
-      subtitle={t("pageShell.models.subtitle")}
-      actions={
-        modelCategory === "chat" ? (
-          <Space>
-            <Button
-              icon={<RefreshCw size={14} />}
-              onClick={() => void fetchAll()}
-            >
-              {t("common.refresh")}
-            </Button>
-          </Space>
-        ) : null
-      }
+      title={standaloneTitle}
+      subtitle={standaloneSubtitle}
+      actions={standaloneActions}
+      hideTitle={inSettings}
     >
       <Tabs
         activeKey={modelCategory}

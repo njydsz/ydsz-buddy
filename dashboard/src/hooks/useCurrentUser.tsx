@@ -40,9 +40,7 @@ export function useCurrentUser(): YdszUser | null {
   return useContext(CurrentUserContext)?.user ?? null;
 }
 
-export function useSetCurrentUser(): Dispatch<
-  SetStateAction<YdszUser | null>
-> {
+export function useSetCurrentUser(): Dispatch<SetStateAction<YdszUser | null>> {
   const ctx = useContext(CurrentUserContext);
   if (!ctx) {
     return () => undefined;

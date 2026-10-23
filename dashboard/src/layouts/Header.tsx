@@ -1,5 +1,6 @@
 import { Layout } from "antd";
 import { Menu as MenuIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import PwaInstallPrompt from "../components/PwaInstallPrompt";
 import AppVersionBadge from "../components/AppVersionBadge";
 import CurrentVersionBadge from "../components/CurrentVersionBadge";
@@ -20,6 +21,7 @@ interface HeaderProps {
  * Desktop GitHub / theme controls moved into the account popover.
  */
 export default function Header({ onToggle, isMobile }: HeaderProps) {
+  const { t } = useTranslation();
   const { isDark } = useTheme();
 
   if (!isMobile) return null;
@@ -85,7 +87,7 @@ export default function Header({ onToggle, isMobile }: HeaderProps) {
             display: "block",
           }}
         >
-          Ydsz Worker
+          {t("app.brandName")}
         </span>
         <div
           style={{

@@ -11,6 +11,7 @@ import { Spin, Tabs } from "antd";
 import { HardDrive, LayoutGrid } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PageShell from "../../../layouts/PageShell";
+import { useSettingsHeader } from "../../../layouts/SettingsWindow/SettingsHeaderContext";
 import TabLabel from "../../../components/TabLabel";
 import { YdEmptyMascot } from "../../../components/EmptyState";
 import StreamSetupGuide from "../../../components/StreamSetupGuide/StreamSetupGuide";
@@ -157,10 +158,18 @@ export default function AdminStoragePage() {
     [configuredKinds],
   );
 
+  const standaloneTitle = t("storage.pageTitle");
+  const standaloneSubtitle = t("storage.pageSubtitle");
+  const inSettings = useSettingsHeader(
+    { title: standaloneTitle, subtitle: standaloneSubtitle },
+    [standaloneTitle, standaloneSubtitle],
+  );
+
   return (
     <PageShell.FillTabs
-      title={t("storage.pageTitle")}
-      subtitle={t("storage.pageSubtitle")}
+      title={standaloneTitle}
+      subtitle={standaloneSubtitle}
+      hideTitle={inSettings}
     >
       <Tabs
         activeKey={activeTab}

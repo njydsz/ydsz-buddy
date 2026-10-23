@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Segmented, Steps, Typography } from "antd";
-import { Lock, UserCog, Cpu, CheckCircle, Wand2, Database } from "lucide-react";
+import { Lock, UserCog, Cpu, CheckCircle, Database } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ensureLocaleBundle } from "../../i18n";
 import { storeUiLocale, type UiLocale } from "../../utils/locale";
@@ -9,7 +9,6 @@ import { storeUiLocale, type UiLocale } from "../../utils/locale";
 import { authApi } from "../../api/modules/auth";
 import { preferencesApi } from "../../api/modules/preferences";
 import BootOfflinePanel from "../../components/BootOfflinePanel";
-import BrandLogo from "../../components/BrandLogo";
 import { isNetworkFetchError } from "../../utils/networkError";
 import DatabaseStep from "./steps/DatabaseStep";
 import PasswordStep from "./steps/PasswordStep";
@@ -255,10 +254,12 @@ export default function SetupPage() {
         <div className={styles.wizardHeader}>
           <div className={styles.wizardHeaderTop}>
             <div className={styles.wizardHeaderBrand}>
-              <BrandLogo height={32} gap={8} />
               <div className={styles.wizardHeaderBrandText}>
+                <span className={styles.wizardHeaderTitle}>
+                  {t("app.brandName")}
+                </span>
                 <Text type="secondary" className={styles.wizardHeaderSubtitle}>
-                  <Wand2 size={11} /> {t("wizard.title")}
+                  {t("wizard.title")}
                 </Text>
               </div>
             </div>

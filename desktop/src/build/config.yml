@@ -7,7 +7,7 @@ version: "3"
 info:
   companyName: "YdszWorker"
   productName: "YdszWorker"
-  productIdentifier: "com.tencent.ydsz"
+  productIdentifier: "com.njydsz.worker"
   description: "YdszWorker desktop shell"
   copyright: "(c) 2026, YdszWorker"
   comments: "Wails v3 + green portable"

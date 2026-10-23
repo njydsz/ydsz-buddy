@@ -286,8 +286,6 @@
     "records": "任务",
     "paneSettings": "设置",
     "paneRecords": "任务",
-    "customize": "自定义导航",
-    "customizeTitle": "自定义导航",
     "ungrouped": "未分组",
     "ungroupedHint": "显示在侧栏最前面，没有分组标题。",
     "hiddenItems": "未显示",
@@ -306,6 +304,19 @@
     "saveFailed": "没能保存导航布局",
     "dragToReorder": "拖动排序",
     "chatHistory": "会话列表"
+  },
+  "settingsWindow": {
+    "title": "设置",
+    "searchPlaceholder": "搜索设置项",
+    "group": {
+      "models": "模型",
+      "account": "账户与安全",
+      "integration": "集成与个性化",
+      "system": "系统与更新",
+      "remote": "远程",
+      "analytics": "统计"
+    },
+    "close": "关闭"
   },
   "skillPackages": {
     "title": "技能包",
@@ -4070,15 +4081,15 @@
   "account": {
     "myAccount": "我的账户",
     "settings": "个人设置",
-    "appearance": "外观",
-    "systemSettings": "系统设置",
+    "appearance": "配色方案",
+    "systemSettings": "个人设置",
     "palette": "配色",
     "paletteHint": "选择界面品牌配色，与浅色/深色模式独立。",
     "language": "语言",
     "languageHint": "选择界面显示语言。",
     "themeLight": "浅色",
     "themeDark": "深色",
-    "helpFeedback": "帮助与反馈",
+    "helpFeedback": "使用反馈",
     "helpBuilding": "正在建设中",
     "projectUrl": "项目地址",
     "checkUpdates": "检查更新",
@@ -4136,7 +4147,7 @@
     "title": "用户设置",
     "description": "管理密码保护和显示偏好。",
     "passwordProtection": "密码保护",
-    "appearance": "外观",
+    "appearance": "配色方案",
     "language": "语言",
     "passwordProtectionDesc": "开启后需要输入密码才能访问控制台。",
     "setPasswordHint": "设置一个密码以启用保护。",

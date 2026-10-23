@@ -1297,7 +1297,7 @@ function handleHarnessChunk(
             : "";
         state.pendingPlanPath = pending || null;
       }
-      if (Boolean(chunk.team_wrapup)) {
+      if (chunk.team_wrapup) {
         finalizeWrapupMessages(state, speaker);
         clearSpeakerLive(state, speaker);
         // Wrap-up means members already finished — drop stale live bits
@@ -2179,7 +2179,10 @@ export function patchToolResultData(callId: string, nextData: unknown): void {
     }
     if (idx < 0) return false;
     const target = state.messages[idx];
-    const output = mergePatchedYdszToolOutput(target.toolData?.output, nextData);
+    const output = mergePatchedYdszToolOutput(
+      target.toolData?.output,
+      nextData,
+    );
     state.messages = [
       ...state.messages.slice(0, idx),
       {

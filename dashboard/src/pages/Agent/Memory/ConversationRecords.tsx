@@ -158,9 +158,7 @@ export default function ConversationRecords({
   const serverTimezone = useServerTimezone();
   const [threads, setThreads] = useState<YdszThread[]>([]);
   const [listLoading, setListLoading] = useState(false);
-  const [selectedThread, setSelectedThread] = useState<YdszThread | null>(
-    null,
-  );
+  const [selectedThread, setSelectedThread] = useState<YdszThread | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyLoadingMore, setHistoryLoadingMore] = useState(false);

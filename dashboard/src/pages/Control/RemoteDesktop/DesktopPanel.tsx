@@ -1166,7 +1166,10 @@ export default function DesktopPanel({
                         "remoteDesktop.macPermissionsTitle",
                         "需要 macOS 系统权限",
                       )
-                    : t("remoteDesktop.subtitle", "控制 Worker 主机操作系统桌面")
+                    : t(
+                        "remoteDesktop.subtitle",
+                        "控制 Worker 主机操作系统桌面",
+                      )
                 }
                 description={
                   envReady

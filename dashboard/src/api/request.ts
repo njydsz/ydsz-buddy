@@ -268,11 +268,7 @@ function buildHeaders(path: string, extra?: HeadersInit): HeadersInit {
     }
   }
 
-  if (
-    activeAgentId &&
-    isAgentScopedPath(path) &&
-    !headers["X-Ydsz-Agent-Id"]
-  ) {
+  if (activeAgentId && isAgentScopedPath(path) && !headers["X-Ydsz-Agent-Id"]) {
     headers["X-Ydsz-Agent-Id"] = activeAgentId;
   }
 
@@ -290,11 +286,7 @@ function buildAuthHeaders(path: string): Record<string, string> {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
-  if (
-    activeAgentId &&
-    isAgentScopedPath(path) &&
-    !headers["X-Ydsz-Agent-Id"]
-  ) {
+  if (activeAgentId && isAgentScopedPath(path) && !headers["X-Ydsz-Agent-Id"]) {
     headers["X-Ydsz-Agent-Id"] = activeAgentId;
   }
   return headers;

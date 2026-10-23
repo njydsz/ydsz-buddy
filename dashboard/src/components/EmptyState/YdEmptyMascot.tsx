@@ -12,10 +12,7 @@ interface YdEmptyMascotProps {
  * Use inside custom empty UIs or pass as ``EmptyState`` icon /
  * antd ``Empty`` ``image``.
  */
-export function YdEmptyMascot({
-  className,
-  size = 160,
-}: YdEmptyMascotProps) {
+export function YdEmptyMascot({ className, size = 160 }: YdEmptyMascotProps) {
   return (
     <img
       src={YDSZ_EMPTY_MASCOT_SRC}

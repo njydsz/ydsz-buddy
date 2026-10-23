@@ -47,7 +47,7 @@ describe("dockFilePath", () => {
   it("canonicalizes Windows agent-home paths", () => {
     expect(
       canonicalizeDockFilePath(
-        "C:\\Users\\wally\.ydsz\\agents\\main\\generated\\a.pptx",
+        "C:\\Users\\wally.ydsz\\agents\\main\\generated\\a.pptx",
         "main",
       ),
     ).toBe("generated/a.pptx");
@@ -208,7 +208,7 @@ describe("dockFilePath", () => {
     ).toBe("file:///home/wally/.ydsz/agents/main/generated/a.pptx");
     expect(
       toDockWorkspaceApiPath(
-        "C:\\Users\\wally\.ydsz\\agents\\main\\generated\\a.pptx",
+        "C:\\Users\\wally.ydsz\\agents\\main\\generated\\a.pptx",
         "main",
       ),
     ).toBe("file:///C:/Users/wally/.ydsz/agents/main/generated/a.pptx");
