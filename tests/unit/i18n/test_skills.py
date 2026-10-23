@@ -13,11 +13,11 @@ def test_skill_display_name_known_zh():
 
 
 def test_skill_display_name_ydsz_assistant_slug_zh():
-    assert skill_display_name("ydsz-assistant", "zh") == "Ydsz Worker 助手"
+    assert skill_display_name("ydsz-assistant", "zh") == "云顶数字工作台 助手"
 
 
 def test_skill_display_name_ydsz_assistant_name_zh():
-    assert skill_display_name("ydsz_assistant", "zh") == "Ydsz Worker 助手"
+    assert skill_display_name("ydsz_assistant", "zh") == "云顶数字工作台 助手"
 
 
 def test_skill_display_name_unknown_passthrough():
