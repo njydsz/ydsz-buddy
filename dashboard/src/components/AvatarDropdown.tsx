@@ -32,6 +32,7 @@ import {
   KeyRound,
   Lock,
   LockOpen,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -60,6 +61,7 @@ import {
   ProfileAvatar,
   ProfileAvatarPicker,
 } from "../pages/Admin/Users/ProfileAvatar";
+import NavigationConfigPage from "../pages/Settings/NavigationConfig";
 import styles from "./AvatarDropdown.module.less";
 
 const GITHUB_URL = "https://gitee.com/njydsz/ydsz-worker";
@@ -123,6 +125,7 @@ const AvatarDropdown = forwardRef<AvatarDropdownHandle, AvatarDropdownProps>(
 
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [passwordOpen, setPasswordOpen] = useState(false);
+    const [navConfigOpen, setNavConfigOpen] = useState(false);
     const [saving, setSaving] = useState(false);
     const [ssoProviders, setSsoProviders] = useState<
       { kind: string; display_name: string; enabled: boolean }[]
@@ -302,6 +305,7 @@ const AvatarDropdown = forwardRef<AvatarDropdownHandle, AvatarDropdownProps>(
 
     const closeSettings = () => setSettingsOpen(false);
     const closePassword = () => setPasswordOpen(false);
+    const closeNavConfig = () => setNavConfigOpen(false);
 
     useEffect(() => {
       if (!settingsOpen) return;
@@ -378,6 +382,19 @@ const AvatarDropdown = forwardRef<AvatarDropdownHandle, AvatarDropdownProps>(
           </div>
           <ThemeSwitcher compact />
         </div>
+
+        <button
+          type="button"
+          className={styles.menuItem}
+          onClick={() => {
+            setMenuOpen(false);
+            onBeforeOpenSettings?.();
+            deferOpen(() => setNavConfigOpen(true));
+          }}
+        >
+          <SlidersHorizontal size={16} strokeWidth={1.8} />
+          <span>{t("nav.placement.title")}</span>
+        </button>
 
         <button
           type="button"
@@ -879,6 +896,19 @@ const AvatarDropdown = forwardRef<AvatarDropdownHandle, AvatarDropdownProps>(
           }
         >
           {passwordBody}
+        </Drawer>
+
+        <Drawer
+          title={t("nav.placement.title")}
+          open={navConfigOpen}
+          onClose={closeNavConfig}
+          placement="right"
+          width={isMobile ? "100%" : 520}
+          destroyOnHidden
+          className={styles.settingsDrawer}
+          footer={null}
+        >
+          <NavigationConfigPage />
         </Drawer>
       </>
     );

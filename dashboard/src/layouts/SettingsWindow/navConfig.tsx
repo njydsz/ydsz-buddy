@@ -20,6 +20,7 @@ import {
   Waypoints,
 } from "lucide-react";
 import type { YdszUser } from "../../api/modules/auth";
+import type { NavZone } from "../../api/modules/preferences";
 import { navAllowed, userCan } from "../../utils/permissions";
 
 const iconSize = 16;
@@ -64,20 +65,28 @@ export interface SettingsNavGroup {
  * surface. Some workbench-style items intentionally live under the settings
  * pane: connectors, skill-packages and knowledge-bases also have related
  * personalization controls, so they are discoverable from settings too.
+ *
+ * `navZones` controls placement: items the user moved to the main sidebar are
+ * excluded here, and items the user moved to settings are included even if
+ * they do not normally render in the settings list.
  */
 export function buildSettingsNavGroups(
   user: YdszUser | null,
+  navZones?: Record<string, NavZone>,
 ): SettingsNavGroup[] {
+  const zoneOf = (key: string): NavZone => (navZones ?? {})[key] ?? "sidebar";
+  const showInSettings = (key: string): boolean =>
+    key === "updates" || key === "environments" || zoneOf(key) === "settings";
   // ── Top-level (ungrouped) ──────────────────────────────────────────────
   const mainItems: SettingsNavItem[] = [];
-  if (navAllowed(user, "models")) {
+  if (navAllowed(user, "models") && showInSettings("models")) {
     mainItems.push({
       key: "models",
       icon: <Cpu size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.models",
     });
   }
-  if (navAllowed(user, "token-usage")) {
+  if (navAllowed(user, "token-usage") && showInSettings("token-usage")) {
     mainItems.push({
       key: "token-usage",
       icon: <Activity size={iconSize} strokeWidth={iconStroke} />,
@@ -87,35 +96,44 @@ export function buildSettingsNavGroups(
 
   // ── 设置 (Settings) ───────────────────────────────────────────────────
   const settingsItems: SettingsNavItem[] = [];
-  if (navAllowed(user, "personalization")) {
+  if (
+    navAllowed(user, "personalization") &&
+    showInSettings("personalization")
+  ) {
     settingsItems.push({
       key: "personalization",
       icon: <Sparkles size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.personalization",
     });
   }
-  if (navAllowed(user, "channels")) {
+  if (navAllowed(user, "channels") && showInSettings("channels")) {
     settingsItems.push({
       key: "channels",
       icon: <Waypoints size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.channels",
     });
   }
-  if (navAllowed(user, "connectors")) {
+  if (navAllowed(user, "connectors") && showInSettings("connectors")) {
     settingsItems.push({
       key: "connectors",
       icon: <Link2 size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.connectors",
     });
   }
-  if (navAllowed(user, "skill-packages")) {
+  if (
+    navAllowed(user, "skill-packages") &&
+    showInSettings("skill-packages")
+  ) {
     settingsItems.push({
       key: "skill-packages",
       icon: <Package size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.skillPackages",
     });
   }
-  if (navAllowed(user, "knowledge-bases")) {
+  if (
+    navAllowed(user, "knowledge-bases") &&
+    showInSettings("knowledge-bases")
+  ) {
     settingsItems.push({
       key: "knowledge-bases",
       icon: <Database size={iconSize} strokeWidth={iconStroke} />,
@@ -123,30 +141,35 @@ export function buildSettingsNavGroups(
     });
   }
   // bridge (cloud sync) — always available, no module permission gate.
-  settingsItems.push({
-    key: "bridge",
-    icon: <Cloudy size={iconSize} strokeWidth={iconStroke} />,
-    labelKey: "nav.bridge",
-    badge: "Beta",
-  });
+  if (showInSettings("bridge")) {
+    settingsItems.push({
+      key: "bridge",
+      icon: <Cloudy size={iconSize} strokeWidth={iconStroke} />,
+      labelKey: "nav.bridge",
+      badge: "Beta",
+    });
+  }
 
   // ── 运维 (Control) ────────────────────────────────────────────────────
   const controlItems: SettingsNavItem[] = [];
-  if (navAllowed(user, "workbench")) {
+  if (navAllowed(user, "workbench") && showInSettings("workbench")) {
     controlItems.push({
       key: "workbench",
       icon: <PanelsTopLeft size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.workbench",
     });
   }
-  if (userCan(user, "desktop") || userCan(user, "mobile")) {
+  if (
+    (userCan(user, "desktop") || userCan(user, "mobile")) &&
+    showInSettings("remote-desktop")
+  ) {
     controlItems.push({
       key: "remote-desktop",
       icon: <Monitor size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.remoteDesktop",
     });
   }
-  if (navAllowed(user, "acp")) {
+  if (navAllowed(user, "acp") && showInSettings("acp")) {
     controlItems.push({
       key: "acp",
       icon: <Share2 size={iconSize} strokeWidth={iconStroke} />,
@@ -156,35 +179,35 @@ export function buildSettingsNavGroups(
 
   // ── 管理 (Admin) ──────────────────────────────────────────────────────
   const adminItems: SettingsNavItem[] = [];
-  if (navAllowed(user, "admin-users")) {
+  if (navAllowed(user, "admin-users") && showInSettings("admin-users")) {
     adminItems.push({
       key: "admin-users",
       icon: <UsersIcon size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.adminUsers",
     });
   }
-  if (navAllowed(user, "admin-storage")) {
+  if (navAllowed(user, "admin-storage") && showInSettings("admin-storage")) {
     adminItems.push({
       key: "admin-storage",
       icon: <HardDrive size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.adminStorage",
     });
   }
-  if (navAllowed(user, "admin-plugins")) {
+  if (navAllowed(user, "admin-plugins") && showInSettings("admin-plugins")) {
     adminItems.push({
       key: "admin-plugins",
       icon: <Puzzle size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.adminPlugins",
     });
   }
-  if (navAllowed(user, "admin-security")) {
+  if (navAllowed(user, "admin-security") && showInSettings("admin-security")) {
     adminItems.push({
       key: "admin-security",
       icon: <Shield size={iconSize} strokeWidth={iconStroke} />,
       labelKey: "nav.security",
     });
   }
-  if (navAllowed(user, "admin-advanced")) {
+  if (navAllowed(user, "admin-advanced") && showInSettings("admin-advanced")) {
     adminItems.push({
       key: "admin-advanced",
       icon: <SlidersHorizontal size={iconSize} strokeWidth={iconStroke} />,

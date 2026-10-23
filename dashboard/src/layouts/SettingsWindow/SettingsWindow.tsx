@@ -10,6 +10,7 @@ import { Modal, Spin, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
 import type { YdszUser } from "../../api/modules/auth";
+import type { NavZone } from "../../api/modules/preferences";
 import { buildSettingsNavGroups, type SettingsWindowKey } from "./navConfig";
 import {
   SettingsHeaderProvider,
@@ -59,6 +60,7 @@ interface SettingsWindowProps {
   open: boolean;
   onClose: () => void;
   user: YdszUser | null;
+  navZones?: Record<string, NavZone>;
   /** Initial page key to focus when the window opens. */
   initialKey?: SettingsWindowKey;
 }
@@ -180,10 +182,11 @@ export default function SettingsWindow({
   open,
   onClose,
   user,
+  navZones,
   initialKey,
 }: SettingsWindowProps) {
   const { t } = useTranslation();
-  const groups = useMemo(() => buildSettingsNavGroups(user), [user]);
+  const groups = useMemo(() => buildSettingsNavGroups(user, navZones), [user, navZones]);
 
   // First available key (across all groups) — fallback when no initialKey given.
   const firstKey = useMemo<SettingsWindowKey | null>(() => {

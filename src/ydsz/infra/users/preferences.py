@@ -17,6 +17,59 @@ PREFERENCES_KEY_PREFERRED_MODEL = "preferred_model"
 PREFERENCES_KEY_MODEL_REASONING = "model_reasoning"
 PREFERENCES_KEY_TIMEZONE = "timezone"
 PREFERENCES_KEY_SIDEBAR_NAV = "sidebar_nav"
+PREFERENCES_KEY_NAV_ZONES = "nav_zones"
+
+ZONE_SIDEBAR = "sidebar"
+ZONE_SETTINGS = "settings"
+VALID_ZONES = frozenset({ZONE_SIDEBAR, ZONE_SETTINGS})
+
+# Nav item keys the user may move between the main sidebar and the settings page.
+# Primary-only items (chat, experts, tasks) and settings-only items (updates,
+# environments) are fixed and not listed here — see `buildNavSections` /
+# `buildSettingsNavGroups` for the fixed lists.
+MOVABLE_NAV_KEYS = frozenset(
+    {
+        "token-usage",
+        "personalization",
+        "channels",
+        "connectors",
+        "skill-packages",
+        "knowledge-bases",
+        "bridge",
+        "workbench",
+        "remote-desktop",
+        "acp",
+        "admin-users",
+        "models",
+        "admin-storage",
+        "admin-plugins",
+        "admin-security",
+        "admin-advanced",
+    }
+)
+
+# Where each movable item lands when the user has never configured zones.
+# Defaults match the out-of-the-box UI: the main sidebar keeps the handful of
+# items visible on first launch (Figure 1); everything else lives on the
+# settings page (Figure 2).
+DEFAULT_NAV_ZONES: dict[str, str] = {
+    "token-usage": ZONE_SETTINGS,
+    "personalization": ZONE_SETTINGS,
+    "channels": ZONE_SETTINGS,
+    "connectors": ZONE_SIDEBAR,
+    "skill-packages": ZONE_SIDEBAR,
+    "knowledge-bases": ZONE_SIDEBAR,
+    "bridge": ZONE_SETTINGS,
+    "workbench": ZONE_SETTINGS,
+    "remote-desktop": ZONE_SETTINGS,
+    "acp": ZONE_SETTINGS,
+    "admin-users": ZONE_SETTINGS,
+    "models": ZONE_SETTINGS,
+    "admin-storage": ZONE_SETTINGS,
+    "admin-plugins": ZONE_SETTINGS,
+    "admin-security": ZONE_SETTINGS,
+    "admin-advanced": ZONE_SETTINGS,
+}
 
 # Keep in sync with dashboard/src/layouts/sidebarNav.tsx SIDEBAR_NAV_KEYS.
 SIDEBAR_NAV_KEYS = frozenset(
@@ -310,3 +363,48 @@ def merge_sidebar_nav_json(current_raw: str | None, layout: Any | None) -> str:
         groups, items = validate_sidebar_nav(layout)
         data[PREFERENCES_KEY_SIDEBAR_NAV] = sidebar_nav_to_dict(groups, items)
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+
+def validate_nav_zones(value: Any) -> dict[str, str]:
+    """Normalize nav-zone assignments. Unknown / invalid keys or zones are dropped."""
+    if not isinstance(value, dict):
+        raise YdszError(ErrorCode.SLASH_BAD_ARGS, "invalid nav_zones")
+    out: dict[str, str] = {}
+    for raw_key, raw_zone in value.items():
+        key = str(raw_key).strip()
+        if key not in MOVABLE_NAV_KEYS:
+            continue
+        zone = str(raw_zone).strip().lower() if isinstance(raw_zone, str) else ""
+        if zone not in VALID_ZONES:
+            raise YdszError(ErrorCode.SLASH_BAD_ARGS, f"invalid nav zone: {raw_zone!r}")
+        out[key] = zone
+    return out
+
+
+def merge_nav_zones_json(
+    current_raw: str | None,
+    zones: dict[str, str] | None,
+) -> str:
+    data = parse_preferences_json(current_raw)
+    if zones is None:
+        data.pop(PREFERENCES_KEY_NAV_ZONES, None)
+    else:
+        cleaned = validate_nav_zones(zones)
+        if cleaned:
+            data[PREFERENCES_KEY_NAV_ZONES] = cleaned
+        else:
+            data.pop(PREFERENCES_KEY_NAV_ZONES, None)
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+
+def get_nav_zones_from_json(raw: str | None) -> dict[str, str]:
+    """Return the user's nav-zone assignments, falling back to defaults for items not yet customized."""
+    data = parse_preferences_json(raw)
+    raw_zones = data.get(PREFERENCES_KEY_NAV_ZONES)
+    if not isinstance(raw_zones, dict):
+        return dict(DEFAULT_NAV_ZONES)
+    merged = dict(DEFAULT_NAV_ZONES)
+    for key, zone in raw_zones.items():
+        if key in MOVABLE_NAV_KEYS and isinstance(zone, str) and zone.strip().lower() in VALID_ZONES:
+            merged[key] = zone.strip().lower()
+    return merged

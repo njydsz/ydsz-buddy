@@ -267,7 +267,7 @@
     "user": "用户设置",
     "advancedSettings": "高级设置",
     "embedding": "Embedding",
-    "tokenUsage": "Token 统计",
+    "tokenUsage": "统计",
     "checkUpdates": "应用更新",
     "newVersionBadge": "有新版本",
     "newVersionBadgeShort": "新",
@@ -303,7 +303,19 @@
     "groupNameRequired": "请填写分组名称",
     "saveFailed": "没能保存导航布局",
     "dragToReorder": "拖动排序",
-    "chatHistory": "会话列表"
+    "chatHistory": "会话列表",
+    "placement": {
+      "title": "导航配置",
+      "description": "选择每个导航项的显示位置。每个导航项只能出现在一个位置——要么在主侧栏，要么在设置页面。",
+      "sidebar": "主页面侧栏",
+      "settings": "设置页面",
+      "group": {
+        "primary": "主要功能",
+        "settings": "设置",
+        "control": "运维",
+        "admin": "管理"
+      }
+    }
   },
   "settingsWindow": {
     "title": "设置",

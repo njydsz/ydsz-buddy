@@ -116,3 +116,33 @@ async def test_preferences_sidebar_nav_roundtrip(env) -> None:
     r = await client.patch("/api/preferences", headers=auth, json={"sidebar_nav": None})
     assert r.status_code == 200
     assert r.json()["sidebar_nav"] is None
+
+
+@pytest.mark.asyncio
+async def test_preferences_nav_zones_roundtrip(env) -> None:
+    client, _srv, auth = env
+    r = await client.get("/api/preferences", headers=auth)
+    assert r.status_code == 200
+    assert r.json()["nav_zones"]["models"] == "settings"
+
+    r = await client.patch(
+        "/api/preferences",
+        headers=auth,
+        json={"nav_zones": {"models": "sidebar", "chat": "settings"}},
+    )
+    assert r.status_code == 200
+    zones = r.json()["nav_zones"]
+    assert zones["models"] == "sidebar"
+    # Unknown movable key "chat" (primary-only) is dropped silently.
+    assert "chat" not in zones
+
+    r = await client.patch(
+        "/api/preferences",
+        headers=auth,
+        json={"nav_zones": {"models": "bogus"}},
+    )
+    assert r.status_code in (400, 422)
+
+    r = await client.patch("/api/preferences", headers=auth, json={"nav_zones": None})
+    assert r.status_code == 200
+    assert r.json()["nav_zones"]["models"] == "settings"

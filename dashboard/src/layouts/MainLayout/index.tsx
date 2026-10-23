@@ -4,6 +4,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { SettingsWindow } from "../SettingsWindow";
 import type { SettingsWindowKey } from "../SettingsWindow";
+import type { NavZone } from "../../api/modules/preferences";
+import { preferencesApi } from "../../api/modules/preferences";
 import Header from "../Header";
 import RailEdgeControl from "../../components/RailEdgeControl";
 import PageLoading from "../../components/PageLoading";
@@ -79,6 +81,22 @@ export default function MainLayout() {
   >(undefined);
   const [chatSidebarOpen, setChatSidebarOpen] = useChatSidebarOpen();
   const [workbenchMounted, setWorkbenchMounted] = useState(() => onWorkbench);
+  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void preferencesApi
+      .get()
+      .then((prefs) => {
+        if (!cancelled) setNavZones(prefs.nav_zones ?? null);
+      })
+      .catch(() => {
+        /* keep defaults */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (onWorkbench) {
@@ -377,6 +395,7 @@ export default function MainLayout() {
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         user={user}
+        navZones={navZones ?? undefined}
         initialKey={settingsInitialKey}
       />
     </ServiceRestartProvider>

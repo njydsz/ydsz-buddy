@@ -86,6 +86,9 @@ html[data-theme="light"] {
   --fn-color-brand-shadow: rgba(0, 128, 85, 0.15);
   --fn-color-brand-glow: rgba(0, 128, 85, 0.08);
 
+  /* ---- Icons default to brand (元宝绿 / 当前调色板) ---- */
+  --fn-icon-default: var(--fn-color-brand);
+
   /* ---- AI message bubble (frosted glass) ---- */
   --fn-assistant-bubble-bg: rgba(255, 255, 255, 0.45);
   --fn-assistant-bubble-bg-gradient: linear-gradient(
@@ -269,6 +272,9 @@ html[data-theme="dark"] {
   --fn-color-brand-light: rgba(0, 128, 85, 0.18);
   --fn-color-brand-shadow: rgba(0, 128, 85, 0.28);
   --fn-color-brand-glow: rgba(0, 128, 85, 0.1);
+
+  /* ---- Icons default to brand (元宝绿 / 当前调色板) ---- */
+  --fn-icon-default: var(--fn-color-brand);
 
   /* ---- AI message bubble (frosted glass) ---- */
   --fn-assistant-bubble-bg: rgba(255, 255, 255, 0.06);
@@ -959,4 +965,33 @@ html[data-theme="dark"] body {
 ::selection {
   background: var(--fn-color-brand);
   color: #ffffff;
+}
+
+/* ===================================================================
+   ICONS DEFAULT TO BRAND (元宝绿 / 当前调色板)
+   让所有中性的 antd / Lucide 图标默认跟随品牌色。
+   语义态（error / success / warning）由各自父级 class 覆盖其内部
+   的 .anticon 颜色，不受此规则影响。
+   =================================================================== */
+
+/* Ant Design 图标 */
+.ant-btn-icon > .anticon,
+.ant-btn-icon > svg,
+.anticon,
+.ant-result-icon > svg,
+.ant-empty-image > svg,
+.ant-modal-close-x .anticon,
+.ant-drawer-close .anticon,
+.ant-tabs-tab-btn .anticon,
+.ant-tabs-tab-btn > svg,
+.ant-breadcrumb .anticon,
+.ant-cascader-menu-item .anticon,
+.ant-tree .anticon {
+  color: var(--fn-icon-default);
+}
+
+/* Lucide 等独立 SVG 图标（无 app 特有 class 的按钮内图标） */
+.ant-btn-icon > svg:not([class]),
+.anticon svg {
+  color: var(--fn-icon-default);
 }

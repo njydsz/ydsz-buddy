@@ -1,6 +1,11 @@
 /**
- * Form required mark style protection
- * Prevent CSS-in-JS styles from third-party components from overriding
+ * Form validation & icon style overrides.
+ *
+ * antd v5 renders feedback icons via CSS pseudo-elements on
+ * .ant-form-item-feedback-icon-success / -error / -warning / -validating.
+ * We remap the bright #52c41a / #ff4d4f hard circles into soft pastel pills
+ * that echo the brand palette (--fn-color-brand / --fn-color-error).
+ * Reference: Linear · Notion · Atlassian (soft pastel pill > hard solid circle).
  */
 
 /* Protect red asterisk for Ant Design form required marks */
@@ -12,4 +17,112 @@
 span.spark-required-mark,
 span[class*="spark-required-mark"] {
   color: var(--fn-color-danger) !important;
+}
+
+/* ===================================================================
+   Feedback icon — pastel pill style (Linear / Atlassian pattern)
+   antd default: bright green background circle with white ✓ / red circle
+   Remap to: ~12% tint background + 1px matching border + sharp icon.
+   =================================================================== */
+
+/* ---------- Remove the bright antd hard circle ---------- */
+.ant-form-item-feedback-icon-success::before,
+.ant-form-item-feedback-icon-error::before,
+.ant-form-item-feedback-icon-warning::before,
+.ant-form-item-feedback-icon-validating::before {
+  content: none !important;
+}
+
+.ant-form-item-feedback-icon svg {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* ---------- Success — pastel green pill ---------- */
+.ant-form-item-feedback-icon-success,
+.ant-form-item-has-success .ant-form-item-feedback-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--fn-primary-bg, rgba(0, 128, 85, 0.1)) !important;
+  color: var(--fn-color-brand, #008055) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-color-brand, #008055) 22%, transparent);
+  box-sizing: border-box;
+}
+
+.ant-form-item-feedback-icon-success svg,
+.ant-form-item-has-success .ant-form-item-feedback-icon svg {
+  width: 10px;
+  height: 10px;
+  color: var(--fn-color-brand, #008055) !important;
+}
+
+/* ---------- Error — pastel red pill ---------- */
+.ant-form-item-feedback-icon-error,
+.ant-form-item-has-error .ant-form-item-feedback-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fn-color-error, #ef4444) 10%, transparent) !important;
+  color: var(--fn-color-error, #b91c1c) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-color-error, #ef4444) 22%, transparent);
+  box-sizing: border-box;
+}
+
+.ant-form-item-feedback-icon-error svg,
+.ant-form-item-has-error .ant-form-item-feedback-icon svg {
+  width: 10px;
+  height: 10px;
+  color: var(--fn-color-error, #b91c1c) !important;
+}
+
+/* ---------- Warning — pastel amber ---------- */
+.ant-form-item-feedback-icon-warning {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #f59e0b 10%, transparent) !important;
+  color: #b45309 !important;
+  border: 1px solid color-mix(in srgb, #f59e0b 22%, transparent);
+  box-sizing: border-box;
+}
+
+.ant-form-item-feedback-icon-warning svg {
+  width: 10px;
+  height: 10px;
+  color: #b45309 !important;
+}
+
+/* ---------- Validating (spinner) — tinted ring ---------- */
+.ant-form-item-feedback-icon-validating {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--fn-color-brand, #3b82f6) 28%, transparent);
+  border-top-color: var(--fn-color-brand, #3b82f6) !important;
+  background: transparent !important;
+  animation: fn-feedback-spin 0.7s linear infinite;
+}
+
+@keyframes fn-feedback-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Ensure correct vertical alignment next to inputs ---------- */
+.ant-form-item-feedback-icon {
+  line-height: 1 !important;
+  vertical-align: middle;
+  font-size: 0 !important;
 }

@@ -12,13 +12,16 @@ from pydantic import BaseModel, Field, model_validator
 from ydsz.api.deps import current_user, get_server
 from ydsz.infra.errors import ErrorCode, YdszError
 from ydsz.infra.users.preferences import (
+    DEFAULT_NAV_ZONES,
     MAX_REMOTE_BROWSER_BOOKMARKS,
     PREFERENCES_KEY_TIMEZONE,
     ModelReasoningPreference,
     get_model_reasoning_from_json,
+    get_nav_zones_from_json,
     get_preferred_model_from_json,
     get_remote_browser_bookmarks_from_json,
     get_sidebar_nav_from_json,
+    merge_nav_zones_json,
     merge_sidebar_nav_json,
     parse_preferences_json,
 )
@@ -75,6 +78,10 @@ class PreferencesResponse(BaseModel):
         default=None,
         description="Custom sidebar layout. Null means the user has not customized navigation.",
     )
+    nav_zones: dict[str, str] = Field(
+        default_factory=lambda: dict(DEFAULT_NAV_ZONES),
+        description="Per-item nav placement: `sidebar` (main sidebar) or `settings` (settings page).",
+    )
 
 
 class PatchPreferencesBody(BaseModel):
@@ -90,6 +97,10 @@ class PatchPreferencesBody(BaseModel):
         default=None,
         description="Replace the sidebar layout. Null clears it and restores the default nav.",
     )
+    nav_zones: dict[str, str] | None = Field(
+        default=None,
+        description="Replace nav-zone assignments. Null clears them and restores defaults.",
+    )
 
     @model_validator(mode="after")
     def at_least_one_field(self) -> Self:
@@ -101,6 +112,7 @@ class PatchPreferencesBody(BaseModel):
                 "model_reasoning",
                 "timezone",
                 "sidebar_nav",
+                "nav_zones",
             }
         ):
             raise ValueError("at least one preference field is required")
@@ -134,6 +146,7 @@ def _response(row: Any) -> PreferencesResponse:
         },
         timezone=parse_preferences_json(raw).get(PREFERENCES_KEY_TIMEZONE),
         sidebar_nav=_sidebar_nav_response(raw),
+        nav_zones=get_nav_zones_from_json(raw),
     )
 
 
@@ -210,6 +223,13 @@ async def patch_preferences(
         row = server.services.user_repo.get(user.id)
         layout = None if body.sidebar_nav is None else body.sidebar_nav.model_dump()
         merged = merge_sidebar_nav_json(row.preferences_json if row else None, layout)
+        server.services.user_repo.set_preferences_json(user.id, merged)
+    if "nav_zones" in body.model_fields_set:
+        row = server.services.user_repo.get(user.id)
+        merged = merge_nav_zones_json(
+            row.preferences_json if row else None,
+            body.nav_zones,
+        )
         server.services.user_repo.set_preferences_json(user.id, merged)
     row = server.services.user_repo.get(user.id)
     return _response(row)

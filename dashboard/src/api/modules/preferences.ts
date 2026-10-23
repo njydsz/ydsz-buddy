@@ -5,6 +5,8 @@ export interface RemoteBrowserBookmark {
   title: string;
 }
 
+export type NavZone = "sidebar" | "settings";
+
 export interface SidebarNavGroupPref {
   id: string;
   name?: string | null;
@@ -30,6 +32,7 @@ export interface UserPreferences {
     { mode: "auto" | "enabled" | "disabled"; effort?: string | null }
   >;
   sidebar_nav?: SidebarNavLayoutPref | null;
+  nav_zones: Record<string, NavZone>;
 }
 
 export type PatchPreferencesBody = {
@@ -38,6 +41,7 @@ export type PatchPreferencesBody = {
   preferred_model?: string | null;
   model_reasoning?: UserPreferences["model_reasoning"];
   sidebar_nav?: SidebarNavLayoutPref | null;
+  nav_zones?: Record<string, NavZone> | null;
 };
 
 export const preferencesApi = {

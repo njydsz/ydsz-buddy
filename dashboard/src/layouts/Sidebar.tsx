@@ -22,7 +22,7 @@ import {
 import type { MinimalNavPane } from "./layoutModeStorage";
 import MinimalRecordsHost from "./MinimalRecordsHost";
 import SidebarCollapsedIconNav from "./SidebarCollapsedIconNav";
-import { preferencesApi } from "../api/modules/preferences";
+import { preferencesApi, type NavZone } from "../api/modules/preferences";
 import {
   EXPANDED_WIDTH,
   buildNavSections,
@@ -404,11 +404,12 @@ export default function Sidebar({
   const isMinimal = layoutMode === "minimal";
   const onChatPath = isChatPath(location.pathname);
   const { width: sidebarWidth, onResizeMouseDown } = useSidebarWidth(collapsed);
-  const catalog = useMemo(
-    () => buildNavSections(user, { mobileEnabled }),
-    [user, mobileEnabled],
-  );
   const [savedLayout, setSavedLayout] = useState<SidebarNavLayout | null>(null);
+  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(null);
+  const catalog = useMemo(
+    () => buildNavSections(user, { mobileEnabled, navZones: navZones ?? undefined }),
+    [user, mobileEnabled, navZones],
+  );
   const navSections = useMemo(
     () => sectionsFromLayout(catalog, savedLayout),
     [catalog, savedLayout],
@@ -424,7 +425,10 @@ export default function Sidebar({
     void preferencesApi
       .get()
       .then((prefs) => {
-        if (!cancelled) setSavedLayout(prefs.sidebar_nav ?? null);
+        if (!cancelled) {
+          setSavedLayout(prefs.sidebar_nav ?? null);
+          setNavZones(prefs.nav_zones ?? null);
+        }
       })
       .catch(() => {
         /* keep the default nav */
@@ -765,7 +769,7 @@ export default function Sidebar({
           alignItems: "center",
           gap: 6,
           minWidth: 0,
-          padding: isRailCollapsed ? "12px 8px" : "14px 14px 10px",
+          padding: isRailCollapsed ? "12px 8px" : "14px 12px 10px",
           justifyContent: "center",
           flexShrink: 0,
         }}

@@ -21,6 +21,7 @@ import {
   PanelsTopLeft,
 } from "lucide-react";
 import type { YdszUser } from "../api/modules/auth";
+import type { NavZone } from "../api/modules/preferences";
 import { navAllowed, userCan } from "../utils/permissions";
 
 export const EXPANDED_WIDTH = 220;
@@ -149,8 +150,10 @@ export function isGroupedNavKey(key: string): boolean {
 
 export function buildNavSections(
   user: YdszUser | null,
-  opts?: { mobileEnabled?: boolean },
+  opts?: { mobileEnabled?: boolean; navZones?: Record<string, NavZone> },
 ): NavSection[] {
+  const navZones = opts?.navZones ?? {};
+  const zoneOf = (key: string): NavZone => navZones[key] ?? "sidebar";
   const topItems: NavItem[] = [
     {
       key: "chat",
@@ -175,7 +178,7 @@ export function buildNavSections(
       labelKey: "nav.tasks",
     });
   }
-  if (navAllowed(user, "token-usage")) {
+  if (navAllowed(user, "token-usage") && zoneOf("token-usage") === "sidebar") {
     topItems.push({
       key: "token-usage",
       path: "/token-usage",
@@ -186,7 +189,10 @@ export function buildNavSections(
   const sections: NavSection[] = [{ items: topItems }];
 
   const settingsItems: NavItem[] = [];
-  if (navAllowed(user, "personalization")) {
+  if (
+    navAllowed(user, "personalization") &&
+    zoneOf("personalization") === "sidebar"
+  ) {
     settingsItems.push({
       key: "personalization",
       path: personalizationNavPath(user),
@@ -194,7 +200,7 @@ export function buildNavSections(
       labelKey: "nav.personalization",
     });
   }
-  if (navAllowed(user, "channels")) {
+  if (navAllowed(user, "channels") && zoneOf("channels") === "sidebar") {
     settingsItems.push({
       key: "channels",
       path: "/personalization/channels",
@@ -202,7 +208,7 @@ export function buildNavSections(
       labelKey: "nav.channels",
     });
   }
-  if (navAllowed(user, "connectors")) {
+  if (navAllowed(user, "connectors") && zoneOf("connectors") === "sidebar") {
     settingsItems.push({
       key: "connectors",
       path: "/connectors",
@@ -210,7 +216,10 @@ export function buildNavSections(
       labelKey: "nav.connectors",
     });
   }
-  if (navAllowed(user, "skill-packages")) {
+  if (
+    navAllowed(user, "skill-packages") &&
+    zoneOf("skill-packages") === "sidebar"
+  ) {
     settingsItems.push({
       key: "skill-packages",
       path: "/skill-packages",
@@ -218,7 +227,10 @@ export function buildNavSections(
       labelKey: "nav.skillPackages",
     });
   }
-  if (navAllowed(user, "knowledge-bases")) {
+  if (
+    navAllowed(user, "knowledge-bases") &&
+    zoneOf("knowledge-bases") === "sidebar"
+  ) {
     settingsItems.push({
       key: "knowledge-bases",
       path: "/knowledge-bases",
@@ -227,13 +239,15 @@ export function buildNavSections(
     });
   }
   // User-scoped remote Ydsz Worker links stay available without a module permission.
-  settingsItems.push({
-    key: "bridge",
-    path: "/bridge",
-    icon: <Cloudy size={iconSize} strokeWidth={iconStroke} />,
-    labelKey: "nav.bridge",
-    badge: "Beta",
-  });
+  if (zoneOf("bridge") === "sidebar") {
+    settingsItems.push({
+      key: "bridge",
+      path: "/bridge",
+      icon: <Cloudy size={iconSize} strokeWidth={iconStroke} />,
+      labelKey: "nav.bridge",
+      badge: "Beta",
+    });
+  }
   if (settingsItems.length > 0) {
     sections.push({
       id: "settings",
@@ -243,7 +257,7 @@ export function buildNavSections(
   }
 
   const controlItems: NavItem[] = [];
-  if (navAllowed(user, "workbench")) {
+  if (navAllowed(user, "workbench") && zoneOf("workbench") === "sidebar") {
     controlItems.push({
       key: "workbench",
       path: "/workbench",
@@ -253,8 +267,9 @@ export function buildNavSections(
   }
   // Server desktop + phone share one nav entry; phone tab also needs host capability.
   if (
-    userCan(user, "desktop") ||
-    (opts?.mobileEnabled && userCan(user, "mobile"))
+    (userCan(user, "desktop") ||
+      (opts?.mobileEnabled && userCan(user, "mobile"))) &&
+    zoneOf("remote-desktop") === "sidebar"
   ) {
     controlItems.push({
       key: "remote-desktop",
@@ -264,7 +279,7 @@ export function buildNavSections(
     });
   }
   // ACP: no module key this round — admin role only.
-  if (navAllowed(user, "acp")) {
+  if (navAllowed(user, "acp") && zoneOf("acp") === "sidebar") {
     controlItems.push({
       key: "acp",
       path: "/acp",
@@ -281,7 +296,7 @@ export function buildNavSections(
   }
 
   const adminItems: NavItem[] = [];
-  if (navAllowed(user, "admin-users")) {
+  if (navAllowed(user, "admin-users") && zoneOf("admin-users") === "sidebar") {
     adminItems.push({
       key: "admin-users",
       path: "/admin/users",
@@ -289,7 +304,7 @@ export function buildNavSections(
       labelKey: "nav.adminUsers",
     });
   }
-  if (navAllowed(user, "models")) {
+  if (navAllowed(user, "models") && zoneOf("models") === "sidebar") {
     adminItems.push({
       key: "models",
       path: "/admin/models",
@@ -297,7 +312,10 @@ export function buildNavSections(
       labelKey: "nav.models",
     });
   }
-  if (navAllowed(user, "admin-storage")) {
+  if (
+    navAllowed(user, "admin-storage") &&
+    zoneOf("admin-storage") === "sidebar"
+  ) {
     adminItems.push({
       key: "admin-storage",
       path: "/admin/backend",
@@ -305,7 +323,10 @@ export function buildNavSections(
       labelKey: "nav.adminStorage",
     });
   }
-  if (navAllowed(user, "admin-plugins")) {
+  if (
+    navAllowed(user, "admin-plugins") &&
+    zoneOf("admin-plugins") === "sidebar"
+  ) {
     adminItems.push({
       key: "admin-plugins",
       path: "/admin/plugins",
@@ -313,7 +334,10 @@ export function buildNavSections(
       labelKey: "nav.adminPlugins",
     });
   }
-  if (navAllowed(user, "admin-security")) {
+  if (
+    navAllowed(user, "admin-security") &&
+    zoneOf("admin-security") === "sidebar"
+  ) {
     adminItems.push({
       key: "admin-security",
       path: "/admin/security",
@@ -321,7 +345,10 @@ export function buildNavSections(
       labelKey: "nav.security",
     });
   }
-  if (navAllowed(user, "admin-advanced")) {
+  if (
+    navAllowed(user, "admin-advanced") &&
+    zoneOf("admin-advanced") === "sidebar"
+  ) {
     adminItems.push({
       key: "admin-advanced",
       path: "/admin/advanced",

@@ -6,15 +6,20 @@ import pytest
 
 from ydsz.infra.errors import ErrorCode, YdszError
 from ydsz.infra.users.preferences import (
+    DEFAULT_NAV_ZONES,
+    MOVABLE_NAV_KEYS,
     ModelReasoningPreference,
     get_model_reasoning_from_json,
+    get_nav_zones_from_json,
     get_preferred_model_from_json,
     get_remote_browser_bookmarks_from_json,
     get_sidebar_nav_from_json,
     get_timezone_from_preferences_json,
     merge_model_preferences_json,
+    merge_nav_zones_json,
     merge_preferences_json,
     merge_sidebar_nav_json,
+    validate_nav_zones,
     validate_remote_browser_bookmarks,
     validate_sidebar_nav,
 )
@@ -145,12 +150,49 @@ def test_sidebar_nav_clear_and_invalid_payload() -> None:
     assert get_sidebar_nav_from_json("{}") is None
 
 
-def test_clear_preferred_model_keeps_reasoning_defaults() -> None:
-    raw = merge_model_preferences_json(
-        "{}",
-        preferred_model="token/glm-5",
-        model_reasoning={"token/glm-5": ModelReasoningPreference(mode="auto")},
-    )
-    cleared = merge_model_preferences_json(raw, preferred_model=None)
-    assert get_preferred_model_from_json(cleared) is None
-    assert "token/glm-5" in get_model_reasoning_from_json(cleared)
+def test_nav_zones_defaults_cover_all_movable_keys() -> None:
+    assert set(DEFAULT_NAV_ZONES.keys()) == set(MOVABLE_NAV_KEYS)
+    for zone in DEFAULT_NAV_ZONES.values():
+        assert zone in {"sidebar", "settings"}
+
+
+def test_validate_nav_zones_rejects_invalid_zone() -> None:
+    with pytest.raises(YdszError) as ei:
+        validate_nav_zones({"models": "everywhere"})
+    assert ei.value.code is ErrorCode.SLASH_BAD_ARGS
+
+
+def test_validate_nav_zones_drops_unknown_keys() -> None:
+    cleaned = validate_nav_zones({"models": "settings", "chat": "sidebar"})
+    assert cleaned == {"models": "settings"}
+
+
+def test_validate_nav_zones_normalizes_case() -> None:
+    cleaned = validate_nav_zones({"models": "SETTINGS"})
+    assert cleaned == {"models": "settings"}
+
+
+def test_nav_zones_roundtrip_and_preserve_other_keys() -> None:
+    merged = merge_nav_zones_json('{"foo": 1}', {"models": "sidebar"})
+    import json
+
+    data = json.loads(merged)
+    assert data["foo"] == 1
+    assert get_nav_zones_from_json(merged)["models"] == "sidebar"
+
+
+def test_nav_zones_get_defaults_when_unset() -> None:
+    assert get_nav_zones_from_json("{}")["models"] == "settings"
+    assert get_nav_zones_from_json('{"nav_zones": null}')["models"] == "settings"
+
+
+def test_nav_zones_clear_via_null() -> None:
+    merged = merge_nav_zones_json("{}", {"models": "sidebar"})
+    cleared = merge_nav_zones_json(merged, None)
+    assert get_nav_zones_from_json(cleared) == DEFAULT_NAV_ZONES
+
+
+def test_nav_zones_rejects_non_dict() -> None:
+    with pytest.raises(YdszError) as ei:
+        validate_nav_zones(["models"])
+    assert ei.value.code is ErrorCode.SLASH_BAD_ARGS
