@@ -127,7 +127,6 @@ const AvatarDropdown = forwardRef<
   const { layoutMode, setLayoutMode } = useLayoutMode();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useImperativeHandle(ref, () => ({ openSettings }), [openSettings]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -142,6 +141,17 @@ const AvatarDropdown = forwardRef<
     new_password: string;
     confirm: string;
   }>();
+
+  const deferOpen = (open: () => void) => {
+    window.setTimeout(open, 0);
+  };
+  const openSettings = useCallback(() => {
+    setMenuOpen(false);
+    onBeforeOpenSettings?.();
+    profileForm.setFieldsValue({ display_name: user?.display_name || "" });
+    deferOpen(() => setSettingsOpen(true));
+  }, [onBeforeOpenSettings, profileForm, user?.display_name]);
+  useImperativeHandle(ref, () => ({ openSettings }), [openSettings]);
 
   const handleLogout = useCallback(async () => {
     setMenuOpen(false);
@@ -285,18 +295,6 @@ const AvatarDropdown = forwardRef<
     role === "admin" ? t("account.roleAdmin") : t("account.roleUser");
 
   const displayName = user?.display_name || user?.username || "—";
-
-  /** Defer panel open so the account Popover / mobile sidebar can unmount first. */
-  const deferOpen = (open: () => void) => {
-    window.setTimeout(open, 0);
-  };
-
-  const openSettings = () => {
-    setMenuOpen(false);
-    onBeforeOpenSettings?.();
-    profileForm.setFieldsValue({ display_name: user?.display_name || "" });
-    deferOpen(() => setSettingsOpen(true));
-  };
 
   const openPassword = () => {
     setMenuOpen(false);
@@ -892,6 +890,6 @@ const AvatarDropdown = forwardRef<
       </Drawer>
     </>
   );
-}
+});
 
 export default AvatarDropdown;

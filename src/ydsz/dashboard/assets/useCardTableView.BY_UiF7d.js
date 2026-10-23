@@ -1,0 +1,1 @@
+import{r as reactExports}from"./vendor-react.DWWhhpb4.js";import{g as useIsMobile}from"./index.D-Adb5gt.js";function useCardTableView(defaultMode="table"){const isMobile=useIsMobile(),[viewMode,setViewMode]=reactExports.useState(defaultMode);return{isMobile,viewMode,setViewMode,showCardView:viewMode==="card"}}export{useCardTableView as u};

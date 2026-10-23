@@ -1,1 +1,0 @@
-import{_ as __name}from"./mermaid.core.Blhp7Qob.js";function populateCommonDb(ast,db){var _a,_b,_c;ast.accDescr&&((_a=db.setAccDescription)==null||_a.call(db,ast.accDescr)),ast.accTitle&&((_b=db.setAccTitle)==null||_b.call(db,ast.accTitle)),ast.title&&((_c=db.setDiagramTitle)==null||_c.call(db,ast.title))}__name(populateCommonDb,"populateCommonDb");export{populateCommonDb as p};

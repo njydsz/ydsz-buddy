@@ -3,10 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import AvatarDropdown from "../components/AvatarDropdown";
-import type { AvatarDropdownHandle } from "../components/AvatarDropdown";
 import AppVersionBadge from "../components/AppVersionBadge";
-import CurrentVersionBadge from "../components/CurrentVersionBadge";
-import { ChevronDown, Settings, X } from "lucide-react";
+import { Popover } from "antd";
+import { ArrowRightLeft, ChevronDown, Settings, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useLayoutMode } from "../context/LayoutModeContext";
 import { useUserRole } from "../hooks/useUserRole";
@@ -503,7 +502,31 @@ export default function Sidebar({
     setChatSidebarOpen,
   ]);
 
-  const avatarDropdownRef = useRef<AvatarDropdownHandle>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const gearBtnRef = useRef<HTMLButtonElement>(null);
+
+  /** Settings groups shown in the popover — ordered for display. */
+  const settingsGroups = useMemo(() => {
+    const allById = new Map(navSections.flatMap((s) => s.items.map((i) => [i.key, i])));
+    const order = [
+      "models",
+      "admin-users",
+      "admin-storage",
+      "channels",
+      "admin-plugins",
+      "personalization",
+      "workbench",
+      "bridge",
+      "admin-security",
+      "admin-advanced",
+      "remote-desktop",
+      "updates",
+      "environments",
+    ];
+    return order
+      .map((key) => allById.get(key))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  }, [navSections]);
 
   const brandInner = (
     <div
@@ -529,21 +552,54 @@ export default function Sidebar({
       >
         {isRailCollapsed ? "Yd" : "Ydsz Worker"}
       </span>
-      {!isRailCollapsed && !isMobile && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-          <CurrentVersionBadge isMobile={isMobile} isSidebar />
-          <AppVersionBadge isMobile={isMobile} isSidebar />
-        </span>
-      )}
-      <button
-        type="button"
-        className={styles.sidebarGearBtn}
-        onClick={() => avatarDropdownRef.current?.openSettings()}
-        aria-label={t("account.settings")}
-        hidden={isRailCollapsed}
+{!isRailCollapsed && !isMobile && (
+  <AppVersionBadge isMobile={isMobile} isSidebar />
+)}
+      <Popover
+        open={settingsOpen && !isRailCollapsed}
+        onOpenChange={setSettingsOpen}
+        placement="bottomRight"
+        trigger="click"
+        destroyOnHidden
+        styles={{
+          body: { padding: 0 },
+        }}
+        getPopupContainer={() => gearBtnRef.current?.parentElement ?? document.body}
+        content={
+          <ul className={styles.settingsGroupList}>
+            {settingsGroups.map((item) => (
+              <li key={item.key}>
+                <button
+                  type="button"
+                  className={styles.settingsGroupItem}
+                  onClick={() => {
+                    setSettingsOpen(false);
+                    navigate(item.path);
+                  }}
+                >
+                  <span className={styles.settingsGroupIcon}>{item.icon}</span>
+                  <span className={styles.settingsGroupLabel}>
+                    {t(item.labelKey)}
+                  </span>
+                  {item.badge ? (
+                    <span className={styles.settingsGroupBadge}>{item.badge}</span>
+                  ) : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        }
       >
-        <Settings size={15} strokeWidth={1.8} />
-      </button>
+        <button
+          ref={gearBtnRef}
+          type="button"
+          className={styles.sidebarGearBtn}
+          aria-label={t("account.settings")}
+          hidden={isRailCollapsed}
+        >
+          <Settings size={15} strokeWidth={1.8} />
+        </button>
+      </Popover>
     </div>
   );
 
@@ -558,7 +614,6 @@ export default function Sidebar({
       }}
     >
       <AvatarDropdown
-        ref={avatarDropdownRef}
         user={user}
         onUserChange={setUser}
         placement="sidebar"
