@@ -326,6 +326,7 @@
       "adminAdvanced": "Advanced",
       "cloudCollab": "Cloud Collaboration",
       "fixedItemTooltip": "System item, always shown in sidebar",
+      "groupBasic": "Basic",
       "groupSettings": "Settings",
       "groupControl": "Control",
       "groupAdmin": "Admin"

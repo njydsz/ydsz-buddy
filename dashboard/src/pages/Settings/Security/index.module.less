@@ -13,45 +13,27 @@
   line-height: 1.55;
 }
 
-.footer {
+/* Sticky save bar — lives in the scrollable body, pins below the tab bar. */
+.saveBar {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 12px 20px;
-  margin-top: 8px;
-  padding-top: 20px;
-  border-top: 1px solid var(--fn-border-primary);
-  width: 100%;
-}
-
-/* Compact variant for placement inside the SettingsWindow header actions:
-   no border, no top margin/padding, wraps gracefully, and shrinks. */
-.footerCompact {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
-  min-width: 0;
-  flex-shrink: 1;
-
-  /* Line up with the close button: keep on one row if possible,
-     allow wrapping to a second row only when necessary. */
-  &:not(:last-child) {
-    margin-right: 4px;
-  }
+  align-items: center;
+  gap: 8px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-top: -8px; /* offset .tabbedBody padding-top */
+  margin-bottom: 16px;
+  padding: 10px 0;
+  background: var(--fn-bg-base, #fff);
+  border-bottom: 1px solid var(--fn-border-subtle, var(--fn-border-primary));
 }
 
-.runtimeHint {
+.saveBarHint {
   flex: 1;
   min-width: 0;
   font-size: 12px;
   line-height: 1.5;
-}
-
-@media (max-width: 767px) {
-  .footer {
-    flex-wrap: wrap;
-  }
 }
 
 .rulesSection {

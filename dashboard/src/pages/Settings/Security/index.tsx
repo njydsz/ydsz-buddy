@@ -78,22 +78,20 @@ function textToRules(text: string | undefined): FilesystemRule[] {
   return [{ operations: ["read", "write"], paths, mode: "deny" }];
 }
 
-function PolicyFooter({
+function SaveBar({
   saving,
   onSave,
-  compact = false,
 }: {
   saving: boolean;
   onSave: () => void;
-  compact?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <div className={compact ? styles.footerCompact : styles.footer}>
+    <div className={styles.saveBar}>
       <Button type="primary" loading={saving} onClick={onSave}>
         {t("security.saveAll")}
       </Button>
-      <Text type="secondary" className={styles.runtimeHint}>
+      <Text type="secondary" className={styles.saveBarHint}>
         {t("security.saveAllHint")}
       </Text>
     </div>
@@ -113,8 +111,6 @@ export default function SecuritySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [policy, setPolicy] = useState<SecurityPolicy | null>(null);
-  // useSettingsHeader must be declared after policy/saving so its handleSave
-  // closure (and [saving, policy] deps) are captured correctly.
   const [hitlToolCatalog, setHitlToolCatalog] = useState<HitlToolCatalogItem[]>(
     [],
   );
@@ -209,19 +205,8 @@ export default function SecuritySettingsPage() {
     {
       title: t("pageShell.security.title"),
       subtitle: t("pageShell.security.subtitle"),
-      actions: (
-        <PolicyFooter
-          saving={saving}
-          onSave={() => void handleSave()}
-          compact
-        />
-      ),
     },
-    [saving, policy],
-  );
-
-  const saveFooter = inSettings ? null : (
-    <PolicyFooter saving={saving} onSave={() => void handleSave()} />
+    [],
   );
 
   const renderPolicyTab = () => {
@@ -266,7 +251,6 @@ export default function SecuritySettingsPage() {
                 />
               </Form.Item>
             </div>
-            {saveFooter}
           </>
         );
       case "filesystem":
@@ -297,7 +281,6 @@ export default function SecuritySettingsPage() {
                 />
               </Form.Item>
             </div>
-            {saveFooter}
           </>
         );
       case "pii":
@@ -327,7 +310,6 @@ export default function SecuritySettingsPage() {
                 />
               </Form.Item>
             </div>
-            {saveFooter}
           </>
         );
       case "tool_guard":
@@ -372,7 +354,6 @@ export default function SecuritySettingsPage() {
               </h4>
               <ToolGuardRulesPanel />
             </div>
-            {saveFooter}
           </>
         );
       case "skill_scan":
@@ -401,7 +382,6 @@ export default function SecuritySettingsPage() {
                 />
               </Form.Item>
             </div>
-            {saveFooter}
           </>
         );
       default:
@@ -420,6 +400,8 @@ export default function SecuritySettingsPage() {
         <TabBar tabs={allowedTabs} activeKey={activeTab} onChange={selectTab} />
       }
     >
+      {/* Sticky save bar — always visible below tabs, sticks to top of scroll area */}
+      <SaveBar saving={saving} onSave={() => void handleSave()} />
       {activeTab === "audit" ? (
         <div className={styles.panel}>
           <TabPanelHeader

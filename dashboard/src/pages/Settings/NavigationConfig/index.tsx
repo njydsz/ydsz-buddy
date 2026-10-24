@@ -4,6 +4,7 @@ import { Button, Input, Popconfirm } from "antd";
 import { GripVertical, Lock, Plus, Trash2 } from "lucide-react";
 import { message } from "@/utils/antdMessage";
 import { apiErrorMessage } from "@/utils/apiError";
+import { NAV_PREFS_CHANGED_EVENT } from "../../../layouts/chatHistoryRail";
 import {
   preferencesApi,
   type SidebarNavLayoutPref,
@@ -30,6 +31,7 @@ type DragPayload =
   | { type: "group"; id: string };
 
 const SETTINGS_GROUP_LABELS: Record<SettingsGroup, string> = {
+  basic: "nav.groupBasic",
   settings: "nav.groupSettings",
   control: "nav.groupControl",
   admin: "nav.groupAdmin",
@@ -119,7 +121,7 @@ function groupNameMissing(state: ZoneEditorState): boolean {
 
 /** Build the settings-zone editor with default groups from placement.ts. */
 function defaultSettingsEditor(settingsItems: NavPlacementItem[]): ZoneEditorState {
-  const groupIds: SettingsGroup[] = ["settings", "control", "admin"];
+  const groupIds: SettingsGroup[] = ["basic", "settings", "control", "admin"];
   const groups = groupIds.map((id) => ({ id }));
   const itemsByGroup: Record<string, string[]> = {};
   for (const id of groupIds) itemsByGroup[id] = [];
@@ -387,6 +389,7 @@ export default function NavigationConfigPage() {
         navZones: (prefs.nav_zones ?? {}) as Record<string, NavZone>,
         settingsNav: prefs.settings_nav ?? null,
       });
+      window.dispatchEvent(new Event(NAV_PREFS_CHANGED_EVENT));
       message.success(t("common.saveSuccess"));
     } catch (error) {
       message.error(apiErrorMessage(error, t("common.saveFailed"), t));

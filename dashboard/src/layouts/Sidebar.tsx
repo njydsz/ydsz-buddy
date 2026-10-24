@@ -16,6 +16,7 @@ import { useChatSidebarOpen } from "../pages/Chat/hooks/useChatSidebarState";
 import { EXPAND_CHAT_RAIL_EVENT } from "../pages/Chat/components/ChatSidebarPanel";
 import {
   CHAT_HISTORY_RAIL_ID,
+  NAV_PREFS_CHANGED_EVENT,
   OPEN_NAV_RECORDS_EVENT,
   isChatPath,
 } from "./chatHistoryRail";
@@ -406,6 +407,43 @@ export default function Sidebar({
   const { width: sidebarWidth, onResizeMouseDown } = useSidebarWidth(collapsed);
   const [savedLayout, setSavedLayout] = useState<SidebarNavLayout | null>(null);
   const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(null);
+
+  // Refetch sidebar preferences from the server. Shared between the initial
+  // mount / user-change path and the cross-component "prefs changed" event.
+  const refreshNavPrefs = useCallback(() => {
+    let cancelled = false;
+    void preferencesApi
+      .get()
+      .then((prefs) => {
+        if (cancelled) return;
+        setSavedLayout(prefs.sidebar_nav ?? null);
+        setNavZones(prefs.nav_zones ?? null);
+      })
+      .catch(() => {
+        /* keep the current nav */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const cancel = refreshNavPrefs();
+    return cancel;
+  }, [user, refreshNavPrefs]);
+
+  // NavigationConfig updates preferences via the same /preferences endpoint.
+  // Listen for its "saved" event so the live sidebar picks up zone/layout
+  // changes without a page reload.
+  useEffect(() => {
+    const handler = () => refreshNavPrefs();
+    window.addEventListener(NAV_PREFS_CHANGED_EVENT, handler);
+    return () => {
+      window.removeEventListener(NAV_PREFS_CHANGED_EVENT, handler);
+    };
+  }, [refreshNavPrefs]);
+
   const catalog = useMemo(
     () => buildNavSections(user, { mobileEnabled, navZones: navZones ?? undefined }),
     [user, mobileEnabled, navZones],
@@ -419,24 +457,6 @@ export default function Sidebar({
     selectedKey,
   );
 
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    void preferencesApi
-      .get()
-      .then((prefs) => {
-        if (!cancelled) {
-          setSavedLayout(prefs.sidebar_nav ?? null);
-          setNavZones(prefs.nav_zones ?? null);
-        }
-      })
-      .catch(() => {
-        /* keep the default nav */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
   const [chatSidebarOpen, setChatSidebarOpen] = useChatSidebarOpen();
   // Classic only: keep the control beside Chat whether the history rail is open or closed.
   const showChatRailToggle = !isMinimal;
