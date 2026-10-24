@@ -3,7 +3,7 @@
 > Ydsz Worker 基于 Tencent Ydsz Worker（MIT 协议）二开。
 
 > 本帮助文档面向最终用户，介绍 **安装 → 设置向导 → 配置模型 → 基本使用** 的完整流程。
-> 所有运行时数据默认存放在 `~/.ydsz/`（可通过 `YDSZ_HOME` 覆盖）。
+> 所有运行时数据默认存放在 `~/.ydsz-worker/`（可通过 `YDSZ_HOME` 覆盖）。
 
 ---
 
@@ -65,7 +65,7 @@
 ### 2.1 环境要求
 
 - 操作系统：**macOS / Linux / Windows**。
-- **无需** 预先安装 Python —— 安装脚本会通过 [uv](https://docs.astral.sh/uv/) 在 `~/.ydsz/` 下自动创建隔离的 Python 3.12 虚拟环境。
+- **无需** 预先安装 Python —— 安装脚本会通过 [uv](https://docs.astral.sh/uv/) 在 `~/.ydsz-worker/` 下自动创建隔离的 Python 3.12 虚拟环境。
 - 需要可访问外网，用于下载安装脚本与依赖。
 
 ### 2.2 一键脚本安装（推荐）
@@ -97,7 +97,7 @@ source ~/.zshrc   # Zsh
 source ~/.bashrc  # Bash
 ```
 
-安装脚本会把 `ydsz-worker` 命令放入 `~/.ydsz/bin` 并加入 PATH，并在 `~/.ydsz/venv` 创建隔离环境；**不会改动系统 Python**。
+安装脚本会把 `ydsz-worker` 命令放入 `~/.ydsz-worker/bin` 并加入 PATH，并在 `~/.ydsz-worker/venv` 创建隔离环境；**不会改动系统 Python**。
 
 > **可选附加组件**：安装脚本支持通过 `--extras` 追加能力，例如浏览器自动化 `--extras browser`；也可用 `--version` 指定版本、`--mirror <url>` 使用国内 PyPI 镜像。更多选项见 [scripts/README.md](../scripts/README.md)。
 
@@ -108,7 +108,7 @@ ydsz-worker --version
 ydsz-worker run --help
 ```
 
-若提示 `command not found: ydsz-worker`，请确认已重新加载 shell 或检查 `~/.ydsz/bin` 是否在 PATH 中。
+若提示 `command not found: ydsz-worker`，请确认已重新加载 shell 或检查 `~/.ydsz-worker/bin` 是否在 PATH 中。
 
 ### 2.4 Docker 安装（生产推荐）
 
@@ -120,7 +120,7 @@ docker compose -f docker/docker-compose.yml up -d
 bash docker/docker_build.sh
 docker run -d \
   -p 8088:8088 \
-  -v ydsz-data:/data/.ydsz \
+  -v ydsz-data:/data/.ydsz-worker \
   -e HOME=/data \
   -e YDSZ_DEFAULT_PASSWORD="<自定义强密码，留空则进入设置向导>" \
   ydsz-worker:latest
@@ -133,9 +133,9 @@ docker run -d \
 | `YDSZ_PORT` | `8088` | HTTP 监听端口 |
 | `YDSZ_DEFAULT_PASSWORD` | _(空)_ | 首次运行管理员密码（Docker 引导；≥8 位且含字母+数字；合格则建账号；留空或不合格则走设置向导） |
 | `YDSZ_ADMIN_USERNAME` | `admin` | 首次运行管理员用户名 |
-| `YDSZ_DATA` | `~/.ydsz` | 宿主机数据目录（compose 挂载） |
+| `YDSZ_DATA` | `~/.ydsz-worker` | 宿主机数据目录（compose 挂载） |
 
-> 未设置或不合格的 `YDSZ_DEFAULT_PASSWORD` 不会静默换成随机管理员密码；打开页面走设置向导，向导口令在 `/data/.ydsz/ydsz-login.txt`。
+> 未设置或不合格的 `YDSZ_DEFAULT_PASSWORD` 不会静默换成随机管理员密码；打开页面走设置向导，向导口令在 `/data/.ydsz-worker/ydsz-login.txt`。
 
 ---
 
@@ -173,7 +173,7 @@ ydsz-worker service start   # Linux(systemd) / macOS(launchd) / Windows 服务
 
 **步骤 2：选择控制面数据库**
 
-- 默认使用本地 **SQLite**（路径相对 `~/.ydsz/`，通常为 `ydsz.db`），点击「保存并继续」即可。
+- 默认使用本地 **SQLite**（路径相对 `~/.ydsz-worker/`，通常为 `ydsz.db`），点击「保存并继续」即可。
 - 「展开更多」可配置 **PostgreSQL**（内测）：填写主机等并先「测试连接」，再「使用 PostgreSQL 并继续」。
 - 向导会把选择写入 `config.json` 的 `database` 段，并在服务进程内**首次绑定**连接池、跑迁移。
 - 也可事先用环境变量指定（见 [configuration.md](configuration.md) 的 `YDSZ_DATABASE_*`）；已有库文件的升级安装不会延后建连。
@@ -303,7 +303,7 @@ ydsz-worker provider --help     # 供应商增删改查帮助
 
 打开 **http://127.0.0.1:8088**，使用向导创建的账号登录。
 
-> ⚠️ **安全提醒**：Docker 若未设置合格的 `YDSZ_DEFAULT_PASSWORD`，首次打开会进入设置向导（向导口令在 `/data/.ydsz/ydsz-login.txt`，可用 `docker exec <容器> cat /data/.ydsz/ydsz-login.txt` 查看）。无论哪种方式，都请尽快在 **个人设置 → 修改密码** 中更换，避免服务暴露到公网时被未授权访问。
+> ⚠️ **安全提醒**：Docker 若未设置合格的 `YDSZ_DEFAULT_PASSWORD`，首次打开会进入设置向导（向导口令在 `/data/.ydsz-worker/ydsz-login.txt`，可用 `docker exec <容器> cat /data/.ydsz-worker/ydsz-login.txt` 查看）。无论哪种方式，都请尽快在 **个人设置 → 修改密码** 中更换，避免服务暴露到公网时被未授权访问。
 
 ![图 5.1 — 登录页面](assets/use-01-login.png)
 
@@ -370,11 +370,11 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 ### 5.8 设置（用户 / 安全 / TLS / 系统）
 
 - **用户**：管理账号、角色、修改密码。
-- **安全**：工具审批、Shell 命令护栏（`~/.ydsz/security/tool_guard/`）。
+- **安全**：工具审批、Shell 命令护栏（`~/.ydsz-worker/security/tool_guard/`）。
 - **TLS**：配置 HTTPS（自签或 Let's Encrypt）。
 - **系统**：监听地址 / 端口、日志级别、定时任务时区等。
 
-> 手动编辑配置文件：运行时参数保存在 `~/.ydsz/config.json`，可用环境变量覆盖（如 `YDSZ_PORT`、`YDSZ_BIND_HOST`）。详见 [docs/configuration.md](configuration.md)。
+> 手动编辑配置文件：运行时参数保存在 `~/.ydsz-worker/config.json`，可用环境变量覆盖（如 `YDSZ_PORT`、`YDSZ_BIND_HOST`）。详见 [docs/configuration.md](configuration.md)。
 
 ![图 5.6 — 设置页面](assets/use-06-settings.png)
 
@@ -434,10 +434,10 @@ Ydsz Worker 支持两个方向的 ACP 集成：
 - 启动时：`ydsz-worker run --host 0.0.0.0 --port 8088`；或设置环境变量 `YDSZ_BIND_HOST=0.0.0.0`、`YDSZ_PORT=8088`。
 
 **Q：数据存放在哪里？**
-- 全部在 `~/.ydsz/`：
+- 全部在 `~/.ydsz-worker/`：
 
 ```
-~/.ydsz/
+~/.ydsz-worker/
 ├── config.json              # 进程级配置（地址、端口、CORS、TLS、database …）
 ├── ydsz.db                 # 默认 SQLite 控制面 — 用户、Agent、通道、定时任务 …
 ├── secrets/                 # JWT 密钥、通道 Token

@@ -56,7 +56,7 @@ rejected before siteverify.
 Offline recovery: delete the `captcha.settings` row via local CLI /
 `settings_repo` if a settings-sourced strong provider is unreachable. If
 the process refused to start because `YDSZ_CAPTCHA_PROVIDER` is strong
-without both keys and no readable settings blob, edit `~/.ydsz/env` on
+without both keys and no readable settings blob, edit `~/.ydsz-worker/env` on
 disk — the dashboard and `PUT /api/envs` are unreachable until the
 process starts. `GET /api/envs` redacts `YDSZ_CAPTCHA_SECRET` as
 `********`; sending that sentinel on PUT keeps the on-disk value.

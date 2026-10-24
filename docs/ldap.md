@@ -233,7 +233,7 @@ RUNTIME=/tmp/ydsz-ldap-dev
 mkdir -p "$RUNTIME/home"
 
 HOME="$RUNTIME/home" \
-YDSZ_HOME="$RUNTIME/home/.ydsz" \
+YDSZ_HOME="$RUNTIME/home/.ydsz-worker" \
 uv run ydsz-worker run --host 127.0.0.1 --port 8799
 ```
 

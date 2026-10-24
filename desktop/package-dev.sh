@@ -1,5 +1,5 @@
 #!/bin/bash
-# Desktop shell against a source Ydsz Worker (hot reload). Not ~/.ydsz/portable.
+# Desktop shell against a source Ydsz Worker (hot reload). Not ~/.ydsz-worker/portable.
 # Starts Ydsz Worker in this shell and stops it when wails3 / this script exits.
 set -euo pipefail
 

@@ -133,8 +133,8 @@ def agent_host_data_dirs(
 ) -> list[Path]:
     """Every on-disk directory that belongs to this agent and may be removed.
 
-    Covers the persisted workspace, ``~/.ydsz/agents/<id>``, a scoped jail
-    workspace, and ``~/.ydsz/workspaces/<id>``. Roots such as ``/``, the
+    Covers the persisted workspace, ``~/.ydsz-worker/agents/<id>``, a scoped jail
+    workspace, and ``~/.ydsz-worker/workspaces/<id>``. Roots such as ``/``, the
     home directory, and ``YDSZ_HOME`` itself are never included.
     """
     candidates: list[Path] = []

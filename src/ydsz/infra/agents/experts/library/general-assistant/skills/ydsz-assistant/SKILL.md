@@ -38,7 +38,7 @@ metadata:
 
 **Ydsz Worker** 是开源、自托管的 AI 助手，支持多用户、多 Agent。口号是：更聪明，更懂你；文档站上的说法是「会思考、能干活、陪企业成长的智能伙伴」。
 
-它不只是聊天窗口，而是可以并行运作的数字助手。通过多 Agent 架构，为团队、家庭和个人提供既独立又协作的环境。全部跑在用户自己的机器上：对话、工作区和凭据都留在本地。一条 `ydsz-worker run` 同时提供 Web 控制台、CLI、IM 通道和定时任务。数据目录默认 `~/.ydsz/`（控制面数据库默认 SQLite，可选 PostgreSQL）。
+它不只是聊天窗口，而是可以并行运作的数字助手。通过多 Agent 架构，为团队、家庭和个人提供既独立又协作的环境。全部跑在用户自己的机器上：对话、工作区和凭据都留在本地。一条 `ydsz-worker run` 同时提供 Web 控制台、CLI、IM 通道和定时任务。数据目录默认 `~/.ydsz-worker/`（控制面数据库默认 SQLite，可选 PostgreSQL）。
 
 设计目标：每一次对话、工作区与凭据都留在自己的机器上，同时每个用户可以按场景切换一组专业 Agent。
 
@@ -71,7 +71,7 @@ metadata:
 | 💻 | 终端 / 浏览器 AI+ | 浏览器里的交互式 Shell，以及无头 Chromium 会话 |
 | 🖥️ | 远程桌面 | 控制台看屏和键鼠，覆盖 Linux / Windows / macOS |
 | 🪟 | 桌面客户端 | Windows / macOS / Linux，以及飞牛（FnOS）安装包 |
-| 🏠 | 自托管 | 单进程 `ydsz-worker run`，数据在 `~/.ydsz/` |
+| 🏠 | 自托管 | 单进程 `ydsz-worker run`，数据在 `~/.ydsz-worker/` |
 
 底层是 Python 3.12+、FastAPI，Agent 运行时为 Ydsz Worker Harness（ydsz-harness），IM 桥接为 Ydsz Worker Gateway（ydsz-gateway）。不依赖外部消息队列。
 
@@ -138,7 +138,7 @@ irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/Ydsz/install.ps1 | i
 装好后新开终端，再：
 
 ```bash
-ydsz-worker init    # 创建 ~/.ydsz/、管理员账号
+ydsz-worker init    # 创建 ~/.ydsz-worker/、管理员账号
 ydsz-worker run     # 前台启动，浏览器打开 http://127.0.0.1:8088
 ```
 
@@ -171,7 +171,7 @@ ydsz-worker run     # 前台启动，浏览器打开 http://127.0.0.1:8088
 | **Agent ID** | 后续 `ydsz-worker --agent <id>` 的必填参数 |
 | **归属用户** | Agent 所有者（共享 Agent 会标注「无单一归属」） |
 | **对话用户** | **本次对话** 的 Ydsz Worker 用户（username + id）— 比 CLI `config show` 可靠 |
-| **工作区** | `~/.ydsz/agents/<id>/` 路径 |
+| **工作区** | `~/.ydsz-worker/agents/<id>/` 路径 |
 | **专家模板** | 若从专家库创建，显示 template 名 |
 | **模型 / 渠道 / 定时任务** | 当前会话与运行态摘要 |
 
@@ -189,7 +189,7 @@ Agent 自身无法代替用户触发斜杠指令时，明确提示用户发送 `
 |------|------------------|-------------------------------------|
 | **Web Dashboard** | 浏览器 JWT；服务端在消息里带 `user_id`（`channel_subject.subject_id`） | **不能** |
 | **IM Channel** | 通道映射的 Ydsz Worker 用户 id（同上） | **不能** |
-| **服务器终端 CLI** | `ydsz-worker user login` 写入 `~/.ydsz/cli_state.json` | **能**（仅反映该文件里的账号） |
+| **服务器终端 CLI** | `ydsz-worker user login` 写入 `~/.ydsz-worker/cli_state.json` | **能**（仅反映该文件里的账号） |
 
 `ydsz-worker config show` 的 `default_user` / `token` 是 **运行 shell 的那台机器、那个 OS 用户** 上次 CLI 登录的结果，**不是** 正在 Dashboard 里和你对话的用户，也 **不是** IM 里发消息的用户。
 
@@ -203,7 +203,7 @@ Agent 自身无法代替用户触发斜杠指令时，明确提示用户发送 `
 
 | 信息 | 如何获得 |
 |------|----------|
-| **Agent ID** | 让用户发 `/status`，或从工作区路径 `~/.ydsz/agents/<id>/` 推断 |
+| **Agent ID** | 让用户发 `/status`，或从工作区路径 `~/.ydsz-worker/agents/<id>/` 推断 |
 | **对话用户** | `/status` 的 **对话用户** 行（权威来源） |
 | **归属用户** | `/status` 的 **归属用户** 行 |
 | **工作区路径** | `/status` 的 **工作区** 行 |
@@ -219,11 +219,11 @@ Agent 自身无法代替用户触发斜杠指令时，明确提示用户发送 `
 
 你正在为用户服务的 Agent，其 ID 通常可从工作区路径推断：
 
-- 工作区目录：`~/.ydsz/agents/<AGENT_ID>/`
+- 工作区目录：`~/.ydsz-worker/agents/<AGENT_ID>/`
 - 若 shell 当前目录在工作区内，可执行：
 
 ```bash
-# 从当前工作区路径解析 agent id（在 ~/.ydsz/agents/<id>/ 下时有效）
+# 从当前工作区路径解析 agent id（在 ~/.ydsz-worker/agents/<id>/ 下时有效）
 AGENT_ID="$(basename "$(cd .. 2>/dev/null && pwd)")"
 echo "agent=$AGENT_ID"
 ```
@@ -306,7 +306,7 @@ Ydsz Worker 的 Provider 为**全局（管理员）**配置；Agent 可选用全
 
 ### 查看 Provider 与模型（直接执行）
 
-**禁止**直接查 `~/.ydsz/ydsz.db`。`json_each(providers.models_json).id` 是 SQLite 内部序号，不是模型名，会拼出非法的 `"model": 1`。
+**禁止**直接查 `~/.ydsz-worker/ydsz.db`。`json_each(providers.models_json).id` 是 SQLite 内部序号，不是模型名，会拼出非法的 `"model": 1`。
 
 用 CLI（`models[].id` / 输出里的模型 id 才是发给网关的字符串）：
 
@@ -575,7 +575,7 @@ ydsz-worker update -y
 
 升级后需 **重启** `ydsz-worker run`（或 Docker 容器）才生效。先用 `ydsz-worker service status` 确认服务状态，再告知用户重启方式。
 
-### 插件（直接执行，读写本地 ~/.ydsz/plugins）
+### 插件（直接执行，读写本地 ~/.ydsz-worker/plugins）
 
 ```bash
 ydsz-worker plugin list
@@ -593,11 +593,11 @@ ydsz-worker plugin uninstall <plugin_id>
 
 | 层 | 位置 | 谁继承 |
 |---|---|---|
-| 全局 | `~/.ydsz/env` | 所有 Agent（shell / Docker 沙箱 / ACP） |
+| 全局 | `~/.ydsz-worker/env` | 所有 Agent（shell / Docker 沙箱 / ACP） |
 | Agent | 工作区 `.env` | 仅该 Agent（同名覆盖全局；不可覆盖 `YDSZ_*` / `HOME` / `USER`） |
 
 - 查看 / 编辑全局：Web 控制台 → **Admin → 应用设置 → 环境变量**
-- 或直接编辑 `~/.ydsz/env`（控制台保存会立刻对齐进程环境；搜索类 key 变化会后台 reload Agent。手改文件后需保存一次或 `ydsz-worker agent reload`）
+- 或直接编辑 `~/.ydsz-worker/env`（控制台保存会立刻对齐进程环境；搜索类 key 变化会后台 reload Agent。手改文件后需保存一次或 `ydsz-worker agent reload`）
 - Agent 专用变量写入工作区 `.env`（也可用 `write_env_file`）；下一句 shell / Docker exec 即生效，不必 reload
 - 搜索 API Key（如 `TAVILY_API_KEY`）请放全局，不要只写在某个 Agent 的 `.env`
 
@@ -660,7 +660,7 @@ ydsz-worker plugin uninstall <plugin_id>
 | 产品介绍、概念、安装说明 | 直接回答，并给 https://Ydsz.cloud 或 https://docs.Ydsz.cloud/guide/ |
 | 首次向导、Provider、用户 | Web 控制台或 `ydsz-worker init` / `models config` |
 | 脚本化、批量、排障 | CLI（本 skill） |
-| 环境变量 | 控制台 Environments 或编辑 `~/.ydsz/env` |
+| 环境变量 | 控制台 Environments 或编辑 `~/.ydsz-worker/env` |
 | 对话与文件 | Web / IM 通道，非 CLI |
 
-数据目录：`~/.ydsz/`（`ydsz.db`、`config.json`、`agents/`、`env`、`cli_state.json`）。
+数据目录：`~/.ydsz-worker/`（`ydsz.db`、`config.json`、`agents/`、`env`、`cli_state.json`）。

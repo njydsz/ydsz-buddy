@@ -1,12 +1,12 @@
 # Configuration
 
-Ydsz Worker stores all of its state under `~/.ydsz/`. The directory is created
+Ydsz Worker stores all of its state under `~/.ydsz-worker/`. The directory is created
 on first server start (or by `ydsz-worker init` / `ydsz-worker run`).
 
 ## Filesystem layout
 
 ```
-~/.ydsz/
+~/.ydsz-worker/
 ├── config.json              # process-level settings (host, port, CORS, DB, TLS, …)
 ├── env                      # optional dotenv (YDSZ_DATABASE_*, API keys, …); loaded at server start
 ├── ydsz.db                 # SQLite — users, agents, providers, sessions, audit
@@ -37,7 +37,7 @@ file are left alone). Every running agent inherits those keys:
   injects `YDSZ_AGENT_ID`, `YDSZ_AUTH_DIR` (under `{workspace}/.ydsz/auth`
   for new agents; legacy agents keep `{workspace}/.ydsz-auth`),
   and `YDSZ_HOME` into shell/sandbox env.
-- **Docker sandbox** — re-reads `~/.ydsz/env` on execute, plus workspace `.env`
+- **Docker sandbox** — re-reads `~/.ydsz-worker/env` on execute, plus workspace `.env`
   and a minimal `PATH` (not the full host environment). Admin `PATH`/`HOME`
   cannot override the container toolchain; workspace `.env` may set `PATH`.
 - **Web search tools** (Tavily, Brave, …) register at agent start from process
@@ -156,7 +156,7 @@ Notes:
   `client_max_body_size`). Agent workspace file upload, plugin ZIPs,
   and backup archives use separate limits and are not this setting.
 - `plugins.<id>.enabled` is the **global** plugin switch (Dashboard Admin →
-  Plugins). Bundled plugins are copied into `~/.ydsz/plugins/` on init and
+  Plugins). Bundled plugins are copied into `~/.ydsz-worker/plugins/` on init and
   server start with `enabled: false`. `bundled_plugins_seeded` lists ids
   already offered so uninstall does not come back on the next start.
 
@@ -167,7 +167,7 @@ Each variable, when set, takes precedence over the matching key in
 
 | Variable | Type | Default | Effect |
 |----------|------|---------|--------|
-| `YDSZ_HOME` | path | `~/.ydsz` | Install root (DB, secrets, workspaces, plugins) |
+| `YDSZ_HOME` | path | `~/.ydsz-worker` | Install root (DB, secrets, workspaces, plugins) |
 | `YDSZ_BIND_HOST` | string | `127.0.0.1` | Listen address (use `0.0.0.0` for LAN access) |
 | `YDSZ_PORT` | int | `8088` | Listen port (`0`–`65535`; `0` asks the OS for a free port) |
 | `YDSZ_LOG_LEVEL` | string | `info` | One of `debug` `info` `warning` `error` |
@@ -213,7 +213,7 @@ configured backend at boot.
 **Docker Compose:** put `YDSZ_DATABASE_*` in `docker/.env` *and* ensure
 they are listed under `environment:` in `docker/docker-compose.yml`
 (Compose uses `.env` for interpolation only; unset keys do not enter the
-container). Writing the same keys to the mounted `~/.ydsz/env` also works.
+container). Writing the same keys to the mounted `~/.ydsz-worker/env` also works.
 
 ### Agent memory vs control plane
 
@@ -267,7 +267,7 @@ runs the same migrations + admin creation without the HTTP wizard.
 ## Secrets
 
 The JWT secret is generated on first start and stored in
-`~/.ydsz/secrets/jwt_secret`. Rotate it with:
+`~/.ydsz-worker/secrets/jwt_secret`. Rotate it with:
 
 ```bash
 ydsz admin rotate-jwt-secret

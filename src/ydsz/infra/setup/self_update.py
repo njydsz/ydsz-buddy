@@ -83,8 +83,8 @@ def green_packages_dir() -> Path | None:
 
 
 def resolve_venv_python() -> str:
-    """Return the Python executable for the managed ~/.ydsz/venv install."""
-    # Green portable: always the interpreter that launched launch.py, never ~/.ydsz/venv.
+"""Return the Python executable for the managed ~/.ydsz-worker/venv install."""
+# Green portable: always the interpreter that launched launch.py, never ~/.ydsz-worker/venv.
     if green_packages_dir() is not None:
         return sys.executable
 

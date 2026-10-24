@@ -21,7 +21,7 @@ Ydsz Worker is a self-hosted control plane. Operators are responsible for:
 
 - Securing the host and network exposure of `ydsz-worker run`
 - Rotating JWT secrets and admin credentials
-- Reviewing tool guard rules under `~/.ydsz/security/tool_guard/`
+- Reviewing tool guard rules under `~/.ydsz-worker/security/tool_guard/`
 - Protecting LLM API keys and IM channel credentials
 
 See [docs/configuration.md](docs/configuration.md) for deployment hardening guidance.

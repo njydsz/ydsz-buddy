@@ -1,4 +1,4 @@
-"""Persisted environment variables at ``~/.ydsz/env`` (dotenv format)."""
+"""Persisted environment variables at ``~/.ydsz-worker/env`` (dotenv format)."""
 
 from __future__ import annotations
 

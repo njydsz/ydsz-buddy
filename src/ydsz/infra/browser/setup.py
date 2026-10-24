@@ -176,8 +176,8 @@ def _probe_dir_writable(directory: Path) -> bool:
 def _under_root_home(path: Path) -> bool:
     """True for paths under ``/root`` that are unsafe for Chrome (YunJing).
 
-    Ydsz Worker home (``YDSZ_HOME`` / ``~/.ydsz``) is exempt so shared profiles
-    at ``~/.ydsz/browser-profiles`` stay put even when running as root.
+Ydsz Worker home (``YDSZ_HOME`` / ``~/.ydsz-worker``) is exempt so shared profiles
+at ``~/.ydsz-worker/browser-profiles`` stay put even when running as root.
     """
     if not sys.platform.startswith("linux"):
         return False
@@ -282,7 +282,7 @@ async def prepare_harness_profile_for_launch(
 
     - Forces a writable ``XDG_RUNTIME_DIR``
     - Injects virtual-desktop ``DISPLAY`` when Xvnc is up
-    - Prefers shared ``~/.ydsz/browser-profiles`` (cross-agent)
+    - Prefers shared ``~/.ydsz-worker/browser-profiles`` (cross-agent)
     - If CDP is already listening, leaves the running browser alone
     - Otherwise kills leftover Chrome for this profile and clears Singleton locks
     - Ensures the profile directory is writable (recreate / relocate if needed)
@@ -473,7 +473,7 @@ async def uninstall_browser_stream(*, locale: str = "en") -> AsyncIterator[str]:
     """Remove Playwright-installed Chromium only (SSE).
 
     Does **not** touch the user's system Chrome/Chromium, and does **not**
-    delete ``~/.ydsz/browser-profiles`` or leftover ``~/.harness-browser`` data.
+    delete ``~/.ydsz-worker/browser-profiles`` or leftover ``~/.harness-browser`` data.
 
     ``locale`` is reserved for future i18n of log lines.
     """

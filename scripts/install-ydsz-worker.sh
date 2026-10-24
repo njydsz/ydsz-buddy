@@ -4,14 +4,14 @@
 #   或: bash scripts/install.sh --from-source  # 从本地源码安装
 #   或: curl -fsSL <url>/install.sh | bash   # 远程安装
 #
-# 将 Ydsz Worker 安装到 ~/.ydsz，使用 uv 管理 Python 环境。
+# 将 Ydsz Worker 安装到 ~/.ydsz-worker，使用 uv 管理 Python 环境。
 # 用户无需预先安装 Python — uv 会处理一切。
 # 安装后会尽量把 ydsz-worker 链接到已在 PATH 中的目录（如 /usr/local/bin），
 # 当前终端无需 source / 重开即可直接使用。
 set -euo pipefail
 
 # ── 默认配置 ──────────────────────────────────────────────────────────────────
-YDSZ_HOME="${YDSZ_HOME:-$HOME/.ydsz}"
+YDSZ_HOME="${YDSZ_HOME:-$HOME/.ydsz-worker}"
 YDSZ_VENV="$YDSZ_HOME/venv"
 YDSZ_BIN="$YDSZ_HOME/bin"
 PYTHON_VERSION="3.12"
@@ -94,7 +94,7 @@ Note: Playwright Chromium is not downloaded by default. Pass
   even with --extras browser.
 
 Environment variables:
-  YDSZ_HOME               Install directory (default: ~/.ydsz)
+  YDSZ_HOME               Install directory (default: ~/.ydsz-worker)
   YDSZ_PYPI_MIRROR        PyPI mirror URL (same as --mirror)
   YDSZ_REPO               Git URL to clone (used by --from-source with no local dir)
   HARNESS_AGENT_REPO      agent-runtime repo (derived from YDSZ_REPO by default)
@@ -104,7 +104,7 @@ Environment variables:
   PLAYWRIGHT_INSTALL_TIMEOUT  Per-mirror download timeout in seconds (default 600)
 
 Details:
-  Everything is installed into an isolated virtualenv (~/.ydsz/venv), so the
+  Everything is installed into an isolated virtualenv (~/.ydsz-worker/venv), so the
   system Python is untouched. Playwright Chromium is opt-in (--extras browser):
   1. Playwright Chromium browser (skipped if a system browser exists)
   2. System libraries (Linux: apt/dnf/yum/pacman/zypper; only needed for Chromium)
@@ -914,7 +914,7 @@ cat > "$YDSZ_BIN/ydsz-worker" << 'WRAPPER'
 # Ydsz Worker CLI 包装脚本 — 委托给 uv 管理的环境。
 set -euo pipefail
 
-YDSZ_HOME="${YDSZ_HOME:-$HOME/.ydsz}"
+YDSZ_HOME="${YDSZ_HOME:-$HOME/.ydsz-worker}"
 REAL_BIN="$YDSZ_HOME/venv/bin/ydsz-worker"
 
 if [ ! -x "$REAL_BIN" ]; then

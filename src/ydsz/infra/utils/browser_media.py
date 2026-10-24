@@ -82,7 +82,7 @@ def _maybe_migrate_legacy_profiles(dest: Path) -> None:
 
 
 def ydsz_browser_profiles_dir(paths: PathLayout | None = None) -> Path:
-    """Shared Chrome profiles root: ``~/.ydsz/browser-profiles``.
+    """Shared Chrome profiles root: ``~/.ydsz-worker/browser-profiles``.
 
     Profiles live under one Ydsz Worker-owned root and are named ``user-<id>``.
     A pre-isolation ``default`` directory, if present, is left untouched.

@@ -82,13 +82,13 @@ ydsz-worker acp --agent main
 | `--agent ID` | Agent to expose (default: CLI `default_agent` or first agent) |
 | `--debug` | Log to stderr |
 
-This starts a **standalone** `YdszServer` (reads `~/.ydsz`), boots the agent, and speaks ACP on stdin/stdout. It does **not** require `ydsz-worker run` to be running; it is a separate process.
+This starts a **standalone** `YdszServer` (reads `~/.ydsz-worker`), boots the agent, and speaks ACP on stdin/stdout. It does **not** require `ydsz-worker run` to be running; it is a separate process.
 
 Pin the default agent for convenience:
 
 ```bash
 ydsz-worker user login --username you
-# set default_agent in ~/.ydsz/cli_state.json, or:
+# set default_agent in ~/.ydsz-worker/cli_state.json, or:
 ydsz-worker --agent main acp
 ```
 
@@ -122,7 +122,7 @@ From a dev checkout:
 }
 ```
 
-Create an agent thread in Zed and prompt as usual. Sessions map to `thread_id`; the agent workspace remains under `~/.ydsz/agents/<agent_id>/`.
+Create an agent thread in Zed and prompt as usual. Sessions map to `thread_id`; the agent workspace remains under `~/.ydsz-worker/agents/<agent_id>/`.
 
 ---
 

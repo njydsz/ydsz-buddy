@@ -34,8 +34,8 @@ def backup() -> None:
     "--home",
     type=click.Path(path_type=Path),
     default=None,
-    help="Ydsz Worker home (default ~/.ydsz).",
-)
+    help="Ydsz Worker home (default ~/.ydsz-worker).",
+    )
 @click.option("--no-config", is_flag=True, help="Do not include config.json / env.")
 @click.option("--no-workspaces", is_flag=True, help="Do not include agent workspaces.")
 @click.option("--no-skill-packages", is_flag=True, help="Do not include global skill packages.")
@@ -100,7 +100,7 @@ def auto() -> None:
     "--home",
     type=click.Path(path_type=Path),
     default=None,
-    help="Ydsz Worker home (default ~/.ydsz).",
+    help="Ydsz Worker home (default ~/.ydsz-worker).",
 )
 def auto_status(home: Path | None) -> None:
     """Print automatic backup settings from config.json."""
@@ -124,7 +124,7 @@ def auto_status(home: Path | None) -> None:
     "--home",
     type=click.Path(path_type=Path),
     default=None,
-    help="Ydsz Worker home (default ~/.ydsz).",
+    help="Ydsz Worker home (default ~/.ydsz-worker).",
 )
 def auto_run(home: Path | None) -> None:
     """Create one automatic backup now and apply retention pruning."""
@@ -161,7 +161,7 @@ def auto_run(home: Path | None) -> None:
     "--home",
     type=click.Path(path_type=Path),
     default=None,
-    help="Ydsz Worker home (default ~/.ydsz).",
+    help="Ydsz Worker home (default ~/.ydsz-worker).",
 )
 @click.option("--no-config", is_flag=True, default=False, help="Do not restore config.json / env.")
 @click.option(

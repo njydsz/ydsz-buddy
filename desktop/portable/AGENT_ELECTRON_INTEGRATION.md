@@ -32,10 +32,10 @@ YdszWorker-<plat>/
    beside the executable (Linux); the desktop shell does not download it at runtime.
 2. Extract to a writable user directory **outside** `app.asar`.
 3. On macOS, after checksum: `xattr -dr com.apple.quarantine <extractDir>`.
-4. Set `YDSZ_HOME` to Ydsz Worker's default data dir (`~/.ydsz`, or `$YDSZ_HOME`
+4. Set `YDSZ_HOME` to Ydsz Worker's default data dir (`~/.ydsz-worker`, or `$YDSZ_HOME`
    if already set). Do **not** use the zip's `./data` folder when launching
    from the Wails desktop shell (`desktop/src`).
-   Extract the zip under `~/.ydsz/portable/` so runtime files stay next to
+   Extract the zip under `~/.ydsz-worker/portable/` so runtime files stay next to
    user data without overwriting `ydsz.db`.
 5. Set `PYTHONNOUSERSITE=1` and `YDSZ_GREEN_PACKAGES=<extract>/packages`.
    **Do not set `PYTHONPATH`.**

@@ -365,7 +365,7 @@ async def _fill_missing_subagent_colors(agent: Any, rows: list[dict[str, Any]]) 
 # Data types
 # ---------------------------------------------------------------------------
 
-# Custom agent ids become workspace directory names (~/.ydsz/agents/<id>/),
+# Custom agent ids become workspace directory names (~/.ydsz-worker/agents/<id>/),
 # so restrict to a conservative slug charset — no separators, dots, or
 # unicode — to keep every downstream path/URL usage safe.
 _CUSTOM_AGENT_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{1,62}[a-zA-Z0-9]$")
@@ -3733,7 +3733,7 @@ class AgentManager:
         raw = cfg.get("workspace_dir")
         stored = self._repos.agent_repo.get(row.agent_id) is not None
         if isinstance(raw, str) and raw.strip() and stored:
-            # Host mkdir may remap an unwritable leftover (e.g. /root/.ydsz/…)
+            # Host mkdir may remap an unwritable leftover (e.g. /root/.ydsz-worker/…)
             # and persist the new path; re-read so harness gets that string.
             workspace_dir = self.resolve_workspace_dir(row.agent_id)
             persisted = self.get_config(row.agent_id)

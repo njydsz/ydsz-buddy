@@ -78,7 +78,7 @@ def _install_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(YdszError)
     async def _ydsz(request: Request, exc: YdszError) -> JSONResponse:
         # Client responses are locale-localized; log the original English message
-        # so INTERNAL_ERROR (and other 5xx) remain diagnosable in ~/.ydsz/logs.
+        # so INTERNAL_ERROR (and other 5xx) remain diagnosable in ~/.ydsz-worker/logs.
         if exc.status >= 500:
             logger.error(
                 "YdszError %s in %s: %s",

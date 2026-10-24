@@ -4,7 +4,7 @@
 
 ## 安装 Ydsz Worker（终端用户）
 
-将 Ydsz Worker 安装到隔离虚拟环境 `~/.ydsz/venv`，并创建 `~/.ydsz/bin/ydsz-worker` 包装脚本加入 PATH。
+将 Ydsz Worker 安装到隔离虚拟环境 `~/.ydsz-worker/venv`，并创建 `~/.ydsz-worker/bin/ydsz-worker` 包装脚本加入 PATH。
 
 ### 远程一键安装（推荐）
 
@@ -48,7 +48,7 @@ Windows PowerShell 等价参数：`-Version`、`-FromSource`、`-SourceDir`、`-
 
 | 变量 | 说明 |
 |------|------|
-| `YDSZ_HOME` | 安装根目录，默认 `~/.ydsz` |
+| `YDSZ_HOME` | 安装根目录，默认 `~/.ydsz-worker` |
 | `YDSZ_REPO` | `--from-source` 无本地目录时的 git 克隆地址 |
 | `YDSZ_PYPI_MIRROR` | PyPI 镜像（与 `--mirror` 等效） |
 | `PLAYWRIGHT_DOWNLOAD_HOST` | Playwright 浏览器下载镜像（仅 `--extras browser`） |

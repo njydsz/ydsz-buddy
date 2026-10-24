@@ -2,7 +2,7 @@
 # Usage: irm <url>/install.ps1 | iex
 #    or: .\install.ps1 [-Version X.Y.Z] [-FromSource] [-SourceDir DIR] [-Extras "browser"]
 #
-# Installs Ydsz Worker into ~/.ydsz with a uv-managed Python environment.
+# Installs Ydsz Worker into ~/.ydsz-worker with a uv-managed Python environment.
 
 & {
 param(
@@ -45,7 +45,7 @@ to install it, or install later from the dashboard. If a system Chrome already
 exists, that download is skipped even with -Extras browser.
 
 Environment:
-  YDSZ_HOME            Installation directory (default: ~/.ydsz)
+  YDSZ_HOME            Installation directory (default: ~/.ydsz-worker)
   YDSZ_REPO            Git clone URL for -FromSource without -SourceDir
 "@
     exit 0

@@ -25,7 +25,7 @@ class PathLayout:
 
     @property
     def logs_dir(self) -> Path:
-        """Structured runtime logs: ``~/.ydsz/logs/``."""
+        """Structured runtime logs: ``~/.ydsz-worker/logs/``."""
         return self.root / "logs"
 
     @property
@@ -56,31 +56,31 @@ class PathLayout:
 
     @property
     def agents_dir(self) -> Path:
-        """Global agents directory: ~/.ydsz/agents/"""
+        """Global agents directory: ~/.ydsz-worker/agents/"""
         return self.root / "agents"
 
     @property
     def expert_market_dir(self) -> Path:
-        """Cached SkillHub expert templates: ``~/.ydsz/expert_market/``."""
+        """Cached SkillHub expert templates: ``~/.ydsz-worker/expert_market/``."""
         return self.root / "expert_market"
 
     @property
     def published_experts_dir(self) -> Path:
-        """User-published expert snapshots: ``~/.ydsz/published_experts/``."""
+        """User-published expert snapshots: ``~/.ydsz-worker/published_experts/``."""
         return self.root / "published_experts"
 
     @property
     def skill_packages_dir(self) -> Path:
-        """Global skill package content: ``~/.ydsz/skill-packages/``."""
+        """Global skill package content: ``~/.ydsz-worker/skill-packages/``."""
         return self.root / "skill-packages"
 
     @property
     def knowledge_dir(self) -> Path:
-        """Global knowledge base files: ``~/.ydsz/knowledge/``."""
+        """Global knowledge base files: ``~/.ydsz-worker/knowledge/``."""
         return self.root / "knowledge"
 
     def agent_workspace(self, agent_id: str) -> Path:
-        """Global agent workspace: ~/.ydsz/agents/<agent_id>/"""
+        """Global agent workspace: ~/.ydsz-worker/agents/<agent_id>/"""
         return self.agents_dir / agent_id
 
     def ensure_agent_workspace(self, agent_id: str) -> Path:
@@ -99,7 +99,7 @@ class PathLayout:
 
     @property
     def tool_guard_rules_dir(self) -> Path:
-        """User-editable command guard rules: ``~/.ydsz/security/tool_guard/``."""
+        """User-editable command guard rules: ``~/.ydsz-worker/security/tool_guard/``."""
         return self.root / "security" / "tool_guard"
 
     @property
@@ -108,7 +108,7 @@ class PathLayout:
 
     @property
     def backups_dir(self) -> Path:
-        """Stored system backup archives: ``~/.ydsz/backups/``."""
+        """Stored system backup archives: ``~/.ydsz-worker/backups/``."""
         return self.root / "backups"
 
     def ensure_backups_dir(self) -> Path:
@@ -122,17 +122,17 @@ class PathLayout:
 
     @property
     def user_avatars_dir(self) -> Path:
-        """Uploaded user portraits: ``~/.ydsz/avatars/users/``."""
+        """Uploaded user portraits: ``~/.ydsz-worker/avatars/users/``."""
         return self.root / "avatars" / "users"
 
     @property
     def role_avatars_dir(self) -> Path:
-        """Uploaded role portraits: ``~/.ydsz/avatars/roles/``."""
+        """Uploaded role portraits: ``~/.ydsz-worker/avatars/roles/``."""
         return self.root / "avatars" / "roles"
 
     @property
     def ssl_dir(self) -> Path:
-        """TLS certificates and ACME account keys: ``~/.ydsz/ssl/``."""
+        """TLS certificates and ACME account keys: ``~/.ydsz-worker/ssl/``."""
         return self.root / "ssl"
 
     def ensure_ssl_dir(self) -> Path:
@@ -142,7 +142,7 @@ class PathLayout:
 
     @property
     def connector_cli_dir(self) -> Path:
-        """Per-instance CLI config roots: ``~/.ydsz/connector-cli/``."""
+        """Per-instance CLI config roots: ``~/.ydsz-worker/connector-cli/``."""
         return self.root / "connector-cli"
 
     def connector_cli_instance_dir(self, kind: str, instance_key: str) -> Path:

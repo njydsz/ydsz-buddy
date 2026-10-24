@@ -109,7 +109,7 @@ async def reload_plugins(
     server: YdszServer = Depends(get_server),
     _user: Any = Depends(require_permission("plugins")),
 ) -> dict[str, Any]:
-    """Re-read ``~/.ydsz/plugins`` into the process registry and reload agents.
+    """Re-read ``~/.ydsz-worker/plugins`` into the process registry and reload agents.
 
     Use after a CLI ``ydsz-worker plugin install`` while ``ydsz-worker run`` is already up —
     disk install does not update the running server until reload or restart.
@@ -223,7 +223,7 @@ async def install_market_plugin(
     server: YdszServer = Depends(get_server),
     _user: Any = Depends(require_permission("plugins")),
 ) -> dict[str, Any]:
-    """Copy a catalog plugin into ``~/.ydsz/plugins`` (future: download ZIP)."""
+    """Copy a catalog plugin into ``~/.ydsz-worker/plugins`` (future: download ZIP)."""
     mgr = _plugin_manager(server)
     loop = asyncio.get_running_loop()
     try:
@@ -322,7 +322,7 @@ async def get_plugin_ui_asset(
     server: YdszServer = Depends(get_server),
     _user: Any = Depends(current_user),
 ) -> Response:
-    """Read-only static files from ``~/.ydsz/plugins/<id>/`` (typically ``ui/dist/``).
+    """Read-only static files from ``~/.ydsz-worker/plugins/<id>/`` (typically ``ui/dist/``).
 
     Authenticated users only. Paths are traversal-checked in ``PluginManager``.
     """

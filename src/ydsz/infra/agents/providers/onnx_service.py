@@ -1,7 +1,7 @@
 """ONNX local embedding service: config, cache, and download lifecycle.
 
 This is **not** a chat Provider. It prepares local ONNX / fastembed embedding
-models under ``~/.ydsz/embedding_models`` for the Models admin local tab.
+models under ``~/.ydsz-worker/embedding_models`` for the Models admin local tab.
 """
 
 from __future__ import annotations

@@ -52,11 +52,11 @@ Talk to agents through the Web Dashboard, Feishu, DingTalk, WeCom, QQ, WeChat, a
 | 🌐 | **Browser AI+** | Headless Chromium sessions for web automation, screenshots, and remote browsing |
 | 🖥️ | **Remote desktop** | Live screen and input from the dashboard on Linux, Windows, and macOS |
 | 🪟 | **Desktop client** | Native Windows / macOS / Linux apps (and FnOS packages) alongside the web dashboard |
-| 🏠 | **Self-hosted** | Dashboard, CLI, IM channels, and cron in one `ydsz-worker run` — all data under `~/.ydsz/` |
+| 🏠 | **Self-hosted** | Dashboard, CLI, IM channels, and cron in one `ydsz-worker run` — all data under `~/.ydsz-worker/` |
 
 ## 📌 Overview
 
-Ydsz Worker (云顶数字工作台) is a self-hosted AI assistant platform for enterprises and teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, WeCom, QQ, WeChat, and more), and cron automation — all sharing one control-plane database under `~/.ydsz/` (SQLite by default; PostgreSQL optional).
+Ydsz Worker (云顶数字工作台) is a self-hosted AI assistant platform for enterprises and teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, WeCom, QQ, WeChat, and more), and cron automation — all sharing one control-plane database under `~/.ydsz-worker/` (SQLite by default; PostgreSQL optional).
 
 > **Core idea:** Let AI not only answer questions, but also get things done. Knowledge accumulates through conversation, skills evolve through use, and the platform grows with your business.
 
@@ -162,7 +162,7 @@ This roadmap may shift as the community grows; treat it as indicative only.
 ### Prerequisites
 
 - **macOS / Linux / Windows**
-- No pre-installed Python required — the installer uses [uv](https://docs.astral.sh/uv/) to provision Python 3.12 in an isolated venv under `~/.ydsz/`
+- No pre-installed Python required — the installer uses [uv](https://docs.astral.sh/uv/) to provision Python 3.12 in an isolated venv under `~/.ydsz-worker/`
 - A modern multi-core CPU with a few GB of RAM for the process plus model/embedding caches; enough disk for the database, agent workspaces, and document corpora
 
 ### 1. Install
@@ -186,7 +186,7 @@ curl -fsSL https://install.ydsz.ai/install.bat -o install.bat
 install.bat
 ```
 
-After installation, open a **new terminal** or reload your shell. The installer places `ydsz-worker` on your PATH via `~/.ydsz/bin`. See [scripts/README.md](scripts/README.md) for all install options.
+After installation, open a **new terminal** or reload your shell. The installer places `ydsz-worker` on your PATH via `~/.ydsz-worker/bin`. See [scripts/README.md](scripts/README.md) for all install options.
 
 **Desktop app** (GUI, no terminal) — grab the artifact for your platform from [GitHub Releases](https://github.com/njydsz/ydsz-worker/releases/latest):
 
@@ -216,7 +216,7 @@ uv sync --extra local-embedding
 ydsz-worker init
 ```
 
-The interactive wizard creates the SQLite database, JWT secret, and first admin account under `~/.ydsz/`.
+The interactive wizard creates the SQLite database, JWT secret, and first admin account under `~/.ydsz-worker/`.
 
 ### 3. Run
 
@@ -261,7 +261,7 @@ Open `http://localhost:8088`. A valid `YDSZ_DEFAULT_PASSWORD` creates the admin 
 | `YDSZ_PORT` | `8088` | HTTP listen port |
 | `YDSZ_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (Docker bootstrap). Valid -> create admin; unset or rejected -> setup wizard |
 | `YDSZ_ADMIN_USERNAME` | `admin` | First-run admin username |
-| `YDSZ_DATA` | `~/.ydsz` | Host data directory (compose bind mount) |
+| `YDSZ_DATA` | `~/.ydsz-worker` | Host data directory (compose bind mount) |
 
 See [`.env.example`](.env.example) for the full list.
 
@@ -301,11 +301,11 @@ See [`.env.example`](.env.example) for the full list.
 | PyPI | Any | `pip install ydsz-worker` (optional extras such as `local-embedding`) |
 | Docker | Any | `docker/docker-compose.yml`; China mirror: `docker/docker-compose.cn.yml` |
 
-All install scripts provision an isolated environment at `~/.ydsz/venv` and a `~/.ydsz/bin/ydsz-worker` wrapper — they do not touch system Python.
+All install scripts provision an isolated environment at `~/.ydsz-worker/venv` and a `~/.ydsz-worker/bin/ydsz-worker` wrapper — they do not touch system Python.
 
 ### Upgrade
 
-`ydsz-worker update` replaces only the wheel/binary — your `~/.ydsz/` database, workspaces, secrets, and `config.json` are preserved:
+`ydsz-worker update` replaces only the wheel/binary — your `~/.ydsz-worker/` database, workspaces, secrets, and `config.json` are preserved:
 
 ```bash
 ydsz-worker update          # fetch and install the latest version, then restart the service if one is registered
@@ -315,7 +315,7 @@ The schema migrates automatically on next boot; run `ydsz-worker init` only if t
 
 ## ⚙️ Configuration
 
-All runtime state lives in `~/.ydsz/`. Manage it via CLI or edit files directly.
+All runtime state lives in `~/.ydsz-worker/`. Manage it via CLI or edit files directly.
 
 ```bash
 # LLM providers and models
@@ -364,7 +364,7 @@ Full catalog, auth kinds, and MCP modes: **[docs/connectors.md](docs/connectors.
 
 | Command | Description |
 |---------|-------------|
-| `ydsz-worker init` | Bootstrap `~/.ydsz/` (DB, admin, JWT secret) |
+| `ydsz-worker init` | Bootstrap `~/.ydsz-worker/` (DB, admin, JWT secret) |
 | `ydsz-worker run` | Start Ydsz Worker in the foreground |
 | `ydsz-worker service start` | Install and start as a system service |
 | `ydsz-worker service stop` | Stop the system service |
@@ -377,7 +377,7 @@ Full catalog, auth kinds, and MCP modes: **[docs/connectors.md](docs/connectors.
 | `ydsz-worker skills` | Enable/disable per-agent skills |
 | `ydsz-worker plugin` | Install and manage third-party plugins |
 | `ydsz-worker backup` | Export / restore backups |
-| `ydsz-worker clean` | Remove CLI state or wipe `~/.ydsz/` |
+| `ydsz-worker clean` | Remove CLI state or wipe `~/.ydsz-worker/` |
 | `ydsz-worker memory list` | List running agents eligible for memory maintenance |
 | `ydsz-worker memory slim [--agent ID]` | Back up and slim SQLite memory through the running host; [details](docs/memory-slim.md) |
 | `ydsz-worker memory slim --all` | Sequentially maintain all eligible running agents |
@@ -406,7 +406,7 @@ Interactive API docs: **http://127.0.0.1:8088/api/docs** (disabled by default �
 ## 📁 Data directory
 
 ```
-~/.ydsz/                          <- install & data root
+~/.ydsz-worker/                          <- install & data root
 ├── config.json                    # process config (optional database section)
 ├── ydsz.db                        # SQLite — users, agents, channels, cron, ...
 ├── secrets/                       # JWT secret, channel tokens
@@ -476,10 +476,10 @@ Individual targets: `make test`, `make lint`, `make typecheck`, `make format`.
 
 ## 🔒 Security & privacy
 
-- **Local-first**: Config, chats, workspaces, and credentials live under `~/.ydsz/` on your machine.
+- **Local-first**: Config, chats, workspaces, and credentials live under `~/.ydsz-worker/` on your machine.
 - **Multi-user isolation**: JWT auth with per-user agents and workspaces.
 - **PII redaction & tool approval**: sensitive data is redacted before it leaves the workspace, and risky tools or shell commands require explicit approval under the guardrail rules.
-- **Tool guardrails**: User-editable shell command rules under `~/.ydsz/security/tool_guard/`.
+- **Tool guardrails**: User-editable shell command rules under `~/.ydsz-worker/security/tool_guard/`.
 - **No vendor lock-in**: Swap LLM providers, storage backends, and channels without rewriting agents.
 
 ## 🤝 Contributing

@@ -1,4 +1,4 @@
-"""Install, load, and expose plugins under ``~/.ydsz/plugins/``."""
+"""Install, load, and expose plugins under ``~/.ydsz-worker/plugins/``."""
 
 from __future__ import annotations
 

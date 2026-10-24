@@ -215,7 +215,7 @@ async def list_backups(
     _: Any = Depends(require_permission("backup")),
     server: Any = Depends(get_server),
 ) -> dict[str, Any]:
-    """List ``.tar.gz`` files in ``~/.ydsz/backups/``.
+    """List ``.tar.gz`` files in ``~/.ydsz-worker/backups/``.
 
     Disk/manifest peek runs in a worker thread so the event loop stays free.
     """

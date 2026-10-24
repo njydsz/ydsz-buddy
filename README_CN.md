@@ -56,7 +56,7 @@
 
 ## 📌 概述
 
-云顶数字工作台（Ydsz Worker）是面向企业与团队的自托管 AI 助手平台。单进程同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、企业微信、QQ、微信等）与定时任务，共享 `~/.ydsz/` 下的控制面数据库（默认 SQLite；可选 PostgreSQL）。
+云顶数字工作台（Ydsz Worker）是面向企业与团队的自托管 AI 助手平台。单进程同时提供 Web 控制台、CLI、IM 通道（飞书、钉钉、企业微信、QQ、微信等）与定时任务，共享 `~/.ydsz-worker/` 下的控制面数据库（默认 SQLite；可选 PostgreSQL）。
 
 > **核心理念：** 让 AI 不仅回答问题，更能动手做事。知识在对话中积累，技能在使用中沉淀，陪伴企业每一步成长。
 
@@ -160,7 +160,7 @@
 ### 环境要求
 
 - **macOS / Linux / Windows**
-- 无需预先安装 Python — 安装脚本通过 [uv](https://docs.astral.sh/uv/) 在 `~/.ydsz/` 下创建隔离的 Python 3.12 虚拟环境
+- 无需预先安装 Python — 安装脚本通过 [uv](https://docs.astral.sh/uv/) 在 `~/.ydsz-worker/` 下创建隔离的 Python 3.12 虚拟环境
 - 现代多核 CPU，并预留数 GB 内存供进程与模型/Embedding 缓存使用；磁盘需容纳数据库、Agent 工作区与文档语料
 
 ### 1. 安装
@@ -184,7 +184,7 @@ curl -fsSL https://install.ydsz.ai/install.bat -o install.bat
 install.bat
 ```
 
-安装完成后，请打开**新终端**，或重新加载 shell 配置。安装脚本会将 `ydsz-worker` 加入 PATH（`~/.ydsz/bin`）。
+安装完成后，请打开**新终端**，或重新加载 shell 配置。安装脚本会将 `ydsz-worker` 加入 PATH（`~/.ydsz-worker/bin`）。
 
 完整安装选项见 [scripts/README.md](scripts/README.md)。
 
@@ -216,7 +216,7 @@ uv sync --extra local-embedding
 ydsz-worker init
 ```
 
-交互式向导会在 `~/.ydsz/` 下创建 SQLite 数据库、JWT 密钥，并引导你设置首个管理员账号。
+交互式向导会在 `~/.ydsz-worker/` 下创建 SQLite 数据库、JWT 密钥，并引导你设置首个管理员账号。
 
 ### 3. 启动
 
@@ -250,7 +250,7 @@ docker compose -f docker/docker-compose.cn.yml up -d
 | `YDSZ_PORT` | `8088` | HTTP 监听端口 |
 | `YDSZ_DEFAULT_PASSWORD` | _(未设置)_ | 首次管理员密码 |
 | `YDSZ_ADMIN_USERNAME` | `admin` | 首次管理员用户名 |
-| `YDSZ_DATA` | `~/.ydsz` | 宿主机数据目录 |
+| `YDSZ_DATA` | `~/.ydsz-worker` | 宿主机数据目录 |
 
 完整变量列表见 [`.env.example`](.env.example)。
 
@@ -343,7 +343,7 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 
 | 命令 | 说明 |
 |------|------|
-| `ydsz-worker init` | 初始化 `~/.ydsz/`（数据库、管理员、JWT 密钥） |
+| `ydsz-worker init` | 初始化 `~/.ydsz-worker/`（数据库、管理员、JWT 密钥） |
 | `ydsz-worker run` | 前台启动 |
 | `ydsz-worker service start` | 安装并启动系统服务 |
 | `ydsz-worker agent` | 创建、列出、启停 Agent |
@@ -381,7 +381,7 @@ OpenAI 兼容 API、DashScope（千问）、Ollama 等预设 — 在控制台或
 ## 📁 数据目录
 
 ```
-~/.ydsz/                          ← 安装与数据根目录
+~/.ydsz-worker/                          ← 安装与数据根目录
 ├── config.json                    # 进程配置
 ├── ydsz.db                       # 默认 SQLite 控制面
 ├── secrets/                       # JWT 密钥、通道 Token
@@ -443,7 +443,7 @@ make build-frontend   # 生产构建
 
 ## 🔒 安全与隐私
 
-- **本地优先**：配置、对话、工作区与凭证均存储在 `~/.ydsz/`。
+- **本地优先**：配置、对话、工作区与凭证均存储在 `~/.ydsz-worker/`。
 - **多用户隔离**：JWT 认证，按用户隔离 Agent 与工作区。
 - **敏感信息脱敏与工具审批**：离开工作区前自动脱敏；高风险工具或 Shell 命令需显式审批。
 - **无厂商锁定**：可自由切换 LLM 供应商、存储后端与 IM 通道。

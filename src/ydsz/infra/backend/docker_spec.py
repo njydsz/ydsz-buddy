@@ -82,7 +82,7 @@ def inject_docker_global_environment(
     spec: dict[str, Any],
     env_file: str | Path | None,
 ) -> dict[str, Any]:
-    """Point a docker spec at Admin ``~/.ydsz/env`` (re-read on each execute)."""
+    """Point a docker spec at Admin ``~/.ydsz-worker/env`` (re-read on each execute)."""
     if str(spec.get("type") or "").lower() != "docker":
         return spec
     out = dict(spec)

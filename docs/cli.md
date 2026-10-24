@@ -27,7 +27,7 @@ Commands:
   chat       [deprecated] Alias for `ydsz-worker chats`.
   chats      Chat REPL and session management.
   channel    Channel management commands.
-  clean      Remove CLI state or wipe all of ~/.ydsz.
+  clean      Remove CLI state or wipe all of ~/.ydsz-worker.
   completion Shell completion utilities.
   config     CLI state (base URL, defaults).
   cron       Cron job management commands.
@@ -61,29 +61,29 @@ Ydsz Worker commands pick one of these transports:
 
 | Layer | When | Login? | Examples |
 |-------|------|--------|----------|
-| **Offline** (local DB only) | Need to read/write `~/.ydsz` without a running server | No | `init`, `backup`, `plugin`, `agent list`, `chats list/get/create/update/delete`, `cron list`, `user *`, `admin overview/audit`, `models presets/list/active`, `bridge list/get` |
+| **Offline** (local DB only) | Need to read/write `~/.ydsz-worker` without a running server | No | `init`, `backup`, `plugin`, `agent list`, `chats list/get/create/update/delete`, `cron list`, `user *`, `admin overview/audit`, `models presets/list/active`, `bridge list/get` |
 | **Attach** (HTTP / WS) | Need a live `ydsz-worker run` process (IM, streams, model pulls) | Yes (`ydsz-worker user login`) | `chats send/repl`, `channel test/probe`, `models ollama-*`, `skills enable/disable`, `provider test` |
 | **Embedded** (in-process) | CLI boots `YdszServer` for a single command | No | `ydsz-worker acp`, `ydsz-worker chats repl`, `ydsz-worker chats send` (defaults to embedded), `ydsz-worker agent create/from-expert/start/stop/reload` |
 | **Embedded (bridge)** | In-process `BridgeManager` (no full server); CLI cannot keep the WS after exit | No | `bridge probe/create/patch/delete/connect/disconnect/agents` |
 
 The dashboards and HTTP callers manage their own JWTs and do **not**
-share `~/.ydsz/cli_state.json`.
+share `~/.ydsz-worker/cli_state.json`.
 
 ## `ydsz-worker init`
 
 Bootstrap a fresh install (DB migrations, JWT secret, first admin).
-Idempotent on the DB; pass `--force` to wipe `~/.ydsz` first.
+Idempotent on the DB; pass `--force` to wipe `~/.ydsz-worker` first.
 
 ```
 Usage: ydsz-worker init [OPTIONS]
 
-  Bootstrap a Ydsz Worker server (~/.ydsz dir, DB migrations, JWT secret, first admin).
+  Bootstrap a Ydsz Worker server (~/.ydsz-worker dir, DB migrations, JWT secret, first admin).
 
 Options:
   --admin-username TEXT       [env: YDSZ_ADMIN_USERNAME]
   --admin-password TEXT       [env: YDSZ_ADMIN_PASSWORD]
   --admin-display-name TEXT   [env: YDSZ_ADMIN_DISPLAY_NAME]
-  --force                     Wipe existing ~/.ydsz contents before bootstrapping.
+  --force                     Wipe existing ~/.ydsz-worker contents before bootstrapping.
   --yes                       Skip all interactive prompts.
   -h, --help                  Show this message and exit.
 ```
@@ -184,13 +184,13 @@ Commands:
 
 `create` and `from-expert` accept `--user` (admin only) to create
 agents on behalf of another user. `use` writes the agent id into
-`~/.ydsz/cli_state.json` so subsequent commands default to it.
+`~/.ydsz-worker/cli_state.json` so subsequent commands default to it.
 
 ## `ydsz-worker chats`
 
 Thread CRUD + interactive REPL. The REPL and `send` use an embedded
 server (no separate `ydsz-worker run` needed); `list` / `get` / `create` /
-`update` / `delete` work fully offline against `~/.ydsz/ydsz.db`.
+`update` / `delete` work fully offline against `~/.ydsz-worker/ydsz.db`.
 
 ```
 Usage: ydsz-worker chats [OPTIONS] COMMAND [ARGS]...
@@ -328,7 +328,7 @@ Commands:
 ## `ydsz-worker skills`
 
 Per-agent skill enable / disable. All subcommands need a running
-server (the dashboard's Skill Hub and bundled `~/.ydsz/skills/`
+server (the dashboard's Skill Hub and bundled `~/.ydsz-worker/skills/`
 library are queried at boot).
 
 ```
@@ -392,7 +392,7 @@ Usage: ydsz-worker backup [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   create     Create a backup archive (DB + workspaces + config).
-  restore    Restore a backup archive into ~/.ydsz.
+  restore    Restore a backup archive into ~/.ydsz-worker.
   auto       Automatic backup status and one-shot run.
 ```
 
@@ -435,10 +435,10 @@ Options:
 
 ## `ydsz-worker plugin`
 
-Install and manage third-party plugins (drop into `~/.ydsz/plugins/`).
+Install and manage third-party plugins (drop into `~/.ydsz-worker/plugins/`).
 The same plugin manager powers the dashboard's "Plugins" page.
 
-Ydsz Worker also **seeds bundled plugins** into `~/.ydsz/plugins/` during
+Ydsz Worker also **seeds bundled plugins** into `~/.ydsz-worker/plugins/` during
 `ydsz-worker init` and every `ydsz-worker run` start. They are listed in Admin →
 Plugins but stay **globally disabled** until you turn them on. An id
 already recorded in `config.json` → `bundled_plugins_seeded` is not
@@ -459,7 +459,7 @@ Commands:
 ## `ydsz-worker acp`
 
 Expose a Ydsz Worker agent as a stdio JSON-RPC ACP server. Boots a
-standalone `YdszServer` (reads `~/.ydsz`); does **not** require
+standalone `YdszServer` (reads `~/.ydsz-worker`); does **not** require
 `ydsz-worker run` to be running.
 
 ```
@@ -478,13 +478,13 @@ runner object schema.
 
 ## `ydsz-worker clean`
 
-Reset CLI state or wipe the whole `~/.ydsz` tree. Destructive — read
+Reset CLI state or wipe the whole `~/.ydsz-worker` tree. Destructive — read
 the help carefully.
 
 ```
 Usage: ydsz-worker clean [OPTIONS]
 
-  Remove CLI state or wipe all of ~/.ydsz.
+  Remove CLI state or wipe all of ~/.ydsz-worker.
 
 Options:
   --state / --all       What to remove.
@@ -494,7 +494,7 @@ Options:
 
 ## `ydsz-worker config`
 
-Inspect / edit `~/.ydsz/cli_state.json` (default base URL, user,
+Inspect / edit `~/.ydsz-worker/cli_state.json` (default base URL, user,
 agent).
 
 ```
@@ -517,7 +517,7 @@ $ ydsz-worker version                # print the installed ydsz-worker version
 
 ## CLI state file
 
-`~/.ydsz/cli_state.json` stores:
+`~/.ydsz-worker/cli_state.json` stores:
 
 ```json
 {

@@ -1,6 +1,6 @@
 """Inject platform execute defaults into harness backend specs.
 
-Global admin env (``~/.ydsz/env``) and workspace ``.env`` are merged at
+Global admin env (``~/.ydsz-worker/env``) and workspace ``.env`` are merged at
 **execute** time inside harness (``inherit_env`` / ``environment_file`` /
 ``BackendWorkspace`` reader) — not snapshotted here.
 
