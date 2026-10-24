@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="assets/images/banner.jpeg" alt="Ydsz Harness" width="600" />
   <h1>Ydsz Harness</h1>
 </div>
 

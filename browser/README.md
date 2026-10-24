@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="assets/images/banner.jpeg" alt="Ydsz Browser Banner" width="600" />
-</p>
+<div align="center">
+  <h1>Ydsz Browser</h1>
+</div>
 
 <p align="center">
   <strong>Agent-first lightweight browser automation — direct CDP, no Playwright, more accurate and more reliable.</strong>

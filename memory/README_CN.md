@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="assets/images/banner.jpeg" alt="Ydsz Memory — 帮你珍藏记忆的小章鱼" width="880" />
-</p>
+<div align="center">
+  <h1>Ydsz Memory</h1>
+</div>
 
 <p align="center">
   <strong>让 Agent 记住重要的事。</strong><br />

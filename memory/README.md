@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="assets/images/banner.jpeg" alt="Ydsz Memory — a little Ydszus keeping memories safe" width="880" />
-</p>
+<div align="center">
+  <h1>Ydsz Memory</h1>
+</div>
 
 <p align="center">
   <strong>Help your agent remember what matters.</strong><br />
