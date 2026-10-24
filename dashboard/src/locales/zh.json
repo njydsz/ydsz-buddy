@@ -306,14 +306,13 @@
     "chatHistory": "会话列表",
     "placement": {
       "title": "导航配置",
-      "description": "选择每个导航项的显示位置。每个导航项只能出现在一个位置——要么在主侧栏，要么在设置页面。",
       "sidebar": "主页面侧栏",
       "settings": "设置页面",
       "group": {
-        "primary": "主要功能",
-        "settings": "设置",
-        "control": "运维",
-        "admin": "管理"
+      "primary": "基础",
+      "settings": "设置",
+      "control": "运维",
+      "admin": "管理"
       }
     }
   },
@@ -321,7 +320,7 @@
     "title": "设置",
     "searchPlaceholder": "搜索设置项",
     "group": {
-      "main": "主要功能",
+      "main": "基础",
       "models": "模型",
       "account": "账户与安全",
       "integration": "集成与个性化",

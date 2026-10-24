@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Switch, Tooltip } from "antd";
-import {
-  PanelRight,
-  Settings as SettingsIcon,
-  Info,
-} from "lucide-react";
+import { PanelRight, Settings as SettingsIcon } from "lucide-react";
 import { message } from "@/utils/antdMessage";
 import { apiErrorMessage } from "@/utils/apiError";
 import {
@@ -114,30 +110,6 @@ export default function NavigationConfigPage() {
 
   return (
     <div style={{ padding: "32px 40px", maxWidth: 680 }}>
-      <h2
-        style={{
-          fontSize: 20,
-          fontWeight: 600,
-          color: "var(--fn-text-primary)",
-          marginBottom: 8,
-        }}
-      >
-        {t("nav.placement.title")}
-      </h2>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 8,
-          fontSize: 14,
-          color: "var(--fn-text-tertiary)",
-          marginBottom: 24,
-        }}
-      >
-        <Info size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-        <span>{t("nav.placement.description")}</span>
-      </div>
-
       {loading ? (
         <div style={{ padding: 24, color: "var(--fn-text-tertiary)" }}>
           {t("common.loading")}

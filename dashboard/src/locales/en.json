@@ -304,16 +304,15 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list",
-    "placement": {
-      "title": "Navigation Configuration",
-      "description": "Choose where each item appears. Each item can only show in one place — either the main sidebar or the settings page.",
-      "sidebar": "Main sidebar",
+"placement": {
+"title": "Navigation Configuration",
+"sidebar": "Main sidebar",
       "settings": "Settings page",
       "group": {
-        "primary": "Primary",
-        "settings": "Settings",
-        "control": "Control",
-        "admin": "Admin"
+      "primary": "Basic",
+      "settings": "Settings",
+      "control": "Control",
+      "admin": "Admin"
       }
     }
   },
@@ -321,7 +320,7 @@
     "title": "Settings",
     "searchPlaceholder": "Search settings",
     "group": {
-      "main": "Main",
+      "main": "Basic",
       "models": "Model",
       "account": "Account & Security",
       "integration": "Integration & personalization",
