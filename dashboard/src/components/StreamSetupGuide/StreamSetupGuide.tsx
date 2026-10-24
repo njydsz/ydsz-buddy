@@ -24,7 +24,7 @@ interface StreamSetupGuideProps {
   icon: ReactNode;
   title?: string;
   description?: string;
-  steps: SetupGuideStep[];
+  steps?: SetupGuideStep[];
   primaryAction?: SetupGuideAction;
   secondaryAction?: SetupGuideAction;
   /** Optional third action (e.g. uninstall) rendered after the main pair. */
@@ -94,7 +94,7 @@ export default function StreamSetupGuide({
         {description ? (
           <p className={styles.description}>{description}</p>
         ) : null}
-        {steps.length > 0 ? (
+        {steps && steps.length > 0 ? (
           <ol className={styles.steps}>
             {steps.map((step, index) => (
               <li key={index} className={styles.step}>

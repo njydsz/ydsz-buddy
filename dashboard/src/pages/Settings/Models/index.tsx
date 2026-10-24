@@ -10,8 +10,10 @@
  *  2. Custom providers — any configured provider whose name doesn't match a preset.
  */
 import { useMemo, useState } from "react";
-import { Button, Divider, Empty, Space, Tabs, Typography } from "antd";
+import { Button, Empty, Typography } from "antd";
 import {
+  Cloud,
+  HardDrive,
   Images,
   MessageSquareText,
   Mic2,
@@ -23,6 +25,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import PageShell from "../../../layouts/PageShell";
+import TabBar, { type TabBarItem } from "../../../components/TabLabel/TabBar";
+import StreamSetupGuide from "../../../components/StreamSetupGuide/StreamSetupGuide";
+import { YdEmptyMascot } from "../../../components/EmptyState/YdEmptyMascot";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { userCan } from "../../../utils/permissions";
 import { useProviders, type ProviderRow } from "./useProviders";
@@ -73,6 +78,19 @@ function resolveModelCategory(
 }
 
 const { Title } = Typography;
+
+const MODEL_TABS: TabBarItem<ModelCategory>[] = [
+  { key: "chat", labelKey: "models.chatModelsTab", icon: MessageSquareText },
+  { key: "generation", labelKey: "models.generationModelsTab", icon: Images },
+  { key: "voice", labelKey: "models.voiceModelsTab", icon: Mic2 },
+  { key: "decision", labelKey: "models.decisionModelsTab", icon: Scale },
+  { key: "search", labelKey: "models.searchModelsTab", icon: Search },
+];
+
+const PRESET_TABS: TabBarItem<"cloud" | "local">[] = [
+  { key: "cloud", labelKey: "models.presetCloud", icon: Cloud },
+  { key: "local", labelKey: "models.presetLocal", icon: HardDrive },
+];
 
 export default function ModelsPage() {
   const { t } = useTranslation();
@@ -127,11 +145,9 @@ export default function ModelsPage() {
   const standaloneSubtitle = t("pageShell.models.subtitle");
   const standaloneActions =
     modelCategory === "chat" ? (
-      <Space>
-        <Button icon={<RefreshCw size={14} />} onClick={() => void fetchAll()}>
-          {t("common.refresh")}
-        </Button>
-      </Space>
+      <Button icon={<RefreshCw size={14} />} onClick={() => void fetchAll()}>
+        {t("common.refresh")}
+      </Button>
     ) : null;
   const inSettings = useSettingsHeader(
     {
@@ -171,6 +187,9 @@ export default function ModelsPage() {
     (canOllama || canOnnx) &&
     (localPresets.grouped.length > 0 || localPresets.ungrouped.length > 0);
   const showPresetSection = showCloudTab || showLocalTab;
+  const [presetTab, setPresetTab] = useState<"cloud" | "local">(
+    showCloudTab ? "cloud" : "local",
+  );
 
   const renderPresetCards = (
     grouped: PresetGroup[],
@@ -270,84 +289,29 @@ export default function ModelsPage() {
 
   const hasContent = presets.length > 0 || providers.length > 0;
 
+  const visibleModelTabs = MODEL_TABS.filter((tab) => {
+    if (tab.key === "chat") return canChat;
+    if (tab.key === "generation") return canProviders;
+    if (tab.key === "voice") return canVoice;
+    if (tab.key === "decision") return canProviders;
+    if (tab.key === "search") return canSearch;
+    return false;
+  });
+
   return (
-    <PageShell
+    <PageShell.Tabbed
       title={standaloneTitle}
       subtitle={standaloneSubtitle}
       actions={standaloneActions}
       hideTitle={inSettings}
+      tabBar={
+        <TabBar<ModelCategory>
+          tabs={visibleModelTabs}
+          activeKey={modelCategory}
+          onChange={(key) => setModelCategory(key)}
+        />
+      }
     >
-      <Tabs
-        activeKey={modelCategory}
-        onChange={setModelCategory}
-        items={[
-          ...(canChat
-            ? [
-                {
-                  key: "chat",
-                  label: (
-                    <Space className={styles.modelTabLabel} size={6}>
-                      <MessageSquareText size={15} />
-                      {t("models.chatModelsTab")}
-                    </Space>
-                  ),
-                },
-              ]
-            : []),
-          ...(canProviders
-            ? [
-                {
-                  key: "generation",
-                  label: (
-                    <Space className={styles.modelTabLabel} size={6}>
-                      <Images size={15} />
-                      {t("models.generationModelsTab")}
-                    </Space>
-                  ),
-                },
-              ]
-            : []),
-          ...(canVoice
-            ? [
-                {
-                  key: "voice",
-                  label: (
-                    <Space className={styles.modelTabLabel} size={6}>
-                      <Mic2 size={15} />
-                      {t("models.voiceModelsTab")}
-                    </Space>
-                  ),
-                },
-              ]
-            : []),
-          ...(canProviders
-            ? [
-                {
-                  key: "decision",
-                  label: (
-                    <Space className={styles.modelTabLabel} size={6}>
-                      <Scale size={15} />
-                      {t("models.decisionModelsTab")}
-                    </Space>
-                  ),
-                },
-              ]
-            : []),
-          ...(canSearch
-            ? [
-                {
-                  key: "search",
-                  label: (
-                    <Space className={styles.modelTabLabel} size={6}>
-                      <Search size={15} />
-                      {t("models.searchModelsTab")}
-                    </Space>
-                  ),
-                },
-              ]
-            : []),
-        ]}
-      />
       {modelCategory === "generation" ? (
         <MediaGenerationSettingsPanel />
       ) : modelCategory === "voice" ? (
@@ -370,7 +334,12 @@ export default function ModelsPage() {
       ) : error ? (
         <LoadingState message={error} error onRetry={() => void fetchAll()} />
       ) : !hasContent ? (
-        <Empty description={t("models.noProvidersHint")} />
+        <StreamSetupGuide
+          icon={<YdEmptyMascot />}
+          title={t("models.noProvidersHint")}
+          wide
+          plain
+        />
       ) : (
         <>
           <ActiveModelPool
@@ -381,41 +350,33 @@ export default function ModelsPage() {
             onSaved={fetchAll}
           />
 
-          <Divider style={{ margin: "24px 0" }} />
-
           {showPresetSection && (
             <>
-              <Title level={5} style={{ marginBottom: 12 }}>
+              <Title level={5} style={{ marginBottom: 12, marginTop: 24 }}>
                 {t("models.presetProviders")}
               </Title>
-              <Tabs
-                items={[
-                  showCloudTab
-                    ? {
-                        key: "cloud",
-                        label: t("models.presetCloud"),
-                        children: renderCloudPresetGrid(),
-                      }
-                    : null,
-                  showLocalTab
-                    ? {
-                        key: "local",
-                        label: t("models.presetLocal"),
-                        children: renderPresetGrid(
-                          localPresets.grouped,
-                          localPresets.ungrouped,
-                        ),
-                      }
-                    : null,
-                ].filter((item) => item !== null)}
+              <TabBar<"cloud" | "local">
+                tabs={PRESET_TABS.filter((tab) => {
+                  if (tab.key === "cloud") return showCloudTab;
+                  if (tab.key === "local") return showLocalTab;
+                  return false;
+                })}
+                activeKey={presetTab}
+                onChange={(key) => setPresetTab(key)}
               />
+              {presetTab === "cloud"
+                ? renderCloudPresetGrid()
+                : renderPresetGrid(
+                    localPresets.grouped,
+                    localPresets.ungrouped,
+                  )}
             </>
           )}
 
           {canProviders && (
             <>
               {(presets.length > 0 || customProviders.length > 0) && (
-                <Divider style={{ margin: "20px 0" }} />
+                <div style={{ height: 24 }} />
               )}
               <div
                 style={{
@@ -470,6 +431,6 @@ export default function ModelsPage() {
           apiPrefix="/admin/providers"
         />
       )}
-    </PageShell>
+    </PageShell.Tabbed>
   );
 }

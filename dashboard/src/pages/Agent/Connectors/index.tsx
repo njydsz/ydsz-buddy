@@ -2282,10 +2282,20 @@ export default function ConnectorsPage() {
    * (The custom TabBar used by PageShell.Tabbed renders outside the title row,
    * so it stays visible — no tab re-lift needed.)
    */
+  const standaloneActions = (
+    <Button
+      icon={<RefreshCw size={14} />}
+      loading={loading}
+      onClick={() => void refresh()}
+    >
+      {t("common.refresh")}
+    </Button>
+  );
   const inSettings = useSettingsHeader(
     {
       title: t("pageShell.connectors.title"),
       subtitle: t("pageShell.connectors.subtitle"),
+      actions: standaloneActions,
     },
     [t],
   );
@@ -2359,6 +2369,7 @@ export default function ConnectorsPage() {
     <PageShell.Tabbed
       title={t("pageShell.connectors.title")}
       subtitle={t("pageShell.connectors.subtitle")}
+      actions={standaloneActions}
       hideTitle={inSettings}
       tabBar={
         <TabBar
@@ -2419,20 +2430,11 @@ export default function ConnectorsPage() {
           </div>
         ) : (
           <>
-            <div className={styles.listToolbar}>
-              <span className={styles.listToolbarMeta}>
-                {t("connectors.enabledSummary", {
-                  count: instances.length,
-                  defaultValue: "已启用 {{count}} 个连接器实例",
-                })}
-              </span>
-              <Button
-                icon={<RefreshCw size={14} />}
-                loading={loading}
-                onClick={() => void refresh()}
-              >
-                {t("common.refresh")}
-              </Button>
+            <div className={styles.listMeta}>
+              {t("connectors.enabledSummary", {
+                count: instances.length,
+                defaultValue: "已启用 {{count}} 个连接器实例",
+              })}
             </div>
             <div className={styles.typeGrid}>
               {instances.map((instance) => (
@@ -2459,22 +2461,13 @@ export default function ConnectorsPage() {
         )
       ) : (
         <>
-          <div className={styles.listToolbar}>
-            <span className={styles.listToolbarMeta}>
-              {t("connectors.listSummary", {
-                total: catalog.length,
-                configured: configuredCount,
-                defaultValue:
-                  "当前支持 {{total}} 个连接器，已配置 {{configured}} 个",
-              })}
-            </span>
-            <Button
-              icon={<RefreshCw size={14} />}
-              loading={loading}
-              onClick={() => void refresh()}
-            >
-              {t("common.refresh")}
-            </Button>
+          <div className={styles.listMeta}>
+            {t("connectors.listSummary", {
+              total: catalog.length,
+              configured: configuredCount,
+              defaultValue:
+                "当前支持 {{total}} 个连接器，已配置 {{configured}} 个",
+            })}
           </div>
           {loading ? (
             <div className={styles.loadingState}>

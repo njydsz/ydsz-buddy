@@ -17,6 +17,7 @@ PREFERENCES_KEY_PREFERRED_MODEL = "preferred_model"
 PREFERENCES_KEY_MODEL_REASONING = "model_reasoning"
 PREFERENCES_KEY_TIMEZONE = "timezone"
 PREFERENCES_KEY_SIDEBAR_NAV = "sidebar_nav"
+PREFERENCES_KEY_SETTINGS_NAV = "settings_nav"
 PREFERENCES_KEY_NAV_ZONES = "nav_zones"
 
 ZONE_SIDEBAR = "sidebar"
@@ -394,6 +395,32 @@ def merge_nav_zones_json(
             data[PREFERENCES_KEY_NAV_ZONES] = cleaned
         else:
             data.pop(PREFERENCES_KEY_NAV_ZONES, None)
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+
+def validate_settings_nav(value: Any) -> tuple[list[SidebarNavGroup], list[SidebarNavItem]]:
+    """Normalize a settings-page nav layout. Reuses sidebar item/group schema."""
+    return validate_sidebar_nav(value)
+
+
+def get_settings_nav_from_json(raw: str | None) -> dict[str, Any] | None:
+    value = parse_preferences_json(raw).get(PREFERENCES_KEY_SETTINGS_NAV)
+    if value is None:
+        return None
+    try:
+        groups, items = validate_settings_nav(value)
+    except YdszError:
+        return None
+    return sidebar_nav_to_dict(groups, items)
+
+
+def merge_settings_nav_json(current_raw: str | None, layout: Any | None) -> str:
+    data = parse_preferences_json(current_raw)
+    if layout is None:
+        data.pop(PREFERENCES_KEY_SETTINGS_NAV, None)
+    else:
+        groups, items = validate_settings_nav(layout)
+        data[PREFERENCES_KEY_SETTINGS_NAV] = sidebar_nav_to_dict(groups, items)
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
 
 

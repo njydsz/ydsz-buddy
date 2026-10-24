@@ -304,15 +304,48 @@
     "saveFailed": "没能保存导航布局",
     "dragToReorder": "拖动排序",
     "chatHistory": "会话列表",
+    "nav": {
+      "chat": "对话",
+      "experts": "专家团",
+      "tasks": "自动化",
+      "models": "模型",
+      "tokenUsage": "统计",
+      "personalization": "个性化",
+      "channels": "通道",
+      "connectors": "连接器",
+      "skillPackages": "技能包",
+      "knowledgeBases": "知识库",
+      "bridge": "桥接",
+      "workbench": "工作台",
+      "remoteDesktop": "远程桌面",
+      "acp": "ACP 协作",
+      "adminUsers": "用户",
+      "adminStorage": "存储",
+      "adminPlugins": "插件",
+      "security": "安全防护",
+      "adminAdvanced": "应用设置",
+      "cloudCollab": "云端协同",
+      "fixedItemTooltip": "系统导航，始终显示在侧栏",
+      "groupSettings": "设置",
+      "groupControl": "控制",
+      "groupAdmin": "管理"
+    },
     "placement": {
       "title": "导航配置",
       "sidebar": "主页面侧栏",
       "settings": "设置页面",
+      "zone": {
+        "sidebar": "主侧栏",
+        "settings": "设置页"
+      },
+      "zoneSidebarDesc": "这些导航显示在侧边栏中，未分组的条目在最上方。",
+      "zoneSettingsDesc": "这些导航显示在设置页面中。",
+      "crossZoneHint": "拖拽导航项到另一个区域，可在主侧栏和设置页之间移动。也可以上下拖动调整顺序。",
       "group": {
-      "primary": "基础",
-      "settings": "设置",
-      "control": "运维",
-      "admin": "管理"
+        "primary": "基础",
+        "settings": "设置",
+        "control": "运维",
+        "admin": "管理"
       }
     }
   },

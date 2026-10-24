@@ -304,15 +304,48 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list",
+    "nav": {
+      "chat": "Chat",
+      "experts": "Experts",
+      "tasks": "Automations",
+      "models": "Models",
+      "tokenUsage": "Statistics",
+      "personalization": "Personalization",
+      "channels": "Channels",
+      "connectors": "Connectors",
+      "skillPackages": "Skill Packages",
+      "knowledgeBases": "Knowledge Bases",
+      "bridge": "Bridge",
+      "workbench": "Workbench",
+      "remoteDesktop": "Remote Desktop",
+      "acp": "ACP Collaboration",
+      "adminUsers": "Users",
+      "adminStorage": "Storage",
+      "adminPlugins": "Plugins",
+      "security": "Security",
+      "adminAdvanced": "Advanced",
+      "cloudCollab": "Cloud Collaboration",
+      "fixedItemTooltip": "System item, always shown in sidebar",
+      "groupSettings": "Settings",
+      "groupControl": "Control",
+      "groupAdmin": "Admin"
+    },
     "placement": {
       "title": "Navigation Configuration",
       "sidebar": "Main sidebar",
       "settings": "Settings page",
+      "zone": {
+        "sidebar": "Main Sidebar",
+        "settings": "Settings Page"
+      },
+      "zoneSidebarDesc": "These items appear in the main sidebar. Ungrouped items show at the top.",
+      "zoneSettingsDesc": "These items appear in the settings page.",
+      "crossZoneHint": "Drag a navigation item to another zone to move it between the main sidebar and settings page, or reorder items by dragging up and down.",
       "group": {
-      "primary": "Basic",
-      "settings": "Settings",
-      "control": "Control",
-      "admin": "Admin"
+        "primary": "Basic",
+        "settings": "Settings",
+        "control": "Control",
+        "admin": "Admin"
       }
     }
   },

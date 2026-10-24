@@ -20,8 +20,10 @@ from ydsz.infra.users.preferences import (
     get_nav_zones_from_json,
     get_preferred_model_from_json,
     get_remote_browser_bookmarks_from_json,
+    get_settings_nav_from_json,
     get_sidebar_nav_from_json,
     merge_nav_zones_json,
+    merge_settings_nav_json,
     merge_sidebar_nav_json,
     parse_preferences_json,
 )
@@ -78,6 +80,10 @@ class PreferencesResponse(BaseModel):
         default=None,
         description="Custom sidebar layout. Null means the user has not customized navigation.",
     )
+    settings_nav: SidebarNavLayoutModel | None = Field(
+        default=None,
+        description="Settings-page nav layout. Null restores the default settings-page grouping.",
+    )
     nav_zones: dict[str, str] = Field(
         default_factory=lambda: dict(DEFAULT_NAV_ZONES),
         description="Per-item nav placement: `sidebar` (main sidebar) or `settings` (settings page).",
@@ -97,6 +103,10 @@ class PatchPreferencesBody(BaseModel):
         default=None,
         description="Replace the sidebar layout. Null clears it and restores the default nav.",
     )
+    settings_nav: SidebarNavLayoutModel | None = Field(
+        default=None,
+        description="Replace the settings-page layout. Null clears it and restores the default settings grouping.",
+    )
     nav_zones: dict[str, str] | None = Field(
         default=None,
         description="Replace nav-zone assignments. Null clears them and restores defaults.",
@@ -112,6 +122,7 @@ class PatchPreferencesBody(BaseModel):
                 "model_reasoning",
                 "timezone",
                 "sidebar_nav",
+                "settings_nav",
                 "nav_zones",
             }
         ):
@@ -146,12 +157,20 @@ def _response(row: Any) -> PreferencesResponse:
         },
         timezone=parse_preferences_json(raw).get(PREFERENCES_KEY_TIMEZONE),
         sidebar_nav=_sidebar_nav_response(raw),
+        settings_nav=_settings_nav_response(raw),
         nav_zones=get_nav_zones_from_json(raw),
     )
 
 
 def _sidebar_nav_response(raw: str | None) -> SidebarNavLayoutModel | None:
     payload = get_sidebar_nav_from_json(raw)
+    if payload is None:
+        return None
+    return SidebarNavLayoutModel.model_validate(payload)
+
+
+def _settings_nav_response(raw: str | None) -> SidebarNavLayoutModel | None:
+    payload = get_settings_nav_from_json(raw)
     if payload is None:
         return None
     return SidebarNavLayoutModel.model_validate(payload)
@@ -223,6 +242,11 @@ async def patch_preferences(
         row = server.services.user_repo.get(user.id)
         layout = None if body.sidebar_nav is None else body.sidebar_nav.model_dump()
         merged = merge_sidebar_nav_json(row.preferences_json if row else None, layout)
+        server.services.user_repo.set_preferences_json(user.id, merged)
+    if "settings_nav" in body.model_fields_set:
+        row = server.services.user_repo.get(user.id)
+        layout = None if body.settings_nav is None else body.settings_nav.model_dump()
+        merged = merge_settings_nav_json(row.preferences_json if row else None, layout)
         server.services.user_repo.set_preferences_json(user.id, merged)
     if "nav_zones" in body.model_fields_set:
         row = server.services.user_repo.get(user.id)
