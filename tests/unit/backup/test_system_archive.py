@@ -29,7 +29,7 @@ def layout(tmp_path: Path) -> PathLayout:
 def test_manifest_roundtrip_includes_driver_fields() -> None:
     m = BackupManifest(
         manifest_version=1,
-        Ydsz_version="0.0.0",
+        ydsz_version="0.0.0",
         schema_version=1,
         created_at="t",
         home="/tmp",
@@ -47,7 +47,7 @@ def test_legacy_manifest_defaults_plugins_omitted() -> None:
     loaded = BackupManifest.from_dict(
         {
             "manifest_version": 1,
-            "Ydsz_version": "0.0.0",
+            "ydsz_version": "0.0.0",
             "schema_version": 1,
             "created_at": "t",
             "home": "/tmp",
@@ -918,7 +918,7 @@ def _make_migration_backup(
                 assert f is not None
                 members[m.name] = f.read()
     manifest_obj = json.loads(members["manifest.json"])
-    manifest_obj["Ydsz_version"] = manifest_obj["Ydsz_version"] + "-migrated-from-lightclaw"
+    manifest_obj["ydsz_version"] = manifest_obj["ydsz_version"] + "-migrated-from-lightclaw"
     members["manifest.json"] = json.dumps(manifest_obj).encode()
     with tarfile.open(dest, mode="w:gz") as tf:
         for name, blob in members.items():

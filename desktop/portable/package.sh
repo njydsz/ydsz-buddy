@@ -266,7 +266,7 @@ assemble_one() {
   (
     cd "$GREEN_RELEASE"
     if command -v zip >/dev/null 2>&1; then
-      zip -qry "$zip_name" "YdszWorker-${plat}"
+      zip -qry "$zip_name" "ydsz-${plat}"
     else
       # Windows runners often have `python` but not `python3` / `zip`.
       py=""
@@ -279,7 +279,7 @@ assemble_one() {
         echo "[package] need zip or python to create archive" >&2
         exit 1
       fi
-      "$py" -c "import shutil; shutil.make_archive('${zip_stem}', 'zip', '.', 'ydsz-')"
+      "$py" -c "import shutil; shutil.make_archive('${zip_stem}', 'zip', '.', 'ydsz-${plat}')"
     fi
   )
   echo "[package] wrote ${zip_path}"

@@ -17,7 +17,7 @@ from ydsz.infra.utils.paths import PathLayout
 
 _BACKUP_SUFFIXES = (".tar.gz", ".tgz")
 _BACKUP_CREATED_RE = re.compile(
-    r"ydsz-backup-(\d{8}T\d{6}Z)",
+    r"ydsz-(?:auto-)?backup-(\d{8}T\d{6}Z)",
 )
 _AUTO_BACKUP_PREFIX = "ydsz-auto-backup-"
 

@@ -48,7 +48,7 @@ def ctx(tmp_path: Path):
             user_repo=UserRepo(db),
             agent_manager=manager,
             paths=paths,
-            Ydsz_version="0.1.0",
+            ydsz_version="0.1.0",
             server_started_at=1_700_000_000,
         ),
         manager,

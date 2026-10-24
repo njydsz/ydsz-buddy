@@ -175,7 +175,7 @@ class _FakeWS:
     """Minimal starlette-WebSocket stand-in for the terminal handler."""
 
     def __init__(self, server: object, received: tuple[str, ...] = ()) -> None:
-        self.app = SimpleNamespace(state=SimpleNamespace(Ydsz_server=server))
+        self.app = SimpleNamespace(state=SimpleNamespace(ydsz_server=server))
         self.application_state = WebSocketState.CONNECTING
         self._received = list(received)
         self.sent: list[str] = []
