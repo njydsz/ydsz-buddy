@@ -304,9 +304,9 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list",
-"placement": {
-"title": "Navigation Configuration",
-"sidebar": "Main sidebar",
+    "placement": {
+      "title": "Navigation Configuration",
+      "sidebar": "Main sidebar",
       "settings": "Settings page",
       "group": {
       "primary": "Basic",
