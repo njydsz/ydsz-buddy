@@ -161,12 +161,12 @@ Only `launch.py` may import both `infra/server` and `api/app` in the same module
 
 | Layer | When | Examples |
 |-------|------|----------|
-| **Offline** | Read/write local `~/.ydsz` SQLite only | `user *`, `provider *`, `cron` list/create/delete, `agent list/delete`, `chats` CRUD, `models` presets/list/active, `channel` CRUD, `admin`, `skills` enable/disable, `bridge` list/get |
+| **Offline** | Read/write local `~/.ydsz-worker` SQLite only | `user *`, `provider *`, `cron` list/create/delete, `agent list/delete`, `chats` CRUD, `models` presets/list/active, `channel` CRUD, `admin`, `skills` enable/disable, `bridge` list/get |
 | **Embedded** | Needs harness/gateway runtime; boots in-process `YdszServer` | `chats send/repl`, `chats get` (history), `cron run-now`, `agent` create/start/stop/reload, `provider test`, `channel test`, `skills list`, `acp` |
 | **Embedded (bridge)** | In-process `BridgeManager` (no full server); CLI cannot keep Bridge WS after exit | `bridge` probe/create/patch/delete/connect/disconnect/agents |
 | **External** | Talks to OS/daemon directly, no Ydsz Worker HTTP | `models ollama-*`, channel QR bind (WeCom/WeChat), Feishu bot-creator subprocess |
 
-No `ydsz-worker user login` — CLI trusts local filesystem access to `~/.ydsz`. Pin acting user with `ydsz-worker config set-user` or root `--user`; pin agent with `ydsz-worker agent use` or root `--agent`. If `ydsz-worker run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
+No `ydsz-worker user login` — CLI trusts local filesystem access to `~/.ydsz-worker`. Pin acting user with `ydsz-worker config set-user` or root `--user`; pin agent with `ydsz-worker agent use` or root `--agent`. If `ydsz-worker run` is already running, config CLI writes take effect after server restart (cron, channels loaded at boot).
 
 ### `dashboard/src/` layout
 
@@ -208,8 +208,7 @@ make build-frontend                     # dashboard/ → src/ydsz/dashboard/
 
 **Agent scope:** Most agent routes use `/api/agents/{agent_id}/…` in the URL. A few legacy endpoints (e.g. MBTI) still take `X-Ydsz-Agent-Id`. Always validate ownership: load the agent row → `_assert_agent_owner(row, user)` (or admin bypass).
 
-**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `ydsz-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.ydsz/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Ydsz — path rules live in `BackendWorkspace`.
-
+**Agent workspace I/O:** All reads/writes of agent workspace **content files** go through `HarnessAgent.workspace` (`BackendWorkspace` from `ydsz-harness`). Do **not** use `agent.backend` directly, `resolve_harness_backend`, or `Path.write_text` / `read_text` on `~/.ydsz-worker/agents/<id>/` for workspace content. Do **not** branch on backend type or `virtual_mode` in Ydsz — path rules live in `BackendWorkspace`.
 New agents additionally keep system-scoped files under `{workspace}/.ydsz/` (e.g. sessions/sqlite, skills/agents system trees, auth tokens under `.ydsz/auth`). `system_files_path` is internal and not user-configurable; the `.ydsz` directory is created on first harness workspace init. Legacy agents keep auth at `{workspace}/.ydsz-auth`.
 
 | Context | Entry |
@@ -220,7 +219,7 @@ New agents additionally keep system-scoped files under `{workspace}/.ydsz/` (e.g
 
 **Path conventions:** Pass workspace-relative paths to `BackendWorkspace` (`SOUL.md`, `skills/foo/SKILL.md`). Directory listing defaults to `"."` (current workspace directory). `"/"` is a distinct backend-root path inside `BackendWorkspace` — do **not** conflate it with `"."` there. The dashboard may send leading-`/` paths; HTTP adapters normalize those in `workspace_api_path()` before calling `BackendWorkspace`.
 
-**Chat attachments:** Dashboard uploads go to `{workspace}/inbound/` via `api/common/attachments.py` + `api/routers/uploads.py`, not a separate `~/.ydsz/uploads/` store.
+**Chat attachments:** Dashboard uploads go to `{workspace}/inbound/` via `api/common/attachments.py` + `api/routers/uploads.py`, not a separate `~/.ydsz-worker/uploads/` store.
 
 **Database:** SQLite and PostgreSQL share one schema. Add or change tables via a numbered pair
 `infra/db/migrations/00N_description.sql` **and** `00N_description.pg.sql`, then bump the

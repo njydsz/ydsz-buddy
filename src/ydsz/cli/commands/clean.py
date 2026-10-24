@@ -20,7 +20,7 @@ def _all_targets() -> list[Path]:
 
 
 @click.command("clean")
-@click.option("--all", "wipe_all", is_flag=True, default=False, help="Wipe ALL of ~/.ydsz.")
+@click.option("--all", "wipe_all", is_flag=True, default=False, help="Wipe ALL of ~/.ydsz-worker.")
 @click.option("--yes", is_flag=True, default=False, help="Skip confirmation.")
 @click.option("--dry-run", is_flag=True, default=False, help="Show targets without deleting.")
 def clean(wipe_all: bool, yes: bool, dry_run: bool) -> None:

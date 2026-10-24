@@ -33,7 +33,7 @@ services:
     privileged: true
     network_mode: host
     volumes:
-      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+      - ${YDSZ_DATA:-~/.ydsz-worker}:/data/.ydsz-worker
       - /var/run/docker.sock:/var/run/docker.sock
       - /dev/binderfs:/dev/binderfs
       - ${YDSZ_PLATFORM_TOOLS:-../.tools/platform-tools}:/opt/android-sdk/platform-tools:ro

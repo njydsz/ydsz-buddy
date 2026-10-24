@@ -30,7 +30,7 @@ import click
     "--force",
     is_flag=True,
     default=False,
-    help="Wipe existing ~/.ydsz contents before bootstrapping.",
+    help="Wipe existing ~/.ydsz-worker contents before bootstrapping.",
 )
 @click.option(
     "--yes",
@@ -46,7 +46,7 @@ def init(
     force: bool,
     non_interactive: bool,
 ) -> None:
-    """Bootstrap an Ydsz Worker server (~/.ydsz dir, DB migrations, first admin)."""
+    """Bootstrap an Ydsz Worker server (~/.ydsz-worker dir, DB migrations, first admin)."""
     from ydsz.config import load_config
     from ydsz.infra.agents.plugins.manager import PluginManager
     from ydsz.infra.db.factory import open_database
@@ -114,7 +114,7 @@ def init(
 
         user_repo = UserRepo(db)
         if user_repo.get_by_username(username) is not None:
-            # 幂等引导（issue #1866）：外部数据库（PostgreSQL）不会在 ~/.ydsz
+            # 幂等引导（issue #1866）：外部数据库（PostgreSQL）不会在 ~/.ydsz-worker
             # 生成 ydsz.infra.db，容器重启后 entrypoint 会重跑 init；此时跳过创建，
             # 避免管理员 INSERT 撞 UNIQUE(username) 直接崩溃。
             click.echo(f"  admin user '{username}' already exists, skipping.")

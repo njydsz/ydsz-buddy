@@ -232,7 +232,7 @@ def resolve_service_home(*, run_as_user: str | None = None) -> Path:
     if raw:
         return Path(raw).expanduser()
     user = run_as_user or resolve_run_as_user()
-    return _account_home(user) / ".ydsz"
+    return _account_home(user) / ".ydsz-worker"
 
 
 def persist_bind_options(home: Path, *, host: str | None = None, port: int | None = None) -> None:

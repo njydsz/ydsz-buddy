@@ -78,7 +78,7 @@ def _isolated_user_home(
 
     Keeping HOME off ``tmp_path`` avoids polluting directory listings and
     colliding with tests that create ``tmp_path / \"home\"`` themselves.
-    Required for xdist so workers never share ``~/.ydsz`` / CLI state.
+    Required for xdist so workers never share ``~/.ydsz-worker`` / CLI state.
     """
     home = tmp_path_factory.mktemp("user-home")
     monkeypatch.setenv("HOME", str(home))
@@ -95,7 +95,7 @@ def _isolated_user_home(
 
 @pytest.fixture
 def tmp_ydsz_home(_isolated_user_home: Path) -> Iterator[Path]:
-    """Redirect ``~/.ydsz`` under the autouse isolated HOME."""
-    ydsz = _isolated_user_home / ".ydsz"
+    """Redirect ``~/.ydsz-worker`` under the autouse isolated HOME."""
+    ydsz = _isolated_user_home / ".ydsz-worker"
     ydsz.mkdir(exist_ok=True)
     yield ydsz

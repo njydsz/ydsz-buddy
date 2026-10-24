@@ -3,7 +3,7 @@
 # Ydsz Worker 容器入口脚本
 #
 # 环境变量:
-#   HOME                      — 必须为 /data，使 ~/.ydsz 映射到数据卷
+#   HOME                      — 必须为 /data，使 ~/.ydsz-worker 映射到数据卷
 #   YDSZ_DEFAULT_PASSWORD    — 首次管理员密码（须 ≥8 位且含字母和数字）。
 #                               合格则 ydsz-worker init 建账号；未设置或未通过
 #                               策略则不建管理员，启动后走 Web 设置向导。
@@ -13,17 +13,17 @@
 #
 # 首次引导（issue #502）：容器不得因弱默认密码重启循环。未设置或不合格
 # 的 YDSZ_DEFAULT_PASSWORD 不再静默换成随机管理员密码，而是把向导口令
-# 写到数据卷（/data/.ydsz/ydsz-login.txt），打开页面走设置向导。
+# 写到数据卷（/data/.ydsz-worker/ydsz-login.txt），打开页面走设置向导。
 #
 # 初始化标记（issue #1866）：PostgreSQL 等外部数据库不会在数据卷生成
 # ydsz.db，仅凭 DB_FILE 判断会在每次重启重复执行 ydsz-worker init（管理员
 # INSERT 撞 UNIQUE 约束直接崩溃）。ydsz-worker init 成功后写入
-# /data/.ydsz/.initialized，重启命中该标记即跳过引导直接启动。
+# /data/.ydsz-worker/.initialized，重启命中该标记即跳过引导直接启动。
 # =============================================================================
 set -euo pipefail
 
 export HOME="${HOME:-/data}"
-YDSZ_HOME="${YDSZ_HOME:-${HOME}/.ydsz}"
+YDSZ_HOME="${YDSZ_HOME:-${HOME}/.ydsz-worker}"
 export YDSZ_HOME
 DB_FILE="${YDSZ_HOME}/ydsz.db"
 INIT_MARKER="${YDSZ_HOME}/.initialized"

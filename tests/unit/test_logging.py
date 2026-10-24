@@ -1,7 +1,7 @@
 """tests/unit/test_logging.py
 
 Covers the daily-rotation + retention logging strategy in ``ydsz.infra.server``:
-the log path lives under ``~/.ydsz/logs`` and stale rotated files are purged.
+the log path lives under ``~/.ydsz-worker/logs`` and stale rotated files are purged.
 """
 
 from __future__ import annotations

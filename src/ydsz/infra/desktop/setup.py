@@ -146,7 +146,7 @@ async def _iter_subprocess_lines(stream: asyncio.StreamReader) -> AsyncIterator[
 
 
 def ydsz_home() -> Path:
-    return Path(os.environ.get("YDSZ_HOME", Path.home() / ".ydsz"))
+    return Path(os.environ.get("YDSZ_HOME", Path.home() / ".ydsz-worker"))
 
 
 def desktop_state_dir() -> Path:

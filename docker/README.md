@@ -27,7 +27,7 @@ From the repository root:
 docker compose -f docker/docker-compose.yml up -d --build
 ```
 
-Open `http://localhost:8088`. A valid `YDSZ_DEFAULT_PASSWORD` (≥8 characters with letters and digits) creates the admin on first boot and writes credentials to `/data/.ydsz/credential.txt`. If the variable is unset, or the password fails policy (too short, missing letters/digits, or a common password), **no** admin is created — open the dashboard and complete the setup wizard. The wizard unlock password is in `/data/.ydsz/ydsz-login.txt` (also noted in `credential.txt`).
+Open `http://localhost:8088`. A valid `YDSZ_DEFAULT_PASSWORD` (≥8 characters with letters and digits) creates the admin on first boot and writes credentials to `/data/.ydsz-worker/credential.txt`. If the variable is unset, or the password fails policy (too short, missing letters/digits, or a common password), **no** admin is created — open the dashboard and complete the setup wizard. The wizard unlock password is in `/data/.ydsz-worker/ydsz-login.txt` (also noted in `credential.txt`).
 
 Compose sets the open-file limit to 65535 for multi-agent workloads. Server startup also raises the soft limit up to 65535 within the inherited hard limit and logs the effective limits. Recreate existing containers to apply changed Compose limits; a restart alone does not change their hard limit.
 
@@ -39,9 +39,9 @@ docker run -d \
   --name ydsz \
   --ulimit nofile=65535:65535 \
   -p 8088:8088 \
-  -v ydsz-data:/data/.ydsz \
+  -v ydsz-data:/data/.ydsz-worker \
   -e HOME=/data \
-  ydsz:latest
+  ydsz-worker:latest
 ```
 
 ### Faster downloads (mirrors, optional)
@@ -60,7 +60,7 @@ bash docker/docker_build.sh
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HOME` | `/data` | Must be `/data` so `~/.ydsz` maps to the data volume |
+| `HOME` | `/data` | Must be `/data` so `~/.ydsz-worker` maps to the data volume |
 | `YDSZ_PORT` | `8088` | HTTP listen port |
 | `YDSZ_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (≥8 chars, letters + digits). Valid → `ydsz-worker init`; unset or rejected → web setup wizard |
 | `YDSZ_ADMIN_USERNAME` | `admin` | Initial admin username |
@@ -69,7 +69,7 @@ bash docker/docker_build.sh
 | `OPENAI_API_KEY` | — | OpenAI-compatible API key |
 | `DASHSCOPE_API_KEY` | — | Alibaba DashScope API key |
 
-For Compose, put these in `docker/.env`. Values only reach the container if listed under `environment:` in `docker-compose.yml` (Compose interpolates `.env`; it does not auto-export every key). Alternatively write the same keys into the mounted data dir as `~/.ydsz/env`.
+For Compose, put these in `docker/.env`. Values only reach the container if listed under `environment:` in `docker-compose.yml` (Compose interpolates `.env`; it does not auto-export every key). Alternatively write the same keys into the mounted data dir as `~/.ydsz-worker/env`.
 
 ### Knowledge-base dependencies
 
@@ -81,15 +81,15 @@ be imported; it does not download model weights or enable either feature.
 Dependencies installed from the dashboard into a running container live in its
 writable layer and disappear when that container is recreated. Rebuild or pull
 an image containing these extras instead of relying on runtime installation.
-Keep the `/data/.ydsz` volume to preserve settings, knowledge indexes and the
+Keep the `/data/.ydsz-worker` volume to preserve settings, knowledge indexes and the
 local embedding model cache. Existing deployments must rebuild or upgrade their
 image to receive these dependencies; restarting an older image is insufficient.
 
 ### Data persistence
 
-- Compose mounts host `~/.ydsz` → container `/data/.ydsz`
+- Compose mounts host `~/.ydsz-worker` → container `/data/.ydsz-worker`
 - `docker run` example uses named volume `ydsz-data`
-- First boot: a valid `YDSZ_DEFAULT_PASSWORD` runs `ydsz-worker init` and writes `credential.txt`; unset or rejected passwords skip admin creation and write the wizard unlock password to `/data/.ydsz/ydsz-login.txt`. The container does not exit because of a weak default.
+- First boot: a valid `YDSZ_DEFAULT_PASSWORD` runs `ydsz-worker init` and writes `credential.txt`; unset or rejected passwords skip admin creation and write the wizard unlock password to `/data/.ydsz-worker/ydsz-login.txt`. The container does not exit because of a weak default.
 
 ### Health check
 

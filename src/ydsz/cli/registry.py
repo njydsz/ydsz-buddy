@@ -30,7 +30,7 @@ COMMANDS: dict[str, tuple[str, str, str]] = {
     "version": (".commands.version", "version", "Show the installed ydsz-worker version."),
     "completion": (".commands.completion", "completion", "Shell completion utilities."),
     "update": (".commands.update", "update", "Check for and install a newer Ydsz Worker release."),
-    "clean": (".commands.clean", "clean", "Remove CLI state or wipe all of ~/.ydsz."),
+    "clean": (".commands.clean", "clean", "Remove CLI state or wipe all of ~/.ydsz-worker."),
     "backup": (".commands.backup", "backup", "Export and restore Ydsz Worker backups."),
     "bridge": (".commands.bridge", "bridge", "Manage remote Ydsz Worker bridge peers."),
     "acp": (".commands.acp", "acp_cmd", "Run Ydsz Worker agent as ACP server (stdio)."),

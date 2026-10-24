@@ -25,7 +25,7 @@ services:
     ports:
       - "${YDSZ_PORT:-8088}:${YDSZ_PORT:-8088}"
     volumes:
-      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+      - ${YDSZ_DATA:-~/.ydsz-worker}:/data/.ydsz-worker
     environment:
       - HOME=/data
       - YDSZ_BIND_HOST=0.0.0.0

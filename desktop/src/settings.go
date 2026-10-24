@@ -15,7 +15,7 @@ const (
 	LocaleEN Locale = "en"
 )
 
-// Settings is persisted at ~/.ydsz/desktop-settings.json
+// Settings is persisted at ~/.ydsz-worker/desktop-settings.json
 type Settings struct {
 	Locale         Locale `json:"locale"`
 	Autostart      bool   `json:"autostart"`
@@ -40,9 +40,9 @@ func ydszHome() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return ".ydsz"
+		return ".ydsz-worker"
 	}
-	return filepath.Join(home, ".ydsz")
+	return filepath.Join(home, ".ydsz-worker")
 }
 
 func portableDir() string {

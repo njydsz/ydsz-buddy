@@ -13,9 +13,9 @@ All desktop-client code lives here. This is **not** `src/ydsz/infra/desktop`
 
 Same as the Ydsz Worker CLI/server default:
 
-- `YDSZ_HOME` → `~/.ydsz` (or the existing `YDSZ_HOME` env)
-- Green runtime extract → `~/.ydsz/portable/`
-- Shell prefs → `~/.ydsz/desktop-settings.json`
+- `YDSZ_HOME` → `~/.ydsz-worker` (or the existing `YDSZ_HOME` env)
+- Green runtime extract → `~/.ydsz-worker/portable/`
+- Shell prefs → `~/.ydsz-worker/desktop-settings.json`
 
 ## Build green zip
 
@@ -69,13 +69,13 @@ cd desktop/src
 YDSZ_DESKTOP_URL=http://127.0.0.1:8088 wails3 dev
 ```
 
-Without `YDSZ_DESKTOP_URL`, first launch uses `~/.ydsz/portable/` if valid,
+Without `YDSZ_DESKTOP_URL`, first launch uses `~/.ydsz-worker/portable/` if valid,
 otherwise extracts the matching zip shipped with the desktop package (embedded
 in the Windows and Linux binaries, under `Contents/Resources` on macOS). The
 Wails shell never downloads Ydsz. For local runtime debugging, set
 `YDSZ_DESKTOP_PORTABLE_ZIP=/absolute/path/ydsz-portable-<plat>-<version>.zip`.
 On later launches, a newer bundled portable version replaces the extracted
-runtime after creating a consistent SQLite backup under `~/.ydsz/backups/`.
+runtime after creating a consistent SQLite backup under `~/.ydsz-worker/backups/`.
 The upgraded Ydsz Worker process then applies the normal database migrations during
 startup. Newer extracted runtimes are never downgraded; PostgreSQL remains
 externally managed and is not copied by the desktop shell.

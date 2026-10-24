@@ -1,4 +1,4 @@
-"""Filesystem layout for ``~/.ydsz/``."""
+"""Filesystem layout for ``~/.ydsz-worker/``."""
 
 from __future__ import annotations
 
@@ -13,11 +13,11 @@ class PathLayout:
 
     @classmethod
     def from_env(cls) -> PathLayout:
-        """Resolve install root from ``YDSZ_HOME`` or ``~/.ydsz``."""
+        """Resolve install root from ``YDSZ_HOME`` or ``~/.ydsz-worker``."""
         raw = os.environ.get("YDSZ_HOME", "").strip()
         if raw:
             return cls(Path(raw).expanduser())
-        return cls(Path.home() / ".ydsz")
+        return cls(Path.home() / ".ydsz-worker")
 
     @property
     def db(self) -> Path:

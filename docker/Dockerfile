@@ -6,8 +6,8 @@
 # 阶段 2: Python 运行时 + 预构建前端
 #
 # 用法（在仓库根目录执行，构建上下文为根目录）:
-#   docker build -f docker/Dockerfile -t ydsz:latest .
-#   docker run -d -p 8088:8088 -v ydsz-data:/data/.ydsz -e HOME=/data ydsz:latest
+#   docker build -f docker/Dockerfile -t ydsz-worker:latest .
+#   docker run -d -p 8088:8088 -v ydsz-data:/data/.ydsz-worker -e HOME=/data ydsz-worker:latest
 #
 # 国内加速（可选，需 BuildKit，docker/docker_build.sh 默认已开启）:
 #   PIP_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple \
@@ -135,7 +135,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     && apt-get purge -y --auto-remove build-essential \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 
-RUN mkdir -p /data/.ydsz
+RUN mkdir -p /data/.ydsz-worker
 
 EXPOSE 8088
 

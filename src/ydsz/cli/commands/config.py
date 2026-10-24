@@ -11,7 +11,7 @@ from ydsz.cli.support.state import default_state_path, load, save
 
 @click.group("config")
 def config_group() -> None:
-    """View or update CLI defaults (~/.ydsz/cli_state.json)."""
+    """View or update CLI defaults (~/.ydsz-worker/cli_state.json)."""
 
 
 @config_group.command("show")

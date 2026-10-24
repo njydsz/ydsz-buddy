@@ -16,7 +16,7 @@ from ydsz.infra.utils.paths import PathLayout
 
 
 def default_state_path() -> Path:
-    """Default location for the CLI state file (``~/.ydsz/cli_state.json``)."""
+    """Default location for the CLI state file (``~/.ydsz-worker/cli_state.json``)."""
     return PathLayout.from_env().root / "cli_state.json"
 
 

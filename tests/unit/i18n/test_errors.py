@@ -97,8 +97,8 @@ def test_localized_message_falls_back_when_key_missing(monkeypatch: pytest.Monke
 
 
 def test_config_file_corrupt_interpolates_path_and_detail():
-    kwargs = {"path": "~/.ydsz/config.json", "detail": "line 3, column 1"}
-    assert "~/.ydsz/config.json" in error_message("CONFIG_FILE_CORRUPT", "en", **kwargs)
+    kwargs = {"path": "~/.ydsz-worker/config.json", "detail": "line 3, column 1"}
+    assert "~/.ydsz-worker/config.json" in error_message("CONFIG_FILE_CORRUPT", "en", **kwargs)
     assert "line 3, column 1" in error_message("CONFIG_FILE_CORRUPT", "zh", **kwargs)
     for locale in ("en", "zh"):
         msg = error_message("CONFIG_FILE_CORRUPT", locale, **kwargs)

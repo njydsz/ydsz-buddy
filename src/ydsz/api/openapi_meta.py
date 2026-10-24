@@ -111,7 +111,7 @@ OPENAPI_TAGS: list[dict[str, str]] = [
     },
     {
         "name": "envs",
-        "description": "Global environment variables (~/.ydsz/env) inherited by every agent.",
+        "description": "Global environment variables (~/.ydsz-worker/env) inherited by every agent.",
     },
     {
         "name": "search",

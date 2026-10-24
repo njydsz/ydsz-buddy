@@ -170,7 +170,7 @@ def run(
     """Run ydsz-server in the foreground.
 
     Host and port are resolved with the following precedence: explicit CLI
-    flags > ``YDSZ_BIND_HOST``/``YDSZ_PORT`` env > ``~/.ydsz/config.json``
+    flags > ``YDSZ_BIND_HOST``/``YDSZ_PORT`` env > ``~/.ydsz-worker/config.json``
     > launch defaults. When ``--host`` or ``--port`` is passed on the CLI,
     that override is persisted to ``config.json`` immediately before uvicorn
     starts.

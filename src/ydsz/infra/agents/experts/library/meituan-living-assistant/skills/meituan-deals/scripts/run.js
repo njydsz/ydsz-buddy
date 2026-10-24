@@ -83,7 +83,7 @@ function findPython() {
   if (process.env.YDSZ_PYTHON && isPython3(process.env.YDSZ_PYTHON)) {
     return process.env.YDSZ_PYTHON;
   }
-  const ydszHome = process.env.YDSZ_HOME || path.join(require('os').homedir(), '.ydsz');
+  const ydszHome = process.env.YDSZ_HOME || path.join(require('os').homedir(), '.ydsz-worker');
   const venvCandidates = [
     path.join(ydszHome, 'venv', 'bin', 'python'),             // macOS / Linux
     path.join(ydszHome, 'venv', 'Scripts', 'python.exe'),     // Windows

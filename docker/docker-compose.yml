@@ -14,10 +14,10 @@
 #   YDSZ_DATABASE_URL=postgresql://ydsz:ydsz@host.docker.internal:5432/ydsz
 #
 # 注意: docker/.env 仅用于 Compose 插值；变量必须列在下方 environment
-# 才会进入容器。也可写入数据卷内的 ~/.ydsz/env（宿主机挂载目录下的 env）。
+# 才会进入容器。也可写入数据卷内的 ~/.ydsz-worker/env（宿主机挂载目录下的 env）。
 # 密码须 ≥8 位且同时包含字母与数字（与控制台改密策略一致）。
 # 未设置或未通过策略时不自动建管理员，打开页面走设置向导
-# （向导口令写入 /data/.ydsz/ydsz-login.txt）。
+# （向导口令写入 /data/.ydsz-worker/ydsz-login.txt）。
 # =============================================================================
 
 services:
@@ -35,7 +35,7 @@ services:
     ports:
       - "${YDSZ_PORT:-8088}:${YDSZ_PORT:-8088}"
     volumes:
-      - ${YDSZ_DATA:-~/.ydsz}:/data/.ydsz
+      - ${YDSZ_DATA:-~/.ydsz-worker}:/data/.ydsz-worker
     environment:
       - HOME=/data
       - YDSZ_BIND_HOST=0.0.0.0
