@@ -339,6 +339,7 @@ func main() {
 	app := application.New(application.Options{
 		Name:        "YdszWorker",
 		Description: "YdszWorker desktop",
+		Icon:        appIcon(),
 		Services: []application.Service{
 			application.NewService(api),
 		},

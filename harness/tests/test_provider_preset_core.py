@@ -176,9 +176,9 @@ class TestCoreProviderPresets:
     def test_deepseek_bundle_only_lists_current_v4_models(self) -> None:
         presets = {p.id: p for p in load_provider_templates(templates_path=_BUNDLED_TEMPLATE)}
         ds = presets["deepseek"]
-        assert {m.id for m in ds.models} == {"deepseek-v4-flash", "deepseek-v4-pro"}
-        assert {m.max_input_tokens for m in ds.models} == {1_000_000}
-        assert {m.max_output_tokens for m in ds.models} == {384_000}
+        assert {m.id for m in ds.models} == {"deepseek-v4-flash", "deepseek-v4-pro", "deepseek-v4.1-flash", "deepseek-v3.2", "deepseek-r1"}
+        assert {m.max_input_tokens for m in ds.models} == {65536, 1_000_000, 1_048_576}
+        assert {m.max_output_tokens for m in ds.models} == {32768, 384_000, 393_216}
 
     def test_hai_kimi_k25_supports_image(self) -> None:
         presets = {p.id: p for p in load_provider_templates(templates_path=_BUNDLED_TEMPLATE)}
@@ -247,11 +247,18 @@ class TestCoreProviderPresets:
         assert set(models) == {
             "tc-code-latest",
             "minimax-m2.7",
+            "minimax-m3.1-flash",
             "glm-5",
             "glm-5.1",
             "glm-5.2",
+            "glm-5.3",
             "deepseek-v4-flash-202605",
             "deepseek-v4-pro-202606",
+            "deepseek-v4.1-flash",
+            "kimi-k3",
+            "kimi-k3.1-pro",
+            "kimi-k3-thinking",
+            "mimo-v2.6-flash",
         }
         assert models["glm-5.2"].max_input_tokens == 1_000_000
         assert models["deepseek-v4-pro-202606"].max_output_tokens == 384_000
@@ -275,6 +282,7 @@ class TestCoreProviderPresets:
             "deepseek-v4-pro",
             "deepseek-v4-pro-0813",
             "deepseek-v4-pro-202606",
+            "deepseek-v4.1-flash-1017",
             "glm-5",
             "glm-5-turbo",
             "glm-5.1",
@@ -284,9 +292,15 @@ class TestCoreProviderPresets:
             "kimi-k2.6",
             "kimi-k2.7-code",
             "kimi-k2.7-code-highspeed",
+            "kimi-k3",
+            "kimi-k3-thinking",
+            "kimi-k3.1-pro",
+            "kimi-k3.1-pro-highspeed",
             "minimax-m2.5",
             "minimax-m2.7",
             "minimax-m3",
+            "minimax-m3.1-flash",
+            "mimo-v2.6-flash",
         }
         assert enterprise_models["glm-5.3"].max_input_tokens == 1_000_000
         assert enterprise_models["deepseek-v4-pro-0813"].max_output_tokens == 384_000
@@ -324,7 +338,7 @@ class TestCoreProviderPresets:
             assert models["kimi-k2-0711-preview"].max_input_tokens == 131_072
 
         for provider_id in ("minimax-cn", "minimax-intl"):
-            assert {m.max_input_tokens for m in presets[provider_id].models} == {204_800}
+            assert {m.max_input_tokens for m in presets[provider_id].models} == {204_800, 1_000_000}
 
         mimo = {model.id: model for model in presets["mimo"].models}
         assert mimo["mimo-v2.5"].max_input_tokens == 1_048_576

@@ -23,3 +23,6 @@ func applyTrayIcon(tray *application.SystemTray) {
 // 824/1024 icon-grid padding. Overriding NSApp's icon image would replace it
 // with a full-bleed PNG that renders a size bigger than every other app.
 func applyAppIcon(_ *application.App) {}
+
+// appIcon returns nil on macOS — the .app bundle carries the Dock icon.
+func appIcon() []byte { return nil }

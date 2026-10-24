@@ -18,3 +18,11 @@ func applyTrayIcon(tray *application.SystemTray) {
 func applyAppIcon(app *application.App) {
 	app.SetIcon(trayIcon)
 }
+
+// appIcon returns the platform icon bytes for use in application.Options.Icon.
+// SetIcon is a no-op on Windows, but the window reads Options.Icon during
+// creation and falls back to the embedded PNG when no .exe resource exists
+// (e.g. in the dev runner that has no .syso linked in).
+func appIcon() []byte {
+	return trayIcon
+}

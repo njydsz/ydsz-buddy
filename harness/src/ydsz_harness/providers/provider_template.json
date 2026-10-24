@@ -119,6 +119,53 @@
         "input": [
           "text"
         ]
+      },
+      {
+        "id": "kimi-k3",
+        "name": "Kimi K3",
+        "max_input_tokens": 262144,
+        "reasoning": true
+      },
+      {
+        "id": "minimax-m3.1-flash",
+        "name": "MiniMax-M3.1 Flash",
+        "max_input_tokens": 1000000,
+        "reasoning": true
+      },
+      {
+        "id": "mimo-v2.6-flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 1048576,
+        "reasoning": true
+      },
+      {
+        "id": "glm-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 202752,
+        "reasoning": true
+      },
+      {
+        "id": "deepseek-v4.1-flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 384000,
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k3.1-pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 262144,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3-thinking",
+        "name": "Kimi K3 Thinking",
+        "max_input_tokens": 262144,
+        "reasoning": true
       }
     ],
     "vendor": "tencent",
@@ -268,6 +315,68 @@
         "name": "MiniMax-M3",
         "max_input_tokens": 1000000,
         "reasoning": true
+      },
+      {
+        "id": "kimi-k3",
+        "name": "Kimi K3",
+        "max_input_tokens": 1000000,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3-thinking",
+        "name": "Kimi K3 Thinking",
+        "max_input_tokens": 1000000,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "minimax-m3.1-flash",
+        "name": "MiniMax-M3.1-Flash",
+        "max_input_tokens": 1000000,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "mimo-v2.6-flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 1048576
+      },
+      {
+        "id": "deepseek-v4.1-flash-1017",
+        "name": "DeepSeek V4.1 Flash 1017",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 393216,
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k3.1-pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 1000000,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3.1-pro-highspeed",
+        "name": "Kimi K3.1 Pro Highspeed",
+        "max_input_tokens": 1000000,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "tencent",
@@ -387,6 +496,43 @@
         "id": "DeepSeek-V3.1-Terminus-W4AFP8",
         "name": "DeepSeek V3.1 Terminus W4AFP8",
         "max_input_tokens": 128000
+      },
+      {
+        "id": "Qwen3.7-Max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen3.8-35B-A3B",
+        "name": "Qwen3.8 35B A3B",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Kimi-K3",
+        "name": "Kimi K3",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "MiMo-V2.6-Flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 128000
+      },
+      {
+        "id": "DeepSeek-V4.1-Flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 128000
       }
     ],
     "vendor": "tencent",
@@ -413,6 +559,29 @@
         "name": "DeepSeek V4 Pro",
         "max_input_tokens": 1000000,
         "max_output_tokens": 384000
+      },
+      {
+        "id": "deepseek-v4.1-flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 393216,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "deepseek-v3.2",
+        "name": "DeepSeek V3.2",
+        "max_input_tokens": 65536,
+        "max_output_tokens": 32768
+      },
+      {
+        "id": "deepseek-r1",
+        "name": "DeepSeek R1",
+        "max_input_tokens": 65536,
+        "max_output_tokens": 32768,
+        "reasoning": true
       }
     ]
   },
@@ -446,6 +615,76 @@
         "id": "mimo-v2-pro",
         "name": "MiMo V2 Pro",
         "max_input_tokens": 262144
+      },
+      {
+        "id": "mimo-v2.6-flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072
+      },
+      {
+        "id": "mimo-v2.6-pro",
+        "name": "MiMo V2.6 Pro",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image",
+          "video",
+          "audio"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "mimo-v2.6-pro-ultraspeed",
+        "name": "MiMo V2.6 Pro UltraSpeed",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "mimo-v2-omni",
+        "name": "MiMo V2 Omni",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image",
+          "video",
+          "audio"
+        ]
+      },
+      {
+        "id": "mimo-v2-tts",
+        "name": "MiMo V2 TTS",
+        "max_input_tokens": 8192,
+        "type": "tts"
+      },
+      {
+        "id": "mimo-v2.5-asr",
+        "name": "MiMo V2.5 ASR",
+        "max_input_tokens": 0,
+        "type": "asr"
+      },
+      {
+        "id": "mimo-v2.5-tts",
+        "name": "MiMo V2.5 TTS",
+        "max_input_tokens": 8192,
+        "type": "tts"
+      },
+      {
+        "id": "mimo-7b-base",
+        "name": "MiMo 7B Base",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "mimo-7b-rl",
+        "name": "MiMo 7B RL",
+        "max_input_tokens": 131072,
+        "reasoning": true
       }
     ]
   },
@@ -466,6 +705,46 @@
       {
         "id": "ZhipuAI/GLM-5",
         "name": "GLM-5",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "Qwen/Qwen3.8-Max",
+        "name": "Qwen3.8 Max",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "Qwen/Qwen3.7-Max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3-Coder-Next",
+        "name": "Qwen3 Coder Next",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "ZhipuAI/GLM-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 131072,
+        "reasoning": true
+      },
+      {
+        "id": "XiaomiMiMo/MiMo-V2.6-Flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "moonshotai/Kimi-K3",
+        "name": "Kimi K3",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "name": "Kimi K3.1 Pro",
         "max_input_tokens": 131072
       }
     ]
@@ -575,6 +854,79 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "gpt-6-astra",
+        "name": "GPT-6 Astra",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-6.1-sol",
+        "name": "GPT-6.1 Sol",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "max_input_tokens": 256000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "max_input_tokens": 256000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-5.2-pro",
+        "name": "GPT-5.2 Pro",
+        "max_input_tokens": 256000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-5-pro",
+        "name": "GPT-5 Pro",
+        "max_input_tokens": 256000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gpt-4.1-pro",
+        "name": "GPT-4.1 Pro",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "o3-pro",
+        "name": "o3 Pro",
+        "max_input_tokens": 200000,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
       }
     ]
   },
@@ -618,6 +970,34 @@
         "id": "claude-3-5-haiku-20241022",
         "name": "Claude 3.5 Haiku",
         "max_input_tokens": 200000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "claude-opus-5-5",
+        "name": "Claude Opus 5.5",
+        "max_input_tokens": 200000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "max_input_tokens": 200000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "claude-haiku-5-5",
+        "name": "Claude Haiku 5.5",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072,
         "input": [
           "text",
           "image"
@@ -696,6 +1076,60 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "gemini-4-argon",
+        "name": "Gemini 4 Argon",
+        "max_input_tokens": 2000000,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      {
+        "id": "gemini-3.1-pro",
+        "name": "Gemini 3.1 Pro",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gemini-3.1-flash",
+        "name": "Gemini 3.1 Flash",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gemini-3.1-flash-lite",
+        "name": "Gemini 3.1 Flash Lite",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text"
+        ]
+      },
+      {
+        "id": "gemini-3-pro",
+        "name": "Gemini 3 Pro",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "gemini-3-flash",
+        "name": "Gemini 3 Flash",
+        "max_input_tokens": 1048576,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ]
   },
@@ -726,6 +1160,16 @@
       {
         "id": "openai/gpt-oss-20b",
         "name": "GPT-OSS 20B",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "moonshotai/Kimi-K3",
+        "name": "Kimi K3",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "qwen/qwen3-235b-a22b",
+        "name": "Qwen3 235B",
         "max_input_tokens": 131072
       }
     ]
@@ -857,6 +1301,49 @@
         "name": "Kimi K2 Thinking Turbo",
         "max_input_tokens": 262144,
         "reasoning": true
+      },
+      {
+        "id": "kimi-k3-thinking",
+        "name": "Kimi K3 Thinking",
+        "max_input_tokens": 1000000,
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k2.7",
+        "name": "Kimi K2.7",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3.1-pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k3.1-pro-highspeed",
+        "name": "Kimi K3.1 Pro Highspeed",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k2.6-tool-calling",
+        "name": "Kimi K2.6 Tool Calling",
+        "max_input_tokens": 262144,
+        "reasoning": true
       }
     ],
     "vendor": "kimi",
@@ -924,6 +1411,49 @@
       {
         "id": "kimi-k2-thinking-turbo",
         "name": "Kimi K2 Thinking Turbo",
+        "max_input_tokens": 262144,
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k3-thinking",
+        "name": "Kimi K3 Thinking",
+        "max_input_tokens": 1000000,
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k2.7",
+        "name": "Kimi K2.7",
+        "max_input_tokens": 262144,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3.1-pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k3.1-pro-highspeed",
+        "name": "Kimi K3.1 Pro Highspeed",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ],
+        "reasoning": true
+      },
+      {
+        "id": "kimi-k2.6-tool-calling",
+        "name": "Kimi K2.6 Tool Calling",
         "max_input_tokens": 262144,
         "reasoning": true
       }
@@ -994,6 +1524,26 @@
         "id": "MiniMax-M2.7-highspeed",
         "name": "MiniMax M2.7 Highspeed",
         "max_input_tokens": 204800
+      },
+      {
+        "id": "MiniMax-M3",
+        "name": "MiniMax M3",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      {
+        "id": "MiniMax-M3.1-flash",
+        "name": "MiniMax M3.1 Flash",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
       }
     ],
     "vendor": "minimax",
@@ -1028,6 +1578,26 @@
         "id": "MiniMax-M2.7-highspeed",
         "name": "MiniMax M2.7 Highspeed",
         "max_input_tokens": 204800
+      },
+      {
+        "id": "MiniMax-M3",
+        "name": "MiniMax M3",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      {
+        "id": "MiniMax-M3.1-flash",
+        "name": "MiniMax M3.1 Flash",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
       }
     ],
     "vendor": "minimax",
@@ -1078,6 +1648,25 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "glm-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072,
+        "reasoning": true
+      },
+      {
+        "id": "glm-5.3-turbo",
+        "name": "GLM-5.3 Turbo",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072
+      },
+      {
+        "id": "glm-5.3-highspeed",
+        "name": "GLM-5.3 Highspeed",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072
       }
     ],
     "vendor": "zhipu",
@@ -1128,6 +1717,25 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "glm-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072,
+        "reasoning": true
+      },
+      {
+        "id": "glm-5.3-turbo",
+        "name": "GLM-5.3 Turbo",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072
+      },
+      {
+        "id": "glm-5.3-highspeed",
+        "name": "GLM-5.3 Highspeed",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072
       }
     ],
     "vendor": "zhipu",
@@ -1178,6 +1786,17 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "glm-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 200000,
+        "reasoning": true
+      },
+      {
+        "id": "glm-5.3-turbo",
+        "name": "GLM-5.3 Turbo",
+        "max_input_tokens": 200000
       }
     ],
     "vendor": "zhipu",
@@ -1228,6 +1847,17 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "glm-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 200000,
+        "reasoning": true
+      },
+      {
+        "id": "glm-5.3-turbo",
+        "name": "GLM-5.3 Turbo",
+        "max_input_tokens": 200000
       }
     ],
     "vendor": "zhipu",
@@ -1264,6 +1894,31 @@
         "id": "deepseek-v3.2",
         "name": "DeepSeek V3.2",
         "max_input_tokens": 65536
+      },
+      {
+        "id": "qwen3.8-max",
+        "name": "Qwen3.8 Max",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "qwen3.7-max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "qwen3-coder-next",
+        "name": "Qwen3 Coder Next",
+        "max_input_tokens": 262144
       }
     ],
     "vendor": "aliyun",
@@ -1294,6 +1949,26 @@
         "id": "deepseek-v3.2",
         "name": "DeepSeek V3.2",
         "max_input_tokens": 65536
+      },
+      {
+        "id": "qwen3.7-max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 131072,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "qwen3.7-plus",
+        "name": "Qwen3.7 Plus",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "aliyun",
@@ -1324,6 +1999,26 @@
         "id": "deepseek-v3.2",
         "name": "DeepSeek V3.2",
         "max_input_tokens": 65536
+      },
+      {
+        "id": "qwen3.7-max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 131072,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "qwen3.7-plus",
+        "name": "Qwen3.7 Plus",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "aliyun",
@@ -1609,6 +2304,37 @@
         "id": "doubao-seed-character-251128",
         "name": "Doubao-Seed-Character",
         "max_input_tokens": 131072
+      },
+      {
+        "id": "doubao-seed-2.1-pro",
+        "name": "Doubao-Seed-2.1-Pro",
+        "max_input_tokens": 262144,
+        "max_output_tokens": 131072,
+        "input": [
+          "text",
+          "image",
+          "video"
+        ]
+      },
+      {
+        "id": "doubao-seed-2.1-turbo",
+        "name": "Doubao-Seed-2.1-Turbo",
+        "max_input_tokens": 262144,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "kimi-k3.1-pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 262144,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "volcengine",
@@ -1882,6 +2608,16 @@
           "text",
           "image"
         ]
+      },
+      {
+        "id": "doubao-seed-2.1-pro",
+        "name": "Doubao Seed 2.1 Pro",
+        "max_input_tokens": 256000,
+        "max_output_tokens": 65536,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "volcengine",
@@ -1977,6 +2713,39 @@
         "id": "xopglmv47flash",
         "name": "GLM-4.7-Flash",
         "max_input_tokens": 131072
+      },
+      {
+        "id": "xopkimik3",
+        "name": "Kimi-K3",
+        "max_input_tokens": 262144,
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "xopmimov26f",
+        "name": "MiMo-V2.6-Flash",
+        "max_input_tokens": 262144
+      },
+      {
+        "id": "xopdeepseekv41f",
+        "name": "DeepSeek-V4.1-Flash",
+        "max_input_tokens": 262144,
+        "reasoning": true
+      },
+      {
+        "id": "xopglm53",
+        "name": "GLM-5.3",
+        "max_input_tokens": 262144,
+        "reasoning": true
+      },
+      {
+        "id": "xopminimaxm31f",
+        "name": "MiniMax-M3.1-Flash",
+        "max_input_tokens": 262144,
+        "reasoning": true
       }
     ],
     "vendor": "iflytek",
@@ -2017,6 +2786,60 @@
         "id": "Pro/zai-org/GLM-4.7",
         "name": "GLM-4.7",
         "max_input_tokens": 131072
+      },
+      {
+        "id": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 393216,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3.8-Max",
+        "name": "Qwen3.8 Max",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "Qwen/Qwen3.7-Max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3.7-Plus",
+        "name": "Qwen3.7 Plus",
+        "max_input_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3-Coder-Next",
+        "name": "Qwen3 Coder Next",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "THUDM/GLM-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 131072,
+        "reasoning": true
+      },
+      {
+        "id": "moonshotai/Kimi-K3",
+        "name": "Kimi K3",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "name": "Kimi K3.1 Pro",
+        "max_input_tokens": 131072
       }
     ],
     "vendor": "siliconflow",
@@ -2056,6 +2879,60 @@
       {
         "id": "Pro/zai-org/GLM-4.7",
         "name": "GLM-4.7",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 393216,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3.8-Max",
+        "name": "Qwen3.8 Max",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "Qwen/Qwen3.7-Max",
+        "name": "Qwen3.7 Max",
+        "max_input_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3.7-Plus",
+        "name": "Qwen3.7 Plus",
+        "max_input_tokens": 131072,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "Qwen/Qwen3-Coder-Next",
+        "name": "Qwen3 Coder Next",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "THUDM/GLM-5.3",
+        "name": "GLM-5.3",
+        "max_input_tokens": 131072,
+        "reasoning": true
+      },
+      {
+        "id": "moonshotai/Kimi-K3",
+        "name": "Kimi K3",
+        "max_input_tokens": 131072
+      },
+      {
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "name": "Kimi K3.1 Pro",
         "max_input_tokens": 131072
       }
     ],
@@ -2133,6 +3010,24 @@
         "name": "DeepSeek V4 Flash Free",
         "max_input_tokens": 1000000,
         "max_output_tokens": 384000
+      },
+      {
+        "id": "kimi-k3-thinking",
+        "name": "Kimi K3 Thinking",
+        "max_input_tokens": 1000000,
+        "reasoning": true
+      },
+      {
+        "id": "mimo-v2.6-flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072
+      },
+      {
+        "id": "deepseek-v4.1-flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 384000
       }
     ],
     "vendor": "opencode",
@@ -2192,6 +3087,15 @@
         "name": "Qwen3.6 Plus",
         "max_input_tokens": 1000000,
         "max_output_tokens": 65536
+      },
+      {
+        "id": "claude-opus-5-5",
+        "name": "Claude Opus 5.5",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "opencode",
@@ -2265,6 +3169,18 @@
       {
         "id": "hy3",
         "name": "Hy3"
+      },
+      {
+        "id": "deepseek-v4.1-flash",
+        "name": "DeepSeek V4.1 Flash",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 384000
+      },
+      {
+        "id": "mimo-v2.6-flash",
+        "name": "MiMo V2.6 Flash",
+        "max_input_tokens": 1048576,
+        "max_output_tokens": 131072
       }
     ],
     "vendor": "opencode",
@@ -2311,6 +3227,24 @@
         "name": "Qwen3.6 Plus",
         "max_input_tokens": 1000000,
         "max_output_tokens": 65536
+      },
+      {
+        "id": "claude-opus-5-5",
+        "name": "Claude Opus 5.5",
+        "max_input_tokens": 1000000,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "max_input_tokens": 200000,
+        "input": [
+          "text",
+          "image"
+        ]
       }
     ],
     "vendor": "opencode",
