@@ -778,7 +778,10 @@ def test_resolve_service_home_uses_passwd_not_effective_uid(
 
 def test_resolve_service_home_root_session(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("YDSZ_HOME", raising=False)
-    assert resolve_service_home(run_as_user="root") == Path(pwd.getpwnam("root").pw_dir) / ".ydsz-worker"
+    assert (
+        resolve_service_home(run_as_user="root")
+        == Path(pwd.getpwnam("root").pw_dir) / ".ydsz-worker"
+    )
 
 
 def test_build_runtime_root_always_system_scope(

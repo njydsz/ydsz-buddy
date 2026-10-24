@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { authApi } from "../../../api/modules/auth";
 import { wizardApi, wizardSession } from "../wizardClient";
 import { apiErrorMessage } from "../../../utils/apiError";
+import styles from "../setup.module.less";
 
 const { Text, Paragraph } = Typography;
 
@@ -46,31 +47,24 @@ export default function PasswordStep({ onVerified }: Props) {
   };
 
   return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <div
-          style={{
-            fontSize: 16,
-            fontWeight: 600,
-            color: "var(--fn-text-primary)",
-            marginBottom: 4,
-          }}
-        >
+    <div className={styles.passwordStepInner}>
+      <div className={styles.passwordStepHeader}>
+        <div className={styles.passwordStepTitle}>
           {t("wizard.stepPassword")}
         </div>
-        <Text type="secondary" style={{ fontSize: 13 }}>
+        <Text type="secondary" className={styles.passwordStepHint}>
           {t("wizard.password.hint")}
-        </Text>
+        </div>
       </div>
 
       <Alert
         type="info"
         showIcon
         icon={<Terminal size={16} />}
-        style={{ marginBottom: 16 }}
+        className={styles.passwordStepAlert}
         message={t("wizard.password.whereTitle")}
         description={
-          <Paragraph style={{ marginBottom: 0, fontSize: 13 }}>
+          <Paragraph style={{ marginBottom: 0, fontSize: 12.5 }}>
             {passwordPath
               ? t("wizard.password.wherePath", { path: passwordPath })
               : t("wizard.password.whereDefault")}
@@ -82,7 +76,7 @@ export default function PasswordStep({ onVerified }: Props) {
         <Alert
           type="warning"
           showIcon
-          style={{ marginBottom: 16 }}
+          className={styles.passwordStepAlert}
           message={t("wizard.password.missingFile")}
         />
       )}
@@ -92,6 +86,7 @@ export default function PasswordStep({ onVerified }: Props) {
         layout="vertical"
         onFinish={onFinish}
         requiredMark={false}
+        className={styles.passwordStepForm}
       >
         <Form.Item
           label={t("wizard.password.label")}
@@ -112,7 +107,7 @@ export default function PasswordStep({ onVerified }: Props) {
             type="error"
             showIcon
             message={error}
-            style={{ marginBottom: 12 }}
+            className={styles.passwordStepAlert}
           />
         )}
 
@@ -126,6 +121,6 @@ export default function PasswordStep({ onVerified }: Props) {
           {t("wizard.password.verifyButton")}
         </Button>
       </Form>
-    </>
+    </div>
   );
 }

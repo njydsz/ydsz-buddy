@@ -285,7 +285,9 @@ export default function SetupPage() {
 
         <div
           className={`${styles.wizardBody} ${
-            isModelStep ? styles.wizardBodyFlush : ""
+            isModelStep
+              ? styles.wizardBodyFlush
+              : styles.wizardBodyCentered
           }`}
         >
           {current === STEP_PASSWORD && passwordRequired && (

@@ -77,7 +77,7 @@ def test_serialize_history_message_includes_thinking_and_tools() -> None:
         HumanMessage(
             content="hello",
             additional_kwargs={
-                "Ydsz_composer_context": {
+                "ydsz_composer_context": {
                     "skills": ["docx"],
                     "model": "openai/gpt-4o",
                 },
@@ -136,7 +136,7 @@ def test_serialize_history_message_includes_thinking_and_tools() -> None:
         AIMessage(
             content="模型服务返回余额或额度不足。",
             additional_kwargs={
-                "Ydsz_stream_error": True,
+                "ydsz_stream_error": True,
                 "error_code": "TOKEN_QUOTA_EXCEEDED",
             },
         )
@@ -350,7 +350,7 @@ def test_serialize_history_message_drops_image_offload_placeholder_for_image_use
             {"type": "text", "text": _PLACEHOLDER_TEXT},
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "image.png",
                     "media_type": "image/png",
@@ -378,7 +378,7 @@ def test_serialize_history_message_keeps_user_caption_alongside_image_placeholde
             {"type": "text", "text": _PLACEHOLDER_TEXT},
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "image.png",
                     "media_type": "image/png",
@@ -414,7 +414,7 @@ def test_serialize_history_message_drops_placeholder_for_en_locale() -> None:
             {"type": "text", "text": _PLACEHOLDER_TEXT},
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "image.png",
                     "media_type": "image/png",
@@ -437,7 +437,7 @@ def test_strip_image_only_text_blocks_without_user_skips_zh_default() -> None:
             {"type": "text", "text": _PLACEHOLDER_TEXT},
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "image.png",
                     "media_type": "image/png",
@@ -461,7 +461,7 @@ def test_strip_image_only_text_blocks_keeps_voice_caption() -> None:
             {"type": "text", "text": _PLACEHOLDER_TEXT},  # NOT real, but tests shape
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "voice.m4a",
                     "media_type": "audio/mp4",
@@ -487,7 +487,7 @@ def test_serialize_history_message_drops_zip_path_hint() -> None:
     msg = HumanMessage(
         content=[{"type": "text", "text": f"请解压\n\n{hint}"}],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "report.zip",
                     "media_type": "application/zip",
@@ -516,7 +516,7 @@ def test_serialize_history_message_drops_workspace_image_ref() -> None:
             },
         ],
         additional_kwargs={
-            "Ydsz_inbound_attachments": [
+            "ydsz_inbound_attachments": [
                 {
                     "filename": "shot.png",
                     "media_type": "image/png",

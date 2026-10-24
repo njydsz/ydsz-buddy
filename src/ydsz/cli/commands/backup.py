@@ -35,7 +35,7 @@ def backup() -> None:
     type=click.Path(path_type=Path),
     default=None,
     help="Ydsz Worker home (default ~/.ydsz-worker).",
-    )
+)
 @click.option("--no-config", is_flag=True, help="Do not include config.json / env.")
 @click.option("--no-workspaces", is_flag=True, help="Do not include agent workspaces.")
 @click.option("--no-skill-packages", is_flag=True, help="Do not include global skill packages.")

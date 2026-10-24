@@ -114,7 +114,7 @@ async def batch_save_envs(
 @router.delete(
     "/{key}",
     summary="Delete one global environment variable",
-    description="Remove a key from ~/.ydsz-worker/env and the process environment.,
+    description="Remove a key from ~/.ydsz-worker/env and the process environment.",
 )
 async def delete_env(
     key: str,

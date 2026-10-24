@@ -98,8 +98,8 @@ export const ALL_NAV_ITEMS: NavPlacementItem[] = [
     defaultGroup: "settings",
   },
   {
-    key: "cloud-collab",
-    labelKey: "nav.cloudCollab",
+    key: "bridge",
+    labelKey: "nav.bridge",
     defaultZone: "settings",
     defaultGroup: "settings",
   },
