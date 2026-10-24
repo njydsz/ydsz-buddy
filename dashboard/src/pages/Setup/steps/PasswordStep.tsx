@@ -54,7 +54,7 @@ export default function PasswordStep({ onVerified }: Props) {
         </div>
         <Text type="secondary" className={styles.passwordStepHint}>
           {t("wizard.password.hint")}
-        </div>
+        </Text>
       </div>
 
       <Alert
