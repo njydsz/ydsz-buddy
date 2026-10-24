@@ -78,13 +78,7 @@ function textToRules(text: string | undefined): FilesystemRule[] {
   return [{ operations: ["read", "write"], paths, mode: "deny" }];
 }
 
-function SaveBar({
-  saving,
-  onSave,
-}: {
-  saving: boolean;
-  onSave: () => void;
-}) {
+function SaveBar({ saving, onSave }: { saving: boolean; onSave: () => void }) {
   const { t } = useTranslation();
   return (
     <div className={styles.saveBar}>

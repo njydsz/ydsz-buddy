@@ -432,6 +432,10 @@ def get_nav_zones_from_json(raw: str | None) -> dict[str, str]:
         return dict(DEFAULT_NAV_ZONES)
     merged = dict(DEFAULT_NAV_ZONES)
     for key, zone in raw_zones.items():
-        if key in MOVABLE_NAV_KEYS and isinstance(zone, str) and zone.strip().lower() in VALID_ZONES:
+        if (
+            key in MOVABLE_NAV_KEYS
+            and isinstance(zone, str)
+            and zone.strip().lower() in VALID_ZONES
+        ):
             merged[key] = zone.strip().lower()
     return merged

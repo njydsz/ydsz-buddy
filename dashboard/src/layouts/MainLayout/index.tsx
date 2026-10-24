@@ -81,7 +81,9 @@ export default function MainLayout() {
   >(undefined);
   const [chatSidebarOpen, setChatSidebarOpen] = useChatSidebarOpen();
   const [workbenchMounted, setWorkbenchMounted] = useState(() => onWorkbench);
-  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(null);
+  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;

@@ -120,10 +120,7 @@ export function buildSettingsNavGroups(
       labelKey: "nav.connectors",
     });
   }
-  if (
-    navAllowed(user, "skill-packages") &&
-    showInSettings("skill-packages")
-  ) {
+  if (navAllowed(user, "skill-packages") && showInSettings("skill-packages")) {
     settingsItems.push({
       key: "skill-packages",
       icon: <Package size={iconSize} strokeWidth={iconStroke} />,

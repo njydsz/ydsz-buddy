@@ -41,20 +41,31 @@ const BUILTIN_GROUP_IDS = new Set(Object.keys(SETTINGS_GROUP_LABELS));
 
 function newNavGroupId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(8));
-  const body = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  const body = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
   return `c_${body}`;
 }
 
-function nextGroupName(state: ZoneEditorState, t: (k: string) => string): string {
+function nextGroupName(
+  state: ZoneEditorState,
+  t: (k: string) => string,
+): string {
   const base = t("nav.newGroupDefault");
-  const names = new Set(state.groups.map((g) => (g.name ?? "").trim()).filter(Boolean));
+  const names = new Set(
+    state.groups.map((g) => (g.name ?? "").trim()).filter(Boolean),
+  );
   if (!names.has(base)) return base;
   let n = 2;
   while (names.has(`${base} ${n}`)) n += 1;
   return `${base} ${n}`;
 }
 
-function createGroup(state: ZoneEditorState, id: string, name: string): ZoneEditorState {
+function createGroup(
+  state: ZoneEditorState,
+  id: string,
+  name: string,
+): ZoneEditorState {
   return {
     ...state,
     groups: [...state.groups, { id, name }],
@@ -62,7 +73,11 @@ function createGroup(state: ZoneEditorState, id: string, name: string): ZoneEdit
   };
 }
 
-function renameGroup(state: ZoneEditorState, id: string, name: string | null): ZoneEditorState {
+function renameGroup(
+  state: ZoneEditorState,
+  id: string,
+  name: string | null,
+): ZoneEditorState {
   return {
     ...state,
     groups: state.groups.map((g) => (g.id === id ? { ...g, name } : g)),
@@ -81,25 +96,42 @@ function deleteGroup(state: ZoneEditorState, groupId: string): ZoneEditorState {
   };
 }
 
-function moveGroup(state: ZoneEditorState, groupId: string, beforeId: string | null): ZoneEditorState {
+function moveGroup(
+  state: ZoneEditorState,
+  groupId: string,
+  beforeId: string | null,
+): ZoneEditorState {
   if (beforeId === groupId) return state;
   const moving = state.groups.find((g) => g.id === groupId);
   if (!moving) return state;
   const groups = state.groups.filter((g) => g.id !== groupId);
-  const index = beforeId ? groups.findIndex((g) => g.id === beforeId) : groups.length;
+  const index = beforeId
+    ? groups.findIndex((g) => g.id === beforeId)
+    : groups.length;
   groups.splice(index < 0 ? groups.length : index, 0, moving);
   return { ...state, groups };
 }
 
-function placeItem(state: ZoneEditorState, key: string, groupId: string | null, beforeKey: string | null): ZoneEditorState {
+function placeItem(
+  state: ZoneEditorState,
+  key: string,
+  groupId: string | null,
+  beforeKey: string | null,
+): ZoneEditorState {
   if (beforeKey === key) return state;
   const stripped = stripKey(state, key);
-  const list = groupId === null ? stripped.ungrouped : (stripped.itemsByGroup[groupId] ?? []);
+  const list =
+    groupId === null
+      ? stripped.ungrouped
+      : stripped.itemsByGroup[groupId] ?? [];
   const next = [...list];
   const index = beforeKey ? next.indexOf(beforeKey) : next.length;
   next.splice(index < 0 ? next.length : index, 0, key);
   if (groupId === null) return { ...stripped, ungrouped: next };
-  return { ...stripped, itemsByGroup: { ...stripped.itemsByGroup, [groupId]: next } };
+  return {
+    ...stripped,
+    itemsByGroup: { ...stripped.itemsByGroup, [groupId]: next },
+  };
 }
 
 function stripKey(state: ZoneEditorState, key: string): ZoneEditorState {
@@ -107,7 +139,11 @@ function stripKey(state: ZoneEditorState, key: string): ZoneEditorState {
   for (const [id, keys] of Object.entries(state.itemsByGroup)) {
     itemsByGroup[id] = keys.filter((k) => k !== key);
   }
-  return { ...state, ungrouped: state.ungrouped.filter((k) => k !== key), itemsByGroup };
+  return {
+    ...state,
+    ungrouped: state.ungrouped.filter((k) => k !== key),
+    itemsByGroup,
+  };
 }
 
 function groupNameMissing(state: ZoneEditorState): boolean {
@@ -120,7 +156,9 @@ function groupNameMissing(state: ZoneEditorState): boolean {
 // ── Settings-zone initialisation ────────────────────────────────────────────
 
 /** Build the settings-zone editor with default groups from placement.ts. */
-function defaultSettingsEditor(settingsItems: NavPlacementItem[]): ZoneEditorState {
+function defaultSettingsEditor(
+  settingsItems: NavPlacementItem[],
+): ZoneEditorState {
   const groupIds: SettingsGroup[] = ["basic", "settings", "control", "admin"];
   const groups = groupIds.map((id) => ({ id }));
   const itemsByGroup: Record<string, string[]> = {};
@@ -190,7 +228,9 @@ function serializeZone(state: ZoneEditorState): SidebarNavLayoutPref {
 export default function NavigationConfigPage() {
   const { t } = useTranslation();
   const [navZones, setNavZones] = useState<Record<string, NavZone>>({});
-  const [settingsNav, setSettingsNav] = useState<SidebarNavLayoutPref | null>(null);
+  const [settingsNav, setSettingsNav] = useState<SidebarNavLayoutPref | null>(
+    null,
+  );
   const [baseline, setBaseline] = useState<{
     navZones: Record<string, NavZone>;
     settingsNav: SidebarNavLayoutPref | null;
@@ -216,32 +256,40 @@ export default function NavigationConfigPage() {
         const zones = (prefs.nav_zones ?? {}) as Record<string, NavZone>;
         setNavZones(zones);
         setSettingsNav(prefs.settings_nav ?? null);
-        setBaseline({ navZones: zones, settingsNav: prefs.settings_nav ?? null });
+        setBaseline({
+          navZones: zones,
+          settingsNav: prefs.settings_nav ?? null,
+        });
       })
       .catch(() => {})
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // ── Sidebar / settings item sets ───────────────────────────────────────
   // The sidebar zone includes fixed items (chat/experts/tasks) plus every
   // movable item whose current zone is "sidebar".
   const sidebarMovable = useMemo(
-    () => MOVABLE_PLACEMENT_ITEMS.filter((it) => (navZones[it.key] ?? it.defaultZone) === "sidebar"),
+    () =>
+      MOVABLE_PLACEMENT_ITEMS.filter(
+        (it) => (navZones[it.key] ?? it.defaultZone) === "sidebar",
+      ),
     [navZones],
   );
   const settingsMovable = useMemo(
-    () => MOVABLE_PLACEMENT_ITEMS.filter((it) => (navZones[it.key] ?? it.defaultZone) === "settings"),
+    () =>
+      MOVABLE_PLACEMENT_ITEMS.filter(
+        (it) => (navZones[it.key] ?? it.defaultZone) === "settings",
+      ),
     [navZones],
   );
 
   // Fixed items always render at the top of the sidebar zone.
-  const fixedItems = useMemo(
-    () => ALL_NAV_ITEMS.filter((it) => it.fixed),
-    [],
-  );
+  const fixedItems = useMemo(() => ALL_NAV_ITEMS.filter((it) => it.fixed), []);
 
   const [settingsDraft, setSettingsDraft] = useState<ZoneEditorState>({
     groups: [],
@@ -255,12 +303,19 @@ export default function NavigationConfigPage() {
   useEffect(() => {
     const keys = settingsMovable.map((i) => i.key).join(",");
     const nav = JSON.stringify(settingsNav);
-    if (keys === settingsKeyRef.current && nav === settingsNavRef.current) return;
+    if (keys === settingsKeyRef.current && nav === settingsNavRef.current)
+      return;
     settingsKeyRef.current = keys;
     settingsNavRef.current = nav;
 
     const base = defaultSettingsEditor(settingsMovable);
-    setSettingsDraft(mergeSettingsEditor(base, settingsNav, new Set(settingsMovable.map((i) => i.key))));
+    setSettingsDraft(
+      mergeSettingsEditor(
+        base,
+        settingsNav,
+        new Set(settingsMovable.map((i) => i.key)),
+      ),
+    );
   }, [settingsMovable, settingsNav]);
 
   // ── Sidebar order ──────────────────────────────────────────────────────
@@ -281,7 +336,9 @@ export default function NavigationConfigPage() {
   const onDragStart = (event: DragEvent, payload: DragPayload) => {
     dragRef.current = payload;
     event.dataTransfer.effectAllowed = "move";
-    try { event.dataTransfer.setData("text/plain", ""); } catch {}
+    try {
+      event.dataTransfer.setData("text/plain", "");
+    } catch {}
   };
 
   const allowDrop = (event: DragEvent) => {
@@ -293,13 +350,18 @@ export default function NavigationConfigPage() {
    * Drop an item into the settings zone.
    * `groupId` null = ungrouped; `beforeKey` = insert before this key.
    */
-  const dropIntoSettings = (groupId: string | null, beforeKey: string | null) => {
+  const dropIntoSettings = (
+    groupId: string | null,
+    beforeKey: string | null,
+  ) => {
     const payload = dragRef.current;
     dragRef.current = null;
     if (!payload || payload.type !== "item") return;
 
     if (payload.fromZone === "settings") {
-      setSettingsDraft((prev) => placeItem(prev, payload.key, groupId, beforeKey));
+      setSettingsDraft((prev) =>
+        placeItem(prev, payload.key, groupId, beforeKey),
+      );
     } else {
       // Moving from sidebar → settings: remove from sidebar, add to settings.
       setSidebarOrder((prev) => prev.filter((k) => k !== payload.key));
@@ -312,7 +374,8 @@ export default function NavigationConfigPage() {
   const sidebarReorder = (beforeKey: string | null) => {
     const payload = dragRef.current;
     dragRef.current = null;
-    if (!payload || payload.type !== "item" || payload.fromZone !== "sidebar") return;
+    if (!payload || payload.type !== "item" || payload.fromZone !== "sidebar")
+      return;
     setSidebarOrder((prev) => {
       const stripped = prev.filter((k) => k !== payload.key);
       const index = beforeKey ? stripped.indexOf(beforeKey) : stripped.length;
@@ -325,7 +388,8 @@ export default function NavigationConfigPage() {
   const moveToSidebar = () => {
     const payload = dragRef.current;
     dragRef.current = null;
-    if (!payload || payload.type !== "item" || payload.fromZone === "sidebar") return;
+    if (!payload || payload.type !== "item" || payload.fromZone === "sidebar")
+      return;
     setSidebarOrder((prev) => [...prev, payload.key]);
     setNavZones((prev) => ({ ...prev, [payload.key]: "sidebar" }));
   };
@@ -339,7 +403,9 @@ export default function NavigationConfigPage() {
 
   // Group CRUD
   const addSettingsGroup = () => {
-    setSettingsDraft((prev) => createGroup(prev, newNavGroupId(), nextGroupName(prev, t)));
+    setSettingsDraft((prev) =>
+      createGroup(prev, newNavGroupId(), nextGroupName(prev, t)),
+    );
   };
 
   const confirmDeleteGroup = (groupId: string) => {
@@ -355,10 +421,12 @@ export default function NavigationConfigPage() {
     if (!baseline) return false;
     const zonesChanged = MOVABLE_PLACEMENT_ITEMS.some(
       (it: NavPlacementItem) =>
-        (navZones[it.key] ?? it.defaultZone) !== (baseline.navZones[it.key] ?? it.defaultZone),
+        (navZones[it.key] ?? it.defaultZone) !==
+        (baseline.navZones[it.key] ?? it.defaultZone),
     );
     const settingsChanged =
-      JSON.stringify(serializeZone(settingsDraft)) !== JSON.stringify(baseline.settingsNav);
+      JSON.stringify(serializeZone(settingsDraft)) !==
+      JSON.stringify(baseline.settingsNav);
     // Sidebar order change: compare current session order against the movable items' default sequence.
     const sidebarChanged = sidebarMovable.some(
       (it: NavPlacementItem, idx: number) => sidebarOrder[idx] !== it.key,
@@ -370,12 +438,11 @@ export default function NavigationConfigPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const settingsPayload = groupNameMissing(settingsDraft) ? null : serializeZone(settingsDraft);
+      const settingsPayload = groupNameMissing(settingsDraft)
+        ? null
+        : serializeZone(settingsDraft);
       // Build a sidebar layout: fixed items first (unchanging order), then movable items in current session order.
-      const sidebarItems = [
-        ...fixedItems.map((it) => it.key),
-        ...sidebarOrder,
-      ];
+      const sidebarItems = [...fixedItems.map((it) => it.key), ...sidebarOrder];
       const sidebarPayload: SidebarNavLayoutPref = {
         groups: [],
         items: sidebarItems.map((key) => ({ key })),
@@ -404,7 +471,11 @@ export default function NavigationConfigPage() {
   };
 
   if (loading) {
-    return <div style={{ padding: 24, color: "var(--fn-text-tertiary)" }}>{t("common.loading")}</div>;
+    return (
+      <div style={{ padding: 24, color: "var(--fn-text-tertiary)" }}>
+        {t("common.loading")}
+      </div>
+    );
   }
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -423,15 +494,35 @@ export default function NavigationConfigPage() {
         moveToSidebar();
       }}
     >
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--fn-text-primary)", margin: "0 0 4px" }}>
+      <h3
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: "var(--fn-text-primary)",
+          margin: "0 0 4px",
+        }}
+      >
         {t("nav.placement.zone.sidebar")}
       </h3>
-      <p style={{ fontSize: 12, color: "var(--fn-text-tertiary)", margin: "0 0 12px" }}>
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--fn-text-tertiary)",
+          margin: "0 0 12px",
+        }}
+      >
         {t("nav.placement.zoneSidebarDesc")}
       </p>
 
       {/* Fixed sidebar items */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          marginBottom: 8,
+        }}
+      >
         {fixedItems.map((it) => (
           <div
             key={it.key}
@@ -479,12 +570,23 @@ export default function NavigationConfigPage() {
 
       {/* Divider */}
       {sidebarOrder.length > 0 && (
-        <div style={{ height: 1, background: "var(--fn-border, rgba(0,0,0,0.08))", margin: "4px 0" }} />
+        <div
+          style={{
+            height: 1,
+            background: "var(--fn-border, rgba(0,0,0,0.08))",
+            margin: "4px 0",
+          }}
+        />
       )}
 
       {/* Movable sidebar items */}
       <div
-        style={{ display: "flex", flexDirection: "column", gap: 4, minHeight: 28 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          minHeight: 28,
+        }}
         onDragOver={allowDrop}
         onDrop={(event) => {
           event.preventDefault();
@@ -520,15 +622,40 @@ export default function NavigationConfigPage() {
         dropIntoSettings(null, null);
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--fn-text-primary)", margin: 0 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 4,
+        }}
+      >
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: "var(--fn-text-primary)",
+            margin: 0,
+          }}
+        >
           {t("nav.placement.zone.settings")}
         </h3>
-        <Button type="text" size="small" icon={<Plus size={14} />} onClick={addSettingsGroup}>
+        <Button
+          type="text"
+          size="small"
+          icon={<Plus size={14} />}
+          onClick={addSettingsGroup}
+        >
           {t("nav.newGroup")}
         </Button>
       </div>
-      <p style={{ fontSize: 12, color: "var(--fn-text-tertiary)", margin: "0 0 12px" }}>
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--fn-text-tertiary)",
+          margin: "0 0 12px",
+        }}
+      >
         {t("nav.placement.zoneSettingsDesc")}
       </p>
 
@@ -551,7 +678,14 @@ export default function NavigationConfigPage() {
         }}
       >
         {settingsDraft.ungrouped.length === 0 ? (
-          <div style={{ padding: 8, color: "var(--fn-text-tertiary)", fontSize: 12, textAlign: "center" }}>
+          <div
+            style={{
+              padding: 8,
+              color: "var(--fn-text-tertiary)",
+              fontSize: 12,
+              textAlign: "center",
+            }}
+          >
             {t("nav.dropHere")}
           </div>
         ) : null}
@@ -593,7 +727,14 @@ export default function NavigationConfigPage() {
               }
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 6,
+              }}
+            >
               <span
                 style={{
                   display: "inline-flex",
@@ -617,7 +758,10 @@ export default function NavigationConfigPage() {
                 style={{ flex: 1, minWidth: 0 }}
                 maxLength={40}
                 value={group.name ?? ""}
-                placeholder={t(SETTINGS_GROUP_LABELS[group.id as SettingsGroup] ?? "nav.groupNamePlaceholder")}
+                placeholder={t(
+                  SETTINGS_GROUP_LABELS[group.id as SettingsGroup] ??
+                    "nav.groupNamePlaceholder",
+                )}
                 onChange={(e) => updateGroupName(group.id, e.target.value)}
               />
               <Popconfirm
@@ -635,7 +779,12 @@ export default function NavigationConfigPage() {
               </Popconfirm>
             </div>
             <div
-              style={{ display: "flex", flexDirection: "column", gap: 4, minHeight: 28 }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                minHeight: 28,
+              }}
               onDragOver={allowDrop}
               onDrop={(event) => {
                 event.preventDefault();
@@ -644,7 +793,14 @@ export default function NavigationConfigPage() {
               }}
             >
               {items.length === 0 ? (
-                <div style={{ padding: 4, color: "var(--fn-text-tertiary)", fontSize: 12, textAlign: "center" }}>
+                <div
+                  style={{
+                    padding: 4,
+                    color: "var(--fn-text-tertiary)",
+                    fontSize: 12,
+                    textAlign: "center",
+                  }}
+                >
                   {t("nav.dropHere")}
                 </div>
               ) : null}
@@ -655,7 +811,9 @@ export default function NavigationConfigPage() {
                   label={itemLabel.get(key) ?? key}
                   zone="settings"
                   onDragStart={onDragStart}
-                  onDropBefore={(beforeKey) => dropIntoSettings(group.id, beforeKey)}
+                  onDropBefore={(beforeKey) =>
+                    dropIntoSettings(group.id, beforeKey)
+                  }
                 />
               ))}
             </div>
@@ -699,7 +857,12 @@ export default function NavigationConfigPage() {
         <Button disabled={!dirty} onClick={reset}>
           {t("common.reset")}
         </Button>
-        <Button type="primary" loading={saving} disabled={!dirty} onClick={() => void save()}>
+        <Button
+          type="primary"
+          loading={saving}
+          disabled={!dirty}
+          onClick={() => void save()}
+        >
           {t("common.save")}
         </Button>
       </div>

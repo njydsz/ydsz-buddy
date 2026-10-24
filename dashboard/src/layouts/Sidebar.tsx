@@ -406,7 +406,9 @@ export default function Sidebar({
   const onChatPath = isChatPath(location.pathname);
   const { width: sidebarWidth, onResizeMouseDown } = useSidebarWidth(collapsed);
   const [savedLayout, setSavedLayout] = useState<SidebarNavLayout | null>(null);
-  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(null);
+  const [navZones, setNavZones] = useState<Record<string, NavZone> | null>(
+    null,
+  );
 
   // Refetch sidebar preferences from the server. Shared between the initial
   // mount / user-change path and the cross-component "prefs changed" event.
@@ -445,7 +447,11 @@ export default function Sidebar({
   }, [refreshNavPrefs]);
 
   const catalog = useMemo(
-    () => buildNavSections(user, { mobileEnabled, navZones: navZones ?? undefined }),
+    () =>
+      buildNavSections(user, {
+        mobileEnabled,
+        navZones: navZones ?? undefined,
+      }),
     [user, mobileEnabled, navZones],
   );
   const navSections = useMemo(

@@ -186,7 +186,10 @@ export default function SettingsWindow({
   initialKey,
 }: SettingsWindowProps) {
   const { t } = useTranslation();
-  const groups = useMemo(() => buildSettingsNavGroups(user, navZones), [user, navZones]);
+  const groups = useMemo(
+    () => buildSettingsNavGroups(user, navZones),
+    [user, navZones],
+  );
 
   // First available key (across all groups) — fallback when no initialKey given.
   const firstKey = useMemo<SettingsWindowKey | null>(() => {

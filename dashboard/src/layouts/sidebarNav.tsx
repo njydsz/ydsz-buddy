@@ -87,7 +87,12 @@ export const SIDEBAR_NAV_KEYS = [
   "admin-advanced",
 ] as const;
 
-export const BUILTIN_NAV_GROUP_IDS = ["basic", "settings", "control", "admin"] as const;
+export const BUILTIN_NAV_GROUP_IDS = [
+  "basic",
+  "settings",
+  "control",
+  "admin",
+] as const;
 
 const BUILTIN_NAV_GROUP_LABEL_KEYS: Record<
   (typeof BUILTIN_NAV_GROUP_IDS)[number],
